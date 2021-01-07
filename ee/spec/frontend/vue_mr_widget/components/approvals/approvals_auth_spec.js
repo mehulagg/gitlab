@@ -6,10 +6,7 @@ const TEST_PASSWORD = 'password';
 
 // For some reason, the `Promise.resolve` needs to be deferred
 // or the timing doesn't work.
-const waitForTick = done =>
-  Promise.resolve()
-    .then(done)
-    .catch(done.fail);
+const waitForTick = (done) => Promise.resolve().then(done).catch(done.fail);
 
 describe('Approval auth component', () => {
   let wrapper;
@@ -32,7 +29,7 @@ describe('Approval auth component', () => {
   const findErrorMessage = () => wrapper.find('.gl-field-error');
 
   describe('when created', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent();
       waitForTick(done);
     });
@@ -57,12 +54,12 @@ describe('Approval auth component', () => {
   });
 
   describe('when approve clicked', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent();
       waitForTick(done);
     });
 
-    it('emits the approve event', done => {
+    it('emits the approve event', (done) => {
       findInput().setValue(TEST_PASSWORD);
       wrapper.find(GlModal).vm.$emit('ok', { preventDefault: () => null });
       waitForTick(done);
@@ -72,7 +69,7 @@ describe('Approval auth component', () => {
   });
 
   describe('when isApproving is true', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent({ isApproving: true });
       waitForTick(done);
     });
@@ -85,7 +82,7 @@ describe('Approval auth component', () => {
   });
 
   describe('when hasError is true', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent({ hasError: true });
       waitForTick(done);
     });

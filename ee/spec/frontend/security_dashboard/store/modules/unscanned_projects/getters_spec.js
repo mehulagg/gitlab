@@ -59,7 +59,7 @@ describe('Unscanned projects getters', () => {
       expect(result).toEqual(
         groupByDateRanges({
           ranges: UNSCANNED_PROJECTS_DATE_RANGES,
-          dateFn: x => x.securityTestsLastSuccessfulRun,
+          dateFn: (x) => x.securityTestsLastSuccessfulRun,
           projects,
         }),
       );

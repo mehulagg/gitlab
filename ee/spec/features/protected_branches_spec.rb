@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Protected Branches', :js do
   include ProtectedBranchHelpers
 
-  let(:user) { create(:user, :admin) }
   let(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
 
   before do
     stub_feature_flags(deploy_keys_on_protected_branches: false)

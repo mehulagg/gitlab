@@ -128,7 +128,7 @@ export default {
       this.focusedIndex = 0;
     }
 
-    Mousetrap.bind(['t', 'mod+p'], e => {
+    Mousetrap.bind(['t', 'mod+p'], (e) => {
       if (e.preventDefault) {
         e.preventDefault();
       }
@@ -234,7 +234,6 @@ export default {
           name="search"
           class="dropdown-input-search"
           :class="{ hidden: showClearInputButton }"
-          aria-hidden="true"
         />
         <gl-icon
           name="close"

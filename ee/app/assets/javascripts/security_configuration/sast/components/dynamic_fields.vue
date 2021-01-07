@@ -16,7 +16,7 @@ export default {
     entities: {
       type: Array,
       required: true,
-      validator: value => value.every(isValidConfigurationEntity),
+      validator: (value) => value.every(isValidConfigurationEntity),
     },
     disabled: {
       type: Boolean,

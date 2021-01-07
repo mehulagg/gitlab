@@ -359,35 +359,33 @@ RSpec.describe 'getting group information' do
 
     let(:data_path) { [:group, :codeCoverageActivities] }
 
-    def pagination_query(params, page_info)
+    def pagination_query(params)
       graphql_query_for(
-        'group',
-        { 'fullPath' => group.full_path },
+        :group, { full_path: group.full_path },
         <<~QUERY
         codeCoverageActivities(startDate: "#{start_date}" #{params}) {
-          #{page_info} edges {
-            node {
-              averageCoverage
-            }
-          }
+          #{page_info}
+          nodes { averageCoverage }
         }
         QUERY
       )
     end
 
-    def pagination_results_data(data)
-      data.map { |coverage| coverage.dig('node', 'averageCoverage') }
-    end
-
     context 'when default sorting' do
-      let!(:coverage_1) { create(:ci_daily_build_group_report_result, project: project_1) }
-      let!(:coverage_2) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 88.8, date: 1.week.ago) }
-      let(:start_date) { 1.week.ago.to_date.to_s }
+      let_it_be(:cov_1) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 77.0) }
+      let_it_be(:cov_2) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 88.8, date: 1.week.ago) }
+      let_it_be(:cov_3) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 66.6, date: 2.weeks.ago) }
+      let_it_be(:cov_4) { create(:ci_daily_build_group_report_result, project: project_2, coverage: 99.9, date: 3.weeks.ago) }
+      let_it_be(:cov_5) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 44.4, date: 4.weeks.ago) }
+      let_it_be(:cov_6) { create(:ci_daily_build_group_report_result, project: project_1, coverage: 100.0, date: 6.weeks.ago) }
+
+      let(:start_date) { 5.weeks.ago.to_date.to_s }
 
       it_behaves_like 'sorted paginated query' do
+        let(:node_path) { ['averageCoverage'] }
         let(:sort_param) { }
         let(:first_param) { 2 }
-        let(:expected_results) { [88.8, 77.0] }
+        let(:expected_results) { [cov_1, cov_2, cov_3, cov_4, cov_5].reverse.map(&:coverage) }
       end
     end
   end

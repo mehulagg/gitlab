@@ -4,11 +4,16 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
+import ArtifactDownload from './components/artifact_download.vue';
+import { LOADING } from '~/reports/constants';
+import { securityReportTypeEnumToReportType } from './constants';
+import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
+import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
 import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
@@ -16,9 +21,9 @@ import createStore from './store';
 import { mrStates } from '~/mr_popover/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
-import SecuritySummary from './components/security_summary.vue';
 import {
   MODULE_CONTAINER_SCANNING,
+  MODULE_API_FUZZING,
   MODULE_COVERAGE_FUZZING,
   MODULE_DAST,
   MODULE_DEPENDENCY_SCANNING,
@@ -30,6 +35,7 @@ import {
 export default {
   store: createStore(),
   components: {
+    ArtifactDownload,
     GroupedIssuesList,
     ReportSection,
     SummaryRow,
@@ -44,7 +50,7 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin, vulnerabilityModalMixin(), glFeatureFlagsMixin()],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -101,6 +107,11 @@ export default {
       required: false,
       default: '',
     },
+    apiFuzzingHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     coverageFuzzingHelpPath: {
       type: String,
       required: false,
@@ -122,11 +133,6 @@ export default {
       default: false,
     },
     vulnerabilityFeedbackPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    vulnerabilityFeedbackHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -190,6 +196,49 @@ export default {
       type: String,
       required: true,
     },
+    apiFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    containerScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    coverageFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dependencyScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    sastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    secretScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    targetProjectFullPath: {
+      type: String,
+      required: true,
+    },
+    mrIid: {
+      type: Number,
+      required: true,
+    },
   },
   componentNames,
   computed: {
@@ -197,6 +246,7 @@ export default {
       MODULE_SAST,
       MODULE_CONTAINER_SCANNING,
       MODULE_DAST,
+      MODULE_API_FUZZING,
       MODULE_COVERAGE_FUZZING,
       MODULE_DEPENDENCY_SCANNING,
       MODULE_SECRET_DETECTION,
@@ -227,6 +277,7 @@ export default {
       'groupedSecretDetectionText',
       'secretDetectionStatusIcon',
     ]),
+    ...mapGetters(MODULE_API_FUZZING, ['groupedApiFuzzingText', 'apiFuzzingStatusIcon']),
     ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
@@ -239,6 +290,9 @@ export default {
     },
     hasDastReports() {
       return this.enabledReports.dast;
+    },
+    hasApiFuzzingReports() {
+      return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
       // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
@@ -268,6 +322,9 @@ export default {
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
     },
+    hasApiFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_API_FUZZING);
+    },
     hasCoverageFuzzingIssues() {
       return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
     },
@@ -286,6 +343,9 @@ export default {
     hasSecretDetectionIssues() {
       return this.hasIssuesForReportType(MODULE_SECRET_DETECTION);
     },
+    shouldShowDownloadGuidance() {
+      return this.targetProjectFullPath && this.mrIid && this.summaryStatus !== LOADING;
+    },
   },
 
   created() {
@@ -295,7 +355,6 @@ export default {
 
     this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
-    this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
     this.setCreateVulnerabilityFeedbackMergeRequestPath(
       this.createVulnerabilityFeedbackMergeRequestPath,
@@ -305,46 +364,40 @@ export default {
     this.setPipelineId(this.pipelineId);
     this.setPipelineJobsId(this.pipelineId);
 
-    const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
-
-    if (sastDiffEndpoint && this.hasSastReports) {
-      this.setSastDiffEndpoint(sastDiffEndpoint);
+    if (this.sastComparisonPath && this.hasSastReports) {
+      this.setSastDiffEndpoint(this.sastComparisonPath);
       this.fetchSastDiff();
     }
 
-    const containerScanningDiffEndpoint = gl?.mrWidgetData?.container_scanning_comparison_path;
-
-    if (containerScanningDiffEndpoint && this.hasContainerScanningReports) {
-      this.setContainerScanningDiffEndpoint(containerScanningDiffEndpoint);
+    if (this.containerScanningComparisonPath && this.hasContainerScanningReports) {
+      this.setContainerScanningDiffEndpoint(this.containerScanningComparisonPath);
       this.fetchContainerScanningDiff();
     }
 
-    const dastDiffEndpoint = gl?.mrWidgetData?.dast_comparison_path;
-
-    if (dastDiffEndpoint && this.hasDastReports) {
-      this.setDastDiffEndpoint(dastDiffEndpoint);
+    if (this.dastComparisonPath && this.hasDastReports) {
+      this.setDastDiffEndpoint(this.dastComparisonPath);
       this.fetchDastDiff();
     }
 
-    const dependencyScanningDiffEndpoint = gl?.mrWidgetData?.dependency_scanning_comparison_path;
-
-    if (dependencyScanningDiffEndpoint && this.hasDependencyScanningReports) {
-      this.setDependencyScanningDiffEndpoint(dependencyScanningDiffEndpoint);
+    if (this.dependencyScanningComparisonPath && this.hasDependencyScanningReports) {
+      this.setDependencyScanningDiffEndpoint(this.dependencyScanningComparisonPath);
       this.fetchDependencyScanningDiff();
     }
 
-    const secretDetectionDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretDetectionDiffEndpoint && this.hasSecretDetectionReports) {
-      this.setSecretDetectionDiffEndpoint(secretDetectionDiffEndpoint);
+    if (this.secretScanningComparisonPath && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(this.secretScanningComparisonPath);
       this.fetchSecretDetectionDiff();
     }
 
-    const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
-
-    if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
-      this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
+    if (this.coverageFuzzingComparisonPath && this.hasCoverageFuzzingReports) {
+      this.setCoverageFuzzingDiffEndpoint(this.coverageFuzzingComparisonPath);
       this.fetchCoverageFuzzingDiff();
       this.fetchPipelineJobs();
+    }
+
+    if (this.apiFuzzingComparisonPath && this.hasApiFuzzingReports) {
+      this.setApiFuzzingDiffEndpoint(this.apiFuzzingComparisonPath);
+      this.fetchApiFuzzingDiff();
     }
   },
   methods: {
@@ -355,20 +408,15 @@ export default {
       'setSourceBranch',
       'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
-      'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
       'setPipelineId',
-      'dismissVulnerability',
-      'revertDismissVulnerability',
       'createNewIssue',
       'createMergeRequest',
       'openDismissalCommentBox',
       'closeDismissalCommentBox',
       'downloadPatch',
-      'addDismissalComment',
-      'deleteDismissalComment',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
       'fetchContainerScanningDiff',
@@ -388,6 +436,10 @@ export default {
       setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
       fetchSecretDetectionDiff: 'fetchDiff',
     }),
+    ...mapActions(MODULE_API_FUZZING, {
+      setApiFuzzingDiffEndpoint: 'setDiffEndpoint',
+      fetchApiFuzzingDiff: 'fetchDiff',
+    }),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
     ...mapActions('pipelineJobs', {
       setPipelineJobsId: 'setPipelineId',
@@ -397,6 +449,7 @@ export default {
     },
   },
   summarySlots: ['success', 'error', 'loading'],
+  reportTypes: securityReportTypeEnumToReportType,
 };
 </script>
 <template>
@@ -604,9 +657,37 @@ export default {
           />
         </template>
 
+        <template v-if="hasApiFuzzingReports">
+          <summary-row
+            :status-icon="apiFuzzingStatusIcon"
+            :popover-options="apiFuzzingPopover"
+            class="js-api-fuzzing-widget"
+            data-qa-selector="api_fuzzing_report"
+          >
+            <template #summary>
+              <security-summary :message="groupedApiFuzzingText" />
+            </template>
+
+            <artifact-download
+              v-if="shouldShowDownloadGuidance"
+              :report-types="[$options.reportTypes.API_FUZZING]"
+              :target-project-full-path="targetProjectFullPath"
+              :mr-iid="mrIid"
+            />
+          </summary-row>
+
+          <grouped-issues-list
+            v-if="hasApiFuzzingIssues"
+            :unresolved-issues="apiFuzzing.newIssues"
+            :resolved-issues="apiFuzzing.resolvedIssues"
+            :component="$options.componentNames.SecurityIssueBody"
+            class="report-block-group-list"
+            data-testid="api-fuzzing-issues-list"
+          />
+        </template>
+
         <issue-modal
           :modal="modal"
-          :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
           :can-create-issue="canCreateIssue"
           :can-create-merge-request="canCreateMergeRequest"
           :can-dismiss-vulnerability="canDismissVulnerability"
@@ -616,13 +697,13 @@ export default {
           @closeDismissalCommentBox="closeDismissalCommentBox()"
           @createMergeRequest="createMergeRequest"
           @createNewIssue="createNewIssue"
-          @dismissVulnerability="dismissVulnerability"
+          @dismissVulnerability="handleDismissVulnerability"
           @openDismissalCommentBox="openDismissalCommentBox()"
           @editVulnerabilityDismissalComment="openDismissalCommentBox()"
-          @revertDismissVulnerability="revertDismissVulnerability"
+          @revertDismissVulnerability="handleRevertDismissVulnerability"
           @downloadPatch="downloadPatch"
-          @addDismissalComment="addDismissalComment({ comment: $event })"
-          @deleteDismissalComment="deleteDismissalComment"
+          @addDismissalComment="handleAddDismissalComment({ comment: $event })"
+          @deleteDismissalComment="handleDeleteDismissalComment"
           @showDismissalDeleteButtons="showDismissalDeleteButtons"
           @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
         />

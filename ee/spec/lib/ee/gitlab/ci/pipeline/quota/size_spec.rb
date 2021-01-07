@@ -12,8 +12,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Size do
   let(:pipeline) { build_stubbed(:ci_pipeline, project: project) }
 
   let(:command) do
-    double(:command,
-      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
+    double(:command, pipeline_seed: double(:pipeline_seed, size: 2))
   end
 
   subject { described_class.new(namespace, pipeline, command) }
@@ -86,7 +85,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Size do
 
       it 'returns infor about pipeline size limit exceeded' do
         expect(subject.message)
-          .to eq "Pipeline size limit exceeded by 1 job!"
+          .to eq "Pipeline has too many jobs! Requested 2, but the limit is 1."
       end
     end
   end

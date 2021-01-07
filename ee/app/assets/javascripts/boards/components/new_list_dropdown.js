@@ -3,7 +3,7 @@ import initNewListDropdown from '~/boards/components/new_list_dropdown';
 import AssigneeList from './assignees_list_selector';
 import MilestoneList from './milestone_list_selector';
 
-const handleDropdownHide = e => {
+const handleDropdownHide = (e) => {
   const $currTarget = $(e.currentTarget);
   if ($currTarget.data('preventClose')) {
     e.preventDefault();
@@ -14,7 +14,7 @@ const handleDropdownHide = e => {
 let assigneeList;
 let milestoneList;
 
-const handleDropdownTabClick = e => {
+const handleDropdownTabClick = (e) => {
   const $addListEl = $('#js-add-list');
   $addListEl.data('preventClose', true);
   if (e.target.dataset.action === 'tab-assignees' && !assigneeList) {

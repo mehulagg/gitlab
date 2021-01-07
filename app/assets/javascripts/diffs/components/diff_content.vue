@@ -50,7 +50,7 @@ export default {
   },
   computed: {
     ...mapState({
-      projectPath: state => state.diffs.projectPath,
+      projectPath: (state) => state.diffs.projectPath,
     }),
     ...mapGetters('diffs', [
       'isInlineView',
@@ -169,12 +169,16 @@ export default {
         :a-mode="diffFile.a_mode"
         :b-mode="diffFile.b_mode"
       >
-        <image-diff-overlay
-          slot="image-overlay"
-          :discussions="imageDiscussions"
-          :file-hash="diffFileHash"
-          :can-comment="getNoteableData.current_user.can_create_note && !diffFile.brokenSymlink"
-        />
+        <template #image-overlay="{ renderedWidth, renderedHeight }">
+          <image-diff-overlay
+            v-if="renderedWidth"
+            :rendered-width="renderedWidth"
+            :rendered-height="renderedHeight"
+            :discussions="imageDiscussions"
+            :file-hash="diffFileHash"
+            :can-comment="getNoteableData.current_user.can_create_note && !diffFile.brokenSymlink"
+          />
+        </template>
         <div v-if="showNotesContainer" class="note-container">
           <user-avatar-link
             v-if="diffFileCommentForm && author"

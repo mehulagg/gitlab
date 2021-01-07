@@ -992,7 +992,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           temp_undo_cleanup_column,
           type: :string,
           batch_column_name: :id,
-          type_cast_function: nil
+          type_cast_function: nil,
+          limit: nil
         ).and_return(true)
 
         expect(model).to receive(:rename_column)
@@ -1007,7 +1008,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         model.undo_cleanup_concurrent_column_type_change(:users, :old, :string)
       end
 
-      it 'passes the type_cast_function and batch_column_name' do
+      it 'passes the type_cast_function, batch_column_name and limit' do
         expect(model).to receive(:column_exists?).with(:users, :other_batch_column).and_return(true)
         expect(model).to receive(:check_trigger_permissions!).with(:users)
 
@@ -1017,7 +1018,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           temp_undo_cleanup_column,
           type: :string,
           batch_column_name: :other_batch_column,
-          type_cast_function: :custom_type_cast_function
+          type_cast_function: :custom_type_cast_function,
+          limit: 8
         ).and_return(true)
 
         expect(model).to receive(:rename_column)
@@ -1034,7 +1036,8 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           :old,
           :string,
           type_cast_function: :custom_type_cast_function,
-          batch_column_name: :other_batch_column
+          batch_column_name: :other_batch_column,
+          limit: 8
         )
       end
 
@@ -1542,6 +1545,69 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         :closed_at,
         :closed_at_timestamp
       )
+    end
+  end
+
+  describe '#initialize_conversion_of_integer_to_bigint' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, :repository) }
+    let(:issue) { create(:issue, project: project) }
+    let!(:event) do
+      create(:event, :created, project: project, target: issue, author: user)
+    end
+
+    context 'in a transaction' do
+      it 'raises RuntimeError' do
+        allow(model).to receive(:transaction_open?).and_return(true)
+
+        expect { model.initialize_conversion_of_integer_to_bigint(:events, :id) }
+          .to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+      end
+
+      it 'creates a bigint column and starts backfilling it' do
+        expect(model)
+          .to receive(:add_column)
+          .with(
+            :events,
+            'id_convert_to_bigint',
+            :bigint,
+            default: 0,
+            null: false
+          )
+
+        expect(model)
+          .to receive(:install_rename_triggers)
+          .with(:events, :id, 'id_convert_to_bigint')
+
+        expect(model).to receive(:queue_background_migration_jobs_by_range_at_intervals).and_call_original
+
+        expect(BackgroundMigrationWorker)
+          .to receive(:perform_in)
+          .ordered
+          .with(
+            2.minutes,
+            'CopyColumnUsingBackgroundMigrationJob',
+            [event.id, event.id, :events, :id, :id, 'id_convert_to_bigint', 100]
+          )
+
+        expect(Gitlab::BackgroundMigration)
+          .to receive(:steal)
+          .ordered
+          .with('CopyColumnUsingBackgroundMigrationJob')
+
+        model.initialize_conversion_of_integer_to_bigint(
+          :events,
+          :id,
+          batch_size: 300,
+          sub_batch_size: 100
+        )
+      end
     end
   end
 

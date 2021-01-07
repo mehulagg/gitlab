@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require_relative 'teammate'
+require_relative 'title_linting'
 
 module Gitlab
   module Danger
     module Helper
       RELEASE_TOOLS_BOT = 'gitlab-release-tools-bot'
-      DRAFT_REGEX = /\A*#{Regexp.union(/(?i)(\[WIP\]\s*|WIP:\s*|WIP$)/, /(?i)(\[draft\]|\(draft\)|draft:|draft\s\-\s|draft$)/)}+\s*/i.freeze
 
       # Returns a list of all files that have been added, modified or renamed.
       # `git.modified_files` might contain paths that already have been renamed,
@@ -64,7 +64,7 @@ module Gitlab
         # - respond_to?(:gitlab)
         # - respond_to?(:gitlab, true)
         gitlab
-      rescue NoMethodError
+      rescue NameError
         nil
       end
 
@@ -128,7 +128,7 @@ module Gitlab
       }.freeze
       # First-match win, so be sure to put more specific regex at the top...
       CATEGORIES = {
-        [%r{usage_data\.rb}, %r{^(\+|-).*(count|distinct_count)\(.*\)(.*)$}] => [:database, :backend],
+        [%r{usage_data\.rb}, %r{^(\+|-).*\s+(count|distinct_count|estimate_batch_distinct_count)\(.*\)(.*)$}] => [:database, :backend],
 
         %r{\Adoc/.*(\.(md|png|gif|jpg))\z} => :docs,
         %r{\A(CONTRIBUTING|LICENSE|MAINTENANCE|PHILOSOPHY|PROCESS|README)(\.md)?\z} => :docs,
@@ -216,14 +216,10 @@ module Gitlab
         usernames.map { |u| Gitlab::Danger::Teammate.new('username' => u) }
       end
 
-      def sanitize_mr_title(title)
-        title.gsub(DRAFT_REGEX, '').gsub(/`/, '\\\`')
-      end
-
       def draft_mr?
         return false unless gitlab_helper
 
-        DRAFT_REGEX.match?(gitlab_helper.mr_json['title'])
+        TitleLinting.has_draft_flag?(gitlab_helper.mr_json['title'])
       end
 
       def security_mr?
@@ -267,6 +263,10 @@ module Gitlab
 
       def has_database_scoped_labels?(current_mr_labels)
         current_mr_labels.any? { |label| label.start_with?('database::') }
+      end
+
+      def has_ci_changes?
+        changed_files(%r{\A(\.gitlab-ci\.yml|\.gitlab/ci/)}).any?
       end
     end
   end

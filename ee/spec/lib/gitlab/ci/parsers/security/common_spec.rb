@@ -8,26 +8,98 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
+    let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
 
     before do
-      allow(parser).to receive(:create_location).and_return(nil)
-      artifact.each_blob do |blob|
-        parser.parse!(blob, report)
+      allow_next_instance_of(described_class) do |parser|
+        allow(parser).to receive(:create_location).and_return(location)
+      end
+
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
+    end
+
+    describe 'parsing finding.name' do
+      let(:artifact) { build(:ee_ci_job_artifact, :common_security_report_with_blank_names) }
+
+      context 'when message is provided' do
+        it 'sets message from the report as a finding name' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
+          expected_name = Gitlab::Json.parse(vulnerability.raw_metadata)['message']
+
+          expect(vulnerability.name).to eq(expected_name)
+        end
+      end
+
+      context 'when message is not provided' do
+        context 'and name is provided' do
+          it 'sets name from the report as a name' do
+            vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1030' }
+            expected_name = Gitlab::Json.parse(vulnerability.raw_metadata)['name']
+
+            expect(vulnerability.name).to eq(expected_name)
+          end
+        end
+
+        context 'and name is not provided' do
+          context 'when CVE identifier exists' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'CVE-2017-11429' }
+              expect(vulnerability.name).to eq("CVE-2017-11429 in yarn.lock")
+            end
+          end
+
+          context 'when CWE identifier exists' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'CWE-2017-11429' }
+              expect(vulnerability.name).to eq("CWE-2017-11429 in yarn.lock")
+            end
+          end
+
+          context 'when neither CVE nor CWE identifier exist' do
+            it 'combines identifier with location to create name' do
+              vulnerability = report.findings.find { |x| x.compare_key == 'OTHER-2017-11429' }
+              expect(vulnerability.name).to eq("other-2017-11429 in yarn.lock")
+            end
+          end
+        end
       end
     end
 
-    context 'parsing remediations' do
+    describe 'parsing finding.details' do
+      context 'when details are provided' do
+        it 'sets details from the report' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1020' }
+          expected_details = Gitlab::Json.parse(vulnerability.raw_metadata)['details']
+
+          expect(vulnerability.details).to eq(expected_details)
+        end
+      end
+
+      context 'when details are not provided' do
+        it 'sets empty hash' do
+          vulnerability = report.findings.find { |x| x.compare_key == 'CVE-1030' }
+          expect(vulnerability.details).to eq({})
+        end
+      end
+    end
+
+    describe 'parsing remediations' do
+      let(:expected_remediation) { create(:ci_reports_security_remediation, diff: '') }
+
       it 'finds remediation with same cve' do
         vulnerability = report.findings.find { |x| x.compare_key == "CVE-1020" }
         remediation = { 'fixes' => [{ 'cve' => 'CVE-1020' }], 'summary' => '', 'diff' => '' }
+
         expect(Gitlab::Json.parse(vulnerability.raw_metadata).dig('remediations').first).to include remediation
+        expect(vulnerability.remediations.first.checksum).to eq(expected_remediation.checksum)
       end
 
       it 'finds remediation with same id' do
         vulnerability = report.findings.find { |x| x.compare_key == "CVE-1030" }
         remediation = { 'fixes' => [{ 'cve' => 'CVE', 'id' => 'bb2fbeb1b71ea360ce3f86f001d4e84823c3ffe1a1f7d41ba7466b14cfa953d3' }], 'summary' => '', 'diff' => '' }
+
         expect(Gitlab::Json.parse(vulnerability.raw_metadata).dig('remediations').first).to include remediation
+        expect(vulnerability.remediations.first.checksum).to eq(expected_remediation.checksum)
       end
 
       it 'does not find remediation with different id' do
@@ -48,7 +120,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scanners' do
+    describe 'parsing scanners' do
       subject(:scanner) { report.findings.first.scanner }
 
       context 'when vendor is not missing in scanner' do
@@ -58,7 +130,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
     end
 
-    context 'parsing scan' do
+    describe 'parsing scan' do
       it 'returns scan object for each finding' do
         scans = report.findings.map(&:scan)
 
@@ -71,15 +143,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
 
       it 'returns nil when scan is not a hash' do
-        parser =  described_class.new
         empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
-        parser.parse!({}.to_json, empty_report)
+        described_class.parse!({}.to_json, empty_report)
 
         expect(empty_report.scan).to be(nil)
       end
     end
 
-    context 'parsing links' do
+    describe 'parsing links' do
       it 'returns links object for each finding', :aggregate_failures do
         links = report.findings.flat_map(&:links)
 
@@ -87,6 +158,19 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         expect(links.map(&:name)).to match_array([nil, 'CVE-1030'])
         expect(links.size).to eq(2)
         expect(links.first).to be_a(::Gitlab::Ci::Reports::Security::Link)
+      end
+    end
+
+    describe 'setting the uuid' do
+      let(:finding_uuids) { report.findings.map(&:uuid) }
+      let(:uuid_1_components) { "dependency_scanning-4ff8184cd18485b6e85d5b101e341b12eacd1b3b-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+      let(:uuid_2_components) { "dependency_scanning-d55f9e66e79882ae63af9fd55cc822ab75307e31-33dc9f32c77dde16d39c69d3f78f27ca3114a7c5-#{pipeline.project_id}" }
+      let(:uuid_1) { Gitlab::UUID.v5(uuid_1_components) }
+      let(:uuid_2) { Gitlab::UUID.v5(uuid_2_components) }
+      let(:expected_uuids) { [uuid_1, uuid_2, nil] }
+
+      it 'sets the UUIDv5 for findings', :aggregate_failures do
+        expect(finding_uuids).to match_array(expected_uuids)
       end
     end
   end

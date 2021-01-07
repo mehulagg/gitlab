@@ -59,7 +59,7 @@ export default {
       type: String,
       required: false,
       default: '',
-      validator: value => value === '' || /(_desc)|(_asc)/g.test(value),
+      validator: (value) => value === '' || /(_desc)|(_asc)/g.test(value),
     },
     showCheckbox: {
       type: Boolean,
@@ -89,7 +89,7 @@ export default {
     if (this.initialSortBy) {
       selectedSortOption = this.sortOptions
         .filter(
-          sortBy =>
+          (sortBy) =>
             sortBy.sortDirection.ascending === this.initialSortBy ||
             sortBy.sortDirection.descending === this.initialSortBy,
         )
@@ -204,12 +204,12 @@ export default {
 
       this.recentSearchesStore = new RecentSearchesStore({
         isLocalStorageAvailable: RecentSearchesService.isAvailable(),
-        allowedKeys: this.tokens.map(token => token.type),
+        allowedKeys: this.tokens.map((token) => token.type),
       });
 
       this.recentSearchesPromise = this.recentSearchesService
         .fetch()
-        .catch(error => {
+        .catch((error) => {
           if (error.name === 'RecentSearchesServiceError') return undefined;
 
           createFlash(__('An error occurred while parsing recent searches'));
@@ -217,7 +217,7 @@ export default {
           // Gracefully fail to empty array
           return [];
         })
-        .then(searches => {
+        .then((searches) => {
           if (!searches) return;
 
           // Put any searches that may have come in before
@@ -250,7 +250,7 @@ export default {
      * spaces.
      */
     removeQuotesEnclosure(filters = []) {
-      return filters.map(filter => {
+      return filters.map((filter) => {
         if (typeof filter === 'object') {
           const valueString = filter.value.data;
           return {
@@ -286,6 +286,7 @@ export default {
     handleFilterSubmit() {
       const filterTokens = uniqueTokens(this.filterValue);
       this.filterValue = filterTokens;
+
       if (this.recentSearchesStorageKey) {
         this.recentSearchesPromise
           .then(() => {
@@ -301,6 +302,17 @@ export default {
       }
       this.blurSearchInput();
       this.$emit('onFilter', this.removeQuotesEnclosure(filterTokens));
+    },
+    historyTokenOptionTitle(historyToken) {
+      const tokenOption = this.tokens
+        .find((token) => token.type === historyToken.type)
+        ?.options?.find((option) => option.value === historyToken.value.data);
+
+      if (!tokenOption?.title) {
+        return historyToken.value.data;
+      }
+
+      return tokenOption.title;
     },
   },
 };
@@ -333,7 +345,7 @@ export default {
             <span v-if="tokenTitles[token.type]"
               >{{ tokenTitles[token.type] }} :{{ token.value.operator }}</span
             >
-            <strong>{{ tokenSymbols[token.type] }}{{ token.value.data }}</strong>
+            <strong>{{ tokenSymbols[token.type] }}{{ historyTokenOptionTitle(token) }}</strong>
           </span>
         </template>
       </template>

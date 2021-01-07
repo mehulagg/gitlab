@@ -48,7 +48,7 @@ export default {
     groupedAwards() {
       const { thumbsup, thumbsdown, ...rest } = {
         ...this.groupedDefaultAwards,
-        ...groupBy(this.awards, x => x.name),
+        ...groupBy(this.awards, (x) => x.name),
       };
 
       return [
@@ -73,7 +73,7 @@ export default {
         return false;
       }
 
-      return awardList.some(award => award.user.id === this.currentUserId);
+      return awardList.some((award) => award.user.id === this.currentUserId);
     },
     createAwardList(name, list) {
       return {
@@ -95,11 +95,11 @@ export default {
 
       // Filter myself from list if I am awarded.
       if (hasReactionByCurrentUser) {
-        awardList = awardList.filter(award => award.user.id !== this.currentUserId);
+        awardList = awardList.filter((award) => award.user.id !== this.currentUserId);
       }
 
       // Get only 9-10 usernames to show in tooltip text.
-      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map(award => award.user.name);
+      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map((award) => award.user.name);
 
       // Get the remaining list to use in `and x more` text.
       const remainingAwardList = awardList.slice(TOOLTIP_NAME_COUNT, awardList.length);
@@ -174,13 +174,13 @@ export default {
         :aria-label="__('Add reaction')"
       >
         <span class="reaction-control-icon reaction-control-icon-neutral">
-          <gl-icon aria-hidden="true" name="slight-smile" />
+          <gl-icon name="slight-smile" />
         </span>
         <span class="reaction-control-icon reaction-control-icon-positive">
-          <gl-icon aria-hidden="true" name="smiley" />
+          <gl-icon name="smiley" />
         </span>
         <span class="reaction-control-icon reaction-control-icon-super-positive">
-          <gl-icon aria-hidden="true" name="smile" />
+          <gl-icon name="smile" />
         </span>
       </gl-button>
     </div>

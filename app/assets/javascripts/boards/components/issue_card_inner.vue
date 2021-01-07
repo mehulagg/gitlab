@@ -1,6 +1,6 @@
 <script>
 import { sortBy } from 'lodash';
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
 import { sprintf, __, n__ } from '~/locale';
@@ -8,8 +8,10 @@ import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueDueDate from './issue_due_date.vue';
 import IssueTimeEstimate from './issue_time_estimate.vue';
-import boardsStore from '../stores/boards_store';
+import eventHub from '../eventhub';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import { ListType } from '../constants';
+import { updateHistory } from '~/lib/utils/url_utility';
 
 export default {
   components: {
@@ -41,7 +43,7 @@ export default {
       default: false,
     },
   },
-  inject: ['groupId', 'rootPath'],
+  inject: ['groupId', 'rootPath', 'scopedLabelsAvailable'],
   data() {
     return {
       limitBeforeCounter: 2,
@@ -51,6 +53,16 @@ export default {
   },
   computed: {
     ...mapState(['isShowingLabels']),
+    cappedAssignees() {
+      // e.g. maxRender is 4,
+      // Render up to all 4 assignees if there are only 4 assigness
+      // Otherwise render up to the limitBeforeCounter
+      if (this.issue.assignees.length <= this.maxRender) {
+        return this.issue.assignees.slice(0, this.maxRender);
+      }
+
+      return this.issue.assignees.slice(0, this.limitBeforeCounter);
+    },
     numberOverLimit() {
       return this.issue.assignees.length - this.limitBeforeCounter;
     },
@@ -97,17 +109,8 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['performSearch']),
     isIndexLessThanlimit(index) {
-      return index < this.limitBeforeCounter;
-    },
-    shouldRenderAssignee(index) {
-      // Eg. maxRender is 4,
-      // Render up to all 4 assignees if there are only 4 assigness
-      // Otherwise render up to the limitBeforeCounter
-      if (this.issue.assignees.length <= this.maxRender) {
-        return index < this.maxRender;
-      }
-
       return index < this.limitBeforeCounter;
     },
     assigneeUrl(assignee) {
@@ -117,22 +120,37 @@ export default {
     avatarUrlTitle(assignee) {
       return sprintf(__(`Avatar for %{assigneeName}`), { assigneeName: assignee.name });
     },
+    avatarUrl(assignee) {
+      return assignee.avatarUrl || assignee.avatar || gon.default_avatar_url;
+    },
     showLabel(label) {
       if (!label.id) return false;
       return true;
     },
     isNonListLabel(label) {
-      return label.id && !(this.list.type === 'label' && this.list.title === label.title);
+      return (
+        label.id &&
+        !(
+          (this.list.type || this.list.listType) === ListType.label &&
+          this.list.title === label.title
+        )
+      );
     },
     filterByLabel(label) {
       if (!this.updateFilters) return;
-      const labelTitle = encodeURIComponent(label.title);
-      const filter = `label_name[]=${labelTitle}`;
+      const filterPath = window.location.search ? `${window.location.search}&` : '?';
+      const filter = `label_name[]=${encodeURIComponent(label.title)}`;
 
-      boardsStore.toggleFilter(filter);
+      if (!filterPath.includes(filter)) {
+        updateHistory({
+          url: `${filterPath}${filter}`,
+        });
+        this.performSearch();
+        eventHub.$emit('updateTokens');
+      }
     },
     showScopedLabel(label) {
-      return boardsStore.scopedLabels.enabled && isScopedLabel(label);
+      return this.scopedLabelsAvailable && isScopedLabel(label);
     },
   },
 };
@@ -158,9 +176,13 @@ export default {
           class="confidential-icon gl-mr-2"
           :aria-label="__('Confidential')"
         />
-        <a :href="issue.path" :title="issue.title" class="js-no-trigger" @mousemove.stop>{{
-          issue.title
-        }}</a>
+        <a
+          :href="issue.path || issue.webUrl || ''"
+          :title="issue.title"
+          class="js-no-trigger"
+          @mousemove.stop
+          >{{ issue.title }}</a
+        >
       </h4>
     </div>
     <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-display-flex gl-flex-wrap">
@@ -196,7 +218,11 @@ export default {
           #{{ issue.iid }}
         </span>
         <span class="board-info-items gl-mt-3 gl-display-inline-block">
-          <issue-due-date v-if="issue.dueDate" :date="issue.dueDate" :closed="issue.closed" />
+          <issue-due-date
+            v-if="issue.dueDate"
+            :date="issue.dueDate"
+            :closed="issue.closed || Boolean(issue.closedAt)"
+          />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
           <issue-card-weight
             v-if="validIssueWeight"
@@ -207,12 +233,11 @@ export default {
       </div>
       <div class="board-card-assignee gl-display-flex">
         <user-avatar-link
-          v-for="(assignee, index) in issue.assignees"
-          v-if="shouldRenderAssignee(index)"
+          v-for="assignee in cappedAssignees"
           :key="assignee.id"
           :link-href="assigneeUrl(assignee)"
           :img-alt="avatarUrlTitle(assignee)"
-          :img-src="assignee.avatarUrl || assignee.avatar || assignee.avatar_url"
+          :img-src="avatarUrl(assignee)"
           :img-size="24"
           class="js-no-trigger"
           tooltip-placement="bottom"

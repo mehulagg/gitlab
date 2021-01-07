@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: index, reference, howto
 ---
 
@@ -117,6 +117,13 @@ To filter merge requests already approved by a specific individual, you can type
 the dropdown) **Approved-By** and select the user.
 
 ![Filter MRs by approved by](img/filter_approved_by_merge_requests_v13_0.png)
+
+### Filtering merge requests by reviewer **(CORE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47605) in GitLab 13.7.
+
+To filter review requested merge requests for a specific individual, you can type (or select from
+the dropdown) **Reviewer** and select the user.
 
 ### Filtering merge requests by environment or deployment date **(CORE)**
 

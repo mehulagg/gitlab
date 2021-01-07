@@ -7,7 +7,7 @@ class SurveyResponsesController < ApplicationController
 
   skip_before_action :authenticate_user!
 
-  feature_category :collection
+  feature_category :navigation
 
   def index
     track_response if Gitlab.com?
@@ -28,7 +28,7 @@ class SurveyResponsesController < ApplicationController
       response: params[:response]
     }.compact
 
-    track_self_describing_event(SURVEY_RESPONSE_SCHEMA_URL, data)
+    track_self_describing_event(SURVEY_RESPONSE_SCHEMA_URL, data: data)
   end
 
   def to_number(param)

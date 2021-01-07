@@ -1,6 +1,0 @@
----
-title: Show purchase confirmation banner when user makes new purchases for existing
-  groups
-merge_request: 45786
-author:
-type: fixed

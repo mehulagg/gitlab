@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -9,7 +9,7 @@ type: reference, howto
 
 You can use an external service for validating a pipeline before it's created.
 
-CAUTION: **Warning:**
+WARNING:
 This is an experimental feature and subject to change without notice.
 
 ## Usage

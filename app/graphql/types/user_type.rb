@@ -19,7 +19,10 @@ module Types
     field :state, Types::UserStateEnum, null: false,
           description: 'State of the user'
     field :email, GraphQL::STRING_TYPE, null: true,
-          description: 'User email'
+          description: 'User email', method: :public_email,
+          deprecated: { reason: 'Use public_email', milestone: '13.7' }
+    field :public_email, GraphQL::STRING_TYPE, null: true,
+          description: "User's public email"
     field :avatar_url, GraphQL::STRING_TYPE, null: true,
           description: "URL of the user's avatar"
     field :web_url, GraphQL::STRING_TYPE, null: false,
@@ -30,28 +33,31 @@ module Types
           resolver: Resolvers::TodoResolver,
           description: 'Todos of the user'
     field :group_memberships, Types::GroupMemberType.connection_type, null: true,
-          description: 'Group memberships of the user',
-          method: :group_members
+          description: 'Group memberships of the user'
     field :group_count, GraphQL::INT_TYPE, null: true,
           resolver: Resolvers::Users::GroupCountResolver,
           description: 'Group count for the user',
           feature_flag: :user_group_counts
     field :status, Types::UserStatusType, null: true,
            description: 'User status'
+    field :location, ::GraphQL::STRING_TYPE, null: true,
+          description: 'The location of the user.'
     field :project_memberships, Types::ProjectMemberType.connection_type, null: true,
-          description: 'Project memberships of the user',
-          method: :project_members
+          description: 'Project memberships of the user'
     field :starred_projects, Types::ProjectType.connection_type, null: true,
           description: 'Projects starred by the user',
           resolver: Resolvers::UserStarredProjectsResolver
 
-    # Merge request field: MRs can be either authored or assigned:
+    # Merge request field: MRs can be authored, assigned, or assigned-for-review:
     field :authored_merge_requests,
           resolver: Resolvers::AuthoredMergeRequestsResolver,
           description: 'Merge Requests authored by the user'
     field :assigned_merge_requests,
           resolver: Resolvers::AssignedMergeRequestsResolver,
           description: 'Merge Requests assigned to the user'
+    field :review_requested_merge_requests,
+          resolver: Resolvers::ReviewRequestedMergeRequestsResolver,
+          description: 'Merge Requests assigned to the user for review'
 
     field :snippets,
           Types::SnippetType.connection_type,

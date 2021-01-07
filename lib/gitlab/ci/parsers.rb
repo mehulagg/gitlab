@@ -10,12 +10,13 @@ module Gitlab
           junit: ::Gitlab::Ci::Parsers::Test::Junit,
           cobertura: ::Gitlab::Ci::Parsers::Coverage::Cobertura,
           terraform: ::Gitlab::Ci::Parsers::Terraform::Tfplan,
-          accessibility: ::Gitlab::Ci::Parsers::Accessibility::Pa11y
+          accessibility: ::Gitlab::Ci::Parsers::Accessibility::Pa11y,
+          codequality: ::Gitlab::Ci::Parsers::Codequality::CodeClimate
         }
       end
 
-      def self.fabricate!(file_type)
-        parsers.fetch(file_type.to_sym).new
+      def self.fabricate!(file_type, *args)
+        parsers.fetch(file_type.to_sym).new(*args)
       rescue KeyError
         raise ParserNotFoundError, "Cannot find any parser matching file type '#{file_type}'"
       end

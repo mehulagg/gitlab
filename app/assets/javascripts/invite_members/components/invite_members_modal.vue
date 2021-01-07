@@ -93,7 +93,7 @@ export default {
     },
     selectedRoleName() {
       return Object.keys(this.accessLevels).find(
-        key => this.accessLevels[key] === Number(this.selectedAccessLevel),
+        (key) => this.accessLevels[key] === Number(this.selectedAccessLevel),
       );
     },
   },
@@ -195,7 +195,7 @@ export default {
 
       <div class="gl-mt-2">
         <gl-sprintf :message="$options.labels.readMoreText">
-          <template #link="{content}">
+          <template #link="{ content }">
             <gl-link :href="helpLink" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>

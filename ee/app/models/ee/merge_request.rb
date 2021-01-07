@@ -274,6 +274,12 @@ module EE
       (base_pipeline.security_scans.pluck(:scan_type) - actual_head_pipeline.security_scans.pluck(:scan_type)).uniq
     end
 
+    def applicable_approval_rules_for_user(user_id)
+      wrapped_approval_rules.select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
+    end
+
     private
 
     def has_approved_license_check?

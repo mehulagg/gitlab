@@ -13,6 +13,7 @@ import {
   scrollDown,
   scrollUp,
 } from '~/lib/utils/scroll_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 export const init = ({ dispatch }, { endpoint, logState, pagePath }) => {
   dispatch('setJobEndpoint', endpoint);
@@ -172,7 +173,11 @@ export const fetchTrace = ({ dispatch, state }) =>
         dispatch('startPollingTrace');
       }
     })
-    .catch(() => dispatch('receiveTraceError'));
+    .catch((e) =>
+      e.response.status === httpStatusCodes.FORBIDDEN
+        ? dispatch('receiveTraceUnauthorizedError')
+        : dispatch('receiveTraceError'),
+    );
 
 export const startPollingTrace = ({ dispatch, commit }) => {
   const traceTimeout = setTimeout(() => {
@@ -193,6 +198,10 @@ export const receiveTraceSuccess = ({ commit }, log) => commit(types.RECEIVE_TRA
 export const receiveTraceError = ({ dispatch }) => {
   dispatch('stopPollingTrace');
   flash(__('An error occurred while fetching the job log.'));
+};
+export const receiveTraceUnauthorizedError = ({ dispatch }) => {
+  dispatch('stopPollingTrace');
+  flash(__('The current user is not authorized to access the job log.'));
 };
 /**
  * When the user clicks a collapsible line in the job
@@ -220,7 +229,7 @@ export const fetchJobsForStage = ({ dispatch }, stage = {}) => {
       },
     })
     .then(({ data }) => {
-      const retriedJobs = data.retried.map(job => ({ ...job, retried: true }));
+      const retriedJobs = data.retried.map((job) => ({ ...job, retried: true }));
       const jobs = data.latest_statuses.concat(retriedJobs);
 
       dispatch('receiveJobsForStageSuccess', jobs);
@@ -235,7 +244,7 @@ export const receiveJobsForStageError = ({ commit }) => {
 };
 
 export const triggerManualJob = ({ state }, variables) => {
-  const parsedVariables = variables.map(variable => {
+  const parsedVariables = variables.map((variable) => {
     const copyVar = { ...variable };
     delete copyVar.id;
     return copyVar;

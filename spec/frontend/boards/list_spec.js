@@ -37,7 +37,7 @@ describe('List model', () => {
   describe('list type', () => {
     const notExpandableList = ['blank'];
 
-    const table = Object.keys(ListType).map(k => {
+    const table = Object.keys(ListType).map((k) => {
       const value = ListType[k];
       return [value, !notExpandableList.includes(value)];
     });
@@ -184,10 +184,9 @@ describe('List model', () => {
         }),
       );
       list.issues = [];
-      global.gon.features = { boardsWithSwimlanes: false };
     });
 
-    it('adds new issue to top of list', done => {
+    it('adds new issue to top of list', (done) => {
       const user = new ListAssignee({
         id: 1,
         name: 'testing 123',

@@ -91,6 +91,15 @@ RSpec.describe Ci::CreatePipelineService do
           .with({ source: 'push' }, 5)
       end
 
+      describe 'recording a conversion event' do
+        it 'schedules a record conversion event worker' do
+          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:ci_syntax_templates, user.id)
+          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:pipelines_empty_state, user.id)
+
+          pipeline
+        end
+      end
+
       context 'when merge requests already exist for this source branch' do
         let(:merge_request_1) do
           create(:merge_request, source_branch: 'feature', target_branch: "master", source_project: project)
@@ -481,6 +490,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       expect(execute_service).not_to be_persisted
       expect(Ci::Pipeline.count).to eq(0)
+      expect(Namespaces::OnboardingPipelineCreatedWorker).not_to receive(:perform_async)
     end
 
     shared_examples 'a failed pipeline' do
@@ -1414,6 +1424,13 @@ RSpec.describe Ci::CreatePipelineService do
             it 'schedules update for the head pipeline of the merge request' do
               expect(UpdateHeadPipelineForMergeRequestWorker)
                 .to receive(:perform_async).with(merge_request.id)
+
+              pipeline
+            end
+
+            it 'schedules a namespace onboarding create action worker' do
+              expect(Namespaces::OnboardingPipelineCreatedWorker)
+                .to receive(:perform_async).with(project.namespace_id)
 
               pipeline
             end
@@ -2385,16 +2402,6 @@ RSpec.describe Ci::CreatePipelineService do
             expect(build_names).to contain_exactly('regular-job')
           end
 
-          context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-            before do
-              stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-            end
-
-            it 'does not a pipeline' do
-              expect(pipeline).not_to be_persisted
-            end
-          end
-
           context 'when a job requires the same variable' do
             let(:config) do
               <<-EOY
@@ -2423,16 +2430,6 @@ RSpec.describe Ci::CreatePipelineService do
               expect(pipeline).to be_persisted
               expect(build_names).to contain_exactly('build', 'test1', 'test2')
             end
-
-            context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-              before do
-                stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-              end
-
-              it 'does not a pipeline' do
-                expect(pipeline).not_to be_persisted
-              end
-            end
           end
         end
 
@@ -2441,16 +2438,6 @@ RSpec.describe Ci::CreatePipelineService do
 
           it 'does not create a pipeline' do
             expect(pipeline).not_to be_persisted
-          end
-
-          context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-            before do
-              stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-            end
-
-            it 'does not create a pipeline' do
-              expect(pipeline).not_to be_persisted
-            end
           end
 
           context 'when a job requires the same variable' do
@@ -2479,16 +2466,6 @@ RSpec.describe Ci::CreatePipelineService do
 
             it 'does not create a pipeline' do
               expect(pipeline).not_to be_persisted
-            end
-
-            context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-              before do
-                stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-              end
-
-              it 'does not create a pipeline' do
-                expect(pipeline).not_to be_persisted
-              end
             end
           end
         end

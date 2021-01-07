@@ -3,8 +3,10 @@ import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
 import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
@@ -13,6 +15,8 @@ import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
+
+const gidPrefix = 'gid://gitlab/Vulnerability/';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -78,7 +82,7 @@ export default {
       );
     },
     hasIssue() {
-      return Boolean(this.vulnerability.issue_feedback?.issue_iid);
+      return Boolean(this.vulnerability.issueFeedback?.issueIid);
     },
     hasRemediation() {
       const { remediations } = this.vulnerability;
@@ -86,14 +90,14 @@ export default {
     },
     canCreateMergeRequest() {
       return (
-        !this.vulnerability.merge_request_feedback?.merge_request_path &&
-        Boolean(this.vulnerability.create_mr_url) &&
+        !this.vulnerability.mergeRequestFeedback?.mergeRequestPath &&
+        Boolean(this.vulnerability.createMrUrl) &&
         this.hasRemediation
       );
     },
     showResolutionAlert() {
       return (
-        this.vulnerability.resolved_on_default_branch &&
+        this.vulnerability.resolvedOnDefaultBranch &&
         this.vulnerability.state !== VULNERABILITY_STATE_OBJECTS.resolved.state
       );
     },
@@ -103,14 +107,16 @@ export default {
     'vulnerability.state': {
       immediate: true,
       handler(state) {
-        const id = this.vulnerability[`${state}_by_id`];
+        const id = this.vulnerability[`${state}ById`];
 
-        if (id === undefined) return; // Don't do anything if there's no ID.
+        if (!id) {
+          return;
+        }
 
         this.isLoadingUser = true;
 
         UsersCache.retrieveById(id)
-          .then(userData => {
+          .then((userData) => {
             this.user = userData;
           })
           .catch(() => {
@@ -128,49 +134,63 @@ export default {
       const fn = this[action];
       if (typeof fn === 'function') fn();
     },
-    changeVulnerabilityState(newState) {
+
+    async changeVulnerabilityState({ action, payload }) {
       this.isLoadingVulnerability = true;
 
-      Api.changeVulnerabilityState(this.vulnerability.id, newState)
-        .then(({ data }) => {
-          Object.assign(this.vulnerability, data);
-          this.$emit('vulnerability-state-change');
-        })
-        .catch(() => {
-          createFlash(
-            s__(
-              'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
-            ),
-          );
-        })
-        .finally(() => {
-          this.isLoadingVulnerability = false;
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: vulnerabilityStateMutations[action],
+          variables: { id: `${gidPrefix}${this.vulnerability.id}`, ...payload },
         });
+        const [queryName] = Object.keys(data);
+        const { vulnerability } = data[queryName];
+        vulnerability.id = vulnerability.id.replace(gidPrefix, '');
+        vulnerability.state = vulnerability.state.toLowerCase();
+
+        this.vulnerability = {
+          ...this.vulnerability,
+          ...vulnerability,
+        };
+
+        this.$emit('vulnerability-state-change');
+      } catch (error) {
+        createFlash({
+          error,
+          captureError: true,
+          message: s__(
+            'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
+          ),
+        });
+      } finally {
+        this.isLoadingVulnerability = false;
+      }
     },
+
     createMergeRequest() {
       this.isProcessingAction = true;
 
       const {
-        report_type: category,
+        reportType: category,
         pipeline: { sourceBranch },
-        project_fingerprint: projectFingerprint,
+        projectFingerprint,
       } = this.vulnerability;
 
       axios
-        .post(this.vulnerability.create_mr_url, {
+        .post(this.vulnerability.createMrUrl, {
           vulnerability_feedback: {
             feedback_type: FEEDBACK_TYPES.MERGE_REQUEST,
             category,
             project_fingerprint: projectFingerprint,
             vulnerability_data: {
-              ...this.vulnerability,
+              ...convertObjectPropsToSnakeCase(this.vulnerability),
               category,
               target_branch: sourceBranch,
             },
           },
         })
-        .then(({ data: { merge_request_path } }) => {
-          redirectTo(merge_request_path);
+        .then(({ data: { merge_request_path: mergeRequestPath } }) => {
+          redirectTo(mergeRequestPath);
         })
         .catch(() => {
           this.isProcessingAction = false;
@@ -201,7 +221,7 @@ export default {
         .then(({ data }) => {
           Object.assign(this.vulnerability, data);
         })
-        .catch(e => {
+        .catch((e) => {
           // Don't show an error message if the request was cancelled through the cancel token.
           if (!axios.isCancel(e)) {
             createFlash(
@@ -225,7 +245,7 @@ export default {
     <resolution-alert
       v-if="showResolutionAlert"
       :vulnerability-id="vulnerability.id"
-      :default-branch-name="vulnerability.project_default_branch"
+      :default-branch-name="vulnerability.projectDefaultBranch"
     />
     <div class="detail-page-header">
       <div class="detail-page-header-body align-items-center">

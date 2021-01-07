@@ -32,7 +32,7 @@ export default function initJiraIssuesList({ mountPointSelector }) {
       initialState,
       initialSortBy,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement(JiraIssuesListApp, {
         props: {
           initialFilterParams,

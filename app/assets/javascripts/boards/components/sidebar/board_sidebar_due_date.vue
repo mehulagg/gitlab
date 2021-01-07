@@ -18,16 +18,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ issue: 'activeIssue', projectPathForActiveIssue: 'projectPathForActiveIssue' }),
+    ...mapGetters(['activeIssue', 'projectPathForActiveIssue']),
     hasDueDate() {
-      return this.issue.dueDate != null;
+      return this.activeIssue.dueDate != null;
     },
     parsedDueDate() {
       if (!this.hasDueDate) {
         return null;
       }
 
-      return parsePikadayDate(this.issue.dueDate);
+      return parsePikadayDate(this.activeIssue.dueDate);
     },
     formattedDueDate() {
       if (!this.hasDueDate) {
@@ -79,7 +79,7 @@ export default {
         <span class="gl-mx-2">-</span>
         <gl-button
           variant="link"
-          class="gl-text-gray-400!"
+          class="gl-text-gray-500!"
           data-testid="reset-button"
           :disabled="loading"
           @click="setDueDate(null)"

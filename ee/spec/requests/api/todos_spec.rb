@@ -88,6 +88,8 @@ RSpec.describe API::Todos do
       end
 
       it 'returns 304 there already exist a todo on that epic' do
+        stub_feature_flags(multiple_todos: false)
+
         create(:todo, project: nil, group: group, user: user, target: epic)
 
         subject

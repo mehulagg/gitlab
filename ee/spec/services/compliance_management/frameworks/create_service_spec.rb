@@ -24,7 +24,7 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
     end
 
     it 'responds with an error message' do
-      expect(subject.execute.message).to eq('Feature not available')
+      expect(subject.execute.message).to eq('Not permitted to create framework')
     end
   end
 

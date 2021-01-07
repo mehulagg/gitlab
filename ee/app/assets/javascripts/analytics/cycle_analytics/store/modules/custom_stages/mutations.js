@@ -25,7 +25,7 @@ const extractFormFields = (rawStage = {}) => {
 
 export default {
   [types.SET_STAGE_EVENTS](state, data = []) {
-    state.formEvents = data.map(ev => convertObjectPropsToCamelCase(ev, { deep: true }));
+    state.formEvents = data.map((ev) => convertObjectPropsToCamelCase(ev, { deep: true }));
   },
   [types.SET_STAGE_FORM_ERRORS](state, errors) {
     state.formErrors = convertObjectPropsToCamelCase(errors, { deep: true });

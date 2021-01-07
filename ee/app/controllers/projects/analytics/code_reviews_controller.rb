@@ -7,7 +7,6 @@ module Projects
 
       before_action :authorize_read_code_review_analytics!
       before_action do
-        push_frontend_feature_flag(:code_review_analytics_has_new_search)
         push_frontend_feature_flag(:not_issuable_queries, @project, default_enabled: true)
       end
 

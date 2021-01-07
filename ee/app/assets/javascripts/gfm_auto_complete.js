@@ -41,7 +41,7 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
       callbacks: {
         ...defaultCallbacks,
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
@@ -75,7 +75,7 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
       callbacks: {
         ...defaultCallbacks,
         beforeSave(merges) {
-          return merges.map(m => {
+          return merges.map((m) => {
             if (m.title == null) {
               return m;
             }

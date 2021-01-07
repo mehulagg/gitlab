@@ -96,13 +96,9 @@ module EE
 
       def check_maintenance_mode!(cmd)
         return unless cmd == 'git-receive-pack'
-        return unless maintenance_mode?
+        return unless ::Gitlab.maintenance_mode?
 
         raise ::Gitlab::GitAccess::ForbiddenError, 'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.'
-      end
-
-      def maintenance_mode?
-        ::Gitlab::CurrentSettings.current_application_settings.maintenance_mode
       end
 
       def can_access_without_new_smartcard_login?

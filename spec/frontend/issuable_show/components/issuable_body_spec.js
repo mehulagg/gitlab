@@ -98,10 +98,7 @@ describe('IssuableBody', () => {
 
     it('renders issuable edit info', () => {
       const editedEl = wrapper.find('small');
-      const sanitizedText = editedEl
-        .text()
-        .replace(/\n/g, ' ')
-        .replace(/\s+/g, ' ');
+      const sanitizedText = editedEl.text().replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
       expect(sanitizedText).toContain('Edited');
       expect(sanitizedText).toContain('ago');
@@ -135,6 +132,33 @@ describe('IssuableBody', () => {
 
         expect(wrapper.emitted('edit-issuable')).toBeTruthy();
       });
+
+      it.each(['keydown-title', 'keydown-description'])(
+        'component emits `%s` event with event object and issuableMeta params via issuable-edit-form',
+        async (eventName) => {
+          const eventObj = {
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn(),
+          };
+          const issuableMeta = {
+            issuableTitle: 'foo',
+            issuableDescription: 'foobar',
+          };
+
+          wrapper.setProps({
+            editFormVisible: true,
+          });
+
+          await wrapper.vm.$nextTick();
+
+          const issuableEditForm = wrapper.find(IssuableEditForm);
+
+          issuableEditForm.vm.$emit(eventName, eventObj, issuableMeta);
+
+          expect(wrapper.emitted(eventName)).toBeTruthy();
+          expect(wrapper.emitted(eventName)[0]).toMatchObject([eventObj, issuableMeta]);
+        },
+      );
     });
   });
 });

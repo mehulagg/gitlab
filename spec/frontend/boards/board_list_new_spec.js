@@ -1,15 +1,11 @@
-/* global List */
-/* global ListIssue */
-
 import Vuex from 'vuex';
 import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 import { createLocalVue, mount } from '@vue/test-utils';
 import eventHub from '~/boards/eventhub';
 import BoardList from '~/boards/components/board_list_new.vue';
 import BoardCard from '~/boards/components/board_card.vue';
-import '~/boards/models/issue';
 import '~/boards/models/list';
-import { listObj, mockIssuesByListId, issues, mockIssues } from './mock_data';
+import { mockList, mockIssuesByListId, issues, mockIssues } from './mock_data';
 import defaultState from '~/boards/stores/state';
 
 const localVue = createLocalVue();
@@ -46,13 +42,11 @@ const createComponent = ({
     ...state,
   });
 
-  const list = new List({
-    ...listObj,
-    id: 'gid://gitlab/List/1',
+  const list = {
+    ...mockList,
     ...listProps,
-    doNotFetchIssues: true,
-  });
-  const issue = new ListIssue({
+  };
+  const issue = {
     title: 'Testing',
     id: 1,
     iid: 1,
@@ -60,9 +54,9 @@ const createComponent = ({
     labels: [],
     assignees: [],
     ...listIssueProps,
-  });
-  if (!Object.prototype.hasOwnProperty.call(listProps, 'issuesSize')) {
-    list.issuesSize = 1;
+  };
+  if (!Object.prototype.hasOwnProperty.call(listProps, 'issuesCount')) {
+    list.issuesCount = 1;
   }
 
   const component = mount(BoardList, {
@@ -88,7 +82,7 @@ const createComponent = ({
 
 describe('Board list component', () => {
   let wrapper;
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   useFakeRequestAnimationFrame();
 
   afterEach(() => {
@@ -160,7 +154,7 @@ describe('Board list component', () => {
 
     it('shows how many more issues to load', async () => {
       wrapper.vm.showCount = true;
-      wrapper.setProps({ list: { issuesSize: 20 } });
+      wrapper.setProps({ list: { issuesCount: 20 } });
 
       await wrapper.vm.$nextTick();
       expect(wrapper.find('.board-list-count').text()).toBe('Showing 1 of 20 issues');
@@ -170,7 +164,7 @@ describe('Board list component', () => {
   describe('load more issues', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        listProps: { issuesSize: 25 },
+        listProps: { issuesCount: 25 },
       });
     });
 
@@ -181,15 +175,19 @@ describe('Board list component', () => {
     });
 
     it('does not load issues if already loading', () => {
-      wrapper.vm.listRef.dispatchEvent(new Event('scroll'));
+      wrapper = createComponent({
+        state: { listsFlags: { 'gid://gitlab/List/1': { isLoadingMore: true } } },
+      });
       wrapper.vm.listRef.dispatchEvent(new Event('scroll'));
 
-      expect(actions.fetchIssuesForList).toHaveBeenCalledTimes(1);
+      expect(actions.fetchIssuesForList).not.toHaveBeenCalled();
     });
 
     it('shows loading more spinner', async () => {
+      wrapper = createComponent({
+        state: { listsFlags: { 'gid://gitlab/List/1': { isLoadingMore: true } } },
+      });
       wrapper.vm.showCount = true;
-      wrapper.vm.list.loadingMore = true;
 
       await wrapper.vm.$nextTick();
       expect(wrapper.find('.board-list-count .gl-spinner').exists()).toBe(true);
@@ -199,13 +197,13 @@ describe('Board list component', () => {
   describe('max issue count warning', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        listProps: { issuesSize: 50 },
+        listProps: { issuesCount: 50 },
       });
     });
 
     describe('when issue count exceeds max issue count', () => {
       it('sets background to bg-danger-100', async () => {
-        wrapper.setProps({ list: { issuesSize: 4, maxIssueCount: 3 } });
+        wrapper.setProps({ list: { issuesCount: 4, maxIssueCount: 3 } });
 
         await wrapper.vm.$nextTick();
         expect(wrapper.find('.bg-danger-100').exists()).toBe(true);
@@ -214,7 +212,7 @@ describe('Board list component', () => {
 
     describe('when list issue count does NOT exceed list max issue count', () => {
       it('does not sets background to bg-danger-100', () => {
-        wrapper.setProps({ list: { issuesSize: 2, maxIssueCount: 3 } });
+        wrapper.setProps({ list: { issuesCount: 2, maxIssueCount: 3 } });
 
         expect(wrapper.find('.bg-danger-100').exists()).toBe(false);
       });

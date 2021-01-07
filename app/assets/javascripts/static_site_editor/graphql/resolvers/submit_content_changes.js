@@ -4,7 +4,17 @@ import savedContentMetaQuery from '../queries/saved_content_meta.query.graphql';
 
 const submitContentChangesResolver = (
   _,
-  { input: { project: projectId, username, sourcePath, content, images, mergeRequestMeta } },
+  {
+    input: {
+      project: projectId,
+      username,
+      sourcePath,
+      content,
+      images,
+      mergeRequestMeta,
+      formattedMarkdown,
+    },
+  },
   { cache },
 ) => {
   return submitContentChanges({
@@ -14,8 +24,9 @@ const submitContentChangesResolver = (
     content,
     images,
     mergeRequestMeta,
-  }).then(savedContentMeta => {
-    const data = produce(savedContentMeta, draftState => {
+    formattedMarkdown,
+  }).then((savedContentMeta) => {
+    const data = produce(savedContentMeta, (draftState) => {
       return {
         savedContentMeta: {
           __typename: 'SavedContentMeta',

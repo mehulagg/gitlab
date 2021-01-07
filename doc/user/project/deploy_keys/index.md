@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, reference
 ---
 
@@ -27,7 +27,7 @@ repository in automation, it's a simple solution.
 
 A drawback is that your repository could become vulnerable if a remote machine is compromised
 by a hacker. You should limit access to the remote machine before a deploy key is
-enabled on your repository. A good rule to follow is to access only to trusted users,
+enabled on your repository. A good rule to follow is to provide access only to trusted users,
 and make sure that the allowed users have [maintainer permissions or higher](../../permissions.md)
 in the GitLab project.
 
@@ -92,7 +92,7 @@ There are three lists of Project Deploy Keys:
 
 ![Deploy Keys section](img/deploy_keys_v13_0.png)
 
-After you add a key, it will be enabled for this project by default, and it'll appear
+After you add a key, it's enabled for this project by default and it appears
 in the **Enabled deploy keys** tab.
 
 In the **Privately accessible deploy keys** tab, you can enable a private key which
@@ -108,10 +108,10 @@ keys that were [made available to your entire GitLab instance](#public-deploy-ke
 After a key is added, you can edit it to update its title, or switch between `read-only`
 and `read-write` access.
 
-NOTE: **Note:**
+NOTE:
 If you have enabled a privately or publicly accessible or deploy key for your
 project, and if you then update the access level for this key from `read-only` to
-`read-write`, the change will be only for the **current project**.
+`read-write`, the change is only for the **current project**.
 
 ### Public deploy keys
 
@@ -131,10 +131,10 @@ Instance administrators can add public deploy keys:
 
 ![Public Deploy Keys section](img/public_deploy_key_v13_0.png)
 
-After adding a key, it will be available to any shared systems. Project maintainers
+After adding a key, it's available to any shared systems. Project maintainers
 or higher can [authorize a public deploy key](#project-deploy-keys) to start using it with the project.
 
-NOTE: **Note:**
+NOTE:
 The **Publicly accessible deploy keys** tab within Project's CI/CD settings only appears
 if there is at least one Public deploy key configured.
 
@@ -146,7 +146,7 @@ When creating a Public deploy key, determine whether or not it can be defined fo
 very narrow usage, such as just a specific service, or if it needs to be defined for
 broader usage, such as full `read-write` access for all services.
 
-CAUTION: **Warning:**
+WARNING:
 Adding a public deploy key does not immediately expose any repository to it. Public
 deploy keys enable access from other systems, but access is not given to any project
 until a project maintainer chooses to make use of it.
@@ -155,8 +155,8 @@ until a project maintainer chooses to make use of it.
 
 ### Deploy Key cannot push to a protected branch
 
-If the owner of this deploy key does not have access to a [protected
-branch](../protected_branches.md), then this deploy key won't have access to
+If the owner of this deploy key doesn't have access to a [protected
+branch](../protected_branches.md), then this deploy key doesn't have access to
 the branch either. In addition to this, choosing the **No one** value in
 [the "Allowed to push" section](../protected_branches.md#configuring-protected-branches)
 means that no users **and** no services using deploy keys can push to that selected branch.

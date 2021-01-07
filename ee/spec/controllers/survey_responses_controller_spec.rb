@@ -23,8 +23,7 @@ RSpec.describe SurveyResponsesController do
       it 'tracks a survey_response event' do
         expect(controller).to receive(:track_self_describing_event).with(
           SurveyResponsesController::SURVEY_RESPONSE_SCHEMA_URL,
-          survey_id: 1,
-          response: 'bar'
+          data: { survey_id: 1, response: 'bar' }
         )
 
         subject

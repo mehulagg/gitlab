@@ -41,6 +41,7 @@ export default {
   user_callouts_path: 'some/callout/path',
   suggest_pipeline_feature_id: 'suggest_pipeline',
   new_project_pipeline_path: '/group2/project2/pipelines/new',
+  source_project_default_url: '/gitlab-org/html5-boilerplate.git',
   metrics: {
     merged_by: {
       name: 'Administrator',
@@ -193,7 +194,10 @@ export default {
     updated_at: '2017-04-07T15:28:44.800Z',
   },
   pipelineCoverageDelta: '15.25',
-  buildsWithCoverage: [{ name: 'karma', coverage: '40.2' }, { name: 'rspec', coverage: '80.4' }],
+  buildsWithCoverage: [
+    { name: 'karma', coverage: '40.2' },
+    { name: 'rspec', coverage: '80.4' },
+  ],
   work_in_progress: false,
   source_branch_exists: false,
   mergeable_discussions_state: true,
@@ -263,6 +267,8 @@ export default {
   merge_trains_count: 3,
   merge_train_index: 1,
   security_reports_docs_path: 'security-reports-docs-path',
+  sast_comparison_path: '/sast_comparison_path',
+  secret_scanning_comparison_path: '/secret_scanning_comparison_path',
 };
 
 export const mockStore = {

@@ -26,7 +26,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::CreateService do
 
   subject { described_class.new(parent: group, params: params, current_user: user).execute }
 
-  it_behaves_like 'permission check for cycle analytics stage services', :cycle_analytics_for_groups
+  it_behaves_like 'permission check for Value Stream Analytics Stage services', :cycle_analytics_for_groups
 
   describe 'custom stage creation' do
     context 'when service response is successful' do

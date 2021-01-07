@@ -14,8 +14,6 @@ RSpec.describe 'Issue Sidebar' do
   let_it_be(:issue_no_group) { create(:labeled_issue, project: project_without_group, labels: [label]) }
 
   before do
-    stub_feature_flags(vue_issue_header: false)
-
     sign_in(user)
   end
 
@@ -98,7 +96,9 @@ RSpec.describe 'Issue Sidebar' do
 
       context 'when user closes an issue' do
         it 'disables the edit button' do
-          page.find('[data-testid="close-issue-button"]').click
+          page.within('.detail-page-header') do
+            click_button 'Close issue'
+          end
 
           page.within('.health-status') do
             expect(page).to have_button('Edit', disabled: true)
@@ -110,17 +110,6 @@ RSpec.describe 'Issue Sidebar' do
     context 'when health status feature is not available' do
       it 'does not show health status on sidebar' do
         stub_licensed_features(issuable_health_status: false)
-
-        visit_issue(project, issue)
-
-        expect(page).not_to have_selector('.block.health-status')
-      end
-    end
-
-    context 'when health status feature flag is disabled' do
-      it 'does not show health status on sidebar' do
-        stub_licensed_features(issuable_health_status: true)
-        stub_feature_flags(save_issuable_health_status: false)
 
         visit_issue(project, issue)
 

@@ -2,7 +2,7 @@ import { GlDropdownItem } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import OnDemandScansProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
-import { scannerProfiles } from '../../mock_data';
+import { scannerProfiles } from '../../mocks/mock_data';
 
 describe('OnDemandScansProfileSelector', () => {
   let wrapper;
@@ -13,7 +13,7 @@ describe('OnDemandScansProfileSelector', () => {
     profiles: [],
   };
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findProfilesLibraryPathLink = () => findByTestId('manage-profiles-link');
   const findProfilesDropdown = () => findByTestId('profiles-dropdown');
   const findCreateNewProfileLink = () => findByTestId('create-profile-link');
@@ -21,15 +21,13 @@ describe('OnDemandScansProfileSelector', () => {
   const parseDropdownItems = () =>
     findProfilesDropdown()
       .findAll(GlDropdownItem)
-      .wrappers.map(x => ({
+      .wrappers.map((x) => ({
         text: x.text(),
         isChecked: x.props('isChecked'),
       }));
 
   const selectFirstProfile = () => {
-    return findProfilesDropdown()
-      .find(GlDropdownItem)
-      .vm.$emit('click');
+    return findProfilesDropdown().find(GlDropdownItem).vm.$emit('click');
   };
 
   const createFullComponent = (options = {}) => {
@@ -41,11 +39,9 @@ describe('OnDemandScansProfileSelector', () => {
           slots: {
             title: 'Section title',
             label: 'Use existing scanner profile',
+            summary: `<div>Profile's summary</div>`,
             'no-profiles': 'No profile yet',
             'new-profile': 'Create a new profile',
-          },
-          scopedSlots: {
-            summary: "<div>{{ props.profile.profileName }}'s summary</div>",
           },
         },
         options,
@@ -110,7 +106,7 @@ describe('OnDemandScansProfileSelector', () => {
 
     it('shows dropdown items for each profile', () => {
       expect(parseDropdownItems()).toEqual(
-        scannerProfiles.map(x => ({
+        scannerProfiles.map((x) => ({
           text: x.profileName,
           isChecked: false,
         })),
@@ -139,7 +135,7 @@ describe('OnDemandScansProfileSelector', () => {
       const summary = findSelectedProfileSummary();
 
       expect(summary.exists()).toBe(true);
-      expect(summary.text()).toContain(`${scannerProfiles[0].profileName}'s summary`);
+      expect(summary.text()).toContain(`Profile's summary`);
     });
 
     it('displays item as checked', () => {

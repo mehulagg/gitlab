@@ -14,5 +14,5 @@ export const getStoreConfig = ({ replicableType, graphqlFieldName }) => ({
   state: createState({ replicableType, graphqlFieldName }),
 });
 
-const createStore = config => new Vuex.Store(getStoreConfig(config));
+const createStore = (config) => new Vuex.Store(getStoreConfig(config));
 export default createStore;

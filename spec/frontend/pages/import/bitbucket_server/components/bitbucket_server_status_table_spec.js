@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 
 import { GlButton } from '@gitlab/ui';
 import BitbucketServerStatusTable from '~/pages/import/bitbucket_server/status/components/bitbucket_server_status_table.vue';
-import BitbucketStatusTable from '~/import_projects/components/bitbucket_status_table.vue';
+import BitbucketStatusTable from '~/import_entities/import_projects/components/bitbucket_status_table.vue';
 
 const BitbucketStatusTableStub = {
   name: 'BitbucketStatusTable',
@@ -15,7 +15,7 @@ describe('BitbucketServerStatusTable', () => {
   const findReconfigureButton = () =>
     wrapper
       .findAll(GlButton)
-      .filter(w => w.props().variant === 'info')
+      .filter((w) => w.props().variant === 'info')
       .at(0);
 
   afterEach(() => {

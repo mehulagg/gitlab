@@ -29,15 +29,15 @@ export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
-      rules: state => state.approvals.rules,
+      rules: (state) => state.approvals.rules,
     }),
     hasNamedRule() {
-      return this.rules.some(rule => rule.ruleType === RULE_TYPE_REGULAR);
+      return this.rules.some((rule) => rule.ruleType === RULE_TYPE_REGULAR);
     },
     hasAnyRule() {
       return (
         this.settings.allowMultiRule &&
-        !this.rules.some(rule => rule.ruleType === RULE_TYPE_ANY_APPROVER)
+        !this.rules.some((rule) => rule.ruleType === RULE_TYPE_ANY_APPROVER)
       );
     },
   },
@@ -46,7 +46,7 @@ export default {
       handler(newValue) {
         if (
           this.settings.allowMultiRule &&
-          !newValue.some(rule => rule.ruleType === RULE_TYPE_ANY_APPROVER)
+          !newValue.some((rule) => rule.ruleType === RULE_TYPE_ANY_APPROVER)
         ) {
           this.addEmptyRule();
         }

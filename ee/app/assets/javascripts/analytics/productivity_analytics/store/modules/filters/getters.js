@@ -19,7 +19,7 @@ import { dateFormats } from '../../../../shared/constants';
  * }
  *
  */
-export const getCommonFilterParams = (state, getters) => chartKey => {
+export const getCommonFilterParams = (state, getters) => (chartKey) => {
   const {
     groupNamespace,
     projectPath,
@@ -55,7 +55,7 @@ export const getCommonFilterParams = (state, getters) => chartKey => {
  * When a minDate exists and the minDate is after the computed dateInPast,
  * the minDate is returned. Otherwise the computed dateInPast is returned.
  */
-export const scatterplotStartDate = state => {
+export const scatterplotStartDate = (state) => {
   const { startDate, minDate } = state;
   const dateInPast = getDateInPast(startDate, scatterPlotAddonQueryDays);
 

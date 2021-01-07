@@ -57,7 +57,7 @@ export default {
   computed: {
     ...mapState(['formErrors']),
     visibleFormGroups() {
-      return this.formGroups.filter(group => {
+      return this.formGroups.filter((group) => {
         if (group.conditional) {
           return this.nodeData.primary
             ? group.conditional === 'primary'

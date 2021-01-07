@@ -39,7 +39,7 @@ RSpec.describe Mutations::Issues::Create do
       stub_licensed_features(issuable_health_status: true)
     end
 
-    subject { mutation.resolve(mutation_params) }
+    subject { mutation.resolve(**mutation_params) }
 
     context 'when user can create issues' do
       before do

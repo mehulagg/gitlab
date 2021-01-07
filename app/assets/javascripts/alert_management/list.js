@@ -17,12 +17,10 @@ export default () => {
     emptyAlertSvgPath,
     populatingAlertsHelpUrl,
     alertsHelpUrl,
-    opsgenieMvcTargetUrl,
     textQuery,
     assigneeUsernameQuery,
     alertManagementEnabled,
     userCanEnableAlertManagement,
-    opsgenieMvcEnabled,
   } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
@@ -30,7 +28,7 @@ export default () => {
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object => {
+          dataIdFromObject: (object) => {
             // eslint-disable-next-line no-underscore-dangle
             if (object.__typename === 'AlertManagementAlert') {
               return object.iid;
@@ -57,10 +55,8 @@ export default () => {
       enableAlertManagementPath,
       populatingAlertsHelpUrl,
       emptyAlertSvgPath,
-      opsgenieMvcTargetUrl,
       alertManagementEnabled: parseBoolean(alertManagementEnabled),
       userCanEnableAlertManagement: parseBoolean(userCanEnableAlertManagement),
-      opsgenieMvcEnabled: parseBoolean(opsgenieMvcEnabled),
     },
     apolloProvider,
     components: {

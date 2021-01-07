@@ -21,7 +21,7 @@ RSpec.describe 'Updating an Iteration' do
   end
 
   let(:mutation) do
-    params = { group_path: group.full_path, id: iteration.id }.merge(attributes)
+    params = { group_path: group.full_path, id: iteration.to_global_id.to_s }.merge(attributes)
 
     graphql_mutation(:update_iteration, params)
   end
@@ -53,9 +53,12 @@ RSpec.describe 'Updating an Iteration' do
         stub_licensed_features(iterations: false)
       end
 
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['The resource that you are attempting to access does not '\
-                 'exist or you don\'t have permission to perform this action']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) do
+          include('The resource that you are attempting to access does not '\
+                  'exist or you don\'t have permission to perform this action')
+        end
+      end
     end
 
     context 'when iterations are enabled' do
@@ -89,6 +92,18 @@ RSpec.describe 'Updating an Iteration' do
 
         it 'does not update the iteration' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(iteration, :title)
+        end
+      end
+
+      context 'when given a raw model id (backward compatibility)' do
+        let(:attributes) { { id: iteration.id, title: 'title' } }
+
+        it 'updates the iteration' do
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          iteration_hash = mutation_response['iteration']
+          expect(iteration_hash['title']).to eq('title')
+          expect(iteration.reload.title).to eq('title')
         end
       end
 

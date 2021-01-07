@@ -38,6 +38,7 @@ module Gitlab
       extend self
 
       FALLBACK = -1
+      DISTRIBUTED_HLL_FALLBACK = -2
 
       def count(relation, column = nil, batch: true, batch_size: nil, start: nil, finish: nil)
         if batch
@@ -57,6 +58,20 @@ module Gitlab
         end
       rescue ActiveRecord::StatementInvalid
         FALLBACK
+      end
+
+      def estimate_batch_distinct_count(relation, column = nil, batch_size: nil, start: nil, finish: nil)
+        Gitlab::Database::PostgresHll::BatchDistinctCounter
+          .new(relation, column)
+          .execute(batch_size: batch_size, start: start, finish: finish)
+          .estimated_distinct_count
+      rescue ActiveRecord::StatementInvalid
+        FALLBACK
+      # catch all rescue should be removed as a part of feature flag rollout issue
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/285485
+      rescue StandardError => error
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error)
+        DISTRIBUTED_HLL_FALLBACK
       end
 
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)
@@ -130,7 +145,8 @@ module Gitlab
 
       def prometheus_server_address
         if Gitlab::Prometheus::Internal.prometheus_enabled?
-          Gitlab::Prometheus::Internal.server_address
+          # Stripping protocol from URI
+          Gitlab::Prometheus::Internal.uri&.strip&.sub(%r{^https?://}, '')
         elsif Gitlab::Consul::Internal.api_url
           Gitlab::Consul::Internal.discover_prometheus_server_address
         end

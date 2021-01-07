@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 export default {
@@ -9,7 +9,7 @@ export default {
   components: {
     GlButton,
     GlDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdownItem,
   },
   props: {
     jobs: {
@@ -46,12 +46,9 @@ export default {
       category="secondary"
       size="small"
     >
-      <gl-deprecated-dropdown-item
-        v-for="job in jobs"
-        :key="job.id"
-        :href="artifactDownloadUrl(job)"
-        >{{ job.name }}</gl-deprecated-dropdown-item
-      >
+      <gl-dropdown-item v-for="job in jobs" :key="job.id" :href="artifactDownloadUrl(job)">{{
+        job.name
+      }}</gl-dropdown-item>
     </gl-dropdown>
     <gl-button
       v-else

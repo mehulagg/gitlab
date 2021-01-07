@@ -43,13 +43,23 @@ RSpec.describe Resolvers::IterationsResolver do
           start_date = now
           end_date = start_date + 1.hour
           search = 'wow'
-          id = 1
+          id = '1'
           iid = 2
           params = { id: id, iid: iid, group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date, search_title: search }
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
-          resolve_group_iterations(start_date: start_date, end_date: end_date, state: 'closed', title: search, id: id, iid: iid)
+          resolve_group_iterations(start_date: start_date, end_date: end_date, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iid: iid)
+        end
+
+        it 'accepts a raw model id for backward compatibility' do
+          id = 1
+          iid = 2
+          params = { id: id, iid: iid, group_ids: group.id, state: 'all', start_date: nil, end_date: nil, search_title: nil }
+
+          expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
+
+          resolve_group_iterations(id: id, iid: iid)
         end
       end
 

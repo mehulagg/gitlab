@@ -171,9 +171,11 @@ export default {
       this.hideErrors();
 
       const variables = {
-        projectFullPath: this.projectFullPath,
-        ...(this.isEdit ? { id: this.profile.id } : {}),
-        ...serializeFormObject(this.form),
+        input: {
+          fullPath: this.projectFullPath,
+          ...(this.isEdit ? { id: this.profile.id } : {}),
+          ...serializeFormObject(this.form),
+        },
       };
 
       this.$apollo
@@ -199,7 +201,7 @@ export default {
             }
           },
         )
-        .catch(e => {
+        .catch((e) => {
           Sentry.captureException(e);
           this.showErrors();
           this.loading = false;

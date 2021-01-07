@@ -62,12 +62,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
     }),
     chartOptions() {
       return {
@@ -75,7 +75,7 @@ export default {
           name: THROUGHPUT_CHART_STRINGS.X_AXIS_TITLE,
           type: 'category',
           axisLabel: {
-            formatter: value => {
+            formatter: (value) => {
               return value.split(' ')[0]; // Aug 2020 => Aug
             },
           },
@@ -92,7 +92,7 @@ export default {
       return !this.hasError && this.$apollo.queries.throughputChartData.loading;
     },
     chartDataAvailable() {
-      return this.formattedThroughputChartData[0]?.data?.some(entry => Boolean(entry[1]));
+      return this.formattedThroughputChartData[0]?.data?.some((entry) => Boolean(entry[1]));
     },
     alertDetails() {
       return {

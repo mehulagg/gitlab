@@ -61,8 +61,7 @@ class ApplicationController < ActionController::Base
     :gitea_import_enabled?, :github_import_configured?,
     :gitlab_import_enabled?, :gitlab_import_configured?,
     :bitbucket_import_enabled?, :bitbucket_import_configured?,
-    :bitbucket_server_import_enabled?,
-    :google_code_import_enabled?, :fogbugz_import_enabled?,
+    :bitbucket_server_import_enabled?, :fogbugz_import_enabled?,
     :git_import_enabled?, :gitlab_project_import_enabled?,
     :manifest_import_enabled?, :phabricator_import_enabled?
 
@@ -434,10 +433,6 @@ class ApplicationController < ActionController::Base
     Gitlab::Auth::OAuth::Provider.enabled?(:bitbucket)
   end
 
-  def google_code_import_enabled?
-    Gitlab::CurrentSettings.import_sources.include?('google_code')
-  end
-
   def fogbugz_import_enabled?
     Gitlab::CurrentSettings.import_sources.include?('fogbugz')
   end
@@ -473,6 +468,7 @@ class ApplicationController < ActionController::Base
       project: -> { @project if @project&.persisted? },
       namespace: -> { @group if @group&.persisted? },
       caller_id: caller_id,
+      remote_ip: request.ip,
       feature_category: feature_category) do
       yield
     ensure

@@ -73,23 +73,23 @@ describe('Board List Header Component', () => {
   const findCaret = () => wrapper.find('.board-title-caret');
 
   describe('Add issue button', () => {
-    const hasNoAddButton = [ListType.promotion, ListType.blank, ListType.closed];
+    const hasNoAddButton = [ListType.closed];
     const hasAddButton = [ListType.backlog, ListType.label, ListType.milestone, ListType.assignee];
 
-    it.each(hasNoAddButton)('does not render when List Type is `%s`', listType => {
+    it.each(hasNoAddButton)('does not render when List Type is `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findAddIssueButton().exists()).toBe(false);
     });
 
-    it.each(hasAddButton)('does render when List Type is `%s`', listType => {
+    it.each(hasAddButton)('does render when List Type is `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findAddIssueButton().exists()).toBe(true);
     });
 
     it('has a test for each list type', () => {
-      Object.values(ListType).forEach(value => {
+      Object.values(ListType).forEach((value) => {
         expect([...hasAddButton, ...hasNoAddButton]).toContain(value);
       });
     });

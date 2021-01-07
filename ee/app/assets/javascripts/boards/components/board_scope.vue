@@ -2,15 +2,17 @@
 import { __ } from '~/locale';
 import ListLabel from '~/boards/models/label';
 import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
-import BoardMilestoneSelect from './milestone_select.vue';
-import BoardWeightSelect from './weight_select.vue';
 import AssigneeSelect from './assignee_select.vue';
+import BoardMilestoneSelect from './milestone_select.vue';
+import BoardScopeCurrentIteration from './board_scope_current_iteration.vue';
+import BoardWeightSelect from './weight_select.vue';
 
 export default {
   components: {
     AssigneeSelect,
     BoardLabelsSelect,
     BoardMilestoneSelect,
+    BoardScopeCurrentIteration,
     BoardWeightSelect,
   },
 
@@ -73,7 +75,7 @@ export default {
     handleLabelClick(label) {
       if (label.isAny) {
         this.board.labels = [];
-      } else if (!this.board.labels.find(l => l.id === label.id)) {
+      } else if (!this.board.labels.find((l) => l.id === label.id)) {
         this.board.labels.push(
           new ListLabel({
             id: label.id,
@@ -84,7 +86,7 @@ export default {
         );
       } else {
         let { labels } = this.board;
-        labels = labels.filter(selected => selected.id !== label.id);
+        labels = labels.filter((selected) => selected.id !== label.id);
         this.board.labels = labels;
       }
     },
@@ -109,6 +111,12 @@ export default {
         :group-id="groupId"
         :project-id="projectId"
         :can-edit="canAdminBoard"
+      />
+
+      <board-scope-current-iteration
+        :can-admin-board="canAdminBoard"
+        :iteration-id="board.iteration_id"
+        @set-iteration="$emit('set-iteration', $event)"
       />
 
       <board-labels-select

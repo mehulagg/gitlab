@@ -6,7 +6,7 @@ RSpec.describe Ci::Minutes::Notification do
   let_it_be(:user) { create(:user) }
   let(:shared_runners_enabled) { true }
   let!(:project) { create(:project, :repository, namespace: group, shared_runners_enabled: shared_runners_enabled) }
-  let_it_be(:group) { create(:group) }
+  let_it_be(:group, refind: true) { create(:group) }
   let(:injected_group) { group }
   let(:injected_project) { project }
 
@@ -38,7 +38,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when at the warning level' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(4)
+          allow(group).to receive(:shared_runners_seconds).and_return(16.minutes)
         end
 
         describe '#show?' do
@@ -70,7 +70,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when at the danger level' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(1)
+          allow(group).to receive(:shared_runners_seconds).and_return(19.minutes)
         end
 
         describe '#show?' do
@@ -102,7 +102,7 @@ RSpec.describe Ci::Minutes::Notification do
 
       context 'when right at the limit for notification' do
         before do
-          allow(group).to receive(:shared_runners_remaining_minutes).and_return(6)
+          allow(group).to receive(:shared_runners_seconds).and_return(14.minutes)
         end
 
         describe '#show?' do
@@ -167,7 +167,7 @@ RSpec.describe Ci::Minutes::Notification do
   shared_examples 'not eligible to see notifications' do
     before do
       group.shared_runners_minutes_limit = 10
-      allow(group).to receive(:shared_runners_remaining_minutes).and_return(2)
+      allow(group).to receive(:shared_runners_seconds).and_return(8.minutes)
     end
 
     context 'when not permitted to see notifications' do

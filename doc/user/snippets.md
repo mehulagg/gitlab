@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -52,8 +52,8 @@ part of the dropdown (**This project**).
 From there, add the **Title**, **Description**, and a **File** name with the
 appropriate extension (for example, `example.rb`, `index.html`).
 
-CAUTION: **Warning:**
-Make sure to add the file name to get code highlighting and to avoid this
+WARNING:
+Make sure to add the filename to get code highlighting and to avoid this
 [copy-pasting bug](https://gitlab.com/gitlab-org/gitlab/-/issues/22870).
 
 ## Versioned Snippets
@@ -72,7 +72,7 @@ it or creating other branches is not supported.
 Existing snippets will be automatically migrated in 13.0. Their current
 content will be saved as the initial commit to the snippets' repository.
 
-### File names
+### Filenames
 
 Snippets support syntax highlighting based on the filename and
 extension provided for them. While it is possible to submit a snippet
@@ -122,7 +122,7 @@ To delete a file from your snippet through the GitLab UI:
 
 1. Go to your snippet in the GitLab UI.
 1. Click **Edit** in the top right.
-1. Select **Delete file** alongside the file name of each file
+1. Select **Delete file** alongside the filename of each file
 you wish to delete.
 1. Click **Save changes**.
 
@@ -221,6 +221,6 @@ Here's how an embedded snippet looks like:
 
 <script src="https://gitlab.com/gitlab-org/gitlab-foss/snippets/1717978.js"></script>
 
-Embedded snippets are displayed with a header that shows the file name if it's defined,
+Embedded snippets are displayed with a header that shows the filename if it's defined,
 the snippet size, a link to GitLab, and the actual snippet content. Actions in
 the header allow users to see the snippet in raw format and download it.

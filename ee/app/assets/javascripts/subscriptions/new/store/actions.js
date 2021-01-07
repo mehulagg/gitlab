@@ -49,7 +49,7 @@ export const fetchCountries = ({ dispatch }) =>
     .catch(() => dispatch('fetchCountriesError'));
 
 export const fetchCountriesSuccess = ({ commit }, data = []) => {
-  const countries = data.map(country => ({ text: country[0], value: country[1] }));
+  const countries = data.map((country) => ({ text: country[0], value: country[1] }));
 
   commit(types.UPDATE_COUNTRY_OPTIONS, countries);
 };
@@ -71,7 +71,7 @@ export const fetchStates = ({ state, dispatch }) => {
 };
 
 export const fetchStatesSuccess = ({ commit }, data = {}) => {
-  const states = Object.keys(data).map(state => ({ text: state, value: data[state] }));
+  const states = Object.keys(data).map((state) => ({ text: state, value: data[state] }));
 
   commit(types.UPDATE_STATE_OPTIONS, states);
 };

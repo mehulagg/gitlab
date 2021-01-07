@@ -1,0 +1,7 @@
+{
+  "type": "object",
+  "properties": {
+    "allow_author_approval": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

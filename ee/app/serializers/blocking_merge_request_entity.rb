@@ -29,7 +29,7 @@ class BlockingMergeRequestEntity < Grape::Entity
   expose :created_at
   expose :merged_at
   expose :closed_at do |blocking_mr|
-    blocking_mr.metrics.latest_closed_at
+    blocking_mr.metrics&.latest_closed_at
   end
 
   private

@@ -60,7 +60,7 @@ export default {
       const isProjectSelected = this.selectedProjects.some(({ id }) => id === project.id);
 
       if (isProjectSelected) {
-        this.selectedProjects = this.selectedProjects.filter(p => p.id !== project.id);
+        this.selectedProjects = this.selectedProjects.filter((p) => p.id !== project.id);
       } else {
         this.selectedProjects.push(project);
       }
@@ -68,7 +68,7 @@ export default {
     addProjects() {
       this.$emit('handleProjectManipulation', true);
 
-      const addProjectsPromises = this.selectedProjects.map(project => {
+      const addProjectsPromises = this.selectedProjects.map((project) => {
         return this.$apollo
           .mutate({
             mutation: addProjectToSecurityDashboard,
@@ -81,7 +81,7 @@ export default {
               const sourceData = store.readQuery({ query: projectsQuery });
               const newProject = results.addProjectToSecurityDashboard.project;
 
-              const data = produce(sourceData, draftData => {
+              const data = produce(sourceData, (draftData) => {
                 // eslint-disable-next-line no-param-reassign
                 draftData.instanceSecurityDashboard.projects.nodes = [
                   ...draftData.instanceSecurityDashboard.projects.nodes,
@@ -112,8 +112,8 @@ export default {
       });
 
       return Promise.all(addProjectsPromises)
-        .then(response => {
-          const invalidProjects = response.filter(value => value.error);
+        .then((response) => {
+          const invalidProjects = response.filter((value) => value.error);
           this.$emit('handleProjectManipulation', false);
 
           if (invalidProjects.length) {
@@ -156,10 +156,10 @@ export default {
           update(store) {
             const sourceData = store.readQuery({ query: projectsQuery });
 
-            const data = produce(sourceData, draftData => {
+            const data = produce(sourceData, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
-                curr => curr.id !== id,
+                (curr) => curr.id !== id,
               );
             });
 
@@ -188,7 +188,7 @@ export default {
       }
 
       return this.searchProjects(this.searchQuery, this.pageInfo)
-        .then(payload => {
+        .then((payload) => {
           const {
             data: {
               projects: { nodes, pageInfo },

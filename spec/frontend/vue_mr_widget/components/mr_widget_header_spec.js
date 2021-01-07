@@ -164,9 +164,7 @@ describe('MRWidgetHeader', () => {
       it('renders checkout branch button with modal trigger', () => {
         const button = vm.$el.querySelector('.js-check-out-branch');
 
-        expect(button.textContent.trim()).toEqual('Check out branch');
-        expect(button.getAttribute('data-target')).toEqual('#modal_merge_info');
-        expect(button.getAttribute('data-toggle')).toEqual('modal');
+        expect(button.textContent.trim()).toBe('Check out branch');
       });
 
       it('renders web ide button', () => {
@@ -189,7 +187,7 @@ describe('MRWidgetHeader', () => {
         expect(link.getAttribute('href')).toBeNull();
       });
 
-      it('renders web ide button with blank query string if target & source project branch', done => {
+      it('renders web ide button with blank query string if target & source project branch', (done) => {
         vm.mr.targetProjectFullPath = 'root/gitlab-ce';
 
         vm.$nextTick(() => {
@@ -204,7 +202,7 @@ describe('MRWidgetHeader', () => {
         });
       });
 
-      it('renders web ide button with relative URL', done => {
+      it('renders web ide button with relative URL', (done) => {
         gon.relative_url_root = '/gitlab';
         vm.mr.iid = 2;
 

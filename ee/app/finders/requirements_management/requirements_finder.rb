@@ -79,7 +79,7 @@ module RequirementsManagement
 
     def sort(items)
       sorts = RequirementsManagement::Requirement.simple_sorts.keys
-      sort = sorts.include?(params[:sort]) ? params[:sort] : 'id_desc'
+      sort = sorts.include?(params[:sort]&.to_s) ? params[:sort] : 'id_desc'
 
       items.order_by(sort)
     end

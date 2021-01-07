@@ -76,6 +76,8 @@ module API
 
         build = find_build!(params[:job_id])
 
+        authorize_read_build_trace!(build) if build
+
         header 'Content-Disposition', "infile; filename=\"#{build.id}.log\""
         content_type 'text/plain'
         env['api.format'] = :binary
@@ -136,25 +138,32 @@ module API
         present build, with: Entities::Ci::Job
       end
 
-      desc 'Trigger a actionable job (manual, delayed, etc)' do
-        success Entities::Ci::Job
+      desc 'Trigger an actionable job (manual, delayed, etc)' do
+        success Entities::Ci::JobBasic
         detail 'This feature was added in GitLab 8.11'
       end
       params do
         requires :job_id, type: Integer, desc: 'The ID of a Job'
       end
+
       post ":id/jobs/:job_id/play" do
         authorize_read_builds!
 
-        build = find_build!(params[:job_id])
+        job = find_job!(params[:job_id])
 
-        authorize!(:update_build, build)
-        bad_request!("Unplayable Job") unless build.playable?
+        authorize!(:play_job, job)
 
-        build.play(current_user)
+        bad_request!("Unplayable Job") unless job.playable?
+
+        job.play(current_user)
 
         status 200
-        present build, with: Entities::Ci::Job
+
+        if job.is_a?(::Ci::Build)
+          present job, with: Entities::Ci::Job
+        else
+          present job, with: Entities::Ci::Bridge
+        end
       end
     end
 

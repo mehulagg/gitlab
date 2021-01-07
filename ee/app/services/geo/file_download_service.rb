@@ -79,9 +79,11 @@ module Geo
       retry_later = !registry.success || registry.missing_on_primary
 
       if retry_later
+        custom_max_wait_time = missing_on_primary ? 4.hours : nil
+
         # We don't limit the amount of retries
         registry.retry_count = (registry.retry_count || 0) + 1
-        registry.retry_at = next_retry_time(registry.retry_count)
+        registry.retry_at = next_retry_time(registry.retry_count, custom_max_wait_time)
       else
         registry.retry_count = 0
         registry.retry_at = nil

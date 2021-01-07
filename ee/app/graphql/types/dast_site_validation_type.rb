@@ -8,10 +8,17 @@ module Types
     authorize :create_on_demand_dast_scan
 
     field :id, ::Types::GlobalIDType[::DastSiteValidation], null: false,
-          description: 'ID of the site validation'
+          description: 'Global ID of the site validation'
 
     field :status, Types::DastSiteProfileValidationStatusEnum, null: false,
-          description: 'The status of the validation',
-          resolve: -> (obj, _args, _ctx) { obj.state }
+          description: 'Status of the site validation',
+          method: :state
+
+    field :normalized_target_url, GraphQL::STRING_TYPE, null: true,
+          description: 'Normalized URL of the target to be validated'
+
+    def normalized_target_url
+      object.url_base
+    end
   end
 end

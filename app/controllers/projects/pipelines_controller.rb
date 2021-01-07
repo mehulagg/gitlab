@@ -17,9 +17,11 @@ class Projects::PipelinesController < Projects::ApplicationController
     push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: true)
     push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
     push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: false)
-    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development)
+    push_frontend_feature_flag(:graphql_pipeline_analytics, project, type: :development)
+    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development, default_enabled: true)
   end
   before_action :ensure_pipeline, only: [:show]
+  before_action :push_experiment_to_gon, only: :index, if: :html_request?
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
@@ -39,12 +41,16 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(30)
+      .per(20)
 
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
-      format.html
+      format.html do
+        record_empty_pipeline_experiment
+
+        render :index
+      end
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
@@ -185,12 +191,15 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def charts
     @charts = {}
+    @counts = {}
+
+    return if Feature.enabled?(:graphql_pipeline_analytics)
+
     @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
     @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
     @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
     @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
 
-    @counts = {}
     @counts[:total] = @project.all_pipelines.count(:all)
     @counts[:success] = @project.all_pipelines.success.count(:all)
     @counts[:failed] = @project.all_pipelines.failed.count(:all)
@@ -214,7 +223,9 @@ class Projects::PipelinesController < Projects::ApplicationController
   def config_variables
     respond_to do |format|
       format.json do
-        render json: Ci::ListConfigVariablesService.new(@project, current_user).execute(params[:sha])
+        result = Ci::ListConfigVariablesService.new(@project, current_user).execute(params[:sha])
+
+        result.nil? ? head(:no_content) : render(json: result)
       end
     end
   end
@@ -306,6 +317,20 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def index_params
     params.permit(:scope, :username, :ref, :status)
+  end
+
+  def record_empty_pipeline_experiment
+    return unless @pipelines_count.to_i == 0
+    return if helpers.has_gitlab_ci?(@project)
+
+    record_experiment_user(:pipelines_empty_state)
+  end
+
+  def push_experiment_to_gon
+    return unless current_user
+
+    push_frontend_experiment(:pipelines_empty_state, subject: current_user)
+    frontend_experimentation_tracking_data(:pipelines_empty_state, 'view', project.namespace_id, subject: current_user)
   end
 end
 

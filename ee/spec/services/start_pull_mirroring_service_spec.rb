@@ -29,33 +29,47 @@ RSpec.describe StartPullMirroringService do
 
     it_behaves_like 'force mirror update'
 
-    context 'when project mirror has been updated in the last 5 minutes' do
-      it 'schedules next execution' do
-        travel_to(Time.current) do
-          import_state.update(last_update_at: 3.minutes.ago, last_successful_update_at: 10.minutes.ago)
+    shared_examples 'mirrors using interval' do |interval_minutes:|
+      context 'when project mirror has been updated in the interval' do
+        it 'schedules next execution' do
+          freeze_time do
+            import_state.update(last_update_at: (interval_minutes - 1).minutes.ago, last_successful_update_at: 10.minutes.ago)
 
-          expect { execute }
-            .to change { import_state.next_execution_timestamp }
-            .to(2.minutes.from_now)
-            .and not_change { UpdateAllMirrorsWorker.jobs.size }
+            expect { execute }
+              .to change { import_state.next_execution_timestamp }
+              .to(interval_minutes.minutes.since(import_state.last_update_at))
+              .and not_change { UpdateAllMirrorsWorker.jobs.size }
+          end
         end
       end
-    end
 
-    context 'when project mirror has been updated more than 5 minutes ago' do
-      before do
-        import_state.update(last_update_at: 6.minutes.ago, last_successful_update_at: 10.minutes.ago)
+      context 'when project mirror has been updated outside of the interval' do
+        before do
+          import_state.update(last_update_at: (interval_minutes + 1).minutes.ago, last_successful_update_at: 10.minutes.ago)
+        end
+
+        it_behaves_like 'force mirror update'
       end
 
-      it_behaves_like 'force mirror update'
+      context 'when project mirror has been updated in interval but has never been successfully updated' do
+        before do
+          import_state.update(last_update_at: (interval_minutes - 1).minutes.ago, last_successful_update_at: nil)
+        end
+
+        it_behaves_like 'force mirror update'
+      end
     end
 
-    context 'when project mirror has been updated in the last 5 minutes but has never been successfully updated' do
+    context 'with default interval' do
+      it_behaves_like 'mirrors using interval', interval_minutes: 5
+    end
+
+    context 'with a custom interval' do
       before do
-        import_state.update(last_update_at: 3.minutes.ago, last_successful_update_at: nil)
+        Plan.default.actual_limits.update!(pull_mirror_interval_seconds: 2.minutes)
       end
 
-      it_behaves_like 'force mirror update'
+      it_behaves_like 'mirrors using interval', interval_minutes: 2
     end
   end
 

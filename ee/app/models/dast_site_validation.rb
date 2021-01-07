@@ -17,16 +17,21 @@ class DastSiteValidation < ApplicationRecord
     where(url_base: url_base)
   end
 
+  scope :by_most_recent, -> do
+    where(id: select('MAX(id) AS id').group(:url_base))
+  end
+
   before_create :set_normalized_url_base
 
   enum validation_strategy: { text_file: 0, header: 1 }
 
-  delegate :project, to: :dast_site_token, allow_nil: true
+  delegate :project, :dast_site, to: :dast_site_token, allow_nil: true
 
   def validation_url
     "#{url_base}/#{url_path}"
   end
 
+  NONE_STATE = 'none'
   INITIAL_STATE = 'pending'
 
   state_machine :state, initial: INITIAL_STATE.to_sym do

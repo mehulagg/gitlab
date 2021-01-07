@@ -64,10 +64,7 @@ export default {
       return this.suggestions.length > 0;
     },
     lowerCaseType() {
-      return this.config.type
-        .replace('_', ' ')
-        .trim()
-        .toLowerCase();
+      return this.config.type.replace('_', ' ').trim().toLowerCase();
     },
     noSuggestionsString() {
       return sprintf(s__('AuditLogs|No matching %{type} found.'), { type: this.lowerCaseType });
@@ -75,7 +72,7 @@ export default {
   },
   watch: {
     // eslint-disable-next-line func-names
-    'value.data': function(term) {
+    'value.data': function (term) {
       this.debouncedLoadSuggestions(term);
     },
     active() {
@@ -108,12 +105,12 @@ export default {
       createFlash(sprintf(message, { type }));
     },
     selectActiveItem(id) {
-      this.activeItem = this.suggestions.find(u => u.id === id);
+      this.activeItem = this.suggestions.find((u) => u.id === id);
     },
     loadView(id) {
       this.viewLoading = true;
       return this.fetchItem(id)
-        .then(data => {
+        .then((data) => {
           this.activeItem = data;
         })
         .catch(this.onApiError)
@@ -124,7 +121,7 @@ export default {
     loadSuggestions(term) {
       this.suggestionsLoading = true;
       return this.fetchSuggestions(term)
-        .then(data => {
+        .then((data) => {
           this.suggestions = data;
         })
         .catch(this.onApiError)

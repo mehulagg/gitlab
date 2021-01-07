@@ -6,9 +6,13 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
   let(:project) { create(:project, :repository, namespace: group) }
   let(:project_2) { create(:project, :repository, namespace: group) }
   let(:from) { 1.day.ago }
-  let(:user) { create(:user, :admin) }
+  let(:user) { create(:user) }
 
   subject { described_class.new(group, options: { from: Time.now, current_user: user }).data }
+
+  before do
+    group.add_owner(user)
+  end
 
   describe "#new_issues" do
     context 'with from date' do

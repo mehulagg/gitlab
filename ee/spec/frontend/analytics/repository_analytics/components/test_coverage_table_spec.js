@@ -18,10 +18,10 @@ describe('Test coverage table component', () => {
   const findLoadingState = () => wrapper.find('[data-testid="test-coverage-loading-state"');
   const findTable = () => wrapper.find('[data-testid="test-coverage-data-table"');
   const findTableRows = () => findTable().findAll('tbody tr');
-  const findProjectNameById = id => wrapper.find(`[data-testid="${id}-name"`);
-  const findProjectAverageById = id => wrapper.find(`[data-testid="${id}-average"`);
-  const findProjectCountById = id => wrapper.find(`[data-testid="${id}-count"`);
-  const findProjectDateById = id => wrapper.find(`[data-testid="${id}-date"`);
+  const findProjectNameById = (id) => wrapper.find(`[data-testid="${id}-name"`);
+  const findProjectAverageById = (id) => wrapper.find(`[data-testid="${id}-average"`);
+  const findProjectCountById = (id) => wrapper.find(`[data-testid="${id}-count"`);
+  const findProjectDateById = (id) => wrapper.find(`[data-testid="${id}-date"`);
 
   const createComponent = ({ data = {}, mountFn = shallowMount } = {}) => {
     wrapper = mountFn(TestCoverageTable, {
@@ -180,16 +180,8 @@ describe('Test coverage table component', () => {
       });
 
       expect(findTable().exists()).toBe(true);
-      expect(
-        findTableRows()
-          .at(0)
-          .text(),
-      ).toContain('should be first');
-      expect(
-        findTableRows()
-          .at(1)
-          .text(),
-      ).toContain('should be last');
+      expect(findTableRows().at(0).text()).toContain('should be first');
+      expect(findTableRows().at(1).text()).toContain('should be last');
     });
 
     it('renders the correct link', async () => {

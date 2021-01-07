@@ -1,7 +1,6 @@
 <script>
 import { GlIcon, GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import popover from '~/vue_shared/directives/popover';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from '../constants';
 
@@ -18,9 +17,6 @@ export default {
     GlPopover,
     GlLink,
     GlSprintf,
-  },
-  directives: {
-    popover,
   },
   props: {
     itemTitle: {

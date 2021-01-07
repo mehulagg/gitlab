@@ -6,6 +6,8 @@ module Gitlab
       module Security
         module Locations
           class SecretDetection < Base
+            include Security::Concerns::FingerprintPathFromFile
+
             attr_reader :class_name
             attr_reader :end_line
             attr_reader :file_path

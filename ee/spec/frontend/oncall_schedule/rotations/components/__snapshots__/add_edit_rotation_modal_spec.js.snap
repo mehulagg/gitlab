@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddEditRotationModal renders rotation modal layout 1`] = `
+<gl-modal-stub
+  actioncancel="[object Object]"
+  actionprimary="[object Object]"
+  modalclass=""
+  modalid="addRotationModal"
+  size="sm"
+  title="Add rotation"
+  titletag="h4"
+>
+  <!---->
+   
+  <add-edit-rotation-form-stub
+    form="[object Object]"
+    participants=""
+    schedule="[object Object]"
+  />
+</gl-modal-stub>
+`;

@@ -10,7 +10,7 @@ module Geo
 
     # @replicator [Gitlab::Geo::Replicator] Gitlab Geo Replicator
     # @params [Hash] Should include keys: full_path, repository_storage, disk_path
-    def initialize(replicator, params)
+    def initialize(replicator, params = {})
       @replicator = replicator
       @params = params
       @full_path = params[:full_path]
@@ -25,6 +25,10 @@ module Geo
     private
 
     def destroy_repository
+      # We don't have repository location information after main DB record deletion.
+      # The issue https://gitlab.com/gitlab-org/gitlab/-/issues/281430
+      return unless full_path
+
       repository = Repository.new(params[:disk_path], self, shard: params[:repository_storage])
       result = Repositories::DestroyService.new(repository).execute
 

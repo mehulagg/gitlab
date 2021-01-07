@@ -14,8 +14,9 @@ module Vulnerabilities
 
     attr_accessor :vulnerability_data
 
+    enum dismissal_reason: { acceptable_risk: 0, false_positive: 1, mitigating_control: 2, used_in_tests: 3, not_applicable: 4 }
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: ::Vulnerabilities::Finding::REPORT_TYPES
+    enum category: ::Enums::Vulnerability.report_types
 
     validates :project, presence: true
     validates :author, presence: true
@@ -88,7 +89,10 @@ module Vulnerabilities
     end
 
     def touch_pipeline
-      pipeline&.touch
+      pipeline&.touch if pipeline&.needs_touch?
+    rescue ActiveRecord::StaleObjectError
+      # Often the pipeline has already been updated by creating vulnerability feedback
+      # in batches. In this case, we can ignore the exception as it's already been touched.
     end
 
     def finding

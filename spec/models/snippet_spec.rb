@@ -21,6 +21,7 @@ RSpec.describe Snippet do
     it { is_expected.to have_many(:user_mentions).class_name("SnippetUserMention") }
     it { is_expected.to have_one(:snippet_repository) }
     it { is_expected.to have_one(:statistics).class_name('SnippetStatistics').dependent(:destroy) }
+    it { is_expected.to have_many(:repository_storage_moves).class_name('SnippetRepositoryStorageMove').inverse_of(:container) }
   end
 
   describe 'validation' do
@@ -767,6 +768,118 @@ RSpec.describe Snippet do
       let(:snippet) { build(:snippet) }
 
       it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#git_transfer_in_progress?' do
+    let(:snippet) { build(:snippet) }
+
+    subject { snippet.git_transfer_in_progress? }
+
+    it 'returns true when there are git transfers' do
+      allow(snippet).to receive(:reference_counter).with(type: Gitlab::GlRepository::SNIPPET) do
+        double(:reference_counter, value: 2)
+      end
+
+      expect(subject).to eq true
+    end
+
+    it 'returns false when there are not git transfers' do
+      allow(snippet).to receive(:reference_counter).with(type: Gitlab::GlRepository::SNIPPET) do
+        double(:reference_counter, value: 0)
+      end
+
+      expect(subject).to eq false
+    end
+  end
+
+  it_behaves_like 'can move repository storage' do
+    let_it_be(:container) { create(:snippet, :repository) }
+  end
+
+  describe '#change_head_to_default_branch' do
+    let(:head_path) { Rails.root.join(TestEnv.repos_path, "#{snippet.disk_path}.git", 'HEAD') }
+
+    subject { snippet.change_head_to_default_branch }
+
+    context 'when repository does not exist' do
+      let(:snippet) { create(:snippet) }
+
+      it 'does nothing' do
+        expect(snippet.repository_exists?).to eq false
+        expect(snippet.repository.raw_repository).not_to receive(:write_ref)
+
+        subject
+      end
+    end
+
+    context 'when repository is empty' do
+      let(:snippet) { create(:snippet, :empty_repo) }
+
+      before do
+        allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return(default_branch)
+      end
+
+      context 'when default branch in settings is "master"' do
+        let(:default_branch) { 'master' }
+
+        it 'does nothing' do
+          expect(File.read(head_path).squish).to eq 'ref: refs/heads/master'
+
+          expect(snippet.repository.raw_repository).not_to receive(:write_ref)
+
+          subject
+        end
+      end
+
+      context 'when default branch in settings is different from "master"' do
+        let(:default_branch) { 'main' }
+
+        it 'changes the HEAD reference to the default branch' do
+          expect(File.read(head_path).squish).to eq 'ref: refs/heads/master'
+
+          subject
+
+          expect(File.read(head_path).squish).to eq "ref: refs/heads/#{default_branch}"
+        end
+      end
+    end
+
+    context 'when repository is not empty' do
+      let(:snippet) { create(:snippet, :empty_repo) }
+
+      before do
+        populate_snippet_repo
+      end
+
+      context 'when HEAD branch is empty' do
+        it 'changes HEAD to default branch' do
+          File.write(head_path, 'ref: refs/heads/non_existen_branch')
+          expect(File.read(head_path).squish).to eq 'ref: refs/heads/non_existen_branch'
+
+          subject
+
+          expect(File.read(head_path).squish).to eq 'ref: refs/heads/main'
+          expect(snippet.list_files('HEAD')).not_to be_empty
+        end
+      end
+
+      context 'when HEAD branch is not empty' do
+        it 'does nothing' do
+          File.write(head_path, 'ref: refs/heads/main')
+
+          expect(snippet.repository.raw_repository).not_to receive(:write_ref)
+
+          subject
+        end
+      end
+
+      def populate_snippet_repo
+        allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return('main')
+
+        data = [{ file_path: 'new_file_test', content: 'bar' }]
+        snippet.snippet_repository.multi_files_action(snippet.author, data, branch_name: 'main', message: 'foo')
+      end
     end
   end
 end

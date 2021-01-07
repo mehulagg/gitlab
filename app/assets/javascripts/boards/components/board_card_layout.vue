@@ -1,11 +1,12 @@
 <script>
 import IssueCardInner from './issue_card_inner.vue';
+import IssueCardInnerDeprecated from './issue_card_inner_deprecated.vue';
 import boardsStore from '../stores/boards_store';
 
 export default {
   name: 'BoardsIssueCard',
   components: {
-    IssueCardInner,
+    IssueCardInner: gon.features?.graphqlBoardLists ? IssueCardInner : IssueCardInnerDeprecated,
   },
   props: {
     list: {
@@ -42,7 +43,7 @@ export default {
   },
   computed: {
     multiSelectVisible() {
-      return this.multiSelect.list.findIndex(issue => issue.id === this.issue.id) > -1;
+      return this.multiSelect.list.findIndex((issue) => issue.id === this.issue.id) > -1;
     },
   },
   methods: {

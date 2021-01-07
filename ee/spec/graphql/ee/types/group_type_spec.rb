@@ -5,8 +5,10 @@ require 'spec_helper'
 RSpec.describe GitlabSchema.types['Group'] do
   describe 'nested epic request' do
     it { expect(described_class).to have_graphql_field(:epicsEnabled) }
-    it { expect(described_class).to have_graphql_field(:epics) }
     it { expect(described_class).to have_graphql_field(:epic) }
+    it { expect(described_class).to have_graphql_field(:epics) }
+    it { expect(described_class).to have_graphql_field(:epic_board) }
+    it { expect(described_class).to have_graphql_field(:epic_boards) }
   end
 
   it { expect(described_class).to have_graphql_field(:iterations) }
@@ -69,37 +71,6 @@ RSpec.describe GitlabSchema.types['Group'] do
       expect(vulnerabilities.first['title']).to eq('A terrible one!')
       expect(vulnerabilities.first['state']).to eq('DETECTED')
       expect(vulnerabilities.first['severity']).to eq('CRITICAL')
-    end
-  end
-
-  describe 'codeCoverageActivities' do
-    let(:group) { create(:group) }
-    let(:user) { create(:user) }
-    let(:start_date) { 1.day.ago.to_date.to_s }
-    let(:query) do
-      %(
-        query {
-          group(fullPath: "#{group.full_path}") {
-            codeCoverageActivities(startDate: "#{start_date}") {
-              nodes {
-                averageCoverage
-              }
-            }
-          }
-        }
-      )
-    end
-
-    context 'when group_coverage_data_report flag is disabled' do
-      subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
-
-      it 'returns a graphQL error field does not exist' do
-        stub_feature_flags(group_coverage_data_report_graph: false)
-
-        expected_message = "Field 'codeCoverageActivities' doesn't exist on type 'Group'"
-
-        expect(subject.dig('errors').first.dig('message')).to eq(expected_message)
-      end
     end
   end
 end

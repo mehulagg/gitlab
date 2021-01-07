@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlFormCheckbox,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
@@ -10,6 +10,7 @@ import {
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
 import { DASHBOARD_TYPES } from '../store/constants';
@@ -17,7 +18,7 @@ import { DASHBOARD_TYPES } from '../store/constants';
 export default {
   name: 'SecurityDashboardTableRow',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormCheckbox,
     GlSkeletonLoading,
     GlSprintf,
@@ -88,12 +89,20 @@ export default {
     },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    ...mapActions('vulnerabilities', [
+      'setModalData',
+      'selectVulnerability',
+      'deselectVulnerability',
+    ]),
     toggleVulnerability() {
       if (this.isSelected) {
         return this.deselectVulnerability(this.vulnerability);
       }
       return this.selectVulnerability(this.vulnerability);
+    },
+    openModal(payload) {
+      this.setModalData(payload);
+      this.$root.$emit('bv::show::modal', VULNERABILITY_MODAL_ID);
     },
   },
 };
@@ -128,12 +137,12 @@ export default {
       >
         <gl-skeleton-loading v-if="isLoading" class="mt-2 js-skeleton-loader" :lines="2" />
         <template v-else>
-          <gl-deprecated-button
+          <gl-button
             ref="vulnerability-title"
-            class="d-inline gl-reset-line-height gl-reset-text-align gl-white-space-normal"
-            variant="blank"
+            class="text-body"
+            variant="link"
             @click="openModal({ vulnerability })"
-            >{{ vulnerability.name }}</gl-deprecated-button
+            >{{ vulnerability.name }}</gl-button
           >
           <template v-if="isDismissed">
             <gl-icon

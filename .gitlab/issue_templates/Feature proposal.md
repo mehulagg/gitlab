@@ -77,6 +77,15 @@ Please list the test areas (unit, integration and end-to-end) that needs to be a
 
 See the test engineering planning process and reach out to your counterpart Software Engineer in Test for assistance: https://about.gitlab.com/handbook/engineering/quality/test-engineering/#test-planning -->
 
+### Available Tier
+
+<!-- This section should be used for setting the appropriate tier that this feature will belong to. Pricing can be found here: https://about.gitlab.com/pricing/
+
+* Free
+* Premium/Silver
+* Ultimate/Gold
+-->
+
 ### What does success look like, and how can we measure that?
 
 <!--
@@ -96,8 +105,11 @@ In which enterprise tier should this feature go? See https://about.gitlab.com/ha
 
 ### Links / references
 
-<!--  Label reminders - you should have one of each of the following labels.
-Read the descriptions on https://gitlab.com/gitlab-org/gitlab/-/labels to find the correct ones -->
+<!-- Label reminders - you should have one of each of the following labels.
+Use the following resources to find the appropriate labels:
+- https://gitlab.com/gitlab-org/gitlab/-/labels
+- https://about.gitlab.com/handbook/product/categories/features/
+-->
 /label ~devops:: ~group: ~Category:
 
 /label ~feature

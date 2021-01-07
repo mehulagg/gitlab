@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Protected Tags', :js do
   include ProtectedTagHelpers
 
-  let(:user) { create(:user, :admin) }
   let(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
 
   before do
     sign_in(user)
@@ -68,7 +68,7 @@ RSpec.describe 'Protected Tags', :js do
       click_on "Protect"
 
       within(".protected-tags-list") do
-        expect(page).to have_content("Protected tag (2)")
+        expect(page).to have_content("Protected tags (2)")
         expect(page).to have_content("2 matching tags")
       end
     end

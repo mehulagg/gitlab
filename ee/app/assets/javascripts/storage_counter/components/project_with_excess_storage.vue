@@ -1,10 +1,4 @@
 <script>
-/**
- * project_with_excess_storage.vue component is rendered behind
- * `additional_repo_storage_by_namespace` feature flag. The component
- * looks similar to project.vue component so that once the flag is
- * lifted this component could replace and be used mainstream.
- */
 import { GlLink, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';

@@ -17,7 +17,7 @@ import {
 } from 'ee_jest/roadmap/mock_data';
 
 jest.mock('lodash/delay', () =>
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.delay = jest.fn();
     return func;
@@ -35,7 +35,7 @@ const createComponent = ({
   currentGroupId = mockGroupId,
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { '1': { itemExpanded: false } },
+  childrenFlags = { 1: { itemExpanded: false } },
   hasFiltersApplied = false,
 }) => {
   return mount(EpicItemComponent, {
@@ -99,7 +99,7 @@ describe('EpicItemComponent', () => {
 
   describe('timeframeString', () => {
     it('returns timeframe string correctly when both start and end dates are defined', () => {
-      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Jul 10, 2017 – Jun 2, 2018');
+      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Nov 10, 2017 – Jun 2, 2018');
     });
 
     it('returns timeframe string correctly when no dates are defined', () => {
@@ -113,7 +113,7 @@ describe('EpicItemComponent', () => {
       const epic = { ...mockEpic, endDateUndefined: true };
       wrapper = createComponent({ epic });
 
-      expect(wrapper.vm.timeframeString(epic)).toBe('Jul 10, 2017 – No end date');
+      expect(wrapper.vm.timeframeString(epic)).toBe('Nov 10, 2017 – No end date');
     });
 
     it('returns timeframe string correctly when only end date is defined', () => {
@@ -170,11 +170,11 @@ describe('EpicItemComponent', () => {
     it('renders Epic item container element with class `epic-list-item-container` if epic has children and is expanded', () => {
       wrapper = createComponent({
         childrenEpics: {
-          '1': [mockFormattedChildEpic1],
+          1: [mockFormattedChildEpic1],
         },
         childrenFlags: {
-          '1': { itemExpanded: true },
-          '50': { itemExpanded: false },
+          1: { itemExpanded: true },
+          50: { itemExpanded: false },
         },
       });
       expect(wrapper.find('.epic-list-item-container').exists()).toBe(true);

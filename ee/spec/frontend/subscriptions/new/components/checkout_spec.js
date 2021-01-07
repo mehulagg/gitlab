@@ -28,7 +28,10 @@ describe('Checkout', () => {
     wrapper.destroy();
   });
 
-  describe.each([[true, true], [false, false]])('when isNewUser=%s', (isNewUser, visible) => {
+  describe.each([
+    [true, true],
+    [false, false],
+  ])('when isNewUser=%s', (isNewUser, visible) => {
     beforeEach(() => {
       store.state.isNewUser = isNewUser;
     });

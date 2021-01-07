@@ -17,7 +17,7 @@ export default {
     state.removedMetrics = response.removed_metrics || [];
 
     state.numberOfChanges =
-      state.existingMetrics.filter(metric => metric.previous_value !== undefined).length +
+      state.existingMetrics.filter((metric) => metric.previous_value !== undefined).length +
       state.newMetrics.length +
       state.removedMetrics.length;
   },

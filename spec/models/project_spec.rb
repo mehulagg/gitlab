@@ -147,6 +147,10 @@ RSpec.describe Project, factory_default: :keep do
       let(:container_without_wiki) { create(:project) }
     end
 
+    it_behaves_like 'can move repository storage' do
+      let_it_be(:container) { create(:project, :repository) }
+    end
+
     it 'has an inverse relationship with merge requests' do
       expect(described_class.reflect_on_association(:merge_requests).has_inverse?).to eq(:target_project)
     end
@@ -608,6 +612,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to delegate_method(:name).to(:owner).with_prefix(true).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:root_ancestor).to(:namespace).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:last_pipeline).to(:commit).with_arguments(allow_nil: true) }
+    it { is_expected.to delegate_method(:allow_editing_commit_messages?).to(:project_setting) }
   end
 
   describe 'reference methods' do
@@ -1531,6 +1536,42 @@ RSpec.describe Project, factory_default: :keep do
         end
 
         it_behaves_like 'with incoming email address'
+      end
+    end
+  end
+
+  describe '.service_desk_custom_address_enabled?' do
+    let_it_be(:project) { create(:project, service_desk_enabled: true) }
+
+    subject(:address_enabled) { project.service_desk_custom_address_enabled? }
+
+    context 'when service_desk_email is enabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(true)
+      end
+
+      it 'returns true' do
+        expect(address_enabled).to be_truthy
+      end
+
+      context 'when service_desk_custom_address flag is disabled' do
+        before do
+          stub_feature_flags(service_desk_custom_address: false)
+        end
+
+        it 'returns false' do
+          expect(address_enabled).to be_falsey
+        end
+      end
+    end
+
+    context 'when service_desk_email is disabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(false)
+      end
+
+      it 'returns false when service_desk_email is disabled' do
+        expect(address_enabled).to be_falsey
       end
     end
   end
@@ -3003,39 +3044,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#set_repository_read_only!' do
-    let(:project) { create(:project) }
-
-    it 'makes the repository read-only' do
-      expect { project.set_repository_read_only! }
-        .to change(project, :repository_read_only?)
-        .from(false)
-        .to(true)
-    end
-
-    it 'raises an error if the project is already read-only' do
-      project.set_repository_read_only!
-
-      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /already read-only/)
-    end
-
-    it 'raises an error when there is an existing git transfer in progress' do
-      allow(project).to receive(:git_transfer_in_progress?) { true }
-
-      expect { project.set_repository_read_only! }.to raise_error(described_class::RepositoryReadOnlyError, /in progress/)
-    end
-  end
-
-  describe '#set_repository_writable!' do
-    it 'sets repository_read_only to false' do
-      project = create(:project, :read_only)
-
-      expect { project.set_repository_writable! }
-        .to change(project, :repository_read_only)
-        .from(true).to(false)
-    end
-  end
-
   describe '#pushes_since_gc' do
     let(:project) { build_stubbed(:project) }
 
@@ -4282,29 +4290,33 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
+    using RSpec::Parameterized::TableSyntax
+
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
 
-    it 'returns false when repo_reference_count and wiki_reference_count are 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
-
-      expect(subject).to be_falsey
+    where(:project_reference_counter, :wiki_reference_counter, :design_reference_counter, :result) do
+      0 | 0 | 0 | false
+      2 | 0 | 0 | true
+      0 | 2 | 0 | true
+      0 | 0 | 2 | true
     end
 
-    it 'returns true when repo_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 2 }
-      allow(project).to receive(:wiki_reference_count) { 0 }
+    with_them do
+      before do
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::PROJECT) do
+          double(:project_reference_counter, value: project_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::WIKI) do
+          double(:wiki_reference_counter, value: wiki_reference_counter)
+        end
+        allow(project).to receive(:reference_counter).with(type: Gitlab::GlRepository::DESIGN) do
+          double(:design_reference_counter, value: design_reference_counter)
+        end
+      end
 
-      expect(subject).to be_truthy
-    end
-
-    it 'returns true when wiki_reference_count is > 0' do
-      allow(project).to receive(:repo_reference_count) { 0 }
-      allow(project).to receive(:wiki_reference_count) { 2 }
-
-      expect(subject).to be_truthy
+      specify { expect(subject).to be result }
     end
   end
 
@@ -4533,6 +4545,24 @@ RSpec.describe Project, factory_default: :keep do
           expect(project).not_to have_ci
         end
       end
+    end
+  end
+
+  describe '#predefined_project_variables' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    subject { project.predefined_project_variables.to_runner_variables }
+
+    specify do
+      expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false })
+    end
+
+    context 'when ci config path is overridden' do
+      before do
+        project.update!(ci_config_path: 'random.yml')
+      end
+
+      it { expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false }) }
     end
   end
 
@@ -4930,6 +4960,7 @@ RSpec.describe Project, factory_default: :keep do
       expect(project).to receive(:after_create_default_branch)
       expect(project).to receive(:refresh_markdown_cache!)
       expect(InternalId).to receive(:flush_records!).with(project: project)
+      expect(ProjectCacheWorker).to receive(:perform_async).with(project.id, [], [:repository_size])
       expect(DetectRepositoryLanguagesWorker).to receive(:perform_async).with(project.id)
       expect(project).to receive(:write_repository_config)
 
@@ -5020,11 +5051,11 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe "#default_branch" do
-    context "with an empty repository" do
+  describe '#default_branch' do
+    context 'with an empty repository' do
       let_it_be(:project) { create(:project_empty_repo) }
 
-      context "group.default_branch_name is available" do
+      context 'group.default_branch_name is available' do
         let(:project_group) { create(:group) }
         let(:project) { create(:project, path: 'avatar', namespace: project_group) }
 
@@ -5037,19 +5068,19 @@ RSpec.describe Project, factory_default: :keep do
             .and_return('example_branch')
         end
 
-        it "returns the group default value" do
-          expect(project.default_branch).to eq("example_branch")
+        it 'returns the group default value' do
+          expect(project.default_branch).to eq('example_branch')
         end
       end
 
-      context "Gitlab::CurrentSettings.default_branch_name is available" do
+      context 'Gitlab::CurrentSettings.default_branch_name is available' do
         before do
           expect(Gitlab::CurrentSettings)
             .to receive(:default_branch_name)
             .and_return(example_branch_name)
         end
 
-        context "is missing or nil" do
+        context 'is missing or nil' do
           let(:example_branch_name) { nil }
 
           it "returns nil" do
@@ -5057,10 +5088,18 @@ RSpec.describe Project, factory_default: :keep do
           end
         end
 
-        context "is present" do
-          let(:example_branch_name) { "example_branch_name" }
+        context 'is blank' do
+          let(:example_branch_name) { '' }
 
-          it "returns the expected branch name" do
+          it 'returns nil' do
+            expect(project.default_branch).to be_nil
+          end
+        end
+
+        context 'is present' do
+          let(:example_branch_name) { 'example_branch_name' }
+
+          it 'returns the expected branch name' do
             expect(project.default_branch).to eq(example_branch_name)
           end
         end
@@ -5565,6 +5604,26 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#disabled_services' do
+    subject { build(:project).disabled_services }
+
+    context 'without datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: false)
+      end
+
+      it { is_expected.to include('datadog') }
+    end
+
+    context 'with datadog_ci_integration' do
+      before do
+        stub_feature_flags(datadog_ci_integration: true)
+      end
+
+      it { is_expected.not_to include('datadog') }
+    end
+  end
+
   describe '#find_or_initialize_service' do
     it 'avoids N+1 database queries' do
       allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover])
@@ -5961,6 +6020,43 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#set_first_pages_deployment!' do
+    let(:project) { create(:project) }
+    let(:deployment) { create(:pages_deployment, project: project) }
+
+    it "creates new metadata record if none exists yet and sets deployment" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.set_first_pages_deployment!(deployment)
+
+      expect(project.pages_metadatum.reload.pages_deployment).to eq(deployment)
+    end
+
+    it "updates the existing metadara record with deployment" do
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.to change { project.pages_metadatum.reload.pages_deployment }.from(nil).to(deployment)
+    end
+
+    it 'only updates metadata for this project' do
+      other_project = create(:project)
+
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.not_to change { other_project.pages_metadatum.reload.pages_deployment }.from(nil)
+    end
+
+    it 'does nothing if metadata already references some deployment' do
+      existing_deployment = create(:pages_deployment, project: project)
+      project.set_first_pages_deployment!(existing_deployment)
+
+      expect do
+        project.set_first_pages_deployment!(deployment)
+      end.not_to change { project.pages_metadatum.reload.pages_deployment }.from(existing_deployment)
+    end
+  end
+
   describe '#has_pool_repsitory?' do
     it 'returns false when it does not have a pool repository' do
       subject = create(:project, :repository)
@@ -6231,28 +6327,6 @@ RSpec.describe Project, factory_default: :keep do
       it 'returns empty array' do
         expect(subject).to be_empty
       end
-    end
-  end
-
-  describe '#alerts_service_activated?' do
-    let!(:project) { create(:project) }
-
-    subject { project.alerts_service_activated? }
-
-    context 'when project has an activated alerts service' do
-      before do
-        create(:alerts_service, project: project)
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when project has an inactive alerts service' do
-      before do
-        create(:alerts_service, :inactive, project: project)
-      end
-
-      it { is_expected.to be_falsey }
     end
   end
 

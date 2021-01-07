@@ -37,7 +37,7 @@ export default Vue.extend({
     filterItems(term, items) {
       const query = term.toLowerCase();
 
-      return items.filter(item => {
+      return items.filter((item) => {
         const name = item.name ? item.name.toLowerCase() : item.title.toLowerCase();
         const foundName = name.indexOf(query) > -1;
 

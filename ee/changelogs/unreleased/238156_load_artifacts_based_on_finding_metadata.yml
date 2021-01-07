@@ -1,5 +1,0 @@
----
-title: Fix the timeout errors happenning on the "pipeline security tab"
-merge_request: 41762
-author:
-type: fixed

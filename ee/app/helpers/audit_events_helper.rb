@@ -39,6 +39,14 @@ module AuditEventsHelper
   end
 
   def export_url
-    Feature.enabled?(:audit_log_export_csv) ? admin_audit_log_reports_url(format: :csv) : ''
+    admin_audit_log_reports_url(format: :csv)
+  end
+
+  def show_filter_for_project?(project)
+    can?(current_user, :admin_project, project)
+  end
+
+  def show_filter_for_group?(group)
+    can?(current_user, :admin_group, group)
   end
 end

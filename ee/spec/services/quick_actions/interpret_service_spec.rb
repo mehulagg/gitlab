@@ -44,6 +44,16 @@ RSpec.describe QuickActions::InterpretService do
           expect(updates[:assignee_ids]).to match_array([user.id, user3.id])
         end
 
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/assign @#{user3.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
+        end
+
         context 'assign command with multiple assignees' do
           it 'fetches assignee and populates assignee_ids if content contains /assign' do
             issue.update!(assignee_ids: [user.id])
@@ -206,6 +216,16 @@ RSpec.describe QuickActions::InterpretService do
           _, updates = service.execute("/reassign @#{current_user.username}", issue)
 
           expect(updates[:assignee_ids]).to match_array([current_user.id])
+        end
+
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/reassign @#{current_user.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
         end
       end
     end
@@ -503,6 +523,12 @@ RSpec.describe QuickActions::InterpretService do
             let(:target) { merge_request }
           end
 
+          context 'when target epic is not persisted yet' do
+            let(:target) { build(:epic, group: group) }
+
+            it_behaves_like 'quick action is unavailable', :child_epic
+          end
+
           context 'when passed child epic is nil' do
             let(:child_epic) { nil }
 
@@ -645,6 +671,12 @@ RSpec.describe QuickActions::InterpretService do
 
           it_behaves_like 'quick action is unavailable', :remove_child_epic do
             let(:target) { merge_request }
+          end
+
+          context 'when target epic is not persisted yet' do
+            let(:target) { build(:epic, group: group) }
+
+            it_behaves_like 'quick action is unavailable', :remove_child_epic
           end
 
           it_behaves_like 'epic relation is removed'
@@ -957,6 +989,18 @@ RSpec.describe QuickActions::InterpretService do
         let(:issuable) { build(:merge_request, source_project: project) }
       end
     end
+
+    context 'confidential command' do
+      context 'for test cases' do
+        it 'does not mark to update confidential attribute' do
+          issuable = create(:quality_test_case, project: project)
+
+          _, updates, _ = service.execute('/confidential', issuable)
+
+          expect(updates[:confidential]).to eq(nil)
+        end
+      end
+    end
   end
 
   describe '#explain' do
@@ -1176,6 +1220,12 @@ RSpec.describe QuickActions::InterpretService do
           it_behaves_like 'target epic does not exist', :parent
         end
 
+        context 'when target epic is not persisted yet' do
+          let(:target) { build(:epic, group: group) }
+
+          it_behaves_like 'quick action is unavailable', :parent_epic
+        end
+
         context 'when user has no permission to read epic' do
           let(:content) { "/parent_epic #{epic2&.to_reference(epic)}" }
 
@@ -1207,6 +1257,12 @@ RSpec.describe QuickActions::InterpretService do
             expect(message)
               .to eq("Removed parent epic #{epic2.group.name}&#{epic2.iid}.")
           end
+        end
+
+        context 'when target epic is not persisted yet' do
+          let(:target) { build(:epic, group: group) }
+
+          it_behaves_like 'quick action is unavailable', :remove_parent_epic
         end
 
         context 'when parent is not present' do

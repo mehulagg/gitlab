@@ -9,7 +9,6 @@
 ---
 - accessibility_testing
 - advanced_deployments
-- analysis
 - api
 - attack_emulation
 - audit_events
@@ -25,7 +24,6 @@
 - code_quality
 - code_review
 - code_testing
-- collection
 - compliance_management
 - container_host_security
 - container_network_security
@@ -38,7 +36,6 @@
 - dependency_proxy
 - dependency_scanning
 - design_management
-- design_system
 - devops_reports
 - disaster_recovery
 - dynamic_application_security_testing
@@ -54,7 +51,6 @@
 - git_lfs
 - gitaly
 - gitlab_docs
-- gitlab_handbook
 - global_search
 - helm_chart_registry
 - importers
@@ -69,13 +65,11 @@
 - issue_tracking
 - jenkins_importer
 - jira_importer
-- jupyter_notebooks
 - kubernetes_management
 - license_compliance
 - live_preview
 - load_testing
 - logging
-- malware_scanning
 - memory
 - merge_trains
 - metrics
@@ -86,8 +80,8 @@
 - package_registry
 - pages
 - pipeline_authoring
-- pki_management
 - planning_analytics
+- privacy_control_center
 - product_analytics
 - projects
 - provision
@@ -117,6 +111,7 @@
 - time_tracking
 - tracing
 - usability_testing
+- usage_ping
 - users
 - value_stream_management
 - vulnerability_database

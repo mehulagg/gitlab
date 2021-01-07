@@ -25,7 +25,7 @@ RSpec.describe Packages::CreateEventService do
           stub_feature_flags(collect_package_events: false)
         end
 
-        it 'does not create an event object' do
+        it 'does not create an event' do
           expect { subject }.not_to change { Packages::Event.count }
         end
       end
@@ -43,10 +43,20 @@ RSpec.describe Packages::CreateEventService do
           expect(subject.event_scope).to eq(expected_scope)
           expect(subject.event_type).to eq(event_name)
         end
+
+        context 'on a read-only instance' do
+          before do
+            allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+          end
+
+          it 'does not create an event' do
+            expect { subject }.not_to change { Packages::Event.count }
+          end
+        end
       end
     end
 
-    shared_examples 'redis package event creation' do |originator_type, expected_scope|
+    shared_examples 'redis package unique event creation' do |originator_type, expected_scope|
       context 'with feature flag disable' do
         before do
           stub_feature_flags(collect_package_events_redis: false)
@@ -60,7 +70,27 @@ RSpec.describe Packages::CreateEventService do
       end
 
       it 'tracks the event' do
-        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(user.id, Packages::Event.allowed_event_name(expected_scope, event_name, originator_type))
+        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(user.id, /package/)
+
+        subject
+      end
+    end
+
+    shared_examples 'redis package count event creation' do |originator_type, expected_scope|
+      context 'with feature flag disabled' do
+        before do
+          stub_feature_flags(collect_package_events_redis: false)
+        end
+
+        it 'does not track the event' do
+          expect(::Gitlab::UsageDataCounters::PackageEventCounter).not_to receive(:count)
+
+          subject
+        end
+      end
+
+      it 'tracks the event' do
+        expect(::Gitlab::UsageDataCounters::PackageEventCounter).to receive(:count).at_least(:once)
 
         subject
       end
@@ -70,20 +100,23 @@ RSpec.describe Packages::CreateEventService do
       let(:user) { create(:user) }
 
       it_behaves_like 'db package event creation', 'user', 'container'
-      it_behaves_like 'redis package event creation', 'user', 'container'
+      it_behaves_like 'redis package unique event creation', 'user', 'container'
+      it_behaves_like 'redis package count event creation', 'user', 'container'
     end
 
     context 'with a deploy token' do
       let(:user) { create(:deploy_token) }
 
       it_behaves_like 'db package event creation', 'deploy_token', 'container'
-      it_behaves_like 'redis package event creation', 'deploy_token', 'container'
+      it_behaves_like 'redis package unique event creation', 'deploy_token', 'container'
+      it_behaves_like 'redis package count event creation', 'deploy_token', 'container'
     end
 
     context 'with no user' do
       let(:user) { nil }
 
       it_behaves_like 'db package event creation', 'guest', 'container'
+      it_behaves_like 'redis package count event creation', 'guest', 'container'
     end
 
     context 'with a package as scope' do
@@ -93,13 +126,15 @@ RSpec.describe Packages::CreateEventService do
         let(:user) { nil }
 
         it_behaves_like 'db package event creation', 'guest', 'npm'
+        it_behaves_like 'redis package count event creation', 'guest', 'npm'
       end
 
       context 'with user' do
         let(:user) { create(:user) }
 
         it_behaves_like 'db package event creation', 'user', 'npm'
-        it_behaves_like 'redis package event creation', 'user', 'npm'
+        it_behaves_like 'redis package unique event creation', 'user', 'npm'
+        it_behaves_like 'redis package count event creation', 'user', 'npm'
       end
     end
   end

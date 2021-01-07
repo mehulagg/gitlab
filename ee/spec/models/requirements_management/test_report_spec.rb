@@ -19,15 +19,28 @@ RSpec.describe RequirementsManagement::TestReport do
   end
 
   describe 'scopes' do
-    describe 'for_user_build' do
-      it "returns only test reports matching build's user and pipeline" do
-        user = create(:user)
-        build = create(:ci_build)
-        report1 = create(:test_report, author: user, build: build)
-        create(:test_report, author: user)
-        create(:test_report, build: build)
+    let_it_be(:user) { create(:user) }
+    let_it_be(:build) { create(:ci_build) }
+    let_it_be(:report1) { create(:test_report, author: user, build: build) }
+    let_it_be(:report2) { create(:test_report, author: user) }
+    let_it_be(:report3) { create(:test_report, build: build) }
+    let_it_be(:report4) { create(:test_report, build: nil) }
 
+    describe '.for_user_build' do
+      it "returns only test reports matching build's user and pipeline" do
         expect(described_class.for_user_build(user.id, build.id)).to match_array([report1])
+      end
+    end
+
+    describe '.with_build' do
+      it 'returns only test reports which reference a CI build' do
+        expect(described_class.with_build).to match_array([report1, report2, report3])
+      end
+    end
+
+    describe '.without_build' do
+      it 'returns only test reports which do not refer any CI build' do
+        expect(described_class.without_build).to match_array([report4])
       end
     end
   end

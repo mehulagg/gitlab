@@ -14,6 +14,7 @@ import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
 import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import PolicyAlertPicker from 'ee/threat_monitoring/components/policy_editor/policy_alert_picker.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -23,7 +24,7 @@ describe('PolicyEditorApp component', () => {
   let store;
   let wrapper;
 
-  const factory = ({ propsData, state, data } = {}) => {
+  const factory = ({ propsData, provide = {}, state, data } = {}) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       ...state,
@@ -39,6 +40,10 @@ describe('PolicyEditorApp component', () => {
         threatMonitoringPath: '/threat-monitoring',
         ...propsData,
       },
+      provide: {
+        glFeatures: { threatMonitoringAlerts: false },
+        ...provide,
+      },
       store,
       data,
     });
@@ -50,10 +55,20 @@ describe('PolicyEditorApp component', () => {
   const findAddRuleButton = () => wrapper.find('[data-testid="add-rule"]');
   const findYAMLParsingAlert = () => wrapper.find('[data-testid="parsing-alert"]');
   const findNetworkPolicyEditor = () => wrapper.find(NetworkPolicyEditor);
+  const findPolicyAlertPicker = () => wrapper.find(PolicyAlertPicker);
   const findPolicyName = () => wrapper.find("[id='policyName']");
   const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
   const findDeletePolicy = () => wrapper.find("[data-testid='delete-policy']");
   const findEditorModeToggle = () => wrapper.find("[data-testid='editor-mode']");
+
+  const modifyPolicyAlert = async ({ isAlertEnabled }) => {
+    const policyAlertPicker = findPolicyAlertPicker();
+    policyAlertPicker.vm.$emit('update-alert', isAlertEnabled);
+    await wrapper.vm.$nextTick();
+    expect(policyAlertPicker.props('policyAlert')).toBe(isAlertEnabled);
+    findSavePolicy().vm.$emit('click');
+    await wrapper.vm.$nextTick();
+  };
 
   beforeEach(() => {
     factory();
@@ -61,6 +76,7 @@ describe('PolicyEditorApp component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders the policy editor layout', () => {
@@ -77,6 +93,10 @@ describe('PolicyEditorApp component', () => {
 
   it('does not render delete button', () => {
     expect(findDeletePolicy().exists()).toBe(false);
+  });
+
+  it('does not render the policy alert picker', () => {
+    expect(findPolicyAlertPicker().exists()).toBe(false);
   });
 
   describe('given .yaml editor mode is enabled', () => {
@@ -337,6 +357,36 @@ spec:
         policy: { name: 'policy', manifest: toYaml(wrapper.vm.policy) },
       });
       expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
+    });
+  });
+
+  describe('add alert picker', () => {
+    beforeEach(() => {
+      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
+    });
+
+    it('does render the policy alert picker', () => {
+      expect(findPolicyAlertPicker().exists()).toBe(true);
+    });
+
+    it('adds a policy annotation on alert addition', async () => {
+      await modifyPolicyAlert({ isAlertEnabled: true });
+      expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: {
+          manifest: expect.stringContaining("app.gitlab.com/alert: 'true'"),
+        },
+      });
+    });
+
+    it('removes a policy annotation on alert removal', async () => {
+      await modifyPolicyAlert({ isAlertEnabled: false });
+      expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: {
+          manifest: expect.not.stringContaining("app.gitlab.com/alert: 'true'"),
+        },
+      });
     });
   });
 });

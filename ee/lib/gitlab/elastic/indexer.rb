@@ -38,9 +38,11 @@ module Gitlab
         return update_index_status(Gitlab::Git::BLANK_SHA) unless commit
 
         repository.__elasticsearch__.elastic_writing_targets.each do |target|
-          Sidekiq.logger.debug(message: "Indexation running for #{project.id} #{from_sha}..#{commit.sha}",
+          logger.debug(message: "indexing_commit_range",
                                project_id: project.id,
-                               wiki: index_wiki?)
+                               from_sha: from_sha,
+                               to_sha: commit.sha,
+                               index_wiki: index_wiki?)
           run_indexer!(commit.sha, target)
         end
 
@@ -73,9 +75,9 @@ module Gitlab
 
         command =
           if index_wiki?
-            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", project.id.to_s, repository_path]
+            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           else
-            [path_to_indexer, project.id.to_s, repository_path]
+            [path_to_indexer, "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           end
 
         output, status = Gitlab::Popen.popen(command, nil, vars)
@@ -178,10 +180,10 @@ module Gitlab
       # rubocop: disable CodeReuse/ActiveRecord
       def update_index_status(to_sha)
         unless Project.exists?(id: project.id)
-          Gitlab::Elasticsearch::Logger.build.debug(
+          logger.debug(
             message: 'Index status could not be updated as the project does not exist',
             project_id: project.id,
-            wiki: index_wiki?
+            index_wiki: index_wiki?
           )
           return false
         end
@@ -204,6 +206,10 @@ module Gitlab
         project.reload_index_status
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def logger
+        @logger ||= ::Gitlab::Elasticsearch::Logger.build
+      end
     end
   end
 end

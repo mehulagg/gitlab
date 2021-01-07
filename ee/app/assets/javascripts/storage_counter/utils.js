@@ -5,7 +5,7 @@ import { STORAGE_USAGE_THRESHOLDS } from './constants';
 
 export function usageRatioToThresholdLevel(currentUsageRatio) {
   let currentLevel = Object.keys(STORAGE_USAGE_THRESHOLDS)[0];
-  Object.keys(STORAGE_USAGE_THRESHOLDS).forEach(thresholdLevel => {
+  Object.keys(STORAGE_USAGE_THRESHOLDS).forEach((thresholdLevel) => {
     if (currentUsageRatio >= STORAGE_USAGE_THRESHOLDS[thresholdLevel])
       currentLevel = thresholdLevel;
   });
@@ -23,7 +23,7 @@ export function usageRatioToThresholdLevel(currentUsageRatio) {
  * @param {Number} size size in bytes
  * @returns {String}
  */
-export const formatUsageSize = size => {
+export const formatUsageSize = (size) => {
   const formatDecimalBytes = getFormatter(SUPPORTED_FORMATS.kibibytes);
   return formatDecimalBytes(bytesToKiB(size), 1);
 };
@@ -86,7 +86,7 @@ export const parseProjects = ({
     additionalPurchasedStorageSize - totalRepositorySizeExcess,
   );
 
-  return projects.nodes.map(project =>
+  return projects.nodes.map((project) =>
     calculateUsedAndRemStorage(project, purchasedStorageRemaining),
   );
 };
@@ -103,7 +103,7 @@ export const parseProjects = ({
  * @param {Object} data graphql result
  * @returns {Object}
  */
-export const parseGetStorageResults = data => {
+export const parseGetStorageResults = (data) => {
   const {
     namespace: {
       projects,

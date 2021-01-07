@@ -12,7 +12,12 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Use this scope for all new project routes.
       scope '-' do
         namespace :requirements_management do
-          resources :requirements, only: [:index]
+          resources :requirements, only: [:index] do
+            collection do
+              post :import_csv
+              post 'import_csv/authorize', to: 'requirements#authorize'
+            end
+          end
         end
 
         namespace :quality do
@@ -100,9 +105,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
         end
 
-        scope :on_demand_scans do
-          root 'on_demand_scans#index', as: 'on_demand_scans'
-        end
+        resources :on_demand_scans, only: [:index, :new, :edit]
 
         namespace :integrations do
           namespace :jira do
@@ -114,6 +117,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :iterations do
           resources :inherited, only: [:show], constraints: { id: /\d+/ }
+        end
+
+        namespace :incident_management, path: '' do
+          resources :oncall_schedules, only: [:index], path: 'oncall_schedules'
         end
       end
       # End of the /-/ scope.

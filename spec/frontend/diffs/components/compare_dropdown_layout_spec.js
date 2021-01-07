@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import CompareDropdownLayout from '~/diffs/components/compare_dropdown_layout.vue';
@@ -22,7 +22,7 @@ describe('CompareDropdownLayout', () => {
   });
 
   const createComponent = (propsData = {}) => {
-    wrapper = shallowMount(CompareDropdownLayout, {
+    wrapper = mount(CompareDropdownLayout, {
       propsData: {
         ...propsData,
       },
@@ -31,11 +31,11 @@ describe('CompareDropdownLayout', () => {
 
   const findListItems = () => wrapper.findAll('li');
   const findListItemsData = () =>
-    findListItems().wrappers.map(listItem => ({
+    findListItems().wrappers.map((listItem) => ({
       href: listItem.find('a').attributes('href'),
       text: trimText(listItem.text()),
       createdAt: listItem.findAll(TimeAgo).wrappers[0]?.props('time'),
-      isActive: listItem.find('a.is-active').exists(),
+      isActive: listItem.classes().includes('is-active'),
     }));
 
   afterEach(() => {
@@ -69,7 +69,7 @@ describe('CompareDropdownLayout', () => {
       expect(findListItemsData()).toEqual([
         {
           href: 'version/1',
-          text: 'version 1 (base) abcdef1 1 commit',
+          text: 'version 1 (base) abcdef1 1 commit 2 years ago',
           createdAt: TEST_CREATED_AT,
           isActive: true,
         },

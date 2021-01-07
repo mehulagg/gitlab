@@ -34,4 +34,4 @@ export const generateBadges = (member, isCurrentUser) => [
   },
 ];
 
-export const canOverride = member => member.canOverride;
+export const canOverride = (member) => member.canOverride;

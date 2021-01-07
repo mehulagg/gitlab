@@ -14,18 +14,12 @@ function addBlockTags(blockTag, selected) {
 }
 
 function lineBefore(text, textarea) {
-  const split = text
-    .substring(0, textarea.selectionStart)
-    .trim()
-    .split('\n');
+  const split = text.substring(0, textarea.selectionStart).trim().split('\n');
   return split[split.length - 1];
 }
 
 function lineAfter(text, textarea) {
-  return text
-    .substring(textarea.selectionEnd)
-    .trim()
-    .split('\n')[0];
+  return text.substring(textarea.selectionEnd).trim().split('\n')[0];
 }
 
 function convertMonacoSelectionToAceFormat(sel) {
@@ -226,7 +220,7 @@ export function insertMarkdownText({
         : blockTagText(text, textArea, blockTag, selected);
     } else {
       textToInsert = selectedSplit
-        .map(val => {
+        .map((val) => {
           if (tag.indexOf(textPlaceholder) > -1) {
             return tag.replace(textPlaceholder, val);
           }
@@ -339,9 +333,10 @@ export function addMarkdownListeners(form) {
       Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
     });
 
+  // eslint-disable-next-line @gitlab/no-global-event-off
   const $allToolbarBtns = $('.js-md', form)
     .off('click')
-    .on('click', function() {
+    .on('click', function () {
       const $toolbarBtn = $(this);
 
       return updateTextForToolbarBtn($toolbarBtn);
@@ -351,9 +346,10 @@ export function addMarkdownListeners(form) {
 }
 
 export function addEditorMarkdownListeners(editor) {
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.js-md')
     .off('click')
-    .on('click', e => {
+    .on('click', (e) => {
       const { mdTag, mdBlock, mdPrepend, mdSelect } = $(e.currentTarget).data();
 
       insertMarkdownText({
@@ -376,5 +372,6 @@ export function removeMarkdownListeners(form) {
       Shortcuts.removeMarkdownEditorShortcuts($(this));
     });
 
+  // eslint-disable-next-line @gitlab/no-global-event-off
   return $('.js-md', form).off('click');
 }

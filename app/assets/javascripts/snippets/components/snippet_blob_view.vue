@@ -53,9 +53,7 @@ export default {
   },
   provide() {
     return {
-      blobHash: Math.random()
-        .toString()
-        .split('.')[1],
+      blobHash: Math.random().toString().split('.')[1],
     };
   },
   data() {
@@ -90,7 +88,7 @@ export default {
       const {
         blobs: { nodes: dataBlobs },
       } = data.snippets.nodes[0];
-      const updatedBlobData = dataBlobs.find(blob => blob.path === blobPath);
+      const updatedBlobData = dataBlobs.find((blob) => blob.path === blobPath);
       return updatedBlobData.richData || updatedBlobData.plainData;
     },
   },

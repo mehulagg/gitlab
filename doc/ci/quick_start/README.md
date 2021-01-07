@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -79,7 +79,7 @@ To create a `.gitlab-ci.yml` file:
 
    ![New file](img/new_file_v13_6.png)
 
-1. For the **File name** type `.gitlab-ci.yml` and in the larger window,
+1. For the **Filename**, type `.gitlab-ci.yml` and in the larger window,
    paste this sample code:
 
    ```yaml

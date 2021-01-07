@@ -26,10 +26,10 @@ export const fetchLicenses = ({ state, dispatch }, params = {}) => {
         ...params,
       },
     })
-    .then(response => {
+    .then((response) => {
       dispatch('receiveLicensesSuccess', response);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveLicensesError', error);
     });
 };

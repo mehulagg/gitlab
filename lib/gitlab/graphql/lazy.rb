@@ -17,6 +17,14 @@ module Gitlab
         self.class.new { yield force }
       end
 
+      def catch(error_class = StandardError, &block)
+        self.class.new do
+          force
+        rescue error_class => e
+          yield e
+        end
+      end
+
       # Force evaluation of a (possibly) lazy value
       def self.force(value)
         case value
@@ -24,6 +32,8 @@ module Gitlab
           value.force
         when ::BatchLoader::GraphQL
           value.sync
+        when ::Gitlab::Graphql::Deferred
+          value.execute
         when ::GraphQL::Execution::Lazy
           value.value # part of the private api, but we can force this as well
         when ::Concurrent::Promise

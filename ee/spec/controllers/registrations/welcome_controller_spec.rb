@@ -4,6 +4,42 @@ require 'spec_helper'
 
 RSpec.describe Registrations::WelcomeController do
   let_it_be(:user) { create(:user) }
+  let_it_be(:another_user) { create(:user) }
+  let_it_be(:project) { create(:project, creator: user) }
+
+  describe '#trial_getting_started' do
+    subject(:trial_getting_started) do
+      get :trial_getting_started, params: { learn_gitlab_project_id: project.id }
+    end
+
+    context 'without a signed in user' do
+      it { is_expected.to redirect_to new_user_session_path }
+    end
+
+    context 'with the creator user signed' do
+      before do
+        sign_in(user)
+      end
+
+      it 'sets the learn_gitlab_project and renders' do
+        subject
+
+        is_expected.to render_template(:trial_getting_started)
+      end
+    end
+
+    context 'with any other user signed in except the creator' do
+      before do
+        sign_in(another_user)
+      end
+
+      it 'sets the learn_gitlab_project and renders' do
+        subject
+
+        is_expected.to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
 
   describe '#update' do
     let(:setup_for_company) { 'false' }
@@ -76,7 +112,7 @@ RSpec.describe Registrations::WelcomeController do
 
         context 'when part of the onboarding issues experiment' do
           before do
-            stub_experiment_for_user(onboarding_issues: true)
+            stub_experiment_for_subject(onboarding_issues: true)
           end
 
           it { is_expected.to redirect_to new_users_sign_up_group_path }
@@ -123,7 +159,7 @@ RSpec.describe Registrations::WelcomeController do
         sign_in(user)
         allow(::Gitlab).to receive(:com?).and_return(on_gitlab_com)
         stub_experiment(onboarding_issues: experiment_enabled)
-        stub_experiment_for_user(onboarding_issues: experiment_enabled_for_user)
+        stub_experiment_for_subject(onboarding_issues: experiment_enabled_for_user)
         allow(controller.helpers).to receive(:in_subscription_flow?).and_return(in_subscription_flow)
         allow(controller.helpers).to receive(:in_invitation_flow?).and_return(in_invitation_flow)
         allow(controller.helpers).to receive(:in_oauth_flow?).and_return(in_oauth_flow)
@@ -144,7 +180,7 @@ RSpec.describe Registrations::WelcomeController do
 
             with_them do
               it 'adds the user to the experiments table with the correct group_type' do
-                expect(::Experiment).to receive(:add_user).with(:onboarding_issues, group_type, user)
+                expect(::Experiment).to receive(:add_user).with(:onboarding_issues, group_type, user, {})
 
                 subject
               end

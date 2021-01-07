@@ -6,9 +6,9 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Coverage-Fuzzing') }
 
   describe 'the created pipeline' do
-    let(:user) { create(:admin) }
     let(:default_branch) { 'master' }
     let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
+    let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
@@ -17,12 +17,6 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
       stub_ci_pipeline_yaml_file(template.content)
       allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
       allow(project).to receive(:default_branch).and_return(default_branch)
-    end
-
-    context 'when project has no license' do
-      it 'includes job to display error' do
-        expect(build_names).to match_array(%w[coverage_fuzzing_unlicensed])
-      end
     end
 
     context 'when project has Ultimate license' do

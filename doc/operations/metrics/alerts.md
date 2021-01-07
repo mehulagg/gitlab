@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Set up alerts for Prometheus metrics **(CORE)**
@@ -80,7 +80,7 @@ Prometheus. The value of this should match the name of your environment in GitLa
 
 In GitLab versions 13.1 and greater, you can configure your manually configured
 Prometheus server to use the
-[Generic alerts integration](../incident_management/generic_alerts.md).
+[Generic alerts integration](../incident_management/alert_integrations.md).
 
 ## Trigger actions from alerts **(ULTIMATE)**
 

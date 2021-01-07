@@ -4,8 +4,8 @@
  * Scanning, Secret Scanning) body text
  * [severity-badge] [name] in [link]:[line]
  */
+import ModalOpenName from 'ee/reports/components/modal_open_name.vue';
 import ReportLink from '~/reports/components/report_link.vue';
-import ModalOpenName from '~/reports/components/modal_open_name.vue';
 import SeverityBadge from './severity_badge.vue';
 
 export default {

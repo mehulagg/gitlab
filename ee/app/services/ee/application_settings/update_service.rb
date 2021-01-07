@@ -42,6 +42,21 @@ module EE
 
       private
 
+      def should_auto_approve_blocked_users?
+        super || user_cap_increased?
+      end
+
+      def user_cap_increased?
+        return false unless application_setting.previous_changes.key?(:new_user_signups_cap)
+        return false unless ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
+
+        previous_user_cap, current_user_cap = application_setting.previous_changes[:new_user_signups_cap]
+
+        return false if previous_user_cap.nil?
+
+        current_user_cap.nil? || current_user_cap > previous_user_cap
+      end
+
       def find_or_create_index
         # The order of checks is important. We should not attempt to create a new index
         # unless elasticsearch_indexing is enabled

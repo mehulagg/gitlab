@@ -16,7 +16,7 @@ export default class DropdownWeight extends FilteredSearchDropdown {
   }
 
   itemClicked(e) {
-    super.itemClicked(e, selected => {
+    super.itemClicked(e, (selected) => {
       const title = selected.querySelector('.js-data-value').innerText.trim();
       return `${DropdownUtils.getEscapedText(title)}`;
     });
@@ -25,7 +25,7 @@ export default class DropdownWeight extends FilteredSearchDropdown {
   renderContent(forceShowList = false) {
     this.droplab.changeHookList(this.hookId, this.dropdown, [CustomNumber], this.config);
 
-    const defaultDropdownOptions = this.defaultOptions.map(o => ({ id: o, title: o }));
+    const defaultDropdownOptions = this.defaultOptions.map((o) => ({ id: o, title: o }));
     this.droplab.setData(defaultDropdownOptions);
 
     super.renderContent(forceShowList);

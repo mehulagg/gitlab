@@ -23,7 +23,7 @@ RSpec.describe Gitlab::Analytics::TypeOfWork::TasksByType do
   end
 
   subject do
-    described_class.new(params).counts_by_labels
+    described_class.new(**params).counts_by_labels
   end
 
   around do |example|
@@ -121,7 +121,7 @@ RSpec.describe Gitlab::Analytics::TypeOfWork::TasksByType do
   end
 
   shared_examples '#top_labels' do
-    let(:top_labels) { described_class.new(params).top_labels }
+    let(:top_labels) { described_class.new(**params).top_labels }
 
     let!(:with_label) do
       create(factory_name, {
@@ -144,7 +144,7 @@ RSpec.describe Gitlab::Analytics::TypeOfWork::TasksByType do
     end
 
     it 'limits the the size of the results' do
-      expect(described_class.new(params).top_labels(1)).to eq([other_label])
+      expect(described_class.new(**params).top_labels(1)).to eq([other_label])
     end
   end
 

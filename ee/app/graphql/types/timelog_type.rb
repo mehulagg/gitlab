@@ -19,18 +19,24 @@ module Types
     field :user,
           Types::UserType,
           null: false,
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.user_id).find },
           description: 'The user that logged the time'
 
     field :issue,
           Types::IssueType,
           null: true,
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Issue, obj.issue_id).find },
           description: 'The issue that logged time was added to'
 
     field :note,
           Types::Notes::NoteType,
           null: true,
           description: 'The note where the quick action to add the logged time was executed'
+
+    def user
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.user_id).find
+    end
+
+    def issue
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(Issue, object.issue_id).find
+    end
   end
 end

@@ -1,6 +1,0 @@
----
-title: 'Geo: Disable Self-service framework verification by default, and add package
-  file verification feature flag'
-merge_request: 46998
-author:
-type: added

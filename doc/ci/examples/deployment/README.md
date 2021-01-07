@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -55,10 +55,10 @@ To use different provider take a look at long list of [Supported Providers](http
 
 ## Using Dpl with Docker
 
-In most cases, you will have configured [GitLab Runner](https://docs.gitlab.com/runner/) to use your server's shell commands.
+In most cases, you configured [GitLab Runner](https://docs.gitlab.com/runner/) to use your server's shell commands.
 This means that all commands are run in the context of local user (e.g. `gitlab_runner` or `gitlab_ci_multi_runner`).
 It also means that most probably in your Docker container you don't have the Ruby runtime installed.
-You will have to install it:
+You must install it:
 
 ```yaml
 staging:
@@ -115,8 +115,8 @@ We also use two secure variables:
 
 ## Storing API keys
 
-Secure Variables can added by going to your project's
-**Settings ➔ CI / CD ➔ Variables**. The variables that are defined
+To add secure variables, navigate to your project's
+**Settings > CI / CD > Variables**. The variables that are defined
 in the project settings are sent along with the build script to the runner.
 The secure variables are stored out of the repository. Never store secrets in
 your project's `.gitlab-ci.yml`. It is also important that the secret's value

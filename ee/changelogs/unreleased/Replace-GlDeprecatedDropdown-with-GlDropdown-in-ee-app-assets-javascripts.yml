@@ -1,5 +1,0 @@
----
-title: Replace `GlDeprecatedDropdown` with `GlDropdown` in `ee/app/assets/javascripts/insights/components/insights.vue`
-merge_request: 41442
-author: nuwe1
-type: other

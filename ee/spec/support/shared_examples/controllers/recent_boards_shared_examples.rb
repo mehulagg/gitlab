@@ -34,10 +34,10 @@ RSpec.shared_examples 'redirects to last visited board' do
 
       if parent.is_a?(Group)
         expect(response).to render_template :index
-        expect(response.content_type).to eq 'text/html'
+        expect(response.media_type).to eq 'text/html'
         expect(response).to have_gitlab_http_status(:ok)
       else
-        expect(response.content_type).to eq 'text/html'
+        expect(response.media_type).to eq 'text/html'
         expect(response).to have_gitlab_http_status(:found)
       end
     end

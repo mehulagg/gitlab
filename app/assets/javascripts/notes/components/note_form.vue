@@ -3,8 +3,9 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
-import NoteableWarning from '../../vue_shared/components/notes/noteable_warning.vue';
-import markdownField from '../../vue_shared/components/markdown/field.vue';
+import NoteableWarning from '~/vue_shared/components/notes/noteable_warning.vue';
+import markdownField from '~/vue_shared/components/markdown/field.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import issuableStateMixin from '../mixins/issuable_state';
 import resolvable from '../mixins/resolvable';
 import { __, sprintf } from '~/locale';
@@ -16,7 +17,7 @@ export default {
     NoteableWarning,
     markdownField,
   },
-  mixins: [issuableStateMixin, resolvable],
+  mixins: [glFeatureFlagsMixin(), issuableStateMixin, resolvable],
   props: {
     noteBody: {
       type: String,
@@ -114,7 +115,7 @@ export default {
       'getUserDataByProp',
     ]),
     ...mapState({
-      withBatchComments: state => state.batchComments?.withBatchComments,
+      withBatchComments: (state) => state.batchComments?.withBatchComments,
     }),
     ...mapGetters('batchComments', ['hasDrafts']),
     showBatchCommentsActions() {
@@ -125,8 +126,8 @@ export default {
 
       return (
         this.discussion?.notes
-          .filter(n => n.resolvable)
-          .some(n => n.current_user?.can_resolve_discussion) || this.isDraft
+          .filter((n) => n.resolvable)
+          .some((n) => n.current_user?.can_resolve_discussion) || this.isDraft
       );
     },
     noteHash() {
@@ -192,8 +193,7 @@ export default {
     },
     canSuggest() {
       return (
-        this.getNoteableData.can_receive_suggestion &&
-        (this.line && this.line.can_receive_suggestion)
+        this.getNoteableData.can_receive_suggestion && this.line && this.line.can_receive_suggestion
       );
     },
     changedCommentText() {
@@ -342,7 +342,7 @@ export default {
           ref="textarea"
           slot="textarea"
           v-model="updatedNoteBody"
-          :data-supports-quick-actions="!isEditing"
+          :data-supports-quick-actions="!isEditing && !glFeatures.tributeAutocomplete"
           name="note[note]"
           class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
           data-qa-selector="reply_field"
@@ -422,7 +422,7 @@ export default {
           </button>
           <button
             v-if="discussion.resolvable"
-            class="btn btn-nr btn-default gl-mr-3 js-comment-resolve-button"
+            class="btn btn-default gl-mr-3 js-comment-resolve-button"
             @click.prevent="handleUpdate(true)"
           >
             {{ resolveButtonTitle }}

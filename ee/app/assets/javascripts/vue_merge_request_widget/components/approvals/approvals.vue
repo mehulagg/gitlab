@@ -39,7 +39,7 @@ export default {
       return this.mr.approvals || {};
     },
     approvedBy() {
-      return this.approvals.approved_by ? this.approvals.approved_by.map(x => x.user) : [];
+      return this.approvals.approved_by ? this.approvals.approved_by.map((x) => x.user) : [];
     },
     approvalsRequired() {
       return (!this.isBasic && this.approvals.approvals_required) || 0;
@@ -76,7 +76,7 @@ export default {
 
       this.isLoadingRules = true;
 
-      return this.service.fetchApprovalSettings().then(settings => {
+      return this.service.fetchApprovalSettings().then((settings) => {
         this.mr.setApprovalRules(settings);
         this.isLoadingRules = false;
       });

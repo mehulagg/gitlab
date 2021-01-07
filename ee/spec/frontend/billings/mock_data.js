@@ -70,20 +70,23 @@ export const mockDataSeats = {
     {
       name: 'Administrator',
       username: 'root',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_administrator',
+      web_url: 'path/to/administrator',
+      email: 'administrator@email.com',
     },
     {
       name: 'Agustin Walker',
       username: 'lester.orn',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_agustin_walker',
+      web_url: 'path/to/agustin_walker',
+      email: 'agustin_walker@email.com',
     },
     {
       name: 'Joella Miller',
       username: 'era',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      avatar_url: 'path/to/img_joella_miller',
+      web_url: 'path/to/joella_miller',
+      email: null,
     },
   ],
   headers: {
@@ -93,29 +96,32 @@ export const mockDataSeats = {
   },
 };
 
-export const seatsTableItems = [
+export const mockTableItems = [
   {
+    email: 'administrator@email.com',
     user: {
+      avatar_url: 'path/to/img_administrator',
       name: 'Administrator',
       username: '@root',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      web_url: 'path/to/administrator',
     },
   },
   {
+    email: 'agustin_walker@email.com',
     user: {
+      avatar_url: 'path/to/img_agustin_walker',
       name: 'Agustin Walker',
       username: '@lester.orn',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      web_url: 'path/to/agustin_walker',
     },
   },
   {
+    email: null,
     user: {
+      avatar_url: 'path/to/img_joella_miller',
       name: 'Joella Miller',
       username: '@era',
-      avatar_url: 'path/to/img',
-      web_url: 'path/to/user',
+      web_url: 'path/to/joella_miller',
     },
   },
 ];

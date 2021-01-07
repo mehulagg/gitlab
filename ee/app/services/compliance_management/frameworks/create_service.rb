@@ -6,15 +6,13 @@ module ComplianceManagement
       attr_reader :namespace, :params, :current_user, :framework
 
       def initialize(namespace:, params:, current_user:)
-        @namespace = namespace.root_ancestor
+        @namespace = namespace&.root_ancestor
         @params = params
         @current_user = current_user
         @framework = ComplianceManagement::Framework.new
       end
 
       def execute
-        return ServiceResponse.error(message: _('Feature not available')) unless permitted?
-
         framework.assign_attributes(
           namespace: namespace,
           name: params[:name],
@@ -22,13 +20,15 @@ module ComplianceManagement
           color: params[:color]
         )
 
+        return ServiceResponse.error(message: 'Not permitted to create framework') unless permitted?
+
         framework.save ? success : error
       end
 
       private
 
       def permitted?
-        can?(current_user, :create_custom_compliance_frameworks, namespace)
+        can? current_user, :manage_compliance_framework, framework
       end
 
       def success

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'User sees new onboarding flow', :js do
   before do
     stub_const('Gitlab::QueryLimiting::Transaction::THRESHOLD', 200)
-    stub_experiment_for_user(onboarding_issues: true)
+    stub_experiment_for_subject(onboarding_issues: true)
     allow(Gitlab).to receive(:com?).and_return(true)
     gitlab_sign_in(:user)
     visit users_sign_up_welcome_path

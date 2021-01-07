@@ -1,15 +1,16 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto, reference
 ---
 
-# Deploy Boards **(PREMIUM)**
+# Deploy Boards **(CORE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1589) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1589) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+> - [Moved](<https://gitlab.com/gitlab-org/gitlab/-/issues/212320>) to GitLab Core in 13.7.
 
-GitLab's Deploy Boards offer a consolidated view of the current health and
+GitLab Deploy Boards offer a consolidated view of the current health and
 status of each CI [environment](../../ci/environments/index.md) running on [Kubernetes](https://kubernetes.io), displaying the status
 of the pods in the deployment. Developers and other teammates can view the
 progress and status of a rollout, pod by pod, in the workflow they already use
@@ -53,8 +54,8 @@ specific environment, there are a lot of use cases. To name a few:
 - You want to promote what's running in staging, to production. You go to the
   environments list, verify that what's running in staging is what you think is
   running, then click on the [manual action](../../ci/yaml/README.md#whenmanual) to deploy to production.
-- You trigger a deploy, and you've got lots of containers to upgrade so you know
-  it'll take a while (you've also throttled your deploy to only take down X
+- You trigger a deploy, and you have many containers to upgrade so you know
+  this takes a while (you've also throttled your deploy to only take down X
   containers at a time). But you need to tell someone when it's deployed, so you
   go to the environments list, look at the production environment to see what
   the progress is in real-time as each pod is rolled.
@@ -74,9 +75,9 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
 
 1. Have a Kubernetes cluster up and running.
 
-   NOTE: **Running on OpenShift:**
-   If you are using OpenShift, ensure that you're using the `Deployment` resource
-   instead of `DeploymentConfiguration`. Otherwise, the Deploy Boards won't render
+   NOTE:
+   If you're using OpenShift, ensure that you're using the `Deployment` resource
+   instead of `DeploymentConfiguration`. Otherwise, the Deploy Boards don't render
    correctly. For more information, read the
    [OpenShift docs](https://docs.openshift.com/container-platform/3.7/dev_guide/deployments/kubernetes_deployments.html#kubernetes-deployments-vs-deployment-configurations)
    and [GitLab issue #4584](https://gitlab.com/gitlab-org/gitlab/-/issues/4584).
@@ -84,7 +85,7 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
 1. [Configure GitLab Runner](../../ci/runners/README.md) with the [`docker`](https://docs.gitlab.com/runner/executors/docker.html) or
    [`kubernetes`](https://docs.gitlab.com/runner/executors/kubernetes.html) executor.
 1. Configure the [Kubernetes integration](clusters/index.md) in your project for the
-   cluster. The Kubernetes namespace is of particular note as you will need it
+   cluster. The Kubernetes namespace is of particular note as you need it
    for your deployment scripts (exposed by the `KUBE_NAMESPACE` environment variable).
 1. Ensure Kubernetes annotations of `app.gitlab.com/env: $CI_ENVIRONMENT_SLUG`
    and `app.gitlab.com/app: $CI_PROJECT_PATH_SLUG` are applied to the
@@ -94,18 +95,18 @@ To display the Deploy Boards for a specific [environment](../../ci/environments/
    than one. These resources should be contained in the namespace defined in
    the Kubernetes service setting. You can use an [Autodeploy](../../topics/autodevops/stages.md#auto-deploy) `.gitlab-ci.yml`
    template which has predefined stages and commands to use, and automatically
-   applies the annotations. Each project will need to have a unique namespace in
+   applies the annotations. Each project must have a unique namespace in
    Kubernetes as well. The image below demonstrates how this is shown inside
    Kubernetes.
 
-   NOTE: **Note:**
+   NOTE:
    Matching based on the Kubernetes `app` label was removed in [GitLab
    12.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/14020).
    To migrate, please apply the required annotations (see above) and
    re-deploy your application. If you are using Auto DevOps, this will
    be done automatically and no action is necessary.
 
-   If you are using GCP to manage clusters, you can see the deployment details in GCP itself by going to **Workloads > deployment name > Details**:
+   If you use GCP to manage clusters, you can see the deployment details in GCP itself by navigating to **Workloads > deployment name > Details**:
 
    ![Deploy Boards Kubernetes Label](img/deploy_boards_kubernetes_label.png)
 
@@ -141,9 +142,9 @@ spec:
         app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
 ```
 
-The annotations will be applied to the deployments, replica sets, and pods. By changing the number of replicas, like `kubectl scale --replicas=3 deploy APPLICATION_NAME -n ${KUBE_NAMESPACE}`, you can follow the instances' pods from the board.
+The annotations are applied to the deployments, replica sets, and pods. By changing the number of replicas, like `kubectl scale --replicas=3 deploy APPLICATION_NAME -n ${KUBE_NAMESPACE}`, you can follow the instances' pods from the board.
 
-NOTE: **Note:**
+NOTE:
 The YAML file is static. If you apply it using `kubectl apply`, you must
 manually provide the project and environment slugs, or create a script to
 replace the variables in the YAML before applying.

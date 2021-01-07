@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
+import { vulnerabilityModalMixin } from 'ee/vue_shared/security_reports/mixins/vulnerability_modal_mixin';
 import Filters from './filters.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
-import VulnerabilityChart from './vulnerability_chart.vue';
 import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
 import LoadingError from './loading_error.vue';
 
@@ -14,19 +14,14 @@ export default {
     IssueModal,
     SecurityDashboardLayout,
     SecurityDashboardTable,
-    VulnerabilityChart,
     FuzzingArtifactsDownload,
     LoadingError,
   },
+  mixins: [vulnerabilityModalMixin('vulnerabilities')],
   props: {
     vulnerabilitiesEndpoint: {
       type: String,
       required: true,
-    },
-    vulnerabilitiesHistoryEndpoint: {
-      type: String,
-      required: false,
-      default: '',
     },
     pipelineId: {
       type: Number,
@@ -67,38 +62,24 @@ export default {
     vulnerability() {
       return this.modal.vulnerability;
     },
-    shouldShowAside() {
-      return this.shouldShowChart;
-    },
-    shouldShowChart() {
-      return Boolean(this.vulnerabilitiesHistoryEndpoint);
-    },
   },
   created() {
     this.setPipelineId(this.pipelineId);
     this.setVulnerabilitiesEndpoint(this.vulnerabilitiesEndpoint);
-    this.setVulnerabilitiesHistoryEndpoint(this.vulnerabilitiesHistoryEndpoint);
     this.fetchVulnerabilities({ ...this.filters, page: this.pageInfo.page });
-    this.fetchVulnerabilitiesHistory(this.filters);
     this.fetchPipelineJobs();
   },
   methods: {
     ...mapActions('vulnerabilities', [
-      'addDismissalComment',
-      'deleteDismissalComment',
       'closeDismissalCommentBox',
       'createIssue',
       'createMergeRequest',
-      'dismissVulnerability',
       'fetchVulnerabilities',
-      'fetchVulnerabilitiesHistory',
       'openDismissalCommentBox',
       'setPipelineId',
       'setVulnerabilitiesEndpoint',
-      'setVulnerabilitiesHistoryEndpoint',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
-      'undoDismiss',
       'downloadPatch',
     ]),
     ...mapActions('pipelineJobs', ['fetchPipelineJobs']),
@@ -133,10 +114,6 @@ export default {
             <slot name="empty-state"></slot>
           </template>
         </security-dashboard-table>
-
-        <template v-if="shouldShowAside" #aside>
-          <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
-        </template>
       </security-dashboard-layout>
 
       <issue-modal
@@ -147,17 +124,17 @@ export default {
         :is-creating-issue="isCreatingIssue"
         :is-dismissing-vulnerability="isDismissingVulnerability"
         :is-creating-merge-request="isCreatingMergeRequest"
-        @addDismissalComment="addDismissalComment({ vulnerability, comment: $event })"
+        @addDismissalComment="handleAddDismissalComment({ vulnerability, comment: $event })"
         @editVulnerabilityDismissalComment="openDismissalCommentBox"
         @showDismissalDeleteButtons="showDismissalDeleteButtons"
         @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
-        @deleteDismissalComment="deleteDismissalComment({ vulnerability })"
+        @deleteDismissalComment="handleDeleteDismissalComment({ vulnerability })"
         @closeDismissalCommentBox="closeDismissalCommentBox"
         @createMergeRequest="createMergeRequest({ vulnerability })"
         @createNewIssue="createIssue({ vulnerability })"
-        @dismissVulnerability="dismissVulnerability({ vulnerability, comment: $event })"
+        @dismissVulnerability="handleDismissVulnerability({ vulnerability, comment: $event })"
         @openDismissalCommentBox="openDismissalCommentBox"
-        @revertDismissVulnerability="undoDismiss({ vulnerability })"
+        @revertDismissVulnerability="handleRevertDismissVulnerability({ vulnerability })"
         @downloadPatch="downloadPatch({ vulnerability })"
       />
     </template>

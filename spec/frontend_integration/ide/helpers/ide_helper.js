@@ -1,14 +1,18 @@
-import { TEST_HOST } from 'helpers/test_constants';
-import { findAllByText, fireEvent, getByLabelText, screen } from '@testing-library/dom';
-import { initIde } from '~/ide';
-import extendStore from '~/ide/stores/extend';
-import { IDE_DATASET } from './mock_data';
+import {
+  findAllByText,
+  fireEvent,
+  getByLabelText,
+  findByTestId,
+  getByText,
+  screen,
+  findByText,
+} from '@testing-library/dom';
 
-const isFolderRowOpen = row => row.matches('.folder.is-open');
+const isFolderRowOpen = (row) => row.matches('.folder.is-open');
 
 const getLeftSidebar = () => screen.getByTestId('left-sidebar');
 
-const clickOnLeftSidebarTab = name => {
+export const switchLeftSidebarTab = (name) => {
   const sidebar = getLeftSidebar();
 
   const button = getByLabelText(sidebar, name);
@@ -16,10 +20,18 @@ const clickOnLeftSidebarTab = name => {
   button.click();
 };
 
-export const findMonacoEditor = () =>
-  screen.findByLabelText(/Editor content;/).then(x => x.closest('.monaco-editor'));
+export const getStatusBar = () => document.querySelector('.ide-status-bar');
 
-export const findAndSetEditorValue = async value => {
+export const waitForMonacoEditor = () =>
+  new Promise((resolve) => window.monaco.editor.onDidCreateEditor(resolve));
+
+export const findMonacoEditor = () =>
+  screen.findAllByLabelText(/Editor content;/).then(([x]) => x.closest('.monaco-editor'));
+
+export const findMonacoDiffEditor = () =>
+  screen.findAllByLabelText(/Editor content;/).then(([x]) => x.closest('.monaco-diff-editor'));
+
+export const findAndSetEditorValue = async (value) => {
   const editor = await findMonacoEditor();
   const uri = editor.getAttribute('data-uri');
 
@@ -33,9 +45,9 @@ export const getEditorValue = async () => {
   return window.monaco.editor.getModel(uri).getValue();
 };
 
-const findTreeBody = () => screen.findByTestId('ide-tree-body', {}, { timeout: 5000 });
+const findTreeBody = () => screen.findByTestId('ide-tree-body');
 
-const findRootActions = () => screen.findByTestId('ide-root-actions', {}, { timeout: 7000 });
+const findRootActions = () => screen.findByTestId('ide-root-actions');
 
 const findFileRowContainer = (row = null) =>
   row ? Promise.resolve(row.parentElement) : findTreeBody();
@@ -44,10 +56,12 @@ const findFileChild = async (row, name, index = 0) => {
   const container = await findFileRowContainer(row);
   const children = await findAllByText(container, name, { selector: '.file-row-name' });
 
-  return children.map(x => x.closest('.file-row')).find(x => x.dataset.level === index.toString());
+  return children
+    .map((x) => x.closest('.file-row'))
+    .find((x) => x.dataset.level === index.toString());
 };
 
-const openFileRow = row => {
+const openFileRow = (row) => {
   if (!row || isFolderRowOpen(row)) {
     return;
   }
@@ -79,32 +93,38 @@ const clickFileRowAction = (row, name) => {
   dropdownAction.click();
 };
 
-const findAndSetFileName = async value => {
-  const nameField = await screen.findByTestId('file-name-field');
+const fillFileNameModal = async (value, submitText = 'Create file') => {
+  const modal = await screen.findByTestId('ide-new-entry');
+
+  const nameField = await findByTestId(modal, 'file-name-field');
   fireEvent.input(nameField, { target: { value } });
 
-  const createButton = screen.getByText('Create file');
+  const createButton = getByText(modal, submitText, { selector: 'button' });
   createButton.click();
 };
 
-const findAndClickRootAction = async name => {
+const findAndClickRootAction = async (name) => {
   const container = await findRootActions();
   const button = getByLabelText(container, name);
 
   button.click();
 };
 
-export const openFile = async path => {
+export const clickPreviewMarkdown = () => {
+  screen.getByText('Preview Markdown').click();
+};
+
+export const openFile = async (path) => {
   const row = await findAndTraverseToPath(path);
 
   openFileRow(row);
 };
 
+export const waitForTabToOpen = (fileName) =>
+  findByText(document.querySelector('.multi-file-edit-pane'), fileName);
+
 export const createFile = async (path, content) => {
-  const parentPath = path
-    .split('/')
-    .slice(0, -1)
-    .join('/');
+  const parentPath = path.split('/').slice(0, -1).join('/');
 
   const parentRow = await findAndTraverseToPath(parentPath);
 
@@ -114,37 +134,39 @@ export const createFile = async (path, content) => {
     await findAndClickRootAction('New file');
   }
 
-  await findAndSetFileName(path);
+  await fillFileNameModal(path);
   await findAndSetEditorValue(content);
 };
 
 export const getFilesList = () => {
-  return screen.getAllByTestId('file-row-name-container').map(e => e.textContent.trim());
+  return screen.getAllByTestId('file-row-name-container').map((e) => e.textContent.trim());
 };
 
-export const deleteFile = async path => {
+export const deleteFile = async (path) => {
   const row = await findAndTraverseToPath(path);
   clickFileRowAction(row, 'Delete');
 };
 
-export const commit = async () => {
-  clickOnLeftSidebarTab('Commit');
-  screen.getByTestId('begin-commit-button').click();
+export const renameFile = async (path, newPath) => {
+  const row = await findAndTraverseToPath(path);
+  clickFileRowAction(row, 'Rename/Move');
 
-  await screen.findByLabelText(/Commit to .+ branch/).then(x => x.click());
-
-  screen.getByText('Commit').click();
+  await fillFileNameModal(newPath, 'Rename file');
 };
 
-export const createIdeComponent = (container, { isRepoEmpty = false, path = '' } = {}) => {
-  global.jsdom.reconfigure({
-    url: `${TEST_HOST}/-/ide/project/gitlab-test/lorem-ipsum${
-      isRepoEmpty ? '-empty' : ''
-    }/tree/master/-/${path}`,
+export const closeFile = async (path) => {
+  const button = await screen.getByLabelText(`Close ${path}`, {
+    selector: '.multi-file-tabs button',
   });
 
-  const el = document.createElement('div');
-  Object.assign(el.dataset, IDE_DATASET);
-  container.appendChild(el);
-  return initIde(el, { extendStore });
+  button.click();
+};
+
+export const commit = async () => {
+  switchLeftSidebarTab('Commit');
+  screen.getByTestId('begin-commit-button').click();
+
+  await screen.findByLabelText(/Commit to .+ branch/).then((x) => x.click());
+
+  screen.getByText('Commit').click();
 };

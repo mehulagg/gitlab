@@ -85,11 +85,11 @@ export default {
         </gl-dropdown-item>
       </gl-dropdown>
       <div
-        v-if="selectedProfile && $scopedSlots.summary"
+        v-if="value && $scopedSlots.summary"
         data-testid="selected-profile-summary"
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
-        <slot name="summary" :profile="selectedProfile"></slot>
+        <slot name="summary"></slot>
       </div>
     </gl-form-group>
     <template v-else>

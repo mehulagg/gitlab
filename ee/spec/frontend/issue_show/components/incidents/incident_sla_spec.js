@@ -11,7 +11,7 @@ const defaultProvide = { fullPath: 'test', iid: 1, slaFeatureAvailable: true };
 describe('Incident SLA', () => {
   let wrapper;
 
-  const mountComponent = options => {
+  const mountComponent = (options) => {
     wrapper = shallowMount(
       IncidentSla,
       merge(

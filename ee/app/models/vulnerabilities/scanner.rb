@@ -18,9 +18,11 @@ module Vulnerabilities
 
     scope :for_projects, -> (project_ids) { where(project_id: project_ids) }
     scope :with_report_type, -> do
-      joins(:findings)
-        .select('DISTINCT ON ("vulnerability_scanners"."external_id", "vulnerability_occurrences"."report_type") "vulnerability_scanners".*, "vulnerability_occurrences"."report_type" AS "report_type"')
-        .order('"vulnerability_scanners"."external_id" ASC, "vulnerability_occurrences"."report_type" ASC')
+      lateral = Vulnerabilities::Finding.where(Vulnerabilities::Finding.arel_table[:scanner_id].eq(arel_table[:id])).select(:report_type).limit(1)
+
+      joins("JOIN LATERAL (#{lateral.to_sql}) report_types ON true")
+        .select('DISTINCT ON ("vulnerability_scanners"."external_id", "report_types"."report_type") "vulnerability_scanners".*, "report_types"."report_type" AS "report_type"')
+        .order('"vulnerability_scanners"."external_id" ASC, "report_types"."report_type" ASC')
     end
   end
 end

@@ -15,12 +15,17 @@ export default {
   }),
   computed: {
     ...mapState('filters', ['filters']),
-    hideDismissed() {
-      return this.filters.scope === DISMISSAL_STATES.DISMISSED;
+    hideDismissed: {
+      set(isHidden) {
+        this.setHideDismissed(isHidden);
+      },
+      get() {
+        return this.filters.scope === DISMISSAL_STATES.DISMISSED;
+      },
     },
   },
   methods: {
-    ...mapActions('filters', ['setFilter', 'toggleHideDismissed']),
+    ...mapActions('filters', ['setFilter', 'setHideDismissed']),
   },
 };
 </script>
@@ -39,11 +44,7 @@ export default {
         <slot name="buttons"></slot>
         <div class="pl-md-6">
           <strong>{{ s__('SecurityReports|Hide dismissed') }}</strong>
-          <gl-toggle
-            class="d-block mt-1 js-toggle"
-            :value="hideDismissed"
-            @change="toggleHideDismissed"
-          />
+          <gl-toggle v-model="hideDismissed" class="gl-mt-2 js-toggle" />
         </div>
       </div>
     </div>

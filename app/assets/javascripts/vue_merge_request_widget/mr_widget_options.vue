@@ -16,7 +16,6 @@ import WidgetHeader from './components/mr_widget_header.vue';
 import WidgetSuggestPipeline from './components/mr_widget_suggest_pipeline.vue';
 import WidgetMergeHelp from './components/mr_widget_merge_help.vue';
 import MrWidgetPipelineContainer from './components/mr_widget_pipeline_container.vue';
-import Deployment from './components/deployment/deployment.vue';
 import WidgetRelatedLinks from './components/mr_widget_related_links.vue';
 import MrWidgetAlertMessage from './components/mr_widget_alert_message.vue';
 import MergedState from './components/states/mr_widget_merged.vue';
@@ -63,7 +62,6 @@ export default {
     'mr-widget-suggest-pipeline': WidgetSuggestPipeline,
     'mr-widget-merge-help': WidgetMergeHelp,
     MrWidgetPipelineContainer,
-    Deployment,
     'mr-widget-related-links': WidgetRelatedLinks,
     MrWidgetAlertMessage,
     'mr-widget-merged': MergedState,
@@ -155,10 +153,7 @@ export default {
     },
     shouldSuggestPipelines() {
       return (
-        gon.features?.suggestPipeline &&
-        !this.mr.hasCI &&
-        this.mr.mergeRequestAddCiConfigPath &&
-        !this.mr.isDismissedSuggestPipeline
+        !this.mr.hasCI && this.mr.mergeRequestAddCiConfigPath && !this.mr.isDismissedSuggestPipeline
       );
     },
     shouldRenderCodeQuality() {
@@ -171,7 +166,8 @@ export default {
       return (
         !this.mr.canRemoveSourceBranch &&
         this.mr.shouldRemoveSourceBranch &&
-        (!this.mr.isNothingToMergeState && !this.mr.isMergedState)
+        !this.mr.isNothingToMergeState &&
+        !this.mr.isMergedState
       );
     },
     shouldRenderCollaborationStatus() {
@@ -201,6 +197,9 @@ export default {
     },
     shouldShowAccessibilityReport() {
       return this.mr.accessibilityReportPath;
+    },
+    formattedHumanAccess() {
+      return (this.mr.humanAccess || '').toLowerCase();
     },
   },
   watch: {
@@ -359,7 +358,7 @@ export default {
     fetchActionsContent() {
       this.service
         .fetchMergeActionsContent()
-        .then(res => {
+        .then((res) => {
           if (res.data) {
             const el = document.createElement('div');
             el.innerHTML = res.data;
@@ -389,26 +388,26 @@ export default {
       this.pollingInterval.stopTimer();
     },
     bindEventHubListeners() {
-      eventHub.$on('MRWidgetUpdateRequested', cb => {
+      eventHub.$on('MRWidgetUpdateRequested', (cb) => {
         this.checkStatus(cb);
       });
 
-      eventHub.$on('MRWidgetRebaseSuccess', cb => {
+      eventHub.$on('MRWidgetRebaseSuccess', (cb) => {
         this.checkStatus(cb, true);
       });
 
       // `params` should be an Array contains a Boolean, like `[true]`
       // Passing parameter as Boolean didn't work.
-      eventHub.$on('SetBranchRemoveFlag', params => {
+      eventHub.$on('SetBranchRemoveFlag', (params) => {
         [this.mr.isRemovingSourceBranch] = params;
       });
 
-      eventHub.$on('FailedToMerge', mergeError => {
+      eventHub.$on('FailedToMerge', (mergeError) => {
         this.mr.state = 'failedToMerge';
         this.mr.mergeError = mergeError;
       });
 
-      eventHub.$on('UpdateWidgetData', data => {
+      eventHub.$on('UpdateWidgetData', (data) => {
         this.mr.setData(data);
       });
 
@@ -439,7 +438,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
@@ -469,8 +468,10 @@ export default {
       <security-reports-app
         v-if="shouldRenderSecurityReport"
         :pipeline-id="mr.pipeline.id"
-        :project-id="mr.targetProjectId"
+        :project-id="mr.sourceProjectId"
         :security-reports-docs-path="mr.securityReportsDocsPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
       />
 
       <grouped-test-reports-app

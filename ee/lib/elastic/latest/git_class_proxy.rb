@@ -161,7 +161,7 @@ module Elastic
             _name: context.name(:blob, :match, :search_terms),
             query: query.term,
             default_operator: :and,
-            fields: %w[blob.content blob.file_name]
+            fields: %w[blob.content blob.file_name blob.path]
           }
         }
 

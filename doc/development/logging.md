@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Developers Guide to Logging
@@ -12,7 +12,7 @@ administrators and GitLab team members to diagnose problems in the field.
 ## Don't use `Rails.logger`
 
 Currently `Rails.logger` calls all get saved into `production.log`, which contains
-a mix of Rails' logs and other calls developers have inserted in the code base.
+a mix of Rails' logs and other calls developers have inserted in the codebase.
 For example:
 
 ```plaintext

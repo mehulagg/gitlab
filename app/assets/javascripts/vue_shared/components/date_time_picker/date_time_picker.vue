@@ -202,7 +202,7 @@ export default {
 <template>
   <tooltip-on-truncate
     :title="timeWindowText"
-    :truncate-target="elem => elem.querySelector('.gl-dropdown-toggle-text')"
+    :truncate-target="(elem) => elem.querySelector('.gl-dropdown-toggle-text')"
     placement="top"
     class="d-inline-block"
   >
@@ -219,7 +219,7 @@ export default {
         <span v-if="utc" class="gl-text-gray-500 gl-font-weight-bold gl-font-sm">{{
           __('UTC')
         }}</span>
-        <gl-icon class="gl-dropdown-caret" name="chevron-down" aria-hidden="true" />
+        <gl-icon class="gl-dropdown-caret" name="chevron-down" />
       </template>
 
       <div class="d-flex justify-content-between gl-p-2">

@@ -2,20 +2,20 @@ import { n__, s__, sprintf } from '~/locale';
 import { addLicensesMatchingReportGroupStatus, reportGroupHasAtLeastOneLicense } from './utils';
 import { LICENSE_APPROVAL_STATUS, REPORT_GROUPS } from '../constants';
 
-export const isLoading = state =>
+export const isLoading = (state) =>
   state.isLoadingManagedLicenses ||
   state.isLoadingLicenseReport ||
   state.isLoadingLicenseCheckApprovalRule;
 
-export const isLicenseBeingUpdated = state => (id = null) => state.pendingLicenses.includes(id);
+export const isLicenseBeingUpdated = (state) => (id = null) => state.pendingLicenses.includes(id);
 
 export const isAddingNewLicense = (_, getters) => getters.isLicenseBeingUpdated();
 
-export const hasPendingLicenses = state => state.pendingLicenses.length > 0;
+export const hasPendingLicenses = (state) => state.pendingLicenses.length > 0;
 
-export const licenseReport = state => state.newLicenses;
+export const licenseReport = (state) => state.newLicenses;
 
-export const licenseReportGroups = state =>
+export const licenseReportGroups = (state) =>
   REPORT_GROUPS.map(addLicensesMatchingReportGroupStatus(state.newLicenses)).filter(
     reportGroupHasAtLeastOneLicense,
   );
@@ -24,7 +24,7 @@ export const hasReportItems = (_, getters) => {
   return Boolean(getters.licenseReportLength);
 };
 
-export const baseReportHasLicenses = state => {
+export const baseReportHasLicenses = (state) => {
   return Boolean(state.existingLicenses.length);
 };
 
@@ -118,5 +118,5 @@ export const summaryTextWithoutLicenseCheck = (_, getters) => {
 
 export const reportContainsBlacklistedLicense = (_, getters) =>
   (getters.licenseReport || []).some(
-    license => license.approvalStatus === LICENSE_APPROVAL_STATUS.DENIED,
+    (license) => license.approvalStatus === LICENSE_APPROVAL_STATUS.DENIED,
   );

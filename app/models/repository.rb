@@ -24,9 +24,9 @@ class Repository
 
   attr_accessor :full_path, :shard, :disk_path, :container, :repo_type
 
-  delegate :ref_name_for_sha, to: :raw_repository
-  delegate :bundle_to_disk, to: :raw_repository
   delegate :lfs_enabled?, to: :container
+
+  delegate_missing_to :raw_repository
 
   CreateTreeError = Class.new(StandardError)
   AmbiguousRefError = Class.new(StandardError)
@@ -386,10 +386,6 @@ class Repository
     raw_repository.expire_has_local_branches_cache
   end
 
-  def lookup_cache
-    @lookup_cache ||= {}
-  end
-
   def expire_exists_cache
     expire_method_caches(%i(exists?))
   end
@@ -494,17 +490,10 @@ class Repository
     expire_branches_cache if expire_cache
   end
 
-  def method_missing(msg, *args, &block)
-    if msg == :lookup && !block_given?
-      lookup_cache[msg] ||= {}
-      lookup_cache[msg][args.join(":")] ||= raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
-    else
-      raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
+  def lookup(sha)
+    strong_memoize("lookup_#{sha}") do
+      raw_repository.lookup(sha)
     end
-  end
-
-  def respond_to_missing?(method, include_private = false)
-    raw_repository.respond_to?(method, include_private) || super
   end
 
   def blob_at(sha, path)
@@ -512,6 +501,9 @@ class Repository
 
     # Don't attempt to return a special result if there is no blob at all
     return unless blob
+
+    # Don't attempt to return a special result if this can't be a README
+    return blob unless Gitlab::FileDetector.type_of(blob.name) == :readme
 
     # Don't attempt to return a special result unless we're looking at HEAD
     return blob unless head_commit&.sha == sha
@@ -615,7 +607,7 @@ class Repository
   end
 
   def readme_path
-    readme&.path
+    head_tree&.readme_path
   end
   cache_method :readme_path
 

@@ -6,7 +6,7 @@ describe('Members Utils', () => {
     it('has correct properties for each badge', () => {
       const badges = generateBadges(memberMock, true);
 
-      badges.forEach(badge => {
+      badges.forEach((badge) => {
         expect(badge).toEqual(
           expect.objectContaining({
             show: expect.any(Boolean),

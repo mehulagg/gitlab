@@ -37,6 +37,127 @@ RSpec.describe Gitlab::Utils::UsageData do
     end
   end
 
+  describe '#estimate_batch_distinct_count' do
+    let(:error_rate) { Gitlab::Database::PostgresHll::BatchDistinctCounter::ERROR_RATE } # HyperLogLog is a probabilistic algorithm, which provides estimated data, with given error margin
+    let(:relation) { double(:relation) }
+
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
+    end
+
+    it 'delegates counting to counter class instance' do
+      buckets = instance_double(Gitlab::Database::PostgresHll::Buckets)
+
+      expect_next_instance_of(Gitlab::Database::PostgresHll::BatchDistinctCounter, relation, 'column') do |instance|
+        expect(instance).to receive(:execute)
+                              .with(batch_size: nil, start: nil, finish: nil)
+                              .and_return(buckets)
+      end
+      expect(buckets).to receive(:estimated_distinct_count).and_return(5)
+
+      expect(described_class.estimate_batch_distinct_count(relation, 'column')).to eq(5)
+    end
+
+    context 'quasi integration test for different counting parameters', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296169' } do
+      let_it_be(:user) { create(:user, email: 'email1@domain.com') }
+      let_it_be(:another_user) { create(:user, email: 'email2@domain.com') }
+
+      let(:model) { Issue }
+      let(:column) { :author_id }
+
+      context 'different distribution of relation records' do
+        [10, 100, 100_000].each do |spread|
+          context "records are spread within #{spread}" do
+            before do
+              ids = (1..spread).to_a.sample(10)
+              create_list(:issue, 10).each_with_index do |issue, i|
+                issue.id = ids[i]
+              end
+            end
+
+            it 'counts table' do
+              expect(described_class.estimate_batch_distinct_count(model)).to be_within(error_rate).percent_of(10)
+            end
+          end
+        end
+      end
+
+      context 'different counting parameters' do
+        before_all do
+          create_list(:issue, 3, author: user)
+          create_list(:issue, 2, author: another_user)
+        end
+
+        it 'counts table' do
+          expect(described_class.estimate_batch_distinct_count(model)).to be_within(error_rate).percent_of(5)
+        end
+
+        it 'counts with column field' do
+          expect(described_class.estimate_batch_distinct_count(model, column)).to be_within(error_rate).percent_of(2)
+        end
+
+        it 'counts with :id field' do
+          expect(described_class.estimate_batch_distinct_count(model, :id)).to be_within(error_rate).percent_of(5)
+        end
+
+        it 'counts with "id" field' do
+          expect(described_class.estimate_batch_distinct_count(model, "id")).to be_within(error_rate).percent_of(5)
+        end
+
+        it 'counts with table.column field' do
+          expect(described_class.estimate_batch_distinct_count(model, "#{model.table_name}.#{column}")).to be_within(error_rate).percent_of(2)
+        end
+
+        it 'counts with Arel column' do
+          expect(described_class.estimate_batch_distinct_count(model, model.arel_table[column])).to be_within(error_rate).percent_of(2)
+        end
+
+        it 'counts over joined relations' do
+          expect(described_class.estimate_batch_distinct_count(model.joins(:author), "users.email")).to be_within(error_rate).percent_of(2)
+        end
+
+        it 'counts with :column field with batch_size of 50K' do
+          expect(described_class.estimate_batch_distinct_count(model, column, batch_size: 50_000)).to be_within(error_rate).percent_of(2)
+        end
+
+        it 'counts with different number of batches and aggregates total result' do
+          stub_const('Gitlab::Database::PostgresHll::BatchDistinctCounter::MIN_REQUIRED_BATCH_SIZE', 0)
+
+          [1, 2, 4, 5, 6].each { |i| expect(described_class.estimate_batch_distinct_count(model, batch_size: i)).to be_within(error_rate).percent_of(5) }
+        end
+
+        it 'counts with a start and finish' do
+          expect(described_class.estimate_batch_distinct_count(model, column, start: model.minimum(:id), finish: model.maximum(:id))).to be_within(error_rate).percent_of(2)
+        end
+      end
+    end
+
+    describe 'error handling' do
+      before do
+        stub_const("Gitlab::Utils::UsageData::FALLBACK", 3)
+        stub_const("Gitlab::Utils::UsageData::DISTRIBUTED_HLL_FALLBACK", 4)
+      end
+
+      it 'returns fallback if counter raises WRONG_CONFIGURATION_ERROR' do
+        expect(described_class.estimate_batch_distinct_count(relation, 'id', start: 1, finish: 0)).to eq 3
+      end
+
+      it 'returns default fallback value when counting fails due to database error' do
+        allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid.new(''))
+
+        expect(described_class.estimate_batch_distinct_count(relation)).to eq(3)
+      end
+
+      it 'logs error and returns DISTRIBUTED_HLL_FALLBACK value when counting raises any error', :aggregate_failures do
+        error = StandardError.new('')
+        allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(error)
+
+        expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(error)
+        expect(described_class.estimate_batch_distinct_count(relation)).to eq(4)
+      end
+    end
+  end
+
   describe '#sum' do
     let(:relation) { double(:relation) }
 
@@ -163,7 +284,7 @@ RSpec.describe Gitlab::Utils::UsageData do
     context 'when Prometheus server address is available from settings' do
       before do
         expect(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(true)
-        expect(Gitlab::Prometheus::Internal).to receive(:server_address).and_return('prom:9090')
+        expect(Gitlab::Prometheus::Internal).to receive(:uri).and_return('http://prom:9090')
       end
 
       it_behaves_like 'try to query Prometheus with given address'

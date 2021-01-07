@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab managed Terraform State
@@ -104,7 +104,7 @@ and the CI YAML file:
    ```
 
 1. In the root directory of your project repository, configure a
-   `.gitlab-ci.yaml` file. This example uses a pre-built image which includes a
+   `.gitlab-ci.yml` file. This example uses a pre-built image which includes a
    `gitlab-terraform` helper. For supported Terraform versions, see the [GitLab
    Terraform Images project](https://gitlab.com/gitlab-org/terraform-images).
 
@@ -112,7 +112,7 @@ and the CI YAML file:
    image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
    ```
 
-1. In the `.gitlab-ci.yaml` file, define some environment variables to ease
+1. In the `.gitlab-ci.yml` file, define some environment variables to ease
    development. In this example, `TF_ROOT` is the directory where the Terraform
    commands must be executed, `TF_ADDRESS` is the URL to the state on the GitLab
    instance where this pipeline runs, and the final path segment in `TF_ADDRESS`
@@ -186,7 +186,7 @@ and the CI YAML file:
 
 The output from the above `terraform` commands should be viewable in the job logs.
 
-CAUTION: **Caution:**
+WARNING:
 Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
 Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
 includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
@@ -344,17 +344,65 @@ location. You can then go back to running it from within GitLab CI.
 
 ## Managing state files
 
-NOTE: **Note:**
+NOTE:
 We are currently working on [providing a graphical interface for managing state files](https://gitlab.com/groups/gitlab-org/-/epics/4563).
 
-![Terraform state list](img/terraform_list_view_v13_5.png)
+![Terraform state list](img/terraform_list_view_v13_8.png)
 
-The state files attached to a project can be found under Operations / Terraform.
+To list the state files attached to a project go to **Operations > Terraform**.
 
-## Removing a State file
+![Terraform state list](img/terraform_list_view_actions_v13_8.png)
 
-You can only remove a state file by making a request to the API, like the following example:
+The list also includes an **Actions** column where you can download, lock or unlock, or remove each state file.
+
+## Remove a state file
+
+You can use the following options to remove a state file:
+
+1. GitLab REST API
+1. GitLab GraphQL API
+1. GitLab UI
+
+### Remove a state file with the GitLab REST API
+
+You can remove a state file by making a request to the REST API, for example:
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id/terraform/state/<your_state_name>"
+curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
 ```
+
+### Remove a state file with the GitLab GraphQL API
+
+You can remove a state file by making a GraphQL API request, for example:
+
+```shell
+mutation deleteState {
+  terraformStateDelete(input: { id: "<global_id_for_the_state>" }) {
+    errors
+  }
+}
+```
+
+You can obtain the <global_id_for_the_state> by querying the list of states. For example:
+
+```shell
+query ProjectTerraformStates {
+  project(fullPath: "<your_project_path>") {
+    terraformStates {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+For those new to the GitLab GraphQL API, see [Getting started with GitLab GraphQL API](../../api/graphql/getting_started.md).
+
+### Remove a state file with the GitLab UI
+
+To delete a state file:
+
+- From your project, go to **Operations > Terraform**.
+- In the **Actions** column, click on the vertical ellipsis (**{ellipsis_v}**) button and select **Remove state file and versions**.

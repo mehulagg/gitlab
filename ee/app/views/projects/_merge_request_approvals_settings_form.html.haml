@@ -23,20 +23,20 @@
   .form-check
     = form.check_box(:disable_overriding_approvers_per_merge_request, { class: 'form-check-input', disabled: !can_modify_approvers }, false, true)
     = form.label :disable_overriding_approvers_per_merge_request, class: 'form-check-label' do
-      %span= _('Can override approvers and approvals required per merge request')
+      %span= _('Allow overrides to approval lists per merge request (MR)')
       = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'prevent-overriding-default-approvals'), target: '_blank'
 
 .form-group.reset-approvals-on-push
   .form-check
     = form.check_box :reset_approvals_on_push, class: 'form-check-input'
     = form.label :reset_approvals_on_push, class: 'form-check-label' do
-      %span= _('Remove all approvals in a merge request when new commits are pushed to its source branch')
+      %span= _('Require new approvals when new commits are added to an MR.')
 
 .form-group.self-approval
   .form-check
     = form.check_box :merge_requests_author_approval, { class: 'form-check-input', disabled: !can_modify_merge_request_author_settings }, false, true
     = form.label :merge_requests_author_approval, class: 'form-check-label' do
-      %span= _('Prevent approval of merge requests by merge request author')
+      %span= _('Prevent MR approvals by the author.')
       = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals',
         anchor: 'allowing-merge-request-authors-to-approve-their-own-merge-requests'), target: '_blank'
 
@@ -44,7 +44,7 @@
   .form-check
     = form.check_box :merge_requests_disable_committers_approval, { disabled: !can_modify_merge_request_committer_settings, class: 'form-check-input' }
     = form.label :merge_requests_disable_committers_approval, class: 'form-check-label' do
-      %span= _('Prevent approval of merge requests by merge request committers')
+      %span= _('Prevent MR approvals from users who make commits to the MR.')
       = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals',
         anchor: 'allowing-merge-request-authors-to-approve-their-own-merge-requests'), target: '_blank'
 
@@ -53,6 +53,6 @@
     .form-check
       = form.check_box :require_password_to_approve, class: 'form-check-input'
       = form.label :require_password_to_approve, class: 'form-check-label' do
-        %span= _('Require user password to approve')
+        %span= _('Require user password for approvals.')
         = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/merge_request_approvals',
           anchor: 'require-authentication-when-approving-a-merge-request'), target: '_blank'

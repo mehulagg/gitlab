@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Distributed Tracing - development guidelines
@@ -49,7 +49,7 @@ all subsystems at GitLab:
   - Correlation IDs should never be used to pass context (for example, a username or an IP address).
   - Correlation IDs should never be _parsed_, or manipulated in other ways (for example, split).
 
-The [LabKit library](https://gitlab.com/gitlab-org/labkit) provides a standardized interface for working with GitLab's
+The [LabKit library](https://gitlab.com/gitlab-org/labkit) provides a standardized interface for working with GitLab
 correlation IDs in the Go programming language. LabKit can be used as a
 reference implementation for developers working with tracing and correlation IDs
 on non-Go GitLab subsystems.
@@ -180,7 +180,7 @@ This configuration string uses the Jaeger driver `opentracing://jaeger` with the
 | `sampler_param` | `0.01` | Use a ratio of `0.01` to configure the `probabalistic` sampler to randomly sample _1%_ of traces. |
 | `service_name` | `api` | Override the service name used by the Jaeger backend. This parameter takes precedence over the application-supplied value. |
 
-NOTE: **Note:**
+NOTE:
 The same `GITLAB_TRACING` value should to be configured in the environment
 variables for all GitLab processes, including Workhorse, Gitaly, Rails, and Sidekiq.
 
@@ -215,6 +215,6 @@ not set.
 
 By default, the Jaeger search UI is available at <http://localhost:16686/search>.
 
-TIP: **Tip:**
+NOTE:
 Don't forget that you must generate traces by using the application before
 they appear in the Jaeger UI.

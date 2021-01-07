@@ -1003,47 +1003,6 @@ RSpec.describe MergeRequest do
     end
   end
 
-  describe '#mergeable_with_quick_action?' do
-    def create_pipeline(status)
-      pipeline = create(:ci_pipeline,
-        project: project,
-        ref:     merge_request.source_branch,
-        sha:     merge_request.diff_head_sha,
-        status:  status,
-        head_pipeline_of: merge_request)
-
-      pipeline
-    end
-
-    let(:project)       { create(:project, :public, :repository, only_allow_merge_if_pipeline_succeeds: true) }
-    let(:developer)     { create(:user) }
-    let(:user)          { create(:user) }
-    let(:merge_request) { create(:merge_request, source_project: project) }
-    let(:mr_sha)        { merge_request.diff_head_sha }
-
-    before do
-      project.add_developer(developer)
-    end
-
-    context 'when autocomplete_precheck is set to false' do
-      context 'with approvals' do
-        before do
-          merge_request.target_project.update(approvals_before_merge: 1)
-        end
-
-        it 'is not mergeable when not approved' do
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_falsey
-        end
-
-        it 'is mergeable when approved' do
-          merge_request.approvals.create(user: user)
-
-          expect(merge_request.mergeable_with_quick_action?(developer, last_diff_sha: mr_sha)).to be_truthy
-        end
-      end
-    end
-  end
-
   describe '#approver_group_ids=' do
     it 'create approver_groups' do
       group = create :group

@@ -4,7 +4,6 @@ import { camelCase, kebabCase } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import ProfilesList from './dast_profiles_list.vue';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
 
@@ -14,7 +13,6 @@ export default {
     GlDropdownItem,
     GlTab,
     GlTabs,
-    ProfilesList,
   },
   props: {
     createNewProfilePaths: {
@@ -143,7 +141,7 @@ export default {
           variables: { after: pageInfo.endCursor },
           updateQuery: cacheUtils.appendToPreviousResult(profileType),
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -174,8 +172,10 @@ export default {
         .mutate({
           mutation: deletion.mutation,
           variables: {
-            projectFullPath,
-            profileId,
+            input: {
+              fullPath: projectFullPath,
+              id: profileId,
+            },
           },
           update(store, { data = {} }) {
             const errors = data[`${profileType}Delete`]?.errors ?? [];
@@ -199,7 +199,7 @@ export default {
           },
           optimisticResponse: deletion.optimisticResponse,
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -249,10 +249,11 @@ export default {
     <gl-tabs v-model="tabIndex">
       <gl-tab v-for="(settings, profileType) in profileSettings" :key="profileType">
         <template #title>
-          <span>{{ settings.i18n.tabName }}</span>
+          <span>{{ settings.i18n.name }}</span>
         </template>
 
-        <profiles-list
+        <component
+          :is="profileSettings[profileType].component"
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
@@ -260,7 +261,9 @@ export default {
           :is-loading="isLoadingProfiles(profileType)"
           :profiles-per-page="$options.profilesPerPage"
           :profiles="profileTypes[profileType].profiles"
+          :table-label="settings.i18n.name"
           :fields="settings.tableFields"
+          :full-path="projectFullPath"
           @load-more-profiles="fetchMoreProfiles(profileType)"
           @delete-profile="deleteProfile(profileType, $event)"
         />

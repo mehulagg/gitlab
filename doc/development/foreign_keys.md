@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Foreign Keys & Associations
@@ -105,6 +105,8 @@ create_table :user_configs, id: false do |t|
 end
 ```
 
+Setting `default: nil` will ensure a primary key sequence is not created, and since the primary key
+will automatically get an index, we set `index: false` to avoid creating a duplicate.
 You will also need to add the new primary key to the model:
 
 ```ruby

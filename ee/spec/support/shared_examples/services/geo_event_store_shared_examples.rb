@@ -6,7 +6,7 @@ RSpec.shared_examples 'a Geo event store' do |event_class|
       stub_secondary_node
     end
 
-    it 'does not create an event ' do
+    it 'does not create an event' do
       expect { subject.create! }.not_to change(event_class, :count)
     end
   end

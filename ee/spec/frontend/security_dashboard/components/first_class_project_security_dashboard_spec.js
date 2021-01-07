@@ -1,5 +1,6 @@
 import { GlBanner } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { within } from '@testing-library/dom';
 import Cookies from 'js-cookie';
 import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
@@ -46,7 +47,7 @@ describe('First class Project Security Dashboard component', () => {
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findAutoFixUserCallout = () => wrapper.find(AutoFixUserCallout);
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = shallowMount(FirstClassProjectSecurityDashboard, {
       propsData: {
         ...props,
@@ -69,6 +70,12 @@ describe('First class Project Security Dashboard component', () => {
         props: { hasVulnerabilities: true },
         data: () => ({ filters }),
       });
+    });
+
+    it('should render the header correctly', () => {
+      expect(
+        within(wrapper.element).getByRole('heading', { name: 'Vulnerability Report' }),
+      ).not.toBe(null);
     });
 
     it('should render the vulnerabilities', () => {

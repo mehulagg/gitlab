@@ -18,7 +18,8 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
-    stub_experiment_for_user(contact_sales_btn_in_app: true)
+    stub_feature_flags(hide_deprecated_billing_plans: false)
+    stub_experiment_for_subject(contact_sales_btn_in_app: true)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}")
       .to_return(status: 200, body: plans_data.to_json)
     stub_application_setting(check_namespace_plan: true)
@@ -475,6 +476,48 @@ RSpec.describe 'Billing plan pages', :feature do
         expect(panels.length).to eq(plans_data.length)
         plans_data.each_with_index do |data, index|
           expect(panels[index].find('.card-header')).to have_content(data[:name])
+        end
+      end
+    end
+  end
+
+  context 'when ff purchase_deprecated_plans is enabled' do
+    before do
+      stub_feature_flags(hide_deprecated_billing_plans: true)
+    end
+
+    context 'when deprecated plan is active' do
+      let(:plan) { bronze_plan }
+      let!(:subscription) do
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
+      end
+
+      let(:expected_card_header) { "#{plans_data[1][:name]} (Legacy)" }
+
+      it 'renders the plan card marked as Legacy' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length)
+
+          panel_with_legacy_plan = panels[1] # free [0], bronze [1]
+
+          expect(panel_with_legacy_plan.find('.card-header')).to have_content(expected_card_header)
+          expect(panel_with_legacy_plan.find('.card-body')).to have_link('frequently asked questions')
+        end
+      end
+    end
+
+    context 'when deprecated plan is inactive' do
+      let(:plan) { free_plan }
+
+      it 'does not render the card for that plan' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length - 1)
         end
       end
     end

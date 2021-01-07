@@ -20,6 +20,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
   describe '#perform!' do
     before do
       stub_ci_pipeline_yaml_file(YAML.dump(config))
+      run_chain
     end
 
     let(:config) do
@@ -36,22 +37,16 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
     end
 
     it 'allocates next IID' do
-      run_chain
-
       expect(pipeline.iid).to be_present
     end
 
     it 'ensures ci_ref' do
-      run_chain
-
       expect(pipeline.ci_ref).to be_present
     end
 
     it 'sets the seeds in the command object' do
-      run_chain
-
-      expect(command.stage_seeds).to all(be_a Gitlab::Ci::Pipeline::Seed::Base)
-      expect(command.stage_seeds.count).to eq 1
+      expect(command.pipeline_seed).to be_a(Gitlab::Ci::Pipeline::Seed::Pipeline)
+      expect(command.pipeline_seed.size).to eq 1
     end
 
     context 'when no ref policy is specified' do
@@ -63,16 +58,16 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
         }
       end
 
-      it 'correctly fabricates a stage seeds object' do
-        run_chain
+      it 'correctly fabricates stages and builds' do
+        seed = command.pipeline_seed
 
-        seeds = command.stage_seeds
-        expect(seeds.size).to eq 2
-        expect(seeds.first.attributes[:name]).to eq 'test'
-        expect(seeds.second.attributes[:name]).to eq 'deploy'
-        expect(seeds.dig(0, 0, :name)).to eq 'rspec'
-        expect(seeds.dig(0, 1, :name)).to eq 'spinach'
-        expect(seeds.dig(1, 0, :name)).to eq 'production'
+        expect(seed.stages.size).to eq 2
+        expect(seed.size).to eq 3
+        expect(seed.stages.first.name).to eq 'test'
+        expect(seed.stages.second.name).to eq 'deploy'
+        expect(seed.stages[0].statuses[0].name).to eq 'rspec'
+        expect(seed.stages[0].statuses[1].name).to eq 'spinach'
+        expect(seed.stages[1].statuses[0].name).to eq 'production'
       end
     end
 
@@ -88,14 +83,12 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
         }
       end
 
-      it 'returns stage seeds only assigned to master' do
-        run_chain
+      it 'returns pipeline seed with jobs only assigned to master' do
+        seed = command.pipeline_seed
 
-        seeds = command.stage_seeds
-
-        expect(seeds.size).to eq 1
-        expect(seeds.first.attributes[:name]).to eq 'test'
-        expect(seeds.dig(0, 0, :name)).to eq 'spinach'
+        expect(seed.size).to eq 1
+        expect(seed.stages.first.name).to eq 'test'
+        expect(seed.stages[0].statuses[0].name).to eq 'spinach'
       end
     end
 
@@ -109,14 +102,12 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
         }
       end
 
-      it 'returns stage seeds only assigned to schedules' do
-        run_chain
+      it 'returns pipeline seed with jobs only assigned to schedules' do
+        seed = command.pipeline_seed
 
-        seeds = command.stage_seeds
-
-        expect(seeds.size).to eq 1
-        expect(seeds.first.attributes[:name]).to eq 'test'
-        expect(seeds.dig(0, 0, :name)).to eq 'spinach'
+        expect(seed.size).to eq 1
+        expect(seed.stages.first.name).to eq 'test'
+        expect(seed.stages[0].statuses[0].name).to eq 'spinach'
       end
     end
 
@@ -139,25 +130,21 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
           let(:pipeline) { build(:ci_pipeline, project: project) }
 
           it 'returns seeds for kubernetes dependent job' do
-            run_chain
+            seed = command.pipeline_seed
 
-            seeds = command.stage_seeds
-
-            expect(seeds.size).to eq 2
-            expect(seeds.dig(0, 0, :name)).to eq 'spinach'
-            expect(seeds.dig(1, 0, :name)).to eq 'production'
+            expect(seed.size).to eq 2
+            expect(seed.stages[0].statuses[0].name).to eq 'spinach'
+            expect(seed.stages[1].statuses[0].name).to eq 'production'
           end
         end
       end
 
       context 'when kubernetes is not active' do
         it 'does not return seeds for kubernetes dependent job' do
-          run_chain
+          seed = command.pipeline_seed
 
-          seeds = command.stage_seeds
-
-          expect(seeds.size).to eq 1
-          expect(seeds.dig(0, 0, :name)).to eq 'spinach'
+          expect(seed.size).to eq 1
+          expect(seed.stages[0].statuses[0].name).to eq 'spinach'
         end
       end
     end
@@ -171,12 +158,10 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
       end
 
       it 'returns stage seeds only when variables expression is truthy' do
-        run_chain
+        seed = command.pipeline_seed
 
-        seeds = command.stage_seeds
-
-        expect(seeds.size).to eq 1
-        expect(seeds.dig(0, 0, :name)).to eq 'unit'
+        expect(seed.size).to eq 1
+        expect(seed.stages[0].statuses[0].name).to eq 'unit'
       end
     end
 
@@ -185,24 +170,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Seed do
         ->(pipeline) { pipeline.variables.build(key: 'VAR', value: '123') }
       end
 
-      context 'when FF ci_seed_block_run_before_workflow_rules is enabled' do
-        it 'does not execute the block' do
-          run_chain
-
-          expect(pipeline.variables.size).to eq(0)
-        end
-      end
-
-      context 'when FF ci_seed_block_run_before_workflow_rules is disabled' do
-        before do
-          stub_feature_flags(ci_seed_block_run_before_workflow_rules: false)
-        end
-
-        it 'executes the block' do
-          run_chain
-
-          expect(pipeline.variables.size).to eq(1)
-        end
+      it 'does not execute the block' do
+        expect(pipeline.variables.size).to eq(0)
       end
     end
   end

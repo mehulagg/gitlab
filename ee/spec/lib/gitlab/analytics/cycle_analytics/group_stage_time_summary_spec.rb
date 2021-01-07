@@ -5,7 +5,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::GroupStageTimeSummary do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, :repository, namespace: group) }
   let_it_be(:project_2) { create(:project, :repository, namespace: group) }
-  let_it_be(:user) { create(:user, :admin) }
+  let_it_be(:user) { create(:user) }
   let(:from) { 1.day.ago }
   let(:to) { nil }
   let(:options) { { from: from, to: to, current_user: user } }
@@ -14,6 +14,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::GroupStageTimeSummary do
 
   around do |example|
     freeze_time { example.run }
+  end
+
+  before do
+    group.add_owner(user)
   end
 
   describe '#lead_time' do

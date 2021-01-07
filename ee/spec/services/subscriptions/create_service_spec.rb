@@ -49,7 +49,11 @@ RSpec.describe Subscriptions::CreateService do
       end
 
       it 'creates a subscription with the returned authentication token' do
-        expect(client).to receive(:create_subscription).with(anything, customer_email, 'token')
+        expect(client)
+          .to receive(:create_subscription)
+          .with(anything, customer_email, 'token')
+          .and_return(success: true, data: { success: true, subscription_id: 'xxx' })
+
         subject.execute
       end
 
@@ -60,6 +64,12 @@ RSpec.describe Subscriptions::CreateService do
 
         it 'returns the response hash' do
           expect(subject.execute).to eq(success: false, data: { errors: 'failed to create subscription' })
+        end
+
+        it 'does not create a namespace onboarding action' do
+          subject.execute
+
+          expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(false)
         end
       end
 
@@ -90,6 +100,12 @@ RSpec.describe Subscriptions::CreateService do
         expect(client).to receive(:create_subscription).with(create_service_params[:subscription], customer_email, 'token')
 
         subject.execute
+      end
+
+      it 'creates a namespace onboarding action' do
+        subject.execute
+
+        expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(true)
       end
     end
   end

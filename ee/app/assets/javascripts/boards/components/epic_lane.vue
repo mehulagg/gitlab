@@ -131,7 +131,8 @@ export default {
           :title="chevronTooltip"
           :icon="chevronIcon"
           class="gl-mr-2 gl-cursor-pointer"
-          variant="link"
+          category="tertiary"
+          size="small"
           data-testid="epic-lane-chevron"
           @click="toggleCollapsed"
         />
@@ -142,9 +143,7 @@ export default {
           {{ epic.title }}
         </h4>
         <gl-popover :target="() => $refs.epicTitle" triggers="hover" placement="top">
-          <template #title
-            >{{ epic.title }} &middot; {{ epic.reference }}</template
-          >
+          <template #title>{{ epic.title }} &middot; {{ epic.reference }}</template>
           <div>{{ epicTimeAgoString }}</div>
           <div class="gl-mb-2">{{ epicDateString }}</div>
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
@@ -158,7 +157,7 @@ export default {
           :aria-label="issuesCountTooltipText"
           data-testid="epic-lane-issue-count"
         >
-          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
+          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />

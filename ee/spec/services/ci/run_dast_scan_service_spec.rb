@@ -23,10 +23,6 @@ RSpec.describe Ci::RunDastScanService do
     it 'has only one stage' do
       expect(described_class.ci_template['stages']).to eq(['dast'])
     end
-
-    it 'has has no rules' do
-      expect(described_class.ci_template['dast']['rules']).to be_nil
-    end
   end
 
   describe '#execute' do
@@ -91,8 +87,6 @@ RSpec.describe Ci::RunDastScanService do
             'name' => '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
           },
           'script' => [
-            'export DAST_WEBSITE=${DAST_WEBSITE:-$(cat environment_url.txt)}',
-            'if [ -z "$DAST_WEBSITE$DAST_API_SPECIFICATION" ]; then echo "Either DAST_WEBSITE or DAST_API_SPECIFICATION must be set. See https://docs.gitlab.com/ee/user/application_security/dast/#configuration for more details." && exit 1; fi',
             '/analyze'
           ],
           'artifacts' => {

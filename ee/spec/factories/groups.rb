@@ -50,7 +50,7 @@ FactoryBot.define do
 
   factory :group_with_deletion_schedule, parent: :group do
     transient do
-      deleting_user { create(:user) }
+      deleting_user { association(:user) }
       marked_for_deletion_on { nil }
     end
 

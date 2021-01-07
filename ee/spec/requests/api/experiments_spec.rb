@@ -11,8 +11,7 @@ RSpec.describe API::Experiments do
       let(:experiments) do
         {
           experiment_1: {
-            tracking_category: 'something',
-            environment: true
+            tracking_category: 'something'
           },
           experiment_2: {
             tracking_category: 'something_else'

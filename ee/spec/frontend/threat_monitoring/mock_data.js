@@ -66,14 +66,23 @@ export const mockNetworkPolicyStatisticsResponse = {
     drops: 84,
   },
   ops_rate: {
-    total: [[1575417600, 56], [1575504000, 2647]],
-    drops: [[1575417600, 1], [1575504000, 83]],
+    total: [
+      [1575417600, 56],
+      [1575504000, 2647],
+    ],
+    drops: [
+      [1575417600, 1],
+      [1575504000, 83],
+    ],
   },
 };
 
 export const formattedMockNetworkPolicyStatisticsResponse = {
   opsRate: {
-    drops: [[new Date('2019-12-04T00:00:00.000Z'), 1], [new Date('2019-12-05T00:00:00.000Z'), 83]],
+    drops: [
+      [new Date('2019-12-04T00:00:00.000Z'), 1],
+      [new Date('2019-12-05T00:00:00.000Z'), 83],
+    ],
     total: [
       [new Date('2019-12-04T00:00:00.000Z'), 56],
       [new Date('2019-12-05T00:00:00.000Z'), 2647],
@@ -81,3 +90,30 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
   },
   opsTotal: { drops: 84, total: 2703 },
 };
+
+export const mockAlerts = [
+  {
+    iid: '01',
+    title: 'Issue 01',
+    status: 'TRIGGERED',
+    startedAt: '2020-11-19T18:36:23Z',
+  },
+  {
+    iid: '02',
+    title: 'Issue 02',
+    status: 'ACKNOWLEDGED',
+    startedAt: '2020-11-16T21:59:28Z',
+  },
+  {
+    iid: '03',
+    title: 'Issue 03',
+    status: 'RESOLVED',
+    startedAt: '2020-11-13T20:03:04Z',
+  },
+  {
+    iid: '04',
+    title: 'Issue 04',
+    status: 'IGNORED',
+    startedAt: '2020-10-29T13:37:55Z',
+  },
+];

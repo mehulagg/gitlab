@@ -9,9 +9,10 @@ RSpec.describe Vulnerabilities::UpdateService do
 
   let_it_be(:user) { create(:user) }
   let!(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
-  let!(:updated_finding) { create(:vulnerabilities_finding, project: project, name: 'New title', severity: :critical, confidence: :confirmed, vulnerability: vulnerability) }
+  let!(:updated_finding) { create(:vulnerabilities_finding, project: project, name: finding_name, severity: :critical, confidence: :confirmed, vulnerability: vulnerability) }
 
   let!(:vulnerability) { create(:vulnerability, project: project, severity: :low, severity_overridden: severity_overridden, confidence: :ignore, confidence_overridden: confidence_overridden) }
+  let(:finding_name) { 'New title' }
   let(:severity_overridden) { false }
   let(:confidence_overridden) { false }
   let(:resolved_on_default_branch) { nil }
@@ -25,6 +26,15 @@ RSpec.describe Vulnerabilities::UpdateService do
 
     it_behaves_like 'calls Vulnerabilities::Statistics::UpdateService'
     it_behaves_like 'calls Vulnerabilities::HistoricalStatistics::UpdateService'
+
+    context 'when finding name is longer than 255 characters' do
+      let(:finding_name) { 'a' * 256 }
+
+      it 'truncates vulnerability title to have 255 characters' do
+        expect { subject }.not_to change { project.vulnerabilities.count }
+        expect(vulnerability.title).to have_attributes(size: 255)
+      end
+    end
 
     context 'when neither severity nor confidence are overridden' do
       it 'updates the vulnerability from updated finding (title, severity and confidence only)', :aggregate_failures do

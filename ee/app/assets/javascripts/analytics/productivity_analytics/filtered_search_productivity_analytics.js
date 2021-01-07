@@ -22,7 +22,7 @@ export default class FilteredSearchProductivityAnalytics extends FilteredSearchM
   /**
    * Updates filters in productivity analytics store
    */
-  updateObject = path => {
+  updateObject = (path) => {
     const filters = urlParamsToObject(path);
     store.dispatch('filters/setFilters', filters);
   };

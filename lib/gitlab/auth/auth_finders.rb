@@ -46,6 +46,7 @@ module Gitlab
 
       def find_user_from_feed_token(request_format)
         return unless valid_rss_format?(request_format)
+        return if Gitlab::CurrentSettings.disable_feed_token
 
         # NOTE: feed_token was renamed from rss_token but both needs to be supported because
         #       users might have already added the feed to their RSS reader before the rename
@@ -91,10 +92,10 @@ module Gitlab
       # We only allow Private Access Tokens with `api` scope to be used by web
       # requests on RSS feeds or ICS files for backwards compatibility.
       # It is also used by GraphQL/API requests.
-      def find_user_from_web_access_token(request_format)
+      def find_user_from_web_access_token(request_format, scopes: [:api])
         return unless access_token && valid_web_access_format?(request_format)
 
-        validate_access_token!(scopes: [:api])
+        validate_access_token!(scopes: scopes)
 
         ::PersonalAccessTokens::LastUsedService.new(access_token).execute
 
@@ -193,7 +194,15 @@ module Gitlab
 
       def access_token
         strong_memoize(:access_token) do
-          find_oauth_access_token || find_personal_access_token
+          if try(:namespace_inheritable, :authentication)
+            access_token_from_namespace_inheritable
+          else
+            # The token can be a PAT or an OAuth (doorkeeper) token
+            # It is also possible that a PAT is encapsulated in a `Bearer` OAuth token
+            # (e.g. NPM client registry auth), this case will be properly handled
+            # by find_personal_access_token
+            find_oauth_access_token || find_personal_access_token
+          end
         end
       end
 
@@ -236,7 +245,7 @@ module Gitlab
       end
 
       def matches_personal_access_token_length?(token)
-        token.length == PersonalAccessToken::TOKEN_LENGTH
+        PersonalAccessToken::TOKEN_LENGTH_RANGE.include?(token.length)
       end
 
       # Check if the request is GET/HEAD, or if CSRF token is valid.

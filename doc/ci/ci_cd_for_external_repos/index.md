@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, howto
 ---
 
@@ -26,7 +26,7 @@ snippets disabled. These features
 To connect to an external repository:
 
 1. From your GitLab dashboard, click **New project**.
-1. Switch to the **CI/CD for external repo** tab.
+1. Switch to the **CI/CD for external repository** tab.
 1. Choose **GitHub** or **Repo by URL**.
 1. The next steps are similar to the [import flow](../../user/project/import/index.md).
 

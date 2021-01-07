@@ -3,6 +3,7 @@ import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import { stubTransition } from 'helpers/stub_transition';
 import LicenseComplianceApp from 'ee/license_compliance/components/app.vue';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
 import PipelineInfo from 'ee/license_compliance/components/pipeline_info.vue';
@@ -30,13 +31,6 @@ const emptyStateSvgPath = '/';
 const documentationPath = '/';
 
 const noop = () => {};
-
-const transitionStub = () => ({
-  render() {
-    // eslint-disable-next-line no-underscore-dangle
-    return this.$options._renderChildren;
-  },
-});
 
 const createComponent = ({ state, props, options }) => {
   const fakeStore = new Vuex.Store({
@@ -85,11 +79,11 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
-    stubs: { transition: transitionStub() },
+    stubs: { transition: stubTransition() },
   });
 };
 
-const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
 describe('Project Licenses', () => {
   afterEach(() => {
@@ -285,21 +279,11 @@ describe('Project Licenses', () => {
       );
 
       it('it renders the correct count in "Detected in project" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(0)
-            .text(),
-        ).toBe(pageInfo.total.toString());
+        expect(wrapper.findAll(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
       });
 
       it('it renders the correct count in "Policies" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(1)
-            .text(),
-        ).toBe(managedLicenses.length.toString());
+        expect(wrapper.findAll(GlBadge).at(1).text()).toBe(managedLicenses.length.toString());
       });
     });
 

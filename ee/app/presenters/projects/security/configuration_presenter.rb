@@ -82,8 +82,8 @@ module Projects
 
       def autofix_enabled
         {
-          dependency_scanning: project_settings.auto_fix_dependency_scanning,
-          container_scanning: project_settings.auto_fix_container_scanning
+          dependency_scanning: project_settings&.auto_fix_dependency_scanning,
+          container_scanning: project_settings&.auto_fix_container_scanning
         }
       end
 
@@ -101,7 +101,7 @@ module Projects
         return '' if project.empty_repo?
 
         gitlab_ci = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
-        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch, gitlab_ci))
+        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch_or_master, gitlab_ci))
       end
 
       def features
@@ -177,7 +177,7 @@ module Projects
       end
 
       def project_settings
-        ProjectSecuritySetting.safe_find_or_create_for(project)
+        project.security_setting
       end
 
       def configuration_path(type)

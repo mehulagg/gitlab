@@ -13,7 +13,7 @@ module Gitlab
         def initialize(user, saml_provider, auth_hash)
           @user = user
           @saml_provider = saml_provider
-          @auth_hash = AuthHash.new(auth_hash)
+          @auth_hash = auth_hash
         end
 
         def execute
@@ -54,7 +54,7 @@ module Gitlab
 
         def group_names_from_saml
           strong_memoize(:group_names_from_saml) do
-            auth_hash.groups
+            auth_hash.groups || []
           end
         end
 

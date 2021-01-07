@@ -80,7 +80,7 @@ export default {
     <div ref="header" class="file-title file-title-flex-parent">
       <div class="file-header-content d-flex align-content-center">
         <div v-if="hasCode" class="d-inline-block cursor-pointer" @click="toggle()">
-          <gl-icon :name="collapseIcon" :size="16" aria-hidden="true" class="gl-mr-2" />
+          <gl-icon :name="collapseIcon" :size="16" class="gl-mr-2" />
         </div>
         <file-icon :file-name="filePath" :size="18" aria-hidden="true" css-classes="gl-mr-2" />
         <strong
@@ -100,7 +100,7 @@ export default {
         />
 
         <gl-sprintf v-if="errorFn" :message="__('%{spanStart}in%{spanEnd} %{errorFn}')">
-          <template #span="{content}">
+          <template #span="{ content }">
             <span class="gl-text-gray-200">{{ content }}&nbsp;</span>
           </template>
           <template #errorFn>
@@ -109,7 +109,7 @@ export default {
         </gl-sprintf>
 
         <gl-sprintf :message="__('%{spanStart}at line%{spanEnd} %{errorLine}%{errorColumn}')">
-          <template #span="{content}">
+          <template #span="{ content }">
             <span class="gl-text-gray-200">{{ content }}&nbsp;</span>
           </template>
           <template #errorLine>

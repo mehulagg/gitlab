@@ -121,9 +121,7 @@ export default {
         <!-- eslint-disable-next-line vue/no-v-html-->
         <span v-html="formatReviewTime(value)"></span>
       </template>
-      <template v-else>
-        &ndash;
-      </template>
+      <template v-else> &ndash; </template>
     </template>
 
     <template #cell(author)="{ value }">

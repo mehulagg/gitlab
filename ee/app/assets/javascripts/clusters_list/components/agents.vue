@@ -14,7 +14,7 @@ export default {
           projectPath: this.projectPath,
         };
       },
-      update: data => {
+      update: (data) => {
         return {
           list: data?.project?.clusterAgents?.nodes,
           folders: data?.project?.repository?.tree?.trees?.nodes,
@@ -52,7 +52,7 @@ export default {
       const configFolders = this.agents?.folders;
 
       if (list && configFolders) {
-        list = list.map(agent => {
+        list = list.map((agent) => {
           const configFolder = configFolders.find(({ name }) => name === agent.name);
           return { ...agent, configFolder };
         });

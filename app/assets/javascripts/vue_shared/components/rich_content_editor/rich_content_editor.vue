@@ -20,7 +20,7 @@ export default {
   components: {
     ToastEditor: () =>
       import(/* webpackChunkName: 'toast_editor' */ '@toast-ui/vue-editor').then(
-        toast => toast.Editor,
+        (toast) => toast.Editor,
       ),
     AddImageModal,
     InsertVideoModal,
@@ -105,6 +105,8 @@ export default {
       registerHTMLToMarkdownRenderer(editorApi);
 
       this.addListeners(editorApi);
+
+      this.$emit('load', { formattedMarkdown: editorApi.getMarkdown() });
     },
     onOpenAddImageModal() {
       this.$refs.addImageModal.show();

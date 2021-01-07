@@ -10,13 +10,13 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.sastHelp = data.sast_help_path;
     this.containerScanningHelp = data.container_scanning_help_path;
     this.dastHelp = data.dast_help_path;
+    this.apiFuzzingHelp = data.api_fuzzing_help_path;
     this.coverageFuzzingHelp = data.coverage_fuzzing_help_path;
     this.secretScanningHelp = data.secret_scanning_help_path;
     this.dependencyScanningHelp = data.dependency_scanning_help_path;
     this.canReadVulnerabilities = data.can_read_vulnerabilities;
     this.vulnerabilityFeedbackPath = data.vulnerability_feedback_path;
     this.canReadVulnerabilityFeedback = data.can_read_vulnerability_feedback;
-    this.vulnerabilityFeedbackHelpPath = data.vulnerability_feedback_help_path;
     this.securityReportsPipelineId = data.pipeline_id;
     this.securityReportsPipelineIid = data.pipeline_iid;
     this.createVulnerabilityFeedbackIssuePath = data.create_vulnerability_feedback_issue_path;
@@ -48,6 +48,20 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.policyViolation = data.policy_violation;
 
     super.setData(data, isRebased);
+  }
+
+  setPaths(data) {
+    // Paths are set on the first load of the page and not auto-refreshed
+    super.setPaths(data);
+
+    this.discoverProjectSecurityPath = data.discover_project_security_path;
+
+    // Security scan diff paths
+    this.containerScanningComparisonPath = data.container_scanning_comparison_path;
+    this.coverageFuzzingComparisonPath = data.coverage_fuzzing_comparison_path;
+    this.apiFuzzingComparisonPath = data.api_fuzzing_comparison_path;
+    this.dastComparisonPath = data.dast_comparison_path;
+    this.dependencyScanningComparisonPath = data.dependency_scanning_comparison_path;
   }
 
   initGeo(data) {
@@ -98,9 +112,9 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(subject => {
+    Object.keys(headMetricsIndexed).forEach((subject) => {
       const subjectMetrics = headMetricsIndexed[subject];
-      Object.keys(subjectMetrics).forEach(metric => {
+      Object.keys(subjectMetrics).forEach((metric) => {
         const headMetricData = subjectMetrics[metric];
 
         if (baseMetricsIndexed[subject] && baseMetricsIndexed[subject][metric]) {
@@ -154,7 +168,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(metric => {
+    Object.keys(headMetricsIndexed).forEach((metric) => {
       const headMetricData = headMetricsIndexed[metric];
       if (metric in baseMetricsIndexed) {
         const baseMetricData = baseMetricsIndexed[metric];
@@ -190,7 +204,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const { metrics } = loadPerformanceData;
     const indexedMetrics = {};
 
-    Object.keys(loadPerformanceData.metrics).forEach(metric => {
+    Object.keys(loadPerformanceData.metrics).forEach((metric) => {
       switch (metric) {
         case 'http_reqs':
           indexedMetrics[s__('ciReport|RPS')] = metrics.http_reqs.rate;

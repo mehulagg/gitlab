@@ -45,7 +45,6 @@ describe('UnscannedProjects component', () => {
       propsData: { ...defaultPropsData, ...propsData },
       store,
       localVue,
-      sync: false,
     });
   };
 

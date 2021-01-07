@@ -59,13 +59,13 @@ export const dependencyScanningStatusIcon = ({ dependencyScanning }) =>
 export const coverageFuzzingStatusIcon = ({ coverageFuzzing }) =>
   statusIcon(coverageFuzzing.isLoading, coverageFuzzing.hasError, coverageFuzzing.newIssues.length);
 
-export const isBaseSecurityReportOutOfDate = state =>
-  state.reportTypes.some(reportType => state[reportType].baseReportOutofDate);
+export const isBaseSecurityReportOutOfDate = (state) =>
+  state.reportTypes.some((reportType) => state[reportType].baseReportOutofDate);
 
-export const canCreateIssue = state => Boolean(state.createVulnerabilityFeedbackIssuePath);
+export const canCreateIssue = (state) => Boolean(state.createVulnerabilityFeedbackIssuePath);
 
-export const canCreateMergeRequest = state =>
+export const canCreateMergeRequest = (state) =>
   Boolean(state.createVulnerabilityFeedbackMergeRequestPath);
 
-export const canDismissVulnerability = state =>
+export const canDismissVulnerability = (state) =>
   Boolean(state.createVulnerabilityFeedbackDismissalPath);

@@ -271,8 +271,8 @@ export default {
   methods: {
     getGraphAlerts(queries) {
       if (!this.allAlerts) return {};
-      const metricIdsForChart = queries.map(q => q.metricId);
-      return pickBy(this.allAlerts, alert => metricIdsForChart.includes(alert.metricId));
+      const metricIdsForChart = queries.map((q) => q.metricId);
+      return pickBy(this.allAlerts, (alert) => metricIdsForChart.includes(alert.metricId));
     },
     getGraphAlertValues(queries) {
       return Object.values(this.getGraphAlerts(queries));
@@ -346,10 +346,10 @@ export default {
       }
     },
     getAlertRunbooks(queries) {
-      const hasRunbook = alert => Boolean(alert.runbookUrl);
+      const hasRunbook = (alert) => Boolean(alert.runbookUrl);
       const graphAlertsWithRunbooks = pickBy(this.getGraphAlerts(queries), hasRunbook);
-      const alertToRunbookTransform = alert => {
-        const alertQuery = queries.find(query => query.metricId === alert.metricId);
+      const alertToRunbookTransform = (alert) => {
+        const alertQuery = queries.find((query) => query.metricId === alert.metricId);
         return {
           key: alert.metricId,
           href: alert.runbookUrl,
@@ -394,10 +394,10 @@ export default {
         data-qa-selector="prometheus_graph_widgets"
       >
         <div data-testid="dropdown-wrapper" class="d-flex align-items-center">
-          <!-- 
+          <!--
             This component should be replaced with a variant developed
             as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
-            The variant will create a dropdown with an icon, no text and no caret    
+            The variant will create a dropdown with an icon, no text and no caret
            -->
           <gl-dropdown
             v-gl-tooltip

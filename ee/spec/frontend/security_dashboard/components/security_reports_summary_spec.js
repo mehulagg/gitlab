@@ -11,7 +11,7 @@ describe('Security reports summary component', () => {
 
   let wrapper;
 
-  const createWrapper = options => {
+  const createWrapper = (options) => {
     wrapper = shallowMount(SecurityReportsSummary, {
       propsData: {
         summary: {},

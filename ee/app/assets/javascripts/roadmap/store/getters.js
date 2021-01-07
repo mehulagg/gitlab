@@ -7,14 +7,14 @@ import { PRESET_TYPES, DAYS_IN_WEEK } from '../constants';
  *
  * @param {Object} state
  */
-export const lastTimeframeIndex = state => state.timeframe.length - 1;
+export const lastTimeframeIndex = (state) => state.timeframe.length - 1;
 
 /**
  * Returns first item of the timeframe array from state
  *
  * @param {Object} state
  */
-export const timeframeStartDate = state => {
+export const timeframeStartDate = (state) => {
   if (state.presetType === PRESET_TYPES.QUARTERS) {
     return state.timeframe[0].range[0];
   }

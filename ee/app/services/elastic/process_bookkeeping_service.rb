@@ -53,6 +53,30 @@ module Elastic
       def with_redis(&blk)
         Gitlab::Redis::SharedState.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
       end
+
+      def maintain_indexed_associations(object, associations)
+        each_indexed_association(object, associations) do |_, association|
+          association.find_in_batches do |group|
+            track!(*group)
+          end
+        end
+      end
+
+      private
+
+      def each_indexed_association(object, associations)
+        associations.each do |association_name|
+          association = object.association(association_name)
+          scope = association.scope
+          klass = association.klass
+
+          if klass == Note
+            scope = scope.searchable
+          end
+
+          yield klass, scope
+        end
+      end
     end
 
     def execute

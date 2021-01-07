@@ -30,9 +30,8 @@ export default {
         .on('hide.bs.dropdown', () => this.hideDropdown());
     },
     removeDropdownListeners() {
-      $(this.$refs.dropdown)
-        .off('show.bs.dropdown')
-        .off('hide.bs.dropdown');
+      // eslint-disable-next-line @gitlab/no-global-event-off
+      $(this.$refs.dropdown).off('show.bs.dropdown').off('hide.bs.dropdown');
     },
     showDropdown() {
       this.isVisibleDropdown = true;

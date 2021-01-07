@@ -31,6 +31,7 @@ export default {
         storageSize,
         wikiSize,
         snippetsSize,
+        uploadsSize,
       } = this.rootStorageStatistics;
       const artifactsSize = buildArtifactsSize + pipelineArtifactsSize;
 
@@ -76,8 +77,14 @@ export default {
           class: 'gl-bg-data-viz-orange-800',
           size: snippetsSize,
         },
+        {
+          name: s__('UsageQuota|Uploads'),
+          style: this.usageStyle(this.barRatio(uploadsSize)),
+          class: 'gl-bg-data-viz-aqua-700',
+          size: uploadsSize,
+        },
       ]
-        .filter(data => data.size !== 0)
+        .filter((data) => data.size !== 0)
         .sort((a, b) => b.size - a.size);
     },
   },

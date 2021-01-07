@@ -21,10 +21,16 @@ module RackAttackSpecHelpers
     { 'AUTHORIZATION' => "Bearer #{oauth_access_token.token}" }
   end
 
+  def basic_auth_headers(user, personal_access_token)
+    encoded_login = ["#{user.username}:#{personal_access_token.token}"].pack('m0')
+    { 'AUTHORIZATION' => "Basic #{encoded_login}" }
+  end
+
   def expect_rejection(&block)
     yield
 
     expect(response).to have_gitlab_http_status(:too_many_requests)
+    expect(response).to have_header('Retry-After')
   end
 
   def expect_ok(&block)

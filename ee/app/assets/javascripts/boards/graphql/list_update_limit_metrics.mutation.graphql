@@ -1,0 +1,10 @@
+#import "ee_else_ce/boards/graphql/board_list.fragment.graphql"
+
+mutation boardListUpdateLimitMetrics($input: BoardListUpdateLimitMetricsInput!) {
+  boardListUpdateLimitMetrics(input: $input) {
+    list {
+      ...BoardListFragment
+    }
+    errors
+  }
+}

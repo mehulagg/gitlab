@@ -2,22 +2,22 @@ import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { STEPS, TAX_RATE } from '../constants';
 
-const parsePlanData = planData =>
-  JSON.parse(planData).map(plan => ({
+const parsePlanData = (planData) =>
+  JSON.parse(planData).map((plan) => ({
     value: plan.id,
     text: capitalizeFirstCharacter(plan.code),
     pricePerUserPerYear: plan.price_per_year,
   }));
 
-const parseGroupData = groupData =>
-  JSON.parse(groupData).map(group => ({
+const parseGroupData = (groupData) =>
+  JSON.parse(groupData).map((group) => ({
     value: group.id,
     text: group.name,
     numberOfUsers: group.users,
   }));
 
 const determineSelectedPlan = (planId, plans) => {
-  if (planId && plans.find(plan => plan.value === planId)) {
+  if (planId && plans.find((plan) => plan.value === planId)) {
     return planId;
   }
   return plans[0] && plans[0].value;
@@ -28,7 +28,7 @@ const determineNumberOfUsers = (groupId, groups) => {
     return 1;
   }
 
-  const chosenGroup = groups.find(group => group.value === groupId);
+  const chosenGroup = groups.find((group) => group.value === groupId);
 
   if (chosenGroup?.numberOfUsers > 1) {
     return chosenGroup.numberOfUsers;

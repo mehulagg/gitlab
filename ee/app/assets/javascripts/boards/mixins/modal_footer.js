@@ -2,7 +2,7 @@ export default {
   methods: {
     buildUpdateRequest(list) {
       const { currentBoard } = this.state;
-      const boardLabelIds = currentBoard.labels.map(label => label.id);
+      const boardLabelIds = currentBoard.labels.map((label) => label.id);
       const assigneeIds = currentBoard.assignee && [currentBoard.assignee.id];
 
       return {

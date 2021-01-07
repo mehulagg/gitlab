@@ -1,8 +1,8 @@
 ---
 type: reference, howto
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Releases
@@ -78,6 +78,16 @@ To create a new release through the GitLab UI:
    [title](#title), [milestones](#associate-milestones-with-a-release),
    [release notes](#release-notes-description), or [assets links](#links).
 1. Click **Create release**.
+
+### Create release from GitLab CI
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 12.7.
+
+You can [create a release directly from the GitLab CI pipeline](../../../ci/yaml/README.md#release)
+by using a `release` node in the job definition.
+
+The release is created only if the job processes without error. If the Rails API returns an error
+during release creation, the release job fails.
 
 ### Schedule a future release
 
@@ -190,7 +200,7 @@ If the job that's executing is within a freeze period, GitLab CI/CD creates an e
 variable named `$CI_DEPLOY_FREEZE`.
 
 To prevent the deployment job from executing, create a `rules` entry in your
-`gitlab-ci.yaml`, for example:
+`gitlab-ci.yml`, for example:
 
 ```yaml
 deploy_to_production:
@@ -213,7 +223,7 @@ To set a deploy freeze window in the UI, complete these steps:
 
 ![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_2.png)
 
-CAUTION: **Caution:**
+WARNING:
 To edit or delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
 
 If a project contains multiple freeze periods, all periods apply. If they overlap, the freeze covers the
@@ -264,13 +274,10 @@ Release note descriptions are unrelated. Description supports [Markdown](../../m
 
 ### Release assets
 
-You can currently add the following types of assets to each release:
+You can add the following types of assets to each release:
 
 - [Source code](#source-code)
 - [Links](#links)
-
-GitLab will support more asset types in the future, including objects such
-as pre-built packages, compliance/security evidence, or container images.
 
 #### Permanent links to release assets
 
@@ -326,8 +333,8 @@ The four types of links are "Runbook," "Package," "Image," and "Other."
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.6.
 
 Each time a release is created, GitLab takes a snapshot of data that's related to it.
-This data is saved in a JSON file and called *release evidence*. The feature currently
-includes test artifacts and linked milestones (and will include issues) to facilitate
+This data is saved in a JSON file and called *release evidence*. The feature
+includes test artifacts and linked milestones to facilitate
 internal processes, like external audits.
 
 To access the release evidence, on the Releases page, click the link to the JSON file that's listed
@@ -460,7 +467,7 @@ In the API:
 > [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/6) in GitLab 12.10.
 
 The Release CLI is a command-line tool for managing GitLab Releases from the command line or from
-GitLab's CI/CD configuration file, `.gitlab-ci.yml`.
+the GitLab CI/CD configuration file, `.gitlab-ci.yml`.
 
 With it, you can create, update, modify, and delete releases right through the
 terminal.

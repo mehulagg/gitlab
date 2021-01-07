@@ -6,7 +6,7 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpic1, mockEpic2, mockEpics, noneEpic } from '../mock_data';
 
-const epics = mockEpics.map(epic => convertObjectPropsToCamelCase(epic));
+const epics = mockEpics.map((epic) => convertObjectPropsToCamelCase(epic));
 
 describe('EpicsSelect', () => {
   describe('DropdownContents', () => {
@@ -27,7 +27,7 @@ describe('EpicsSelect', () => {
 
     describe('computed', () => {
       describe('isNoEpic', () => {
-        it('should return true when `selectedEpic` is of type `No Epic`', done => {
+        it('should return true when `selectedEpic` is of type `No Epic`', (done) => {
           wrapper.setProps({
             selectedEpic: noneEpic,
           });
@@ -92,24 +92,9 @@ describe('EpicsSelect', () => {
 
         expect(epicsEl).toHaveLength(epics.length + 2); // includes divider & No Epic` <li>.
         expect(epicsEl.at(1).classes()).toContain('divider');
-        expect(
-          epicsEl
-            .at(2)
-            .find(GlLink)
-            .text(),
-        ).toBe(epics[0].title);
-        expect(
-          epicsEl
-            .at(3)
-            .find(GlLink)
-            .text(),
-        ).toBe(epics[1].title);
-        expect(
-          epicsEl
-            .at(2)
-            .find(GlLink)
-            .classes(),
-        ).toContain('is-active');
+        expect(epicsEl.at(2).find(GlLink).text()).toBe(epics[0].title);
+        expect(epicsEl.at(3).find(GlLink).text()).toBe(epics[1].title);
+        expect(epicsEl.at(2).find(GlLink).classes()).toContain('is-active');
       });
 
       it('should render string "No matches found" when `epics` array is empty', () => {

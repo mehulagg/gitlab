@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -66,7 +66,7 @@ token = "the secret token"
 transitioning = true
 ```
 
-CAUTION: **Warning:**
+WARNING:
 Remember to disable `transitioning` when you are done
 changing your token settings.
 

@@ -19,6 +19,7 @@ class Project < ApplicationRecord
   include Presentable
   include HasRepository
   include HasWiki
+  include CanMoveRepositoryStorage
   include Routable
   include GroupDescendant
   include Gitlab::SQL::Pattern
@@ -63,6 +64,8 @@ class Project < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :projects_sort
   MAX_BUILD_TIMEOUT = 1.month
+
+  GL_REPOSITORY_TYPES = [Gitlab::GlRepository::PROJECT, Gitlab::GlRepository::WIKI, Gitlab::GlRepository::DESIGN].freeze
 
   cache_markdown_field :description, pipeline: :description
 
@@ -145,6 +148,7 @@ class Project < ApplicationRecord
   # Project services
   has_one :alerts_service
   has_one :campfire_service
+  has_one :datadog_service
   has_one :discord_service
   has_one :drone_ci_service
   has_one :emails_on_push_service
@@ -164,6 +168,7 @@ class Project < ApplicationRecord
   has_one :bamboo_service
   has_one :teamcity_service
   has_one :pushover_service
+  has_one :jenkins_service
   has_one :jira_service
   has_one :redmine_service
   has_one :youtrack_service
@@ -337,7 +342,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove'
+  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove', inverse_of: :container
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -380,11 +385,11 @@ class Project < ApplicationRecord
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
     :merge_requests_enabled?, :forking_enabled?, :issues_enabled?,
-    :pages_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
+    :pages_enabled?, :analytics_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
     :merge_requests_access_level, :forking_access_level, :issues_access_level,
     :wiki_access_level, :snippets_access_level, :builds_access_level,
-    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level,
-    to: :project_feature, allow_nil: true
+    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
+    :operations_enabled?, :operations_access_level, to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
     to: :project_setting, allow_nil: true
@@ -405,7 +410,7 @@ class Project < ApplicationRecord
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
-    :allow_merge_on_skipped_pipeline=, :has_confluence?,
+    :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
     to: :project_setting
   delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
 
@@ -1350,6 +1355,8 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
+    return ['datadog'] unless Feature.enabled?(:datadog_ci_integration, self)
+
     []
   end
 
@@ -1822,6 +1829,15 @@ class Project < ApplicationRecord
     ensure_pages_metadatum.update!(pages_deployment: deployment)
   end
 
+  def set_first_pages_deployment!(deployment)
+    ensure_pages_metadatum
+
+    # where().update_all to perform update in the single transaction with check for null
+    ProjectPagesMetadatum
+      .where(project_id: id, pages_deployment_id: nil)
+      .update_all(pages_deployment_id: deployment.id)
+  end
+
   def write_repository_config(gl_full_path: full_path)
     # We'd need to keep track of project full path otherwise directory tree
     # created with hashed storage enabled cannot be usefully imported using
@@ -1837,6 +1853,7 @@ class Project < ApplicationRecord
     wiki.repository.expire_content_cache
 
     DetectRepositoryLanguagesWorker.perform_async(id)
+    ProjectCacheWorker.perform_async(self.id, [], [:repository_size])
 
     # The import assigns iid values on its own, e.g. by re-using GitHub ids.
     # Flush existing InternalId records for this project for consistency reasons.
@@ -1953,6 +1970,7 @@ class Project < ApplicationRecord
       .concat(predefined_project_variables)
       .concat(pages_variables)
       .concat(container_registry_variables)
+      .concat(dependency_proxy_variables)
       .concat(auto_devops_variables)
       .concat(api_variables)
   end
@@ -1971,6 +1989,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
+      .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2001,6 +2020,18 @@ class Project < ApplicationRecord
   def api_variables
     Gitlab::Ci::Variables::Collection.new.tap do |variables|
       variables.append(key: 'CI_API_V4_URL', value: API::Helpers::Version.new('v4').root_url)
+    end
+  end
+
+  def dependency_proxy_variables
+    Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      break variables unless Gitlab.config.dependency_proxy.enabled
+
+      variables.append(key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}")
+      variables.append(
+        key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+        value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}"
+      )
     end
   end
 
@@ -2090,39 +2121,6 @@ class Project < ApplicationRecord
     return [] unless auto_devops_enabled?
 
     (auto_devops || build_auto_devops)&.predefined_variables
-  end
-
-  RepositoryReadOnlyError = Class.new(StandardError)
-
-  # Tries to set repository as read_only, checking for existing Git transfers in
-  # progress beforehand. Setting a repository read-only will fail if it is
-  # already in that state.
-  #
-  # @return nil. Failures will raise an exception
-  def set_repository_read_only!
-    with_lock do
-      raise RepositoryReadOnlyError, _('Git transfer in progress') if
-        git_transfer_in_progress?
-
-      raise RepositoryReadOnlyError, _('Repository already read-only') if
-        self.class.where(id: id).pick(:repository_read_only)
-
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, true)
-
-      nil
-    end
-  end
-
-  # Set repository as writable again. Unlike setting it read-only, this will
-  # succeed if the repository is already writable.
-  def set_repository_writable!
-    with_lock do
-      raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, false)
-
-      nil
-    end
   end
 
   def pushes_since_gc
@@ -2274,18 +2272,17 @@ class Project < ApplicationRecord
     end
   end
 
+  override :git_transfer_in_progress?
   def git_transfer_in_progress?
-    repo_reference_count > 0 || wiki_reference_count > 0
+    GL_REPOSITORY_TYPES.any? do |type|
+      reference_counter(type: type).value > 0
+    end
   end
 
   def storage_version=(value)
     super
 
     @storage = nil if storage_version_changed?
-  end
-
-  def reference_counter(type: Gitlab::GlRepository::PROJECT)
-    Gitlab::ReferenceCounter.new(type.identifier_for_container(self))
   end
 
   def badges
@@ -2443,10 +2440,6 @@ class Project < ApplicationRecord
     protected_branches.limit(limit)
   end
 
-  def alerts_service_activated?
-    alerts_service&.active?
-  end
-
   def self_monitoring?
     Gitlab::CurrentSettings.self_monitoring_project_id == id
   end
@@ -2499,13 +2492,16 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address
-    return unless ::Gitlab::ServiceDeskEmail.enabled?
-    return unless ::Feature.enabled?(:service_desk_custom_address, self)
+    return unless service_desk_custom_address_enabled?
 
     key = service_desk_setting&.project_key
     return unless key.present?
 
     ::Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
+  end
+
+  def service_desk_custom_address_enabled?
+    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self, default_enabled: true)
   end
 
   def root_namespace
@@ -2606,14 +2602,6 @@ class Project < ApplicationRecord
     if self.new_record? && Gitlab::CurrentSettings.hashed_storage_enabled
       self.storage_version = LATEST_STORAGE_VERSION
     end
-  end
-
-  def repo_reference_count
-    reference_counter.value
-  end
-
-  def wiki_reference_count
-    reference_counter(type: Gitlab::GlRepository::WIKI).value
   end
 
   def check_repository_absence!

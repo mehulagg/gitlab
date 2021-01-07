@@ -16,10 +16,7 @@ module EE
     THREAT_MONITORING_INFO         = 'threat_monitoring_info'
 
     def show_canary_deployment_callout?(project)
-      !user_dismissed?(CANARY_DEPLOYMENT) &&
-        show_promotions? &&
-        # use :canary_deployments if we create a feature flag for it in the future
-        !project.feature_available?(:deploy_board)
+      false
     end
 
     def render_enable_hashed_storage_warning
@@ -91,7 +88,7 @@ module EE
     end
 
     def show_new_user_signups_cap_reached?
-      return false unless ::Feature.enabled?(:admin_new_user_signups_cap)
+      return false unless ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
       return false unless current_user&.admin?
       return false if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
 

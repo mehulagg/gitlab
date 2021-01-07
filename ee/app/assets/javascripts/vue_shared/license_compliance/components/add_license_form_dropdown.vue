@@ -30,14 +30,14 @@ export default {
           .select2({
             allowClear: true,
             placeholder: this.placeholder,
-            createSearchChoice: term => ({ id: term, text: term }),
+            createSearchChoice: (term) => ({ id: term, text: term }),
             createSearchChoicePosition: 'bottom',
-            data: this.knownLicenses.map(license => ({
+            data: this.knownLicenses.map((license) => ({
               id: license,
               text: license,
             })),
           })
-          .on('change', e => {
+          .on('change', (e) => {
             this.$emit('input', e.target.value);
           });
       })

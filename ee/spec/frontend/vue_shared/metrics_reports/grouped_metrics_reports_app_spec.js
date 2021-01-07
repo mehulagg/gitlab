@@ -18,14 +18,15 @@ describe('Grouped metrics reports app', () => {
       propsData: {
         endpoint: 'metrics.json',
       },
-      methods: {
-        fetchMetrics: () => {},
-      },
     });
   };
 
   beforeEach(() => {
-    mockStore = new Vuex.Store(getStoreConfig());
+    const { actions, ...storeConfig } = getStoreConfig();
+    mockStore = new Vuex.Store({
+      ...storeConfig,
+      actions: { ...actions, fetchMetrics: () => ({}) },
+    });
     mountComponent();
   });
 

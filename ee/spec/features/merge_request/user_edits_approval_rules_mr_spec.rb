@@ -41,12 +41,16 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
   end
 
   it "shows approval rules" do
+    click_button 'Approval rules'
+
     names = page_rule_names.map(&:text)
 
     expect(names).to eq(mr_rule_names)
   end
 
   it "allows user to create approval rule" do
+    click_button 'Approval rules'
+
     rule_name = "Custom Approval Rule"
 
     click_button "Add approval rule"
@@ -67,6 +71,7 @@ RSpec.describe 'Merge request > User edits MR with approval rules', :js do
     before do
       group.add_developer create(:user)
 
+      click_button 'Approval rules'
       click_button "Add approval rule"
     end
 

@@ -50,8 +50,8 @@ module QA
               expect(snippet).to have_file_name(file_name)
               expect(snippet).to have_file_content('Geo snippet heading')
               expect(snippet).to have_file_content('GitLab link')
-              expect(snippet).to have_no_file_content('###')
-              expect(snippet).to have_no_file_content('https://gitlab.com/')
+              expect(snippet).not_to have_file_content('###')
+              expect(snippet).not_to have_file_content('https://gitlab.com/')
             end
           end
         end

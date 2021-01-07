@@ -37,7 +37,7 @@ describe('Blob viewer', () => {
     window.location.hash = '';
   });
 
-  it('loads source file after switching views', done => {
+  it('loads source file after switching views', (done) => {
     document.querySelector('.js-blob-viewer-switch-btn[data-viewer="simple"]').click();
 
     setImmediate(() => {
@@ -51,7 +51,7 @@ describe('Blob viewer', () => {
     });
   });
 
-  it('loads source file when line number is in hash', done => {
+  it('loads source file when line number is in hash', (done) => {
     window.location.hash = '#L1';
 
     new BlobViewer();
@@ -117,7 +117,7 @@ describe('Blob viewer', () => {
       expect(copyButton.blur).not.toHaveBeenCalled();
     });
 
-    it('enables after switching to simple view', done => {
+    it('enables after switching to simple view', (done) => {
       document.querySelector('.js-blob-viewer-switch-btn[data-viewer="simple"]').click();
 
       setImmediate(() => {
@@ -127,7 +127,7 @@ describe('Blob viewer', () => {
       });
     });
 
-    it('updates tooltip after switching to simple view', done => {
+    it('updates tooltip after switching to simple view', (done) => {
       document.querySelector('.js-blob-viewer-switch-btn[data-viewer="simple"]').click();
 
       setImmediate(() => {
@@ -154,7 +154,7 @@ describe('Blob viewer', () => {
 
       blob.switchToViewer('simple');
 
-      expect(simpleBtn.classList.contains('active')).toBeTruthy();
+      expect(simpleBtn.classList.contains('selected')).toBeTruthy();
 
       expect(simpleBtn.blur).toHaveBeenCalled();
     });
@@ -171,7 +171,7 @@ describe('Blob viewer', () => {
       ${['simple', 'rich']}
     `('when view switches to $views', ({ views }) => {
       beforeEach(async () => {
-        views.forEach(view => blob.switchToViewer(view));
+        views.forEach((view) => blob.switchToViewer(view));
         await axios.waitForAll();
       });
 

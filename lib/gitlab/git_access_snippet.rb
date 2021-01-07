@@ -30,7 +30,10 @@ module Gitlab
     def check(cmd, changes)
       check_snippet_accessibility!
 
-      super
+      super.tap do |_|
+        # Ensure HEAD points to the default branch in case it is not master
+        snippet.change_head_to_default_branch
+      end
     end
 
     override :download_ability
@@ -114,7 +117,7 @@ module Gitlab
 
     override :check_single_change_access
     def check_single_change_access(change, _skip_lfs_integrity_check: false)
-      Checks::SnippetCheck.new(change, default_branch: snippet.default_branch, logger: logger).validate!
+      Checks::SnippetCheck.new(change, default_branch: snippet.default_branch, root_ref: snippet.repository.root_ref, logger: logger).validate!
       Checks::PushFileCountCheck.new(change, repository: repository, limit: Snippet.max_file_limit, logger: logger).validate!
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message

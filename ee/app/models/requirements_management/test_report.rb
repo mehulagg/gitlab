@@ -13,6 +13,8 @@ module RequirementsManagement
 
     enum state: { passed: 1, failed: 2 }
 
+    scope :without_build, -> { where(build_id: nil) }
+    scope :with_build, -> { where.not(build_id: nil) }
     scope :for_user_build, ->(user_id, build_id) { where(author_id: user_id, build_id: build_id) }
 
     class << self

@@ -356,6 +356,12 @@ FactoryBot.define do
       end
     end
 
+    trait :codequality_reports do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :codequality, job: build)
+      end
+    end
+
     trait :terraform_reports do
       after(:build) do |build|
         build.job_artifacts << create(:ci_job_artifact, :terraform, job: build)
@@ -476,6 +482,14 @@ FactoryBot.define do
       options do
         {
           artifacts: { reports: { license_management: 'gl-license-scanning-report.json' } }
+        }
+      end
+    end
+
+    trait :non_public_artifacts do
+      options do
+        {
+          artifacts: { public: false }
         }
       end
     end

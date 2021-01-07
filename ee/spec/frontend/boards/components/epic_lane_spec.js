@@ -4,7 +4,7 @@ import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
 import getters from 'ee/boards/stores/getters';
-import { mockEpic, mockListsWithModel, mockIssuesByListId, issues } from '../mock_data';
+import { mockEpic, mockLists, mockIssuesByListId, issues } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,7 +12,7 @@ localVue.use(Vuex);
 describe('EpicLane', () => {
   let wrapper;
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 
@@ -42,7 +42,7 @@ describe('EpicLane', () => {
 
     const defaultProps = {
       epic: mockEpic,
-      lists: mockListsWithModel,
+      lists: mockLists,
       disabled: false,
     };
 

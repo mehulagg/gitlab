@@ -3,7 +3,7 @@ import { deprecatedCreateFlash as Flash } from '~/flash';
 import Translate from '~/vue_shared/translate';
 import { __ } from '~/locale';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
-import pipelineGraph from './components/graph/graph_component.vue';
+import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
 import createDagApp from './pipeline_details_dag';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
 import legacyPipelineHeader from './components/legacy_header_component.vue';
@@ -20,7 +20,7 @@ const SELECTORS = {
   PIPELINE_TESTS: '#js-pipeline-tests-detail',
 };
 
-const createLegacyPipelinesDetailApp = mediator => {
+const createLegacyPipelinesDetailApp = (mediator) => {
   if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
     return;
   }
@@ -28,7 +28,7 @@ const createLegacyPipelinesDetailApp = mediator => {
   new Vue({
     el: SELECTORS.PIPELINE_GRAPH,
     components: {
-      pipelineGraph,
+      PipelineGraphLegacy,
     },
     mixins: [GraphBundleMixin],
     data() {
@@ -37,7 +37,7 @@ const createLegacyPipelinesDetailApp = mediator => {
       };
     },
     render(createElement) {
-      return createElement('pipeline-graph', {
+      return createElement('pipeline-graph-legacy', {
         props: {
           isLoading: this.mediator.state.isLoading,
           pipeline: this.mediator.store.state.pipeline,
@@ -47,15 +47,15 @@ const createLegacyPipelinesDetailApp = mediator => {
           refreshPipelineGraph: this.requestRefreshPipelineGraph,
           onResetDownstream: (parentPipeline, pipeline) =>
             this.resetDownstreamPipelines(parentPipeline, pipeline),
-          onClickUpstreamPipeline: pipeline => this.clickUpstreamPipeline(pipeline),
-          onClickDownstreamPipeline: pipeline => this.clickDownstreamPipeline(pipeline),
+          onClickUpstreamPipeline: (pipeline) => this.clickUpstreamPipeline(pipeline),
+          onClickDownstreamPipeline: (pipeline) => this.clickDownstreamPipeline(pipeline),
         },
       });
     },
   });
 };
 
-const createLegacyPipelineHeaderApp = mediator => {
+const createLegacyPipelineHeaderApp = (mediator) => {
   if (!document.querySelector(SELECTORS.PIPELINE_HEADER)) {
     return;
   }
@@ -125,7 +125,7 @@ const createTestDetails = () => {
   });
 };
 
-export default async function() {
+export default async function () {
   createTestDetails();
   createDagApp();
 
@@ -149,7 +149,9 @@ export default async function() {
       const { createPipelinesDetailApp } = await import(
         /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
       );
-      createPipelinesDetailApp();
+
+      const { pipelineProjectPath, pipelineIid } = dataset;
+      createPipelinesDetailApp(SELECTORS.PIPELINE_DETAILS, pipelineProjectPath, pipelineIid);
     } catch {
       Flash(__('An error occurred while loading the pipeline.'));
     }

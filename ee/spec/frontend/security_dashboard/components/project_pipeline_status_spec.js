@@ -1,5 +1,6 @@
 import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { within } from '@testing-library/dom';
 import { merge } from 'lodash';
 import PipelineStatusBadge from 'ee/security_dashboard/components/pipeline_status_badge.vue';
 import ProjectPipelineStatus from 'ee/security_dashboard/components/project_pipeline_status.vue';
@@ -53,6 +54,15 @@ describe('Project Pipeline Status Component', () => {
   describe('default state', () => {
     beforeEach(() => {
       wrapper = createWrapper();
+    });
+
+    it('should display the help message properly', () => {
+      expect(
+        within(wrapper.element).getByRole('heading', {
+          name:
+            'The Vulnerability Report shows the results of the last successful pipeline run on the default branch.',
+        }),
+      ).not.toBe(null);
     });
 
     it('should show the timeAgoTooltip component', () => {

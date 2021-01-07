@@ -12,6 +12,7 @@ RSpec.describe 'Changes GL.com plan for group' do
     allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
 
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe 'for group namespace' do

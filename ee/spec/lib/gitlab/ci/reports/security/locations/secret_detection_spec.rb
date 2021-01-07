@@ -15,6 +15,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Locations::SecretDetection do
 
   let(:mandatory_params) { %i[file_path start_line] }
   let(:expected_fingerprint) { Digest::SHA1.hexdigest('src/main/App.java:29:31') }
+  let(:expected_fingerprint_path) { 'App.java' }
 
   it_behaves_like 'vulnerability location'
 end

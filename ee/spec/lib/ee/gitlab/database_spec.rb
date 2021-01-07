@@ -34,6 +34,16 @@ RSpec.describe Gitlab::Database do
         expect(described_class.read_only?).to be_falsey
       end
     end
+
+    context 'in maintenance mode' do
+      before do
+        stub_application_setting(maintenance_mode: true)
+      end
+
+      it 'returns true' do
+        expect(described_class.read_only?).to be_truthy
+      end
+    end
   end
 
   describe '.healthy?' do

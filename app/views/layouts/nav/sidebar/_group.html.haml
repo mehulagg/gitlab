@@ -10,6 +10,8 @@
         .sidebar-context-title
           = @group.name
     %ul.sidebar-top-level-items.qa-group-sidebar
+      = render_if_exists 'layouts/nav/sidebar/group_trial_status_widget', group: @group
+
       - if group_sidebar_link?(:overview)
         - paths = group_overview_nav_link_paths
         = nav_link(path: paths, unless: -> { current_path?('groups/contribution_analytics#show') }, html_options: { class: 'home' }) do
@@ -159,11 +161,10 @@
                 %span
                   = _('General')
 
-            - if group_level_integrations?
-              = nav_link(controller: :integrations) do
-                = link_to group_settings_integrations_path(@group), title: _('Integrations') do
-                  %span
-                    = _('Integrations')
+            = nav_link(controller: :integrations) do
+              = link_to group_settings_integrations_path(@group), title: _('Integrations') do
+                %span
+                  = _('Integrations')
 
             = nav_link(path: 'groups#projects') do
               = link_to projects_group_path(@group), title: _('Projects') do

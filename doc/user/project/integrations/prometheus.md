@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Prometheus integration
@@ -199,7 +199,6 @@ to integrate with.
 
 ### Precedence with multiple Prometheus configurations
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 Although you can enable both a [manual configuration](#manual-configuration-of-prometheus)
 and [auto configuration](#managed-prometheus-on-kubernetes) of Prometheus, you
 can use only one:

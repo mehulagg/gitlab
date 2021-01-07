@@ -27,9 +27,9 @@ export const forceProjectsRequest = () => {
 export const addProjectsToDashboard = ({ state, dispatch }) =>
   axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsToDashboardError'));
 
 export const toggleSelectedProject = ({ commit, state }, project) => {
@@ -49,8 +49,8 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -105,7 +105,7 @@ export const fetchProjects = ({ state, dispatch, commit }, page) => {
       fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: response => {
+    successCallback: (response) => {
       const {
         data: { projects },
         headers,
@@ -160,7 +160,7 @@ export const fetchSearchResults = ({ state, dispatch }) => {
     dispatch('minimumQueryMessage');
   } else {
     Api.projects(searchQuery, {})
-      .then(results => dispatch('receiveSearchResultsSuccess', results))
+      .then((results) => dispatch('receiveSearchResultsSuccess', results))
       .catch(() => dispatch('receiveSearchResultsError'));
   }
 };
@@ -170,7 +170,7 @@ export const fetchNextPage = ({ state, dispatch }) => {
     return;
   }
   Api.projects(state.searchQuery, { page: state.pageInfo.nextPage })
-    .then(results => dispatch('receiveNextPageSuccess', results))
+    .then((results) => dispatch('receiveNextPageSuccess', results))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

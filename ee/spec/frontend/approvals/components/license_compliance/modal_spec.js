@@ -72,7 +72,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
     wrapper = null;
   });
 
-  const findByHref = href => wrapper.find(`[href="${href}"`);
+  const findByHref = (href) => wrapper.find(`[href="${href}"`);
   const findModal = () => wrapper.find(GlModalVuex);
   const findRuleForm = () => wrapper.find(mocks.RuleForm);
   const findInformationIcon = () => wrapper.find('[name="question"]');
@@ -89,11 +89,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
 
       createWrapper();
 
-      expect(
-        findModal()
-          .attributes('title')
-          .startsWith(expectTitleStartsWith),
-      ).toBe(true);
+      expect(findModal().attributes('title').startsWith(expectTitleStartsWith)).toBe(true);
     });
   });
 

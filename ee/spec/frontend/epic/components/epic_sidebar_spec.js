@@ -1,8 +1,10 @@
+import { nextTick } from 'vue';
+import Vuex from 'vuex';
 import { shallowMount } from '@vue/test-utils';
 
 import EpicSidebar from 'ee/epic/components/epic_sidebar.vue';
 import { dateTypes } from 'ee/epic/constants';
-import createStore from 'ee/epic/store';
+import { getStoreConfig } from 'ee/epic/store';
 
 import epicUtils from 'ee/epic/utils/epic_utils';
 
@@ -10,21 +12,29 @@ import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 
 import { mockEpicMeta, mockEpicData, mockAncestors } from '../mock_data';
 
-const createComponent = ({ methods } = {}) => {
-  const store = createStore();
-  store.dispatch('setEpicMeta', mockEpicMeta);
-  store.dispatch('setEpicData', mockEpicData);
-  store.state.ancestors = mockAncestors;
-
-  return shallowMount(EpicSidebar, {
-    store,
-    methods,
-  });
-};
-
 describe('EpicSidebarComponent', () => {
   const originalUserId = gon.current_user_id;
   let wrapper;
+  let store;
+
+  const createComponent = ({ actions: actionMocks } = {}) => {
+    const { actions, state, ...storeConfig } = getStoreConfig();
+    store = new Vuex.Store({
+      ...storeConfig,
+      state: {
+        ...state,
+        ...mockEpicMeta,
+        ...mockEpicData,
+        ancestors: mockAncestors,
+      },
+
+      actions: { ...actions, ...actionMocks },
+    });
+
+    return shallowMount(EpicSidebar, {
+      store,
+    });
+  };
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -148,9 +158,9 @@ describe('EpicSidebarComponent', () => {
     });
 
     it('renders component container element with classes `right-sidebar-expanded`, `right-sidebar` & `epic-sidebar`', async () => {
-      wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
+      store.dispatch('toggleSidebarFlag', false);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       expect(wrapper.classes()).toContain('right-sidebar-expanded');
       expect(wrapper.classes()).toContain('right-sidebar');
@@ -162,9 +172,9 @@ describe('EpicSidebarComponent', () => {
     });
 
     it('renders Todo toggle button element when sidebar is collapsed and user is signed in', async () => {
-      wrapper.vm.$store.dispatch('toggleSidebarFlag', true);
+      store.dispatch('toggleSidebarFlag', true);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       expect(wrapper.find('[data-testid="todo"]').exists()).toBe(true);
     });
@@ -172,7 +182,7 @@ describe('EpicSidebarComponent', () => {
     it('renders Start date & Due date elements when sidebar is expanded', async () => {
       wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       const startDateEl = wrapper.find('[data-testid="start-date"]');
       const dueDateEl = wrapper.find('[data-testid="due-date"]');
@@ -196,13 +206,13 @@ describe('EpicSidebarComponent', () => {
 
     describe('when sub-epics feature is available', () => {
       it('renders ancestors list', async () => {
-        wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
-        wrapper.vm.$store.dispatch('setEpicMeta', {
+        store.dispatch('toggleSidebarFlag', false);
+        store.dispatch('setEpicMeta', {
           ...mockEpicMeta,
           allowSubEpics: false,
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(wrapper.find('.block.ancestors').exists()).toBe(false);
       });
@@ -212,7 +222,7 @@ describe('EpicSidebarComponent', () => {
       it('does not render ancestors list', async () => {
         wrapper.vm.$store.dispatch('toggleSidebarFlag', false);
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         const ancestorsEl = wrapper.find('[data-testid="ancestors"]');
 
@@ -232,15 +242,15 @@ describe('EpicSidebarComponent', () => {
 
   describe('mounted', () => {
     it('makes request to get epic details', () => {
-      const methodSpies = {
+      const actionSpies = {
         fetchEpicDetails: jest.fn(),
       };
 
       const wrapperWithMethod = createComponent({
-        methods: methodSpies,
+        actions: actionSpies,
       });
 
-      expect(methodSpies.fetchEpicDetails).toHaveBeenCalled();
+      expect(actionSpies.fetchEpicDetails).toHaveBeenCalled();
 
       wrapperWithMethod.destroy();
     });

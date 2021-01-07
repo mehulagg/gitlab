@@ -94,6 +94,17 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
         end
       end
 
+      context 'when ref_path is nil' do
+        let(:ref_path) { nil }
+
+        it 'responds HTTP 200' do
+          get :index, params: valid_request_params
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(csv_response.size).to eq(3)
+        end
+      end
+
       it 'executes the same number of queries regardless of the number of records returned' do
         control = ActiveRecord::QueryRecorder.new do
           get :index, params: valid_request_params

@@ -7,21 +7,12 @@ import * as types from 'ee/boards/stores/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { formatListIssues } from '~/boards/boards_util';
-import { ListType } from '~/boards/constants';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import {
-  mockLists,
-  mockIssue,
-  mockEpic,
-  rawIssue,
-  mockIssueWithModel,
-  mockIssue2WithModel,
-  mockListsWithModel,
-} from '../mock_data';
+import { mockLists, mockIssue, mockIssue2, mockEpic, rawIssue } from '../mock_data';
 
-const expectNotImplemented = action => {
+const expectNotImplemented = (action) => {
   it('is not implemented', () => {
     expect(action).toThrow(new Error('Not implemented!'));
   });
@@ -109,12 +100,45 @@ describe('setFilters', () => {
   });
 });
 
+describe('performSearch', () => {
+  it('should dispatch setFilters action', (done) => {
+    testAction(actions.performSearch, {}, {}, [], [{ type: 'setFilters', payload: {} }], done);
+  });
+
+  it('should dispatch setFilters, fetchLists and resetIssues action when graphqlBoardLists FF is on', async () => {
+    window.gon = { features: { graphqlBoardLists: true } };
+    const getters = { isSwimlanesOn: false };
+
+    await testAction({
+      action: actions.performSearch,
+      state: { ...getters },
+      expectedActions: [
+        { type: 'setFilters', payload: {} },
+        { type: 'fetchLists' },
+        { type: 'resetIssues' },
+      ],
+    });
+  });
+
+  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes and resetIssues action when isSwimlanesOn', async () => {
+    const getters = { isSwimlanesOn: true };
+    await testAction({
+      action: actions.performSearch,
+      state: { isShowingEpicsSwimlanes: true, ...getters },
+      expectedActions: [
+        { type: 'setFilters', payload: {} },
+        { type: 'resetEpics' },
+        { type: 'resetIssues' },
+        { type: 'fetchEpicsSwimlanes', payload: {} },
+      ],
+    });
+  });
+});
+
 describe('fetchEpicsSwimlanes', () => {
   const state = {
-    endpoints: {
-      fullPath: 'gitlab-org',
-      boardId: 1,
-    },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     filterParams: {},
     boardType: 'group',
   };
@@ -132,7 +156,7 @@ describe('fetchEpicsSwimlanes', () => {
     },
   };
 
-  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', done => {
+  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -150,7 +174,7 @@ describe('fetchEpicsSwimlanes', () => {
     );
   });
 
-  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', done => {
+  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(
@@ -163,7 +187,7 @@ describe('fetchEpicsSwimlanes', () => {
     );
   });
 
-  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', done => {
+  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', (done) => {
     const queryResponseWithNextPage = {
       data: {
         group: {
@@ -204,9 +228,7 @@ describe('fetchEpicsSwimlanes', () => {
 
 describe('updateBoardEpicUserPreferences', () => {
   const state = {
-    endpoints: {
-      boardId: 1,
-    },
+    boardId: 1,
   };
 
   const queryResponse = (collapsed = false) => ({
@@ -218,7 +240,7 @@ describe('updateBoardEpicUserPreferences', () => {
     },
   });
 
-  it('should send mutation', done => {
+  it('should send mutation', (done) => {
     const collapsed = true;
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue(queryResponse(collapsed));
 
@@ -244,7 +266,7 @@ describe('updateBoardEpicUserPreferences', () => {
 });
 
 describe('setShowLabels', () => {
-  it('should commit mutation SET_SHOW_LABELS', done => {
+  it('should commit mutation SET_SHOW_LABELS', (done) => {
     const state = {
       isShowingLabels: true,
     };
@@ -290,7 +312,9 @@ describe('updateListWipLimit', () => {
       .then(() => {
         expect(axios.put).toHaveBeenCalledWith(
           `${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`,
-          { list: { max_issue_count: maxIssueCount } },
+          {
+            list: { max_issue_count: maxIssueCount },
+          },
         );
       });
   });
@@ -345,44 +369,12 @@ describe('updateListWipLimit', () => {
   });
 });
 
-describe('showPromotionList', () => {
-  it('should dispatch addList action when conditions showPromotion is true', done => {
-    const state = {
-      endpoints: { fullPath: 'gitlab-org', boardId: '1' },
-      boardType: 'group',
-      disabled: false,
-      boardLists: [{ type: 'backlog' }, { type: 'closed' }],
-      showPromotion: true,
-    };
-
-    const promotionList = {
-      id: 'promotion',
-      listType: ListType.promotion,
-      title: 'Improve Issue Boards',
-      position: 0,
-    };
-
-    testAction(
-      actions.showPromotionList,
-      {},
-      state,
-      [],
-      [{ type: 'addList', payload: promotionList }],
-      done,
-    );
-  });
-});
-
 describe('fetchAllBoards', () => {
   expectNotImplemented(actions.fetchAllBoards);
 });
 
 describe('fetchRecentBoards', () => {
   expectNotImplemented(actions.fetchRecentBoards);
-});
-
-describe('createBoard', () => {
-  expectNotImplemented(actions.createBoard);
 });
 
 describe('deleteBoard', () => {
@@ -393,19 +385,13 @@ describe('updateIssueWeight', () => {
   expectNotImplemented(actions.updateIssueWeight);
 });
 
-describe('togglePromotionState', () => {
-  expectNotImplemented(actions.updateIssueWeight);
-});
-
 describe('fetchIssuesForEpic', () => {
   const listId = mockLists[0].id;
   const epicId = mockEpic.id;
 
   const state = {
-    endpoints: {
-      fullPath: 'gitlab-org',
-      boardId: 1,
-    },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     filterParams: {},
     boardType: 'group',
   };
@@ -431,7 +417,7 @@ describe('fetchIssuesForEpic', () => {
 
   const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -447,7 +433,7 @@ describe('fetchIssuesForEpic', () => {
     );
   });
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', done => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(
@@ -466,16 +452,15 @@ describe('fetchIssuesForEpic', () => {
 
 describe('toggleEpicSwimlanes', () => {
   it('should commit mutation TOGGLE_EPICS_SWIMLANES', () => {
+    const startURl = `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`;
     global.jsdom.reconfigure({
-      url: `${TEST_HOST}/groups/gitlab-org/-/boards/1?group_by=epic`,
+      url: startURl,
     });
 
     const state = {
       isShowingEpicsSwimlanes: false,
-      endpoints: {
-        fullPath: 'gitlab-org',
-        boardId: 1,
-      },
+      fullPath: 'gitlab-org',
+      boardId: 1,
     };
 
     return testAction(
@@ -485,7 +470,11 @@ describe('toggleEpicSwimlanes', () => {
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
       [],
       () => {
-        expect(commonUtils.historyPushState).toHaveBeenCalledWith(removeParams(['group_by']));
+        expect(commonUtils.historyPushState).toHaveBeenCalledWith(
+          removeParams(['group_by']),
+          startURl,
+          true,
+        );
         expect(global.window.location.href).toBe(`${TEST_HOST}/groups/gitlab-org/-/boards/1`);
       },
     );
@@ -500,10 +489,8 @@ describe('toggleEpicSwimlanes', () => {
 
     const state = {
       isShowingEpicsSwimlanes: true,
-      endpoints: {
-        fullPath: 'gitlab-org',
-        boardId: 1,
-      },
+      fullPath: 'gitlab-org',
+      boardId: 1,
     };
 
     return testAction(
@@ -584,7 +571,7 @@ describe('setActiveIssueWeight', () => {
     projectPath: 'h/b',
   };
 
-  it('should commit weight after setting the issue', done => {
+  it('should commit weight after setting the issue', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueSetWeight: {
@@ -635,20 +622,21 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssueWithModel,
-    '437': mockIssue2WithModel,
+    436: mockIssue,
+    437: mockIssue2,
   };
 
   const state = {
-    endpoints: { fullPath: 'gitlab-org', boardId: '1' },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     boardType: 'group',
     disabled: false,
-    boardLists: mockListsWithModel,
+    boardLists: mockLists,
     issuesByListId: listIssues,
     issues,
   };
 
-  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', done => {
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueMoveList: {
@@ -673,7 +661,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -689,7 +677,7 @@ describe('moveIssue', () => {
     );
   });
 
-  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_FAILURE mutation when unsuccessful', done => {
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_FAILURE mutation when unsuccessful', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueMoveList: {
@@ -714,7 +702,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             epicId,
@@ -723,7 +711,7 @@ describe('moveIssue', () => {
         {
           type: types.MOVE_ISSUE_FAILURE,
           payload: {
-            originalIssue: mockIssueWithModel,
+            originalIssue: mockIssue,
             fromListId: 'gid://gitlab/List/1',
             toListId: 'gid://gitlab/List/2',
             originalIndex: 0,

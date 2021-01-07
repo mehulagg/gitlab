@@ -1,0 +1,202 @@
+<script>
+import { isEmpty } from 'lodash';
+import { GlModal, GlAlert } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
+import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
+import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
+import AddEditScheduleForm from './add_edit_schedule_form.vue';
+import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
+
+export const i18n = {
+  cancel: __('Cancel'),
+  addSchedule: s__('OnCallSchedules|Add schedule'),
+  editSchedule: s__('OnCallSchedules|Edit schedule'),
+  addErrorMsg: s__('OnCallSchedules|Failed to edit schedule'),
+  editErrorMsg: s__('OnCallSchedules|Failed to add schedule'),
+};
+
+export default {
+  i18n,
+  inject: ['projectPath', 'timezones'],
+  components: {
+    GlModal,
+    GlAlert,
+    AddEditScheduleForm,
+  },
+  props: {
+    modalId: {
+      type: String,
+      required: true,
+    },
+    schedule: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+    isEditMode: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      loading: false,
+      form: {
+        name: this.schedule?.name,
+        description: this.schedule?.description,
+        timezone: this.timezones.find(({ identifier }) => this.schedule?.timezone === identifier),
+      },
+      error: null,
+    };
+  },
+  computed: {
+    actionsProps() {
+      return {
+        primary: {
+          text: this.title,
+          attributes: [
+            { variant: 'info' },
+            { loading: this.loading },
+            { disabled: this.isFormInvalid },
+          ],
+        },
+        cancel: {
+          text: i18n.cancel,
+        },
+      };
+    },
+    isNameInvalid() {
+      return !this.form.name?.length;
+    },
+    isTimezoneInvalid() {
+      return isEmpty(this.form.timezone);
+    },
+    isFormInvalid() {
+      return this.isNameInvalid || this.isTimezoneInvalid;
+    },
+    editScheduleVariables() {
+      return {
+        projectPath: this.projectPath,
+        iid: this.schedule.iid,
+        name: this.form.name,
+        description: this.form.description,
+        timezone: this.form.timezone.identifier,
+      };
+    },
+    errorMsg() {
+      return this.error || (this.isEditMode ? i18n.editErrorMsg : i18n.addErrorMsg);
+    },
+    title() {
+      return this.isEditMode ? i18n.editSchedule : i18n.addSchedule;
+    },
+  },
+  methods: {
+    createSchedule() {
+      this.loading = true;
+      const { projectPath } = this;
+
+      this.$apollo
+        .mutate({
+          mutation: createOncallScheduleMutation,
+          variables: {
+            oncallScheduleCreateInput: {
+              projectPath,
+              ...this.form,
+              timezone: this.form.timezone.identifier,
+            },
+          },
+          update(store, { data: { oncallScheduleCreate } }) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
+              projectPath,
+            });
+          },
+        })
+        .then(
+          ({
+            data: {
+              oncallScheduleCreate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateScheduleModal.hide();
+            this.$emit('scheduleCreated');
+          },
+        )
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    editSchedule() {
+      const { projectPath } = this;
+      this.loading = true;
+
+      this.$apollo
+        .mutate({
+          mutation: updateOncallScheduleMutation,
+          variables: this.editScheduleVariables,
+          update(store, { data }) {
+            updateStoreAfterScheduleEdit(store, getOncallSchedulesQuery, data, { projectPath });
+          },
+        })
+        .then(
+          ({
+            data: {
+              oncallScheduleUpdate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateScheduleModal.hide();
+          },
+        )
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    hideErrorAlert() {
+      this.error = null;
+    },
+    updateScheduleForm({ type, value }) {
+      this.form[type] = value;
+    },
+  },
+};
+</script>
+
+<template>
+  <gl-modal
+    ref="addUpdateScheduleModal"
+    :modal-id="modalId"
+    size="sm"
+    :title="title"
+    :action-primary="actionsProps.primary"
+    :action-cancel="actionsProps.cancel"
+    @primary.prevent="isEditMode ? editSchedule() : createSchedule()"
+  >
+    <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
+      {{ errorMsg }}
+    </gl-alert>
+    <add-edit-schedule-form
+      :is-name-invalid="isNameInvalid"
+      :is-timezone-invalid="isTimezoneInvalid"
+      :form="form"
+      :schedule="schedule"
+      @update-schedule-form="updateScheduleForm"
+    />
+  </gl-modal>
+</template>

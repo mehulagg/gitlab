@@ -10,7 +10,7 @@ import notesEventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
-import { collapsedType, isCollapsed } from '../diff_file';
+import { collapsedType, isCollapsed } from '../utils/diff_file';
 import {
   DIFF_FILE_AUTOMATIC_COLLAPSE,
   DIFF_FILE_MANUAL_COLLAPSE,
@@ -36,6 +36,11 @@ export default {
     file: {
       type: Object,
       required: true,
+    },
+    reviewed: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     isFirstFile: {
       type: Boolean,
@@ -134,7 +139,7 @@ export default {
       return !this.isCollapsed || this.automaticallyCollapsed;
     },
     showWarning() {
-      return this.isCollapsed && (this.automaticallyCollapsed && !this.viewDiffsFileByFile);
+      return this.isCollapsed && this.automaticallyCollapsed && !this.viewDiffsFileByFile;
     },
     showContent() {
       return !this.isCollapsed && !this.isFileTooLarge;
@@ -205,7 +210,7 @@ export default {
 
       await this.$nextTick();
 
-      eventsForThisFile.forEach(event => {
+      eventsForThisFile.forEach((event) => {
         eventHub.$emit(event);
       });
     },

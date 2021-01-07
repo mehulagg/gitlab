@@ -398,8 +398,8 @@ describe('Issuable output', () => {
 
           wrapper.vm.poll.makeRequest();
 
-          return new Promise(resolve => {
-            wrapper.vm.$watch('formState.lockedWarningVisible', value => {
+          return new Promise((resolve) => {
+            wrapper.vm.$watch('formState.lockedWarningVisible', (value) => {
               if (value) {
                 resolve();
               }
@@ -503,13 +503,6 @@ describe('Issuable output', () => {
 
     it('returns false when title is empty null', () => {
       wrapper.vm.store.formState.title = null;
-
-      expect(wrapper.vm.issueChanged).toBe(false);
-    });
-
-    it('returns false when `initialTitleText` is null and `formState.title` is empty string', () => {
-      wrapper.vm.store.formState.title = '';
-      wrapper.setProps({ initialTitleText: null });
 
       expect(wrapper.vm.issueChanged).toBe(false);
     });

@@ -25,13 +25,13 @@ describe('MergeRequestTable component', () => {
       },
     });
 
-  const createComponent = store =>
+  const createComponent = (store) =>
     mount(MergeRequestTable, {
       localVue,
       store,
     });
 
-  const bootstrap = initialState => {
+  const bootstrap = (initialState) => {
     vuexStore = createStore(initialState);
     wrapper = createComponent(vuexStore);
   };
@@ -41,14 +41,8 @@ describe('MergeRequestTable component', () => {
   });
 
   const findTable = () => wrapper.find(GlTable);
-  const findTableRow = index =>
-    findTable()
-      .findAll('tbody tr')
-      .at(index);
-  const findReviewTimeCol = rowIndex =>
-    findTableRow(rowIndex)
-      .findAll('td')
-      .at(1);
+  const findTableRow = (index) => findTable().findAll('tbody tr').at(index);
+  const findReviewTimeCol = (rowIndex) => findTableRow(rowIndex).findAll('td').at(1);
 
   const updateMergeRequests = (index, attrs) =>
     mockMergeRequests.map((item, idx) => {

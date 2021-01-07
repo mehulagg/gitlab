@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 last_update: 2019-07-03
 ---
@@ -90,7 +90,7 @@ To enable merge trains for your project:
 In GitLab 13.5 and earlier, there is only one checkbox, named
 **Enable merge trains and pipelines for merged results**.
 
-CAUTION: **Caution:**
+WARNING:
 If you select the check box but don't configure your CI/CD to use
 pipelines for merge requests, your merge requests may become stuck in an
 unresolved state or your pipelines may be dropped.
@@ -143,7 +143,7 @@ This is the fastest option to get the change merged into the target branch.
 
 ![Merge Immediately](img/merge_train_immediate_merge_v12_6.png)
 
-CAUTION: **Caution:**
+WARNING:
 Each time you merge a merge request immediately, the current merge train
 is recreated and all pipelines restart.
 
@@ -177,9 +177,13 @@ for more information.
 
 ### Merge Train Pipeline cannot be retried
 
-A Merge Train pipeline cannot be retried because the merge request is dropped from the merge train upon failure. For this reason, the retry button does not appear next to the pipeline icon.
+When a pipeline for merge trains fails the merge request is dropped from the train and the pipeline can't be retried.
+Pipelines for merge trains run on the merged result of the changes in the merge request and
+the changes from other merge requests already on the train. If the merge request is dropped from the train,
+the merged result is out of date and the pipeline can't be retried.
 
-In the case of pipeline failure, you should [re-enqueue](#add-a-merge-request-to-a-merge-train) the merge request to the merge train, which then initiates a new pipeline.
+Instead, you should [add the merge request to the train](#add-a-merge-request-to-a-merge-train)
+again, which triggers a new pipeline.
 
 ### Unable to add to merge train with message "The pipeline for this merge request failed."
 

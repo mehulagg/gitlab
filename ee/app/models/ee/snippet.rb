@@ -8,6 +8,8 @@ module EE
     prepended do
       include Elastic::SnippetsSearch
       include UsageStatistics
+
+      scope :for_projects, ->(projects) { where(project: projects) }
     end
 
     override :repository_size_checker

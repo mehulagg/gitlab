@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Adding GKE clusters
@@ -10,7 +10,7 @@ GitLab supports adding new and existing GKE clusters.
 
 ## GKE requirements
 
-Before creating your first cluster on Google GKE with GitLab's integration, make sure the following
+Before creating your first cluster on Google GKE with GitLab integration, make sure the following
 requirements are met:
 
 - A [billing account](https://cloud.google.com/billing/docs/how-to/manage-billing-account)

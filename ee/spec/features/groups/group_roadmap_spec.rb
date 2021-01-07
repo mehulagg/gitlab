@@ -156,36 +156,36 @@ RSpec.describe 'group epic roadmap', :js do
     end
   end
 
-  context 'when over 1000 epics exist for the group' do
+  context 'when over 1000 epics match roadmap filters' do
     before do
-      stub_const('Groups::RoadmapController::EPICS_ROADMAP_LIMIT', 1)
       create_list(:epic, 2, group: group, start_date: 10.days.ago, end_date: 1.day.ago)
       visit group_roadmap_path(group)
       wait_for_requests
+      execute_script("gon.roadmap_epics_limit = 1;")
     end
 
     describe 'roadmap page' do
       it 'renders warning callout banner' do
         page.within('.content-wrapper .content') do
-          expect(page).to have_selector('.js-epics-limit-callout', count: 1)
-          expect(find('.js-epics-limit-callout')).to have_content 'Some of your epics may not be visible. A roadmap is limited to the first 1,000 epics, in your selected sort order.'
+          expect(page).to have_selector('[data-testid="epics_limit_callout"]', count: 1)
+          expect(find('[data-testid="epics_limit_callout"]')).to have_content 'Some of your epics might not be visible Roadmaps can display up to 1,000 epics. These appear in your selected sort order.'
         end
 
-        page.within('.js-epics-limit-callout') do
+        page.within('[data-testid="epics_limit_callout"]') do
           expect(find_link('Learn more')[:href]).to eq("https://docs.gitlab.com/ee/user/group/roadmap/")
         end
       end
 
       it 'is removed after dismissal and even after reload' do
-        page.within('.js-epics-limit-callout') do
-          find('.js-close-callout').click
+        page.within('[data-testid="epics_limit_callout"]') do
+          find('.gl-alert-dismiss').click
         end
 
-        expect(page).not_to have_selector('.js-epics-limit-callout')
+        expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')
 
         refresh
 
-        expect(page).not_to have_selector('.js-epics-limit-callout')
+        expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')
       end
     end
   end

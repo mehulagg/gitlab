@@ -51,7 +51,7 @@ export default {
       let fulfilledCount = 0;
       let rejectedCount = 0;
 
-      const promises = this.selectedVulnerabilities.map(vulnerability =>
+      const promises = this.selectedVulnerabilities.map((vulnerability) =>
         this.$apollo
           .mutate({
             mutation: vulnerabilityDismiss,

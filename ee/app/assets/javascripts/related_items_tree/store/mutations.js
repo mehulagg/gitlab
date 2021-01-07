@@ -49,7 +49,7 @@ export default {
   },
 
   [types.SET_ITEM_CHILDREN_FLAGS](state, { children }) {
-    children.forEach(item => {
+    children.forEach((item) => {
       Vue.set(state.childrenFlags, item.reference, {
         itemExpanded: false,
         itemChildrenFetchInProgress: false,
@@ -166,7 +166,9 @@ export default {
   },
 
   [types.ADD_PENDING_REFERENCES](state, references) {
-    const nonDuplicateReferences = references.filter(ref => !state.pendingReferences.includes(ref));
+    const nonDuplicateReferences = references.filter(
+      (ref) => !state.pendingReferences.includes(ref),
+    );
     state.pendingReferences.push(...nonDuplicateReferences);
   },
 

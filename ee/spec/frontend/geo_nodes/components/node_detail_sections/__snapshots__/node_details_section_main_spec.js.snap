@@ -19,6 +19,7 @@ exports[`NodeDetailsSectionMain template node url section renders section correc
   >
     http://127.0.0.1:3001/ 
     <svg
+      aria-hidden="true"
       class="gl-ml-1 gl-icon s16"
       data-testid="external-link-icon"
     >

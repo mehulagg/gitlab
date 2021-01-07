@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'title_linting'
+
 module Gitlab
   module Danger
     module Changelog
@@ -39,6 +41,7 @@ module Gitlab
       def required?
         git.added_files.any? { |path| path =~ %r{\Adb/(migrate|post_migrate)/} }
       end
+      alias_method :db_changes?, :required?
 
       def optional?
         categories_need_changelog? && without_no_changelog_label?
@@ -74,7 +77,7 @@ module Gitlab
       end
 
       def sanitized_mr_title
-        helper.sanitize_mr_title(gitlab.mr_json["title"])
+        TitleLinting.sanitize_mr_title(gitlab.mr_json["title"])
       end
 
       def categories_need_changelog?

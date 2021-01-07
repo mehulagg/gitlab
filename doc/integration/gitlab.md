@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Integrate your server with GitLab.com
@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Import projects from GitLab.com and login to your GitLab instance with your GitLab.com account.
 
 To enable the GitLab.com OmniAuth provider you must register your application with GitLab.com.
-GitLab.com will generate an application ID and secret key for you to use.
+GitLab.com generates an application ID and secret key for you to use.
 
 1. Sign in to GitLab.com
 
@@ -75,15 +75,20 @@ GitLab.com will generate an application ID and secret key for you to use.
        args: { scope: 'api' } }
    ```
 
-1. Change 'YOUR_APP_ID' to the Application ID from the GitLab.com application page.
+1. Change `'YOUR_APP_ID'` to the Application ID from the GitLab.com application page.
 
-1. Change 'YOUR_APP_SECRET' to the secret from the GitLab.com application page.
+1. Change `'YOUR_APP_SECRET'` to the secret from the GitLab.com application page.
 
 1. Save the configuration file.
 
-1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect if you
-   installed GitLab via Omnibus or from source respectively.
+1. Based on how GitLab was installed, implement these changes by using
+   the appropriate method:
 
-On the sign in page there should now be a GitLab.com icon below the regular sign in form.
-Click the icon to begin the authentication process. GitLab.com will ask the user to sign in and authorize the GitLab application.
-If everything goes well the user will be returned to your GitLab instance and will be signed in.
+   - Omnibus GitLab: [Reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure).
+   - Source: [Restart GitLab](../administration/restart_gitlab.md#installations-from-source).
+
+On the sign-in page, there should now be a GitLab.com icon following the
+regular sign-in form. Select the icon to begin the authentication process.
+GitLab.com asks the user to sign in and authorize the GitLab application. If
+everything goes well, the user is returned to your GitLab instance and is
+signed in.

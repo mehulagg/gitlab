@@ -74,7 +74,7 @@ export default {
       <security-dashboard-layout>
         <template #header>
           <div class="gl-mt-6 gl-display-flex">
-            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerabilities') }}</h4>
+            <h4 class="gl-flex-grow-1 gl-my-0">{{ __('Vulnerability Report') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
           <project-pipeline-status :pipeline="pipeline" />

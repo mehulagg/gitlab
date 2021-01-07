@@ -37,7 +37,7 @@ RSpec.describe EE::ServicesHelper do
 
       context 'when there is no license for jira_vulnerabilities_integration' do
         before do
-          stub_feature_flags(jira_for_vulnerabilities: true)
+          allow(integration).to receive(:jira_vulnerabilities_integration_available?).and_return(false)
         end
 
         it 'includes Jira specific fields' do

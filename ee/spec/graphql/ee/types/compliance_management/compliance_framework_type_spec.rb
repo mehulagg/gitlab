@@ -3,5 +3,16 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['ComplianceFramework'] do
-  it { expect(described_class).to have_graphql_field(:name) }
+  subject { described_class }
+
+  fields = %w[
+    id
+    name
+    description
+    color
+  ]
+
+  it 'has the correct fields' do
+    is_expected.to have_graphql_fields(fields)
+  end
 end

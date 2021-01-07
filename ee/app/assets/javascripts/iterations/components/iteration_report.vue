@@ -3,17 +3,16 @@
 import {
   GlAlert,
   GlBadge,
-  GlLoadingIcon,
-  GlEmptyState,
-  GlIcon,
   GlDropdown,
   GlDropdownItem,
+  GlEmptyState,
+  GlIcon,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationReportSummary from './iteration_report_summary.vue';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 import query from '../queries/iteration.query.graphql';
@@ -35,13 +34,12 @@ export default {
     BurnCharts,
     GlAlert,
     GlBadge,
-    GlLoadingIcon,
-    GlEmptyState,
     GlIcon,
     GlDropdown,
     GlDropdownItem,
+    GlEmptyState,
+    GlLoadingIcon,
     IterationForm,
-    IterationReportSummary,
     IterationReportTabs,
   },
   apollo: {
@@ -94,7 +92,7 @@ export default {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
       type: String,
@@ -113,8 +111,11 @@ export default {
     canEditIteration() {
       return this.canEdit && this.namespaceType === Namespace.Group;
     },
-    hasIteration() {
-      return !this.$apollo.queries.iteration.loading && this.iteration?.title;
+    loading() {
+      return this.$apollo.queries.iteration.loading;
+    },
+    showEmptyState() {
+      return !this.loading && this.iteration && !this.iteration.title;
     },
     status() {
       switch (this.iteration.state) {
@@ -171,9 +172,9 @@ export default {
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
-    <gl-loading-icon v-if="$apollo.queries.iteration.loading" class="gl-py-5" size="lg" />
+    <gl-loading-icon v-else-if="loading" class="gl-py-5" size="lg" />
     <gl-empty-state
-      v-else-if="!hasIteration"
+      v-else-if="showEmptyState"
       :title="__('Could not find iteration')"
       :compact="false"
     />
@@ -214,16 +215,13 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <iteration-report-summary
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      />
       <burn-charts
-        v-if="glFeatures.iterationCharts && glFeatures.burnupCharts"
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
         :iteration-id="iteration.id"
+        :iteration-state="iteration.state"
+        :full-path="fullPath"
+        :namespace-type="namespaceType"
       />
       <iteration-report-tabs
         :full-path="fullPath"

@@ -40,18 +40,6 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.REQUEST_ADD_BOARD]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_BOARD_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_ADD_BOARD_ERROR]: () => {
-    notImplemented();
-  },
-
   [mutationTypes.REQUEST_REMOVE_BOARD]: () => {
     notImplemented();
   },
@@ -71,7 +59,7 @@ export default {
     Vue.set(state.boardLists, listId, list);
   },
 
-  [mutationTypes.UPDATE_LIST_FAILURE]: state => {
+  [mutationTypes.UPDATE_LIST_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while updating the list. Please try again.');
   },
 
@@ -112,12 +100,12 @@ export default {
     Vue.set(state.epicsFlags, epicId, { isLoading: false });
   },
 
-  [mutationTypes.TOGGLE_EPICS_SWIMLANES]: state => {
+  [mutationTypes.TOGGLE_EPICS_SWIMLANES]: (state) => {
     state.isShowingEpicsSwimlanes = !state.isShowingEpicsSwimlanes;
     state.epicsSwimlanesFetchInProgress = true;
   },
 
-  [mutationTypes.SET_EPICS_SWIMLANES]: state => {
+  [mutationTypes.SET_EPICS_SWIMLANES]: (state) => {
     state.isShowingEpicsSwimlanes = true;
     state.epicsSwimlanesFetchInProgress = true;
   },
@@ -127,7 +115,7 @@ export default {
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_SWIMLANES_FAILURE]: state => {
+  [mutationTypes.RECEIVE_SWIMLANES_FAILURE]: (state) => {
     state.error = s__(
       'Boards|An error occurred while fetching the board swimlanes. Please reload the page.',
     );
@@ -145,7 +133,7 @@ export default {
     Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
   },
 
-  [mutationTypes.RESET_EPICS]: state => {
+  [mutationTypes.RESET_EPICS]: (state) => {
     Vue.set(state, 'epics', []);
   },
 
@@ -171,7 +159,7 @@ export default {
   [mutationTypes.SET_BOARD_EPIC_USER_PREFERENCES]: (state, val) => {
     const { userPreferences, epicId } = val;
 
-    const epic = state.epics.filter(currentEpic => currentEpic.id === epicId)[0];
+    const epic = state.epics.filter((currentEpic) => currentEpic.id === epicId)[0];
 
     if (epic) {
       Vue.set(epic, 'userPreferences', userPreferences);

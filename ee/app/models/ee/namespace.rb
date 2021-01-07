@@ -39,6 +39,22 @@ module EE
       scope :include_gitlab_subscription_with_hosted_plan, -> { includes(gitlab_subscription: :hosted_plan) }
       scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
 
+      scope :top_most, -> { where(parent_id: nil) }
+
+      scope :in_active_trial, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(gitlab_subscriptions: { trial: true, trial_ends_on: Date.today.. })
+      end
+
+      scope :in_default_plan, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(plans: { name: [nil, *::Plan.default_plans] })
+      end
+
+      scope :eligible_for_subscription, -> do
+        top_most.in_active_trial.or(top_most.in_default_plan)
+      end
+
       scope :eligible_for_trial, -> do
         left_joins(gitlab_subscription: :hosted_plan)
           .where(
@@ -57,8 +73,7 @@ module EE
         where("EXISTS (?)", matcher)
       end
 
-      delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
-        :extra_shared_runners_minutes, to: :namespace_statistics, allow_nil: true
+      delegate :shared_runners_seconds, :shared_runners_seconds_last_reset, to: :namespace_statistics, allow_nil: true
 
       delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
         :additional_purchased_storage_ends_on, :additional_purchased_storage_ends_on=,
@@ -230,41 +245,9 @@ module EE
       @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
     end
 
-    def shared_runner_minutes_supported?
-      !has_parent?
-    end
-
-    def actual_shared_runners_minutes_limit(include_extra: true)
-      extra_minutes = include_extra ? extra_shared_runners_minutes_limit.to_i : 0
-
-      if shared_runners_minutes_limit
-        shared_runners_minutes_limit + extra_minutes
-      else
-        ::Gitlab::CurrentSettings.shared_runners_minutes + extra_minutes
-      end
-    end
-
+    # The same method name is used also at project and job level
     def shared_runners_minutes_limit_enabled?
-      shared_runner_minutes_supported? &&
-        any_project_with_shared_runners_enabled? &&
-        actual_shared_runners_minutes_limit.nonzero?
-    end
-
-    def shared_runners_remaining_minutes_percent
-      return 0 if shared_runners_remaining_minutes.to_f <= 0
-      return 0 if actual_shared_runners_minutes_limit.to_f == 0
-
-      (shared_runners_remaining_minutes.to_f * 100) / actual_shared_runners_minutes_limit.to_f
-    end
-
-    def shared_runners_remaining_minutes_below_threshold?
-      shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
-    end
-
-    def extra_shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        extra_shared_runners_minutes_limit &&
-        extra_shared_runners_minutes.to_i >= extra_shared_runners_minutes_limit
+      ci_minutes_quota.enabled?
     end
 
     def any_project_with_shared_runners_enabled?
@@ -369,7 +352,6 @@ module EE
 
     def additional_repo_storage_by_namespace_enabled?
       !::Feature.enabled?(:namespace_storage_limit, self) &&
-        ::Feature.enabled?(:additional_repo_storage_by_namespace, self) &&
         ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation?
     end
 
@@ -389,7 +371,7 @@ module EE
     end
 
     def validate_shared_runner_minutes_support
-      return if shared_runner_minutes_supported?
+      return if root?
 
       if shared_runners_minutes_limit_changed?
         errors.add(:shared_runners_minutes_limit, 'is not supported for this namespace')
@@ -434,10 +416,6 @@ module EE
         start_date: created_at,
         seats: 0
       )
-    end
-
-    def shared_runners_remaining_minutes
-      [actual_shared_runners_minutes_limit.to_f - shared_runners_minutes.to_f, 0].max
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)

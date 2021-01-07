@@ -208,12 +208,16 @@ RSpec.describe API::Scim do
         it 'created the identity' do
           expect(group.scim_identities.with_extern_uid('test_uid').first).not_to be_nil
         end
+
+        it 'marks the user as provisioned by the group' do
+          expect(new_user.provisioned_by_group).to eq(group)
+        end
       end
 
       context 'existing user' do
-        before do
-          old_user = create(:user, email: 'work@example.com')
+        let(:old_user) { create(:user, email: 'work@example.com') }
 
+        before do
           create(:scim_identity, user: old_user, group: group, extern_uid: 'test_uid')
           group.add_guest(old_user)
 
@@ -226,6 +230,10 @@ RSpec.describe API::Scim do
 
         it 'has the user external ID' do
           expect(json_response['id']).to eq('test_uid')
+        end
+
+        it 'does not mark the user as provisioned' do
+          expect(old_user.reload.provisioned_by_group).to be_nil
         end
       end
 

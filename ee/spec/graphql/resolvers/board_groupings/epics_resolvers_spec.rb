@@ -50,18 +50,6 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
       end
     end
 
-    context 'when boards_with_swimlanes is disabled' do
-      before do
-        stub_feature_flags(boards_with_swimlanes: false)
-      end
-
-      it 'returns nil' do
-        result = resolve_board_epics(board)
-
-        expect(result).to be_nil
-      end
-    end
-
     context 'when user can access the group' do
       before do
         group.add_developer(current_user)
@@ -81,7 +69,7 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
 
       it 'finds only epics for issues matching issue filters' do
         result = resolve_board_epics(
-          group_board, { issue_filters: { label_name: label1.title, not: { label_name: label2.title } } })
+          group_board, { issue_filters: { label_name: [label1.title], not: { label_name: [label2.title] } } })
 
         expect(result).to match_array([epic1])
       end
@@ -94,13 +82,15 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
       end
 
       it 'accepts negated issue params' do
+        filters = { label_name: ['foo'], not: { label_name: %w(foo bar) } }
+
         expect(Boards::Issues::ListService).to receive(:new).with(
           group_board.resource_parent,
           current_user,
-          { all_lists: true, board_id: group_board.id, label_name: 'foo', not: { label_name: %w(foo bar) } }
+          { all_lists: true, board_id: group_board.id, **filters }
         ).and_call_original
 
-        resolve_board_epics(group_board, { issue_filters: { label_name: 'foo', not: { label_name: %w(foo bar) } } })
+        resolve_board_epics(group_board, { issue_filters: filters })
       end
 
       it 'raises an exception if both epic_id and epic_wildcard_id are present' do

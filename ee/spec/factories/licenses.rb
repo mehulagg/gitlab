@@ -51,9 +51,8 @@ FactoryBot.define do
       attrs = [:gitlab_license]
       attrs << :trial if trial
       attrs << :expired if expired
-      attrs << { plan: plan }
 
-      build(*attrs).export
+      build(*attrs, plan: plan).export
     end
 
     # Disable validations when creating an expired license key

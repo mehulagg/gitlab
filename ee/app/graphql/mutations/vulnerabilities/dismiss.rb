@@ -19,11 +19,16 @@ module Mutations
       argument :comment,
                GraphQL::STRING_TYPE,
                required: false,
+               description: 'Comment why vulnerability should be dismissed'
+
+      argument :dismissal_reason,
+               Types::Vulnerabilities::DismissalReasonEnum,
+               required: false,
                description: 'Reason why vulnerability should be dismissed'
 
-      def resolve(id:, comment: nil)
+      def resolve(id:, comment: nil, dismissal_reason: nil)
         vulnerability = authorized_find!(id: id)
-        result = dismiss_vulnerability(vulnerability, comment)
+        result = dismiss_vulnerability(vulnerability, comment, dismissal_reason)
 
         {
           vulnerability: result,
@@ -33,8 +38,8 @@ module Mutations
 
       private
 
-      def dismiss_vulnerability(vulnerability, comment)
-        ::Vulnerabilities::DismissService.new(current_user, vulnerability, comment).execute
+      def dismiss_vulnerability(vulnerability, comment, dismissal_reason)
+        ::Vulnerabilities::DismissService.new(current_user, vulnerability, comment, dismissal_reason).execute
       end
 
       def find_object(id:)

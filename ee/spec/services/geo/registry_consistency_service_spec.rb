@@ -19,6 +19,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
     { Geo::DesignRegistry => :project_with_design,
       Geo::MergeRequestDiffRegistry => :external_merge_request_diff,
       Geo::PackageFileRegistry => :package_file_with_file,
+      Geo::SnippetRepositoryRegistry => :snippet_repository,
       Geo::TerraformStateVersionRegistry => :terraform_state_version }
       .fetch(registry_class, default_factory_name)
   end
@@ -172,7 +173,7 @@ RSpec.describe Geo::RegistryConsistencyService, :geo, :use_clean_rails_memory_st
           end
 
           before do
-            model_class.where(id: unused_model_ids).delete_all
+            model_class.where(model_class.primary_key => unused_model_ids).delete_all
           end
 
           it 'deletes unused registries', :sidekiq_inline do

@@ -8,6 +8,7 @@ import {
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
   coverageFuzzingDiffSuccessMock,
+  apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
@@ -25,12 +26,19 @@ import mockData, {
   pipelineJobs,
 } from './mock_data';
 
+// Force Jest to transpile and cache
+// eslint-disable-next-line import/order, no-unused-vars
+import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
+// eslint-disable-next-line no-unused-vars
+import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
 const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
 const CONTAINER_SCANNING_SELECTOR = '.js-container-scanning';
 const SECRET_SCANNING_SELECTOR = '.js-secret-scanning';
 const COVERAGE_FUZZING_SELECTOR = '.js-coverage-fuzzing-widget';
+const API_FUZZING_SELECTOR = '.js-api-fuzzing-widget';
 
 describe('ee merge request widget options', () => {
   let vm;
@@ -51,6 +59,7 @@ describe('ee merge request widget options', () => {
     delete mrWidgetOptions.extends.el; // Prevent component mounting
 
     gon.features = { asyncMrWidget: true };
+    gl.mrWidgetData = { ...mockData };
 
     Component = Vue.extend(mrWidgetOptions);
     mock = new MockAdapter(axios);
@@ -67,6 +76,7 @@ describe('ee merge request widget options', () => {
     // https://gitlab.com/gitlab-org/gitlab/-/issues/214032
     return waitForPromises().then(() => {
       vm.$destroy();
+      vm = null;
       mock.restore();
       gon.features = {};
     });
@@ -117,9 +127,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(SAST_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent.trim(),
         ).toContain('SAST is loading');
       });
     });
@@ -131,7 +139,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -153,7 +161,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -175,7 +183,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             trimText(findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent),
@@ -226,7 +234,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -254,7 +262,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('renders no vulnerabilities message', done => {
+      it('renders no vulnerabilities message', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -276,7 +284,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -297,7 +305,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -319,7 +327,7 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', done => {
+      it('should render loading indicator', (done) => {
         mock.onGet('head.json').reply(200, headBrowserPerformance);
         mock.onGet('base.json').reply(200, baseBrowserPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
@@ -348,7 +356,7 @@ describe('ee merge request widget options', () => {
           setBrowserPerformance();
         });
 
-        it('should render provided data', done => {
+        it('should render provided data', (done) => {
           setImmediate(() => {
             expect(
               trimText(
@@ -360,7 +368,7 @@ describe('ee merge request widget options', () => {
         });
 
         describe('text connector', () => {
-          it('should only render information about fixed issues', done => {
+          it('should only render information about fixed issues', (done) => {
             setImmediate(() => {
               vm.mr.browserPerformanceMetrics.degraded = [];
               vm.mr.browserPerformanceMetrics.same = [];
@@ -377,7 +385,7 @@ describe('ee merge request widget options', () => {
             });
           });
 
-          it('should only render information about added issues', done => {
+          it('should only render information about added issues', (done) => {
             setImmediate(() => {
               vm.mr.browserPerformanceMetrics.improved = [];
               vm.mr.browserPerformanceMetrics.same = [];
@@ -423,7 +431,7 @@ describe('ee merge request widget options', () => {
     });
 
     describe('with empty successful request', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         mock.onGet(DEFAULT_BROWSER_PERFORMANCE.head_path).reply(200, []);
         mock.onGet(DEFAULT_BROWSER_PERFORMANCE.base_path).reply(200, []);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
@@ -468,7 +476,7 @@ describe('ee merge request widget options', () => {
         vm.mr.browserPerformance = gl.mrWidgetData.browserPerformance;
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -490,7 +498,7 @@ describe('ee merge request widget options', () => {
     });
 
     describe('when it is loading', () => {
-      it('should render loading indicator', done => {
+      it('should render loading indicator', (done) => {
         mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(200, headLoadPerformance);
         mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(200, baseLoadPerformance);
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
@@ -515,7 +523,7 @@ describe('ee merge request widget options', () => {
       });
 
       describe('default', () => {
-        beforeEach(done => {
+        beforeEach((done) => {
           setLoadPerformance();
 
           // wait for network request from component watch update method
@@ -529,7 +537,7 @@ describe('ee merge request widget options', () => {
         });
 
         describe('text connector', () => {
-          it('should only render information about fixed issues', done => {
+          it('should only render information about fixed issues', (done) => {
             vm.mr.loadPerformanceMetrics.degraded = [];
             vm.mr.loadPerformanceMetrics.same = [];
 
@@ -543,7 +551,7 @@ describe('ee merge request widget options', () => {
             });
           });
 
-          it('should only render information about added issues', done => {
+          it('should only render information about added issues', (done) => {
             vm.mr.loadPerformanceMetrics.improved = [];
             vm.mr.loadPerformanceMetrics.same = [];
 
@@ -561,7 +569,7 @@ describe('ee merge request widget options', () => {
     });
 
     describe('with empty successful request', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         mock.onGet(DEFAULT_LOAD_PERFORMANCE.head_path).reply(200, {});
         mock.onGet(DEFAULT_LOAD_PERFORMANCE.base_path).reply(200, {});
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
@@ -602,7 +610,7 @@ describe('ee merge request widget options', () => {
         vm.mr.loadPerformance = gl.mrWidgetData.loadPerformance;
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             trimText(vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent),
@@ -653,7 +661,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -677,7 +685,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             findExtendedSecurityWidget()
@@ -715,9 +723,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(DAST_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
         ).toContain('DAST is loading');
       });
     });
@@ -730,7 +736,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -752,12 +758,10 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
-            findExtendedSecurityWidget()
-              .querySelector(DAST_SELECTOR)
-              .textContent.trim(),
+            findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
           ).toContain('DAST: Loading resulted in an error');
           done();
         });
@@ -794,9 +798,7 @@ describe('ee merge request widget options', () => {
         vm = mountWithFeatureFlag();
 
         expect(
-          findExtendedSecurityWidget()
-            .querySelector(COVERAGE_FUZZING_SELECTOR)
-            .textContent.trim(),
+          findExtendedSecurityWidget().querySelector(COVERAGE_FUZZING_SELECTOR).textContent.trim(),
         ).toContain('Coverage fuzzing is loading');
       });
     });
@@ -808,7 +810,7 @@ describe('ee merge request widget options', () => {
         vm = mountWithFeatureFlag();
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -831,7 +833,7 @@ describe('ee merge request widget options', () => {
         vm = mountWithFeatureFlag();
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
             findExtendedSecurityWidget()
@@ -885,7 +887,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render provided data', done => {
+      it('should render provided data', (done) => {
         setImmediate(() => {
           expect(
             trimText(
@@ -909,13 +911,82 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('should render error indicator', done => {
+      it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
-            findExtendedSecurityWidget()
-              .querySelector(SECRET_SCANNING_SELECTOR)
-              .textContent.trim(),
+            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent.trim(),
           ).toContain('Secret scanning: Loading resulted in an error');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('API Fuzzing', () => {
+    const API_FUZZING_ENDPOINT = 'api_fuzzing_report';
+
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        target_project_full_path: '',
+        enabled_reports: {
+          api_fuzzing: true,
+        },
+        api_fuzzing_comparison_path: API_FUZZING_ENDPOINT,
+        vulnerability_feedback_path: VULNERABILITY_FEEDBACK_ENDPOINT,
+      };
+    });
+
+    describe('when it is loading', () => {
+      it('should render loading indicator', () => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        expect(
+          trimText(findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent),
+        ).toContain('API fuzzing is loading');
+      });
+    });
+
+    describe('with successful request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(200, apiFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render provided data', (done) => {
+        setImmediate(() => {
+          expect(
+            trimText(
+              findExtendedSecurityWidget().querySelector(
+                `${API_FUZZING_SELECTOR} .report-block-list-issue-description`,
+              ).textContent,
+            ),
+          ).toEqual(
+            'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
+          );
+          done();
+        });
+      });
+    });
+
+    describe('with failed request', () => {
+      beforeEach(() => {
+        mock.onGet(API_FUZZING_ENDPOINT).reply(500, {});
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render error indicator', (done) => {
+        setImmediate(() => {
+          expect(
+            findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent.trim(),
+          ).toContain('API fuzzing: Loading resulted in an error');
           done();
         });
       });
@@ -1022,7 +1093,7 @@ describe('ee merge request widget options', () => {
       });
     });
 
-    it('renders when user cannot remove branch and branch should be removed', done => {
+    it('renders when user cannot remove branch and branch should be removed', (done) => {
       vm.mr.canRemoveSourceBranch = false;
       vm.mr.shouldRemoveSourceBranch = true;
       vm.mr.state = 'readyToMerge';
@@ -1039,7 +1110,7 @@ describe('ee merge request widget options', () => {
       });
     });
 
-    it('does not render in merged state', done => {
+    it('does not render in merged state', (done) => {
       vm.mr.canRemoveSourceBranch = false;
       vm.mr.shouldRemoveSourceBranch = true;
       vm.mr.state = 'merged';
@@ -1068,7 +1139,7 @@ describe('ee merge request widget options', () => {
       status: SUCCESS,
     };
 
-    beforeEach(done => {
+    beforeEach((done) => {
       vm = mountComponent(Component, {
         mrData: {
           ...mockData,
@@ -1144,7 +1215,7 @@ describe('ee merge request widget options', () => {
       },
     ];
 
-    noSecurityReportsEnabledCases.forEach(noSecurityReportsEnabled => {
+    noSecurityReportsEnabledCases.forEach((noSecurityReportsEnabled) => {
       it('does not render the security reports widget', () => {
         gl.mrWidgetData = {
           ...mockData,

@@ -2,7 +2,7 @@
 type: index, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # User account
@@ -74,7 +74,7 @@ From there, you can:
 - Manage your [preferences](preferences.md#syntax-highlighting-theme)
   to customize your own GitLab experience
 - [View your active sessions](active_sessions.md) and revoke any of them if necessary
-- Access your audit log, a security log of important events involving your account
+- Access your audit events, a security log of important events involving your account
 
 ## Changing your password
 
@@ -101,12 +101,12 @@ To change your `username`:
 1. Enter a new username under **Change username**.
 1. Click **Update username**.
 
-CAUTION: **Caution:**
+WARNING:
 It is currently not possible to change your username if it contains a
 project with [Container Registry](../packages/container_registry/index.md) tags,
 because the project cannot be moved.
 
-TIP: **Tip:**
+NOTE:
 If you want to retain ownership over the original namespace and
 protect the URL redirects, then instead of changing a group's path or renaming a
 username, you can create a new group and transfer projects to it.
@@ -135,7 +135,7 @@ To enable private profile:
 1. Check the **Private profile** option in the **Main settings** section.
 1. Click **Update profile settings**.
 
-NOTE: **Note:**
+NOTE:
 All your profile information can be seen by yourself, and GitLab admins, even if
 the **Private profile** option is enabled.
 
@@ -188,21 +188,56 @@ To set your current status:
 1. Set the desired emoji and/or status message.
 1. Click **Set status**. Alternatively, you can click **Remove status** to remove your user status entirely.
 
-![Busy status indicator](img/busy_status_indicator_v13_6.png)
-
 or
 
 1. Click your avatar.
 1. Select **Profile**.
 1. Click **Edit profile** (pencil icon).
 1. Enter your status message in the **Your status** text field.
-   1. Alternatively, select the **Busy** checkbox ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259649) in GitLab 13.6}.
 1. Click **Add status emoji** (smiley face), and select the desired emoji.
 1. Click **Update profile settings**.
 
 You can also set your current status [using the API](../../api/users.md#user-status).
 
 If you previously selected the "Busy" checkbox, remember to deselect it when you become available again.
+
+## Busy status indicator
+
+> - Introduced in GitLab 13.6.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-busy-status-feature).
+
+To indicate to others that you are busy, you can set an indicator
+
+![Busy status indicator](img/busy_status_indicator_v13_6.png)
+
+To set the busy status indicator, either:
+
+- Set it directly:
+
+  1. Click your avatar.
+  1. Click **Set status**, or **Edit status** if you have already set a status.
+  1. Select the **Busy** checkbox
+
+- Set it on your profile:
+
+  1. Click your avatar.
+  1. Select **Profile**.
+  1. Click **Edit profile** (**{pencil}**).
+  1. Select the **Busy** checkbox
+
+### Enable busy status feature
+
+The busy status feature is deployed behind a feature flag and is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md) can enable it for your instance from the [rails console](../../administration/feature_flags.md#start-the-gitlab-rails-console).
+
+To enable it:
+
+```ruby
+Feature.enable(:set_user_availability_status)
+```
 
 ## Commit email
 
@@ -253,7 +288,7 @@ git config --global user.email <your email address>
 When signing in to the main GitLab application, a `_gitlab_session` cookie is
 set. `_gitlab_session` is cleared client-side when you close your browser
 and expires after "Application settings -> Session duration (minutes)"/`session_expire_delay`
-(defaults to `10080` minutes = 7 days).
+(defaults to `10080` minutes = 7 days) of no activity.
 
 When signing in to the main GitLab application, you can also check the
 "Remember me" option which sets the `remember_user_token`
@@ -267,10 +302,10 @@ to get you a new `_gitlab_session` and keep you signed in through browser restar
 After your `remember_user_token` expires and your `_gitlab_session` is cleared/expired,
 you are asked to sign in again to verify your identity for security reasons.
 
-NOTE: **Note:**
+NOTE:
 When any session is signed out, or when a session is revoked
 via [Active Sessions](active_sessions.md), all **Remember me** tokens are revoked.
-While other sessions will remain active, the **Remember me** feature will not restore
+While other sessions remain active, the **Remember me** feature doesn't restore
 a session if the browser is closed or the existing session expires.
 
 ### Increased sign-in time
@@ -281,7 +316,9 @@ The `remember_user_token` lifetime of a cookie can now extend beyond the deadlin
 
 GitLab uses both session and persistent cookies:
 
-- Session cookie: Session cookies are normally removed at the end of the browser session when the browser is closed. The `_gitlab_session` cookie has no expiration date.
+- Session cookie: Session cookies are normally removed at the end of the browser session when
+  the browser is closed. The `_gitlab_session` cookie has no fixed expiration date. However,
+  it expires based on its [`session_expire_delay`](#why-do-i-keep-getting-signed-out).
 - Persistent cookie: The `remember_user_token` is a cookie with an expiration date of two weeks. GitLab activates this cookie if you click Remember Me when you sign in.
 
 By default, the server sets a time-to-live (TTL) of 1-week on any session that is used.

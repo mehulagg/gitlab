@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'cycle analytics stages controller' do
+RSpec.shared_examples 'Value Stream Analytics Stages controller' do
   before do
     stub_licensed_features(cycle_analytics_for_groups: true)
 
@@ -200,13 +200,13 @@ RSpec.shared_examples 'cycle analytics stages controller' do
         expect(response).to match_response_schema('analytics/cycle_analytics/median', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
     end
 
     describe 'GET #records' do
       subject { get :records, params: params }
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
     end
 
@@ -222,7 +222,7 @@ RSpec.shared_examples 'cycle analytics stages controller' do
         expect(response).to match_response_schema('analytics/cycle_analytics/duration_chart', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
     end
   end
@@ -280,7 +280,7 @@ RSpec.shared_context 'when invalid stage parameters are given' do
   end
 end
 
-RSpec.shared_examples 'cycle analytics data endpoint examples' do
+RSpec.shared_examples 'Value Stream Analytics data endpoint examples' do
   before do
     params[:created_after] = '2019-01-01'
     params[:created_before] = '2019-04-01'

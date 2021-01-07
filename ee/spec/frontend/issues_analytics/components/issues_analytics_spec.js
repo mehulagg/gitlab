@@ -30,7 +30,7 @@ describe('Issue Analytics component', () => {
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
-    mountComponent = data => {
+    mountComponent = (data) => {
       setFixtures('<div id="mock-filter"></div>');
       const propsData = data || {
         endpoint: TEST_HOST,

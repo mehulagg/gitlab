@@ -1,6 +1,14 @@
 import { has } from 'lodash';
 import { isInIssuePage, isInMRPage, isInEpicPage } from './common_utils';
 
+/**
+ * Checks whether an element's content exceeds the element's width.
+ *
+ * @param element DOM element to check
+ */
+export const hasHorizontalOverflow = (element) =>
+  Boolean(element && element.scrollWidth > element.offsetWidth);
+
 export const addClassIfElementExists = (element, className) => {
   if (element) {
     element.classList.add(className);
@@ -56,7 +64,7 @@ export const parseBooleanDataAttributes = ({ dataset }, names) =>
  * @param {HTMLElement} element The element to test
  * @returns {Boolean} `true` if the element is currently visible, otherwise false
  */
-export const isElementVisible = element =>
+export const isElementVisible = (element) =>
   Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
 
 /**
@@ -68,4 +76,4 @@ export const isElementVisible = element =>
  * @param {HTMLElement} element The element to test
  * @returns {Boolean} `true` if the element is currently hidden, otherwise false
  */
-export const isElementHidden = element => !isElementVisible(element);
+export const isElementHidden = (element) => !isElementVisible(element);

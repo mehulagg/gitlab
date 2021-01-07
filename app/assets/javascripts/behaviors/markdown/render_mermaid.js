@@ -18,12 +18,18 @@ import { __, sprintf } from '~/locale';
 //
 
 // This is an arbitrary number; Can be iterated upon when suitable.
-const MAX_CHAR_LIMIT = 5000;
+const MAX_CHAR_LIMIT = 2000;
+// Max # of mermaid blocks that can be rendered in a page.
+const MAX_MERMAID_BLOCK_LIMIT = 50;
+// Keep a map of mermaid blocks we've already rendered.
+const elsProcessingMap = new WeakMap();
+let renderedMermaidBlocks = 0;
+
 let mermaidModule = {};
 
 function importMermaidModule() {
   return import(/* webpackChunkName: 'mermaid' */ 'mermaid')
-    .then(mermaid => {
+    .then((mermaid) => {
       let theme = 'neutral';
       const ideDarkThemes = ['dark', 'solarized-dark', 'monokai'];
 
@@ -53,7 +59,7 @@ function importMermaidModule() {
 
       return mermaid;
     })
-    .catch(err => {
+    .catch((err) => {
       flash(sprintf(__("Can't load mermaid module: %{err}"), { err }));
       // eslint-disable-next-line no-console
       console.error(err);
@@ -71,7 +77,7 @@ function fixElementSource(el) {
 }
 
 function renderMermaidEl(el) {
-  mermaidModule.init(undefined, el, id => {
+  mermaidModule.init(undefined, el, (id) => {
     const source = el.textContent;
     const svg = document.getElementById(id);
 
@@ -110,13 +116,22 @@ function renderMermaids($els) {
       let renderedChars = 0;
 
       $els.each((i, el) => {
+        // Skipping all the elements which we've already queued in requestIdleCallback
+        if (elsProcessingMap.has(el)) {
+          return;
+        }
+
         const { source } = fixElementSource(el);
         /**
-         * Restrict the rendering to a certain amount of character to
-         * prevent mermaidjs from hanging up the entire thread and
-         * causing a DoS.
+         * Restrict the rendering to a certain amount of character
+         * and mermaid blocks to prevent mermaidjs from hanging
+         * up the entire thread and causing a DoS.
          */
-        if ((source && source.length > MAX_CHAR_LIMIT) || renderedChars > MAX_CHAR_LIMIT) {
+        if (
+          (source && source.length > MAX_CHAR_LIMIT) ||
+          renderedChars > MAX_CHAR_LIMIT ||
+          renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT
+        ) {
           const html = `
           <div class="alert gl-alert gl-alert-warning alert-dismissible lazy-render-mermaid-container js-lazy-render-mermaid-container fade show" role="alert">
             <div>
@@ -146,11 +161,16 @@ function renderMermaids($els) {
         }
 
         renderedChars += source.length;
+        renderedMermaidBlocks += 1;
 
-        renderMermaidEl(el);
+        const requestId = window.requestIdleCallback(() => {
+          renderMermaidEl(el);
+        });
+
+        elsProcessingMap.set(el, requestId);
       });
     })
-    .catch(err => {
+    .catch((err) => {
       flash(sprintf(__('Encountered an error while rendering: %{err}'), { err }));
       // eslint-disable-next-line no-console
       console.error(err);

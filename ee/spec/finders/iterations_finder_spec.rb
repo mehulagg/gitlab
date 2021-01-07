@@ -18,7 +18,7 @@ RSpec.describe IterationsFinder do
 
   context 'without permissions' do
     context 'groups and projects' do
-      let(:params) { { project_ids: project_ids, group_ids: group.id, state: 'all' } }
+      let(:params) { { project_ids: project_ids, group_ids: group.id } }
 
       it 'returns iterations for groups and projects' do
         expect(subject).to be_empty
@@ -34,7 +34,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for projects' do
-      let(:params) { { project_ids: project_ids, state: 'all' } }
+      let(:params) { { project_ids: project_ids } }
 
       it 'returns iterations for projects' do
         expect(subject).to contain_exactly(iteration_from_project_1, iteration_from_project_2)
@@ -42,7 +42,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for groups' do
-      let(:params) { { group_ids: group.id, state: 'all' } }
+      let(:params) { { group_ids: group.id } }
 
       it 'returns iterations for groups' do
         expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration)
@@ -50,7 +50,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for groups and project' do
-      let(:params) { { project_ids: project_ids, group_ids: group.id, state: 'all' } }
+      let(:params) { { project_ids: project_ids, group_ids: group.id } }
 
       it 'returns iterations for groups and projects' do
         expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration, iteration_from_project_1, iteration_from_project_2)
@@ -69,14 +69,19 @@ RSpec.describe IterationsFinder do
       let(:params) do
         {
           project_ids: project_ids,
-          group_ids: group.id,
-          state: 'all'
+          group_ids: group.id
         }
       end
 
       before do
         started_group_iteration.close
         iteration_from_project_1.close
+      end
+
+      it 'filters by all states' do
+        params[:state] = 'all'
+
+        expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration, iteration_from_project_1, iteration_from_project_2)
       end
 
       it 'filters by started state' do
@@ -154,7 +159,7 @@ RSpec.describe IterationsFinder do
 
     describe '#find_by' do
       it 'finds a single iteration' do
-        finder = described_class.new(user, project_ids: [project_1.id], state: 'all')
+        finder = described_class.new(user, project_ids: [project_1.id])
 
         expect(finder.find_by(iid: iteration_from_project_1.iid)).to eq(iteration_from_project_1)
       end

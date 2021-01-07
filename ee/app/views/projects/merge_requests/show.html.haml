@@ -1,6 +1,6 @@
 = render_ce "projects/merge_requests/show"
 
-= javascript_tag nonce: true do
+= javascript_tag do
   :plain
     // Append static, server-generated data not included in merge request entity (EE-Only)
     // Object.assign would be useful here, but it blows up Phantom.js in tests
@@ -11,8 +11,8 @@
     window.gl.mrWidgetData.container_scanning_help_path = '#{help_page_path("user/application_security/container_scanning/index")}';
     window.gl.mrWidgetData.dast_help_path = '#{help_page_path("user/application_security/dast/index")}';
     window.gl.mrWidgetData.dependency_scanning_help_path = '#{help_page_path("user/application_security/dependency_scanning/index")}';
+    window.gl.mrWidgetData.api_fuzzing_help_path = '#{help_page_path("user/application_security/api_fuzzing/index")}';
     window.gl.mrWidgetData.coverage_fuzzing_help_path = '#{help_page_path("user/application_security/coverage_fuzzing/index")}';
-    window.gl.mrWidgetData.vulnerability_feedback_help_path = '#{help_page_path("user/application_security/index")}';
     window.gl.mrWidgetData.visual_review_app_available = '#{@project.feature_available?(:visual_review_app)}' === 'true';
     window.gl.mrWidgetData.license_scanning_comparison_path = '#{license_scanning_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:license_scanning)}'
     window.gl.mrWidgetData.container_scanning_comparison_path = '#{container_scanning_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:container_scanning)}'
@@ -21,3 +21,5 @@
     window.gl.mrWidgetData.dast_comparison_path = '#{dast_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:dast)}'
     window.gl.mrWidgetData.secret_scanning_comparison_path = '#{secret_detection_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:secret_detection)}'
     window.gl.mrWidgetData.coverage_fuzzing_comparison_path = '#{coverage_fuzzing_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:coverage_fuzzing) && Feature.enabled?(:coverage_fuzzing_mr_widget, @project, default_enabled: true)}'
+    window.gl.mrWidgetData.api_fuzzing_comparison_path = '#{api_fuzzing_reports_project_merge_request_path(@project, @merge_request) if @project.feature_available?(:api_fuzzing)}'
+

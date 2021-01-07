@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
@@ -22,8 +21,6 @@ import * as types from './mutation_types';
  * https://gitlab.com/gitlab-org/gitlab/issues/8519
  */
 
-const hideModal = () => $('#modal-mrwidget-security-issue').modal('hide');
-
 export const setHeadBlobPath = ({ commit }, blobPath) => commit(types.SET_HEAD_BLOB_PATH, blobPath);
 
 export const setBaseBlobPath = ({ commit }, blobPath) => commit(types.SET_BASE_BLOB_PATH, blobPath);
@@ -35,9 +32,6 @@ export const setCanReadVulnerabilityFeedback = ({ commit }, value) =>
 
 export const setVulnerabilityFeedbackPath = ({ commit }, path) =>
   commit(types.SET_VULNERABILITY_FEEDBACK_PATH, path);
-
-export const setVulnerabilityFeedbackHelpPath = ({ commit }, path) =>
-  commit(types.SET_VULNERABILITY_FEEDBACK_HELP_PATH, path);
 
 export const setCreateVulnerabilityFeedbackIssuePath = ({ commit }, path) =>
   commit(types.SET_CREATE_VULNERABILITY_FEEDBACK_ISSUE_PATH, path);
@@ -70,7 +64,7 @@ export const fetchContainerScanningDiff = ({ state, dispatch }) => {
   dispatch('requestContainerScanningDiff');
 
   return fetchDiffData(state, state.containerScanning.paths.diffEndpoint, 'container_scanning')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveContainerScanningDiffSuccess', data);
     })
     .catch(() => {
@@ -99,7 +93,7 @@ export const fetchDastDiff = ({ state, dispatch }) => {
   dispatch('requestDastDiff');
 
   return fetchDiffData(state, state.dast.paths.diffEndpoint, 'dast')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveDastDiffSuccess', data);
     })
     .catch(() => {
@@ -127,7 +121,7 @@ export const fetchDependencyScanningDiff = ({ state, dispatch }) => {
   dispatch('requestDependencyScanningDiff');
 
   return fetchDiffData(state, state.dependencyScanning.paths.diffEndpoint, 'dependency_scanning')
-    .then(data => {
+    .then((data) => {
       dispatch('receiveDependencyScanningDiffSuccess', data);
     })
     .catch(() => {
@@ -164,7 +158,7 @@ export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
       },
     }),
   ])
-    .then(values => {
+    .then((values) => {
       dispatch('receiveCoverageFuzzingDiffSuccess', {
         diff: values[0].data,
         enrichData: values[1].data,
@@ -177,12 +171,6 @@ export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
 
 export const updateCoverageFuzzingIssue = ({ commit }, issue) =>
   commit(types.UPDATE_COVERAGE_FUZZING_ISSUE, issue);
-
-export const openModal = ({ dispatch }, payload) => {
-  dispatch('setModalData', payload);
-
-  $('#modal-mrwidget-security-issue').modal('show');
-};
 
 export const setModalData = ({ commit }, payload) => commit(types.SET_ISSUE_MODAL_DATA, payload);
 export const requestDismissVulnerability = ({ commit }) =>
@@ -199,7 +187,7 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
     vulnerabilityName: state.modal.vulnerability.name,
   });
 
-  axios
+  return axios
     .post(state.createVulnerabilityFeedbackDismissalPath, {
       vulnerability_feedback: {
         category: state.modal.vulnerability.category,
@@ -207,6 +195,7 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
         feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: state.modal.vulnerability.project_fingerprint,
+        finding_uuid: state.modal.vulnerability.uuid,
         vulnerability_data: state.modal.vulnerability,
       },
     })
@@ -219,7 +208,6 @@ export const dismissVulnerability = ({ state, dispatch }, comment) => {
 
       dispatch('closeDismissalCommentBox');
       dispatch('receiveDismissVulnerability', updatedIssue);
-      hideModal();
       toast(toastMsg);
     })
     .catch(() => {
@@ -248,7 +236,7 @@ export const addDismissalComment = ({ state, dispatch }, { comment }) => {
         vulnerabilityName: vulnerability.name,
       });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissalFeedback.project_id,
       id: dismissalFeedback.id,
@@ -277,7 +265,7 @@ export const deleteDismissalComment = ({ state, dispatch }) => {
     vulnerabilityName: vulnerability.name,
   });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissalFeedback.project_id,
       comment: '',
@@ -301,7 +289,6 @@ export const requestDeleteDismissalComment = ({ commit }) => {
 
 export const receiveDeleteDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveDeleteDismissalCommentError = ({ commit }, error) => {
@@ -314,7 +301,6 @@ export const requestAddDismissalComment = ({ commit }) => {
 
 export const receiveAddDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveAddDismissalCommentError = ({ commit }, error) => {
@@ -324,7 +310,7 @@ export const receiveAddDismissalCommentError = ({ commit }, error) => {
 export const revertDismissVulnerability = ({ state, dispatch }) => {
   dispatch('requestDismissVulnerability');
 
-  axios
+  return axios
     .delete(
       state.modal.vulnerability.dismissalFeedback.destroy_vulnerability_feedback_dismissal_path,
     )
@@ -337,8 +323,6 @@ export const revertDismissVulnerability = ({ state, dispatch }) => {
       };
 
       dispatch('receiveDismissVulnerability', updatedIssue);
-
-      hideModal();
     })
     .catch(() =>
       dispatch(
@@ -370,11 +354,12 @@ export const createNewIssue = ({ state, dispatch }) => {
         feedback_type: FEEDBACK_TYPE_ISSUE,
         category: state.modal.vulnerability.category,
         project_fingerprint: state.modal.vulnerability.project_fingerprint,
+        finding_uuid: state.modal.vulnerability.uuid,
         pipeline_id: state.pipelineId,
         vulnerability_data: state.modal.vulnerability,
       },
     })
-    .then(response => {
+    .then((response) => {
       dispatch('receiveCreateIssue');
       // redirect the user to the created issue
       visitUrl(response.data.issue_url);
@@ -401,6 +386,7 @@ export const createMergeRequest = ({ state, dispatch }) => {
         feedback_type: FEEDBACK_TYPE_MERGE_REQUEST,
         category,
         project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: vulnerability,
       },
     })
@@ -426,7 +412,6 @@ export const downloadPatch = ({ state }) => {
   */
   const { vulnerability } = state.modal;
   download({ fileData: vulnerability.remediations[0].diff, fileName: 'remediation.patch' });
-  $('#modal-mrwidget-security-issue').modal('hide');
 };
 
 export const requestCreateMergeRequest = ({ commit }) => {

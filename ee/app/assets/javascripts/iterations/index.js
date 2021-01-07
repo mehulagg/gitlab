@@ -9,7 +9,12 @@ import IterationReport from './components/iteration_report.vue';
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      batchMax: 1,
+    },
+  ),
 });
 
 export function initIterationsList(namespaceType) {
@@ -80,5 +85,3 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
     },
   });
 }
-
-export default {};

@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 const ANY_WEIGHT = 'Any weight';
 const NO_WEIGHT = 'None';
@@ -7,8 +7,8 @@ const NO_WEIGHT = 'None';
 export default {
   components: {
     GlButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
   props: {
     board: {
@@ -49,17 +49,15 @@ export default {
       this.dropdownHidden = false;
       this.$refs.dropdown.$children[0].show();
     },
-    selectWeight({ target: { value: weight } }) {
+    selectWeight(weight) {
       this.board.weight = this.weightInt(weight);
       this.dropdownHidden = true;
     },
     weightInt(weight) {
-      if (weight > 0) {
-        return parseInt(weight, 10);
+      if (weight >= 0) {
+        return weight;
       } else if (weight === NO_WEIGHT) {
         return -2;
-      } else if (weight === '0') {
-        return 0;
       }
       return -1;
     },
@@ -77,19 +75,21 @@ export default {
     </div>
     <div :class="valueClass" :hidden="!dropdownHidden" class="value">{{ valueText }}</div>
 
-    <gl-deprecated-dropdown
+    <gl-dropdown
       ref="dropdown"
       :hidden="dropdownHidden"
       :text="valueText"
-      class="w-100"
-      menu-class="w-100"
+      block
       toggle-class="d-flex justify-content-between"
     >
-      <div ref="weight-select" @click="selectWeight">
-        <gl-deprecated-dropdown-item v-for="weight in weights" :key="weight" :value="weight">
-          {{ weight }}
-        </gl-deprecated-dropdown-item>
-      </div>
-    </gl-deprecated-dropdown>
+      <gl-dropdown-item
+        v-for="weight in weights"
+        :key="weight"
+        :value="weight"
+        @click="selectWeight(weight)"
+      >
+        {{ weight }}
+      </gl-dropdown-item>
+    </gl-dropdown>
   </div>
 </template>

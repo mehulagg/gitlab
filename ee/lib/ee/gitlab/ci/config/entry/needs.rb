@@ -8,14 +8,16 @@ module EE
           module Needs
             extend ActiveSupport::Concern
 
-            NEEDS_CROSS_DEPENDENCIES_LIMIT = 5
+            NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT = 5
 
             prepended do
               validations do
                 validate on: :composed do
                   cross_dependencies = value[:cross_dependency].to_a
-                  if cross_dependencies.size > NEEDS_CROSS_DEPENDENCIES_LIMIT
-                    errors.add(:config, "must be less than or equal to #{NEEDS_CROSS_DEPENDENCIES_LIMIT}")
+                  cross_project_dependencies = cross_dependencies.select { |dep| dep[:project] }
+
+                  if cross_project_dependencies.size > NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT
+                    errors.add(:config, "must be less than or equal to #{NEEDS_CROSS_PROJECT_DEPENDENCIES_LIMIT}")
                   end
                 end
               end

@@ -7,7 +7,7 @@ import {
   ICON_NOTFOUND,
 } from '../constants';
 
-const textBuilder = results => {
+const textBuilder = (results) => {
   const { failed, errored, resolved, total } = results;
 
   const failedOrErrored = (failed || 0) + (errored || 0);
@@ -62,35 +62,34 @@ export const recentFailuresTextBuilder = (summary = {}) => {
   }
   return sprintf(
     n__(
-      s__(
-        'Reports|%{recentlyFailed} out of %{failed} failed tests has failed more than once in the last 14 days',
-      ),
-      s__(
-        'Reports|%{recentlyFailed} out of %{failed} failed tests have failed more than once in the last 14 days',
-      ),
+      'Reports|%{recentlyFailed} out of %{failed} failed tests has failed more than once in the last 14 days',
+      'Reports|%{recentlyFailed} out of %{failed} failed tests have failed more than once in the last 14 days',
       recentlyFailed,
     ),
     { recentlyFailed, failed },
   );
 };
 
-export const countRecentlyFailedTests = subject => {
+export const countRecentlyFailedTests = (subject) => {
   // handle either a single report or an array of reports
   const reports = !subject.length ? [subject] : subject;
 
   return reports
-    .map(report => {
+    .map((report) => {
       return (
         [report.new_failures, report.existing_failures, report.resolved_failures]
           // only count tests which have failed more than once
-          .map(failureArray => failureArray.filter(failure => failure.recent_failures > 1).length)
+          .map(
+            (failureArray) =>
+              failureArray.filter((failure) => failure.recent_failures?.count > 1).length,
+          )
           .reduce((total, count) => total + count, 0)
       );
     })
     .reduce((total, count) => total + count, 0);
 };
 
-export const statusIcon = status => {
+export const statusIcon = (status) => {
   if (status === STATUS_FAILED) {
     return ICON_WARNING;
   }

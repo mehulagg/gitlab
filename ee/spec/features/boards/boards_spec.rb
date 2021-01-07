@@ -75,10 +75,9 @@ RSpec.describe 'issue boards', :js do
   end
 
   context 'swimlanes dropdown' do
-    context 'feature flag on' do
+    context 'license feature on' do
       before do
         stub_licensed_features(swimlanes: true)
-        stub_feature_flags(boards_with_swimlanes: true, swimlanes: true)
       end
 
       it 'does not show Group by dropdown when user is not logged in' do
@@ -96,9 +95,9 @@ RSpec.describe 'issue boards', :js do
       end
     end
 
-    context 'feature flag off' do
+    context 'license feature off' do
       before do
-        stub_feature_flags(boards_with_swimlanes: false, swimlanes: false)
+        stub_licensed_features(swimlanes: false)
       end
 
       it 'does not show Group by dropdown when user is not logged in' do

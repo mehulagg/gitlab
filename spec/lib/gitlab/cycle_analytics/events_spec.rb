@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'value stream analytics events', :aggregate_failures do
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:user) { create(:user, :admin) }
+  let_it_be(:user) { project.owner }
   let(:from_date) { 10.days.ago }
   let!(:context) { create(:issue, project: project, created_at: 2.days.ago) }
 
@@ -40,6 +40,9 @@ RSpec.describe 'value stream analytics events', :aggregate_failures do
 
     before do
       create_commit_referencing_issue(context)
+
+      # Adding extra duration because the new VSA backend filters out 0 durations between these columns
+      context.metrics.update!(first_mentioned_in_commit_at: context.metrics.first_associated_with_milestone_at + 1.day)
     end
 
     it 'has correct attributes' do

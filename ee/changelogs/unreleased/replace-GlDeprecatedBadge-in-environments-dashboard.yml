@@ -1,5 +1,0 @@
----
-title: Replaced GlDeprecatedBadge with GlBadge for environments_dashboard
-merge_request: 45679
-author:
-type: changed

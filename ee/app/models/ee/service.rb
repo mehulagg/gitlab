@@ -10,7 +10,6 @@ module EE
 
     EE_PROJECT_SPECIFIC_SERVICE_NAMES = %w[
       github
-      jenkins
     ].freeze
 
     class_methods do

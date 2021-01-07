@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -20,7 +20,7 @@ specific environments are "protected" to prevent unauthorized people from affect
 By default, a protected environment does one thing: it ensures that only people
 with the right privileges can deploy to it, thus keeping it safe.
 
-NOTE: **Note:**
+NOTE:
 A GitLab admin is always allowed to use environments, even if they are protected.
 
 To protect, update, or unprotect an environment, you need to have at least
@@ -36,14 +36,14 @@ To protect an environment:
 1. In the **Allowed to Deploy** dropdown menu, select the role, users, or groups you
    want to give deploy access to. Keep in mind that:
    - There are two roles to choose from:
-     - **Maintainers**: will allow access to all maintainers in the project.
-     - **Developers**: will allow access to all maintainers and all developers in the project.
+     - **Maintainers**: Allows access to all maintainers in the project.
+     - **Developers**: Allows access to all maintainers and all developers in the project.
    - You can only select groups that are already associated with the project.
-   - Only users that have at least Developer permission level will appear in
+   - Only users that have at least the Developer permission level appear in
      the **Allowed to Deploy** dropdown menu.
 1. Click the **Protect** button.
 
-The protected environment will now appear in the list of protected environments.
+The protected environment now appears in the list of protected environments.
 
 ### Use the API to protect an environment
 

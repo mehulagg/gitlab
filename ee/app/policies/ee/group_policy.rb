@@ -21,6 +21,10 @@ module EE
         @subject.feature_available?(:cycle_analytics_for_groups)
       end
 
+      condition(:group_ci_cd_analytics_available) do
+        @subject.feature_available?(:group_ci_cd_analytics)
+      end
+
       condition(:group_merge_request_analytics_available) do
         @subject.feature_available?(:group_merge_request_analytics)
       end
@@ -78,7 +82,7 @@ module EE
       end
 
       condition(:group_saml_group_sync_available, scope: :subject) do
-        @subject.feature_available?(:group_saml_group_sync)
+        @subject.saml_group_sync_available?
       end
 
       condition(:group_timelogs_available) do
@@ -105,6 +109,10 @@ module EE
 
       condition(:push_rules_available) do
         @subject.feature_available?(:push_rules)
+      end
+
+      condition(:group_merge_request_approval_settings_enabled) do
+        @subject.feature_available?(:group_merge_request_approval_settings)
       end
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
@@ -161,11 +169,19 @@ module EE
         enable :read_group_cycle_analytics, :create_group_stage, :read_group_stage, :update_group_stage, :delete_group_stage
       end
 
+      rule { reporter & group_ci_cd_analytics_available }.policy do
+        enable :view_group_ci_cd_analytics
+      end
+
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
         enable :change_prevent_group_forking
       end
 
-      rule { can?(:read_group) & epics_available }.enable :read_epic
+      rule { can?(:read_group) & epics_available }.policy do
+        enable :read_epic
+        enable :read_epic_board
+        enable :read_epic_list
+      end
 
       rule { can?(:read_group) & iterations_available }.enable :read_iteration
 
@@ -205,7 +221,7 @@ module EE
 
       rule { group_saml_config_enabled & group_saml_available & (admin | owner) }.enable :admin_group_saml
 
-      rule { group_saml_group_sync_available & group_saml_enabled & can?(:admin_group_saml) }.policy do
+      rule { group_saml_config_enabled & group_saml_group_sync_available & (admin | owner) }.policy do
         enable :admin_saml_group_links
       end
 
@@ -230,6 +246,7 @@ module EE
         enable :create_wiki
         enable :admin_merge_request
         enable :read_ci_minutes_quota
+        enable :read_group_audit_events
       end
 
       rule { security_dashboard_enabled & developer }.enable :read_group_security_dashboard
@@ -240,6 +257,10 @@ module EE
         enable :read_group_compliance_dashboard
         enable :read_group_credentials_inventory
         enable :admin_group_credentials_inventory
+      end
+
+      rule { (admin | owner) & group_merge_request_approval_settings_enabled }.policy do
+        enable :admin_merge_request_approval_settings
       end
 
       rule { needs_new_sso_session }.policy do

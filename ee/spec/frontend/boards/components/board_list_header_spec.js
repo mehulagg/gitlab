@@ -12,10 +12,6 @@ import List from '~/boards/models/list';
 import axios from '~/lib/utils/axios_utils';
 import sidebarEventHub from '~/sidebar/event_hub';
 
-// board_promotion_state tries to mount on the real DOM,
-// so we are mocking it in this test
-jest.mock('ee/boards/components/board_promotion_state', () => ({}));
-
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
@@ -86,22 +82,22 @@ describe('Board List Header Component', () => {
 
   describe('Settings Button', () => {
     const hasSettings = [ListType.assignee, ListType.milestone, ListType.label];
-    const hasNoSettings = [ListType.backlog, ListType.blank, ListType.closed, ListType.promotion];
+    const hasNoSettings = [ListType.backlog, ListType.closed];
 
-    it.each(hasSettings)('does render for List Type `%s`', listType => {
+    it.each(hasSettings)('does render for List Type `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findSettingsButton().exists()).toBe(true);
     });
 
-    it.each(hasNoSettings)('does not render for List Type `%s`', listType => {
+    it.each(hasNoSettings)('does not render for List Type `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findSettingsButton().exists()).toBe(false);
     });
 
     it('has a test for each list type', () => {
-      Object.values(ListType).forEach(value => {
+      Object.values(ListType).forEach((value) => {
         expect([...hasSettings, ...hasNoSettings]).toContain(value);
       });
     });

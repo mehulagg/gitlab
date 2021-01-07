@@ -1,7 +1,7 @@
 ---
 stage: none
 group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GraphQL API
@@ -16,7 +16,7 @@ For those new to the GitLab GraphQL API, see
 
 ### Quick Reference
 
-- GitLab's GraphQL API endpoint is located at `/api/graphql`.
+- The GitLab GraphQL API endpoint is located at `/api/graphql`.
 - Get an [introduction to GraphQL from graphql.org](https://graphql.org/).
 - GitLab supports a wide range of resources, listed in the [GraphQL API Reference](reference/index.md).
 
@@ -82,6 +82,10 @@ The process is as follows:
    release post (at or prior to X.11 and X.5 releases).
 1. Fields meeting criteria are removed in X.0 or X.6.
 
+NOTE:
+Fields behind a feature flag and disabled by default are exempt from the deprecation process,
+and can be removed at any time without notice.
+
 ### List of removed items
 
 View the [fields, enums, and other items we removed](removed_items.md) from the GraphQL API.
@@ -115,9 +119,9 @@ library GitLab uses on the backend.
 
 ## Reference
 
-GitLab's GraphQL reference [is available](reference/index.md).
+The GitLab GraphQL reference [is available](reference/index.md).
 
-It is automatically generated from GitLab's GraphQL schema and embedded in a Markdown file.
+It is automatically generated from the GitLab GraphQL schema and embedded in a Markdown file.
 
 Machine-readable versions are also available:
 

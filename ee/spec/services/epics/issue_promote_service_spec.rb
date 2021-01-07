@@ -62,8 +62,6 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
           let!(:issue_note) { create(:note, noteable: issue, author: user, project: project, note: "note without mention") }
 
           before do
-            allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
-
             subject.execute(issue)
 
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id)
@@ -191,7 +189,6 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
 
         context 'when issue has notes', :snowplow do
           before do
-            allow(ProductAnalytics::Tracker).to receive(:event).with('epics', 'promote', an_instance_of(Hash))
             issue.reload
           end
 

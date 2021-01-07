@@ -23,7 +23,7 @@ import {
 } from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import getAlerts from '../graphql/queries/get_alerts.query.graphql';
+import getAlerts from '~/graphql_shared/queries/get_alerts.query.graphql';
 import getAlertsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
 import {
   ALERTS_STATUS_TABS,
@@ -138,7 +138,7 @@ export default {
           data.project || {};
         const now = new Date();
 
-        const listWithData = list.map(alert => {
+        const listWithData = list.map((alert) => {
           const then = new Date(alert.startedAt);
           const diff = now - then;
 

@@ -22,7 +22,7 @@ gem 'rugged', '~> 0.28'
 gem 'grape-path-helpers', '~> 1.5'
 
 gem 'faraday', '~> 1.0'
-gem 'marginalia', '~> 1.9.0'
+gem 'marginalia', '~> 1.10.0'
 
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
@@ -66,7 +66,7 @@ gem 'attr_encrypted', '~> 3.1.0'
 gem 'u2f', '~> 0.2.1'
 
 # GitLab Pages
-gem 'validates_hostname', '~> 1.0.10'
+gem 'validates_hostname', '~> 1.0.11'
 gem 'rubyzip', '~> 2.0.0', require: 'zip'
 # GitLab Pages letsencrypt support
 gem 'acme-client', '~> 2.0', '>= 2.0.6'
@@ -115,11 +115,11 @@ gem 'carrierwave', '~> 1.3'
 gem 'mini_magick', '~> 4.10.1'
 
 # for backups
-gem 'fog-aws', '~> 3.5'
+gem 'fog-aws', '~> 3.7'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'fog-google', '~> 1.11'
+gem 'fog-google', '~> 1.12'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -145,7 +145,7 @@ gem 'aws-sdk-s3', '~> 1'
 gem 'faraday_middleware-aws-sigv4', '~>0.3.0'
 
 # Markdown and HTML processing
-gem 'html-pipeline', '~> 2.12'
+gem 'html-pipeline', '~> 2.13.2'
 gem 'deckar01-task_list', '2.3.1'
 gem 'gitlab-markup', '~> 1.7.1'
 gem 'github-markup', '~> 1.7.0', require: 'github/markup'
@@ -159,7 +159,8 @@ gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
-gem 'rouge', '~> 3.25.0'
+gem 'asciidoctor-kroki', '~> 0.2.2', require: false
+gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
 gem 'nokogiri', '~> 1.10.9'
@@ -188,10 +189,10 @@ group :puma do
 end
 
 # State machine
-gem 'state_machines-activerecord', '~> 0.6.0'
+gem 'state_machines-activerecord', '~> 0.8.0'
 
 # Issue tags
-gem 'acts-as-taggable-on', '~> 6.0'
+gem 'acts-as-taggable-on', '~> 7.0'
 
 # Background jobs
 gem 'sidekiq', '~> 5.2.7'
@@ -209,7 +210,7 @@ gem 'httparty', '~> 0.16.4'
 gem 'rainbow', '~> 3.0'
 
 # Progress bar
-gem 'ruby-progressbar'
+gem 'ruby-progressbar', '~> 1.10'
 
 # GitLab settings
 gem 'settingslogic', '~> 2.0.9'
@@ -291,7 +292,6 @@ gem 'sassc-rails', '~> 2.1.0'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
-gem 'font-awesome-rails', '~> 4.7'
 gem 'gemojione', '~> 3.3'
 gem 'gon', '~> 6.2'
 gem 'request_store', '~> 1.5'
@@ -306,12 +306,12 @@ gem 'rack-attack', '~> 6.3.0'
 gem 'sentry-raven', '~> 3.0'
 
 # PostgreSQL query parsing
-gem 'gitlab-pg_query', '~> 1.3', require: 'pg_query'
+gem 'pg_query', '~> 1.3.0'
 
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.13.1'
+gem 'gitlab-labkit', '0.13.5'
 
 # I18n
 gem 'ruby_parser', '~> 3.15', require: false
@@ -331,6 +331,7 @@ gem 'snowplow-tracker', '~> 0.6.1'
 # Metrics
 group :metrics do
   gem 'method_source', '~> 1.0', require: false
+  gem 'webrick', '~> 1.6.1', require: false
 
   # Prometheus
   gem 'prometheus-client-mmap', '~> 0.12.0'
@@ -351,6 +352,7 @@ group :development do
 end
 
 group :development, :test do
+  gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
   gem 'pry-byebug', '~> 3.9.0', platform: :mri
   gem 'pry-rails', '~> 0.3.9'
@@ -358,8 +360,8 @@ group :development, :test do
   gem 'awesome_print', require: false
 
   gem 'database_cleaner', '~> 1.7.0'
-  gem 'factory_bot_rails', '~> 5.1.0'
-  gem 'rspec-rails', '~> 4.0.0'
+  gem 'factory_bot_rails', '~> 6.1.0'
+  gem 'rspec-rails', '~> 4.0.1'
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
   gem 'minitest', '~> 5.11.0'
@@ -370,7 +372,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.1.0', require: false
+  gem 'gitlab-styles', '~> 5.3.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
@@ -428,7 +430,7 @@ end
 gem 'octokit', '~> 4.15'
 
 # https://gitlab.com/gitlab-org/gitlab/issues/207207
-gem 'gitlab-mail_room', '~> 0.0.7', require: 'mail_room'
+gem 'gitlab-mail_room', '~> 0.0.8', require: 'mail_room'
 
 gem 'email_reply_trimmer', '~> 0.1'
 gem 'html2text'
@@ -464,7 +466,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.5.0-rc2'
+gem 'gitaly', '~> 13.7.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -477,6 +479,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
+gem 'gitlab-experiment', '~> 0.4.4'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

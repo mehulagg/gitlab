@@ -23,7 +23,7 @@ export const fetchReport = ({ state, dispatch }) => {
       if (!state.blobPath) throw new Error();
       dispatch('receiveReportSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveReportError', error);
       createFlash(s__('ciReport|There was an error fetching the codequality report.'));
     });

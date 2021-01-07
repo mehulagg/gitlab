@@ -1,6 +1,8 @@
 <script>
-import { formatTime } from '~/lib/utils/datetime_utility';
+import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { s__, n__ } from '~/locale';
+
+const defaultPrecision = 2;
 
 export default {
   props: {
@@ -10,10 +12,9 @@ export default {
     },
   },
   computed: {
-    totalDuration() {
-      return formatTime(this.counts.totalDuration);
-    },
     statistics() {
+      const formatter = getFormatter(SUPPORTED_FORMATS.percentHundred);
+
       return [
         {
           title: s__('PipelineCharts|Total:'),
@@ -29,11 +30,7 @@ export default {
         },
         {
           title: s__('PipelineCharts|Success ratio:'),
-          value: `${this.counts.successRatio}%`,
-        },
-        {
-          title: s__('PipelineCharts|Total duration:'),
-          value: this.totalDuration,
+          value: formatter(this.counts.successRatio, defaultPrecision),
         },
       ];
     },

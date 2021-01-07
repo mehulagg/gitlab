@@ -189,7 +189,7 @@ describe('IDE store file actions', () => {
     });
 
     describe('call to service', () => {
-      const callExpectation = serviceCalled => {
+      const callExpectation = (serviceCalled) => {
         store.dispatch('getFileData', { path: localFile.path });
 
         if (serviceCalled) {
@@ -422,11 +422,11 @@ describe('IDE store file actions', () => {
           loadingWhenGettingRawData = undefined;
           loadingWhenGettingBaseRawData = undefined;
 
-          jest.spyOn(service, 'getRawFileData').mockImplementation(f => {
+          jest.spyOn(service, 'getRawFileData').mockImplementation((f) => {
             loadingWhenGettingRawData = f.loading;
             return Promise.resolve('raw');
           });
-          jest.spyOn(service, 'getBaseRawFileData').mockImplementation(f => {
+          jest.spyOn(service, 'getBaseRawFileData').mockImplementation((f) => {
             loadingWhenGettingBaseRawData = f.loading;
             return Promise.resolve('rawBase');
           });
@@ -510,8 +510,6 @@ describe('IDE store file actions', () => {
 
   describe('changeFileContent', () => {
     let tmpFile;
-    const callAction = (content = 'content\n') =>
-      store.dispatch('changeFileContent', { path: tmpFile.path, content });
 
     beforeEach(() => {
       tmpFile = file('tmpFile');
@@ -521,9 +519,21 @@ describe('IDE store file actions', () => {
     });
 
     it('updates file content', () => {
-      return callAction().then(() => {
+      const content = 'content\n';
+
+      return store.dispatch('changeFileContent', { path: tmpFile.path, content }).then(() => {
         expect(tmpFile.content).toBe('content\n');
       });
+    });
+
+    it('does nothing if path does not exist', () => {
+      const content = 'content\n';
+
+      return store
+        .dispatch('changeFileContent', { path: 'not/a/real_file.txt', content })
+        .then(() => {
+          expect(tmpFile.content).toBe('\n');
+        });
     });
 
     it('adds file into stagedFiles array', () => {
@@ -733,7 +743,7 @@ describe('IDE store file actions', () => {
     });
 
     it('returns true when opened', () => {
-      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then(added => {
+      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then((added) => {
         expect(added).toBe(true);
       });
     });
@@ -745,7 +755,7 @@ describe('IDE store file actions', () => {
         key: `pending-${f.key}`,
       });
 
-      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then(added => {
+      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then((added) => {
         expect(added).toBe(false);
       });
     });

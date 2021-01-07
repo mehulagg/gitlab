@@ -40,7 +40,7 @@ export default {
       return (
         this.downstreamPipelines &&
         this.downstreamPipelines.some(
-          pipeline =>
+          (pipeline) =>
             pipeline.details &&
             pipeline.details.status &&
             pipeline.details.status.group === STATUS_FAILED,

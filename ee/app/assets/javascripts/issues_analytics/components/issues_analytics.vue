@@ -66,7 +66,7 @@ export default {
       const data = [];
 
       if (chartHasData()) {
-        Object.keys(chartData).forEach(key => {
+        Object.keys(chartData).forEach((key) => {
           const date = new Date(key);
           const label = `${getMonthNames(true)[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
           const val = chartData[key];
@@ -78,7 +78,7 @@ export default {
       return data;
     },
     chartLabels() {
-      return this.data.map(val => val[0]);
+      return this.data.map((val) => val[0]);
     },
     chartDateRange() {
       return `${this.chartLabels[0]} - ${this.chartLabels[this.chartLabels.length - 1]}`;
@@ -110,7 +110,7 @@ export default {
       };
     },
     series() {
-      return this.data.map(val => val[1]);
+      return this.data.map((val) => val[1]);
     },
     seriesAverage() {
       return engineeringNotation(average(...this.series), 0);
@@ -159,11 +159,11 @@ export default {
         return false;
       }
 
-      return Object.values(this.chartData).some(val => val > 0);
+      return Object.values(this.chartData).some((val) => val > 0);
     },
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }

@@ -37,12 +37,19 @@ class Deployment < ApplicationRecord
   end
 
   scope :for_status, -> (status) { where(status: status) }
+  scope :for_project, -> (project_id) { where(project_id: project_id) }
 
   scope :visible, -> { where(status: %i[running success failed canceled]) }
   scope :stoppable, -> { where.not(on_stop: nil).where.not(deployable_id: nil).success }
   scope :active, -> { where(status: %i[created running]) }
-  scope :older_than, -> (deployment) { where('id < ?', deployment.id) }
-  scope :with_deployable, -> { includes(:deployable).where('deployable_id IS NOT NULL') }
+  scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
+  scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+
+  scope :finished_between, -> (start_date, end_date = nil) do
+    selected = where('deployments.finished_at >= ?', start_date)
+    selected = selected.where('deployments.finished_at < ?', end_date) if end_date
+    selected
+  end
 
   FINISHED_STATUSES = %i[success failed canceled].freeze
 
@@ -102,6 +109,23 @@ class Deployment < ApplicationRecord
         Deployments::ExecuteHooksWorker.perform_async(id)
       end
     end
+
+    after_transition any => any - [:skipped] do |deployment, transition|
+      next if transition.loopback?
+      next unless Feature.enabled?(:jira_sync_deployments, deployment.project)
+
+      deployment.run_after_commit do
+        ::JiraConnect::SyncDeploymentsWorker.perform_async(id)
+      end
+    end
+  end
+
+  after_create unless: :importing? do |deployment|
+    next unless Feature.enabled?(:jira_sync_deployments, deployment.project)
+
+    run_after_commit do
+      ::JiraConnect::SyncDeploymentsWorker.perform_async(deployment.id)
+    end
   end
 
   enum status: {
@@ -148,6 +172,10 @@ class Deployment < ApplicationRecord
       by_project.each do |project, ref_paths|
         project.repository.delete_refs(*ref_paths.flatten)
       end
+    end
+
+    def latest_for_sha(sha)
+      where(sha: sha).order(id: :desc).take
     end
   end
 

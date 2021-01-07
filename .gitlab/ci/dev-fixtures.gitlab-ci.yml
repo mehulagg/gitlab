@@ -8,14 +8,13 @@
   needs: ["setup-test-env"]
   variables:
     FIXTURE_PATH: "db/fixtures/development"
-    SEED_CYCLE_ANALYTICS: "true"
+    SEED_VSA: "true"
     SEED_PRODUCTIVITY_ANALYTICS: "true"
-    CYCLE_ANALYTICS_ISSUE_COUNT: 1
+    VSA_ISSUE_COUNT: 1
     SIZE: 0  # number of external projects to fork, requires network connection
     # SEED_NESTED_GROUPS: "false" # requires network connection
 
 .run-dev-fixtures-script: &run-dev-fixtures-script
-  - run_timed_command "scripts/gitaly-test-build"
   - run_timed_command "scripts/gitaly-test-spawn"
   - run_timed_command "RAILS_ENV=test bundle exec rake db:seed_fu"
 

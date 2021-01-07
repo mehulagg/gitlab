@@ -9,9 +9,11 @@ RSpec.describe Vulnerabilities::CreateService do
 
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
-  let(:finding) { create(:vulnerabilities_finding, project: project) }
+  let(:finding) { create(:vulnerabilities_finding, name: finding_name, project: project) }
   let(:finding_id) { finding.id }
   let(:expected_error_messages) { { base: ['finding is not found or is already attached to a vulnerability'] } }
+  let(:finding_name) { 'New title' }
+  let(:vulnerability) { project.vulnerabilities.last }
 
   subject { described_class.new(project, user, finding_id: finding_id).execute }
 
@@ -40,7 +42,6 @@ RSpec.describe Vulnerabilities::CreateService do
 
     context 'and finding is dismissed' do
       let(:finding) { create(:vulnerabilities_finding, :with_dismissal_feedback, project: project) }
-      let(:vulnerability) { project.vulnerabilities.last }
 
       it 'creates a vulnerability in a dismissed state and sets dismissal information' do
         expect { subject }.to change { project.vulnerabilities.count }.by(1)
@@ -48,6 +49,15 @@ RSpec.describe Vulnerabilities::CreateService do
         expect(vulnerability.state).to eq('dismissed')
         expect(vulnerability.dismissed_at).to eq(finding.dismissal_feedback.created_at)
         expect(vulnerability.dismissed_by_id).to eq(finding.dismissal_feedback.author_id)
+      end
+    end
+
+    context 'when finding name is longer than 255 characters' do
+      let(:finding_name) { 'a' * 256 }
+
+      it 'truncates vulnerability title to have 255 characters' do
+        expect { subject }.to change { project.vulnerabilities.count }.by(1)
+        expect(vulnerability.title).to have_attributes(size: 255)
       end
     end
 

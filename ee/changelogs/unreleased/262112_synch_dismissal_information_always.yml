@@ -1,5 +1,0 @@
----
-title: Synchronize dismissal information between `finding` and `vulnerability` entries
-merge_request: 46141
-author:
-type: fixed

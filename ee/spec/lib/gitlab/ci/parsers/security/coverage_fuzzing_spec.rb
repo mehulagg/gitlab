@@ -6,14 +6,11 @@ RSpec.describe Gitlab::Ci::Parsers::Security::CoverageFuzzing do
   let(:project) { artifact.project }
   let(:pipeline) { artifact.job.pipeline }
   let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-  let(:parser) { described_class.new }
   let(:artifact) { create(:ee_ci_job_artifact, :coverage_fuzzing) }
 
   describe '#parse!' do
     before do
-      artifact.each_blob do |blob|
-        parser.parse!(blob, report)
-      end
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
     it 'parses all identifiers and findings' do

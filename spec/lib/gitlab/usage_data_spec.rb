@@ -54,6 +54,32 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect { subject }.to raise_error('Stopped calculating recorded_at')
     end
+
+    context 'when generating usage ping in critical weeks' do
+      it 'does not raise error when generated in last week of the year' do
+        travel_to(DateTime.parse('2020-12-29')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in first week of the year' do
+        travel_to(DateTime.parse('2021-01-01')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in second week of the year' do
+        travel_to(DateTime.parse('2021-01-07')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in 3rd week of the year' do
+        travel_to(DateTime.parse('2021-01-14')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+    end
   end
 
   describe 'usage_activity_by_stage_package' do
@@ -224,7 +250,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 2
           },
           projects_imported: {
-            total: 20,
+            total: 2,
             gitlab_project: 2,
             gitlab: 2,
             github: 2,
@@ -248,7 +274,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 1
           },
           projects_imported: {
-            total: 10,
+            total: 1,
             gitlab_project: 1,
             gitlab: 1,
             github: 1,
@@ -456,6 +482,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects]).to eq(4)
       expect(count_data[:projects_asana_active]).to eq(0)
       expect(count_data[:projects_prometheus_active]).to eq(1)
+      expect(count_data[:projects_jenkins_active]).to eq(1)
       expect(count_data[:projects_jira_active]).to eq(4)
       expect(count_data[:projects_jira_server_active]).to eq(2)
       expect(count_data[:projects_jira_cloud_active]).to eq(2)
@@ -653,6 +680,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     it { is_expected.to include(:kubernetes_agent_gitops_sync) }
     it { is_expected.to include(:static_site_editor_views) }
+    it { is_expected.to include(:package_events_i_package_pull_package) }
+    it { is_expected.to include(:package_events_i_package_delete_package_by_user) }
+    it { is_expected.to include(:package_events_i_package_conan_push_package) }
   end
 
   describe '.usage_data_counters' do
@@ -837,24 +867,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             uploads: 'uploads_object_store_config',
             packages: 'packages_object_store_config'
           })
-      end
-    end
-
-    describe '.cycle_analytics_usage_data' do
-      subject { described_class.cycle_analytics_usage_data }
-
-      it 'works when queries time out in new' do
-        allow(Gitlab::CycleAnalytics::UsageData)
-          .to receive(:new).and_raise(ActiveRecord::StatementInvalid.new(''))
-
-        expect { subject }.not_to raise_error
-      end
-
-      it 'works when queries time out in to_json' do
-        allow_any_instance_of(Gitlab::CycleAnalytics::UsageData)
-          .to receive(:to_json).and_raise(ActiveRecord::StatementInvalid.new(''))
-
-        expect { subject }.not_to raise_error
       end
     end
 
@@ -1054,6 +1066,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         end
       end
     end
+
+    describe ".system_usage_data_settings" do
+      subject { described_class.system_usage_data_settings }
+
+      it 'gathers settings usage data', :aggregate_failures do
+        expect(subject[:settings][:ldap_encrypted_secrets_enabled]).to eq(Gitlab::Auth::Ldap::Config.encrypted_secrets.active?)
+      end
+    end
   end
 
   describe '.merge_requests_users', :clean_gitlab_redis_shared_state do
@@ -1122,6 +1142,12 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       counter.track_web_ide_edit_action(author: user3, time: time - 3.days)
       counter.track_snippet_editor_edit_action(author: user3)
+
+      counter.track_sse_edit_action(author: user1)
+      counter.track_sse_edit_action(author: user1)
+      counter.track_sse_edit_action(author: user2)
+      counter.track_sse_edit_action(author: user3)
+      counter.track_sse_edit_action(author: user2, time: time - 3.days)
     end
 
     it 'returns the distinct count of user actions within the specified time period' do
@@ -1134,7 +1160,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           action_monthly_active_users_web_ide_edit: 2,
           action_monthly_active_users_sfe_edit: 2,
           action_monthly_active_users_snippet_editor_edit: 2,
-          action_monthly_active_users_ide_edit: 3
+          action_monthly_active_users_ide_edit: 3,
+          action_monthly_active_users_sse_edit: 3
         }
       )
     end
@@ -1235,7 +1262,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.redis_hll_counters }
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
-    let(:ineligible_total_categories) { %w[source_code testing ci_secrets_management] }
+    let(:ineligible_total_categories) { %w[source_code testing ci_secrets_management incident_management_alerts snippets terraform] }
 
     it 'has all known_events' do
       expect(subject).to have_key(:redis_hll_counters)
@@ -1256,45 +1283,21 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
-  describe 'aggregated_metrics' do
-    shared_examples 'aggregated_metrics_for_time_range' do
-      context 'with product_analytics_aggregated_metrics feature flag on' do
-        before do
-          stub_feature_flags(product_analytics_aggregated_metrics: true)
-        end
+  describe '.aggregated_metrics_weekly' do
+    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_weekly }
 
-        it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
-          expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(aggregated_metrics_data_method).and_return(global_search_gmau: 123)
-          expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
-        end
-      end
-
-      context 'with product_analytics_aggregated_metrics feature flag off' do
-        before do
-          stub_feature_flags(product_analytics_aggregated_metrics: false)
-        end
-
-        it 'returns empty hash', :aggregate_failures do
-          expect(::Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(aggregated_metrics_data_method)
-          expect(aggregated_metrics_payload).to be {}
-        end
-      end
+    it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
+      expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:aggregated_metrics_weekly_data).and_return(global_search_gmau: 123)
+      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
     end
+  end
 
-    describe '.aggregated_metrics_weekly' do
-      subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_weekly }
+  describe '.aggregated_metrics_monthly' do
+    subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_monthly }
 
-      let(:aggregated_metrics_data_method) { :aggregated_metrics_weekly_data }
-
-      it_behaves_like 'aggregated_metrics_for_time_range'
-    end
-
-    describe '.aggregated_metrics_monthly' do
-      subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_monthly }
-
-      let(:aggregated_metrics_data_method) { :aggregated_metrics_monthly_data }
-
-      it_behaves_like 'aggregated_metrics_for_time_range'
+    it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
+      expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:aggregated_metrics_monthly_data).and_return(global_search_gmau: 123)
+      expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
     end
   end
 
@@ -1323,7 +1326,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       context 'and product_analytics FF is enabled for it' do
         before do
-          stub_feature_flags(product_analytics: project)
+          stub_feature_flags(product_analytics_tracking: true)
 
           create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote')
           create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote', collector_tstamp: 2.days.ago)
@@ -1339,7 +1342,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       context 'and product_analytics FF is disabled' do
         before do
-          stub_feature_flags(product_analytics: false)
+          stub_feature_flags(product_analytics_tracking: false)
         end
 
         it 'returns an empty hash' do

@@ -74,6 +74,8 @@ RSpec.describe Projects::MergeRequests::DiffsController do
   let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
 
   before do
+    stub_feature_flags(diffs_gradual_load: false)
+
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -375,6 +377,57 @@ RSpec.describe Projects::MergeRequests::DiffsController do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'tracks mr_diffs event' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_mr_diffs_action)
+          .with(merge_request: merge_request)
+
+        subject
+      end
+
+      context 'when DNT is enabled' do
+        before do
+          request.headers['DNT'] = '1'
+        end
+
+        it 'does not track any mr_diffs event' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .not_to receive(:track_mr_diffs_action)
+
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .not_to receive(:track_mr_diffs_single_file_action)
+
+          subject
+        end
+      end
+
+      context 'when user has view_diffs_file_by_file set to false' do
+        before do
+          user.update!(view_diffs_file_by_file: false)
+        end
+
+        it 'does not track single_file_diffs events' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .not_to receive(:track_mr_diffs_single_file_action)
+
+          subject
+        end
+      end
+
+      context 'when user has view_diffs_file_by_file set to true' do
+        before do
+          user.update!(view_diffs_file_by_file: true)
+        end
+
+        it 'tracks single_file_diffs events' do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_mr_diffs_single_file_action)
+            .with(merge_request: merge_request, user: user)
+
+          subject
+        end
       end
     end
 

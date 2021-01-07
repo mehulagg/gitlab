@@ -81,7 +81,7 @@ export default {
   methods: {
     // transform the object to a chart-friendly array of date + value
     transform(key) {
-      return this.burnupData.map(val => [val.date, val[key]]);
+      return this.burnupData.map((val) => [val.date, val[key]]);
     },
     formatTooltipText(params) {
       const [total, completed] = params.seriesData;

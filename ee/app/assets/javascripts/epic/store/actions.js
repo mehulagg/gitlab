@@ -1,3 +1,4 @@
+import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
@@ -7,9 +8,8 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
-import epicDetailsQuery from '../queries/epicDetails.query.graphql';
-import updateEpic from '../queries/updateEpic.mutation.graphql';
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+import updateEpic from '../queries/updateEpic.mutation.graphql';
 
 import * as types from './mutation_types';
 
@@ -29,7 +29,7 @@ export const fetchEpicDetails = ({ state, dispatch }) => {
       variables,
     })
     .then(({ data }) => {
-      const participants = data.group.epic.participants.edges.map(participant => ({
+      const participants = data.group.epic.participants.edges.map((participant) => ({
         name: participant.node.name,
         avatar_url: participant.node.avatarUrl,
         web_url: participant.node.webUrl,
@@ -218,7 +218,7 @@ export const updateConfidentialityOnIssuable = ({ state, commit }, { confidentia
         throw errMsg;
       }
     })
-    .catch(error => {
+    .catch((error) => {
       flash(error);
       throw error;
     });
@@ -235,8 +235,8 @@ export const receiveEpicLabelsSelectFailure = ({ commit }) => {
   flash(s__('Epics|An error occurred while updating labels.'));
 };
 export const updateEpicLabels = ({ dispatch, state }, labels) => {
-  const addLabelIds = labels.filter(label => label.set).map(label => label.id);
-  const removeLabelIds = labels.filter(label => !label.set).map(label => label.id);
+  const addLabelIds = labels.filter((label) => label.set).map((label) => label.id);
+  const removeLabelIds = labels.filter((label) => !label.set).map((label) => label.id);
   const updateEpicInput = {
     iid: `${state.epicIid}`,
     groupPath: state.fullPath,

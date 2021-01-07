@@ -62,7 +62,7 @@ export default {
       type: String,
       required: true,
     },
-    autoDevopsPath: {
+    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -246,7 +246,7 @@ export default {
     filterPipelines(filters) {
       this.resetRequestData();
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         // do not add Any for username query param, so we
         // can fetch all trigger authors
         if (
@@ -342,7 +342,7 @@ export default {
           :pipelines="state.pipelines"
           :pipeline-schedule-url="pipelineScheduleUrl"
           :update-graph-dropdown="updateGraphDropdown"
-          :auto-devops-help-path="autoDevopsPath"
+          :auto-devops-help-path="autoDevopsHelpPath"
           :view-type="viewType"
         />
       </div>

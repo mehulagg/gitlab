@@ -18,9 +18,7 @@ module QA
 
             def filter_project(project)
               click_element(:filter_project_dropdown)
-              within_element(:filter_dropdown_content) do
-                click_on project
-              end
+              click_element "filter_#{project.downcase.tr(" ", "_")}_dropdown"
             end
 
             def has_security_status_project_for_severity?(severity, project)

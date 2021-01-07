@@ -22,6 +22,4 @@ export const getTimeRange = (seconds = 0) => {
   };
 };
 
-export const formatDate = timestamp => dateFormat(timestamp, dateFormatMask);
-
-export default {};
+export const formatDate = (timestamp) => dateFormat(timestamp, dateFormatMask);

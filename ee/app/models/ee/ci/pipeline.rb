@@ -6,11 +6,6 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
-      EE_FAILURE_REASONS = {
-        activity_limit_exceeded: 20,
-        size_limit_exceeded: 21
-      }.freeze
-
       prepended do
         include UsageStatistics
 
@@ -58,7 +53,7 @@ module EE
 
         state_machine :status do
           after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
-            next unless pipeline.has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+            next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
@@ -83,6 +78,10 @@ module EE
             end
           end
         end
+      end
+
+      def needs_touch?
+        updated_at < 5.minutes.ago
       end
 
       def triggers_subscriptions?

@@ -12,6 +12,7 @@ import ciCdProjectIllustration from '../illustrations/ci-cd-project.svg';
 
 const BLANK_PANEL = 'blank_project';
 const CI_CD_PANEL = 'cicd_for_external_repo';
+const LAST_ACTIVE_TAB_KEY = 'new_project_last_active_tab';
 const PANELS = [
   {
     name: BLANK_PANEL,
@@ -82,11 +83,11 @@ export default {
         return PANELS;
       }
 
-      return PANELS.filter(p => p.name !== CI_CD_PANEL);
+      return PANELS.filter((p) => p.name !== CI_CD_PANEL);
     },
 
     activePanel() {
-      return PANELS.find(p => p.name === this.activeTab);
+      return PANELS.find((p) => p.name === this.activeTab);
     },
 
     breadcrumbs() {
@@ -105,14 +106,14 @@ export default {
     this.handleLocationHashChange();
 
     if (this.hasErrors) {
-      this.activeTab = BLANK_PANEL;
+      this.activeTab = localStorage.getItem(LAST_ACTIVE_TAB_KEY) || BLANK_PANEL;
     }
 
     window.addEventListener('hashchange', () => {
       this.handleLocationHashChange();
       this.resetProjectErrors();
     });
-    this.$root.$on('clicked::link', e => {
+    this.$root.$on('clicked::link', (e) => {
       window.location = e.target.href;
     });
   },
@@ -127,6 +128,9 @@ export default {
 
     handleLocationHashChange() {
       this.activeTab = window.location.hash.substring(1) || null;
+      if (this.activeTab) {
+        localStorage.setItem(LAST_ACTIVE_TAB_KEY, this.activeTab);
+      }
     },
   },
 

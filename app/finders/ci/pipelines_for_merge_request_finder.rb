@@ -5,8 +5,6 @@ module Ci
   class PipelinesForMergeRequestFinder
     include Gitlab::Utils::StrongMemoize
 
-    EVENT = 'merge_request_event'
-
     def initialize(merge_request, current_user)
       @merge_request = merge_request
       @current_user = current_user
@@ -50,13 +48,11 @@ module Ci
     def pipelines_using_cte
       cte = Gitlab::SQL::CTE.new(:shas, merge_request.all_commits.select(:sha))
 
-      source_sha_join = cte.table[:sha].eq(Ci::Pipeline.arel_table[:source_sha])
-      merged_result_pipelines = filter_by(triggered_by_merge_request, cte, source_sha_join)
-      detached_merge_request_pipelines = filter_by_sha(triggered_by_merge_request, cte)
+      pipelines_for_merge_requests = triggered_by_merge_request
       pipelines_for_branch = filter_by_sha(triggered_for_branch, cte)
 
       Ci::Pipeline.with(cte.to_arel) # rubocop: disable CodeReuse/ActiveRecord
-        .from_union([merged_result_pipelines, detached_merge_request_pipelines, pipelines_for_branch])
+        .from_union([pipelines_for_merge_requests, pipelines_for_branch])
     end
 
     def filter_by_sha(pipelines, cte)
@@ -84,14 +80,7 @@ module Ci
     end
 
     def triggered_for_branch
-      source_project.ci_pipelines
-        .where(source: branch_pipeline_sources, ref: source_branch, tag: false) # rubocop: disable CodeReuse/ActiveRecord
-    end
-
-    def branch_pipeline_sources
-      strong_memoize(:branch_pipeline_sources) do
-        Ci::Pipeline.sources.reject { |source| source == EVENT }.values
-      end
+      source_project.all_pipelines.ci_branch_sources.for_branch(source_branch)
     end
 
     def sort(pipelines)

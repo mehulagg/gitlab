@@ -39,7 +39,7 @@ describe('SidebarHeaderComponent', () => {
       expect(todoEl.innerText.trim()).toBe('To Do');
     });
 
-    it('renders Todo toggle button element when sidebar is expanded', done => {
+    it('renders Todo toggle button element when sidebar is expanded', (done) => {
       vm.sidebarCollapsed = false;
 
       vm.$nextTick()

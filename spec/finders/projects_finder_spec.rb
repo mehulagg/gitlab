@@ -161,6 +161,29 @@ RSpec.describe ProjectsFinder, :do_not_mock_admin_mode do
         it { is_expected.to eq([public_project]) }
       end
 
+      describe 'filter by search with minimum search length' do
+        context 'when search term is shorter than minimum length' do
+          let(:params) { { search: 'C', minimum_search_length: 3 } }
+
+          it { is_expected.to be_empty }
+        end
+
+        context 'when search term is longer than minimum length' do
+          let(:project) { create(:project, :public, group: group, name: 'test_project') }
+          let(:params) { { search: 'test', minimum_search_length: 3 } }
+
+          it { is_expected.to eq([project]) }
+        end
+
+        context 'when minimum length is invalid' do
+          let(:params) { { search: 'C', minimum_search_length: 'x' } }
+
+          it 'ignores the minimum length param' do
+            is_expected.to eq([public_project])
+          end
+        end
+      end
+
       describe 'filter by group name' do
         let(:params) { { name: group.name, search_namespaces: true } }
 
@@ -330,7 +353,7 @@ RSpec.describe ProjectsFinder, :do_not_mock_admin_mode do
           end
 
           before do
-            stub_feature_flags(project_finder_similarity_sort: true)
+            stub_feature_flags(project_finder_similarity_sort: current_user)
           end
 
           it { is_expected.to eq([internal_project2, internal_project4, internal_project3]) }

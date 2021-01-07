@@ -28,7 +28,7 @@ RSpec.describe Mutations::Boards::Issues::IssueMoveList do
   end
 
   subject do
-    mutation.resolve(params.merge(move_params))
+    mutation.resolve(**params.merge(move_params))
   end
 
   describe '#resolve' do

@@ -1,0 +1,5 @@
+---
+title: Resolve the race-condition of ScanSecurityReportSecretsWorker
+merge_request: 50335
+author:
+type: changed

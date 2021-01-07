@@ -6,7 +6,7 @@ import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profi
 import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
-import { scannerProfiles } from 'ee_jest/on_demand_scans/mock_data';
+import { scannerProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 import { TEST_HOST } from 'helpers/test_constants';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -36,7 +36,7 @@ describe('DAST Scanner Profile', () => {
   let wrapper;
 
   const withinComponent = () => within(wrapper.element);
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"`);
 
   const findForm = () => wrapper.find(GlForm);
   const findProfileNameInput = () => findByTestId('profile-name-input');
@@ -50,7 +50,7 @@ describe('DAST Scanner Profile', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
-  const componentFactory = (mountFn = shallowMount) => options => {
+  const componentFactory = (mountFn = shallowMount) => (options) => {
     wrapper = mountFn(
       DastScannerProfileForm,
       merge(
@@ -120,28 +120,20 @@ describe('DAST Scanner Profile', () => {
       createFullComponent();
     });
 
-    it.each(invalidValues)('is marked as invalid provided an invalid value', async value => {
-      await finder()
-        .find('input')
-        .setValue(value);
+    it.each(invalidValues)('is marked as invalid provided an invalid value', async (value) => {
+      await finder().find('input').setValue(value);
 
       expect(wrapper.text()).toContain(errorMessage);
     });
 
     it('is marked as valid provided a valid value', async () => {
-      await finder()
-        .find('input')
-        .setValue(validValue);
+      await finder().find('input').setValue(validValue);
 
       expect(wrapper.text()).not.toContain(errorMessage);
     });
 
     it('should allow only numbers', async () => {
-      expect(
-        finder()
-          .find('input')
-          .props('type'),
-      ).toBe('number');
+      expect(finder().find('input').props('type')).toBe('number');
     });
   });
 
@@ -189,14 +181,16 @@ describe('DAST Scanner Profile', () => {
           expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
             mutation,
             variables: {
-              profileName,
-              spiderTimeout,
-              targetTimeout,
-              projectFullPath,
-              scanType,
-              useAjaxSpider,
-              showDebugMessages,
-              ...mutationVars,
+              input: {
+                profileName,
+                spiderTimeout,
+                targetTimeout,
+                fullPath: projectFullPath,
+                scanType,
+                useAjaxSpider,
+                showDebugMessages,
+                ...mutationVars,
+              },
             },
           });
         });
@@ -248,7 +242,7 @@ describe('DAST Scanner Profile', () => {
           const alert = findAlert();
 
           expect(alert.exists()).toBe(true);
-          errors.forEach(error => {
+          errors.forEach((error) => {
             expect(alert.text()).toContain(error);
           });
         });

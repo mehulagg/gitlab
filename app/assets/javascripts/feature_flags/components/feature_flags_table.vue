@@ -38,9 +38,6 @@ export default {
     permissions() {
       return this.glFeatures.featureFlagPermissions;
     },
-    isNewVersionFlagsEnabled() {
-      return this.glFeatures.featureFlagsNewVersion;
-    },
     isLegacyReadOnlyFlagsEnabled() {
       return (
         this.glFeatures.featureFlagsLegacyReadOnly &&
@@ -68,7 +65,7 @@ export default {
   },
   methods: {
     isLegacyFlag(flag) {
-      return !this.isNewVersionFlagsEnabled || flag.version !== NEW_VERSION_FLAG;
+      return flag.version !== NEW_VERSION_FLAG;
     },
     statusToggleDisabled(flag) {
       return this.isLegacyReadOnlyFlagsEnabled && flag.version === LEGACY_FLAG;
@@ -103,7 +100,7 @@ export default {
       return featureFlag.iid ? `^${featureFlag.iid}` : '';
     },
     canDeleteFlag(flag) {
-      return !this.permissions || (flag.scopes || []).every(scope => scope.can_update);
+      return !this.permissions || (flag.scopes || []).every((scope) => scope.can_update);
     },
     setDeleteModalData(featureFlag) {
       this.deleteFeatureFlagUrl = featureFlag.destroy_path;

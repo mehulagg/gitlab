@@ -7,6 +7,7 @@ RSpec.describe "Admin views license" do
 
   before do
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow_any_instance_of(Gitlab::ExpiringSubscriptionMessage).to receive(:grace_period_effective_from).and_return(Date.today - 45.days)
   end
 

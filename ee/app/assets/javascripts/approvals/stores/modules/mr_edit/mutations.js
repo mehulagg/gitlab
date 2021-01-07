@@ -5,7 +5,7 @@ import { RULE_TYPE_ANY_APPROVER } from '../../../constants';
 export default {
   ...base,
   [types.DELETE_RULE](state, id) {
-    const idx = state.rules.findIndex(x => x.id === id);
+    const idx = state.rules.findIndex((x) => x.id === id);
 
     if (idx < 0) {
       return;
@@ -34,7 +34,7 @@ export default {
     state.rules = [newRule];
   },
   [types.PUT_RULE](state, { id, ...newRule }) {
-    const idx = state.rules.findIndex(x => x.id === id);
+    const idx = state.rules.findIndex((x) => x.id === id);
 
     if (idx < 0) {
       return;
@@ -63,7 +63,7 @@ export default {
     state.fallbackApprovalsRequired = fallback.approvalsRequired;
   },
   [types.SET_EMPTY_RULE](state) {
-    const anyRule = state.initialRules.find(rule => rule.ruleType === RULE_TYPE_ANY_APPROVER);
+    const anyRule = state.initialRules.find((rule) => rule.ruleType === RULE_TYPE_ANY_APPROVER);
 
     if (anyRule) {
       state.rules = [anyRule];

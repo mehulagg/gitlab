@@ -492,7 +492,7 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
           let(:execute_params) { {} }
 
-          subject { described_class.new(search_user, group_id: base_group.id).execute(execute_params) }
+          subject { described_class.new(search_user, group_id: base_group.id).execute(**execute_params) }
 
           it 'returns only public epics' do
             expect(subject).to match_array([base_epic2, public_epic1])

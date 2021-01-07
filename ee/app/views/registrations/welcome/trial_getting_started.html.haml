@@ -1,0 +1,11 @@
+- return unless learn_gitlab_project
+- page_title _('Get started with GitLab')
+
+.row.gl-flex-grow-1.gl-bg-gray-10
+  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-w-full
+    .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-pt-6.gl-w-half
+      = image_tag 'learn-gitlab-avatar.jpg', width: '90'
+      %h2.gl-text-center.gl-mt-5= _('Get started with GitLab')
+      %p.gl-text-center.gl-mb-5= _('We created a sandbox project that will help you learn the basics of GitLab. You’ll be guided by issues in an issue board. You can go through the issues at your own pace.')
+      = image_tag 'trial-learn-gitlab-gold-board.png', class: 'gl-w-full'
+      = link_to s_("Ok, let's go"), project_boards_path(learn_gitlab_project), class: 'btn btn-success gl-button gl-mt-5'

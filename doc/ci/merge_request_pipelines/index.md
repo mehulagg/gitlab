@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, index
 last_update: 2019-07-03
 ---
@@ -177,6 +177,10 @@ coming from a fork:
 - It's created and runs in the fork (source) project, not the parent (target) project.
 - It uses the fork project's CI/CD configuration and resources.
 
+If a pipeline runs in a fork, the **fork** icon appears for the pipeline in the merge request.
+
+![Pipeline ran in fork](img/pipeline-fork_v13_7.png)
+
 Sometimes parent project members want the pipeline to run in the parent
 project. This could be to ensure that the post-merge pipeline passes in the parent project.
 For example, a fork project could try to use a corrupted runner that doesn't execute
@@ -188,7 +192,7 @@ can create pipelines in the parent project for merge requests
 from a forked project. In the merge request, go to the **Pipelines** and click
 **Run Pipeline** button.
 
-CAUTION: **Caution:**
+WARNING:
 Fork merge requests could contain malicious code that tries to steal secrets in the
 parent project when the pipeline runs, even before merge. Reviewers must carefully
 check the changes in the merge request before triggering the pipeline. GitLab shows

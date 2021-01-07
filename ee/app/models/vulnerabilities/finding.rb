@@ -34,44 +34,14 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+
     attr_writer :sha
     attr_accessor :scan
 
-    CONFIDENCE_LEVELS = {
-      # undefined: 0, no longer applicable
-      ignore: 1,
-      unknown: 2,
-      experimental: 3,
-      low: 4,
-      medium: 5,
-      high: 6,
-      confirmed: 7
-    }.with_indifferent_access.freeze
-
-    SEVERITY_LEVELS = {
-      # undefined: 0, no longer applicable
-      info: 1,
-      unknown: 2,
-      # experimental: 3, formerly used by confidence, no longer applicable
-      low: 4,
-      medium: 5,
-      high: 6,
-      critical: 7
-    }.with_indifferent_access.freeze
-
-    REPORT_TYPES = {
-      sast: 0,
-      dependency_scanning: 1,
-      container_scanning: 2,
-      dast: 3,
-      secret_detection: 4,
-      coverage_fuzzing: 5,
-      api_fuzzing: 6
-    }.with_indifferent_access.freeze
-
-    enum confidence: CONFIDENCE_LEVELS, _prefix: :confidence
-    enum report_type: REPORT_TYPES
-    enum severity: SEVERITY_LEVELS, _prefix: :severity
+    enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
+    enum report_type: ::Enums::Vulnerability.report_types
+    enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -90,6 +60,7 @@ module Vulnerabilities
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
+    validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
 
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 
@@ -121,7 +92,7 @@ module Vulnerabilities
 
     def self.counted_by_severity
       group(:severity).count.transform_keys do |severity|
-        SEVERITY_LEVELS[severity]
+        severities[severity]
       end
     end
 
@@ -268,7 +239,9 @@ module Vulnerabilities
     end
 
     def remediations
-      metadata.dig('remediations')
+      return metadata.dig('remediations') unless super.present?
+
+      super.as_json(only: [:summary], methods: [:diff])
     end
 
     def build_evidence_request(data)
@@ -388,6 +361,12 @@ module Vulnerabilities
       self.class.confidences[self.confidence]
     end
 
+    # We will eventually have only UUIDv5 values for the `uuid`
+    # attribute of the finding records.
+    def uuid_v5
+      Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
+    end
+
     protected
 
     def first_fingerprint
@@ -402,6 +381,15 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def uuid_v5_name
+      [
+        report_type,
+        primary_identifier.fingerprint,
+        location_fingerprint,
+        project_id
+      ].join('-')
     end
   end
 end

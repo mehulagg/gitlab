@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -37,7 +37,7 @@ A simple `docker-compose.yml` file would be:
 version: "3"
 services:
   gitlab:
-    image: 'gitlab/gitlab-ce:12.2.5-ce.0'
+    image: 'gitlab/gitlab-ee:12.2.5-ee.0'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
@@ -137,7 +137,7 @@ that, login with an Admin account and do following:
 - Check **Enable PlantUML** checkbox.
 - Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`.
 
-NOTE: **Note:**
+NOTE:
 If you are using a PlantUML server running v1.2020.9 and
 above (for example, [plantuml.com](https://plantuml.com)), set the `PLANTUML_ENCODING`
 environment variable to enable the `deflate` compression. On Omnibus,

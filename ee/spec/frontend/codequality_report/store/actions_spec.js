@@ -28,19 +28,19 @@ describe('Codequality report actions', () => {
   });
 
   describe('setPage', () => {
-    it('sets the page number', done => {
+    it('sets the page number', (done) => {
       testAction(actions.setPage, 12, state, [{ type: types.SET_PAGE, payload: 12 }], [], done);
     });
   });
 
   describe('requestReport', () => {
-    it('sets the loading flag', done => {
+    it('sets the loading flag', (done) => {
       testAction(actions.requestReport, null, state, [{ type: types.REQUEST_REPORT }], [], done);
     });
   });
 
   describe('receiveReportSuccess', () => {
-    it('parses the list of issues from the report', done => {
+    it('parses the list of issues from the report', (done) => {
       testAction(
         actions.receiveReportSuccess,
         unparsedIssues,
@@ -53,7 +53,7 @@ describe('Codequality report actions', () => {
   });
 
   describe('receiveReportError', () => {
-    it('accepts a report error', done => {
+    it('accepts a report error', (done) => {
       testAction(
         actions.receiveReportError,
         'error',
@@ -70,7 +70,7 @@ describe('Codequality report actions', () => {
       mock.onGet(endpoint).replyOnce(200, unparsedIssues);
     });
 
-    it('fetches the report', done => {
+    it('fetches the report', (done) => {
       testAction(
         actions.fetchReport,
         null,
@@ -81,7 +81,7 @@ describe('Codequality report actions', () => {
       );
     });
 
-    it('shows a flash message when there is an error', done => {
+    it('shows a flash message when there is an error', (done) => {
       testAction(
         actions.fetchReport,
         'error',
@@ -97,7 +97,7 @@ describe('Codequality report actions', () => {
       );
     });
 
-    it('shows an error when blob path is missing', done => {
+    it('shows an error when blob path is missing', (done) => {
       testAction(
         actions.fetchReport,
         null,

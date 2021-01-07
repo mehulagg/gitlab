@@ -41,14 +41,14 @@ export const fetchDependencies = ({ state, dispatch }, params = {}) => {
         ...params,
       },
     })
-    .then(response => {
+    .then((response) => {
       if (isValidResponse(response)) {
         dispatch('receiveDependenciesSuccess', response);
       } else {
         throw new Error(__('Invalid server response'));
       }
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDependenciesError', error);
       createFlash(FETCH_ERROR_MESSAGE);
     });

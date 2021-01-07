@@ -95,7 +95,7 @@ export default {
         .then(() => {
           this.incrementGlobalTodoCount();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$emit('error', Error(CREATE_DESIGN_TODO_ERROR));
           throw err;
         })
@@ -116,12 +116,7 @@ export default {
           variables: {
             id,
           },
-          update(
-            store,
-            {
-              data: { todoMarkDone },
-            },
-          ) {
+          update(store, { data: { todoMarkDone } }) {
             const todoMarkDoneFirstError = (todoMarkDone.errors || [])[0];
             if (todoMarkDoneFirstError) {
               this.$emit('error', Error(todoMarkDoneFirstError));
@@ -138,7 +133,7 @@ export default {
         .then(() => {
           this.decrementGlobalTodoCount();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$emit('error', Error(DELETE_DESIGN_TODO_ERROR));
           throw err;
         })

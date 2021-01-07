@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Deployment safety
@@ -107,6 +107,7 @@ build:service-b:
     name: production
 ```
 
-The [Skip outdated deployment jobs](../pipelines/settings.md#skip-outdated-deployment-jobs) might not work well with this configuration, and will need to be disabled.
+The [Skip outdated deployment jobs](../pipelines/settings.md#skip-outdated-deployment-jobs) might
+not work well with this configuration, and must be disabled.
 
 There is a [plan to introduce a new annotation for environments](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) to address this issue.

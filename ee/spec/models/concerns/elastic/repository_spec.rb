@@ -20,6 +20,7 @@ RSpec.describe Repository, :elastic do
     index!(project)
 
     expect(project.repository.elastic_search('def popen')[:blobs][:total_count]).to eq(1)
+    expect(project.repository.elastic_search('files/ruby/popen.rb')[:blobs][:total_count]).to eq(1)
     expect(project.repository.elastic_search('def | popen')[:blobs][:total_count] > 1).to be_truthy
     expect(project.repository.elastic_search('initial')[:commits][:total_count]).to eq(1)
 
@@ -63,6 +64,24 @@ RSpec.describe Repository, :elastic do
 
     # Finds files/ruby/popen.rb
     expect(project.repository.elastic_search('* blob:7e3e39ebb9b2bf433b4ad17313770fbe4051649c')[:blobs][:total_count]).to eq(1)
+
+    # filename filter without search term
+    count = project.repository.ls_files('master').count { |path| path.split('/')[-1].include?('test') }
+    expect(project.repository.elastic_search('filename:test')[:blobs][:total_count]).to eq(count)
+    expect(project.repository.elastic_search('filename:test')[:blobs][:total_count]).to be > 0
+
+    # extension filter without search term
+    count = project.repository.ls_files('master').count { |path| path.split('/')[-1].split('.')[-1].include?('md') }
+    expect(project.repository.elastic_search('extension:md')[:blobs][:total_count]).to eq(count)
+    expect(project.repository.elastic_search('extension:md')[:blobs][:total_count]).to be > 0
+
+    # path filter without search term
+    count = project.repository.ls_files('master').count { |path| path.include?('ruby') }
+    expect(project.repository.elastic_search('path:ruby')[:blobs][:total_count]).to eq(count)
+    expect(project.repository.elastic_search('path:ruby')[:blobs][:total_count]).to be > 0
+
+    # blob filter without search term
+    expect(project.repository.elastic_search('blob:7e3e39ebb9b2bf433b4ad17313770fbe4051649c')[:blobs][:total_count]).to eq(1)
   end
 
   def search_and_check!(on, query, type:, per: 1000)

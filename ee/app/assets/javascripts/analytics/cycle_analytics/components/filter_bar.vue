@@ -30,14 +30,14 @@ export default {
   },
   computed: {
     ...mapState('filters', {
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedLabelList: state => state.labels.selectedList,
-      selectedAssigneeList: state => state.assignees.selectedList,
-      milestonesData: state => state.milestones.data,
-      labelsData: state => state.labels.data,
-      authorsData: state => state.authors.data,
-      assigneesData: state => state.assignees.data,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
+      selectedAssigneeList: (state) => state.assignees.selectedList,
+      milestonesData: (state) => state.milestones.data,
+      labelsData: (state) => state.labels.data,
+      authorsData: (state) => state.authors.data,
+      assigneesData: (state) => state.assignees.data,
     }),
     tokens() {
       return [

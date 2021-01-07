@@ -141,7 +141,7 @@ export const updateNote = ({ commit, dispatch }, { endpoint, note }) =>
 
 export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes) => {
   const { notesById } = getters;
-  const debouncedFetchDiscussions = isFetching => {
+  const debouncedFetchDiscussions = (isFetching) => {
     if (!isFetching) {
       commit(types.SET_FETCHING_DISCUSSIONS, true);
       dispatch('fetchDiscussions', { path: state.notesData.discussionsPath });
@@ -159,7 +159,7 @@ export const updateOrCreateNotes = ({ commit, state, getters, dispatch }, notes)
     }
   };
 
-  notes.forEach(note => {
+  notes.forEach((note) => {
     if (notesById[note.id]) {
       commit(types.UPDATE_NOTE, note);
     } else if (note.type === constants.DISCUSSION_NOTE || note.type === constants.DIFF_NOTE) {
@@ -244,21 +244,7 @@ export const toggleResolveNote = ({ commit, dispatch }, { endpoint, isResolved, 
   });
 };
 
-export const toggleBlockedIssueWarning = ({ commit }, value) => {
-  commit(types.TOGGLE_BLOCKED_ISSUE_WARNING, value);
-  // Hides Close issue button at the top of issue page
-  const closeDropdown = document.querySelector('.js-issuable-close-dropdown');
-  if (closeDropdown) {
-    closeDropdown.classList.toggle('d-none');
-  } else {
-    const closeButton = document.querySelector(
-      '.detail-page-header-actions .btn-close.btn-grouped',
-    );
-    closeButton.classList.toggle('d-md-block');
-  }
-};
-
-export const closeIssue = ({ commit, dispatch, state }) => {
+export const closeIssuable = ({ commit, dispatch, state }) => {
   dispatch('toggleStateButtonLoading', true);
   return axios.put(state.notesData.closePath).then(({ data }) => {
     commit(types.CLOSE_ISSUE);
@@ -267,7 +253,7 @@ export const closeIssue = ({ commit, dispatch, state }) => {
   });
 };
 
-export const reopenIssue = ({ commit, dispatch, state }) => {
+export const reopenIssuable = ({ commit, dispatch, state }) => {
   dispatch('toggleStateButtonLoading', true);
   return axios.put(state.notesData.reopenPath).then(({ data }) => {
     commit(types.REOPEN_ISSUE);
@@ -343,7 +329,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     }
   }
 
-  const processQuickActions = res => {
+  const processQuickActions = (res) => {
     const { errors: { commands_only: message } = { commands_only: null } } = res;
     /*
      The following reply means that quick actions have been successfully applied:
@@ -361,7 +347,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const processEmojiAward = res => {
+  const processEmojiAward = (res) => {
     const { commands_changes: commandsChanges } = res;
     const { emoji_award: emojiAward } = commandsChanges || {};
     if (!emojiAward) {
@@ -371,7 +357,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     const votesBlock = $('.js-awards-block').eq(0);
 
     return loadAwardsHandler()
-      .then(awardsHandler => {
+      .then((awardsHandler) => {
         awardsHandler.addAwardToEmojiBar(votesBlock, emojiAward);
         awardsHandler.scrollToAwards();
       })
@@ -385,7 +371,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
       .then(() => res);
   };
 
-  const processTimeTracking = res => {
+  const processTimeTracking = (res) => {
     const { commands_changes: commandsChanges } = res;
     const { spend_time: spendTime, time_estimate: timeEstimate } = commandsChanges || {};
     if (spendTime != null || timeEstimate != null) {
@@ -397,7 +383,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const removePlaceholder = res => {
+  const removePlaceholder = (res) => {
     if (replyId) {
       commit(types.REMOVE_PLACEHOLDER_NOTES);
     }
@@ -405,7 +391,7 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     return res;
   };
 
-  const processErrors = error => {
+  const processErrors = (error) => {
     if (error.response) {
       const {
         response: { data = {} },
@@ -435,6 +421,10 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
 };
 
 const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
+  if (state.isResolvingDiscussion) {
+    return null;
+  }
+
   if (resp.notes?.length) {
     dispatch('updateOrCreateNotes', resp.notes);
     dispatch('startTaskList');
@@ -445,7 +435,7 @@ const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
   return resp;
 };
 
-const getFetchDataParams = state => {
+const getFetchDataParams = (state) => {
   const endpoint = state.notesData.notesPath;
   const options = {
     headers: {
@@ -574,10 +564,13 @@ export const submitSuggestion = (
   const dispatchResolveDiscussion = () =>
     dispatch('resolveDiscussion', { discussionId }).catch(() => {});
 
+  commit(types.SET_RESOLVING_DISCUSSION, true);
+  dispatch('stopPolling');
+
   return Api.applySuggestion(suggestionId)
     .then(() => commit(types.APPLY_SUGGESTION, { discussionId, noteId, suggestionId }))
     .then(dispatchResolveDiscussion)
-    .catch(err => {
+    .catch((err) => {
       const defaultMessage = __(
         'Something went wrong while applying the suggestion. Please try again.',
       );
@@ -587,6 +580,10 @@ export const submitSuggestion = (
       const flashMessage = errorMessage || defaultMessage;
 
       Flash(__(flashMessage), 'alert', flashContainer);
+    })
+    .finally(() => {
+      commit(types.SET_RESOLVING_DISCUSSION, false);
+      dispatch('restartPolling');
     });
 };
 
@@ -594,23 +591,25 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
   const suggestionIds = state.batchSuggestionsInfo.map(({ suggestionId }) => suggestionId);
 
   const applyAllSuggestions = () =>
-    state.batchSuggestionsInfo.map(suggestionInfo =>
+    state.batchSuggestionsInfo.map((suggestionInfo) =>
       commit(types.APPLY_SUGGESTION, suggestionInfo),
     );
 
   const resolveAllDiscussions = () =>
-    state.batchSuggestionsInfo.map(suggestionInfo => {
+    state.batchSuggestionsInfo.map((suggestionInfo) => {
       const { discussionId } = suggestionInfo;
       return dispatch('resolveDiscussion', { discussionId }).catch(() => {});
     });
 
   commit(types.SET_APPLYING_BATCH_STATE, true);
+  commit(types.SET_RESOLVING_DISCUSSION, true);
+  dispatch('stopPolling');
 
   return Api.applySuggestionBatch(suggestionIds)
     .then(() => Promise.all(applyAllSuggestions()))
     .then(() => Promise.all(resolveAllDiscussions()))
     .then(() => commit(types.CLEAR_SUGGESTION_BATCH))
-    .catch(err => {
+    .catch((err) => {
       const defaultMessage = __(
         'Something went wrong while applying the batch of suggestions. Please try again.',
       );
@@ -621,7 +620,11 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
 
       Flash(__(flashMessage), 'alert', flashContainer);
     })
-    .finally(() => commit(types.SET_APPLYING_BATCH_STATE, false));
+    .finally(() => {
+      commit(types.SET_APPLYING_BATCH_STATE, false);
+      commit(types.SET_RESOLVING_DISCUSSION, false);
+      dispatch('restartPolling');
+    });
 };
 
 export const addSuggestionInfoToBatch = ({ commit }, { suggestionId, noteId, discussionId }) =>
@@ -649,10 +652,10 @@ export const fetchDescriptionVersion = ({ dispatch }, { endpoint, startingVersio
 
   return axios
     .get(requestUrl)
-    .then(res => {
+    .then((res) => {
       dispatch('receiveDescriptionVersion', { descriptionVersion: res.data, versionId });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDescriptionVersionError', error);
       Flash(__('Something went wrong while fetching description changes. Please try again.'));
     });
@@ -684,7 +687,7 @@ export const softDeleteDescriptionVersion = (
     .then(() => {
       dispatch('receiveDeleteDescriptionVersion', versionId);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDeleteDescriptionVersionError', error);
       Flash(__('Something went wrong while deleting description changes. Please try again.'));
 

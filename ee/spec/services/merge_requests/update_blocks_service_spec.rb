@@ -88,10 +88,20 @@ RSpec.describe MergeRequests::UpdateBlocksService do
           context 'with a self-referential block' do
             let(:mr_to_add) { merge_request }
 
-            it 'ignores the addition' do
+            it 'has an error on the merge request' do
               service.execute
 
-              expect(merge_request.blocking_merge_requests).not_to include(mr_to_add)
+              expect(merge_request.reload.blocking_merge_requests).not_to include(mr_to_add)
+              expect(merge_request.errors[:dependencies]).to include(/cannot itself be blocked/)
+            end
+          end
+
+          context 'when an invalid reference' do
+            it 'has an error on the merge request' do
+              refs << 'notavalid'
+              service.execute
+
+              expect(merge_request.errors[:dependencies]).to include(/notavalid/)
             end
           end
         end

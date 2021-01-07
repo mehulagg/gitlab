@@ -69,6 +69,7 @@ const Api = {
   issuePath: '/api/:version/projects/:id/issues/:issue_iid',
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
+  usageDataIncrementCounterPath: '/api/:version/usage_data/increment_counter',
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
@@ -373,8 +374,8 @@ const Api = {
       .post(url, {
         label: data,
       })
-      .then(res => callback(res.data))
-      .catch(e => callback(e.response.data));
+      .then((res) => callback(res.data))
+      .catch((e) => callback(e.response.data));
   },
 
   // Return group projects list. Filtered by query
@@ -388,8 +389,13 @@ const Api = {
       .get(url, {
         params: { ...defaults, ...options },
       })
-      .then(({ data }) => callback(data))
-      .catch(() => flash(__('Something went wrong while fetching projects')));
+      .then(({ data }) => (callback ? callback(data) : data))
+      .catch(() => {
+        flash(__('Something went wrong while fetching projects'));
+        if (callback) {
+          callback();
+        }
+      });
   },
 
   commit(id, sha, params = {}) {
@@ -425,7 +431,7 @@ const Api = {
   commitPipelines(projectId, sha) {
     const encodedProjectId = projectId
       .split('/')
-      .map(fragment => encodeURIComponent(fragment))
+      .map((fragment) => encodeURIComponent(fragment))
       .join('/');
 
     const url = Api.buildUrl(Api.commitPipelinesPath)
@@ -449,7 +455,7 @@ const Api = {
       .replace(':type', type)
       .replace(':key', encodeURIComponent(key));
 
-    return axios.get(url, { params: options }).then(res => {
+    return axios.get(url, { params: options }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -461,7 +467,7 @@ const Api = {
       .replace(':id', encodeURIComponent(id))
       .replace(':type', type);
 
-    return axios.get(url, { params }).then(res => {
+    return axios.get(url, { params }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -751,6 +757,19 @@ const Api = {
     return axios.post(url, freezePeriod);
   },
 
+  trackRedisCounterEvent(event) {
+    if (!gon.features?.usageDataApi) {
+      return null;
+    }
+
+    const url = Api.buildUrl(this.usageDataIncrementCounterPath);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    return axios.post(url, { event }, { headers });
+  },
+
   trackRedisHllUserEvent(event) {
     if (!gon.features?.usageDataApi) {
       return null;
@@ -817,11 +836,18 @@ const Api = {
       page: 1,
     };
 
+    const passedOptions = options;
+
+    // calling search API with empty string will not return results
+    if (!passedOptions.search) {
+      passedOptions.search = undefined;
+    }
+
     return axios
       .get(url, {
         params: {
           ...defaults,
-          ...options,
+          ...passedOptions,
         },
       })
       .then(({ data, headers }) => {

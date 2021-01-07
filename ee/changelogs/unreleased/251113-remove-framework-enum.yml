@@ -1,6 +1,0 @@
----
-title: Remove not null constraint on framework column in project_compliance_framework_settings
-  table
-merge_request: 45411
-author:
-type: changed

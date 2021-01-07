@@ -6,15 +6,18 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { flow, reverse, sortBy } from 'lodash/fp';
 import { s__ } from '~/locale';
 import EnvironmentItem from './environment_item.vue';
+import DeployBoard from './deploy_board.vue';
+import CanaryUpdateModal from './canary_update_modal.vue';
+import CanaryDeploymentCallout from './canary_deployment_callout.vue';
 
 export default {
   components: {
     EnvironmentItem,
     GlLoadingIcon,
-    DeployBoard: () => import('ee_component/environments/components/deploy_board_component.vue'),
-    CanaryDeploymentCallout: () =>
-      import('ee_component/environments/components/canary_deployment_callout.vue'),
+    DeployBoard,
+    CanaryDeploymentCallout,
     EnvironmentAlert: () => import('ee_component/environments/components/environment_alert.vue'),
+    CanaryUpdateModal,
   },
   props: {
     environments: {
@@ -58,9 +61,15 @@ export default {
       default: '',
     },
   },
+  data() {
+    return {
+      canaryWeight: 0,
+      environmentToChange: null,
+    };
+  },
   computed: {
     sortedEnvironments() {
-      return this.sortEnvironments(this.environments).map(env =>
+      return this.sortEnvironments(this.environments).map((env) =>
         this.shouldRenderFolderContent(env)
           ? { ...env, children: this.sortEnvironments(env.children) }
           : env,
@@ -71,7 +80,7 @@ export default {
         // percent spacing for cols, should add up to 100
         name: {
           title: s__('Environments|Environment'),
-          spacing: 'section-15',
+          spacing: 'section-10',
         },
         deploy: {
           title: s__('Environments|Deployment'),
@@ -83,18 +92,23 @@ export default {
         },
         commit: {
           title: s__('Environments|Commit'),
-          spacing: 'section-20',
+          spacing: 'section-15',
         },
         date: {
           title: s__('Environments|Updated'),
           spacing: 'section-10',
         },
+        upcoming: {
+          title: s__('Environments|Upcoming'),
+          mobileTitle: s__('Environments|Upcoming deployment'),
+          spacing: 'section-10',
+        },
         autoStop: {
           title: s__('Environments|Auto stop in'),
-          spacing: 'section-5',
+          spacing: 'section-10',
         },
         actions: {
-          spacing: 'section-25',
+          spacing: 'section-20',
         },
       };
     },
@@ -132,18 +146,23 @@ export default {
        * 5. Put folders first.
        */
       return flow(
-        sortBy(env => (env.isFolder ? env.folderName : env.name)),
+        sortBy((env) => (env.isFolder ? env.folderName : env.name)),
         reverse,
-        sortBy(env => (env.last_deployment ? env.last_deployment.created_at : '0000')),
+        sortBy((env) => (env.last_deployment ? env.last_deployment.created_at : '0000')),
         reverse,
-        sortBy(env => (env.isFolder ? -1 : 1)),
+        sortBy((env) => (env.isFolder ? -1 : 1)),
       )(environments);
+    },
+    changeCanaryWeight(model, weight) {
+      this.environmentToChange = model;
+      this.canaryWeight = weight;
     },
   },
 };
 </script>
 <template>
   <div class="ci-table" role="grid">
+    <canary-update-modal :environment="environmentToChange" :weight="canaryWeight" />
     <div class="gl-responsive-table-row table-row-header" role="row">
       <div class="table-section" :class="tableData.name.spacing" role="columnheader">
         {{ tableData.name.title }}
@@ -160,6 +179,9 @@ export default {
       <div class="table-section" :class="tableData.date.spacing" role="columnheader">
         {{ tableData.date.title }}
       </div>
+      <div class="table-section" :class="tableData.upcoming.spacing" role="columnheader">
+        {{ tableData.upcoming.title }}
+      </div>
       <div class="table-section" :class="tableData.autoStop.spacing" role="columnheader">
         {{ tableData.autoStop.title }}
       </div>
@@ -171,6 +193,7 @@ export default {
         :model="model"
         :can-read-environment="canReadEnvironment"
         :table-data="tableData"
+        data-qa-selector="environment_item"
       />
 
       <div
@@ -185,6 +208,7 @@ export default {
             :is-loading="model.isLoadingDeployBoard"
             :is-empty="model.isEmptyDeployBoard"
             :logs-path="model.logs_path"
+            @changeCanaryWeight="changeCanaryWeight(model, $event)"
           />
         </div>
       </div>
@@ -207,6 +231,7 @@ export default {
             :model="children"
             :can-read-environment="canReadEnvironment"
             :table-data="tableData"
+            data-qa-selector="environment_item"
           />
 
           <div :key="`sub-div-${i}`">

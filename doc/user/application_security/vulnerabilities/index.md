@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Threat Insights
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Vulnerability Pages
@@ -47,9 +47,9 @@ and allows you to comment on a change.
 
 You can create an issue for a vulnerability by selecting the **Create issue** button.
 
-This creates a [confidential issue](../../project/issues/confidential_issues.md) in the
-project the vulnerability came from and pre-populates it with useful information from
-the vulnerability report. After the issue is created, GitLab redirects you to the
+This allows the user to create a [confidential issue](../../project/issues/confidential_issues.md)
+in the project the vulnerability came from. Fields are pre-populated with pertinent information
+from the vulnerability report. After the issue is created, GitLab redirects you to the
 issue page so you can edit, assign, or comment on the issue.
 
 ## Link issues to the vulnerability

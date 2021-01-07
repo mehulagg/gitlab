@@ -28,7 +28,7 @@ describe('EE Project Selector store utils', () => {
 
     it.each([{}, { foo: 'foo' }, null, undefined, false])(
       'returns the original input if it does not contain a header property',
-      input => {
+      (input) => {
         expect(addPageInfo(input)).toBe(input);
       },
     );

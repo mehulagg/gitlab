@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Troubleshooting a reference architecture setup
@@ -23,12 +23,12 @@ with the Fog library that GitLab uses. Symptoms include:
 ### GitLab Pages requires NFS
 
 If you intend to use [GitLab Pages](../../user/project/pages/index.md), this currently requires
-[NFS](../nfs.md). There is [work in progress](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196)
-to remove this dependency. In the future, GitLab Pages may use
-[object storage](https://gitlab.com/gitlab-org/gitlab/-/issues/208135).
+[NFS](../nfs.md). There is [work in progress](https://gitlab.com/groups/gitlab-org/-/epics/3901)
+to remove this dependency. In the future, GitLab Pages will use
+object storage.
 
 The dependency on disk storage also prevents Pages being deployed using the
-[GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/37).
+[GitLab Helm chart](https://gitlab.com/groups/gitlab-org/-/epics/4283).
 
 ### Incremental logging is required for CI to use object storage
 
@@ -434,13 +434,13 @@ If the monitoring node is not receiving any data, check that the exporters are
 capturing data.
 
 ```shell
-curl http[s]://localhost:<EXPORTER LISTENING PORT>/metric
+curl "http[s]://localhost:<EXPORTER LISTENING PORT>/metric"
 ```
 
 or
 
 ```shell
-curl http[s]://localhost:<EXPORTER LISTENING PORT>/-/metric
+curl "http[s]://localhost:<EXPORTER LISTENING PORT>/-/metric"
 ```
 
 ## Troubleshooting PgBouncer

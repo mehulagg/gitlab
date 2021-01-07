@@ -25,7 +25,7 @@ export default class AccessDropdown {
     this.setSelectedItems([]);
     this.persistPreselectedItems();
 
-    this.noOneObj = this.accessLevelsData.find(level => level.id === ACCESS_LEVEL_NONE);
+    this.noOneObj = this.accessLevelsData.find((level) => level.id === ACCESS_LEVEL_NONE);
 
     this.initDropdown();
   }
@@ -45,26 +45,27 @@ export default class AccessDropdown {
           onHide();
         }
       },
-      clicked: options => {
+      clicked: (options) => {
         const { $el, e } = options;
         const item = options.selectedObj;
+        const fossWithMergeAccess = !this.hasLicense && this.accessLevel === ACCESS_LEVELS.MERGE;
 
         e.preventDefault();
 
-        if (!this.hasLicense) {
-          // We're not multiselecting quite yet with FOSS:
+        if (fossWithMergeAccess) {
+          // We're not multiselecting quite yet in "Merge" access dropdown, on FOSS:
           // remove all preselected items before selecting this item
           // https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37499
-          this.accessLevelsData.forEach(level => {
+          this.accessLevelsData.forEach((level) => {
             this.removeSelectedItem(level);
           });
         }
 
         if ($el.is('.is-active')) {
           if (this.noOneObj) {
-            if (item.id === this.noOneObj.id && this.hasLicense) {
+            if (item.id === this.noOneObj.id && !fossWithMergeAccess) {
               // remove all others selected items
-              this.accessLevelsData.forEach(level => {
+              this.accessLevelsData.forEach((level) => {
                 if (level.id !== item.id) {
                   this.removeSelectedItem(level);
                 }
@@ -108,7 +109,7 @@ export default class AccessDropdown {
       return;
     }
 
-    const persistedItems = itemsToPreselect.map(item => {
+    const persistedItems = itemsToPreselect.map((item) => {
       const persistedItem = { ...item };
       persistedItem.persisted = true;
       return persistedItem;
@@ -122,7 +123,7 @@ export default class AccessDropdown {
   }
 
   getSelectedItems() {
-    return this.items.filter(item => !item._destroy);
+    return this.items.filter((item) => !item._destroy);
   }
 
   getAllSelectedItems() {
@@ -133,7 +134,7 @@ export default class AccessDropdown {
   getInputData() {
     const selectedItems = this.getAllSelectedItems();
 
-    const accessLevels = selectedItems.map(item => {
+    const accessLevels = selectedItems.map((item) => {
       const obj = {};
 
       if (typeof item.id !== 'undefined') {
@@ -287,12 +288,14 @@ export default class AccessDropdown {
     $dropdownToggleText.removeClass('is-default');
 
     if (currentItems.length === 1 && currentItems[0].type === LEVEL_TYPES.ROLE) {
-      const roleData = this.accessLevelsData.find(data => data.id === currentItems[0].access_level);
+      const roleData = this.accessLevelsData.find(
+        (data) => data.id === currentItems[0].access_level,
+      );
       return roleData.text;
     }
 
     const labelPieces = [];
-    const counts = countBy(currentItems, item => item.type);
+    const counts = countBy(currentItems, (item) => item.type);
 
     if (counts[LEVEL_TYPES.ROLE] > 0) {
       labelPieces.push(n__('1 role', '%d roles', counts[LEVEL_TYPES.ROLE]));
@@ -335,7 +338,7 @@ export default class AccessDropdown {
         });
     } else {
       this.getDeployKeys(query)
-        .then(deployKeysResponse => callback(this.consolidateData(deployKeysResponse.data)))
+        .then((deployKeysResponse) => callback(this.consolidateData(deployKeysResponse.data)))
         .catch(() => createFlash({ message: __('Failed to load deploy keys.') }));
     }
   }
@@ -364,7 +367,7 @@ export default class AccessDropdown {
     /*
      * Build roles
      */
-    const roles = this.accessLevelsData.map(level => {
+    const roles = this.accessLevelsData.map((level) => {
       /* eslint-disable no-param-reassign */
       // This re-assignment is intentional as
       // level.type property is being used in removeSelectedItem()
@@ -388,7 +391,7 @@ export default class AccessDropdown {
       /*
        * Build groups
        */
-      const groups = groupsResponse.map(group => ({
+      const groups = groupsResponse.map((group) => ({
         ...group,
         type: LEVEL_TYPES.GROUP,
       }));
@@ -397,8 +400,8 @@ export default class AccessDropdown {
        * Build users
        */
       const users = selectedItems
-        .filter(item => item.type === LEVEL_TYPES.USER)
-        .map(item => {
+        .filter((item) => item.type === LEVEL_TYPES.USER)
+        .map((item) => {
           // Save identifiers for easy-checking more later
           map.push(LEVEL_TYPES.USER + item.user_id);
 
@@ -413,7 +416,7 @@ export default class AccessDropdown {
 
       // Has to be checked against server response
       // because the selected item can be in filter results
-      usersResponse.forEach(response => {
+      usersResponse.forEach((response) => {
         // Add is it has not been added
         if (map.indexOf(LEVEL_TYPES.USER + response.id) === -1) {
           const user = { ...response };
@@ -443,7 +446,7 @@ export default class AccessDropdown {
     }
 
     if (this.deployKeysOnProtectedBranchesEnabled) {
-      const deployKeys = deployKeysResponse.map(response => {
+      const deployKeys = deployKeysResponse.map((response) => {
         const {
           id,
           fingerprint,

@@ -14,6 +14,7 @@ class License < ApplicationRecord
   EES_FEATURES = %i[
     audit_events
     blocked_issues
+    board_iteration_lists
     code_owners
     code_review_analytics
     contribution_analytics
@@ -26,7 +27,6 @@ class License < ApplicationRecord
     issuable_default_templates
     issue_weights
     iterations
-    jenkins_integration
     ldap_group_sync
     member_lock
     merge_request_approvers
@@ -63,6 +63,7 @@ class License < ApplicationRecord
     code_owner_approval_required
     commit_committer_check
     compliance_framework
+    custom_compliance_frameworks
     cross_project_pipelines
     custom_file_templates
     custom_file_templates_for_namespace
@@ -71,7 +72,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    deploy_board
     disable_name_update_for_users
     email_additional_text
     epics
@@ -87,12 +87,15 @@ class License < ApplicationRecord
     group_forking_protection
     group_ip_restriction
     group_merge_request_analytics
+    group_merge_request_approval_settings
     group_milestone_project_releases
     group_project_templates
     group_repository_analytics
     group_saml
+    group_saml_group_sync
     group_wikis
     incident_sla
+    incident_metric_upload
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -125,32 +128,36 @@ class License < ApplicationRecord
     unprotection_restrictions
     ci_project_subscriptions
     incident_timeline_view
+    oncall_schedules
+    export_user_permissions
   ]
   EEP_FEATURES.freeze
 
   EEU_FEATURES = EEP_FEATURES + %i[
+    api_fuzzing
     auto_rollback
+    cilium_alerts
     container_scanning
     coverage_fuzzing
     credentials_inventory
-    custom_compliance_frameworks
     dast
     dependency_scanning
     devops_adoption
+    enforce_pat_expiration
     enterprise_templates
-    api_fuzzing
+    environment_alerts
+    group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
     insights
     issuable_health_status
     license_scanning
     personal_access_token_expiration_policy
-    enforce_pat_expiration
-    group_saml_group_sync
+    project_activity_analytics
     prometheus_alerts
     pseudonymizer
+    quality_management
     release_evidence_test_artifacts
-    environment_alerts
     report_approver_rules
     requirements
     sast
@@ -161,7 +168,7 @@ class License < ApplicationRecord
     status_page
     subepics
     threat_monitoring
-    quality_management
+    vulnerability_auto_fix
   ]
   EEU_FEATURES.freeze
 
@@ -181,7 +188,6 @@ class License < ApplicationRecord
   # Add on codes that may occur in legacy licenses that don't have a plan yet.
   FEATURES_FOR_ADD_ONS = {
     'GitLab_Auditor_User' => :auditor_user,
-    'GitLab_DeployBoard' => :deploy_board,
     'GitLab_FileLocks' => :file_locks,
     'GitLab_Geo' => :geo
   }.freeze
@@ -235,6 +241,8 @@ class License < ApplicationRecord
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
 
+  CACHE_KEY = :current_license
+
   class << self
     def features_for_plan(plan)
       FEATURES_BY_PLAN.fetch(plan, [])
@@ -253,11 +261,12 @@ class License < ApplicationRecord
     end
 
     def current
-      if RequestStore.active?
-        RequestStore.fetch(:current_license) { load_license }
-      else
-        load_license
-      end
+      cache.fetch(CACHE_KEY, as: License, expires_in: 1.minute) { load_license }
+    end
+
+    def cache
+      Gitlab::SafeRequestStore[:license_cache] ||=
+        Gitlab::JsonCache.new(namespace: :ee, backend: ::Gitlab::ProcessMemoryCache.cache_backend)
     end
 
     def all_plans
@@ -267,7 +276,7 @@ class License < ApplicationRecord
     delegate :block_changes?, :feature_available?, to: :current, allow_nil: true
 
     def reset_current
-      RequestStore.delete(:current_license)
+      cache.expire(CACHE_KEY)
     end
 
     def load_license
@@ -467,7 +476,7 @@ class License < ApplicationRecord
   end
 
   def overage_with_historical_max
-    overage(historical_max_with_default_period)
+    overage(maximum_user_count)
   end
 
   def historical_max(from = nil, to = nil)
@@ -475,12 +484,7 @@ class License < ApplicationRecord
   end
 
   def maximum_user_count
-    [historical_max, daily_billable_users_count].max
-  end
-
-  def historical_max_with_default_period
-    @historical_max_with_default_period ||=
-      historical_max
+    [historical_max(starts_at), daily_billable_users_count].max
   end
 
   def update_trial_setting

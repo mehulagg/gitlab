@@ -2,13 +2,13 @@ import { initSearchApp } from '~/search';
 import createStore from '~/search/store';
 
 jest.mock('~/search/store');
+jest.mock('~/search/topbar');
 jest.mock('~/search/sidebar');
-jest.mock('~/search/group_filter');
 
 describe('initSearchApp', () => {
   let defaultLocation;
 
-  const setUrl = query => {
+  const setUrl = (query) => {
     window.location.href = `https://localhost:3000/search${query}`;
     window.location.search = query;
   };

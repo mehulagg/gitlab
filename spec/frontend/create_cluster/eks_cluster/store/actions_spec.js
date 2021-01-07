@@ -94,7 +94,7 @@ describe('EKS Cluster Store Actions', () => {
     ${'setNodeCount'}               | ${SET_NODE_COUNT}                | ${{ nodeCount }}           | ${'node count'}
     ${'setGitlabManagedCluster'}    | ${SET_GITLAB_MANAGED_CLUSTER}    | ${gitlabManagedCluster}    | ${'gitlab managed cluster'}
     ${'setNamespacePerEnvironment'} | ${SET_NAMESPACE_PER_ENVIRONMENT} | ${namespacePerEnvironment} | ${'namespace per environment'}
-  `(`$action commits $mutation with $payloadDescription payload`, data => {
+  `(`$action commits $mutation with $payloadDescription payload`, (data) => {
     const { action, mutation, payload } = data;
 
     testAction(actions[action], payload, state, [{ type: mutation, payload }]);
@@ -186,7 +186,7 @@ describe('EKS Cluster Store Actions', () => {
             role_external_id: payload.externalId,
             region: DEFAULT_REGION,
           })
-          .reply(400, error);
+          .reply(400, null);
       });
 
       it('dispatches createRoleError action', () =>
@@ -196,6 +196,32 @@ describe('EKS Cluster Store Actions', () => {
           state,
           [],
           [{ type: 'requestCreateRole' }, { type: 'createRoleError', payload: { error } }],
+        ));
+    });
+
+    describe('when request fails with a message', () => {
+      beforeEach(() => {
+        const errResp = { message: 'Something failed' };
+
+        mock
+          .onPost(state.createRolePath, {
+            role_arn: payload.roleArn,
+            role_external_id: payload.externalId,
+            region: DEFAULT_REGION,
+          })
+          .reply(4, errResp);
+      });
+
+      it('dispatches createRoleError action', () =>
+        testAction(
+          actions.createRole,
+          payload,
+          state,
+          [],
+          [
+            { type: 'requestCreateRole' },
+            { type: 'createRoleError', payload: { error: 'Something failed' } },
+          ],
         ));
     });
   });

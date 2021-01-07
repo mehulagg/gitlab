@@ -87,7 +87,7 @@ export default {
     },
     fetchData() {
       this.loading = true;
-      return Api.groups(this.searchTerm, this.queryParams).then(groups => {
+      return Api.groups(this.searchTerm, this.queryParams).then((groups) => {
         this.loading = false;
         this.groups = groups;
       });

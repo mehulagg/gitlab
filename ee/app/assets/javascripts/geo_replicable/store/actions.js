@@ -54,7 +54,7 @@ export const fetchReplicableItemsGraphQl = ({ state, dispatch }, direction) => {
       query: buildReplicableTypeQuery(state.graphqlFieldName),
       variables: { first, last, before, after },
     })
-    .then(res => {
+    .then((res) => {
       if (!res.data.geoNode || !(state.graphqlFieldName in res.data.geoNode)) {
         dispatch('receiveReplicableItemsSuccess', { data: [], pagination: null });
         return;
@@ -86,7 +86,7 @@ export const fetchReplicableItemsRestful = ({ state, dispatch }) => {
   };
 
   Api.getGeoReplicableItems(state.replicableType, query)
-    .then(res => {
+    .then((res) => {
       const normalizedHeaders = normalizeHeaders(res.headers);
       const pagination = parseIntPagination(normalizedHeaders);
       const data = convertObjectPropsToCamelCase(res.data, { deep: true });

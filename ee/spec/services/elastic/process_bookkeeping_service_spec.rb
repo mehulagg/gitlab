@@ -76,6 +76,28 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
     end
   end
 
+  describe '.maintain_indexed_associations' do
+    let(:project) { create(:project) }
+
+    it 'calls track! for each associated object' do
+      issue_1 = create(:issue, project: project)
+      issue_2 = create(:issue, project: project)
+
+      expect(described_class).to receive(:track!).with(issue_1, issue_2)
+
+      described_class.maintain_indexed_associations(project, ['issues'])
+    end
+
+    it 'correctly scopes associated note objects to not include system notes' do
+      note_searchable = create(:note, :on_issue, project: project)
+      create(:note, :on_issue, :system, project: project)
+
+      expect(described_class).to receive(:track!).with(note_searchable)
+
+      described_class.maintain_indexed_associations(project, ['notes'])
+    end
+  end
+
   describe '#execute' do
     let(:limit) { 5 }
 

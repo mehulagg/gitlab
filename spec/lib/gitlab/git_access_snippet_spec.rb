@@ -172,13 +172,31 @@ RSpec.describe Gitlab::GitAccessSnippet do
         end
       end
 
-      [:guest, :reporter, :maintainer, :author, :admin].each do |membership|
+      [:guest, :reporter, :maintainer, :author].each do |membership|
         context membership.to_s do
           let(:membership) { membership }
 
           it 'cannot perform git pushes' do
             expect { push_access_check }.to raise_error(described_class::ForbiddenError)
             expect { pull_access_check }.not_to raise_error
+          end
+        end
+      end
+
+      context 'admin' do
+        let(:membership) { :admin }
+
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'cannot perform git pushes' do
+            expect { push_access_check }.to raise_error(described_class::ForbiddenError)
+            expect { pull_access_check }.not_to raise_error
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'cannot perform git operations' do
+            expect { push_access_check }.to raise_error(described_class::ForbiddenError)
+            expect { pull_access_check }.to raise_error(described_class::ForbiddenError)
           end
         end
       end
@@ -369,6 +387,38 @@ RSpec.describe Gitlab::GitAccessSnippet do
       it_behaves_like 'a push to repository already over the limit'
       it_behaves_like 'a push to repository below the limit'
       it_behaves_like 'a push to repository to make it over the limit'
+    end
+  end
+
+  describe 'HEAD realignment' do
+    let_it_be(:snippet) { create(:project_snippet, :private, :repository, project: project) }
+
+    shared_examples 'HEAD is updated to the snippet default branch' do
+      let(:actor) { snippet.author }
+
+      specify do
+        expect(snippet).to receive(:change_head_to_default_branch).and_call_original
+
+        subject
+      end
+
+      context 'when an error is raised' do
+        let(:actor) { nil }
+
+        it 'does not realign HEAD' do
+          expect(snippet).not_to receive(:change_head_to_default_branch).and_call_original
+
+          expect { subject }.to raise_error(described_class::ForbiddenError)
+        end
+      end
+    end
+
+    it_behaves_like 'HEAD is updated to the snippet default branch' do
+      subject { push_access_check }
+    end
+
+    it_behaves_like 'HEAD is updated to the snippet default branch' do
+      subject { pull_access_check }
     end
   end
 

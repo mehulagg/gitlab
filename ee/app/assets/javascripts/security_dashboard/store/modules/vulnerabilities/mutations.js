@@ -2,7 +2,6 @@ import Vue from 'vue';
 import { s__, __ } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import * as types from './mutation_types';
-import { DAYS } from './constants';
 import { isSameVulnerability } from './utils';
 
 export default {
@@ -33,30 +32,6 @@ export default {
   },
   [types.SET_VULNERABILITIES_PAGE](state, payload) {
     state.pageInfo = { ...state.pageInfo, page: payload };
-  },
-  [types.SET_VULNERABILITIES_HISTORY_ENDPOINT](state, payload) {
-    state.vulnerabilitiesHistoryEndpoint = payload;
-  },
-  [types.SET_VULNERABILITIES_HISTORY_DAY_RANGE](state, days) {
-    state.vulnerabilitiesHistoryDayRange = days;
-
-    if (days <= DAYS.THIRTY) {
-      state.vulnerabilitiesHistoryMaxDayInterval = 7;
-    } else if (days > DAYS.SIXTY) {
-      state.vulnerabilitiesHistoryMaxDayInterval = 14;
-    }
-  },
-  [types.REQUEST_VULNERABILITIES_HISTORY](state) {
-    state.isLoadingVulnerabilitiesHistory = true;
-    state.errorLoadingVulnerabilitiesHistory = false;
-  },
-  [types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS](state, payload) {
-    state.isLoadingVulnerabilitiesHistory = false;
-    state.vulnerabilitiesHistory = payload;
-  },
-  [types.RECEIVE_VULNERABILITIES_HISTORY_ERROR](state) {
-    state.isLoadingVulnerabilitiesHistory = false;
-    state.errorLoadingVulnerabilitiesHistory = true;
   },
   [types.SET_MODAL_DATA](state, payload) {
     const { vulnerability } = payload;
@@ -101,7 +76,7 @@ export default {
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS](state, payload) {
-    const vulnerability = state.vulnerabilities.find(vuln =>
+    const vulnerability = state.vulnerabilities.find((vuln) =>
       isSameVulnerability(vuln, payload.vulnerability),
     );
     vulnerability.dismissal_feedback = payload.data;
@@ -150,7 +125,7 @@ export default {
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS](state, payload) {
-    const vulnerability = state.vulnerabilities.find(vuln =>
+    const vulnerability = state.vulnerabilities.find((vuln) =>
       isSameVulnerability(vuln, payload.vulnerability),
     );
     if (vulnerability) {
@@ -168,7 +143,7 @@ export default {
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS](state, payload) {
-    const vulnerability = state.vulnerabilities.find(vuln => vuln.id === payload.id);
+    const vulnerability = state.vulnerabilities.find((vuln) => vuln.id === payload.id);
     if (vulnerability) {
       vulnerability.dismissal_feedback = payload.data;
       state.isDismissingVulnerability = false;
@@ -184,7 +159,7 @@ export default {
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_REVERT_DISMISSAL_SUCCESS](state, payload) {
-    const vulnerability = state.vulnerabilities.find(vuln =>
+    const vulnerability = state.vulnerabilities.find((vuln) =>
       isSameVulnerability(vuln, payload.vulnerability),
     );
     vulnerability.dismissal_feedback = null;

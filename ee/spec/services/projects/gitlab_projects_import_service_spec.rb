@@ -16,9 +16,9 @@ RSpec.describe Projects::GitlabProjectsImportService do
   end
 
   describe '#execute' do
-    context 'creates export job' do
+    context 'creates template export job' do
       it 'if project saved and custom template exists' do
-        expect(custom_template).to receive(:add_export_job)
+        expect(custom_template).to receive(:add_template_export_job)
 
         project = subject.execute
 
@@ -27,8 +27,8 @@ RSpec.describe Projects::GitlabProjectsImportService do
 
       it 'sets custom template import strategy after export' do
         expect(custom_template)
-          .to receive(:add_export_job).with(current_user: namespace.owner,
-                                            after_export_strategy: instance_of(EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy))
+          .to receive(:add_template_export_job).with(current_user: namespace.owner,
+                                                     after_export_strategy: instance_of(EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy))
 
         subject.execute
       end
@@ -40,7 +40,7 @@ RSpec.describe Projects::GitlabProjectsImportService do
           allow(instance).to receive(:saved?).and_return(false)
         end
 
-        expect(custom_template).not_to receive(:add_export_job)
+        expect(custom_template).not_to receive(:add_template_export_job)
 
         project = subject.execute
 

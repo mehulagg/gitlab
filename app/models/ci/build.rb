@@ -27,7 +27,8 @@ module Ci
       upload_multiple_artifacts: -> (build) { build.publishes_artifacts_reports? },
       refspecs: -> (build) { build.merge_request_ref? },
       artifacts_exclude: -> (build) { build.supports_artifacts_exclude? },
-      multi_build_steps: -> (build) { build.multi_build_steps? }
+      multi_build_steps: -> (build) { build.multi_build_steps? },
+      return_exit_code: -> (build) { build.exit_codes_defined? }
     }.freeze
 
     DEFAULT_RETRIES = {
@@ -146,6 +147,12 @@ module Ci
         .includes(:metadata, :job_artifacts_metadata)
     end
 
+    scope :with_project_and_metadata, -> do
+      if Feature.enabled?(:non_public_artifacts, type: :development)
+        joins(:metadata).includes(:project, :metadata)
+      end
+    end
+
     scope :with_artifacts_not_expired, -> { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
     scope :with_expired_artifacts, -> { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
     scope :last_month, -> { where('created_at > ?', Date.today - 1.month) }
@@ -189,6 +196,8 @@ module Ci
     end
 
     scope :with_coverage, -> { where.not(coverage: nil) }
+
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
 
     acts_as_taggable
 
@@ -535,6 +544,7 @@ module Ci
       strong_memoize(:variables) do
         Gitlab::Ci::Variables::Collection.new
           .concat(persisted_variables)
+          .concat(dependency_proxy_variables)
           .concat(job_jwt_variables)
           .concat(scoped_variables)
           .concat(job_variables)
@@ -580,6 +590,15 @@ module Ci
 
         variables.append(key: 'CI_DEPLOY_USER', value: gitlab_deploy_token.username)
         variables.append(key: 'CI_DEPLOY_PASSWORD', value: gitlab_deploy_token.token, public: false, masked: true)
+      end
+    end
+
+    def dependency_proxy_variables
+      Gitlab::Ci::Variables::Collection.new.tap do |variables|
+        break variables unless Gitlab.config.dependency_proxy.enabled
+
+        variables.append(key: 'CI_DEPENDENCY_PROXY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
+        variables.append(key: 'CI_DEPENDENCY_PROXY_PASSWORD', value: token.to_s, public: false, masked: true)
       end
     end
 
@@ -727,6 +746,16 @@ module Ci
 
     def browsable_artifacts?
       artifacts_metadata?
+    end
+
+    def artifacts_public?
+      return true unless Feature.enabled?(:non_public_artifacts, type: :development)
+
+      artifacts_public = options.dig(:artifacts, :public)
+
+      return true if artifacts_public.nil? # Default artifacts:public to true
+
+      options.dig(:artifacts, :public)
     end
 
     def artifacts_metadata_entry(path, **options)
@@ -916,11 +945,31 @@ module Ci
     end
 
     def collect_coverage_reports!(coverage_report)
+      project_path, worktree_paths = if Feature.enabled?(:smart_cobertura_parser, project)
+                                       # If the flag is disabled, we intentionally pass nil
+                                       # for both project_path and worktree_paths to fallback
+                                       # to the non-smart behavior of the parser
+                                       [project.full_path, pipeline.all_worktree_paths]
+                                     end
+
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
-        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+          blob,
+          coverage_report,
+          project_path: project_path,
+          worktree_paths: worktree_paths
+        )
       end
 
       coverage_report
+    end
+
+    def collect_codequality_reports!(codequality_report)
+      each_report(Ci::JobArtifact::CODEQUALITY_REPORT_FILE_TYPES) do |file_type, blob|
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, codequality_report)
+      end
+
+      codequality_report
     end
 
     def collect_terraform_reports!(terraform_reports)
@@ -972,6 +1021,26 @@ module Ci
       # NOTE: This is temporary and will be replaced later by a value
       # that would come from an actual application limit.
       ::Gitlab.com? ? 500_000 : 0
+    end
+
+    def debug_mode?
+      return false unless Feature.enabled?(:restrict_access_to_build_debug_mode, default_enabled: true)
+
+      # TODO: Have `debug_mode?` check against data on sent back from runner
+      # to capture all the ways that variables can be set.
+      # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
+      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
+    end
+
+    def drop_with_exit_code!(failure_reason, exit_code)
+      transaction do
+        conditionally_allow_failure!(exit_code)
+        drop!(failure_reason)
+      end
+    end
+
+    def exit_codes_defined?
+      options.dig(:allow_failure_criteria, :exit_codes).present?
     end
 
     protected
@@ -1056,6 +1125,22 @@ module Ci
       rescue OpenSSL::PKey::RSAError, Gitlab::Ci::Jwt::NoSigningKeyError => e
         Gitlab::ErrorTracking.track_exception(e)
       end
+    end
+
+    def conditionally_allow_failure!(exit_code)
+      return unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes_enabled?
+      return unless exit_code
+
+      if allowed_to_fail_with_code?(exit_code)
+        update_columns(allow_failure: true)
+      end
+    end
+
+    def allowed_to_fail_with_code?(exit_code)
+      options
+        .dig(:allow_failure_criteria, :exit_codes)
+        .to_a
+        .include?(exit_code)
     end
   end
 end

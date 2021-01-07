@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
   include GraphqlHelpers
 
-  let_it_be(:dast_site_profile) { create(:dast_site_profile) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, :with_dast_site_validation) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:current_user) { create(:user) }
 
@@ -18,6 +18,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
             profileName
             targetUrl
             validationStatus
+            normalizedTargetUrl
           }
         }
       }
@@ -92,10 +93,10 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
     end
 
     context 'when there is no associated dast_site_validation' do
-      it 'returns a pending validation status' do
+      it 'returns a none validation status' do
         dast_site_profile.dast_site_validation.destroy!
 
-        expect(dast_site_profile_response['validationStatus']).to eq('PENDING_VALIDATION')
+        expect(dast_site_profile_response['validationStatus']).to eq('NONE')
       end
     end
   end

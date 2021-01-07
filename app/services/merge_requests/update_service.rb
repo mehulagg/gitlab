@@ -11,7 +11,7 @@ module MergeRequests
       params.delete(:target_project_id)
       params.delete(:source_branch)
 
-      if merge_request.closed_without_fork?
+      if merge_request.closed_or_merged_without_fork?
         params.delete(:target_branch)
         params.delete(:force_remove_source_branch)
       end
@@ -112,9 +112,11 @@ module MergeRequests
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
+      affected_reviewers = (old_reviewers + merge_request.reviewers) - (old_reviewers & merge_request.reviewers)
       create_reviewer_note(merge_request, old_reviewers)
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
       todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
+      invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
     end
 
     def create_branch_change_note(issuable, branch_type, old_branch, new_branch)
@@ -126,27 +128,29 @@ module MergeRequests
     override :handle_quick_actions
     def handle_quick_actions(merge_request)
       super
+
+      # Ensure this parameter does not get used as an attribute
+      rebase = params.delete(:rebase)
+
+      if rebase
+        rebase_from_quick_action(merge_request)
+        # Ignore "/merge" if "/rebase" is used to avoid an unexpected race
+        params.delete(:merge)
+      end
+
       merge_from_quick_action(merge_request) if params[:merge]
+    end
+
+    def rebase_from_quick_action(merge_request)
+      merge_request.rebase_async(current_user.id)
     end
 
     def merge_from_quick_action(merge_request)
       last_diff_sha = params.delete(:merge)
 
-      if Feature.enabled?(:merge_orchestration_service, merge_request.project, default_enabled: true)
-        MergeRequests::MergeOrchestrationService
-          .new(project, current_user, { sha: last_diff_sha })
-          .execute(merge_request)
-      else
-        return unless merge_request.mergeable_with_quick_action?(current_user, last_diff_sha: last_diff_sha)
-
-        merge_request.update(merge_error: nil)
-
-        if merge_request.head_pipeline_active?
-          AutoMergeService.new(project, current_user, { sha: last_diff_sha }).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
-        else
-          merge_request.merge_async(current_user.id, { sha: last_diff_sha })
-        end
-      end
+      MergeRequests::MergeOrchestrationService
+        .new(project, current_user, { sha: last_diff_sha })
+        .execute(merge_request)
     end
 
     override :quick_action_options

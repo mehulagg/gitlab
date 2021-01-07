@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# When adding new user-configurable throttles, remember to update the documentation
+# in doc/user/admin_area/settings/user_and_ip_rate_limits.md
+#
 # Integration specs for throttling can be found in:
 # spec/requests/rack_attack_global_spec.rb
 module Gitlab
@@ -7,8 +10,26 @@ module Gitlab
     def self.configure(rack_attack)
       # This adds some methods used by our throttles to the `Rack::Request`
       rack_attack::Request.include(Gitlab::RackAttack::Request)
+
+      # This is Rack::Attack::DEFAULT_THROTTLED_RESPONSE, modified to allow a custom response
+      Rack::Attack.throttled_response = lambda do |env|
+        # Send the Retry-After header so clients (e.g. python-gitlab) can make good choices about delays
+        match_data = env['rack.attack.match_data']
+        now = match_data[:epoch_time]
+        retry_after = match_data[:period] - (now % match_data[:period])
+
+        [429, { 'Content-Type' => 'text/plain', 'Retry-After' => retry_after.to_s }, [Gitlab::Throttle.rate_limiting_response_text]]
+      end
+
       # Configure the throttles
       configure_throttles(rack_attack)
+
+      configure_user_allowlist
+    end
+
+    def self.configure_user_allowlist
+      @user_allowlist = nil
+      user_allowlist
     end
 
     def self.configure_throttles(rack_attack)
@@ -23,7 +44,7 @@ module Gitlab
       throttle_or_track(rack_attack, 'throttle_authenticated_api', Gitlab::Throttle.authenticated_api_options) do |req|
         if req.api_request? &&
            Gitlab::Throttle.settings.throttle_authenticated_api_enabled
-          req.authenticated_user_id([:api])
+          req.throttled_user_id([:api])
         end
       end
 
@@ -39,7 +60,7 @@ module Gitlab
       throttle_or_track(rack_attack, 'throttle_authenticated_web', Gitlab::Throttle.authenticated_web_options) do |req|
         if req.web_request? &&
            Gitlab::Throttle.settings.throttle_authenticated_web_enabled
-          req.authenticated_user_id([:api, :rss, :ics])
+          req.throttled_user_id([:api, :rss, :ics])
         end
       end
 
@@ -58,7 +79,7 @@ module Gitlab
            req.api_request? &&
            req.protected_path? &&
            Gitlab::Throttle.protected_paths_enabled?
-          req.authenticated_user_id([:api])
+          req.throttled_user_id([:api])
         end
       end
 
@@ -67,7 +88,7 @@ module Gitlab
            req.web_request? &&
            req.protected_path? &&
            Gitlab::Throttle.protected_paths_enabled?
-          req.authenticated_user_id([:api, :rss, :ics])
+          req.throttled_user_id([:api, :rss, :ics])
         end
       end
 
@@ -92,6 +113,14 @@ module Gitlab
       return true if dry_run_config == '*'
 
       dry_run_config.split(',').map(&:strip).include?(name)
+    end
+
+    def self.user_allowlist
+      @user_allowlist ||= begin
+        list = UserAllowlist.new(ENV['GITLAB_THROTTLE_USER_ALLOWLIST'])
+        Gitlab::AuthLogger.info(gitlab_throttle_user_allowlist: list.to_a)
+        list
+      end
     end
   end
 end

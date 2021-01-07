@@ -31,6 +31,10 @@ module Gitlab
         @blob&.path
       end
 
+      def sections
+        parsed_data.keys
+      end
+
       def entry_for_path(path)
         path = "/#{path}" unless path.start_with?('/')
 
@@ -93,16 +97,12 @@ module Gitlab
         section_headers.find { |k| k.casecmp?(section) } || section
       end
 
-      def extract_entry_and_populate_parsed_data(line, parsed, section = nil)
+      def extract_entry_and_populate_parsed_data(line, parsed, section)
         pattern, _separator, owners = line.partition(/(?<!\\)\s+/)
 
         normalized_pattern = normalize_pattern(pattern)
 
-        if section
-          parsed[section][normalized_pattern] = Entry.new(pattern, owners, section)
-        else
-          parsed[normalized_pattern] = Entry.new(pattern, owners)
-        end
+        parsed[section][normalized_pattern] = Entry.new(pattern, owners, section)
       end
 
       def skip?(line)

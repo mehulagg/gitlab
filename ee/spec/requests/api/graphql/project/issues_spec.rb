@@ -11,16 +11,10 @@ RSpec.describe 'getting an issue list for a project' do
     let(:sort_project) { create(:project, :public) }
     let(:data_path)    { [:project, :issues] }
 
-    def pagination_query(params, page_info)
-      graphql_query_for(
-        'project',
-        { 'fullPath' => sort_project.full_path },
-        query_graphql_field('issues', params, "#{page_info} edges { node { iid weight} }")
+    def pagination_query(params)
+      graphql_query_for(:project, { full_path: sort_project.full_path },
+        query_nodes(:issues, :iid, args: params, include_pagination_info: true)
       )
-    end
-
-    def pagination_results_data(data)
-      data.map { |issue| issue.dig('node', 'iid').to_i }
     end
 
     context 'when sorting by weight' do
@@ -32,17 +26,19 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'WEIGHT_ASC' }
+          let(:node_path)        { %w[iid] }
+          let(:sort_param)       { :WEIGHT_ASC }
           let(:first_param)      { 2 }
-          let(:expected_results) { [weight_issue3.iid, weight_issue5.iid, weight_issue1.iid, weight_issue4.iid, weight_issue2.iid] }
+          let(:expected_results) { [weight_issue3, weight_issue5, weight_issue1, weight_issue4, weight_issue2].map { |i| i.iid.to_s } }
         end
       end
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'WEIGHT_DESC' }
+          let(:node_path)        { %w[iid] }
+          let(:sort_param)       { :WEIGHT_DESC }
           let(:first_param)      { 2 }
-          let(:expected_results) { [weight_issue1.iid, weight_issue5.iid, weight_issue3.iid, weight_issue4.iid, weight_issue2.iid] }
+          let(:expected_results) { [weight_issue1, weight_issue5, weight_issue3, weight_issue4, weight_issue2].map { |i| i.iid.to_s } }
         end
       end
     end

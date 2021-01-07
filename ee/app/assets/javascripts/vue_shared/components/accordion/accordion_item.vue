@@ -4,7 +4,7 @@ import { GlSkeletonLoader, GlIcon } from '@gitlab/ui';
 
 import accordionEventBus from './accordion_event_bus';
 
-const accordionItemUniqueId = name => uniqueId(`gl-accordion-item-${name}-`);
+const accordionItemUniqueId = (name) => uniqueId(`gl-accordion-item-${name}-`);
 
 export default {
   components: {
@@ -60,6 +60,7 @@ export default {
     accordionEventBus.$on(this.closeOtherItemsEvent, this.onCloseOtherAccordionItems);
   },
   destroyed() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     accordionEventBus.$off(this.closeOtherItemsEvent);
   },
   methods: {

@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Instrumenting Ruby code
@@ -11,7 +11,7 @@ blocks of Ruby code. Method instrumentation is the primary form of
 instrumentation with block-based instrumentation only being used when we want to
 drill down to specific regions of code within a method.
 
-Please refer to [Product Analytics](product_analytics/index.md) if you are tracking product usage patterns.
+Please refer to [Product Analytics](https://about.gitlab.com/handbook/product/product-analytics-guide/) if you are tracking product usage patterns.
 
 ## Instrumenting Methods
 

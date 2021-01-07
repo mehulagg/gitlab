@@ -4,6 +4,10 @@ export const FIELDS = [
   {
     key: 'account',
     label: __('Account'),
+    sort: {
+      asc: 'name_asc',
+      desc: 'name_desc',
+    },
   },
   {
     key: 'source',
@@ -16,6 +20,10 @@ export const FIELDS = [
     label: __('Access granted'),
     thClass: 'col-meta',
     tdClass: 'col-meta',
+    sort: {
+      asc: 'last_joined',
+      desc: 'oldest_joined',
+    },
   },
   {
     key: 'invited',
@@ -40,6 +48,10 @@ export const FIELDS = [
     label: __('Max role'),
     thClass: 'col-max-role',
     tdClass: 'col-max-role',
+    sort: {
+      asc: 'access_level_asc',
+      desc: 'access_level_desc',
+    },
   },
   {
     key: 'expiration',
@@ -48,12 +60,25 @@ export const FIELDS = [
     tdClass: 'col-expiration',
   },
   {
+    key: 'lastSignIn',
+    label: __('Last sign-in'),
+    sort: {
+      asc: 'recent_sign_in',
+      desc: 'oldest_sign_in',
+    },
+  },
+  {
     key: 'actions',
     thClass: 'col-actions',
     tdClass: 'col-actions',
     showFunction: 'showActionsField',
   },
 ];
+
+export const DEFAULT_SORT = {
+  sortByKey: 'account',
+  sortDesc: false,
+};
 
 export const AVATAR_SIZE = 48;
 
@@ -69,3 +94,7 @@ export const DAYS_TO_EXPIRE_SOON = 7;
 export const LEAVE_MODAL_ID = 'member-leave-modal';
 
 export const REMOVE_GROUP_LINK_MODAL_ID = 'remove-group-link-modal-id';
+
+export const SEARCH_TOKEN_TYPE = 'filtered-search-term';
+
+export const SORT_PARAM = 'sort';

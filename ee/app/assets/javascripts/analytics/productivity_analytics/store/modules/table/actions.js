@@ -17,11 +17,11 @@ export const fetchMergeRequests = ({ dispatch, state, rootState, rootGetters }) 
 
   return axios
     .get(rootState.endpoint, { params })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       dispatch('receiveMergeRequestsSuccess', { headers, data });
     })
-    .catch(err => dispatch('receiveMergeRequestsError', err));
+    .catch((err) => dispatch('receiveMergeRequestsError', err));
 };
 
 export const requestMergeRequests = ({ commit }) => commit(types.REQUEST_MERGE_REQUESTS);

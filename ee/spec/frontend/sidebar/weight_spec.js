@@ -24,16 +24,17 @@ describe('Weight', () => {
     }
   });
 
-  const containsCollapsedLoadingIcon = () => wrapper.contains('.js-weight-collapsed-loading-icon');
-  const containsLoadingIcon = () => wrapper.contains('.js-weight-loading-icon');
+  const containsCollapsedLoadingIcon = () =>
+    wrapper.find('.js-weight-collapsed-loading-icon').exists();
+  const containsLoadingIcon = () => wrapper.find('.js-weight-loading-icon').exists();
   const findCollapsedLabel = () => wrapper.find('.js-weight-collapsed-weight-label');
   const findLabelValue = () => wrapper.find('.js-weight-weight-label-value');
   const findLabelNoValue = () => wrapper.find('.js-weight-weight-label .no-value');
   const findCollapsedBlock = () => wrapper.find('.js-weight-collapsed-block');
   const findEditLink = () => wrapper.find('.js-weight-edit-link');
   const findRemoveLink = () => wrapper.find('.js-weight-remove-link');
-  const containsEditableField = () => wrapper.contains({ ref: 'editableField' });
-  const containsInputError = () => wrapper.contains('.gl-field-error');
+  const containsEditableField = () => wrapper.find({ ref: 'editableField' }).exists();
+  const containsInputError = () => wrapper.find('.gl-field-error').exists();
 
   it('shows loading spinner when fetching', () => {
     createComponent({

@@ -15,6 +15,7 @@ function shouldCreateListGraphQL(label) {
   return store.getters.shouldUseGraphQL && !store.getters.getListByLabelId(fullLabelId(label));
 }
 
+// eslint-disable-next-line @gitlab/no-global-event-off
 $(document)
   .off('created.label')
   .on('created.label', (e, label, addNewList) => {
@@ -39,7 +40,7 @@ $(document)
   });
 
 export default function initNewListDropdown() {
-  $('.js-new-board-list').each(function() {
+  $('.js-new-board-list').each(function () {
     const $dropdownToggle = $(this);
     const $dropdown = $dropdownToggle.closest('.dropdown');
     new CreateLabelDropdown(

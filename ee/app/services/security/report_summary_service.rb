@@ -5,7 +5,7 @@ module Security
     include Gitlab::Utils::StrongMemoize
 
     # @param [Ci::Pipeline] pipeline
-    # @param [Hash[Symbol, Array[Symbol]] selection_information keys must be in the set of Vulnerabilities::Finding::REPORT_TYPES for example: {dast: [:scanned_resources_count, :vulnerabilities_count], container_scanning:[:vulnerabilities_count]}
+    # @param [Hash[Symbol, Array[Symbol]] selection_information keys must be in the set of Enums::Vulnerability.report_types for example: {dast: [:scanned_resources_count, :vulnerabilities_count], container_scanning:[:vulnerabilities_count]}
     def initialize(pipeline, selection_information)
       @pipeline = pipeline
       @selection_information = selection_information

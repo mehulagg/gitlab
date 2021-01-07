@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Run multiple Sidekiq processes **(CORE ONLY)**
@@ -11,7 +11,7 @@ These processes can be used to consume a dedicated set
 of queues. This can be used to ensure certain queues always have dedicated
 workers, no matter the number of jobs that need to be processed.
 
-NOTE: **Note:**
+NOTE:
 The information in this page applies only to Omnibus GitLab.
 
 ## Available Sidekiq queues
@@ -114,7 +114,7 @@ you list:
 
 > - [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/45) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
 > - [Sidekiq cluster including queue selector moved](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/181) to GitLab [Core](https://about.gitlab.com/pricing/#self-managed) in GitLab 12.10.
-> - [Marked as supported](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/147) in GitLab [Core](https://about.gitlab.com/pricing/#self-managed) in GitLab 13.6. Renamed from `experimental_queue_selector` to `queue_selector`.
+> - [Renamed from `experimental_queue_selector` to `queue_selector`](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/147) in GitLab 13.6.
 
 In addition to selecting queues by name, as above, the `queue_selector`
 option allows queue groups to be selected in a more general way using
@@ -209,7 +209,7 @@ sidekiq['queue_groups'] = [
 
 ### Disable Sidekiq cluster
 
-CAUTION: **Warning:**
+WARNING:
 Sidekiq cluster is [scheduled](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240)
 to be the only way to start Sidekiq in GitLab 14.0.
 
@@ -341,7 +341,7 @@ being equal to `max_concurrency`.
 
 Running a single Sidekiq process is the default in GitLab 12.10 and earlier.
 
-CAUTION: **Warning:**
+WARNING:
 Running Sidekiq directly is scheduled to be removed in GitLab
 [14.0](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/240).
 
@@ -376,7 +376,7 @@ This tells the additional processes how often to check for enqueued jobs.
 
 ## Troubleshoot using the CLI
 
-CAUTION: **Warning:**
+WARNING:
 It's recommended to use `/etc/gitlab/gitlab.rb` to configure the Sidekiq processes.
 If you experience a problem, you should contact GitLab support. Use the command
 line at your own risk.

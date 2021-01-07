@@ -21,6 +21,8 @@ module Security
       vulnerability_ids = create_all_vulnerabilities!
       mark_as_resolved_except(vulnerability_ids)
 
+      start_auto_fix
+
       success
     end
 
@@ -48,12 +50,12 @@ module Security
       end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
-      vulnerability_params[:uuid] = calculate_uuid_v5(finding)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
 
       update_vulnerability_scanner(finding)
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
+      reset_remediations_for(vulnerability_finding, finding)
 
       # The maximum number of identifiers is not used in validation
       # we just want to ignore the rest if a finding has more than that.
@@ -91,23 +93,6 @@ module Security
       end
     end
 
-    def calculate_uuid_v5(vulnerability_finding)
-      uuid_v5_name_components = {
-        report_type: vulnerability_finding.report_type,
-        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
-        location_fingerprint: vulnerability_finding.location.fingerprint,
-        project_id: project.id
-      }
-
-      if uuid_v5_name_components.values.any?(&:nil?)
-        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
-      end
-
-      name = uuid_v5_name_components.values.join('-')
-
-      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
-    end
-
     def update_vulnerability_scanner(finding)
       scanner = scanners_objects[finding.scanner.key]
       scanner.update!(finding.scanner.to_hash)
@@ -131,6 +116,34 @@ module Security
         vulnerability_finding.finding_links.safe_find_or_create_by!(link.to_hash)
       end
     rescue ActiveRecord::RecordNotUnique
+    end
+
+    def reset_remediations_for(vulnerability_finding, finding)
+      existing_remediations = find_existing_remediations_for(finding)
+      new_remediations = build_new_remediations_for(finding, existing_remediations)
+
+      vulnerability_finding.remediations = existing_remediations + new_remediations
+    end
+
+    def find_existing_remediations_for(finding)
+      checksums = finding.remediations.map(&:checksum)
+
+      @project.vulnerability_remediations.by_checksum(checksums)
+    end
+
+    def build_new_remediations_for(finding, existing_remediations)
+      find_missing_remediations_for(finding, existing_remediations)
+        .map { |remediation| build_vulnerability_remediation(remediation) }
+    end
+
+    def find_missing_remediations_for(finding, existing_remediations)
+      existing_remediation_checksums = existing_remediations.map(&:checksum)
+
+      finding.remediations.select { |remediation| !remediation.checksum.in?(existing_remediation_checksums) }
+    end
+
+    def build_vulnerability_remediation(remediation)
+      @project.vulnerability_remediations.new(summary: remediation.summary, file: remediation.diff_file, checksum: remediation.checksum)
     end
 
     def create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
@@ -189,6 +202,18 @@ module Security
 
     def put_warning_for(finding)
       Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
+    end
+
+    def start_auto_fix
+      return unless auto_fix_enabled?
+
+      ::Security::AutoFixWorker.perform_async(pipeline.id)
+    end
+
+    def auto_fix_enabled?
+      return false unless project.security_setting&.auto_fix_enabled?
+
+      project.security_setting.auto_fix_enabled_types.include?(report.type.to_sym)
     end
   end
 end

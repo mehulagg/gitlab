@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Alerts
@@ -37,7 +37,7 @@ The alert list displays the following information:
   - **Acknowledged**: Someone is actively investigating the problem.
   - **Resolved**: No further work is required.
 
-TIP: **Tip:**
+NOTE:
 Check out a live example available from the
 [`tanuki-inc` project page](https://gitlab-examples-ops-incident-setup-everyone-tanuki-inc.34.69.64.147.nip.io/)
 in GitLab to examine alerts in action.
@@ -67,7 +67,7 @@ Navigate to the Alert details view by visiting the [Alert list](alerts.md)
 and selecting an alert from the list. You need least Developer [permissions](../../user/permissions.md)
 to access alerts.
 
-TIP: **Tip:**
+NOTE:
 To review live examples of GitLab alerts, visit the
 [alert list](https://gitlab.com/gitlab-examples/ops/incident-setup/everyone/tanuki-inc/-/alert_management)
 for this demo project. Select any alert in the list to examine its alert details
@@ -78,7 +78,7 @@ amount of information you need.
 
 ### Alert details tab
 
-The **Alert details** tab has two sections. The top section provides a short list of critical details such as the severity, start time, number of events, and originating monitorting tool. The second section displays the full alert payload.
+The **Alert details** tab has two sections. The top section provides a short list of critical details such as the severity, start time, number of events, and originating monitoring tool. The second section displays the full alert payload.
 
 ### Metrics tab
 
@@ -222,7 +222,7 @@ the correct runbook:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5 behind a feature flag, disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.6.
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 The environment information and the link are displayed in the [Alert Details tab](#alert-details-tab).

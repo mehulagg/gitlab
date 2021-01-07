@@ -22,12 +22,6 @@ module QA
       before do
         unless elasticsearch_original_state_on?
           QA::EE::Resource::Settings::Elasticsearch.fabricate_via_api!
-          sleep(90)
-          # wait for the change to propagate before inserting records or else
-          # Gitlab::CurrentSettings.elasticsearch_indexing and
-          # Elastic::ApplicationVersionedSearch::searchable? will be false
-          # this sleep can be removed after we're able to query logs via the API
-          # as per this issue https://gitlab.com/gitlab-org/quality/team-tasks/issues/395
         end
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|

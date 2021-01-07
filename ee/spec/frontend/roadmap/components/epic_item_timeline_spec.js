@@ -26,7 +26,7 @@ const createComponent = ({
   });
 };
 
-const getEpicBar = wrapper => wrapper.find('.epic-bar');
+const getEpicBar = (wrapper) => wrapper.find('.epic-bar');
 
 describe('EpicItemTimelineComponent', () => {
   let wrapper;

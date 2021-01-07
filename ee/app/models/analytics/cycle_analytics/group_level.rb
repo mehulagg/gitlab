@@ -37,6 +37,15 @@ module Analytics
           self[stage_name].as_json(serializer: GroupAnalyticsStageSerializer)
         end
       end
+
+      def build_stage(stage_name)
+        stage_params = stage_params_by_name(stage_name).merge(group: group)
+        Analytics::CycleAnalytics::GroupStage.new(stage_params)
+      end
+
+      def resource_parent
+        group
+      end
     end
   end
 end

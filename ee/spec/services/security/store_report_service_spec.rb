@@ -2,19 +2,6 @@
 
 require 'spec_helper'
 
-UUID_REGEXP = Regexp.new("^([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-" \
-                         "([0-9a-f]{2})([0-9a-f]{2})-([0-9a-f]{12})$").freeze
-
-RSpec::Matchers.define :be_uuid_v5 do
-  match do |string|
-    expect(string).to be_a(String)
-
-    uuid_components = string.downcase.scan(UUID_REGEXP).first
-    time_hi_and_version = uuid_components[2].to_i(16)
-    (time_hi_and_version >> 12) == 5
-  end
-end
-
 RSpec.describe Security::StoreReportService, '#execute' do
   let_it_be(:user) { create(:user) }
   let(:artifact) { create(:ee_ci_job_artifact, trait) }
@@ -25,11 +12,17 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   before do
     stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, security_dashboard: true)
+    allow(Security::AutoFixWorker).to receive(:perform_async)
   end
 
   subject { described_class.new(pipeline, report).execute }
 
   context 'without existing data' do
+    before(:all) do
+      checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
+      create(:vulnerabilities_remediation, checksum: checksum)
+    end
+
     before do
       project.add_developer(user)
       allow(pipeline).to receive(:user).and_return(user)
@@ -37,11 +30,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :finding_links) do
-      'with SAST report'                | :sast                       | 3 | 17 | 33 | 39 | 33 | 0
-      'with exceeding identifiers'      | :with_exceeding_identifiers | 1 | 20 | 1  | 20 | 1  | 0
-      'with Dependency Scanning report' | :dependency_scanning        | 2 | 7  | 4  | 7  | 4  | 6
-      'with Container Scanning report'  | :container_scanning         | 1 | 8  | 8  | 8  | 8  | 8
+    where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations) do
+      'with SAST report'                | :sast                            | 3 | 17 | 33 | 39 | 33 | 0
+      'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0
+      'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1
+      'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0
     end
 
     with_them do
@@ -65,14 +58,12 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
       end
 
-      it 'inserts all vulnerabilties' do
-        expect { subject }.to change { Vulnerability.count }.by(findings)
+      it 'inserts all remediations' do
+        expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
-      it 'calculates UUIDv5 for all findings' do
-        subject
-        uuids = Vulnerabilities::Finding.pluck(:uuid)
-        expect(uuids).to all(be_uuid_v5)
+      it 'inserts all vulnerabilties' do
+        expect { subject }.to change { Vulnerability.count }.by(findings)
       end
     end
 
@@ -139,10 +130,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
     end
 
-    it 'calculates UUIDv5 for all findings' do
-      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
-    end
-
     it 'inserts all finding pipelines (join model) for this new pipeline' do
       expect { subject }.to change { Vulnerabilities::FindingPipeline.where(pipeline: new_pipeline).count }.by(33)
     end
@@ -165,7 +152,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let!(:existing_vulnerability) { create(:vulnerability, report_type: report_type, project: project) }
 
       it 'marks the vulnerability as resolved on default branch' do
-        expect { subject }.to change { existing_vulnerability.reload[:resolved_on_default_branch] }.from(false).to(true)
+        expect { subject }.to change { existing_vulnerability.reload.resolved_on_default_branch }.from(false).to(true)
       end
     end
 
@@ -175,7 +162,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'marks the vulnerability as not resolved on default branch' do
-        expect { subject }.to change { vulnerability.reload[:resolved_on_default_branch] }.from(true).to(false)
+        expect { subject }.to change { vulnerability.reload.resolved_on_default_branch }.from(true).to(false)
       end
     end
 
@@ -212,6 +199,88 @@ RSpec.describe Security::StoreReportService, '#execute' do
         status: :error,
         message: "sast report already stored for this pipeline, skipping..."
       })
+    end
+  end
+
+  context 'start auto_fix' do
+    before do
+      stub_licensed_features(vulnerability_auto_fix: true)
+    end
+
+    context 'with auto fix supported report type' do
+      let(:trait) { :dependency_scanning }
+
+      context 'when auto fix enabled' do
+        it 'start auto fix worker' do
+          expect(Security::AutoFixWorker).to receive(:perform_async).with(pipeline.id)
+
+          subject
+        end
+      end
+
+      context 'when auto fix disabled' do
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(security_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when auto fix feature is disabled' do
+          before do
+            project.security_setting.update!(auto_fix_dependency_scanning: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when licensed feature is unavailable' do
+          before do
+            stub_licensed_features(vulnerability_auto_fix: false)
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+            subject
+          end
+        end
+
+        context 'when security setting is not created' do
+          before do
+            project.security_setting.destroy!
+            project.reload
+          end
+
+          it 'does not start auto fix worker' do
+            expect(Security::AutoFixWorker).not_to receive(:perform_async)
+            expect(subject[:status]).to eq(:success)
+          end
+        end
+      end
+    end
+
+    context 'with auto fix not supported report type' do
+      let(:trait) { :sast }
+
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+      end
+
+      it 'does not start auto fix worker' do
+        expect(Security::AutoFixWorker).not_to receive(:perform_async)
+
+        subject
+      end
     end
   end
 end

@@ -1,5 +1,0 @@
----
-title: Return 404 when attempting to delete non-existent SSH key
-merge_request: 46450
-author:
-type: fixed

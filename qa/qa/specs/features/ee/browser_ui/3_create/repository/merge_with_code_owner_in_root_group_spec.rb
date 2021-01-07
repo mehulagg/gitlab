@@ -30,6 +30,7 @@ module QA
         after do
           group_or_project.remove_member(approver)
           approver.remove_via_api!
+          project.remove_via_api!
         end
 
         context 'and the code owner is the root group' do

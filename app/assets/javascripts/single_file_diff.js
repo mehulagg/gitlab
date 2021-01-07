@@ -23,27 +23,23 @@ export default class SingleFileDiff {
     this.file = file;
     this.toggleDiff = this.toggleDiff.bind(this);
     this.content = $('.diff-content', this.file);
-    this.$toggleIcon = $('.diff-toggle-caret', this.file);
+    this.$chevronRightIcon = $('.diff-toggle-caret .chevron-right', this.file);
+    this.$chevronDownIcon = $('.diff-toggle-caret .chevron-down', this.file);
     this.diffForPath = this.content.find('[data-diff-for-path]').data('diffForPath');
     this.isOpen = !this.diffForPath;
     if (this.diffForPath) {
       this.collapsedContent = this.content;
-      this.loadingContent = $(WRAPPER)
-        .addClass('loading')
-        .html(LOADING_HTML)
-        .hide();
+      this.loadingContent = $(WRAPPER).addClass('loading').html(LOADING_HTML).hide();
       this.content = null;
       this.collapsedContent.after(this.loadingContent);
-      this.$toggleIcon.addClass('fa-caret-right');
+      this.$chevronRightIcon.removeClass('gl-display-none');
     } else {
-      this.collapsedContent = $(WRAPPER)
-        .html(COLLAPSED_HTML)
-        .hide();
+      this.collapsedContent = $(WRAPPER).html(COLLAPSED_HTML).hide();
       this.content.after(this.collapsedContent);
-      this.$toggleIcon.addClass('fa-caret-down');
+      this.$chevronDownIcon.removeClass('gl-display-none');
     }
 
-    $('.js-file-title, .click-to-expand', this.file).on('click', e => {
+    $('.js-file-title, .click-to-expand', this.file).on('click', (e) => {
       this.toggleDiff($(e.target));
     });
   }
@@ -52,20 +48,23 @@ export default class SingleFileDiff {
     if (
       !$target.hasClass('js-file-title') &&
       !$target.hasClass('click-to-expand') &&
-      !$target.hasClass('diff-toggle-caret')
+      !$target.closest('.diff-toggle-caret').length > 0
     )
       return;
     this.isOpen = !this.isOpen;
     if (!this.isOpen && !this.hasError) {
       this.content.hide();
-      this.$toggleIcon.addClass('fa-caret-right').removeClass('fa-caret-down');
+      this.$chevronRightIcon.removeClass('gl-display-none');
+      this.$chevronDownIcon.addClass('gl-display-none');
       this.collapsedContent.show();
     } else if (this.content) {
       this.collapsedContent.hide();
       this.content.show();
-      this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
+      this.$chevronDownIcon.removeClass('gl-display-none');
+      this.$chevronRightIcon.addClass('gl-display-none');
     } else {
-      this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
+      this.$chevronDownIcon.removeClass('gl-display-none');
+      this.$chevronRightIcon.addClass('gl-display-none');
       return this.getContentHTML(cb);
     }
   }

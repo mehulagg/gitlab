@@ -280,6 +280,20 @@ RSpec.describe 'Git HTTP requests' do
               project.add_developer(user)
             end
 
+            context 'when user is using credentials with special characters' do
+              context 'with password with special characters' do
+                before do
+                  user.update!(password: 'RKszEwéC5kFnû∆f243fycGu§Gh9ftDj!U')
+                end
+
+                it 'allows clones' do
+                  download(path, user: user.username, password: user.password) do |response|
+                    expect(response).to have_gitlab_http_status(:ok)
+                  end
+                end
+              end
+            end
+
             context 'but the repo is disabled' do
               let(:project) { create(:project, :wiki_repo, :private, :repository_disabled, :wiki_enabled) }
 
@@ -795,12 +809,24 @@ RSpec.describe 'Git HTTP requests' do
             context 'administrator' do
               let(:user) { create(:admin) }
 
-              it_behaves_like 'can download code only'
+              context 'when admin mode is enabled', :enable_admin_mode do
+                it_behaves_like 'can download code only'
 
-              it 'downloads from other project get status 403' do
-                clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
+                it 'downloads from other project get status 403' do
+                  clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
 
-                expect(response).to have_gitlab_http_status(:forbidden)
+                  expect(response).to have_gitlab_http_status(:forbidden)
+                end
+              end
+
+              context 'when admin mode is disabled' do
+                it_behaves_like 'can download code only'
+
+                it 'downloads from other project get status 404' do
+                  clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
+
+                  expect(response).to have_gitlab_http_status(:not_found)
+                end
               end
             end
 

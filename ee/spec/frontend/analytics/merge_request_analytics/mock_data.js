@@ -23,7 +23,11 @@ export const throughputChartNoData = {
 
 export const formattedThroughputChartData = [
   {
-    data: [['May 2020', 2], ['Jun 2020', 4], ['Jul 2020', 3]],
+    data: [
+      ['May 2020', 2],
+      ['Jun 2020', 4],
+      ['Jul 2020', 3],
+    ],
     name: THROUGHPUT_CHART_STRINGS.Y_AXIS_TITLE,
   },
 ];

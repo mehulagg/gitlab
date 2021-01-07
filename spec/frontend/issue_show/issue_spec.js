@@ -14,7 +14,7 @@ useMockIntersectionObserver();
 
 jest.mock('~/lib/utils/poll');
 
-const setupHTML = initialData => {
+const setupHTML = (initialData) => {
   document.body.innerHTML = `<div id="js-issuable-app"></div>`;
   document.getElementById('js-issuable-app').dataset.initial = JSON.stringify(initialData);
 };
@@ -30,7 +30,8 @@ describe('Issue show index', () => {
         initialDescriptionHtml: '<svg onload=window.alert(1)>',
       });
 
-      const issuableData = parseData.parseIssuableData();
+      const initialDataEl = document.getElementById('js-issuable-app');
+      const issuableData = parseData.parseIssuableData(initialDataEl);
       initIssuableApp(issuableData, createStore());
 
       await waitForPromises();

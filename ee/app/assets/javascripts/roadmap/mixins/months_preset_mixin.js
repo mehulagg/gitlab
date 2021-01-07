@@ -5,10 +5,10 @@ export default {
     /**
      * Check if current epic starts within current month (timeline cell)
      */
-    hasStartDateForMonth() {
+    hasStartDateForMonth(timeframeItem) {
       return (
-        this.startDateValues.month === this.timeframeItem.getMonth() &&
-        this.startDateValues.year === this.timeframeItem.getFullYear()
+        this.startDateValues.month === timeframeItem.getMonth() &&
+        this.startDateValues.year === timeframeItem.getFullYear()
       );
     },
     /**
@@ -41,7 +41,7 @@ export default {
      *    when startDate is out of range.
      */
     getTimelineBarStartOffsetForMonths(roadmapItem) {
-      const daysInMonth = totalDaysInMonth(this.timeframeItem);
+      const daysInMonth = totalDaysInMonth(roadmapItem.startDate);
       const startDate = this.startDateValues.date;
 
       if (
@@ -62,8 +62,9 @@ export default {
 
       // Calculate proportional offset based on startDate and total days in
       // current month.
+      const leftOffsetPercentage = Math.floor((startDate / daysInMonth) * 100);
       /* eslint-disable-next-line @gitlab/require-i18n-strings */
-      return `left: ${(startDate / daysInMonth) * 100}%;`;
+      return `left: ${leftOffsetPercentage}%;`;
     },
     /**
      * This method is externally only called when current timeframe cell has timeline

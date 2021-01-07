@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 import { getTimeWindow, defaultTimeRange } from '~/vue_shared/constants';
 
-export const getTimeWindowConfig = timeWindow => {
+export const getTimeWindowConfig = (timeWindow) => {
   const timeWindowObj = pick(getTimeWindow(timeWindow) || defaultTimeRange, 'duration', 'interval');
   return {
     durationInMilliseconds: timeWindowObj.duration.seconds * 1000,

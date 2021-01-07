@@ -24,7 +24,7 @@ const createComponent = ({
   children = [],
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { '1': { itemExpanded: false } },
+  childrenFlags = { 1: { itemExpanded: false } },
   hasFiltersApplied = false,
 } = {}) => {
   return mount(EpicItemContainer, {
@@ -66,8 +66,8 @@ describe('EpicItemContainer', () => {
       wrapper = createComponent({
         children: [mockFormattedChildEpic1],
         childrenFlags: {
-          '1': { itemExpanded: true },
-          '50': { itemExpanded: false },
+          1: { itemExpanded: true },
+          50: { itemExpanded: false },
         },
       });
       expect(wrapper.find(EpicItem).exists()).toBe(true);

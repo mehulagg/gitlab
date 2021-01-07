@@ -23,6 +23,7 @@ export default () => {
     cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
     valueStreamAnalyticsCreateMultipleValueStreams: hasCreateMultipleValueStreams = false,
+    valueStreamAnalyticsExtendedForm: hasExtendedFormFields = false,
   } = gon?.features;
 
   const {
@@ -42,6 +43,7 @@ export default () => {
       hasDurationChart,
       hasPathNavigation,
       hasCreateMultipleValueStreams,
+      hasExtendedFormFields,
     },
   });
 
@@ -50,7 +52,7 @@ export default () => {
     name: 'CycleAnalyticsApp',
     apolloProvider,
     store,
-    render: createElement =>
+    render: (createElement) =>
       createElement(CycleAnalytics, {
         props: {
           emptyStateSvgPath,

@@ -19,8 +19,6 @@ module Security
     end
 
     def execute
-      return security_scan unless Feature.enabled?(:store_security_findings, project)
-
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 
@@ -57,7 +55,9 @@ module Security
     end
 
     def register_keys(keys)
-      keys.all? { |key| known_keys.add?(key) }
+      return false if known_keys.intersect?(keys.to_set)
+
+      known_keys.merge(keys)
     end
   end
 end

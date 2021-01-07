@@ -11,7 +11,7 @@ describe('DiffView', () => {
   const DiffRow = { template: `<div/>` };
   const DiffCommentCell = { template: `<div/>` };
   const DraftNote = { template: `<div/>` };
-  const createWrapper = props => {
+  const createWrapper = (props) => {
     const localVue = createLocalVue();
     localVue.use(Vuex);
 
@@ -64,12 +64,7 @@ describe('DiffView', () => {
         inline: type === 'inline',
       });
       expect(wrapper.findAll(DiffCommentCell).length).toBe(total);
-      expect(
-        wrapper
-          .find(container)
-          .find(DiffCommentCell)
-          .exists(),
-      ).toBe(true);
+      expect(wrapper.find(container).find(DiffCommentCell).exists()).toBe(true);
     },
   );
 

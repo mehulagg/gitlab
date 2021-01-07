@@ -9,7 +9,7 @@ const NAVSOURCE_VALUE = 'navbar';
  * intercepts clicks on navbar links
  * and adds the 'nav_source=navbar' query parameter
  */
-const appendLinkParam = e => {
+const appendLinkParam = (e) => {
   const target = e.currentTarget;
 
   // get closest link in case the target is a wrapping DOM node
@@ -28,8 +28,8 @@ export default function trackNavbarEvents() {
   if (!navbar) return;
 
   // track search inputs within frequent-items component
-  navbar.querySelectorAll(`.frequent-items-dropdown-container input`).forEach(el => {
-    el.addEventListener('click', e => {
+  navbar.querySelectorAll(`.frequent-items-dropdown-container input`).forEach((el) => {
+    el.addEventListener('click', (e) => {
       const parentDropdown = e.currentTarget.closest('li.dropdown');
 
       Tracking.event(TRACKING_CATEGORY, 'activate_form_input', {

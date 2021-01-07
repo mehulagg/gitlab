@@ -1,7 +1,7 @@
 ---
 stage: Monitor
 group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Monitoring GitLab with Prometheus
@@ -53,7 +53,7 @@ To disable Prometheus and all of its exporters, as well as any added in the futu
 
 ### Changing the port and address Prometheus listens on
 
-CAUTION: **Caution:**
+WARNING:
 The following change was added in [Omnibus GitLab 8.17](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/1261). Although possible,
 it's not recommended to change the port Prometheus listens
 on, as this might affect or conflict with other services running on the GitLab
@@ -183,7 +183,7 @@ ensure that `prometheus['scrape_configs']` is not set in `/etc/gitlab/gitlab.rb`
 
 ### Using an external Prometheus server
 
-CAUTION: **Caution:**
+WARNING:
 Prometheus and most exporters don't support authentication. We don't recommend exposing them outside the local network.
 
 A few configuration changes are required to allow GitLab to be monitored by an external Prometheus server. External servers are recommended for [GitLab deployments with multiple nodes](../../reference_architectures/index.md).
@@ -349,7 +349,7 @@ To add a Prometheus dashboard for a single server GitLab setup:
 
 GitLab monitors its own internal service metrics, and makes them available at the `/-/metrics` endpoint. Unlike other exporters, this endpoint requires authentication as it's available on the same URL and port as user traffic.
 
-[➔ Read more about the GitLab Metrics.](gitlab_metrics.md)
+Read more about the [GitLab Metrics](gitlab_metrics.md).
 
 ## Bundled software metrics
 

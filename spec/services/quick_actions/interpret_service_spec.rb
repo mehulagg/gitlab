@@ -779,6 +779,11 @@ RSpec.describe QuickActions::InterpretService do
 
       it_behaves_like 'assign command' do
         let(:content) { "/assign @#{developer.username}" }
+        let(:issuable) { create(:incident, project: project) }
+      end
+
+      it_behaves_like 'assign command' do
+        let(:content) { "/assign @#{developer.username}" }
         let(:issuable) { merge_request }
       end
     end
@@ -789,12 +794,32 @@ RSpec.describe QuickActions::InterpretService do
         project.add_developer(developer2)
       end
 
-      it_behaves_like 'assign command' do
+      # There's no guarantee that the reference extractor will preserve
+      # the order of the mentioned users since this is dependent on the
+      # order in which rows are returned. We just ensure that at least
+      # one of the mentioned users is assigned.
+      shared_examples 'assigns to one of the two users' do
+        let(:content) { "/assign @#{developer.username} @#{developer2.username}" }
+
+        it 'assigns to a single user' do
+          _, updates, message = service.execute(content, issuable)
+
+          expect(updates[:assignee_ids].count).to eq(1)
+          assignee = updates[:assignee_ids].first
+          expect([developer.id, developer2.id]).to include(assignee)
+
+          user = assignee == developer.id ? developer : developer2
+
+          expect(message).to match("Assigned #{user.to_reference}.")
+        end
+      end
+
+      it_behaves_like 'assigns to one of the two users' do
         let(:content) { "/assign @#{developer.username} @#{developer2.username}" }
         let(:issuable) { issue }
       end
 
-      it_behaves_like 'assign command', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27989' do
+      it_behaves_like 'assigns to one of the two users' do
         let(:content) { "/assign @#{developer.username} @#{developer2.username}" }
         let(:issuable) { merge_request }
       end
@@ -1115,6 +1140,11 @@ RSpec.describe QuickActions::InterpretService do
     it_behaves_like 'confidential command' do
       let(:content) { '/confidential' }
       let(:issuable) { issue }
+    end
+
+    it_behaves_like 'confidential command' do
+      let(:content) { '/confidential' }
+      let(:issuable) { create(:incident, project: project) }
     end
 
     it_behaves_like 'lock command' do
@@ -1584,7 +1614,7 @@ RSpec.describe QuickActions::InterpretService do
       end
     end
 
-    it 'limits to commands passed ' do
+    it 'limits to commands passed' do
       content = "/shrug test\n/close"
 
       text, commands = service.execute(content, issue, only: [:shrug])
@@ -1593,7 +1623,7 @@ RSpec.describe QuickActions::InterpretService do
       expect(text).to eq("test #{described_class::SHRUG}\n/close")
     end
 
-    it 'preserves leading whitespace ' do
+    it 'preserves leading whitespace' do
       content = " - list\n\n/close\n\ntest\n\n"
 
       text, _ = service.execute(content, issue)

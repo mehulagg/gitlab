@@ -33,6 +33,16 @@ RSpec.describe Gitlab::Danger::Helper do
         expect(helper.gitlab_helper).to eq(fake_gitlab)
       end
     end
+
+    context 'when danger gitlab plugin is not available' do
+      it 'returns nil' do
+        invalid_danger = Class.new do
+          include Gitlab::Danger::Helper
+        end.new
+
+        expect(invalid_danger.gitlab_helper).to be_nil
+      end
+    end
   end
 
   describe '#release_automation?' do
@@ -341,33 +351,23 @@ RSpec.describe Gitlab::Danger::Helper do
     end
 
     context 'having specific changes' do
-      it 'has database and backend categories' do
-        changed_files = ['usage_data.rb', 'lib/gitlab/usage_data.rb', 'ee/lib/ee/gitlab/usage_data.rb']
+      where(:expected_categories, :patch, :changed_files) do
+        [:database, :backend] | '+ count(User.active)'                         | ['usage_data.rb', 'lib/gitlab/usage_data.rb', 'ee/lib/ee/gitlab/usage_data.rb']
+        [:database, :backend] | '+ estimate_batch_distinct_count(User.active)' | ['usage_data.rb']
+        [:backend]            | '+ alt_usage_data(User.active)'                | ['usage_data.rb']
+        [:backend]            | '+ count(User.active)'                         | ['user.rb']
+        [:backend]            | '+ count(User.active)'                         | ['usage_data/topology.rb']
+        [:backend]            | '+ foo_count(User.active)'                     | ['usage_data.rb']
+      end
 
-        changed_files.each do |file|
-          allow(fake_git).to receive(:diff_for_file).with(file) { double(:diff, patch: "+ count(User.active)") }
+      with_them do
+        it 'has the correct categories' do
+          changed_files.each do |file|
+            allow(fake_git).to receive(:diff_for_file).with(file) { double(:diff, patch: patch) }
 
-          expect(helper.categories_for_file(file)).to eq([:database, :backend])
+            expect(helper.categories_for_file(file)).to eq(expected_categories)
+          end
         end
-      end
-
-      it 'has backend category' do
-        allow(fake_git).to receive(:diff_for_file).with('usage_data.rb') { double(:diff, patch: "+ alt_usage_data(User.active)") }
-
-        expect(helper.categories_for_file('usage_data.rb')).to eq([:backend])
-      end
-
-      it 'has backend category for changes outside usage_data files' do
-        allow(fake_git).to receive(:diff_for_file).with('user.rb') { double(:diff, patch: "+ count(User.active)") }
-
-        expect(helper.categories_for_file('user.rb')).to eq([:backend])
-      end
-
-      it 'has backend category for files that are not usage_data.rb' do
-        changed_file = 'usage_data/topology.rb'
-        allow(fake_git).to receive(:diff_for_file).with(changed_file) { double(:diff, patch: "+ count(User.active)") }
-
-        expect(helper.categories_for_file(changed_file)).to eq([:backend])
       end
     end
   end
@@ -399,24 +399,6 @@ RSpec.describe Gitlab::Danger::Helper do
       teammates = helper.new_teammates(usernames)
 
       expect(teammates.map(&:username)).to eq(usernames)
-    end
-  end
-
-  describe '#sanitize_mr_title' do
-    where(:mr_title, :expected_mr_title) do
-      'My MR title'      | 'My MR title'
-      'WIP: My MR title' | 'My MR title'
-      'Draft: My MR title' | 'My MR title'
-      '(Draft) My MR title' | 'My MR title'
-      '[Draft] My MR title' | 'My MR title'
-      '[DRAFT] My MR title' | 'My MR title'
-      'DRAFT: My MR title' | 'My MR title'
-    end
-
-    with_them do
-      subject { helper.sanitize_mr_title(mr_title) }
-
-      it { is_expected.to eq(expected_mr_title) }
     end
   end
 
@@ -589,6 +571,32 @@ RSpec.describe Gitlab::Danger::Helper do
 
     it 'returns empty string for empty array' do
       expect(helper.prepare_labels_for_mr([])).to eq('')
+    end
+  end
+
+  describe '#has_ci_changes?' do
+    context 'when .gitlab/ci is changed' do
+      it 'returns true' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb .gitlab/ci/test.yml])
+
+        expect(helper.has_ci_changes?).to be_truthy
+      end
+    end
+
+    context 'when .gitlab-ci.yml is changed' do
+      it 'returns true' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb .gitlab-ci.yml])
+
+        expect(helper.has_ci_changes?).to be_truthy
+      end
+    end
+
+    context 'when neither .gitlab/ci/ or .gitlab-ci.yml is changed' do
+      it 'returns false' do
+        expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb nested/.gitlab-ci.yml])
+
+        expect(helper.has_ci_changes?).to be_falsey
+      end
     end
   end
 end

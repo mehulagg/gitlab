@@ -14,7 +14,7 @@ RSpec.describe Ci::Build do
                          status: 'success')
   end
 
-  let(:build) { create(:ci_build, pipeline: pipeline) }
+  let_it_be(:build, refind: true) { create(:ci_build, pipeline: pipeline) }
 
   it { is_expected.to belong_to(:runner) }
   it { is_expected.to belong_to(:trigger_request) }
@@ -307,8 +307,6 @@ RSpec.describe Ci::Build do
   end
 
   describe '.without_needs' do
-    let!(:build) { create(:ci_build) }
-
     subject { described_class.without_needs }
 
     context 'when no build_need is created' do
@@ -716,6 +714,22 @@ RSpec.describe Ci::Build do
       let(:build) { create(:ci_build, :artifacts) }
 
       it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#artifacts_public?' do
+    subject { build.artifacts_public? }
+
+    context 'artifacts with defaults' do
+      let(:build) { create(:ci_build, :artifacts) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'non public artifacts' do
+      let(:build) { create(:ci_build, :artifacts, :non_public_artifacts) }
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -2019,6 +2033,8 @@ RSpec.describe Ci::Build do
     end
 
     context 'when ci_build_metadata_config is disabled' do
+      let(:build) { create(:ci_build, pipeline: pipeline) }
+
       before do
         stub_feature_flags(ci_build_metadata_config: false)
       end
@@ -2406,6 +2422,7 @@ RSpec.describe Ci::Build do
 
     before do
       stub_container_registry_config(enabled: container_registry_enabled, host_port: 'registry.example.com')
+      stub_config(dependency_proxy: { enabled: true })
     end
 
     subject { build.variables }
@@ -2423,6 +2440,8 @@ RSpec.describe Ci::Build do
           { key: 'CI_REGISTRY_USER', value: 'gitlab-ci-token', public: true, masked: false },
           { key: 'CI_REGISTRY_PASSWORD', value: 'my-token', public: false, masked: true },
           { key: 'CI_REPOSITORY_URL', value: build.repo_url, public: false, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_USER', value: 'gitlab-ci-token', public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_PASSWORD', value: 'my-token', public: false, masked: true },
           { key: 'CI_JOB_JWT', value: 'ci.job.jwt', public: false, masked: true },
           { key: 'CI_JOB_NAME', value: 'test', public: true, masked: false },
           { key: 'CI_JOB_STAGE', value: 'test', public: true, masked: false },
@@ -2453,8 +2472,14 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
+          { key: 'CI_PROJECT_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_SERVER', value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}", public: true, masked: false },
+          { key: 'CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX',
+            value: "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}/#{project.namespace.root_ancestor.path}#{DependencyProxy::URL_SUFFIX}",
+            public: true,
+            masked: false },
           { key: 'CI_API_V4_URL', value: 'http://localhost/api/v4', public: true, masked: false },
           { key: 'CI_PIPELINE_IID', value: pipeline.iid.to_s, public: true, masked: false },
           { key: 'CI_PIPELINE_SOURCE', value: pipeline.source, public: true, masked: false },
@@ -2516,6 +2541,7 @@ RSpec.describe Ci::Build do
           let(:project_pre_var) { { key: 'project', value: 'value', public: true, masked: false } }
           let(:pipeline_pre_var) { { key: 'pipeline', value: 'value', public: true, masked: false } }
           let(:build_yaml_var) { { key: 'yaml', value: 'value', public: true, masked: false } }
+          let(:dependency_proxy_var) { { key: 'dependency_proxy', value: 'value', public: true, masked: false } }
           let(:job_jwt_var) { { key: 'CI_JOB_JWT', value: 'ci.job.jwt', public: false, masked: true } }
           let(:job_dependency_var) { { key: 'job_dependency', value: 'value', public: true, masked: false } }
 
@@ -2525,6 +2551,7 @@ RSpec.describe Ci::Build do
             allow(build).to receive(:persisted_variables) { [] }
             allow(build).to receive(:job_jwt_variables) { [job_jwt_var] }
             allow(build).to receive(:dependency_variables) { [job_dependency_var] }
+            allow(build).to receive(:dependency_proxy_variables) { [dependency_proxy_var] }
 
             allow(build.project)
               .to receive(:predefined_variables) { [project_pre_var] }
@@ -2537,7 +2564,8 @@ RSpec.describe Ci::Build do
 
           it 'returns variables in order depending on resource hierarchy' do
             is_expected.to eq(
-              [job_jwt_var,
+              [dependency_proxy_var,
+               job_jwt_var,
                build_pre_var,
                project_pre_var,
                pipeline_pre_var,
@@ -2744,7 +2772,11 @@ RSpec.describe Ci::Build do
         pipeline.update!(tag: true)
       end
 
-      it { is_expected.to include(tag_variable) }
+      it do
+        build.reload
+
+        expect(subject).to include(tag_variable)
+      end
     end
 
     context 'when CI variable is defined' do
@@ -2971,15 +3003,18 @@ RSpec.describe Ci::Build do
       let(:ci_config_path) { { key: 'CI_CONFIG_PATH', value: 'custom', public: true, masked: false } }
 
       before do
-        expect_any_instance_of(Project).to receive(:ci_config_path) { 'custom' }
+        project.update!(ci_config_path: 'custom')
       end
 
       it { is_expected.to include(ci_config_path) }
     end
 
     context 'when pipeline variable overrides build variable' do
+      let(:build) do
+        create(:ci_build, pipeline: pipeline, yaml_variables: [{ key: 'MYVAR', value: 'myvar', public: true }])
+      end
+
       before do
-        build.yaml_variables = [{ key: 'MYVAR', value: 'myvar', public: true }]
         pipeline.variables.build(key: 'MYVAR', value: 'pipeline value')
       end
 
@@ -3295,9 +3330,12 @@ RSpec.describe Ci::Build do
     end
 
     context 'when overriding user-provided variables' do
+      let(:build) do
+        create(:ci_build, pipeline: pipeline, yaml_variables: [{ key: 'MY_VAR', value: 'myvar', public: true }])
+      end
+
       before do
         pipeline.variables.build(key: 'MY_VAR', value: 'pipeline value')
-        build.yaml_variables = [{ key: 'MY_VAR', value: 'myvar', public: true }]
       end
 
       it 'returns a hash including variable with higher precedence' do
@@ -3654,7 +3692,7 @@ RSpec.describe Ci::Build do
         end
 
         it 'handles raised exception' do
-          expect { subject.drop! }.not_to raise_exception(Gitlab::Access::AccessDeniedError)
+          expect { subject.drop! }.not_to raise_error
         end
 
         it 'logs the error' do
@@ -4059,13 +4097,72 @@ RSpec.describe Ci::Build do
         end
       end
 
+      context 'when there is a Cobertura coverage report with class filename paths not relative to project root' do
+        before do
+          allow(build.project).to receive(:full_path).and_return('root/javademo')
+          allow(build.pipeline).to receive(:all_worktree_paths).and_return(['src/main/java/com/example/javademo/User.java'])
+
+          create(:ci_job_artifact, :coverage_with_paths_not_relative_to_project_root, job: build, project: build.project)
+        end
+
+        it 'parses blobs and add the results to the coverage report with corrected paths' do
+          expect { subject }.not_to raise_error
+
+          expect(coverage_report.files.keys).to match_array(['src/main/java/com/example/javademo/User.java'])
+        end
+
+        context 'and smart_cobertura_parser feature flag is disabled' do
+          before do
+            stub_feature_flags(smart_cobertura_parser: false)
+          end
+
+          it 'parses blobs and add the results to the coverage report with unmodified paths' do
+            expect { subject }.not_to raise_error
+
+            expect(coverage_report.files.keys).to match_array(['com/example/javademo/User.java'])
+          end
+        end
+      end
+
       context 'when there is a corrupted Cobertura coverage report' do
         before do
           create(:ci_job_artifact, :coverage_with_corrupted_data, job: build, project: build.project)
         end
 
         it 'raises an error' do
-          expect { subject }.to raise_error(Gitlab::Ci::Parsers::Coverage::Cobertura::CoberturaParserError)
+          expect { subject }.to raise_error(Gitlab::Ci::Parsers::Coverage::Cobertura::InvalidLineInformationError)
+        end
+      end
+    end
+  end
+
+  describe '#collect_codequality_reports!' do
+    subject(:codequality_report) { build.collect_codequality_reports!(Gitlab::Ci::Reports::CodequalityReports.new) }
+
+    it { expect(codequality_report.degradations).to eq({}) }
+
+    context 'when build has a codequality report' do
+      context 'when there is a codequality report' do
+        before do
+          create(:ci_job_artifact, :codequality, job: build, project: build.project)
+        end
+
+        it 'parses blobs and add the results to the codequality report' do
+          expect { codequality_report }.not_to raise_error
+
+          expect(codequality_report.degradations_count).to eq(3)
+        end
+      end
+
+      context 'when there is an codequality report without errors' do
+        before do
+          create(:ci_job_artifact, :codequality_without_errors, job: build, project: build.project)
+        end
+
+        it 'parses blobs and add the results to the codequality report' do
+          expect { codequality_report }.not_to raise_error
+
+          expect(codequality_report.degradations_count).to eq(0)
         end
       end
     end
@@ -4263,7 +4360,7 @@ RSpec.describe Ci::Build do
   end
 
   describe '#supported_runner?' do
-    let_it_be(:build) { create(:ci_build) }
+    let_it_be_with_refind(:build) { create(:ci_build) }
 
     subject { build.supported_runner?(runner_features) }
 
@@ -4326,6 +4423,41 @@ RSpec.describe Ci::Build do
         let(:runner_features) { {} }
 
         it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when `return_exit_code` feature is required by build' do
+      let(:options) { { allow_failure_criteria: { exit_codes: [1] } } }
+
+      before do
+        build.update!(options: options)
+      end
+
+      context 'when runner provides given feature' do
+        let(:runner_features) { { return_exit_code: true } }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when runner does not provide given feature' do
+        let(:runner_features) { {} }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the runner does not provide all of the required features' do
+        let(:options) do
+          {
+            allow_failure_criteria: { exit_codes: [1] },
+            artifacts: { reports: { junit: "junit.xml" } }
+          }
+        end
+
+        let(:runner_features) { { return_exit_code: true } }
+
+        it 'requires `upload_multiple_artifacts` too' do
+          is_expected.to be_falsey
+        end
       end
     end
   end
@@ -4651,6 +4783,235 @@ RSpec.describe Ci::Build do
       build.save!
 
       expect(action).not_to have_received(:perform!)
+    end
+  end
+
+  describe '#debug_mode?' do
+    subject { build.debug_mode? }
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(restrict_access_to_build_debug_mode: false)
+      end
+
+      it { is_expected.to eq false }
+
+      context 'when in variables' do
+        before do
+          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
+        end
+
+        it { is_expected.to eq false }
+      end
+    end
+
+    context 'when CI_DEBUG_TRACE=true is in variables' do
+      context 'when in instance variables' do
+        before do
+          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
+        end
+
+        it { is_expected.to eq true }
+      end
+
+      context 'when in group variables' do
+        before do
+          create(:ci_group_variable, key: 'CI_DEBUG_TRACE', value: 'true', group: project.group)
+        end
+
+        it { is_expected.to eq true }
+      end
+
+      context 'when in pipeline variables' do
+        before do
+          create(:ci_pipeline_variable, key: 'CI_DEBUG_TRACE', value: 'true', pipeline: pipeline)
+        end
+
+        it { is_expected.to eq true }
+      end
+
+      context 'when in project variables' do
+        before do
+          create(:ci_variable, key: 'CI_DEBUG_TRACE', value: 'true', project: project)
+        end
+
+        it { is_expected.to eq true }
+      end
+
+      context 'when in job variables' do
+        before do
+          create(:ci_job_variable, key: 'CI_DEBUG_TRACE', value: 'true', job: build)
+        end
+
+        it { is_expected.to eq true }
+      end
+
+      context 'when in yaml variables' do
+        before do
+          build.update!(yaml_variables: [{ key: :CI_DEBUG_TRACE, value: 'true' }])
+        end
+
+        it { is_expected.to eq true }
+      end
+    end
+
+    context 'when CI_DEBUG_TRACE is not in variables' do
+      it { is_expected.to eq false }
+    end
+  end
+
+  describe '#drop_with_exit_code!' do
+    let(:exit_code) { 1 }
+    let(:options) { {} }
+
+    before do
+      build.options.merge!(options)
+      build.save!
+    end
+
+    subject(:drop_with_exit_code) do
+      build.drop_with_exit_code!(:unknown_failure, exit_code)
+    end
+
+    shared_examples 'drops the build without changing allow_failure' do
+      it 'does not change allow_failure' do
+        expect { drop_with_exit_code }
+          .not_to change { build.reload.allow_failure }
+      end
+
+      it 'drops the build' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.failed? }
+      end
+    end
+
+    context 'when exit_codes are not defined' do
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when allow_failure_criteria is nil' do
+      let(:options) { { allow_failure_criteria: nil } }
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when exit_codes is nil' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: nil
+          }
+        }
+      end
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'when exit_codes do not match' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: [2, 3, 4]
+          }
+        }
+      end
+
+      it_behaves_like 'drops the build without changing allow_failure'
+    end
+
+    context 'with matching exit codes' do
+      let(:options) do
+        { allow_failure_criteria: { exit_codes: [1, 2, 3] } }
+      end
+
+      it 'changes allow_failure' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.allow_failure }
+      end
+
+      it 'drops the build' do
+        expect { drop_with_exit_code }
+          .to change { build.reload.failed? }
+      end
+
+      it 'is executed inside a transaction' do
+        expect(build).to receive(:drop!)
+          .with(:unknown_failure)
+          .and_raise(ActiveRecord::Rollback)
+
+        expect(build).to receive(:conditionally_allow_failure!)
+          .with(1)
+          .and_call_original
+
+        expect { drop_with_exit_code }
+          .not_to change { build.reload.allow_failure }
+      end
+
+      context 'when exit_code is nil' do
+        let(:exit_code) {}
+
+        it_behaves_like 'drops the build without changing allow_failure'
+      end
+
+      context 'when ci_allow_failure_with_exit_codes is disabled' do
+        before do
+          stub_feature_flags(ci_allow_failure_with_exit_codes: false)
+        end
+
+        it_behaves_like 'drops the build without changing allow_failure'
+      end
+    end
+  end
+
+  describe '#exit_codes_defined?' do
+    let(:options) { {} }
+
+    before do
+      build.options.merge!(options)
+    end
+
+    subject(:exit_codes_defined) do
+      build.exit_codes_defined?
+    end
+
+    context 'without allow_failure_criteria' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is nil' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: nil
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes is an empty array' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: []
+          }
+        }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when exit_codes are defined' do
+      let(:options) do
+        {
+          allow_failure_criteria: {
+            exit_codes: [5, 6]
+          }
+        }
+      end
+
+      it { is_expected.to be_truthy }
     end
   end
 end

@@ -11,12 +11,23 @@ module EE
       validates :vulnerabilities_issuetype, presence: true, if: :vulnerabilities_enabled
     end
 
+    def jira_vulnerabilities_integration_available?
+      feature_enabled = ::Feature.enabled?(:jira_for_vulnerabilities, parent, default_enabled: false)
+      feature_available = parent.present? ? parent&.feature_available?(:jira_vulnerabilities_integration) : License.feature_available?(:jira_vulnerabilities_integration)
+
+      feature_enabled && feature_available
+    end
+
     def jira_vulnerabilities_integration_enabled?
-      project&.jira_vulnerabilities_integration_available? && vulnerabilities_enabled
+      jira_vulnerabilities_integration_available? && vulnerabilities_enabled
     end
 
     def project_key_required?
       issues_enabled || vulnerabilities_enabled
+    end
+
+    def configured_to_create_issues_from_vulnerabilities?
+      active? && project_key.present? && vulnerabilities_issuetype.present? && jira_vulnerabilities_integration_enabled?
     end
 
     def issue_types
@@ -40,6 +51,23 @@ module EE
       escaped_summary = CGI.escape(summary)
       escaped_description = CGI.escape(description)
       "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
+    end
+
+    def create_issue(summary, description)
+      return if client_url.blank?
+
+      jira_request do
+        issue = client.Issue.build
+        issue.save(
+          fields: {
+            project: { id: jira_project_id },
+            issuetype: { id: vulnerabilities_issuetype },
+            summary: summary,
+            description: description
+          }
+        )
+        issue
+      end
     end
 
     def jira_project_id

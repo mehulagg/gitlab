@@ -1,11 +1,15 @@
 import { mount, shallowMount } from '@vue/test-utils';
+import { stubTransition } from 'helpers/stub_transition';
 import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
 
 describe('ExpandableSection component', () => {
   let wrapper;
 
   const createComponent = (options, mountFn = shallowMount) => {
-    wrapper = mountFn(ExpandableSection, options);
+    wrapper = mountFn(ExpandableSection, {
+      stubs: { transition: stubTransition() },
+      ...options,
+    });
   };
 
   const findButton = () => wrapper.find('button');
@@ -76,7 +80,8 @@ describe('ExpandableSection component', () => {
       createComponent({}, mount);
     });
 
-    it('hides the content by default', () => {
+    it('hides the content by default', async () => {
+      await wrapper.vm.$nextTick();
       expect(findContent().isVisible()).toBe(false);
     });
 

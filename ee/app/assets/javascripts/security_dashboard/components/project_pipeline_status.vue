@@ -40,7 +40,7 @@ export default {
   },
   i18n: {
     title: __(
-      'The Security Dashboard shows the results of the last successful pipeline run on the default branch.',
+      'The Vulnerability Report shows the results of the last successful pipeline run on the default branch.',
     ),
     lastUpdated: __('Last updated'),
     autoFixSolutions: s__('AutoRemediation|Auto-fix solutions'),

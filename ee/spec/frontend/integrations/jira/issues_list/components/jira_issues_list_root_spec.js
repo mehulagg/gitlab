@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 
 import JiraIssuesListRoot from 'ee/integrations/jira/issues_list/components/jira_issues_list_root.vue';
+import { stubComponent } from 'helpers/stub_component';
 
 import createFlash from '~/flash';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
@@ -25,6 +26,9 @@ const createComponent = ({ provide = mockProvide, initialFilterParams = {} } = {
       initialFilterParams,
     },
     provide,
+    stubs: {
+      IssuableList: stubComponent(IssuableList),
+    },
   });
 
 describe('JiraIssuesListRoot', () => {

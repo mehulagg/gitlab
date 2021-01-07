@@ -48,6 +48,7 @@ module Gitlab
       push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
       push_frontend_feature_flag(:usage_data_api, default_enabled: true)
       push_frontend_feature_flag(:security_auto_fix, default_enabled: false)
+      push_frontend_feature_flag(:gl_tooltips, default_enabled: :yaml)
 
       # Startup CSS feature is a special one as it can be enabled by means of cookies and params
       gon.push({ features: { 'startupCss' => use_startup_css? } }, true)
@@ -61,15 +62,15 @@ module Gitlab
     def push_frontend_feature_flag(name, *args, **kwargs)
       enabled = Feature.enabled?(name, *args, **kwargs)
 
-      push_to_gon_features(name, enabled)
+      push_to_gon_attributes(:features, name, enabled)
     end
 
-    def push_to_gon_features(name, enabled)
+    def push_to_gon_attributes(key, name, enabled)
       var_name = name.to_s.camelize(:lower)
       # Here the `true` argument signals gon that the value should be merged
       # into any existing ones, instead of overwriting them. This allows you to
       # use this method to push multiple feature flags.
-      gon.push({ features: { var_name => enabled } }, true)
+      gon.push({ key => { var_name => enabled } }, true)
     end
 
     def default_avatar_url
@@ -83,3 +84,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GonHelper.prepend_if_ee('EE::Gitlab::GonHelper')

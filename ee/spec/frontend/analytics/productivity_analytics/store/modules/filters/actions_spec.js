@@ -30,7 +30,7 @@ describe('Productivity analytics filter actions', () => {
   });
 
   describe('setInitialData', () => {
-    it('commits the SET_INITIAL_DATA mutation and fetches data by default', done => {
+    it('commits the SET_INITIAL_DATA mutation and fetches data by default', (done) => {
       actions
         .setInitialData(store, { data: initialData })
         .then(() => {
@@ -54,7 +54,7 @@ describe('Productivity analytics filter actions', () => {
         .catch(done.fail);
     });
 
-    it("commits the SET_INITIAL_DATA mutation and doesn't fetch data when skipFetch=true", done =>
+    it("commits the SET_INITIAL_DATA mutation and doesn't fetch data when skipFetch=true", (done) =>
       testAction(
         actions.setInitialData,
         { skipFetch: true, data: initialData },
@@ -71,7 +71,7 @@ describe('Productivity analytics filter actions', () => {
   });
 
   describe('setGroupNamespace', () => {
-    it('commits the SET_GROUP_NAMESPACE mutation', done => {
+    it('commits the SET_GROUP_NAMESPACE mutation', (done) => {
       actions
         .setGroupNamespace(store, groupNamespace)
         .then(() => {
@@ -103,7 +103,7 @@ describe('Productivity analytics filter actions', () => {
   });
 
   describe('setProjectPath', () => {
-    it('commits the SET_PROJECT_PATH mutation', done => {
+    it('commits the SET_PROJECT_PATH mutation', (done) => {
       actions
         .setProjectPath(store, projectPath)
         .then(() => {
@@ -135,7 +135,7 @@ describe('Productivity analytics filter actions', () => {
   });
 
   describe('setFilters', () => {
-    it('commits the SET_FILTERS mutation', done => {
+    it('commits the SET_FILTERS mutation', (done) => {
       actions
         .setFilters(store, { author_username: 'root' })
         .then(() => {
@@ -167,7 +167,7 @@ describe('Productivity analytics filter actions', () => {
   });
 
   describe('setDateRange', () => {
-    it('commits the SET_DATE_RANGE mutation', done => {
+    it('commits the SET_DATE_RANGE mutation', (done) => {
       actions
         .setDateRange(store, { startDate, endDate })
         .then(() => {

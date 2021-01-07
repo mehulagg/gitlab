@@ -17,7 +17,7 @@ describe('Approval Check Popover', () => {
 
   describe('with a documentation link', () => {
     const documentationLink = `${TEST_HOST}/documentation`;
-    beforeEach(done => {
+    beforeEach((done) => {
       wrapper.setProps({
         documentationLink,
       });
@@ -25,23 +25,13 @@ describe('Approval Check Popover', () => {
     });
 
     it('should render the documentation link', () => {
-      expect(
-        wrapper
-          .find(GlPopover)
-          .find(GlLink)
-          .attributes('href'),
-      ).toBe(documentationLink);
+      expect(wrapper.find(GlPopover).find(GlLink).attributes('href')).toBe(documentationLink);
     });
   });
 
   describe('without a documentation link', () => {
     it('should not render the documentation link', () => {
-      expect(
-        wrapper
-          .find(GlPopover)
-          .find(GlLink)
-          .exists(),
-      ).toBeFalsy();
+      expect(wrapper.find(GlPopover).find(GlLink).exists()).toBeFalsy();
     });
   });
 });

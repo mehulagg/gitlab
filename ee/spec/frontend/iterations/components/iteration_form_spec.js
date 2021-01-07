@@ -186,7 +186,7 @@ describe('Iteration Form', () => {
         variables: {
           input: {
             groupPath,
-            id,
+            id: iteration.id,
             title,
             description,
             startDate,

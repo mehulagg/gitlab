@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Global Search
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -9,7 +9,7 @@ type: reference
 
 > - Introduced in [GitLab Enterprise Starter](https://about.gitlab.com/pricing/) 9.2
 
-NOTE: **GitLab.com availability:**
+NOTE:
 Advanced Search (powered by Elasticsearch) is enabled for Bronze and above on GitLab.com since 2020-07-10.
 
 Use advanced queries for more targeted search results.
@@ -24,19 +24,6 @@ The Advanced Search Syntax is a subset of the
 want to have more specific search results.
 
 Advanced Search only supports searching the [default branch](../project/repository/branches/index.md#default-branch).
-
-## Use cases
-
-Let's say for example that the product you develop relies on the code of another
-product that's hosted under some other group.
-
-Since under your GitLab instance there are hosted hundreds of different projects,
-you need the search results to be as efficient as possible. You have a feeling
-of what you want to find (e.g., a function name), but at the same you're also
-not so sure.
-
-In that case, using the advanced search syntax in your query will yield much
-better results.
 
 ## Using the Advanced Search Syntax
 
@@ -65,14 +52,17 @@ The Advanced Search Syntax also supports the use of filters. The available filte
 - blob: Filters by Git `object ID`. Exact match only.
 
 To use them, add them to your keyword in the format `<filter_name>:<value>` without
-any spaces between the colon (`:`) and the value. A keyword or an asterisk (`*`) is required for filter searches and has to be added in front of the filter separated by a space.
+any spaces between the colon (`:`) and the value. When no keyword is provided, an asterisk (`*`) will be used as the keyword.
 
 Examples:
 
 - Finding a file with any content named `search_results.rb`: [`* filename:search_results.rb`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=*+filename%3Asearch_results.rb&group_id=9970&project_id=278964)
-- Finding a file named `found_blob_spec.rb` with the text `CHANGELOG` inside of it: [`CHANGELOG filename:found_blob_spec.rb](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=CHANGELOG+filename%3Afound_blob_spec.rb&group_id=9970&project_id=278964)
+- The leading asterisk (`*`) can be ignored in the case above: [`filename:search_results.rb`](https://gitlab.com/search?group_id=9970&project_id=278964&scope=blobs&search=filename%3Asearch_results.rb)
+- Finding a file named `found_blob_spec.rb` with the text `CHANGELOG` inside of it: [`CHANGELOG filename:found_blob_spec.rb`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=CHANGELOG+filename%3Afound_blob_spec.rb&group_id=9970&project_id=278964)
 - Finding the text `EpicLinks` inside files with the `.rb` extension: [`EpicLinks extension:rb`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=EpicLinks+extension%3Arb&group_id=9970&project_id=278964)
+- Finding any file with the `.yaml` extension: [`extension:yaml`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=extension%3Ayaml&group_id=9970&project_id=278964)
 - Finding the text `Sidekiq` in a file, when that file is in a path that includes `elastic`: [`Sidekiq path:elastic`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=Sidekiq+path%3Aelastic&group_id=9970&project_id=278964)
+- Finding any file in a path that includes `elasticsearch`: [`path:elasticsearch`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=path%3Aelasticsearch&group_id=9970&project_id=278964)
 - Finding the files represented by the Git object ID `998707b421c89bd9a3063333f9f728ef3e43d101`: [`* blob:998707b421c89bd9a3063333f9f728ef3e43d101`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=false&scope=blobs&repository_ref=&search=*+blob%3A998707b421c89bd9a3063333f9f728ef3e43d101&group_id=9970)
 - Syntax filters can be combined for complex filtering. Finding any file starting with `search` containing `eventHub` and with the `.js` extension: [`eventHub filename:search* extension:js`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=eventHub+filename%3Asearch*+extension%3Ajs&group_id=9970&project_id=278964)
 
@@ -93,3 +83,10 @@ Examples:
 - Finding `success` in all files excluding `.po|pot` files: [`success -filename:*.po*`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=success+-filename%3A*.po*&group_id=9970&project_id=278964)
 - Finding `import` excluding minified JavaScript (`.min.js`) files: [`import -extension:min.js`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=import+-extension%3Amin.js&group_id=9970&project_id=278964)
 - Finding `docs` for all files outside the `docs/` folder: [`docs -path:docs/`](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=blobs&repository_ref=&search=docs+-path%3Adocs%2F&group_id=9970&project_id=278964)
+
+### Search by issue or merge request ID
+
+You can search a specific issue or merge request by its ID with a special prefix.
+
+- To search by issue ID, use prefix `#` followed by issue ID. For example, [#23456](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=issues&repository_ref=&search=%2323456&group_id=9970&project_id=278964)
+- To search by merge request ID, use prefix `!` followed by merge request ID. For example [!23456](https://gitlab.com/search?utf8=%E2%9C%93&snippets=&scope=merge_requests&repository_ref=&search=%2123456&group_id=9970&project_id=278964)

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Container Registry', :js do
+  include_context 'container registry tags'
+
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -94,8 +96,23 @@ RSpec.describe 'Container Registry', :js do
       end
 
       it('pagination navigate to the second page') do
-        visit_second_page
+        visit_next_page
+
         expect(page).to have_content '20'
+      end
+    end
+
+    describe 'with a tag missing digest' do
+      before do
+        stub_container_registry_tags(repository: %r{my/image}, tags: %w[latest stable])
+        stub_next_container_registry_tags_call(:digest, nil)
+        visit_container_registry_details 'my/image'
+      end
+
+      it 'renders the tags list correctly' do
+        expect(page).to have_content('latest')
+        expect(page).to have_content('stable')
+        expect(page).to have_content('Digest: N/A')
       end
     end
   end
@@ -116,22 +133,23 @@ RSpec.describe 'Container Registry', :js do
 
   context 'when there are more than 10 images' do
     before do
-      create_list(:container_repository, 12, project: project)
       project.container_repositories << container_repository
+      create_list(:container_repository, 12, project: project)
+
       visit_container_registry
     end
 
     it 'shows pagination' do
-      expect(page).to have_css '.gl-pagination'
+      expect(page).to have_css '.gl-keyset-pagination'
     end
 
     it 'pagination goes to second page' do
-      visit_second_page
+      visit_next_page
       expect(page).to have_content 'my/image'
     end
 
     it 'pagination is preserved after navigating back from details' do
-      visit_second_page
+      visit_next_page
       click_link 'my/image'
       breadcrumb = find '.breadcrumbs'
       breadcrumb.click_link 'Container Registry'
@@ -148,8 +166,8 @@ RSpec.describe 'Container Registry', :js do
     click_link name
   end
 
-  def visit_second_page
-    pagination = find '.gl-pagination'
-    pagination.click_link '2'
+  def visit_next_page
+    pagination = find '.gl-keyset-pagination'
+    pagination.click_button 'Next'
   end
 end

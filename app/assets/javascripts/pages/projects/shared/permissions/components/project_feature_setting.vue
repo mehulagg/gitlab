@@ -33,6 +33,11 @@ export default {
       required: false,
       default: false,
     },
+    showToggle: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   computed: {
     featureEnabled() {
@@ -74,6 +79,7 @@ export default {
   >
     <input v-if="name" :name="name" :value="value" type="hidden" />
     <project-feature-toggle
+      v-if="showToggle"
       class="gl-flex-grow-0 gl-mr-3"
       :value="featureEnabled"
       :disabled-input="disabledInput"
@@ -94,11 +100,7 @@ export default {
           {{ optionName }}
         </option>
       </select>
-      <gl-icon
-        name="chevron-down"
-        aria-hidden="true"
-        class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
-      />
+      <gl-icon name="chevron-down" class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500" />
     </div>
   </div>
 </template>

@@ -9,7 +9,7 @@ export default () => {
 
   return new Vue({
     el,
-    render: createElement =>
+    render: (createElement) =>
       createElement(ComplianceDashboard, {
         props: {
           mergeRequests: JSON.parse(mergeRequests),

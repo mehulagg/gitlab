@@ -22,10 +22,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    mergeRequestDiffs: {
-      type: Array,
-      required: true,
-    },
     isLimitedContainer: {
       type: Boolean,
       required: false,
@@ -44,6 +40,7 @@ export default {
       'diffCompareDropdownSourceVersions',
     ]),
     ...mapState('diffs', [
+      'diffFiles',
       'commit',
       'showTreeList',
       'startVersion',
@@ -51,11 +48,14 @@ export default {
       'addedLines',
       'removedLines',
     ]),
-    showDropdowns() {
-      return !this.commit && this.mergeRequestDiffs.length;
-    },
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
+    },
+    hasChanges() {
+      return this.diffFiles.length > 0;
+    },
+    hasSourceVersions() {
+      return this.diffCompareDropdownSourceVersions.length > 0;
     },
   },
   created() {
@@ -65,11 +65,7 @@ export default {
     polyfillSticky(this.$el);
   },
   methods: {
-    ...mapActions('diffs', [
-      'setInlineDiffViewType',
-      'setParallelDiffViewType',
-      'toggleShowTreeList',
-    ]),
+    ...mapActions('diffs', ['setInlineDiffViewType', 'setParallelDiffViewType', 'setShowTreeList']),
     expandAllFiles() {
       eventHub.$emit(EVT_EXPAND_ALL_FILES);
     },
@@ -86,16 +82,21 @@ export default {
       }"
     >
       <gl-button
+        v-if="hasChanges"
         v-gl-tooltip.hover
         variant="default"
         icon="file-tree"
         class="gl-mr-3 js-toggle-tree-list"
         :title="toggleFileBrowserTitle"
         :selected="showTreeList"
-        @click="toggleShowTreeList"
+        @click="setShowTreeList({ showTreeList: !showTreeList })"
       />
+      <div v-if="commit">
+        {{ __('Viewing commit') }}
+        <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
+      </div>
       <gl-sprintf
-        v-if="showDropdowns"
+        v-else-if="hasSourceVersions"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
@@ -113,11 +114,7 @@ export default {
           />
         </template>
       </gl-sprintf>
-      <div v-else-if="commit">
-        {{ __('Viewing commit') }}
-        <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
-      </div>
-      <div class="inline-parallel-buttons d-none d-md-flex ml-auto">
+      <div v-if="hasChanges" class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"

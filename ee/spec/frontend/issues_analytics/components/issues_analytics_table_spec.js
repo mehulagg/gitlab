@@ -24,20 +24,12 @@ describe('IssuesAnalyticsTable', () => {
 
   const findTable = () => wrapper.find(GlTable);
 
-  const findIssueDetailsCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="detailsCol"]')
-      .at(rowIndex);
+  const findIssueDetailsCol = (rowIndex) =>
+    findTable().findAll('[data-testid="detailsCol"]').at(rowIndex);
 
-  const findAgeCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="ageCol"]')
-      .at(rowIndex);
+  const findAgeCol = (rowIndex) => findTable().findAll('[data-testid="ageCol"]').at(rowIndex);
 
-  const findStatusCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="statusCol"]')
-      .at(rowIndex);
+  const findStatusCol = (rowIndex) => findTable().findAll('[data-testid="statusCol"]').at(rowIndex);
 
   beforeEach(() => {
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2020-01-08'));

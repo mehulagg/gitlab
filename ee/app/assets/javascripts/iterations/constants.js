@@ -3,4 +3,10 @@ export const Namespace = {
   Project: 'project',
 };
 
+export const iterationStates = {
+  closed: 'closed',
+  upcoming: 'upcoming',
+  expired: 'expired',
+};
+
 export default {};

@@ -63,6 +63,26 @@ RSpec.describe Mutations::Security::CiConfiguration::ConfigureSast do
       end
     end
 
+    context 'when the user does not have permission to create a new branch' do
+      before_all do
+        project.add_developer(user)
+      end
+
+      let(:error_message) { 'You are not allowed to create protected branches on this project.' }
+
+      it 'returns an array of errors' do
+        allow_next_instance_of(::Files::MultiService) do |multi_service|
+          allow(multi_service).to receive(:execute).and_raise(Gitlab::Git::PreReceiveError.new("GitLab: #{error_message}"))
+        end
+
+        expect(result).to match(
+          status: :error,
+          success_path: nil,
+          errors: match_array([error_message])
+        )
+      end
+    end
+
     context 'when the user can create a merge request' do
       before_all do
         project.add_developer(user)

@@ -155,7 +155,7 @@ export default {
 <template>
   <div
     class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex gl-flex-shrink-0"
-    :class="{ 'is-collapsed': !list.isExpanded }"
+    :class="{ 'is-collapsed': list.collapsed }"
   >
     <div class="board-inner gl-rounded-base gl-relative gl-w-full">
       <board-new-issue
@@ -164,7 +164,7 @@ export default {
       />
       <component
         :is="treeRootWrapper"
-        v-if="list.isExpanded"
+        v-if="!list.collapsed"
         v-bind="treeRootOptions"
         class="board-cell gl-p-2 gl-m-0 gl-h-full"
         data-testid="tree-root-wrapper"

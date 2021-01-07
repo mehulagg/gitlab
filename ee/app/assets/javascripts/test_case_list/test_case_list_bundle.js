@@ -52,7 +52,7 @@ const initTestCaseList = ({ mountPointSelector }) => {
       initialState,
       initialSortBy,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement(TestCaseListApp, {
         props: {
           initialFilterParams,

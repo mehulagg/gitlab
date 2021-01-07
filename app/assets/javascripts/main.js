@@ -23,7 +23,6 @@ import { getLocationHash, visitUrl } from './lib/utils/url_utility';
 // everything else
 import { deprecatedCreateFlash as Flash, removeFlashClickListener } from './flash';
 import initTodoToggle from './header';
-import initImporterStatus from './importer_status';
 import initLayoutNav from './layout_nav';
 import initAlertHandler from './alert_handler';
 import './feature_highlight/feature_highlight_options';
@@ -54,7 +53,7 @@ window.$ = jQuery;
 jQuery.ajaxSetup({
   converters: {
     // eslint-disable-next-line @gitlab/require-i18n-strings, func-names
-    'text script': function(text) {
+    'text script': function (text) {
       jQuery.globalEval(text, { nonce: getCspNonceValue() });
       return text;
     },
@@ -78,6 +77,7 @@ if (process.env.NODE_ENV !== 'production' && gon?.test_env) {
 
 document.addEventListener('beforeunload', () => {
   // Unbind scroll events
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $(document).off('scroll');
   // Close any open tooltips
   tooltips.dispose(document.querySelectorAll('.has-tooltip, [data-toggle="tooltip"]'));
@@ -107,7 +107,6 @@ function deferredInitialisation() {
   const $body = $('body');
 
   initBreadcrumbs();
-  initImporterStatus();
   initTodoToggle();
   initLogoAnimation();
   initUsagePingConsent();
@@ -138,10 +137,7 @@ function deferredInitialisation() {
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
     tooltips.dispose(this);
 
-    // eslint-disable-next-line no-jquery/no-fade
-    $(this)
-      .closest('li')
-      .fadeOut();
+    $(this).closest('li').addClass('gl-display-none!');
   });
 
   $('.js-remove-tr').on('ajax:before', function removeTRAjaxBeforeCallback() {
@@ -149,10 +145,7 @@ function deferredInitialisation() {
   });
 
   $('.js-remove-tr').on('ajax:success', function removeTRAjaxSuccessCallback() {
-    // eslint-disable-next-line no-jquery/no-fade
-    $(this)
-      .closest('tr')
-      .fadeOut();
+    $(this).closest('tr').addClass('gl-display-none!');
   });
 
   const glTooltipDelay = localStorage.getItem('gl-tooltip-delay');
@@ -281,15 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $this.toggleClass('active');
 
     if ($this.hasClass('active')) {
-      notesHolders
-        .show()
-        .find('.hide, .content')
-        .show();
+      notesHolders.show().find('.hide, .content').show();
     } else {
-      notesHolders
-        .hide()
-        .find('.content')
-        .hide();
+      notesHolders.hide().find('.content').hide();
     }
 
     $(document).trigger('toggle.comments');
@@ -311,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (flashContainer && flashContainer.children.length) {
     flashContainer
       .querySelectorAll('.flash-alert, .flash-notice, .flash-success')
-      .forEach(flashEl => {
+      .forEach((flashEl) => {
         removeFlashClickListener(flashEl);
       });
   }

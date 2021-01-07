@@ -1,5 +1,0 @@
----
-title: Replace bootstrap alerts in ee/app/views/admin/licenses/_repeat_trial_info.html.haml
-merge_request: 41070
-author: Jacopo Beschi @jacopo-beschi
-type: changed
