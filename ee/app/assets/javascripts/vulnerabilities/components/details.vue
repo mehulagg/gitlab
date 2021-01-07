@@ -2,6 +2,7 @@
 import { GlLink, GlSprintf, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import { bodyWithFallBack } from 'ee/vue_shared/security_reports/components/helpers';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { __ } from '~/locale';
 import DetailItem from './detail_item.vue';
@@ -147,12 +148,7 @@ export default {
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return statusCode && reasonPhrase && headerLines
-        ? [
-            `${statusCode} ${reasonPhrase}\n`,
-            headerLines,
-            '\n\n',
-            body || this.$options.emptyBody,
-          ].join('')
+        ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', bodyWithFallBack(body)].join('')
         : '';
     },
     constructRequest(request) {
@@ -160,11 +156,10 @@ export default {
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
       return method && url && headerLines
-        ? [`${method} ${url}\n`, headerLines, '\n\n', body || this.$options.emptyBody].join('')
+        ? [`${method} ${url}\n`, headerLines, '\n\n', bodyWithFallBack(body)].join('')
         : '';
     },
   },
-  emptyBody: '<Message body is not provided>',
 };
 </script>
 
