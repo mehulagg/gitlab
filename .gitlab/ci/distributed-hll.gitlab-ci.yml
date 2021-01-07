@@ -1,0 +1,17 @@
+distributed-hll-standard-error-verify:
+  extends:
+    - .default-retry
+    - .rails-cache
+    - .default-before_script
+    - .use-pg11
+  stage: test
+  needs: ["setup-test-env"]
+  script:
+    - standard_error=$(bundle exec rake gitlab:distributed_hll:standard_error)
+    - |
+      if [ $standard_error -le 4 ]; then
+        echo "Distributed Postgres HLL Standard Error ($standard_error) below limit of 4";
+      else
+        echo "Distributed Postgres HLL Standard Error ($standard_error) above limit of 4";
+        exit 1;
+      fi
