@@ -7,9 +7,10 @@ import DirtyDiffController from '~/ide/lib/diff/controller';
 import keymap from '~/ide/lib/keymap.json';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
 import ModelManager from '~/ide/lib/common/model_manager';
+import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 
-const isDiffEditorType = instance => {
-  return instance.getEditorType() === 'vs.editor.IDiffEditor';
+const isDiffEditorType = (instance) => {
+  return instance.getEditorType() === EDITOR_TYPE_DIFF;
 };
 
 export class EditorWebIdeExtension extends EditorLiteExtension {
@@ -108,7 +109,7 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
 
     this.updateOptions(
       editorOptions.reduce((acc, obj) => {
-        Object.keys(obj).forEach(key => {
+        Object.keys(obj).forEach((key) => {
           Object.assign(acc, {
             [key]: obj[key](model),
           });
@@ -158,7 +159,7 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   onPositionChange(cb) {
     if (!this.onDidChangeCursorPosition) return;
 
-    this.disposable.add(this.onDidChangeCursorPosition(e => cb(this, e)));
+    this.disposable.add(this.onDidChangeCursorPosition((e) => cb(this, e)));
   }
 
   updateDiffView() {
@@ -191,14 +192,14 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
 
   addCommands() {
     const { store } = this;
-    const getKeyCode = key => {
+    const getKeyCode = (key) => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 
       return monacoKeyMod ? KeyCode[key] : KeyMod[key];
     };
 
-    keymap.forEach(command => {
-      const keybindings = command.bindings.map(binding => {
+    keymap.forEach((command) => {
+      const keybindings = command.bindings.map((binding) => {
         const keys = binding.split('+');
 
         // eslint-disable-next-line no-bitwise
