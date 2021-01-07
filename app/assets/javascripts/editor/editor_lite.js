@@ -5,7 +5,7 @@ import { defaultEditorOptions } from '~/ide/lib/editor_options';
 import { registerLanguages } from '~/ide/utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { clearDomElement } from './utils';
-import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX } from './constants';
+import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX, EDITOR_TYPE_DIFF } from './constants';
 import { uuids } from '~/diffs/utils/uuids';
 
 export default class EditorLite {
@@ -182,7 +182,17 @@ export default class EditorLite {
       this.instances.splice(index, 1);
       const instanceModel = instance.getModel();
       if (instanceModel) {
-        instanceModel.dispose();
+        if (instance.getEditorType() === EDITOR_TYPE_DIFF) {
+          const { original, modified } = instanceModel;
+          if (original) {
+            original.dispose();
+          }
+          if (modified) {
+            modified.dispose();
+          }
+        } else {
+          instanceModel.dispose();
+        }
       }
     });
     EditorLite.manageDefaultExtensions(instance, el, extensions);
