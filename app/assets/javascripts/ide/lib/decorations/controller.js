@@ -16,16 +16,6 @@ export default class DecorationsController {
     return decorations;
   }
 
-  addDecorations(model, decorationsKey, decorations) {
-    const decorationMap = this.decorations.get(model.url) || new Map();
-
-    decorationMap.set(decorationsKey, decorations);
-
-    this.decorations.set(model.url, decorationMap);
-
-    this.decorate(model);
-  }
-
   decorate(model) {
     if (!this.editor.instance) return;
 
