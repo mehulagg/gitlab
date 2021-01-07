@@ -105,6 +105,11 @@ export default {
       required: false,
       default: __('Manage group labels'),
     },
+    inline: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isEditing: {
       type: Boolean,
       required: false,
@@ -254,6 +259,7 @@ export default {
   <div
     class="labels-select-wrapper position-relative"
     :class="{
+      'gl-display-inline-block': inline,
       'is-standalone': isDropdownVariantStandalone,
       'is-embedded': isDropdownVariantEmbedded,
     }"

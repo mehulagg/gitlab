@@ -1,0 +1,38 @@
+#import "./iteration_issues.fragment.graphql"
+
+query IterationIssuesWithLabelFilter(
+  $fullPath: ID!
+  $id: ID!
+  $isGroup: Boolean = true
+  $labelName: [String]
+  $beforeCursor: String = ""
+  $afterCursor: String = ""
+  $firstPageSize: Int
+  $lastPageSize: Int
+) {
+  group(fullPath: $fullPath) @include(if: $isGroup) {
+    issues(
+      iterationId: [$id]
+      labelName: $labelName
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+      includeSubgroups: true
+    ) {
+      ...IterationIssues
+    }
+  }
+  project(fullPath: $fullPath) @skip(if: $isGroup) {
+    issues(
+      iterationId: [$id]
+      labelName: $labelName
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+    ) {
+      ...IterationIssues
+    }
+  }
+}
