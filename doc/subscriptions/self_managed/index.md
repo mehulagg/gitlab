@@ -108,7 +108,7 @@ It also displays the following important statistics:
 | Users in License   | The number of users you've paid for in the current license loaded on the system. The number does not change unless you [add seats](#add-seats-to-a-subscription) during your current subscription period. |
 | Billable users     | The daily count of billable users on your system. The count may change as you block or add users to your instance. |
 | Maximum users      | The highest number of billable users on your system during the term of the loaded license. |
-| Users over license | The number of `Maximum users` that exceed the `Users in License` for the current license term. This number incurs a retroactive charge that needs to be paid for at renewal. |
+| Users over license | Calculated as `Maximum users` - `Users in License` for the current license term. This number incurs a retroactive charge that needs to be paid for at renewal. |
 
 ## Renew your subscription
 
@@ -138,12 +138,24 @@ It's important to regularly review your user accounts, because:
 
 #### Users over License
 
-A GitLab subscription is valid for a specific number of seats. If the
-[billable user](#billable-users) count exceeds the number of seats included in the subscription,
-this is the number of _users over license_. You must pay for this number of users either
-before renewal, or at the time of renewal. This is known as the _true up_ process.
+A GitLab subscription is valid for a specific number of seats. The number of users over license
+is the number of `Maximum users` that exceed the `Users in License` for the current license term.
+You must pay for this number of users either before renewal, or at the time of renewal. This is
+known as the _true up_ process.
 
 To view the number of _users over license_ go to the **Admin Area**.
+
+##### Users over license example
+
+You purchase a license for 10 users.
+
+| Event                                              | Billable members | Maximum users |
+|:---------------------------------------------------|:-----------------|:--------------|
+| Ten people (users) occupy all 10 seats.            | 10               | 10            |
+| Two new people join.                               | 12               | 12            |
+| Three people leave and their accounts are removed. | 9                | 12            |
+
+Users over license = 12 - 10 (Maximum users - users in license)
 
 ### Add seats to a subscription
 
