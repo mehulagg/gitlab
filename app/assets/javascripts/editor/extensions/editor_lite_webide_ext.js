@@ -6,7 +6,6 @@ import { editorOptions } from '~/ide/lib/editor_options';
 import DirtyDiffController from '~/ide/lib/diff/controller';
 import keymap from '~/ide/lib/keymap.json';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
-import ModelManager from '~/ide/lib/common/model_manager';
 import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 
 const isDiffEditorType = (instance) => {
@@ -14,26 +13,20 @@ const isDiffEditorType = (instance) => {
 };
 
 export class EditorWebIdeExtension extends EditorLiteExtension {
-  constructor({ instance, ...options } = {}) {
+  constructor({ instance, modelManager, ...options } = {}) {
+    const decorationsController = new DecorationsController(instance);
     super({
       instance,
       ...options,
       currentModel: null,
-      dirtyDiffController: null,
+      modelManager,
+      decorationsController,
+      dirtyDiffController: new DirtyDiffController(modelManager, decorationsController),
       disposable: new Disposable(),
-      modelManager: new ModelManager(),
-      decorationsController: new DecorationsController(instance),
       debouncedUpdate: debounce(() => {
         instance.updateDimensions();
       }, 200),
     });
-
-    instance.disposable.add(
-      (this.dirtyDiffController = new DirtyDiffController(
-        instance.modelManager,
-        instance.decorationsController,
-      )),
-    );
 
     window.addEventListener('resize', instance.debouncedUpdate, false);
 
@@ -44,11 +37,7 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
       // this is mainly for tests caused by elements not existing
       try {
         instance.disposable.dispose();
-
-        // this.instance = null;
       } catch (e) {
-        // this.instance = null;
-
         if (process.env.NODE_ENV !== 'test') {
           // eslint-disable-next-line no-console
           console.error(e);
@@ -58,34 +47,15 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   }
 
   bootstrapInstance() {
-    // if (!this.instance) {
-    //   clearDomElement(domElement);
-
-    // this.disposable.add(
-    //   (this.dirtyDiffController = new DirtyDiffController(
-    //     this.modelManager,
-    //     this.decorationsController,
-    //   )),
-    // );
-
     this.addCommands();
-
-    // window.addEventListener('resize', this.debouncedUpdate, false);
-    // }
   }
 
   bootstrapDiffInstance() {
-    // if (!this.instance) {
-    //   clearDomElement(domElement);
-    debugger;
     this.updateOptions({
       renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
     });
 
-    this.addCommands();
-
-    // window.addEventListener('resize', this.debouncedUpdate, false);
-    // }
+    this.bootstrapInstance();
   }
 
   createModel(file, head = null) {
@@ -133,16 +103,12 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   }
 
   clearEditor() {
-    // if (this.instance) {
     this.setModel(null);
-    // }
   }
 
   updateDimensions() {
-    // if (this.instance) {
     this.layout();
     this.updateDiffView();
-    // }
   }
 
   setPos({ lineNumber, column }) {
@@ -165,7 +131,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   updateDiffView() {
     if (!isDiffEditorType(this)) return;
 
-    debugger;
     this.updateOptions({
       renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
     });

@@ -29,6 +29,7 @@ import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '..
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
 import { defaultDiffEditorOptions, defaultEditorOptions } from '~/ide/lib/editor_options';
+import ModelManager from '~/ide/lib/common/model_manager';
 
 export default {
   name: 'RepoEditor',
@@ -49,6 +50,7 @@ export default {
       images: {},
       rules: {},
       globalEditor: null,
+      modelManager: new ModelManager(),
     };
   },
   computed: {
@@ -276,6 +278,7 @@ export default {
       this.editor.use(
         new EditorWebIdeExtension({
           instance: this.editor,
+          modelManager: this.modelManager,
           store: this.$store,
           file: this.file,
           options: this.editorOptions,
