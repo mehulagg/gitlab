@@ -7,7 +7,7 @@ module SubscriptionsHelper
     {
       setup_for_company: (current_user.setup_for_company == true).to_s,
       full_name: current_user.name,
-      available_plans: available_plans.to_json,
+      available_plans: subscription_available_plans.to_json,
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
@@ -17,7 +17,7 @@ module SubscriptionsHelper
 
   def plan_title
     strong_memoize(:plan_title) do
-      plan = available_plans.find { |plan| plan[:id] == params[:plan_id] }
+      plan = subscription_available_plans.find { |plan| plan[:id] == params[:plan_id] }
       plan[:code].titleize if plan
     end
   end
@@ -33,11 +33,12 @@ module SubscriptionsHelper
   def plans_data
     FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
+      # .map { |plan_data| (plan_data[:code] == ::Plan::BRONZE) ? plan_data.merge( :deprecated => true ) : plan_data }
       .reject { |plan_data| plan_data[:free] }
       .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated) }
   end
 
-  def available_plans
+  def subscription_available_plans
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
     plans_data.reject { |plan_data| plan_data[:deprecated] }
