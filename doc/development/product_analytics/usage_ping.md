@@ -554,8 +554,6 @@ Redis HLL implementation calculates automatic total metrics, if there are more t
 - `#{category}_total_unique_counts_weekly`: Total unique counts for events in the same category for the last 7 days or the last complete week, if events are in the same Redis slot and we have more than one metric.
 - `#{category}_total_unique_counts_monthly`: Total unique counts for events in same category for the last 28 days or the last 4 complete weeks, if events are in the same Redis slot and we have more than one metric.
 
-
-
 Example of `redis_hll_counters` data:
 
 ```ruby
