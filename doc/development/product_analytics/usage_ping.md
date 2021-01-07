@@ -795,7 +795,7 @@ In order to add data for aggregated metrics into Usage Ping payload you should a
 - operator: operator that defines how aggregated metric data is counted. Available operators are:
   - `OR`: removes duplicates and counts all entries that triggered any of listed events
   - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
-- events: list of events names (from [`known_events.yml`](#known-events-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
+- events: list of events names (from [`known_events.yml`](#known-events-are-added-automatically-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
 - feature_flag: name of [development feature flag](../feature_flags/development.md#development-type) that is checked before
 metrics aggregation is performed. Corresponding feature flag should have `default_enabled` attribute set to `false`.
 `feature_flag` attribute is **OPTIONAL**  and can be omitted, when `feature_flag` is missing no feature flag is checked.
