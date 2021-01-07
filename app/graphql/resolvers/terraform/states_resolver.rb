@@ -7,10 +7,16 @@ module Resolvers
 
       alias_method :project, :object
 
-      def resolve(**args)
-        return ::Terraform::State.none unless can_read_terraform_states?
+      when_single do
+        argument :name, GraphQL::STRING_TYPE,
+            required: true,
+            description: 'Name of the Terraform state.'
+      end
 
-        project.terraform_states.ordered_by_name
+      def resolve(**args)
+        ::Terraform::StatesFinder
+          .new(project, current_user, params: args)
+          .execute
       end
 
       private
