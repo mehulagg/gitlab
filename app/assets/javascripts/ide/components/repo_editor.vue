@@ -30,6 +30,7 @@ import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
 import { defaultDiffEditorOptions, defaultEditorOptions } from '~/ide/lib/editor_options';
 import ModelManager from '~/ide/lib/common/model_manager';
+import { EDITOR_TYPE_DIFF } from '~/editor/constants';
 
 export default {
   name: 'RepoEditor',
@@ -255,45 +256,54 @@ export default {
         return;
       }
 
-      if (this.editor) {
-        this.editor.dispose();
-      }
-
       const isDiff = this.viewer !== viewerTypes.edit;
-      const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
+      const shouldDisposeEditor = isDiff !== (this.editor?.getEditorType() === EDITOR_TYPE_DIFF);
 
-      const createInstance = () => {
-        return this.globalEditor.createInstance({
-          el: this.$refs.editor,
-          blobPath: this.file.path,
-          blobGlobalId: this.file.key,
-          blobContent: this.content || this.file.content,
-          diff: isDiff,
-          ...instanceOptions,
-          ...this.editorOptions,
+      const initInstance = () => {
+        const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
+
+        const createInstance = () => {
+          return this.globalEditor.createInstance({
+            el: this.$refs.editor,
+            blobPath: this.file.path,
+            blobGlobalId: this.file.key,
+            blobContent: this.content || this.file.content,
+            diff: isDiff,
+            ...instanceOptions,
+            ...this.editorOptions,
+          });
+        };
+
+        this.editor = createInstance();
+        this.editor.use(
+          new EditorWebIdeExtension({
+            instance: this.editor,
+            modelManager: this.modelManager,
+            store: this.$store,
+            file: this.file,
+            options: this.editorOptions,
+          }),
+        );
+
+        this.$nextTick(() => {
+          if (isDiff) {
+            this.editor.bootstrapDiffInstance();
+          } else {
+            this.editor.bootstrapInstance();
+          }
+
+          this.setupEditor();
         });
       };
 
-      this.editor = createInstance();
-      this.editor.use(
-        new EditorWebIdeExtension({
-          instance: this.editor,
-          modelManager: this.modelManager,
-          store: this.$store,
-          file: this.file,
-          options: this.editorOptions,
-        }),
-      );
-
-      this.$nextTick(() => {
-        if (isDiff) {
-          this.editor.bootstrapDiffInstance();
-        } else {
-          this.editor.bootstrapInstance();
-        }
-
+      if (this.editor && !shouldDisposeEditor) {
         this.setupEditor();
-      });
+      } else {
+        if (shouldDisposeEditor) {
+          this.editor.dispose();
+        }
+        initInstance();
+      }
     },
     setupEditor() {
       if (!this.file || !this.editor || this.file.loading) return;
