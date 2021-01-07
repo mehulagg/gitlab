@@ -15,7 +15,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
     super({
       instance,
       ...options,
-      currentModel: null,
       modelManager,
       disposable: new Disposable(),
       debouncedUpdate: debounce(() => {
@@ -68,8 +67,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
     }
 
     this.setModel(model.getModel());
-
-    this.currentModel = model;
 
     this.updateOptions(
       editorOptions.reduce((acc, obj) => {
