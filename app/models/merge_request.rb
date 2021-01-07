@@ -50,12 +50,13 @@ class MergeRequest < ApplicationRecord
       end
     end
 
-  has_many :merge_request_diffs
+  has_many :merge_request_diffs,
+    -> { regular }
   has_many :merge_request_context_commits, inverse_of: :merge_request
   has_many :merge_request_context_commit_diff_files, through: :merge_request_context_commits, source: :diff_files
 
   has_one :merge_request_diff,
-    -> { order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
+    -> { regular.order('merge_request_diffs.id DESC') }, inverse_of: :merge_request
   has_one :cleanup_schedule, inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'

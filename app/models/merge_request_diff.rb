@@ -50,6 +50,11 @@ class MergeRequestDiff < ApplicationRecord
     state :overflow_diff_lines_limit
   end
 
+  enum diff_type: {
+    regular: 1,
+    merge_head: 2
+  }
+
   scope :with_files, -> { without_states(:without_files, :empty) }
   scope :viewable, -> { without_state(:empty) }
   scope :by_commit_sha, ->(sha) do

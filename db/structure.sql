@@ -13900,6 +13900,7 @@ CREATE TABLE merge_request_diffs (
     stored_externally boolean,
     files_count smallint,
     sorted boolean DEFAULT false NOT NULL,
+    diff_type smallint DEFAULT 1,
     CONSTRAINT check_93ee616ac9 CHECK ((external_diff_store IS NOT NULL))
 );
 
@@ -21886,6 +21887,8 @@ CREATE INDEX index_merge_request_diff_commits_on_sha ON merge_request_diff_commi
 CREATE INDEX index_merge_request_diff_details_on_merge_request_diff_id ON merge_request_diff_details USING btree (merge_request_diff_id);
 
 CREATE INDEX index_merge_request_diffs_by_id_partial ON merge_request_diffs USING btree (id) WHERE ((files_count > 0) AND ((NOT stored_externally) OR (stored_externally IS NULL)));
+
+CREATE INDEX index_merge_request_diffs_on_diff_type ON merge_request_diffs USING btree (diff_type);
 
 CREATE INDEX index_merge_request_diffs_on_external_diff_store ON merge_request_diffs USING btree (external_diff_store);
 
