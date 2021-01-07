@@ -6,18 +6,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab behavior in maintenance mode
 
-This document describes what you can expect from a GitLab instance in maintenance mode.
 
-In maintenance mode, database writes are disabled at the application level.
-
-However, some database write actions are allowed, e.g. to allow users to log in and log out and admins are allowed to edit application settings.
-
+In maintenance mode, most write operations are disabled at the application level. This means that GitLab is effectively in a `read-only mode` for all non-administrative users. Regular users are still able to login to GitLab, view the interface and perform other read-only operations, such as `git clone` or `git pull`. However, there are some exceptions; for example, systems administrators are still able to edit application settings.
 **Visual feedback**
 
-When maintenance mode is enabled, a banner is displayed at the top of the page.
+When maintenance mode is enabled, a banner is displayed at the top of the page. The banner can be customized with a specific message.
 
 An error is displayed when a user tries to perform a write operation that isn't allowed.
 
+NOTE:
 In some cases the visual feedback from an action could be misleading, e.g. on starring a project, the `Star` button changes to show `Unstar` action, however, this is only the frontend update that does not take into account the failed status of the POST request. These visual bugs are to be fixed in follow-up iterations.
 
 The API will return a 403 or 503 for failed write requests.
@@ -36,7 +33,7 @@ If Geo is enabled, logging out of secondary is allowed too. But logging back int
 
 In maintenance mode, no new jobs are started. Already running jobs stay in 'running' status but their logs are no longer updated.
 
-Once maintenance mode is disabled, new jobs are be picked up again. The jobs that were in the running state before enabling maintenance mode, will resume.
+Once maintenance mode is disabled, new jobs are picked up again. The jobs that were in the running state before enabling maintenance mode, will resume.
 Their logs will start getting updated again.
 
 If the job has been in 'running' state for longer than the project's time limit, it will **not** timeout.
