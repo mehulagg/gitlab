@@ -600,7 +600,7 @@ redis_usage_data { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(even
 
 ##### Automatic totals for counters
 
-Redis HLL implementation calculates automatic total metrics, if there are more than one metric for the same category, aggregation and redis slot. The new metrics will be named `<REDIS_SLOT>_total_unique_counts_weekly` and `<REDIS_SLOT>_total_unique_counts_monthly`.
+Redis HLL implementation calculates automatic total metrics, if there are more than one metric for the same category, aggregation and Redis slot. The new metrics will be named `<REDIS_SLOT>_total_unique_counts_weekly` and `<REDIS_SLOT>_total_unique_counts_monthly`.
 
 ### Alternative Counters
 
