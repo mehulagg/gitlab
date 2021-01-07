@@ -28,8 +28,38 @@ RSpec.describe MetricsController, :request_store do
     end
   end
 
+  shared_examples_for 'protected metrics endpoint' do |examples|
+    context 'accessed from whitelisted ip' do
+      before do
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(whitelisted_ip)
+      end
+
+      it_behaves_like examples
+    end
+
+    context 'accessed from ip in whitelisted range' do
+      before do
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(ip_in_whitelisted_range)
+      end
+
+      it_behaves_like examples
+    end
+
+    context 'accessed from not whitelisted ip' do
+      before do
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(not_whitelisted_ip)
+      end
+
+      it 'returns the expected error response' do
+        get :index
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   describe '#index' do
-    shared_examples_for 'endpoint providing metrics' do
+    shared_examples_for 'providing metrics' do
       it 'returns prometheus metrics' do
         get :index
 
@@ -51,32 +81,30 @@ RSpec.describe MetricsController, :request_store do
       end
     end
 
-    context 'accessed from whitelisted ip' do
+    include_examples 'protected metrics endpoint', 'providing metrics'
+  end
+
+  describe '#vm' do
+    shared_examples_for 'providing Ruby VM stats' do
+      let(:gc_stat_keys) { GC.stat.stringify_keys.keys }
+
       before do
-        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(whitelisted_ip)
+        stub_const('RUBY_DESCRIPTION', 'ruby-3.0-patch1')
       end
 
-      it_behaves_like 'endpoint providing metrics'
+      it 'renders Ruby VM stats JSON' do
+        get :vm
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response_json['version']).to eq('ruby-3.0-patch1')
+        expect(response_json['gc_stat'].keys).to eq(gc_stat_keys)
+      end
     end
 
-    context 'accessed from ip in whitelisted range' do
-      before do
-        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(ip_in_whitelisted_range)
-      end
+    include_examples 'protected metrics endpoint', 'providing Ruby VM stats'
+  end
 
-      it_behaves_like 'endpoint providing metrics'
-    end
-
-    context 'accessed from not whitelisted ip' do
-      before do
-        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(not_whitelisted_ip)
-      end
-
-      it 'returns the expected error response' do
-        get :index
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
+  def response_json
+    Gitlab::Json.parse(response.body)
   end
 end

@@ -18,9 +18,23 @@ class MetricsController < ActionController::Base
     render plain: response, content_type: 'text/plain; version=0.0.4'
   end
 
+  def vm
+    # perform a major mark-and-sweep before collecting stats
+    GC.start
+
+    render json: ruby_vm_stats
+  end
+
   private
 
   def metrics_service
     @metrics_service ||= MetricsService.new
+  end
+
+  def ruby_vm_stats
+    {
+      'version': RUBY_DESCRIPTION,
+      'gc_stat': GC.stat
+    }
   end
 end
