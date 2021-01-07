@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Members::PermissionsExportService do
+RSpec.describe MemberPermissions::ExportService do
   let(:service) { described_class.new(current_user) }
 
   let_it_be(:admin) { create(:admin) }
