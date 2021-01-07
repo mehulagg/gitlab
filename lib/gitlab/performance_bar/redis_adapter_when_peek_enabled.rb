@@ -25,13 +25,26 @@ module Gitlab
           timeout: GitlabPerformanceBarStatsWorker::LEASE_TIMEOUT
         ).try_obtain
 
-        GitlabPerformanceBarStatsWorker.perform_in(GitlabPerformanceBarStatsWorker::WORKER_DELAY, uuid)
+        # stats key should be periodically processed and deleted by
+        # GitlabPerformanceBarStatsWorker but if it doesn't happen for
+        # some reason, we set expiration for the stats key to avoid
+        # keeping millions of request ids which would be already expired
+        # anyway
+        @client.expire(
+          GitlabPerformanceBarStatsWorker::STATS_KEY,
+          GitlabPerformanceBarStatsWorker::STATS_KEY_EXPIRE
+        )
+
+        GitlabPerformanceBarStatsWorker.perform_in(
+          GitlabPerformanceBarStatsWorker::WORKER_DELAY,
+          uuid
+        )
       end
 
       def gather_stats?
         return unless Feature.enabled?(:performance_bar_stats)
 
-        Gitlab.com? || !Rails.env.production?
+        Gitlab.com? || Gitlab.staging? || !Rails.env.production?
       end
     end
   end
