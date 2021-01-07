@@ -19,6 +19,7 @@ import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
 import ImportRequirementsModal from './import_requirements_modal.vue';
+import ExportRequirementsModal from './export_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
@@ -45,6 +46,7 @@ export default {
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
     ImportRequirementsModal,
+    ExportRequirementsModal,
   },
   mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
   props: {
@@ -597,6 +599,9 @@ export default {
     handleImportRequirementsClick() {
       this.$refs.modal.show();
     },
+    handleExportRequirementsClick() {
+      this.$refs.exportModal.show();
+    }
   },
 };
 </script>
@@ -612,6 +617,7 @@ export default {
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
+      @click-export-requirements="handleExportRequirementsClick"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -689,5 +695,6 @@ export default {
       :project-path="projectPath"
       @import="importCsv"
     />
+    <export-requirements-modal ref="exportModal" :requirement-count="11" email="foo@bar.com" />
   </div>
 </template>
