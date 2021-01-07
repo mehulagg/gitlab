@@ -19,7 +19,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       it 'is not visible' do
         render
 
-        expect(rendered).not_to have_text /Gold Trial – \d+ days left/
+        expect(rendered).not_to have_selector '#js-trial-status-widget'
       end
     end
 
@@ -29,7 +29,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       it 'is visible' do
         render
 
-        expect(rendered).to have_text 'Gold Trial – 15 days left'
+        expect(rendered).to have_selector '#js-trial-status-widget'
       end
     end
   end

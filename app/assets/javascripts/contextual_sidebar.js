@@ -4,6 +4,9 @@ import Cookies from 'js-cookie';
 import { GlBreakpointInstance as bp, breakpoints } from '@gitlab/ui/dist/utils';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
+// eslint-disable-next-line no-console
+console.log("→ → loaded contextual_sidebar.js");
+
 export const SIDEBAR_COLLAPSED_CLASS = 'js-sidebar-collapsed';
 
 export default class ContextualSidebar {
