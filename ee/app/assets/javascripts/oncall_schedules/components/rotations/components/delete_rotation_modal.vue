@@ -1,8 +1,9 @@
 <script>
+import { isEmpty } from 'lodash';
 import { GlSprintf, GlModal, GlAlert } from '@gitlab/ui';
-import destroyOncallRotationMutation from '../../../graphql/mutations/destroy_oncall_rotation.mutation.graphql';
-import getOncallSchedulesQuery from '../../../graphql/queries/get_oncall_schedules.query.graphql';
-import { updateStoreAfterRotationDelete } from '../../../utils/cache_updates';
+import destroyOncallRotationMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_rotation.mutation.graphql';
+import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
+import { updateStoreAfterRotationDelete } from 'ee/oncall_schedules/utils/cache_updates';
 import { s__, __ } from '~/locale';
 
 export const i18n = {
@@ -25,6 +26,8 @@ export default {
     rotation: {
       type: Object,
       required: true,
+      validator: (rotation) =>
+        isEmpty(rotation) || [rotation.id, rotation.name, rotation.startsAt].every(Boolean),
     },
     modalId: {
       type: String,

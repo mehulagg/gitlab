@@ -12,7 +12,7 @@ describe('CurrentDayIndicator', () => {
   // current indicator will be rendered
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
 
-  function mountComponent() {
+  function createComponent() {
     wrapper = shallowMount(CurrentDayIndicator, {
       propsData: {
         presetType: PRESET_TYPES.WEEKS,
@@ -22,13 +22,12 @@ describe('CurrentDayIndicator', () => {
   }
 
   beforeEach(() => {
-    mountComponent();
+    createComponent();
   });
 
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

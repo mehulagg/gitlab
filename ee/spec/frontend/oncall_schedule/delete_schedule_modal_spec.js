@@ -106,7 +106,6 @@ describe('DeleteScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete schedule modal layout', () => {

@@ -12,7 +12,7 @@ describe('TimelineSectionComponent', () => {
   const schedule =
     getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
-  function mountComponent({
+  function createComponent({
     presetType = PRESET_TYPES.WEEKS,
     timeframe = mockTimeframeWeeks,
   } = {}) {
@@ -26,12 +26,11 @@ describe('TimelineSectionComponent', () => {
   }
 
   beforeEach(() => {
-    mountComponent({});
+    createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders component container element with class `timeline-section`', () => {

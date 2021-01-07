@@ -47,7 +47,6 @@ describe('AddEditScheduleForm', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTimezoneDropdown = () => wrapper.find(GlDropdown);
