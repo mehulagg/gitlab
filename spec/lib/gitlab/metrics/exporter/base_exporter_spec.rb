@@ -115,6 +115,7 @@ RSpec.describe Gitlab::Metrics::Exporter::BaseExporter do
       Net::HTTP::Get | '/metrics' | 200
       Net::HTTP::Get | '/liveness' | 200
       Net::HTTP::Get | '/readiness' | 200
+      Net::HTTP::Get | '/system' | 200
       Net::HTTP::Get | '/' | 404
     end
 

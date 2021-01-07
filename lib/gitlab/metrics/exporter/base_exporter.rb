@@ -39,6 +39,7 @@ module Gitlab
           server.mount_proc '/liveness' do |req, res|
             render_probe(liveness_probe, req, res)
           end
+          server.mount_proc '/system', &method(:render_system_summary)
           server.mount '/', Rack::Handler::WEBrick, rack_app
 
           true
@@ -70,6 +71,12 @@ module Gitlab
             use ::Prometheus::Client::Rack::Exporter if ::Gitlab::Metrics.metrics_folder_present?
             run -> (env) { [404, {}, ['']] }
           end
+        end
+
+        def render_system_summary(req, res)
+          res.status = 200
+          res.content_type = 'application/json; charset=utf-8'
+          res.body = Gitlab::Metrics::System.summary.to_json
         end
 
         def readiness_probe
