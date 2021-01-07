@@ -15117,6 +15117,9 @@ msgstr ""
 msgid "Integrations|%{integration} settings saved, but not active."
 msgstr ""
 
+msgid "Integrations|Add namespace"
+msgstr ""
+
 msgid "Integrations|All details"
 msgstr ""
 
@@ -15156,10 +15159,16 @@ msgstr ""
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
 msgstr ""
 
+msgid "Integrations|Link namespaces"
+msgstr ""
+
 msgid "Integrations|Linked namespaces"
 msgstr ""
 
 msgid "Integrations|Namespaces are your GitLab groups and subgroups that will be linked to this Jira instance."
+msgstr ""
+
+msgid "Integrations|No available namespaces."
 msgstr ""
 
 msgid "Integrations|Projects using custom settings will not be affected."
@@ -15211,6 +15220,9 @@ msgid "Integrations|When a Jira issue is mentioned in a commit or merge request 
 msgstr ""
 
 msgid "Integrations|You can now close this window and return to the GitLab for Jira application."
+msgstr ""
+
+msgid "Integrations|You must have owner or maintainer permissions to link namespaces."
 msgstr ""
 
 msgid "Interactive mode"
