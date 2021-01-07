@@ -21,6 +21,11 @@ export default {
       type: Array,
       required: true,
     },
+    defaultLinkColor: {
+      type: String,
+      required: false,
+      default: 'gl-stroke-gray-200',
+    },
     highlightedJob: {
       type: String,
       required: false,
@@ -101,7 +106,7 @@ export default {
     },
     getLinkClasses(link) {
       return [
-        this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : 'gl-stroke-gray-200',
+        this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : this.defaultLinkColor,
         { 'gl-opacity-3': this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
       ];
     },

@@ -138,6 +138,7 @@ export default {
         :container-id="$options.CONTAINER_ID"
         :container-ref="$options.CONTAINER_REF"
         :highlighted-job="hoveredJobName"
+        default-link-color="gl-stroke-transparent"
       >
         <linked-graph-wrapper>
           <template #upstream>
