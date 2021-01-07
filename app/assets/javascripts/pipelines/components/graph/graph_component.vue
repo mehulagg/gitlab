@@ -52,7 +52,7 @@ export default {
   },
   i18n: {
     showLinksAnyways: __('Show links anyways'),
-    tooManyStages: __('This graph has a large number of stages and showing the links may be slow.')
+    tooManyStages: __('This graph has a large number of stages and showing the links may be slow.'),
   },
   computed: {
     downstreamPipelines() {
@@ -68,12 +68,12 @@ export default {
       return Boolean(this.pipeline?.upstream?.length > 0);
     },
     linkWrapper() {
-      return this.showLinkedLayers || this.showLinksOverride  ? 'links-layer' : 'div';
+      return this.showLinkedLayers || this.showLinksOverride ? 'links-layer' : 'div';
     },
     numStages() {
       return this.graph.reduce((acc, { groups }) => {
-        return acc + Number(groups.length)
-      }, 0)
+        return acc + Number(groups.length);
+      }, 0);
     },
     showAlert() {
       return !this.showLinkedLayers && !this.alertDismissed;
@@ -128,12 +128,13 @@ export default {
       {{ $options.i18n.tooManyStages }}
     </gl-alert>
     <div
-      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-py-5': !isLinkedPipeline }"
       :id="$options.CONTAINER_ID"
       :ref="$options.CONTAINER_REF"
+      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
+      :class="{ 'gl-py-5': !isLinkedPipeline }"
     >
-      <component :is='linkWrapper'
+      <component
+        :is="linkWrapper"
         :pipeline-data="graph"
         :container-id="$options.CONTAINER_ID"
         :container-ref="$options.CONTAINER_REF"

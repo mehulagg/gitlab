@@ -48,12 +48,6 @@ export default {
       return isEmpty(this.pipelineData);
     },
     highlightedJobs() {
-      // On first hover, generate the needs reference
-      if (!this.needsObject) {
-        const jobs = createJobsHash(this.pipelineData);
-        this.needsObject = generateJobNeedsDict(jobs) ?? {};
-      }
-
       // If you are hovering on a job, then the jobs we want to highlight are:
       // The job you are currently hovering + all of its needs.
       return this.hasHighlightedJob
@@ -77,6 +71,15 @@ export default {
     },
     viewBox() {
       return [0, 0, this.width, this.height];
+    },
+  },
+  watch: {
+    highlightedJob() {
+      // On first hover, generate the needs reference
+      if (!this.needsObject) {
+        const jobs = createJobsHash(this.pipelineData);
+        this.needsObject = generateJobNeedsDict(jobs) ?? {};
+      }
     },
   },
   mounted() {
@@ -116,11 +119,11 @@ export default {
 <template>
   <div class="gl-display-flex gl-relative">
     <svg
+      id="link-svg"
+      class="gl-absolute"
       :viewBox="viewBox"
       :width="`${width}px`"
       :height="`${height}px`"
-      class="gl-absolute"
-      id="link-svg"
     >
       <template>
         <path
