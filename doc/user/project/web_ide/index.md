@@ -47,7 +47,7 @@ the command without having to select it in the command palette.
 
 ## Syntax highlighting
 
-As expected from an IDE, syntax highlighting for many languages within
+As expected from an IDE, syntax highlighting for many languages in
 the Web IDE makes your direct editing even easier.
 
 The Web IDE currently provides:
@@ -180,7 +180,7 @@ The Web IDE currently supports the following `.editorconfig` settings:
 After making your changes, click the **Commit** button on the bottom-left to
 review the list of changed files.
 
-Once you have finalized your changes, you can add a commit message, commit the
+After you have finalized your changes, you can add a commit message, commit the
 changes and directly create a merge request. In case you don't have write
 access to the selected branch, you see a warning, but can still create
 a new branch and start a merge request.
@@ -268,7 +268,7 @@ GitLab.com
 
 ![Administrator Live Preview setting](img/admin_live_preview_v13_0.png)
 
-Once you have done that, you can preview projects with a `package.json` file and
+After you have done that, you can preview projects with a `package.json` file and
 a `main` entry point inside the Web IDE. An example `package.json` is shown
 below.
 
@@ -350,7 +350,7 @@ terminal:
     NODE_ENV: "test"
 ```
 
-Once the terminal has started, the console is displayed and we could access
+After the terminal has started, the console is displayed and we could access
 the project repository files.
 
 **Important**. The terminal job is branch dependent. This means that the
@@ -364,7 +364,7 @@ If there is no configuration file in a branch, an error message is shown.
 If Interactive Terminals are available for the current user, the **Terminal** button is visible in the right sidebar of the Web IDE. Click this button to open
 or close the terminal tab.
 
-Once open, the tab shows the **Start Web Terminal** button. This button may
+After opening, the tab shows the **Start Web Terminal** button. This button may
 be disabled if the environment is not configured correctly. If so, a status
 message describes the issue. Here are some reasons why **Start Web Terminal**
 may be disabled:
@@ -378,7 +378,7 @@ can be closed and reopened and the state of the terminal is not affected.
 
 When the terminal is started and is successfully connected to the runner, then the
 runner's shell prompt appears in the terminal. From here, you can enter
-commands executed within the runner's environment. This is similar
+commands executed in the runner's environment. This is similar
 to running commands in a local terminal or through SSH.
 
 While the terminal is running, it can be stopped by clicking **Stop Terminal**.
@@ -426,7 +426,7 @@ terminal:
   [predefined environment variable](../../../ci/variables/predefined_variables.md)
   for GitLab Runners. This is where your project's repository resides.
 
-Once you have configured the web terminal for file syncing, then when the web
+After you have configured the web terminal for file syncing, then when the web
 terminal is started, a **Terminal** status is visible in the status bar.
 
 ![Web IDE Client Side Evaluation](img/terminal_status.png)

@@ -105,8 +105,8 @@ to a certain context. For example:
 - A snippet with a `docker-compose.yml` file and its associated `.env` file.
 - A `gulpfile.js` file coupled with a `package.json` file, which together can be used to bootstrap a project and manage its dependencies.
 
-Snippets support between 1 and 10 files. They can be managed via Git (since they're [versioned](#versioned-snippets)
-by a Git repository), through the [Snippets API](../api/snippets.md), or within the GitLab UI.
+Snippets support between 1 and 10 files. They can be managed via Git (because they're [versioned](#versioned-snippets)
+by a Git repository), through the [Snippets API](../api/snippets.md), or in the GitLab UI.
 
 ![Multi-file Snippet](img/gitlab_snippet_v13_5.png)
 
@@ -139,7 +139,7 @@ master branch.
 
 ### Reduce snippets repository size
 
-Since versioned Snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
+Because versioned Snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
 it's recommended to keep snippets' repositories as compact as possible.
 
 For more information about tools to compact repositories,
@@ -207,7 +207,7 @@ To embed a snippet, first make sure that:
 - In **Project > Settings > Permissions**, the snippets permissions are
   set to **Everyone with access**
 
-Once the above conditions are met, the "Embed" section will appear in your
+After the above conditions are met, the "Embed" section will appear in your
 snippet where you can simply click on the "Copy" button. This copies a one-line
 script that you can add to any website or blog post.
 
