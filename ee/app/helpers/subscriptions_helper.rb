@@ -33,7 +33,6 @@ module SubscriptionsHelper
   def plans_data
     FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
-      # .map { |plan_data| (plan_data[:code] == ::Plan::BRONZE) ? plan_data.merge( :deprecated => true ) : plan_data }
       .reject { |plan_data| plan_data[:free] }
       .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated) }
   end
