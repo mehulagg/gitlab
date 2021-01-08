@@ -51,6 +51,9 @@ If the non-member then resolves this same response, this will resolve the discus
 The need to resolve all standard comments or threads prevents you from forgetting
 to address feedback and lets you hide threads that are no longer relevant.
 
+**Note** Resolving individual comments was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/28750)
+in GitLab 13.6.
+
 !["A thread between two people on a piece of code"](img/thread_view.png)
 
 ### Commit threads in the context of a merge request
