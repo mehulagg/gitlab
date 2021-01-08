@@ -1202,6 +1202,9 @@ msgstr ""
 msgid ":%{startLine} to %{endLine}"
 msgstr ""
 
+msgid "?search=%{user}"
+msgstr ""
+
 msgid "A %{incident_docs_start}modified issue%{incident_docs_end} to guide the resolution of incidents."
 msgstr ""
 
@@ -12384,6 +12387,12 @@ msgid "Footer message"
 msgstr ""
 
 msgid "For a faster browsing experience, some files are collapsed by default."
+msgstr ""
+
+msgid "For additional information, review your %{url} or contact your group administrator."
+msgstr ""
+
+msgid "For additional information, review your group membership: %{url} or contact your group administrator."
 msgstr ""
 
 msgid "For help setting up the Service Desk for your instance, please contact an administrator."
@@ -32125,7 +32134,10 @@ msgstr ""
 msgid "YouTube URL or ID"
 msgstr ""
 
-msgid "Your %{group} membership expiration date has changed."
+msgid "Your %{group} membership expiration date has been removed."
+msgstr ""
+
+msgid "Your %{group} membership will now expire in %{days} days."
 msgstr ""
 
 msgid "Your %{host} account was signed in to from a new location"
