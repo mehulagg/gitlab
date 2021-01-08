@@ -19,7 +19,7 @@ RSpec.describe Releases::ManageEvidenceWorker do
       let(:release) { create(:release, project: project, released_at: 1.hour.since) }
 
       it 'creates a new Evidence record', :sidekiq_inline do
-        expect_next_instance_of(::Releases::CreateEvidenceService, release, { pipeline: nil }) do |service|
+        expect_next_instance_of(::Releases::CreateEvidenceService, release, pipeline: nil) do |service|
           expect(service).to receive(:execute).and_call_original
         end
 
