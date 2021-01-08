@@ -839,18 +839,23 @@ understand the implications.
 
 WARNING:
 This is a destructive operation.
-Please check [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) before continuing:
-When running `registry-garbage-collect` with the -m flag, garbage collection unlinks manifests that are part of a manifest list, unless they're tagged in the same repository. 
-Workaround:
-Instead of:
+
+When you run `registry-garbage-collect` with the -m flag, garbage collection unlinks manifests that
+are part of a multi-arch manifest, unless they're tagged in the same repository.
+See [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) for details.
+
+To work around this issue, instead of:
+
 ```
-myrepo/manifestlist:latest
+myrepo/multiarchmanifest:latest
 myrepo/manifest/amd-64:latest
 myrepo/manifest/arm:latest
 ```
+
 Use:
+
 ```
-myrepo/manifestlist:latest
+myrepo/multiarchmanifest:latest
 myrepo/manifest:amd-64-latest
 myrepo/manifest:arm-latest
 ```
