@@ -52,6 +52,7 @@ export default {
       rules: {},
       globalEditor: null,
       modelManager: new ModelManager(),
+      isEditorLoading: true,
     };
   },
   computed: {
@@ -138,6 +139,7 @@ export default {
 
       // Compare key to allow for files opened in review mode to be cached differently
       if (oldVal.key !== this.file.key) {
+        this.isEditorLoading = true;
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
@@ -155,6 +157,7 @@ export default {
       }
     },
     viewer() {
+      this.isEditorLoading = false;
       if (!this.file.pending) {
         this.createEditorInstance();
       }
@@ -315,6 +318,8 @@ export default {
         this.file.staged && this.file.key.indexOf('unstaged-') === 0 ? head : null,
       );
 
+      this.isEditorLoading = false;
+
       if (this.viewer === viewerTypes.mr && this.file.mrChange) {
         this.editor.attachMergeRequestModel(this.model);
       } else {
@@ -463,6 +468,7 @@ export default {
       }"
       class="multi-file-editor-holder"
       data-qa-selector="editor_container"
+      :data-editor-loading="isEditorLoading"
       @focusout="triggerFilesChange"
     ></div>
     <content-viewer
