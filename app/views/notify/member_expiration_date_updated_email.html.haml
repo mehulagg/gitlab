@@ -1,2 +1,4 @@
 = email_default_heading(say_hi(@member.user))
 
+%p
+  = _('Your %{group} membership expiration date has changed.') % { group: @member_source.human_name }
