@@ -6,7 +6,10 @@ require 'webmock/rspec'
 def webmock_allowed_hosts
   %w[elasticsearch registry.gitlab.com-gitlab-org-test-elastic-image].tap do |hosts|
     if ENV.key?('ELASTIC_URL')
-      hosts << URI.parse(ENV['ELASTIC_URL']).host
+      elastic_url = ENV['ELASTIC_URL']
+      if elastic_url =~ URI::regexp
+        hosts << elastic_url
+      end
     end
 
     if Gitlab.config.webpack&.dev_server&.enabled
