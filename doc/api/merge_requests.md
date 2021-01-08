@@ -1010,6 +1010,7 @@ POST /projects/:id/merge_requests
 | `title`                    | string  | yes      | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | Assignee user ID.                                                                |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) to review the MR. Set to `0` or provide an empty value to unassign all reviewers.  |
 | `description`              | string  | no       | Description of MR. Limited to 1,048,576 characters. |
 | `target_project_id`        | integer | no       | The target project (numeric ID).                                                 |
 | `labels`                   | string  | no       | Labels for MR as a comma-separated list.                                         |
@@ -1158,6 +1159,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid
 | `title`                    | string  | no       | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | The ID of the user to assign the merge request to. Set to `0` or provide an empty value to unassign all assignees.  |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) to review the MR. Set to `0` or provide an empty value to unassign all reviewers.  |
 | `milestone_id`             | integer | no       | The global ID of a milestone to assign the merge request to. Set to `0` or provide an empty value to unassign a milestone.|
 | `labels`                   | string  | no       | Comma-separated label names for a merge request. Set to an empty string to unassign all labels.                    |
 | `add_labels`               | string  | no       | Comma-separated label names to add to a merge request.                          |
