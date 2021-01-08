@@ -53,7 +53,7 @@ groups:
    - [Label](../project/labels.md)
    - My-reaction
    - Confidential
-   - Epic ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in GitLab 12.9),
+   - [Epic and child Epic](../group/epics/index.md) (available only for the group the Epic was created, not for [higher group levels](https://gitlab.com/gitlab-org/gitlab/-/issues/233729)).
      including [child epic](../group/epics/index.md#multi-level-child-epics)
      ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in
      [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.0)
