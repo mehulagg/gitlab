@@ -298,6 +298,15 @@ describe('DevopsAdoptionSegmentModal', () => {
         it('closes the modal after a successful mutation', async () => {
           expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
         });
+
+        it('resets the form fields', async () => {
+          const name = segment ? 'Segment 1' : '';
+          const checkboxValues = segment ? [1] : [];
+
+          expect(wrapper.vm.name).toBe(name);
+          expect(wrapper.vm.checkboxValues).toEqual(checkboxValues);
+          expect(wrapper.vm.filter).toBe('');
+        });
       });
 
       describe('error handling', () => {

@@ -12,7 +12,7 @@ describe('RotationsListSectionComponent', () => {
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 
-  function mountComponent({
+  function createComponent({
     presetType = PRESET_TYPES.WEEKS,
     timeframe = mockTimeframeWeeks,
   } = {}) {
@@ -29,13 +29,12 @@ describe('RotationsListSectionComponent', () => {
   }
 
   beforeEach(() => {
-    mountComponent();
+    createComponent();
   });
 
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

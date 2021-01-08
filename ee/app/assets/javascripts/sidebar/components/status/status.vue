@@ -26,6 +26,11 @@ export default {
   },
   mixins: [Tracking.mixin()],
   props: {
+    isOpen: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isEditable: {
       type: Boolean,
       required: false,
@@ -74,7 +79,7 @@ export default {
       };
     },
     editTooltip() {
-      const tooltipText = !this.isEditable
+      const tooltipText = !this.isOpen
         ? s__('Health status cannot be edited because this issue is closed')
         : '';
 
@@ -147,12 +152,17 @@ export default {
     <div class="hide-collapsed">
       <p class="title gl-display-flex justify-content-between">
         <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
-        <span v-gl-tooltip.topleft="editTooltip" data-testid="editButtonTooltip" tabindex="0">
+        <span
+          v-if="isEditable"
+          v-gl-tooltip.topleft="editTooltip"
+          data-testid="editButtonTooltip"
+          tabindex="0"
+        >
           <gl-button
             ref="editButton"
             variant="link"
             class="edit-link btn-link-hover gl-text-black-normal!"
-            :disabled="!isEditable"
+            :disabled="!isOpen"
             @click.stop="toggleFormDropdown"
             @keydown.esc="hideDropdown"
           >

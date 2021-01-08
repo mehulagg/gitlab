@@ -12,7 +12,8 @@ For a full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
 > - **Supported users (approximate):** 2,000
-> - **High Availability:** No
+> - **High Availability:** No. For a highly-available environment, you can
+>   follow the [3K reference architecture](3k_users.md).
 > - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
@@ -271,7 +272,7 @@ further configuration steps.
    ```ruby
    # Disable all components except PostgreSQL
    roles ['postgres_role']
-   repmgr['enable'] = false
+   patroni['enable'] = false
    consul['enable'] = false
    prometheus['enable'] = false
    alertmanager['enable'] = false

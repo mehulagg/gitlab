@@ -9,6 +9,7 @@ import ResolutionAlert from 'ee/vulnerabilities/components/resolution_alert.vue'
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import VulnerabilityStateDropdown from 'ee/vulnerabilities/components/vulnerability_state_dropdown.vue';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
+import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
 import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -415,6 +416,65 @@ describe('Vulnerability Header', () => {
       return waitForPromises().then(() => {
         expect(mockAxios.history.get).toHaveLength(1);
         expect(findStatusDescription().props('isLoadingUser')).toBe(false);
+      });
+    });
+  });
+
+  describe('refresh vulnerability', () => {
+    describe('on success', () => {
+      beforeEach(() => {
+        const apolloProvider = createApolloProvider([
+          fetchHeaderVulnerabilityQuery,
+          jest.fn().mockResolvedValue({
+            data: {
+              errors: [],
+              vulnerability: {
+                id: 'gid://gitlab/Vulnerability/54',
+                [`resolvedAt`]: '2020-09-16T11:13:26Z',
+                state: 'RESOLVED',
+              },
+            },
+          }),
+        ]);
+
+        createWrapper({
+          apolloProvider,
+          vulnerability: getVulnerability({}),
+        });
+      });
+
+      it('fetches the vulnerability when refreshVulnerability method is called', async () => {
+        expect(findBadge().text()).toBe('detected');
+        wrapper.vm.refreshVulnerability();
+        await waitForPromises();
+        expect(findBadge().text()).toBe('resolved');
+      });
+    });
+
+    describe('on failure', () => {
+      beforeEach(() => {
+        const apolloProvider = createApolloProvider([
+          fetchHeaderVulnerabilityQuery,
+          jest.fn().mockRejectedValue({
+            data: {
+              errors: [{ message: 'something went wrong while fetching the vulnerability' }],
+              vulnerability: null,
+            },
+          }),
+        ]);
+
+        createWrapper({
+          apolloProvider,
+          vulnerability: getVulnerability({}),
+        });
+      });
+
+      it('calls createFlash', async () => {
+        expect(findBadge().text()).toBe('detected');
+        wrapper.vm.refreshVulnerability();
+        await waitForPromises();
+        expect(findBadge().text()).toBe('detected');
+        expect(createFlash).toHaveBeenCalledTimes(1);
       });
     });
   });

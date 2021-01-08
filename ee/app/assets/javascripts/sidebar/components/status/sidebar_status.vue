@@ -36,7 +36,8 @@ export default {
 
 <template>
   <status
-    :is-editable="mediator.store.editable && isOpen"
+    :is-open="isOpen"
+    :is-editable="mediator.store.editable"
     :is-fetching="mediator.store.isFetching.status"
     :status="mediator.store.status"
     @onDropdownClick="handleDropdownClick"

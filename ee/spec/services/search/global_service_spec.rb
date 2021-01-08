@@ -112,13 +112,20 @@ RSpec.describe Search::GlobalService do
       # finished we need a test to verify the old style searches work for
       # instances which haven't finished the migration yet
       context 'when add_new_data_to_issues_documents migration is not finished' do
-        let!(:issue) { create :issue, project: project }
-
         before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
           allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
             .with(:add_new_data_to_issues_documents)
             .and_return(false)
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+            .with(:migrate_issues_to_separate_index)
+            .and_return(false)
         end
+
+        # issue cannot be defined prior to the migration mocks because it
+        # will cause the incorrect value to be passed to `use_separate_indices` when creating
+        # the proxy
+        let!(:issue) { create(:issue, project: project) }
 
         where(:project_level, :feature_access_level, :membership, :admin_mode, :expected_count) do
           permission_table_for_guest_feature_access
@@ -158,6 +165,11 @@ RSpec.describe Search::GlobalService do
         let(:search_url) { Addressable::Template.new("#{es_host}/{index}/doc/_search{?params*}") }
 
         before do
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?).and_call_original
+          allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
+            .with(:migrate_issues_to_separate_index)
+            .and_return(false)
+
           ensure_elasticsearch_index!
         end
 

@@ -53,8 +53,11 @@ export default {
     },
     cancelOptions() {
       return {
-        text: this.$options.i18n.cancel,
-        attributes: [{ disabled: this.loading }],
+        button: {
+          text: this.$options.i18n.cancel,
+          attributes: [{ disabled: this.loading }],
+        },
+        callback: this.resetForm,
       };
     },
     primaryOptions() {
@@ -115,6 +118,7 @@ export default {
         if (errors.length) {
           this.errors = errors;
         } else {
+          this.resetForm();
           this.closeModal();
         }
       } catch (error) {
@@ -161,6 +165,11 @@ export default {
     checkboxValuesFromSegment() {
       return this.segment.groups.map(({ id }) => getIdFromGraphQLId(id));
     },
+    resetForm() {
+      this.name = this.segment?.name || '';
+      this.checkboxValues = this.segment ? this.checkboxValuesFromSegment() : [];
+      this.filter = '';
+    },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
 };
@@ -173,8 +182,10 @@ export default {
     size="sm"
     scrollable
     :action-primary="primaryOptions.button"
-    :action-cancel="cancelOptions"
+    :action-cancel="cancelOptions.button"
     @primary.prevent="primaryOptions.callback"
+    @canceled="cancelOptions.callback"
+    @hide="resetForm"
   >
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}

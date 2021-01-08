@@ -1,6 +1,15 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlAlert, GlEmptyState, GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlEmptyState,
+  GlIcon,
+  GlLink,
+  GlPopover,
+  GlSprintf,
+  GlTabs,
+  GlTab,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -17,6 +26,7 @@ export default {
     GlIcon,
     GlLink,
     GlPopover,
+    GlSprintf,
     GlTabs,
     GlTab,
     Alerts,
@@ -114,7 +124,7 @@ export default {
   ),
   emptyStateDescription: s__(
     `ThreatMonitoring|To view this data, ensure you have configured an environment
-    for this project and that at least one threat monitoring feature is enabled.`,
+    for this project and that at least one threat monitoring feature is enabled. %{linkStart}More information%{linkEnd}`,
   ),
   alertText: s__(
     `ThreatMonitoring|The graph below is an overview of traffic coming to your
@@ -132,11 +142,16 @@ export default {
     v-if="!isSetUpMaybe"
     ref="emptyState"
     :title="s__('ThreatMonitoring|No environments detected')"
-    :description="$options.emptyStateDescription"
     :svg-path="emptyStateSvgPath"
-    :primary-button-link="documentationPath"
-    :primary-button-text="__('More information')"
-  />
+  >
+    <template #description>
+      <gl-sprintf :message="$options.emptyStateDescription">
+        <template #link="{ content }">
+          <gl-link :href="documentationPath" target="_blank">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </template>
+  </gl-empty-state>
 
   <section v-else>
     <gl-alert

@@ -3,6 +3,8 @@
 class Elastic::ReindexingTask < ApplicationRecord
   self.table_name = 'elastic_reindexing_tasks'
 
+  has_many :subtasks, class_name: 'Elastic::ReindexingSubtask', foreign_key: :elastic_reindexing_task_id
+
   enum state: {
     initial:                0,
     indexing_paused:        1,
@@ -27,8 +29,9 @@ class Elastic::ReindexingTask < ApplicationRecord
 
   def self.drop_old_indices!
     old_indices_to_be_deleted.find_each do |task|
-      next unless Gitlab::Elastic::Helper.default.delete_index(index_name: task.index_name_from)
-
+      task.subtasks.each do |subtask|
+        Gitlab::Elastic::Helper.default.delete_index(index_name: subtask.index_name_from)
+      end
       task.update!(state: :original_index_deleted)
     end
   end

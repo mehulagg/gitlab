@@ -44,6 +44,45 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
         end
       end
 
+      context 'migration is halted' do
+        before do
+          allow(Gitlab::CurrentSettings).to receive(:elasticsearch_pause_indexing?).and_return(true)
+          allow(subject).to receive(:current_migration).and_return(migration)
+          allow(migration).to receive(:pause_indexing?).and_return(true)
+          allow(migration).to receive(:halted?).and_return(true)
+        end
+
+        it 'skips execution' do
+          expect(migration).not_to receive(:migrate)
+
+          subject.perform
+        end
+
+        context 'pause indexing is not allowed' do
+          before do
+            migration.save_state!(pause_indexing: false)
+          end
+
+          it 'does not unpauses indexing' do
+            expect(Gitlab::CurrentSettings).not_to receive(:update!)
+
+            subject.perform
+          end
+        end
+
+        context 'pause indexing is allowed' do
+          before do
+            migration.save_state!(pause_indexing: true)
+          end
+
+          it 'unpauses indexing' do
+            expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
+
+            subject.perform
+          end
+        end
+      end
+
       context 'migration process' do
         before do
           allow(migration).to receive(:persisted?).and_return(persisted)
@@ -89,6 +128,29 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
             end
 
             subject.perform
+          end
+        end
+
+        context 'indexing pause' do
+          before do
+            allow(migration).to receive(:pause_indexing?).and_return(true)
+          end
+
+          let(:batched) { true }
+
+          where(:persisted, :completed, :expected) do
+            false | false | false
+            true  | false | false
+            true  | true  | true
+          end
+
+          with_them do
+            it 'pauses and unpauses indexing' do
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: true)
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false) if expected
+
+              subject.perform
+            end
           end
         end
       end

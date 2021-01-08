@@ -8,7 +8,6 @@ import ArtifactDownload from './components/artifact_download.vue';
 import { LOADING } from '~/reports/constants';
 import { securityReportTypeEnumToReportType } from './constants';
 import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
@@ -50,7 +49,7 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, vulnerabilityModalMixin(), glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin, vulnerabilityModalMixin()],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -295,8 +294,7 @@ export default {
       return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
-      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
-      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
+      return this.enabledReports.coverageFuzzing;
     },
     hasSastReports() {
       return this.enabledReports.sast;

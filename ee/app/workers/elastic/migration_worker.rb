@@ -29,11 +29,20 @@ module Elastic
           helper.create_migrations_index
         end
 
+        if migration.halted?
+          logger.info "MigrationWorker: migration[#{migration.name}] has been halted. All future migrations will be halted because of that. Exiting"
+          unpause_indexing!(migration)
+
+          break false
+        end
+
         execute_migration(migration)
 
         completed = migration.completed?
         logger.info "MigrationWorker: migration[#{migration.name}] updating with completed: #{completed}"
         migration.save!(completed: completed)
+
+        unpause_indexing!(migration) if completed
 
         Elastic::DataMigrationService.drop_migration_has_finished_cache!(migration)
       end
@@ -45,6 +54,8 @@ module Elastic
       if migration.persisted? && !migration.batched?
         logger.info "MigrationWorker: migration[#{migration.name}] did not execute migrate method since it was already executed. Waiting for migration to complete"
       else
+        pause_indexing!(migration)
+
         logger.info "MigrationWorker: migration[#{migration.name}] executing migrate method"
         migration.migrate
 
@@ -59,6 +70,27 @@ module Elastic
       completed_migrations = Elastic::MigrationRecord.persisted_versions(completed: true)
 
       Elastic::DataMigrationService.migrations.find { |migration| !completed_migrations.include?(migration.version) }
+    end
+
+    def pause_indexing!(migration)
+      return unless migration.pause_indexing?
+      return if migration.load_state[:pause_indexing].present?
+
+      pause_indexing = !Gitlab::CurrentSettings.elasticsearch_pause_indexing?
+      migration.save_state!(pause_indexing: pause_indexing)
+
+      if pause_indexing
+        logger.info 'MigrationWorker: Pausing indexing'
+        Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: true)
+      end
+    end
+
+    def unpause_indexing!(migration)
+      return unless migration.pause_indexing?
+      return unless migration.load_state[:pause_indexing]
+
+      logger.info 'MigrationWorker: unpausing indexing'
+      Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: false)
     end
 
     def helper

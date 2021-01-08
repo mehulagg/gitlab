@@ -3,7 +3,7 @@
 module Mutations
   module DastScannerProfiles
     class Delete < BaseMutation
-      include AuthorizesProject
+      include FindsProject
 
       graphql_name 'DastScannerProfileDelete'
 
@@ -24,7 +24,7 @@ module Mutations
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
         id = ScannerProfileID.coerce_isolated_input(id)
 
-        project = authorized_find_project!(full_path: full_path)
+        project = authorized_find!(full_path)
 
         service = ::DastScannerProfiles::DestroyService.new(project, current_user)
         result = service.execute(id: id.model_id)

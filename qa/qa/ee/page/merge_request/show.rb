@@ -128,7 +128,7 @@ module QA
             end
 
             wait_until(reload: false) do
-              find_element(:vulnerability_modal_content)[:class].include? 'show'
+              find_element(:vulnerability_modal_content)
             end
           end
 

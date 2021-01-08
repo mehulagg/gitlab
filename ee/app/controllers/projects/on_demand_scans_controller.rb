@@ -22,6 +22,13 @@ module Projects
 
     def edit
       not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
+      @dast_scan = {
+        id: 1,
+        name: "My saved DAST scan",
+        description: "My scan's description",
+        scannerProfileId: "gid://gitlab/DastScannerProfile/5",
+        siteProfileId: "gid://gitlab/DastSiteProfile/15"
+      }
     end
   end
 end

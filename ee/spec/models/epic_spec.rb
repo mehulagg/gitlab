@@ -19,7 +19,8 @@ RSpec.describe Epic do
     it { is_expected.to have_many(:epic_issues) }
     it { is_expected.to have_many(:children) }
     it { is_expected.to have_many(:user_mentions).class_name('EpicUserMention') }
-    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
+    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference').inverse_of(:epic) }
+    it { is_expected.to have_many(:epic_board_positions).class_name('Boards::EpicBoardPosition').inverse_of(:epic_board) }
   end
 
   describe 'scopes' do
@@ -43,6 +44,21 @@ RSpec.describe Epic do
         create(:epic, confidential: true)
 
         expect(described_class.not_confidential_or_in_groups(group)).to match_array([confidential_epic, public_epic])
+      end
+    end
+
+    describe '.order_relative_position_on_board' do
+      let_it_be(:board) { create(:epic_board) }
+      let_it_be(:epic1) { create(:epic) }
+      let_it_be(:epic2) { create(:epic) }
+      let_it_be(:epic3) { create(:epic) }
+
+      it 'returns epics ordered by position on the board, null last' do
+        create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10)
+        create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20)
+        create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20)
+
+        expect(described_class.order_relative_position_on_board(board.id)).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
       end
     end
   end

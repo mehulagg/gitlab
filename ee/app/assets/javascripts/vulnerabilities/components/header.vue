@@ -1,8 +1,7 @@
 <script>
 import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
-import Api from 'ee/api';
-import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
 import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import axios from '~/lib/utils/axios_utils';
 import download from '~/lib/utils/downloader';
@@ -14,9 +13,13 @@ import UsersCache from '~/lib/utils/users_cache';
 import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
-import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
-
-const gidPrefix = 'gid://gitlab/Vulnerability/';
+import { normalizeGraphQLVulnerability } from '../helpers';
+import {
+  VULNERABILITY_STATE_OBJECTS,
+  FEEDBACK_TYPES,
+  HEADER_ACTION_BUTTONS,
+  gidPrefix,
+} from '../constants';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -47,7 +50,7 @@ export default {
       // prop leading to an error in the footer component.
       vulnerability: { ...this.initialVulnerability },
       user: undefined,
-      refreshVulnerabilitySource: undefined,
+      shouldRefreshVulnerability: false,
     };
   },
 
@@ -55,6 +58,38 @@ export default {
     confirmed: 'danger',
     resolved: 'success',
     detected: 'warning',
+  },
+
+  apollo: {
+    vulnerability: {
+      query: fetchHeaderVulnerabilityQuery,
+      manual: true,
+      fetchPolicy: 'no-cache',
+      variables() {
+        return {
+          id: `${gidPrefix}${this.vulnerability.id}`,
+        };
+      },
+      result({ data: { vulnerability } }) {
+        this.shouldRefreshVulnerability = false;
+        this.isLoadingVulnerability = false;
+
+        this.vulnerability = {
+          ...this.vulnerability,
+          ...normalizeGraphQLVulnerability(vulnerability),
+        };
+      },
+      error() {
+        createFlash(
+          s__(
+            'VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later.',
+          ),
+        );
+      },
+      skip() {
+        return !this.shouldRefreshVulnerability;
+      },
+    },
   },
 
   computed: {
@@ -144,13 +179,10 @@ export default {
           variables: { id: `${gidPrefix}${this.vulnerability.id}`, ...payload },
         });
         const [queryName] = Object.keys(data);
-        const { vulnerability } = data[queryName];
-        vulnerability.id = vulnerability.id.replace(gidPrefix, '');
-        vulnerability.state = vulnerability.state.toLowerCase();
 
         this.vulnerability = {
           ...this.vulnerability,
-          ...vulnerability,
+          ...normalizeGraphQLVulnerability(data[queryName].vulnerability),
         };
 
         this.$emit('vulnerability-state-change');
@@ -207,34 +239,7 @@ export default {
     },
     refreshVulnerability() {
       this.isLoadingVulnerability = true;
-
-      // Cancel any pending API requests.
-      if (this.refreshVulnerabilitySource) {
-        this.refreshVulnerabilitySource.cancel();
-      }
-
-      this.refreshVulnerabilitySource = CancelToken.source();
-
-      Api.fetchVulnerability(this.vulnerability.id, {
-        cancelToken: this.refreshVulnerabilitySource.token,
-      })
-        .then(({ data }) => {
-          Object.assign(this.vulnerability, data);
-        })
-        .catch((e) => {
-          // Don't show an error message if the request was cancelled through the cancel token.
-          if (!axios.isCancel(e)) {
-            createFlash(
-              s__(
-                'VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later.',
-              ),
-            );
-          }
-        })
-        .finally(() => {
-          this.isLoadingVulnerability = false;
-          this.refreshVulnerabilitySource = undefined;
-        });
+      this.shouldRefreshVulnerability = true;
     },
   },
 };

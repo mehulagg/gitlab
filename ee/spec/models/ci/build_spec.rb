@@ -578,7 +578,7 @@ RSpec.describe Ci::Build do
           it 'tracks unique users' do
             ci_build = build(:ci_build, secrets: valid_secrets)
 
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(ci_build.user_id, 'i_ci_secrets_management_vault_build_created')
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with('i_ci_secrets_management_vault_build_created', values: ci_build.user_id)
 
             ci_build.save!
           end

@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :elastic do
-    desc "GitLab | Elasticsearch | Index eveything at once"
+    desc "GitLab | Elasticsearch | Index everything at once"
     task :index do
       # UPDATE_INDEX=true can cause some projects not to be indexed properly if someone were to push a commit to the
       # project before the rake task could get to it, so we set it to `nil` here to avoid that. It doesn't make sense
@@ -57,7 +57,7 @@ namespace :gitlab do
       logger.info("Indexing snippets... " + "done".color(:green))
     end
 
-    desc "GitLab | Elasticsearch | Create empty index and assign alias"
+    desc "GitLab | Elasticsearch | Create empty indexes and assigns an alias for each"
     task :create_empty_index, [:target_name] => [:environment] do |t, args|
       with_alias = ENV["SKIP_ALIAS"].nil?
       options = {}
@@ -68,14 +68,25 @@ namespace :gitlab do
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
 
-      helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
-      ::Elastic::DataMigrationService.mark_all_as_completed!
+      # with_alias is used to support interacting with a specific index (such as when reclaiming the production index
+      # name when the index was created prior to 13.0). If the `SKIP_ALIAS` environment variable is set,
+      # do not create standalone indexes and do not create the migrations index
+      if with_alias
+        standalone_index_names = helper.create_standalone_indices(options: options)
+        standalone_index_names.each do |index_name, alias_name|
+          puts "Index '#{index_name}' has been created.".color(:green)
+          puts "Alias '#{alias_name}' -> '#{index_name}' has been created.".color(:green)
+        end
+
+        helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
+        ::Elastic::DataMigrationService.mark_all_as_completed!
+      end
 
       puts "Index '#{index_name}' has been created.".color(:green)
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
 
-    desc "GitLab | Elasticsearch | Delete index"
+    desc "GitLab | Elasticsearch | Delete all indexes"
     task :delete_index, [:target_name] => [:environment] do |t, args|
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
 
@@ -84,9 +95,18 @@ namespace :gitlab do
       else
         puts "Index/alias '#{helper.target_name}' was not found".color(:green)
       end
+
+      results = helper.delete_standalone_indices
+      results.each do |index_name, alias_name, result|
+        if result
+          puts "Index '#{index_name}' with alias '#{alias_name}' has been deleted".color(:green)
+        else
+          puts "Index '#{index_name}' with alias '#{alias_name}' was not found".color(:green)
+        end
+      end
     end
 
-    desc "GitLab | Elasticsearch | Recreate index"
+    desc "GitLab | Elasticsearch | Recreate indexes"
     task :recreate_index, [:target_name] => [:environment] do |t, args|
       Rake::Task["gitlab:elastic:delete_index"].invoke(*args)
       Rake::Task["gitlab:elastic:create_empty_index"].invoke(*args)

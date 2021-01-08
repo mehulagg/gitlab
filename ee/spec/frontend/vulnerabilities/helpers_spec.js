@@ -1,4 +1,8 @@
-import { getFormattedIssue, getAddRelatedIssueRequestParams } from 'ee/vulnerabilities/helpers';
+import {
+  getFormattedIssue,
+  getAddRelatedIssueRequestParams,
+  normalizeGraphQLVulnerability,
+} from 'ee/vulnerabilities/helpers';
 
 describe('Vulnerabilities helpers', () => {
   describe('getFormattedIssue', () => {
@@ -36,5 +40,29 @@ describe('Vulnerabilities helpers', () => {
         expect(params).toMatchObject({ target_issue_iid, target_project_id });
       },
     );
+  });
+
+  describe('normalizeGraphQLVulnerability', () => {
+    it('returns null when vulnerability is null', () => {
+      expect(normalizeGraphQLVulnerability(null)).toBe(null);
+    });
+
+    it('normalizes the GraphQL response when the vulnerability is not null', () => {
+      expect(
+        normalizeGraphQLVulnerability({
+          confirmedBy: { id: 'gid://gitlab/User/16' },
+          resolvedBy: { id: 'gid://gitlab/User/16' },
+          dismissedBy: { id: 'gid://gitlab/User/16' },
+          state: 'DISMISSED',
+          id: 'gid://gitlab/Vulnerability/54',
+        }),
+      ).toEqual({
+        confirmedById: '16',
+        resolvedById: '16',
+        dismissedById: '16',
+        state: 'dismissed',
+        id: '54',
+      });
+    });
   });
 });

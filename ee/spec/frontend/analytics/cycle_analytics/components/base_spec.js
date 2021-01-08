@@ -50,7 +50,6 @@ const defaultStubs = {
 const defaultFeatureFlags = {
   hasDurationChart: true,
   hasPathNavigation: false,
-  hasCreateMultipleValueStreams: false,
 };
 
 const [selectedValueStream] = mockData.valueStreams;
@@ -88,6 +87,9 @@ function mockRequiredRoutes(mockAdapter) {
     .onGet(mockData.endpoints.durationData)
     .reply(httpStatusCodes.OK, mockData.customizableStagesAndEvents.stages);
   mockAdapter.onGet(mockData.endpoints.stageMedian).reply(httpStatusCodes.OK, { value: null });
+  mockAdapter
+    .onGet(mockData.endpoints.valueStreamData)
+    .reply(httpStatusCodes.OK, mockData.valueStreams);
 }
 
 async function shouldMergeUrlParams(wrapper, result) {
@@ -110,7 +112,6 @@ describe('Value Stream Analytics component', () => {
       },
       shallow = true,
       withStageSelected = false,
-      withValueStreamSelected = true,
       featureFlags = {},
       initialState = initialCycleAnalyticsState,
       props = {},
@@ -138,10 +139,6 @@ describe('Value Stream Analytics component', () => {
       mocks,
       ...opts,
     });
-
-    if (withValueStreamSelected) {
-      await store.dispatch('receiveValueStreamsSuccess', mockData.valueStreams);
-    }
 
     if (withStageSelected) {
       await Promise.all([
@@ -316,7 +313,6 @@ describe('Value Stream Analytics component', () => {
       describe('enabled', () => {
         beforeEach(async () => {
           wrapper = await createComponent({
-            withValueStreamSelected: false,
             withStageSelected: true,
             pathNavigationEnabled: true,
           });
@@ -372,25 +368,8 @@ describe('Value Stream Analytics component', () => {
       );
     });
 
-    describe('hasCreateMultipleValueStreams = true', () => {
-      beforeEach(() => {
-        mock = new MockAdapter(axios);
-        mockRequiredRoutes(mock);
-      });
-
-      it('hides the value stream select component', () => {
-        displaysValueStreamSelect(false);
-      });
-
-      it('displays the value stream select component', async () => {
-        wrapper = await createComponent({
-          featureFlags: {
-            hasCreateMultipleValueStreams: true,
-          },
-        });
-
-        displaysValueStreamSelect(true);
-      });
+    it('displays the value stream select component', () => {
+      displaysValueStreamSelect(true);
     });
 
     it('displays the date range picker', () => {
@@ -480,7 +459,6 @@ describe('Value Stream Analytics component', () => {
               StageNavItem,
             },
           },
-          withValueStreamSelected: false,
           withStageSelected: true,
         });
       });

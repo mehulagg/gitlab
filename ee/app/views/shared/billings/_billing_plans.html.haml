@@ -5,7 +5,7 @@
   = render 'shared/billings/billing_plan_header', namespace: namespace, plan: current_plan
 
 - if show_plans?(namespace)
-  - plans = available_plans(plans_data, current_plan)
+  - plans = billing_available_plans(plans_data, current_plan)
 
   .billing-plans.gl-mt-5.row.justify-content-center
     - plans.each do |plan|

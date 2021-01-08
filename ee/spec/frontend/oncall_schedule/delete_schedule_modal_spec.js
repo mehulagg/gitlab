@@ -22,8 +22,6 @@ const mockHideModal = jest.fn();
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
-localVue.use(VueApollo);
-
 describe('DeleteScheduleModal', () => {
   let wrapper;
   let fakeApollo;
@@ -40,9 +38,6 @@ describe('DeleteScheduleModal', () => {
   }
 
   async function destroySchedule(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
@@ -111,7 +106,6 @@ describe('DeleteScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete schedule modal layout', () => {

@@ -154,6 +154,7 @@ export const receiveGroupStagesError = ({ commit }, error) => {
 
 export const setDefaultSelectedStage = ({ dispatch, getters }) => {
   const { activeStages = [] } = getters;
+
   if (activeStages?.length) {
     const [firstActiveStage] = activeStages;
     return Promise.all([
@@ -168,6 +169,7 @@ export const setDefaultSelectedStage = ({ dispatch, getters }) => {
 
 export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
+
   return dispatch('setDefaultSelectedStage');
 };
 
@@ -389,26 +391,20 @@ export const receiveValueStreamsSuccess = (
   return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
-export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
-  const {
-    featureFlags: { hasCreateMultipleValueStreams = false },
-  } = state;
+export const fetchValueStreams = ({ commit, dispatch, getters }) => {
   const { currentGroupPath } = getters;
 
-  if (hasCreateMultipleValueStreams) {
-    commit(types.REQUEST_VALUE_STREAMS);
+  commit(types.REQUEST_VALUE_STREAMS);
 
-    return Api.cycleAnalyticsValueStreams(currentGroupPath)
-      .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
-      .catch((error) => {
-        const {
-          response: { status },
-        } = error;
-        commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
-        throw error;
-      });
-  }
-  return dispatch(FETCH_VALUE_STREAM_DATA);
+  return Api.cycleAnalyticsValueStreams(currentGroupPath)
+    .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
+    .catch((error) => {
+      const {
+        response: { status },
+      } = error;
+      commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
+      throw error;
+    });
 };
 
 export const setFilters = ({ dispatch }) => {

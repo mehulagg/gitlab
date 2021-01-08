@@ -31,7 +31,7 @@ RSpec.describe Elasticsearch::Model::Adapter::ActiveRecord::Records, :elastic do
     end
 
     it 'returns results in the same sorted order as they come back from Elasticsearch' do
-      expect(Issue.elastic_search('make sorting better', search_options).records.to_a).to eq([
+      expect(Issue.elastic_search('make sorting better', **search_options).records.to_a).to eq([
         @most_relevant,
         @middle_relevant,
         @least_relevant

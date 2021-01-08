@@ -64,4 +64,73 @@ RSpec.describe API::GroupMergeRequestApprovalSettings do
       end
     end
   end
+
+  describe 'PUT /groups/:id/merge_request_approval_setting' do
+    let(:params) { { allow_author_approval: true } }
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: false)
+      end
+
+      it 'returns 404 status' do
+        put api(url, user), params: params
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when feature flag is enabled' do
+      before do
+        allow(Ability).to receive(:allowed?).and_call_original
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: true)
+      end
+
+      context 'when the user is authorised' do
+        before do
+          allow(Ability).to receive(:allowed?)
+            .with(user, :admin_merge_request_approval_settings, group)
+            .and_return(true)
+        end
+
+        it 'returns 200 status with correct response body', :aggregate_failures do
+          put api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['allow_author_approval']).to eq(true)
+        end
+
+        it 'matches the response schema' do
+          put api(url, user), params: params
+
+          expect(response).to match_response_schema('public_api/v4/group_merge_request_approval_settings', dir: 'ee')
+        end
+
+        context 'when update fails' do
+          let(:params) { { allow_author_approval: nil } }
+
+          it 'returns 400 status', :aggregate_failures do
+            put api(url, user), params: params
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response['message']).to eq('allow_author_approval' => ['must be a boolean value'])
+          end
+        end
+      end
+
+      context 'when the user is not authorised' do
+        before do
+          allow(Ability).to receive(:allowed?)
+            .with(user, :admin_merge_request_approval_settings, group)
+            .and_return(false)
+        end
+
+        it 'returns 403 status' do
+          put api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+  end
 end

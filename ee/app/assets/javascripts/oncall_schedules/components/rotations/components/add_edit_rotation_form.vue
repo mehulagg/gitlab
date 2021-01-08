@@ -10,13 +10,13 @@ import {
   GlAvatar,
   GlAvatarLabeled,
 } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
 import {
   LENGTH_ENUM,
   HOURS_IN_DAY,
   CHEVRON_SKIPPING_SHADE_ENUM,
   CHEVRON_SKIPPING_PALETTE_ENUM,
-} from '../../../constants';
+} from 'ee/oncall_schedules/constants';
+import { s__, __ } from '~/locale';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export const i18n = {
@@ -65,16 +65,8 @@ export default {
       type: Boolean,
       required: true,
     },
-    rotationNameIsValid: {
-      type: Boolean,
-      required: true,
-    },
-    rotationParticipantsAreValid: {
-      type: Boolean,
-      required: true,
-    },
-    rotationStartsAtIsValid: {
-      type: Boolean,
+    validationState: {
+      type: Object,
       required: true,
     },
     participants: {
@@ -105,11 +97,11 @@ export default {
       label-size="sm"
       label-for="rotation-name"
       :invalid-feedback="$options.i18n.fields.name.error"
-      :state="rotationNameIsValid"
+      :state="validationState.name"
     >
       <gl-form-input
         id="rotation-name"
-        @input="$emit('update-rotation-form', { type: 'name', value: $event })"
+        @blur="$emit('update-rotation-form', { type: 'name', value: $event.target.value })"
       />
     </gl-form-group>
 
@@ -118,7 +110,7 @@ export default {
       label-size="sm"
       label-for="rotation-participants"
       :invalid-feedback="$options.i18n.fields.participants.error"
-      :state="rotationParticipantsAreValid"
+      :state="validationState.participants"
     >
       <gl-token-selector
         v-model="participantsArr"
@@ -126,6 +118,7 @@ export default {
         :loading="isLoading"
         container-class="gl-h-13! gl-overflow-y-auto"
         @text-input="$emit('filter-participants', $event)"
+        @blur="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
         @input="$emit('update-rotation-form', { type: 'participants', value: participantsArr })"
       >
         <template #token-content="{ token }">
@@ -176,13 +169,24 @@ export default {
       label-size="sm"
       label-for="rotation-time"
       :invalid-feedback="$options.i18n.fields.startsAt.error"
-      :state="rotationStartsAtIsValid"
+      :state="validationState.startsAt"
     >
       <div class="gl-display-flex gl-align-items-center">
         <gl-datepicker
           class="gl-mr-3"
           @input="$emit('update-rotation-form', { type: 'startsAt.date', value: $event })"
-        />
+        >
+          <template #default="{ formattedDate }">
+            <gl-form-input
+              class="gl-w-full"
+              :value="formattedDate"
+              :placeholder="__(`YYYY-MM-DD`)"
+              @blur="
+                $emit('update-rotation-form', { type: 'startsAt.date', value: $event.target.value })
+              "
+            />
+          </template>
+        </gl-datepicker>
         <span> {{ __('at') }} </span>
         <gl-dropdown
           id="rotation-time"

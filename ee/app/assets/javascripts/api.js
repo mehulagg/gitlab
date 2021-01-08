@@ -303,11 +303,6 @@ export default {
     return axios.post(url, params);
   },
 
-  fetchVulnerability(id, params) {
-    const url = Api.buildUrl(this.vulnerabilityPath).replace(':id', id);
-    return axios.get(url, params);
-  },
-
   changeVulnerabilityState(id, state) {
     const url = Api.buildUrl(this.vulnerabilityActionPath)
       .replace(':id', id)

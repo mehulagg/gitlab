@@ -27,7 +27,8 @@ module Ci
       upload_multiple_artifacts: -> (build) { build.publishes_artifacts_reports? },
       refspecs: -> (build) { build.merge_request_ref? },
       artifacts_exclude: -> (build) { build.supports_artifacts_exclude? },
-      multi_build_steps: -> (build) { build.multi_build_steps? }
+      multi_build_steps: -> (build) { build.multi_build_steps? },
+      return_exit_code: -> (build) { build.exit_codes_defined? }
     }.freeze
 
     DEFAULT_RETRIES = {
@@ -729,7 +730,13 @@ module Ci
     end
 
     def any_runners_online?
-      project.any_runners? { |runner| runner.active? && runner.online? && runner.can_pick?(self) }
+      project.any_runners? do |runner|
+        if Feature.enabled?(:ci_build_stuck_badge_performance_experiment, project, type: :development, default_enabled: false)
+          runner.active? && runner.online?
+        else
+          runner.active? && runner.online? && runner.can_pick?(self)
+        end
+      end
     end
 
     def stuck?
@@ -1036,6 +1043,10 @@ module Ci
         conditionally_allow_failure!(exit_code)
         drop!(failure_reason)
       end
+    end
+
+    def exit_codes_defined?
+      options.dig(:allow_failure_criteria, :exit_codes).present?
     end
 
     protected

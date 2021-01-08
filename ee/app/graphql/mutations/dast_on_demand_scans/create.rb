@@ -3,9 +3,9 @@
 module Mutations
   module DastOnDemandScans
     class Create < BaseMutation
-      InvalidGlobalID = Class.new(StandardError)
+      include FindsProject
 
-      include AuthorizesProject
+      InvalidGlobalID = Class.new(StandardError)
 
       graphql_name 'DastOnDemandScanCreate'
 
@@ -28,7 +28,7 @@ module Mutations
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, dast_site_profile_id:, **args)
-        project = authorized_find_project!(full_path: full_path)
+        project = authorized_find!(full_path)
 
         dast_site_profile = find_dast_site_profile(project, dast_site_profile_id)
         dast_scanner_profile = find_dast_scanner_profile(project, args[:dast_scanner_profile_id])

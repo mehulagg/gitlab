@@ -28,9 +28,9 @@ module EE
           end
         end
 
-        override :issues_label_links
+        override :label_links
         # rubocop: disable CodeReuse/ActiveRecord
-        def issues_label_links
+        def label_links(label_ids)
           if has_valid_milestone?
             super.where("issues.milestone_id = ?", board.milestone_id)
           else

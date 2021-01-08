@@ -14,7 +14,7 @@ describe('RotationAssignee', () => {
   const findStartsAt = () => wrapper.findByTestId('rotation-assignee-starts-at');
   const findEndsAt = () => wrapper.findByTestId('rotation-assignee-ends-at');
 
-  function mountComponent() {
+  function createComponent() {
     wrapper = extendedWrapper(
       shallowMount(RotationAssignee, {
         propsData: {
@@ -28,12 +28,11 @@ describe('RotationAssignee', () => {
   }
 
   beforeEach(() => {
-    mountComponent();
+    createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('rotation assignee token', () => {

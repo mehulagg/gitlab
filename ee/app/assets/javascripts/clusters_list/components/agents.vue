@@ -1,8 +1,9 @@
 <script>
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
+import { MAX_LIST_COUNT } from '../constants';
 
 export default {
   apollo: {
@@ -12,13 +13,12 @@ export default {
         return {
           defaultBranchName: this.defaultBranchName,
           projectPath: this.projectPath,
+          ...this.cursor,
         };
       },
-      update: (data) => {
-        return {
-          list: data?.project?.clusterAgents?.nodes,
-          folders: data?.project?.repository?.tree?.trees?.nodes,
-        };
+      update(data) {
+        this.updateTreeList(data);
+        return data;
       },
     },
   },
@@ -26,6 +26,7 @@ export default {
     AgentEmptyState,
     AgentTable,
     GlAlert,
+    GlKeysetPagination,
     GlLoadingIcon,
   },
   props: {
@@ -43,22 +44,66 @@ export default {
       type: String,
     },
   },
+  data() {
+    return {
+      cursor: {
+        first: MAX_LIST_COUNT,
+        last: null,
+      },
+      folderList: {},
+    };
+  },
   computed: {
-    isLoading() {
-      return this.$apollo.queries.agents.loading;
-    },
     agentList() {
-      let list = this.agents?.list;
-      const configFolders = this.agents?.folders;
+      let list = this.agents?.project?.clusterAgents?.nodes;
 
-      if (list && configFolders) {
+      if (list) {
         list = list.map((agent) => {
-          const configFolder = configFolders.find(({ name }) => name === agent.name);
+          const configFolder = this.folderList[agent.name];
           return { ...agent, configFolder };
         });
       }
 
       return list;
+    },
+    agentPageInfo() {
+      return this.agents?.project?.clusterAgents?.pageInfo || {};
+    },
+    isLoading() {
+      return this.$apollo.queries.agents.loading;
+    },
+    showPagination() {
+      return this.agentPageInfo.hasPreviousPage || this.agentPageInfo.hasNextPage;
+    },
+    treePageInfo() {
+      return this.agents?.project?.repository?.tree?.trees?.pageInfo || {};
+    },
+  },
+  methods: {
+    nextPage() {
+      this.cursor = {
+        first: MAX_LIST_COUNT,
+        last: null,
+        afterAgent: this.agentPageInfo.endCursor,
+        afterTree: this.treePageInfo.endCursor,
+      };
+    },
+    prevPage() {
+      this.cursor = {
+        first: null,
+        last: MAX_LIST_COUNT,
+        beforeAgent: this.agentPageInfo.startCursor,
+        beforeTree: this.treePageInfo.endCursor,
+      };
+    },
+    updateTreeList(data) {
+      const configFolders = data?.project?.repository?.tree?.trees?.nodes;
+
+      if (configFolders) {
+        configFolders.forEach((folder) => {
+          this.folderList[folder.name] = folder;
+        });
+      }
     },
   },
 };
@@ -68,7 +113,13 @@ export default {
   <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" />
 
   <section v-else-if="agentList" class="gl-mt-3">
-    <AgentTable v-if="agentList.length" :agents="agentList" />
+    <div v-if="agentList.length">
+      <AgentTable :agents="agentList" />
+
+      <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
+        <gl-keyset-pagination v-bind="agentPageInfo" @prev="prevPage" @next="nextPage" />
+      </div>
+    </div>
 
     <AgentEmptyState v-else :image="emptyStateImage" />
   </section>

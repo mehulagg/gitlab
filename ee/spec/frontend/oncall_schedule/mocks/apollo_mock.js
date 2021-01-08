@@ -1,3 +1,5 @@
+import mockRotations from './mock_rotation.json';
+
 export const participants = [
   {
     id: '1',
@@ -162,6 +164,30 @@ export const createRotationResponseWithErrors = {
         __typename: 'IncidentManagementOncallRotation',
       },
       __typename: 'OncallRotationCreatePayload',
+    },
+  },
+};
+
+export const destroyRotationResponse = {
+  data: {
+    oncallRotationDestroy: {
+      errors: [],
+      oncallRotation: {
+        __typename: 'IncidentManagementOncallRotation',
+        ...mockRotations[0],
+      },
+    },
+  },
+};
+
+export const destroyRotationResponseWithErrors = {
+  data: {
+    oncallRotationDestroy: {
+      errors: ['Houston, we have a problem'],
+      oncallRotation: {
+        __typename: 'IncidentManagementOncallRotation',
+        ...mockRotations[0],
+      },
     },
   },
 };

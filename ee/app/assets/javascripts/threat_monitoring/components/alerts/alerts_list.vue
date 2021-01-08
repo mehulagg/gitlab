@@ -12,7 +12,7 @@ import {
 import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import getAlerts from '~/graphql_shared/queries/get_alerts.query.graphql';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
@@ -42,7 +42,7 @@ export default {
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
-      query: getAlerts,
+      query: getAlertsQuery,
       variables() {
         return {
           firstPageSize: this.$options.PAGE_SIZE,

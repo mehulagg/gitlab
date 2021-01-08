@@ -3,7 +3,8 @@ import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@
 import { s__ } from '~/locale';
 import CurrentDayIndicator from './current_day_indicator.vue';
 import RotationAssignee from '../../rotations/components/rotation_assignee.vue';
-import { editRotationModalId } from '../../../constants';
+import DeleteRotationModal from '../../rotations/components/delete_rotation_modal.vue';
+import { editRotationModalId, deleteRotationModalId } from '../../../constants';
 
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
@@ -13,11 +14,13 @@ export const i18n = {
 export default {
   i18n,
   editRotationModalId,
+  deleteRotationModalId,
   components: {
     GlButtonGroup,
     GlButton,
     CurrentDayIndicator,
     RotationAssignee,
+    DeleteRotationModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -35,6 +38,16 @@ export default {
     timeframe: {
       type: Array,
       required: true,
+    },
+  },
+  data() {
+    return {
+      rotationToUpdate: {},
+    };
+  },
+  methods: {
+    setRotationToUpdate(rotation) {
+      this.rotationToUpdate = rotation;
     },
   },
 };
@@ -61,12 +74,13 @@ export default {
             :aria-label="$options.i18n.editRotationLabel"
           />
           <gl-button
-            v-gl-modal="$options.editRotationModalId"
+            v-gl-modal="$options.deleteRotationModalId"
             v-gl-tooltip
             category="tertiary"
             :title="$options.i18n.deleteRotationLabel"
             icon="remove"
             :aria-label="$options.i18n.deleteRotationLabel"
+            @click="setRotationToUpdate(rotation)"
           />
         </gl-button-group>
       </span>
@@ -85,5 +99,10 @@ export default {
         />
       </span>
     </div>
+    <delete-rotation-modal
+      :rotation="rotationToUpdate"
+      :modal-id="$options.deleteRotationModalId"
+      @set-rotation-to-update="setRotationToUpdate"
+    />
   </div>
 </template>

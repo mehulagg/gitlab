@@ -16,7 +16,14 @@ class ApprovalWrappedCodeOwnerRule < ApprovalWrappedRule
 
   def branch_requires_code_owner_approval?
     return false unless project.code_owner_approval_required_available?
+    return false if section_optional?
 
     ProtectedBranch.branch_requires_code_owner_approval?(project, merge_request.target_branch)
+  end
+
+  def section_optional?
+    return false unless Feature.enabled?(:optional_code_owners_sections, project)
+
+    Gitlab::CodeOwners.optional_section?(project, merge_request.target_branch, section)
   end
 end

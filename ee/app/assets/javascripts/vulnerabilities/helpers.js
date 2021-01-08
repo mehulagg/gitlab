@@ -1,5 +1,5 @@
 import { isAbsolute, isSafeURL } from '~/lib/utils/url_utility';
-import { REGEXES } from './constants';
+import { REGEXES, gidPrefix, uidPrefix } from './constants';
 
 // Get the issue in the format expected by the descendant components of related_issues_block.vue.
 export const getFormattedIssue = (issue) => ({
@@ -26,4 +26,29 @@ export const getAddRelatedIssueRequestParams = (reference, defaultProjectId) => 
   }
 
   return { target_issue_iid: issueId, target_project_id: projectId };
+};
+
+export const normalizeGraphQLVulnerability = (vulnerability) => {
+  if (!vulnerability) {
+    return null;
+  }
+
+  const newVulnerability = { ...vulnerability };
+
+  if (vulnerability.id) {
+    newVulnerability.id = vulnerability.id.replace(gidPrefix, '');
+  }
+
+  if (vulnerability.state) {
+    newVulnerability.state = vulnerability.state.toLowerCase();
+  }
+
+  ['confirmed', 'resolved', 'dismissed'].forEach((state) => {
+    if (vulnerability[`${state}By`]?.id) {
+      newVulnerability[`${state}ById`] = vulnerability[`${state}By`].id.replace(uidPrefix, '');
+      delete newVulnerability[`${state}By`];
+    }
+  });
+
+  return newVulnerability;
 };

@@ -9,3 +9,4 @@ export const SEVERITY_TOOLTIP_TITLE_MAP = {
 };
 
 export const VULNERABILITY_MODAL_ID = 'modal-mrwidget-security-issue';
+export const EMPTY_BODY_MESSAGE = '<Message body is not provided>';

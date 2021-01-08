@@ -81,7 +81,7 @@ gem 'gpgme', '~> 2.0.19'
 # GitLab fork with several improvements to original library. For full list of changes
 # see https://github.com/intridea/omniauth-ldap/compare/master...gitlabhq:master
 gem 'gitlab_omniauth-ldap', '~> 2.1.1', require: 'omniauth-ldap'
-gem 'net-ldap'
+gem 'net-ldap', '~> 0.16.3'
 
 # API
 # Locked at Grape v1.4.0 until https://github.com/ruby-grape/grape/pull/2088 is merged
@@ -163,7 +163,7 @@ gem 'asciidoctor-kroki', '~> 0.2.2', require: false
 gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
-gem 'nokogiri', '~> 1.10.9'
+gem 'nokogiri', '~> 1.11.1'
 gem 'escape_utils', '~> 1.1'
 
 # Calendar rendering
@@ -242,7 +242,7 @@ gem 'discordrb-webhooks-blackst0ne', '~> 3.3', require: false
 gem 'hipchat', '~> 1.5.0'
 
 # Jira integration
-gem 'jira-ruby', '~> 2.0.0'
+gem 'jira-ruby', '~> 2.1.4'
 gem 'atlassian-jwt', '~> 0.2.0'
 
 # Flowdock integration
@@ -255,7 +255,7 @@ gem 'slack-messenger', '~> 2.3.4'
 gem 'hangouts-chat', '~> 0.0.5'
 
 # Asana integration
-gem 'asana', '0.10.2'
+gem 'asana', '~> 0.10.3'
 
 # FogBugz integration
 gem 'ruby-fogbugz', '~> 0.2.1'
@@ -372,7 +372,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.3.0', require: false
+  gem 'gitlab-styles', '~> 5.4.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false

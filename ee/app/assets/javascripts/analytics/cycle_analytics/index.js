@@ -22,7 +22,6 @@ export default () => {
   const {
     cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
-    valueStreamAnalyticsCreateMultipleValueStreams: hasCreateMultipleValueStreams = false,
     valueStreamAnalyticsExtendedForm: hasExtendedFormFields = false,
   } = gon?.features;
 
@@ -42,7 +41,6 @@ export default () => {
     featureFlags: {
       hasDurationChart,
       hasPathNavigation,
-      hasCreateMultipleValueStreams,
       hasExtendedFormFields,
     },
   });
