@@ -1612,7 +1612,7 @@ RSpec.describe Notify do
       end
     end
 
-    describe 'group expiration date updated' do 
+    describe 'group expiration date updated' do
       let_it_be(:group_member) { create(:group_member, group: group, expires_at: 1.day.from_now) }
 
       before do
