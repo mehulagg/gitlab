@@ -58,7 +58,7 @@ export default {
     classNameMap() {
       return {
         [CONTEXT_LINE_CLASS_NAME]: this.line.isContextLineLeft,
-        [PARALLEL_DIFF_VIEW_TYPE]: true,
+        [PARALLEL_DIFF_VIEW_TYPE]: !this.inline,
       };
     },
     parallelViewLeftLineType() {
@@ -146,9 +146,12 @@ export default {
     <div class="diff-grid-left left-side">
       <template v-if="line.left && line.left.type !== $options.CONFLICT_MARKER">
         <div
-          :class="classNameMapCellLeft"
+          :class="[
+            classNameMapCellLeft,
+            { old_line: line.left.type === 'old', new_line: line.left.type === 'new' },
+          ]"
           data-testid="leftLineNumber"
-          class="diff-td diff-line-num old_line"
+          class="diff-td diff-line-num"
         >
           <template v-if="!isLeftConflictMarker">
             <span
@@ -189,7 +192,14 @@ export default {
             "
           />
         </div>
-        <div v-if="inline" :class="classNameMapCellLeft" class="diff-td diff-line-num old_line">
+        <div
+          v-if="inline"
+          :class="[
+            classNameMapCellLeft,
+            { old_line: line.left.type === 'old', new_line: line.left.type === 'new' },
+          ]"
+          class="diff-td diff-line-num"
+        >
           <a
             v-if="line.left.new_line && line.left.type !== $options.CONFLICT_OUR"
             :data-linenumber="line.left.new_line"
@@ -202,8 +212,8 @@ export default {
         <div
           :id="line.left.line_code"
           :key="line.left.line_code"
-          :class="parallelViewLeftLineType"
-          class="diff-td line_content with-coverage parallel left-side"
+          :class="[parallelViewLeftLineType, { parallel: !inline }]"
+          class="diff-td line_content with-coverage left-side"
           data-testid="leftContent"
           @mousedown="handleParallelLineMouseDown"
         >
@@ -229,8 +239,8 @@ export default {
           :class="emptyCellLeftClassMap"
         ></div>
         <div
-          class="diff-td line_content with-coverage parallel left-side empty-cell"
-          :class="emptyCellLeftClassMap"
+          class="diff-td line_content with-coverage left-side empty-cell"
+          :class="[emptyCellLeftClassMap, { parallel: !inline }]"
         ></div>
       </template>
     </div>
@@ -285,8 +295,8 @@ export default {
         <div
           :id="line.right.line_code"
           :key="line.right.rich_text"
-          :class="[line.right.type, { hll: isHighlighted }]"
-          class="diff-td line_content with-coverage parallel right-side"
+          :class="[line.right.type, { hll: isHighlighted, parallel: !inline }]"
+          class="diff-td line_content with-coverage right-side"
           @mousedown="handleParallelLineMouseDown"
         >
           <strong v-if="line.right.type === $options.CONFLICT_MARKER_THEIR">{{
@@ -311,8 +321,8 @@ export default {
           :class="emptyCellRightClassMap"
         ></div>
         <div
-          class="diff-td line_content with-coverage parallel right-side empty-cell"
-          :class="emptyCellRightClassMap"
+          class="diff-td line_content with-coverage right-side empty-cell"
+          :class="[emptyCellRightClassMap, { parallel: !inline }]"
         ></div>
       </template>
     </div>
