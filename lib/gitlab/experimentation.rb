@@ -103,6 +103,9 @@ module Gitlab
       show_trial_status_in_sidebar: {
         tracking_category: 'Growth::Conversion::Experiment::ShowTrialStatusInSidebar'
       },
+      invite_email_avatar: {
+        tracking_category: 'Growth::Expansion::Experiment::InviteEmailAvatar'
+      },
       trial_onboarding_issues: {
         tracking_category: 'Growth::Conversion::Experiment::TrialOnboardingIssues'
       }

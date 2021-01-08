@@ -58,11 +58,26 @@ module Emails
           subject(s_("MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}") % { project_or_group: member_source.human_name, project_or_group_name: member_source.model_name.singular })
         end
 
-      member_email_with_layout(
-        to: member.invite_email,
-        subject: subject_line,
-        layout: 'unknown_user_mailer'
-      )
+      if send_invite_with_avatar?
+        @invite_url_params = { new_user_invite: 'invite_email_avatar' }
+
+        mail(to: member.invite_email, subject: subject_line) do |format|
+          format.html { render 'member_invited_email_avatar', layout: 'unknown_user_mailer' }
+          format.text { render layout: 'unknown_user_mailer' } # not valid for text as it is an image rendered in html
+        end
+
+        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email_avatar][:tracking_category], 'sent', property: 'experiment_group')
+      else
+        @invite_url_params = { new_user_invite: 'control' }
+
+        member_email_with_layout(
+          to: member.invite_email,
+          subject: subject_line,
+          layout: 'unknown_user_mailer'
+        )
+
+        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email_avatar][:tracking_category], 'sent', property: 'control_group')
+      end
     end
 
     def member_invited_reminder_email(member_source_type, member_id, token, reminder_index)
@@ -139,11 +154,22 @@ module Emails
       @member_source_type.classify.constantize
     end
 
+    def member_email_with_template(to:, subject:, layout: 'mailer')
+      mail(to: to, subject: subject) do |format|
+        format.html { render template, layout: layout }
+        format.text { render layout: layout }
+      end
+    end
+
     def member_email_with_layout(to:, subject:, layout: 'mailer')
       mail(to: to, subject: subject) do |format|
         format.html { render layout: layout }
         format.text { render layout: layout }
       end
+    end
+
+    def send_invite_with_avatar?
+      member.created_by && Gitlab::Experimentation.active?(:invite_email_avatar)
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe InvitesController, :snowplow do
+RSpec.describe InvitesController do
   let_it_be(:user) { create(:user) }
   let(:member) { create(:project_member, :invited, invite_email: user.email) }
   let(:raw_invite_token) { member.raw_invite_token }
@@ -51,6 +51,56 @@ RSpec.describe InvitesController, :snowplow do
       end
 
       it_behaves_like 'invalid token'
+
+      context 'when new_user_invite is not set', :snowplow do
+        it 'does not track the user as experiment group' do
+          request
+
+          expect_no_snowplow_event
+        end
+      end
+
+      context 'when new_user_invite is experiment', :snowplow do
+        let(:params) { { id: raw_invite_token, new_user_invite: 'experiment' } }
+
+        it 'tracks the user as experiment group' do
+          request
+
+          expect_snowplow_event(
+            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            action: 'opened',
+            property: 'experiment_group',
+            label: md5_member_global_id
+          )
+          expect_snowplow_event(
+            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            action: 'accepted',
+            property: 'experiment_group',
+            label: md5_member_global_id
+          )
+        end
+      end
+
+      context 'when new_user_invite is control', :snowplow do
+        let(:params) { { id: raw_invite_token, new_user_invite: 'control' } }
+
+        it 'tracks the user as control group' do
+          request
+
+          expect_snowplow_event(
+            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            action: 'opened',
+            property: 'control_group',
+            label: md5_member_global_id
+          )
+          expect_snowplow_event(
+            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            action: 'accepted',
+            property: 'control_group',
+            label: md5_member_global_id
+          )
+        end
+      end
     end
 
     context 'when not logged in' do
@@ -82,6 +132,44 @@ RSpec.describe InvitesController, :snowplow do
     subject(:request) { post :accept, params: params }
 
     it_behaves_like 'invalid token'
+
+    context 'when new_user_invite is not set', :snowplow do
+      it 'does not track an event' do
+        request
+
+        expect_no_snowplow_event
+      end
+    end
+
+    context 'when new_user_invite is experiment', :snowplow do
+      let(:params) { { id: raw_invite_token, new_user_invite: 'experiment' } }
+
+      it 'tracks the user as experiment group' do
+        request
+
+        expect_snowplow_event(
+          category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+          action: 'accepted',
+          property: 'experiment_group',
+          label: md5_member_global_id
+        )
+      end
+    end
+
+    context 'when new_user_invite is control', :snowplow do
+      let(:params) { { id: raw_invite_token, new_user_invite: 'control' } }
+
+      it 'tracks the user as control group' do
+        request
+
+        expect_snowplow_event(
+          category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+          action: 'accepted',
+          property: 'control_group',
+          label: md5_member_global_id
+        )
+      end
+    end
   end
 
   describe 'POST #decline for link in UI' do

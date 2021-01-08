@@ -9,4 +9,4 @@
       - else
         = html_escape(s_("InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}")) % placeholders
     %p.invite-actions
-      = link_to s_('InviteEmail|Join now'), invite_url(@token), class: 'invite-btn-join'
+      = link_to s_('InviteEmail|Join now'), invite_url(@token, @invite_url_params), class: 'invite-btn-join'
