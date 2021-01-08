@@ -3,6 +3,7 @@ import dark from './dark';
 import monokai from './monokai';
 import solarizedLight from './solarized_light';
 import solarizedDark from './solarized_dark';
+import christmas from './christmas';
 import none from './none';
 
 export const themes = [
@@ -25,6 +26,10 @@ export const themes = [
   {
     name: 'monokai',
     data: monokai,
+  },
+  {
+    name: 'christmas',
+    data: christmas,
   },
   {
     name: 'none',

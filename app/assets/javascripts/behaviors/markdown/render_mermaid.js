@@ -31,7 +31,7 @@ function importMermaidModule() {
   return import(/* webpackChunkName: 'mermaid' */ 'mermaid')
     .then((mermaid) => {
       let theme = 'neutral';
-      const ideDarkThemes = ['dark', 'solarized-dark', 'monokai'];
+      const ideDarkThemes = ['dark', 'solarized-dark', 'monokai', 'christmas'];
 
       if (
         ideDarkThemes.includes(window.gon?.user_color_scheme) &&
