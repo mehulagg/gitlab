@@ -2,7 +2,7 @@
   "type": "array",
   "items": {
     "allOf": [
-      { "$ref": "../../../../../spec/fixtures/api/schemas/group_member.json" },
+      { "$ref": "../../../../../spec/fixtures/api/schemas/entities/member.json" },
       {
         "required": ["using_license", "group_sso", "group_managed_account", "can_override", "is_overridden"],
         "properties": {
