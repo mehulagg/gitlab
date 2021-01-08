@@ -696,6 +696,23 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eq(vulnerabilities_finding.scanner.name) }
   end
 
+  describe '#description' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_description) { finding.metadata['description'] }
+
+    subject { finding.description }
+
+    context 'when description metadata key is present' do
+      it { is_expected.to eql(expected_description) }
+    end
+
+    context 'when description data is present' do
+      let(:finding) { build(:vulnerabilities_finding, description: 'Vulnerability description') }
+
+      it { is_expected.to eq('Vulnerability description') }
+    end
+  end
+
   describe '#solution' do
     subject { vulnerabilities_finding.solution }
 
@@ -705,12 +722,36 @@ RSpec.describe Vulnerabilities::Finding do
       it { is_expected.to eq(vulnerabilities_finding.metadata['solution']) }
     end
 
-    context 'when remediations key is present' do
+    context 'when remediations key is present in finding' do
       let(:vulnerabilities_finding) do
         build(:vulnerabilities_finding_with_remediation, summary: "Test remediation")
       end
 
       it { is_expected.to eq(vulnerabilities_finding.remediations.dig(0, 'summary')) }
+    end
+
+    context 'when solution data is present' do
+      let(:vulnerabilities_finding) { build(:vulnerabilities_finding, solution: 'Vulnerability solution') }
+
+      it { is_expected.to eq('Vulnerability solution') }
+    end
+  end
+
+  describe '#location' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_location) { finding.metadata['location'] }
+
+    subject { finding.location }
+
+    context 'when location metadata key is present' do
+      it { is_expected.to eql(expected_location) }
+    end
+
+    context 'when location data is present' do
+      let(:location) { { 'class' => 'class', 'end_line' => 3, 'file' => 'test_file.rb', 'start_line' => 1 } }
+      let(:finding) { build(:vulnerabilities_finding, location: location) }
+
+      it { is_expected.to eq(location) }
     end
   end
 
@@ -817,7 +858,15 @@ RSpec.describe Vulnerabilities::Finding do
 
     subject { finding.message }
 
-    it { is_expected.to eql(expected_message) }
+    context 'when message metadata key is present' do
+      it { is_expected.to eql(expected_message) }
+    end
+
+    context 'when message data is present' do
+      let(:finding) { build(:vulnerabilities_finding, message: 'Vulnerability message') }
+
+      it { is_expected.to eq('Vulnerability message') }
+    end
   end
 
   describe '#cve_value' do
@@ -830,7 +879,15 @@ RSpec.describe Vulnerabilities::Finding do
       finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', name: expected_cve)
     end
 
-    it { is_expected.to eql(expected_cve) }
+    context 'when cve metadata key is present' do
+      it { is_expected.to eql(expected_cve) }
+    end
+
+    context 'when cve data is present' do
+      let(:finding) { build(:vulnerabilities_finding, cve: 'Vulnerability cve') }
+
+      it { is_expected.to eq('Vulnerability cve') }
+    end
   end
 
   describe '#cwe_value' do
