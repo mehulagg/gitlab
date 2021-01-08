@@ -23,11 +23,11 @@ module Packages
         package_versions_index(packages).as_json
       end
 
+      private
+
       def package_versions_sha(packages = @packages)
         package_versions_index(packages).sha
       end
-
-      private
 
       def package_versions_index(packages)
         ::Gitlab::Composer::VersionIndex.new(packages)

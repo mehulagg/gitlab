@@ -10,7 +10,7 @@ module Gitlab
       end
 
       def as_json(_options = nil)
-        { 'packages' => { @packages.first.name => package_versions_map(@packages) } }
+        { 'packages' => { @packages.first.name => package_versions_map } }
       end
 
       def sha
@@ -19,8 +19,8 @@ module Gitlab
 
       private
 
-      def package_versions_map(packages)
-        packages.each_with_object({}) do |package, map|
+      def package_versions_map
+        @packages.each_with_object({}) do |package, map|
           map[package.version] = package_metadata(package)
         end
       end

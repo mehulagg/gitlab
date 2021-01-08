@@ -15,7 +15,7 @@ RSpec.describe Gitlab::Composer::VersionIndex do
   let(:packages) { [package1, package2] }
 
   describe '#as_json' do
-    subject { described_class.new(packages).as_json }
+    subject(:index) { described_class.new(packages).as_json }
 
     def expected_json(package)
       {
@@ -32,7 +32,7 @@ RSpec.describe Gitlab::Composer::VersionIndex do
     end
 
     it 'returns the packages json' do
-      packages = subject['packages'][package_name]
+      packages = index['packages'][package_name]
 
       expect(packages['1.0.0']).to eq(expected_json(package1))
       expect(packages['2.0.0']).to eq(expected_json(package2))
@@ -40,10 +40,10 @@ RSpec.describe Gitlab::Composer::VersionIndex do
   end
 
   describe '#sha' do
-    subject { described_class.new(packages).sha }
+    subject(:sha) { described_class.new(packages).sha }
 
     it 'returns the json SHA' do
-      expect(subject).to match /^[A-Fa-f0-9]{64}$/
+      expect(sha).to match /^[A-Fa-f0-9]{64}$/
     end
   end
 end
