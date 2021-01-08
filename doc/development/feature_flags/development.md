@@ -398,6 +398,9 @@ to ensure the feature works properly.
 
 When using the testing environment, all feature flags are enabled by default.
 
+NOTE:
+This does not apply to end-to-end (QA) tests. [See below for more information](#end-to-end-qa-tests).
+
 To disable a feature flag in a test, use the `stub_feature_flags`
 helper. For example, to globally disable the `ci_live_trace` feature
 flag in a test:
@@ -545,3 +548,21 @@ a mode that is used by `production` and `development`.
 
 You should use this mode only when you really want to tests aspects of Flipper
 with how it interacts with `ActiveRecord`.
+
+### End-to-end (QA) tests
+
+Toggling feature flags works differently in QA tests. The QA test framework does not have direct access to
+Rails or the database, so it can't use Flipper. Instead, it uses the public API.
+
+[As noted above, feature flags are not enabled by default in QA tests.](#feature-flags-in-tests)
+This means that QA tests will run with feature flags in the default state implemented in the source
+code, or with the feature flag in its current state on the GitLab instance under test, unless the
+test is written to enable/disable a feature flag explicitly.
+
+That is why the [feature flag rollout template](https://gitlab.com/gitlab-org/gitlab/-/blob/f7447302eafe1320ccc6136b5f3c39638ec8dc64/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md)
+requires that QA tests be run with the feature flag enabled before the feature flag is enabled on
+Staging or on GitLab.com. The QA tests might fail if they are not written to account for the
+changes behind the feature flag.
+
+Please see the [end-to-end test documentation on how to confirm that QA tests pass with a feature
+flag enabled.](../testing_guide/end_to_end/feature_flags.md#confirming-that-end-to-end-tests-pass-with-a-feature-flag-enabled)
