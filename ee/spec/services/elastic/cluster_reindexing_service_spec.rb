@@ -63,9 +63,10 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
   context 'state: reindexing' do
     let(:task) { create(:elastic_reindexing_task, state: :reindexing) }
     let(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count: 10)}
+    let(:refresh_interval) { nil }
     let(:expected_default_settings) do
       {
-        refresh_interval: nil,
+        refresh_interval: refresh_interval,
         number_of_replicas: Gitlab::CurrentSettings.elasticsearch_replicas,
         translog: { durability: 'request' }
       }
@@ -104,6 +105,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
     context 'task finishes correctly' do
       before do
         allow(Gitlab::Elastic::Helper.default).to receive(:documents_count).with(index_name: subtask.index_name_to).and_return(subtask.reload.documents_count)
+        allow(Gitlab::Elastic::Helper.default).to receive(:get_settings).with(index_name: subtask.index_name_from).and_return({})
       end
 
       it 'launches all state steps' do
@@ -113,6 +115,19 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
         expect { subject.execute }.to change { task.reload.state }.from('reindexing').to('success')
         expect(task.reload.delete_original_index_at).to be_within(1.minute).of(described_class::DELETE_ORIGINAL_INDEX_AFTER.from_now)
+      end
+
+      context 'with a refresh_interval set' do
+        let(:refresh_interval) { '60s' }
+
+        before do
+          allow(Gitlab::Elastic::Helper.default).to receive(:get_settings).with(index_name: subtask.index_name_from).and_return({ 'refresh_interval': refresh_interval })
+        end
+        it 'uses existing refresh_interval setting' do
+          expect(Gitlab::Elastic::Helper.default).to receive(:update_settings).with(index_name: subtask.index_name_to, settings: expected_default_settings)
+
+          subject.execute
+        end
       end
     end
   end
