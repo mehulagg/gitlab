@@ -18,17 +18,18 @@ export const generateLinksData = ({ links }, containerID, modifier = '') => {
   return links.map((link) => {
     const path = d3.path();
 
-    const sourceId = `${link.source}${modifier}`;
-    const targetId = `${link.target}${modifier}`;
+    const sourceId = link.source;
+    const targetId = link.target;
 
-    const sourceNodeEl = document.getElementById(sourceId);
-    const targetNodeEl = document.getElementById(targetId);
+    const modifiedSourceId = `${sourceId}${modifier}`;
+    const modifiedTargetId = `${targetId}${modifier}`;
+
+    const sourceNodeEl = document.getElementById(modifiedSourceId);
+    const targetNodeEl = document.getElementById(modifiedTargetId);
 
     const sourceNodeCoordinates = sourceNodeEl.getBoundingClientRect();
     const targetNodeCoordinates = targetNodeEl.getBoundingClientRect();
     const containerCoordinates = containerEl.getBoundingClientRect();
-
-    console.log('1:', sourceId, targetId, sourceNodeCoordinates, targetNodeCoordinates, containerCoordinates);
 
     // Because we add the svg dynamically and calculate the coordinates
     // with plain JS and not D3, we need to account for the fact that
@@ -57,9 +58,6 @@ export const generateLinksData = ({ links }, containerID, modifier = '') => {
       containerCoordinates.y -
       paddingTop +
       sourceNodeCoordinates.height / 2;
-
-      console.log('2:', sourceNodeX, sourceNodeY, targetNodeX, targetNodeY);
-
 
     // Start point
     path.moveTo(sourceNodeX, sourceNodeY);

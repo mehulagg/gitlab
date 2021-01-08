@@ -29,7 +29,6 @@ export const createJobsHash = (stages = []) => {
  * @returns {Object} - Hash of jobs and array of needs
  */
 export const generateJobNeedsDict = (jobs = {}) => {
-  console.log('JOBS', jobs);
   const arrOfJobNames = Object.keys(jobs);
 
   return arrOfJobNames.reduce((acc, value) => {
