@@ -37,6 +37,11 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to validate_presence_of(:severity) }
     it { is_expected.to validate_presence_of(:confidence) }
 
+    it { is_expected.to validate_length_of(:description).is_at_most(15000) }
+    it { is_expected.to validate_length_of(:message).is_at_most(3000) }
+    it { is_expected.to validate_length_of(:solution).is_at_most(7000) }
+    it { is_expected.to validate_length_of(:cve).is_at_most(48400) }
+
     context 'when value for details field is valid' do
       it 'is valid' do
         finding.details = {}
@@ -455,11 +460,11 @@ RSpec.describe Vulnerabilities::Finding do
   describe '#remediations' do
     let(:raw_remediation) { { summary: 'foo', diff: 'bar' }.stringify_keys }
     let(:raw_metadata) { { remediations: [raw_remediation] }.to_json }
-    let(:finding) { create(:vulnerabilities_finding, raw_metadata: raw_metadata) }
 
     subject { finding.remediations }
 
     context 'when the finding has associated remediation records' do
+      let(:finding) { create(:vulnerabilities_finding) }
       let!(:persisted_remediation) { create(:vulnerabilities_remediation, findings: [finding]) }
       let(:remediation_hash) { { 'summary' => persisted_remediation.summary, 'diff' => persisted_remediation.diff } }
 
@@ -467,6 +472,8 @@ RSpec.describe Vulnerabilities::Finding do
     end
 
     context 'when the finding does not have associated remediation records' do
+      let(:finding) { create(:vulnerabilities_finding, raw_metadata: raw_metadata) }
+
       context 'when the finding has remediations in `raw_metadata`' do
         it { is_expected.to eq([raw_remediation]) }
       end
