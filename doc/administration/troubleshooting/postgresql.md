@@ -157,7 +157,7 @@ See current settings with:
 
 ```shell
 sudo gitlab-rails runner "c = ApplicationRecord.connection ; puts c.execute('SHOW statement_timeout').to_a ;
-puts c.execute('SHOW lock_timeout').to_a ;
+puts c.execute('SHOW deadlock_timeout').to_a ;
 puts c.execute('SHOW idle_in_transaction_session_timeout').to_a ;"
 ```
 
@@ -165,7 +165,7 @@ It may take a little while to respond.
 
 ```ruby
 {"statement_timeout"=>"1min"}
-{"lock_timeout"=>"0"}
+{"deadlock_timeout"=>"0"}
 {"idle_in_transaction_session_timeout"=>"1min"}
 ```
 
