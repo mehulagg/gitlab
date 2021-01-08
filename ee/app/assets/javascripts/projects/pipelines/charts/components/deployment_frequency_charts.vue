@@ -1,4 +1,5 @@
 <script>
+import { GlLink } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import Api from 'ee/api';
 import { s__, sprintf } from '~/locale';
@@ -10,6 +11,7 @@ import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd
 export default {
   name: 'DeploymentFrequencyCharts',
   components: {
+    GlLink,
     CiCdAnalyticsAreaChart,
   },
   inject: {
@@ -176,7 +178,12 @@ export default {
 </script>
 <template>
   <div>
-    <h4 class="gl-my-4">{{ __('DeploymentFrequencyCharts|Deployments charts') }}</h4>
+    <h4 class="gl-my-4">{{ s__('DeploymentFrequencyCharts|Deployments charts') }}</h4>
+    <p>
+      These charts show the frequency of deployments to the environment named
+      <code>production</code>.
+      <gl-link>Learn more.</gl-link>
+    </p>
     <ci-cd-analytics-area-chart
       v-for="(chart, index) in charts"
       :key="index"
