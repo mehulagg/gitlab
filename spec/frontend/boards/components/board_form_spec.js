@@ -4,6 +4,7 @@ import { TEST_HOST } from 'jest/helpers/test_constants';
 import { GlModal } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import boardsStore from '~/boards/stores/boards_store';
 import BoardForm from '~/boards/components/board_form.vue';
@@ -15,6 +16,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn().mockName('visitUrlMock'),
   stripFinalUrlSegment: jest.requireActual('~/lib/utils/url_utility').stripFinalUrlSegment,
 }));
+jest.mock('~/flash');
 
 const currentBoard = {
   id: 1,
@@ -35,15 +37,9 @@ const defaultProps = {
   currentBoard,
 };
 
-const mutate = jest.fn().mockResolvedValue({
-  data: {
-    createBoard: { board: { id: 'gid://gitlab/Board/123' } },
-    updateBoard: { board: { id: 'gid://gitlab/Board/321' } },
-  },
-});
-
 describe('BoardForm', () => {
   let wrapper;
+  let mutate;
 
   const findModal = () => wrapper.find(GlModal);
   const findModalActionPrimary = () => findModal().props('actionPrimary');
@@ -80,6 +76,7 @@ describe('BoardForm', () => {
     wrapper.destroy();
     wrapper = null;
     boardsStore.state.currentPage = null;
+    mutate = null;
   });
 
   describe('when user can not admin the board', () => {
@@ -153,6 +150,20 @@ describe('BoardForm', () => {
     });
 
     describe('when submitting a create event', () => {
+      const fillForm = () => {
+        findInput().value = 'Test name';
+        findInput().trigger('input');
+        findInput().trigger('keyup.enter', { metaKey: true });
+      };
+
+      beforeEach(() => {
+        mutate = jest.fn().mockResolvedValue({
+          data: {
+            createBoard: { board: { id: 'gid://gitlab/Board/123' } },
+          },
+        });
+      });
+
       it('does not call API if board name is empty', async () => {
         createComponent({ canAdminBoard: true });
         findInput().trigger('keyup.enter', { metaKey: true });
@@ -166,9 +177,7 @@ describe('BoardForm', () => {
         window.location = new URL('https://test/boards/1');
         createComponent({ canAdminBoard: true });
 
-        findInput().value = 'Test name';
-        findInput().trigger('input');
-        findInput().trigger('keyup.enter', { metaKey: true });
+        fillForm();
 
         await waitForPromises();
 
@@ -189,9 +198,7 @@ describe('BoardForm', () => {
         window.location = new URL('https://test/boards');
         createComponent({ canAdminBoard: true });
 
-        findInput().value = 'Test name';
-        findInput().trigger('input');
-        findInput().trigger('keyup.enter', { metaKey: true });
+        fillForm();
 
         await waitForPromises();
 
@@ -206,6 +213,22 @@ describe('BoardForm', () => {
 
         await waitForPromises();
         expect(visitUrl).toHaveBeenCalledWith('boards/123');
+      });
+
+      it('shows an error flash if GraphQL mutation fails', async () => {
+        mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+
+        createComponent({ canAdminBoard: true });
+
+        fillForm();
+
+        await waitForPromises();
+
+        expect(mutate).toHaveBeenCalled();
+
+        await waitForPromises();
+        expect(visitUrl).not.toHaveBeenCalled();
+        expect(createFlash).toHaveBeenCalled();
       });
     });
   });
@@ -242,33 +265,37 @@ describe('BoardForm', () => {
       });
     });
 
-    describe('when submitting an update event', () => {
-      it('calls REST and GraphQL API with correct parameters', async () => {
-        window.location = new URL('https://test/boards/1');
-        createComponent({ canAdminBoard: true });
-
-        findInput().trigger('keyup.enter', { metaKey: true });
-
-        await waitForPromises();
-
-        expect(mutate).toHaveBeenCalledWith({
-          mutation: updateBoardMutation,
-          variables: {
-            input: expect.objectContaining({
-              id: `gid://gitlab/Board/${currentBoard.id}`,
-            }),
-          },
-        });
-
-        await waitForPromises();
-        expect(visitUrl).toHaveBeenCalledWith('321');
+    it('calls GraphQL mutation with correct parameters', async () => {
+      mutate = jest.fn().mockResolvedValue({
+        data: {
+          updateBoard: { board: { id: 'gid://gitlab/Board/321' } },
+        },
       });
+      window.location = new URL('https://test/boards/1');
+      createComponent({ canAdminBoard: true });
+
+      findInput().trigger('keyup.enter', { metaKey: true });
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalledWith({
+        mutation: updateBoardMutation,
+        variables: {
+          input: expect.objectContaining({
+            id: `gid://gitlab/Board/${currentBoard.id}`,
+          }),
+        },
+      });
+
+      await waitForPromises();
+      expect(visitUrl).toHaveBeenCalledWith('321');
     });
   });
 
   describe('when deleting a board', () => {
     beforeEach(() => {
       boardsStore.state.currentPage = 'delete';
+      mutate = jest.fn().mockResolvedValue({});
       createComponent({ canAdminBoard: true });
     });
 
