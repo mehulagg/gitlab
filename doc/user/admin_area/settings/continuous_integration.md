@@ -188,10 +188,10 @@ sourced from:
 - GitLab-supplied configuration.
 
 NOTE:
-When using a configuration defined within an instance template repository,
-[`include:file`](https://docs.gitlab.com/ee/ci/yaml/#include) definitions to
-include configuration from other projects
-[does not work currently](https://gitlab.com/gitlab-org/gitlab/-/issues/35345).
+When you use a configuration defined in an instance template repository,
+nested [`include:`](https://docs.gitlab.com/ee/ci/yaml/#include) keywords
+(including `include:file`, `include:local`, `include:remote`, and `include:template`)
+[do not work](https://gitlab.com/gitlab-org/gitlab/-/issues/35345).
 
 To set required pipeline configuration:
 
