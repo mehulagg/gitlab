@@ -13,13 +13,13 @@ export const createUniqueLinkId = (stageName, jobName) => `${stageName}-${jobNam
  * @returns {Array} Links that contain all the information about them
  */
 
-export const generateLinksData = ({ links }, containerID) => {
+export const generateLinksData = ({ links }, containerID, modifier = '') => {
   const containerEl = document.getElementById(containerID);
   return links.map((link) => {
     const path = d3.path();
 
-    const sourceId = link.source;
-    const targetId = link.target;
+    const sourceId = `${link.source}${modifier}`;
+    const targetId = `${link.target}${modifier}`;
 
     const sourceNodeEl = document.getElementById(sourceId);
     const targetNodeEl = document.getElementById(targetId);
@@ -27,6 +27,8 @@ export const generateLinksData = ({ links }, containerID) => {
     const sourceNodeCoordinates = sourceNodeEl.getBoundingClientRect();
     const targetNodeCoordinates = targetNodeEl.getBoundingClientRect();
     const containerCoordinates = containerEl.getBoundingClientRect();
+
+    console.log('1:', sourceId, targetId, sourceNodeCoordinates, targetNodeCoordinates, containerCoordinates);
 
     // Because we add the svg dynamically and calculate the coordinates
     // with plain JS and not D3, we need to account for the fact that
@@ -55,6 +57,9 @@ export const generateLinksData = ({ links }, containerID) => {
       containerCoordinates.y -
       paddingTop +
       sourceNodeCoordinates.height / 2;
+
+      console.log('2:', sourceNodeX, sourceNodeY, targetNodeX, targetNodeY);
+
 
     // Start point
     path.moveTo(sourceNodeX, sourceNodeY);

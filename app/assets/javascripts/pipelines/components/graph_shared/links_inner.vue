@@ -17,6 +17,10 @@ export default {
       type: String,
       required: true,
     },
+    pipelineId: {
+      type: Number,
+      required: true,
+    },
     pipelineData: {
       type: Array,
       required: true,
@@ -102,8 +106,9 @@ export default {
       try {
         const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
-        this.links = generateLinksData(parsedData, this.containerId);
-      } catch {
+        this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
+      } catch (err) {
+        console.log(err);
         this.$emit('error', DRAW_FAILURE);
       }
     },

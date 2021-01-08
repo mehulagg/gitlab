@@ -34,7 +34,7 @@ export default {
     UPSTREAM,
   },
   CONTAINER_REF: 'PIPELINE_LINKS_CONTAINER_REF',
-  CONTAINER_ID: 'pipeline-links-container',
+  BASE_CONTAINER_ID: 'pipeline-links-container',
   data() {
     return {
       hoveredJobName: '',
@@ -45,6 +45,9 @@ export default {
     };
   },
   computed: {
+    containerId(pipelineId) {
+      return `${this.$options.BASE_CONTAINER_ID}-${this.pipeline.id}`
+    },
     downstreamPipelines() {
       return this.hasDownstreamPipelines ? this.pipeline.downstream : [];
     },
@@ -92,17 +95,17 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
-      :id="$options.CONTAINER_ID"
-      :ref="$options.CONTAINER_REF"
+      :id="containerId"
+      :ref="containerId"
       class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
       :class="{ 'gl-py-5': !isLinkedPipeline }"
     >
       <links-layer
         :pipeline-data="graph"
-        :container-id="$options.CONTAINER_ID"
-        :container-ref="$options.CONTAINER_REF"
+        :pipelineId="pipeline.id"
+        :container-id="containerId"
+        :container-ref="containerId"
         :highlighted-job="hoveredJobName"
-        default-link-color="gl-stroke-transparent"
         @error="onError"
       >
         <linked-graph-wrapper>
@@ -124,6 +127,7 @@ export default {
               :action="stage.status.action"
               :job-hovered="hoveredJobName"
               :pipeline-expanded="pipelineExpanded"
+              :pipeline-id="pipeline.id"
               @refreshPipelineGraph="$emit('refreshPipelineGraph')"
               @jobHover="setJob"
             />

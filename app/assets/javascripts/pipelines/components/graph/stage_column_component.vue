@@ -23,6 +23,10 @@ export default {
       type: Array,
       required: true,
     },
+    pipelineId: {
+      type: Number,
+      required: true,
+    },
     action: {
       type: Object,
       required: false,
@@ -98,10 +102,11 @@ export default {
           :job="group.jobs[0]"
           :job-hovered="jobHovered"
           :pipeline-expanded="pipelineExpanded"
+          :pipeline-id="pipelineId"
           css-class-job-name="gl-build-content"
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
-        <job-group-dropdown v-else :group="group" />
+        <job-group-dropdown v-else :group="group" :pipeline-id="pipelineId" />
       </div>
     </template>
   </main-graph-wrapper>
