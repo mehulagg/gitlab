@@ -9329,7 +9329,7 @@ CREATE TABLE application_settings (
     spam_check_endpoint_enabled boolean DEFAULT false NOT NULL,
     elasticsearch_pause_indexing boolean DEFAULT false NOT NULL,
     repository_storages_weighted jsonb DEFAULT '{}'::jsonb NOT NULL,
-    max_import_size integer DEFAULT 50 NOT NULL,
+    max_import_size integer DEFAULT 0 NOT NULL,
     enforce_pat_expiration boolean DEFAULT true NOT NULL,
     compliance_frameworks smallint[] DEFAULT '{}'::smallint[] NOT NULL,
     notify_on_unknown_sign_in boolean DEFAULT true NOT NULL,
