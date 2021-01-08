@@ -9,22 +9,19 @@ class Profiles::PreferencesController < Profiles::ApplicationController
   end
 
   def update
+    result = Users::UpdateService.new(current_user, preferences_params.merge(user: user)).execute
     begin
-      result = Users::UpdateService.new(current_user, preferences_params.merge(user: user)).execute
-
       if result[:status] == :success
-        flash[:notice] = _('Preferences saved.')
+        message = s_('Preferences saved.')
+
+        render json: { type: :notice, message: message }
       else
-        flash[:alert] = _('Failed to save preferences.')
+        render json: { type: :alert, message: result[:message] }
       end
     rescue ArgumentError => e
       # Raised when `dashboard` is given an invalid value.
-      flash[:alert] = _("Failed to save preferences (%{error_message}).") % { error_message: e.message }
-    end
-
-    respond_to do |format|
-      format.html { redirect_to profile_preferences_path }
-      format.js
+      message = _("Failed to save preferences (%{error_message}).") % { error_message: e.message }
+      render json: { type: :alert, message: message }
     end
   end
 

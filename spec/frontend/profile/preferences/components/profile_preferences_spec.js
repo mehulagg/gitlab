@@ -2,13 +2,16 @@ import { shallowMount } from '@vue/test-utils';
 
 import ProfilePreferences from '~/profile/preferences/components/profile_preferences.vue';
 import IntegrationView from '~/profile/preferences/components/integration_view.vue';
-import { integrationViews, userFields } from '../mock_data';
+import { integrationViews, userFields, bodyClasses } from '../mock_data';
 
 describe('ProfilePreferences component', () => {
   let wrapper;
   const defaultProvide = {
     integrationViews: [],
     userFields,
+    bodyClasses,
+    profilePreferencesPath: '/update-profile',
+    formEl: document.createElement('form'),
   };
 
   function createComponent(options = {}) {
@@ -47,11 +50,5 @@ describe('ProfilePreferences component', () => {
     expect(divider.exists()).toBe(true);
     expect(heading.exists()).toBe(true);
     expect(views).toHaveLength(integrationViews.length);
-  });
-
-  it('should render ProfilePreferences properly', () => {
-    wrapper = createComponent({ provide: { integrationViews } });
-
-    expect(wrapper.element).toMatchSnapshot();
   });
 });
