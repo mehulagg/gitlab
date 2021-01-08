@@ -104,6 +104,12 @@ class ApplicationController < ActionController::Base
   end
 
   rescue_from GRPC::Unavailable, Gitlab::Git::CommandError do |exception|
+    # We can't render a custom 503 page if we've already performed a render, so
+    # just re-raise the error. In production, this will display a generic 500
+    # page. This will normally happen when a gitaly operation is being performed
+    # in an around_action.
+    raise exception if performed?
+
     log_exception(exception)
 
     headers['Retry-After'] = exception.retry_after if exception.respond_to?(:retry_after)
