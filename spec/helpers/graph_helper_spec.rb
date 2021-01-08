@@ -15,4 +15,10 @@ RSpec.describe GraphHelper do
       expect(refs).to match('master')
     end
   end
+
+  describe '#should_render_deployment_frequency_charts' do
+    it 'always returns false' do
+      expect(should_render_deployment_frequency_charts).to be(false)
+    end
+  end
 end

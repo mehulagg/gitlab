@@ -42,6 +42,8 @@ export default {
   vulnerabilityIssueLinksPath: '/api/:version/vulnerabilities/:id/issue_links',
   applicationSettingsPath: '/api/:version/application/settings',
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
+  projectDeploymentFrequencyAnalyticsPath:
+    '/api/:version/projects/:id/analytics/deployment_frequency',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -329,5 +331,14 @@ export default {
   updateApplicationSettings(data) {
     const url = Api.buildUrl(this.applicationSettingsPath);
     return axios.put(url, data);
+  },
+
+  deploymentFrequencies(projectId, params = {}) {
+    const url = Api.buildUrl(this.projectDeploymentFrequencyAnalyticsPath).replace(
+      ':id',
+      encodeURIComponent(projectId),
+    );
+
+    return axios.get(url, { params });
   },
 };

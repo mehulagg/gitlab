@@ -9565,6 +9565,27 @@ msgstr ""
 msgid "Deployment Frequency"
 msgstr ""
 
+msgid "DeploymentFrequencyCharts|Date"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Deployments"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Something went wrong while getting deployment frequency data"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|Deployments charts"
+msgstr ""
+
 msgid "Deployment|API"
 msgstr ""
 

@@ -818,4 +818,21 @@ describe('Api', () => {
       });
     });
   });
+
+  describe('Project analytics: deployment frequency', () => {
+    const projectPath = 'test/project';
+    const encodedProjectPath = encodeURIComponent(projectPath);
+    const params = { environment: 'production' };
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${encodedProjectPath}/analytics/deployment_frequency`;
+
+    describe('deploymentFrequencies', () => {
+      it('GETs the right url', async () => {
+        mock.onGet(expectedUrl, { params }).replyOnce(httpStatus.OK, []);
+
+        const { data } = await Api.deploymentFrequencies(projectPath, params);
+
+        expect(data).toEqual([]);
+      });
+    });
+  });
 });
