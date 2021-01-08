@@ -176,7 +176,7 @@ export default {
 </script>
 <template>
   <div>
-    <h4 class="gl-my-4">{{ __('DeploymentFrequencyCharts|Deployments charts') }}</h4>
+    <h4 class="gl-my-4">{{ s__('DeploymentFrequencyCharts|Deployments charts') }}</h4>
     <ci-cd-analytics-area-chart
       v-for="(chart, index) in charts"
       :key="index"
