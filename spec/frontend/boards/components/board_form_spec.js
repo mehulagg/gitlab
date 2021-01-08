@@ -176,7 +176,6 @@ describe('BoardForm', () => {
       it('calls a correct GraphQL mutation and redirects to correct page from existing board', async () => {
         window.location = new URL('https://test/boards/1');
         createComponent({ canAdminBoard: true });
-
         fillForm();
 
         await waitForPromises();
@@ -197,7 +196,6 @@ describe('BoardForm', () => {
       it('calls a correct GraphQL mutation and redirects to correct page from boards list', async () => {
         window.location = new URL('https://test/boards');
         createComponent({ canAdminBoard: true });
-
         fillForm();
 
         await waitForPromises();
@@ -217,9 +215,7 @@ describe('BoardForm', () => {
 
       it('shows an error flash if GraphQL mutation fails', async () => {
         mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
-
         createComponent({ canAdminBoard: true });
-
         fillForm();
 
         await waitForPromises();
@@ -290,25 +286,41 @@ describe('BoardForm', () => {
       await waitForPromises();
       expect(visitUrl).toHaveBeenCalledWith('321');
     });
+
+    it('shows an error flash if GraphQL mutation fails', async () => {
+      mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+      createComponent({ canAdminBoard: true });
+      findInput().trigger('keyup.enter', { metaKey: true });
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalled();
+
+      await waitForPromises();
+      expect(visitUrl).not.toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled();
+    });
   });
 
   describe('when deleting a board', () => {
     beforeEach(() => {
       boardsStore.state.currentPage = 'delete';
-      mutate = jest.fn().mockResolvedValue({});
-      createComponent({ canAdminBoard: true });
     });
 
     it('passes correct primary action text and variant', () => {
+      createComponent({ canAdminBoard: true });
       expect(findModalActionPrimary().text).toBe('Delete');
       expect(findModalActionPrimary().attributes[0].variant).toBe('danger');
     });
 
     it('renders delete confirmation message', () => {
+      createComponent({ canAdminBoard: true });
       expect(findDeleteConfirmation().exists()).toBe(true);
     });
 
     it('calls a correct GraphQL mutation and redirects to correct page after deleting board', async () => {
+      mutate = jest.fn().mockResolvedValue({});
+      createComponent({ canAdminBoard: true });
       findModal().vm.$emit('primary');
 
       await waitForPromises();
@@ -322,6 +334,20 @@ describe('BoardForm', () => {
 
       await waitForPromises();
       expect(visitUrl).toHaveBeenCalledWith('root');
+    });
+
+    it('shows an error flash if GraphQL mutation fails', async () => {
+      mutate = jest.fn().mockRejectedValue('Houston, we have a problem');
+      createComponent({ canAdminBoard: true });
+      findModal().vm.$emit('primary');
+
+      await waitForPromises();
+
+      expect(mutate).toHaveBeenCalled();
+
+      await waitForPromises();
+      expect(visitUrl).not.toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalled();
     });
   });
 });
