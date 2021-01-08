@@ -846,7 +846,7 @@ See [this issue](https://gitlab.com/gitlab-org/container-registry/-/issues/149) 
 
 To work around this issue, instead of:
 
-```
+```plaintext
 myrepo/multiarchmanifest:latest
 myrepo/manifest/amd-64:latest
 myrepo/manifest/arm:latest
@@ -854,7 +854,7 @@ myrepo/manifest/arm:latest
 
 Use:
 
-```
+```plaintext
 myrepo/multiarchmanifest:latest
 myrepo/manifest:amd-64-latest
 myrepo/manifest:arm-latest
