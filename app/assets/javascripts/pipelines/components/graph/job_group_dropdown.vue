@@ -27,11 +27,11 @@ export default {
       type: Number,
       required: false,
       default: () => Number(uniqueId()),
-    }
+    },
   },
   computed: {
     computedJobId() {
-      return `${this.group.name}-${this.pipelineId}`
+      return `${this.group.name}-${this.pipelineId}`;
     },
     tooltipText() {
       const { name, status } = this.group;

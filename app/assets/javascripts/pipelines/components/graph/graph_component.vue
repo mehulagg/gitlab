@@ -45,8 +45,8 @@ export default {
     };
   },
   computed: {
-    containerId(pipelineId) {
-      return `${this.$options.BASE_CONTAINER_ID}-${this.pipeline.id}`
+    containerId() {
+      return `${this.$options.BASE_CONTAINER_ID}-${this.pipeline.id}`;
     },
     downstreamPipelines() {
       return this.hasDownstreamPipelines ? this.pipeline.downstream : [];
@@ -78,7 +78,7 @@ export default {
   },
   methods: {
     onError(errorType) {
-      this.$emit('error', errorType)
+      this.$emit('error', errorType);
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
@@ -102,7 +102,7 @@ export default {
     >
       <links-layer
         :pipeline-data="graph"
-        :pipelineId="pipeline.id"
+        :pipeline-id="pipeline.id"
         :container-id="containerId"
         :container-ref="containerId"
         :highlighted-job="hoveredJobName"

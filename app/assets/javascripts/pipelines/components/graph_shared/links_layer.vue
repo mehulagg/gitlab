@@ -24,7 +24,9 @@ export default {
   },
   i18n: {
     showLinksAnyways: __('Show links anyways'),
-    tooManyStages: __('This graph has a large number of stages and showing the links between them may have performance implications.'),
+    tooManyStages: __(
+      'This graph has a large number of stages and showing the links between them may have performance implications.',
+    ),
   },
   computed: {
     numStages() {
@@ -48,10 +50,15 @@ export default {
       this.showLinksOverride = true;
     },
   },
-}
+};
 </script>
 <template>
-  <links-inner v-if="showLinkedLayers" v-bind="$attrs" v-on="$listeners" :pipelineData="pipelineData">
+  <links-inner
+    v-if="showLinkedLayers"
+    :pipeline-data="pipelineData"
+    v-bind="$attrs"
+    v-on="$listeners"
+  >
     <slot></slot>
   </links-inner>
   <div v-else>

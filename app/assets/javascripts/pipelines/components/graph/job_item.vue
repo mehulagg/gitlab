@@ -78,7 +78,7 @@ export default {
       type: Number,
       required: false,
       default: () => Number(uniqueId()),
-    }
+    },
   },
   computed: {
     boundary() {
@@ -91,7 +91,7 @@ export default {
       return accessValue(this.dataMethod, 'hasDetails', this.status);
     },
     computedJobId() {
-      return `${this.job.name}-${this.pipelineId}`
+      return `${this.job.name}-${this.pipelineId}`;
     },
     status() {
       return this.job && this.job.status ? this.job.status : {};

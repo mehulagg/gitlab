@@ -28599,7 +28599,7 @@ msgstr ""
 msgid "This field is required."
 msgstr ""
 
-msgid "This graph has a large number of stages and showing the links may be slow."
+msgid "This graph has a large number of stages and showing the links between them may have performance implications."
 msgstr ""
 
 msgid "This group"
