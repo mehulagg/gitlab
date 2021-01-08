@@ -12,7 +12,6 @@ RSpec.describe RuboCop::Cop::RSpec::WebMockEnable do
       expect_offense(<<~RUBY)
         WebMock.disable_net_connect!(allow_localhost: true)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use webmock_enable! instead of calling WebMock.disable_net_connect! directly.
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use webmock_enable! instead of calling WebMock.disable_net_connect! directly.
       RUBY
 
       expect_correction(<<~RUBY)
