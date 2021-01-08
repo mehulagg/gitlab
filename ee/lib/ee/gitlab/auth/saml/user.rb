@@ -16,9 +16,7 @@ module EE
             elsif user&.persisted?
               block_user(user, "not in required group") unless user.blocked?
             else
-              # Return early if user == nil, before calling build_user_synced_attributes_metadata with a nil user object.
               user = nil
-              return
             end
 
             if user
