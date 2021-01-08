@@ -61,3 +61,13 @@ export const scannerProfiles = [
     showDebugMessages: true,
   },
 ];
+
+export const savedScans = [
+  {
+    id: 'gid://gitlab/DastScan/1',
+    name: 'Scan 1',
+    dastSiteProfile: siteProfiles[0],
+    dastScannerProfile: scannerProfiles[0],
+    editPath: '/1/edit',
+  },
+];

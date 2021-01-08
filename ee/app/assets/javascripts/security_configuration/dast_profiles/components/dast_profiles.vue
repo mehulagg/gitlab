@@ -6,6 +6,7 @@ import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -14,6 +15,7 @@ export default {
     GlTab,
     GlTabs,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     createNewProfilePaths: {
       type: Object,
@@ -34,9 +36,9 @@ export default {
   computed: {
     profileSettings() {
       const { createNewProfilePaths } = this;
-
       return getProfileSettings({
         createNewProfilePaths,
+        isDastSavedScansEnabled: this.glFeatures.dastSavedScans,
       });
     },
     tabIndex: {
@@ -96,7 +98,8 @@ export default {
         query,
         variables,
         manual: true,
-        result({ data, error }) {
+        result(res) {
+          const { data, error } = res;
           if (!error) {
             const { project } = data;
             const profileEdges = project?.[profileType]?.edges ?? [];
