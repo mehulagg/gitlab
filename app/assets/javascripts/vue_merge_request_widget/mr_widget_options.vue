@@ -505,7 +505,7 @@ export default {
           />
 
           <mr-widget-alert-message
-            v-if="showMergePipelineForkWarning || true"
+            v-if="showMergePipelineForkWarning"
             type="warning"
             :help-path="mr.mergeRequestPipelinesHelpPath"
           >
