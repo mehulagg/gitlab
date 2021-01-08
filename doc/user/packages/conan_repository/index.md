@@ -388,3 +388,29 @@ The GitLab Conan repository supports the following Conan CLI commands:
   packages you have permission to view.
 - `conan info`: View the information on a given package from the Package Registry.
 - `conan remove`: Delete the package from the Package Registry.
+
+## Troubleshooting Conan packages
+
+### `ERROR: <package> was not found in remote <remote>`
+
+When you attempt to install a Conan package, you might receive a `404` error
+like `ERROR: <package> was not found in remote <remote>`.
+
+This issue occurs when you request a download from the project-level Conan API.
+The resulting URL is missing is project's `/<id>` and Conan commands, like 
+`conan install`, fail.
+
+Workaround: Insert the project's `/<id>` in the appropriate part of the URL.
+For example, use:
+
+```shell
+https://gitlab.example.com/api/v4/projects/<id>/packages/conan/v1/files
+```
+
+Instead of:
+
+```shell
+https://gitlab.example.com/api/v4/packages/conan/v1/files
+```
+
+For more information, see [issue 270129](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).
