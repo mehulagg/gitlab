@@ -33,7 +33,6 @@ RSpec.describe 'package composer details' do
     end
   end
 
-
   subject { post_graphql(query, current_user: user) }
 
   it_behaves_like 'a working graphql query' do
