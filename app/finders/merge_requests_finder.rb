@@ -57,7 +57,7 @@ class MergeRequestsFinder < IssuableFinder
   end
 
   def params_class
-    MergeRequestsFinder::Params
+    self.class.const_get(:Params, false)
   end
 
   def filter_items(_items)
