@@ -20,7 +20,7 @@ module API
     helpers do
       params :filter_params do
         optional :search, type: String, desc: 'Return list of branches matching the search criteria'
-        optional :sort, type: String, desc: 'Return list of branches sorted by the given field'
+        optional :sort, type: String, desc: 'Return list of branches sorted by the given field', default: 'updated_desc'
       end
     end
 

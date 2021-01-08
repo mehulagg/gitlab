@@ -64,7 +64,7 @@ RSpec.describe API::Branches do
           end
 
           it 'merge status matches reality on paginated input' do
-            expected_first_branch_name = project.repository.branches_sorted_by('name')[20].name
+            expected_first_branch_name = project.repository.branches_sorted_by('updated_desc')[20].name
 
             get api(route, current_user), params: base_params.merge(per_page: 20, page: 2)
 
@@ -78,7 +78,7 @@ RSpec.describe API::Branches do
 
         context 'with gitaly pagination params' do
           it 'merge status matches reality on paginated input' do
-            expected_first_branch_name = project.repository.branches_sorted_by('name').first.name
+            expected_first_branch_name = project.repository.branches_sorted_by('updated_desc').first.name
 
             get api(route, current_user), params: base_params.merge(per_page: 20, page_token: 'feature')
 
@@ -125,7 +125,7 @@ RSpec.describe API::Branches do
             it 'merge status matches reality on paginated input' do
               expected_first_branch_name = project.repository.branches_sorted_by('name').drop_while { |b| b.name <= 'feature' }.first.name
 
-              get api(route, current_user), params: base_params.merge(per_page: 20, page_token: 'feature')
+              get api(route, current_user), params: base_params.merge(per_page: 20, page_token: 'feature', sort: 'name')
 
               expect(response).to have_gitlab_http_status(:ok)
               expect(json_response.count).to eq 20
@@ -137,7 +137,7 @@ RSpec.describe API::Branches do
 
           context 'with offset pagination params' do
             it 'ignores legacy pagination params' do
-              expected_first_branch_name = project.repository.branches_sorted_by('name').first.name
+              expected_first_branch_name = project.repository.branches_sorted_by('updated_desc').first.name
               get api(route, current_user), params: base_params.merge(per_page: 20, page: 2)
 
               expect(response).to have_gitlab_http_status(:ok)
