@@ -49,7 +49,7 @@ groups:
    - Assignee
    - [Milestone](../project/milestones/index.md)
    - [Iteration](../group/iterations/index.md)
-   - Release
+   - [Release](../project/releases/index.md)
    - [Label](../project/labels.md)
    - My-reaction
    - Confidential
