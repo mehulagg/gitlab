@@ -365,10 +365,7 @@ RSpec.describe API::Helpers do
   end
 
   describe '#present_disk_file!' do
-    let(:path) { '/tmp/file.txt' }
-    let(:filename) { 'file.txt' }
-    let(:dummy_instance) { dummy_class.include(described_class).new }
-    let(:dummy_class) do
+    let_it_be(:dummy_class) do
       Class.new do
         attr_reader :headers
         alias_method :header, :headers
@@ -378,6 +375,10 @@ RSpec.describe API::Helpers do
         end
       end
     end
+
+    let(:dummy_instance) { dummy_class.include(described_class).new }
+    let(:path) { '/tmp/file.txt' }
+    let(:filename) { 'file.txt' }
 
     subject { dummy_instance.present_disk_file!(path, filename) }
 
