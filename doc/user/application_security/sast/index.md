@@ -729,6 +729,7 @@ triggered even if the scanner doesn't support your project. For more details abo
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
 
 ### SpotBugs UTF-8 "unmappable character" errors
+
 These errors occur when UTF-8 encoding is not enabled on a SpotBugs build and there are UTF-8 characters within the source code. 
 To fix this error, enable UTF-8 for your project's build tool.
 
