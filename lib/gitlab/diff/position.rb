@@ -19,6 +19,7 @@ module Gitlab
                :height,
                :x,
                :y,
+               :line_range,
                :position_type, to: :formatter
 
       # A position can belong to a text line or to an image coordinate
@@ -165,6 +166,11 @@ module Gitlab
         else
           diff_files.first
         end
+      end
+
+      def multiline?
+        self.line_range&.dig("start", "old_line") != self.line_range&.dig("end", "old_line") &&
+          self.line_range&.dig("start", "new_line") != self.line_range&.dig("end", "new_line")
       end
 
       private

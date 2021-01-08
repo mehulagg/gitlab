@@ -123,6 +123,10 @@ module Notes
 
     def track_note_creation_usage_for_merge_requests(note)
       Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_create_comment_action(user: note.author)
+
+      if note.position.multiline?
+        Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_create_multiline_comment_action(user: note.author)
+      end
     end
   end
 end
