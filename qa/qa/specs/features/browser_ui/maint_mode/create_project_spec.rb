@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'pry-byebug'
 
 module QA
   RSpec.describe 'Manage', :maint_mode do
@@ -24,6 +23,7 @@ module QA
           end
         end
 
+        # Need to set existing project name on line 32
         context 'An existing project' do
           it 'user CAN view but CANNOT edit an existing project' do
             Flow::Login.while_signed_in do
@@ -41,8 +41,22 @@ module QA
             end
           end
 
-          it 'user CANNOT delete an existing project' do
-          end
+          # it 'user CANNOT delete an existing project' do
+          #   Flow::Login.while_signed_in do
+          #     Page::Dashboard::Projects.perform do |dashboard|
+          #       dashboard.go_to_project('awesome-project-3305715c998a2c91')
+          #     end
+
+          #     Page::Project::Show.perform(&:go_to_general_settings)
+
+          #     Page::Project::Settings::Main.perform do |settings|
+          #       settings.expand_advanced_settings do |advanced|
+          #         advanced.delete_project!('awesome-project-3305715c998a2c91')
+          #       end
+          #       expect(settings).to have_content('You cannot perform write operations on a read-only instance')
+          #     end
+          #   end
+          # end
         end
       end
     end
