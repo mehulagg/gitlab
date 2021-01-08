@@ -6,6 +6,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
+  GlFilteredSearchToken,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
@@ -132,6 +133,18 @@ export default {
             });
           },
         },
+        {
+          type: 'confidential',
+          icon: 'eye-slash',
+          title: __('Confidential'),
+          unique: true,
+          token: GlFilteredSearchToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          options: [
+            { icon: 'eye-slash', value: true, title: __('Yes') },
+            { icon: 'eye', value: false, title: __('No') },
+          ],
+        },
       ];
     },
     getFilteredSearchValue() {
@@ -228,6 +241,9 @@ export default {
               break;
             case 'label_name':
               labels.push(filter.value.data);
+              break;
+            case 'confidential':
+              filterParams.confidential = filter.value.data;
               break;
             default:
               break;
