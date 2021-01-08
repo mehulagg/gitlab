@@ -1613,7 +1613,7 @@ RSpec.describe Notify do
     end
 
     describe 'group expiration date updated' do 
-      let_it_be(:group_member) { create(:group_member, :developer, group: group, expires_at: 1.day.from_now) }
+      let_it_be(:group_member) { create(:group_member, group: group, expires_at: 1.day.from_now) }
 
       before do
         group_member.update!(expires_at: 2.days.from_now)
@@ -1630,6 +1630,7 @@ RSpec.describe Notify do
       it 'contains all the useful information' do
         is_expected.to have_subject 'Group expiration date changed'
         is_expected.to have_body_text group_member.user.name
+        is_expected.to have_body_text group.name
       end
     end
   end
