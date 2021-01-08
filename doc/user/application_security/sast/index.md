@@ -729,11 +729,13 @@ triggered even if the scanner doesn't support your project. For more details abo
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
 
 ### SpotBugs UTF-8 "unmappable character" errors
+
 These errors occur when UTF-8 encoding is not enabled on a SpotBugs build and there are UTF-8 chacters within the source code. 
 To fix this error, enable UTF-8 for your project's build tool.
 
 For Gradle builds, add the following to your `build.gradle` file:
-```
+
+```gradle
 compileJava.options.encoding = 'UTF-8'
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -741,7 +743,8 @@ tasks.withType(JavaCompile) {
 ```
 
 For Maven builds, add the following to your `pom.xml` file:
-```
+
+```xml
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 </properties>
