@@ -2034,6 +2034,13 @@ This example creates four paths of execution:
 
 ##### Changing the `needs:` job limit **(FREE SELF)**
 
+WARNING:
+It is not currently possible to `needs:` a single job when using `parallel:`.
+Instead, all the jobs will match, and their `artifacts:` will clobber eachother.  
+Make sure that your artifacts have unique paths if your intention is to
+keep all of them, for instance by using the variables from the
+`parallel:matrix:`.
+
 The maximum number of jobs that can be defined in `needs:` defaults to 50.
 
 A GitLab administrator with [access to the GitLab Rails console](../../administration/feature_flags.md)
