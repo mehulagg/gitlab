@@ -2479,7 +2479,7 @@ Details of a composer package.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `composerJson` | PackageComposerJsonType! | Data of the composer.json file. |
+| `composerJson` | PackageComposerJsonType! | Data of the composer.JSON file. |
 | `createdAt` | Time! | The created date. |
 | `id` | ID! | The ID of the package. |
 | `name` | String! | The name of the package. |
@@ -2494,14 +2494,14 @@ Details of a composer package.
 
 ### PackageComposerJsonType
 
-Represents a composer json file.
+Represents a composer JSON file.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `license` | String | The license set in the composer.json file. |
-| `name` | String | The name set in the composer.json file. |
-| `type` | String | The type set in the composer.json file. |
-| `version` | String | The version set in the composer.json file. |
+| `license` | String | The license set in the composer.JSON file. |
+| `name` | String | The name set in the composer.JSON file. |
+| `type` | String | The type set in the composer.JSON file. |
+| `version` | String | The version set in the composer.JSON file. |
 
 ### PackageFileRegistry
 

@@ -48571,7 +48571,7 @@
           "fields": [
             {
               "name": "composerJson",
-              "description": "Data of the composer.json file.",
+              "description": "Data of the composer.JSON file.",
               "args": [
 
               ],
@@ -48897,11 +48897,11 @@
         {
           "kind": "OBJECT",
           "name": "PackageComposerJsonType",
-          "description": "Represents a composer json file",
+          "description": "Represents a composer JSON file",
           "fields": [
             {
               "name": "license",
-              "description": "The license set in the composer.json file.",
+              "description": "The license set in the composer.JSON file.",
               "args": [
 
               ],
@@ -48915,7 +48915,7 @@
             },
             {
               "name": "name",
-              "description": "The name set in the composer.json file.",
+              "description": "The name set in the composer.JSON file.",
               "args": [
 
               ],
@@ -48929,7 +48929,7 @@
             },
             {
               "name": "type",
-              "description": "The type set in the composer.json file.",
+              "description": "The type set in the composer.JSON file.",
               "args": [
 
               ],
@@ -48943,7 +48943,7 @@
             },
             {
               "name": "version",
-              "description": "The version set in the composer.json file.",
+              "description": "The version set in the composer.JSON file.",
               "args": [
 
               ],

@@ -16431,7 +16431,7 @@ Details of a composer package
 """
 type PackageComposerDetails {
   """
-  Data of the composer.json file.
+  Data of the composer.JSON file.
   """
   composerJson: PackageComposerJsonType!
 
@@ -16552,26 +16552,26 @@ type PackageComposerDetails {
 }
 
 """
-Represents a composer json file
+Represents a composer JSON file
 """
 type PackageComposerJsonType {
   """
-  The license set in the composer.json file.
+  The license set in the composer.JSON file.
   """
   license: String
 
   """
-  The name set in the composer.json file.
+  The name set in the composer.JSON file.
   """
   name: String
 
   """
-  The type set in the composer.json file.
+  The type set in the composer.JSON file.
   """
   type: String
 
   """
-  The version set in the composer.json file.
+  The version set in the composer.JSON file.
   """
   version: String
 }
