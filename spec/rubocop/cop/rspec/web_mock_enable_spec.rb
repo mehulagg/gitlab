@@ -10,12 +10,13 @@ RSpec.describe RuboCop::Cop::RSpec::WebMockEnable do
   context 'when calling WebMock.disable_net_connect!' do
     it 'registers an offence and autocorrects it' do
       expect_offense(<<~RUBY)
-      WebMock.disable_net_connect!(allow_localhost: true)
+        WebMock.disable_net_connect!(allow_localhost: true)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use webmock_enable! instead of calling WebMock.disable_net_connect! directly.
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use webmock_enable! instead of calling WebMock.disable_net_connect! directly.
       RUBY
 
       expect_correction(<<~RUBY)
-      webmock_enable!
+        webmock_enable!
       RUBY
     end
   end
