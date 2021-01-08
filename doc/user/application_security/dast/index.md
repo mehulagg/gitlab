@@ -959,7 +959,7 @@ For information on this, see the [general Application Security troubleshooting s
 Newer versions of the DAST CI template do not define stages in order to avoid
 overwriting stages from other CI files. If you've recently started using
 `DAST.latest.gitlab-ci.yml` or upgraded to a new major release of GitLab and
-began receiving this error, you will need to define a `dast` stage with your
+began receiving this error, you must define a `dast` stage with your
 other stages. Please note that you must have a running application for DAST to
 scan. If your application is set up in your pipeline, it must be deployed
  in a stage _before_ the `dast` stage:
