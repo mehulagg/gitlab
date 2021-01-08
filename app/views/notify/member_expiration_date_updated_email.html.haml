@@ -2,7 +2,11 @@
 
 %p
   - if @member.expires?
-    = _('Your %{group} membership will now expire in %{days} days.') % { group: @member_source.human_name, days: (@member.expires_at - Date.today).to_i }
+    - days = (@member.expires_at - Date.today).to_i
+    - if days == 1
+      = _('Your %{group} membership will now expire in %{days} day.') % { group: @member_source.human_name, days: days }
+    - else
+      = _('Your %{group} membership will now expire in %{days} days.') % { group: @member_source.human_name, days: days }
   - else
     = _('Your %{group} membership expiration date has been removed.') % { group: @member_source.human_name }
 %p

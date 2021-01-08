@@ -32137,6 +32137,9 @@ msgstr ""
 msgid "Your %{group} membership expiration date has been removed."
 msgstr ""
 
+msgid "Your %{group} membership will now expire in %{days} day."
+msgstr ""
+
 msgid "Your %{group} membership will now expire in %{days} days."
 msgstr ""
 
