@@ -125,7 +125,7 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
     t.index ["retry_at"], name: "index_package_file_registry_on_retry_at"
     t.index ["state"], name: "index_package_file_registry_on_state"
     t.index ["verification_retry_at"], name: "package_file_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
-    t.index ["verification_state"], name: "package_file_registry_needs_verification", where: "((state = 2) AND ((verification_state = 0) OR (verification_state = 3)))"
+    t.index ["verification_state"], name: "package_file_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
     t.index ["verified_at"], name: "package_file_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
