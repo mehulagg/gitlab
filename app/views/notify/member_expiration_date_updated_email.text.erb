@@ -6,4 +6,6 @@
 <%= _('Your %{group} membership expiry has been removed.') % { group: @member_source.human_name } %>
 <% end %> 
 
-<%= _('For more information, review your group membership: %{membership}.') % { membership: root_url } %>
+<% user = _('?search=%{user}') % { user: @member.user.username } %>
+<% url = group_group_members_url(@member_source) + user %>
+<%= _('For additional information, review your group membership: %{url} or contact your group administrator.') % {url: url} %>
