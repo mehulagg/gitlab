@@ -32125,6 +32125,9 @@ msgstr ""
 msgid "YouTube URL or ID"
 msgstr ""
 
+msgid "Your %{group} membership expiration date has changed."
+msgstr ""
+
 msgid "Your %{host} account was signed in to from a new location"
 msgstr ""
 
