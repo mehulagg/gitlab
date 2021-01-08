@@ -58,6 +58,12 @@ module Types
             argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
           end
 
+    field :package_composer_details, Types::Packages::PackageComposerDetailsType,
+          null: true,
+          description: 'Find a composer package' do
+            argument :id, ::Types::GlobalIDType[::Packages::Package], required: true, description: 'The global ID of the package'
+          end
+
     field :user, Types::UserType,
           null: true,
           description: 'Find a user',
@@ -121,8 +127,21 @@ module Types
       GitlabSchema.find_by_gid(id)
     end
 
+    def package_composer_details(id:)
+      find_package(id)
+    end
+
     def current_user
       context[:current_user]
+    end
+
+    private
+
+    def find_package(id)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::Packages::Package].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
     end
   end
 end
