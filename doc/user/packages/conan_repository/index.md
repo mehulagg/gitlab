@@ -105,7 +105,7 @@ your project or instance.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) in GitLab 13.4.
 
 NOTE:
-There is a known issue with this configuration, please see [gitlab-#270129](https://gitlab.com/gitlab-org/gitlab/-/issues/270129)
+There is a known issue with this configuration, please see [GitLab-#270129](https://gitlab.com/gitlab-org/gitlab/-/issues/270129)
 for more details.
 
 Set a remote so you can work with packages in a project without
