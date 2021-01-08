@@ -27,7 +27,7 @@ In maintenance mode, admins can edit application settings. This will allow them 
 
 All users can log in and out of the GitLab instance.
 
-If Geo is enabled, logging out of secondary is allowed too. But logging back into secondary is currently broken. If a user is already logged into a secondary when maintenance mode is enabled, they will continue to be logged in, unless they log out themselves.
+If Geo is enabled, logging out of secondary is allowed too. But logging back into secondary is currently broken. If a user is already logged into a secondary when maintenance mode is enabled, they will continue to be logged in, unless they log out themselves. This is [a known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/296534).
 
 ## CI/CD
 
