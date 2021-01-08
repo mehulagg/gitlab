@@ -6,10 +6,6 @@ RSpec.describe 'Project Analytics (JavaScript fixtures)' do
   include ApiHelpers
   include JavaScriptFixturesHelpers
 
-  around do |example|
-    freeze_time { example.run }
-  end
-
   let_it_be(:reporter) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:environment) { create(:environment, project: project, name: 'production') }
