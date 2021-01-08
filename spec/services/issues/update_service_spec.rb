@@ -11,6 +11,7 @@ RSpec.describe Issues::UpdateService, :mailer do
   let_it_be(:label) { create(:label, project: project) }
   let_it_be(:label2) { create(:label, project: project) }
   let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:iteration) { create(:iteration, group: group) }
 
   let(:issue) do
     create(:issue, title: 'Old title',
@@ -55,7 +56,8 @@ RSpec.describe Issues::UpdateService, :mailer do
           due_date: Date.tomorrow,
           discussion_locked: true,
           severity: 'low',
-          milestone_id: milestone.id
+          milestone_id: milestone.id,
+          sprint_id: iteration.id
         }
       end
 
@@ -74,6 +76,7 @@ RSpec.describe Issues::UpdateService, :mailer do
         expect(issue.discussion_locked).to be_truthy
         expect(issue.confidential).to be_falsey
         expect(issue.milestone).to eq milestone
+        expect(issue.iteration).to eq iteration
       end
 
       it 'updates issue milestone when passing `milestone` param' do
@@ -293,6 +296,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           expect(issue.due_date).to be_nil
           expect(issue.discussion_locked).to be_falsey
           expect(issue.confidential).to be_falsey
+          expect(issue.iteration).to be_nil
         end
       end
 
@@ -779,6 +783,20 @@ RSpec.describe Issues::UpdateService, :mailer do
           expect do
             update_issue(description: "- [ ] One\n- [ ] Two\n- [ ] Three")
           end.not_to change { Note.count }
+        end
+      end
+    end
+
+    context 'updating iteration' do
+      context 'removing the iteration' do
+        let(:params) { { sprint_id: -1 } }
+
+        before do
+          issue.update!(iteration: iteration)
+        end
+
+        it 'removes the iteration' do
+          expect(described_class.new(project, user, params).execute(issue).reload.iteration).to be_nil
         end
       end
     end

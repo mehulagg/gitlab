@@ -34,16 +34,20 @@ module Issues
 
     private
 
-    def filter_params(merge_request)
+    def filter_params(issue)
       super
 
       moved_issue = params.delete(:moved_issue)
+
+      params.delete(:sprint_id) unless can_admin_issuable?(issue)
 
       # Setting created_at, updated_at and iid is allowed only for admins and owners or
       # when moving an issue as we preserve the original issue attributes except id and iid.
       params.delete(:iid) unless current_user.can?(:set_issue_iid, project)
       params.delete(:created_at) unless moved_issue || current_user.can?(:set_issue_created_at, project)
       params.delete(:updated_at) unless moved_issue || current_user.can?(:set_issue_updated_at, project)
+
+      filter_iteration
     end
 
     def create_assignee_note(issue, old_assignees)
@@ -72,6 +76,19 @@ module Issues
       return unless milestone
 
       Milestones::IssuesCountService.new(milestone).delete_cache
+    end
+
+    def filter_iteration
+      sprint_id = params[:sprint_id]
+      return unless sprint_id
+
+      params[:sprint_id] = '' if sprint_id == IssuableFinder::Params::NONE
+      groups = project.group&.self_and_ancestors&.select(:id)
+
+      iteration =
+        Iteration.for_projects_and_groups([project.id], groups).find_by_id(sprint_id)
+
+      params[:sprint_id] = '' unless iteration
     end
   end
 end
