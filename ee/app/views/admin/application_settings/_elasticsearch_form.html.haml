@@ -35,6 +35,7 @@
           .card-body
             .form-group
               .form-check
+                - STDERR.puts "=== ES form is #{ENV['ELASTIC_URL']}"
                 - pending_migrations = Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing? rescue false
                 - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations
                 = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox

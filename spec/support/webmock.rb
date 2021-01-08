@@ -31,4 +31,5 @@ def webmock_enable!(options = {})
   )
 end
 
+STDERR.puts "=== Enabling webmock for #{webmock_allowed_hosts}, #{ENV['ELASTIC_URL']}"
 webmock_enable!
