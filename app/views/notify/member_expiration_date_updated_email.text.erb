@@ -1,3 +1,9 @@
 <%= say_hi(@member.user) %>
 
-<%= _('Your %{group} membership expiration date has changed.' % { group: @member_source.human_name }) %>
+<% if @member.expires? %>
+<%= _('Your %{group} membership will now expire in %{days} days.') % { group: @member_source.human_name, days: (@member.expires_at - Date.today).to_i } %>
+<% else %> 
+<%= _('Your %{group} membership expiry has been removed.') % { group: @member_source.human_name } %>
+<% end %> 
+
+<%= _('For more information, review your group membership, or contact your group administrator.') %>
