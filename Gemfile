@@ -293,7 +293,7 @@ gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
 gem 'gemojione', '~> 3.3'
-gem 'gon', '~> 6.2'
+gem 'gon', '~> 6.4'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
