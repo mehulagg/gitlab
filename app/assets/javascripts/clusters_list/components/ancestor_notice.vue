@@ -1,11 +1,12 @@
 <script>
-import { GlLink, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlSprintf , GlAlert } from '@gitlab/ui';
 import { mapState } from 'vuex';
 
 export default {
   components: {
     GlLink,
     GlSprintf,
+    GlAlert,
   },
   computed: {
     ...mapState(['ancestorHelperPath', 'hasAncestorClusters']),
@@ -14,7 +15,9 @@ export default {
 </script>
 
 <template>
-  <div v-if="hasAncestorClusters" class="bs-callout bs-callout-info">
+  <gl-alert
+    v-if="hasAncestorClusters" 
+    variant="info" :dismissible="false" class="gl-mt-3"
     <p>
       <gl-sprintf
         :message="
@@ -30,5 +33,5 @@ export default {
         </template>
       </gl-sprintf>
     </p>
-  </div>
+  </gl-alert>
 </template>
