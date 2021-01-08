@@ -1,5 +1,5 @@
 <script>
-import { GlLink, GlSprintf , GlAlert } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlAlert } from '@gitlab/ui';
 import { mapState } from 'vuex';
 
 export default {
@@ -15,9 +15,7 @@ export default {
 </script>
 
 <template>
-  <gl-alert
-    v-if="hasAncestorClusters" 
-    variant="info" :dismissible="false" class="gl-mt-3"
+  <gl-alert v-if="hasAncestorClusters" variant="info" :dismissible="false" class="gl-mt-3">
     <p>
       <gl-sprintf
         :message="
