@@ -349,7 +349,7 @@ Stages in pipeline mini graphs are collapsible. Hover your mouse over them and c
 
 ### Pipeline success and duration charts
 
-Pipeline analytics are available on the [**CI / CD Analytics** page](../../user/analytics/ci_cd_analytics.md#pipeline-success-and-duration-charts).
+Pipeline analytics are available on the [**CI/CD Analytics** page](../../user/analytics/ci_cd_analytics.md#pipeline-success-and-duration-charts).
 
 ### Pipeline badges
 
