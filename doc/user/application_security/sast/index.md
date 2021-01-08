@@ -727,3 +727,6 @@ against the given glob pattern. If the number of matches exceeds the maximum, th
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+
+### SpotBugs UTF-8 "unmappable character" errors
+These errors occur when UTF-8 encoding is not enabled on a SpotBugs build and there are UTF-8 chacters within the source code. To fix this error, enable UTF-8 for your project's build tool (maven, gradle, ant).
