@@ -48,7 +48,7 @@ groups:
    - Author
    - Assignee
    - [Milestone](../project/milestones/index.md)
-   - [Iteration](../group/iterations/index.md) ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6)
+   - [Iteration](../group/iterations/index.md)
    - Release
    - [Label](../project/labels.md)
    - My-reaction
