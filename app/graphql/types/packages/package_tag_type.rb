@@ -5,7 +5,7 @@ module Types
     class PackageTagType < BaseObject
       graphql_name 'PackageTag'
       description 'Represents a package tag'
-      authorize :read_package
+      authorize []
 
       field :id, GraphQL::ID_TYPE, null: false, description: 'The ID of the tag.'
       field :name, GraphQL::STRING_TYPE, null: false, description: 'The name of the tag.'
