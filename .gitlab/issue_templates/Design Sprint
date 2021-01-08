@@ -50,7 +50,7 @@ Here is the list of tools for the Sprint preparation, collaboration and document
 Each Sprint day outcomes and material will be documented in a separate issue under the Design Sprint epic. 
 
 * **Mural** (You can join as anonymous but we need to be able to identify input against names, so please create an account beforehand.<br/>
-We will use Mural for most of the Sprint collaboration. Some of the things we will do in Mural: create artefacts like affinity diagrams from participants' input, use post-its to comment on each other's points and to add notes, vote on ideas and solutions, create the first draft of the storyboard.
+We will use Mural for most of the Sprint collaboration. Some of the things we will do in Mural: create artefacts like affinity diagrams from participants' input, use post-its to comment on each other's points and to add notes, vote on ideas and solutions, create the first draft of the prototype.
 The Mural link to the collaboration project will be provided in the issue before the start of the Design Sprint.
 
 * **Video and/or screen recording tool** (Loom, Quicktime, Zoom or another tool you are using).<br/>
@@ -80,9 +80,9 @@ If you enjoy taking notes using post-it notes make sure you have available some 
   * [The Design Sprint](https://www.gv.com/sprint/)
   * [The Ultimate Guide To Remote Design Sprints](https://www.dropbox.com/s/umtqtnwz3cshxh5/The%20Ultimate%20Guide%20To%20Remote%20Design%20Sprints.pdf?dl=0)
 
-## Pre-Workshop tasks
+## Asyncronus tasks
 
-### Admin work
+### Design Sprint preparation
 
 <!-- Replace the roles with GitLab handles to assign to specific participants -->
 
@@ -95,8 +95,9 @@ If you enjoy taking notes using post-it notes make sure you have available some 
 - [ ] Prepare material and tools (eg. presentation templates, Google folders, Instructions videos etc) and Mural board from the [Mural template ](https://app.mural.co/invitation/mural/gitlab2474/1586990879319?sender=jmandell0210&key=03c25e92-9a43-4a3d-8907-6f0c3b094ab8) - facilitator 
 - [ ] Finalize Agenda - `facilitator` 
 - [ ] Run a test with material and tools - `facilitator` 
+- [ ] Start user recruiting for prototype user testing (EOD 1) - `facilitator` or `decider`
 
-### Homework exercises
+### Pre-Sprint activities (Homework exercises)
 
 Each exercise should be explained and documented in a separate issue. You can use the example issues above as templates.
 
@@ -106,6 +107,18 @@ Each exercise should be explained and documented in a separate issue. You can us
 - [ ] How might we... notetaking assignment (**deadline**: [date]) - `all participants except the facilitator`
 - [ ] Voting How might we... notes assignment (**deadline**: [date]) - `all participants except the facilitator`
 - [ ] Add all required material to the Mural board (**deadline**: [date]) - `facilitator`
+
+### During Sprint activities
+
+- [ ] Organise user testing sessions - `facilitator` or `decider`
+- [ ] Create the Prototype to be tested and task list (End of Day 3) - `Product designer` or `Front end developer`
+- [ ] Run user testing sessions - `facilitator` or `decider`
+
+### Post-Sprint activities
+
+- [ ]  Create a feedback issue for the Design Sprint - `facilitator` or `decider` 
+- [ ] Analyse user testing results - `facilitator` or `decider`
+- [ ] Create report and share with the Design Sprint participants and wider team - `facilitator` or `decider`
 
 ## Personas
 
@@ -155,14 +168,21 @@ Deciding which persona we are focusing on will be part of the Day 1 discussions 
  |  Activity  | Duration | Tool  | Description  |
 |---|---|---|---|
 | User test flow | 25 mins | Mural | • Each participant writes (on separate stickies) 6 steps/actions that represent a each step of a flow (you can think of a high-level prototype flow) from start to finish. Place them in a column on the User Test board. (10 mins) <br/> • Each participant takes 1 minute to walk the team through the steps one-by-one (5-10 mins). Note: It's better to have the Decider go last. <br/> • Voting: All the Sprint participants get one red dot (the Decider gets 2) to vote on the flow row they think is the best foundation for the prototype. <br/> • After everyone has voted the Decider will vote their favourite row with one dot and they can use the second dot to vote for an element of another flow they think should be incorporated in the prototype. (5 mins) <br/> • If selected, copy this sticky in the flow voted by the Decider. | 
-| Storyboard | 45 mins | Mural | • Copy the winning flow from the User Test Flow exercise to the Storyboard section. <br/> • Look at the sketch concepts and move over any relevant screens that fulfill the needs of the sticky note in that container. You can move parts of concepts. <br/> • Fill in the details that are required for each step described in the sticky. |
+| Storyboard | 45 mins | Mural | • Copy the winning flow from the User Test Flow exercise to the Storyboard/Prototype section. <br/> • Look at the sketch concepts and move over any relevant screens that fulfill the needs of the sticky note in that container. You can move parts of concepts. <br/> • Fill in the details that are required for each step described in the sticky. |
 | Recap day | 5 mins | Mural, Zoom | Summarise activities of the day and decisions. Brief walkthrough of the next day's activities and wrap up the day. |
 
 ### Day 4
  |  Activity  | Duration | Tool  | Description  |
 |---|---|---|---|
-| Validate storyboard | 30 mins | Mural | • Go through the Storyboard sketched by the facilitator and discuss any inaccuracies or missing content. |
-| Wrap up the sprint | 15 mins | Zoom, GitLab | • Recap the Sprint and discuss next steps. If there is time create follow up issues. |
+| Validate Prototype | 30 mins | Mural | • Go through the Prototype created by the Product designer of Front end developer and discuss any inaccuracies or missing content. |
+| Wrap up the Sprint | 15 mins | Zoom, GitLab | • Recap the Sprint and discuss next steps. Create user testing issues. |
+
+### Day 5
+ |  Activity  | Duration | Tool  | Description  |
+|---|---|---|---|
+| Prototype testing with 5 users | ~45 mins | Figma or code/Zoom | • Test the prototype with users. |
+| Analyse user testing results | ? | ? | • Analyse the results of the user testing sessions, create a report and share with the decider and the other Sprint participants. |
+
 
 ## Ground Rules
 *  Honor the Facilitator's directions. They're the guide for the entire process.
