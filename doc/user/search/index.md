@@ -36,6 +36,10 @@ on the search field on the top-right of your screen:
 
 ### Filtering issue and merge request lists
 
+> - Filtering by Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
+> - Filtering by child Epics was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.0.
+> - Filtering by Iterations was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118742) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.6.
+
 Follow these steps to filter the **Issues** and **Merge Requests** list pages within projects and
 groups:
 
