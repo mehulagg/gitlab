@@ -118,8 +118,10 @@ module Emails
       @member_source_type = member_source_type
       @member_id = member_id
 
+      return unless member_exists?
+
       member_email_with_layout(
-        to: member.notification_email_for(notification_group),
+        to: member.user.notification_email_for(notification_group),
         subject: subject('Group expiration date changed'))
     end
 

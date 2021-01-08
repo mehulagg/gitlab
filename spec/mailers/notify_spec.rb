@@ -1611,6 +1611,27 @@ RSpec.describe Notify do
         is_expected.to have_body_text group_member.invite_email
       end
     end
+
+    describe 'group expiration date updated' do 
+      let_it_be(:group_member) { create(:group_member, :developer, group: group, expires_at: 1.day.from_now) }
+
+      before do
+        group_member.update!(expires_at: 2.days.from_now)
+      end
+
+      subject { described_class.member_expiration_date_updated_email('group', group_member.id) }
+
+      it_behaves_like 'an email sent from GitLab'
+      it_behaves_like 'it should not have Gmail Actions links'
+      it_behaves_like "a user cannot unsubscribe through footer link"
+      it_behaves_like 'appearance header and footer enabled'
+      it_behaves_like 'appearance header and footer not enabled'
+
+      it 'contains all the useful information' do
+        is_expected.to have_subject 'Group expiration date changed'
+        is_expected.to have_body_text group_member.user.name
+      end
+    end
   end
 
   describe 'confirmation if email changed' do
