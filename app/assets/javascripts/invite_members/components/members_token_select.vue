@@ -51,7 +51,7 @@ export default {
       this.hideDropdownWithNoItems = false;
       this.query = query;
       this.loading = true;
-      this.retrieveUsers(query);
+      this.retrieveUsers();
     },
     retrieveUsers: debounce(function debouncedRetrieveUsers() {
       return getUsers(this.query, this.$options.queryOptions)

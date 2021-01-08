@@ -20,6 +20,7 @@ const user3 = {
   username: 'one_2',
   avatar_url: '',
 };
+const sharedGroup = { id: '981' };
 
 const createComponent = (data = {}) => {
   return shallowMount(InviteMembersModal, {
@@ -271,6 +272,58 @@ describe('InviteMembersModal', () => {
             .mockRejectedValue({ response: { data: { success: false } } });
 
           jest.spyOn(Api, 'addGroupMembersByUserId').mockResolvedValue({ data: postData });
+          jest.spyOn(wrapper.vm, 'showToastMessageError');
+
+          clickInviteButton();
+        });
+
+        it('displays the generic error toastMessage', async () => {
+          await waitForPromises();
+
+          expect(wrapper.vm.showToastMessageError).toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('when inviting a group to share', () => {
+      describe('when sharing the group is successful', () => {
+        const groupPostData = {
+          group_id: sharedGroup.id,
+          group_access: '10',
+          access_level: '10',
+          expires_at: undefined,
+          format: 'json',
+        };
+
+        beforeEach(() => {
+          wrapper = createComponent({ isInviteGroup: true, groupToBeSharedWith: sharedGroup });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+          jest.spyOn(Api, 'groupShareWithGroup').mockResolvedValue({ data: groupPostData });
+          jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
+
+          clickInviteButton();
+        });
+
+        it('calls Api groupShareWithGroup with the correct params', () => {
+          expect(Api.groupShareWithGroup).toHaveBeenCalledWith(id, groupPostData);
+        });
+
+        it('displays the successful toastMessage', () => {
+          expect(wrapper.vm.showToastMessageSuccess).toHaveBeenCalled();
+        });
+      });
+
+      describe('when sharing the group fails', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ isInviteGroup: true, groupToBeSharedWith: sharedGroup });
+
+          wrapper.vm.$toast = { show: jest.fn() };
+
+          jest
+            .spyOn(Api, 'groupShareWithGroup')
+            .mockRejectedValue({ response: { data: { success: false } } });
+
           jest.spyOn(wrapper.vm, 'showToastMessageError');
 
           clickInviteButton();

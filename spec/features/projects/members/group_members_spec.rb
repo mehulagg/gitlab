@@ -18,6 +18,21 @@ RSpec.describe 'Projects members', :js do
     sign_in(user)
   end
 
+  context 'when Invite Members modal is disabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: false)
+      visit project_project_members_path(project)
+    end
+
+    it 'does not have a link to the Invite Members modal on the project members page' do
+      expect(page).not_to have_selector('.js-invite-members-trigger')
+    end
+
+    it 'has a nav-tab for the haml invite form' do
+      expect(page).to have_selector('#invite-member-tab')
+    end
+  end
+
   context 'with a group invitee' do
     before do
       group_invitee

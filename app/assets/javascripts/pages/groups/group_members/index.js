@@ -8,6 +8,8 @@ import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigg
 import { initMembersApp } from '~/members/index';
 import { groupMemberRequestFormatter } from '~/groups/members/utils';
 import { groupLinkRequestFormatter } from '~/members/utils';
+import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
+import { memberRequestFormatter, groupLinkRequestFormatter } from '~/groups/members/utils';
 import { s__ } from '~/locale';
 
 function mountRemoveMemberModal() {
@@ -70,5 +72,6 @@ memberExpirationDate('.js-access-expiration-date-groups');
 mountRemoveMemberModal();
 initInviteMembersModal();
 initInviteMembersTrigger();
+initInviteGroupTrigger();
 
 new UsersSelect(); // eslint-disable-line no-new

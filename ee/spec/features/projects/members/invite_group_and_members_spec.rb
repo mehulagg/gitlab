@@ -71,6 +71,7 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
         it_behaves_like 'the project can be shared with groups and members'
 
         it 'the project can be shared with another group' do
+          stub_feature_flags(invite_members_group_modal: false)
           visit project_project_members_path(project)
 
           click_on 'invite-group-tab'
