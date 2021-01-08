@@ -8,7 +8,7 @@
 <%= _('Your %{group} membership will now expire in %{days} days.') % { group: @member_source.human_name, days: (@member.expires_at - Date.today).to_i } %>
   <% end %> 
 <% else %> 
-<%= _('Your %{group} membership expiration date has been removed.') % { group: @member_source.human_name } %>
+<%= _('Your membership in %{group} no longer expires.') % { group: @member_source.human_name } %>
 <% end %> 
 
 <% user = _('?search=%{user}') % { user: @member.user.username } %>

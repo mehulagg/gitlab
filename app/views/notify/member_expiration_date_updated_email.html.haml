@@ -8,7 +8,7 @@
     - else
       = _('Your %{group} membership will now expire in %{days} days.') % { group: @member_source.human_name, days: days }
   - else
-    = _('Your %{group} membership expiration date has been removed.') % { group: @member_source.human_name }
+    = _('Your membership in %{group} no longer expires.') % { group: @member_source.human_name }
 %p
   - user = _('?search=%{user}') % { user: @member.user.username }
   - url = group_group_members_url(@member_source) + user

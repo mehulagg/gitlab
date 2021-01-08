@@ -32134,9 +32134,6 @@ msgstr ""
 msgid "YouTube URL or ID"
 msgstr ""
 
-msgid "Your %{group} membership expiration date has been removed."
-msgstr ""
-
 msgid "Your %{group} membership will now expire in %{days} day."
 msgstr ""
 
@@ -32336,6 +32333,9 @@ msgid "Your license is valid from"
 msgstr ""
 
 msgid "Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your %{code_open}.gitlab-license%{code_close} file."
+msgstr ""
+
+msgid "Your membership in %{group} no longer expires."
 msgstr ""
 
 msgid "Your message here"
