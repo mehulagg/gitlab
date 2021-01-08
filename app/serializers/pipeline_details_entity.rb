@@ -11,7 +11,7 @@ class PipelineDetailsEntity < PipelineEntity
     expose :artifacts do |pipeline, options|
       rel = pipeline.downloadable_artifacts
 
-      if Feature.enabled?(:non_public_artifacts, type: :development)
+      if Feature.enabled?(:non_public_artifacts, type: :development, default_enabled: true)
         rel = rel.select { |artifact| can?(request.current_user, :read_job_artifacts, artifact.job) }
       end
 

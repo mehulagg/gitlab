@@ -135,7 +135,7 @@ module Ci
     scope :for_job_name, ->(name) { joins(:job).where(ci_builds: { name: name }) }
 
     scope :with_job, -> do
-      if Feature.enabled?(:non_public_artifacts, type: :development)
+      if Feature.enabled?(:non_public_artifacts, type: :development, default_enabled: true)
         joins(:job).includes(:job)
       end
     end

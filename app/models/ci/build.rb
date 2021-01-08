@@ -148,7 +148,7 @@ module Ci
     end
 
     scope :with_project_and_metadata, -> do
-      if Feature.enabled?(:non_public_artifacts, type: :development)
+      if Feature.enabled?(:non_public_artifacts, type: :development, default_enabled: true)
         joins(:metadata).includes(:project, :metadata)
       end
     end
@@ -755,7 +755,7 @@ module Ci
     end
 
     def artifacts_public?
-      return true unless Feature.enabled?(:non_public_artifacts, type: :development)
+      return true unless Feature.enabled?(:non_public_artifacts, type: :development, default_enabled: true)
 
       artifacts_public = options.dig(:artifacts, :public)
 
