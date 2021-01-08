@@ -21,12 +21,20 @@ large-scale production usage.
 
 ## Summary
 
+The GraphQL initiative [started around three years ago](https://gitlab.com/gitlab-org/gitlab/-/commit/9c6c17cbcdb8bf8185fc1b873dcfd08f723e4df5).
+Most of the work around the GraphQL ecosystem is done by volunteers that are
+[GraphQL experts](https://gitlab.com/groups/gitlab-org/graphql-experts/-/group_members?with_inherited_permissions=exclude),
+one of whom [raised concerns](https://gitlab.com/gitlab-org/gitlab/-/issues/235659) about how the
+work is approached and structured. This blueprint describes a plan to address
+these concerns
+
+This blueprint describes
+
 ## Challenges
 
 ## Iterations
 
 ## Status
-
 
 ## Who
 
