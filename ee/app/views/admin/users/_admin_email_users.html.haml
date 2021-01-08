@@ -1,3 +1,8 @@
 - return unless send_emails_from_admin_area_feature_available?
 
-= link_to s_('AdminUsers|Send email to users'), admin_email_path, class: 'btn gl-button'
+- if current_user.can?(:export_user_permissions)
+  .btn-group
+    = link_to admin_email_path, class: 'gl-button btn btn-default has-tooltip', title: _('Send email to users'), ref: 'tooltip', aria: { label: _('Send email to users') }, data: { placement: 'top', container: 'body'} do
+      = sprite_icon('mail')
+- else
+  = link_to s_('AdminUsers|Send email to users'), admin_email_path, class: 'btn gl-button'

@@ -44,6 +44,10 @@
         %small.badge.badge-pill= limited_counter_with_delimiter(User.without_projects)
   .nav-controls
     = render_if_exists 'admin/users/admin_email_users'
+    - if current_user.can?(:export_user_permissions)
+      .btn-group
+        = link_to admin_user_permission_exports_path, class: 'gl-button btn btn-default has-tooltip', title: _('Export permissions as CSV'), ref: 'tooltip', aria: { label: _('Export permissions as CSV') }, data: { placement: 'top', container: 'body'} do
+          = sprite_icon('upload')
     = link_to s_('AdminUsers|New user'), new_admin_user_path, class: 'btn gl-button btn-success btn-search float-right'
 
 .filtered-search-block.row-content-block.border-top-0
