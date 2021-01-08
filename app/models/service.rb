@@ -435,7 +435,7 @@ class Service < ApplicationRecord
   def async_execute(data)
     return unless supported_events.include?(data[:object_kind])
 
-    ProjectServiceWorker.perform_async(id, data)
+    ProjectServiceWorker.new.perform(id, data)
   end
 
   def external_issue_tracker?
