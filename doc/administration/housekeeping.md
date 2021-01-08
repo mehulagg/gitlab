@@ -40,3 +40,18 @@ from your project on the same schedule as the `git gc` operation, freeing up sto
 You can find this option under your project's **Settings > General > Advanced**.
 
 ![Housekeeping settings](img/housekeeping_settings.png)
+
+## How housekeeping handles pool repositories
+
+Housekeeping for pool repositories is less obvious than that for the standard repositories. It is ultimately performed by the Gital RPC `FetchIntoObjectPool`.
+
+This is the current call stack by which it is invoked:
+
+1. `Projects::HousekeepingService#execute_gitlab_shell_gc`
+2. `GitGarbageCollectWorker#perform`
+3. `Projects::GitDeduplicationService#fetch_from_source`
+4. `ObjectPool#fetch`
+5. `ObjectPoolService#fetch`
+6. `Gitaly::FetchIntoObjectPoolRequest`
+
+To manually invoke it from a Rails console, if needed, you can call `project.pool_repository.object_pool.fetch`. This is a potentially long-running task, though Gitaly will time out around 8 hours.
