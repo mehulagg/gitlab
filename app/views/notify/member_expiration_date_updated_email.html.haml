@@ -9,4 +9,3 @@
   - user = _('?search=%{user}') % { user: @member.user.username }
   - url = group_group_members_url(@member_source) + user
   = _('For additional information, review your %{url} or contact your group administrator.').html_safe % { url: link_to('group membership', url) }
- 
