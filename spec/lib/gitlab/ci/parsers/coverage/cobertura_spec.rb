@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
+require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Coverage::Cobertura do
   describe '#parse!' do
@@ -680,6 +680,19 @@ RSpec.describe Gitlab::Ci::Parsers::Coverage::Cobertura do
         let(:paths) { nil }
 
         it_behaves_like 'non-smart parsing'
+      end
+
+      it_behaves_like 'instrumented report parser' do
+        let(:sources_xml) { '' }
+        let(:classes_xml) do
+          <<~EOF
+          <packages><package name="app"><classes>
+            <class filename="app.rb"><lines>
+              <line number="1" hits="2"/>
+            </lines></class>
+          </classes></package></packages>
+          EOF
+        end
       end
     end
 

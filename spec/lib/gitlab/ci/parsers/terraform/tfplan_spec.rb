@@ -5,7 +5,6 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Parsers::Terraform::Tfplan do
   describe '#parse!' do
     let(:artifact) { create(:ci_job_artifact, :terraform) }
-
     let(:reports) { Gitlab::Ci::Reports::TerraformReports.new }
 
     context 'when data is invalid' do
@@ -129,6 +128,12 @@ RSpec.describe Gitlab::Ci::Parsers::Terraform::Tfplan do
           )
         )
       end
+    end
+
+    it_behaves_like 'instrumented report parser' do
+      let(:plan) { '{ "create": 0, "update": 1, "delete": 0 }' }
+
+      subject(:parse_report) { described_class.new.parse!(plan, reports, artifact: artifact) }
     end
   end
 end

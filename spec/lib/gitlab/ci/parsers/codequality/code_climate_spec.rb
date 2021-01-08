@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Codequality::CodeClimate do
   describe '#parse!' do
-    subject(:parse) { described_class.new.parse!(code_climate, codequality_report) }
+    subject(:parse_report) { described_class.new.parse!(code_climate, codequality_report) }
 
     let(:codequality_report) { Gitlab::Ci::Reports::CodequalityReports.new }
     let(:code_climate) do
@@ -40,7 +40,7 @@ RSpec.describe Gitlab::Ci::Parsers::Codequality::CodeClimate do
         let(:code_climate) { [].to_json }
 
         it "returns a codequality report" do
-          expect { parse }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(codequality_report.degradations_count).to eq(0)
         end
@@ -48,7 +48,7 @@ RSpec.describe Gitlab::Ci::Parsers::Codequality::CodeClimate do
 
       context "when there are degradations" do
         it "returns a codequality report" do
-          expect { parse }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(codequality_report.degradations_count).to eq(1)
         end
@@ -85,7 +85,7 @@ RSpec.describe Gitlab::Ci::Parsers::Codequality::CodeClimate do
       end
 
       it "sets error_message" do
-        expect { parse }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(codequality_report.error_message).to include('JSON parsing failed')
       end
@@ -128,11 +128,13 @@ RSpec.describe Gitlab::Ci::Parsers::Codequality::CodeClimate do
       end
 
       it 'stops parsing the report' do
-        expect { parse }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(codequality_report.degradations_count).to eq(0)
         expect(codequality_report.error_message).to eq("Invalid degradation format: The property '#/' did not contain a required property of 'location'")
       end
     end
+
+    it_behaves_like 'instrumented report parser'
   end
 end

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Accessibility::Pa11y do
   describe '#parse!' do
-    subject { described_class.new.parse!(pa11y, accessibility_report) }
+    subject(:parse_report) { described_class.new.parse!(pa11y, accessibility_report) }
 
     let(:accessibility_report) { Gitlab::Ci::Reports::AccessibilityReports.new }
 
@@ -26,7 +26,7 @@ RSpec.describe Gitlab::Ci::Parsers::Accessibility::Pa11y do
         end
 
         it "returns an accessibility report" do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(accessibility_report.errors_count).to eq(0)
           expect(accessibility_report.passes_count).to eq(0)
@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Ci::Parsers::Accessibility::Pa11y do
         end
 
         it "returns an accessibility report" do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(accessibility_report.urls['http://pa11y.org/']).to be_empty
           expect(accessibility_report.errors_count).to eq(0)
@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Ci::Parsers::Accessibility::Pa11y do
         end
 
         it "returns an accessibility report" do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(accessibility_report.errors_count).to eq(1)
           expect(accessibility_report.passes_count).to eq(0)
@@ -106,12 +106,25 @@ RSpec.describe Gitlab::Ci::Parsers::Accessibility::Pa11y do
       end
 
       it "sets error_message" do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(accessibility_report.error_message).to include('JSON parsing failed')
         expect(accessibility_report.errors_count).to eq(0)
         expect(accessibility_report.passes_count).to eq(0)
         expect(accessibility_report.scans_count).to eq(0)
+      end
+    end
+
+    it_behaves_like 'instrumented report parser' do
+      let(:pa11y) do
+        {
+          "total": 1,
+          "passes": 1,
+          "errors": 0,
+          "results": {
+            "http://pa11y.org/": []
+          }
+        }.to_json
       end
     end
   end

@@ -5,6 +5,8 @@ module Gitlab
     module Parsers
       module Test
         class Junit
+          prepend Parsers::Instrumentation
+
           JunitParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
           ATTACHMENT_TAG_REGEX = /\[\[ATTACHMENT\|(?<path>.+?)\]\]/.freeze
 

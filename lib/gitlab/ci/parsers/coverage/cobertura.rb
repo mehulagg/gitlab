@@ -5,6 +5,8 @@ module Gitlab
     module Parsers
       module Coverage
         class Cobertura
+          prepend Parsers::Instrumentation
+
           InvalidXMLError = Class.new(Gitlab::Ci::Parsers::ParserError)
           InvalidLineInformationError = Class.new(Gitlab::Ci::Parsers::ParserError)
 

@@ -5,6 +5,8 @@ module Gitlab
     module Parsers
       module Terraform
         class Tfplan
+          prepend Parsers::Instrumentation
+
           TfplanParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
           def parse!(json_data, terraform_reports, artifact:)

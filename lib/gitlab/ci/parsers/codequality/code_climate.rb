@@ -5,6 +5,8 @@ module Gitlab
     module Parsers
       module Codequality
         class CodeClimate
+          prepend Parsers::Instrumentation
+
           def parse!(json_data, codequality_report)
             root = Gitlab::Json.parse(json_data)
 

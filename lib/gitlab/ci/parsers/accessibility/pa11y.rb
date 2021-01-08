@@ -5,6 +5,8 @@ module Gitlab
     module Parsers
       module Accessibility
         class Pa11y
+          prepend Parsers::Instrumentation
+
           def parse!(json_data, accessibility_report)
             root = Gitlab::Json.parse(json_data).with_indifferent_access
 

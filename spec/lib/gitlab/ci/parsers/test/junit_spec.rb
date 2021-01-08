@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
+require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
   describe '#parse!' do
-    subject { described_class.new.parse!(junit, test_suite, job: job) }
+    subject(:parse_report) { described_class.new.parse!(junit, test_suite, job: job) }
 
     let(:test_suite) { Gitlab::Ci::Reports::TestSuite.new('rspec') }
     let(:test_cases) { flattened_test_cases(test_suite) }
@@ -20,7 +20,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'ignores the case' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases.count).to eq(0)
         end
@@ -34,7 +34,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'ignores the case' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases.count).to eq(0)
         end
@@ -52,7 +52,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'parses XML and adds a test case to a suite' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases[0].suite_name).to eq('Math')
           expect(test_cases[0].classname).to eq('Calculator')
@@ -75,7 +75,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         let(:test_case) { test_cases[0] }
 
         before do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
         end
 
         shared_examples_for '<testcase> XML parser' do |status, output|
@@ -152,7 +152,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'parses XML and adds a test case to a suite' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases.count).to eq(1)
           expect(test_cases.first.suite_name).to eq("XXX\\FrontEnd\\WebBundle\\Tests\\Controller\\LogControllerTest")
@@ -171,7 +171,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'parses XML and adds test cases to a suite' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases[0].suite_name).to eq('Math')
           expect(test_cases[0].classname).to eq('Calculator')
@@ -201,7 +201,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
         end
 
         it 'parses XML and adds test cases to a suite' do
-          expect { subject }.not_to raise_error
+          expect { parse_report }.not_to raise_error
 
           expect(test_cases).to contain_exactly(
             have_attributes(
@@ -237,7 +237,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
 
         shared_examples_for 'rejecting too many test cases' do
           it 'attaches an error to the TestSuite object' do
-            expect { subject }.not_to raise_error
+            expect { parse_report }.not_to raise_error
             expect(test_suite.suite_error).to eq("JUnit data parsing failed: number of test cases exceeded the limit of #{max_test_cases}")
           end
         end
@@ -286,7 +286,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       let(:junit) { { testsuite: 'abc' }.to_json }
 
       it 'attaches an error to the TestSuite object' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
         expect(test_cases).to be_empty
       end
     end
@@ -302,12 +302,12 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'attaches an error to the TestSuite object' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
         expect(test_suite.suite_error).to eq("JUnit XML parsing failed: 4:1: FATAL: expected '>'")
       end
 
       it 'returns 0 tests cases' do
-        subject
+        parse_report
 
         expect(test_cases).to be_empty
         expect(test_suite.total_count).to eq(0)
@@ -316,7 +316,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'returns a failure status' do
-        subject
+        parse_report
 
         expect(test_suite.total_status).to eq(Gitlab::Ci::Reports::TestCase::STATUS_ERROR)
       end
@@ -326,12 +326,12 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       let(:junit) { double(:random_trash) }
 
       it 'attaches an error to the TestSuite object' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
         expect(test_suite.suite_error).to eq('JUnit data parsing failed: no implicit conversion of RSpec::Mocks::Double into String')
       end
 
       it 'returns 0 tests cases' do
-        subject
+        parse_report
 
         expect(test_cases).to be_empty
         expect(test_suite.total_count).to eq(0)
@@ -340,7 +340,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'returns a failure status' do
-        subject
+        parse_report
 
         expect(test_suite.total_status).to eq(Gitlab::Ci::Reports::TestCase::STATUS_ERROR)
       end
@@ -361,7 +361,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'assigns correct attributes to the test case' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(test_cases[0].has_attachment?).to be_truthy
         expect(test_cases[0].attachment).to eq("some/path.png")
@@ -388,7 +388,7 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'adds the first match attachment to a test case' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(test_cases[0].has_attachment?).to be_truthy
         expect(test_cases[0].attachment).to eq("some/path.png")
@@ -410,10 +410,22 @@ RSpec.describe Gitlab::Ci::Parsers::Test::Junit do
       end
 
       it 'does not add attachment to a test case' do
-        expect { subject }.not_to raise_error
+        expect { parse_report }.not_to raise_error
 
         expect(test_cases[0].has_attachment?).to be_falsy
         expect(test_cases[0].attachment).to be_nil
+      end
+    end
+
+    it_behaves_like 'instrumented report parser' do
+      let(:junit) do
+        <<-EOF.strip_heredoc
+            <testsuites>
+              <testsuite name='Math'>
+                <testcase classname='Calculator' name='sumTest1' time='0.01'></testcase>
+              </testsuite>
+            </testsuites>
+        EOF
       end
     end
 
