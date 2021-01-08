@@ -2462,12 +2462,46 @@ Represents a package.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `createdAt` | Time! | The created date |
-| `id` | ID! | The ID of the package |
-| `name` | String! | The name of the package |
-| `packageType` | PackageTypeEnum! | The type of the package |
-| `updatedAt` | Time! | The update date |
-| `version` | String | The version of the package |
+| `createdAt` | Time! | The created date. |
+| `id` | ID! | The ID of the package. |
+| `name` | String! | The name of the package. |
+| `packageType` | PackageTypeEnum! | The type of the package. |
+| `pipelines` | PipelineConnection | Pipelines that built the package. |
+| `project` | Project! | Project of the container registry. |
+| `tags` | PackageTagConnection | The tags of the package. |
+| `updatedAt` | Time! | The update date. |
+| `version` | String | The version of the package. |
+| `versions` | PackageConnection | The other versions of the package. |
+
+### PackageComposerDetails
+
+Details of a composer package.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `composerJson` | PackageComposerJsonType! | Data of the composer.json file. |
+| `createdAt` | Time! | The created date. |
+| `id` | ID! | The ID of the package. |
+| `name` | String! | The name of the package. |
+| `packageType` | PackageTypeEnum! | The type of the package. |
+| `pipelines` | PipelineConnection | Pipelines that built the package. |
+| `project` | Project! | Project of the container registry. |
+| `tags` | PackageTagConnection | The tags of the package. |
+| `targetSha` | String! | Target SHA of the package. |
+| `updatedAt` | Time! | The update date. |
+| `version` | String | The version of the package. |
+| `versions` | PackageConnection | The other versions of the package. |
+
+### PackageComposerJsonType
+
+Represents a composer json file.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `license` | String | The license set in the composer.json file. |
+| `name` | String | The name set in the composer.json file. |
+| `type` | String | The type set in the composer.json file. |
+| `version` | String | The version set in the composer.json file. |
 
 ### PackageFileRegistry
 
@@ -2492,6 +2526,17 @@ Namespace-level Package Registry settings.
 | ----- | ---- | ----------- |
 | `mavenDuplicateExceptionRegex` | UntrustedRegexp | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | `mavenDuplicatesAllowed` | Boolean! | Indicates whether duplicate Maven packages are allowed for this namespace. |
+
+### PackageTag
+
+Represents a package tag.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `createdAt` | Time! | The created date. |
+| `id` | ID! | The ID of the tag. |
+| `name` | String! | The name of the tag. |
+| `updatedAt` | Time! | The update date. |
 
 ### PageInfo
 
