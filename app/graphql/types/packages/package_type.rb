@@ -13,7 +13,7 @@ module Types
       field :updated_at, Types::TimeType, null: false, description: 'The update date.'
       field :version, GraphQL::STRING_TYPE, null: true, description: 'The version of the package.'
       field :package_type, Types::Packages::PackageTypeEnum, null: false, description: 'The type of the package.'
-      field :tags, Types::Packages::PackageTagType.connection_type, null: true, description: 'The tags of the package'
+      field :tags, Types::Packages::PackageTagType.connection_type, null: true, description: 'The tags of the package.'
       field :project, Types::ProjectType, null: false, description: 'Project of the container registry.'
       field :pipelines, Types::Ci::PipelineType.connection_type, null: true, description: 'Pipelines that built the package.'
       field :versions, Types::Packages::PackageType.connection_type, null: true, description: 'The other versions of the package.'
@@ -21,7 +21,6 @@ module Types
       def project
         Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find
       end
-
     end
   end
 end

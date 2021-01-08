@@ -58,6 +58,13 @@ module Types
             argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
           end
 
+    field :package_composer_details, Types::Packages::PackageComposerDetailsType,
+          null: true,
+          description: 'Find a composer package',
+          resolver: Resolvers::PackageDetailsResolver do
+            argument :id, ::Types::GlobalIDType[::Packages::Package], required: true, description: 'The global ID of the package'
+          end
+
     field :user, Types::UserType,
           null: true,
           description: 'Find a user',
