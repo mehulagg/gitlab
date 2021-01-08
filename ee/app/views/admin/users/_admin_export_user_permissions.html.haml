@@ -1,0 +1,5 @@
+- return unless current_user.can?(:export_user_permissions)
+
+.btn-group
+  = link_to admin_user_permission_exports_path, class: 'gl-button btn btn-default has-tooltip', title: _('Export permissions as CSV'), ref: 'tooltip', aria: { label: _('Export permissions as CSV') }, data: { placement: 'top', container: 'body'} do
+    = sprite_icon('upload')
