@@ -36,7 +36,6 @@ export default {
     return {
       failureType: null,
       highlightedJob: null,
-      jobs: {},
       links: [],
       needsObject: null,
       height: 0,
@@ -106,23 +105,7 @@ export default {
     highlightedJobs() {
       // If you are hovering on a job, then the jobs we want to highlight are:
       // The job you are currently hovering + all of its needs.
-      const needs = this.needsObject[[this.highlightedJob]];
-
-      if (!this.hasHighlightedJob) {
-        return [];
-      } else if (!needs.length) {
-        return this.highlightedJob;
-      }
-
-      // In case it's a parallel job, the name of the group and the job will be different.
-      // This mean we also need to add the group name
-      // to the list of `needs` to ensure we can properly reference it.
-      const groupName = this.jobs[needs[0]].name;
-      if (!needs.includes(groupName)) {
-        return [this.highlightedJob, groupName, ...needs];
-      }
-
-      return [this.highlightedJob, ...needs];
+      return [this.highlightedJob, ...this.needsObject[this.highlightedJob]];
     },
     highlightedLinks() {
       // If you are hovering on a job, then the links we want to highlight are:
@@ -200,8 +183,8 @@ export default {
       // The first time we hover, we create the object where
       // we store all the data to properly highlight the needs.
       if (!this.needsObject) {
-        this.jobs = createJobsHash(this.pipelineStages);
-        this.needsObject = generateJobNeedsDict(this.jobs) ?? {};
+        const jobs = createJobsHash(this.pipelineStages);
+        this.needsObject = generateJobNeedsDict(jobs) ?? {};
       }
 
       this.highlightedJob = uniqueJobId;

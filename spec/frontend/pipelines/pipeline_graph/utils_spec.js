@@ -110,5 +110,41 @@ describe('utils functions', () => {
         [jobName4]: [jobName3, jobName1, jobName2],
       });
     });
+
+    it('handles parallel jobs by adding the group name as a need', () => {
+      const size = 3;
+      const jobOptimize1 = 'optimize_1';
+      const jobPrepareA = 'prepare_a';
+      const jobPrepareA1 = `${jobPrepareA} 1/${size}`;
+      const jobPrepareA2 = `${jobPrepareA} 2/${size}`;
+      const jobPrepareA3 = `${jobPrepareA} 3/${size}`;
+
+      const jobsParallel = {
+        [jobOptimize1]: {
+          jobs: [job1],
+          name: [jobOptimize1],
+          needs: [jobPrepareA1, jobPrepareA2, jobPrepareA3],
+        },
+        [jobPrepareA]: { jobs: [], name: jobPrepareA, needs: [], size },
+        [jobPrepareA1]: { jobs: [], name: jobPrepareA, needs: [], size },
+        [jobPrepareA2]: { jobs: [], name: jobPrepareA, needs: [], size },
+        [jobPrepareA3]: { jobs: [], name: jobPrepareA, needs: [], size },
+      };
+
+      expect(generateJobNeedsDict(jobsParallel)).toEqual({
+        [jobOptimize1]: [
+          jobPrepareA1,
+          // This is the important part, the `jobPrepareA` group name has been
+          // added to our list of needs.
+          jobPrepareA,
+          jobPrepareA2,
+          jobPrepareA3,
+        ],
+        [jobPrepareA]: [],
+        [jobPrepareA1]: [],
+        [jobPrepareA2]: [],
+        [jobPrepareA3]: [],
+      });
+    });
   });
 });

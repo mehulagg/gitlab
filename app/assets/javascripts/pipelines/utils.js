@@ -46,6 +46,13 @@ export const generateJobNeedsDict = (jobs = {}) => {
           // to save some performance.
           const newNeeds = acc[job] ?? recursiveNeeds(job);
 
+          // In case it's a parallel job (size > 1), the name of the group
+          // and the job will be different. This mean we also need to add the group name
+          // to the list of `needs` to ensure we can properly reference it.
+          if (jobs[job].size > 1) {
+            return [job, jobs[job].name, ...newNeeds];
+          }
+
           return [job, ...newNeeds];
         })
         .flat(Infinity);
