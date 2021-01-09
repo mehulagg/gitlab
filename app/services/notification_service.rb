@@ -475,6 +475,12 @@ class NotificationService
     mailer.member_access_granted_email(group_member.real_source_type, group_member.id).deliver_later
   end
 
+  def new_group_member_with_confirmation(group_member)
+    return true unless group_member.notifiable?(:mention)
+
+    mailer.member_access_granted_with_confirmation_email(group_member.real_source_type, group_member.id).deliver_later
+  end
+
   def update_group_member(group_member)
     return true unless group_member.notifiable?(:mention)
 

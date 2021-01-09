@@ -117,9 +117,19 @@ module EE
       return unless GroupHook.where(group_id: self.source.self_and_ancestors).exists?
 
       run_after_commit do
+        notification_service.new_group_member_with_confirmation(self) if provisioned_by_this_group?
         data = ::Gitlab::HookData::GroupMemberBuilder.new(self).build(:create)
         self.source.execute_hooks(data, :member_hooks)
       end
+    end
+
+    override :available_for_welcome_email
+    def available_for_welcome_email
+      provisioned_by_this_group?
+    end
+
+    def provisioned_by_this_group?
+      user.user_detail.provisioned_by_group_id == source_id
     end
   end
 end

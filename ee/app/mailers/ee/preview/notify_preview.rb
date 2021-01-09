@@ -43,6 +43,10 @@ module EE
         def import_requirements_csv_email
           Notify.import_requirements_csv_email(user.id, project.id, { success: 3, errors: [5, 6, 7], valid_file: true })
         end
+
+        def member_access_granted_email_with_confirmation
+          Notify.member_access_granted_email_with_confirmation(member.source_type, member.id).message
+        end
       end
 
       private
