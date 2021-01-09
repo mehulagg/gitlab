@@ -197,7 +197,7 @@ Arguments:
 - `end`: custom end of the batch counting in order to avoid complex min calculations
 
 WARNING:
-Counting over non-unique columns can lead to performance issues. Take a look at the [iterating tables in batches](../iterating_tables_in_batches.md) guide for more details.
+Counting over non-unique columns can lead to performance issues. Take a look at the [iterating tables in batches](iterating_tables_in_batches.md) guide for more details.
 
 Examples:
 
@@ -356,7 +356,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
      aggregation.
    - `aggregation`: may be set to a `:daily` or `:weekly` key. Defines how counting data is stored in Redis.
      Aggregation on a `daily` basis does not pull more fine grained data.
-   - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](../feature_flags/) documentation.
+   - `feature_flag`: optional. For details, see our [GitLab internal Feature flags](feature_flags/) documentation.
 
 1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
 
@@ -440,7 +440,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
    In order to increment the values, the related feature `usage_data_<event_name>` should be
    set to `default_enabled: true`. For more information, see
-   [Feature flags in development of GitLab](../feature_flags/index.md).
+   [Feature flags in development of GitLab](feature_flags/index.md).
 
    ```plaintext
    POST /usage_data/increment_unique_users
@@ -523,18 +523,18 @@ We have the following recommendations for [Adding new events](#adding-new-events
 - Key expiry time:
   - Daily: 29 days.
   - Weekly: 42 days.
-- When adding new metrics, use a [feature flag](../../operations/feature_flags.md) to control the impact.
+- When adding new metrics, use a [feature flag](../operations/feature_flags.md) to control the impact.
 - For feature flags triggered by another service, set `default_enabled: false`,
   - Events can be triggered using the `UsageData` API, which helps when there are > 10 events per change
 
 ##### Enable/Disable Redis HLL tracking
 
-Events are tracked behind [feature flags](../feature_flags/index.md) due to concerns for Redis performance and scalability.
+Events are tracked behind [feature flags](feature_flags/index.md) due to concerns for Redis performance and scalability.
 
 For a full list of events and corresponding feature flags see, [known_events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events/) files.
 
 To enable or disable tracking for specific event within <https://gitlab.com> or <https://about.staging.gitlab.com>, run commands such as the following to
-[enable or disable the corresponding feature](../feature_flags/index.md).
+[enable or disable the corresponding feature](feature_flags/index.md).
 
 ```shell
 /chatops run feature set <feature_name> true
@@ -630,7 +630,7 @@ components publish metrics to it that can be queried back, aggregated, and inclu
 
 NOTE:
 Prometheus as a data source for Usage Ping is currently only available for single-node Omnibus installations
-that are running the [bundled Prometheus](../../administration/monitoring/prometheus/index.md) instance.
+that are running the [bundled Prometheus](../administration/monitoring/prometheus/index.md) instance.
 
 To query Prometheus for metrics, a helper method is available to `yield` a fully configured
 `PrometheusClient`, given it is available as per the note above:
@@ -689,7 +689,7 @@ Paste the SQL query into `#database-lab` to see how the query performs at scale.
 
 - `#database-lab` is a Slack channel which uses a production-sized environment to test your queries.
 - GitLab.com’s production database has a 15 second timeout.
-- Any single query must stay below [1 second execution time](../query_performance.md#timing-guidelines-for-queries) with cold caches.
+- Any single query must stay below [1 second execution time](query_performance.md#timing-guidelines-for-queries) with cold caches.
 - Add a specialized index on columns involved to reduce the execution time.
 
 In order to have an understanding of the query's execution we add in the MR description the following information:
@@ -701,7 +701,7 @@ In order to have an understanding of the query's execution we add in the MR desc
 - Query generated for the index and time
 - Migration output for up and down execution
 
-We also use `#database-lab` and [explain.depesz.com](https://explain.depesz.com/). For more details, see the [database review guide](../database_review.md#preparation-when-adding-or-modifying-queries).
+We also use `#database-lab` and [explain.depesz.com](https://explain.depesz.com/). For more details, see the [database review guide](database_review.md#preparation-when-adding-or-modifying-queries).
 
 #### Optimization recommendations and examples
 
@@ -724,7 +724,7 @@ Add the `feature` label to the Merge Request for new Usage Ping metrics. These a
 
 ### 8. Add a changelog file
 
-Ensure you comply with the [Changelog entries guide](../changelog.md).
+Ensure you comply with the [Changelog entries guide](changelog.md).
 
 ### 9. Ask for a Product Intelligence Review
 
@@ -759,7 +759,7 @@ build in a [downstream pipeline of the `omnibus-gitlab-mirror` project](https://
 1. In the downstream pipeline, wait for the `gitlab-docker` job to finish.
 1. Open the job logs and locate the full container name including the version. It takes the following form: `registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`.
 1. On your local machine, make sure you are logged in to the GitLab Docker registry. You can find the instructions for this in
-[Authenticate to the GitLab Container Registry](../../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
+[Authenticate to the GitLab Container Registry](../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
 1. Once logged in, download the new image via `docker pull registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`
 1. For more information about working with and running Omnibus GitLab containers in Docker, please refer to [GitLab Docker images](https://docs.gitlab.com/omnibus/docker/README.html) in the Omnibus documentation.
 
@@ -783,7 +783,7 @@ appear to be associated to any of the services running, since they all appear to
 ## Aggregated metrics
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45979) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - It's enabled on GitLab.com.
 
 WARNING:
@@ -796,7 +796,7 @@ In order to add data for aggregated metrics into Usage Ping payload you should a
   - `OR`: removes duplicates and counts all entries that triggered any of listed events
   - `AND`: removes duplicates and counts all elements that were observed triggering all of following events
 - events: list of events names (from [`known_events.yml`](#known-events-are-added-automatically-in-usage-data-payload)) to aggregate into metric. All events in this list must have the same `redis_slot` and `aggregation` attributes.
-- feature_flag: name of [development feature flag](../feature_flags/development.md#development-type) that is checked before
+- feature_flag: name of [development feature flag](feature_flags/development.md#development-type) that is checked before
 metrics aggregation is performed. Corresponding feature flag should have `default_enabled` attribute set to `false`.
 `feature_flag` attribute is **OPTIONAL**  and can be omitted, when `feature_flag` is missing no feature flag is checked.
 
@@ -1062,4 +1062,4 @@ bin/rake gitlab:usage_data:dump_sql_in_yaml > ~/Desktop/usage-metrics-2020-09-02
 
 ## Generating and troubleshooting usage ping
 
-To get a usage ping, or to troubleshoot caching issues on your GitLab instance, please follow [instructions to generate usage ping](../../administration/troubleshooting/gitlab_rails_cheat_sheet.md#generate-usage-ping).
+To get a usage ping, or to troubleshoot caching issues on your GitLab instance, please follow [instructions to generate usage ping](../administration/troubleshooting/gitlab_rails_cheat_sheet.md#generate-usage-ping).
