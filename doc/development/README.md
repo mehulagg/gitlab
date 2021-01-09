@@ -256,9 +256,9 @@ See [database guidelines](database/index.md).
 - [Externalization](i18n/externalization.md)
 - [Translation](i18n/translation.md)
 
-## Product Analytics guides
+## Product Intelligence guides
 
-- [Product Analytics guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
+- [Product Intelligence guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
 - [Usage Ping guide](usage_ping.md)
 - [Snowplow guide](snowplow.md)
 

@@ -1,6 +1,6 @@
 ---
 stage: Growth
-group: Product Analytics
+group: Product Intelligence
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -8,21 +8,21 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This guide provides an overview of how Snowplow works, and implementation details.
 
-For more information about Product Analytics, see:
+For more information about Product Intelligence, see:
 
-- [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
+- [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
 - [Usage Ping Guide](usage_ping.md)
 
 More useful links:
 
-- [Product Analytics Direction](https://about.gitlab.com/direction/product-analytics/)
+- [Product Intelligence Direction](https://about.gitlab.com/direction/product-intelligence/)
 - [Data Analysis Process](https://about.gitlab.com/handbook/business-ops/data-team/#data-analysis-process/)
 - [Data for Product Managers](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/)
 - [Data Infrastructure](https://about.gitlab.com/handbook/business-ops/data-team/platform/infrastructure/)
 
 ## What is Snowplow
 
-Snowplow is an enterprise-grade marketing and product analytics platform which helps track the way users engage with our website and application.
+Snowplow is an enterprise-grade marketing and Product Intelligence platform which helps track the way users engage with our website and application.
 
 [Snowplow](https://github.com/snowplow/snowplow) consists of the following loosely-coupled sub-systems:
 

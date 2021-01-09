@@ -1,6 +1,6 @@
 ---
 stage: Growth
-group: Product Analytics
+group: Product Intelligence
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -13,14 +13,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This guide describes Usage Ping's purpose and how it's implemented.
 
-For more information about Product Analytics, see:
+For more information about Product Intelligence, see:
 
-- [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
+- [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
 - [Snowplow Guide](snowplow.md)
 
 More useful links:
 
-- [Product Analytics Direction](https://about.gitlab.com/direction/product-analytics/)
+- [Product Intelligence Direction](https://about.gitlab.com/direction/product-intelligence/)
 - [Data Analysis Process](https://about.gitlab.com/handbook/business-ops/data-team/#data-analysis-process/)
 - [Data for Product Managers](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/)
 - [Data Infrastructure](https://about.gitlab.com/handbook/business-ops/data-team/platform/infrastructure/)
@@ -726,13 +726,13 @@ Add the `feature` label to the Merge Request for new Usage Ping metrics. These a
 
 Ensure you comply with the [Changelog entries guide](../changelog.md).
 
-### 9. Ask for a Product Analytics Review
+### 9. Ask for a Product Intelligence Review
 
-On GitLab.com, we have DangerBot setup to monitor Product Analytics related files and DangerBot recommends a Product Analytics review. Mention `@gitlab-org/growth/product_intelligence/engineers` in your MR for a review.
+On GitLab.com, we have DangerBot setup to monitor Product Intelligence related files and DangerBot recommends a Product Intelligence review. Mention `@gitlab-org/growth/product_intelligence/engineers` in your MR for a review.
 
 ### 10. Verify your metric
 
-On GitLab.com, the Product Analytics team regularly monitors Usage Ping. They may alert you that your metrics need further optimization to run quicker and with greater success. You may also use the [Usage Ping QA dashboard](https://app.periscopedata.com/app/gitlab/632033/Usage-Ping-QA) to check how well your metric performs. The dashboard allows filtering by GitLab version, by "Self-managed" & "Saas" and shows you how many failures have occurred for each metric. Whenever you notice a high failure rate, you may re-optimize your metric.
+On GitLab.com, the Product Intelligence team regularly monitors Usage Ping. They may alert you that your metrics need further optimization to run quicker and with greater success. You may also use the [Usage Ping QA dashboard](https://app.periscopedata.com/app/gitlab/632033/Usage-Ping-QA) to check how well your metric performs. The dashboard allows filtering by GitLab version, by "Self-managed" & "Saas" and shows you how many failures have occurred for each metric. Whenever you notice a high failure rate, you may re-optimize your metric.
 
 ### Optional: Test Prometheus based Usage Ping
 
