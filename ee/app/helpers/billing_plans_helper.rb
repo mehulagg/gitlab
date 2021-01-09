@@ -45,10 +45,10 @@ module BillingPlansHelper
     }
   end
 
-  def plan_feature_short_list(plan)
+  def plan_feature_list(plan)
     return [] unless plan.features
 
-    plan.features.sort_by! { |feature| feature.highlight ? 0 : 1 }[0...4]
+    plan.features.sort_by! { |feature| feature.highlight ? 0 : 1 }
   end
 
   def plan_purchase_or_upgrade_url(group, plan)

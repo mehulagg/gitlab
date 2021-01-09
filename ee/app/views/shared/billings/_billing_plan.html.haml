@@ -32,7 +32,7 @@
       %hr.gl-my-3
 
       %ul.unstyled-list
-        - plan_feature_short_list(plan).each do |feature|
+        - plan_feature_list(plan).each do |feature|
           - feature_class = "gl-p-0!"
           - if feature.highlight
             - feature_class += " gl-font-weight-bold"
