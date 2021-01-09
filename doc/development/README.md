@@ -258,9 +258,9 @@ See [database guidelines](database/index.md).
 
 ## Product Analytics guides
 
-- [Product Analytics guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
-- [Usage Ping guide](product_analytics/usage_ping.md)
-- [Snowplow guide](product_analytics/snowplow.md)
+- [Product Analytics guide](https://about.gitlab.com/handbook/product/product-intelligence-guide/)
+- [Usage Ping guide](usage_ping.md)
+- [Snowplow guide](snowplow.md)
 
 ## Experiment guide
 
