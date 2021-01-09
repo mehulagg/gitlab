@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
         generation_1: 'uuid',
         generation_2: 'license.uuid'
       },
-      group: 'group::product analytics',
+      group: 'group::product intelligence',
       time_frame: 'none',
       data_source: 'database',
       distribution: %w(ee ce),

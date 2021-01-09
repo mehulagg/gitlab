@@ -10,7 +10,7 @@ full_path:
   generation_2: license.uuid
 milestone: 9.1
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1521
-group: group::product analytics
+group: group::product intelligence
 time_frame: none
 data_source: database
 distribution: [ee, ce]
