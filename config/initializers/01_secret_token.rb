@@ -6,6 +6,7 @@
 #
 # Be sure to restart your server when you modify this file.
 
+
 require 'securerandom'
 
 # Transition material in .secret to the secret_key_base key in config/secrets.yml.
