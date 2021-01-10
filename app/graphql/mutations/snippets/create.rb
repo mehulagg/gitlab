@@ -3,7 +3,8 @@
 module Mutations
   module Snippets
     class Create < BaseMutation
-      include SpammableMutationFields
+      include ServiceCompatibility
+      include CanMutateSpammable
 
       authorize :create_snippet
 
@@ -45,18 +46,17 @@ module Mutations
           authorize!(:global)
         end
 
-        service_response = ::Snippets::CreateService.new(project,
-                                                         current_user,
-                                                         create_params(args)).execute
+        process_args_for_params!(args)
 
-        snippet = service_response.payload[:snippet]
+        service_response = ::Snippets::CreateService.new(project, current_user, args).execute
 
         # Only when the user is not an api user and the operation was successful
         if !api_user? && service_response.success?
           ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
         end
 
-        with_spam_fields(snippet) do
+        with_spam_check_fields(service_response.payload) do
+          snippet = service_response.payload[:snippet]
           {
             snippet: service_response.success? ? snippet : nil,
             errors: errors_on_object(snippet)
@@ -70,18 +70,20 @@ module Mutations
         Project.find_by_full_path(full_path)
       end
 
-      def create_params(args)
-        with_spam_params do
-          args.tap do |create_args|
-            # We need to rename `blob_actions` into `snippet_actions` because
-            # it's the expected key param
-            create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
+      # process_args_for_params!(args)    -> nil
+      #
+      # Modifies/adds/deletes mutation resolve args as necessary to be passed as params to service layer.
+      def process_args_for_params!(args)
+        convert_blob_actions_to_snippet_actions!(args)
 
-            # We need to rename `uploaded_files` into `files` because
-            # it's the expected key param
-            create_args[:files] = create_args.delete(:uploaded_files)
-          end
-        end
+        # We need to rename `uploaded_files` into `files` because
+        # it's the expected key param
+        args[:files] = args.delete(:uploaded_files)
+
+        args.merge!(additional_spam_check_params(args))
+
+        # Return nil to make it explicit that this method is mutating the args parameter
+        nil
       end
     end
   end

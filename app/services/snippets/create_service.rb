@@ -13,7 +13,12 @@ module Snippets
 
       @snippet.author = current_user
 
-      spam_check(@snippet, current_user, action: :create)
+      spam_check_fields =
+        if Feature.enabled?(:snippet_spam)
+          spam_check(@snippet, current_user, action: :create)
+        else
+          { spam: false, needs_recaptcha_response: false }
+        end
 
       if save_and_commit
         UserAgentDetailService.new(@snippet, @request).create
@@ -23,7 +28,8 @@ module Snippets
 
         ServiceResponse.success(payload: { snippet: @snippet } )
       else
-        snippet_error_response(@snippet, 400)
+        payload = { snippet: @snippet, spam_check_fields: spam_check_fields }
+        snippet_error_response(payload, 400)
       end
     end
 

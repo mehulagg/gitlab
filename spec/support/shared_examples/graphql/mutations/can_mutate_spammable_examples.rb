@@ -24,6 +24,15 @@ RSpec.shared_examples 'can raise spam flag' do
       allow_next_instance_of(service) do |instance|
         allow(instance).to receive(:spam_check) do |snippet, user, _|
           snippet.spam!
+
+          # TODO: Is it appropriate for these the tests of the mutation to be coupled to the
+          #   implementation of the service, and mocking logic which lives within the service?
+          {
+            spam: true,
+            needs_recaptcha_response: true,
+            spam_log_id: 1,
+            recaptcha_site_key: 'fake-recaptcha-site-key'
+          }
         end
       end
 
@@ -35,14 +44,13 @@ RSpec.shared_examples 'can raise spam flag' do
   end
 
   context 'when :snippet_spam flag is disabled' do
+    # TODO: Move this to the service tests, the check now lives there
     before do
       stub_feature_flags(snippet_spam: false)
     end
 
     it 'request parameter is not passed to the service' do
-      expect(service).to receive(:new)
-        .with(anything, anything, hash_not_including(request: instance_of(ActionDispatch::Request)))
-        .and_call_original
+      expect(service).not_to receive(:spam_check)
 
       subject
     end

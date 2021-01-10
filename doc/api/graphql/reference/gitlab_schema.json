@@ -13737,6 +13737,26 @@
           "fields": null,
           "inputFields": [
             {
+              "name": "recaptchaResponse",
+              "description": "A valid recaptchaResponse value obtained by using the provided recaptchaSiteKey with the reCAPTCHA API to present a challenge for the user to solve. See the reCAPTCHA API documentation for more details.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be returned along with a valid recaptchaResponse in order for the operation to be completed.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "title",
               "description": "Title of the snippet.",
               "type": {
@@ -13881,6 +13901,34 @@
               "deprecationReason": null
             },
             {
+              "name": "needsRecaptchaResponse",
+              "description": "Indicates that a valid recaptchaResponse field must be included in the request in order for the operation to be completed. The recaptchaResponse value is obtained by using the provided recaptchaSiteKey with the reCAPTCHA API to present a challenge for the user to solve. See the reCAPTCHA API documentation for more details.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "recaptchaSiteKey",
+              "description": "The reCAPTCHA site_key which must be used to render a challenge for the user to solve in order to obtain a valid recaptchaResponse value.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "snippet",
               "description": "The snippet after mutation.",
               "args": [
@@ -13903,6 +13951,20 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be returned along with a valid recaptchaResponse in order for the operation to be completed.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -72877,6 +72939,26 @@
           "fields": null,
           "inputFields": [
             {
+              "name": "recaptchaResponse",
+              "description": "A valid recaptchaResponse value obtained by using the provided recaptchaSiteKey with the reCAPTCHA API to present a challenge for the user to solve. See the reCAPTCHA API documentation for more details.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be returned along with a valid recaptchaResponse in order for the operation to be completed.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "id",
               "description": "The global ID of the snippet to update.",
               "type": {
@@ -72999,6 +73081,34 @@
               "deprecationReason": null
             },
             {
+              "name": "needsRecaptchaResponse",
+              "description": "Indicates that a valid recaptchaResponse field must be included in the request in order for the operation to be completed. The recaptchaResponse value is obtained by using the provided recaptchaSiteKey with the reCAPTCHA API to present a challenge for the user to solve. See the reCAPTCHA API documentation for more details.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "recaptchaSiteKey",
+              "description": "The reCAPTCHA site_key which must be used to render a challenge for the user to solve in order to obtain a valid recaptchaResponse value.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "snippet",
               "description": "The snippet after mutation.",
               "args": [
@@ -73021,6 +73131,20 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spamLogId",
+              "description": "The spam log ID which must be returned along with a valid recaptchaResponse in order for the operation to be completed.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
                 "ofType": null
               },
               "isDeprecated": false,
