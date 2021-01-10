@@ -33,18 +33,6 @@ module Emails
         subject: subject("Access to the #{member_source.human_name} #{member_source.model_name.singular} was granted"))
     end
 
-    def member_access_granted_email_with_confirmation(member_source_type, member_id)
-      @member_source_type = member_source_type
-      @member_id = member_id
-      @user = member.user
-
-      return unless member_exists?
-
-      member_email_with_layout(
-        to: member.user.notification_email_for(notification_group),
-        subject: subject("Welcome to GitLab")
-    end
-
     def member_access_denied_email(member_source_type, source_id, user_id)
       @member_source_type = member_source_type
       @member_source = member_source_class.find(source_id)
@@ -159,3 +147,5 @@ module Emails
     end
   end
 end
+
+Emails::Members.prepend_if_ee('EE::Emails::Members')
