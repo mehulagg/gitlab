@@ -6,7 +6,7 @@
     %p
       = _('An Enterprise User GitLab account has been created for you by your organization:')
     %p
-      = _('Username: %{username}' % { username: @user.username }
+      = _('Username: %{username}') % { username: @user.username }
       %br
       = _('Email: %{email}') % { email: @user.email }
       %br
@@ -15,10 +15,10 @@
 %tr
   %td.text-content
     %p
-      = _('By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an
-        Enterprise User. To ensure no loss of personal content, an Individual User should create a separate account under
-        their own personal email address, not tied to the Enterprise email domain or name-space.')
-    %p
-      = _('To get started, click the link below to confirm your account.')
-    %p
-      = link_to 'Confirm your account', confirmation_link
+      = _('By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. ')
+      = _('To ensure no loss of personal content, an Individual User should create a separate account under their own personal email address, not tied to the Enterprise email domain or name-space.')
+    - unless @user.confirmed?
+      %p
+        = _('To get started, click the link below to confirm your account.')
+      %p
+        = link_to 'Confirm your account', confirmation_link
