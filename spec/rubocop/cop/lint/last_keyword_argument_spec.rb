@@ -95,6 +95,23 @@ RSpec.describe RuboCop::Cop::Lint::LastKeywordArgument do
       SOURCE
     end
 
+    it 'registers an offense on the last non-block argument' do
+      expect_offense(<<~SOURCE, 'create_service.rb')
+        users.call(id, params, &block)
+                       ^^^^^^ Using the last argument as keyword parameters is deprecated
+      SOURCE
+
+      expect_correction(<<~SOURCE)
+        users.call(id, **params, &block)
+      SOURCE
+    end
+
+    it 'does not register an offense if the only argument is a block argument' do
+      expect_no_offenses(<<~SOURCE, 'create_service.rb')
+        users.call(&block)
+      SOURCE
+    end
+
     it 'registers an offense and corrects by converting splat to double splat' do
       expect_offense(<<~SOURCE, 'create_service.rb')
         users.call(id, *params)
