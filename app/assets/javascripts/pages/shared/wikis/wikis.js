@@ -26,6 +26,7 @@ export default class Wikis {
     this.isNewWikiPage = Boolean(document.querySelector('.js-new-wiki-page'));
     this.editTitleInput = document.querySelector('form.wiki-form #wiki_title');
     this.commitMessageInput = document.querySelector('form.wiki-form #wiki_message');
+    this.submitButton = document.querySelector('.js-wiki-btn-submit');
     this.commitMessageI18n = this.isNewWikiPage
       ? s__('WikiPageCreate|Create %{pageTitle}')
       : s__('WikiPageEdit|Update %{pageTitle}');
@@ -50,11 +51,12 @@ export default class Wikis {
       });
     }
 
-    const wikiTextarea = document.querySelector('form.wiki-form #wiki_content');
+    this.wikiTextarea = document.querySelector('form.wiki-form #wiki_content');
     const wikiForm = document.querySelector('form.wiki-form');
 
-    if (wikiTextarea) {
-      wikiTextarea.addEventListener('input', () => {
+    if (this.wikiTextarea) {
+      this.wikiTextarea.addEventListener('input', () => {
+        this.toggleSubmitButton();
         window.onbeforeunload = () => '';
       });
 
@@ -65,10 +67,21 @@ export default class Wikis {
 
     Wikis.trackPageView();
     Wikis.showToasts();
+
+    this.toggleSubmitButton();
   }
 
   handleWikiTitleChange(e) {
+    this.toggleSubmitButton();
     this.setWikiCommitMessage(e.target.value);
+  }
+
+  toggleSubmitButton() {
+    if (!this.wikiTextarea) return;
+
+    const enabled = this.wikiTextarea.value.trim() && this.editTitleInput.value.trim();
+    if (enabled) this.submitButton.removeAttribute('disabled');
+    else this.submitButton.setAttribute('disabled', 'true');
   }
 
   setWikiCommitMessage(rawTitle) {
