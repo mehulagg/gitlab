@@ -3787,6 +3787,9 @@ msgstr ""
 msgid "Are you sure you want to reset the health check token?"
 msgstr ""
 
+msgid "Are you sure you want to retry this migration?"
+msgstr ""
+
 msgid "Are you sure you want to revoke this %{type}? This action cannot be undone."
 msgstr ""
 
@@ -5363,6 +5366,9 @@ msgid "Check out, review, and merge locally"
 msgstr ""
 
 msgid "Check the %{docs_link_start}documentation%{docs_link_end}."
+msgstr ""
+
+msgid "Check the elasticsearch.log file to debug why the migration was halted and make any changes before retrying the migration. The migration will be scheduled to retry in the backround."
 msgstr ""
 
 msgid "Check your Docker images for known vulnerabilities."
@@ -18071,6 +18077,12 @@ msgstr ""
 msgid "Migrated %{success_count}/%{total_count} files."
 msgstr ""
 
+msgid "Migration has been scheduled to retry"
+msgstr ""
+
+msgid "Migration not found"
+msgstr ""
+
 msgid "Migration successful."
 msgstr ""
 
@@ -24131,6 +24143,9 @@ msgstr ""
 msgid "Retry job"
 msgstr ""
 
+msgid "Retry migration"
+msgstr ""
+
 msgid "Retry this job"
 msgstr ""
 
@@ -28278,6 +28293,9 @@ msgid "There are pending advanced search migrations. Indexing must remain paused
 msgstr ""
 
 msgid "There are running deployments on the environment. Please retry later."
+msgstr ""
+
+msgid "There is a halted Elasticsearch migration"
 msgstr ""
 
 msgid "There is already a To-Do for this design."
