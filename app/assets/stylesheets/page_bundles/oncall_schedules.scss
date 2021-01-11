@@ -33,7 +33,6 @@
   .gl-card {
     min-width: 75%;
     width: fit-content;
-    @include gl-bg-gray-10;
   }
 
   &.gl-modal .modal-md {

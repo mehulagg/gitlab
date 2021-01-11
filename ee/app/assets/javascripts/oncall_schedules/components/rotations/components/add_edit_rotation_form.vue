@@ -232,7 +232,11 @@ export default {
       class="gl-mb-5"
     />
 
-    <gl-card v-if="endDateEnabled" data-testid="rotation-ends-on">
+    <gl-card
+      v-if="endDateEnabled"
+      data-testid="rotation-ends-on"
+      class="gl-border-gray-400 gl-bg-gray-10"
+    >
       <gl-form-group
         :label="$options.i18n.fields.endsOn.title"
         label-size="sm"
@@ -272,7 +276,11 @@ export default {
       class="gl-my-5"
     />
 
-    <gl-card v-if="restrictToTimeEnabled" data-testid="restricted-to-time">
+    <gl-card
+      v-if="restrictToTimeEnabled"
+      data-testid="restricted-to-time"
+      class="gl-border-gray-400 gl-bg-gray-10"
+    >
       <gl-form-group
         :label="$options.i18n.fields.restrictToTime.title"
         label-size="sm"
