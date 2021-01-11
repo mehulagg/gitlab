@@ -101,10 +101,12 @@ export default {
 
         chart.isLoading = true;
         try {
-          chart.data = this.apiDataToChartSeries(
-            (await Api.deploymentFrequencies(this.projectPath, chart.requestParams)).data,
-            chart.startDate,
+          const { data: apiData } = await Api.deploymentFrequencies(
+            this.projectPath,
+            chart.requestParams,
           );
+
+          chart.data = this.apiDataToChartSeries(apiData, chart.startDate);
         } finally {
           chart.isLoading = false;
         }

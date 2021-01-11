@@ -71,7 +71,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     });
 
     it('makes 3 GET requests - one for each chart', () => {
-      expect(mock.history.get.length).toBe(3);
+      expect(mock.history.get).toHaveLength(3);
     });
 
     it('converts the data from the API into data usable by the chart component', () => {

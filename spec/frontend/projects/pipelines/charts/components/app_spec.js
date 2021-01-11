@@ -14,6 +14,8 @@ const projectPath = 'gitlab-org/gitlab';
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
+const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => {} };
+
 describe('ProjectsPipelinesChartsApp', () => {
   let wrapper;
 
@@ -39,7 +41,7 @@ describe('ProjectsPipelinesChartsApp', () => {
           localVue,
           apolloProvider: createMockApolloProvider(),
           stubs: {
-            DeploymentFrequencyCharts: true,
+            DeploymentFrequencyCharts: DeploymentFrequencyChartsStub,
           },
         },
         mountOptions,
@@ -102,8 +104,7 @@ describe('ProjectsPipelinesChartsApp', () => {
     });
   });
 
-  const findDeploymentFrequencyCharts = () =>
-    wrapper.find('[data-testid="deployment-frequency-charts"]');
+  const findDeploymentFrequencyCharts = () => wrapper.find(DeploymentFrequencyChartsStub);
 
   describe('when shouldRenderDeploymentFrequencyCharts is true', () => {
     beforeEach(() => {

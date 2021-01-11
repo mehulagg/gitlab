@@ -318,7 +318,7 @@ export default {
     </ci-cd-analytics-area-chart>
     <template v-if="shouldRenderDeploymentFrequencyCharts">
       <hr />
-      <deployment-frequency-charts data-testid="deployment-frequency-charts" />
+      <deployment-frequency-charts />
     </template>
   </div>
 </template>
