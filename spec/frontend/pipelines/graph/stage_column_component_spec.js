@@ -30,6 +30,7 @@ const mockGroups = Array(4)
 const defaultProps = {
   title: 'Fish',
   groups: mockGroups,
+  pipelineId: 159,
 };
 
 describe('stage column component', () => {
