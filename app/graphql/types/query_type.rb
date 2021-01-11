@@ -58,7 +58,7 @@ module Types
             argument :id, ::Types::GlobalIDType[::ContainerRepository], required: true, description: 'The global ID of the container repository'
           end
 
-    field :package_composer_details, Types::Packages::PackageComposerDetailsType,
+    field :package_composer_details, Types::Packages::Composer::DetailsType,
           null: true,
           description: 'Find a composer package',
           resolver: Resolvers::PackageDetailsResolver do
