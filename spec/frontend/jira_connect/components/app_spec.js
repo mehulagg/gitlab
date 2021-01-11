@@ -1,19 +1,22 @@
 import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import JiraConnectApp from '~/jira_connect/components/app.vue';
 
 describe('JiraConnectApp', () => {
   let wrapper;
 
-  const findHeader = () => wrapper.find('[data-testid="new-jira-connect-ui-heading"]');
+  const findHeader = () => wrapper.findByTestId('new-jira-connect-ui-heading');
   const findHeaderText = () => findHeader().text();
 
   const createComponent = (options = {}) => {
-    wrapper = shallowMount(JiraConnectApp, {
-      provide: {
-        glFeatures: { newJiraConnectUi: true },
-      },
-      ...options,
-    });
+    wrapper = extendedWrapper(
+      shallowMount(JiraConnectApp, {
+        provide: {
+          glFeatures: { newJiraConnectUi: true },
+        },
+        ...options,
+      }),
+    );
   };
 
   afterEach(() => {

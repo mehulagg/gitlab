@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import $ from 'jquery';
 import setConfigs from '@gitlab/ui/dist/config';
 import Translate from '~/vue_shared/translate';
@@ -6,7 +7,9 @@ import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
 
 import JiraConnectApp from './components/app.vue';
 import { addSubscription, removeSubscription } from '~/jira_connect/api';
-import { mutations } from './store';
+import { createStore, MUTATION_TYPES } from './store';
+
+const store = createStore();
 
 /**
  * Initialize form handlers for the Jira Connect app
@@ -19,7 +22,7 @@ const initJiraFormHandlers = () => {
   const reqFailed = (res, fallbackErrorMessage) => {
     const { responseJSON: { error = fallbackErrorMessage } = {} } = res || {};
 
-    mutations.setErrorMessage(error);
+    store.commit(MUTATION_TYPES.PUT_ERROR_MESSAGE, error);
     // eslint-disable-next-line no-alert
     alert(error);
   };
@@ -68,9 +71,11 @@ function initJiraConnect() {
   setConfigs();
   Vue.use(Translate);
   Vue.use(GlFeatureFlagsPlugin);
+  Vue.use(Vuex);
 
   return new Vue({
     el,
+    store,
     render(createElement) {
       return createElement(JiraConnectApp, {});
     },

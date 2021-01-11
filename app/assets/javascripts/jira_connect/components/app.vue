@@ -1,14 +1,12 @@
 <script>
+import { mapState } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { store } from '../store';
 
 export default {
   name: 'JiraConnectApp',
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    errorMessage() {
-      return store.errorMessage;
-    },
+    ...mapState(['errorMessage']),
     showNewUi() {
       return this.glFeatures.newJiraConnectUi;
     },
