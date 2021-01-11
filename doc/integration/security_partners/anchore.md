@@ -114,9 +114,9 @@ Expand the variables section and add your Anchore credentials as
 [CI/CD Environment Variables](https://docs.gitlab.com/ee/ci/variables/).
 Consider adding them as `Protected` variables.
 
-![Expand variables](./anchore_expand_vars.png)
+![Expand variables](./img/anchore_expand_vars.png)
 
-![Set variables](./anchore_set_vars.png)
+![Set variables](./img/anchore_set_vars.png)
 
 #### Trigger GitLab CI
 
@@ -126,14 +126,14 @@ pipeline runs.
 Then navigate to the Pipelines tab where you can see details of your pipelines
 that ran Anchore scanning.
 
-![Trigger the pipeline](./anchore_trigger.png)
+![Trigger the pipeline](./img/anchore_trigger.png)
 
 #### Review Scan Report
 
 The Anchore scan results will be shown on the Security Dashboard, the pipeline
 Security tab, and the Merge Request widget along all other Secure scan results.
 
-![View the security dashboard](./anchore_security_dashboard.png)
+![View the security dashboard](./img/anchore_security_dashboard.png)
 
 ## Access Tokens
 

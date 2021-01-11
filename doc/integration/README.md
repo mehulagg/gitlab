@@ -42,7 +42,7 @@ GitLab also provides features to improve the security of your own application. F
 ## Security partners
 
 GitLab has several partners that have integrated with us. Read more about them
-at our [Security Partners integration](./security_partners.md) page.
+at our [Security Partners integration](./security_partners/index.md) page.
 
 ## Continuous integration
 
