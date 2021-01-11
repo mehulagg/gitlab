@@ -2,7 +2,7 @@
 
 ## Design Sprint Focus
 
-<!-- What is the focus of the Design Sprint? What problem area will you be solving for and who is the target user? -->
+<!-- What is the focus of the [Design Sprint](https://about.gitlab.com/handbook/product/product-processes/#design-sprint)? What problem area will you be solving for and who is the target user? -->
 
 ## Objectives
 
