@@ -23,6 +23,7 @@ export default (el) => {
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,
       createJiraIssueUrl: vulnerability.createJiraIssueUrl,
+      relatedJiraIssuesPath: vulnerability.relatedJiraIssuesPath,
     },
     render: (h) =>
       h(App, {

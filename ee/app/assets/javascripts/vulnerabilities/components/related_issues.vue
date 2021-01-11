@@ -27,6 +27,11 @@ export default {
       required: false,
       default: false,
     },
+    createJiraIssueUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     helpPath: {
       type: String,
       required: false,
@@ -81,9 +86,6 @@ export default {
       default: '',
     },
     permissionsHelpPath: {
-      default: '',
-    },
-    createJiraIssueUrl: {
       default: '',
     },
   },

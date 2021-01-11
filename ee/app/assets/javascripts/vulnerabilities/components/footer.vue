@@ -11,6 +11,7 @@ import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
 import RelatedIssues from './related_issues.vue';
+import RelatedJiraIssues from './related_jira_issues.vue';
 import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
 import initUserPopovers from '~/user_popovers';
@@ -22,6 +23,7 @@ export default {
     MergeRequestNote,
     HistoryEntry,
     RelatedIssues,
+    RelatedJiraIssues,
     GlIcon,
     StatusDescription,
   },
@@ -74,13 +76,22 @@ export default {
       return Boolean(this.solutionInfo.solution || this.solutionInfo.remediation);
     },
     issueLinksEndpoint() {
-      return Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(':id', this.vulnerability.id);
+      Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(':id', this.vulnerability.id);
     },
     vulnerabilityDetectionData() {
       return {
         state: 'detected',
         pipeline: this.vulnerability.pipeline,
       };
+    },
+  },
+
+  inject: {
+    createJiraIssueUrl: {
+      default: '',
+    },
+    relatedJiraIssuesPath: {
+      default: '',
     },
   },
 
@@ -207,9 +218,16 @@ export default {
       />
     </div>
 
+    <related-jira-issues
+      v-if="createJiraIssueUrl"
+      :url="createJiraIssueUrl"
+      :endpoint="relatedJiraIssuesPath"
+    />
     <related-issues
+      v-else
       :endpoint="issueLinksEndpoint"
       :can-modify-related-issues="vulnerability.canModifyRelatedIssues"
+      :create-jira-issue-url="createJiraIssueUrl"
       :project-path="project.url"
       :help-path="vulnerability.relatedIssuesHelpPath"
     />
