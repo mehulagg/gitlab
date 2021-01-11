@@ -235,6 +235,7 @@ coverage-frontend:
     - *yarn-install
   script:
     - run_timed_command "yarn node scripts/frontend/merge_coverage_frontend.js"
+    - rm coverage-frontend/jest-*
   coverage: '/^Statements\s*:\s*?(\d+(?:\.\d+)?)%/'
   artifacts:
     name: coverage-frontend
