@@ -22,10 +22,10 @@ describe('ProjectsPipelinesChartsApp', () => {
         lastWeekChartData,
         lastMonthChartData,
         lastYearChartData,
-        shouldRenderDeploymentFrequencyCharts: true,
       },
       provide: {
         projectPath: 'test/project',
+        shouldRenderDeploymentFrequencyCharts: true,
       },
       stubs: {
         DeploymentFrequencyCharts: true,

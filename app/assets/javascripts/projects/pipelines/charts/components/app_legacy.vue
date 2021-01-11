@@ -24,6 +24,12 @@ export default {
     DeploymentFrequencyCharts: () =>
       import('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'),
   },
+  inject: {
+    shouldRenderDeploymentFrequencyCharts: {
+      type: Boolean,
+      default: false,
+    },
+  },
   props: {
     counts: {
       type: Object,
@@ -43,10 +49,6 @@ export default {
     },
     lastYearChartData: {
       type: Object,
-      required: true,
-    },
-    shouldRenderDeploymentFrequencyCharts: {
-      type: Boolean,
       required: true,
     },
   },

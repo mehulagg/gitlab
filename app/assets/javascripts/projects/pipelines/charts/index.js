@@ -80,6 +80,7 @@ const mountPipelineChartsApp = (el) => {
     },
     provide: {
       projectPath,
+      shouldRenderDeploymentFrequencyCharts,
     },
     render: (createElement) =>
       createElement(ProjectPipelinesChartsLegacy, {
@@ -110,7 +111,6 @@ const mountPipelineChartsApp = (el) => {
             lastYearChartTotals,
             lastYearChartSuccess,
           ),
-          shouldRenderDeploymentFrequencyCharts,
         },
       }),
   });

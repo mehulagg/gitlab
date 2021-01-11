@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
 import DeploymentFrequencyCharts from 'ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue';
+import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd_analytics_area_chart.vue';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
@@ -35,6 +36,21 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     });
   };
 
+  // Initializes the mock endpoint to return a specific set of deployment
+  // frequency data for a given "from" date.
+  const setUpMockDeploymentFrequencies = ({ from, data }) => {
+    mock
+      .onGet(/projects\/test%2Fproject\/analytics\/deployment_frequency/, {
+        params: {
+          environment: 'production',
+          interval: 'daily',
+          per_page: 100,
+          from,
+        },
+      })
+      .replyOnce(httpStatus.OK, data);
+  };
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -45,38 +61,9 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     beforeEach(async () => {
       mock = new MockAdapter(axios);
 
-      const commonParams = {
-        environment: 'production',
-        interval: 'daily',
-        per_page: 100,
-      };
-
-      mock
-        .onGet(/projects\/test%2Fproject\/analytics\/deployment_frequency/, {
-          params: {
-            ...commonParams,
-            from: '2015-06-26T00:00:00+0000',
-          },
-        })
-        .replyOnce(httpStatus.OK, lastWeekData);
-
-      mock
-        .onGet(/projects\/test%2Fproject\/analytics\/deployment_frequency/, {
-          params: {
-            ...commonParams,
-            from: '2015-06-03T00:00:00+0000',
-          },
-        })
-        .replyOnce(httpStatus.OK, lastMonthData);
-
-      mock
-        .onGet(/projects\/test%2Fproject\/analytics\/deployment_frequency/, {
-          params: {
-            ...commonParams,
-            from: '2015-04-04T00:00:00+0000',
-          },
-        })
-        .replyOnce(httpStatus.OK, last90DaysData);
+      setUpMockDeploymentFrequencies({ from: '2015-06-26T00:00:00+0000', data: lastWeekData });
+      setUpMockDeploymentFrequencies({ from: '2015-06-03T00:00:00+0000', data: lastMonthData });
+      setUpMockDeploymentFrequencies({ from: '2015-04-04T00:00:00+0000', data: last90DaysData });
 
       createComponent();
 
@@ -88,9 +75,9 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     });
 
     it('converts the data from the API into data usable by the chart component', () => {
-      expect(wrapper.vm.charts[0].data[0].data).toMatchSnapshot();
-      expect(wrapper.vm.charts[1].data[0].data).toMatchSnapshot();
-      expect(wrapper.vm.charts[2].data[0].data).toMatchSnapshot();
+      wrapper.findAll(CiCdAnalyticsAreaChart).wrappers.forEach((chartWrapper) => {
+        expect(chartWrapper.props().chartData[0].data).toMatchSnapshot();
+      });
     });
 
     it('does not show a flash message', () => {
