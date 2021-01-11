@@ -67,7 +67,7 @@ The Mural link to the collaboration project will be provided in the issue before
 As part of the pre-Sprint homework, you will be asked to record a short Lightning Walkthrough video. You can use any tool you feel comfortable with as long as it can capture your screen, mouse pointer and your audio.
 
 * **A4/Letter sized paper (preferably white blank), Sharpies/Pens** (please don't use a pencil because it doesn't create enough contrast for photos).<br/>
-Day 2 of the sprint involves some (async) ideation via sketching so you will need a writing utensil (Sharpies are preferred) and some paper. This is the most fun part of the Sprint where you get into a design thinking mindset and can appeal to your creative self. 
+Day 2 of the sprint involves some (async) ideation via sketching so you will need a writing utensil (Sharpies are preferred because they force you to draw at a lower fidelity because the small details aren't necessary at this point) and some paper. This is the most fun part of the Sprint where you get into a design thinking mindset and can appeal to your creative self. Don't worry, it's not about artistry, it's about ideas and collaboration.
 
 * **Camera (phone or other) or scanner**<br/>
 You will need to upload sketches as images for the facilitator to prepare the material before the next sync meeting. You can take a photo with your phone or use a scanner if available.
