@@ -60,7 +60,7 @@ module Types
 
     field :package_composer_details, Types::Packages::PackageComposerDetailsType,
           null: true,
-          description: 'Find a composer package' do
+          description: 'Find a composer package details' do
             argument :id, ::Types::GlobalIDType[::Packages::Package], required: true, description: 'The global ID of the package'
           end
 
