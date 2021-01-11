@@ -25,6 +25,8 @@ class CreateDastScans < ActiveRecord::Migration[6.0]
     add_index :dast_scans, :dast_site_profile_id
     add_index :dast_scans, :dast_scanner_profile_id
 
+    # TODO add scoped uniqueness constraint
+
     add_text_limit :dast_scans, :name, 255
     add_text_limit :dast_scans, :description, 255
   end
