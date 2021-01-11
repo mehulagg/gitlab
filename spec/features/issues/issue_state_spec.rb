@@ -19,6 +19,8 @@ RSpec.describe 'issue state', :js do
         click_button 'Close issue'
       end
 
+      refresh
+
       expect(find('.status-box')).to have_content 'Closed'
     end
   end
@@ -30,6 +32,8 @@ RSpec.describe 'issue state', :js do
       within selector do
         click_button 'Reopen issue'
       end
+
+      refresh
 
       expect(find('.status-box')).to have_content 'Open'
     end
