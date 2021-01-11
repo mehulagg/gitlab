@@ -62,7 +62,7 @@ class GroupMember < Member
   end
 
   def post_create_hook
-    if available_for_welcome_email
+    if available_for_welcome_email?
       run_after_commit_or_now { notification_service.new_group_member(self) }
     end
 
@@ -90,7 +90,7 @@ class GroupMember < Member
     super
   end
 
-  def available_for_welcome_email
+  def available_for_welcome_email?
     true
   end
 end
