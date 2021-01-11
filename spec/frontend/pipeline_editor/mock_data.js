@@ -1,4 +1,5 @@
 import { CI_CONFIG_STATUS_VALID } from '~/pipeline_editor/constants';
+import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 
 export const mockNamespace = 'user1';
 export const mockProjectName = 'project1';
@@ -8,6 +9,7 @@ export const mockNewMergeRequestPath = '/-/merge_requests/new';
 export const mockCommitSha = 'aabbccdd';
 export const mockCommitNextSha = 'eeffgghh';
 export const mockLintHelpPagePath = '/-/lint-help';
+export const mockYmlHelpPagePath = '/-/yml-help';
 export const mockCommitMessage = 'My commit message';
 
 export const mockCiConfigPath = '.gitlab-ci.yml';
@@ -28,7 +30,7 @@ job_test_2:
 
 job_build:
   stage: build
-  script: 
+  script:
     - echo "build"
   needs: ["job_test_2"]
 `;
@@ -47,6 +49,7 @@ export const mockCiConfigQueryResponse = {
               nodes: [
                 {
                   name: 'job_test_1',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
@@ -61,10 +64,12 @@ export const mockCiConfigQueryResponse = {
                 },
                 {
                   name: 'job_test_2',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
                         name: 'job_test_2',
+
                         needs: { nodes: [], __typename: 'CiConfigNeedConnection' },
                         __typename: 'CiConfigJob',
                       },
@@ -84,6 +89,7 @@ export const mockCiConfigQueryResponse = {
               nodes: [
                 {
                   name: 'job_build',
+                  size: 1,
                   jobs: {
                     nodes: [
                       {
@@ -109,6 +115,15 @@ export const mockCiConfigQueryResponse = {
       __typename: 'CiConfig',
     },
   },
+};
+
+export const mergeUnwrappedCiConfig = (mergedConfig) => {
+  const { ciConfig } = mockCiConfigQueryResponse.data;
+  return {
+    ...ciConfig,
+    stages: unwrapStagesWithNeeds(ciConfig.stages.nodes),
+    ...mergedConfig,
+  };
 };
 
 export const mockLintResponse = {
