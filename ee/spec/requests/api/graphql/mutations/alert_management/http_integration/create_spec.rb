@@ -15,11 +15,11 @@ RSpec.describe 'Creating a new HTTP Integration' do
     }.to_json
   end
 
-  let(:payload_attribute_mapping) do
-    {
-      'title' => { 'path' => %w[alert name], 'type' => 'string' },
-      'start_time' => { 'path' => %w[started_at], 'type' => 'datetime' }
-    }.to_json
+  let(:payload_attribute_mappings) do
+    [
+      { fieldName: 'title', path: %w[alert name], type: 'string' },
+      { fieldName: 'start_time', path: %w[started_at], type: 'datetime', label: 'Start time' }
+    ]
   end
 
   let(:variables) do
@@ -28,7 +28,7 @@ RSpec.describe 'Creating a new HTTP Integration' do
       active: false,
       name: 'New HTTP Integration',
       payload_example: payload_example,
-      payload_attribute_mapping: payload_attribute_mapping
+      payload_attribute_mappings: payload_attribute_mappings
     }
   end
 
@@ -82,7 +82,12 @@ RSpec.describe 'Creating a new HTTP Integration' do
     new_integration = ::AlertManagement::HttpIntegration.last!
 
     expect(new_integration.payload_example).to eq(Gitlab::Json.parse(payload_example))
-    expect(new_integration.payload_attribute_mapping).to eq(Gitlab::Json.parse(payload_attribute_mapping))
+    expect(new_integration.payload_attribute_mapping).to eq(
+      {
+        'title' => { 'path' => %w[alert name], 'type' => 'string', 'label' => nil },
+        'start_time' => { 'path' => %w[started_at], 'type' => 'datetime', 'label' => 'Start time' }
+      }
+    )
   end
 
   [:project_path, :active, :name].each do |argument|
@@ -121,13 +126,39 @@ RSpec.describe 'Creating a new HTTP Integration' do
     end
   end
 
-  context 'with invalid payloadAttributeMapping attribute' do
-    let(:payload_attribute_mapping) { 'not a JSON' }
+  context 'with invalid payloadAttributeMapping attribute does not contain fieldName' do
+    let(:payload_attribute_mappings) do
+      [{ path: %w[alert name], type: 'string' }]
+    end
 
     it 'responds with errors' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      expect_graphql_errors_to_include(/was provided invalid value for payloadAttributeMapping \(Invalid JSON string/)
+      expect_graphql_errors_to_include(/was provided invalid value for payloadAttributeMappings\.0\.fieldName \(Expected value to not be null/)
+    end
+  end
+
+  context 'with invalid payloadAttributeMapping attribute does not contain path' do
+    let(:payload_attribute_mappings) do
+      [{ fieldName: 'title', type: 'string' }]
+    end
+
+    it 'responds with errors' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect_graphql_errors_to_include(/was provided invalid value for payloadAttributeMappings\.0\.path \(Expected value to not be null/)
+    end
+  end
+
+  context 'with invalid payloadAttributeMapping attribute does not contain type' do
+    let(:payload_attribute_mappings) do
+      [{ fieldName: 'title', path: %w[alert name] }]
+    end
+
+    it 'responds with errors' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect_graphql_errors_to_include(/was provided invalid value for payloadAttributeMappings\.0\.type \(Expected value to not be null/)
     end
   end
 end

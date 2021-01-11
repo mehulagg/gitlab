@@ -743,6 +743,31 @@ enum AlertManagementIntegrationType {
 }
 
 """
+Field that are available while modifying the custom mapping attributes for an HTTP integration
+"""
+input AlertManagementPayloadAlertFieldInput {
+  """
+  An GitLab alert field name.
+  """
+  fieldName: String!
+
+  """
+  Human-readble label of the payload path.
+  """
+  label: String
+
+  """
+  Path to value inside payload JSON.
+  """
+  path: [String!]!
+
+  """
+  Type of the parsed value.
+  """
+  type: String!
+}
+
+"""
 An endpoint and credentials used to accept Prometheus alerts for a project
 """
 type AlertManagementPrometheusIntegration implements AlertManagementIntegration {
@@ -11182,7 +11207,7 @@ input HttpIntegrationCreateInput {
   """
   The custom mapping of GitLab alert attributes to fields from the payload_example.
   """
-  payloadAttributeMapping: JsonString
+  payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
 
   """
   The example of an alert payload.

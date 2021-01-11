@@ -13,7 +13,7 @@ module EE
                      required: false,
                      description: 'The example of an alert payload.'
 
-            argument :payload_attribute_mapping, ::Types::JsonStringType,
+            argument :payload_attribute_mappings, [::Types::AlertManagement::PayloadAlertFieldInputType],
                      required: false,
                      description: 'The custom mapping of GitLab alert attributes to fields from the payload_example.'
           end
@@ -26,7 +26,15 @@ module EE
 
             return base_args unless ::Gitlab::AlertManagement.custom_mapping_available?(project)
 
-            args.slice(*base_args.keys, :payload_example, :payload_attribute_mapping)
+            args.slice(*base_args.keys, :payload_example).merge(
+              payload_attribute_mapping: payload_attribute_mapping(args[:payload_attribute_mappings])
+            )
+          end
+
+          def payload_attribute_mapping(mappings)
+            mappings.each_with_object({}) do |m, h|
+              h[m.field_name] = { path: m.path, type: m.type, label: m.label }
+            end
           end
         end
       end
