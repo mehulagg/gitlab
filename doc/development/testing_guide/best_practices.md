@@ -519,6 +519,21 @@ let_it_be_with_refind(:project) { create(:project) }
 let_it_be(:project, refind: true) { create(:project) }
 ```
 
+`let_it_be_with_refind` is also useful when using `stub_licensed_features` in your tests:
+
+
+```ruby
+let_it_be_with_refind(:issue) { create(:issue) } # won't work without a refind
+
+context 'license disabled' do
+  before do
+    stub_licensed_features(some_licensed_feature: false)
+  end
+
+  it { is_expected.to eq(true) }
+end
+```
+
 ### Time-sensitive tests
 
 [`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
