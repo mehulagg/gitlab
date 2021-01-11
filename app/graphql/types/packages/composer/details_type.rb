@@ -3,7 +3,8 @@
 module Types
   module Packages
     module Composer
-      class DetailsType < ::Types::Packages::PackageType
+      class DetailsType < Types::Packages::PackageType
+        graphql_name 'PackageComposerDetails'
         description 'Details of a composer package'
 
         authorize :read_package
