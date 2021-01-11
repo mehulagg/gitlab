@@ -42,6 +42,8 @@ Gitaly.
 When called from Gitaly in a `pre-receive` hook the changes are passed
 and those are validated to determine if the push is allowed.
 
+This endpoint is covered in more detail on [its own page](./internal_api_allowed.md), due to the scope of what it covers.
+
 ```plaintext
 POST /internal/allowed
 ```
