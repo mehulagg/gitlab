@@ -33,7 +33,7 @@
 ### WHO
 
    - `Name` `gitlab handle` - Facilitator 
-   - `Name` `gitlab handle` - Decider
+   - `Name` `gitlab handle` - Decider (usually the Product Manager)
    - `Name` `gitlab handle` - Co-decider (optional)
    - `Name` `gitlab handle` - Sprint team member
    - `Name` `gitlab handle` - Sprint team member
