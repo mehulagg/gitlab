@@ -10,4 +10,12 @@
   .form-check.gl-mb-3
     = check_box_tag :keep_divergent_refs, '1', false, class: 'js-mirror-keep-divergent-refs form-check-input'
     = label_tag :keep_divergent_refs, _('Keep divergent refs'), class: 'form-check-label'
-    = link_to sprite_icon('question-o'), help_page_path('user/project/repository/repository_mirroring', anchor: 'keep-divergent-refs'), target: '_blank'
+    .form-text.text-muted
+      = _('By default, if any ref (branches, tags) on the remote mirror has diverged from the local repository, the entire push will fail, and nothing will be updated. Choose this option to override this behavior.')
+      = link_to _('Read more'), help_page_path('user/project/repository/repository_mirroring', anchor: 'keep-divergent-refs'), target: '_blank'
+  .form-check.gl-mb-3
+    = check_box_tag :only_protected_branches, '1', false, class: 'js-mirror-protected form-check-input'
+    = label_tag :only_protected_branches, _('Only mirror protected branches.'), class: 'form-check-label'
+    .form-text.text-muted
+      = _('If enabled, only protected branches will be mirrored.')
+      = link_to _('Read more'), help_page_path('user/project/repository/repository_mirroring', anchor: 'push-only-protected-branches'), target: '_blank'
