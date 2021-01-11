@@ -56,7 +56,11 @@ Here is the list of tools for the Sprint preparation, collaboration and document
 Each Sprint day outcomes and material will be documented in a separate issue under the Design Sprint epic. 
 
 * **Mural** (You can join as anonymous but we need to be able to identify input against names, so please create an account beforehand.<br/>
-We will use Mural for most of the Sprint collaboration. Some of the things we will do in Mural: create artefacts like affinity diagrams from participants' input, use post-its to comment on each other's points and to add notes, vote on ideas and solutions, create the first draft of the prototype.
+We will use Mural for most of the Sprint collaboration. Some of the things we will do in Mural: 
+    * Create artifacts like affinity diagrams from participants' input
+    * Use post-its to comment on each other's points and to add notes
+    * Vote on ideas and solutions
+    * Create the first draft of the prototype.
 The Mural link to the collaboration project will be provided in the issue before the start of the Design Sprint.
 
 * **Video and/or screen recording tool** (Loom, Quicktime, Zoom or another tool you are using).<br/>
