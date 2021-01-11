@@ -48,6 +48,7 @@ module EE
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
+        mount ::API::GroupRepositoryStorageMoves
       end
     end
   end
