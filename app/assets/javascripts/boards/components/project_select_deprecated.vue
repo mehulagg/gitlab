@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import {
   GlDropdown,
   GlDropdownItem,
@@ -7,7 +6,9 @@ import {
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import eventHub from '../eventhub';
 import { s__ } from '~/locale';
+import Api from '../../api';
 import { featureAccessLevel } from '~/pages/projects/shared/permissions/constants';
 import { ListType } from '../constants';
 
@@ -42,12 +43,13 @@ export default {
   data() {
     return {
       initialLoading: true,
+      isFetching: false,
+      projects: [],
       selectedProject: {},
       searchTerm: '',
     };
   },
   computed: {
-    ...mapState(['groupProjects', 'isLoadingGroupProjects']),
     selectedProjectName() {
       return this.selectedProject.name || this.$options.i18n.dropdownText;
     },
@@ -63,24 +65,47 @@ export default {
       };
     },
     isFetchResultEmpty() {
-      return this.groupProjects.length === 0;
+      return this.projects.length === 0;
     },
   },
   watch: {
     searchTerm() {
-      this.fetchGroupProjects(this.searchTerm);
+      this.fetchProjects();
     },
   },
-  mounted() {
-    this.fetchGroupProjects();
+  async mounted() {
+    await this.fetchProjects();
 
     this.initialLoading = false;
   },
   methods: {
-    ...mapActions(['fetchGroupProjects', 'setSelectedProject']),
+    async fetchProjects() {
+      this.isFetching = true;
+      try {
+        const projects = await Api.groupProjects(this.groupId, this.searchTerm, this.fetchOptions);
+
+        this.projects = projects.map((project) => {
+          return {
+            id: project.id,
+            name: project.name,
+            namespacedName: project.name_with_namespace,
+            path: project.path_with_namespace,
+          };
+        });
+      } catch (err) {
+        /* Handled in Api.groupProjects */
+      } finally {
+        this.isFetching = false;
+      }
+    },
     selectProject(projectId) {
-      this.selectedProject = this.groupProjects.find((project) => project.id === projectId);
-      this.setSelectedProject(this.selectedProject);
+      this.selectedProject = this.projects.find((project) => project.id === projectId);
+
+      /*
+        TODO Remove eventhub, use Vuex for BoardNewIssue and GraphQL for BoardNewIssueNew
+        https://gitlab.com/gitlab-org/gitlab/-/issues/276173
+      */
+      eventHub.$emit('setSelectedProject', this.selectedProject);
     },
   },
 };
@@ -105,21 +130,18 @@ export default {
         :placeholder="$options.i18n.searchPlaceholder"
       />
       <gl-dropdown-item
-        v-for="project in groupProjects"
-        v-show="!isLoadingGroupProjects"
+        v-for="project in projects"
+        v-show="!isFetching"
         :key="project.id"
         :name="project.name"
         @click="selectProject(project.id)"
       >
-        {{ project.nameWithNamespace }}
+        {{ project.namespacedName }}
       </gl-dropdown-item>
-      <gl-dropdown-text v-show="isLoadingGroupProjects" data-testid="dropdown-text-loading-icon">
+      <gl-dropdown-text v-show="isFetching" data-testid="dropdown-text-loading-icon">
         <gl-loading-icon class="gl-mx-auto" />
       </gl-dropdown-text>
-      <gl-dropdown-text
-        v-if="isFetchResultEmpty && !isLoadingGroupProjects"
-        data-testid="empty-result-message"
-      >
+      <gl-dropdown-text v-if="isFetchResultEmpty && !isFetching" data-testid="empty-result-message">
         <span class="gl-text-gray-500">{{ $options.i18n.emptySearchResult }}</span>
       </gl-dropdown-text>
     </gl-dropdown>

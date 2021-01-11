@@ -1,7 +1,7 @@
 import mutations from '~/boards/stores/mutations';
 import * as types from '~/boards/stores/mutation_types';
 import defaultState from '~/boards/stores/state';
-import { mockLists, rawIssue, mockIssue, mockIssue2 } from '../mock_data';
+import { mockLists, rawIssue, mockIssue, mockIssue2, mockGroupProjects } from '../mock_data';
 
 const expectNotImplemented = (action) => {
   it('is not implemented', () => {
@@ -528,5 +528,41 @@ describe('Board Store Mutations', () => {
 
   describe('TOGGLE_EMPTY_STATE', () => {
     expectNotImplemented(mutations.TOGGLE_EMPTY_STATE);
+  });
+
+  describe('REQUEST_GROUP_PROJECTS', () => {
+    it('Should set isLoadingGroupProjects to true in state', () => {
+      mutations[types.REQUEST_GROUP_PROJECTS](state);
+
+      expect(state.isLoadingGroupProjects).toEqual(true);
+    });
+  });
+
+  describe('RECEIVE_GROUP_PROJECTS_SUCCESS', () => {
+    it('Should set groupProjects to state and isLoadingGroupProjects to false', () => {
+      mutations[types.RECEIVE_GROUP_PROJECTS_SUCCESS](state, mockGroupProjects);
+
+      expect(state.groupProjects).toEqual(mockGroupProjects);
+      expect(state.isLoadingGroupProjects).toEqual(false);
+    });
+  });
+
+  describe('RECEIVE_GROUP_PROJECTS_FAILURE', () => {
+    it('Should set error in state and isLoadingGroupProjects to false', () => {
+      mutations[types.RECEIVE_GROUP_PROJECTS_FAILURE](state);
+
+      expect(state.error).toEqual(
+        'An error occurred while fetching group projects. Please try again.',
+      );
+      expect(state.isLoadingGroupProjects).toEqual(false);
+    });
+  });
+
+  describe('SET_SELECTED_PROJECT', () => {
+    it('Should set selectedProject to state', () => {
+      mutations[types.SET_SELECTED_PROJECT](state, mockGroupProjects[0]);
+
+      expect(state.selectedProject).toEqual(mockGroupProjects[0]);
+    });
   });
 });

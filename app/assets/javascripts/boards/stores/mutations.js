@@ -237,4 +237,22 @@ export default {
   [mutationTypes.TOGGLE_EMPTY_STATE]: () => {
     notImplemented();
   },
+
+  [mutationTypes.REQUEST_GROUP_PROJECTS]: (state) => {
+    state.isLoadingGroupProjects = true;
+  },
+
+  [mutationTypes.RECEIVE_GROUP_PROJECTS_SUCCESS]: (state, projects) => {
+    state.groupProjects = projects;
+    state.isLoadingGroupProjects = false;
+  },
+
+  [mutationTypes.RECEIVE_GROUP_PROJECTS_FAILURE]: (state) => {
+    state.error = s__('Boards|An error occurred while fetching group projects. Please try again.');
+    state.isLoadingGroupProjects = false;
+  },
+
+  [mutationTypes.SET_SELECTED_PROJECT]: (state, project) => {
+    state.selectedProject = project;
+  },
 };
