@@ -17,16 +17,22 @@ module UpdateRepositoryStorageWorker
       else
         # maintain compatibility with workers queued before release
         container = find_container(container_id)
-        container.repository_storage_moves.create!(
-          source_storage_name: container.repository_storage,
-          destination_storage_name: new_repository_storage_key
-        )
+        if previous_storage = source_repository_storage(container)
+          container.repository_storage_moves.create!(
+            source_storage_name: previous_storage,
+            destination_storage_name: new_repository_storage_key
+          )
+        end
       end
 
-    update_repository_storage(repository_storage_move)
+    update_repository_storage(repository_storage_move) if repository_storage_move
   end
 
   private
+
+  def source_repository_storage(container)
+    container.repository_storage
+  end
 
   def find_repository_storage_move(repository_storage_move_id)
     raise NotImplementedError

@@ -14,6 +14,9 @@ module EE
       include InsightsFeature
       include HasTimelogsReport
       include HasWiki
+      include CanMoveRepositoryStorage
+
+      GL_REPOSITORY_TYPES = [::Gitlab::GlRepository::WIKI].freeze
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
@@ -51,6 +54,7 @@ module EE
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
 
       has_one :group_wiki_repository
+      has_many :repository_storage_moves, class_name: 'GroupRepositoryStorageMove', inverse_of: :container
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -169,6 +173,14 @@ module EE
 
         root = groups.first.root_ancestor
         groups.drop(1).each { |group| group.root_ancestor = root }
+      end
+
+      # TODO avoid this repetition from HasRepository
+      def pick_repository_storage
+        # We need to ensure application settings are fresh when we pick
+        # a repository storage to use.
+        ::Gitlab::CurrentSettings.expire_current_application_settings
+        ::Gitlab::CurrentSettings.pick_repository_storage
       end
     end
 
@@ -458,6 +470,13 @@ module EE
       self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
       self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
         hook.async_execute(data, hooks_scope.to_s)
+      end
+    end
+
+    override :git_transfer_in_progress?
+    def git_transfer_in_progress?
+      GL_REPOSITORY_TYPES.any? do |type|
+        reference_counter(type: type).value > 0
       end
     end
 
