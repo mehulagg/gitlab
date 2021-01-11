@@ -15,7 +15,7 @@ Our primary goal is to **provide developers with immediate feedback for new migr
 
 Developers are expected to test database migrations prior to deploying to any environment, but we lack the ability to perform testing against large environments such as GitLab.com. The [developer database migration style guide](/ee/development/migration_style_guide.md) provides guidelines on migrations, and we focus on validating migrations during code review and testing in CI and staging.
 
-The [code review phase](/ee/development/database_review.html) involves Database Reviewers and Maintainers to manually check the migrations committed. This often involves knowing and spotting problematic patterns and their particular behavior on GitLab.com from experience. There is no large-scale environment available that allows us to test database migrations before they are being merged.
+The [code review phase](/ee/development/database_review.md) involves Database Reviewers and Maintainers to manually check the migrations committed. This often involves knowing and spotting problematic patterns and their particular behavior on GitLab.com from experience. There is no large-scale environment available that allows us to test database migrations before they are being merged.
 
 Testing in CI is done on a very small database. We mainly check forward/backward migration consistency, evaluate rubocop rules to detect well-known problematic behaviors (static code checking) and have a few other, rather technical checks in place (adding the right files etc).
 
@@ -51,9 +51,9 @@ The intended benefits include
 
 ## Technology and Next Steps
 
-We already use Database Labs from postgres.ai, which is a thin-cloning technology. We maintain a Postgres replica which is up to date with production data but does not serve any production traffic. This runs Database Labs which allows us to quickly create a full clone of the production dataset (in the order of seconds).
+We already use Database Labs from postgres.ai, which is a thin-cloning technology. We maintain a PostgreSQL replica which is up to date with production data but does not serve any production traffic. This runs Database Labs which allows us to quickly create a full clone of the production dataset (in the order of seconds).
 
-Internally, this is based on ZFS and implements a "thin-cloning technology". That is, ZFS snapshots are being used to clone the data and it exposes a full read/write Postgres cluster based on the cloned data. This is called a *thin clone*. It is rather short lived and is going to be destroyed again shortly after we are finished using it.
+Internally, this is based on ZFS and implements a "thin-cloning technology". That is, ZFS snapshots are being used to clone the data and it exposes a full read/write PostgreSQL cluster based on the cloned data. This is called a *thin clone*. It is rather short lived and is going to be destroyed again shortly after we are finished using it.
 
 It is important to note that a thin clone is fully read/write. This allows us to execute migrations on top of it.
 
