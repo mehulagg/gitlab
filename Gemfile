@@ -354,7 +354,7 @@ end
 group :development, :test do
   gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
-  gem 'pry-byebug', platform: :mri, github: 'meinac/pry-byebug', ref: '48be23af4e73ee00f5f0349c3f6e0ed2d7c5b59b'
+  gem 'pry-byebug', platform: :mri, github: 'meinac/pry-byebug', ref: '48be23af4e73ee00f5f0349c3f6e0ed2d7c5b59b', require: ['pry-byebug', 'pry-byebug/pry_remote_ext']
   gem 'pry-rails', '~> 0.3.9'
   gem 'pry-remote'
 
