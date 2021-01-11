@@ -15,7 +15,7 @@ RSpec.describe GitlabSchema.types['PackageComposerDetails'] do
 
   it 'includes composer specific files' do
     expected_fields = %w[
-      target_sha composer_json
+      composer_metadatum
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
