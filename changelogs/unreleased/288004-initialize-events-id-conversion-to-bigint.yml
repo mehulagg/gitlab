@@ -1,0 +1,5 @@
+---
+title: Initialize conversion of events.id to bigint
+merge_request: 51332
+author:
+type: other
