@@ -23657,6 +23657,9 @@ ALTER TABLE ONLY alert_management_alerts
 ALTER TABLE ONLY ci_stages
     ADD CONSTRAINT fk_2360681d1d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY dast_scans
+    ADD CONSTRAINT fk_2449f41960 FOREIGN KEY (dast_scanner_profile_id) REFERENCES dast_scanner_profiles(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY import_failures
     ADD CONSTRAINT fk_24b824da43 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -23739,7 +23742,7 @@ ALTER TABLE ONLY todos
     ADD CONSTRAINT fk_45054f9c45 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_scans
-    ADD CONSTRAINT fk_45dcdb8a56 FOREIGN KEY (dast_site_profile_id) REFERENCES projects(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_45dcdb8a56 FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY releases
     ADD CONSTRAINT fk_47fe2a0596 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

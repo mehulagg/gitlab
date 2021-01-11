@@ -6,7 +6,7 @@ class AddDastSiteProfileFkForDastScan < ActiveRecord::Migration[6.0]
   disable_ddl_transaction!
 
   def up
-    add_concurrent_foreign_key :dast_scans, :projects, column: :dast_site_profile_id, on_delete: :cascade
+    add_concurrent_foreign_key :dast_scans, :dast_site_profiles, column: :dast_site_profile_id, on_delete: :cascade
   end
 
   def down
