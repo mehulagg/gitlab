@@ -9377,6 +9377,8 @@ CREATE TABLE application_settings (
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
+    container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
@@ -14491,6 +14493,36 @@ CREATE SEQUENCE oauth_openid_requests_id_seq
 
 ALTER SEQUENCE oauth_openid_requests_id_seq OWNED BY oauth_openid_requests.id;
 
+CREATE TABLE onboarding_progresses (
+    id bigint NOT NULL,
+    namespace_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    git_pull_at timestamp with time zone,
+    git_write_at timestamp with time zone,
+    merge_request_created_at timestamp with time zone,
+    pipeline_created_at timestamp with time zone,
+    user_added_at timestamp with time zone,
+    trial_started_at timestamp with time zone,
+    subscription_created_at timestamp with time zone,
+    required_mr_approvals_enabled_at timestamp with time zone,
+    code_owners_enabled_at timestamp with time zone,
+    scoped_label_created_at timestamp with time zone,
+    security_scan_enabled_at timestamp with time zone,
+    issue_auto_closed_at timestamp with time zone,
+    repository_imported_at timestamp with time zone,
+    repository_mirrored_at timestamp with time zone
+);
+
+CREATE SEQUENCE onboarding_progresses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE onboarding_progresses_id_seq OWNED BY onboarding_progresses.id;
+
 CREATE TABLE open_project_tracker_data (
     id bigint NOT NULL,
     service_id integer NOT NULL,
@@ -18715,6 +18747,8 @@ ALTER TABLE ONLY oauth_applications ALTER COLUMN id SET DEFAULT nextval('oauth_a
 
 ALTER TABLE ONLY oauth_openid_requests ALTER COLUMN id SET DEFAULT nextval('oauth_openid_requests_id_seq'::regclass);
 
+ALTER TABLE ONLY onboarding_progresses ALTER COLUMN id SET DEFAULT nextval('onboarding_progresses_id_seq'::regclass);
+
 ALTER TABLE ONLY open_project_tracker_data ALTER COLUMN id SET DEFAULT nextval('open_project_tracker_data_id_seq'::regclass);
 
 ALTER TABLE ONLY operations_feature_flag_scopes ALTER COLUMN id SET DEFAULT nextval('operations_feature_flag_scopes_id_seq'::regclass);
@@ -20051,6 +20085,9 @@ ALTER TABLE ONLY oauth_applications
 
 ALTER TABLE ONLY oauth_openid_requests
     ADD CONSTRAINT oauth_openid_requests_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY onboarding_progresses
+    ADD CONSTRAINT onboarding_progresses_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY open_project_tracker_data
     ADD CONSTRAINT open_project_tracker_data_pkey PRIMARY KEY (id);
@@ -22253,6 +22290,8 @@ CREATE INDEX index_on_users_lower_email ON users USING btree (lower((email)::tex
 CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username)::text));
 
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
+
+CREATE UNIQUE INDEX index_onboarding_progresses_on_namespace_id ON onboarding_progresses USING btree (namespace_id);
 
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
@@ -24464,6 +24503,9 @@ ALTER TABLE ONLY geo_repository_updated_events
 
 ALTER TABLE ONLY boards_epic_board_labels
     ADD CONSTRAINT fk_rails_2bedeb8799 FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY onboarding_progresses
+    ADD CONSTRAINT fk_rails_2ccfd420cc FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_2d2aba21ef FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;

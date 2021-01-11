@@ -9,6 +9,8 @@ import {
   GlTokenSelector,
   GlAvatar,
   GlAvatarLabeled,
+  GlToggle,
+  GlCard,
 } from '@gitlab/ui';
 import {
   LENGTH_ENUM,
@@ -33,6 +35,10 @@ export const i18n = {
       title: __('Starts on'),
       error: s__('OnCallSchedules|Rotation start date cannot be empty'),
     },
+    endsOn: {
+      enableToggle: s__('OnCallSchedules|Enable end date'),
+      title: __('Ends on'),
+    },
   },
 };
 
@@ -55,6 +61,8 @@ export default {
     GlTokenSelector,
     GlAvatar,
     GlAvatarLabeled,
+    GlToggle,
+    GlCard,
   },
   props: {
     form: {
@@ -82,6 +90,7 @@ export default {
   data() {
     return {
       participantsArr: [],
+      endDateEnabled: false,
     };
   },
   methods: {
@@ -150,7 +159,7 @@ export default {
           :value="1"
           @input="$emit('update-rotation-form', { type: 'rotationLength.length', value: $event })"
         />
-        <gl-dropdown id="rotation-length" :text="form.rotationLength.unit.toLowerCase()">
+        <gl-dropdown :text="form.rotationLength.unit.toLowerCase()">
           <gl-dropdown-item
             v-for="unit in $options.LENGTH_ENUM"
             :key="unit"
@@ -167,7 +176,7 @@ export default {
     <gl-form-group
       :label="$options.i18n.fields.startsAt.title"
       label-size="sm"
-      label-for="rotation-time"
+      label-for="rotation-start-time"
       :invalid-feedback="$options.i18n.fields.startsAt.error"
       :state="validationState.startsAt"
     >
@@ -189,7 +198,7 @@ export default {
         </gl-datepicker>
         <span> {{ __('at') }} </span>
         <gl-dropdown
-          id="rotation-time"
+          id="rotation-start-time"
           :text="format24HourTimeStringFromInt(form.startsAt.time)"
           class="gl-w-12 gl-pl-3"
         >
@@ -206,5 +215,45 @@ export default {
         <span class="gl-pl-5"> {{ schedule.timezone }} </span>
       </div>
     </gl-form-group>
+
+    <gl-toggle
+      v-model="endDateEnabled"
+      :label="$options.i18n.fields.endsOn.enableToggle"
+      label-position="left"
+      class="gl-mb-5"
+    />
+
+    <gl-card v-if="endDateEnabled" class="gl-min-w-fit-content" data-testid="rotation-ends-on">
+      <gl-form-group
+        :label="$options.i18n.fields.endsOn.title"
+        label-size="sm"
+        label-for="rotation-end-time"
+        :invalid-feedback="$options.i18n.fields.endsOn.error"
+      >
+        <div class="gl-display-flex gl-align-items-center">
+          <gl-datepicker
+            class="gl-mr-3"
+            @input="$emit('update-rotation-form', { type: 'endsOn.date', value: $event })"
+          />
+          <span> {{ __('at') }} </span>
+          <gl-dropdown
+            id="rotation-end-time"
+            :text="format24HourTimeStringFromInt(form.endsOn.time)"
+            class="gl-w-12 gl-pl-3"
+          >
+            <gl-dropdown-item
+              v-for="time in $options.HOURS_IN_DAY"
+              :key="time"
+              :is-checked="form.endsOn.time === time"
+              is-check-item
+              @click="$emit('update-rotation-form', { type: 'endsOn.time', value: time })"
+            >
+              <span class="gl-white-space-nowrap"> {{ format24HourTimeStringFromInt(time) }}</span>
+            </gl-dropdown-item>
+          </gl-dropdown>
+          <div class="gl-mx-5">{{ schedule.timezone }}</div>
+        </div>
+      </gl-form-group>
+    </gl-card>
   </gl-form>
 </template>

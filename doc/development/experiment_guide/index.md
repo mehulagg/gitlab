@@ -339,7 +339,7 @@ https://gitlab.com/<EXPERIMENT_ENTRY_URL>?force_experiment=<EXPERIMENT_KEY>
 
 ### A cookie-based approach to force an experiment
 
-It's possible to force the current user to be in the experiment group for <EXPERIMENT_KEY> 
+It's possible to force the current user to be in the experiment group for `<EXPERIMENT_KEY>`
 during the browser session by using your browser's developer tools:
 
 ```javascript

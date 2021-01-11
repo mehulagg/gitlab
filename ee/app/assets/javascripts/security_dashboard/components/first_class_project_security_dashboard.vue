@@ -25,6 +25,7 @@ export default {
     Filters,
   },
   mixins: [glFeatureFlagsMixin()],
+  inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
   props: {
     securityDashboardHelpPath: {
       type: String,
@@ -49,7 +50,6 @@ export default {
       shoudShowAutoFixUserCallout,
     };
   },
-  inject: ['dashboardDocumentation', 'autoFixDocumentation', 'projectFullPath'],
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;

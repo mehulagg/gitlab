@@ -211,6 +211,20 @@ RSpec.describe EpicsFinder do
 
             expect(epics(params)).to contain_exactly(epic3)
           end
+
+          describe 'when one of the timeframe params are missing' do
+            it 'does not filter by timeframe if start_date is missing' do
+              only_end_date = epics(end_date: 1.year.ago.strftime('%Y-%m-%d'))
+
+              expect(only_end_date).to eq(epics)
+            end
+
+            it 'does not filter by timeframe if end_date is missing' do
+              only_start_date = epics(start_date: 1.year.from_now.strftime('%Y-%m-%d'))
+
+              expect(only_start_date).to eq(epics)
+            end
+          end
         end
 
         context 'by parent' do

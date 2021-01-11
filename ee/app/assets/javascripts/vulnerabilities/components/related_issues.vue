@@ -16,6 +16,26 @@ export default {
     RelatedIssuesBlock,
     GlButton,
   },
+  inject: {
+    vulnerabilityId: {
+      default: 0,
+    },
+    projectFingerprint: {
+      default: '',
+    },
+    newIssueUrl: {
+      default: '',
+    },
+    reportType: {
+      default: '',
+    },
+    issueTrackingHelpPath: {
+      default: '',
+    },
+    permissionsHelpPath: {
+      default: '',
+    },
+  },
   props: {
     endpoint: {
       type: String,
@@ -58,26 +78,6 @@ export default {
     },
     canCreateIssue() {
       return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl);
-    },
-  },
-  inject: {
-    vulnerabilityId: {
-      default: 0,
-    },
-    projectFingerprint: {
-      default: '',
-    },
-    newIssueUrl: {
-      default: '',
-    },
-    reportType: {
-      default: '',
-    },
-    issueTrackingHelpPath: {
-      default: '',
-    },
-    permissionsHelpPath: {
-      default: '',
     },
   },
   created() {

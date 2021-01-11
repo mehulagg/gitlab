@@ -13,4 +13,4 @@
     = form_for @project, remote: true, html: { class: "merge-request-approval-settings-form js-mr-approvals-form" }, authenticity_token: true do |f|
       %input{ name: 'update_section', type: 'hidden', value: 'js-merge-request-approval-settings' }
       = render 'projects/merge_request_approvals_settings_form', form: f, project: @project
-      = f.submit _("Save changes"), class: "btn gl-button btn-success qa-save-merge-request-approval-settings-button"
+      = f.submit _("Save changes"), class: "btn gl-button btn-success qa-save-merge-request-approval-settings-button gl-mt-4"

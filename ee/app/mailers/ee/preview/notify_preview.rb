@@ -41,7 +41,14 @@ module EE
         end
 
         def import_requirements_csv_email
-          Notify.import_requirements_csv_email(user.id, project.id, { success: 3, errors: [5, 6, 7], valid_file: true })
+          ::Notify.import_requirements_csv_email(user.id, project.id, { success: 3, errors: [5, 6, 7], valid_file: true })
+        end
+
+        def requirements_csv_email
+          ::Notify.requirements_csv_email(
+            user, project, 'requirement1,requirement2,requirement3',
+            { truncated: false, rows_expected: 3, rows_written: 3 }
+          ).message
         end
       end
 

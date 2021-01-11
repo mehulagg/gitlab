@@ -80,6 +80,10 @@ export default {
           date: null,
           time: 0,
         },
+        endsOn: {
+          date: null,
+          time: 0,
+        },
       },
       error: '',
       validationState: {
@@ -241,10 +245,10 @@ export default {
   <gl-modal
     ref="addEditScheduleRotationModal"
     :modal-id="modalId"
-    size="sm"
     :title="title"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
+    modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">

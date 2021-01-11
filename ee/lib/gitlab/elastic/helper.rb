@@ -141,6 +141,14 @@ module Gitlab
         end
       end
 
+      def delete_migrations_index
+        delete_index(index_name: migrations_index_name)
+      end
+
+      def migrations_index_exists?
+        index_exists?(index_name: migrations_index_name)
+      end
+
       def create_empty_index(with_alias: true, options: {})
         new_index_name = options[:index_name] || "#{target_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 

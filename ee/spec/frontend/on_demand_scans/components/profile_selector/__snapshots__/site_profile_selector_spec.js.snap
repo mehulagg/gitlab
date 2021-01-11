@@ -13,10 +13,10 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
       class="row"
     >
       <div
-        class="col-7"
+        class="col-7 gl-display-flex gl-align-items-center"
       >
         <h3
-          class="gl-font-lg gl-display-inline"
+          class="gl-font-lg gl-my-0"
         >
           Site profile
         </h3>
@@ -218,10 +218,10 @@ exports[`OnDemandScansSiteProfileSelector renders properly without profiles 1`] 
       class="row"
     >
       <div
-        class="col-7"
+        class="col-7 gl-display-flex gl-align-items-center"
       >
         <h3
-          class="gl-font-lg gl-display-inline"
+          class="gl-font-lg gl-my-0"
         >
           Site profile
         </h3>

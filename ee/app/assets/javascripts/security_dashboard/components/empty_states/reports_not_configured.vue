@@ -6,13 +6,13 @@ export default {
   components: {
     GlEmptyState,
   },
+  inject: ['emptyStateSvgPath'],
   props: {
     helpPath: {
       type: String,
       required: true,
     },
   },
-  inject: ['emptyStateSvgPath'],
   DESCRIPTION: s__(
     `SecurityReports|The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.`,
   ),

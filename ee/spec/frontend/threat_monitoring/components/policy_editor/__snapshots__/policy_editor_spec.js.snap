@@ -247,6 +247,7 @@ spec:
   <gl-modal-stub
     actioncancel="[object Object]"
     actionsecondary="[object Object]"
+    dismisslabel="Close"
     modalclass=""
     modalid="delete-modal"
     size="md"

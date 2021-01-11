@@ -38,38 +38,6 @@ export default {
     };
   },
   computed: {
-    startDateValues() {
-      const { startDate } = this.milestone;
-
-      return {
-        day: startDate.getDay(),
-        date: startDate.getDate(),
-        month: startDate.getMonth(),
-        year: startDate.getFullYear(),
-        time: startDate.getTime(),
-      };
-    },
-    endDateValues() {
-      const { endDate } = this.milestone;
-
-      return {
-        day: endDate.getDay(),
-        date: endDate.getDate(),
-        month: endDate.getMonth(),
-        year: endDate.getFullYear(),
-        time: endDate.getTime(),
-      };
-    },
-    hasStartDate() {
-      if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter(this.timeframeItem);
-      } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth(this.timeframeItem);
-      } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek(this.timeframeItem);
-      }
-      return false;
-    },
     startDate() {
       return this.milestone.startDateOutOfRange
         ? this.milestone.originalStartDate

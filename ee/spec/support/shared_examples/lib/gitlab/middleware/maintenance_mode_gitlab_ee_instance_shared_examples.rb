@@ -15,8 +15,15 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
 
     it_behaves_like 'allowlisted /admin/geo requests'
 
-    it "expects a PUT request to /admin/application_settings/general to be allowed" do
+    it "expects a PUT request to /api/v4/application/settings to be allowed" do
       response = request.send(:put, "/api/v4/application/settings")
+
+      expect(response).not_to be_redirect
+      expect(subject).not_to disallow_request
+    end
+
+    it "expects a POST request to /admin/application_settings/general to be allowed" do
+      response = request.send(:post, "/admin/application_settings/general")
 
       expect(response).not_to be_redirect
       expect(subject).not_to disallow_request
@@ -46,6 +53,7 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
         'LFS request to locks create' | '/root/rouge.git/info/lfs/locks'
         'LFS request to locks unlock' | '/root/rouge.git/info/lfs/locks/1/unlock'
         'git-receive-pack'            | '/root/rouge.git/git-receive-pack'
+        'application settings'        | '/admin/application_settings/general'
       end
 
       with_them do
@@ -55,6 +63,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
           expect(response).to be_redirect
           expect(subject).to disallow_request
         end
+      end
+
+      it "expects a PUT request to /api/v4/application/settings to not be allowed" do
+        response = request.send(:put, "/api/v4/application/settings")
+
+        expect(response).to be_redirect
+        expect(subject).to disallow_request
       end
     end
 

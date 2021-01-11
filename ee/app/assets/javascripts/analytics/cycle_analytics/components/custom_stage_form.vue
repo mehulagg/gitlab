@@ -11,7 +11,7 @@ import {
 } from '@gitlab/ui';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
-import { validateFields, initializeFormData } from './create_value_stream_form/utils';
+import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
 import { STAGE_ACTIONS } from '../constants';
 import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
@@ -157,7 +157,8 @@ export default {
     },
     handleUpdateFields(field, value) {
       this.fields = { ...this.fields, [field]: value };
-      const newErrors = validateFields(this.fields);
+
+      const newErrors = validateStage({ ...this.fields, custom: true });
       newErrors.endEventIdentifier =
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
