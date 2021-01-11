@@ -11585,8 +11585,8 @@ CREATE TABLE dast_scans (
     dast_scanner_profile_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    name text,
-    description text,
+    name text NOT NULL,
+    description text NOT NULL,
     CONSTRAINT check_8c72942777 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_d14d6d8a3c CHECK ((char_length(description) <= 255))
 );

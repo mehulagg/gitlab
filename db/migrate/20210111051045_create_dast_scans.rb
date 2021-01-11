@@ -16,8 +16,8 @@ class CreateDastScans < ActiveRecord::Migration[6.0]
 
         t.timestamps_with_timezone
 
-        t.text :name
-        t.text :description
+        t.text :name, null: false
+        t.text :description, null: false
       end
     end
 
