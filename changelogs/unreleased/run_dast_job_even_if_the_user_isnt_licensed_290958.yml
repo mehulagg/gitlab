@@ -1,0 +1,5 @@
+---
+title: Update the DAST job to run when configured if even if the users doesn't have sufficient permission
+merge_request: 51279
+author:
+type: changed
