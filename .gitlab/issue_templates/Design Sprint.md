@@ -116,7 +116,7 @@ Each exercise should be explained and documented in a separate issue. You can us
 
 ### Post-Sprint activities
 
-- [ ]  Create a feedback issue for the Design Sprint - `facilitator` or `decider` 
+- [ ] Create a feedback issue for the Design Sprint - `facilitator` or `decider` 
 - [ ] Analyse user testing results - `facilitator` or `decider`
 - [ ] Create report and share with the Design Sprint participants and wider team - `facilitator` or `decider`
 
