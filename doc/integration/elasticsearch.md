@@ -508,6 +508,16 @@ This should return something similar to:
 
 In order to debug issues with the migrations you can check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog).
 
+### Retry a halted migration
+
+Some migrations are built with a retry limit. If the migration cannot finish within the retry limit,
+it will be halted and a notification will be displayed in the Advanced Search integration settings.
+It is recommended to check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog) to
+debug why the migration was halted and make any changes before retrying the migration. The migration will
+be scheduled to retry in the background.
+
+![retry a halted migration](img/elasticsearch_retry_migration.png)
+
 ## GitLab Advanced Search Rake tasks
 
 Rake tasks are available to:
