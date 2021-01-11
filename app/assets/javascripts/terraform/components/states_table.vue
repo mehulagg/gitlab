@@ -191,7 +191,7 @@ export default {
     </template>
 
     <template #row-details="row">
-      <h1>Error Row!</h1>
+      <h1>{{ row }}</h1>
     </template>
   </gl-table>
 </template>

@@ -24,6 +24,22 @@ export default () => {
           fragmentName: 'State',
         });
 
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        terraformState.name = 'Name can be changed!';
+
+        // eslint-disable-next-line no-underscore-dangle
+        terraformState._showDetails = true; // <-- This field is ignored
+
+        client.writeFragment({
+          id: stateID,
+          fragment: TerraformState,
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          fragmentName: 'State',
+          data: {
+            ...terraformState,
+          },
+        });
+
         return terraformState;
       },
     },
