@@ -113,6 +113,13 @@ module Gitlab
           api_fuzzing: 7
         }
 
+        def recover_findings
+          populate_finding_uuids
+          remove_broken_findings
+        end
+
+        private
+
         def populate_finding_uuids
           report_findings.each_with_index do |report_finding, index|
             findings.where(position: index)
@@ -120,7 +127,9 @@ module Gitlab
           end
         end
 
-        private
+        def remove_broken_findings
+          findings.where(uuid: nil).each_batch { |batch| batch.delete_all }
+        end
 
         def report_findings
           security_reports&.findings.to_a
@@ -144,7 +153,7 @@ module Gitlab
       end
 
       def perform(scan_ids)
-        SecurityScan.where(id: scan_ids).each(&:populate_finding_uuids)
+        SecurityScan.where(id: scan_ids).each(&:recover_findings)
       end
     end
   end
