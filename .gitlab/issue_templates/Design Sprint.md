@@ -64,7 +64,7 @@ We will use Mural for most of the Sprint collaboration. Some of the things we wi
 The Mural link to the collaboration project will be provided in the issue before the start of the Design Sprint.
 
 * **Video and/or screen recording tool** (Loom, Quicktime, Zoom or another tool you are using).<br/>
-As part of the pre-Sprint homework, you will be asked to record a short Lightning Walkthrough video. You can use any tool you feel comfortable with that can capture your screen and your audio.
+As part of the pre-Sprint homework, you will be asked to record a short Lightning Walkthrough video. You can use any tool you feel comfortable with as long as it can capture your screen, mouse pointer and your audio.
 
 * **A4/Letter sized paper (preferably white blank), Sharpies/Pens** (please don't use a pencil because it doesn't create enough contrast for photos).<br/>
 Day 2 of the sprint involves some (async) ideation via sketching so you will need a writing utensil (Sharpies are preferred) and some paper. This is the most fun part of the Sprint where you get into a design thinking mindset and can appeal to your creative self. 
