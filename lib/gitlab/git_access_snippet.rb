@@ -9,7 +9,8 @@ module Gitlab
       read_snippet: 'You are not allowed to read this snippet.',
       update_snippet: 'You are not allowed to update this snippet.',
       snippet_not_found: 'The snippet you were looking for could not be found.',
-      no_repo: 'The snippet repository you were looking for could not be found.'
+      no_repo: 'The snippet repository you were looking for could not be found.',
+      read_only: 'The repository is temporarily read-only. Please try again later.'
     }.freeze
 
     alias_method :snippet, :container
@@ -59,7 +60,7 @@ module Gitlab
       # TODO: Investigate if expanding actor/authentication types are needed.
       # https://gitlab.com/gitlab-org/gitlab/issues/202190
       if actor && !allowed_actor?
-        raise ForbiddenError, ERROR_MESSAGES[:authentication_mechanism]
+        raise ForbiddenError, error_message(:authentication_mechanism)
       end
 
       super
@@ -71,14 +72,18 @@ module Gitlab
 
     override :check_push_access!
     def check_push_access!
-      raise ForbiddenError, ERROR_MESSAGES[:update_snippet] unless user
+      raise ForbiddenError, error_message(:update_snippet) unless user
+
+      if snippet&.repository_read_only?
+        raise ForbiddenError, error_message(:read_only)
+      end
 
       check_change_access!
     end
 
     def check_snippet_accessibility!
       if snippet.blank?
-        raise NotFoundError, ERROR_MESSAGES[:snippet_not_found]
+        raise NotFoundError, error_message(:snippet_not_found)
       end
     end
 
@@ -94,14 +99,14 @@ module Gitlab
       passed = guest_can_download_code? || user_can_download_code?
 
       unless passed
-        raise ForbiddenError, ERROR_MESSAGES[:read_snippet]
+        raise ForbiddenError, error_message(:read_snippet)
       end
     end
 
     override :check_change_access!
     def check_change_access!
       unless user_can_push?
-        raise ForbiddenError, ERROR_MESSAGES[:update_snippet]
+        raise ForbiddenError, error_message(:update_snippet)
       end
 
       check_size_before_push!
