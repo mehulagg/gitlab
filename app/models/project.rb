@@ -487,7 +487,27 @@ class Project < ApplicationRecord
       { column: arel_table["description"], multiplier: 0.2 }
     ])
 
-    query = reorder(order_expression.desc, arel_table['id'].desc)
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'similarity',
+        column_expression: order_expression,
+        order_expression: order_expression.desc,
+        reversed_order_expression: order_expression.asc,
+        order_direction: :desc,
+        nullable: false,
+        distinct: false
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'id',
+        column_expression: Project.arel_table[:id],
+        order_expression: Project.arel_table[:id].desc,
+        order_direction: :desc,
+        nullable: false,
+        distinct: true
+      )
+    ])
+
+    query = reorder(order)
 
     query = query.select(*query.arel.projections, order_expression.as('similarity')) if include_in_select
     query

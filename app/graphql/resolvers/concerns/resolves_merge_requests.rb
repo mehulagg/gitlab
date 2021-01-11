@@ -12,6 +12,7 @@ module ResolvesMergeRequests
 
   def resolve_with_lookahead(**args)
     mr_finder = MergeRequestsFinder.new(current_user, args.compact)
+
     finder = Gitlab::Graphql::Loaders::IssuableLoader.new(mr_parent, mr_finder)
 
     select_result(finder.batching_find_all { |query| apply_lookahead(query) })
