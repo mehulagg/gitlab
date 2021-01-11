@@ -6,7 +6,6 @@ import Container from '~/environments/components/container.vue';
 import EmptyState from '~/environments/components/empty_state.vue';
 import EnvironmentsApp from '~/environments/components/environments_app.vue';
 import DeployBoard from '~/environments/components/deploy_board.vue';
-import CanaryDeploymentBoard from '~/environments/components/canary_deployment_callout.vue';
 import axios from '~/lib/utils/axios_utils';
 import { environment, folder } from './mock_data';
 
@@ -20,8 +19,6 @@ describe('Environment', () => {
     canReadEnvironment: true,
     newEnvironmentPath: 'environments/new',
     helpPagePath: 'help',
-    canaryDeploymentFeatureId: 'canary_deployment',
-    showCanaryDeploymentCallout: true,
     userCalloutsPath: '/callouts',
     lockPromotionSvgPath: '/assets/illustrations/lock-promotion.svg',
     helpCanaryDeploymentsPath: 'help/canary-deployments',
@@ -37,9 +34,6 @@ describe('Environment', () => {
       'X-Total-Pages': '2',
     });
   };
-
-  const canaryPromoKeyValue = () =>
-    wrapper.find(CanaryDeploymentBoard).attributes('data-js-canary-promo-key');
 
   const createWrapper = (shallow = false, props = {}) => {
     const fn = shallow ? shallowMount : mount;
@@ -100,21 +94,21 @@ describe('Environment', () => {
         });
 
         it('should make an API request when page is clicked', () => {
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
 
           wrapper.find('.gl-pagination li:nth-child(3) .page-link').trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'available', page: '2' });
         });
 
         it('should make an API request when using tabs', () => {
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
           findEnvironmentsTabStopped().trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'stopped', page: '1' });
         });
 
         it('should not make the same API request when clicking on the current scope tab', () => {
           // component starts at available
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
           findEnvironmentsTabAvailable().trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledTimes(0);
         });
@@ -146,28 +140,6 @@ describe('Environment', () => {
           expect(
             wrapper.find('.deploy-board-icon [data-testid="chevron-down-icon"]').exists(),
           ).toBe(true);
-        });
-      });
-
-      describe('canary callout with one environment', () => {
-        it('should render banner underneath first environment', () => {
-          expect(canaryPromoKeyValue()).toBe('0');
-        });
-      });
-
-      describe('canary callout with multiple environments', () => {
-        beforeEach(() => {
-          mockRequest(200, {
-            environments: [environment, environment],
-            stopped_count: 1,
-            available_count: 0,
-          });
-
-          return createWrapper();
-        });
-
-        it('should render banner underneath second environment', () => {
-          expect(canaryPromoKeyValue()).toBe('1');
         });
       });
     });

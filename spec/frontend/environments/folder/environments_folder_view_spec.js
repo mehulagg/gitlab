@@ -16,8 +16,6 @@ describe('Environments Folder View', () => {
     folderName: 'review',
     canReadEnvironment: true,
     cssContainerClass: 'container',
-    canaryDeploymentFeatureId: 'canary_deployment',
-    showCanaryDeploymentCallout: true,
     userCalloutsPath: '/callouts',
     lockPromotionSvgPath: '/assets/illustrations/lock-promotion.svg',
     helpCanaryDeploymentsPath: 'help/canary-deployments',
@@ -100,7 +98,7 @@ describe('Environments Folder View', () => {
       });
 
       it('should make an API request when changing page', () => {
-        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
         wrapper.find('.gl-pagination .page-item:nth-last-of-type(2) .page-link').trigger('click');
         expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
           scope: wrapper.vm.scope,
@@ -109,7 +107,7 @@ describe('Environments Folder View', () => {
       });
 
       it('should make an API request when using tabs', () => {
-        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
         findEnvironmentsTabStopped().trigger('click');
         expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'stopped', page: '1' });
       });
@@ -146,7 +144,7 @@ describe('Environments Folder View', () => {
     beforeEach(() => {
       mockEnvironments([]);
       createWrapper();
-      jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
+      jest.spyOn(window.history, 'pushState').mockImplementation(() => { });
       return axios.waitForAll();
     });
 
@@ -161,7 +159,7 @@ describe('Environments Folder View', () => {
 
     describe('onChangeTab', () => {
       it('should set page to 1', () => {
-        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
         wrapper.vm.onChangeTab('stopped');
         expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'stopped', page: '1' });
       });
@@ -169,7 +167,7 @@ describe('Environments Folder View', () => {
 
     describe('onChangePage', () => {
       it('should update page and keep scope', () => {
-        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+        jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
         wrapper.vm.onChangePage(4);
         expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
           scope: wrapper.vm.scope,
