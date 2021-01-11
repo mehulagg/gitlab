@@ -18,6 +18,12 @@
 
 ## Design Sprint Details
 
+| Start | End |
+| ------ | ------ |
+| YYYY-MM-DD | YYYY-MM-DD |
+| TT:TT PST | TT:TT PST |
+
+
 ### WHEN 
 
 **Start date:**
