@@ -13,6 +13,7 @@ import initRelatedMergeRequestsApp from '~/related_merge_requests';
 import { parseIssuableData } from '~/issue_show/utils/parse_data';
 import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
 import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 
 import { IssuableType } from '~/issuable_show/constants';
 
@@ -35,6 +36,7 @@ export default function () {
   initIssueHeaderActions(store);
   initSentryErrorStackTraceApp();
   initRelatedMergeRequestsApp();
+  initInviteMembersModal();
 
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
     .then((module) => module.default())

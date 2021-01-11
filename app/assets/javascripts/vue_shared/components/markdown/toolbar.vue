@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlLink, GlLoadingIcon, GlSprintf, GlIcon } from '@gitlab/ui';
+import eventHub from '../../../invite_members/event_hub';
 
 export default {
   components: {
@@ -28,6 +29,11 @@ export default {
   computed: {
     hasQuickActionsDocsPath() {
       return this.quickActionsDocsPath !== '';
+    },
+  },
+  methods: {
+    openInviteModal() {
+      eventHub.$emit('openModal');
     },
   },
 };
@@ -101,6 +107,14 @@ export default {
           </template>
         </gl-sprintf>
       </span>
+      <gl-button
+        icon="assignee"
+        variant="link"
+        class="gl-vertical-align-text-bottom gl-mr-3"
+        @click="openInviteModal"
+      >
+        {{ __('Invite Member') }}
+      </gl-button>
       <gl-button
         icon="media"
         variant="link"

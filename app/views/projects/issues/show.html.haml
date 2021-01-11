@@ -4,3 +4,4 @@
 - page_title "#{@issue.title} (#{@issue.to_reference})", _("Issues")
 
 = render 'projects/issuable/show', issuable: @issue
+= render 'projects/invite_members_modal', project: @project
