@@ -1,0 +1,5 @@
+---
+title: Add dast_scans db table
+merge_request: 51296
+author:
+type: added
