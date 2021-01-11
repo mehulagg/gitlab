@@ -191,7 +191,11 @@ export default {
     </template>
 
     <template #row-details="row">
-      <h1>{{ row }}</h1>
+      <div>
+        <h1>{{ row.item.errorMessages }}</h1>
+
+        <p>{{ row.item.name }}</p>
+      </div>
     </template>
   </gl-table>
 </template>

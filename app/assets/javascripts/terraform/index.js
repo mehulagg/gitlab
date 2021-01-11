@@ -15,6 +15,12 @@ export default () => {
   }
 
   const resolvers = {
+    TerraformState: {
+      _showDetails: (state) => {
+        // return state._showDetails <- This will error
+        return state.name;
+      },
+    },
     Mutation: {
       addErrorsToTerraformState: (_, { stateID }, { client }) => {
         const terraformState = client.readFragment({
@@ -25,10 +31,15 @@ export default () => {
         });
 
         // eslint-disable-next-line @gitlab/require-i18n-strings
-        terraformState.name = 'Name can be changed!';
+        terraformState.name = 'Name can be changed because it is part of the fragment!';
 
         // eslint-disable-next-line no-underscore-dangle
-        terraformState._showDetails = true; // <-- This field is ignored
+        terraformState._showDetails = true;
+        // This field is ignored because terraformState._showDetails() is a function
+
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        terraformState.errorMessages = ['Error Message!'];
+        // This field will also be igored
 
         client.writeFragment({
           id: stateID,
@@ -40,7 +51,7 @@ export default () => {
           },
         });
 
-        return terraformState;
+        return null;
       },
     },
   };
