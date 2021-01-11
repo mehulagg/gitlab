@@ -61,9 +61,7 @@ module Types
     field :package_composer_details, Types::Packages::Composer::DetailsType,
           null: true,
           description: 'Find a composer package',
-          resolver: Resolvers::PackageDetailsResolver do
-            argument :id, ::Types::GlobalIDType[::Packages::Package], required: true, description: 'The global ID of the package'
-          end
+          resolver: Resolvers::PackageDetailsResolver
 
     field :user, Types::UserType,
           null: true,
