@@ -1,0 +1,8 @@
+---
+name: gitaly_go_user_cherry_pick
+introduced_by_url:  https://gitlab.com/gitlab-org/gitaly/-/merge_requests/2709
+rollout_issue_url: https://gitlab.com/gitlab-org/gitaly/-/issues/3281
+milestone: '13.8'
+type: development
+group: group::gitaly
+default_enabled: false
