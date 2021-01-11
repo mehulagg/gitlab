@@ -34,6 +34,15 @@ RSpec.describe Gitlab::GitAccessSnippet do
     end
   end
 
+  describe 'when snippet repository is read-only' do
+    it 'does not allow push and allows pull access' do
+      allow(snippet).to receive(:repository_read_only?).and_return(true)
+
+      expect { push_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:read_only])
+      expect { pull_access_check }.not_to raise_error
+    end
+  end
+
   shared_examples 'actor is migration bot' do
     context 'when user is the migration bot' do
       let(:user) { migration_bot }
