@@ -88,7 +88,7 @@ If you enjoy taking notes using post-it notes make sure you have available some 
 
 ### Articles on Design Sprints
   * [The Design Sprint](https://www.gv.com/sprint/)
-  * [The Ultimate Guide To Remote Design Sprints](https://www.dropbox.com/s/umtqtnwz3cshxh5/The%20Ultimate%20Guide%20To%20Remote%20Design%20Sprints.pdf?dl=0)
+  * [The Ultimate Guide To Remote Design Sprints](https://drive.google.com/file/d/16bwrAqHVf8qxovd87Q7LdzqwAgy7a6Rx/view?usp=sharing)
 
 ## Asyncronus tasks
 
