@@ -28,7 +28,7 @@ To use GitLab CI/CD:
    If you don't have a runner, [install GitLab Runner](https://docs.gitlab.com/runner/install/)
    and [register a runner](https://docs.gitlab.com/runner/register/) for your instance, project, or group.
 1. [Create a `.gitlab-ci.yml` file](#create-a-gitlab-ciyml-file)
-   at the root of your repository. This file is where you define your CI/CD jobs.
+   at the root of your repository on the `master` branch. This file is where you define your CI/CD jobs.
 
 When you commit the file to your repository, the runner runs your jobs.
 The job results [are displayed in a pipeline](#view-the-status-of-your-pipeline-and-jobs).
