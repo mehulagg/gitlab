@@ -93,6 +93,14 @@ module Gitlab
         migrations_index_name
       end
 
+      def delete_migration_record(migration)
+        result = client.delete(index: migrations_index_name, type: '_doc', id: migration.version)
+        result['result'] == 'deleted'
+      rescue ::Elasticsearch::Transport::Transport::Errors::NotFound => e
+        Gitlab::ErrorTracking.log_exception(e)
+        false
+      end
+
       def standalone_indices_proxies
         ES_SEPARATE_CLASSES.map do |class_name|
           ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)

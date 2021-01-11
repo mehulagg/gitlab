@@ -283,4 +283,22 @@ RSpec.describe Gitlab::Elastic::Helper do
       end
     end
   end
+
+  describe '#delete_migration_record', :elastic do
+    let(:migration) { ::Elastic::DataMigrationService.migrations.last }
+
+    subject { helper.delete_migration_record(migration) }
+
+    context 'when record exists' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when record does not exist' do
+      before do
+        allow(migration).to receive(:version).and_return(1)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
 end
