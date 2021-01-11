@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class List < ApplicationRecord
+  include Boards::Listable
   include Importable
 
   belongs_to :board
@@ -10,30 +11,14 @@ class List < ApplicationRecord
   enum list_type: { backlog: 0, label: 1, closed: 2, assignee: 3, milestone: 4, iteration: 5 }
 
   validates :board, :list_type, presence: true, unless: :importing?
-  validates :label, :position, presence: true, if: :label?
-  validates :label_id, uniqueness: { scope: :board_id }, if: :label?
-  validates :position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, if: :movable?
 
   before_destroy :can_be_destroyed
 
-  scope :destroyable, -> { where(list_type: list_types.slice(*destroyable_types).values) }
-  scope :movable, -> { where(list_type: list_types.slice(*movable_types).values) }
-
   scope :preload_associated_models, -> { preload(:board, label: :priorities) }
-
-  scope :ordered, -> { order(:list_type, :position) }
 
   alias_method :preferences, :list_user_preferences
 
   class << self
-    def destroyable_types
-      [:label]
-    end
-
-    def movable_types
-      [:label]
-    end
-
     def preload_preferences_for_user(lists, user)
       return unless user
 
@@ -58,18 +43,6 @@ class List < ApplicationRecord
     return unless user
 
     preferences_for(user).update(preferences)
-  end
-
-  def destroyable?
-    self.class.destroyable_types.include?(list_type&.to_sym)
-  end
-
-  def movable?
-    self.class.movable_types.include?(list_type&.to_sym)
-  end
-
-  def title
-    label? ? label.name : list_type.humanize
   end
 
   def collapsed?(user)
