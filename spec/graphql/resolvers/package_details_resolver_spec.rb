@@ -23,6 +23,5 @@ RSpec.describe Resolvers::PackageDetailsResolver do
 
       it { is_expected.to eq(package) }
     end
-
   end
 end

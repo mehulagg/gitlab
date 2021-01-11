@@ -48709,8 +48709,8 @@
           "description": "Details of a composer package",
           "fields": [
             {
-              "name": "composerJson",
-              "description": "Data of the composer.JSON file.",
+              "name": "composerMetadatum",
+              "description": "The composer metadatum",
               "args": [
 
               ],
@@ -48719,7 +48719,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "PackageComposerJsonType",
+                  "name": "PackageComposerMetadatumType",
                   "ofType": null
                 }
               },
@@ -48923,24 +48923,6 @@
               "deprecationReason": null
             },
             {
-              "name": "targetSha",
-              "description": "Target SHA of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "updatedAt",
               "description": "The update date.",
               "args": [
@@ -49040,7 +49022,7 @@
           "fields": [
             {
               "name": "license",
-              "description": "The license set in the composer.JSON file.",
+              "description": "The license set in the composer JSON file.",
               "args": [
 
               ],
@@ -49054,7 +49036,7 @@
             },
             {
               "name": "name",
-              "description": "The name set in the composer.JSON file.",
+              "description": "The name set in the composer JSON file.",
               "args": [
 
               ],
@@ -49068,7 +49050,7 @@
             },
             {
               "name": "type",
-              "description": "The type set in the composer.JSON file.",
+              "description": "The type set in the composer JSON file.",
               "args": [
 
               ],
@@ -49082,7 +49064,7 @@
             },
             {
               "name": "version",
-              "description": "The version set in the composer.JSON file.",
+              "description": "The version set in the composer JSON file.",
               "args": [
 
               ],
@@ -49090,6 +49072,55 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageComposerMetadatumType",
+          "description": "Composer metadatum",
+          "fields": [
+            {
+              "name": "composerJson",
+              "description": "Data of the composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageComposerJsonType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "targetSha",
+              "description": "Target SHA of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null

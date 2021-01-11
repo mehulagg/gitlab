@@ -9,7 +9,7 @@ module Types
 
         authorize :read_package
 
-        field :composer_metadatum, Types::Packages::Composer::MetadatumType, null: false, description: 'The composer metadatum'
+        field :composer_metadatum, Types::Packages::Composer::MetadatumType, null: false, description: 'The composer metadatum.'
       end
     end
   end

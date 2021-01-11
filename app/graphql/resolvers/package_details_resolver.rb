@@ -6,7 +6,7 @@ module Resolvers
   class PackageDetailsResolver < BaseResolver
     argument :id, ::Types::GlobalIDType[::Packages::Package],
       required: true,
-      description: 'The global ID of the package'
+      description: 'The global ID of the package.'
 
     def resolve(id:)
       # TODO: remove this line when the compatibility layer is removed

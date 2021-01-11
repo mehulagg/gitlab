@@ -2482,7 +2482,7 @@ Details of a composer package.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `composerJson` | PackageComposerJsonType! | Data of the composer.JSON file. |
+| `composerMetadatum` | PackageComposerMetadatumType! | The composer metadatum |
 | `createdAt` | Time! | The created date. |
 | `id` | ID! | The ID of the package. |
 | `name` | String! | The name of the package. |
@@ -2490,7 +2490,6 @@ Details of a composer package.
 | `pipelines` | PipelineConnection | Pipelines that built the package. |
 | `project` | Project! | Project of the container registry. |
 | `tags` | PackageTagConnection | The tags of the package. |
-| `targetSha` | String! | Target SHA of the package. |
 | `updatedAt` | Time! | The update date. |
 | `version` | String | The version of the package. |
 | `versions` | PackageConnection | The other versions of the package. |
@@ -2501,10 +2500,19 @@ Represents a composer JSON file.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `license` | String | The license set in the composer.JSON file. |
-| `name` | String | The name set in the composer.JSON file. |
-| `type` | String | The type set in the composer.JSON file. |
-| `version` | String | The version set in the composer.JSON file. |
+| `license` | String | The license set in the composer JSON file. |
+| `name` | String | The name set in the composer JSON file. |
+| `type` | String | The type set in the composer JSON file. |
+| `version` | String | The version set in the composer JSON file. |
+
+### PackageComposerMetadatumType
+
+Composer metadatum.
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `composerJson` | PackageComposerJsonType! | Data of the composer JSON file. |
+| `targetSha` | String! | Target SHA of the package. |
 
 ### PackageFileRegistry
 
