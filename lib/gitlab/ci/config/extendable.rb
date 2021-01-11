@@ -9,7 +9,7 @@ module Gitlab
         ExtensionError = Class.new(StandardError)
 
         def initialize(hash)
-          @hash = hash.to_h.deep_dup
+          @hash = hash
 
           each { |entry| entry.extend! if entry.extensible? }
         end
@@ -21,7 +21,7 @@ module Gitlab
         end
 
         def to_hash
-          @hash.to_h
+          @hash
         end
       end
     end

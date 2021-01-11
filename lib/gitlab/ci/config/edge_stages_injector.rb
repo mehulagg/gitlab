@@ -17,7 +17,7 @@ module Gitlab
         end
 
         def initialize(config)
-          @config = config.to_h.deep_dup
+          @config = config
         end
 
         def to_hash

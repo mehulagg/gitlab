@@ -60,7 +60,8 @@ module Gitlab
 
             def content_hash
               strong_memoize(:content_yaml) do
-                Gitlab::Config::Loader::Yaml.new(content).load!
+                # Gitlab::Config::Loader::Yaml.new(content).load!
+                External::Reader.new(params.to_s, content).result.deep_symbolize_keys
               end
             rescue Gitlab::Config::Loader::FormatError
               nil

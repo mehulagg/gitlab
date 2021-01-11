@@ -85,7 +85,8 @@ module Gitlab
       end
 
       def build_config(config)
-        initial_config = Gitlab::Config::Loader::Yaml.new(config).load!
+        # initial_config = Gitlab::Config::Loader::Yaml.new(config).load!
+        initial_config = External::Reader.new('.gitlab-ci.yml', config).result.deep_symbolize_keys
         initial_config = Config::External::Processor.new(initial_config, @context).perform
         initial_config = Config::Extendable.new(initial_config).to_hash
         initial_config = Config::EdgeStagesInjector.new(initial_config).to_hash
