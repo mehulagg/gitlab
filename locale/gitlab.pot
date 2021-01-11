@@ -14961,6 +14961,9 @@ msgstr ""
 msgid "Incidents|Must start with http or https"
 msgstr ""
 
+msgid "Incidents|There was an issue deleting the image."
+msgstr ""
+
 msgid "Incidents|There was an issue loading metric images."
 msgstr ""
 
