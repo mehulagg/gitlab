@@ -13,8 +13,8 @@ export default {
       type: String,
       required: true,
     },
-    containerRef: {
-      type: String,
+    containerMeasurements: {
+      type: Object,
       required: true,
     },
     pipelineId: {
@@ -40,8 +40,6 @@ export default {
     return {
       links: [],
       needsObject: null,
-      height: 0,
-      width: 0,
     };
   },
   computed: {
@@ -74,10 +72,18 @@ export default {
       return [];
     },
     viewBox() {
-      return [0, 0, this.width, this.height];
+      return [0, 0, this.containerMeasurements.width, this.containerMeasurements.height];
     },
   },
   watch: {
+    pipelineData: {
+      immediate: true,
+      handler: function(val) {
+        if (!isEmpty(val)) {
+          this.prepareLinkData();
+        }
+      }
+    },
     highlightedJob() {
       // On first hover, generate the needs reference
       if (!this.needsObject) {
@@ -86,28 +92,18 @@ export default {
       }
     },
   },
-  mounted() {
-    if (!this.isPipelineDataEmpty) {
-      this.getGraphDimensions();
-      this.prepareLinkData();
-    }
-  },
   methods: {
-    getGraphDimensions() {
-      const graphContainer = this.$parent.$parent.$refs[this.containerRef];
-
-      this.width = graphContainer.scrollWidth;
-      this.height = graphContainer.scrollHeight;
-    },
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
     },
     prepareLinkData() {
       try {
+        console.log('in try');
         const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
-      } catch {
+      } catch (err) {
+        console.log(err);
         this.$emit('error', DRAW_FAILURE);
       }
     },
@@ -126,8 +122,8 @@ export default {
       id="link-svg"
       class="gl-absolute"
       :viewBox="viewBox"
-      :width="`${width}px`"
-      :height="`${height}px`"
+      :width="`${containerMeasurements.width}px`"
+      :height="`${containerMeasurements.height}px`"
     >
       <template>
         <path

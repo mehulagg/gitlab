@@ -38,6 +38,10 @@ export default {
   data() {
     return {
       hoveredJobName: '',
+      measurements: {
+        width: 0,
+        height: 0,
+      },
       pipelineExpanded: {
         jobName: '',
         expanded: false,
@@ -76,7 +80,16 @@ export default {
       return this.hasUpstreamPipelines ? this.pipeline.upstream : [];
     },
   },
+  mounted() {
+    this.measurements = this.getMeasurements();
+  },
   methods: {
+    getMeasurements() {
+      return {
+        width: this.$refs[this.containerId].scrollWidth,
+        height: this.$refs[this.containerId].scrollHeight
+      }
+    },
     onError(errorType) {
       this.$emit('error', errorType);
     },
@@ -104,7 +117,7 @@ export default {
         :pipeline-data="graph"
         :pipeline-id="pipeline.id"
         :container-id="containerId"
-        :container-ref="containerId"
+        :container-measurements="measurements"
         :highlighted-job="hoveredJobName"
         @error="onError"
       >
