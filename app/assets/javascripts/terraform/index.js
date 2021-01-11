@@ -12,7 +12,9 @@ export default () => {
     return null;
   }
 
-  const defaultClient = createDefaultClient();
+  const resolvers = {};
+
+  const defaultClient = createDefaultClient(resolvers, {});
 
   const { emptyStateImage, projectPath } = el.dataset;
 
