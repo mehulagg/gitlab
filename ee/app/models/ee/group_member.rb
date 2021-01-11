@@ -113,11 +113,16 @@ module EE
     def post_create_hook
       super
 
+      if provisioned_by_this_group?
+        run_after_commit_or_now do
+          notification_service.new_group_member_with_confirmation(self)
+        end
+      end
+
       return unless self.source.feature_available?(:group_webhooks)
       return unless GroupHook.where(group_id: self.source.self_and_ancestors).exists?
 
       run_after_commit do
-        notification_service.new_group_member_with_confirmation(self) if provisioned_by_this_group?
         data = ::Gitlab::HookData::GroupMemberBuilder.new(self).build(:create)
         self.source.execute_hooks(data, :member_hooks)
       end
