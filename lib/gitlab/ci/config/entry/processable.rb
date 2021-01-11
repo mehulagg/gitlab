@@ -15,13 +15,14 @@ module Gitlab
           include ::Gitlab::Config::Entry::Inheritable
 
           PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables
-                                        inherit allow_failure when needs].freeze
+                                        inherit allow_failure when needs resource_group].freeze
 
           included do
             validations do
               validates :config, presence: true
               validates :name, presence: true
               validates :name, type: Symbol
+              validates :resource_group, type: String
 
               validates :config, disallowed_keys: {
                   in: %i[only except when start_in],
@@ -64,7 +65,7 @@ module Gitlab
               inherit: false,
               default: {}
 
-            attributes :extends, :rules
+            attributes :extends, :rules, :resource_group
           end
 
           def compose!(deps = nil)
@@ -125,7 +126,8 @@ module Gitlab
               rules: rules_value,
               variables: root_and_job_variables_value,
               only: only_value,
-              except: except_value }.compact
+              except: except_value,
+              resource_group: resource_group }.compact
           end
 
           def root_and_job_variables_value
