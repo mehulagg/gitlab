@@ -41,6 +41,8 @@ class Namespace < ApplicationRecord
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
 
+  has_one :admin_note, dependent: :destroy
+
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
     presence: true,
