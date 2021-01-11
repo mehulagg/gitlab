@@ -37,8 +37,12 @@ module Gitlab
           Project.__elasticsearch__.version(version)
         end
 
-        def default
-          @default ||= self.new
+        def default_cached
+          @default ||= default_uncached
+        end
+
+        def default_uncached
+          self.new
         end
       end
 
