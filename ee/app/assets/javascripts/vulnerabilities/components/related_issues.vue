@@ -1,6 +1,6 @@
 <script>
 import axios from 'axios';
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlLink } from '@gitlab/ui';
 import RelatedIssuesStore from '~/related_issues/stores/related_issues_store';
 import RelatedIssuesBlock from '~/related_issues/components/related_issues_block.vue';
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
@@ -15,6 +15,7 @@ export default {
   components: {
     RelatedIssuesBlock,
     GlButton,
+    GlLink,
   },
   props: {
     endpoint: {
@@ -57,7 +58,10 @@ export default {
       return Boolean(this.state.relatedIssues.find((i) => i.lockIssueRemoval));
     },
     canCreateIssue() {
-      return !this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl);
+      return (
+        this.createJiraIssueUrl ||
+        (!this.isIssueAlreadyCreated && !this.isFetching && Boolean(this.newIssueUrl))
+      );
     },
   },
   inject: {
@@ -77,6 +81,9 @@ export default {
       default: '',
     },
     permissionsHelpPath: {
+      default: '',
+    },
+    createJiraIssueUrl: {
       default: '',
     },
   },
@@ -230,7 +237,11 @@ export default {
         {{ $options.i18n.relatedIssues }}
       </template>
       <template v-if="canCreateIssue" #header-actions>
+        <gl-link v-if="createJiraIssueUrl" :href="createJiraIssueUrl" target="_blank">
+          {{ __('Create Jira Issue') }}
+        </gl-link>
         <gl-button
+          v-else
           ref="createIssue"
           variant="success"
           category="secondary"
