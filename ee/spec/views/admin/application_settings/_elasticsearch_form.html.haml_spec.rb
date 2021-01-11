@@ -7,6 +7,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let(:page) { Capybara::Node::Simple.new(rendered) }
   let(:pause_indexing) { false }
   let(:pending_migrations) { false }
+  let(:application_setting) { build(:application_setting) }
 
   before do
     assign(:application_setting, application_setting)
@@ -15,7 +16,6 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'es indexing' do
-    let(:application_setting) { build(:application_setting) }
     let(:button_text) { 'Index all projects' }
 
     before do
@@ -70,8 +70,6 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'when elasticsearch_aws_secret_access_key is not set' do
-    let(:application_setting) { build(:application_setting) }
-
     it 'has field with "AWS Secret Access Key" label and no value' do
       render
       expect(rendered).to have_field('AWS Secret Access Key', type: 'password')
@@ -90,8 +88,6 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'zero-downtime elasticsearch reindexing' do
-    let(:application_setting) { build(:application_setting) }
-
     before do
       assign(:elasticsearch_reindexing_task, task)
     end
@@ -189,6 +185,31 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'hides the input' do
         render
         expect(rendered).not_to have_field('application_setting[elasticsearch_project_ids]')
+      end
+    end
+  end
+
+  context 'elasticsearch migrations' do
+    it 'does not show the retry migration card' do
+      render
+
+      expect(rendered).not_to include('There is a halted Elasticsearch migration')
+      expect(rendered).not_to include('Retry migration')
+    end
+
+    context 'when there is a halted migration' do
+      let(:migration) { Elastic::DataMigrationService.migrations.last }
+
+      before do
+        allow(Elastic::DataMigrationService).to receive(:halted_migrations?).and_return(true)
+        allow(Elastic::DataMigrationService).to receive(:halted_migration).and_return(migration)
+      end
+
+      it 'shows the retry migration card' do
+        render
+
+        expect(rendered).to include('There is a halted Elasticsearch migration')
+        expect(rendered).to include('Retry migration')
       end
     end
   end

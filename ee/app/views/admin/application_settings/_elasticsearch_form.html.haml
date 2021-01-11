@@ -19,6 +19,15 @@
 
       %fieldset
         .sub-section
+          - if Elastic::DataMigrationService.halted_migrations?
+            .card.border-info
+              .card-header.bg-info.text-white
+                = _('There is a halted Elasticsearch migration')
+              .card-body
+                - migration = Elastic::DataMigrationService.halted_migration
+                = link_to _('Retry migration'), admin_elasticsearch_retry_migration_path(version: migration.version), class: "gl-button btn btn-info", disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to retry this migration?') }, method: :post
+              .card-footer.text-muted
+                = _('Check logs to determine what caused the migration to be halted and make any changes before retrying the migration. Migrations scheduled for retry will be run again by the Elastic Migration Worker.')
           .form-group
             .form-check
               = f.check_box :elasticsearch_indexing, class: 'form-check-input', data: { qa_selector: 'indexing_checkbox' }
