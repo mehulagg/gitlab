@@ -76,7 +76,7 @@ export default {
       return Boolean(this.solutionInfo.solution || this.solutionInfo.remediation);
     },
     issueLinksEndpoint() {
-      Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(':id', this.vulnerability.id);
+      return Api.buildUrl(Api.vulnerabilityIssueLinksPath).replace(':id', this.vulnerability.id);
     },
     vulnerabilityDetectionData() {
       return {
@@ -220,6 +220,7 @@ export default {
 
     <related-jira-issues
       v-if="createJiraIssueUrl"
+      help-path="http://todo"
       :url="createJiraIssueUrl"
       :endpoint="relatedJiraIssuesPath"
     />

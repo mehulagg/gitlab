@@ -239,11 +239,7 @@ export default {
         {{ $options.i18n.relatedIssues }}
       </template>
       <template v-if="canCreateIssue" #header-actions>
-        <gl-link v-if="createJiraIssueUrl" :href="createJiraIssueUrl" target="_blank">
-          {{ __('Create Jira Issue') }}
-        </gl-link>
         <gl-button
-          v-else
           ref="createIssue"
           variant="success"
           category="secondary"
