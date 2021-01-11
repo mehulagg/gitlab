@@ -30,7 +30,7 @@ for aspects that we do know that do not need to be exposed elsewhere.
 
 ### Application contexes
 
-We today run the application in multiple contexes (as presented by GitLab.com):
+We today run the application in multiple contexts (as presented by GitLab.com):
 
 - Git nodes running Puma serving only internal API for `ssh/git pull/push` authorization
 - Web nodes running Puma serving all Rails controllers
