@@ -7,8 +7,8 @@ RSpec.describe QuickActions::InterpretService do
   let(:developer) { create(:user) }
   let(:developer2) { create(:user) }
   let(:user) { create(:user) }
-  let_it_be(:user2) { create(:user) }
-  let_it_be(:user3) { create(:user) }
+  let(:user2) { create(:user) }
+  let(:user3) { create(:user) }
   let_it_be_with_refind(:group) { create(:group) }
   let_it_be_with_refind(:project) { create(:project, :repository, :public, group: group) }
   let_it_be_with_reload(:issue) { create(:issue, project: project) }
@@ -107,11 +107,6 @@ RSpec.describe QuickActions::InterpretService do
 
     context 'assign_reviewer command' do
       context 'with a merge request' do
-        before_all do
-          project.add_developer(user2)
-          project.add_developer(user3)
-        end
-
         let(:merge_request) { create(:merge_request, source_project: project) }
 
         it 'fetches reviewers and populates them if content contains /assign_reviewer' do
@@ -1069,7 +1064,7 @@ RSpec.describe QuickActions::InterpretService do
       it 'includes only selected assignee references' do
         _, explanations = service.explain(content, issue)
 
-        expect(explanations).to eq(["Removes assignees @#{user3.username} and @#{user.username}."])
+        expect(explanations).to eq(["Removes assignees @#{user.username} and @#{user3.username}."])
       end
     end
 
