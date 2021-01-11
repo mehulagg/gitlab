@@ -122,7 +122,6 @@ export default {
     <template v-if="hasMilestone" #collapsed>
       <strong class="gl-text-gray-900">{{ activeIssue.milestone.title }}</strong>
     </template>
-    <template>
       <gl-dropdown
         ref="dropdown"
         :text="dropdownText"
@@ -156,6 +155,5 @@ export default {
           {{ $options.i18n.noMilestonesFound }}
         </gl-dropdown-text>
       </gl-dropdown>
-    </template>
   </board-editable-item>
 </template>

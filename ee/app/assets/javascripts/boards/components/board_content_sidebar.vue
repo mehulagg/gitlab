@@ -51,16 +51,14 @@ export default {
   >
     <template #header>{{ __('Issue details') }}</template>
 
-    <template>
-      <board-sidebar-issue-title />
-      <board-assignee-dropdown />
-      <board-sidebar-epic-select />
-      <board-sidebar-milestone-select />
-      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
-      <board-sidebar-due-date />
-      <board-sidebar-labels-select />
-      <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
-      <board-sidebar-subscription />
-    </template>
+    <board-sidebar-issue-title />
+    <board-assignee-dropdown />
+    <board-sidebar-epic-select />
+    <board-sidebar-milestone-select />
+    <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
+    <board-sidebar-due-date />
+    <board-sidebar-labels-select />
+    <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
+    <board-sidebar-subscription />
   </gl-drawer>
 </template>

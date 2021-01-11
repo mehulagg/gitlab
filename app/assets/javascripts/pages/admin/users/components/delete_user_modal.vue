@@ -85,7 +85,6 @@ export default {
 
 <template>
   <gl-modal ref="modal" modal-id="delete-user-modal" :title="modalTitle" kind="danger">
-    <template>
       <p>
         <gl-sprintf :message="content">
           <template #username>
@@ -130,6 +129,5 @@ export default {
       <gl-button :disabled="!canSubmit" category="primary" variant="danger" @click="onSubmit">{{
         action
       }}</gl-button>
-    </template>
   </gl-modal>
 </template>

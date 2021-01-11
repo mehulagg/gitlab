@@ -233,9 +233,7 @@ export default {
       @cancel="hideNodeActionModal"
       @ok="handleNodeAction"
     >
-      <template>
-        {{ modalMessage }}
-      </template>
+      {{ modalMessage }}
     </gl-modal>
   </div>
 </template>
