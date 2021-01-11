@@ -3,8 +3,7 @@
 module SpammableActions
   extend ActiveSupport::Concern
 
-  include Recaptcha::Verify
-  include Gitlab::Utils::StrongMemoize
+  include SpamRecaptchaSupport
 
   included do
     before_action :authorize_submit_spammable!, only: :mark_as_spam
@@ -20,16 +19,10 @@ module SpammableActions
 
   private
 
-  def ensure_spam_config_loaded!
-    strong_memoize(:spam_config_loaded) do
-      Gitlab::Recaptcha.load_configurations!
-    end
-  end
-
   def recaptcha_check_with_fallback(should_redirect = true, &fallback)
     if should_redirect && spammable.valid?
       redirect_to spammable_path
-    elsif render_recaptcha?
+    elsif render_recaptcha?(spammable)
       ensure_spam_config_loaded!
 
       if params[:recaptcha_verification]
@@ -56,9 +49,7 @@ module SpammableActions
   def spammable_params
     default_params = { request: request }
 
-    recaptcha_check = params[:recaptcha_verification] &&
-      ensure_spam_config_loaded! &&
-      verify_recaptcha
+    recaptcha_check = params[:recaptcha_verification] && verify_spammable_recaptcha!
 
     return default_params unless recaptcha_check
 
@@ -76,12 +67,5 @@ module SpammableActions
 
   def authorize_submit_spammable!
     access_denied! unless current_user.admin?
-  end
-
-  def render_recaptcha?
-    return false if spammable.errors.count > 1 # re-render "new" template in case there are other errors
-    return false unless Gitlab::Recaptcha.enabled?
-
-    spammable.needs_recaptcha?
   end
 end

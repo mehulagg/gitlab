@@ -13,7 +13,9 @@ module Spam
       @user = user
       @context = context
       @options = {}
+    end
 
+    def execute(api: false, recaptcha_verified:, spam_log_id:)
       if @request
         @options[:ip_address] = @request.env['action_dispatch.remote_ip'].to_s
         @options[:user_agent] = @request.env['HTTP_USER_AGENT']
@@ -22,9 +24,7 @@ module Spam
         @options[:ip_address] = @target.ip_address
         @options[:user_agent] = @target.user_agent
       end
-    end
 
-    def execute(api: false, recaptcha_verified:, spam_log_id:)
       if recaptcha_verified
         # If it's a request which is already verified through reCAPTCHA,
         # update the spam log accordingly.

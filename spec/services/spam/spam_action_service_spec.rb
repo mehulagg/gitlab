@@ -38,18 +38,6 @@ RSpec.describe Spam::SpamActionService do
         end
       end
     end
-
-    context 'when the request is present' do
-      let(:request) { double(:request, env: env) }
-
-      it 'assembles the options with information from the spammable' do
-        aggregate_failures do
-          expect(subject.options[:ip_address]).to eq(fake_ip)
-          expect(subject.options[:user_agent]).to eq(fake_user_agent)
-          expect(subject.options[:referrer]).to eq(fake_referrer)
-        end
-      end
-    end
   end
 
   shared_examples 'only checks for spam if a request is provided' do
@@ -72,14 +60,15 @@ RSpec.describe Spam::SpamActionService do
   end
 
   describe '#execute' do
+    let(:recaptcha_verified) { true }
     let(:request) { double(:request, env: env) }
     let(:fake_verdict_service) { double(:spam_verdict_service) }
     let(:allowlisted) { false }
+    let(:described_service) { described_class.new(spammable: issue, request: request, user: user) }
 
     let_it_be(:existing_spam_log) { create(:spam_log, user: user, recaptcha_verified: false) }
 
     subject do
-      described_service = described_class.new(spammable: issue, request: request, user: user)
       allow(described_service).to receive(:allowlisted?).and_return(allowlisted)
       described_service.execute(api: nil, recaptcha_verified: recaptcha_verified, spam_log_id: existing_spam_log.id)
     end
@@ -88,9 +77,19 @@ RSpec.describe Spam::SpamActionService do
       allow(Spam::SpamVerdictService).to receive(:new).and_return(fake_verdict_service)
     end
 
-    context 'when reCAPTCHA was already verified' do
-      let(:recaptcha_verified) { true }
+    context 'when the request is present' do
+      it 'assembles the options with information from the spammable' do
+        subject
 
+        aggregate_failures do
+          expect(described_service.options[:ip_address]).to eq(fake_ip)
+          expect(described_service.options[:user_agent]).to eq(fake_user_agent)
+          expect(described_service.options[:referrer]).to eq(fake_referrer)
+        end
+      end
+    end
+
+    context 'when reCAPTCHA was already verified' do
       it "doesn't check with the SpamVerdictService" do
         aggregate_failures do
           expect(SpamLog).to receive(:verify_recaptcha!)
