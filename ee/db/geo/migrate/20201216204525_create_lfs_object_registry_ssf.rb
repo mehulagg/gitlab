@@ -21,7 +21,7 @@ class CreateLfsObjectRegistrySsf < ActiveRecord::Migration[6.0]
       t.datetime_with_timezone :created_at, null: false
       t.text :last_sync_failure
 
-      t.index :lfs_object_id, name: :index_lfs_object_registry_on_lfs_object_id
+      t.index :lfs_object_id, name: :index_lfs_object_registry_ssf_on_lfs_object_id
       t.index :retry_at
       t.index :state
     end
