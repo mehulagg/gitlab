@@ -116,6 +116,17 @@ RSpec.describe 'Admin Groups' do
 
       expect(page).to have_link(group.name, href: group_path(group))
     end
+
+    it 'has a note if one is available' do
+      group = create(:group, :private)
+      note_text = 'Testing our the notes'
+      group.update(admin_note_attributes: { note: note_text })
+
+      visit admin_group_path(group)
+
+      expect(page).to have_text(note_text)
+
+    end
   end
 
   describe 'group edit' do

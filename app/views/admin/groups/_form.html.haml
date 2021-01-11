@@ -22,6 +22,8 @@
 
   = render_if_exists 'namespaces/shared_runners_minutes_settings', group: @group, form: f
 
+  = render 'shared/admin_note_form', f: f
+
   - if @group.new_record?
     .form-group.row
       .offset-sm-2.col-sm-10
