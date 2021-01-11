@@ -1,6 +1,7 @@
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__ } from '~/locale';
 
+import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 import * as epicUtils from '../utils/epic_utils';
 import * as roadmapItemUtils from '../utils/roadmap_item_utils';
 import {
@@ -58,7 +59,17 @@ const fetchGroupEpics = (
         ? data?.group?.epic?.children?.edges || []
         : data?.group?.epics?.edges || [];
 
-      return epicUtils.extractGroupEpics(edges);
+      // Flatten and turn date strings into Date objects
+      // (leave the dates as null when null)
+      const epics = epicUtils.extractGroupEpics(edges).map((epic) => {
+        return {
+          ...epic,
+          startDate: epic.startDate !== null ? new Date(parsePikadayDate(epic.startDate)) : null,
+          dueDate: epic.dueDate !== null ? new Date(parsePikadayDate(epic.dueDate)) : null,
+        };
+      });
+
+      return epics;
     });
 };
 
@@ -81,32 +92,18 @@ export const receiveEpicsSuccess = (
   { commit, dispatch, state },
   { rawEpics, newEpic, timeframeExtended },
 ) => {
-  const epicIds = [];
-  const epics = rawEpics.reduce((filteredEpics, epic) => {
-    const { presetType, timeframe } = state;
-    const formattedEpic = roadmapItemUtils.formatRoadmapItemDetails(
-      epic,
-      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-    );
-
-    formattedEpic.isChildEpic = false;
-
-    // Exclude any Epic that has invalid dates
-    // or is already present in Roadmap timeline
-    if (
-      formattedEpic.startDate.getTime() <= formattedEpic.endDate.getTime() &&
-      state.epicIds.indexOf(formattedEpic.id) < 0
-    ) {
-      Object.assign(formattedEpic, {
+  const epics = rawEpics
+    // Exclude any Epic already present in Roadmap timeline
+    .filter((epic) => state.epicIds.indexOf(epic.id) < 0)
+    .map((epic) => {
+      return {
+        ...epic,
+        isChildEpic: false,
         newEpic,
-      });
-      filteredEpics.push(formattedEpic);
-      epicIds.push(formattedEpic.id);
-    }
-    return filteredEpics;
-  }, []);
+      };
+    });
 
+  const epicIds = epics.map((epic) => epic.id);
   commit(types.UPDATE_EPIC_IDS, epicIds);
   dispatch('initItemChildrenFlags', { epics });
 
@@ -126,26 +123,14 @@ export const receiveEpicsFailure = ({ commit }) => {
 export const requestChildrenEpics = ({ commit }, { parentItemId }) => {
   commit(types.REQUEST_CHILDREN_EPICS, { parentItemId });
 };
-export const receiveChildrenSuccess = (
-  { commit, dispatch, state },
-  { parentItemId, rawChildren },
-) => {
-  const children = rawChildren.reduce((filteredChildren, epic) => {
-    const { presetType, timeframe } = state;
-    const formattedChild = roadmapItemUtils.formatRoadmapItemDetails(
-      epic,
-      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-    );
+export const receiveChildrenSuccess = ({ commit, dispatch }, { parentItemId, rawChildren }) => {
+  const children = rawChildren.map((epic) => {
+    return {
+      ...epic,
+      isChildEpic: true,
+    };
+  });
 
-    formattedChild.isChildEpic = true;
-
-    // Exclude any Epic that has invalid dates
-    if (formattedChild.startDate.getTime() <= formattedChild.endDate.getTime()) {
-      filteredChildren.push(formattedChild);
-    }
-    return filteredChildren;
-  }, []);
   dispatch('expandEpic', {
     parentItemId,
   });
@@ -189,8 +174,8 @@ export const extendTimeframe = ({ commit, state }, { extendAs }) => {
     extendAs,
     presetType,
     initialDate: isExtendTypePrepend
-      ? roadmapItemUtils.timeframeStartDate(presetType, timeframe)
-      : roadmapItemUtils.timeframeEndDate(presetType, timeframe),
+      ? roadmapItemUtils.getTimeframeStartDate(presetType, timeframe)
+      : roadmapItemUtils.getTimeframeEndDate(presetType, timeframe),
   });
 
   if (isExtendTypePrepend) {
@@ -233,34 +218,6 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
   }
 };
 
-/**
- * For epics that have no start or end date, this function updates their start and end dates
- * so that the epic bars get longer to appear infinitely scrolling.
- */
-export const refreshEpicDates = ({ commit, state }) => {
-  const { presetType, timeframe } = state;
-
-  const epics = state.epics.map((epic) => {
-    // Update child epic dates too
-    if (epic.children?.edges?.length > 0) {
-      epic.children.edges.map((childEpic) =>
-        roadmapItemUtils.processRoadmapItemDates(
-          childEpic,
-          roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-          roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-        ),
-      );
-    }
-    return roadmapItemUtils.processRoadmapItemDates(
-      epic,
-      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-    );
-  });
-
-  commit(types.SET_EPICS, epics);
-};
-
 export const fetchGroupMilestones = (
   { fullPath, presetType, filterParams, timeframe },
   defaultTimeframe,
@@ -287,7 +244,15 @@ export const fetchGroupMilestones = (
 
       const edges = (group.milestones && group.milestones.edges) || [];
 
-      return roadmapItemUtils.extractGroupMilestones(edges);
+      return roadmapItemUtils.extractGroupMilestones(edges).map((milestone) => {
+        return {
+          ...milestone,
+          startDate:
+            milestone.startDate !== null ? new Date(parsePikadayDate(milestone.startDate)) : null,
+          dueDate:
+            milestone.dueDate !== null ? new Date(parsePikadayDate(milestone.dueDate)) : null,
+        };
+      });
     });
 };
 
@@ -307,29 +272,17 @@ export const receiveMilestonesSuccess = (
   { commit, state },
   { rawMilestones, newMilestone }, // timeframeExtended
 ) => {
-  const { presetType, timeframe } = state;
-  const milestoneIds = [];
-  const milestones = rawMilestones.reduce((filteredMilestones, milestone) => {
-    const formattedMilestone = roadmapItemUtils.formatRoadmapItemDetails(
-      milestone,
-      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-    );
-    // Exclude any Milestone that has invalid dates
-    // or is already present in Roadmap timeline
-    if (
-      formattedMilestone.startDate.getTime() <= formattedMilestone.endDate.getTime() &&
-      state.milestoneIds.indexOf(formattedMilestone.id) < 0
-    ) {
-      Object.assign(formattedMilestone, {
+  const milestones = rawMilestones
+    // Exclude any Milestone already present in Roadmap timeline
+    .filter((milestone) => state.milestoneIds.indexOf(milestone.id) < 0)
+    .map((milestone) => {
+      return {
+        ...milestone,
         newMilestone,
-      });
-      filteredMilestones.push(formattedMilestone);
-      milestoneIds.push(formattedMilestone.id);
-    }
-    return filteredMilestones;
-  }, []);
+      };
+    });
 
+  const milestoneIds = milestones.map((milestone) => milestone.id);
   commit(types.UPDATE_MILESTONE_IDS, milestoneIds);
   commit(types.RECEIVE_MILESTONES_SUCCESS, milestones);
 };
@@ -337,20 +290,6 @@ export const receiveMilestonesSuccess = (
 export const receiveMilestonesFailure = ({ commit }) => {
   commit(types.RECEIVE_MILESTONES_FAILURE);
   flash(s__('GroupRoadmap|Something went wrong while fetching milestones'));
-};
-
-export const refreshMilestoneDates = ({ commit, state }) => {
-  const { presetType, timeframe } = state;
-
-  const milestones = state.milestones.map((milestone) =>
-    roadmapItemUtils.processRoadmapItemDates(
-      milestone,
-      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
-      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
-    ),
-  );
-
-  commit(types.SET_MILESTONES, milestones);
 };
 
 export const setBufferSize = ({ commit }, bufferSize) => commit(types.SET_BUFFER_SIZE, bufferSize);

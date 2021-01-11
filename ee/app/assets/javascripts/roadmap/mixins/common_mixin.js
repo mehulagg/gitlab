@@ -5,6 +5,7 @@ import {
   dayInQuarter,
   totalDaysInQuarter,
 } from '~/lib/utils/datetime_utility';
+import { timeframeStartDate, timeframeEndDate } from '../utils/roadmap_item_utils';
 
 import { PRESET_TYPES, DAYS_IN_WEEK } from '../constants';
 
@@ -46,6 +47,77 @@ export default {
     },
     hasToday() {
       return this.isTimeframeForToday(this.timeframeItem);
+    },
+    startDate() {
+      // FIX
+      // return this.milestone.startDateOutOfRange
+      //   ? this.milestone.originalStartDate
+      //   : this.milestone.startDate;
+      return this.roadmapItem.startDate;
+    },
+    endDate() {
+      return this.roadmapItem.endDate;
+    },
+    startDateExists() {
+      return this.startDate !== null;
+    },
+    endDateExists() {
+      return this.endDate !== null;
+    },
+    startDateInRange() {
+      // Example of start date being in range:
+      //
+      // |---------- timeframe loaded -----------|
+      //       |-------- epic timeline --------|
+      // ^     ^
+      // ^     start date of an epic
+      // ^     (epic may not have a start date then we have a null, out-of-range start date)
+      // ^
+      // timeframeStartDate
+      const timeframeStart = timeframeStartDate(this.presetType, this.timeframe);
+
+      if (this.startDateExists) {
+        const dateInRange = timeframeStart.getTime() <= this.startDate.getTime();
+        return dateInRange;
+      }
+
+      return false;
+    },
+    endDateInRange() {
+      const timeframeEnd = timeframeEndDate(this.presetType, this.timeframe);
+
+      if (this.endDateExists) {
+        const dateInRange = this.endDate.getTime() <= timeframeEnd.getTime();
+        return dateInRange;
+      }
+
+      return false;
+    },
+    renderStartDate() {
+      if (this.startDateExists && this.startDateInRange) {
+        return this.startDate;
+      }
+
+      // Use a proxy date for rendering a timeline when start date doesn't exist or out-of-range.
+      const timeframeStart = timeframeStartDate(this.presetType, this.timeframe);
+      return newDate(timeframeStart);
+      // Example:
+      //      |---------- timeframe loaded ----------|
+      //  |--------- epic timeline ---------|
+      //  ^   ^
+      //  ^   proxy start date used for rendering (= timeframeStartDate)
+      //  ^
+      //  actual start date of an epic is out-of-range
+      //  (or epic may not have a start date)
+    },
+    renderEndDate() {
+      if (this.startDateExists && this.startDateInRange) {
+        return this.startDate;
+      }
+
+      // Use a proxy date for rendering a timeline when start date doesn't exist or out-of-range.
+      const timeframeEnd = timeframeEndDate(this.presetType, this.timeframe);
+      return newDate(timeframeEnd);
     },
     hasStartDate() {
       if (this.presetTypeQuarters) {
