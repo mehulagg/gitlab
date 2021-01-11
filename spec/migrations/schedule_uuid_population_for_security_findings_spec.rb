@@ -8,7 +8,6 @@ RSpec.describe ScheduleUuidPopulationForSecurityFindings do
   let(:projects) { table(:projects) }
   let(:ci_pipelines) { table(:ci_pipelines) }
   let(:ci_builds) { table(:ci_builds) }
-  let(:ci_artifacts) { table(:ci_job_artifacts) }
   let(:scanners) { table(:vulnerability_scanners) }
   let(:security_scans) { table(:security_scans) }
   let(:security_findings) { table(:security_findings) }
@@ -17,7 +16,6 @@ RSpec.describe ScheduleUuidPopulationForSecurityFindings do
   let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
   let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
   let(:ci_build) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }
-  let(:ci_artifact) { ci_artifacts.create!(project_id: project.id, job_id: ci_build.id, file_type: 0, file_format: 1) }
   let(:scanner) { scanners.create!(project_id: project.id, external_id: 'bandit', name: 'Bandit') }
   let(:security_scan_1) { security_scans.create!(build_id: ci_build.id, scan_type: 0) }
   let(:security_scan_2) { security_scans.create!(build_id: ci_build.id, scan_type: 1) }
