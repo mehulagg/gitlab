@@ -6,7 +6,7 @@ module Types
       class JsonType < BaseObject
         graphql_name 'PackageComposerJsonType'
         description 'Represents a composer JSON file'
-        authorize :read_package
+        authorize []
 
         field :name, GraphQL::STRING_TYPE, null: true, description: 'The name set in the composer JSON file.'
         field :type, GraphQL::STRING_TYPE, null: true, description: 'The type set in the composer JSON file.'
