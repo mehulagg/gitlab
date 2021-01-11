@@ -126,32 +126,23 @@ export default {
     },
   },
   watch: {
-    isPipelineDataEmpty: {
+    pipelineData: {
       immediate: true,
-      handler(isDataEmpty) {
-        if (isDataEmpty) {
+      handler() {
+        if (this.isPipelineDataEmpty) {
           this.reportFailure(EMPTY_PIPELINE_DATA);
-        }
-      },
-    },
-    isInvalidCiConfig: {
-      immediate: true,
-      handler(isInvalid) {
-        if (isInvalid) {
+        } else if (this.isInvalidCiConfig) {
           this.reportFailure(INVALID_CI_CONFIG);
+        } else {
+          // This guarantee that all sub-elements are rendered
+          // https://v3.vuejs.org/api/options-lifecycle-hooks.html#mounted
+          this.$nextTick(() => {
+            this.getGraphDimensions();
+            this.prepareLinkData();
+          });
         }
       },
     },
-  },
-  mounted() {
-    if (!this.isPipelineDataEmpty && !this.isInvalidCiConfig) {
-      // This guarantee that all sub-elements are rendered
-      // https://v3.vuejs.org/api/options-lifecycle-hooks.html#mounted
-      this.$nextTick(() => {
-        this.getGraphDimensions();
-        this.prepareLinkData();
-      });
-    }
   },
   methods: {
     prepareLinkData() {
