@@ -1,6 +1,13 @@
 <script>
 import axios from 'axios';
-import { GlButton, GlCard, GlIcon, GlLink, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCard,
+  GlIcon,
+  GlLink,
+  GlLoadingIcon,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 
 export default {
@@ -9,6 +16,7 @@ export default {
     GlCard,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     jiraLogo,
   },
   directives: {
@@ -42,6 +50,10 @@ export default {
     issuesCount() {
       return this.isFetching && !this.issues.length ? '...' : this.issues.length;
     },
+    lastIssue() {
+      const [lastIssue] = this.issues.slice(-1);
+      return lastIssue;
+    },
   },
   methods: {
     async fetchIssues() {
@@ -52,6 +64,7 @@ export default {
       this.isFetching = false;
     },
   },
+  issueBorderClasses: ['gl-border-b-1', 'gl-border-b-gray-100', 'gl-border-b-solid'],
 };
 </script>
 <template>
@@ -75,22 +88,33 @@ export default {
         variant="success"
         category="secondary"
         :href="url"
-        target="__blank"
+        target="_blank"
         class="gl-ml-auto"
-        icon="external-link"
       >
         {{ __('Create new issue in Jira') }}
       </gl-button>
     </template>
-    <ul class="gl-list-style-none gl-p-0 gl-m-0">
-      <gl-card v-for="issue in issues" :key="issue.creted_at" tag="li" body-class="gl-py-3">
-        <div class="gl-min-h-7 gl-display-flex gl-align-items-center">
-          <gl-link :href="issue.web_url" target="_blank">
-            <span v-safe-html="jiraLogo" class="svg-container jira-logo-container"></span>
+    <section class="gl-list-style-none gl-p-0 gl-m-0">
+      <gl-loading-icon
+        v-if="isFetching"
+        ref="loadingIcon"
+        label="Fetching linked Jira issues"
+        class="gl-mt-2"
+      />
+      <gl-card body-class="gl-p-0">
+        <div
+          v-for="issue in issues"
+          :key="issue.creted_at"
+          class="gl-min-h-7 gl-display-flex gl-align-items-center gl-py-3 gl-px-4"
+          :class="issue !== lastIssue && $options.issueBorderClasses"
+        >
+          <span v-safe-html="jiraLogo" class="gl-mr-5 gl-display-inline-flex gl-align-items-center">
+          </span>
+          <gl-link :href="issue.web_url" target="_blank" class="gl-text-gray-900">
             {{ issue.title }}
           </gl-link>
         </div>
       </gl-card>
-    </ul>
+    </section>
   </gl-card>
 </template>
