@@ -34,6 +34,7 @@ export default {
     IssuableShow,
     TestCaseSidebar,
   },
+  mixins: [TestCaseGraphQL],
   inject: [
     'projectFullPath',
     'testCaseNewPath',
@@ -42,7 +43,6 @@ export default {
     'descriptionPreviewPath',
     'descriptionHelpPath',
   ],
-  mixins: [TestCaseGraphQL],
   data() {
     return {
       testCase: {},

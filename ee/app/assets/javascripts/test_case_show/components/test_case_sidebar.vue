@@ -19,6 +19,7 @@ export default {
   directives: {
     GlTooltip,
   },
+  mixins: [TestCaseGraphQL],
   inject: [
     'projectFullPath',
     'testCaseId',
@@ -28,7 +29,6 @@ export default {
     'labelsManagePath',
     'projectsFetchPath',
   ],
-  mixins: [TestCaseGraphQL],
   props: {
     sidebarExpanded: {
       type: Boolean,
