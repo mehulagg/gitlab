@@ -12,7 +12,13 @@ export default () => {
     return null;
   }
 
-  const resolvers = {};
+  const resolvers = {
+    Mutation: {
+      addErrorsToTerraformState: (_, __, { cache }) => {
+        return cache;
+      },
+    },
+  };
 
   const defaultClient = createDefaultClient(resolvers, {});
 
