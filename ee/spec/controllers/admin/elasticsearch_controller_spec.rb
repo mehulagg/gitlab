@@ -5,11 +5,11 @@ require 'spec_helper'
 RSpec.describe Admin::ElasticsearchController do
   let(:admin) { create(:admin) }
 
-  before do
-    sign_in(admin)
-  end
-
   describe 'POST #enqueue_index' do
+    before do
+      sign_in(admin)
+    end
+
     it 'starts indexing' do
       expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
       expect_next_instance_of(::Elastic::IndexProjectsService) do |service|
@@ -39,6 +39,10 @@ RSpec.describe Admin::ElasticsearchController do
   end
 
   describe 'POST #trigger_reindexing' do
+    before do
+      sign_in(admin)
+    end
+
     it 'creates a reindexing task' do
       expect(Elastic::ReindexingTask).to receive(:create!)
 
@@ -60,6 +64,10 @@ RSpec.describe Admin::ElasticsearchController do
   end
 
   describe 'POST #cancel_index_deletion' do
+    before do
+      sign_in(admin)
+    end
+
     let(:task) { create(:elastic_reindexing_task, state: :success, delete_original_index_at: Time.current) }
 
     it 'sets delete_original_index_at to nil' do
@@ -72,6 +80,10 @@ RSpec.describe Admin::ElasticsearchController do
   end
 
   describe 'POST #retry_migration' do
+    before do
+      sign_in(admin)
+    end
+
     let(:migration) { Elastic::DataMigrationService.migrations.last }
     let(:migration_name) { migration.name.underscore }
 

@@ -7,7 +7,6 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let(:page) { Capybara::Node::Simple.new(rendered) }
   let(:pause_indexing) { false }
   let(:pending_migrations) { false }
-  let(:application_setting) { build(:application_setting) }
 
   before do
     assign(:application_setting, application_setting)
@@ -16,6 +15,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'es indexing' do
+    let(:application_setting) { build(:application_setting) }
     let(:button_text) { 'Index all projects' }
 
     before do
@@ -53,6 +53,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
     end
 
     context 'indexing is disabled' do
+      let(:application_setting) { build(:application_setting) }
       let(:es_indexing) { false }
 
       it 'shows index button when indexing is enabled' do
@@ -70,6 +71,8 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'when elasticsearch_aws_secret_access_key is not set' do
+    let(:application_setting) { build(:application_setting) }
+
     it 'has field with "AWS Secret Access Key" label and no value' do
       render
       expect(rendered).to have_field('AWS Secret Access Key', type: 'password')
@@ -88,6 +91,8 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'zero-downtime elasticsearch reindexing' do
+    let(:application_setting) { build(:application_setting) }
+
     before do
       assign(:elasticsearch_reindexing_task, task)
     end
@@ -190,6 +195,8 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   end
 
   context 'elasticsearch migrations' do
+    let(:application_setting) { build(:application_setting) }
+
     it 'does not show the retry migration card' do
       render
 
