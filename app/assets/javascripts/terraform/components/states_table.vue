@@ -189,5 +189,9 @@ export default {
     <template v-if="terraformAdmin" #cell(actions)="{ item }">
       <state-actions :state="item" />
     </template>
+
+    <template #row-details="row">
+      <h1>Error Row!</h1>
+    </template>
   </gl-table>
 </template>
