@@ -11592,6 +11592,28 @@ CREATE SEQUENCE dast_scanner_profiles_id_seq
 
 ALTER SEQUENCE dast_scanner_profiles_id_seq OWNED BY dast_scanner_profiles.id;
 
+CREATE TABLE dast_scans (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    dast_site_profile_id bigint NOT NULL,
+    dast_scanner_profile_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    CONSTRAINT check_8c72942777 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_d14d6d8a3c CHECK ((char_length(description) <= 255))
+);
+
+CREATE SEQUENCE dast_scans_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_scans_id_seq OWNED BY dast_scans.id;
+
 CREATE TABLE dast_site_profiles (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -18543,6 +18565,8 @@ ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
 
+ALTER TABLE ONLY dast_scans ALTER COLUMN id SET DEFAULT nextval('dast_scans_id_seq'::regclass);
+
 ALTER TABLE ONLY dast_site_profiles ALTER COLUMN id SET DEFAULT nextval('dast_site_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_site_tokens ALTER COLUMN id SET DEFAULT nextval('dast_site_tokens_id_seq'::regclass);
@@ -19692,6 +19716,9 @@ ALTER TABLE ONLY custom_emoji
 
 ALTER TABLE ONLY dast_scanner_profiles
     ADD CONSTRAINT dast_scanner_profiles_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY dast_scans
+    ADD CONSTRAINT dast_scans_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY dast_site_profiles
     ADD CONSTRAINT dast_site_profiles_pkey PRIMARY KEY (id);
@@ -21514,6 +21541,12 @@ CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji 
 CREATE UNIQUE INDEX index_daily_build_group_report_results_unique_columns ON ci_daily_build_group_report_results USING btree (project_id, ref_path, date, group_name);
 
 CREATE UNIQUE INDEX index_dast_scanner_profiles_on_project_id_and_name ON dast_scanner_profiles USING btree (project_id, name);
+
+CREATE INDEX index_dast_scans_on_dast_scanner_profile_id ON dast_scans USING btree (dast_scanner_profile_id);
+
+CREATE INDEX index_dast_scans_on_dast_site_profile_id ON dast_scans USING btree (dast_site_profile_id);
+
+CREATE UNIQUE INDEX index_dast_scans_on_project_id_and_name ON dast_scans USING btree (project_id, name);
 
 CREATE INDEX index_dast_site_profiles_on_dast_site_id ON dast_site_profiles USING btree (dast_site_id);
 
@@ -23818,6 +23851,9 @@ ALTER TABLE ONLY releases
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_4a99ebfd60 FOREIGN KEY (repositories_changed_event_id) REFERENCES geo_repositories_changed_events(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY dast_scans
+    ADD CONSTRAINT fk_4d23897ab4 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_build_trace_sections
     ADD CONSTRAINT fk_4ebe41f502 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
@@ -24532,6 +24568,9 @@ ALTER TABLE ONLY service_desk_settings
 ALTER TABLE ONLY saml_group_links
     ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY dast_scans
+    ADD CONSTRAINT fk_rails_2449f41960 FOREIGN KEY (dast_scanner_profile_id) REFERENCES dast_scanner_profiles(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -24732,6 +24771,9 @@ ALTER TABLE ONLY merge_requests_closing_issues
 
 ALTER TABLE ONLY protected_environment_deploy_access_levels
     ADD CONSTRAINT fk_rails_45cc02a931 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_scans
+    ADD CONSTRAINT fk_rails_45dcdb8a56 FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY prometheus_alert_events
     ADD CONSTRAINT fk_rails_4675865839 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
