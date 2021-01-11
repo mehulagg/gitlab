@@ -174,7 +174,7 @@ Deciding which persona we are focusing on will be part of the Day 1 discussions 
 ### Day 4
  |  Activity  | Duration | Tool  | Description  |
 |---|---|---|---|
-| Validate Prototype | 30 mins | Mural | • Go through the Prototype created by the Product designer of Front end developer and discuss any inaccuracies or missing content. |
+| Validate Prototype | 30 mins | Mural | • Go through the Prototype created by the Product designer or Front end developer and discuss any inaccuracies or missing content. |
 | Wrap up the Sprint | 15 mins | Zoom, GitLab | • Recap the Sprint and discuss next steps. Create user testing issues. |
 
 ### Day 5
