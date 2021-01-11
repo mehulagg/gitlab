@@ -117,7 +117,7 @@ RSpec.shared_examples 'sorted paginated query' do
 
           expect(results).to eq rest
 
-          bwds = pagination_query(sort_argument.merge(before: start_cursor))
+          bwds = pagination_query(sort_argument.merge(before: start_cursor, first: 2))
           post_graphql(bwds, current_user: current_user)
 
           expect(results).to eq first_page

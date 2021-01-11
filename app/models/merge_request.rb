@@ -299,10 +299,33 @@ class MergeRequest < ApplicationRecord
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
   scope :order_merged_at, ->(direction) do
-    query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
+    reverse_direction = { 'ASC' => 'DESC', 'DESC' => 'ASC' }
+    order = Gitlab::Pagination::Keyset::Order.build([
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_merged_at',
+        column_expression: MergeRequest::Metrics.arel_table[:merged_at],
+        order_expression: Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction),
+        reversed_order_expression: Gitlab::Database.nulls_first_order('merge_request_metrics.merged_at', reverse_direction.fetch(direction)),
+        nullable: { nulls_position: :bottom },
+        distinct: false
+      ),
+      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+        attribute_name: 'merge_request_metrics_id',
+        column_expression: MergeRequest::Metrics.arel_table[:id],
+        order_expression: MergeRequest::Metrics.arel_table[:id].desc,
+        nullable: false,
+        distinct: true
+      )
+    ])
+
+    query = join_metrics.order(order)
 
     # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
-    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+    query.select(
+      *query.arel.projections,
+      MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics_merged_at"'),
+      MergeRequest::Metrics.arel_table[:id].as('"merge_request_metrics_id"')
+    )
   end
   scope :order_merged_at_asc, -> { order_merged_at('ASC') }
   scope :order_merged_at_desc, -> { order_merged_at('DESC') }
@@ -399,8 +422,8 @@ class MergeRequest < ApplicationRecord
 
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
-    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
-    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc
+    when 'merged_at_desc' then order_merged_at_desc
     else
       super
     end

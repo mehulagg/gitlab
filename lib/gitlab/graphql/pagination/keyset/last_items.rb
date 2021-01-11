@@ -10,8 +10,9 @@ module Gitlab
         class LastItems
           # rubocop: disable CodeReuse/ActiveRecord
           def self.take_items(scope, count)
-            if custom_order = lookup_custom_reverse_order(scope.order_values)
-              items = scope.reorder(*custom_order).first(count) # returns a single record when count is nil
+            if Gitlab::Pagination::Keyset::Order.keyset_aware?(scope)
+              order = scope.order_values.first
+              items = scope.reorder(order.reversed_order).first(count)
               items.is_a?(Array) ? items.reverse : items
             else
               scope.last(count)
