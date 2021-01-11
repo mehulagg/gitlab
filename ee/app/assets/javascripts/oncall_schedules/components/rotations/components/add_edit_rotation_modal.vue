@@ -27,12 +27,12 @@ export const i18n = {
 export default {
   i18n,
   LENGTH_ENUM,
-  inject: ['projectPath'],
   components: {
     GlModal,
     GlAlert,
     AddEditRotationForm,
   },
+  inject: ['projectPath'],
   props: {
     modalId: {
       type: String,
