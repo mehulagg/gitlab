@@ -40,9 +40,37 @@ module Elastic
         !!migration&.load_from_index&.dig('_source', 'completed')
       end
 
+      def migration_halted?(name)
+        Rails.cache.fetch cache_key(:migration_halted, name.to_s.underscore), expires_in: 30.minutes do
+          migration_halted_uncached?(name)
+        end
+      end
+
+      def drop_migration_halted_cache!(migration)
+        Rails.cache.delete cache_key(:migration_halted, migration.name_for_key)
+      end
+
+      def migration_halted_uncached?(name)
+        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+
+        !!migration&.load_from_index&.dig('_source', 'state', 'halted')
+      end
+
       def pending_migrations?
         migrations.reverse.any? do |migration|
           !migration_has_finished?(migration.name_for_key)
+        end
+      end
+
+      def halted_migrations?
+        migrations.reverse.any? do |migration|
+          migration_halted?(migration.name_for_key)
+        end
+      end
+
+      def halted_migration
+        migrations.reverse.find do |migration|
+          migration_halted?(migration.name_for_key)
         end
       end
 
