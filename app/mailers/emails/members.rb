@@ -4,6 +4,7 @@ module Emails
   module Members
     extend ActiveSupport::Concern
     include MembersHelper
+    include Gitlab::Experiment::Dsl
 
     included do
       helper_method :member_source, :member
@@ -58,25 +59,10 @@ module Emails
           subject(s_("MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}") % { project_or_group: member_source.human_name, project_or_group_name: member_source.model_name.singular })
         end
 
-      if send_invite_with_avatar?
-        @invite_url_params = { new_user_invite: 'invite_email_avatar' }
-
-        mail(to: member.invite_email, subject: subject_line) do |format|
-          format.html { render 'member_invited_email_avatar', layout: 'unknown_user_mailer' }
-          format.text { render layout: 'unknown_user_mailer' } # not valid for text as it is an image rendered in html
-        end
-
-        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email_avatar][:tracking_category], 'sent', property: 'experiment_group')
-      else
-        @invite_url_params = { new_user_invite: 'control' }
-
-        member_email_with_layout(
-          to: member.invite_email,
-          subject: subject_line,
-          layout: 'unknown_user_mailer'
-        )
-
-        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email_avatar][:tracking_category], 'sent', property: 'control_group')
+      experiment(:invite_email, actor: member.created_by) do |e|
+        e.use { control_behavior(subject_line) } # control
+        e.try(:avatar) { avatar_behavior(subject_line) } # with avatar
+        e.track(:sent)
       end
     end
 
@@ -168,8 +154,23 @@ module Emails
       end
     end
 
-    def send_invite_with_avatar?
-      member.created_by && Gitlab::Experimentation.active?(:invite_email_avatar)
+    def mail_invite_standard(subject_line)
+      @invite_url_params = { new_user_invite: 'control' }
+
+      member_email_with_layout(
+        to: member.invite_email,
+        subject: subject_line,
+        layout: 'unknown_user_mailer'
+      )
+    end
+
+    def mail_invite_with_avatar(subject_line)
+      @invite_url_params = { new_user_invite: 'avatar' }
+
+      mail(to: member.invite_email, subject: subject_line) do |format|
+        format.html { render 'member_invited_email_avatar', layout: 'unknown_user_mailer' }
+        format.text { render layout: 'unknown_user_mailer' } # not valid for text as it is an image rendered in html
+      end
     end
   end
 end

@@ -60,22 +60,22 @@ RSpec.describe InvitesController do
         end
       end
 
-      context 'when new_user_invite is experiment', :snowplow do
-        let(:params) { { id: raw_invite_token, new_user_invite: 'experiment' } }
+      context 'when new_user_invite is avatar', :snowplow do
+        let(:params) { { id: raw_invite_token, new_user_invite: 'avatar' } }
 
-        it 'tracks the user as experiment group' do
+        it 'tracks the user as experiment group', :aggregate_failures do
           request
 
           expect_snowplow_event(
-            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            category: 'invite_email',
             action: 'opened',
-            property: 'experiment_group',
+            property: 'avatar',
             label: md5_member_global_id
           )
           expect_snowplow_event(
-            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            category: 'invite_email',
             action: 'accepted',
-            property: 'experiment_group',
+            property: 'avatar',
             label: md5_member_global_id
           )
         end
@@ -84,19 +84,19 @@ RSpec.describe InvitesController do
       context 'when new_user_invite is control', :snowplow do
         let(:params) { { id: raw_invite_token, new_user_invite: 'control' } }
 
-        it 'tracks the user as control group' do
+        it 'tracks the user as control group', :aggregate_failures do
           request
 
           expect_snowplow_event(
-            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            category: 'invite_email',
             action: 'opened',
-            property: 'control_group',
+            property: 'control',
             label: md5_member_global_id
           )
           expect_snowplow_event(
-            category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+            category: 'invite_email',
             action: 'accepted',
-            property: 'control_group',
+            property: 'control',
             label: md5_member_global_id
           )
         end
@@ -142,15 +142,15 @@ RSpec.describe InvitesController do
     end
 
     context 'when new_user_invite is experiment', :snowplow do
-      let(:params) { { id: raw_invite_token, new_user_invite: 'experiment' } }
+      let(:params) { { id: raw_invite_token, new_user_invite: 'avatar' } }
 
       it 'tracks the user as experiment group' do
         request
 
         expect_snowplow_event(
-          category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+          category: 'invite_email',
           action: 'accepted',
-          property: 'experiment_group',
+          property: 'avatar',
           label: md5_member_global_id
         )
       end
@@ -163,9 +163,9 @@ RSpec.describe InvitesController do
         request
 
         expect_snowplow_event(
-          category: 'Growth::Expansion::Experiment::InviteEmailAvatar',
+          category: 'invite_email',
           action: 'accepted',
-          property: 'control_group',
+          property: 'control',
           label: md5_member_global_id
         )
       end

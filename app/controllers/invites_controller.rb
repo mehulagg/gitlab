@@ -110,14 +110,12 @@ class InvitesController < ApplicationController
   end
 
   def track_experiment(action)
-    return unless params[:new_user_invite]
-
-    property = params[:new_user_invite] == 'experiment' ? 'experiment_group' : 'control_group'
+    return unless params[:new_user_invite].in?(%w[control avatar])
 
     Gitlab::Tracking.event(
-      Gitlab::Experimentation::EXPERIMENTS[:invite_email_avatar][:tracking_category],
+      'invite_email',
       action,
-      property: property,
+      property: params[:new_user_invite],
       label: Digest::MD5.hexdigest(member.to_global_id.to_s)
     )
   end
