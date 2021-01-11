@@ -2,7 +2,7 @@
 import { GlModal } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import boardsStore from '~/boards/stores/boards_store';
