@@ -36,7 +36,8 @@ module Elastic
     def fail_migration_halt_error!(retry_attempt: 0)
       set_migration_state(
         retry_attempt: retry_attempt,
-        halted: true
+        halted: true,
+        halted_indexing_unpaused: false
       )
     end
 

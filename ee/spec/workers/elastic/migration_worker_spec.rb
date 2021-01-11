@@ -45,38 +45,30 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
       end
 
       context 'migration is halted' do
-        before do
-          allow(Gitlab::CurrentSettings).to receive(:elasticsearch_pause_indexing?).and_return(true)
-          allow(subject).to receive(:current_migration).and_return(migration)
-          allow(migration).to receive(:pause_indexing?).and_return(true)
-          allow(migration).to receive(:halted?).and_return(true)
+        using RSpec::Parameterized::TableSyntax
+
+        where(:pause_indexing, :halted_indexing_unpaused, :unpause) do
+          false | false | false
+          false | true  | false
+          true  | false | true
+          true  | true  | false
         end
 
-        it 'skips execution' do
-          expect(migration).not_to receive(:migrate)
-
-          subject.perform
-        end
-
-        context 'pause indexing is not allowed' do
+        with_them do
           before do
-            migration.save_state!(pause_indexing: false)
-          end
-
-          it 'does not unpauses indexing' do
-            expect(Gitlab::CurrentSettings).not_to receive(:update!)
-
-            subject.perform
-          end
-        end
-
-        context 'pause indexing is allowed' do
-          before do
-            migration.save_state!(pause_indexing: true)
+            allow(Gitlab::CurrentSettings).to receive(:elasticsearch_pause_indexing?).and_return(true)
+            allow(migration).to receive(:pause_indexing?).and_return(true)
+            migration.save_state!(halted: true, pause_indexing: pause_indexing, halted_indexing_unpaused: halted_indexing_unpaused)
           end
 
           it 'unpauses indexing' do
-            expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
+            if unpause
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
+            else
+              expect(Gitlab::CurrentSettings).not_to receive(:update!)
+            end
+
+            expect(migration).not_to receive(:migrate)
 
             subject.perform
           end
