@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
+reviewer_path = File.expand_path('weightage/reviewers', __dir__)
+
+if defined?(Rails)
+  require_dependency(reviewer_path)
+else
+  require_relative(reviewer_path)
+end
+
 require_relative 'teammate'
 require_relative 'request_helper' unless defined?(Gitlab::Danger::RequestHelper)
-require_relative 'weightage/reviewers'
-require_relative 'weightage/maintainers'
+require_relative 'weightage/maintainers' unless defined?(Gitlab::Danger::Weightage::Maintainers)
 
 module Gitlab
   module Danger

@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-require_relative '../weightage'
+weightage_path = File.expand_path('../weightage', __dir__)
+
+if defined?(Rails)
+  require_dependency(weightage_path)
+else
+  require_relative(weightage_path)
+end
 
 module Gitlab
   module Danger

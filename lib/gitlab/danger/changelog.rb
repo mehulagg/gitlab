@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'title_linting'
+title_linting_path = File.expand_path('title_linting', __dir__)
+
+if defined?(Rails)
+  require_dependency(title_linting_path)
+else
+  require_relative(title_linting_path)
+end
 
 module Gitlab
   module Danger
