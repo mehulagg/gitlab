@@ -10800,10 +10800,10 @@ msgstr ""
 msgid "Ends at (UTC)"
 msgstr ""
 
-msgid "Ends: %{endsAt}"
+msgid "Ends on"
 msgstr ""
 
-msgid "Ends on"
+msgid "Ends: %{endsAt}"
 msgstr ""
 
 msgid "Enforce DNS rebinding attack protection"
