@@ -257,3 +257,24 @@ Another Title,"A description, with a comma"
 The limit depends on the configuration value of Max Attachment Size for the GitLab instance.
 
 For GitLab.com, it is set to 10 MB.
+
+## Export requirements to a CSV file
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290813) in GitLab 13.8.
+
+Requirements can be exported as CSV from GitLab and are sent to your default notification email as an attachment.
+
+## Overview
+
+**Export Requirements to CSV** enables you and your team to export all the data collected from Requirements into
+a **[comma-separated values](https://en.wikipedia.org/wiki/Comma-separated_values)** (CSV) file,
+which stores tabular data in plain text.
+
+> _CSVs are a handy way of getting data from one program to another where one program cannot read the other ones normal output._ [Ref](https://www.quora.com/What-is-a-CSV-file-and-its-uses)
+
+CSV files can be used with any plotter or spreadsheet-based program, such as Microsoft Excel,
+Open Office Calc, or Google Spreadsheets.
+
+## Use cases
+
+The export functionality of requirements can aid collaboration with higher level systems as well as audit and regulatory compliance tasks.
