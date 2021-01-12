@@ -151,7 +151,7 @@ undefined local variable or method `get_pository' for main:Object
 
 You can either move the file to the `/tmp` directory or create a new directory onwed by the user `git` and save the script in that directory as illustrated below:
 
-```shell
+```plaintext
 $ mkdir /scripts
 $ mv /script_path/get_pository.rb /scripts
 $ chown -R git:git /scripts
