@@ -19,10 +19,9 @@ module Security
     enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
     enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
 
-    validates :project_fingerprint, presence: true, length: { maximum: 40 }
-    validates :position, presence: true
+    validates :project_fingerprint, length: { maximum: 40 }
 
-    scope :by_position, -> (positions) { where(position: positions) }
+    scope :by_uuid, -> (uuids) { where(uuid: uuids) }
     scope :by_build_ids, -> (build_ids) { joins(scan: :build).where(ci_builds: { id: build_ids }) }
     scope :by_project_fingerprints, -> (fingerprints) { where(project_fingerprint: fingerprints) }
     scope :by_severity_levels, -> (severity_levels) { where(severity: severity_levels) }

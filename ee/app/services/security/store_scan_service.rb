@@ -43,15 +43,15 @@ module Security
         security_scan.findings.update_all(deduplicated: false)
 
         security_scan.findings
-                     .by_position(register_finding_keys)
+                     .by_uuid(register_finding_keys)
                      .update_all(deduplicated: true)
       end
     end
 
     # This method registers all finding keys and
-    # returns the positions of unique findings
+    # returns the UUIDs of the unique findings
     def register_finding_keys
-      @register_finding_keys ||= security_report.findings.map.with_index { |finding, index| register_keys(finding.keys) && index }.compact
+      @register_finding_keys ||= security_report.findings.map { |finding, index| register_keys(finding.keys) && finding.uuid }.compact
     end
 
     def register_keys(keys)
