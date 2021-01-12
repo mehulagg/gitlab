@@ -1,5 +1,5 @@
 ---
-title: Override tertiary button mix blend mode
+title: Fix tertiary button color in dark mode
 merge_request: 51349
 author:
 type: fixed
