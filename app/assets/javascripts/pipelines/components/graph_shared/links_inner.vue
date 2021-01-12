@@ -76,14 +76,6 @@ export default {
     },
   },
   watch: {
-    pipelineData: {
-      immediate: true,
-      handler: function(val) {
-        if (!isEmpty(val)) {
-          this.prepareLinkData();
-        }
-      }
-    },
     highlightedJob() {
       // On first hover, generate the needs reference
       if (!this.needsObject) {
@@ -92,13 +84,17 @@ export default {
       }
     },
   },
+  mounted() {
+    if (!isEmpty(this.pipelineData)) {
+      this.prepareLinkData();
+    }
+  },
   methods: {
     isLinkHighlighted(linkRef) {
       return this.highlightedLinks.includes(linkRef);
     },
     prepareLinkData() {
       try {
-        console.log('in try');
         const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
