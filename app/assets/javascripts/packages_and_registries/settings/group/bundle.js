@@ -6,7 +6,7 @@ import { apolloProvider } from './graphql/index';
 Vue.use(Translate);
 
 export default () => {
-  const el = document.getElementById('js-container-registry');
+  const el = document.getElementById('js-packages-and-registries-settings');
   if (!el) {
     return null;
   }
