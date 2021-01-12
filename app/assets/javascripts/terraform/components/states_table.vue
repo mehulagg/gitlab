@@ -1,5 +1,5 @@
 <script>
-import { GlBadge, GlIcon, GlLink, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
+import { GlAlert, GlBadge, GlIcon, GlLink, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
@@ -10,6 +10,7 @@ import timeagoMixin from '~/vue_shared/mixins/timeago';
 export default {
   components: {
     CiBadge,
+    GlAlert,
     GlBadge,
     GlIcon,
     GlLink,
@@ -105,6 +106,7 @@ export default {
     :items="states"
     :fields="fields"
     data-testid="terraform-states-table"
+    details-td-class="gl-p-0!"
     fixed
     stacked="md"
   >
@@ -191,11 +193,19 @@ export default {
     </template>
 
     <template #row-details="row">
-      <div>
-        <h1>{{ row.item.errorMessages }}</h1>
-
-        <p>{{ row.item.name }}</p>
-      </div>
+      <gl-alert
+        data-testid="terraform-states-table-error"
+        variant="danger"
+        @dismiss="row.toggleDetails"
+      >
+        <span
+          v-for="errorMessage in row.item.errorMessages"
+          :key="errorMessage"
+          class="gl-display-flex gl-justify-content-start"
+        >
+          {{ errorMessage }}
+        </span>
+      </gl-alert>
     </template>
   </gl-table>
 </template>
