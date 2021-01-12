@@ -20,18 +20,18 @@ export default () => {
         // eslint-disable-next-line no-underscore-dangle
         return state._showDetails || false;
       },
+      errorMessages: (state) => {
+        return state.errorMessages || [];
+      },
     },
     Mutation: {
-      addDataToTerraformState: (_, { stateID, showDetails }, { client }) => {
+      addDataToTerraformState: (_, { stateID, showDetails, errorMessages }, { client }) => {
         const terraformState = client.readFragment({
           id: stateID,
           fragment: TerraformState,
           // eslint-disable-next-line @gitlab/require-i18n-strings
           fragmentName: 'State',
         });
-
-        // eslint-disable-next-line no-underscore-dangle
-        terraformState._showDetails = showDetails || false;
 
         client.writeFragment({
           id: stateID,
@@ -40,6 +40,8 @@ export default () => {
           fragmentName: 'State',
           data: {
             ...terraformState,
+            errorMessages,
+            _showDetails: showDetails,
           },
         });
 
