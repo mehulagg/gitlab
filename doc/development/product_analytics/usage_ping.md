@@ -15,7 +15,7 @@ This guide describes Usage Ping's purpose and how it's implemented.
 
 For more information about Product Analytics, see:
 
-- [Product Analytics Guide](https://about.gitlab.com/handbook/product/product-analytics-guide/)
+- [Product Intelligence Guide](https://about.gitlab.com/handbook/product/product-intelligence-guide)
 - [Snowplow Guide](snowplow.md)
 
 More useful links:
