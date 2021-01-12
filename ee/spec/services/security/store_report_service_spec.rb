@@ -70,7 +70,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
     context 'when report data includes all raw_metadata' do
       let(:trait) { :dependency_scanning_remediation }
 
-      it 'inserts top level finding data' do
+      it 'inserts top level finding data', :aggregate_failures do
         subject
 
         finding = Vulnerabilities::Finding.last
