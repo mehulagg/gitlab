@@ -24,8 +24,16 @@ export class CiSchemaExtension extends EditorLiteExtension {
       .replace(':filename', EXTENSION_CI_SCHEMA_FILE_NAME_MATCH);
     const modelFileName = this.getModel().uri.path.split('/').pop();
 
+    // In order for workers loaded from `data://` as the
+    // ones loaded by monaco, we use absolute URLs to fetch
+    // schema files, hence the `location.origin` reference.
+    // This prevents error:
+    //   "Failed to execute 'fetch' on 'WorkerGlobalScope'"
+    // eslint-disable-next-line no-restricted-globals
+    const absoluteSchemaUrl = location.origin + ciSchemaUri;
+
     registerSchema({
-      uri: ciSchemaUri,
+      uri: absoluteSchemaUrl,
       fileMatch: [modelFileName],
     });
   }
