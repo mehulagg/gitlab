@@ -22,18 +22,11 @@ module EE
       end
 
       def blocked_issue_ids(issue_ids)
-        blocked_and_blocking_issues_union(issue_ids).pluck(:blocked_issue_id)
+        blocked_or_blocking_issues(issue_ids, ::IssueLink::TYPE_BLOCKS).pluck(:blocked_issue_id)
       end
 
       def blocking_issue_ids_for(issue)
-        blocked_and_blocking_issues_union(issue.id).pluck(:blocking_issue_id)
-      end
-
-      def blocked_and_blocking_issues_union(issue_ids)
-        from_union([
-          blocked_or_blocking_issues(issue_ids, ::IssueLink::TYPE_BLOCKS),
-          blocked_or_blocking_issues(issue_ids, ::IssueLink::TYPE_IS_BLOCKED_BY)
-        ])
+        blocked_or_blocking_issues(issue_ids, ::IssueLink::TYPE_BLOCKS).pluck(:blocking_issue_id)
       end
 
       def blocked_or_blocking_issues(issue_ids, link_type)
@@ -54,35 +47,20 @@ module EE
       def blocking_issues_for_collection(issues_ids)
         open_state_id = ::Issuable::STATE_ID_MAP[:opened]
 
-        from_union([
-          select("COUNT(CASE WHEN issues.state_id = #{open_state_id} then 1 else null end), issue_links.source_id AS blocking_issue_id")
-            .joins(:target)
-            .where(link_type: ::IssueLink::TYPE_BLOCKS)
-            .where(source_id: issues_ids)
-            .group(:blocking_issue_id),
-          select("COUNT(CASE WHEN issues.state_id = #{open_state_id} then 1 else null end), issue_links.target_id AS blocking_issue_id")
-            .joins(:source)
-            .where(link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
-            .where(target_id: issues_ids)
-            .group(:blocking_issue_id)
-        ], remove_duplicates: false).select('blocking_issue_id, SUM(count) AS count').group('blocking_issue_id')
+        select("COUNT(CASE WHEN issues.state_id = #{open_state_id} then 1 else null end), issue_links.source_id AS blocking_issue_id")
+          .joins(:target)
+          .where(link_type: ::IssueLink::TYPE_BLOCKS)
+          .where(source_id: issues_ids)
+          .group(:blocking_issue_id)
       end
 
       def blocked_issues_for_collection(issues_ids)
-        from_union([
-          select('COUNT(*), issue_links.source_id AS blocked_issue_id')
-            .joins(:target)
-            .where(issues: { state_id: ::Issue.available_states[:opened] })
-            .where(link_type: ::IssueLink::TYPE_IS_BLOCKED_BY)
-            .where(source_id: issues_ids)
-            .group(:blocked_issue_id),
-          select('COUNT(*), issue_links.target_id AS blocked_issue_id')
-            .joins(:source)
-            .where(issues: { state_id: ::Issue.available_states[:opened] })
-            .where(link_type: ::IssueLink::TYPE_BLOCKS)
-            .where(target_id: issues_ids)
-            .group(:blocked_issue_id)
-        ], remove_duplicates: false).select('blocked_issue_id, SUM(count) AS count').group('blocked_issue_id')
+        select('COUNT(*), issue_links.target_id AS blocked_issue_id')
+          .joins(:source)
+          .where(issues: { state_id: ::Issue.available_states[:opened] })
+          .where(link_type: ::IssueLink::TYPE_BLOCKS)
+          .where(target_id: issues_ids)
+          .group(:blocked_issue_id)
       end
 
       def blocking_issues_count_for(issue)
@@ -93,10 +71,7 @@ module EE
     private
 
     def blocking_issue
-      case link_type
-      when ::IssueLink::TYPE_BLOCKS then source
-      when ::IssueLink::TYPE_IS_BLOCKED_BY then target
-      end
+      source if link_type == ::IssueLink::TYPE_BLOCKS
     end
 
     def refresh_blocking_issue_cache
