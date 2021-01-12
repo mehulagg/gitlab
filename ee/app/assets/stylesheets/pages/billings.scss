@@ -20,9 +20,44 @@
 }
 
 .billing-plans {
+  // this color is not part of the GitLab-UI/Pajamas specifications
+  $highlight-color: #6E49CB;
+
+  @include gl-display-grid;
+
+  column-gap: $gl-spacing-scale-7;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto 1fr;
+
+  .card-badge {
+    @include gl-rounded-top-left-base;
+    @include gl-rounded-top-right-base;
+    @include gl-font-weight-bold;
+    @include gl-px-5;
+    @include gl-py-2;
+    @include gl-text-white;
+
+    background-color: $highlight-color;
+
+    // these values are consistent with the startup-*.scss .card overrides
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
+
   .card {
+    grid-row-start: 2;
+
     &-active {
       background-color: $gray-light;
+    }
+
+    &-has-badge {
+      @include gl-border-1;
+      @include gl-border-solid;
+      @include gl-rounded-top-left-none;
+      @include gl-rounded-top-right-none;
+
+      border-color: $highlight-color;
     }
 
     .card-body {

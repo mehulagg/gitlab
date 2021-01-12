@@ -6,7 +6,7 @@
   - faq_link_url   = 'https://about.gitlab.com/gitlab-com/#faq'
   - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
 
-.card.h-100{ class: ("card-active" if is_current || show_deprecated_plan) }
+.card{ class: [("card-active" if is_current || show_deprecated_plan), ("card-has-badge" if is_upgrade_to_this_plan_free)] }
   .card-header.gl-font-weight-bold.d-flex.flex-row.justify-content-between.flex-wrap
     %div
       = plan_name
