@@ -120,7 +120,7 @@ export default {
     }
   },
   created() {
-    // this.redirectToOnDemandScansPage = true;
+    this.redirectToOnDemandScansPage = document.referrer.includes(this.onDemandScansPath);
   },
   methods: {
     onSubmit() {
