@@ -1,18 +1,18 @@
-import { membersJsonString } from 'jest/groups/members/mock_data';
-import { initGroupMembersApp } from '~/groups/members';
+import { membersJsonString } from 'jest/members/mock_data';
+import { initMembersApp } from '~/members/index';
 
-describe('initGroupMembersApp', () => {
+describe('initMembersApp', () => {
   let el;
   let vm;
 
   const createVm = () => {
-    vm = initGroupMembersApp(el, {});
+    vm = initMembersApp(el, {});
   };
 
   beforeEach(() => {
     el = document.createElement('div');
     el.setAttribute('data-members', membersJsonString);
-    el.setAttribute('data-group-id', '234');
+    el.setAttribute('data-source-id', '234');
     el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
     el.setAttribute('data-ldap-override-path', '/groups/ldap-group/-/group_members/:id/override');
   });

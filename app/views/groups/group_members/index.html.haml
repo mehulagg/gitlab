@@ -76,7 +76,7 @@
           = render 'shared/members/tab_pane/header' do
             = render 'shared/members/tab_pane/title' do
               = html_escape(_('Groups with access to %{strong_start}%{group_name}%{strong_end}')) % { group_name: @group.name, strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe }
-        .js-group-linked-list{ data: linked_groups_list_data_attributes(@group) }
+        .js-group-group-links-list{ data: group_group_links_list_data_attributes(@group) }
           .loading
             .spinner.spinner-md
     - if show_invited_members
