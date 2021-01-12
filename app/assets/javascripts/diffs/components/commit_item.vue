@@ -149,7 +149,7 @@ export default {
           />
         </gl-button-group>
         <div
-          v-if="hasNeighborCommits && glFeatures.mrCommitNeighborNav"
+          v-if="hasNeighborCommits"
           class="commit-nav-buttons ml-3"
         >
           <gl-button-group>
