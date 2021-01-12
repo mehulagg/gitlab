@@ -20,7 +20,8 @@ export default {
   props: {
     lists: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     canAdminList: {
       type: Boolean,
