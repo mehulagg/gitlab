@@ -103,18 +103,19 @@ export default class EditorLite {
   }
 
   static createEditorModel({
-    blobPath = '',
-    blobContent = '',
-    originalBlobContent = null,
-    blobGlobalId = uuids()[0],
-    instance = null,
+    blobPath,
+    blobContent,
+    originalBlobContent,
+    blobGlobalId,
+    instance,
   } = {}) {
+    let model;
     if (instance) {
       const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
       const existingModel = monacoEditor.getModel(uriFilePath);
-      const model =
+      model =
         existingModel || monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
-      if (originalBlobContent === null) {
+      if (!originalBlobContent) {
         instance.setModel(model);
       } else {
         instance.setModel({
@@ -123,6 +124,7 @@ export default class EditorLite {
         });
       }
     }
+    return model;
   }
 
   /**
@@ -147,6 +149,7 @@ export default class EditorLite {
     EditorLite.prepareInstance(el);
 
     let instance;
+    let model;
 
     if (!diff) {
       instance = monacoEditor.create(el, {
@@ -154,7 +157,7 @@ export default class EditorLite {
         ...instanceOptions,
       });
       if (instanceOptions.model !== null) {
-        EditorLite.createEditorModel({ blobGlobalId, blobPath, blobContent, instance });
+        model = EditorLite.createEditorModel({ blobGlobalId, blobPath, blobContent, instance });
       }
     } else {
       instance = monacoEditor.createDiffEditor(el, {
@@ -162,7 +165,7 @@ export default class EditorLite {
         ...instanceOptions,
       });
       if (instanceOptions.model !== null) {
-        EditorLite.createEditorModel({
+        model = EditorLite.createEditorModel({
           blobGlobalId,
           originalBlobContent,
           blobPath,
@@ -193,6 +196,8 @@ export default class EditorLite {
         } else {
           instanceModel.dispose();
         }
+      } else if (model) {
+        model.dispose();
       }
     });
     EditorLite.manageDefaultExtensions(instance, el, extensions);

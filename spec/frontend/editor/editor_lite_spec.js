@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { editor as monacoEditor, languages as monacoLanguages, Uri } from 'monaco-editor';
 import waitForPromises from 'helpers/wait_for_promises';
-import Editor from '~/editor/editor_lite';
+import EditorLite from '~/editor/editor_lite';
 import { EditorLiteExtension } from '~/editor/editor_lite_extension_base';
 import { DEFAULT_THEME, themes } from '~/ide/lib/themes';
 import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX } from '~/editor/constants';
@@ -17,7 +17,7 @@ describe('Base editor', () => {
   beforeEach(() => {
     setFixtures('<div id="editor" data-editor-loading></div>');
     editorEl = document.getElementById('editor');
-    editor = new Editor();
+    editor = new EditorLite();
   });
 
   afterEach(() => {
@@ -127,16 +127,14 @@ describe('Base editor', () => {
       editorEl2 = document.getElementById('editor2');
       inst1Args = {
         el: editorEl1,
-        blobGlobalId,
       };
       inst2Args = {
         el: editorEl2,
         blobContent,
         blobPath,
-        blobGlobalId,
       };
 
-      editor = new Editor();
+      editor = new EditorLite();
       instanceSpy = jest.spyOn(monacoEditor, 'create');
     });
 
@@ -167,7 +165,7 @@ describe('Base editor', () => {
     });
 
     it('shares global editor options among all instances', () => {
-      editor = new Editor({
+      editor = new EditorLite({
         readOnly: true,
       });
 
@@ -179,7 +177,7 @@ describe('Base editor', () => {
     });
 
     it('allows overriding editor options on the instance level', () => {
-      editor = new Editor({
+      editor = new EditorLite({
         readOnly: true,
       });
       inst1 = editor.createInstance({
@@ -402,19 +400,20 @@ describe('Base editor', () => {
           el: editorEl,
           blobPath,
           blobContent,
-          blobGlobalId,
           extensions,
         });
       };
 
       beforeEach(() => {
-        editorExtensionSpy = jest.spyOn(Editor, 'pushToImportsArray').mockImplementation((arr) => {
-          arr.push(
-            Promise.resolve({
-              default: {},
-            }),
-          );
-        });
+        editorExtensionSpy = jest
+          .spyOn(EditorLite, 'pushToImportsArray')
+          .mockImplementation((arr) => {
+            arr.push(
+              Promise.resolve({
+                default: {},
+              }),
+            );
+          });
       });
 
       it.each([undefined, [], [''], ''])(
@@ -526,7 +525,7 @@ describe('Base editor', () => {
     it('sets default syntax highlighting theme', () => {
       const expectedTheme = themes.find((t) => t.name === DEFAULT_THEME);
 
-      editor = new Editor();
+      editor = new EditorLite();
 
       expect(themeDefineSpy).toHaveBeenCalledWith(DEFAULT_THEME, expectedTheme.data);
       expect(themeSetSpy).toHaveBeenCalledWith(DEFAULT_THEME);
@@ -538,7 +537,7 @@ describe('Base editor', () => {
       expect(expectedTheme.name).not.toBe(DEFAULT_THEME);
 
       window.gon.user_color_scheme = expectedTheme.name;
-      editor = new Editor();
+      editor = new EditorLite();
 
       expect(themeDefineSpy).toHaveBeenCalledWith(expectedTheme.name, expectedTheme.data);
       expect(themeSetSpy).toHaveBeenCalledWith(expectedTheme.name);
@@ -549,7 +548,7 @@ describe('Base editor', () => {
       const nonExistentTheme = { name };
 
       window.gon.user_color_scheme = nonExistentTheme.name;
-      editor = new Editor();
+      editor = new EditorLite();
 
       expect(themeDefineSpy).not.toHaveBeenCalled();
       expect(themeSetSpy).toHaveBeenCalledWith(DEFAULT_THEME);
