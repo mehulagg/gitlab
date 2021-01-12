@@ -281,13 +281,19 @@ Note that this data is completely separate from the [events tracking data](#impl
 
 #### Add context
 
-You can add arbitrary context data in a hash which gets stored as part of the experiment user record.
+You can add arbitrary context data in a hash which gets stored as part of the experiment user record. New calls to the `record_experiment_user` with newer contexts get merged deeply into the existing context.
+
 This data can then be used by data analytics dashboards.
 
 ```ruby
 before_action do
-  record_experiment_user(:signup_flow, foo: 42)
+  record_experiment_user(:signup_flow, foo: 42, bar: { a: 22})
+  # context is { "foo" => 42, "bar" => { "a" => 22 }}
 end
+
+# Additional contexts for newer record calls are merged deeply
+record_experiment_user(:signup_flow, foo: 40, bar: { b: 2 }, thor: 3)
+# context becomes { "foo" => 40, "bar" => { "a" => 22, "b" => 2 }, "thor" => 3}
 ```
 
 ### Record experiment conversion event

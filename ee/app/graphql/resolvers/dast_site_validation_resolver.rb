@@ -18,7 +18,7 @@ module Resolvers
     private
 
     def allowed?
-      ::Feature.enabled?(:security_on_demand_scans_site_validation, project)
+      ::Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
     end
   end
 end

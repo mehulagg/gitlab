@@ -34,7 +34,6 @@ export default {
   editScheduleModalId,
   deleteScheduleModalId,
   presetType: PRESET_TYPES.WEEKS,
-  inject: ['timezones'],
   components: {
     GlSprintf,
     GlCard,
@@ -50,6 +49,7 @@ export default {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['timezones'],
   props: {
     schedule: {
       type: Object,

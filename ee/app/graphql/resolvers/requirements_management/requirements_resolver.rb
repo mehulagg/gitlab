@@ -4,6 +4,7 @@ module Resolvers
   module RequirementsManagement
     class RequirementsResolver < BaseResolver
       include LooksAhead
+      include CommonRequirementArguments
 
       type ::Types::RequirementsManagement::RequirementType.connection_type, null: true
 
@@ -14,22 +15,6 @@ module Resolvers
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
                description: 'List of IIDs of requirements, e.g., [1, 2]'
-
-      argument :sort, Types::SortEnum,
-               required: false,
-               description: 'List requirements by sort order'
-
-      argument :state, Types::RequirementsManagement::RequirementStateEnum,
-               required: false,
-               description: 'Filter requirements by state'
-
-      argument :search, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Search query for requirement title'
-
-      argument :author_username, [GraphQL::STRING_TYPE],
-               required: false,
-               description: 'Filter requirements by author username'
 
       def resolve_with_lookahead(**args)
         # The project could have been loaded in batch by `BatchLoader`.

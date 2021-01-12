@@ -24,7 +24,7 @@ describe('EE - DastSiteProfileList', () => {
   const defaultProps = {
     profiles: [],
     tableLabel: 'Site profiles',
-    fields: ['profileName', 'targetUrl', 'validationStatus'],
+    fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
     profilesPerPage: 10,
     errorMessage: '',
     errorDetails: [],
@@ -136,7 +136,7 @@ describe('EE - DastSiteProfileList', () => {
       ${'in-progress'} | ${DAST_SITE_VALIDATION_STATUS.INPROGRESS} | ${'Validating...'}     | ${false}
       ${'passed'}      | ${DAST_SITE_VALIDATION_STATUS.PASSED}     | ${'Validated'}         | ${false}
       ${'failed'}      | ${DAST_SITE_VALIDATION_STATUS.FAILED}     | ${'Validation failed'} | ${true}
-    `('profile with validation $status', ({ statusEnum, label, hasValidateButton }) => {
+    `('profile with $status validation', ({ statusEnum, label, hasValidateButton }) => {
       const profile = siteProfiles.find(({ validationStatus }) => validationStatus === statusEnum);
 
       it(`should show correct label`, () => {
@@ -144,17 +144,13 @@ describe('EE - DastSiteProfileList', () => {
         expect(validationStatusCell.innerText).toContain(label);
       });
 
-      it(`should ${hasValidateButton ? '' : 'not '}render validate button`, () => {
+      it(`should ${hasValidateButton ? 'not ' : ''} disable validate button`, () => {
         const actionsCell = getTableRowForProfile(profile).cells[3];
         const validateButton = within(actionsCell).queryByRole('button', {
-          name: /validate/i,
+          name: /validate|Retry validation/i,
         });
 
-        if (hasValidateButton) {
-          expect(validateButton).not.toBeNull();
-        } else {
-          expect(validateButton).toBeNull();
-        }
+        expect(validateButton.hasAttribute('disabled')).toBe(!hasValidateButton);
       });
     });
 

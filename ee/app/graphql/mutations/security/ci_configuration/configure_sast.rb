@@ -10,17 +10,17 @@ module Mutations
 
         argument :project_path, GraphQL::ID_TYPE,
           required: true,
-          description: 'Full path of the project'
+          description: 'Full path of the project.'
 
         argument :configuration, ::Types::CiConfiguration::Sast::InputType,
           required: true,
-          description: 'SAST CI configuration for the project'
+          description: 'SAST CI configuration for the project.'
 
         field :status, GraphQL::STRING_TYPE, null: false,
-          description: 'Status of creating the commit for the supplied SAST CI configuration'
+          description: 'Status of creating the commit for the supplied SAST CI configuration.'
 
         field :success_path, GraphQL::STRING_TYPE, null: true,
-          description: 'Redirect path to use when the response is successful'
+          description: 'Redirect path to use when the response is successful.'
 
         authorize :push_code
 

@@ -11,13 +11,13 @@ module EE
           prepended do
             argument :milestone_id, ::Types::GlobalIDType[::Milestone],
                      required: false,
-                     description: 'Global ID of an existing milestone'
+                     description: 'Global ID of an existing milestone.'
             argument :iteration_id, ::Types::GlobalIDType[::Iteration],
                      required: false,
-                     description: 'Global ID of an existing iteration'
+                     description: 'Global ID of an existing iteration.'
             argument :assignee_id, ::Types::GlobalIDType[::User],
                      required: false,
-                     description: 'Global ID of an existing user'
+                     description: 'Global ID of an existing user.'
           end
 
           private

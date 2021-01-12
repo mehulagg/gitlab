@@ -139,7 +139,8 @@ export default {
         <template v-else>
           <gl-button
             ref="vulnerability-title"
-            class="text-body"
+            class="text-body gl-display-grid"
+            button-text-classes="gl-text-left gl-white-space-normal! gl-pr-4!"
             variant="link"
             @click="openModal({ vulnerability })"
             >{{ vulnerability.name }}</gl-button
@@ -160,7 +161,7 @@ export default {
             :issue="vulnerability.issue_feedback"
             :project-name="vulnerability.project.name"
           />
-          <br />
+
           <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
             {{ vulnerabilityNamespace }}
           </small>

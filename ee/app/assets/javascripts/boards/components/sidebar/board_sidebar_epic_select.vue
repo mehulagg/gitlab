@@ -12,12 +12,12 @@ export default {
     BoardEditableItem,
     EpicsSelect,
   },
+  inject: ['groupId'],
   data() {
     return {
       loading: false,
     };
   },
-  inject: ['groupId'],
   computed: {
     ...mapState(['epics']),
     ...mapGetters(['activeIssue', 'getEpicById', 'projectPathForActiveIssue']),

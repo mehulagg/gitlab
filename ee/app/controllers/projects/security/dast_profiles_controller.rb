@@ -5,7 +5,7 @@ module Projects
     class DastProfilesController < Projects::ApplicationController
       before_action do
         authorize_read_on_demand_scans!
-        push_frontend_feature_flag(:security_on_demand_scans_site_validation, @project)
+        push_frontend_feature_flag(:security_on_demand_scans_site_validation, @project, default_enabled: :yaml)
       end
 
       feature_category :dynamic_application_security_testing

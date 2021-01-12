@@ -7,7 +7,11 @@ import {
   GlSkeletonLoader,
   GlTable,
   GlTooltipDirective,
+  GlDropdown,
+  GlDropdownItem,
+  GlIcon,
 } from '@gitlab/ui';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {
   components: {
@@ -16,6 +20,9 @@ export default {
     GlModal,
     GlSkeletonLoader,
     GlTable,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -88,8 +95,16 @@ export default {
     },
     tableFields() {
       const defaultClasses = ['gl-word-break-all'];
-      const dataFields = this.fields.map((key) => ({ key, class: defaultClasses }));
-      const staticFields = [{ key: 'actions' }];
+      const defaultThClasses = ['gl-bg-transparent!', 'gl-text-black-normal'];
+
+      const dataFields = this.fields.map(({ key, label }) => ({
+        key,
+        label,
+        class: defaultClasses,
+        thClass: defaultThClasses,
+      }));
+
+      const staticFields = [{ key: 'actions', label: '', thClass: defaultThClasses }];
 
       return [...dataFields, ...staticFields];
     },
@@ -105,6 +120,9 @@ export default {
     handleCancel() {
       this.toBeDeletedProfileId = null;
     },
+    navigateToProfile({ editPath }) {
+      return visitUrl(editPath);
+    },
   },
 };
 </script>
@@ -117,7 +135,11 @@ export default {
         :fields="tableFields"
         :items="profiles"
         stacked="md"
-        thead-class="gl-display-none"
+        fixed
+        hover
+        thead-class="gl-border-b-solid gl-border-gray-100 gl-border-1 gl-pt-3!"
+        tbody-tr-class="gl-hover-cursor-pointer gl-hover-bg-blue-50!"
+        @row-clicked="navigateToProfile"
       >
         <template v-if="hasError" #top-row>
           <td :colspan="tableFields.length">
@@ -135,7 +157,9 @@ export default {
         </template>
 
         <template #cell(profileName)="{ value }">
-          <strong>{{ value }}</strong>
+          <div class="gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis">
+            {{ value }}
+          </div>
         </template>
 
         <template v-for="slotName in Object.keys($scopedSlots)" #[slotName]="slotScope">
@@ -146,21 +170,48 @@ export default {
           <div class="gl-text-right">
             <slot name="actions" :profile="item"></slot>
 
+            <gl-dropdown
+              class="gl-display-none gl-display-sm-inline-flex!"
+              toggle-class="gl-border-0! gl-shadow-none!"
+              no-caret
+              right
+              category="tertiary"
+            >
+              <template #button-content>
+                <gl-icon name="ellipsis_v" />
+                <span class="gl-sr-only">{{ __('Actions') }}</span>
+              </template>
+
+              <gl-dropdown-item
+                v-if="item.editPath"
+                :href="item.editPath"
+                :title="s__('DastProfiles|Edit profile')"
+                >{{ __('Edit') }}</gl-dropdown-item
+              >
+
+              <gl-dropdown-item
+                variant="danger"
+                :title="s__('DastProfiles|Delete profile')"
+                @click="prepareProfileDeletion(item.id)"
+              >
+                {{ __('Delete') }}
+              </gl-dropdown-item>
+            </gl-dropdown>
             <gl-button
               v-if="item.editPath"
               :href="item.editPath"
-              class="gl-ml-3 gl-my-1"
+              category="tertiary"
+              class="gl-ml-3 gl-my-1 gl-display-sm-none"
               size="small"
               >{{ __('Edit') }}</gl-button
             >
-
             <gl-button
               v-gl-tooltip.hover.focus
+              category="tertiary"
               icon="remove"
               variant="danger"
-              category="secondary"
               size="small"
-              class="gl-mx-3 gl-my-1"
+              class="gl-mx-3 gl-my-1 gl-display-sm-none"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />

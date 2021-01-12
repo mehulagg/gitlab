@@ -38,7 +38,7 @@ module Gitlab
         end
 
         def default
-          @default ||= self.new
+          self.new
         end
       end
 

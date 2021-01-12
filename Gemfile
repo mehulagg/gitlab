@@ -57,7 +57,7 @@ gem 'gssapi', group: :kerberos
 # Spam and anti-bot protection
 gem 'recaptcha', '~> 4.11', require: 'recaptcha/rails'
 gem 'akismet', '~> 3.0'
-gem 'invisible_captcha', '~> 0.12.1'
+gem 'invisible_captcha', '~> 1.1.0'
 
 # Two-factor authentication
 gem 'devise-two-factor', '~> 3.1.0'
@@ -84,9 +84,7 @@ gem 'gitlab_omniauth-ldap', '~> 2.1.1', require: 'omniauth-ldap'
 gem 'net-ldap', '~> 0.16.3'
 
 # API
-# Locked at Grape v1.4.0 until https://github.com/ruby-grape/grape/pull/2088 is merged
-# Remove config/initializers/grape_patch.rb
-gem 'grape', '= 1.4.0'
+gem 'grape', '~> 1.5.1'
 gem 'grape-entity', '~> 0.7.1'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 

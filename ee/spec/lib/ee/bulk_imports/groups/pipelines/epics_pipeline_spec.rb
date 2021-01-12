@@ -46,13 +46,11 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     it { expect(described_class).to include_module(BulkImports::Pipeline::Runner) }
 
     it 'has extractors' do
-      expect(described_class.extractors)
-        .to contain_exactly(
-          {
-            klass: BulkImports::Common::Extractors::GraphqlExtractor,
-            options: {
-              query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
-            }
+      expect(described_class.get_extractor)
+        .to eq(
+          klass: BulkImports::Common::Extractors::GraphqlExtractor,
+          options: {
+            query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
           }
         )
     end
@@ -67,9 +65,7 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     end
 
     it 'has loaders' do
-      expect(described_class.loaders).to contain_exactly({
-        klass: EE::BulkImports::Groups::Loaders::EpicsLoader, options: nil
-      })
+      expect(described_class.get_loader).to eq(klass: EE::BulkImports::Groups::Loaders::EpicsLoader, options: nil)
     end
   end
 

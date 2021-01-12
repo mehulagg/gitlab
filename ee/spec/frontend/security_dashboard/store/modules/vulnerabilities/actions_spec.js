@@ -164,6 +164,18 @@ describe('vulnerabilities actions', () => {
         return testAction(actions.fetchVulnerabilities, {}, state);
       });
     });
+
+    describe('pending request', () => {
+      it('cancels the pending request when a new one is made', () => {
+        const dispatch = jest.fn();
+        const cancel = jest.fn();
+        jest.spyOn(axios.CancelToken, 'source').mockImplementation(() => ({ cancel }));
+        actions.fetchVulnerabilities({ state, dispatch });
+        actions.fetchVulnerabilities({ state, dispatch });
+
+        expect(cancel).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('receiveVulnerabilitiesSuccess', () => {
@@ -590,7 +602,7 @@ describe('vulnerability dismissal', () => {
         );
       });
 
-      it('should load the previous page if there is no more vulnerabiliy on the current one and page > 1', () => {
+      it('should load the previous page if there are no more vulnerabilities on the current one and page > 1', () => {
         state.vulnerabilities = [mockDataVulnerabilities[0]];
         state.pageInfo.page = 3;
 

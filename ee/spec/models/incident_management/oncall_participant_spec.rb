@@ -36,33 +36,6 @@ RSpec.describe IncidentManagement::OncallParticipant do
         expect(subject.errors.full_messages.to_sentence).to eq('User has already been taken')
       end
     end
-
-    context 'when participant cannot read project' do
-      let_it_be(:other_user) { create(:user) }
-      subject { build(:incident_management_oncall_participant, rotation: rotation, user: other_user) }
-
-      context 'on creation' do
-        it 'has validation errors' do
-          expect(subject).to be_invalid
-          expect(subject.errors.full_messages.to_sentence).to eq('User does not have access to the project')
-        end
-      end
-
-      context 'after creation' do
-        let(:project) { rotation.project }
-
-        before do
-          project.add_developer(other_user)
-        end
-
-        it 'is valid' do
-          subject.save!
-          remove_user_from_project(other_user, project)
-
-          expect(subject).to be_valid
-        end
-      end
-    end
   end
 
   private

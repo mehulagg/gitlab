@@ -11,8 +11,6 @@ import Filters from './first_class_vulnerability_filters.vue';
 import CsvExportButton from './csv_export_button.vue';
 import { vulnerabilitiesSeverityCountScopes } from '../constants';
 
-export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
-
 export default {
   components: {
     AutoFixUserCallout,
@@ -43,11 +41,11 @@ export default {
     },
   },
   data() {
-    const shoudShowAutoFixUserCallout =
+    const shouldShowAutoFixUserCallout =
       this.glFeatures.securityAutoFix && !Cookies.get('auto_fix_user_callout_dismissed');
     return {
       filters: {},
-      shoudShowAutoFixUserCallout,
+      shouldShowAutoFixUserCallout,
     };
   },
   methods: {
@@ -56,7 +54,7 @@ export default {
     },
     handleAutoFixUserCalloutClose() {
       Cookies.set('auto_fix_user_callout_dismissed', 'true');
-      this.shoudShowAutoFixUserCallout = false;
+      this.shouldShowAutoFixUserCallout = false;
     },
   },
   vulnerabilitiesSeverityCountScopes,
@@ -67,7 +65,7 @@ export default {
   <div>
     <template v-if="pipeline.id">
       <auto-fix-user-callout
-        v-if="shoudShowAutoFixUserCallout"
+        v-if="shouldShowAutoFixUserCallout"
         :help-page-path="autoFixDocumentation"
         @close="handleAutoFixUserCalloutClose"
       />

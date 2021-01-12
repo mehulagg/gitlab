@@ -39,6 +39,12 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
+  describe '.default' do
+    it 'does not cache the value' do
+      expect(described_class.default.object_id).not_to eq(described_class.default.object_id)
+    end
+  end
+
   describe '#default_mappings' do
     it 'has only one type' do
       expect(helper.default_mappings.keys).to match_array %i(doc)

@@ -9,7 +9,7 @@ module Mutations
 
       argument :id, Types::GlobalIDType[::Project],
                required: true,
-               description: 'ID of the project to remove from the Instance Security Dashboard'
+               description: 'ID of the project to remove from the Instance Security Dashboard.'
 
       def resolve(id:)
         dashboard = authorized_find!

@@ -52,11 +52,11 @@ describe('Dependency Location component', () => {
       });
     });
 
-    it('shoud render the popover', () => {
+    it('should render the popover', () => {
       expect(findPopover().exists()).toBe(true);
     });
 
-    it('shoud have the complete path', () => {
+    it('should have the complete path', () => {
       expect(trimText(findPopover().text())).toBe(
         'swell 1.2 / emmajsq 10.11 / zeb 12.1 / post 2.5 / core 1.0 There may be multiple paths',
       );

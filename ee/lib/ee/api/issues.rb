@@ -65,7 +65,7 @@ module EE
                   iids: [params[:issue_iid]]
                 ).execute.first
 
-                present issue.metric_images, with: Entities::IssuableMetricImage
+                present issue.metric_images.order_created_at_asc, with: Entities::IssuableMetricImage
               else
                 render_api_error!('Issue not found', 404)
               end

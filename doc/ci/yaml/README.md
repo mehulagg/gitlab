@@ -363,8 +363,6 @@ use the [`extends` keyword](#extends).
 | [`remote`](#includeremote)      | Include a file from a remote URL. Must be publicly accessible.    |
 | [`template`](#includetemplate)  | Include templates that are provided by GitLab.                    |
 
-The `include` methods do not support [variable expansion](../variables/where_variables_can_be_used.md#variables-usage).
-
 `.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
 The configuration is a snapshot in time and persisted in the database. Any changes to
 referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
@@ -378,6 +376,48 @@ The files defined by `include` are:
 NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
+
+#### Variables with `include`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-includepredefined-project-variables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can [use some predefined variables in `include` sections](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+in your `.gitlab-ci.yml`:
+
+```yaml
+include:
+  project: '$CI_PROJECT_PATH'
+  file: '.compliance-gitlab-ci.yml'
+```
+
+For an example of how you can include these predefined variables, and their impact on CI jobs,
+see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
+
+##### Enable or disable include:predefined-project-variables **(CORE ONLY)**
+
+Use of predefined project variables in `include` section of `.gitlab-ci.yml` is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:variables_in_include_section_ci)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:variables_in_include_section_ci)
+```
 
 #### `include:local`
 
@@ -2278,10 +2318,10 @@ job3:
 #### `allow_failure:exit_codes`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273157) in GitLab 13.8.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-allow_failureexit_codes). **(CORE ONLY)**
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-allow_failureexit_codes). **(CORE ONLY)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -2310,21 +2350,21 @@ test_job_2:
 
 ##### Enable or disable `allow_failure:exit_codes` **(CORE ONLY)**
 
-`allow_failure:exit_codes` is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+`allow_failure:exit_codes` is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_allow_failure_with_exit_codes)
-```
+can disable it.
 
 To disable it:
 
 ```ruby
 Feature.disable(:ci_allow_failure_with_exit_codes)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_allow_failure_with_exit_codes)
 ```
 
 ### `when`

@@ -29,13 +29,6 @@ export default {
     IssuableList,
     TestCaseListEmptyState,
   },
-  props: {
-    initialFilterParams: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
-  },
   inject: [
     'canCreateTestCase',
     'initialState',
@@ -47,6 +40,13 @@ export default {
     'projectLabelsPath',
     'testCaseNewPath',
   ],
+  props: {
+    initialFilterParams: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+  },
   apollo: {
     testCases: {
       query: projectTestCases,

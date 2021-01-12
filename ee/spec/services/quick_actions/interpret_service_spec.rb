@@ -107,11 +107,6 @@ RSpec.describe QuickActions::InterpretService do
 
     context 'assign_reviewer command' do
       context 'with a merge request' do
-        before_all do
-          project.add_developer(user2)
-          project.add_developer(user3)
-        end
-
         let(:merge_request) { create(:merge_request, source_project: project) }
 
         it 'fetches reviewers and populates them if content contains /assign_reviewer' do
@@ -1069,7 +1064,9 @@ RSpec.describe QuickActions::InterpretService do
       it 'includes only selected assignee references' do
         _, explanations = service.explain(content, issue)
 
-        expect(explanations).to eq(["Removes assignees @#{user3.username} and @#{user.username}."])
+        expect(explanations.first).to match(/Removes assignees/)
+        expect(explanations.first).to match("@#{user3.username}")
+        expect(explanations.first).to match("@#{user.username}")
       end
     end
 

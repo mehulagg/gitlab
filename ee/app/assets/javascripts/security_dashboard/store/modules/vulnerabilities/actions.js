@@ -12,6 +12,8 @@ import {
 } from '~/vue_shared/security_reports/constants';
 import * as types from './mutation_types';
 
+let vulnerabilitiesSource;
+
 /**
  * A lot of this file has duplicate actions in
  * ee/app/assets/javascripts/vue_shared/security_reports/store/actions.js
@@ -38,10 +40,17 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
     return;
   }
   dispatch('requestVulnerabilities');
+  // Cancel a pending request if there is one.
+  if (vulnerabilitiesSource) {
+    vulnerabilitiesSource.cancel();
+  }
+
+  vulnerabilitiesSource = axios.CancelToken.source();
 
   axios({
     method: 'GET',
     url: state.vulnerabilitiesEndpoint,
+    cancelToken: vulnerabilitiesSource.token,
     params,
   })
     .then((response) => {
@@ -49,7 +58,10 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
       dispatch('receiveVulnerabilitiesSuccess', { headers, data });
     })
     .catch((error) => {
-      dispatch('receiveVulnerabilitiesError', error?.response?.status);
+      // Don't show an error message if the request was cancelled through the cancel token.
+      if (!axios.isCancel(error)) {
+        dispatch('receiveVulnerabilitiesError', error?.response?.status);
+      }
     });
 };
 

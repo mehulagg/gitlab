@@ -14,29 +14,70 @@ RSpec.describe Groups::TransferService, '#execute' do
     new_group&.add_owner(user)
   end
 
-  context 'when visibility changes' do
-    let(:new_group) { create(:group, :private) }
-
+  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
     end
 
-    it 'reindexes projects and associated issues', :elastic do
-      project1 = create(:project, :repository, :public, namespace: group)
-      project2 = create(:project, :repository, :public, namespace: group)
-      project3 = create(:project, :repository, :private, namespace: group)
+    context 'when elasticsearch_limit_indexing is on' do
+      before do
+        stub_ee_application_setting(elasticsearch_limit_indexing: true)
+      end
 
-      expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
-      expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
-      expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
-      expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, ['issues'])
-      expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
-      expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, ['issues'])
+      let(:project) { create(:project, :repository, :public, namespace: group) }
 
-      transfer_service.execute(new_group)
+      context 'when moving from a non-indexed namespace to an indexed namespace' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: new_group)
+        end
 
-      expect(transfer_service.error).not_to be
-      expect(group.parent).to eq(new_group)
+        it 'invalidates the cache and indexes the project and associated issues' do
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+          transfer_service.execute(new_group)
+        end
+      end
+
+      context 'when both namespaces are indexed' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+          create(:elasticsearch_indexed_namespace, namespace: new_group)
+        end
+
+        it 'invalidates the cache and indexes the project and associated issues' do
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+          transfer_service.execute(new_group)
+        end
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is off' do
+      context 'when visibility changes' do
+        let(:new_group) { create(:group, :private) }
+
+        it 'reindexes projects and associated issues' do
+          project1 = create(:project, :repository, :public, namespace: group)
+          project2 = create(:project, :repository, :public, namespace: group)
+          project3 = create(:project, :repository, :private, namespace: group)
+
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, ['issues'])
+          expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, ['issues'])
+
+          transfer_service.execute(new_group)
+
+          expect(transfer_service.error).not_to be
+          expect(group.parent).to eq(new_group)
+        end
+      end
     end
   end
 

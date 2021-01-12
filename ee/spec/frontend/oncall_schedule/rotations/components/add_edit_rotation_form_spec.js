@@ -44,6 +44,10 @@ describe('AddEditRotationForm', () => {
             date: null,
             time: 0,
           },
+          restrictedTo: {
+            from: 0,
+            to: 0,
+          },
         },
       },
       provide: {
@@ -63,14 +67,20 @@ describe('AddEditRotationForm', () => {
   });
 
   const findRotationLength = () => wrapper.find('[id="rotation-length"]');
-  const findRotationStartTime = () => wrapper.find('[id="rotation-start-time"]');
+  const findRotationStartTime = () => wrapper.find('[data-testid="rotation-start-time"]');
   const findRotationEndsContainer = () => wrapper.find('[data-testid="rotation-ends-on"]');
   const findEndDateToggle = () => wrapper.find(GlToggle);
-  const findRotationEndTime = () => wrapper.find('[id="rotation-end-time"]');
+  const findRotationEndTime = () => wrapper.find('[data-testid="rotation-end-time"]');
   const findUserSelector = () => wrapper.find(GlTokenSelector);
   const findRotationFormGroups = () => wrapper.findAllComponents(GlFormGroup);
   const findStartsOnTimeOptions = () => findRotationStartTime().findAllComponents(GlDropdownItem);
   const findEndsOnTimeOptions = () => findRotationEndTime().findAllComponents(GlDropdownItem);
+  const findRestrictedToTime = () => wrapper.find('[data-testid="restricted-to-time"]');
+  const findRestrictedToToggle = () => wrapper.find('[data-testid="restricted-to-toggle"]');
+  const findRestrictedFromOptions = () =>
+    wrapper.find('[data-testid="restricted-from"]').findAllComponents(GlDropdownItem);
+  const findRestrictedToOptions = () =>
+    wrapper.find('[data-testid="restricted-to"]').findAllComponents(GlDropdownItem);
 
   describe('Rotation form validation', () => {
     it.each`
@@ -174,6 +184,68 @@ describe('AddEditRotationForm', () => {
       expect(
         findEndsOnTimeOptions()
           .at(time - 1)
+          .props('isChecked'),
+      ).toBe(true);
+    });
+  });
+
+  describe('Rotation restricted to time', () => {
+    it('toggles restricted to time visibility', async () => {
+      const toggle = findRestrictedToToggle().vm;
+      toggle.$emit('change', false);
+      await wrapper.vm.$nextTick();
+      expect(findRestrictedToTime().exists()).toBe(false);
+      toggle.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      expect(findRestrictedToTime().exists()).toBe(true);
+    });
+
+    it('should emit an event with selected value on restricted FROM time selection', async () => {
+      findRestrictedToToggle().vm.$emit('change', true);
+      await wrapper.vm.$nextTick();
+      const timeFrom = 5;
+      const timeTo = 22;
+      findRestrictedFromOptions().at(timeFrom).vm.$emit('click');
+      findRestrictedToOptions().at(timeTo).vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      const emittedEvent = wrapper.emitted('update-rotation-form');
+      expect(emittedEvent).toHaveLength(2);
+      expect(emittedEvent[0][0]).toEqual({ type: 'restrictedTo.from', value: timeFrom + 1 });
+      expect(emittedEvent[1][0]).toEqual({ type: 'restrictedTo.to', value: timeTo + 1 });
+    });
+
+    it('should add a checkmark to a selected  restricted FROM time', async () => {
+      findRestrictedToToggle().vm.$emit('change', true);
+      const timeFrom = 5;
+      const timeTo = 22;
+
+      wrapper.setProps({
+        form: {
+          endsOn: {
+            time: 0,
+          },
+          startsAt: {
+            time: 0,
+          },
+          restrictedTo: {
+            from: timeFrom,
+            to: timeTo,
+          },
+          rotationLength: {
+            length: 1,
+            unit: LENGTH_ENUM.hours,
+          },
+        },
+      });
+      await wrapper.vm.$nextTick();
+      expect(
+        findRestrictedFromOptions()
+          .at(timeFrom - 1)
+          .props('isChecked'),
+      ).toBe(true);
+      expect(
+        findRestrictedToOptions()
+          .at(timeTo - 1)
           .props('isChecked'),
       ).toBe(true);
     });

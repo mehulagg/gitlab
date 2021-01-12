@@ -129,7 +129,6 @@ module EE
 
       rule { reporter }.policy do
         enable :admin_list
-        enable :admin_board
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs

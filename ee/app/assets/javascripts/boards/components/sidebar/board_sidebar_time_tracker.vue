@@ -3,10 +3,10 @@ import { mapGetters } from 'vuex';
 import IssuableTimeTracker from '~/sidebar/components/time_tracking/time_tracker.vue';
 
 export default {
-  inject: ['timeTrackingLimitToHours'],
   components: {
     IssuableTimeTracker,
   },
+  inject: ['timeTrackingLimitToHours'],
   computed: {
     ...mapGetters(['activeIssue']),
   },
