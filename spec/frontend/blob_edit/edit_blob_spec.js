@@ -6,7 +6,8 @@ import { FileTemplateExtension } from '~/editor/extensions/editor_file_template_
 
 jest.mock('~/editor/editor_lite');
 jest.mock('~/editor/editor_markdown_ext');
-jest.mock('~/editor/editor_file_template_ext');
+jest.mock('~/editor/extensions/editor_markdown_ext');
+jest.mock('~/editor/extensions/editor_file_template_ext');
 
 describe('Blob Editing', () => {
   const useMock = jest.fn();
