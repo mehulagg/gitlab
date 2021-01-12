@@ -121,6 +121,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   end
 
   def after_project_changes_hooks(project, user, refs, changes)
+    experiment(:new_project_readme, actor: user).track_first_write(project)
+
     repository_update_hook_data = Gitlab::DataBuilder::Repository.update(project, user, changes, refs)
     SystemHooksService.new.execute_hooks(repository_update_hook_data, :repository_update_hooks)
     Gitlab::UsageDataCounters::SourceCodeCounter.count(:pushes)
