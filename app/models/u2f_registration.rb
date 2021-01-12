@@ -4,11 +4,18 @@
 
 class U2fRegistration < ApplicationRecord
   belongs_to :user
-  after_commit :schedule_webauthn_migration, on: :create
+  after_commit :create_webauthn_registration, on: :create
   after_commit :update_webauthn_registration, on: :update, if: :counter_changed?
 
-  def schedule_webauthn_migration
-    BackgroundMigrationWorker.perform_async('MigrateU2fWebauthn', [id, id])
+  def create_webauthn_registration
+    converter = Gitlab::Auth::U2fWebauthnConverter.new(self)
+    WebauthnRegistration.create!(converter.convert)
+  rescue StandardError => ex
+    Gitlab::AppJsonLogger.error(
+      event: 'u2f_migration',
+      error: ex.message,
+      backtrace: ex.backtrace.join("\n"),
+      message: "U2F to WebAuthn conversion failed")
   end
 
   def update_webauthn_registration
