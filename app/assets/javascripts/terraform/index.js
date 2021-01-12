@@ -28,32 +28,16 @@ export default () => {
       },
     },
     Mutation: {
-      addDataToTerraformState: (
-        _,
-        { errorMessages, loadingActions, stateID, showDetails },
-        { client },
-      ) => {
-        const terraformState = client.readFragment({
-          id: stateID,
+      addDataToTerraformState: (_, { terraformState }, { client }) => {
+        client.writeFragment({
+          id: terraformState.id,
           fragment: TerraformState,
           // eslint-disable-next-line @gitlab/require-i18n-strings
           fragmentName: 'State',
+          data: {
+            ...terraformState,
+          },
         });
-
-        if (terraformState) {
-          client.writeFragment({
-            id: stateID,
-            fragment: TerraformState,
-            // eslint-disable-next-line @gitlab/require-i18n-strings
-            fragmentName: 'State',
-            data: {
-              ...terraformState,
-              _showDetails: showDetails,
-              errorMessages,
-              loadingActions,
-            },
-          });
-        }
       },
     },
   };
