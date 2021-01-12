@@ -23,9 +23,16 @@ export default () => {
       errorMessages: (state) => {
         return state.errorMessages || [];
       },
+      loadingActions: (state) => {
+        return state.loadingActions || false;
+      },
     },
     Mutation: {
-      addDataToTerraformState: (_, { stateID, showDetails, errorMessages }, { client }) => {
+      addDataToTerraformState: (
+        _,
+        { errorMessages, loadingActions, stateID, showDetails },
+        { client },
+      ) => {
         const terraformState = client.readFragment({
           id: stateID,
           fragment: TerraformState,
@@ -33,19 +40,20 @@ export default () => {
           fragmentName: 'State',
         });
 
-        client.writeFragment({
-          id: stateID,
-          fragment: TerraformState,
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          fragmentName: 'State',
-          data: {
-            ...terraformState,
-            errorMessages,
-            _showDetails: showDetails,
-          },
-        });
-
-        return null;
+        if (terraformState) {
+          client.writeFragment({
+            id: stateID,
+            fragment: TerraformState,
+            // eslint-disable-next-line @gitlab/require-i18n-strings
+            fragmentName: 'State',
+            data: {
+              ...terraformState,
+              _showDetails: showDetails,
+              errorMessages,
+              loadingActions,
+            },
+          });
+        }
       },
     },
   };

@@ -1,10 +1,12 @@
 mutation addDataToTerraformState(
   $errorMessages: [String]
+  $loadingActions: Boolean
   $stateID: String!
   $showDetails: Boolean
 ) {
   addDataToTerraformState(
     errorMessages: $errorMessages
+    loadingActions: $loadingActions
     stateID: $stateID
     showDetails: $showDetails
   ) @client

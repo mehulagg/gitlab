@@ -34,7 +34,6 @@ export default {
   },
   data() {
     return {
-      loading: false,
       showRemoveModal: false,
       removeConfirmText: '',
     };
@@ -83,24 +82,33 @@ export default {
         },
       });
     },
+    addStateLoading() {
+      this.$apollo.mutate({
+        mutation: addDataToState,
+        variables: {
+          loadingActions: true,
+          stateID: this.state.id,
+        },
+      });
+    },
     hideModal() {
       this.showRemoveModal = false;
       this.removeConfirmText = '';
     },
     lock() {
-      this.stateMutation(lockState);
+      this.stateActionMutation(lockState);
     },
     unlock() {
-      this.stateMutation(unlockState);
+      this.stateActionMutation(unlockState);
     },
     remove() {
       if (!this.disableModalSubmit) {
         this.hideModal();
-        this.stateMutation(removeState);
+        this.stateActionMutation(removeState);
       }
     },
-    stateMutation(mutation) {
-      this.loading = true;
+    stateActionMutation(mutation) {
+      this.addStateLoading();
 
       let errorMessages = [];
 
@@ -125,8 +133,6 @@ export default {
           errorMessages = [this.$options.i18n.errorUpdate];
         })
         .finally(() => {
-          this.loading = false;
-
           if (errorMessages.length) {
             this.addStateError(errorMessages);
           }
@@ -142,7 +148,7 @@ export default {
       icon="ellipsis_v"
       right
       :data-testid="`terraform-state-actions-${state.name}`"
-      :disabled="loading"
+      :disabled="state.loadingActions"
       toggle-class="gl-px-3! gl-shadow-none!"
     >
       <template #button-content>
