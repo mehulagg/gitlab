@@ -22,7 +22,7 @@ export default () => {
       },
     },
     Mutation: {
-      addErrorsToTerraformState: (_, { stateID }, { client }) => {
+      addDataToTerraformState: (_, { stateID }, { client }) => {
         const terraformState = client.readFragment({
           id: stateID,
           fragment: TerraformState,

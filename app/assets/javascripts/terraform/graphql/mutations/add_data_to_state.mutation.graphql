@@ -1,3 +1,3 @@
-mutation addErrorsToTerraformState($stateID: String!) {
-  addErrorsToTerraformState(stateID: $stateID) @client
+mutation addDataToTerraformState($stateID: String!) {
+  addDataToTerraformState(stateID: $stateID) @client
 }
