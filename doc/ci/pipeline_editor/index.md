@@ -19,23 +19,23 @@ It checks the syntax of your CI YAML configuration and also runs some basic logi
 The result of this is shown above your config.
 If your config is invalid, a tip is shown to help you fix your config:
 
-![IMAGE]()
+![Errors in a CI config validation](./img/validate.png)
 
 ## Lint
 
 If you want to test the validity of your GitLab CI/CD configuration before committing the changes, you can use the lint tab.
-This tool checks for syntax and logical errors but goes into more detail than the [inline validator](#validate).
+This tool checks for syntax and logical errors but goes into more detail than the [validator](#validate).
 As with the validation, this is updated in real-time so any changes you make to the config will be reflected in the linter.
-This feature will display the same results as the existing [CI Linter](../lint).
+This feature will display the same results as the existing [CI Linter](../lint.md).
 
-![IMAGE]()
+![Linting errors in a CI config](./img/lint.png)
 
 ## Visualize
 
-You can visualize your changes on the [visualization tab](../yaml/visualization.html).
+You can visualize your changes on the [visualization tab](../yaml/visualization.md).
 Any changes made to the config will be reflected in the visualization.
 
-![IMAGE]()
+![The visualization tab](./img/visualize.png)
 
 ## Commit
 
@@ -45,4 +45,4 @@ The branch field will default to your projects default branch.
 If you enter a new branch name, a checkbox will appear, allowing you to start a new merge request after you commit the changes.
 When you are ready, click Commit Changes at the bottom.
 
-![IMAGE]()
+![The commit form with a new branch](./img/commit.png)
