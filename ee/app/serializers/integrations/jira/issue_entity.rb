@@ -58,7 +58,7 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{jira_issue.client.options[:site]}browse/#{jira_issue.key}"
+        "#{base_web_url(jira_issue)}/browse/#{jira_issue.key}"
       end
 
       expose :references do |jira_issue|
@@ -78,10 +78,19 @@ module Integrations
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
         if jira_issue.reporter.try(:accountId)
-          "#{jira_issue.client.options[:site]}people/#{jira_issue.reporter.accountId}"
+          "#{base_web_url(jira_issue)}/people/#{jira_issue.reporter.accountId}"
         else
-          "#{jira_issue.client.options[:site]}secure/ViewProfile.jspa?name=#{jira_issue.reporter.name}"
+          "#{base_web_url(jira_issue)}/secure/ViewProfile.jspa?name=#{jira_issue.reporter.name}"
         end
+      end
+
+      def base_web_url(jira_issue)
+        site_url = jira_issue.client.options[:site].delete_suffix('/')
+        context_path = jira_issue.client.options[:context_path].to_s.delete_prefix('/')
+
+        return site_url if context_path.empty?
+
+        [site_url, context_path].join('/')
       end
     end
   end
