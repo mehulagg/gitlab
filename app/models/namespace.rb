@@ -447,6 +447,21 @@ class Namespace < ApplicationRecord
     !has_parent?
   end
 
+  def delayed_project_removal
+    return self[:delayed_project_removal] unless self[:delayed_project_removal].nil?
+    return @delayed_project_removal unless @delayed_project_removal.nil?
+
+    if has_parent?
+      results = self_and_ancestors(hierarchy_order: :asc)
+        .where('delayed_project_removal IS NOT NULL')
+        .select(:delayed_project_removal)
+        .limit(1)
+
+      @delayed_project_removal = results.first.delayed_project_removal
+    end
+  end
+  alias_method :delayed_project_removal?, :delayed_project_removal
+
   private
 
   def all_projects_with_pages
