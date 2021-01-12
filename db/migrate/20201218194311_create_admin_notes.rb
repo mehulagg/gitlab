@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateAdminNotes < ActiveRecord::Migration[6.0]
   DOWNTIME = false
 
