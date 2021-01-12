@@ -76,9 +76,11 @@ export default {
       this.$apollo.mutate({
         mutation: addDataToState,
         variables: {
-          errorMessages,
-          showDetails: true,
-          stateID: this.state.id,
+          terraformState: {
+            ...this.state,
+            _showDetails: true,
+            errorMessages,
+          },
         },
       });
     },

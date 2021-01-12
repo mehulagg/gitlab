@@ -29,15 +29,28 @@ export default () => {
     },
     Mutation: {
       addDataToTerraformState: (_, { terraformState }, { client }) => {
-        client.writeFragment({
+        const previousTerraformState = client.readFragment({
           id: terraformState.id,
           fragment: TerraformState,
           // eslint-disable-next-line @gitlab/require-i18n-strings
           fragmentName: 'State',
-          data: {
-            ...terraformState,
-          },
         });
+
+        if (previousTerraformState) {
+          client.writeFragment({
+            id: previousTerraformState.id,
+            fragment: TerraformState,
+            // eslint-disable-next-line @gitlab/require-i18n-strings
+            fragmentName: 'State',
+            data: {
+              ...previousTerraformState,
+              // eslint-disable-next-line no-underscore-dangle
+              _showDetails: terraformState._showDetails,
+              errorMessages: terraformState.errorMessages,
+              loadingActions: terraformState.loadingActions,
+            },
+          });
+        }
       },
     },
   };
