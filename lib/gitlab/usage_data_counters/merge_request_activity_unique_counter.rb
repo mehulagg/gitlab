@@ -13,6 +13,8 @@ module Gitlab
       MR_CREATE_COMMENT_ACTION = 'i_code_review_user_create_mr_comment'
       MR_EDIT_COMMENT_ACTION = 'i_code_review_user_edit_mr_comment'
       MR_REMOVE_COMMENT_ACTION = 'i_code_review_user_remove_mr_comment'
+      MR_START_REVIEW_ACTION = 'i_code_review_user_start_review'
+      MR_PUBLISH_REVIEW_ACTION = 'i_code_review_user_publish_review'
 
       class << self
         def track_mr_diffs_action(merge_request:)
@@ -50,6 +52,14 @@ module Gitlab
 
         def track_remove_comment_action(user:)
           track_unique_action_by_user(MR_REMOVE_COMMENT_ACTION, user)
+        end
+
+        def track_start_review_action(user:)
+          track_unique_action_by_user(MR_START_REVIEW_ACTION, user)
+        end
+
+        def track_publish_review_action(user:)
+          track_unique_action_by_user(MR_PUBLISH_REVIEW_ACTION, user)
         end
 
         private

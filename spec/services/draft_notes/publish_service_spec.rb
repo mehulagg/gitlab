@@ -43,6 +43,14 @@ RSpec.describe DraftNotes::PublishService do
       expect(result[:status]).to eq(:success)
     end
 
+    it 'tracks the publish event' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_publish_review_action)
+        .with(user: user)
+
+      publish
+    end
+
     context 'commit_id is set' do
       let(:commit_id) { commit.id }
 

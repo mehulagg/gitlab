@@ -11,6 +11,8 @@ module DraftNotes
         publish_draft_notes
       end
 
+      merge_request_activity_counter.track_publish_review_action(user: current_user)
+
       success
     rescue ActiveRecord::RecordInvalid => e
       message = "Unable to save #{e.record.class.name}: #{e.record.errors.full_messages.join(", ")} "
