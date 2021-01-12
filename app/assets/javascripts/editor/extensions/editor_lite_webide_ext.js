@@ -27,15 +27,12 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   }
 
   bootstrapInstance() {
+    if (isDiffEditorType(this)) {
+      this.updateOptions({
+        renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
+      });
+    }
     this.addCommands();
-  }
-
-  bootstrapDiffInstance() {
-    this.updateOptions({
-      renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
-    });
-
-    this.bootstrapInstance();
   }
 
   createModel(file, head = null) {
@@ -64,10 +61,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
         return acc;
       }, {}),
     );
-  }
-
-  clearEditor() {
-    this.setModel(null);
   }
 
   updateDimensions() {
