@@ -17,13 +17,13 @@ export default {
 <template>
   <div>
     <div
-      class="gl-display-flex gl-align-items-center gl-w-full gl-px-8 gl-mb-5"
+      class="gl-display-flex gl-align-items-center gl-w-full gl-mb-5"
       :class="stageClasses"
     >
       <slot name="stages"> </slot>
     </div>
     <div
-      class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
+      class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full"
       :class="jobClasses"
     >
       <slot name="jobs"> </slot>

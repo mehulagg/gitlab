@@ -69,7 +69,7 @@ export default {
 };
 </script>
 <template>
-  <main-graph-wrapper>
+  <main-graph-wrapper class="gl-px-6">
     <template #stages>
       <div
         data-testid="stage-column-title"
