@@ -94,9 +94,6 @@ module Gitlab
       #
       # @return [Class<Geo::BaseRegistry>] registry class
       def self.registry_class
-        # TODO: remove this
-        return ::Geo::LfsObjectRegistrySsf if replicable_name.camelize.eql?('LfsObject')
-
         const_get("::Geo::#{replicable_name.camelize}Registry", false)
       end
 

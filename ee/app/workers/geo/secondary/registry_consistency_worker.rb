@@ -19,7 +19,7 @@ module Geo
         Geo::ContainerRepositoryRegistry,
         Geo::DesignRegistry,
         Geo::JobArtifactRegistry,
-        Geo::LfsObjectRegistrySsf,
+        Geo::LfsObjectRegistry,
         Geo::MergeRequestDiffRegistry,
         Geo::PackageFileRegistry,
         Geo::ProjectRegistry,

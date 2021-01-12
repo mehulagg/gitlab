@@ -63,7 +63,7 @@ ActiveRecord::Schema.define(version: 2020_12_16_204525) do
     t.index ["success"], name: "index_file_registry_on_success"
   end
 
-  create_table "job_artifact_registry", id: :serial, force: :cascade do |t|
+  create_table "job_artifact_registry", force: :cascade do |t|
     t.datetime_with_timezone "created_at"
     t.datetime_with_timezone "retry_at"
     t.bigint "bytes"
@@ -78,20 +78,6 @@ ActiveRecord::Schema.define(version: 2020_12_16_204525) do
   end
 
   create_table "lfs_object_registry", force: :cascade do |t|
-    t.datetime_with_timezone "created_at"
-    t.datetime_with_timezone "retry_at"
-    t.bigint "bytes"
-    t.integer "lfs_object_id"
-    t.integer "retry_count"
-    t.boolean "missing_on_primary", default: false, null: false
-    t.boolean "success", default: false, null: false
-    t.binary "sha256"
-    t.index ["lfs_object_id"], name: "index_lfs_object_registry_on_lfs_object_id", unique: true
-    t.index ["retry_at"], name: "index_lfs_object_registry_on_retry_at"
-    t.index ["success"], name: "index_lfs_object_registry_on_success"
-  end
-
-  create_table "lfs_object_registry_ssf", force: :cascade do |t|
     t.integer "lfs_object_id", null: false
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
@@ -99,9 +85,9 @@ ActiveRecord::Schema.define(version: 2020_12_16_204525) do
     t.datetime_with_timezone "last_synced_at"
     t.datetime_with_timezone "created_at", null: false
     t.text "last_sync_failure"
-    t.index ["retry_at"], name: "index_lfs_object_registry_ssf_on_retry_at"
-    t.index ["state"], name: "index_lfs_object_registry_ssf_on_state"
     t.index ["lfs_object_id"], name: "index_lfs_object_registry_on_lfs_object_id"
+    t.index ["retry_at"], name: "index_lfs_object_registry_on_retry_at"
+    t.index ["state"], name: "index_lfs_object_registry_on_state"
   end
 
   create_table "merge_request_diff_registry", force: :cascade do |t|
