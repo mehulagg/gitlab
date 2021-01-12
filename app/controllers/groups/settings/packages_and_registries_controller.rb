@@ -5,6 +5,8 @@ module Groups
     class PackagesAndRegistriesController < Groups::ApplicationController
       before_action :authorize_admin_group!
 
+      feature_category :package_registry
+
       def index
       end
     end
