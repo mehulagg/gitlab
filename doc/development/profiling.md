@@ -180,8 +180,8 @@ Example output:
 }
 ```
 
-You can also access this data through the `web_exporter` and `sidekiq_exporter` metric exporters via the
-`/system` path. To enable these exporters, refer to the [GitLab monitoring documentation](../../administration/monitoring/prometheus/gitlab_metrics.html).
+NOTE:
+This endpoint is only available for Rails web workers. Sidekiq workers can not be inspected this way.
 
 ## Settings that impact performance
 
