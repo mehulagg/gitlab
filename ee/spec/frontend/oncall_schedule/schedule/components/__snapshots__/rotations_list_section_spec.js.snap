@@ -134,14 +134,14 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
               class="gl-m-0"
               data-testid="rotation-assignee-starts-at"
             >
-              Starts: January 10, 2021, 10:01
+              Starts: January 12, 2021, 10:01
             </p>
              
             <p
               class="gl-m-0"
               data-testid="rotation-assignee-ends-at"
             >
-              Ends: January 13, 2021, 10:01
+              Ends: January 15, 2021, 10:01
             </p>
           </div>
         </div>
@@ -207,14 +207,14 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
               class="gl-m-0"
               data-testid="rotation-assignee-starts-at"
             >
-              Starts: January 13, 2021, 10:01
+              Starts: January 15, 2021, 10:01
             </p>
              
             <p
               class="gl-m-0"
               data-testid="rotation-assignee-ends-at"
             >
-              Ends: January 16, 2021, 10:01
+              Ends: January 18, 2021, 10:01
             </p>
           </div>
         </div>
