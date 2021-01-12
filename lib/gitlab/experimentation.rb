@@ -6,6 +6,7 @@
 # Experiment options:
 # - tracking_category (optional, used to set the category when tracking an experiment event)
 # - use_backwards_compatible_subject_index (optional, set this to true if you need backwards compatibility -- you likely do not need this, see note in the next paragraph.)
+# - rollout_strategy: default is `:cookie` based rollout. We may also set it to `:user` based rollout
 #
 # Using the backwards-compatible subject index (use_backwards_compatible_subject_index option):
 # This option was added when [the calculation of experimentation_subject_index was changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45733/diffs#41af4a6fa5a10c7068559ce21c5188483751d934_157_173). It is not intended to be used by new experiments, it exists merely for the segmentation integrity of in-flight experiments at the time the change was deployed. That is, we want users who were assigned to the "experimental" group or the "control" group before the change to still be in those same groups after the change. See [the original issue](https://gitlab.com/gitlab-org/gitlab/-/issues/270858) and [this related comment](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48110#note_458223745) for more information.
@@ -92,7 +93,8 @@ module Gitlab
         tracking_category: 'Growth::Conversion::Experiment::TrialDuringSignup'
       },
       ci_syntax_templates: {
-        tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates'
+        tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
+        rollout_strategy: :user
       },
       pipelines_empty_state: {
         tracking_category: 'Growth::Activation::Experiment::PipelinesEmptyState'
@@ -130,6 +132,17 @@ module Gitlab
         return false unless experiment
 
         experiment.enabled_for_index?(index_for_subject(experiment, subject))
+      end
+
+      def rollout_strategy(experiment_key)
+        experiment = get_experiment(experiment_key)
+        return unless experiment
+
+        experiment.rollout_strategy || :cookie
+      end
+
+      def cookie_rollout_strategy?(experiment_key)
+        rollout_strategy(experiment_key) == :cookie
       end
 
       private

@@ -65,7 +65,9 @@ module Gitlab
         return if dnt_enabled?
         return unless Experimentation.active?(experiment_key) && current_user
 
-        ::Experiment.add_user(experiment_key, tracking_group(experiment_key, nil, subject: current_user), current_user, context)
+        subject = Experimentation.cookie_rollout_strategy?(experiment_key) ? nil : current_user
+
+        ::Experiment.add_user(experiment_key, tracking_group(experiment_key, nil, subject: subject), current_user, context)
       end
 
       def record_experiment_conversion_event(experiment_key)
