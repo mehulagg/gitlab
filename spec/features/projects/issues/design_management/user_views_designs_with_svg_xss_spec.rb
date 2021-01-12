@@ -30,7 +30,7 @@ RSpec.describe 'User views an SVG design that contains XSS', :js do
 
   it 'displays the SVG' do
     find("[data-testid='close-design']").click
-    expect(page).to have_selector("img.design-img[alt='xss.svg']", count: 1, visible: false)
+    expect(page).to have_selector("[data-testid='design-img-#{design.id}']", count: 1, visible: false)
   end
 
   it 'does not execute the JavaScript within the SVG' do

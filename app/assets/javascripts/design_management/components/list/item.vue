@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlIcon, GlIntersectionObserver } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlIntersectionObserver, GlTooltipDirective } from '@gitlab/ui';
 import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 import { n__, __ } from '~/locale';
 import { DESIGN_ROUTE_NAME } from '../../router/constants';
@@ -10,6 +10,9 @@ export default {
     GlIntersectionObserver,
     GlIcon,
     Timeago,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     id: {
@@ -153,16 +156,21 @@ export default {
           v-show="showImage"
           :src="imageLink"
           :alt="filename"
-          class="gl-display-block gl-mx-auto gl-max-w-full mh-100 design-img"
+          class="gl-display-block gl-mx-auto gl-max-w-full gl-max-h-full design-img"
           data-qa-selector="design_image"
           :data-qa-filename="filename"
+          :data-testid="`design-img-${id}`"
           @load="onImageLoad"
           @error="onImageError"
         />
       </gl-intersection-observer>
     </div>
     <div class="card-footer gl-display-flex gl-w-full">
-      <div class="gl-display-flex gl-flex-direction-column str-truncated-100">
+      <div
+        v-gl-tooltip
+        class="gl-display-flex gl-flex-direction-column str-truncated-100"
+        :title="filename"
+      >
         <span class="gl-font-weight-bold str-truncated-100" data-qa-selector="design_file_name">{{
           filename
         }}</span>

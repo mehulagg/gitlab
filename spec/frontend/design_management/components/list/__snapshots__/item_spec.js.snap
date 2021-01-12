@@ -26,7 +26,7 @@ exports[`Design management list item component with notes renders item with mult
        
       <img
         alt="test"
-        class="gl-display-block gl-mx-auto gl-max-w-full mh-100 design-img"
+        class="gl-display-block gl-mx-auto gl-max-w-full gl-max-h-full design-img"
         data-qa-filename="test"
         data-qa-selector="design_image"
         src=""
@@ -39,6 +39,7 @@ exports[`Design management list item component with notes renders item with mult
   >
     <div
       class="gl-display-flex gl-flex-direction-column str-truncated-100"
+      title="test"
     >
       <span
         class="gl-font-weight-bold str-truncated-100"
@@ -100,7 +101,7 @@ exports[`Design management list item component with notes renders item with sing
        
       <img
         alt="test"
-        class="gl-display-block gl-mx-auto gl-max-w-full mh-100 design-img"
+        class="gl-display-block gl-mx-auto gl-max-w-full gl-max-h-full design-img"
         data-qa-filename="test"
         data-qa-selector="design_image"
         src=""
@@ -113,6 +114,7 @@ exports[`Design management list item component with notes renders item with sing
   >
     <div
       class="gl-display-flex gl-flex-direction-column str-truncated-100"
+      title="test"
     >
       <span
         class="gl-font-weight-bold str-truncated-100"
