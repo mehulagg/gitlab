@@ -1,0 +1,5 @@
+---
+title: 'Feat(incidents): update Incidents to allow milestones to be used'
+merge_request: 51456
+author:
+type: changed
