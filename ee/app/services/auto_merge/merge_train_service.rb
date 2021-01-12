@@ -15,7 +15,9 @@ module AutoMerge
     def process(merge_request)
       return unless merge_request.on_train?
 
-      ::MergeTrains::RefreshMergeRequestsService.new(project, nil).execute(merge_request)
+      ::MergeTrains::RefreshMergeRequestsService
+        .new(project, nil)
+        .execute(merge_request.merge_train)
     end
 
     def cancel(merge_request)

@@ -1,93 +1,53 @@
 # frozen_string_literal: true
 module MergeTrains
+  # This class is to refresh all merge requests on the given merge train.
+  #
+  # It performs a sequential update on all merge requests on the train.
+  # In order to prevent concurrent updates by multiple sidekiq jobs,
+  # the process attempts to obtain an exclusive lock at first.
+  # If the process successfully obtains the lock, the sequential refresh will be executed in this sidekiq job.
+  # If the process failed to obtain the lock, the refresh will be performed after the current process has finished.
   class RefreshMergeRequestsService < BaseService
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::Utils::StrongMemoize
 
-    DEFAULT_CONCURRENCY = 20
+    DEFAULT_CONCURRENCY = 20.freeze
+    TRAIN_PROCECCING_LOCK_TIMEOUT = 15.minutes
 
     ##
-    # merge_request ... A merge request pointer in a merge train.
-    #                   All the merge requests following the specified merge request will be refreshed.
-    def execute(merge_request)
-      @merge_request = merge_request
-
-      return unless merge_request.on_train?
+    # merge_train ... A merge train metadata of a merge request.
+    def execute(merge_train)
+      @merge_train = merge_train
 
       queue = Gitlab::BatchPopQueueing.new('merge_trains', queue_id)
-
-      result = queue.safe_execute([merge_request.id], lock_timeout: 15.minutes) do |items|
-        logging("Successfuly obtained the exclusive lock. Found merge requests to be refreshed", merge_request_ids: items.map(&:to_i))
-
-        first_merge_request = get_first_in_train(items)
-        unsafe_refresh(first_merge_request)
-      end
-
-      if result[:status] == :enqueued
-        logging("This merge request was enqueued because the exclusive lock is obtained by the other process.")
+      result = queue.safe_execute([merge_train.merge_request.id], lock_timeout: TRAIN_PROCECCING_LOCK_TIMEOUT) do |items|
+        unsafe_refresh
       end
 
       if result[:status] == :finished && result[:new_items].present?
-        logging("Found more merge requests to be refreshed", merge_request_ids: result[:new_items].map(&:to_i))
-
-        get_first_in_train(result[:new_items]).try do |first_merge_request|
-          logging("Rescheduled to refresh the merge train from", merge_request_ids: [first_merge_request.id])
-
-          AutoMergeProcessWorker.perform_async(first_merge_request.id)
-        end
+        AutoMergeProcessWorker.perform_async(merge_train.first.merge_request)
       end
     end
 
     private
 
-    attr_reader :merge_request
+    attr_reader :merge_train
 
-    # TODO:
-    # As we changed the process flow to refresh merge requests from the begnning always,
-    # we don't use the `items` argument anymore.
-    # We should refactor the current logic to make this class more readable.
-    # See https://gitlab.com/gitlab-org/gitlab/-/issues/281065
-    def get_first_in_train(items)
-      MergeTrain.first_in_train(merge_request.target_project, merge_request.target_branch)
-    end
-
-    def unsafe_refresh(first_merge_request)
+    def unsafe_refresh
       require_next_recreate = false
 
-      following_merge_requests_from(first_merge_request).each do |following_mr|
-        logging("Started refreshing", merge_request_ids: [following_mr.id])
-
-        break if following_mr.merge_train.index >= max_concurrency
-
+      merge_train.all(limit: DEFAULT_CONCURRENCY).each do |train|
         result = MergeTrains::RefreshMergeRequestService
-          .new(following_mr.project, following_mr.merge_user,
+          .new(train.target_project, train.user,
                require_recreate: require_next_recreate)
-          .execute(following_mr)
+          .execute(train.merge_request)
 
         require_next_recreate = (result[:status] == :error || result[:pipeline_created])
       end
     end
 
-    def following_merge_requests_from(first_merge_request)
-      first_merge_request.merge_train.all_next.to_a.unshift(first_merge_request)
-    end
-
     def queue_id
-      "#{merge_request.target_project_id}:#{merge_request.target_branch}"
-    end
-
-    def max_concurrency
-      strong_memoize(:max_concurrency) do
-        DEFAULT_CONCURRENCY
-      end
-    end
-
-    def logging(message, extra = {})
-      return unless Feature.enabled?(:ci_merge_train_logging, merge_request.project)
-
-      Sidekiq.logger.info(
-        { class: self.class.to_s, args: [merge_request.id.to_s], message: message }.merge(extra)
-      )
+      "#{merge_train.target_project_id}:#{merge_train.target_branch}"
     end
   end
 end

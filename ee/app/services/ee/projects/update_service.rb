@@ -90,7 +90,7 @@ module EE
       def refresh_merge_trains(project)
         return unless project.merge_pipelines_were_disabled?
 
-        MergeTrain.first_in_trains(project).each do |merge_request|
+        MergeTrain.first_mrs_in_trains(project).each do |merge_request|
           AutoMergeProcessWorker.perform_async(merge_request.id)
         end
       end

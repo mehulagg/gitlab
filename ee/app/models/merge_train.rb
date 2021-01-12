@@ -82,21 +82,8 @@ class MergeTrain < ApplicationRecord
       )
     end
 
-    def first_in_train(target_project_id, target_branch)
-      all_active_mrs_in_train(target_project_id, target_branch).first
-    end
-
-    def first_in_trains(project)
+    def first_mrs_in_trains(project)
       MergeRequest.preload(:target_project).where(id: first_merge_request_ids(project))
-    end
-
-    def first_in_train_from(merge_request_ids)
-      merge_request = MergeRequest.find(merge_request_ids.first)
-      all_active_mrs_in_train(merge_request.target_project_id, merge_request.target_branch).find_by(id: merge_request_ids)
-    end
-
-    def last_complete_mr_in_train(target_project_id, target_branch)
-      MergeRequest.find_by(id: last_complete_merge_train(target_project_id, target_branch))
     end
 
     def sha_exists_in_history?(target_project_id, target_branch, newrev, limit: 20)
@@ -118,22 +105,22 @@ class MergeTrain < ApplicationRecord
         .order(:target_branch, :id)
     end
 
-    def last_complete_merge_train(target_project_id, target_branch)
-      complete_merge_trains(target_project_id, target_branch, limit: 1)
-    end
-
     def complete_merge_trains(target_project_id, target_branch, limit:)
       MergeTrain.for_target(target_project_id, target_branch)
         .complete.order(id: :desc).select(:merge_request_id).limit(limit)
     end
   end
 
+  def all(limit: nil)
+    self.class.active.for_target(target_project_id, target_branch).by_id.limit(limit)
+  end
+
   def all_next
-    self.class.all_active_mrs_in_train(target_project_id, target_branch).where('merge_trains.id > ?', id)
+    all.where('merge_trains.id > ?', id)
   end
 
   def all_prev
-    self.class.all_active_mrs_in_train(target_project_id, target_branch).where('merge_trains.id < ?', id)
+    all.where('merge_trains.id < ?', id)
   end
 
   def next
@@ -148,12 +135,12 @@ class MergeTrain < ApplicationRecord
     all_prev.count
   end
 
-  def first_in_train?
-    !follower_in_train?
+  def first
+    all.first
   end
 
-  def follower_in_train?
-    all_prev.exists?
+  def first_in_train?
+    self == first
   end
 
   def cleanup_ref
