@@ -275,7 +275,7 @@ RSpec.describe GitlabSubscription do
     subject { gitlab_subscription.expired? }
 
     context 'when end_date is expired' do
-      let(:end_date) { Date.yesterday }
+      let(:end_date) { Date.current.advance(days: -1) }
 
       it { is_expected.to be(true) }
     end
@@ -491,6 +491,118 @@ RSpec.describe GitlabSubscription do
         expired_subscription1.namespace.elasticsearch_indexed_namespace,
         expired_subscription2.namespace.elasticsearch_indexed_namespace
       )
+    end
+  end
+
+  context 'when in a trial' do
+    let_it_be(:gitlab_subscription, reload: true) { create(:gitlab_subscription, :active_trial) }
+
+    let(:start_trial_on) { nil }
+    let(:end_trial_on) { nil }
+
+    before do
+      gitlab_subscription.trial_starts_on = start_trial_on if start_trial_on
+      gitlab_subscription.trial_ends_on = end_trial_on if end_trial_on
+    end
+
+    describe '#trial_days_remaining' do
+      subject { gitlab_subscription.trial_days_remaining }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(30) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(15) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(0) }
+      end
+    end
+
+    describe '#trial_duration' do
+      subject { gitlab_subscription.trial_duration }
+
+      context 'for a default trial duration' do
+        it { is_expected.to eq(30) }
+      end
+
+      context 'for a custom trial duration' do
+        let(:start_trial_on) { Date.current.advance(days: -5) }
+        let(:end_trial_on) { Date.current.advance(days: 5) }
+
+        it { is_expected.to eq(10) }
+      end
+    end
+
+    describe '#trial_days_used' do
+      subject { gitlab_subscription.trial_days_used }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(0) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(15) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(30) }
+      end
+    end
+
+    describe '#trial_percentage_complete' do
+      subject { gitlab_subscription.trial_percentage_complete }
+
+      context 'at the beginning of a trial' do
+        let(:start_trial_on) { Date.current }
+        let(:end_trial_on) { Date.current.advance(days: 30) }
+
+        it { is_expected.to eq(0.0) }
+      end
+
+      context 'in the middle of a trial' do
+        it { is_expected.to eq(50.0) }
+      end
+
+      context 'at the end of a trial' do
+        let(:start_trial_on) { Date.current.advance(days: -30) }
+        let(:end_trial_on) { Date.current }
+
+        it { is_expected.to eq(100.0) }
+      end
+
+      context 'rounding' do
+        let(:start_trial_on) { Date.current.advance(days: -10) }
+        let(:end_trial_on) { Date.current.advance(days: 20) }
+
+        context 'by default' do
+          it 'rounds to 2 decimal places' do
+            is_expected.to eq(33.33)
+          end
+        end
+
+        context 'with custom rounding options' do
+          subject { gitlab_subscription.trial_percentage_complete(4) }
+
+          it 'rounds to the given number of decimal places' do
+            is_expected.to eq(33.3333)
+          end
+        end
+      end
     end
   end
 end
