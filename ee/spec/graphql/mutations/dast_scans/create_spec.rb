@@ -13,7 +13,7 @@ RSpec.describe Mutations::DastScans::Create do
   let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
   let(:run_after_create) { false }
 
-  let(:dast_site) { DastSite.find_by(project: project, name: name) }
+  let(:dast_scan) { DastScan.find_by(project: project, name: name) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: developer }, field: nil) }
 
@@ -45,7 +45,7 @@ RSpec.describe Mutations::DastScans::Create do
       end
 
       context 'when the user can run a dast scan' do
-        it 'returns the dast_site' do
+        it 'returns the dast_scan' do
           subject
 
           expect(subject[:dast_scan]).to eq(dast_scan)
