@@ -119,7 +119,7 @@ export default {
         :container-id="containerId"
         :container-measurements="measurements"
         :highlighted-job="hoveredJobName"
-        :default-link-color="gl-stroke-transparent"
+        default-link-color="gl-stroke-transparent"
         @error="onError"
       >
         <linked-graph-wrapper>

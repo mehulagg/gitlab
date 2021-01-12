@@ -1,8 +1,3 @@
-// add links layer check to graph component
-// add error check to wrapper
-
-// stage column emits on mouseenter
-
 import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlButton } from '@gitlab/ui';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
