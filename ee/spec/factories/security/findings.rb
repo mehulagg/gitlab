@@ -7,7 +7,7 @@ FactoryBot.define do
 
     severity { :critical }
     confidence { :high }
-    project_fingerprint { generate(:project_fingerprint) }
-    sequence :position
+    uuid { SecureRandom.uuid }
+    project_fingerprint { generate(:project_fingerprint) } # We cant remove this now as we have a `NOT NULL` constraint in DB
   end
 end
