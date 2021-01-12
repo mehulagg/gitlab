@@ -13,11 +13,11 @@ exports[`Metrics upload item render the metrics image component 1`] = `
     modalclass=""
     modalid="delete-metric-modal"
     size="sm"
-    title="Deleting file"
     titletag="h4"
   >
+     
     <p>
-      Delete??
+      Are you sure you wish to delete this image?
     </p>
   </gl-modal-stub>
     
