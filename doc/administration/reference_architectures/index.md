@@ -121,6 +121,9 @@ to the default installation:
 - Enable zero-downtime upgrades.
 - Increase availability.
 
+For more details on how to configure a traffic load balancer with GitLab, you can refer
+to any of our [available reference architectures](#available-reference-architectures) with more than 1000 users.
+
 ### Zero downtime updates **(STARTER ONLY)**
 
 > - Level of complexity: **Medium**
