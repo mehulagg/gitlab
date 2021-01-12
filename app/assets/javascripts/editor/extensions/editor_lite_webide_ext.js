@@ -1,38 +1,25 @@
 import { debounce } from 'lodash';
 import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
 import Disposable from '~/ide/lib/common/disposable';
-import DecorationsController from '~/ide/lib/decorations/controller';
 import { editorOptions } from '~/ide/lib/editor_options';
-import DirtyDiffController from '~/ide/lib/diff/controller';
 import keymap from '~/ide/lib/keymap.json';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
-import ModelManager from '~/ide/lib/common/model_manager';
 
-const isDiffEditorType = instance => {
+const isDiffEditorType = (instance) => {
   return instance.getEditorType() === 'vs.editor.IDiffEditor';
 };
 
 export class EditorWebIdeExtension extends EditorLiteExtension {
-  constructor({ instance, ...options } = {}) {
+  constructor({ instance, modelManager, ...options } = {}) {
     super({
       instance,
       ...options,
-      currentModel: null,
-      dirtyDiffController: null,
+      modelManager,
       disposable: new Disposable(),
-      modelManager: new ModelManager(),
-      decorationsController: new DecorationsController(instance),
       debouncedUpdate: debounce(() => {
         instance.updateDimensions();
       }, 200),
     });
-
-    instance.disposable.add(
-      (this.dirtyDiffController = new DirtyDiffController(
-        instance.modelManager,
-        instance.decorationsController,
-      )),
-    );
 
     window.addEventListener('resize', instance.debouncedUpdate, false);
 
@@ -43,11 +30,7 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
       // this is mainly for tests caused by elements not existing
       try {
         instance.disposable.dispose();
-
-        // this.instance = null;
       } catch (e) {
-        // this.instance = null;
-
         if (process.env.NODE_ENV !== 'test') {
           // eslint-disable-next-line no-console
           console.error(e);
@@ -57,34 +40,15 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   }
 
   bootstrapInstance() {
-    // if (!this.instance) {
-    //   clearDomElement(domElement);
-
-    // this.disposable.add(
-    //   (this.dirtyDiffController = new DirtyDiffController(
-    //     this.modelManager,
-    //     this.decorationsController,
-    //   )),
-    // );
-
     this.addCommands();
-
-    // window.addEventListener('resize', this.debouncedUpdate, false);
-    // }
   }
 
   bootstrapDiffInstance() {
-    // if (!this.instance) {
-    //   clearDomElement(domElement);
-    debugger;
     this.updateOptions({
       renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
     });
 
-    this.addCommands();
-
-    // window.addEventListener('resize', this.debouncedUpdate, false);
-    // }
+    this.bootstrapInstance();
   }
 
   createModel(file, head = null) {
@@ -102,13 +66,10 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
     }
 
     this.setModel(model.getModel());
-    if (this.dirtyDiffController) this.dirtyDiffController.attachModel(model);
-
-    this.currentModel = model;
 
     this.updateOptions(
       editorOptions.reduce((acc, obj) => {
-        Object.keys(obj).forEach(key => {
+        Object.keys(obj).forEach((key) => {
           Object.assign(acc, {
             [key]: obj[key](model),
           });
@@ -116,8 +77,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
         return acc;
       }, {}),
     );
-
-    if (this.dirtyDiffController) this.dirtyDiffController.reDecorate(model);
   }
 
   attachMergeRequestModel(model) {
@@ -132,16 +91,12 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   }
 
   clearEditor() {
-    // if (this.instance) {
     this.setModel(null);
-    // }
   }
 
   updateDimensions() {
-    // if (this.instance) {
     this.layout();
     this.updateDiffView();
-    // }
   }
 
   setPos({ lineNumber, column }) {
@@ -158,13 +113,12 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   onPositionChange(cb) {
     if (!this.onDidChangeCursorPosition) return;
 
-    this.disposable.add(this.onDidChangeCursorPosition(e => cb(this, e)));
+    this.disposable.add(this.onDidChangeCursorPosition((e) => cb(this, e)));
   }
 
   updateDiffView() {
     if (!isDiffEditorType(this)) return;
 
-    debugger;
     this.updateOptions({
       renderSideBySide: EditorWebIdeExtension.renderSideBySide(this.getDomNode()),
     });
@@ -191,14 +145,14 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
 
   addCommands() {
     const { store } = this;
-    const getKeyCode = key => {
+    const getKeyCode = (key) => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 
       return monacoKeyMod ? KeyCode[key] : KeyMod[key];
     };
 
-    keymap.forEach(command => {
-      const keybindings = command.bindings.map(binding => {
+    keymap.forEach((command) => {
+      const keybindings = command.bindings.map((binding) => {
         const keys = binding.split('+');
 
         // eslint-disable-next-line no-bitwise
