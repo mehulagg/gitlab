@@ -1,6 +1,5 @@
 import { debounce } from 'lodash';
 import { KeyCode, KeyMod, Range } from 'monaco-editor';
-import Disposable from '~/ide/lib/common/disposable';
 import { editorOptions } from '~/ide/lib/editor_options';
 import keymap from '~/ide/lib/keymap.json';
 import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
@@ -15,7 +14,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
       instance,
       ...options,
       modelManager,
-      disposable: new Disposable(),
       debouncedUpdate: debounce(() => {
         instance.updateDimensions();
       }, 200),
@@ -25,17 +23,6 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
 
     instance.onDidDispose(() => {
       window.removeEventListener('resize', instance.debouncedUpdate);
-
-      // catch any potential errors with disposing the error
-      // this is mainly for tests caused by elements not existing
-      try {
-        instance.disposable.dispose();
-      } catch (e) {
-        if (process.env.NODE_ENV !== 'test') {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
-      }
     });
   }
 
@@ -102,7 +89,7 @@ export class EditorWebIdeExtension extends EditorLiteExtension {
   onPositionChange(cb) {
     if (!this.onDidChangeCursorPosition) return;
 
-    this.disposable.add(this.onDidChangeCursorPosition((e) => cb(this, e)));
+    this.onDidChangeCursorPosition((e) => cb(this, e));
   }
 
   updateDiffView() {
