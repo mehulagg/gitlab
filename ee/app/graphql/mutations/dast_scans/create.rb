@@ -43,10 +43,26 @@ module Mutations
 
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, name:, description:, dast_site_profile_id:, dast_site_scanner_id:, run_after_create:)
-        _ = authorized_find!(full_path)
+      def resolve(full_path:, name:, description: '', dast_site_profile_id:, dast_scanner_profile_id:, run_after_create: false)
+        project = authorized_find!(full_path)
 
-        { dast_scan: nil, pipeline_url: nil, errors: [] }
+        # TODO: remove explicit coercion once compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        site_profile_id = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(dast_site_profile_id)
+        scanner_profile_id = ::Types::GlobalIDType[::DastScannerProfile].coerce_isolated_input(dast_scanner_profile_id)
+
+        dast_site_profile = project.dast_site_profiles.find(site_profile_id.model_id)
+        dast_scanner_profile = project.dast_scanner_profiles.find(scanner_profile_id.model_id)
+
+        dast_scan = DastScan.create(
+          project: project,
+          name: name,
+          description: description,
+          dast_site_profile: dast_site_profile,
+          dast_scanner_profile: dast_scanner_profile
+        )
+
+        { dast_scan: dast_scan, pipeline_url: nil, errors: [] }
       end
     end
   end
