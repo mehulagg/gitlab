@@ -48710,7 +48710,7 @@
           "fields": [
             {
               "name": "composerMetadatum",
-              "description": "The composer metadatum",
+              "description": "The composer metadatum.",
               "args": [
 
               ],
@@ -58224,7 +58224,7 @@
               "args": [
                 {
                   "name": "id",
-                  "description": "The global ID of the package",
+                  "description": "The global ID of the package.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,

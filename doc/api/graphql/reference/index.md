@@ -2482,7 +2482,7 @@ Details of a composer package.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `composerMetadatum` | PackageComposerMetadatumType! | The composer metadatum |
+| `composerMetadatum` | PackageComposerMetadatumType! | The composer metadatum. |
 | `createdAt` | Time! | The created date. |
 | `id` | ID! | The ID of the package. |
 | `name` | String! | The name of the package. |
