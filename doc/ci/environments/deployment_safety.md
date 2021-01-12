@@ -90,6 +90,22 @@ vacation period when most employees are out, you can set up a [Deploy Freeze](..
 During a deploy freeze period, no deployment can be executed. This is helpful to
 ensure that deployments do not happen unexpectedly.
 
+
+## Setting appropriate roles to your project
+
+1. Gitlab supports several different [roles](https://docs.gitlab.com/ee/user/permissions.html#group-members-permissions) that can be assigned to your project members
+  1. Guest - Has the lowest level of permissions
+  1. Reporter
+  1. Developer
+  1. Maintainer - includes project settings (including protected configurations) - has access to produciton environment 
+  1. Owner - Highest level of permissions - Full access to all project features
+
+[!7 tips to secure your pipelines]<iframe width="560" height="315" src="https://www.youtube.com/embed/Mq3C1KveDc0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## Protect production secrets 
+
+Production secrets are needed in order to deploy successfuly. For example when deploying to the cloud, cloud providers require these secrets in order to connect to their services. 
+
 ## Troubleshooting
 
 ### Pipelines jobs fail with `The deployment job is older than the previously succeeded deployment job...`
