@@ -130,12 +130,12 @@ As a follow up to finding `N+1` queries with Bullet, consider writing a [QueryRe
 
 ## System stats
 
-During or after profiling, you may often want to get detailed statistics about the Ruby virtual machine process,
-such as memory consuption, time spent on CPU, or garbage collector statistic. These are easy to produce individually
+During or after profiling, you may want to get detailed information about the Ruby virtual machine process,
+such as memory consumption, time spent on CPU, or garbage collector statistics. These are easy to produce individually
 through various tools, but for convenience, a summary endpoint has been added that exports this data as a JSON payload:
 
 ```shell
-curl -s localhost:3000/-/metrics/system | jq
+curl localhost:3000/-/metrics/system | jq
 ```
 
 Example output:
@@ -144,39 +144,40 @@ Example output:
 {
   "version": "ruby 2.7.2p137 (2020-10-01 revision a8323b79eb) [x86_64-linux-gnu]",
   "gc_stat": {
-    "count": 135,
-    "heap_allocated_pages": 15396,
-    "heap_sorted_length": 15396,
+    "count": 118,
+    "heap_allocated_pages": 11503,
+    "heap_sorted_length": 11503,
     "heap_allocatable_pages": 0,
-    "heap_available_slots": 6275468,
-    "heap_live_slots": 4567714,
-    "heap_free_slots": 1707754,
+    "heap_available_slots": 4688580,
+    "heap_live_slots": 3451712,
+    "heap_free_slots": 1236868,
     "heap_final_slots": 0,
-    "heap_marked_slots": 4567528,
-    "heap_eden_pages": 15396,
+    "heap_marked_slots": 3451450,
+    "heap_eden_pages": 11503,
     "heap_tomb_pages": 0,
-    "total_allocated_pages": 15396,
+    "total_allocated_pages": 11503,
     "total_freed_pages": 0,
-    "total_allocated_objects": 46870469,
-    "total_freed_objects": 42302755,
-    "malloc_increase_bytes": 8960,
-    "malloc_increase_bytes_limit": 31581162,
-    "minor_gc_count": 103,
-    "major_gc_count": 32,
+    "total_allocated_objects": 32679478,
+    "total_freed_objects": 29227766,
+    "malloc_increase_bytes": 84760,
+    "malloc_increase_bytes_limit": 32883343,
+    "minor_gc_count": 88,
+    "major_gc_count": 30,
     "compact_count": 0,
-    "remembered_wb_unprotected_objects": 85310,
-    "remembered_wb_unprotected_objects_limit": 170620,
-    "old_objects": 4317423,
-    "old_objects_limit": 8634846,
-    "oldmalloc_increase_bytes": 8960,
+    "remembered_wb_unprotected_objects": 114228,
+    "remembered_wb_unprotected_objects_limit": 228456,
+    "old_objects": 3185330,
+    "old_objects_limit": 6370660,
+    "oldmalloc_increase_bytes": 21838024,
     "oldmalloc_increase_bytes_limit": 119181499
   },
-  "memory_rss": 1780064256,
-  "memory_uss": 1512116224,
-  "memory_pss": 1599896576,
-  "time_cputime": 156.038678823,
-  "time_realtime": 1610029337.832822,
-  "time_monotonic": 23000.221206433
+  "memory_rss": 1326501888,
+  "memory_uss": 1048563712,
+  "memory_pss": 1139554304,
+  "time_cputime": 82.885264633,
+  "time_realtime": 1610459445.5579069,
+  "time_monotonic": 24001.23145713,
+  "worker_id": "puma_0"
 }
 ```
 
