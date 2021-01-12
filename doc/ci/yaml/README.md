@@ -2278,10 +2278,11 @@ job3:
 #### `allow_failure:exit_codes`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273157) in GitLab 13.8.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-allow_failureexit_codes). **(CORE ONLY)**
+> - It was [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/292024) on GitLab 13.8.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-allow_failureexit_codes). **(CORE ONLY)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
