@@ -32,11 +32,15 @@
 .rotations-modal {
   .gl-card {
     min-width: 75%;
-    width: fit-content;
   }
 
   &.gl-modal .modal-md {
     max-width: 640px;
+  }
+
+  // TODO: move to gitlab-ui
+  .gl-w-fit-content {
+    width: fit-content;
   }
 }
 
