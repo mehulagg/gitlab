@@ -17,12 +17,12 @@ export default () => {
   const resolvers = {
     TerraformState: {
       _showDetails: (state) => {
-        // return state._showDetails <- This will error
-        return state.name;
+        // eslint-disable-next-line no-underscore-dangle
+        return state._showDetails || false;
       },
     },
     Mutation: {
-      addDataToTerraformState: (_, { stateID }, { client }) => {
+      addDataToTerraformState: (_, { stateID, showDetails }, { client }) => {
         const terraformState = client.readFragment({
           id: stateID,
           fragment: TerraformState,
@@ -30,16 +30,8 @@ export default () => {
           fragmentName: 'State',
         });
 
-        // eslint-disable-next-line @gitlab/require-i18n-strings
-        terraformState.name = 'Name can be changed because it is part of the fragment!';
-
         // eslint-disable-next-line no-underscore-dangle
-        terraformState._showDetails = true;
-        // This field is ignored because terraformState._showDetails() is a function
-
-        // eslint-disable-next-line @gitlab/require-i18n-strings
-        terraformState.errorMessages = ['Error Message!'];
-        // This field will also be igored
+        terraformState._showDetails = showDetails || false;
 
         client.writeFragment({
           id: stateID,

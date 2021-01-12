@@ -72,6 +72,15 @@ export default {
     },
   },
   methods: {
+    addStateError() {
+      this.$apollo.mutate({
+        mutation: addDataToState,
+        variables: {
+          stateID: this.state.id,
+          showDetails: true,
+        },
+      });
+    },
     hideModal() {
       this.showRemoveModal = false;
       this.removeConfirmText = '';
@@ -89,13 +98,6 @@ export default {
       }
     },
     stateMutation(mutation) {
-      this.$apollo.mutate({
-        mutation: addDataToState,
-        variables: {
-          stateID: this.state.id,
-        },
-      });
-
       this.loading = true;
       this.$apollo
         .mutate({
@@ -110,6 +112,7 @@ export default {
         .catch(() => {})
         .finally(() => {
           this.loading = false;
+          this.addStateError();
         });
     },
   },

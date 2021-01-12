@@ -1,3 +1,3 @@
-mutation addDataToTerraformState($stateID: String!) {
-  addDataToTerraformState(stateID: $stateID) @client
+mutation addDataToTerraformState($stateID: String!, $showDetails: Boolean) {
+  addDataToTerraformState(stateID: $stateID, showDetails: $showDetails) @client
 }
