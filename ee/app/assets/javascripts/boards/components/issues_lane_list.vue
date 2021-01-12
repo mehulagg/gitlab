@@ -90,7 +90,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
+    ...mapActions(['moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -99,9 +99,6 @@ export default {
     },
     isActiveIssue(issue) {
       return this.activeId === issue.id;
-    },
-    showIssue(issue) {
-      this.setActiveId({ id: issue.id, sidebarType: ISSUABLE });
     },
     handleDragOnStart() {
       document.body.classList.add('is-dragging');
@@ -180,7 +177,6 @@ export default {
           :issue="issue"
           :disabled="disabled || !canAdminEpic"
           :is-active="isActiveIssue(issue)"
-          @show="showIssue(issue)"
         />
         <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>

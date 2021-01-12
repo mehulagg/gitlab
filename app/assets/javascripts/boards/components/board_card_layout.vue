@@ -1,10 +1,14 @@
 <script>
+import { mapActions, mapGetters } from 'vuex';
 import IssueCardInner from './issue_card_inner.vue';
 import IssueCardInnerDeprecated from './issue_card_inner_deprecated.vue';
 import boardsStore from '../stores/boards_store';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { ISSUABLE } from '~/boards/constants';
 
 export default {
   name: 'BoardsIssueCard',
+  mixins: [glFeatureFlagMixin()],
   components: {
     IssueCardInner: gon.features?.graphqlBoardLists ? IssueCardInner : IssueCardInnerDeprecated,
   },
@@ -42,11 +46,13 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isSwimlanesOn']),
     multiSelectVisible() {
       return this.multiSelect.list.findIndex((issue) => issue.id === this.issue.id) > -1;
     },
   },
   methods: {
+    ...mapActions(['setActiveId']),
     mouseDown() {
       this.showDetail = true;
     },
@@ -54,6 +60,12 @@ export default {
       this.showDetail = false;
     },
     showIssue(e) {
+      console.log('showIssue');
+      if (this.glFeatures.graphqlBoardLists || this.isSwimlanesOn) {
+        this.setActiveId({ id: this.issue.id, sidebarType: ISSUABLE });
+        return;
+      }
+
       // Don't do anything if this happened on a no trigger element
       if (e.target.classList.contains('js-no-trigger')) return;
 

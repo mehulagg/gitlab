@@ -106,6 +106,7 @@ export default {
         :list="list"
         :disabled="disabled"
       />
+      <board-content-sidebar v-if="glFeatures.graphqlBoardLists" />
     </component>
 
     <template v-else>
