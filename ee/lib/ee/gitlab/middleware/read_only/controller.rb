@@ -42,15 +42,20 @@ module EE
           override :allowlisted_routes
           def allowlisted_routes
             ::Gitlab::AppLogger.info("oauth look_here: checking allowlisted_routes...")
+
             allowed = super || geo_node_update_route? || geo_api_route? || admin_settings_update?
 
             return true if allowed
+
             ::Gitlab::AppLogger.info("oauth look_here: maintenance_mode...")
+
             return sign_in_route? if ::Gitlab.maintenance_mode?
+
             ::Gitlab::AppLogger.info("oauth look_here: checking if primary...")
             return false unless ::Gitlab::Geo.secondary?
 
             ::Gitlab::AppLogger.info("oauth look_here: checking for secondary...")
+
             git_write_routes
           end
 
