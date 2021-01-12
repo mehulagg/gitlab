@@ -5,6 +5,7 @@ class Oauth::GeoAuthController < ActionController::Base
   rescue_from OAuth2::Error, with: :auth
 
   def auth
+    ::Gitlab::AppLogger.error("[look_here] in GeoAuthController#auth")
     unless login_state.valid?
       redirect_to root_url
       return
@@ -14,6 +15,7 @@ class Oauth::GeoAuthController < ActionController::Base
   end
 
   def callback
+    ::Gitlab::AppLogger.error("[look_here] in GeoAuthController#callback")
     unless login_state.valid?
       redirect_to new_user_session_path
       return
@@ -30,6 +32,7 @@ class Oauth::GeoAuthController < ActionController::Base
   end
 
   def logout
+    ::Gitlab::AppLogger.error("[look_here] in GeoAuthController#logout")
     token = Gitlab::Geo::Oauth::LogoutToken.new(current_user, params[:state])
 
     if token.valid?

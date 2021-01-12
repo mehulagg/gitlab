@@ -28,6 +28,10 @@ module EE
             'sessions' => %w{create}
           }.freeze
 
+          ALLOWLISTED_OAUTH_ROUTES = {
+            'oauth/geo' => %w{auth callback logout}
+          }.freeze
+
           private
 
           # In addition to routes allowed in FOSS, allow geo node update route
@@ -37,12 +41,16 @@ module EE
           # secondary either
           override :allowlisted_routes
           def allowlisted_routes
+            ::Gitlab::AppLogger.info("oauth look_here: checking allowlisted_routes...")
             allowed = super || geo_node_update_route? || geo_api_route? || admin_settings_update?
 
             return true if allowed
+            ::Gitlab::AppLogger.info("oauth look_here: maintenance_mode...")
             return sign_in_route? if ::Gitlab.maintenance_mode?
+            ::Gitlab::AppLogger.info("oauth look_here: checking if primary...")
             return false unless ::Gitlab::Geo.secondary?
 
+            ::Gitlab::AppLogger.info("oauth look_here: checking for secondary...")
             git_write_routes
           end
 
@@ -87,9 +95,20 @@ module EE
           end
 
           def sign_in_route?
-            return unless request.post? && request.path.start_with?('/users/sign_in')
+            return unless request.post?
+
+            return secondary_oauth_route? if ::Gitlab::Geo.secondary?
+
+            return unless request.path.start_with?('/users/sign_in')
 
             ALLOWLISTED_SIGN_IN_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+          end
+
+          def secondary_oauth_route?
+            request.path.start_with?('/oauth/geo')
+            ::Gitlab::AppLogger.info("oauth look_here: controller: #{route_hash[:controller]}, action: #{route_hash[:action]}")
+
+            ALLOWLISTED_OAUTH_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end
 
           def lfs_locks_route?
