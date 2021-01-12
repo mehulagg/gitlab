@@ -140,6 +140,7 @@ RSpec.describe 'Filter issues by iteration', :js do
 
   context 'project board' do
     let_it_be(:board) { create(:board, project: project) }
+    let_it_be(:backlog_list) { create(:backlog_list, board: board) }
 
     let(:page_path) { project_board_path(project, board) }
     let(:issue_title_selector) { '.board-card .board-card-title' }
@@ -157,6 +158,7 @@ RSpec.describe 'Filter issues by iteration', :js do
 
   context 'group board' do
     let_it_be(:board) { create(:board, group: group) }
+    let_it_be(:backlog_list) { create(:backlog_list, board: board) }
     let_it_be(:user) { create(:user) }
 
     let(:page_path) { group_board_path(group, board) }
