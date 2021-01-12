@@ -93,7 +93,6 @@ export default {
     <gl-modal
       modal-id="delete-metric-modal"
       size="sm"
-      :title="__('Incident|Deleting ')"
       :visible="modalVisible"
       :action-primary="actionPrimaryProps"
       :action-cancel="{ text: $options.i18n.modalCancel }"
