@@ -23,9 +23,7 @@ class GroupWiki < Wiki
 
   override :repository_storage
   def repository_storage
-    strong_memoize(:repository_storage) do
-      container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
-    end
+    container.repository_storage
   end
 
   override :hashed_storage?
