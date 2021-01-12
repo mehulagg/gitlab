@@ -9,8 +9,8 @@ class GroupRepositoryStorageMove < ApplicationRecord
 
   belongs_to :container, class_name: 'Group', inverse_of: :repository_storage_moves, foreign_key: :group_id
   alias_attribute :group, :container
-  # TODO review whether this scope is necessary or not
-  # scope :with_projects, -> { includes(container: :route) }
+
+  scope :with_groups, -> { includes(container: :route) }
 
   override :schedule_repository_storage_update_worker
   def schedule_repository_storage_update_worker

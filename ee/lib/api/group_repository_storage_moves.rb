@@ -17,7 +17,7 @@ module API
         use :pagination
       end
       get do
-        storage_moves = GroupRepositoryStorageMove.order_created_at_desc
+        storage_moves = GroupRepositoryStorageMove.with_groups.order_created_at_desc
 
         present paginate(storage_moves), with: Entities::GroupRepositoryStorageMove, current_user: current_user
       end
@@ -64,7 +64,7 @@ module API
         use :pagination
       end
       get ':id/repository_storage_moves' do
-        storage_moves = user_group.repository_storage_moves.order_created_at_desc
+        storage_moves = user_group.repository_storage_moves.with_groups.order_created_at_desc
 
         present paginate(storage_moves), with: Entities::GroupRepositoryStorageMove, current_user: current_user
       end
