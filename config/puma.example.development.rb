@@ -83,7 +83,7 @@ worker_timeout 60
 wait_for_less_busy_worker ENV.fetch('PUMA_WAIT_FOR_LESS_BUSY_WORKER', 0.001).to_f
 
 # https://github.com/puma/puma/blob/master/5.0-Upgrade.md#nakayoshi_fork
-nakayoshi_fork ActiveModel::Type::Boolean.new.cast(ENV.fetch('PUMA_NAKAYOSHI_FORK_ENABLED', true))
+nakayoshi_fork unless ENV['DISABLE_PUMA_NAKAYOSHI_FORK']
 
 # Use json formatter
 require_relative "/home/git/gitlab/lib/gitlab/puma_logging/json_formatter"
