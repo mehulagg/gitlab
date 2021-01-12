@@ -9,7 +9,7 @@ module Types
 
     expose_permissions Types::PermissionTypes::DastSiteProfile
 
-    field :id, ::Types::GlobalIDType[::DastScanType], null: false,
+    field :id, ::Types::GlobalIDType[::DastScan], null: false,
           description: 'ID of the scan.'
 
     field :name, GraphQL::STRING_TYPE, null: true,

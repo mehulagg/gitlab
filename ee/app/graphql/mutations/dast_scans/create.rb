@@ -7,9 +7,13 @@ module Mutations
 
       graphql_name 'DastScanCreate'
 
-      field :id, ::Types::GlobalIDType[::DastSiteProfile],
+      field :dast_scan, ::Types::DastScanType,
             null: true,
-            description: 'ID of the site profile.'
+            description: 'The created scan.'
+
+      field :pipeline_url, GraphQL::STRING_TYPE,
+            null: false,
+            description: 'The URL of the pipeline that was created. Requires `runAfterCreate` to be true.'
 
       argument :full_path, GraphQL::ID_TYPE,
                required: true,
@@ -42,7 +46,7 @@ module Mutations
       def resolve(full_path:, name:, description:, dast_site_profile_id:, dast_site_scanner_id:, run_after_create:)
         _ = authorized_find!(full_path)
 
-        puts "hello world"
+        { dast_scan: nil, pipeline_url: nil, errors: [] }
       end
     end
   end
