@@ -22,11 +22,8 @@ export default {
     state.isUploadingImage = false;
   },
   [types.RECEIVE_METRIC_DELETE_SUCCESS](state, imageId) {
-    const metricIndex = state.metricImages.find((image) => image.id === imageId);
-
-    if (metricIndex) {
-      state.metricImages.splice(metricIndex, 1);
-    }
+    const metricIndex = state.metricImages.findIndex((image) => image.id === imageId);
+    state.metricImages.splice(metricIndex, 1);
   },
   [types.SET_INITIAL_DATA](state, { issueIid, projectId }) {
     state.issueIid = issueIid;

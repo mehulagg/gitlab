@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlCard, GlIcon, GlLink } from '@gitlab/ui';
+import { GlButton, GlCard, GlIcon, GlLink, GlModal } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 
 export default {
@@ -8,6 +8,7 @@ export default {
     GlCard,
     GlIcon,
     GlLink,
+    GlModal,
   },
   props: {
     id: {
@@ -32,6 +33,7 @@ export default {
     return {
       isCollapsed: false,
       isDeleting: false,
+      modalVisible: false,
     };
   },
   computed: {
@@ -52,7 +54,7 @@ export default {
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
     },
-    async handleClick() {
+    async onDelete() {
       try {
         this.isDeleting = true;
         await this.deleteImage(this.id);
@@ -70,6 +72,15 @@ export default {
     header-class="gl-display-flex gl-align-items-center gl-border-b-0 gl-py-3"
     :body-class="bodyClass"
   >
+    <gl-modal
+      modal-id="delete-metric-modal"
+      size="sm"
+      :title="__('Deleting file')"
+      :visible="isDeleting"
+      @primary.prevent="onDelete"
+    >
+      <p>{{ __('Delete??') }}</p>
+    </gl-modal>
     <template #header>
       <div class="gl-w-full gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
         <div class="gl-display-flex gl-flex-direction-row gl-align-items-center gl-w-full">
@@ -87,7 +98,12 @@ export default {
             {{ filename }}
           </gl-link>
           <span v-else>{{ filename }}</span>
-          <gl-button class="gl-ml-auto" icon="remove" :loading="isDeleting" @click="handleClick" />
+          <gl-button
+            class="gl-ml-auto"
+            icon="remove"
+            :loading="isDeleting"
+            @click="() => (isDeleting = true)"
+          />
         </div>
       </div>
     </template>
