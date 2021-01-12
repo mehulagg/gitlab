@@ -581,10 +581,10 @@ module Gitlab
           omniauth_providers: filtered_omniauth_provider_names.reject { |name| name == 'group_saml' },
           user_auth_by_provider: distinct_count_user_auth_by_provider(time_period),
           bulk_imports: {
-            gitlab: distinct_count(::BulkImport.where(time_period, source_type: :gitlab), :user_id)
+            gitlab: count(::BulkImport.where(time_period, source_type: :gitlab))
           },
           projects_imported: {
-            total: distinct_count(::Project.where(time_period).where.not(import_type: nil), :creator_id),
+            total: count(::Project.where(time_period).where.not(import_type: nil)),
             gitlab_project: projects_imported_count('gitlab_project', time_period),
             gitlab: projects_imported_count('gitlab', time_period),
             github: projects_imported_count('github', time_period),
@@ -592,15 +592,20 @@ module Gitlab
             bitbucket_server: projects_imported_count('bitbucket_server', time_period),
             gitea: projects_imported_count('gitea', time_period),
             git: projects_imported_count('git', time_period),
-            manifest: projects_imported_count('manifest', time_period)
+            manifest: projects_imported_count('manifest', time_period),
+            gitlab_migration: count(::BulkImports::Entity.where(time_period).project_entity.with_state(:finished)) # is the project imported with bulk imports
           },
           issues_imported: {
-            jira: distinct_count(::JiraImportState.where(time_period), :user_id),
+            jira: count(::JiraImportState.where(time_period)),
             fogbugz: projects_imported_count('fogbugz', time_period),
             phabricator: projects_imported_count('phabricator', time_period),
-            csv: distinct_count(Issues::CsvImport.where(time_period), :user_id)
+            csv: count(Issues::CsvImport.where(time_period))
           },
-          groups_imported: distinct_count(::GroupImportState.where(time_period), :user_id)
+          groups_imported: {
+            total: sum_of_bellow,
+            group_import: count(::GroupImportState.where(time_period)),
+            gitlab_migration: count(::BulkImports::Entity.where(time_period).group_entity.with_state(:finished))# is the group imported with bulk imports
+          }
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -894,7 +899,7 @@ module Gitlab
       end
 
       def projects_imported_count(from, time_period)
-        distinct_count(::Project.imported_from(from).where(time_period).where.not(import_type: nil), :creator_id) # rubocop: disable CodeReuse/ActiveRecord
+        count(::Project.imported_from(from).where(time_period).where.not(import_type: nil)) # rubocop: disable CodeReuse/ActiveRecord
       end
 
       # rubocop:disable CodeReuse/ActiveRecord
