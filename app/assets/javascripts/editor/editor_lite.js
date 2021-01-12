@@ -87,9 +87,9 @@ export default class EditorLite {
 
   static manageDefaultExtensions(instance, el, extensions) {
     EditorLite.loadExtensions(extensions, instance)
-      .then(modules => {
+      .then((modules) => {
         if (modules) {
-          modules.forEach(module => {
+          modules.forEach((module) => {
             instance.use(module.default);
           });
         }
@@ -97,7 +97,7 @@ export default class EditorLite {
       .then(() => {
         el.dispatchEvent(new Event('editor-ready'));
       })
-      .catch(e => {
+      .catch((e) => {
         throw e;
       });
   }
@@ -173,8 +173,8 @@ export default class EditorLite {
     }
 
     Object.assign(instance, {
-      updateModelLanguage: path => EditorLite.updateModelLanguage(path, instance),
-      use: args => this.use(args, instance),
+      updateModelLanguage: (path) => EditorLite.updateModelLanguage(path, instance),
+      use: (args) => this.use(args, instance),
     });
 
     instance.onDidDispose(() => {
