@@ -45,6 +45,10 @@ export default {
       type: String,
       required: true,
     },
+    onDemandScansPath: {
+      type: String,
+      required: true,
+    },
     siteProfile: {
       type: Object,
       required: false,
@@ -80,6 +84,7 @@ export default {
       token: null,
       errorMessage: '',
       errors: [],
+      redirectToOnDemandScansPage: false,
     };
   },
   computed: {
@@ -112,6 +117,9 @@ export default {
     if (this.isEdit) {
       this.form.showValidation = true;
     }
+  },
+  created() {
+    this.redirectToOnDemandScansPage = true;
   },
   methods: {
     onSubmit() {
@@ -153,7 +161,7 @@ export default {
               this.showErrors({ message: errorMessage, errors });
               this.isLoading = false;
             } else {
-              redirectTo(this.profilesLibraryPath);
+              this.redirectToPreviousPage();
             }
           },
         )
@@ -171,7 +179,7 @@ export default {
       }
     },
     discard() {
-      redirectTo(this.profilesLibraryPath);
+      this.redirectToPreviousPage();
     },
     captureException(exception) {
       Sentry.captureException(exception);
@@ -185,6 +193,12 @@ export default {
       this.errorMessage = '';
       this.errors = [];
       this.hasAlert = false;
+    },
+    redirectToPreviousPage() {
+      const previousPagePath = this.redirectToOnDemandScansPage
+        ? this.onDemandScansPath
+        : this.profilesLibraryPath;
+      redirectTo(previousPagePath);
     },
   },
   modalId: 'deleteDastProfileModal',
