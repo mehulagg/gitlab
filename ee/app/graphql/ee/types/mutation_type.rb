@@ -39,6 +39,7 @@ module EE
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
         mount_mutation ::Mutations::DastOnDemandScans::Create
+        mount_mutation ::Mutations::DastScans::Create
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
         mount_mutation ::Mutations::DastSiteProfiles::Delete
