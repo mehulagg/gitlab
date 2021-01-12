@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Issue Boards new issue', :js do
   let(:project) { create(:project, :public) }
   let(:board)   { create(:board, project: project) }
-  let!(:list)   { create(:list, board: board, position: 0) }
+  let(:label)   { create(:label, project: project, name: 'Label 1') }
+  let!(:list)   { create(:list, board: board, label: label, position: 0) }
   let(:user)    { create(:user) }
 
   context 'authorized user' do
