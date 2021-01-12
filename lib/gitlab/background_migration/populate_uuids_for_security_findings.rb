@@ -116,6 +116,7 @@ module Gitlab
         def recover_findings
           populate_finding_uuids
           remove_broken_findings
+          set_feedback_finding_uuids
         end
 
         private
@@ -131,6 +132,10 @@ module Gitlab
           findings.where(uuid: nil).each_batch { |batch| batch.delete_all }
         end
 
+        def set_feedback_finding_uuids
+          findings.each(&:feedback)
+        end
+
         def report_findings
           security_reports&.findings.to_a
         end
@@ -144,12 +149,57 @@ module Gitlab
         end
       end
 
+      class Feedback < ActiveRecord::Base
+        self.table_name = :vulnerability_feedback
+
+        def finding_key
+          {
+            project_id: project_id,
+            category: category,
+            project_fingerprint: project_fingerprint
+          }
+        end
+      end
+
       class SecurityFinding < ActiveRecord::Base
         include EachBatch
 
         self.table_name = :security_findings
 
+        belongs_to :scan, class_name: '::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings::SecurityScan', foreign_key: :scan_id
+
         scope :without_uuid, -> { where(uuid: nil) }
+
+        def feedback
+          BatchLoader.for(finding_key).batch(replace_methods: false) do |finding_keys, loader|
+            project_ids = finding_keys.map { |key| key[:project_id] }
+            categories = finding_keys.map { |key| key[:category] }
+            fingerprints = finding_keys.map { |key| key[:project_fingerprint] }
+
+            feedback_records = Feedback.where(
+              project_id: project_ids.uniq,
+              category: categories.uniq,
+              project_fingerprint: fingerprints.uniq
+            ).to_a
+
+            finding_keys.each do |finding_key|
+              loader.call(
+                finding_key,
+                feedback_records.find { |f| finding_key == f.finding_key }
+              )
+            end
+          end
+        end
+
+        private
+
+        def finding_key
+          {
+            project_id: scan.build.project_id,
+            category: scan.scan_type - 1,
+            project_fingerprint: project_fingerprint
+          }
+        end
       end
 
       def perform(scan_ids)
