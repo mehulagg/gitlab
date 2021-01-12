@@ -52,7 +52,7 @@ class Admin::ElasticsearchController < Admin::ApplicationController
       Gitlab::Elastic::Helper.default.delete_migration_record(migration)
       Elastic::DataMigrationService.drop_migration_halted_cache!(migration)
 
-      flash[:notice] = _('Migration has been scheduled to retry')
+      flash[:notice] = _('Migration has been scheduled to be retried')
     else
       flash[:warning] = _('Migration not found')
     end
