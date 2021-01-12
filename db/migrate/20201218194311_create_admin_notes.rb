@@ -1,4 +1,6 @@
 class CreateAdminNotes < ActiveRecord::Migration[6.0]
+  DOWNTIME = false
+
   def change
     create_table :admin_notes do |t|
       t.references :namespace, foreign_key: true
