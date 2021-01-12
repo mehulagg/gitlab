@@ -62,7 +62,22 @@ module Mutations
           dast_scanner_profile: dast_scanner_profile
         )
 
-        { dast_scan: dast_scan, pipeline_url: nil, errors: [] }
+        if run_after_create
+          response = ::DastOnDemandScans::CreateService.new(
+            container: project,
+            current_user: current_user,
+            params: {
+              dast_site_profile: dast_site_profile,
+              dast_scanner_profile: dast_scanner_profile
+            }
+          ).execute
+
+          return { errors: response.errors } if response.error?
+
+          { errors: [], dast_scan: dast_scan, pipeline_url: response.payload.fetch(:pipeline_url) }
+        else
+          { errors: [], dast_scan: dast_scan }
+        end
       end
     end
   end

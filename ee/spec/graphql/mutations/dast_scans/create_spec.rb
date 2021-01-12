@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::DastScans::Create do
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository) }
   let(:developer) { create(:user, developer_projects: [project] ) }
 
   let(:full_path) { project.full_path }
@@ -46,8 +46,6 @@ RSpec.describe Mutations::DastScans::Create do
 
       context 'when the user can run a dast scan' do
         it 'returns the dast_scan' do
-          subject
-
           expect(subject[:dast_scan]).to eq(dast_scan)
         end
 
@@ -55,9 +53,13 @@ RSpec.describe Mutations::DastScans::Create do
           let(:run_after_create) { true }
 
           it 'returns the pipeline_url' do
-            subject
-
-            expect(subject[:dast_scan]).to eq(dast_scan)
+            actual_url = subject[:pipeline_url]
+            pipeline = Ci::Pipeline.find_by(project: project, sha: project.repository.commit.sha, source: :ondemand_dast_scan, config_source: :parameter_source)
+            expected_url = Rails.application.routes.url_helpers.project_pipeline_url(
+              project,
+              pipeline
+            )
+            expect(actual_url).to eq(expected_url)
           end
         end
       end
