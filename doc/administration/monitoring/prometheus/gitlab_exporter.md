@@ -53,4 +53,4 @@ For example, to change the server used to Puma:
 1. Save the file and [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure)
    for the changes to take effect.
 
-Not all Ruby Rack servers are supported. We currently support `webrick`, `puma`, and `thin`.
+Not all Ruby Rack servers are supported. We currently support `webrick` and `puma`.
