@@ -1,9 +1,9 @@
 - if ::Feature.enabled?(:whats_new_dropdown, current_user)
   - if ::Feature.enabled?(:whats_new_drawer, current_user)
     %li
-      %button.js-whats-new-trigger{ type: 'button', data: { storage_key: whats_new_storage_key } }
+      %button.gl-justify-content-space-between.gl-align-items-center.js-whats-new-trigger{ type: 'button', data: { storage_key: whats_new_storage_key }, class: 'gl-display-flex!' }
         = _("See what's new at GitLab")
-        %span.js-whats-new-notification-count.whats-new-notification-count.gl-ml-4
+        %span.js-whats-new-notification-count.whats-new-notification-count
           = whats_new_most_recent_release_items_count
   - else
     %li
