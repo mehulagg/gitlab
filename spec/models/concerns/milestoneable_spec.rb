@@ -105,8 +105,8 @@ RSpec.describe Milestoneable do
       let(:incident) { build(:incident) }
 
       it 'returns false' do
-        expect(incident.supports_milestone?).to be_falsy
-      end
+        expect(incident.supports_milestone?).to be_truthy
+      be_truthy
     end
   end
 

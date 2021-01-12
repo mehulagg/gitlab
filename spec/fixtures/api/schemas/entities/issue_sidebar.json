@@ -45,6 +45,7 @@
     "projects_autocomplete_path": { "type": "string" },
     "supports_time_tracking": { "type": "boolean" },
     "supports_milestone": { "type": "boolean" },
-    "supports_severity": { "type": "boolean" }
+    "supports_severity": { "type": "boolean" },
+    "supports_iterations": { "type": "boolean" }
   }
 }
