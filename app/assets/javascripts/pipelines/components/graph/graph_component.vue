@@ -114,8 +114,8 @@ export default {
     <div
       :id="containerId"
       :ref="containerId"
-      class="gl-pipeline-min-h gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-py-5': !isLinkedPipeline }"
+      class="gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
+      :class="{ 'gl-pipeline-min-h gl-py-5': !isLinkedPipeline }"
     >
       <links-layer
         :pipeline-data="graph"
