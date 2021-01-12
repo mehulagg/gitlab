@@ -46,4 +46,5 @@ export default () => ({
   dismissEndpoint: '',
   showSuggestPopover: true,
   mrReviews: {},
+  latestDiff: true,
 });

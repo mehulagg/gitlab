@@ -1,6 +1,6 @@
 <script>
 import { escape } from 'lodash';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import {
   GlTooltipDirective,
   GlSafeHtmlDirective,
@@ -19,7 +19,7 @@ import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { __, s__, sprintf } from '~/locale';
 import DiffStats from './diff_stats.vue';
-import { scrollToElement } from '~/lib/utils/common_utils';
+import { scrollToElement, urlParamsToObject } from '~/lib/utils/common_utils';
 
 import { collapsedType, isCollapsed } from '../utils/diff_file';
 import { reviewable } from '../utils/file_reviews';
@@ -97,6 +97,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('diffs', ['latestDiff']),
     ...mapGetters('diffs', ['diffHasExpandedDiscussions', 'diffHasDiscussions']),
     diffContentIDSelector() {
       return `#diff-content-${this.diffFile.file_hash}`;
@@ -188,7 +189,13 @@ export default {
       return reviewable(this.diffFile);
     },
     showLocalFileReviews() {
-      return Boolean(gon.current_user_id) && this.glFeatures.localFileReviews;
+      const search = urlParamsToObject(window.location.search);
+      const loggedIn = Boolean(gon.current_user_id);
+      const featureOn = this.glFeatures.localFileReviews;
+      const toLatest = this.latestDiff;
+      const fromBase = !search.start_sha;
+
+      return loggedIn && featureOn && fromBase && toLatest;
     },
   },
   methods: {
