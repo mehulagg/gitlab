@@ -29,6 +29,7 @@
                 = link_to _('Retry migration'), admin_elasticsearch_retry_migration_path(version: migration.version), class: "gl-button btn btn-info", disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to retry this migration?') }, method: :post
               .card-footer.text-muted
                 = _('Check the elasticsearch.log file to debug why the migration was halted and make any changes before retrying the migration. The migration will be scheduled to retry in the backround.')
+                = link_to sprite_icon('question-o'), help_page_path('integration/elasticsearch', anchor: 'background-migrations')
           .form-group
             .form-check
               = f.check_box :elasticsearch_indexing, class: 'form-check-input', data: { qa_selector: 'indexing_checkbox' }
