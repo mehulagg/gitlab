@@ -377,7 +377,7 @@ NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
-#### Predefined project variables in `include`
+#### Variables with `include`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
@@ -388,15 +388,17 @@ definitions. Local definitions in `.gitlab-ci.yml` override included definitions
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-Predefined project variables can be used in the `include` section of `.gitlab-ci.yml.`
-
-For example:
+You can [use some predefined variables in `include` sections](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+in your `.gitlab-ci.yml`:
 
 ```yaml
 include:
   project: '$CI_PROJECT_PATH'
   file: '.compliance-gitlab-ci.yml'
 ```
+
+For an example of how you can include these predefined variables, and their impact on CI jobs,
+see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
 
 ##### Enable or disable include:predefined-project-variables **(CORE ONLY)**
 
