@@ -251,9 +251,9 @@ paths to allow for higher rate limits. Unless it is not possible, new package ma
 follow these conventions so they will be able to take advantage of the expanded package rate limit.
 
 ```plaintext
-/api/v[0-9]/packages/
-/api/v[0-9]/projects/[^/]+/packages/
-/api/v[0-9]/groups/[^/]+/-/packages/
+/api/v4/packages/
+/api/v4/projects/:project_id/packages/
+/api/v4/groups/:group_id/-/packages/
 ```
 
 ### Future Work
