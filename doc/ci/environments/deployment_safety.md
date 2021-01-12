@@ -14,7 +14,7 @@ You can:
 
 - [Restrict write-access to a critical environment](#restrict-write-access-to-a-critical-environment)
 - [Prevent deployments during deploy freeze windows](#prevent-deployments-during-deploy-freeze-windows)
-- [Set appropriate roles to your project](Setting-appropriate-roles-to-your-project)
+- [Set appropriate roles to your project](#setting-appropriate-roles-to-your-project)
 - [Protect production secrets](#protect-production-secrets)
 - [Seperate project for deployments](#seperate-project-for-deployments)
 
@@ -107,14 +107,14 @@ ensure that deployments do not happen unexpectedly.
 
 ## Protect production secrets 
 
-Production secrets are needed in order to deploy successfuly. For example when deploying to the cloud, cloud providers require these secrets in order to connect to their services. Environment variables can be used and can be defined under the project settings and they can also be protected. [Protected Variables](variables.md#protect-a-custom-variable)  are only passed to pipelines running on [protected branches](../../user/project/protected_branches.md) or [protected tags](../../user/project/protected_tags.md). The other pipelines do not get the protected variable.
- Variables can also be [scoped to specific environments](variables/where_variables_can_be_used.md#variables-with-an-environment-scope). It is recommended to use protected varaibles on protected environments to make sure that the secrets are not exposed to n unintentional environment.  Production secrets should also be defined on the [runner side](../../charts/installation/secrets.md#gitlab-runner-secret) this prevents other maintainers from reading the secrets and makes sure that the runner runs only on protected branches.
+Production secrets are needed in order to deploy successfuly. For example when deploying to the cloud, cloud providers require these secrets in order to connect to their services. Environment variables can be used and can be defined under the project settings and they can also be protected. [Protected Variables](../variables.md#protect-a-custom-variable)  are only passed to pipelines running on [protected branches](../../user/project/protected_branches.md) or [protected tags](../../user/project/protected_tags.md). The other pipelines do not get the protected variable.
+ Variables can also be [scoped to specific environments](../variables/where_variables_can_be_used.md#variables-with-an-environment-scope). It is recommended to use protected varaibles on protected environments to make sure that the secrets are not exposed to n unintentional environment.  Production secrets should also be defined on the [runner side](../../charts/installation/secrets.md#gitlab-runner-secret) this prevents other maintainers from reading the secrets and makes sure that the runner runs only on protected branches.
 
-For more information, see [pipeline security](pipelines.md#pipeline-security-on-protected-branches).
+For more information, see [pipeline security](../pipelines.md#pipeline-security-on-protected-branches).
 
 ## Seperate project for deployments
 
-All maintainers of a project have access to production secrets. In case there is a need to limit the number of users that are deploying to a produciton environment, another way to achieve this is to create a seperate project where you can configure a new permisison model where you can isolate the CD permisisons from the original project and prevent maintainers from that project to access produciton secret and CD configuration. You can connect the CD project to your development projects by using [multi-project pipelines](multi_project_pipelines.md).
+All maintainers of a project have access to production secrets. In case there is a need to limit the number of users that are deploying to a produciton environment, another way to achieve this is to create a seperate project where you can configure a new permisison model where you can isolate the CD permisisons from the original project and prevent maintainers from that project to access produciton secret and CD configuration. You can connect the CD project to your development projects by using [multi-project pipelines](../multi_project_pipelines.md).
 
 ## Troubleshooting
 
