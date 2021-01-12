@@ -146,6 +146,9 @@ export default {
     showContent() {
       return !this.isCollapsed && !this.isFileTooLarge;
     },
+    showLocalFileReviews() {
+      return Boolean(gon.current_user_id) && this.glFeatures.localFileReviews;
+    },
   },
   watch: {
     'file.file_hash': {
@@ -184,7 +187,7 @@ export default {
       this.postRender();
     }
 
-    if( this.reviewed && !this.isCollapsed ){
+    if (this.reviewed && !this.isCollapsed && this.showLocalFileReviews) {
       this.handleToggle();
     }
   },

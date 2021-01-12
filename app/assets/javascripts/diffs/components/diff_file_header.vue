@@ -13,6 +13,7 @@ import {
   GlFormCheckbox,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import { truncateSha } from '~/lib/utils/text_utility';
@@ -46,6 +47,7 @@ export default {
     GlTooltip: GlTooltipDirective,
     SafeHtml: GlSafeHtmlDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   i18n: {
     ...DIFF_FILE_HEADER,
   },
@@ -183,8 +185,11 @@ export default {
       );
     },
     isReviewable() {
-      return reviewable( this.diffFile );
-    }
+      return reviewable(this.diffFile);
+    },
+    showLocalFileReviews() {
+      return Boolean(gon.current_user_id) && this.glFeatures.localFileReviews;
+    },
   },
   methods: {
     ...mapActions('diffs', [
@@ -326,7 +331,7 @@ export default {
     >
       <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
       <gl-form-checkbox
-        v-if="isReviewable"
+        v-if="isReviewable && showLocalFileReviews"
         :checked="reviewed"
         @change="toggleReview"
       >
