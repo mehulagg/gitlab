@@ -134,10 +134,8 @@ export default {
         } else if (this.isInvalidCiConfig) {
           this.reportFailure(INVALID_CI_CONFIG);
         } else {
-          // This guarantee that all sub-elements are rendered
-          // https://v3.vuejs.org/api/options-lifecycle-hooks.html#mounted
           this.$nextTick(() => {
-            this.getGraphDimensions();
+            this.computeGraphDimensions();
             this.prepareLinkData();
           });
         }
@@ -185,7 +183,7 @@ export default {
     removeHighlightNeeds() {
       this.highlightedJob = null;
     },
-    getGraphDimensions() {
+    computeGraphDimensions() {
       this.width = `${this.$refs[this.$options.CONTAINER_REF].scrollWidth}`;
       this.height = `${this.$refs[this.$options.CONTAINER_REF].scrollHeight}`;
     },
