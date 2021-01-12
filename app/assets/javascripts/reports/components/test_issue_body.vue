@@ -1,7 +1,6 @@
 <script>
 import { mapActions } from 'vuex';
 import { GlBadge, GlSprintf } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   name: 'TestIssueBody',
@@ -9,7 +8,6 @@ export default {
     GlBadge,
     GlSprintf,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     issue: {
       type: Object,
@@ -29,7 +27,6 @@ export default {
   computed: {
     showRecentFailures() {
       return (
-        this.glFeatures.testFailureHistory &&
         this.issue.recent_failures?.count &&
         this.issue.recent_failures?.base_branch
       );
