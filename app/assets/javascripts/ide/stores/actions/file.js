@@ -18,7 +18,7 @@ export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   const fileWasActive = file.active;
 
   if (state.openFiles.length > 1 && fileWasActive) {
-    const nextIndexToOpen = indexOfClosedFile === 0 ? indexOfClosedFile + 1 : 0;
+    const nextIndexToOpen = indexOfClosedFile === 0 ? 1 : indexOfClosedFile - 1;
     const nextFileToOpen = state.openFiles[nextIndexToOpen];
 
     if (nextFileToOpen.pending) {

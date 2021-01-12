@@ -90,10 +90,12 @@ describe('IDE store file actions', () => {
     });
 
     it('removes file if it pending', () => {
-      store.state.openFiles.push({
-        ...localFile,
-        pending: true,
-      });
+      store.state.openFiles = [
+        {
+          ...localFile,
+          pending: true,
+        },
+      ];
 
       return store.dispatch('closeFile', localFile).then(() => {
         expect(store.state.openFiles.length).toBe(0);
