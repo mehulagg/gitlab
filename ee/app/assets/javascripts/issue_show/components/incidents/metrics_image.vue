@@ -1,11 +1,11 @@
 <script>
-import { GlButton, GlCard, GlIcon, GlLink, GlModal } from '@gitlab/ui';
+import { GlButton, GlCard, GlIcon, GlLink, GlModal, GlSprintf } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { __ } from '~/locale';
 
 export default {
   i18n: {
-    modalDelete: __('Ok'),
+    modalDelete: __('Delete'),
     modalCancel: __('Cancel'),
   },
   components: {
@@ -14,6 +14,7 @@ export default {
     GlIcon,
     GlLink,
     GlModal,
+    GlSprintf,
   },
   props: {
     id: {
@@ -92,14 +93,21 @@ export default {
     <gl-modal
       modal-id="delete-metric-modal"
       size="sm"
-      :title="__('Deleting file')"
+      :title="__('Incident|Deleting ')"
       :visible="modalVisible"
       :action-primary="actionPrimaryProps"
       :action-cancel="{ text: $options.i18n.modalCancel }"
       @primary.prevent="onDelete"
       @hidden="modalVisible = false"
     >
-      <p>{{ __('Delete??') }}</p>
+      <template #modal-title>
+        <gl-sprintf :message="s__('Incident|Deleting %{filename}')">
+          <template #filename>
+            {{ filename }}
+          </template>
+        </gl-sprintf>
+      </template>
+      <p>{{ s__('Incident|Are you sure you wish to delete this image?') }}</p>
     </gl-modal>
     <template #header>
       <div class="gl-w-full gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
@@ -118,7 +126,12 @@ export default {
             {{ filename }}
           </gl-link>
           <span v-else>{{ filename }}</span>
-          <gl-button class="gl-ml-auto" icon="remove" @click="modalVisible = true" />
+          <gl-button
+            class="gl-ml-auto"
+            icon="remove"
+            data-testid="delete-button"
+            @click="modalVisible = true"
+          />
         </div>
       </div>
     </template>
