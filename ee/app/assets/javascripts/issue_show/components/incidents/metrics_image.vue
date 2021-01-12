@@ -1,8 +1,13 @@
 <script>
 import { GlButton, GlCard, GlIcon, GlLink, GlModal } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { __ } from '~/locale';
 
 export default {
+  i18n: {
+    modalDelete: __('Ok'),
+    modalCancel: __('Cancel'),
+  },
   components: {
     GlButton,
     GlCard,
@@ -37,6 +42,17 @@ export default {
     };
   },
   computed: {
+    actionPrimaryProps() {
+      return {
+        text: this.$options.i18n.modalDelete,
+        attributes: {
+          loading: this.isDeleting,
+          disabled: this.isDeleting,
+          category: 'primary',
+          variant: 'success',
+        },
+      };
+    },
     arrowIconName() {
       return this.isCollapsed ? 'chevron-right' : 'chevron-down';
     },
@@ -60,6 +76,7 @@ export default {
         await this.deleteImage(this.id);
       } finally {
         this.isDeleting = false;
+        this.modalVisible = false;
       }
     },
   },
@@ -76,8 +93,11 @@ export default {
       modal-id="delete-metric-modal"
       size="sm"
       :title="__('Deleting file')"
-      :visible="isDeleting"
+      :visible="modalVisible"
+      :action-primary="actionPrimaryProps"
+      :action-cancel="{ text: $options.i18n.modalCancel }"
       @primary.prevent="onDelete"
+      @hidden="modalVisible = false"
     >
       <p>{{ __('Delete??') }}</p>
     </gl-modal>
@@ -98,12 +118,7 @@ export default {
             {{ filename }}
           </gl-link>
           <span v-else>{{ filename }}</span>
-          <gl-button
-            class="gl-ml-auto"
-            icon="remove"
-            :loading="isDeleting"
-            @click="() => (isDeleting = true)"
-          />
+          <gl-button class="gl-ml-auto" icon="remove" @click="modalVisible = true" />
         </div>
       </div>
     </template>
