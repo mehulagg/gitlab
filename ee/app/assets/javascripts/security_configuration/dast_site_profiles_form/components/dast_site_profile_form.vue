@@ -12,8 +12,9 @@ import {
 import { initFormField } from 'ee/security_configuration/utils';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
+import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
 import { serializeFormObject } from '~/lib/utils/forms';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DastSiteAuthSection from './dast_site_auth_section.vue';
@@ -119,7 +120,7 @@ export default {
     }
   },
   created() {
-    this.redirectToOnDemandScansPage = true;
+    // this.redirectToOnDemandScansPage = true;
   },
   methods: {
     onSubmit() {
@@ -154,14 +155,17 @@ export default {
         .then(
           ({
             data: {
-              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: { errors = [] },
+              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: {
+                id,
+                errors = [],
+              },
             },
           }) => {
             if (errors.length > 0) {
               this.showErrors({ message: errorMessage, errors });
               this.isLoading = false;
             } else {
-              this.redirectToPreviousPage();
+              this.returnToPreviousPage(id);
             }
           },
         )
@@ -179,7 +183,7 @@ export default {
       }
     },
     discard() {
-      this.redirectToPreviousPage();
+      this.returnToPreviousPage();
     },
     captureException(exception) {
       Sentry.captureException(exception);
@@ -194,10 +198,15 @@ export default {
       this.errors = [];
       this.hasAlert = false;
     },
-    redirectToPreviousPage() {
-      const previousPagePath = this.redirectToOnDemandScansPage
-        ? this.onDemandScansPath
-        : this.profilesLibraryPath;
+    returnToPreviousPage(gid) {
+      if (!this.redirectToOnDemandScansPage) {
+        redirectTo(this.profilesLibraryPath);
+      }
+
+      const id = getIdFromGraphQLId(gid);
+      const previousPagePath = id
+        ? setUrlParams({ site_profile_id: id }, this.onDemandScansPath)
+        : this.onDemandScansPath;
       redirectTo(previousPagePath);
     },
   },
