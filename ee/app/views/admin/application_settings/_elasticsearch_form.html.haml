@@ -19,7 +19,8 @@
 
       %fieldset
         .sub-section
-          - if Elastic::DataMigrationService.halted_migrations?
+          - halted_migrations = Elastic::DataMigrationService.halted_migrations? rescue false
+          - if halted_migrations
             .card.border-info
               .card-header.bg-info.text-white
                 = _('There is a halted Elasticsearch migration')

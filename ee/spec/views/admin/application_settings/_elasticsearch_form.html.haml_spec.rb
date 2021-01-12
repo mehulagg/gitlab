@@ -53,7 +53,6 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
     end
 
     context 'indexing is disabled' do
-      let(:application_setting) { build(:application_setting) }
       let(:es_indexing) { false }
 
       it 'shows index button when indexing is enabled' do
