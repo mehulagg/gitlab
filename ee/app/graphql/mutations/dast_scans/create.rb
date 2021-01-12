@@ -62,6 +62,8 @@ module Mutations
           dast_scanner_profile: dast_scanner_profile
         )
 
+        return { errors: dast_scan.errors.full_messages } unless dast_scan.persisted?
+
         if run_after_create
           response = ::DastOnDemandScans::CreateService.new(
             container: project,
