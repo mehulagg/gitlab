@@ -245,7 +245,7 @@ in your local development environment.
 #### Rate Limiting
 
 Package manager clients can make rapid requests that are often higher than 
-[GitLab's standard API rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits). 
+[GitLabs standard API rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits). 
 This will result in users receiving an error: `429 Too Many Requests`. We have opened a set of
 paths to allow for higher rate limits. Unless it is not possible, new package managers should
 follow these conventions so they will be able to take advantage of the expanded package rate limit.
