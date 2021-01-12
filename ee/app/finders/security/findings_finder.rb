@@ -63,7 +63,7 @@ module Security
     end
 
     def report_finding_for(security_finding)
-      security_reports[security_finding.build.id].findings[security_finding.position]
+      report_findings[security_finding.build.id].findings[security_finding.uuid]
     end
 
     def vulnerability_for(security_finding)
@@ -89,10 +89,12 @@ module Security
       security_findings.map(&:project_fingerprint)
     end
 
-    def security_reports
-      @security_reports ||= begin
+    def report_findings
+      @report_findings ||= begin
         builds.each_with_object({}) do |build, memo|
-          memo[build.id] = build.job_artifacts.map(&:security_report).compact.first
+          report = build.job_artifacts.map(&:security_report).compact.first
+
+          memo[build.id] = report.findings.group_by(&:uuid)
         end
       end
     end
