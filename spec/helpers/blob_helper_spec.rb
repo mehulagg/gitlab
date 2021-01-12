@@ -33,7 +33,7 @@ RSpec.describe BlobHelper do
 
       button = helper.edit_blob_button(project, 'refs/heads/master', 'README.md')
 
-      expect(button).to start_with('<button')
+      expect(button).to include('<button')
     end
 
     it 'uses the passed blob instead retrieve from repository' do

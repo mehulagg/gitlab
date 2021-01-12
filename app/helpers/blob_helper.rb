@@ -106,15 +106,23 @@ module BlobHelper
     return unless blob
 
     common_classes = "btn btn-#{btn_class}"
+    button = button_tag label, class: "#{common_classes} disabled"
+    tooltip = nil
 
     if !on_top_of_branch?(project, ref)
-      button_tag label, class: "#{common_classes} disabled has-tooltip", title: "You can only #{action} files when you are on a branch", data: { container: 'body' }
+      tooltip = "You can only #{action} files when you are on a branch"
     elsif blob.stored_externally?
-      button_tag label, class: "#{common_classes} disabled has-tooltip", title: "It is not possible to #{action} files that are stored in LFS using the web interface", data: { container: 'body' }
+      tooltip = "It is not possible to #{action} files that are stored in LFS using the web interface"
     elsif can_modify_blob?(blob, project, ref)
-      button_tag label, class: "#{common_classes}", 'data-target' => "#modal-#{modal_type}-blob", 'data-toggle' => 'modal'
+      button = button_tag label, class: "#{common_classes}", 'data-target' => "#modal-#{modal_type}-blob", 'data-toggle' => 'modal'
     elsif can?(current_user, :fork_project, project) && can?(current_user, :create_merge_request_in, project)
-      edit_fork_button_tag(common_classes, project, label, edit_modify_file_fork_params(action), action)
+      button = edit_fork_button_tag(common_classes, project, label, edit_modify_file_fork_params(action), action)
+    end
+
+    if tooltip
+      content_tag :span, button, class: 'btn-group has-tooltip', title: tooltip, data: { container: 'body' }
+    else
+      button
     end
   end
 
@@ -364,7 +372,8 @@ module BlobHelper
   end
 
   def edit_disabled_button_tag(button_text, common_classes)
-    button_tag(button_text, class: "#{common_classes} disabled has-tooltip", title: _('You can only edit files when you are on a branch'), data: { container: 'body' })
+    button = button_tag(button_text, class: "#{common_classes} disabled")
+    content_tag(:span, button, class: 'has-tooltip', title: _('You can only edit files when you are on a branch'), data: { container: 'body' })
   end
 
   def edit_link_tag(link_text, edit_path, common_classes, data)

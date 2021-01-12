@@ -53,12 +53,10 @@ module EE
     end
 
     def disabled_lock_link(label, title, html_options)
-      html_options['data-toggle'] = 'tooltip'
-      html_options[:title] = title
-      html_options[:class] = "#{html_options[:class]} disabled has-tooltip"
+      html_options[:class] = "#{html_options[:class]} disabled"
       html_options['data-qa-selector'] = 'disabled_lock_button'
 
-      content_tag :span, label, html_options
+      content_tag(:span, content_tag(:span, label, html_options), title: title, class: 'btn-group has-tooltip')
     end
 
     def enabled_lock_link(label, title, html_options)
