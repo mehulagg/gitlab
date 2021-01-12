@@ -11,9 +11,9 @@ module Gitlab
         @suggestion_set = suggestion_set
       end
 
-      def message
+      def message(custom_message = nil)
         project = suggestion_set.project
-        user_defined_message = project.suggestion_commit_message.presence
+        user_defined_message = custom_message || project.suggestion_commit_message.presence
         message = user_defined_message || DEFAULT_SUGGESTION_COMMIT_MESSAGE
 
         Gitlab::StringPlaceholderReplacer

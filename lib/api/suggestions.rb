@@ -17,7 +17,7 @@ module API
         suggestion = Suggestion.find_by_id(params[:id])
 
         if suggestion
-          apply_suggestions(suggestion, current_user)
+          apply_suggestions(suggestion, current_user, params[:message])
         else
           render_api_error!(_('Suggestion is not applicable as the suggestion was not found.'), :not_found)
         end
@@ -28,6 +28,7 @@ module API
       end
       params do
         requires :ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: "An array of suggestion ID's"
+        # optional :message, type: String, desc: 'A commit message to use instead of the default generated message or project default message'
       end
       put 'batch_apply' do
         ids = params[:ids]
@@ -43,10 +44,10 @@ module API
     end
 
     helpers do
-      def apply_suggestions(suggestions, current_user)
+      def apply_suggestions(suggestions, current_user, message = nil)
         authorize_suggestions(*suggestions)
 
-        result = ::Suggestions::ApplyService.new(current_user, *suggestions).execute
+        result = ::Suggestions::ApplyService.new(current_user, *suggestions, message: message).execute
 
         if result[:status] == :success
           present suggestions, with: Entities::Suggestion, current_user: current_user
