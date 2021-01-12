@@ -181,6 +181,12 @@
                 %span
                   = _('CI / CD')
 
+            - if Feature.enabled?(:packages_and_registries_group_settings, @group)
+              = nav_link(controller: :packages_and_registries) do
+                = link_to group_settings_packages_and_registries_path(@group), title: _('Packages & Registries') do
+                  %span
+                    = _('Packages & Registries')
+
             = render_if_exists "groups/ee/settings_nav"
 
         = render_if_exists "groups/ee/administration_nav"
