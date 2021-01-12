@@ -2442,9 +2442,6 @@ msgstr ""
 msgid "AlertManagement|Create incident"
 msgstr ""
 
-msgid "AlertManagement|Critical"
-msgstr ""
-
 msgid "AlertManagement|Display alerts from all your monitoring tools directly within GitLab. Streamline the investigation of your alerts and the escalation of alerts to incidents."
 msgstr ""
 
@@ -2457,22 +2454,10 @@ msgstr ""
 msgid "AlertManagement|Events"
 msgstr ""
 
-msgid "AlertManagement|High"
-msgstr ""
-
 msgid "AlertManagement|Incident"
 msgstr ""
 
-msgid "AlertManagement|Info"
-msgstr ""
-
 msgid "AlertManagement|Key"
-msgstr ""
-
-msgid "AlertManagement|Low"
-msgstr ""
-
-msgid "AlertManagement|Medium"
 msgstr ""
 
 msgid "AlertManagement|Metrics"
@@ -2554,9 +2539,6 @@ msgid "AlertManagement|Tool"
 msgstr ""
 
 msgid "AlertManagement|Triggered"
-msgstr ""
-
-msgid "AlertManagement|Unknown"
 msgstr ""
 
 msgid "AlertManagement|Value"

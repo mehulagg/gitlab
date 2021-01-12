@@ -3,8 +3,8 @@ import produce from 'immer';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import AlertDetails from './components/alert_details.vue';
-import sidebarStatusQuery from './graphql/queries/sidebar_status.query.graphql';
+import AlertDetails from './alert_details.vue';
+import sidebarStatusQuery from '~/graphql_shared/queries/alert_sidebar_status.query.graphql';
 import createRouter from './router';
 
 Vue.use(VueApollo);

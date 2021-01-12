@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import AlertSummaryRow from '~/alert_management/components/alert_summary_row.vue';
+import AlertSummaryRow from '~/vue_shared/components/alert_details/alert_summary_row.vue';
 
 const label = 'a label';
 const value = 'a value';

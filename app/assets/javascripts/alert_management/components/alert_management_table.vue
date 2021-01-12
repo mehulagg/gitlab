@@ -23,14 +23,11 @@ import {
 } from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
+import { SEVERITY_LEVELS } from '~/lib/utils/constants';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import getAlertsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
-import {
-  ALERTS_STATUS_TABS,
-  ALERTS_SEVERITY_LABELS,
-  trackAlertListViewsOptions,
-} from '../constants';
-import AlertStatus from './alert_status.vue';
+import { ALERTS_STATUS_TABS, trackAlertListViewsOptions } from '../constants';
+import AlertStatus from '~/vue_shared/components/alert_details/alert_status.vue';
 
 const TH_TEST_ID = { 'data-testid': 'alert-management-severity-sort' };
 
@@ -96,7 +93,7 @@ export default {
       sortable: true,
     },
   ],
-  severityLabels: ALERTS_SEVERITY_LABELS,
+  severityLabels: SEVERITY_LEVELS,
   statusTabs: ALERTS_STATUS_TABS,
   components: {
     GlAlert,

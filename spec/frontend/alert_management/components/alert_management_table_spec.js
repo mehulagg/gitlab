@@ -6,7 +6,7 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import mockAlerts from '../mocks/alerts.json';
+import mockAlerts from '../../vue_shared/components/alert_details/mocks/alerts.json';
 import defaultProvideValues from '../mocks/alerts_provide_config.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({

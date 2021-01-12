@@ -13,15 +13,16 @@ import {
 } from '@gitlab/ui';
 import * as Sentry from '~/sentry/wrapper';
 import { s__ } from '~/locale';
-import alertQuery from '../graphql/queries/details.query.graphql';
-import sidebarStatusQuery from '../graphql/queries/sidebar_status.query.graphql';
+import alertQuery from '~/graphql_shared/queries/alert_details.query.graphql';
+import sidebarStatusQuery from '~/graphql_shared/queries/alert_sidebar_status.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
+import { SEVERITY_LEVELS } from '~/lib/utils/constants';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import initUserPopovers from '~/user_popovers';
-import { ALERTS_SEVERITY_LABELS, trackAlertsDetailsViewsOptions } from '../constants';
-import createIssueMutation from '../graphql/mutations/create_issue_from_alert.mutation.graphql';
-import toggleSidebarStatusMutation from '../graphql/mutations/toggle_sidebar_status.mutation.graphql';
+import { trackAlertsDetailsViewsOptions } from './constants';
+import createIssueMutation from '~/graphql_shared/mutations/alert_issue_create.mutation.graphql';
+import toggleSidebarStatusMutation from '~/graphql_shared/mutations/alert_sidebar_status.mutation.graphql';
 import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
 import { toggleContainerClasses } from '~/lib/utils/dom_utils';
@@ -44,7 +45,7 @@ export default {
   directives: {
     SafeHtml: GlSafeHtmlDirective,
   },
-  severityLabels: ALERTS_SEVERITY_LABELS,
+  severityLabels: SEVERITY_LEVELS,
   tabsConfig: [
     {
       id: 'overview',

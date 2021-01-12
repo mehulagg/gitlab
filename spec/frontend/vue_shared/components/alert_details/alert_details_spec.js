@@ -4,17 +4,15 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import AlertDetails from '~/alert_management/components/alert_details.vue';
-import AlertSummaryRow from '~/alert_management/components/alert_summary_row.vue';
-import {
-  ALERTS_SEVERITY_LABELS,
-  trackAlertsDetailsViewsOptions,
-} from '~/alert_management/constants';
-import createIssueMutation from '~/alert_management/graphql/mutations/create_issue_from_alert.mutation.graphql';
+import { SEVERITY_LEVELS } from '~/lib/utils/constants';
+import AlertDetails from '~/vue_shared/components/alert_details/alert_details.vue';
+import AlertSummaryRow from '~/vue_shared/components/alert_details/alert_summary_row.vue';
+import { trackAlertsDetailsViewsOptions } from '~/vue_shared/components/alert_details/constants';
+import createIssueMutation from '~/graphql_shared/mutations/alert_issue_create.mutation.graphql';
 import { joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
-import mockAlerts from '../mocks/alerts.json';
+import mockAlerts from './mocks/alerts.json';
 
 const mockAlert = mockAlerts[0];
 const environmentName = 'Production';
@@ -112,9 +110,7 @@ describe('AlertDetails', () => {
       });
 
       it('renders severity', () => {
-        expect(wrapper.findByTestId('severity').text()).toBe(
-          ALERTS_SEVERITY_LABELS[mockAlert.severity],
-        );
+        expect(wrapper.findByTestId('severity').text()).toBe(SEVERITY_LEVELS[mockAlert.severity]);
       });
 
       it('renders a title', () => {

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
-import SystemNote from '~/alert_management/components/system_notes/system_note.vue';
-import mockAlerts from '../../mocks/alerts.json';
+import SystemNote from '~/vue_shared/components/alert_details/system_notes/system_note.vue';
+import mockAlerts from '../mocks/alerts.json';
 
 const mockAlert = mockAlerts[1];
 
