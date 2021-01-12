@@ -103,7 +103,7 @@ From there, you can see the following actions:
 
 Project events can also be accessed via the [Project Audit Events API](../api/audit_events.md#project-audit-events).
 
-Project events are limited to a 30-day period.
+Project event queries are limited to a maximum of 30 days.
 
 ### Instance events **(PREMIUM ONLY)**
 
