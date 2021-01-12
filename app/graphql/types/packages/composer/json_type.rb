@@ -8,10 +8,10 @@ module Types
         description 'Represents a composer JSON file'
         authorize []
 
-        field :name, GraphQL::STRING_TYPE, null: true, description: 'The name set in the composer JSON file.'
-        field :type, GraphQL::STRING_TYPE, null: true, description: 'The type set in the composer JSON file.'
-        field :license, GraphQL::STRING_TYPE, null: true, description: 'The license set in the composer JSON file.'
-        field :version, GraphQL::STRING_TYPE, null: true, description: 'The version set in the composer JSON file.'
+        field :name, GraphQL::STRING_TYPE, null: true, description: 'The name set in the Composer JSON file.'
+        field :type, GraphQL::STRING_TYPE, null: true, description: 'The type set in the Composer JSON file.'
+        field :license, GraphQL::STRING_TYPE, null: true, description: 'The license set in the Composer JSON file.'
+        field :version, GraphQL::STRING_TYPE, null: true, description: 'The version set in the Composer JSON file.'
       end
     end
   end

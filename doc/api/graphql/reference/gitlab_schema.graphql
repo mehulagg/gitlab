@@ -16372,7 +16372,7 @@ input OncallUserInputType {
 }
 
 """
-Represents a package
+Represents a package in the Package Registry
 """
 type Package {
   """
@@ -16421,12 +16421,12 @@ type Package {
   ): PipelineConnection
 
   """
-  Project of the container registry.
+  Project where the package is stored.
   """
   project: Project!
 
   """
-  The tags of the package.
+  The package tags.
   """
   tags(
     """
@@ -16451,7 +16451,7 @@ type Package {
   ): PackageTagConnection
 
   """
-  The update date.
+  The updated date.
   """
   updatedAt: Time!
 
@@ -16487,11 +16487,11 @@ type Package {
 }
 
 """
-Details of a composer package
+Details of a Composer package
 """
 type PackageComposerDetails {
   """
-  The composer metadatum.
+  The Composer metadatum.
   """
   composerMetadatum: PackageComposerMetadatumType!
 
@@ -16541,12 +16541,12 @@ type PackageComposerDetails {
   ): PipelineConnection
 
   """
-  Project of the container registry.
+  Project where the package is stored.
   """
   project: Project!
 
   """
-  The tags of the package.
+  The package tags.
   """
   tags(
     """
@@ -16571,7 +16571,7 @@ type PackageComposerDetails {
   ): PackageTagConnection
 
   """
-  The update date.
+  The updated date.
   """
   updatedAt: Time!
 
@@ -16611,22 +16611,22 @@ Represents a composer JSON file
 """
 type PackageComposerJsonType {
   """
-  The license set in the composer JSON file.
+  The license set in the Composer JSON file.
   """
   license: String
 
   """
-  The name set in the composer JSON file.
+  The name set in the Composer JSON file.
   """
   name: String
 
   """
-  The type set in the composer JSON file.
+  The type set in the Composer JSON file.
   """
   type: String
 
   """
-  The version set in the composer JSON file.
+  The version set in the Composer JSON file.
   """
   version: String
 }
@@ -16636,7 +16636,7 @@ Composer metadatum
 """
 type PackageComposerMetadatumType {
   """
-  Data of the composer JSON file.
+  Data of the Composer JSON file.
   """
   composerJson: PackageComposerJsonType!
 
@@ -16797,7 +16797,7 @@ type PackageTag {
   name: String!
 
   """
-  The update date.
+  The updated date.
   """
   updatedAt: Time!
 }

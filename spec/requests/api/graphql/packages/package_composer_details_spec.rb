@@ -9,7 +9,7 @@ RSpec.describe 'package composer details' do
   let_it_be(:package) { create(:composer_package, project: project) }
   let_it_be(:composer_metadatum) do
     # we are forced to manually create the metadatum, without using the factory to force the sha to be a string
-    # and avoid an error where gitlay can't find the repository
+    # and avoid an error where gitaly can't find the repository
     create(:composer_metadatum, package: package, target_sha: 'foo_sha', composer_json: { name: 'name', type: 'type', license: 'license', version: 1 })
   end
 

@@ -48412,7 +48412,7 @@
         {
           "kind": "OBJECT",
           "name": "Package",
-          "description": "Represents a package",
+          "description": "Represents a package in the Package Registry",
           "fields": [
             {
               "name": "createdAt",
@@ -48541,7 +48541,7 @@
             },
             {
               "name": "project",
-              "description": "Project of the container registry.",
+              "description": "Project where the package is stored.",
               "args": [
 
               ],
@@ -48559,7 +48559,7 @@
             },
             {
               "name": "tags",
-              "description": "The tags of the package.",
+              "description": "The package tags.",
               "args": [
                 {
                   "name": "after",
@@ -48612,7 +48612,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "The update date.",
+              "description": "The updated date.",
               "args": [
 
               ],
@@ -48706,11 +48706,11 @@
         {
           "kind": "OBJECT",
           "name": "PackageComposerDetails",
-          "description": "Details of a composer package",
+          "description": "Details of a Composer package",
           "fields": [
             {
               "name": "composerMetadatum",
-              "description": "The composer metadatum.",
+              "description": "The Composer metadatum.",
               "args": [
 
               ],
@@ -48853,7 +48853,7 @@
             },
             {
               "name": "project",
-              "description": "Project of the container registry.",
+              "description": "Project where the package is stored.",
               "args": [
 
               ],
@@ -48871,7 +48871,7 @@
             },
             {
               "name": "tags",
-              "description": "The tags of the package.",
+              "description": "The package tags.",
               "args": [
                 {
                   "name": "after",
@@ -48924,7 +48924,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "The update date.",
+              "description": "The updated date.",
               "args": [
 
               ],
@@ -49022,7 +49022,7 @@
           "fields": [
             {
               "name": "license",
-              "description": "The license set in the composer JSON file.",
+              "description": "The license set in the Composer JSON file.",
               "args": [
 
               ],
@@ -49036,7 +49036,7 @@
             },
             {
               "name": "name",
-              "description": "The name set in the composer JSON file.",
+              "description": "The name set in the Composer JSON file.",
               "args": [
 
               ],
@@ -49050,7 +49050,7 @@
             },
             {
               "name": "type",
-              "description": "The type set in the composer JSON file.",
+              "description": "The type set in the Composer JSON file.",
               "args": [
 
               ],
@@ -49064,7 +49064,7 @@
             },
             {
               "name": "version",
-              "description": "The version set in the composer JSON file.",
+              "description": "The version set in the Composer JSON file.",
               "args": [
 
               ],
@@ -49091,7 +49091,7 @@
           "fields": [
             {
               "name": "composerJson",
-              "description": "Data of the composer JSON file.",
+              "description": "Data of the Composer JSON file.",
               "args": [
 
               ],
@@ -49596,7 +49596,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "The update date.",
+              "description": "The updated date.",
               "args": [
 
               ],
