@@ -6,11 +6,6 @@ class GroupUpdateRepositoryStorageWorker # rubocop:disable Scalability/Idempoten
 
   private
 
-  override :source_repository_storage
-  def source_repository_storage(container)
-    container.wiki.repository_storage
-  end
-
   override :find_repository_storage_move
   def find_repository_storage_move(repository_storage_move_id)
     ::GroupRepositoryStorageMove.find(repository_storage_move_id)

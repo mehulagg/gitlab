@@ -20,7 +20,7 @@ module ScheduleBulkRepositoryShardMovesMethods
     repository_klass.for_shard(shard).each_batch(column: container_column) do |relation|
       container_klass.id_in(relation.select(container_column)).each do |container|
         container.with_lock do
-          next if current_container_repository_storage(container) != source_storage_name
+          next if container.repository_storage != source_storage_name
 
           storage_move = container.repository_storage_moves.build(
             source_storage_name: source_storage_name,
@@ -38,10 +38,6 @@ module ScheduleBulkRepositoryShardMovesMethods
   end
 
   private
-
-  def current_container_repository_storage(container)
-    container.repository_storage
-  end
 
   def repository_klass
     raise NotImplementedError

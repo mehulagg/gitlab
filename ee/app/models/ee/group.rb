@@ -16,8 +16,6 @@ module EE
       include HasWiki
       include CanMoveRepositoryStorage
 
-      GL_REPOSITORY_TYPES = [::Gitlab::GlRepository::WIKI].freeze
-
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
       has_many :epics
@@ -475,9 +473,11 @@ module EE
 
     override :git_transfer_in_progress?
     def git_transfer_in_progress?
-      GL_REPOSITORY_TYPES.any? do |type|
-        reference_counter(type: type).value > 0
-      end
+      reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
+    end
+
+    def repository_storage
+      group_wiki_repository&.shard_name || self.class.pick_repository_storage
     end
 
     private

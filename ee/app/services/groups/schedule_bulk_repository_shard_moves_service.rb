@@ -8,11 +8,6 @@ module Groups
 
     private
 
-    override :current_container_repository_storage
-    def current_container_repository_storage(container)
-      container.wiki.repository_storage
-    end
-
     override :repository_klass
     def repository_klass
       GroupWikiRepository

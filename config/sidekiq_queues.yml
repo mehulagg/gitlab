@@ -156,6 +156,10 @@
   - 1
 - - group_saml_group_sync
   - 1
+- - group_schedule_bulk_repository_shard_moves
+  - 1
+- - group_update_repository_storage
+  - 1
 - - hashed_storage
   - 1
 - - import_issues_csv
