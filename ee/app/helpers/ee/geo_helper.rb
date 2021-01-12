@@ -25,6 +25,7 @@ module EE
 
           [status&.version, status&.revision]
         end
+
       {
         primary_version: version.to_s,
         primary_revision: revision.to_s,
