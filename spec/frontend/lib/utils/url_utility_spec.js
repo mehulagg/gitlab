@@ -752,6 +752,13 @@ describe('URL utility', () => {
   });
 
   describe('setUrlParams', () => {
+    beforeEach(() => {
+      setWindowLocation({
+        protocol: 'https:',
+        host: 'gitlab.com',
+      });
+    });
+
     it('adds new params as query string', () => {
       const url = 'https://gitlab.com/test';
 

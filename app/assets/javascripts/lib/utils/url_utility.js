@@ -416,7 +416,7 @@ export const setUrlParams = (
   clearParams = false,
   railsArraySyntax = false,
 ) => {
-  const urlObj = new URL(url);
+  const urlObj = new URL(url, getBaseURL());
   const queryString = urlObj.search;
   const searchParams = clearParams ? new URLSearchParams('') : new URLSearchParams(queryString);
 
