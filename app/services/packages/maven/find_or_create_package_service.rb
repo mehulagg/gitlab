@@ -11,7 +11,13 @@ module Packages
                                           .execute
 
         unless Namespace::PackageSetting.duplicates_allowed?(package)
-          return ServiceResponse.error(message: 'Duplicate package is not allowed')
+          current_maven_files = package.package_files.map do |file|
+            file.file_name.split('.').last
+          end
+
+          if current_maven_files.include?(params[:file_name].split('.').last)
+            return ServiceResponse.error(message: 'Duplicate package is not allowed')
+          end
         end
 
         unless package

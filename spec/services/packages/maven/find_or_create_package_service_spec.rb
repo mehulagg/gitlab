@@ -111,6 +111,10 @@ RSpec.describe Packages::Maven::FindOrCreatePackageService do
         expect(subject.errors).to include('Duplicate package is not allowed')
       end
 
+      it 'allows through a file of a different type' do
+
+      end
+
       context 'when the package name matches the exception regex' do
         before do
           package_settings.update!(maven_duplicate_exception_regex: '.*')
