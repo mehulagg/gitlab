@@ -9,6 +9,7 @@ class Projects::BoardsController < Projects::ApplicationController
   before_action :assign_endpoint_vars
   before_action do
     push_frontend_feature_flag(:add_issues_button)
+    push_frontend_feature_flag(:graphql_board_lists, project, default_enabled: false)
   end
 
   feature_category :boards
