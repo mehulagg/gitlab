@@ -93,7 +93,7 @@ ensure that deployments do not happen unexpectedly.
 
 ## Setting appropriate roles to your project
 
-1. Gitlab supports several different [roles](https://docs.gitlab.com/ee/user/permissions.html#group-members-permissions) that can be assigned to your project members
+1. Gitlab supports several different [roles](../../user/permissions.html#group-members-permissions) that can be assigned to your project members
   1. Guest - Has the lowest level of permissions
   1. Reporter
   1. Developer
@@ -104,7 +104,14 @@ ensure that deployments do not happen unexpectedly.
 
 ## Protect production secrets 
 
-Production secrets are needed in order to deploy successfuly. For example when deploying to the cloud, cloud providers require these secrets in order to connect to their services. 
+Production secrets are needed in order to deploy successfuly. For example when deploying to the cloud, cloud providers require these secrets in order to connect to their services. Environment variables can be used and can be defined under the project settings and they can also be protected. [Protected Variables](../../ci/variables/#protect-a-custom-variable)  are only passed to pipelines running on [protected branches](../../user/project/protected_branches.html) or [protected tags](../../user/project/protected_tags.html). The other pipelines do not get the protected variable.
+Variables can also be [scoped to specific environments](../../ci/variables/where_variables_can_be_used.html#variables-with-an-environment-scope). It is recommended to use protected varaibles on protected environments to make sure that the secrets are not exposed to n unintentional environment.  Production secrets should also be defined on the [runner side](../../charts/installation/secrets.html#gitlab-runner-secret) this prevents other maintainers from reading the secrets and makes sure that the runner runs only on protected branches.
+
+For more information, see [pipeline security](../../ci/pipelines/#pipeline-security-on-protected-branches).
+
+## Seperate project for deployments
+
+All maintainers of a project have access to production secrets. In case there is a need to limit the number of users that are deploying to a produciton environment, another way to achieve this is to create a seperate project where you can configure a new permisison model where you can isolate the CD permisisons from the original project and prevent maintainers from that project to access produciton secret and CD configuration. You can connect the CD project to your development projects by using [multi-project pipelines](../../ci/multi_project_pipelines.html).
 
 ## Troubleshooting
 
