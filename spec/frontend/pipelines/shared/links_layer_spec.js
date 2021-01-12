@@ -91,7 +91,6 @@ describe('links layer component', () => {
       it('renders the disable button', () => {
         expect(findShowAnyways().exists()).toBe(true);
         expect(findShowAnyways().text()).toBe(wrapper.vm.$options.i18n.showLinksAnyways);
-
       });
 
       it('shows links when override is clicked', async () => {

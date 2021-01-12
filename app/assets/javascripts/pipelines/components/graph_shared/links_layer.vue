@@ -9,7 +9,7 @@ export default {
     GlAlert,
     LinksInner,
   },
-  MAX_STAGES: 200,
+  MAX_GROUPS: 200,
   props: {
     pipelineData: {
       type: Array,
@@ -29,7 +29,7 @@ export default {
     ),
   },
   computed: {
-    numStages() {
+    numGroups() {
       return this.pipelineData.reduce((acc, { groups }) => {
         return acc + Number(groups.length);
       }, 0);
@@ -38,7 +38,7 @@ export default {
       return !this.showLinkedLayers && !this.alertDismissed;
     },
     showLinkedLayers() {
-      return this.showLinksOverride || this.numStages < this.$options.MAX_STAGES;
+      return this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS;
     },
   },
   methods: {
