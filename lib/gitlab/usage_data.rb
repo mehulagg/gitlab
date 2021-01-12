@@ -580,6 +580,7 @@ module Gitlab
           users_created: count(::User.where(time_period), start: user_minimum_id, finish: user_maximum_id),
           omniauth_providers: filtered_omniauth_provider_names.reject { |name| name == 'group_saml' },
           user_auth_by_provider: distinct_count_user_auth_by_provider(time_period),
+          unique_users_all_imports: unique_users_all_imports,
           bulk_imports: {
             gitlab: distinct_count(::BulkImport.where(time_period, source_type: :gitlab), :user_id)
           },
@@ -895,6 +896,10 @@ module Gitlab
 
       def projects_imported_count(from, time_period)
         distinct_count(::Project.imported_from(from).where(time_period).where.not(import_type: nil), :creator_id) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      def unique_users_all_imports
+        distinct_count(::Project.where(time_period).where.not(import_type: nil), :creator_id)
       end
 
       # rubocop:disable CodeReuse/ActiveRecord
