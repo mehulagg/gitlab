@@ -250,6 +250,8 @@ This will result in users receiving an error: `429 Too Many Requests`. We have o
 paths to allow for higher rate limits. Unless it is not possible, new package managers should
 follow these conventions so they will be able to take advantage of the expanded package rate limit.
 
+These route prefixes will guarantee a higher rate limit:
+
 ```plaintext
 /api/v4/packages/
 /api/v4/projects/:project_id/packages/
