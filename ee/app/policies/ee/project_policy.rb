@@ -117,6 +117,11 @@ module EE
       end
 
       with_scope :subject
+      condition(:corpus_management_enabled) do
+        @subject.feature_available?(:corpus_management)
+      end
+
+      with_scope :subject
       condition(:on_demand_scans_enabled) do
         @subject.feature_available?(:security_on_demand_scans)
       end
@@ -213,6 +218,11 @@ module EE
         enable :read_vulnerability
         enable :read_vulnerability_scanner
       end
+
+      rule { corpus_management_enabled & can?(:developer_access) }.policy do
+        enable :read_corpus_management
+        enable :create_corpus_management
+      end      
 
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
         enable :read_on_demand_scans
