@@ -51,7 +51,7 @@ export default {
           loading: this.isDeleting,
           disabled: this.isDeleting,
           category: 'primary',
-          variant: 'success',
+          variant: 'danger',
         },
       };
     },
@@ -92,6 +92,7 @@ export default {
     :body-class="bodyClass"
   >
     <gl-modal
+      body-class="gl-pb-0! gl-min-h-6!"
       modal-id="delete-metric-modal"
       size="sm"
       :visible="modalVisible"

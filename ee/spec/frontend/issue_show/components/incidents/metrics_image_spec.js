@@ -91,11 +91,7 @@ describe('Metrics upload item', () => {
 
   describe('delete functionality', () => {
     it('should open the modal when clicked', async () => {
-      mountComponent({
-        stubs: {
-          GlModal: true,
-        },
-      });
+      mountComponent({ stubs: { GlModal: true } });
 
       deleteImage();
 
