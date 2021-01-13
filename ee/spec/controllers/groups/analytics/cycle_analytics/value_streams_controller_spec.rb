@@ -46,7 +46,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
           post :create, params: { group_id: group, value_stream: { name: "busy value stream" } }
         end.to change { Analytics::CycleAnalytics::GroupValueStream.count }.by(1)
 
-        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to have_gitlab_http_status(:created)
       end
     end
 
@@ -58,6 +58,30 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response["message"]).to eq('Invalid parameters')
+      end
+    end
+
+    context 'with stages' do
+      let(:value_stream_params) do
+        {
+          name: 'test',
+          stages: [
+            {
+              name: '',
+              start_event_identifier: 'issue_created',
+              end_event_identifier: 'issue_closed',
+              custom: true
+            }
+          ]
+        }
+      end
+
+      it 'persists the value stream with stages' do
+        post :create, params: { group_id: group, value_stream: value_stream_params }
+
+        expect(response).to have_gitlab_http_status(:created)
+        stage_response = json_response['stages'].first
+        expect(stage_response['title']).to eq('My Stage')
       end
     end
   end

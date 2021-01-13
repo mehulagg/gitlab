@@ -13,12 +13,12 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def create
-    value_stream = @group.value_streams.build(value_stream_params)
+    result = Analytics::CycleAnalytics::ValueStreams::CreateService.new(group: @group, params: create_params).execute
 
-    if value_stream.save
-      render json: Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(value_stream)
+    if result.success?
+      render json: Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(result.payload[:value_stream]), status: result.http_status
     else
-      render json: { message: 'Invalid parameters', payload: { errors: value_stream.errors } }, status: :unprocessable_entity
+      render json: { message: 'Invalid parameters', payload: { errors: result.payload[:errors] } }, status: result.http_status
     end
   end
 
@@ -37,6 +37,14 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
 
   def value_stream_params
     params.require(:value_stream).permit(:name)
+  end
+
+  def create_params
+    params.require(:value_stream).permit(:name, stages: stage_params)
+  end
+
+  def stage_params
+    [:name, :start_event_identifier, :end_event_identifier, :start_event_label_id, :end_event_label_id, :custom]
   end
 
   def value_streams
