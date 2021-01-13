@@ -18,3 +18,14 @@ dependencies and build times.
 ## License compliance
 
 Refer to [licensing guidelines](licensing.md) for ensuring license compliance.
+
+## Upgrading Rails
+
+When upgrading the Rails gem, the [Gemfile in the `qa` directory](https://gitlab.com/gitlab-org/gitlab/-/blob/master/qa/Gemfile) needs to be kept in sync.
+
+It is also recommended to update the [Gemfile in Gitaly Ruby](https://gitlab.com/gitlab-org/gitaly/-/blob/master/ruby/Gemfile) so that we ship only one version of these gems.
+
+There are also NPM packages that follow Rails' versioning and these should be updated as well:
+
+- `@rails/ujs`
+- `@rails/actioncable`
