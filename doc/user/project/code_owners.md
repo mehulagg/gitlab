@@ -225,10 +225,12 @@ the rules for "Groups" and "Documentation" sections:
 
 ![MR widget - Sectional Code Owners](img/sectional_code_owners_v13.2.png)
 
-GitLab 13.8 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995)
-the ability to designate optional code owners sections.
+#### Optional Code Owners Sections **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.8 behind a feature flag, enabled by default.
+
 A section name can be prepended with the caret `^` character in order to mark
-the section will as optional:
+the section will as optional. This means, approvals for changes to the related files/paths will **not** be required.
 
 ```plaintext
 [Documentation]
