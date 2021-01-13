@@ -286,7 +286,7 @@ RSpec.describe Git::WikiPushService, services: true do
       it 'does not raise an exception' do
         allow(housekeeping).to receive(:try_obtain_lease).and_return(false)
 
-        subject
+        expect { subject }.not_to raise_error
       end
     end
 
