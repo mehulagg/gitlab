@@ -2,7 +2,7 @@
 
 module EE
   module Backup
-    class Repositories
+    module Repositories
       extend ::Gitlab::Utils::Override
 
       override :restore
@@ -20,19 +20,29 @@ module EE
       end
 
       def restore_group_repositories
-        Group.find_each(batch_size: 1000) do |group|
-          restore_repository(group, Gitlab::GlRepository::WIKI)
+        find_groups_in_batches do |group|
+          restore_repository(group, ::Gitlab::GlRepository::WIKI)
+        end
+      end
+
+      def find_groups_in_batches(&block)
+        ::Group.find_each(batch_size: 1000) do |group| # rubocop: disable CodeReuse/ActiveRecord
+          yield(group)
         end
       end
 
       override :dump_container
       def dump_container(container)
         case container
-        when Group
+        when ::Group
           dump_group(container)
         else
           super
         end
+      end
+
+      def dump_group(group)
+        backup_repository(group, ::Gitlab::GlRepository::WIKI)
       end
 
       override :dump_consecutive
@@ -43,11 +53,9 @@ module EE
       end
 
       def dump_consecutive_groups
-        Group.find_each(batch_size: 1000) { |group| dump_group(group) }
-      end
-
-      def dump_group(group)
-        backup_repository(group, Gitlab::GlRepository::WIKI)
+        find_groups_in_batches do |group|
+          dump_group(group)
+        end
       end
 
       override :records_to_enqueue
@@ -56,7 +64,7 @@ module EE
       end
 
       def groups_in_storage(storage)
-        Group.id_in(GroupWikiRepository.for_repository_storage(storage).select(:group_id))
+        ::Group.id_in(GroupWikiRepository.for_repository_storage(storage).select(:group_id))
       end
     end
   end
