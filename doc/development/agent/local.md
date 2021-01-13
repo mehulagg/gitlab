@@ -107,4 +107,4 @@ bazel test //internal/module/gitops/server:server_test
 
 - Bazel docs about [specifying targets to build](https://docs.bazel.build/versions/master/guide.html#specifying-targets-to-build).
 - [The Bazel query](https://docs.bazel.build/versions/master/query.html)
-- [Bazel query how to](https://docs.bazel.build/versions/master/query.html)
+- [Bazel query how to](https://docs.bazel.build/versions/master/query-how-to.html)
