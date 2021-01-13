@@ -1,12 +1,14 @@
 <script>
 import { GlButton, GlCard, GlIcon, GlLink, GlModal, GlSprintf } from '@gitlab/ui';
 import { mapActions } from 'vuex';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export default {
   i18n: {
     modalDelete: __('Delete'),
+    modalDescription: s__('Incident|Are you sure you wish to delete this image?'),
     modalCancel: __('Cancel'),
+    modalTitle: s__('Incident|Deleting %{filename}'),
   },
   components: {
     GlButton,
@@ -102,13 +104,13 @@ export default {
       @hidden="modalVisible = false"
     >
       <template #modal-title>
-        <gl-sprintf :message="s__('Incident|Deleting %{filename}')">
+        <gl-sprintf :message="$options.i18n.modalTitle">
           <template #filename>
             {{ filename }}
           </template>
         </gl-sprintf>
       </template>
-      <p>{{ s__('Incident|Are you sure you wish to delete this image?') }}</p>
+      <p>{{ $options.i18n.modalDescription }}</p>
     </gl-modal>
     <template #header>
       <div class="gl-w-full gl-display-flex gl-flex-direction-row gl-justify-content-space-between">
