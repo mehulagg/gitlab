@@ -220,6 +220,7 @@ module ApplicationSettingsHelper
       :enforce_terms,
       :first_day_of_week,
       :force_pages_access_control,
+      :git_cli_session_expiry,
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
       :gitaly_timeout_fast,

@@ -74,6 +74,10 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validates :git_cli_session_expiry,
+            presence: true,
+            numericality: { only_integer: true, greater_than_or_equal_to: 1 }
+
   validates :minimum_password_length,
             presence: true,
             numericality: { only_integer: true,
