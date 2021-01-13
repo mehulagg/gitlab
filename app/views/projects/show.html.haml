@@ -4,6 +4,11 @@
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, project_path(@project, rss_url_options), title: "#{@project.name} activity")
 
+= content_for :invite_members_sidebar do
+  - if invite_members_for_project?(@project)
+    %li
+      .js-invite-members-trigger{ data: { icon: 'plus', display_text: _('Invite team members') } }
+
 = render partial: 'flash_messages', locals: { project: @project }
 
 = render "projects/last_push"

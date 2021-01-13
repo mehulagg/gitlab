@@ -12,6 +12,34 @@ RSpec.describe InviteMembersHelper do
       assign(:project, project)
     end
 
+    describe "#invite_members_for_project?" do
+      context 'when the user is an owner' do
+        before do
+          allow(helper).to receive(:current_user) { owner }
+        end
+
+        it 'returns false' do
+          stub_feature_flags(invite_members_group_modal: false)
+
+          expect(helper.invite_members_for_project?(project)).to eq false
+        end
+
+        it 'returns true' do
+          expect(helper.invite_members_for_project?(project)).to eq true
+        end
+      end
+
+      context 'when the user is a developer' do
+        before do
+          allow(helper).to receive(:current_user) { developer }
+        end
+
+        it 'returns false' do
+          expect(helper.invite_members_for_project?(project)).to eq false
+        end
+      end
+    end
+
     describe "#directly_invite_members?" do
       context 'when the user is an owner' do
         before do
@@ -79,6 +107,35 @@ RSpec.describe InviteMembersHelper do
 
   context 'with group' do
     let_it_be(:group) { create(:group) }
+
+    describe "#invite_members_for_group?" do
+      context 'when the user is an owner' do
+        before do
+          group.add_owner(owner)
+          allow(helper).to receive(:current_user) { owner }
+        end
+
+        it 'returns false' do
+          stub_feature_flags(invite_members_group_modal: false)
+
+          expect(helper.invite_members_for_group?(group)).to eq false
+        end
+
+        it 'returns true' do
+          expect(helper.invite_members_for_group?(group)).to eq true
+        end
+      end
+
+      context 'when the user is a developer' do
+        before do
+          allow(helper).to receive(:current_user) { developer }
+        end
+
+        it 'returns false' do
+          expect(helper.invite_members_for_group?(group)).to eq false
+        end
+      end
+    end
 
     describe "#invite_group_members?" do
       context 'when the user is an owner' do
