@@ -887,7 +887,7 @@ describe('Some component with Apollo mock', () => {
 After this, we need to create a mock Apollo Client instance using a helper:
 
 ```javascript
-import createMockApollo from 'helpers//mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 
 describe('Some component', () => {
   let wrapper;
