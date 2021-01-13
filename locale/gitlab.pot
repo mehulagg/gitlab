@@ -14976,6 +14976,12 @@ msgstr ""
 msgid "Incident|Alert details"
 msgstr ""
 
+msgid "Incident|Are you sure you wish to delete this image?"
+msgstr ""
+
+msgid "Incident|Deleting %{filename}"
+msgstr ""
+
 msgid "Incident|Metrics"
 msgstr ""
 
