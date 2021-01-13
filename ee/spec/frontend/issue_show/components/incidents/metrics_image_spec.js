@@ -53,6 +53,7 @@ describe('Metrics upload item', () => {
   const findModal = () => wrapper.find(GlModal);
   const findDeleteButton = () => wrapper.find('[data-testid="delete-button"]');
 
+  const closeModal = () => findModal().vm.$emit('hidden');
   const submitModal = () => findModal().vm.$emit('primary', mockEvent);
   const deleteImage = () => findDeleteButton().vm.$emit('click');
 
@@ -89,11 +90,13 @@ describe('Metrics upload item', () => {
   });
 
   describe('delete functionality', () => {
-    beforeEach(() => {
-      mountComponent();
-    });
-
     it('should open the modal when clicked', async () => {
+      mountComponent({
+        stubs: {
+          GlModal: true,
+        },
+      });
+
       deleteImage();
 
       await waitForPromises();
@@ -101,44 +104,35 @@ describe('Metrics upload item', () => {
       expect(findModal().attributes('visible')).toBe('true');
     });
 
-    it('should close the modal when cancelled', async () => {
-      mountComponent(
-        {
-          data() {
-            return { modalVisible: true };
+    describe('when the modal is open', () => {
+      beforeEach(() => {
+        mountComponent(
+          {
+            data() {
+              return { modalVisible: true };
+            },
           },
-        },
-        shallowMount,
-      );
+          shallowMount,
+        );
+      });
 
-      await waitForPromises();
+      it('should close the modal when cancelled', async () => {
+        closeModal();
 
-      findModal().vm.$emit('hidden');
+        await waitForPromises();
 
-      await waitForPromises();
+        expect(findModal().attributes('visible')).toBeFalsy();
+      });
 
-      expect(findModal().attributes('visible')).toBeFalsy();
-    });
+      it('should delete the image when selected', async () => {
+        const dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation(jest.fn());
 
-    it('should delete the image when selected', async () => {
-      mountComponent(
-        {
-          data() {
-            return { modalVisible: true };
-          },
-        },
-        shallowMount,
-      );
+        submitModal();
 
-      const dispatchSpy = jest.spyOn(store, 'dispatch').mockImplementation(jest.fn());
+        await waitForPromises();
 
-      await waitForPromises();
-
-      submitModal();
-
-      await waitForPromises();
-
-      expect(dispatchSpy).toHaveBeenCalledWith('deleteImage', defaultProps.id);
+        expect(dispatchSpy).toHaveBeenCalledWith('deleteImage', defaultProps.id);
+      });
     });
   });
 
