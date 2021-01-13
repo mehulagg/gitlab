@@ -61,7 +61,7 @@ class HousekeepingService < BaseService
   end
 
   def lease_key
-    "#{resource.class.name.underscore.pluralize}_housekeeping:#{resource.id}"
+    "#{@resource.class.name.underscore.pluralize}_housekeeping:#{@resource.id}"
   end
 
   def pushes_since_gc
