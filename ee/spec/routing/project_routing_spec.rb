@@ -30,7 +30,7 @@ RSpec.describe 'EE-specific project routing' do
     end
 
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/vulnerability_feedback", "/gitlab/gitlabhq/-/vulnerability_feedback"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/vulnerability_feedback", "/gitlab/gitlabhq/-/vulnerability_feedback"
     end
   end
 
@@ -49,13 +49,13 @@ RSpec.describe 'EE-specific project routing' do
 
   describe Projects::ProtectedEnvironmentsController, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/protected_environments", "/gitlab/gitlabhq/-/protected_environments"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/protected_environments", "/gitlab/gitlabhq/-/protected_environments"
     end
   end
 
   describe Projects::AuditEventsController, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/audit_events", "/gitlab/gitlabhq/-/audit_events"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/audit_events", "/gitlab/gitlabhq/-/audit_events"
     end
   end
 
