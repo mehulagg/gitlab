@@ -88,9 +88,12 @@ module Elastic
     def unpause_indexing!(migration)
       return unless migration.pause_indexing?
       return unless migration.load_state[:pause_indexing]
+      return if migration.load_state[:halted_indexing_unpaused]
 
       logger.info 'MigrationWorker: unpausing indexing'
       Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: false)
+
+      migration.save_state!(halted_indexing_unpaused: true) if migration.halted?
     end
 
     def helper

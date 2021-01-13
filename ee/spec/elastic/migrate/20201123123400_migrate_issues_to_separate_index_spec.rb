@@ -80,7 +80,7 @@ RSpec.describe MigrateIssuesToSeparateIndex, :elastic, :sidekiq_inline do
 
           migration.migrate
 
-          expect(migration.migration_state).to match(slice: 0, max_slices: 2, retry_attempt: 30, halted: true)
+          expect(migration.migration_state).to match(slice: 0, max_slices: 2, retry_attempt: 30, halted: true, halted_indexing_unpaused: false)
           expect(migration).not_to receive(:process_response)
         end
       end

@@ -1265,6 +1265,9 @@ msgstr ""
 msgid "A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects."
 msgstr ""
 
+msgid "A job artifact is an archive of files and directories saved by a job when it finishes."
+msgstr ""
+
 msgid "A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies."
 msgstr ""
 
@@ -2212,6 +2215,9 @@ msgstr ""
 msgid "AdminUsers|Delete user and contributions"
 msgstr ""
 
+msgid "AdminUsers|Export permissions as CSV"
+msgstr ""
+
 msgid "AdminUsers|External"
 msgstr ""
 
@@ -2989,6 +2995,9 @@ msgid "Amount of time (in hours) that users are allowed to skip forced configura
 msgstr ""
 
 msgid "An %{link_start}alert%{link_end} with the same fingerprint is already open. To change the status of this alert, resolve the linked alert."
+msgstr ""
+
+msgid "An Enterprise User GitLab account has been created for you by your organization:"
 msgstr ""
 
 msgid "An administrator changed the password for your GitLab account on %{link_to}."
@@ -4892,6 +4901,9 @@ msgid "Buy more Pipeline minutes"
 msgstr ""
 
 msgid "By %{user_name}"
+msgstr ""
+
+msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
 msgstr ""
 
 msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
@@ -7899,6 +7911,9 @@ msgstr ""
 msgid "Copy commit SHA"
 msgstr ""
 
+msgid "Copy email address"
+msgstr ""
+
 msgid "Copy environment"
 msgstr ""
 
@@ -8791,6 +8806,12 @@ msgstr ""
 msgid "DastProfiles|Could not create the site profile. Please try again."
 msgstr ""
 
+msgid "DastProfiles|Could not delete saved scan. Please refresh the page, or try again later."
+msgstr ""
+
+msgid "DastProfiles|Could not delete saved scans:"
+msgstr ""
+
 msgid "DastProfiles|Could not delete scanner profile. Please refresh the page, or try again later."
 msgstr ""
 
@@ -8803,6 +8824,9 @@ msgstr ""
 msgid "DastProfiles|Could not delete site profiles:"
 msgstr ""
 
+msgid "DastProfiles|Could not fetch saved scans. Please refresh the page, or try again later."
+msgstr ""
+
 msgid "DastProfiles|Could not fetch scanner profiles. Please refresh the page, or try again later."
 msgstr ""
 
@@ -8813,6 +8837,9 @@ msgid "DastProfiles|Could not update the scanner profile. Please try again."
 msgstr ""
 
 msgid "DastProfiles|Could not update the site profile. Please try again."
+msgstr ""
+
+msgid "DastProfiles|DAST Scan"
 msgstr ""
 
 msgid "DastProfiles|Debug messages"
@@ -8857,7 +8884,7 @@ msgstr ""
 msgid "DastProfiles|Include debug messages in the DAST console output."
 msgstr ""
 
-msgid "DastProfiles|Manage Profiles"
+msgid "DastProfiles|Manage DAST scans"
 msgstr ""
 
 msgid "DastProfiles|Manage profiles"
@@ -8867,9 +8894,6 @@ msgid "DastProfiles|Minimum = 0 (no timeout enabled), Maximum = 2880 minutes"
 msgstr ""
 
 msgid "DastProfiles|Minimum = 1 second, Maximum = 3600 seconds"
-msgstr ""
-
-msgid "DastProfiles|New Profile"
 msgstr ""
 
 msgid "DastProfiles|New scanner profile"
@@ -8911,6 +8935,12 @@ msgstr ""
 msgid "DastProfiles|Save profile"
 msgstr ""
 
+msgid "DastProfiles|Saved Scans"
+msgstr ""
+
+msgid "DastProfiles|Scan"
+msgstr ""
+
 msgid "DastProfiles|Scan mode"
 msgstr ""
 
@@ -8936,6 +8966,9 @@ msgid "DastProfiles|Site name"
 msgstr ""
 
 msgid "DastProfiles|Spider timeout"
+msgstr ""
+
+msgid "DastProfiles|Target"
 msgstr ""
 
 msgid "DastProfiles|Target URL"
@@ -13220,6 +13253,9 @@ msgstr ""
 msgid "GitLab for Slack"
 msgstr ""
 
+msgid "GitLab group: %{source_link}"
+msgstr ""
+
 msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way Development, Security, and Ops teams collaborate"
 msgstr ""
 
@@ -14109,9 +14145,6 @@ msgid "Groups to synchronize"
 msgstr ""
 
 msgid "Groups with access to %{strong_open}%{project_name}%{strong_close}"
-msgstr ""
-
-msgid "Groups with access to %{strong_start}%{group_name}%{strong_end}"
 msgstr ""
 
 msgid "GroupsDropdown|Frequently visited"
@@ -15479,6 +15512,9 @@ msgstr ""
 msgid "Invite member"
 msgstr ""
 
+msgid "Invite members"
+msgstr ""
+
 msgid "Invite team members"
 msgstr ""
 
@@ -16170,6 +16206,9 @@ msgid "Just me"
 msgstr ""
 
 msgid "K8s pod health"
+msgstr ""
+
+msgid "Keep artifacts from most recent successful jobs"
 msgstr ""
 
 msgid "Keep divergent refs"
@@ -16962,9 +17001,6 @@ msgstr ""
 msgid "MERGED"
 msgstr ""
 
-msgid "MERGED (REVERTED)"
-msgstr ""
-
 msgid "MR widget|Back to the Merge request"
 msgstr ""
 
@@ -17364,9 +17400,6 @@ msgstr ""
 msgid "Members can be added by project %{i_open}Maintainers%{i_close} or %{i_open}Owners%{i_close}"
 msgstr ""
 
-msgid "Members invited to %{strong_start}%{group_name}%{strong_end}"
-msgstr ""
-
 msgid "Members invited to %{strong_start}%{project_name}%{strong_end}"
 msgstr ""
 
@@ -17383,9 +17416,6 @@ msgid "Members of %{strong_open}%{project_name}%{strong_close}"
 msgstr ""
 
 msgid "Members of a group may only view projects they have permission to access"
-msgstr ""
-
-msgid "Members with access to %{strong_start}%{group_name}%{strong_end}"
 msgstr ""
 
 msgid "Members|%{time} by %{user}"
@@ -17658,9 +17688,6 @@ msgstr ""
 msgid "MergeRequests|Failed to squash. Should be done manually."
 msgstr ""
 
-msgid "MergeRequests|Jump to next unresolved thread"
-msgstr ""
-
 msgid "MergeRequests|Reply..."
 msgstr ""
 
@@ -17727,16 +17754,7 @@ msgstr ""
 msgid "MergeRequest|Search files (%{modifier_key}P)"
 msgstr ""
 
-msgid "MergeRequest|reverted"
-msgstr ""
-
 msgid "Merged"
-msgstr ""
-
-msgid "Merged (%{linkStart}reverted%{linkEnd})"
-msgstr ""
-
-msgid "Merged (%{reverted})"
 msgstr ""
 
 msgid "Merged MRs"
@@ -20799,9 +20817,6 @@ msgstr ""
 msgid "Pipelines|More Information"
 msgstr ""
 
-msgid "Pipelines|No CI file found in this repository, please add one."
-msgstr ""
-
 msgid "Pipelines|No triggers have been created yet. Add one using the form above."
 msgstr ""
 
@@ -20812,9 +20827,6 @@ msgid "Pipelines|Pipeline Editor"
 msgstr ""
 
 msgid "Pipelines|Project cache successfully reset."
-msgstr ""
-
-msgid "Pipelines|Repository does not have a default branch, please set one."
 msgstr ""
 
 msgid "Pipelines|Revoke"
@@ -20836,6 +20848,9 @@ msgid "Pipelines|There are currently no finished pipelines."
 msgstr ""
 
 msgid "Pipelines|There are currently no pipelines."
+msgstr ""
+
+msgid "Pipelines|There is no %{filePath} file in this repository, please add one and visit the Pipeline Editor again."
 msgstr ""
 
 msgid "Pipelines|There was an error fetching the pipelines. Try again in a few moments or contact your support team."
@@ -21889,6 +21904,9 @@ msgid "Project Files"
 msgstr ""
 
 msgid "Project ID"
+msgstr ""
+
+msgid "Project Templates"
 msgstr ""
 
 msgid "Project URL"
@@ -24309,6 +24327,9 @@ msgstr ""
 msgid "Revoked project access token %{project_access_token_name}!"
 msgstr ""
 
+msgid "RightSidebar|Issue email: %{copyText}"
+msgstr ""
+
 msgid "RightSidebar|adding a"
 msgstr ""
 
@@ -25852,9 +25873,6 @@ msgid "SharedRunnersMinutesSettings|Reset used pipeline minutes"
 msgstr ""
 
 msgid "Sherlock Transactions"
-msgstr ""
-
-msgid "Should you ever lose your phone or access to your one time password secret, each of these recovery codes can be used one time each to regain access to your account. Please save them in a safe place, or you %{b_start}will%{b_end} lose access to your account."
 msgstr ""
 
 msgid "Should you ever lose your phone or access to your one time password secret, each of these recovery codes can be used one time each to regain access to your account. Please save them in a safe place, or you %{boldStart}will%{boldEnd} lose access to your account."
@@ -28064,6 +28082,9 @@ msgstr ""
 msgid "The issue was successfully promoted to an epic. Redirecting to epic..."
 msgstr ""
 
+msgid "The latest artifacts created by jobs in the most recent successful pipeline will be stored."
+msgstr ""
+
 msgid "The license key is invalid. Make sure it is exactly as you received it from GitLab Inc."
 msgstr ""
 
@@ -28400,6 +28421,9 @@ msgstr ""
 msgid "There was a problem fetching project users."
 msgstr ""
 
+msgid "There was a problem fetching the keep latest artifact setting."
+msgstr ""
+
 msgid "There was a problem fetching users."
 msgstr ""
 
@@ -28410,6 +28434,9 @@ msgid "There was a problem saving your custom stage, please try again"
 msgstr ""
 
 msgid "There was a problem sending the confirmation email"
+msgstr ""
+
+msgid "There was a problem updating the keep latest artifact setting."
 msgstr ""
 
 msgid "There was an error %{message} todo."
@@ -29493,6 +29520,9 @@ msgstr ""
 msgid "To define internal users, first enable new users set to external"
 msgstr ""
 
+msgid "To ensure no loss of personal content, an Individual User should create a separate account under their own personal email address, not tied to the Enterprise email domain or name-space."
+msgstr ""
+
 msgid "To further protect your account, consider configuring a %{mfa_link_start}two-factor authentication%{mfa_link_end} method."
 msgstr ""
 
@@ -29500,6 +29530,9 @@ msgid "To further protect your account, consider configuring a two-factor authen
 msgstr ""
 
 msgid "To get started you enter your FogBugz URL and login information below. In the next steps, you'll be able to map users and select the projects you want to import."
+msgstr ""
+
+msgid "To get started, click the link below to confirm your account."
 msgstr ""
 
 msgid "To get started, link this page to your Jaeger server, or find out how to %{link_start_tag}install Jaeger%{link_end_tag}"
@@ -30905,9 +30938,6 @@ msgstr ""
 msgid "Users requesting access to"
 msgstr ""
 
-msgid "Users requesting access to %{strong_start}%{group_name}%{strong_end}"
-msgstr ""
-
 msgid "Users requesting access to %{strong_start}%{project_name}%{strong_end}"
 msgstr ""
 
@@ -32174,6 +32204,9 @@ msgstr ""
 msgid "You can invite a new member to %{project_name}."
 msgstr ""
 
+msgid "You can invite a new member to %{strong_start}%{group_name}%{strong_end}."
+msgstr ""
+
 msgid "You can invite another group to %{project_name}."
 msgstr ""
 
@@ -32930,6 +32963,9 @@ msgid "by"
 msgstr ""
 
 msgid "can contain only letters of the Base64 alphabet (RFC4648) with the addition of '@', ':' and '.'"
+msgstr ""
+
+msgid "can't be enabled because signed commits are required for this project"
 msgstr ""
 
 msgid "cannot be a date in the past"

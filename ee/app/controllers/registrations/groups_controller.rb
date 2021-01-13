@@ -45,6 +45,12 @@ module Registrations
       redirect_to new_users_sign_up_project_path(url_params)
     end
 
+    protected
+
+    def show_confirm_warning?
+      false
+    end
+
     private
 
     def authorize_create_group!

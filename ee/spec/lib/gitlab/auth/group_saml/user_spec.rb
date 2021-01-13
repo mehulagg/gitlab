@@ -99,6 +99,11 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
             expect(find_and_update.projects_limit).to eq(20)
           end
         end
+
+        it 'does not send user confirmation email' do
+          expect { find_and_update }
+            .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+        end
       end
 
       context 'when a conflicting user already exists' do

@@ -1,0 +1,26 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query DastSavedScans($fullPath: ID!, $after: String, $before: String, $first: Int, $last: Int) {
+  project @client {
+    savedScans(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          name
+          dastSiteProfile {
+            id
+            targetUrl
+          }
+          dastScannerProfile {
+            id
+            scanType
+          }
+          editPath
+        }
+      }
+    }
+  }
+}

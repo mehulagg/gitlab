@@ -125,17 +125,12 @@ module Geo
       Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
     end
 
-    # Calculates checksum and asks the model/registry to update verification
+    # Calculates checksum and asks the model/registry to manage verification
     # state.
     def verify
-      model_record.verification_started! unless model_record.verification_started?
-
-      calculation_started_at = Time.current
-      checksum = model_record.calculate_checksum
-
-      model_record.verification_succeeded_with_checksum!(checksum, calculation_started_at)
-    rescue => e
-      model_record.verification_failed_with_message!('Error calculating the checksum', e)
+      model_record.track_checksum_attempt! do
+        model_record.calculate_checksum
+      end
     end
 
     # Check if given checksum matches known one

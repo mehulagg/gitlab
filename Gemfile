@@ -19,7 +19,7 @@ gem 'default_value_for', '~> 3.3.0'
 gem 'pg', '~> 1.1'
 
 gem 'rugged', '~> 0.28'
-gem 'grape-path-helpers', '~> 1.5'
+gem 'grape-path-helpers', '~> 1.6.1'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
@@ -309,7 +309,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.13.5'
+gem 'gitlab-labkit', '0.14.0'
 
 # I18n
 gem 'ruby_parser', '~> 3.15', require: false
@@ -352,8 +352,9 @@ end
 group :development, :test do
   gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
-  gem 'pry-byebug', '~> 3.9.0', platform: :mri
+  gem 'gitlab-pry-byebug', platform: :mri, require: ['pry-byebug', 'pry-byebug/pry_remote_ext']
   gem 'pry-rails', '~> 0.3.9'
+  gem 'pry-remote'
 
   gem 'awesome_print', require: false
 
@@ -370,7 +371,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.4.0', require: false
+  gem 'gitlab-styles', '~> 6.0.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false

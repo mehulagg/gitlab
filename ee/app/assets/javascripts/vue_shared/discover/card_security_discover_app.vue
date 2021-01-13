@@ -54,20 +54,10 @@ export default {
   },
   data: () => ({
     slide: 0,
-    textSlide: 0,
     carouselImages: [
-      {
-        index: 0,
-        imageUrl: securityDependencyImageUrl,
-      },
-      {
-        index: 1,
-        imageUrl: securityScanningImageUrl,
-      },
-      {
-        index: 2,
-        imageUrl: securityDashboardImageUrl,
-      },
+      securityDependencyImageUrl,
+      securityScanningImageUrl,
+      securityDashboardImageUrl,
     ],
   }),
   computed: {
@@ -88,7 +78,6 @@ export default {
         label: 'security-discover-carousel',
         property: `sliding${this.slide}-${slide}`,
       });
-      this.textSlide = slide;
     },
   },
   i18n: {
@@ -99,24 +88,15 @@ export default {
     discoverUpgradeLabel: s__('Discover|Upgrade now'),
     discoverTrialLabel: s__('Discover|Start a free trial'),
     carouselCaptions: [
-      {
-        index: 0,
-        caption: s__(
-          'Discover|Check your application for security vulnerabilities that may lead to unauthorized access, data leaks, and denial of services.',
-        ),
-      },
-      {
-        index: 1,
-        caption: s__(
-          'Discover|GitLab will perform static and dynamic tests on the code of your application, looking for known flaws and report them in the merge request so you can fix them before merging.',
-        ),
-      },
-      {
-        index: 2,
-        caption: s__(
-          "Discover|For code that's already live in production, our dashboards give you an easy way to prioritize any issues that are found, empowering your team to ship quickly and securely.",
-        ),
-      },
+      s__(
+        'Discover|Check your application for security vulnerabilities that may lead to unauthorized access, data leaks, and denial of services.',
+      ),
+      s__(
+        'Discover|GitLab will perform static and dynamic tests on the code of your application, looking for known flaws and report them in the merge request so you can fix them before merging.',
+      ),
+      s__(
+        "Discover|For code that's already live in production, our dashboards give you an easy way to prioritize any issues that are found, empowering your team to ship quickly and securely.",
+      ),
     ],
     discoverPlanCaption: s__(
       'Discover|See the other features of the %{linkStart}gold plan%{linkEnd}',
@@ -127,59 +107,52 @@ export default {
 
 <template>
   <div class="discover-box">
-    <h4 class="discover-title center gl-text-gray-900">
+    <h2 class="discover-title center gl-text-gray-900 gl-mx-auto">
       {{ $options.i18n.discoverTitle }}
-    </h4>
-    <gl-carousel
-      v-model="slide"
-      class="discover-carousel"
-      :no-wrap="true"
-      controls
-      :interval="0"
-      indicators
-      img-width="1440"
-      img-height="700"
-      @sliding-start="onSlideStart"
-    >
-      <gl-carousel-slide v-for="{ index, imageUrl } in carouselImages" :key="index" img-blank>
-        <img
-          :src="imageUrl"
-          class="discover-carousel-img w-100 box-shadow-default image-fluid d-block"
-        />
-      </gl-carousel-slide>
-    </gl-carousel>
-    <gl-carousel
-      ref="textCarousel"
-      v-model="textSlide"
-      class="discover-carousel discover-text-carousel"
-      :no-wrap="true"
-      :interval="0"
-      img-width="1440"
-      img-height="200"
-    >
-      <gl-carousel-slide
-        v-for="{ index, caption } in $options.i18n.carouselCaptions"
-        :key="index"
-        img-blank
+    </h2>
+    <div class="discover-carousels">
+      <gl-carousel
+        v-model="slide"
+        class="discover-carousel discover-image-carousel gl-mx-auto gl-text-center gl-border-solid gl-border-1 gl-bg-gray-10"
+        no-wrap
+        controls
+        :interval="0"
+        indicators
+        @sliding-start="onSlideStart"
       >
-        <p class="gl-text-gray-900 gl-text-left">
-          {{ caption }}
-        </p>
-      </gl-carousel-slide>
-    </gl-carousel>
-    <div class="discover-footer d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
-      <p class="gl-text-gray-900 text-left mb-5">
-        <gl-sprintf :message="$options.i18n.discoverPlanCaption">
-          <template #link="{ content }">
-            <gl-link
-              href="https://about.gitlab.com/pricing/saas/feature-comparison/"
-              target="_blank"
-            >
-              {{ content }}
-            </gl-link>
+        <gl-carousel-slide
+          v-for="(imageUrl, index) in carouselImages"
+          :key="index"
+          :img-src="imageUrl"
+        />
+      </gl-carousel>
+      <gl-carousel
+        ref="textCarousel"
+        v-model="slide"
+        class="discover-carousel discover-text-carousel gl-mx-auto gl-text-center"
+        no-wrap
+        :interval="0"
+      >
+        <gl-carousel-slide v-for="caption in $options.i18n.carouselCaptions" :key="caption">
+          <template #img>
+            {{ caption }}
           </template>
-        </gl-sprintf>
-      </p>
+        </gl-carousel-slide>
+      </gl-carousel>
+      <div class="discover-footer mx-auto my-0">
+        <p class="gl-text-gray-900 text-center mb-5">
+          <gl-sprintf :message="$options.i18n.discoverPlanCaption">
+            <template #link="{ content }">
+              <gl-link
+                href="https://about.gitlab.com/pricing/saas/feature-comparison/"
+                target="_blank"
+              >
+                {{ content }}
+              </gl-link>
+            </template>
+          </gl-sprintf>
+        </p>
+      </div>
     </div>
     <div class="discover-buttons d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
       <gl-button

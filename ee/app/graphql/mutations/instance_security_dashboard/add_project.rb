@@ -9,11 +9,11 @@ module Mutations
 
       field :project, Types::ProjectType,
             null: true,
-            description: 'Project that was added to the Instance Security Dashboard'
+            description: 'Project that was added to the Instance Security Dashboard.'
 
       argument :id, ::Types::GlobalIDType[::Project],
                required: true,
-               description: 'ID of the project to be added to Instance Security Dashboard'
+               description: 'ID of the project to be added to Instance Security Dashboard.'
 
       def resolve(id:)
         project = authorized_find!(id: id)

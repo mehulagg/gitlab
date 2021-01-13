@@ -9,11 +9,11 @@ module Mutations
         argument :health_status,
                  ::Types::HealthStatusEnum,
                  required: false,
-                 description: 'The desired health status'
+                 description: 'The desired health status.'
 
         argument :weight, GraphQL::INT_TYPE,
                  required: false,
-                 description: 'The weight of the issue'
+                 description: 'The weight of the issue.'
       end
     end
   end

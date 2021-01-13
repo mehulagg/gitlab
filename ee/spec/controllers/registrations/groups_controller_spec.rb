@@ -5,6 +5,26 @@ require 'spec_helper'
 RSpec.describe Registrations::GroupsController do
   let_it_be(:user) { create(:user) }
 
+  shared_examples 'hides email confirmation warning' do
+    RSpec::Matchers.define :set_confirm_warning_for do |email|
+      match do |response|
+        expect(response).to set_flash.now[:warning].to include("Please check your email (#{email}) to verify that you own this address and unlock the power of CI/CD.")
+      end
+    end
+
+    context 'with an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil, unconfirmed_email: 'unconfirmed@gitlab.com') }
+
+      it { is_expected.not_to set_confirm_warning_for(user.unconfirmed_email) }
+    end
+
+    context 'without an unconfirmed email address present' do
+      let(:user) { create(:user, confirmed_at: nil) }
+
+      it { is_expected.not_to set_confirm_warning_for(user.email) }
+    end
+  end
+
   describe 'GET #new' do
     subject { get :new }
 
@@ -48,6 +68,8 @@ RSpec.describe Registrations::GroupsController do
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
+
+      it_behaves_like 'hides email confirmation warning'
     end
   end
 
@@ -172,6 +194,7 @@ RSpec.describe Registrations::GroupsController do
         end
       end
 
+      it_behaves_like 'hides email confirmation warning'
       it_behaves_like GroupInviteMembers
 
       context 'when the trial onboarding is active' do

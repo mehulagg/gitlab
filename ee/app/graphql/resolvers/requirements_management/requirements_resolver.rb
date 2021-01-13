@@ -10,11 +10,11 @@ module Resolvers
 
       argument :iid, GraphQL::ID_TYPE,
                required: false,
-               description: 'IID of the requirement, e.g., "1"'
+               description: 'IID of the requirement, e.g., "1".'
 
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
-               description: 'List of IIDs of requirements, e.g., [1, 2]'
+               description: 'List of IIDs of requirements, e.g., [1, 2].'
 
       def resolve_with_lookahead(**args)
         # The project could have been loaded in batch by `BatchLoader`.

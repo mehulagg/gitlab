@@ -326,30 +326,39 @@ RSpec.shared_examples 'a verifiable replicator' do
   end
 
   describe '#verify' do
-    context 'on a Geo primary' do
+    it 'wraps the checksum calculation in track_checksum_attempt!' do
+      tracker = double('tracker', calculate_checksum: 'abc123')
+      allow(replicator).to receive(:model_record).and_return(tracker)
+
+      expect(tracker).to receive(:track_checksum_attempt!).and_yield
+
+      replicator.verify
+    end
+  end
+
+  context 'integration tests' do
+    before do
+      model_record.save!
+    end
+
+    context 'on a primary' do
       before do
         stub_primary_node
       end
 
-      context 'when the checksum succeeds' do
-        it 'delegates checksum calculation and the state change to model_record' do
-          expect(model_record).to receive(:calculate_checksum).and_return('abc123')
-          expect(model_record).to receive(:verification_succeeded_with_checksum!).with('abc123', kind_of(Time))
-
-          replicator.verify
+      describe 'background backfill' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationBatchWorker.new.perform(replicator.replicable_name)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
         end
       end
 
-      context 'when an error is raised during calculate_checksum' do
-        it 'passes the error message' do
-          error = StandardError.new('Some exception')
-          allow(model_record).to receive(:calculate_checksum) do
-            raise error
-          end
-
-          expect(model_record).to receive(:verification_failed_with_message!).with('Error calculating the checksum', error)
-
-          replicator.verify
+      describe 'triggered by events' do
+        it 'verifies model records' do
+          expect do
+            Geo::VerificationWorker.new.perform(replicator.replicable_name, replicator.model_record_id)
+          end.to change { model_record.reload.verification_succeeded? }.from(false).to(true)
         end
       end
     end

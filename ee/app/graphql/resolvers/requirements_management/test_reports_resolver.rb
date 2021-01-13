@@ -5,7 +5,7 @@ module Resolvers
     class TestReportsResolver < BaseResolver
       argument :sort, Types::SortEnum,
                required: false,
-               description: 'List test reports by sort order'
+               description: 'List test reports by sort order.'
 
       type Types::RequirementsManagement::TestReportType, null: true
 

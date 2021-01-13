@@ -9,15 +9,15 @@ module Mutations
 
       argument :state, Types::RequirementsManagement::RequirementStateEnum,
                required: false,
-               description: 'State of the requirement'
+               description: 'State of the requirement.'
 
       argument :iid, GraphQL::STRING_TYPE,
                required: true,
-               description: 'The IID of the requirement to update'
+               description: 'The IID of the requirement to update.'
 
       argument :last_test_report_state, Types::RequirementsManagement::TestReportStateEnum,
                required: false,
-               description: 'Creates a test report for the requirement with the given state'
+               description: 'Creates a test report for the requirement with the given state.'
 
       def ready?(**args)
         update_args = [:title, :state, :last_test_report_state, :description]
