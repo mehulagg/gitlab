@@ -836,7 +836,7 @@ Similar to `repmgr`, when a Geo secondary site is replicating from a primary sit
 sudo gitlab-ctl replicate-geo-database --host=<new_leader_ip> --replication-slot=<slot_name>
 ```
 
-Otherwise, the replication will not happen anymore, even if the original node gets re-added as a follower node. This will re-sync your secondary site database and may take a long time depending on the amount of data to sync.
+Otherwise, the replication will not happen anymore, even if the original node gets re-added as a follower node. This will re-sync your secondary site database and may take a long time depending on the amount of data to sync. You may also need to run `gitlab-ctl reconfigure` if replication is still not working after re-syncing.
 
 ### Recovering the Patroni cluster
 
@@ -1232,7 +1232,7 @@ When a Geo secondary site is replicating from a primary site that uses `repmgr` 
 sudo gitlab-ctl replicate-geo-database --host=<new_leader_ip> --replication-slot=<slot_name>
 ```
 
-Otherwise, the replication will not happen anymore, even if the original node gets re-added as a follower node. This will re-sync your secondary site database and may take a long time depending on the amount of data to sync.
+Otherwise, the replication will not happen anymore, even if the original node gets re-added as a follower node. This will re-sync your secondary site database and may take a long time depending on the amount of data to sync. You may also need to run `gitlab-ctl reconfigure` if replication is still not working after re-syncing.
 
 ### Repmgr Restore procedure
 
