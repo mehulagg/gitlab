@@ -134,7 +134,13 @@ describe('Metrics upload item', () => {
         expect(dispatchSpy).toHaveBeenCalledWith('deleteImage', defaultProps.id);
       });
     });
-  });
 
-  // TODO: Add spec for when `canUpdate` is `false`
+    describe('canUpdate permission', () => {
+      it('delete button is hidden when user lacks update permissions', () => {
+        mountComponent({ provide: { canUpdate: false } });
+
+        expect(findDeleteButton().exists()).toBe(false);
+      });
+    });
+  });
 });
