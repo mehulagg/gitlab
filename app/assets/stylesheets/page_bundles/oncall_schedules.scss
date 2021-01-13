@@ -38,7 +38,8 @@
     max-width: 640px;
   }
 
-  // TODO: move to gitlab-ui
+  // TODO: move to gitlab/ui utilities
+  // https://gitlab.com/gitlab-org/gitlab/-/issues/297502
   .gl-w-fit-content {
     width: fit-content;
   }
