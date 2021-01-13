@@ -54,5 +54,18 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
       it_behaves_like 'token creation succeeds'
     end
+
+    context 'project access token audit events' do
+      let_it_be(:user) { create(:admin) }
+      let(:resource) { create(:project) }
+
+      before do
+        resource.add_maintainer(user)
+      end
+
+      it 'logs audit event' do
+        expect { subject }.to change { AuditEvent.count }.from(0).to(1)
+      end
+    end
   end
 end
