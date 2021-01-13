@@ -8,7 +8,6 @@ RSpec.describe Mutations::DastScans::Create do
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
-  let(:full_path) { project.full_path }
   let(:name) { SecureRandom.hex }
   let(:description) { SecureRandom.hex }
   let(:run_after_create) { false }
@@ -26,7 +25,7 @@ RSpec.describe Mutations::DastScans::Create do
   describe '#resolve' do
     subject do
       mutation.resolve(
-        full_path: full_path,
+        full_path: project.full_path,
         name: name,
         description: description,
         dast_site_profile_id: dast_site_profile.to_global_id.to_s,
@@ -35,11 +34,11 @@ RSpec.describe Mutations::DastScans::Create do
       )
     end
 
-    context 'when the feature is available' do
-      context 'when the project does not exist' do
-        let(:full_path) { SecureRandom.hex }
-
+    context 'when the feature is licensed' do
+      context 'when the feature is enabled' do
         it 'raises an exception' do
+          stub_feature_flags(dast_saved_scans: false)
+
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
@@ -54,7 +53,12 @@ RSpec.describe Mutations::DastScans::Create do
 
           it 'returns the pipeline_url' do
             actual_url = subject[:pipeline_url]
-            pipeline = Ci::Pipeline.find_by(project: project, sha: project.repository.commit.sha, source: :ondemand_dast_scan, config_source: :parameter_source)
+            pipeline = Ci::Pipeline.find_by(
+              project: project,
+              sha: project.repository.commit.sha,
+              source: :ondemand_dast_scan,
+              config_source: :parameter_source
+            )
             expected_url = Rails.application.routes.url_helpers.project_pipeline_url(
               project,
               pipeline

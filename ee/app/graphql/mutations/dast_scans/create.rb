@@ -45,6 +45,7 @@ module Mutations
 
       def resolve(full_path:, name:, description: '', dast_site_profile_id:, dast_scanner_profile_id:, run_after_create: false)
         project = authorized_find!(full_path)
+        raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
         # TODO: remove explicit coercion once compatibility layer is removed
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
@@ -54,32 +55,29 @@ module Mutations
         dast_site_profile = project.dast_site_profiles.find(site_profile_id.model_id)
         dast_scanner_profile = project.dast_scanner_profiles.find(scanner_profile_id.model_id)
 
-        dast_scan = DastScan.create(
-          project: project,
-          name: name,
-          description: description,
-          dast_site_profile: dast_site_profile,
-          dast_scanner_profile: dast_scanner_profile
-        )
+        response = ::DastScans::CreateService.new(
+          container: project,
+          current_user: current_user,
+          params: {
+            project: project,
+            name: name,
+            description: description,
+            dast_site_profile: dast_site_profile,
+            dast_scanner_profile: dast_scanner_profile,
+            run_after_create: run_after_create
+          }
+        ).execute
 
-        return { errors: dast_scan.errors.full_messages } unless dast_scan.persisted?
+        return { errors: response.errors } if response.error?
 
-        if run_after_create
-          response = ::DastOnDemandScans::CreateService.new(
-            container: project,
-            current_user: current_user,
-            params: {
-              dast_site_profile: dast_site_profile,
-              dast_scanner_profile: dast_scanner_profile
-            }
-          ).execute
+        { errors: [], dast_scan: response.payload.fetch(:dast_scan), pipeline_url: response.payload.fetch(:pipeline_url) }
+      end
 
-          return { errors: response.errors } if response.error?
+      private
 
-          { errors: [], dast_scan: dast_scan, pipeline_url: response.payload.fetch(:pipeline_url) }
-        else
-          { errors: [], dast_scan: dast_scan }
-        end
+      def allowed?(project)
+        project.feature_available?(:security_on_demand_scans) &&
+          Feature.enabled?(:dast_saved_scans, project, default_enabled: :yaml)
       end
     end
   end
