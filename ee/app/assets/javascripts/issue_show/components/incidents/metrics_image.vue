@@ -42,6 +42,7 @@ export default {
       modalVisible: false,
     };
   },
+  inject: ['canUpdate'],
   computed: {
     actionPrimaryProps() {
       return {
@@ -126,6 +127,7 @@ export default {
           </gl-link>
           <span v-else>{{ filename }}</span>
           <gl-button
+            v-if="canUpdate"
             class="gl-ml-auto"
             icon="remove"
             data-testid="delete-button"

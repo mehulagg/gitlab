@@ -5,7 +5,6 @@ import merge from 'lodash/merge';
 import waitForPromises from 'helpers/wait_for_promises';
 import createStore from 'ee/issue_show/components/incidents/store';
 import MetricsImage from 'ee/issue_show/components/incidents/metrics_image.vue';
-// import actions from 'ee/issue_show/components/incidents/store/actions';
 
 const defaultProps = {
   id: 1,
@@ -34,6 +33,7 @@ describe('Metrics upload item', () => {
           propsData: {
             ...defaultProps,
           },
+          provide: { canUpdate: true },
         },
         options,
       ),
@@ -147,4 +147,6 @@ describe('Metrics upload item', () => {
       expect(dispatchSpy).toHaveBeenCalledWith('deleteImage', defaultProps.id);
     });
   });
+
+  // TODO: Add spec for when `canUpdate` is `false`
 });
