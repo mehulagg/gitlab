@@ -230,7 +230,7 @@ the rules for "Groups" and "Documentation" sections:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.8 behind a feature flag, enabled by default.
 
 A section name can be prepended with the caret `^` character in order to mark
-the section will as optional. This means, approvals for changes to the related files/paths will **not** be required.
+the section will as optional. This means, approvals through merge requests for changes to the related files/paths will **not** be required.
 
 ```plaintext
 [Documentation]
@@ -243,7 +243,7 @@ the section will as optional. This means, approvals for changes to the related f
 *.go @root
 ```
 
-This means, related change through merge requests will not require approval from designated owners:
+Related change through merge requests will not require approval from designated owners and show as optional:
 
 ![MR widget - Optional Code Owners Sections](img/optional_code_owners_sections_13_8.png)
 
