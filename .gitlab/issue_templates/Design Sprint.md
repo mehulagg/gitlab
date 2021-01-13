@@ -1,7 +1,7 @@
 <!-- Title: Design Sprint -->
 
 ## Design Sprint Focus
-
+* [ ] Have you [determined that a Design Sprint is appropriate for this project](#anchor-tag-to-handbook-page)?
 <!-- What is the focus of the [Design Sprint](https://about.gitlab.com/handbook/product/product-processes/#design-sprint)? What problem area will you be solving for and who is the target user? -->
 
 ## Objectives
