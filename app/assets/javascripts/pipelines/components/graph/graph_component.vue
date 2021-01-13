@@ -38,6 +38,7 @@ export default {
   data() {
     return {
       hoveredJobName: '',
+      highlightedJobs: [],
       measurements: {
         width: 0,
         height: 0,
@@ -102,6 +103,9 @@ export default {
         jobName: expanded ? jobName : '',
       };
     },
+    updateHighlightedJobs(jobs) {
+      this.highlightedJobs = jobs;
+    }
   },
 };
 </script>
@@ -121,6 +125,7 @@ export default {
         :highlighted-job="hoveredJobName"
         default-link-color="gl-stroke-transparent"
         @error="onError"
+        @highlightedJobsChange="updateHighlightedJobs"
       >
         <linked-graph-wrapper>
           <template #upstream>
@@ -139,6 +144,7 @@ export default {
               :title="stage.name"
               :groups="stage.groups"
               :action="stage.status.action"
+              :highlighted-jobs="highlightedJobs"
               :job-hovered="hoveredJobName"
               :pipeline-expanded="pipelineExpanded"
               :pipeline-id="pipeline.id"
