@@ -40,7 +40,7 @@
             = revert_commit_link(@commit, project_commit_path(@project, @commit.id), pajamas: true)
         - if can_collaborate
           %li.clearfix
-            = cherry_pick_commit_link(@commit, project_commit_path(@project, @commit.id), has_tooltip: false)
+            = cherry_pick_commit_link
         - if can?(current_user, :push_code, @project)
           %li.clearfix
             = link_to s_('CreateTag|Tag'), new_project_tag_path(@project, ref: @commit)

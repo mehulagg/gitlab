@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import CommitFormTrigger from './components/form_trigger.vue';
-import { OPEN_REVERT_MODAL } from './constants';
+import { OPEN_CHERRY_PICK_MODAL } from './constants';
 
 export default function initInviteMembersTrigger() {
-  const el = document.querySelector('.js-revert-commit-trigger');
+  const el = document.querySelector('.js-cherry-pick-commit-trigger');
 
   if (!el) {
     return false;
@@ -15,6 +15,6 @@ export default function initInviteMembersTrigger() {
     el,
     provide: { displayText },
     render: (createElement) =>
-      createElement(CommitFormTrigger, { props: { openModal: OPEN_REVERT_MODAL } }),
+      createElement(CommitFormTrigger, { props: { openModal: OPEN_CHERRY_PICK_MODAL } }),
   });
 }

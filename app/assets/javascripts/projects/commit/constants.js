@@ -2,6 +2,8 @@ import { s__, __ } from '~/locale';
 
 export const OPEN_REVERT_MODAL = 'openRevertModal';
 export const REVERT_MODAL_ID = 'revert-commit-modal';
+export const OPEN_CHERRY_PICK_MODAL = 'openCherryPickModal';
+export const CHERRY_PICK_MODAL_ID = 'cherry-pick-commit-modal';
 
 export const I18N_MODAL = {
   startMergeRequest: s__('ChangeTypeAction|Start a %{newMergeRequest} with these changes'),
@@ -18,6 +20,11 @@ export const I18N_MODAL = {
 export const I18N_REVERT_MODAL = {
   branchLabel: s__('ChangeTypeAction|Revert in branch'),
   actionPrimaryText: s__('ChangeTypeAction|Revert'),
+};
+
+export const I18N_CHERRY_PICK_MODAL = {
+  branchLabel: s__('ChangeTypeAction|Pick into branch'),
+  actionPrimaryText: s__('ChangeTypeAction|Cherry-pick'),
 };
 
 export const PREPENDED_MODAL_TEXT = s__(

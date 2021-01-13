@@ -19,9 +19,9 @@ module CommitsHelper
 
   def commit_to_html(commit, ref, project)
     render 'projects/commits/commit.html',
-      commit: commit,
-      ref: ref,
-      project: project
+           commit: commit,
+           ref: ref,
+           project: project
   end
 
   # Breadcrumb links for a Project and, if applicable, a tree path
@@ -122,8 +122,10 @@ module CommitsHelper
     end
   end
 
-  def cherry_pick_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true)
-    commit_action_link('cherry-pick', commit, continue_to_path, btn_class: btn_class, has_tooltip: has_tooltip)
+  def cherry_pick_commit_link
+    return unless current_user
+
+    tag(:div, data: { display_text: 'Cherry-pick' }, class: "js-cherry-pick-commit-trigger")
   end
 
   def commit_signature_badge_classes(additional_classes)
@@ -143,7 +145,7 @@ module CommitsHelper
   def commit_person_link(commit, options = {})
     user = commit.public_send(options[:source]) # rubocop:disable GitlabSecurity/PublicSend
 
-    source_name  = clean(commit.public_send(:"#{options[:source]}_name"))  # rubocop:disable GitlabSecurity/PublicSend
+    source_name = clean(commit.public_send(:"#{options[:source]}_name")) # rubocop:disable GitlabSecurity/PublicSend
     source_email = clean(commit.public_send(:"#{options[:source]}_email")) # rubocop:disable GitlabSecurity/PublicSend
 
     person_name = user.try(:name) || source_name
@@ -181,8 +183,8 @@ module CommitsHelper
         notice_now: edit_in_new_fork_notice_now
       }
       fork_path = project_forks_path(@project,
-        namespace_key: current_user.namespace.id,
-        continue: continue_params)
+                                     namespace_key: current_user.namespace.id,
+                                     continue: continue_params)
 
       link_to action.capitalize, fork_path, class: btn_class, method: :post, 'data-toggle' => 'tooltip', 'data-container' => 'body', title: (tooltip if has_tooltip)
     end
