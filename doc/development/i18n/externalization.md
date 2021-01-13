@@ -387,6 +387,9 @@ Namespaces should be PascalCase.
 The namespace should be removed from the translation. See the
 [translation guidelines for more details](translation.md#namespaced-strings).
 
+WARNING:
+Avoid adding namespaces to translations during refactoring unless strictly necessary as we may lose existing translations (you can check for existing translations on [Crowdin](https://crowdin.com/translate/gitlab-ee)).
+
 ### HTML
 
 We no longer include HTML directly in the strings that are submitted for translation. This is for a couple of reasons:
