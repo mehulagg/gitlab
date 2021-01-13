@@ -120,6 +120,61 @@ RSpec.describe Spammable do
         end
       end
 
+      describe '#render_recaptcha?' do
+        context 'when recaptcha is not enabled' do
+          before do
+            allow(Gitlab::Recaptcha).to receive(:enabled?) { false }
+          end
+
+          it 'returns false' do
+            expect(issue.render_recaptcha?).to eq(false)
+          end
+        end
+
+        context 'when recaptcha is enabled' do
+          before do
+            allow(Gitlab::Recaptcha).to receive(:enabled?) { true }
+          end
+
+          context 'when there is more than one error' do
+            before do
+              issue.errors.add(:base, 'a spam error')
+              issue.errors.add(:base, 'some other error')
+            end
+
+            it 'returns false' do
+              expect(issue.render_recaptcha?).to eq(false)
+            end
+          end
+
+          context 'when there is only one or zero errors' do
+            before do
+              issue.errors.add(:base, 'a spam error')
+            end
+
+            context 'when spammable does not need recaptcha' do
+              before do
+                issue.needs_recaptcha = false
+              end
+
+              it 'returns false' do
+                expect(issue.render_recaptcha?).to eq(false)
+              end
+            end
+
+            context 'when spammable needs recaptcha' do
+              before do
+                issue.needs_recaptcha!
+              end
+
+              it 'returns false' do
+                expect(issue.render_recaptcha?).to eq(true)
+              end
+            end
+          end
+        end
+      end
+
       describe '#clear_spam_flags!' do
         it 'clears spam and recaptcha flags' do
           issue.spam = true

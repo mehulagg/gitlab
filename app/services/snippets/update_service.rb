@@ -17,17 +17,20 @@ module Snippets
       end
 
       update_snippet_attributes(snippet)
-      Spam::SpamActionService.new(
-        spammable: snippet,
-        request: request,
-        user: current_user,
-        action: :update
-      ).execute(spam_params: spam_params)
+
+      if Feature.enabled?(:snippet_spam)
+        Spam::SpamActionService.new(
+          spammable: snippet,
+          request: request,
+          user: current_user,
+          action: :update
+        ).execute(spam_params: spam_params)
+      end
 
       if save_and_commit(snippet)
         Gitlab::UsageDataCounters::SnippetCounter.count(:update)
 
-        ServiceResponse.success(payload: { snippet: snippet } )
+        ServiceResponse.success(payload: { snippet: snippet })
       else
         snippet_error_response(snippet, 400)
       end
