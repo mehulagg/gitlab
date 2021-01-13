@@ -443,6 +443,21 @@ RSpec.describe JiraService do
     end
   end
 
+  describe '#find_issue' do
+    let(:issue_key) { 'JIRA-123' }
+    let(:issue_url) { "#{url}/rest/api/2/issue/#{issue_key}" }
+
+    before do
+      stub_request(:get, issue_url).with(basic_auth: [username, password])
+    end
+
+    it 'call the Jira API to get the issue' do
+      jira_service.find_issue(issue_key)
+
+      expect(WebMock).to have_requested(:get, issue_url)
+    end
+  end
+
   describe '#close_issue' do
     let(:custom_base_url) { 'http://custom_url' }
 
