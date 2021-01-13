@@ -14,14 +14,21 @@ module Snippets
       end
 
       update_snippet_attributes(snippet)
-      spam_check(snippet, current_user, action: :update)
+
+      spam_check_fields =
+        if Feature.enabled?(:snippet_spam)
+          spam_check(snippet, current_user, action: :update)
+        else
+          { spam: false, needs_recaptcha_response: false }
+        end
 
       if save_and_commit(snippet)
         Gitlab::UsageDataCounters::SnippetCounter.count(:update)
 
-        ServiceResponse.success(payload: { snippet: snippet } )
+        ServiceResponse.success(payload: { snippet: snippet })
       else
-        snippet_error_response(snippet, 400)
+        payload = { snippet: snippet, spam_check_fields: spam_check_fields }
+        snippet_error_response(payload, 400)
       end
     end
 

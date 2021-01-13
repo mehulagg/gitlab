@@ -31,7 +31,7 @@ module Snippets
     def forbidden_visibility_error(snippet)
       deny_visibility_level(snippet)
 
-      snippet_error_response(snippet, 403)
+      snippet_error_response({ snippet: snippet }, 403)
     end
 
     def valid_params?
@@ -49,14 +49,14 @@ module Snippets
         snippet.errors.add(:snippet_actions, 'have invalid data')
       end
 
-      snippet_error_response(snippet, 422)
+      snippet_error_response({ snippet: snippet }, 422)
     end
 
-    def snippet_error_response(snippet, http_status)
+    def snippet_error_response(payload, http_status)
       ServiceResponse.error(
-        message: snippet.errors.full_messages.to_sentence,
+        message: payload[:snippet].errors.full_messages.to_sentence,
         http_status: http_status,
-        payload: { snippet: snippet }
+        payload: payload
       )
     end
 
