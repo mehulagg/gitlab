@@ -595,6 +595,32 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             end
           end
 
+          context 'when artifact_type is metrics' do
+            context 'when artifact_format is gzip' do
+              let(:file_upload) { fixture_file_upload('spec/fixtures/junit/junit.xml.gz') }
+              let(:params) { { artifact_type: :metrics, artifact_format: :gzip } }
+
+              it 'stores junit test report' do
+                upload_artifacts(file_upload, headers_with_token, params)
+
+                expect(response).to have_gitlab_http_status(:created)
+                expect(job.reload.job_artifacts_metrics).not_to be_nil
+              end
+            end
+
+            context 'when artifact_format is an invalid type' do
+              let(:file_upload) { fixture_file_upload('spec/fixtures/junit/junit.xml.gz') }
+              let(:params) { { artifact_type: :metrics, artifact_format: :raw } }
+
+              it 'returns an error' do
+                upload_artifacts(file_upload, headers_with_token, params)
+
+                expect(response).to have_gitlab_http_status(:bad_request)
+                expect(job.reload.job_artifacts_metrics).to be_nil
+              end
+            end
+          end
+
           context 'when artifact_type is metrics_referee' do
             context 'when artifact_format is gzip' do
               let(:file_upload) { fixture_file_upload('spec/fixtures/referees/metrics_referee.json.gz') }
