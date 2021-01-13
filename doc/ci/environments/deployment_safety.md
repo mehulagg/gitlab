@@ -122,7 +122,6 @@ A `.gitlab-ci.yml` may contain rules to deploy application to production server 
 
 For more information, see [Custom CI configuration path](../pipelines/settings.html#custom-ci-configuration-path).
 
-
 ## Troubleshooting
  
 ### Pipelines jobs fail with `The deployment job is older than the previously succeeded deployment job...`
