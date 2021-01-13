@@ -299,6 +299,14 @@ through web requests. See the
 [follow-up work](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/68)
 for more information.
 
+### Logging context metadata (through workers)
+
+Additional metadata can be attached to a worker through the use of the [`ApplicationWorker#log_extra_metadata_on_done`](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/concerns/application_worker.rb#L31-34)
+method. Using this method will add metadata that will later be logged with the done job payload to Kibana.
+
+Please see [this example](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/ci/pipeline_artifacts/expire_artifacts_worker.rb#L20-21)
+which logs a count of how many artifacts were destroyed in a run of the `ExpireArtifactsWorker`.
+
 ## Exception Handling
 
 It often happens that you catch the exception and want to track it.
