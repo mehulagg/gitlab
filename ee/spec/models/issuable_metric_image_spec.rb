@@ -44,21 +44,12 @@ RSpec.describe IssuableMetricImage do
 
     before do
       stub_licensed_features(incident_metric_upload: true)
-      stub_feature_flags(incident_metric_upload_ui: true)
     end
 
     let_it_be_with_refind(:issue) { create(:issue) }
 
-    context 'license and feature flag enabled' do
+    context 'license enabled' do
       it { is_expected.to eq(true) }
-    end
-
-    context 'feature flag disabled' do
-      before do
-        stub_feature_flags(incident_metric_upload_ui: false)
-      end
-
-      it { is_expected.to eq(false) }
     end
 
     context 'license disabled' do
