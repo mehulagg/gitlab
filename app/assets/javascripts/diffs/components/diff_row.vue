@@ -64,7 +64,12 @@ export default {
     parallelViewLeftLineType() {
       return utils.parallelViewLeftLineType(this.line, this.isHighlighted);
     },
-    coverageState() {
+    coverageStateLeft() {
+      if(!this.line.left) return {}
+      return this.fileLineCoverage(this.filePath, this.line.left.new_line);
+    },
+    coverageStateRight() {
+      if(!this.line.right) return {}
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
     classNameMapCellLeft() {
@@ -198,7 +203,12 @@ export default {
           >
           </a>
         </div>
-        <div :class="parallelViewLeftLineType" class="diff-td line-coverage left-side"></div>
+        <div
+          v-gl-tooltip.hover
+          :title="coverageStateLeft.text"
+          :class="[...parallelViewLeftLineType, coverageStateLeft.class]"
+          class="diff-td line-coverage left-side"
+        ></div>
         <div
           :id="line.left.line_code"
           :key="line.left.line_code"
@@ -278,8 +288,8 @@ export default {
         </div>
         <div
           v-gl-tooltip.hover
-          :title="coverageState.text"
-          :class="[line.right.type, coverageState.class, { hll: isHighlighted }]"
+          :title="coverageStateRight.text"
+          :class="[line.right.type, coverageStateRight.class, { hll: isHighlighted }]"
           class="diff-td line-coverage right-side"
         ></div>
         <div
