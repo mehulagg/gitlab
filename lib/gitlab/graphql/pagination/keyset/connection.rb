@@ -162,8 +162,8 @@ module Gitlab
 
               list = OrderInfo.build_order_list(items)
 
-              if loaded?(items)
-                @order_list = list.presence || [items.primary_key]
+              if loaded?(items) && !before.present? && !after.present?
+                @order_list = list.presence || [OrderInfo.new(items.primary_key)]
 
                 # already sorted, or trivially sorted
                 next items if list.present? || items.size <= 1
