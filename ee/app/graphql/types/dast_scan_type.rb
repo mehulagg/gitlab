@@ -26,8 +26,7 @@ module Types
           description: 'Relative web path to the edit page of a scan.'
 
     def edit_path
-      # edit_project_on_demand_scan_path(project, id: id)
-      ''
+      Rails.application.routes.url_helpers.edit_project_on_demand_scan_path(object.project, object)
     end
   end
 end

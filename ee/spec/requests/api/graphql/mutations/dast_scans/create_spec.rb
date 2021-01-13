@@ -25,13 +25,22 @@ RSpec.describe 'Creating a DAST Scan' do
 
   it_behaves_like 'an on-demand scan mutation when user cannot run an on-demand scan'
   it_behaves_like 'an on-demand scan mutation when user can run an on-demand scan' do
-    it 'returns dastScan.id and pipelineUrl' do
+    it 'returns dastScan.id' do
       subject
 
-      aggregate_failures do
-        expect(mutation_response.dig('dastScan', 'id')).to eq(global_id_of(dast_scan))
-        expect(mutation_response['pipelineUrl']).not_to be_empty
-      end
+      expect(mutation_response.dig('dastScan', 'id')).to eq(global_id_of(dast_scan))
+    end
+
+    it 'returns dastScan.editPath' do
+      subject
+
+      expect(mutation_response.dig('dastScan', 'editPath')).to eq(edit_project_on_demand_scan_path(project, dast_scan))
+    end
+
+    it 'returns a non-empty pipelineUrl' do
+      subject
+
+      expect(mutation_response['pipelineUrl']).not_to be_blank
     end
   end
 end
