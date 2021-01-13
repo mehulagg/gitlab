@@ -2,7 +2,7 @@ return if Rails.env.production?
 
 require 'png_quantizator'
 require 'parallel'
-require_relative '../../tooling/lib/tooling/images'
+require_relative '../../tooling/images'
 
 # The amount of variance (in bytes) allowed in
 # file size when testing for compression size
