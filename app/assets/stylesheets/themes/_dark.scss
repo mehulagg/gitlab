@@ -178,7 +178,7 @@ body.gl-dark {
     &.btn-danger,
     &.btn-warning {
       &-tertiary {
-        mix-blend-mode: normal;
+        mix-blend-mode: screen;
       }
     }
   }
