@@ -1106,7 +1106,7 @@ By doing so, the `wrapper` provides you with the ability to perform a `findByTes
 which is a shortcut to the more verbose `wrapper.find('[data-testid="my-test-id"]');`
 
 ```javascript
-import { extendedWrapper } from 'helpers//vue_test_utils_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('FooComponent', () => {
   const wrapper = extendedWrapper(shallowMount({
