@@ -22,8 +22,8 @@ describe('EE - CorpusManagement', () => {
     wrapper.destroy();
   });
 
-  describe('header', () => {
-    it('shows a heading that describes the purpose of the page', () => {
+  describe('corpus management', () => {
+    it('bootstraps and renders the component', () => {
       createComponent();
       expect(wrapper.find(CorpusManagement).exists()).toBe(true);
     });
