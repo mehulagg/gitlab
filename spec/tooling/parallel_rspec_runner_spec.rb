@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../../tooling/lib/tooling/parallel_rspec_runner'
+require_relative '../../tooling/parallel_rspec_runner'
 
 RSpec.describe Tooling::ParallelRSpecRunner do # rubocop:disable RSpec/FilePath
   describe '#run' do

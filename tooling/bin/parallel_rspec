@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'optparse'
-require_relative '../lib/tooling/parallel_rspec_runner'
+require_relative '../parallel_rspec_runner'
 
 options = {}
 
