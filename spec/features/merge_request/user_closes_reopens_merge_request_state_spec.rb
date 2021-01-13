@@ -89,6 +89,7 @@ RSpec.describe 'User closes/reopens a merge request', :js do
 
         within '.timeline-content-form' do
           click_button 'Reopen merge request'
+          wait_for_requests
 
           # Clicking the bottom `Reopen merge request` button does not yet update
           # the header status so for now we'll check that the button text changes
