@@ -1062,6 +1062,9 @@ See also [Notes on testing Vue components](../fe_guide/vue.md#testing-vue-compon
 
 ## Test helpers
 
+Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__).
+If you introduce new helpers, please place them in that directory.  
+
 ### Vuex Helper: `testAction`
 
 We have a helper available to make testing actions easier, as per [official documentation](https://vuex.vuejs.org/guide/testing.html):
@@ -1103,7 +1106,7 @@ By doing so, the `wrapper` provides you with the ability to perform a `findByTes
 which is a shortcut to the more verbose `wrapper.find('[data-testid="my-test-id"]');`
 
 ```javascript
-import { extendedWrapper } from 'jest/helpers/vue_test_utils_helper';
+import { extendedWrapper } from 'helpers//vue_test_utils_helper';
 
 describe('FooComponent', () => {
   const wrapper = extendedWrapper(shallowMount({
