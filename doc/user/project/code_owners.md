@@ -225,6 +225,45 @@ the rules for "Groups" and "Documentation" sections:
 
 ![MR widget - Sectional Code Owners](img/sectional_code_owners_v13.2.png)
 
+GitLab 13.8 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232995)
+the ability to designate optional code owners sections.
+A section name can be prepended with the caret `^` character in order to mark
+the section will as optional:
+
+```plaintext
+[Documentation]
+*.md @root
+
+[Ruby]
+*.rb @root
+
+^[Go]
+*.go @root
+```
+
+This means, related change through merge requests will not require approval from designated owners:
+
+![MR widget - Optional Code Owners Sections](img/optional_code_owners_sections_13_8.png)
+
+If a duplicated section is marked as optional:
+
+```plaintext
+[Documentation]
+*.md @root
+
+[Ruby]
+*.rb @root
+
+^[Go]
+*.go @root
+
+^[Documentation]
+*.txt @root
+```
+
+It will still be required as long as any other entry of the section name is not
+marked as optional.
+
 ## Example `CODEOWNERS` file
 
 ```plaintext
