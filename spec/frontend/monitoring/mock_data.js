@@ -1,4 +1,5 @@
-import { TEST_HOST } from 'helpers/test_constants';
+// The path below needs to be relative because we import the mock-data to karma
+import { TEST_HOST } from '../__helpers__/test_constants';
 import invalidUrl from '~/lib/utils/invalid_url';
 // This import path needs to be relative for now because this mock data is used in
 // Karma specs too, where the helpers/test_constants alias can not be resolved
