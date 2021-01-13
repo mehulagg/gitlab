@@ -13,5 +13,5 @@ export const uploadMetricImage = async (payload) => {
 
 export const deleteMetricImage = async (payload) => {
   const response = await Api.deleteMetricImage(payload);
-  return convertObjectPropsToCamelCase(response.data); // TODO: Confirm whether response is required
+  return convertObjectPropsToCamelCase(response.data);
 };
