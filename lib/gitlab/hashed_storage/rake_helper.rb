@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'find'
+
 module Gitlab
   module HashedStorage
     module RakeHelper
@@ -65,6 +67,7 @@ module Gitlab
       def self.projects_list(relation_name, relation)
         listing(relation_name, relation.with_route) do |project|
           $stdout.puts "  - #{project.full_path} (id: #{project.id})".color(:red)
+          $stdout.puts "    #{project.repository.disk_path}"
         end
       end
 
@@ -92,6 +95,43 @@ module Gitlab
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def self.prune(relation_name, relation)
+        root = ENV['GDK_REPOSITORY_ROOT'].presence || '../repositories'
+        dry_run = !ENV['FORCE'].present?
+
+        known_paths = Set.new
+        listing(name, relation) { |p| known_paths << "#{root}/#{p.repository.disk_path}" }
+
+        marked_for_deletion = Set.new
+        prefix_length = Pathname.new(root).ascend.count
+
+        Find.find("#{root}/@hashed") do |path|
+          path = Pathname.new(path)
+          next unless path.directory?
+
+          path.ascend do |p|
+            base = p.to_s.gsub(/\.(\w+\.)?git$/, '')
+            Find.prune if known_paths.include?(base)
+          end
+
+          if path.ascend.count == prefix_length + 4
+            marked_for_deletion << path
+            Find.prune
+          end
+        end
+
+        $stdout.puts "Dry run. We would have deleted:" if dry_run
+
+        marked_for_deletion.each do |p|
+          if dry_run
+            $stdout.puts " - #{p}"
+          else
+            $stdout.puts "Removing #{p}"
+            p.rmtree
+          end
+        end
+      end
     end
   end
 end
