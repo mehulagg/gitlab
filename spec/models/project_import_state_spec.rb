@@ -103,7 +103,7 @@ RSpec.describe ProjectImportState, type: :model do
         allow(after_import_service)
           .to receive(:execute) { housekeeping_service.execute }
 
-        allow(HousekeepingService)
+        allow(Projects::HousekeepingService)
           .to receive(:new) { housekeeping_service }
       end
 

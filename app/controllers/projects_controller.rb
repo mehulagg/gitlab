@@ -197,13 +197,13 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def housekeeping
-    ::HousekeepingService.new(@project, :gc).execute
+    ::Projects::HousekeepingService.new(@project, :gc).execute
 
     redirect_to(
       project_path(@project),
       notice: _("Housekeeping successfully started")
     )
-  rescue ::HousekeepingService::LeaseTaken => ex
+  rescue ::Projects::HousekeepingService::LeaseTaken => ex
     redirect_to(
       edit_project_path(@project, anchor: 'js-project-advanced-settings'),
       alert: ex.to_s

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe HousekeepingService do
+RSpec.describe Projects::HousekeepingService do
   subject { described_class.new(project) }
 
   let_it_be(:project) { create(:project, :repository) }
@@ -51,19 +51,19 @@ RSpec.describe HousekeepingService do
       it 'does not enqueue a job' do
         expect(GitGarbageCollectWorker).not_to receive(:perform_async)
 
-        expect { subject.execute }.to raise_error(HousekeepingService::LeaseTaken)
+        expect { subject.execute }.to raise_error(Projects::HousekeepingService::LeaseTaken)
       end
 
       it 'does not reset pushes_since_gc' do
         expect do
-          expect { subject.execute }.to raise_error(HousekeepingService::LeaseTaken)
+          expect { subject.execute }.to raise_error(Projects::HousekeepingService::LeaseTaken)
         end.not_to change { project.pushes_since_gc }
       end
 
       it 'does not yield' do
         expect do |block|
           expect { subject.execute(&block) }
-            .to raise_error(HousekeepingService::LeaseTaken)
+            .to raise_error(Projects::HousekeepingService::LeaseTaken)
         end.not_to yield_with_no_args
       end
     end

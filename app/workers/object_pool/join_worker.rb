@@ -15,7 +15,7 @@ module ObjectPool
 
       project.link_pool_repository
 
-      HousekeepingService.new(project).execute
+      Projects::HousekeepingService.new(project).execute
     end
   end
 end
