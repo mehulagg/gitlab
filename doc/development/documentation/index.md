@@ -310,63 +310,46 @@ When you're building a new feature, you may need to link the documentation
 from GitLab, the application. This is normally done in files inside the
 `app/views/` directory with the help of the `help_page_path` helper method.
 
-In its simplest form, the HAML code to generate a link to the `/help` page is:
-
-```haml
-= link_to 'Help page', help_page_path('user/permissions')
-```
-
 The `help_page_path` contains the path to the document you want to link to with
 the following conventions:
 
-- it is relative to the `doc/` directory in the GitLab repository
-- the `.md` extension must be omitted
-- it must not end with a slash (`/`)
+- It is relative to the `doc/` directory in the GitLab repository.
+- The `.md` extension should be omitted.
+- It must not end with a slash (`/`).
+
+The help text follows the [pajamas guidelines](https://design.gitlab.com/usability/helping-users/#formatting-help-content).
 
 Below are some special cases where should be used depending on the context.
-You can combine one or more of the following:
+Make sure all links are inside `_()` so that they can be translatable:
+
+1. **Linking to a doc page**. In its simplest form, the HAML code to generate a
+   link to the `/help` page is:
+
+   ```haml
+   = link_to _('Learn more.'), help_page_path('user/permissions'), target: '_blank', rel: 'noopener noreferrer'
+   ```
 
 1. **Linking to an anchor link.** Use `anchor` as part of the `help_page_path`
    method:
 
    ```haml
-   = link_to 'Help page', help_page_path('user/permissions', anchor: 'anchor-link')
+   = link_to _('Learn more.'), help_page_path('user/permissions', anchor: 'anchor-link'), target: '_blank', rel: 'noopener noreferrer'
    ```
 
-1. **Opening links in a new tab.** This should be the default behavior:
+1. **Using links inline of some text.** You first need to define the link, and
+   then use it. In this example, `link_start` is the name of the variable that
+   contains the link:
 
    ```haml
-   = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
-   ```
-
-1. **Using a question icon.** Usually used in settings where a long
-   description cannot be used, like near checkboxes. You can basically use
-   any GitLab SVG icon, but prefer the `question-o`:
-
-   ```haml
-   = link_to sprite_icon('question-o'), help_page_path('user/permissions')
+   - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/permissions') }
+   %p= _("This is a text describing the option/feature in a sentence. %{link_start}Learn more.%{link_end}").html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
    ```
 
 1. **Using a button link.** Useful in places where text would be out of context
    with the rest of the page layout:
 
    ```haml
-   = link_to 'Help page', help_page_path('user/permissions'),  class: 'btn btn-info'
-   ```
-
-1. **Using links inline of some text.**
-
-   ```haml
-   Description to #{link_to 'Help page', help_page_path('user/permissions')}.
-   ```
-
-1. **Adding a period at the end of the sentence.** Useful when you don't want
-   the period to be part of the link:
-
-   ```haml
-   = succeed '.' do
-     Learn more in the
-     = link_to 'Help page', help_page_path('user/permissions')
+   = link_to _('Learn more.'), help_page_path('user/permissions'),  class: 'btn btn-info', target: '_blank', rel: 'noopener noreferrer'
    ```
 
 ### GitLab `/help` tests
