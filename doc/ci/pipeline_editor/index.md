@@ -19,6 +19,10 @@ From the pipeline editor page you can:
 - See a visualization of the current configuration.
 - [Commit](#commit) the changes to a specific branch.
 
+NOTE:
+You need to have an existing CI config file to use the editor. See the steps for
+[adding a file](../../gitlab-basics/add-file.md) to get started.
+
 ## Validate
 
 As you edit your pipeline configuration, it is continually validated against our
