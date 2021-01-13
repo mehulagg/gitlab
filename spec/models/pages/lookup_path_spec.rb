@@ -56,6 +56,12 @@ RSpec.describe Pages::LookupPath do
 
     include_examples 'uses disk storage'
 
+    it 'raises error when legacy storage is disabled and there is not deployment' do
+      stub_feature_flags(pages_serve_from_legacy_storage: false)
+
+      expect { source }.to raise_error(described_class::LegacyStorageDisabledError)
+    end
+
     context 'when there is pages deployment' do
       let(:deployment) { create(:pages_deployment, project: project) }
 
