@@ -273,6 +273,7 @@ RSpec.describe 'Epic show', :js do
 
         within selector do
           click_button 'Close epic'
+          wait_for_requests
         end
 
         expect(find('.status-box')).to have_content 'Closed'
@@ -285,6 +286,7 @@ RSpec.describe 'Epic show', :js do
 
         within selector do
           click_button 'Reopen epic'
+          wait_for_requests
         end
 
         expect(find('.status-box')).to have_content 'Open'
