@@ -42,8 +42,14 @@ module DesignManagement
     end
 
     def find_or_create_design!(filename:)
-      designs.find { |design| design.filename == filename } ||
-        designs.safe_find_or_create_by!(project: project, filename: filename)
+      found = designs.find { |design| design.filename == filename }
+
+      return found if found.present?
+
+      built = designs.build(project: project, filename: filename)
+      built.validate!
+      built.save!
+      built
     end
 
     def versions
