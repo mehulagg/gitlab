@@ -77,7 +77,6 @@ To enable merge trains:
 - Your repository must be a GitLab repository, not an
   [external repository](../../../ci_cd_for_external_repos/index.md).
 
-
 ## Enable merge trains
 
 To enable merge trains for your project:
