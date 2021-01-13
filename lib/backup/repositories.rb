@@ -41,7 +41,6 @@ module Backup
 
     def restore
       restore_project_repositories
-      restore_group_repositories
       restore_snippets
 
       restore_object_pools
@@ -57,12 +56,6 @@ module Backup
       end
     end
 
-    def restore_group_repositories
-      Group.find_each(batch_size: 1000) do |group|
-        restore_repository(group, Gitlab::GlRepository::WIKI)
-      end
-    end
-
     def restore_snippets
       invalid_ids = Snippet.find_each(batch_size: 1000)
         .map { |snippet| restore_snippet_repository(snippet) }
@@ -72,11 +65,15 @@ module Backup
     end
 
     def check_valid_storages!
-      [ProjectRepository, SnippetRepository].each do |klass|
+      repository_storage_klasses.each do |klass|
         if klass.excluding_repository_storage(Gitlab.config.repositories.storages.keys).exists?
           raise Error, "repositories.storages in gitlab.yml does not include all storages used by #{klass}"
         end
       end
+    end
+
+    def repository_storages_klasses
+      [ProjectRepository, SnippetRepository]
     end
 
     def backup_repos_path
@@ -91,7 +88,6 @@ module Backup
 
     def dump_consecutive
       dump_consecutive_projects
-      dump_consecutive_groups
       dump_consecutive_snippets
     end
 
@@ -99,10 +95,6 @@ module Backup
       project_relation.find_each(batch_size: 1000) do |project|
         dump_project(project)
       end
-    end
-
-    def dump_consecutive_groups
-      Group.find_each(batch_size: 1000) { |group| dump_group(group) }
     end
 
     def dump_consecutive_snippets
@@ -122,14 +114,7 @@ module Backup
               end
 
               begin
-                case container
-                when Project
-                  dump_project(container)
-                when Snippet
-                  dump_snippet(container)
-                when Group
-                  dump_group(container)
-                end
+                dump_container(container)
               rescue => e
                 errors << e
                 break
@@ -151,14 +136,19 @@ module Backup
       end
     end
 
+    def dump_container(container)
+      case container
+      when Project
+        dump_project(container)
+      when Snippet
+        dump_snippet(container)
+      end
+    end
+
     def dump_project(project)
       backup_repository(project, Gitlab::GlRepository::PROJECT)
       backup_repository(project, Gitlab::GlRepository::WIKI)
       backup_repository(project, Gitlab::GlRepository::DESIGN)
-    end
-
-    def dump_group(group)
-      backup_repository(group, Gitlab::GlRepository::WIKI)
     end
 
     def dump_snippet(snippet)
@@ -176,7 +166,7 @@ module Backup
     end
 
     def records_to_enqueue(storage)
-      [projects_in_storage(storage), groups_in_storagge(storage), snippets_in_storage(storage)]
+      [projects_in_storage(storage), snippets_in_storage(storage)]
     end
 
     def projects_in_storage(storage)
@@ -189,10 +179,6 @@ module Backup
 
     def snippets_in_storage(storage)
       Snippet.id_in(SnippetRepository.for_repository_storage(storage).select(:snippet_id))
-    end
-
-    def groups_in_storage(storage)
-      Group.id_in(GroupWikiRepository.for_repository_storage(storage).select(:group_id))
     end
 
     def backup_repository(container, type)
@@ -337,3 +323,5 @@ module Backup
     end
   end
 end
+
+Backup::Repositories.prepend_if_ee('EE::Backup::Repositories')
