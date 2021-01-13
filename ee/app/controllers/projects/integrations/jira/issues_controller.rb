@@ -34,8 +34,11 @@ module Projects
         private
 
         def issues_json
-          jira_issues = finder.execute
-          jira_issues = Kaminari.paginate_array(jira_issues, limit: finder.per_page, total_count: finder.total_count)
+          jira_issues = Kaminari.paginate_array(
+            finder.execute,
+            limit: finder.per_page,
+            total_count: finder.total_count
+          )
 
           ::Integrations::Jira::IssueSerializer.new
             .with_pagination(request, response)
@@ -43,11 +46,7 @@ module Projects
         end
 
         def finder
-          @finder ||= finder_type.new(project, finder_options)
-        end
-
-        def finder_type
-          ::Projects::Integrations::Jira::IssuesFinder
+          @finder ||= ::Projects::Integrations::Jira::IssuesFinder.new(project, finder_options)
         end
 
         def finder_options
@@ -56,7 +55,7 @@ module Projects
           # Used by view to highlight active option
           @sort = options[:sort]
 
-          params.permit(finder_type.valid_params).merge(options)
+          params.permit(::Projects::Integrations::Jira::IssuesFinder.valid_params).merge(options)
         end
 
         def default_state
@@ -74,7 +73,7 @@ module Projects
         protected
 
         def check_feature_enabled!
-          return render_404 unless project.jira_issues_integration_available? && project.external_issue_tracker
+          return render_404 unless project.jira_issues_integration_available? && project.jira_service.issues_enabled
         end
 
         # Return the informational message to the user

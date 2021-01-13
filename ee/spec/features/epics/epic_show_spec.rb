@@ -266,7 +266,7 @@ RSpec.describe 'Epic show', :js do
     end
   end
 
-  describe 'epic actions' do
+  describe 'epic actions', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297505' do
     shared_examples 'epic closed' do |selector|
       it 'can close an epic' do
         expect(find('.status-box')).to have_content 'Open'

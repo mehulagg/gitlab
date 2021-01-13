@@ -119,4 +119,10 @@ RSpec.describe GroupWiki do
       expect(subject).not_to be_a(Elastic::WikiRepositoriesSearch)
     end
   end
+
+  it_behaves_like 'can housekeep repository' do
+    let_it_be(:resource) { create(:group_wiki) }
+
+    let(:resource_key) { 'group_wikis' }
+  end
 end

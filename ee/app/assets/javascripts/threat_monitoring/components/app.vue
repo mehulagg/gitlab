@@ -34,8 +34,8 @@ export default {
     ThreatMonitoringSection,
     NetworkPolicyList,
   },
-  inject: ['documentationPath'],
   mixins: [glFeatureFlagsMixin()],
+  inject: ['documentationPath'],
   props: {
     defaultEnvironmentId: {
       type: Number,
