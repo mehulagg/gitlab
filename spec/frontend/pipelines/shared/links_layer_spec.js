@@ -8,12 +8,12 @@ describe('links layer component', () => {
   let wrapper;
 
   const findAlert = () => wrapper.find(GlAlert);
-  const findShowAnyways = () => findAlert().findAll(GlButton).at(1);
+  const findShowAnyways = () => findAlert().find(GlButton);
   const findLinksInner = () => wrapper.find(LinksInner);
 
   const pipeline = generateResponse(mockPipelineResponse, 'root/fungi-xoxo');
   const containerId = `pipeline-links-container-${pipeline.id}`;
-  const slotContent = "<div>Ceci n'est pas un grafique</div>";
+  const slotContent = "<div>Ceci n'est pas un graphique</div>";
 
   const tooManyStages = Array(101)
     .fill(0)

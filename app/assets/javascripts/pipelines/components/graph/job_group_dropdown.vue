@@ -1,5 +1,4 @@
 <script>
-import { uniqueId } from 'lodash';
 import { GlTooltipDirective } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import JobItem from './job_item.vue';
@@ -27,12 +26,12 @@ export default {
     pipelineId: {
       type: Number,
       required: false,
-      default: () => Number(uniqueId()),
+      default: -1,
     },
   },
   computed: {
     computedJobId() {
-      return `${this.group.name}-${this.pipelineId}`;
+      return this.pipelineId > -1 ? `${this.group.name}-${this.pipelineId}` : '';
     },
     tooltipText() {
       const { name, status } = this.group;

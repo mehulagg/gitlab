@@ -11,6 +11,10 @@ export default {
   },
   MAX_GROUPS: 200,
   props: {
+    containerMeasurements: {
+      type: Object,
+      required: true,
+    },
     pipelineData: {
       type: Array,
       required: true,
@@ -24,11 +28,14 @@ export default {
   },
   i18n: {
     showLinksAnyways: __('Show links anyways'),
-    tooManyStages: __(
-      'This graph has a large number of stages and showing the links between them may have performance implications.',
+    tooManyJobs: __(
+      'This graph has a large number of jobs and showing the links between them may have performance implications.',
     ),
   },
   computed: {
+    containerZero() {
+      return !this.containerMeasurements.width || !this.containerMeasurements.height;
+    },
     numGroups() {
       return this.pipelineData.reduce((acc, { groups }) => {
         return acc + Number(groups.length);
@@ -38,7 +45,9 @@ export default {
       return !this.showLinkedLayers && !this.alertDismissed;
     },
     showLinkedLayers() {
-      return this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS;
+      return (
+        !this.containerZero && (this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS)
+      );
     },
   },
   methods: {
@@ -55,6 +64,7 @@ export default {
 <template>
   <links-inner
     v-if="showLinkedLayers"
+    :container-measurements="containerMeasurements"
     :pipeline-data="pipelineData"
     v-bind="$attrs"
     v-on="$listeners"
@@ -69,7 +79,7 @@ export default {
       @primaryAction="overrideShowLinks"
       @dismiss="dismissAlert"
     >
-      {{ $options.i18n.tooManyStages }}
+      {{ $options.i18n.tooManyJobs }}
     </gl-alert>
     <slot></slot>
   </div>
