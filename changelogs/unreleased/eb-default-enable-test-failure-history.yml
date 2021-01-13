@@ -1,0 +1,5 @@
+---
+title: Enable test_failure_history flag by default
+merge_request: 51578
+author:
+type: changed

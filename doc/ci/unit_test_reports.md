@@ -68,10 +68,8 @@ execution time and the error output.
 ### Number of recent failures
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241759) in GitLab 13.7.
-> - It's [deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-the-number-of-recent-failures). **(CORE ONLY)**
+> - It's [deployed behind a feature flag](../user/feature_flags.md), enabled by default in GitLab 13.8.
+> - It's enabled on GitLab.com.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
