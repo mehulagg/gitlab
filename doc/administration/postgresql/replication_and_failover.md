@@ -828,6 +828,16 @@ a manual one, where you have two slightly different options:
 For further details on this subject, see the
 [Patroni documentation](https://patroni.readthedocs.io/en/latest/rest_api.html#switchover-and-failover-endpoints).
 
+#### Geo secondary site considerations
+
+Similar to `repmgr`, when a Geo secondary site is replicating from a primary site that uses `Patroni` and `PgBouncer`, [replicating through PgBouncer is not supported](https://github.com/pgbouncer/pgbouncer/issues/382#issuecomment-517911529) and the secondary must replicate directly from the leader node in the `Patroni` cluster. Therefore, when there is an automatic or manual failover in the `Patroni` cluster, you will need to manually re-point your secondary site to replicate from the new leader with:
+
+```shell
+sudo gitlab-ctl replicate-geo-database --host=<new_leader_ip> --replication-slot=<slot_name>
+```
+
+Otherwise, the replication will not happen anymore, even if the original node gets re-added as a follower node. This will re-sync your secondary site database and may take a long time depending on the amount of data to sync.
+
 ### Recovering the Patroni cluster
 
 To recover the old primary and rejoin it to the cluster as a replica, you can simply start Patroni with:
