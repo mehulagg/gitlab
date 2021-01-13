@@ -89,7 +89,7 @@ If your test exceeds that time, it fails.
 
 If you cannot improve the performance of the tests, you can increase the timeout
 for a specific test using
-[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/helpers/timeout.js).
+[`setTestTimeout`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__/timeout.js).
 
 ```javascript
 import { setTestTimeout } from 'helpers/timeout';
@@ -877,7 +877,7 @@ You can import the JSON fixture in a Jest test using the `getJSONFixture` method
 Jest and Karma test suites import fixtures in different ways:
 
 - The Karma test suite are served by [jasmine-jquery](https://github.com/velesin/jasmine-jquery).
-- Jest use `spec/frontend/helpers/fixtures.js`.
+- Jest use `spec/frontend/__helpers__/fixtures.js`.
 
 The following are examples of tests that work for both Karma and Jest:
 

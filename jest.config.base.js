@@ -43,7 +43,7 @@ module.exports = (path) => {
     [TEST_FIXTURES_PATTERN]: '<rootDir>/tmp/tests/frontend/fixtures$1',
     '\\.(jpg|jpeg|png|svg|css)$': '<rootDir>/spec/frontend/__mocks__/file_mock.js',
     'emojis(/.*).json': '<rootDir>/fixtures/emojis$1.json',
-    '^spec/test_constants$': '<rootDir>/spec/frontend/helpers/test_constants',
+    '^spec/test_constants$': '<rootDir>/spec/frontend/__helpers__/test_constants',
     '^jest/(.*)$': '<rootDir>/spec/frontend/$1',
     'test_helpers(/.*)$': '<rootDir>/spec/frontend_integration/test_helpers$1',
   };
