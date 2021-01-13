@@ -1,7 +1,6 @@
 import { ApolloMutation } from 'vue-apollo';
 import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon } from '@gitlab/ui';
-import { getByText } from '@testing-library/dom';
 import { nextTick } from 'vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import DevopsAdoptionSegmentModal from 'ee/admin/dev_ops_report/components/devops_adoption_segment_modal.vue';
@@ -70,8 +69,6 @@ describe('DevopsAdoptionSegmentModal', () => {
   const actionButtonLoadingState = () => findModal().props('actionPrimary').attributes[0].loading;
   const findAlert = () => findModal().find(GlAlert);
 
-  const assertHelperText = (text) => expect(getByText(wrapper.element, text)).not.toBeNull();
-
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -91,7 +88,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
     const isCorrectShape = (option) => {
       const keys = Object.keys(option);
-      return keys.includes('label') && keys.includes('value');
+      return keys.includes('text') && keys.includes('value');
     };
 
     it('displays the name field', () => {
@@ -101,7 +98,7 @@ describe('DevopsAdoptionSegmentModal', () => {
       expect(name.find(GlFormInput).exists()).toBe(true);
     });
 
-    it('contains the checkbox tree component', () => {
+    it('contains the radio group component', () => {
       const checkboxes = findByTestId('groups');
 
       expect(checkboxes.exists()).toBe(true);
@@ -110,28 +107,6 @@ describe('DevopsAdoptionSegmentModal', () => {
 
       expect(options.length).toBe(2);
       expect(options.every(isCorrectShape)).toBe(true);
-    });
-
-    describe('selected groups helper text', () => {
-      it('displays the plural text when 0 groups are selected', () => {
-        assertHelperText('0 groups selected (20 max)');
-      });
-
-      it('dispalys the singular text when only 1 group is selected', async () => {
-        wrapper.setData({ checkboxValues: [groupNodes[0]] });
-
-        await nextTick();
-
-        assertHelperText('1 group selected (20 max)');
-      });
-
-      it('displays the plural text when multiple groups are selected', async () => {
-        wrapper.setData({ checkboxValues: groupNodes });
-
-        await nextTick();
-
-        assertHelperText('2 groups selected (20 max)');
-      });
     });
 
     describe('filtering', () => {
@@ -198,17 +173,17 @@ describe('DevopsAdoptionSegmentModal', () => {
   });
 
   it.each`
-    checkboxValues | name           | disabled | values                 | state
-    ${[]}          | ${''}          | ${true}  | ${'checkbox and name'} | ${'disables'}
-    ${[1]}         | ${''}          | ${true}  | ${'checkbox'}          | ${'disables'}
-    ${[]}          | ${segmentName} | ${true}  | ${'name'}              | ${'disables'}
-    ${[1]}         | ${segmentName} | ${false} | ${'nothing'}           | ${'enables'}
+    selectedGroupId | name           | disabled | values                 | state
+    ${null}         | ${''}          | ${true}  | ${'checkbox and name'} | ${'disables'}
+    ${1}            | ${''}          | ${true}  | ${'checkbox'}          | ${'disables'}
+    ${null}         | ${segmentName} | ${true}  | ${'name'}              | ${'disables'}
+    ${1}            | ${segmentName} | ${false} | ${'nothing'}           | ${'enables'}
   `(
     '$state the primary action if $values is missing',
-    async ({ checkboxValues, name, disabled }) => {
+    async ({ selectedGroupId, name, disabled }) => {
       createComponent();
 
-      wrapper.setData({ checkboxValues, name });
+      wrapper.setData({ selectedGroupId, name });
 
       await nextTick();
 
@@ -218,7 +193,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
   describe.each`
     action                            | segment                                | additionalData
-    ${'creating a new segment'}       | ${null}                                | ${{ checkboxValues: groupIds, name: segmentName }}
+    ${'creating a new segment'}       | ${null}                                | ${{ selectedGroupId: groupIds[0], name: segmentName }}
     ${'updating an existing segment'} | ${devopsAdoptionSegmentsData.nodes[0]} | ${{}}
   `('handles the form submission correctly when $action', ({ segment, additionalData }) => {
     describe('submitting the form', () => {
@@ -280,11 +255,11 @@ describe('DevopsAdoptionSegmentModal', () => {
           const variables = segment
             ? {
                 id: segment.id,
-                groupIds: [groupGids[0]],
+                groupIds: groupGids[0],
                 name: segment.name,
               }
             : {
-                groupIds: groupGids,
+                groupIds: groupGids[0],
                 name: segmentName,
               };
 
@@ -301,10 +276,10 @@ describe('DevopsAdoptionSegmentModal', () => {
 
         it('resets the form fields', async () => {
           const name = segment ? 'Segment 1' : '';
-          const checkboxValues = segment ? [1] : [];
+          const selectedGroupId = segment ? 1 : null;
 
           expect(wrapper.vm.name).toBe(name);
-          expect(wrapper.vm.checkboxValues).toEqual(checkboxValues);
+          expect(wrapper.vm.selectedGroupId).toEqual(selectedGroupId);
           expect(wrapper.vm.filter).toBe('');
         });
       });
@@ -318,6 +293,8 @@ describe('DevopsAdoptionSegmentModal', () => {
           'displays a $errorType error if the mutation has a $errorLocation error',
           async ({ mutationSpy, message }) => {
             createComponent({ mutationMock: mutationSpy, segment });
+
+            wrapper.setData(additionalData);
 
             findModal().vm.$emit('primary', mockEvent);
 
@@ -335,6 +312,8 @@ describe('DevopsAdoptionSegmentModal', () => {
           jest.spyOn(Sentry, 'captureException');
 
           createComponent({ mutationMock: mutateWithErrors, segment });
+
+          wrapper.setData(additionalData);
 
           findModal().vm.$emit('primary', mockEvent);
 

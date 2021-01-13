@@ -9883,25 +9883,25 @@ msgstr ""
 msgid "DevopsAdoptionSegment|The maximum number of selections has been reached"
 msgstr ""
 
-msgid "DevopsAdoption|%{selectedCount} group selected (20 max)"
+msgid "DevopsAdoption|%{selectedCount} group selected"
 msgstr ""
 
-msgid "DevopsAdoption|%{selectedCount} groups selected (20 max)"
+msgid "DevopsAdoption|%{selectedCount} groups selected"
 msgstr ""
 
-msgid "DevopsAdoption|Add a segment to get started"
+msgid "DevopsAdoption|Add Group"
 msgstr ""
 
-msgid "DevopsAdoption|Add new segment"
+msgid "DevopsAdoption|Add a group to get started"
 msgstr ""
 
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
-msgid "DevopsAdoption|An error occured while deleting the segment. Please try again."
+msgid "DevopsAdoption|An error occured while deleting the group. Please try again."
 msgstr ""
 
-msgid "DevopsAdoption|An error occured while saving the segment. Please try again."
+msgid "DevopsAdoption|An error occured while saving the group. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
@@ -9928,22 +9928,19 @@ msgstr ""
 msgid "DevopsAdoption|At least 1 security scan of any type run in pipeline"
 msgstr ""
 
-msgid "DevopsAdoption|Confirm delete segment"
+msgid "DevopsAdoption|Confirm delete Group"
 msgstr ""
 
-msgid "DevopsAdoption|Create new segment"
-msgstr ""
-
-msgid "DevopsAdoption|Delete segment"
+msgid "DevopsAdoption|Delete Group"
 msgstr ""
 
 msgid "DevopsAdoption|Deploys"
 msgstr ""
 
-msgid "DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
+msgid "DevopsAdoption|DevOps adoption uses Segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team."
 msgstr ""
 
-msgid "DevopsAdoption|Edit segment"
+msgid "DevopsAdoption|Edit Group"
 msgstr ""
 
 msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
@@ -9952,22 +9949,22 @@ msgstr ""
 msgid "DevopsAdoption|Filter by name"
 msgstr ""
 
+msgid "DevopsAdoption|Group data pending until the start of next month"
+msgstr ""
+
 msgid "DevopsAdoption|Issues"
 msgstr ""
 
 msgid "DevopsAdoption|MRs"
 msgstr ""
 
-msgid "DevopsAdoption|Maximum %{maxSegments} segments allowed"
+msgid "DevopsAdoption|Maximum %{maxSegments} groups allowed"
 msgstr ""
 
-msgid "DevopsAdoption|My segment"
+msgid "DevopsAdoption|My group"
 msgstr ""
 
 msgid "DevopsAdoption|Name"
-msgstr ""
-
-msgid "DevopsAdoption|New segment"
 msgstr ""
 
 msgid "DevopsAdoption|No filter results."
@@ -9991,16 +9988,10 @@ msgstr ""
 msgid "DevopsAdoption|Scanning"
 msgstr ""
 
-msgid "DevopsAdoption|Segment"
-msgstr ""
-
-msgid "DevopsAdoption|Segment data pending until the start of next month"
+msgid "DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page to try again."
 msgstr ""
 
 msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again."
-msgstr ""
-
-msgid "DevopsAdoption|There was an error fetching Segments. Please refresh the page to try again."
 msgstr ""
 
 msgid "DevopsReport|Adoption"

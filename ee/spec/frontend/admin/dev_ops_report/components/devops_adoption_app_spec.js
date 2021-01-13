@@ -406,7 +406,7 @@ describe('DevopsAdoptionApp', () => {
               const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
 
               expect(tooltip).toBeDefined();
-              expect(tooltip.value).toBe('Maximum 30 segments allowed');
+              expect(tooltip.value).toBe('Maximum 30 groups allowed');
             });
           });
         });
