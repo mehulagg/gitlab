@@ -98,8 +98,7 @@ export default {
         const arrayOfJobs = this.pipelineData.flatMap(({ groups }) => groups);
         const parsedData = parseData(arrayOfJobs);
         this.links = generateLinksData(parsedData, this.containerId, `-${this.pipelineId}`);
-      } catch (err) {
-        console.log(err);
+      } catch {
         this.$emit('error', DRAW_FAILURE);
       }
     },

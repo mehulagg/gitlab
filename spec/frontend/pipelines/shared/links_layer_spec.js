@@ -2,28 +2,25 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlButton } from '@gitlab/ui';
 import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
 import LinksInner from '~/pipelines/components/graph_shared/links_inner.vue';
-import {
-  generateResponse,
-  mockPipelineResponse,
-} from '../graph/mock_data';
+import { generateResponse, mockPipelineResponse } from '../graph/mock_data';
 
 describe('links layer component', () => {
   let wrapper;
 
   const findAlert = () => wrapper.find(GlAlert);
-  const findButton = () => wrapper.find(GlButton);
-  const findButtonAt = (idx) => wrapper.findAll(GlButton).at(idx);
-  const findShowAnyways = () => findAlert().findAll(GlButton).at(1)
+  const findShowAnyways = () => findAlert().findAll(GlButton).at(1);
   const findLinksInner = () => wrapper.find(LinksInner);
 
   const pipeline = generateResponse(mockPipelineResponse, 'root/fungi-xoxo');
   const containerId = `pipeline-links-container-${pipeline.id}`;
   const slotContent = "<div>Ceci n'est pas un grafique</div>";
 
-  const tooManyStages = Array(101).fill(0).flatMap(() => pipeline.stages)
+  const tooManyStages = Array(101)
+    .fill(0)
+    .flatMap(() => pipeline.stages);
 
   const defaultProps = {
-    containerId: containerId,
+    containerId,
     containerMeasurements: { width: 400, height: 400 },
     pipelineId: pipeline.id,
     pipelineData: pipeline.stages,
@@ -40,7 +37,7 @@ describe('links layer component', () => {
       },
       stubs: {
         'links-inner': true,
-      }
+      },
     });
   };
 
@@ -64,10 +61,9 @@ describe('links layer component', () => {
   });
 
   describe('with more than the max number of stages', () => {
-
     describe('rendering', () => {
       beforeEach(() => {
-        createComponent({ props: { pipelineData: tooManyStages }});
+        createComponent({ props: { pipelineData: tooManyStages } });
       });
 
       it('renders the default slot', () => {
@@ -85,7 +81,7 @@ describe('links layer component', () => {
 
     describe('interactions', () => {
       beforeEach(() => {
-        createComponent({ mountFn: mount, props: { pipelineData: tooManyStages }});
+        createComponent({ mountFn: mount, props: { pipelineData: tooManyStages } });
       });
 
       it('renders the disable button', () => {
@@ -99,6 +95,5 @@ describe('links layer component', () => {
         expect(findLinksInner().exists()).toBe(true);
       });
     });
-
-  })
+  });
 });

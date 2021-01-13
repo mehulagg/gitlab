@@ -7,7 +7,7 @@ const boundingRect0 = {
   right: 538,
   bottom: 290,
   left: 98,
-}
+};
 
 const boundingRect1 = {
   x: 98,
@@ -18,7 +18,7 @@ const boundingRect1 = {
   right: 22,
   bottom: 290,
   left: 98,
-}
+};
 
 const boundingRect2 = {
   x: 98,
@@ -29,7 +29,7 @@ const boundingRect2 = {
   right: 62,
   bottom: 290,
   left: 98,
-}
+};
 
 const boundingRect3 = {
   x: 98,
@@ -40,11 +40,6 @@ const boundingRect3 = {
   right: 538,
   bottom: 290,
   left: 98,
-}
+};
 
-export const mockRects = [
-  boundingRect0,
-  boundingRect1,
-  boundingRect2,
-  boundingRect3,
-];
+export const mockRects = [boundingRect0, boundingRect1, boundingRect2, boundingRect3];

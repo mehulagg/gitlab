@@ -134,17 +134,12 @@ describe('stage column component', () => {
 
       it('emits jobHovered event on mouseenter and mouseleave', async () => {
         await findStageColumnGroup().trigger('mouseenter');
-        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name]])
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name]]);
         await findStageColumnGroup().trigger('mouseleave');
-        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name], ['']])
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name], ['']]);
       });
     });
   });
-
-
-
-
-
 
   describe('with action', () => {
     beforeEach(() => {

@@ -32,7 +32,7 @@ describe('graph component', () => {
       },
       stubs: {
         'links-inner': true,
-      }
+      },
     });
   };
 

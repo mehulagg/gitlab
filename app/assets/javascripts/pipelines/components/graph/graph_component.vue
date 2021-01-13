@@ -91,8 +91,8 @@ export default {
     getMeasurements() {
       return {
         width: this.$refs[this.containerId].scrollWidth,
-        height: this.$refs[this.containerId].scrollHeight
-      }
+        height: this.$refs[this.containerId].scrollHeight,
+      };
     },
     onError(errorType) {
       this.$emit('error', errorType);
