@@ -48,6 +48,11 @@ Cop/StaticTranslationDefinition:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+InternalAffairs/DeprecateCopHelper:
+  Enabled: true
+  Include:
+    - spec/rubocop/**/*.rb
+
 Lint/LastKeywordArgument:
   Enabled: true
   Safe: false
@@ -321,6 +326,14 @@ RSpec/TimecopTravel:
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
 
+RSpec/WebMockEnable:
+  Enabled: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+  Exclude:
+    - 'spec/support/webmock.rb'
+
 Naming/PredicateName:
   Enabled: true
   Exclude:
@@ -439,9 +452,6 @@ Graphql/Descriptions:
   Include:
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-
-RSpec/AnyInstanceOf:
-  Enabled: false
 
 # Cops for upgrade to gitlab-styles 3.1.0
 RSpec/ImplicitSubject:

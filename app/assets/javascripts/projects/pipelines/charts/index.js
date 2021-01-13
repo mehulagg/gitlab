@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import ProjectPipelinesChartsLegacy from './components/app_legacy.vue';
 import ProjectPipelinesCharts from './components/app.vue';
 
@@ -10,7 +11,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-const mountPipelineChartsApp = el => {
+const mountPipelineChartsApp = (el) => {
   // Not all of the values will be defined since some them will be
   // empty depending on the value of the graphql_pipeline_analytics
   // feature flag, once the rollout of the feature flag is completed
@@ -34,6 +35,10 @@ const mountPipelineChartsApp = el => {
     lastYearChartSuccess,
     projectPath,
   } = el.dataset;
+
+  const shouldRenderDeploymentFrequencyCharts = parseBoolean(
+    el.dataset.shouldRenderDeploymentFrequencyCharts,
+  );
 
   const parseAreaChartData = (labels, totals, success) => {
     let parsedData = {};
@@ -61,8 +66,9 @@ const mountPipelineChartsApp = el => {
       apolloProvider,
       provide: {
         projectPath,
+        shouldRenderDeploymentFrequencyCharts,
       },
-      render: createElement => createElement(ProjectPipelinesCharts, {}),
+      render: (createElement) => createElement(ProjectPipelinesCharts, {}),
     });
   }
 
@@ -72,7 +78,11 @@ const mountPipelineChartsApp = el => {
     components: {
       ProjectPipelinesChartsLegacy,
     },
-    render: createElement =>
+    provide: {
+      projectPath,
+      shouldRenderDeploymentFrequencyCharts,
+    },
+    render: (createElement) =>
       createElement(ProjectPipelinesChartsLegacy, {
         props: {
           counts: {

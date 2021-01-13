@@ -29,7 +29,7 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
   };
 
   return API.codeReviewAnalytics(params)
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const normalizedHeaders = normalizeHeaders(headers);
       commit(types.RECEIVE_MERGE_REQUESTS_SUCCESS, {

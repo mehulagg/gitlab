@@ -21,7 +21,7 @@ export default {
       type: String,
       required: false,
       default: 'md',
-      validator: value => sizeVariants.includes(value),
+      validator: (value) => sizeVariants.includes(value),
     },
     headerTitleText: {
       type: String,
@@ -32,7 +32,7 @@ export default {
       type: String,
       required: false,
       default: 'primary',
-      validator: value => buttonVariants.includes(value),
+      validator: (value) => buttonVariants.includes(value),
     },
     footerPrimaryButtonText: {
       type: String,
@@ -46,14 +46,10 @@ export default {
     },
   },
   mounted() {
-    $(this.$el)
-      .on('shown.bs.modal', this.opened)
-      .on('hidden.bs.modal', this.closed);
+    $(this.$el).on('shown.bs.modal', this.opened).on('hidden.bs.modal', this.closed);
   },
   beforeDestroy() {
-    $(this.$el)
-      .off('shown.bs.modal', this.opened)
-      .off('hidden.bs.modal', this.closed);
+    $(this.$el).off('shown.bs.modal', this.opened).off('hidden.bs.modal', this.closed);
   },
   methods: {
     emitCancel(event) {

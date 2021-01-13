@@ -2,13 +2,14 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { GlTokenSelector } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
+import { stubComponent } from 'helpers/stub_component';
 import Api from '~/api';
 import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 
 const label = 'testgroup';
 const placeholder = 'Search for a member';
-const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
-const user2 = { id: 2, name: 'Name Two', username: 'two_2', avatar_url: '' };
+const user1 = { id: 1, name: 'John Smith', username: 'one_1', avatar_url: '' };
+const user2 = { id: 2, name: 'Jane Doe', username: 'two_2', avatar_url: '' };
 const allUsers = [user1, user2];
 
 const createComponent = () => {
@@ -16,6 +17,9 @@ const createComponent = () => {
     propsData: {
       ariaLabelledby: label,
       placeholder,
+    },
+    stubs: {
+      GlTokenSelector: stubComponent(GlTokenSelector),
     },
   });
 };
@@ -73,9 +77,14 @@ describe('MembersTokenSelect', () => {
     });
 
     describe('when text input is typed in', () => {
+      let tokenSelector;
+
+      beforeEach(() => {
+        tokenSelector = findTokenSelector();
+      });
+
       it('calls the API with search parameter', async () => {
         const searchParam = 'One';
-        const tokenSelector = findTokenSelector();
 
         tokenSelector.vm.$emit('text-input', searchParam);
 
@@ -84,16 +93,23 @@ describe('MembersTokenSelect', () => {
         expect(Api.users).toHaveBeenCalledWith(searchParam, wrapper.vm.$options.queryOptions);
         expect(tokenSelector.props('hideDropdownWithNoItems')).toBe(false);
       });
+
+      describe('when input text is an email', () => {
+        it('allows user defined tokens', async () => {
+          tokenSelector.vm.$emit('text-input', 'foo@bar.com');
+
+          await nextTick();
+
+          expect(tokenSelector.props('allowUserDefinedTokens')).toBe(true);
+        });
+      });
     });
 
     describe('when user is selected', () => {
       it('emits `input` event with selected users', () => {
-        findTokenSelector().vm.$emit('input', [
-          { id: 1, name: 'John Smith' },
-          { id: 2, name: 'Jane Doe' },
-        ]);
+        findTokenSelector().vm.$emit('input', [user1, user2]);
 
-        expect(wrapper.emitted().input[0][0]).toBe('1,2');
+        expect(wrapper.emitted().input[0][0]).toEqual([user1, user2]);
       });
     });
   });

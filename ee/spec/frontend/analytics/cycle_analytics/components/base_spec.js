@@ -50,7 +50,6 @@ const defaultStubs = {
 const defaultFeatureFlags = {
   hasDurationChart: true,
   hasPathNavigation: false,
-  hasCreateMultipleValueStreams: false,
 };
 
 const [selectedValueStream] = mockData.valueStreams;
@@ -88,6 +87,9 @@ function mockRequiredRoutes(mockAdapter) {
     .onGet(mockData.endpoints.durationData)
     .reply(httpStatusCodes.OK, mockData.customizableStagesAndEvents.stages);
   mockAdapter.onGet(mockData.endpoints.stageMedian).reply(httpStatusCodes.OK, { value: null });
+  mockAdapter
+    .onGet(mockData.endpoints.valueStreamData)
+    .reply(httpStatusCodes.OK, mockData.valueStreams);
 }
 
 async function shouldMergeUrlParams(wrapper, result) {
@@ -110,7 +112,6 @@ describe('Value Stream Analytics component', () => {
       },
       shallow = true,
       withStageSelected = false,
-      withValueStreamSelected = true,
       featureFlags = {},
       initialState = initialCycleAnalyticsState,
       props = {},
@@ -139,10 +140,6 @@ describe('Value Stream Analytics component', () => {
       ...opts,
     });
 
-    if (withValueStreamSelected) {
-      await store.dispatch('receiveValueStreamsSuccess', mockData.valueStreams);
-    }
-
     if (withStageSelected) {
       await Promise.all([
         store.dispatch('receiveGroupStagesSuccess', mockData.customizableStagesAndEvents.stages),
@@ -152,51 +149,48 @@ describe('Value Stream Analytics component', () => {
     return comp;
   }
 
-  const findStageNavItemAtIndex = index =>
-    wrapper
-      .find(StageTableNav)
-      .findAll(StageNavItem)
-      .at(index);
+  const findStageNavItemAtIndex = (index) =>
+    wrapper.find(StageTableNav).findAll(StageNavItem).at(index);
 
   const findAddStageButton = () => wrapper.find(AddStageButton);
 
-  const displaysProjectsDropdownFilter = flag => {
+  const displaysProjectsDropdownFilter = (flag) => {
     expect(wrapper.find(ProjectsDropdownFilter).exists()).toBe(flag);
   };
 
-  const displaysDateRangePicker = flag => {
+  const displaysDateRangePicker = (flag) => {
     expect(wrapper.find(Daterange).exists()).toBe(flag);
   };
 
-  const displaysMetrics = flag => {
+  const displaysMetrics = (flag) => {
     expect(wrapper.find(Metrics).exists()).toBe(flag);
   };
 
-  const displaysStageTable = flag => {
+  const displaysStageTable = (flag) => {
     expect(wrapper.find(StageTable).exists()).toBe(flag);
   };
 
-  const displaysDurationChart = flag => {
+  const displaysDurationChart = (flag) => {
     expect(wrapper.find(DurationChart).exists()).toBe(flag);
   };
 
-  const displaysTypeOfWork = flag => {
+  const displaysTypeOfWork = (flag) => {
     expect(wrapper.find(TypeOfWorkCharts).exists()).toBe(flag);
   };
 
-  const displaysPathNavigation = flag => {
+  const displaysPathNavigation = (flag) => {
     expect(wrapper.find(PathNavigation).exists()).toBe(flag);
   };
 
-  const displaysAddStageButton = flag => {
+  const displaysAddStageButton = (flag) => {
     expect(wrapper.find(AddStageButton).exists()).toBe(flag);
   };
 
-  const displaysFilterBar = flag => {
+  const displaysFilterBar = (flag) => {
     expect(wrapper.find(FilterBar).exists()).toBe(flag);
   };
 
-  const displaysValueStreamSelect = flag => {
+  const displaysValueStreamSelect = (flag) => {
     expect(wrapper.find(ValueStreamSelect).exists()).toBe(flag);
   };
 
@@ -319,7 +313,6 @@ describe('Value Stream Analytics component', () => {
       describe('enabled', () => {
         beforeEach(async () => {
           wrapper = await createComponent({
-            withValueStreamSelected: false,
             withStageSelected: true,
             pathNavigationEnabled: true,
           });
@@ -375,25 +368,8 @@ describe('Value Stream Analytics component', () => {
       );
     });
 
-    describe('hasCreateMultipleValueStreams = true', () => {
-      beforeEach(() => {
-        mock = new MockAdapter(axios);
-        mockRequiredRoutes(mock);
-      });
-
-      it('hides the value stream select component', () => {
-        displaysValueStreamSelect(false);
-      });
-
-      it('displays the value stream select component', async () => {
-        wrapper = await createComponent({
-          featureFlags: {
-            hasCreateMultipleValueStreams: true,
-          },
-        });
-
-        displaysValueStreamSelect(true);
-      });
+    it('displays the value stream select component', () => {
+      displaysValueStreamSelect(true);
     });
 
     it('displays the date range picker', () => {
@@ -483,7 +459,6 @@ describe('Value Stream Analytics component', () => {
               StageNavItem,
             },
           },
-          withValueStreamSelected: false,
           withStageSelected: true,
         });
       });
@@ -551,7 +526,7 @@ describe('Value Stream Analytics component', () => {
     });
 
     const findFlashError = () => document.querySelector('.flash-container .flash-text');
-    const findError = async msg => {
+    const findError = async (msg) => {
       await waitForPromises();
       expect(findFlashError().innerText.trim()).toEqual(msg);
     };

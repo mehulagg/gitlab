@@ -80,9 +80,9 @@ class CommitStatus < ApplicationRecord
     merge(or_conditions)
   end
 
-  # We use `Enums::CommitStatus.failure_reasons` here so that EE can more easily
+  # We use `Enums::Ci::CommitStatus.failure_reasons` here so that EE can more easily
   # extend this `Hash` with new values.
-  enum_with_nil failure_reason: Enums::CommitStatus.failure_reasons
+  enum_with_nil failure_reason: Enums::Ci::CommitStatus.failure_reasons
 
   ##
   # We still create some CommitStatuses outside of CreatePipelineService.
@@ -157,6 +157,12 @@ class CommitStatus < ApplicationRecord
     before_transition any => :failed do |commit_status, transition|
       failure_reason = transition.args.first
       commit_status.failure_reason = CommitStatus.failure_reasons[failure_reason]
+    end
+
+    before_transition [:skipped, :manual] => :created do |commit_status, transition|
+      transition.args.first.try do |user|
+        commit_status.user = user
+      end
     end
 
     after_transition do |commit_status, transition|

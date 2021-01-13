@@ -192,6 +192,7 @@ module EE
                 confidential_epics: count(::Epic.confidential),
                 dependency_list_usages_total: redis_usage_data { ::Gitlab::UsageCounters::DependencyList.usage_totals[:total] },
                 epics: count(::Epic),
+                epic_issues: count(::EpicIssue),
                 feature_flags: count(Operations::FeatureFlag),
                 geo_nodes: count(::GeoNode),
                 geo_event_log_max_id: alt_usage_data { Geo::EventLog.maximum(:id) || 0 },

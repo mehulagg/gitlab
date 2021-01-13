@@ -21,6 +21,6 @@ class Groups::UsageQuotasController < Groups::ApplicationController
   end
 
   def push_additional_repo_storage_by_namespace_feature
-    push_to_gon_features(:additional_repo_storage_by_namespace, @group.additional_repo_storage_by_namespace_enabled?)
+    push_to_gon_attributes(:features, :additional_repo_storage_by_namespace, @group.additional_repo_storage_by_namespace_enabled?)
   end
 end

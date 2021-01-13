@@ -6,20 +6,23 @@ RSpec.configure do |config|
 
     Elastic::ProcessBookkeepingService.clear_tracking!
 
-    # Delete the migration index and the main ES index
-    helper.delete_index(index_name: helper.migrations_index_name)
-    helper.delete_index
+    # Delete all test indices
+    indices = [helper.target_name, helper.migrations_index_name] + helper.standalone_indices_proxies.map(&:index_name)
+    indices.each do |index_name|
+      helper.delete_index(index_name: index_name)
+    end
 
     helper.create_empty_index(options: { settings: { number_of_replicas: 0 } })
     helper.create_migrations_index
     ::Elastic::DataMigrationService.mark_all_as_completed!
+    helper.create_standalone_indices
     refresh_index!
 
     example.run
 
-    helper.delete_index(index_name: helper.migrations_index_name)
-    helper.delete_index
-
+    indices.each do |index_name|
+      helper.delete_index(index_name: index_name)
+    end
     Elastic::ProcessBookkeepingService.clear_tracking!
   end
 

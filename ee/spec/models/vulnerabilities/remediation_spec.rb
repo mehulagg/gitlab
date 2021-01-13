@@ -20,4 +20,14 @@ RSpec.describe Vulnerabilities::Remediation do
 
     it { is_expected.to match_array([remediation_2]) }
   end
+
+  describe '#diff' do
+    let(:diff_content) { 'foo' }
+    let(:diff_file) { Tempfile.new.tap { |f| f.write(diff_content) } }
+    let(:remediation) { create(:vulnerabilities_remediation, file: diff_file) }
+
+    subject { remediation.diff }
+
+    it { is_expected.to eq(diff_content) }
+  end
 end

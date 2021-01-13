@@ -33,10 +33,8 @@ class UsersController < ApplicationController
       end
 
       format.json do
-        # In 13.8, this endpoint will be removed:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/289972
-        load_events
-        pager_json("events/_events", @events.count, events: @events)
+        msg = "This endpoint is deprecated. Use %s instead." % user_activity_path
+        render json: { message: msg }, status: :not_found
       end
     end
   end
@@ -56,6 +54,11 @@ class UsersController < ApplicationController
         pager_json("events/_events", @events.count, events: @events)
       end
     end
+  end
+
+  # Get all gpg keys of a user(params[:username]) in a text format
+  def gpg_keys
+    render plain: user.gpg_keys.select(&:verified?).map(&:key).join("\n")
   end
 
   def groups

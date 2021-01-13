@@ -3,12 +3,11 @@
 
 - if message.present? && subscribable.present?
   .container-fluid.container-limited.pt-3
-    .gl-alert.alert-dismissible.gitlab-ee-license-banner.hidden.js-gitlab-ee-license-banner.gl-pb-7.gl-border-1.gl-border-solid.gl-border-gray-100.gl-rounded-base{ role: 'alert', data: { license_expiry: subscribable.expires_at } }
-      %button.close.p-2{ type: 'button', 'aria-label' => 'Dismiss banner', data: { dismiss: 'alert', track_event: 'click_button', track_label: 'dismiss_subscribable_banner' } }
-        %span{ 'aria-hidden' => 'true' }
-          = sprite_icon('merge-request-close-m', size: 24)
-      .d-flex.flex-row
-        .pr-4.pl-3.pt-2
+    .gl-alert.gitlab-ee-license-banner.hidden.js-gitlab-ee-license-banner.gl-pb-7.gl-border-1.gl-border-solid.gl-border-gray-100.gl-rounded-base{ role: 'alert', data: { license_expiry: subscribable.expires_at } }
+      %button.gl-alert-dismiss{ type: 'button', 'aria-label' => 'Dismiss', data: { track_event: 'click_button', track_label: 'dismiss_subscribable_banner' } }
+        = sprite_icon('close', css_class: 'gl-icon js-close')
+      .gl-display-flex.gl-flex-direction-row
+        .gl-pr-6.gl-pl-5.gl-pt-3
           - if subscribable.expired?
             - if subscribable.block_changes?
               = image_tag('illustrations/subscription-downgraded.svg')
@@ -16,11 +15,11 @@
               = image_tag('illustrations/subscription-cancelled.svg')
           - else
             = image_tag('illustrations/subscription-warning.svg')
-        .text-left.pt-2
+        .gl-text-left.gl-pt-3
           = message
 
           - if subscribable.block_changes?
-            = link_to 'Upgrade your plan', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'upgrade' }
+            = link_to _('Upgrade your plan'), 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn gl-button btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'upgrade' }
           - else
-            = link_to 'Renew subscription', 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'renew' }
-            = link_to "That's ok, I don't want to renew", '#', data: { dismiss: 'alert', track_event: 'click_text', track_label: 'subscribable_action', track_property: 'thats_ok' }, 'aria-label' => 'Dismiss banner', class: 'btn btn-inverted-secondary ml-2'
+            = link_to _('Renew subscription'), 'https://customers.gitlab.com/subscriptions/my_renewal', class: 'btn gl-button btn-primary', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'renew' }
+            = link_to _('That is ok, I do not want to renew'), '#', data: { track_event: 'click_text', track_label: 'subscribable_action', track_property: 'thats_ok' }, 'aria-label' => 'Dismiss', class: 'btn gl-button btn-info btn-info-secondary gl-ml-3 js-close'

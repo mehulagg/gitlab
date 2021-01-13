@@ -72,7 +72,7 @@ describe('Productivity analytics chart actions', () => {
             expect(axios.get).toHaveBeenCalledWith(mockedState.endpoint, { params: globalParams });
           });
 
-          it('dispatches success with received data', done =>
+          it('dispatches success with received data', (done) =>
             testAction(
               actions.fetchChartData,
               chartKey,
@@ -94,7 +94,7 @@ describe('Productivity analytics chart actions', () => {
             mock.onGet(mockedState.endpoint).replyOnce(200, mockScatterplotData);
           });
 
-          it('dispatches success with received data and transformedData', done => {
+          it('dispatches success with received data and transformedData', (done) => {
             testAction(
               actions.fetchChartData,
               chartKeys.scatterplot,
@@ -122,7 +122,7 @@ describe('Productivity analytics chart actions', () => {
           mock.onGet(mockedState.endpoint).replyOnce(500);
         });
 
-        it('dispatches error', done => {
+        it('dispatches error', (done) => {
           testAction(
             actions.fetchChartData,
             chartKey,
@@ -149,7 +149,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('requestChartData', () => {
-    it('should commit the request mutation', done => {
+    it('should commit the request mutation', (done) => {
       testAction(
         actions.requestChartData,
         chartKey,
@@ -167,7 +167,7 @@ describe('Productivity analytics chart actions', () => {
         mockedState.charts[disabledChartKey].enabled = false;
       });
 
-      it('does not dispatch the requestChartData action', done => {
+      it('does not dispatch the requestChartData action', (done) => {
         testAction(actions.fetchChartData, disabledChartKey, mockedState, [], [], done);
       });
 
@@ -180,7 +180,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('receiveChartDataSuccess', () => {
-    it('should commit received data', done => {
+    it('should commit received data', (done) => {
       testAction(
         actions.receiveChartDataSuccess,
         { chartKey, data: mockHistogramData },
@@ -198,7 +198,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('receiveChartDataError', () => {
-    it('should commit error', done => {
+    it('should commit error', (done) => {
       const error = { response: { status: 500 } };
       testAction(
         actions.receiveChartDataError,
@@ -220,7 +220,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('fetchSecondaryChartData', () => {
-    it('dispatches fetchChartData for all chart types except for the main chart', done => {
+    it('dispatches fetchChartData for all chart types except for the main chart', (done) => {
       testAction(
         actions.fetchSecondaryChartData,
         null,
@@ -239,7 +239,7 @@ describe('Productivity analytics chart actions', () => {
   describe('setMetricType', () => {
     const metricType = 'time_to_merge';
 
-    it('should commit metricType', done => {
+    it('should commit metricType', (done) => {
       testAction(
         actions.setMetricType,
         { chartKey, metricType },
@@ -252,7 +252,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('updateSelectedItems', () => {
-    it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', done => {
+    it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', (done) => {
       testAction(
         actions.updateSelectedItems,
         { chartKey, item: 5 },
@@ -266,7 +266,7 @@ describe('Productivity analytics chart actions', () => {
 
   describe('resetMainChartSelection', () => {
     describe('when skipReload is false (by default)', () => {
-      it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', done => {
+      it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', (done) => {
         testAction(
           actions.resetMainChartSelection,
           null,
@@ -279,7 +279,7 @@ describe('Productivity analytics chart actions', () => {
     });
 
     describe('when skipReload is true', () => {
-      it('should commit selected chart and it should not dispatch any further actions', done => {
+      it('should commit selected chart and it should not dispatch any further actions', (done) => {
         testAction(
           actions.resetMainChartSelection,
           true,
@@ -298,7 +298,7 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('setChartEnabled', () => {
-    it('should commit enabled state', done => {
+    it('should commit enabled state', (done) => {
       testAction(
         actions.setChartEnabled,
         { chartKey: chartKeys.scatterplot, isEnabled: false },

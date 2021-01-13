@@ -57,6 +57,7 @@ module EE
       has_many :issues, through: :epic_issues
       has_many :user_mentions, class_name: "EpicUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
+      has_many :epic_board_positions, class_name: 'Boards::EpicBoardPosition', inverse_of: :epic_board
 
       validates :group, presence: true
       validate :validate_parent, on: :create
@@ -103,8 +104,16 @@ module EE
         reorder(::Gitlab::Database.nulls_last_order('start_date', 'DESC'), 'id DESC')
       end
 
+      scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
+
       scope :order_relative_position, -> do
         reorder('relative_position ASC', 'id DESC')
+      end
+
+      scope :order_relative_position_on_board, ->(board_id) do
+        left_joins(:epic_board_positions)
+          .where(boards_epic_board_positions: { epic_board_id: [nil, board_id] })
+          .reorder(::Gitlab::Database.nulls_last_order('boards_epic_board_positions.relative_position', 'ASC'), 'epics.id DESC')
       end
 
       scope :with_api_entity_associations, -> { preload(:author, :labels, group: :route) }

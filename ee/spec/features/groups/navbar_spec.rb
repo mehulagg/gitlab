@@ -122,22 +122,22 @@ RSpec.describe 'Group navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          _('Compliance'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       group.add_owner(user)
 
       stub_licensed_features(security_dashboard: true, group_level_compliance_dashboard: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security Dashboard'),
-            _('Vulnerability Report'),
-            _('Compliance')
-          ]
-        }
-      )
 
       insert_after_nav_item(_('Members'), new_nav_item: settings_nav_item)
       insert_after_nav_item(_('Settings'), new_nav_item: administration_nav_item)

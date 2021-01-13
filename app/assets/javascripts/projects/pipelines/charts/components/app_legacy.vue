@@ -1,10 +1,11 @@
 <script>
 import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import { __, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import StatisticsList from './statistics_list.vue';
-import PipelinesAreaChart from './pipelines_area_chart.vue';
+import CiCdAnalyticsAreaChart from './ci_cd_analytics_area_chart.vue';
+
 import {
   CHART_CONTAINER_HEIGHT,
   INNER_CHART_HEIGHT,
@@ -19,7 +20,15 @@ export default {
   components: {
     StatisticsList,
     GlColumnChart,
-    PipelinesAreaChart,
+    CiCdAnalyticsAreaChart,
+    DeploymentFrequencyCharts: () =>
+      import('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'),
+  },
+  inject: {
+    shouldRenderDeploymentFrequencyCharts: {
+      type: Boolean,
+      default: false,
+    },
   },
   props: {
     counts: {
@@ -98,7 +107,7 @@ export default {
   },
   get chartTitles() {
     const today = dateFormat(new Date(), CHART_DATE_FORMAT);
-    const pastDate = timeScale =>
+    const pastDate = (timeScale) =>
       dateFormat(getDateInPast(new Date(), timeScale), CHART_DATE_FORMAT);
     return {
       lastWeek: sprintf(__('Pipelines for last week (%{oneWeekAgo} - %{today})'), {
@@ -111,6 +120,15 @@ export default {
       }),
       lastYear: __('Pipelines for last year'),
     };
+  },
+  areaChartOptions: {
+    xAxis: {
+      name: s__('Pipeline|Date'),
+      type: 'category',
+    },
+    yAxis: {
+      name: s__('Pipeline|Pipelines'),
+    },
   },
 };
 </script>
@@ -140,12 +158,17 @@ export default {
     </div>
     <hr />
     <h4 class="my-4">{{ __('Pipelines charts') }}</h4>
-    <pipelines-area-chart
+    <ci-cd-analytics-area-chart
       v-for="(chart, index) in areaCharts"
       :key="index"
       :chart-data="chart.data"
+      :area-chart-options="$options.areaChartOptions"
     >
       {{ chart.title }}
-    </pipelines-area-chart>
+    </ci-cd-analytics-area-chart>
+    <template v-if="shouldRenderDeploymentFrequencyCharts">
+      <hr />
+      <deployment-frequency-charts />
+    </template>
   </div>
 </template>

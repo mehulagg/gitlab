@@ -22,7 +22,7 @@ You can also view a list of [recent updates to this guide](https://gitlab.com/da
 If you can't find what you need:
 
 - View the GitLab Handbook for [writing style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines) that apply to all GitLab content.
-- Refer to one of the following:
+- Refer to:
 
   - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/).
   - [Google Developer Documentation Style Guide](https://developers.google.com/style).
@@ -161,7 +161,7 @@ Markdown rendering engine. For a complete Kramdown reference, see the
 The [`gitlab-kramdown`](https://gitlab.com/gitlab-org/gitlab_kramdown) Ruby gem
 plans to support all [GitLab Flavored Markdown](../../../user/markdown.md) in the future, which is
 all Markdown supported for display in the GitLab application itself. For now, use
-regular Markdown, following the rules in the linked style guide.
+regular Markdown and follow the rules in the linked style guide.
 
 Kramdown-specific markup (for example, `{:.class}`) doesn't render
 properly on GitLab instances under [`/help`](../index.md#gitlab-help).
@@ -207,9 +207,9 @@ Some examples fail if incorrect capitalization is used:
 Additionally, commands, parameters, values, filenames, and so on must be
 included in backticks. For example:
 
-- "Change the `needs` keyword in your `.gitlab.yml`..."
-  - `needs` is a parameter, and `.gitlab.yml` is a file, so both need backticks.
-    Additionally, `.gitlab.yml` without backticks fails markdownlint because it
+- "Change the `needs` keyword in your `.gitlab-ci.yml`..."
+  - `needs` is a parameter, and `.gitlab-ci.yml` is a file, so both need backticks.
+    Additionally, `.gitlab-ci.yml` without backticks fails markdownlint because it
     does not have capital G or L.
 - "Run `git clone` to clone a Git repository..."
   - `git clone` is a command, so it must be lowercase, while Git is the product,
@@ -252,7 +252,7 @@ Put files for a specific product area into the related folder:
 
 ### Work with directories and files
 
-Refer to the following items when working with directories and files:
+When working with directories and files:
 
 1. When you create a new directory, always start with an `index.md` file.
    Don't use another filename and _do not_ create `README.md` files.
@@ -332,7 +332,7 @@ GitLab documentation should be clear and easy to understand.
 ### Trademark
 
 Only use the GitLab name and trademarks in accordance with
-[GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/inbound-marketing/digital-experience/brand-guidelines/#trademark).
+[GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/brand-guidelines/#trademark).
 
 Don't use the possessive form of the word GitLab (`GitLab's`).
 
@@ -412,7 +412,7 @@ references to user interface elements. For example:
 ### Inclusive language
 
 We strive to create documentation that's inclusive. This section includes
-guidance and examples for the following categories:
+guidance and examples for these categories:
 
 - [Gender-specific wording](#avoid-gender-specific-wording).
   (Tested in [`InclusionGender.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionGender.yml).)
@@ -481,7 +481,7 @@ more precise and functional, such as `primary` and `secondary`.
 
 <!-- vale gitlab.InclusionCultural = YES -->
 
-For more information see the following [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
+For more information see the [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
 
 ### Fake user information
 
@@ -499,7 +499,8 @@ addresses and names, do use:
 When including sample URLs in the documentation, use:
 
 - `example.com` when the domain name is generic.
-- `gitlab.example.com` when referring to self-managed instances of GitLab.
+- `gitlab.example.com` when referring only to self-managed GitLab instances.
+  Use `gitlab.com` for GitLab SaaS instances.
 
 ### Fake tokens
 
@@ -507,12 +508,11 @@ There may be times where a token is needed to demonstrate an API call using
 cURL or a variable used in CI. It is strongly advised not to use real tokens in
 documentation even if the probability of a token being exploited is low.
 
-You can use the following fake tokens as examples:
+You can use these fake tokens as examples:
 
 | Token type            | Token value                                                        |
 |:----------------------|:-------------------------------------------------------------------|
-| Private user token    | `<your_access_token>`                                              |
-| Personal access token | `n671WNGecHugsdEDPsyo`                                             |
+| Personal access token | `<your_access_token>`                                             |
 | Application ID        | `2fcb195768c39e9a94cec2c2e32c59c0aad7a3365c10892e8116b5d83d4096b6` |
 | Application secret    | `04f294d1eaca42b8692017b426d53bbc8fe75f827734f0260710b83a556082df` |
 | CI/CD variable        | `Li8j-mLUVA3eZYjPfd_H`                                             |
@@ -526,9 +526,13 @@ You can use the following fake tokens as examples:
 ### Usage list
 <!-- vale off -->
 
-| {::nomarkdown}<div style="width:140px">Usage</div>{:/} | Guidance |
-|-----------------------|-----|
+| Usage                 | Guidance |
+|-----------------------|----------|
+| above                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **previously** instead. |
+| admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |
+| allow, enable         | Try to avoid, unless you are talking about security-related features. For example, instead of "This feature allows you to create a pipeline," use "Use this feature to create a pipeline." This phrasing is more active and is from the user perspective, rather than the person who implemented the feature. [View details](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/a/allow-allows). |
 | and/or                | Use **or** instead, or another sensible construction. |
+| below                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **following** instead. |
 | currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
 | easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
 | e.g.                  | Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
@@ -539,7 +543,7 @@ You can use the following fake tokens as examples:
 | i.e.                  | Do not use Latin abbreviations. Use **that is** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 | jargon                | Do not use. Define the term or [link to a definition](#links-to-external-documentation). |
 | may, might            | **Might** means something has the probability of occurring. **May** gives permission to do something. Consider **can** instead of **may**. |
-| me                    | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
+| me, myself, mine      | Do not use first-person singular. Use **you**, **we**, or **us** instead. ([Vale](../testing.md#vale) rule: [`FirstPerson.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FirstPerson.yml)) |
 | please                | Do not use. For details, see the [Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please). |
 | profanity             | Do not use. Doing so may negatively affect other users and contributors, which is contrary to the GitLab value of [Diversity, Inclusion, and Belonging](https://about.gitlab.com/handbook/values/#diversity-inclusion). |
 | scalability           | Do not use when talking about increasing GitLab performance for additional users. The words scale or scaling are sometimes acceptable, but references to increasing GitLab performance for additional users should direct readers to the GitLab [reference architectures](../../../administration/reference_architectures/index.md) page. |
@@ -547,6 +551,7 @@ You can use the following fake tokens as examples:
 | slashes               | Instead of **and/or**, use **or** or another sensible construction. This rule also applies to other slashes, like **follow/unfollow**. Some exceptions (like **CI/CD**) are allowed. |
 | that                  | Do not use. Example: `the file that you save` can be `the file you save`. |
 | useful                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
+| utilize               | Do not use. Use **use** instead. It's more succinct and easier for non-native English speakers to understand. |
 | via                   | Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 
 <!-- vale on -->
@@ -653,6 +658,17 @@ To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
 When the docs are generated, the output is:
 
 To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
+
+### Spaces between words
+
+Use only standard spaces between words. The search engine for the documentation
+website doesn't split words separated with
+[non-breaking spaces](https://en.wikipedia.org/wiki/Non-breaking_space) when
+indexing, and fails to create expected individual search terms. Tests that search
+for certain words separated by regular spaces can't find words separated by
+non-breaking spaces.
+
+Tested in [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh).
 
 ## Lists
 
@@ -852,7 +868,7 @@ Consider installing a plugin or extension in your editor for formatting tables:
 
 When creating tables of lists of features (such the features
 available to each role on the [Permissions](../../../user/permissions.md#project-members-permissions)
-page), use the following phrases:
+page), use these phrases:
 
 | Option | Markdown                 | Displayed result       |
 |--------|--------------------------|------------------------|
@@ -954,7 +970,7 @@ Links are important in GitLab documentation. They allow you to [link instead of
 summarizing](#link-instead-of-summarize) to help preserve a [single source of truth](#why-a-single-source-of-truth)
 in GitLab documentation.
 
-We include guidance for links in the following categories:
+We include guidance for links in these categories:
 
 - How to set up [anchor links](#anchor-links) for headings.
 - How to set up [criteria](#basic-link-criteria) for configuring a link.
@@ -1124,14 +1140,14 @@ When documenting navigation through the user interface:
 
 - Use the exact wording as shown in the UI, including any capital letters as-is.
 - Use bold text for navigation items and the char "greater than" (`>`) as a
-  separator. For example: `Navigate to your project's **Settings > CI/CD**`.
+  separator. For example: `From your project, go to **Settings > CI/CD**`.
 - If there are any expandable menus, make sure to mention that the user needs to
   expand the tab to find the settings you're referring to. For example:
-  `Navigate to your project's **Settings > CI/CD** and expand **General pipelines**`.
+  `From your group, go to **Settings > CI/CD** and expand **General pipelines**`.
 
 ### Navigational elements
 
-Use the following terms when referring to the main GitLab user interface
+Use these terms when referring to the main GitLab user interface
 elements:
 
 - **Top menu**: This is the top menu that spans the width of the user interface.
@@ -1170,7 +1186,7 @@ When you take screenshots:
 
 - Save the image with a lowercase filename that's descriptive of the feature
   or concept in the image. If the image is of the GitLab interface, append the
-  GitLab version to the filename, based on the following format:
+  GitLab version to the filename, based on this format:
   `image_name_vX_Y.png`. For example, for a screenshot taken from the pipelines
   page of GitLab 11.1, a valid name is `pipelines_v11_1.png`. If you're adding an
   illustration that doesn't include parts of the user interface, add the release
@@ -1352,7 +1368,7 @@ hidden on the documentation site, but is displayed by `/help`.
   <!-- vale on -->
 
 Syntax highlighting is required for fenced code blocks added to the GitLab
-documentation. Refer to the following table for the most common language classes,
+documentation. Refer to this table for the most common language classes,
 or check the [complete list](https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers)
 of available language classes:
 
@@ -1420,15 +1436,15 @@ Usage examples:
 Icons should be used sparingly, and only in ways that aid and do not hinder the
 readability of the text.
 
-For example, the following adds little to the accompanying text:
+For example, this Markdown adds little to the accompanying text:
 
 ```markdown
-1. Go to **{home}** **Project overview > Details**
+1. Go to **{home}** **Project overview > Details**.
 ```
 
-1. Go to **{home}** **Project overview > Details**
+1. Go to **{home}** **Project overview > Details**.
 
-However, the following might help the reader connect the text to the user
+However, these tables might help the reader connect the text to the user
 interface:
 
 ```markdown
@@ -1542,14 +1558,12 @@ It renders on the GitLab documentation site as:
 
 ## Terms
 
-To maintain consistency through GitLab documentation, the following guides
-documentation authors on agreed styles and usage of terms.
+To maintain consistency through GitLab documentation, use these styles and terms.
 
 ### Merge requests (MRs)
 
 Merge requests allow you to exchange changes you made to source code and
-collaborate with other people on the same project. This term is used in
-the following ways:
+collaborate with other people on the same project.
 
 - Use lowercase _merge requests_ regardless of whether referring to the feature
   or individual merge requests.
@@ -1567,7 +1581,7 @@ Examples:
 
 ### Describe UI elements
 
-The following are styles to follow when describing user interface elements in an
+Follow these styles when you're describing user interface elements in an
 application:
 
 - For elements with a visible label, use that label in bold with matching case.
@@ -1577,7 +1591,7 @@ application:
 
 ### Verbs for UI elements
 
-The following are recommended verbs for specific uses with user interface
+Use these verbs for specific uses with user interface
 elements:
 
 | Recommended         | Used for                              | Replaces                   |
@@ -1594,8 +1608,9 @@ elements:
 
 ## GitLab versions
 
-To help users be aware of recent product improvements or additions, we add
-GitLab version information to our documentation.
+GitLab product documentation pages (not including [Contributor and Development](../../README.md)
+pages in the `/development` directory) can include version information to help
+users be aware of recent improvements or additions.
 
 The GitLab Technical Writing team determines which versions of
 documentation to display on this site based on the GitLab
@@ -1623,7 +1638,7 @@ displayed for the page or feature.
 
 #### Version text in the **Version History**
 
-If all content in a section is related, add version text following the header
+If all content in a section is related, add version text after the header
 for the section. The version information must be surrounded by blank lines, and
 each entry should be on its own line.
 
@@ -1656,8 +1671,8 @@ the blockquote to use a bulleted list:
 If a feature is moved to another tier:
 
 ```markdown
-> - [Moved](<link-to-issue>) from [GitLab Premium](https://about.gitlab.com/pricing/) to [GitLab Starter](https://about.gitlab.com/pricing/) in 11.8.
-> - [Moved](<link-to-issue>) from [GitLab Starter](https://about.gitlab.com/pricing/) to GitLab Core in 12.0.
+> - [Moved](<link-to-issue>) from GitLab Premium to GitLab Starter in 11.8.
+> - [Moved](<link-to-issue>) from GitLab Starter to GitLab Core in 12.0.
 ```
 
 If a feature is deprecated, include a link to a replacement (when available):
@@ -1695,7 +1710,7 @@ voters to agree.
 #### End-of-life for features or products
 
 When a feature or product enters its end-of-life, indicate its status by
-creating a [warning alert](#alert-boxes) directly following its relevant header.
+creating a [warning alert](#alert-boxes) directly after its relevant header.
 If possible, link to its deprecation and removal issues.
 
 For example:
@@ -1841,7 +1856,8 @@ packages. Possible configuration settings include:
 - Other settings in `lib/support/`.
 
 Configuration procedures can require users to edit configuration files, reconfigure
-GitLab, or restart GitLab. Use these styles to document these steps:
+GitLab, or restart GitLab. Use these styles to document these steps, replacing
+`PATH/TO` with the appropriate path:
 
 <!-- vale off -->
 
@@ -1854,7 +1870,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
    external_url "https://gitlab.example.com"
    ```
 
-1. Save the file and [reconfigure](path/to/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
+1. Save the file and [reconfigure](PATH/TO/administration/restart_gitlab.md#omnibus-gitlab-reconfigure)
    GitLab for the changes to take effect.
 
 ---
@@ -1868,7 +1884,7 @@ GitLab, or restart GitLab. Use these styles to document these steps:
      host: "gitlab.example.com"
    ```
 
-1. Save the file and [restart](path/to/administration/restart_gitlab.md#installations-from-source)
+1. Save the file and [restart](PATH/TO/administration/restart_gitlab.md#installations-from-source)
    GitLab for the changes to take effect.
 ````
 

@@ -43,7 +43,7 @@ It takes several arguments of which the measurement’s name is the only one req
   performance.measure('My component', 'my-component-start', 'my-component-end')
   ```
 
-- Duration between a mark and the moment the measurement is taken. The end mark is omitted in 
+- Duration between a mark and the moment the measurement is taken. The end mark is omitted in
   this case.
 
   ```javascript
@@ -188,7 +188,7 @@ All the marks and measures should be instantiated with the constants from
 `app/assets/javascripts/performance/constants.js`. When you’re ready to add a new mark’s or
 measurement’s label, you can follow the pattern.
 
-NOTE: **Note:**
+NOTE:
 This pattern is a recommendation and not a hard rule.
 
 ```javascript
@@ -197,7 +197,7 @@ app-*-end   // for an end ‘mark’
 app-*       // for ‘measure’
 ```
 
-For example, `'webide-init-editor-start`, `mr-diffs-mark-file-tree-end`, and so on. We do it to 
+For example, `'webide-init-editor-start`, `mr-diffs-mark-file-tree-end`, and so on. We do it to
 help identify marks and measures coming from the different apps on the same page.
 
 ## Best Practices

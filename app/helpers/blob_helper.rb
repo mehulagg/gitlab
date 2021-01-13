@@ -199,7 +199,7 @@ module BlobHelper
 
     categories.each_with_object({}) do |category, hash|
       hash[category] = grouped[category].map do |item|
-        { name: item.name, id: item.key }
+        { name: item.name, id: item.key, project_id: item.project_id }
       end
     end
   end
@@ -215,6 +215,10 @@ module BlobHelper
 
   def gitlab_ci_ymls(project)
     @gitlab_ci_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_ymls, project).execute)
+  end
+
+  def gitlab_ci_syntax_ymls(project)
+    @gitlab_ci_syntax_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_syntax_ymls, project).execute)
   end
 
   def metrics_dashboard_ymls(project)

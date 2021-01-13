@@ -13,7 +13,7 @@ module EE
         expose :resource_id do |event, _options|
           event.issuable.id
         end
-        expose :iteration, using: Entities::Iteration
+        expose :iteration, using: ::API::Entities::Iteration
         expose :action
       end
     end

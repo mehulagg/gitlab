@@ -342,6 +342,7 @@ RSpec.describe API::Internal::Base do
 
       it 'returns a valid token when the expiry date does not exceed the max token lifetime' do
         expires_at = instance_level_max_personal_access_token_lifetime.days.from_now.to_date.to_s
+        token_size = (PersonalAccessToken.token_prefix || '').size + 20
 
         post api('/internal/personal_access_token'),
              params: {
@@ -354,7 +355,7 @@ RSpec.describe API::Internal::Base do
 
         aggregate_failures do
           expect(json_response['success']).to eq(true)
-          expect(json_response['token']).to match(/\A\S{20}\z/)
+          expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
           expect(json_response['scopes']).to match_array(%w(read_api read_repository))
           expect(json_response['expires_at']).to eq(expires_at)
         end

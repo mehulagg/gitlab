@@ -52,10 +52,6 @@ If you set **Project Visibility** to public, you can limit access to some featur
 to **Only Project Members**. In addition, you can select the option to
 [Allow users to request access](../members/index.md#project-membership-and-requesting-access).
 
-WARNING:
-If you [reduce a project's visibility level](../../../public_access/public_access.md#reducing-visibility),
-that action unlinks all forks of that project.
-
 Use the switches to enable or disable the following features:
 
 | Option                            | More access limit options | Description                                                                                                                                                                                    |
@@ -68,11 +64,13 @@ Use the switches to enable or disable the following features:
 | **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
 | **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
 | **Packages**                      |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration) functionality                                    |
+| **Analytics**                     | ✓                         | Enables [analytics](../../analytics/)                                                                                                                                                          |
 | **Wiki**                          | ✓                         | Enables a separate system for [documentation](../wiki/)                                                                                                                                        |
 | **Snippets**                      | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                                                                          |
 | **Pages**                         | ✓                         | Allows you to [publish static websites](../pages/)                                                                                                                                             |
 | **Metrics Dashboard**             | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)
-| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md)
+| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md) |
+| **Operations Dashboard**          | ✓                         | Control access to [operations dashboard](../../../operations/index.md)
 
 Some features depend on others:
 

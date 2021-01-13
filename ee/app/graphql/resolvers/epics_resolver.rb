@@ -46,6 +46,10 @@ module Resolvers
              description: 'Include epics from descendant groups',
              default_value: true
 
+    argument :confidential, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Filter epics by given confidentiality'
+
     type Types::EpicType, null: true
 
     def ready?(**args)

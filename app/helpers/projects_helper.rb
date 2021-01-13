@@ -150,13 +150,7 @@ module ProjectsHelper
   end
 
   def can_change_visibility_level?(project, current_user)
-    return false unless can?(current_user, :change_visibility_level, project)
-
-    if project.fork_source
-      project.fork_source.visibility_level > Gitlab::VisibilityLevel::PRIVATE
-    else
-      true
-    end
+    can?(current_user, :change_visibility_level, project)
   end
 
   def can_disable_emails?(project, current_user)
@@ -463,7 +457,8 @@ module ProjectsHelper
       issues:             :read_issue,
       project_members:    :read_project_member,
       wiki:               :read_wiki,
-      feature_flags:      :read_feature_flag
+      feature_flags:      :read_feature_flag,
+      analytics:          :read_analytics
     }
   end
 
@@ -625,6 +620,7 @@ module ProjectsHelper
       wikiAccessLevel: feature.wiki_access_level,
       snippetsAccessLevel: feature.snippets_access_level,
       pagesAccessLevel: feature.pages_access_level,
+      analyticsAccessLevel: feature.analytics_access_level,
       containerRegistryEnabled: !!project.container_registry_enabled,
       lfsEnabled: !!project.lfs_enabled,
       emailsDisabled: project.emails_disabled?,

@@ -1,7 +1,11 @@
 import { pick } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
-import { historyPushState } from '~/lib/utils/common_utils';
+import {
+  historyPushState,
+  convertObjectPropsToCamelCase,
+  urlParamsToObject,
+} from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType } from '~/boards/constants';
@@ -41,8 +45,7 @@ export const gqlClient = createGqClient(
 );
 
 const fetchAndFormatListIssues = (state, extraVariables) => {
-  const { endpoints, boardType, filterParams } = state;
-  const { fullPath, boardId } = endpoints;
+  const { fullPath, boardId, boardType, filterParams } = state;
 
   const variables = {
     fullPath,
@@ -105,9 +108,24 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
+  performSearch({ dispatch, getters }) {
+    dispatch(
+      'setFilters',
+      convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
+    );
+
+    if (getters.isSwimlanesOn) {
+      dispatch('resetEpics');
+      dispatch('resetIssues');
+      dispatch('fetchEpicsSwimlanes', {});
+    } else if (gon.features.graphqlBoardLists) {
+      dispatch('fetchLists');
+      dispatch('resetIssues');
+    }
+  },
+
   fetchEpicsSwimlanes({ state, commit, dispatch }, { withLists = true, endCursor = null }) {
-    const { endpoints, boardType, filterParams } = state;
-    const { fullPath, boardId } = endpoints;
+    const { fullPath, boardId, boardType, filterParams } = state;
 
     const variables = {
       fullPath,
@@ -126,7 +144,7 @@ export default {
       })
       .then(({ data }) => {
         const { epics, lists } = data[boardType]?.board;
-        const epicsFormatted = epics.edges.map(e => ({
+        const epicsFormatted = epics.edges.map((e) => ({
           ...e.node,
         }));
 
@@ -156,9 +174,7 @@ export default {
   },
 
   updateBoardEpicUserPreferences({ commit, state }, { epicId, collapsed }) {
-    const {
-      endpoints: { boardId },
-    } = state;
+    const { boardId } = state;
 
     const variables = {
       boardId: fullBoardId(boardId),
@@ -291,14 +307,18 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      historyPushState(mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href));
+      historyPushState(
+        mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href, {
+          spreadArrays: true,
+        }),
+      );
       dispatch('fetchEpicsSwimlanes', {});
     } else if (!gon.features.graphqlBoardLists) {
-      historyPushState(removeParams(['group_by']));
+      historyPushState(removeParams(['group_by']), window.location.href, true);
       boardsStore.create();
       eventHub.$emit('initialBoardLoad');
     } else {
-      historyPushState(removeParams(['group_by']));
+      historyPushState(removeParams(['group_by']), window.location.href, true);
     }
   },
 
@@ -370,7 +390,7 @@ export default {
       epicId,
     });
 
-    const { boardId } = state.endpoints;
+    const { boardId } = state;
     const [fullProjectPath] = issuePath.split(/[#]/);
 
     gqlClient

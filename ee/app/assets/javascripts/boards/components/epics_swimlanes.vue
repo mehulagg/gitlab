@@ -40,7 +40,7 @@ export default {
     ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
-      return listId => this.getUnassignedIssues(listId);
+      return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
       return this.lists.reduce(
@@ -70,7 +70,7 @@ export default {
     hasMoreUnassignedIssues() {
       return (
         this.unassignedIssuesCount > 0 &&
-        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage)
+        this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
   },
@@ -89,7 +89,7 @@ export default {
       });
     },
     fetchMoreUnassignedIssues() {
-      this.lists.forEach(list => {
+      this.lists.forEach((list) => {
         if (this.pageInfoByListId[list.id]?.hasNextPage) {
           this.fetchIssuesForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
         }

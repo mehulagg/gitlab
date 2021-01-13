@@ -21,7 +21,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::UpdateService do
   it 'persists the segment' do
     expect(subject).to be_success
     expect(segment.name).to eq('new name')
-    expect(segment.groups).to eq([group, other_group])
+    expect(segment.groups).to match_array([group, other_group])
   end
 
   context 'when user is not an admin' do

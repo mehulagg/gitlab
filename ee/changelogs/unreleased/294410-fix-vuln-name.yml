@@ -1,0 +1,5 @@
+---
+title: Fix alignment of vulnerability names in pipeline security tab
+merge_request: 51313
+author:
+type: fixed

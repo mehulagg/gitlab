@@ -53,7 +53,7 @@ module EE
 
         state_machine :status do
           after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
-            next unless pipeline.has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+            next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?

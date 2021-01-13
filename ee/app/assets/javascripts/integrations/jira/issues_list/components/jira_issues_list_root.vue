@@ -106,7 +106,7 @@ export default {
             search: this.filterParams.search,
           },
         })
-        .then(res => {
+        .then((res) => {
           const { headers, data } = res;
           this.currentPage = parseInt(headers['x-page'], 10);
           this.totalIssues = parseInt(headers['x-total'], 10);
@@ -126,7 +126,7 @@ export default {
           });
           this.issuesCount[this.currentState] = this.issues.length;
         })
-        .catch(error => {
+        .catch((error) => {
           this.issuesListLoadFailed = true;
           createFlash({
             message: __('An error occurred while loading issues'),
@@ -156,7 +156,7 @@ export default {
       const filterParams = {};
       const plainText = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (filter.type === 'filtered-search-term' && filter.value.data) {
           plainText.push(filter.value.data);
         }

@@ -102,7 +102,7 @@ To edit a file:
    in the bottom-right corner.
 1. When you're done, click **Submit changes...**.
 1. (Optional) Adjust the default title and description of the merge request that will be submitted
-   with your changes. Alternatively, select a [merge request template](../../../user/project/description_templates.md#creating-merge-request-templates)
+   with your changes. Alternatively, select a [merge request template](../../../user/project/description_templates.md#create-a-merge-request-template)
    from the dropdown menu and edit it accordingly.
 1. Click **Submit changes**.
 1. A new merge request is automatically created and you can assign a colleague for review.
@@ -169,7 +169,7 @@ title, layout template, or author, but can be used to pass any kind of metadata 
 generator as the page renders out to HTML. Included at the very top of each data file, the
 front matter is often formatted as YAML or JSON and requires consistent and accurate syntax.
 
-To edit the front matter from the Static Site Editor you can use the GitLab's regular file editor,
+To edit the front matter from the Static Site Editor you can use the GitLab regular file editor,
 the Web IDE, or easily update the data directly from the WYSIWYG editor:
 
 1. Click the **Page settings** button on the bottom-right to reveal a web form with the data you

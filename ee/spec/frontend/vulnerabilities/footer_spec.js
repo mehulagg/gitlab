@@ -110,7 +110,10 @@ describe('Vulnerability Footer', () => {
     it('renders the history list if there are history items', () => {
       // The shape of this object doesn't matter for this test, we just need to verify that it's passed to the history
       // entry.
-      const historyItems = [{ id: 1, note: 'some note' }, { id: 2, note: 'another note' }];
+      const historyItems = [
+        { id: 1, note: 'some note' },
+        { id: 2, note: 'another note' },
+      ];
       mockAxios.onGet(discussionUrl).replyOnce(200, historyItems, { date: Date.now() });
       createWrapper();
 
@@ -280,14 +283,17 @@ describe('Vulnerability Footer', () => {
     const statusDescription = () => wrapper.find(StatusDescription);
     const vulnerabilityStates = Object.keys(VULNERABILITY_STATES);
 
-    it.each(vulnerabilityStates)(`shows detection note when vulnerability state is '%s'`, state => {
-      createWrapper({ state });
+    it.each(vulnerabilityStates)(
+      `shows detection note when vulnerability state is '%s'`,
+      (state) => {
+        createWrapper({ state });
 
-      expect(detectionNote().exists()).toBe(true);
-      expect(statusDescription().props('vulnerability')).toEqual({
-        state: 'detected',
-        pipeline: vulnerability.pipeline,
-      });
-    });
+        expect(detectionNote().exists()).toBe(true);
+        expect(statusDescription().props('vulnerability')).toEqual({
+          state: 'detected',
+          pipeline: vulnerability.pipeline,
+        });
+      },
+    );
   });
 });

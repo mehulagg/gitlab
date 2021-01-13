@@ -173,7 +173,7 @@ There are two types of redirects:
 - Redirect files added into the docs themselves, for users who view the docs in `/help`
   on self-managed instances. For example, [`/help` on GitLab.com](https://gitlab.com/help).
 - Redirects in a [`_redirects`](../../user/project/pages/redirects.md) file, for users
-  who view the docs on <http://docs.gitlab.com>.
+  who view the docs on <https://docs.gitlab.com>.
 
 To add a redirect:
 
@@ -201,6 +201,9 @@ To add a redirect:
 
    1. If the document being moved has any Disqus comments on it, follow the steps
       described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
+   1. If a documentation page you're removing includes images that aren't used
+      with any other documentation pages, be sure to use your MR to delete
+      those images from the repository.
    1. Assign the MR to a technical writer for review and merge.
 1. If the redirect is to one of the 4 internal docs projects (not an external URL),
    create an MR in [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs):

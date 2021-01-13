@@ -15,7 +15,7 @@ We rely on different sources to present diffs. These include:
 ## Deep Dive
 
 In January 2019, Oswaldo Ferreira hosted a Deep Dive (GitLab team members only:
-`https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's Diffs and Commenting on Diffs
+`https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab Diffs and Commenting on Diffs
 functionality to share his domain specific knowledge with anyone who may work in this part of the
 codebase in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=K6G3gMcFyek),
 and the slides on [Google Slides](https://docs.google.com/presentation/d/1bGutFH2AT3bxOPZuLMGl1ANWHqFnrxwQwjiwAZkF-TU/edit)
@@ -79,7 +79,7 @@ File diffs are collapsed (but are expandable) if 100 files have already been ren
 Gitlab::Git::DiffCollection.collection_limits[:safe_max_lines] = Gitlab::Git::DiffCollection::DEFAULT_LIMITS[:max_lines] = 5000
 ```
 
-File diffs will be collapsed (but be expandable) if 5000 lines have already been rendered.
+File diffs are collapsed (but be expandable) if 5000 lines have already been rendered.
 
 ```ruby
 Gitlab::Git::DiffCollection.collection_limits[:safe_max_bytes] = Gitlab::Git::DiffCollection.collection_limits[:safe_max_files] * 5.kilobytes = 500.kilobytes

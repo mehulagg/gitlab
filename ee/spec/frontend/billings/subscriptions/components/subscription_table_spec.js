@@ -5,12 +5,11 @@ import SubscriptionTableRow from 'ee/billings/subscriptions/components/subscript
 import initialStore from 'ee/billings/subscriptions/store';
 import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
-import { TEST_HOST } from 'helpers/test_constants';
 import Vuex from 'vuex';
 import { extendedWrapper } from '../../../../../../spec/frontend/helpers/vue_test_utils_helper';
 
-const TEST_NAMESPACE_NAME = 'GitLab.com';
-const CUSTOMER_PORTAL_URL = 'https://customers.gitlab.com/subscriptions';
+const namespaceName = 'GitLab.com';
+const customerPortalUrl = 'https://customers.gitlab.com/subscriptions';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -19,15 +18,19 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
-  const findAddSeatsButton = () => wrapper.findByTestId('add-seats');
-  const findButtonProps = () =>
-    wrapper.findAll('a').wrappers.map(x => ({ text: x.text(), href: x.attributes('href') }));
-  const findRenewButton = () => findButtonProps().filter(({ text }) => text === 'Renew');
+  const defaultFlags = { saasManualRenewButton: false, saasAddSeatsButton: false };
 
-  const createComponent = (
-    options = {},
-    { saasManualRenewButton = false, saasAddSeatsButton = false } = {},
-  ) => {
+  const findAddSeatsButton = () => wrapper.findByTestId('add-seats-button');
+  const findManageButton = () => wrapper.findByTestId('manage-button');
+  const findRenewButton = () => wrapper.findByTestId('renew-button');
+  const findUpgradeButton = () => wrapper.findByTestId('upgrade-button');
+
+  const createComponentWithStore = ({
+    props = {},
+    featureFlags = {},
+    provide = {},
+    state = {},
+  } = {}) => {
     store = new Vuex.Store(initialStore());
     jest.spyOn(store, 'dispatch').mockImplementation();
 
@@ -36,14 +39,20 @@ describe('SubscriptionTable component', () => {
         store,
         localVue,
         provide: {
+          customerPortalUrl,
+          namespaceName,
+          ...provide,
           glFeatures: {
-            saasManualRenewButton,
-            saasAddSeatsButton,
+            defaultFlags,
+            ...featureFlags,
           },
         },
-        ...options,
+        propsData: props,
       }),
     );
+
+    Object.assign(store.state, state);
+    return wrapper.vm.$nextTick();
   };
 
   afterEach(() => {
@@ -53,16 +62,13 @@ describe('SubscriptionTable component', () => {
 
   describe('when created', () => {
     beforeEach(() => {
-      createComponent({
-        propsData: {
-          namespaceName: TEST_NAMESPACE_NAME,
+      createComponentWithStore({
+        provide: {
           planUpgradeHref: '/url/',
           planRenewHref: '/url/for/renew',
-          customerPortalUrl: CUSTOMER_PORTAL_URL,
         },
+        state: { isLoadingSubscription: true },
       });
-
-      Object.assign(store.state, { isLoadingSubscription: true });
     });
 
     it('shows loading icon', () => {
@@ -72,29 +78,18 @@ describe('SubscriptionTable component', () => {
     it('dispatches the correct actions', () => {
       expect(store.dispatch).toHaveBeenCalledWith('fetchSubscription');
     });
-
-    it('matches the snapshot', () => {
-      expect(wrapper.element).toMatchSnapshot();
-    });
   });
 
   describe('with success', () => {
     beforeEach(() => {
-      createComponent({ propsData: { namespaceName: TEST_NAMESPACE_NAME } });
-
+      createComponentWithStore();
       store.state.isLoadingSubscription = false;
       store.commit(`${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
-
       return wrapper.vm.$nextTick();
     });
 
     it('should render the card title "GitLab.com: Gold"', () => {
-      expect(
-        wrapper
-          .find('.js-subscription-header strong')
-          .text()
-          .trim(),
-      ).toBe('GitLab.com: Gold');
+      expect(wrapper.findByTestId('subscription-header').text()).toContain('GitLab.com: Gold');
     });
 
     it('should render a "Usage" and a "Billing" row', () => {
@@ -102,110 +97,142 @@ describe('SubscriptionTable component', () => {
     });
   });
 
-  describe.each`
-    planName        | isFreePlan | upgradable | isTrialPlan | snapshotDesc
-    ${'free'}       | ${true}    | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
-    ${'trial-gold'} | ${false}   | ${false}   | ${true}     | ${'has Manage button'}
-    ${'gold'}       | ${false}   | ${false}   | ${false}    | ${'has Renew and Manage buttons'}
-    ${'bronze'}     | ${false}   | ${true}    | ${false}    | ${'has Upgrade and Renew and Manage buttons'}
-  `(
-    'given a $planName plan with state: isFreePlan=$isFreePlan, upgradable=$upgradable, isTrialPlan=$isTrialPlan',
-    ({ planName, isFreePlan, upgradable, snapshotDesc }) => {
-      beforeEach(() => {
-        const planUpgradeHref = `${TEST_HOST}/plan/upgrade/${planName}`;
-        const planRenewHref = `${TEST_HOST}/plan/renew`;
-
-        createComponent({
-          propsData: {
-            namespaceName: TEST_NAMESPACE_NAME,
-            customerPortalUrl: CUSTOMER_PORTAL_URL,
-            planUpgradeHref,
-            planRenewHref,
-          },
-        });
-
-        Object.assign(store.state, {
-          isLoadingSubscription: false,
-          isFreePlan,
+  describe('when it is a trial', () => {
+    it('should render the card title "GitLab.com: Trial"', async () => {
+      await createComponentWithStore({
+        state: {
           plan: {
-            code: planName,
-            name: planName,
-            upgradable,
+            code: 'gold',
+            trial: true,
           },
+        },
+      });
+      expect(wrapper.findByTestId('subscription-header').text()).toContain('Trial');
+    });
+  });
+
+  describe('Manage button', () => {
+    describe.each`
+      planCode    | expected | testDescription
+      ${'bronze'} | ${true}  | ${'renders the button'}
+      ${null}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${'does not render the button'}
+    `(
+      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+      ({ planCode, upgradable, expected, testDescription }) => {
+        beforeEach(() => {
+          createComponentWithStore({
+            state: {
+              isLoadingSubscription: false,
+              plan: {
+                code: planCode,
+                upgradable,
+              },
+            },
+          });
         });
-      });
 
-      it(snapshotDesc, () => {
-        expect(findButtonProps()).toMatchSnapshot();
-      });
-    },
-  );
-
-  describe.each`
-    planName        | planCode    | isFreePlan | isTrialPlan | featureFlag | expectedBehavior | testDescription
-    ${'free'}       | ${null}     | ${true}    | ${false}    | ${true}     | ${false}         | ${'does not render the renew button for free plan'}
-    ${'gold-trial'} | ${null}     | ${false}   | ${true}     | ${true}     | ${false}         | ${'does not render the renew button for trial plan'}
-    ${'silver'}     | ${'silver'} | ${false}   | ${false}    | ${true}     | ${true}          | ${'renders the renew button for paid plans if feature flag is on'}
-    ${'silver'}     | ${'silver'} | ${false}   | ${false}    | ${false}    | ${false}         | ${'does not render the renew button for paid plans if feature flag is off'}
-  `(
-    'given plan with state: isFreePlan=$isFreePlan and feature flag saasManualRenewButton=$featureFlag',
-    ({ planName, planCode, isFreePlan, featureFlag, testDescription, expectedBehavior }) => {
-      beforeEach(() => {
-        createComponent(
-          {
-            propsData: { namespaceName: TEST_NAMESPACE_NAME },
-          },
-          { saasManualRenewButton: featureFlag },
-        );
-
-        Object.assign(store.state, {
-          isLoadingSubscription: false,
-          isFreePlan,
-          plan: {
-            code: planCode,
-            name: planName,
-            upgradable: true,
-          },
+        it(testDescription, () => {
+          expect(findManageButton().exists()).toBe(expected);
         });
-      });
+      },
+    );
+  });
 
-      it(testDescription, () => {
-        expect(findRenewButton().length > 0).toBe(expectedBehavior);
-      });
-    },
-  );
-
-  describe.each`
-    planCode    | featureFlag | expected | testDescription
-    ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
-    ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
-    ${null}     | ${true}     | ${false} | ${'does not render the button'}
-    ${null}     | ${false}    | ${false} | ${'does not render the button'}
-  `(
-    'Add seats button – given plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
-    ({ planCode, featureFlag, expected, testDescription }) => {
-      beforeEach(() => {
-        createComponent(
-          {
-            propsData: { namespaceName: TEST_NAMESPACE_NAME },
-          },
-          {
-            saasAddSeatsButton: featureFlag,
-          },
-        );
-
-        Object.assign(store.state, {
-          isLoadingSubscription: false,
-          plan: {
-            code: planCode,
-            upgradable: true,
-          },
+  describe('Renew button', () => {
+    describe.each`
+      planCode    | featureFlag | expected | testDescription
+      ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
+      ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
+      ${null}     | ${true}     | ${false} | ${'does not render the button'}
+      ${null}     | ${false}    | ${false} | ${'does not render the button'}
+      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
+    `(
+      'given a plan with state: planCode = $planCode and saasManualRenewButton = $featureFlag',
+      ({ planCode, featureFlag, expected, testDescription }) => {
+        beforeEach(() => {
+          createComponentWithStore({
+            featureFlags: { saasManualRenewButton: featureFlag },
+            state: {
+              isLoadingSubscription: false,
+              plan: {
+                code: planCode,
+              },
+            },
+          });
         });
-      });
 
-      it(testDescription, () => {
-        expect(findAddSeatsButton().exists()).toBe(expected);
-      });
-    },
-  );
+        it(testDescription, () => {
+          expect(findRenewButton().exists()).toBe(expected);
+        });
+      },
+    );
+  });
+
+  describe('Add seats button', () => {
+    describe.each`
+      planCode    | featureFlag | expected | testDescription
+      ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
+      ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
+      ${null}     | ${true}     | ${false} | ${'does not render the button'}
+      ${null}     | ${false}    | ${false} | ${'does not render the button'}
+      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
+    `(
+      'given a plan with state: planCode = $planCode and saasAddSeatsButton = $featureFlag',
+      ({ planCode, featureFlag, expected, testDescription }) => {
+        beforeEach(() => {
+          createComponentWithStore({
+            featureFlags: { saasAddSeatsButton: featureFlag },
+            state: {
+              isLoadingSubscription: false,
+              plan: {
+                code: planCode,
+                upgradable: true,
+              },
+            },
+          });
+        });
+
+        it(testDescription, () => {
+          expect(findAddSeatsButton().exists()).toBe(expected);
+        });
+      },
+    );
+  });
+
+  describe('Upgrade button', () => {
+    describe.each`
+      planCode    | upgradable | expected | testDescription
+      ${'bronze'} | ${true}    | ${true}  | ${'renders the button'}
+      ${'bronze'} | ${false}   | ${false} | ${'does not render the button'}
+      ${null}     | ${true}    | ${true}  | ${'renders the button'}
+      ${null}     | ${false}   | ${true}  | ${'renders the button'}
+      ${'free'}   | ${true}    | ${true}  | ${'renders the button'}
+      ${'free'}   | ${false}   | ${true}  | ${'renders the button'}
+    `(
+      'given a plan with state: planCode = $planCode, upgradable = $upgradable',
+      ({ planCode, upgradable, expected, testDescription }) => {
+        beforeEach(() => {
+          createComponentWithStore({
+            provide: {
+              planUpgradeHref: '',
+            },
+            state: {
+              isLoadingSubscription: false,
+              plan: {
+                code: planCode,
+                upgradable,
+              },
+            },
+          });
+        });
+
+        it(testDescription, () => {
+          expect(findUpgradeButton().exists()).toBe(expected);
+        });
+      },
+    );
+  });
 });

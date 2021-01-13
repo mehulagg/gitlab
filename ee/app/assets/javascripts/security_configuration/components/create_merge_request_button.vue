@@ -55,7 +55,7 @@ export default {
 
           redirectTo(filePath);
         })
-        .catch(error => {
+        .catch((error) => {
           this.isCreatingMergeRequest = false;
           createFlash(
             s__('SecurityConfiguration|An error occurred while creating the merge request.'),

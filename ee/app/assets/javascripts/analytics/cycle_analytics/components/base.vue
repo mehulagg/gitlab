@@ -96,9 +96,7 @@ export default {
       return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
     },
     shouldDisplayCreateMultipleValueStreams() {
-      return Boolean(
-        this.featureFlags.hasCreateMultipleValueStreams && !this.isLoadingValueStreams,
-      );
+      return Boolean(!this.shouldRenderEmptyState && !this.isLoadingValueStreams);
     },
     hasDateRangeSet() {
       return this.startDate && this.endDate;
@@ -179,6 +177,7 @@ export default {
       <value-stream-select
         v-if="shouldDisplayCreateMultipleValueStreams"
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
+        :has-extended-form-fields="featureFlags.hasExtendedFormFields"
       />
     </div>
     <gl-empty-state
@@ -193,6 +192,7 @@ export default {
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
         <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
           <path-navigation
+            :key="`path_navigation_key_${pathNavigationData.length}`"
             class="js-path-navigation"
             :loading="isLoading"
             :stages="pathNavigationData"

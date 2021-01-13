@@ -1,3 +1,5 @@
+import mockRotations from './mock_rotation.json';
+
 export const participants = [
   {
     id: '1',
@@ -108,4 +110,84 @@ export const newlyCreatedSchedule = {
   iid: '2',
   name: 'S-Monitor rotations',
   timezone: 'Kyiv/EST',
+};
+
+export const createRotationResponse = {
+  data: {
+    oncallRotationCreate: {
+      errors: [],
+      oncallRotation: {
+        id: '37',
+        name: 'Test',
+        startsAt: '2020-12-17T12:00:00Z',
+        length: 5,
+        lengthUnit: 'WEEKS',
+        participants: {
+          nodes: [
+            {
+              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              colorWeight: '500',
+              colorPalette: 'blue',
+              __typename: 'OncallParticipantType',
+            },
+          ],
+          __typename: 'OncallParticipantTypeConnection',
+        },
+        __typename: 'IncidentManagementOncallRotation',
+      },
+      __typename: 'OncallRotationCreatePayload',
+    },
+  },
+};
+
+export const createRotationResponseWithErrors = {
+  data: {
+    oncallRotationCreate: {
+      errors: ['Houston, we have a problem'],
+      oncallRotation: {
+        id: '37',
+        name: 'Test',
+        startsAt: '2020-12-17T12:00:00Z',
+        length: 5,
+        lengthUnit: 'WEEKS',
+        participants: {
+          nodes: [
+            {
+              user: { id: 'gid://gitlab/User/50', username: 'project_1_bot3', __typename: 'User' },
+              colorWeight: '500',
+              colorPalette: 'blue',
+              __typename: 'OncallParticipantType',
+            },
+          ],
+          __typename: 'OncallParticipantTypeConnection',
+        },
+        __typename: 'IncidentManagementOncallRotation',
+      },
+      __typename: 'OncallRotationCreatePayload',
+    },
+  },
+};
+
+export const destroyRotationResponse = {
+  data: {
+    oncallRotationDestroy: {
+      errors: [],
+      oncallRotation: {
+        __typename: 'IncidentManagementOncallRotation',
+        ...mockRotations[0],
+      },
+    },
+  },
+};
+
+export const destroyRotationResponseWithErrors = {
+  data: {
+    oncallRotationDestroy: {
+      errors: ['Houston, we have a problem'],
+      oncallRotation: {
+        __typename: 'IncidentManagementOncallRotation',
+        ...mockRotations[0],
+      },
+    },
+  },
 };

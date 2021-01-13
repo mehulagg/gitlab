@@ -13,7 +13,7 @@ module Mutations
 
             argument :id, ::Types::GlobalIDType[::Analytics::DevopsAdoption::Segment],
               required: true,
-              description: "ID of the segment"
+              description: "ID of the segment."
 
             def resolve(id:, name:, group_ids: nil, **)
               groups = GlobalID::Locator.locate_many(group_ids) if group_ids

@@ -116,17 +116,6 @@ RSpec.describe 'Issue Sidebar' do
         expect(page).not_to have_selector('.block.health-status')
       end
     end
-
-    context 'when health status feature flag is disabled' do
-      it 'does not show health status on sidebar' do
-        stub_licensed_features(issuable_health_status: true)
-        stub_feature_flags(save_issuable_health_status: false)
-
-        visit_issue(project, issue)
-
-        expect(page).not_to have_selector('.block.health-status')
-      end
-    end
   end
 
   context 'Iterations', :js do

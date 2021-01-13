@@ -5,17 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly Cluster
+# Gitaly Cluster **(CORE ONLY)**
 
 [Gitaly](index.md), the service that provides storage for Git repositories, can
 be run in a clustered configuration to increase fault tolerance. In this
 configuration, every Git repository is stored on every Gitaly node in the
-cluster. Multiple clusters (or shards), can be configured.
+cluster. Multiple clusters (or shards) can be configured.
 
 NOTE:
-Gitaly Clusters can be created using [GitLab Core](https://about.gitlab.com/pricing/#self-managed)
-and higher tiers. However, technical support is limited to GitLab Premium and Ultimate customers
-only. Not available in GitLab.com.
+Technical support for Gitaly clusters is limited to GitLab Premium and Ultimate
+customers.
 
 Praefect is a router and transaction manager for Gitaly, and a required
 component for running a Gitaly Cluster.
@@ -254,8 +253,23 @@ The database used by Praefect is now configured.
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
 [PgBouncer](https://www.pgbouncer.org/) in front of the PostgreSQL instance. To do
-this, replace value of the `POSTGRESQL_SERVER_ADDRESS` with corresponding IP or host
-address of the PgBouncer instance.
+this, set the corresponding IP or host address of the PgBouncer instance in
+`/etc/gitlab/gitlab.rb` by changing the following settings:
+
+- `praefect['database_host']`, for the address.
+- `praefect['database_port']`, for the port.
+
+Because PgBouncer manages resources more efficiently, Praefect still requires a
+direct connection to the PostgreSQL database because it uses
+[LISTEN](https://www.postgresql.org/docs/11/sql-listen.html)
+functionality that is [not supported](https://www.pgbouncer.org/features.html) by
+PgBouncer with `pool_mode = transaction`.
+
+Therefore, `praefect['database_host_no_proxy']` and `praefect['database_port_no_proxy']`
+should be set to a direct connection and not a PgBouncer connection.
+
+Save the changes to `/etc/gitlab/gitlab.rb` and
+[reconfigure Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 This documentation doesn't provide PgBouncer installation instructions,
 but you can:
@@ -370,6 +384,8 @@ application server, or a Gitaly node.
    praefect['database_user'] = 'praefect'
    praefect['database_password'] = 'PRAEFECT_SQL_PASSWORD'
    praefect['database_dbname'] = 'praefect_production'
+   praefect['database_host_no_proxy'] = 'POSTGRESQL_SERVER_ADDRESS'
+   praefect['database_port_no_proxy'] = 5432
    ```
 
    If you want to use a TLS client certificate, the options below can be used:
@@ -1054,6 +1070,55 @@ To monitor strong consistency, you can use the following Prometheus metrics:
 - `gitaly_hook_transaction_voting_delay_seconds`: Client-side delay introduced
   by waiting for the transaction to be committed.
 
+## Replication factor
+
+Replication factor is the number of copies Praefect maintains of a given repository. A higher
+replication factor offers better redundancy and distribution of read workload, but also results
+in a higher storage cost. By default, Praefect replicates repositories to every storage in a
+virtual storage.
+
+### Variable replication factor
+
+WARNING:
+The feature is not production ready yet. After you set a replication factor, you can't unset it
+without manually modifying database state. Variable replication factor requires you to enable
+repository-specific primaries by configuring the `per_repository` primary election strategy. The election
+strategy is not production ready yet.
+
+Praefect supports configuring a replication factor on a per-repository basis, by assigning
+specific storage nodes to host a repository.
+
+[In an upcoming release](https://gitlab.com/gitlab-org/gitaly/-/issues/3362), we intend to
+support configuring a default replication factor for a virtual storage. The default replication factor
+is applied to every newly-created repository.
+
+Prafect does not store the actual replication factor, but assigns enough storages to host the repository
+so the desired replication factor is met. If a storage node is later removed from the virtual storage,
+the replication factor of repositories assigned to the storage is decreased accordingly.
+
+The only way to configure a repository's replication factor is the `set-replication-factor`
+sub-command. `set-replication-factor` automatically assigns or unassigns random storage nodes as necessary to
+reach the desired replication factor. The repository's primary node is always assigned
+first and is never unassigned.
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage <virtual-storage> -repository <relative-path> -replication-factor <replication-factor>
+```
+
+- `-virtual-storage` is the virtual storage the repository is located in.
+- `-repository` is the repository's relative path in the storage.
+- `-replication-factor` is the desired replication factor of the repository. The minimum value is
+  `1`, as the primary needs a copy of the repository. The maximum replication factor is the number of
+  storages in the virtual storage.
+
+On success, the assigned host storages are printed. For example:
+
+```shell
+$ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml set-replication-factor -virtual-storage default -repository @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git -replication-factor 2
+
+current assignments: gitaly-1, gitaly-2
+```
+
 ## Automatic failover and leader election
 
 Praefect regularly checks the health of each backend Gitaly node. This
@@ -1111,15 +1176,14 @@ useful for identifying potential data loss after a failover. The following param
 available:
 
 - `-virtual-storage` that specifies which virtual storage to check. The default behavior is to
-  display outdated replicas of read-only repositories as they generally require administrator
-  action.
+  display outdated replicas of read-only repositories as they might require administrator action.
 - In GitLab 13.3 and later, `-partially-replicated` that specifies whether to display a list of
   [outdated replicas of writable repositories](#outdated-replicas-of-writable-repositories).
 
 NOTE:
 `dataloss` is still in beta and the output format is subject to change.
 
-To check for outdated replicas of read-only repositories, run:
+To check for repositories with outdated primaries, run:
 
 ```shell
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss [-virtual-storage <virtual-storage>]
@@ -1131,24 +1195,45 @@ Every configured virtual storage is checked if none is specified:
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss
 ```
 
-The number of potentially unapplied changes to repositories is listed for each replica. Listed
-repositories might have the latest changes but it is not guaranteed. Only outdated replicas of
-read-only repositories are listed by default. For example:
+Repositories which have assigned storage nodes that contain an outdated copy of the repository are listed
+in the output. A number of useful information is printed for each repository:
+
+- A repository's relative path to the storage directory identifies each repository and groups the related
+  information.
+- The repository's current status is printed in parentheses next to the disk path. If the repository's primary
+  is outdated, the repository is in `read-only` mode and can't accept writes. Otherwise, the mode is `writable`.
+- The primary field lists the repository's current primary. If the repository has no primary, the field shows
+  `No Primary`.
+- The In-Sync Storages lists replicas which have replicated the latest successful write and all writes
+  preceding it.
+- The Outdated Storages lists replicas which contain an outdated copy of the repository. Replicas which have no copy
+  of the repository but should contain it are also listed here. The maximum number of changes the replica is missing
+  is listed next to replica. It's important to notice that the outdated replicas may be fully up to date or contain
+  later changes but Praefect can't guarantee it.
+
+Whether a replica is assigned to host the repository is listed with each replica's status. `assigned host` is printed
+next to replicas which are assigned to store the repository. The text is omitted if the replica contains a copy of
+the repository but is not assigned to store the repository. Such replicas won't be kept in-sync by Praefect but may
+act as replication sources to bring assigned replicas up to date.
+
+Example output:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-3
   Outdated repositories:
-    @hashed/2c/62/2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3.git (read-only):
-      gitaly-2 is behind by 1 change or less
-      gitaly-3 is behind by 2 changes or less
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (read-only):
+      Primary: gitaly-1
+      In-Sync Storages:
+        gitaly-2, assigned host
+      Outdated Storages:
+        gitaly-1 is behind by 3 changes or less, assigned host
+        gitaly-3 is behind by 3 changes or less
 ```
 
 A confirmation is printed out when every repository is writable. For example:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-1
   All repositories are writable!
 ```
 
@@ -1156,8 +1241,8 @@ Virtual storage: default
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3019) in GitLab 13.3.
 
-To also list information for outdated replicas of writable repositories, use the
-`-partially-replicated` parameter.
+To also list information of repositories whose primary is up to date but one or more assigned
+replicas are outdated, use the `-partially-replicated` flag.
 
 A repository is writable if the primary has the latest changes. Secondaries might be temporarily
 outdated while they are waiting to replicate the latest changes.
@@ -1170,21 +1255,23 @@ Example output:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-3
   Outdated repositories:
-    @hashed/2c/62/2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3.git (read-only):
-      gitaly-2 is behind by 1 change or less
-      gitaly-3 is behind by 2 changes or less
-    @hashed/4b/22/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a.git (writable):
-      gitaly-2 is behind by 1 change or less
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (writable):
+      Primary: gitaly-1
+      In-Sync Storages:
+        gitaly-1, assigned host
+      Outdated Storages:
+        gitaly-2 is behind by 3 changes or less, assigned host
+        gitaly-3 is behind by 3 changes or less
 ```
 
-With the `-partially-replicated` flag set, a confirmation is printed out if every replica is fully up to date.
+With the `-partially-replicated` flag set, a confirmation is printed out if every assigned replica is fully up to
+date.
+
 For example:
 
 ```shell
 Virtual storage: default
-  Primary: gitaly-1
   All repositories are up to date!
 ```
 

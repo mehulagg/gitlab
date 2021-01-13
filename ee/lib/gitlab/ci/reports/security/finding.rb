@@ -93,7 +93,7 @@ module Gitlab
           end
 
           def valid?
-            scanner.present? && primary_identifier.present? && location.present?
+            scanner.present? && primary_identifier.present? && location.present? && uuid.present?
           end
 
           def keys

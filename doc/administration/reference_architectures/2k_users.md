@@ -12,7 +12,8 @@ For a full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
 > - **Supported users (approximate):** 2,000
-> - **High Availability:** No
+> - **High Availability:** No. For a highly-available environment, you can
+>   follow the [3K reference architecture](3k_users.md).
 > - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
@@ -271,7 +272,7 @@ further configuration steps.
    ```ruby
    # Disable all components except PostgreSQL
    roles ['postgres_role']
-   repmgr['enable'] = false
+   patroni['enable'] = false
    consul['enable'] = false
    prometheus['enable'] = false
    alertmanager['enable'] = false
@@ -898,7 +899,7 @@ on what features you intend to use:
 
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
-| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage) | No |
 | [Job artifacts](../job_artifacts.md#using-object-storage) including archived job logs | Yes |
 | [LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](../uploads.md#using-object-storage) | Yes |
@@ -954,7 +955,13 @@ along with [Gitaly](#configure-gitaly), are recommended over using NFS whenever
 possible. However, if you intend to use GitLab Pages,
 [you must use NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-For information about configuring NFS, see the [NFS documentation page](../nfs.md).
+See how to [configure NFS](../nfs.md).
+
+WARNING:
+From GitLab 13.0, using NFS for Git repositories is deprecated.
+From GitLab 14.0, technical support for NFS for Git repositories
+will no longer be provided. Upgrade to [Gitaly Cluster](../gitaly/praefect.md)
+as soon as possible.
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

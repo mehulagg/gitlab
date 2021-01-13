@@ -7,7 +7,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
   let_it_be(:environment) { create(:environment, project: project) }
 
   describe '#execute' do
-    let(:service) { described_class.new(project, nil, payload) }
+    let(:service) { described_class.new(project, payload) }
     let(:tool) { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium] }
     let(:starts_at) { Time.current.change(usec: 0) }
     let(:ended_at) { nil }

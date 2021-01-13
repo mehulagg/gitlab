@@ -25,7 +25,7 @@ describe('Metrics', () => {
     wrapper.destroy();
   });
 
-  const findTimeMetricsAtIndex = index => wrapper.findAll(TimeMetricsCard).at(index);
+  const findTimeMetricsAtIndex = (index) => wrapper.findAll(TimeMetricsCard).at(index);
 
   it.each`
     metric               | index | requestType

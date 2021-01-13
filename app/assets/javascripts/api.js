@@ -13,6 +13,7 @@ const Api = {
   groupMilestonesPath: '/api/:version/groups/:id/milestones',
   subgroupsPath: '/api/:version/groups/:id/subgroups',
   namespacesPath: '/api/:version/namespaces.json',
+  groupInvitationsPath: '/api/:version/groups/:id/invitations',
   groupPackagesPath: '/api/:version/groups/:id/packages',
   projectPackagesPath: '/api/:version/projects/:id/packages',
   projectPackagePath: '/api/:version/projects/:id/packages/:package_id',
@@ -23,6 +24,7 @@ const Api = {
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
   projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
+  projectInvitationsPath: '/api/:version/projects/:id/invitations',
   projectMembersPath: '/api/:version/projects/:id/members',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
@@ -127,8 +129,14 @@ const Api = {
     });
   },
 
-  inviteGroupMember(id, data) {
+  addGroupMembersByUserId(id, data) {
     const url = Api.buildUrl(this.groupMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteGroupMembersByEmail(id, data) {
+    const url = Api.buildUrl(this.groupInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },
@@ -217,8 +225,14 @@ const Api = {
       .then(({ data }) => data);
   },
 
-  inviteProjectMembers(id, data) {
+  addProjectMembersByUserId(id, data) {
     const url = Api.buildUrl(this.projectMembersPath).replace(':id', encodeURIComponent(id));
+
+    return axios.post(url, data);
+  },
+
+  inviteProjectMembersByEmail(id, data) {
+    const url = Api.buildUrl(this.projectInvitationsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, data);
   },
@@ -374,8 +388,8 @@ const Api = {
       .post(url, {
         label: data,
       })
-      .then(res => callback(res.data))
-      .catch(e => callback(e.response.data));
+      .then((res) => callback(res.data))
+      .catch((e) => callback(e.response.data));
   },
 
   // Return group projects list. Filtered by query
@@ -389,8 +403,13 @@ const Api = {
       .get(url, {
         params: { ...defaults, ...options },
       })
-      .then(({ data }) => callback(data))
-      .catch(() => flash(__('Something went wrong while fetching projects')));
+      .then(({ data }) => (callback ? callback(data) : data))
+      .catch(() => {
+        flash(__('Something went wrong while fetching projects'));
+        if (callback) {
+          callback();
+        }
+      });
   },
 
   commit(id, sha, params = {}) {
@@ -426,7 +445,7 @@ const Api = {
   commitPipelines(projectId, sha) {
     const encodedProjectId = projectId
       .split('/')
-      .map(fragment => encodeURIComponent(fragment))
+      .map((fragment) => encodeURIComponent(fragment))
       .join('/');
 
     const url = Api.buildUrl(Api.commitPipelinesPath)
@@ -450,7 +469,7 @@ const Api = {
       .replace(':type', type)
       .replace(':key', encodeURIComponent(key));
 
-    return axios.get(url, { params: options }).then(res => {
+    return axios.get(url, { params: options }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -462,7 +481,7 @@ const Api = {
       .replace(':id', encodeURIComponent(id))
       .replace(':type', type);
 
-    return axios.get(url, { params }).then(res => {
+    return axios.get(url, { params }).then((res) => {
       if (callback) callback(res.data);
 
       return res;
@@ -831,11 +850,18 @@ const Api = {
       page: 1,
     };
 
+    const passedOptions = options;
+
+    // calling search API with empty string will not return results
+    if (!passedOptions.search) {
+      passedOptions.search = undefined;
+    }
+
     return axios
       .get(url, {
         params: {
           ...defaults,
-          ...options,
+          ...passedOptions,
         },
       })
       .then(({ data, headers }) => {

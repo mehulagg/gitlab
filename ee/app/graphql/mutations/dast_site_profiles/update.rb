@@ -3,7 +3,7 @@
 module Mutations
   module DastSiteProfiles
     class Update < BaseMutation
-      include AuthorizesProject
+      include FindsProject
 
       graphql_name 'DastSiteProfileUpdate'
 
@@ -33,7 +33,7 @@ module Mutations
         # TODO: remove explicit coercion once compatibility layer has been removed
         # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
         service_args[:id] = ::Types::GlobalIDType[::DastSiteProfile].coerce_isolated_input(id).model_id
-        project = authorized_find_project!(full_path: full_path)
+        project = authorized_find!(full_path)
 
         service = ::DastSiteProfiles::UpdateService.new(project, current_user)
         result = service.execute(**service_args)

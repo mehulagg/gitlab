@@ -24,18 +24,6 @@ RSpec.describe Projects::Quality::TestCasesController do
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(template)
         end
-
-        context 'when quality_test_cases flag is disabled' do
-          before do
-            stub_feature_flags(quality_test_cases: false)
-          end
-
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
-        end
       end
 
       context 'when feature is not available' do

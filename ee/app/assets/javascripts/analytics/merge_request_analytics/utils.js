@@ -53,12 +53,12 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
  *
  * @return {Array} the formatted chart data
  */
-export const formatThroughputChartData = chartData => {
+export const formatThroughputChartData = (chartData) => {
   if (!chartData) return [];
 
   const data = Object.keys(chartData)
     .slice(0, -1) // Remove the __typeName key
-    .map(value => [value.split('_').join(' '), chartData[value].count]); // key: Aug_2020 => Aug 2020
+    .map((value) => [value.split('_').join(' '), chartData[value].count]); // key: Aug_2020 => Aug 2020
 
   return [
     {

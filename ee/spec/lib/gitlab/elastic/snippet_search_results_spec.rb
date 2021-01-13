@@ -71,7 +71,7 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
     end
   end
 
-  context 'when user has read_all_resources', :do_not_mock_admin_mode do
+  context 'when user has read_all_resources' do
     include_context 'custom session'
 
     let(:user) { create(:admin) }

@@ -47,7 +47,7 @@ export const deleteLicense = ({ dispatch, state }) => {
     .then(() => {
       dispatch('receiveDeleteLicense', licenseId);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDeleteLicenseError', error);
       dispatch('removePendingLicense', licenseId);
     });
@@ -72,7 +72,7 @@ export const fetchManagedLicenses = ({ dispatch, state }) => {
     .then(({ data }) => {
       dispatch('receiveManagedLicensesSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveManagedLicensesError', error);
     });
 };
@@ -95,7 +95,7 @@ export const fetchParsedLicenseReport = ({ dispatch, state }) => {
       const existingLicenses = (data.existing_licenses || []).map(convertToOldReportFormat);
       dispatch('receiveParsedLicenseReportSuccess', { newLicenses, existingLicenses });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveParsedLicenseReportError', error);
     });
 };
@@ -139,13 +139,13 @@ export const fetchLicenseCheckApprovalRule = ({ dispatch, state }) => {
   return axios
     .get(state.approvalsApiPath)
     .then(({ data }) => {
-      const hasLicenseCheckApprovalRule = data.approval_rules_left.some(rule => {
+      const hasLicenseCheckApprovalRule = data.approval_rules_left.some((rule) => {
         return rule.name === LICENSE_CHECK_NAME;
       });
 
       dispatch('receiveLicenseCheckApprovalRuleSuccess', { hasLicenseCheckApprovalRule });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveLicenseCheckApprovalRuleError', error);
     });
 };
@@ -196,7 +196,7 @@ export const setLicenseApproval = ({ dispatch, state }, payload) => {
     .then(() => {
       dispatch('receiveSetLicenseApproval', id);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveSetLicenseApprovalError', error);
       dispatch('removePendingLicense', id);
     });

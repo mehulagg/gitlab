@@ -28,61 +28,63 @@ Example response:
 
 ```json
 {
-   "default_projects_limit" : 100000,
-   "signup_enabled" : true,
-   "id" : 1,
-   "default_branch_protection" : 2,
-   "restricted_visibility_levels" : [],
-   "password_authentication_enabled_for_web" : true,
-   "after_sign_out_path" : null,
-   "max_attachment_size" : 10,
-   "max_import_size": 50,
-   "user_oauth_applications" : true,
-   "updated_at" : "2016-01-04T15:44:55.176Z",
-   "session_expire_delay" : 10080,
-   "home_page_url" : null,
-   "default_snippet_visibility" : "private",
-   "outbound_local_requests_whitelist": [],
-   "domain_allowlist" : [],
-   "domain_denylist_enabled" : false,
-   "domain_denylist" : [],
-   "created_at" : "2016-01-04T15:44:55.176Z",
-   "default_ci_config_path" : null,
-   "default_project_visibility" : "private",
-   "default_group_visibility" : "private",
-   "gravatar_enabled" : true,
-   "sign_in_text" : null,
-   "container_expiration_policies_enable_historic_entries": true,
-   "container_registry_token_expire_delay": 5,
-   "repository_storages_weighted": {"default": 100},
-   "plantuml_enabled": false,
-   "plantuml_url": null,
-   "kroki_enabled": false,
-   "kroki_url": null,
-   "terminal_max_session_time": 0,
-   "polling_interval_multiplier": 1.0,
-   "rsa_key_restriction": 0,
-   "dsa_key_restriction": 0,
-   "ecdsa_key_restriction": 0,
-   "ed25519_key_restriction": 0,
-   "first_day_of_week": 0,
-   "enforce_terms": true,
-   "terms": "Hello world!",
-   "performance_bar_allowed_group_id": 42,
-   "user_show_add_ssh_key_message": true,
-   "local_markdown_version": 0,
-   "allow_local_requests_from_hooks_and_services": true,
-   "allow_local_requests_from_web_hooks_and_services": true,
-   "allow_local_requests_from_system_hooks": false,
-   "asset_proxy_enabled": true,
-   "asset_proxy_url": "https://assets.example.com",
-   "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
-   "npm_package_requests_forwarding": true,
-   "snippet_size_limit": 52428800,
-   "issues_create_limit": 300,
-   "raw_blob_request_limit": 300,
-   "wiki_page_max_content_bytes": 52428800,
-   "require_admin_approval_after_user_signup": false
+  "default_projects_limit" : 100000,
+  "signup_enabled" : true,
+  "id" : 1,
+  "default_branch_protection" : 2,
+  "restricted_visibility_levels" : [],
+  "password_authentication_enabled_for_web" : true,
+  "after_sign_out_path" : null,
+  "max_attachment_size" : 10,
+  "max_import_size": 50,
+  "user_oauth_applications" : true,
+  "updated_at" : "2016-01-04T15:44:55.176Z",
+  "session_expire_delay" : 10080,
+  "home_page_url" : null,
+  "default_snippet_visibility" : "private",
+  "outbound_local_requests_whitelist": [],
+  "domain_allowlist" : [],
+  "domain_denylist_enabled" : false,
+  "domain_denylist" : [],
+  "created_at" : "2016-01-04T15:44:55.176Z",
+  "default_ci_config_path" : null,
+  "default_project_visibility" : "private",
+  "default_group_visibility" : "private",
+  "gravatar_enabled" : true,
+  "sign_in_text" : null,
+  "container_expiration_policies_enable_historic_entries": true,
+  "container_registry_token_expire_delay": 5,
+  "repository_storages_weighted": {"default": 100},
+  "plantuml_enabled": false,
+  "plantuml_url": null,
+  "kroki_enabled": false,
+  "kroki_url": null,
+  "terminal_max_session_time": 0,
+  "polling_interval_multiplier": 1.0,
+  "rsa_key_restriction": 0,
+  "dsa_key_restriction": 0,
+  "ecdsa_key_restriction": 0,
+  "ed25519_key_restriction": 0,
+  "first_day_of_week": 0,
+  "enforce_terms": true,
+  "terms": "Hello world!",
+  "performance_bar_allowed_group_id": 42,
+  "user_show_add_ssh_key_message": true,
+  "local_markdown_version": 0,
+  "allow_local_requests_from_hooks_and_services": true,
+  "allow_local_requests_from_web_hooks_and_services": true,
+  "allow_local_requests_from_system_hooks": false,
+  "asset_proxy_enabled": true,
+  "asset_proxy_url": "https://assets.example.com",
+  "asset_proxy_whitelist": ["example.com", "*.example.com", "your-instance.com"],
+  "npm_package_requests_forwarding": true,
+  "snippet_size_limit": 52428800,
+  "issues_create_limit": 300,
+  "raw_blob_request_limit": 300,
+  "wiki_page_max_content_bytes": 52428800,
+  "require_admin_approval_after_user_signup": false,
+  "personal_access_token_prefix": "GL-",
+  "rate_limiting_response_text": null
 }
 ```
 
@@ -91,12 +93,12 @@ the `file_template_project_id`, `deletion_adjourned_period`, or the `geo_node_al
 
 ```json
 {
-   "id" : 1,
-   "signup_enabled" : true,
-   "file_template_project_id": 1,
-   "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
-   "deletion_adjourned_period": 7,
-   ...
+  "id" : 1,
+  "signup_enabled" : true,
+  "file_template_project_id": 1,
+  "geo_node_allowed_ips": "0.0.0.0/0, ::/0",
+  "deletion_adjourned_period": 7,
+  ...
 }
 ```
 
@@ -174,7 +176,9 @@ Example response:
   "issues_create_limit": 300,
   "raw_blob_request_limit": 300,
   "wiki_page_max_content_bytes": 52428800,
-  "require_admin_approval_after_user_signup": false
+  "require_admin_approval_after_user_signup": false,
+  "personal_access_token_prefix": "GL-",
+  "rate_limiting_response_text": null
 }
 ```
 
@@ -296,6 +300,7 @@ listed in the descriptions of the relevant settings.
 | `housekeeping_incremental_repack_period` | integer          | required by: `housekeeping_enabled`  | Number of Git pushes after which an incremental `git repack` is run. |
 | `html_emails_enabled`                    | boolean          | no                                   | Enable HTML emails. |
 | `import_sources`                         | array of strings | no                                   | Sources to allow project import from, possible values: `github`, `bitbucket`, `bitbucket_server`, `gitlab`, `fogbugz`, `git`, `gitlab_project`, `gitea`, `manifest`, and `phabricator`. |
+| `invisible_captcha_enabled`              | boolean          | no                                   | Enable Invisible Captcha spam detection during signup. Disabled by default. |
 | `issues_create_limit`                    | integer          | no                                   | Max number of issue creation requests per minute per user. Disabled by default.|
 | `local_markdown_version`                 | integer          | no                                   | Increase this value when any cached Markdown should be invalidated. |
 | `maintenance_mode_message`               | string           | no                                   | **(PREMIUM)** Message displayed when instance is in maintenance mode |
@@ -318,6 +323,7 @@ listed in the descriptions of the relevant settings.
 | `performance_bar_allowed_group_id`       | string           | no                                   | (Deprecated: Use `performance_bar_allowed_group_path` instead) Path of the group that is allowed to toggle the performance bar. |
 | `performance_bar_allowed_group_path`     | string           | no                                   | Path of the group that is allowed to toggle the performance bar. |
 | `performance_bar_enabled`                | boolean          | no                                   | (Deprecated: Pass `performance_bar_allowed_group_path: nil` instead) Allow enabling the performance bar. |
+| `personal_access_token_prefix`           | string           | no                                   | Prefix for all generated personal access tokens. |
 | `plantuml_enabled`                       | boolean          | no                                   | (**If enabled, requires:** `plantuml_url`) Enable PlantUML integration. Default is `false`. |
 | `plantuml_url`                           | string           | required by: `plantuml_enabled`      | The PlantUML instance URL for integration. |
 | `polling_interval_multiplier`            | decimal          | no                                   | Interval multiplier used by endpoints that perform polling. Set to `0` to disable polling. |
@@ -327,6 +333,7 @@ listed in the descriptions of the relevant settings.
 | `pseudonymizer_enabled`                  | boolean          | no                                   | **(PREMIUM)** When enabled, GitLab runs a background job that produces pseudonymized CSVs of the GitLab database to upload to your configured object storage directory.
 | `push_event_activities_limit`            | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether individual push events or bulk push events are created. [Bulk push events are created](../user/admin_area/settings/push_event_activities_limit.md) if it surpasses that value. |
 | `push_event_hooks_limit`                 | integer          | no                                   | Number of changes (branches or tags) in a single push to determine whether webhooks and services fire or not. Webhooks and services aren't submitted if it surpasses that value. |
+| `rate_limiting_response_text`            | string           | no                                   | When rate limiting is enabled via the `throttle_*` settings, send this plain text response when a rate limit is exceeded. 'Retry later' is sent if this is blank. |
 | `raw_blob_request_limit`                 | integer          | no                                   | Max number of requests per minute for each raw path. Default: 300. To disable throttling set to 0.|
 | `recaptcha_enabled`                      | boolean          | no                                   | (**If enabled, requires:** `recaptcha_private_key` and `recaptcha_site_key`) Enable reCAPTCHA. |
 | `recaptcha_private_key`                  | string           | required by: `recaptcha_enabled`     | Private key for reCAPTCHA. |

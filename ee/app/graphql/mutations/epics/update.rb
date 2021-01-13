@@ -10,7 +10,7 @@ module Mutations
       argument :state_event,
                 Types::EpicStateEventEnum,
                 required: false,
-                description: 'State event for the epic'
+                description: 'State event for the epic.'
 
       authorize :admin_epic
 

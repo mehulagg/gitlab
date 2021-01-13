@@ -7,9 +7,9 @@ type: reference, howto
 
 # GitLab Markdown
 
-This Markdown guide is **valid only for GitLab's internal Markdown rendering system for entries and files**.
+This Markdown guide is **valid only for the GitLab internal Markdown rendering system for entries and files**.
 It is **not** valid for the [GitLab documentation website](https://docs.gitlab.com)
-or [GitLab's main website](https://about.gitlab.com), as they both use
+or the [GitLab main website](https://about.gitlab.com), as they both use
 [Kramdown](https://kramdown.gettalong.org) as their Markdown engine. The documentation
 website uses an extended Kramdown gem, [GitLab Kramdown](https://gitlab.com/gitlab-org/gitlab_kramdown).
 Consult the [GitLab Kramdown Guide](https://about.gitlab.com/handbook/markdown-guide/)
@@ -52,7 +52,7 @@ The documentation website had its [Markdown engine migrated from Redcarpet to Kr
 in October 2018.
 
 You may have older issues, merge requests, or Markdown documents in your
-repository that were written using some of the nuances of GitLab's RedCarpet version
+repository that were written using some of the nuances of the GitLab RedCarpet version
 of Markdown. Since CommonMark uses slightly stricter syntax, these documents
 might now appear a little differently since we have transitioned to CommonMark.
 
@@ -353,7 +353,7 @@ The wrapping tags can be either curly braces or square brackets:
 - [- deletion 4 -]
 ```
 
-![Inline diff as rendered by GitLab's interface](img/inline_diff_01_v13_3.png)
+![Inline diff as rendered by the GitLab interface](img/inline_diff_01_v13_3.png)
 
 ---
 
@@ -375,7 +375,7 @@ backslash `\`, otherwise the diff highlight don't render correctly:
 - {+ Text with escaped \`backticks\` inside +}
 ```
 
-![Inline diff with mixed formatting, as rendered by GitLab's interface](img/inline_diff_02_v13_3.png)
+![Inline diff with mixed formatting, as rendered by the GitLab interface](img/inline_diff_02_v13_3.png)
 
 ### Math
 
@@ -431,7 +431,7 @@ GFM recognizes the following:
 | merge request                   | `!123`                     | `namespace/project!123`                 | `project!123`                  |
 | snippet                         | `$123`                     | `namespace/project$123`                 | `project$123`                  |
 | epic **(ULTIMATE)**             | `&123`                     | `group1/subgroup&123`                   |                                |
-| vulnerability **(ULTIMATE)**    | `[vulnerability:123]`      | `[vulnerability:namespace/project/123]` | `[vulnerability:project/123]`  |
+| vulnerability **(ULTIMATE)** (1)| `[vulnerability:123]`      | `[vulnerability:namespace/project/123]` | `[vulnerability:project/123]`  |
 | label by ID                     | `~123`                     | `namespace/project~123`                 | `project~123`                  |
 | one-word label by name          | `~bug`                     | `namespace/project~bug`                 | `project~bug`                  |
 | multi-word label by name        | `~"feature request"`       | `namespace/project~"feature request"`   | `project~"feature request"`    |
@@ -441,9 +441,11 @@ GFM recognizes the following:
 | multi-word milestone by name    | `%"release candidate"`     | `namespace/project%"release candidate"` | `project%"release candidate"`  |
 | specific commit                 | `9ba12248`                 | `namespace/project@9ba12248`            | `project@9ba12248`             |
 | commit range comparison         | `9ba12248...b19a04f5`      | `namespace/project@9ba12248...b19a04f5` | `project@9ba12248...b19a04f5`  |
-| repository file references      | `[README](doc/README)`     |                                         |                                |
-| repository file line references | `[README](doc/README#L13)` |                                         |                                |
+| repository file references      | `[README](doc/README.md)`  |                                         |                                |
+| repository file line references | `[README](doc/README.md#L13)` |                                      |                                |
 | [alert](../operations/incident_management/alerts.md) | `^alert#123` | `namespace/project^alert#123`    | `project^alert#123`            |
+
+1. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222483) in GitLab 13.7.
 
 For example, referencing an issue by using `#123` will format the output as a link
 to issue number 123 with text `#123`. Likewise, a link to issue number 123 will be
@@ -480,7 +482,7 @@ unordered or ordered lists:
    1. [x] Sub-task 2
 ```
 
-![A task list as rendered by GitLab's interface](img/completed_tasks_v13_3.png)
+![A task list as rendered by the GitLab interface](img/completed_tasks_v13_3.png)
 
 ### Table of contents
 
@@ -1056,7 +1058,7 @@ are separated into their own lines:
 ```
 
 <!--
-Note: The example below uses HTML to force correct rendering on docs.gitlab.com,
+The example below uses HTML to force correct rendering on docs.gitlab.com,
 Markdown is fine in GitLab.
 -->
 

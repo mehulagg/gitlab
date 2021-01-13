@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 class Import::BulkImportsController < ApplicationController
+  include ActionView::Helpers::SanitizeHelper
+
   before_action :ensure_group_import_enabled
   before_action :verify_blocked_uri, only: :status
 
   feature_category :importers
+
+  POLLING_INTERVAL = 3_000
 
   rescue_from BulkImports::Clients::Http::ConnectionError, with: :bulk_import_connection_error
 
@@ -20,8 +24,9 @@ class Import::BulkImportsController < ApplicationController
       format.json do
         render json: { importable_data: serialized_importable_data }
       end
-
-      format.html
+      format.html do
+        @source_url = session[url_key]
+      end
     end
   end
 
@@ -29,6 +34,12 @@ class Import::BulkImportsController < ApplicationController
     BulkImportService.new(current_user, create_params, credentials).execute
 
     render json: :ok
+  end
+
+  def realtime_changes
+    Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
+
+    render json: current_user_bulk_imports.to_json(only: [:id], methods: [:status_name])
   end
 
   private
@@ -42,7 +53,22 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def importable_data
-    client.get('groups', top_level_only: true).parsed_response
+    client.get('groups', query_params).parsed_response
+  end
+
+  # Default query string params used to fetch groups from GitLab source instance
+  #
+  # top_level_only: fetch only top level groups (subgroups are fetched during import itself)
+  # min_access_level: fetch only groups user has maintainer or above permissions
+  # search: optional search param to search user's groups by a keyword
+  def query_params
+    query_params = {
+      top_level_only: true,
+      min_access_level: Gitlab::Access::MAINTAINER
+    }
+
+    query_params[:search] = sanitized_filter_param if sanitized_filter_param
+    query_params
   end
 
   def client
@@ -57,7 +83,7 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def create_params
-    params.permit(:bulk_import, [*bulk_import_params])
+    params.permit(bulk_import: bulk_import_params)[:bulk_import]
   end
 
   def bulk_import_params
@@ -127,7 +153,15 @@ class Import::BulkImportsController < ApplicationController
   def credentials
     {
       url: session[url_key],
-      access_token: [access_token_key]
+      access_token: session[access_token_key]
     }
+  end
+
+  def sanitized_filter_param
+    @filter ||= sanitize(params[:filter])&.downcase
+  end
+
+  def current_user_bulk_imports
+    current_user.bulk_imports.gitlab
   end
 end

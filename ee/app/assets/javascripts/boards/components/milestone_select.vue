@@ -84,7 +84,7 @@ export default {
       </button>
     </div>
     <div :class="milestoneTitleClass" class="value">{{ milestoneTitle }}</div>
-    <div class="selectbox" style="display: none;">
+    <div class="selectbox" style="display: none">
       <input :value="milestoneId" name="milestone_id" type="hidden" />
       <div class="dropdown">
         <button

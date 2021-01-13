@@ -26,17 +26,17 @@ export default {
   inject: ['fullPath', 'type'],
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
-      milestonesData: state => state.milestones.data,
-      labelsData: state => state.labels.data,
-      assigneesData: state => state.assignees.data,
-      authorsData: state => state.authors.data,
-      branchesData: state => state.branches.data,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
+      milestonesData: (state) => state.milestones.data,
+      labelsData: (state) => state.labels.data,
+      assigneesData: (state) => state.assignees.data,
+      authorsData: (state) => state.authors.data,
+      branchesData: (state) => state.branches.data,
     }),
     tokens() {
       return [

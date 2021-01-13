@@ -64,7 +64,7 @@ export default {
           <gl-search-box-by-type
             :placeholder="__('Search by name')"
             :debounce="$options.searchDebounceValue"
-            @input="input => this.$emit('search', input)"
+            @input="(input) => this.$emit('search', input)"
           />
         </div>
       </template>

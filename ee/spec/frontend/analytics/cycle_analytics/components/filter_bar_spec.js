@@ -75,7 +75,7 @@ describe('Filter bar', () => {
     });
   };
 
-  const createComponent = initialStore => {
+  const createComponent = (initialStore) => {
     return shallowMount(FilterBar, {
       localVue,
       store: initialStore,
@@ -101,10 +101,10 @@ describe('Filter bar', () => {
   const selectedLabelList = [filterLabels[0]];
 
   const findFilteredSearch = () => wrapper.find(FilteredSearchBar);
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('tokens')
-      .find(token => token.type === type);
+      .find((token) => token.type === type);
 
   describe('default', () => {
     beforeEach(() => {
@@ -186,13 +186,19 @@ describe('Filter bar', () => {
     [
       'selectedLabelList',
       'label_name',
-      [{ value: 'Afternix', operator: '=' }, { value: 'Brouceforge', operator: '=' }],
+      [
+        { value: 'Afternix', operator: '=' },
+        { value: 'Brouceforge', operator: '=' },
+      ],
       ['Afternix', 'Brouceforge'],
     ],
     [
       'selectedAssigneeList',
       'assignee_username',
-      [{ value: 'rootUser', operator: '=' }, { value: 'secondaryUser', operator: '=' }],
+      [
+        { value: 'rootUser', operator: '=' },
+        { value: 'secondaryUser', operator: '=' },
+      ],
       ['rootUser', 'secondaryUser'],
     ],
   ])('with a %s updates the %s url parameter', (stateKey, paramKey, payload, result) => {

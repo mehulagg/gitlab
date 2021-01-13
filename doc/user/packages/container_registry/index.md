@@ -16,6 +16,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The group-level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
+NOTE:
+If you pull container images from Docker Hub, you can also use the [GitLab Dependency Proxy](../dependency_proxy/index.md#use-the-dependency-proxy-for-docker-images) to avoid running into rate limits and speed up your pipelines.
+
 With the Docker Container Registry integrated into GitLab, every GitLab project can
 have its own space to store its Docker images.
 
@@ -351,7 +354,7 @@ is set to `always`.
 
 To use your own Docker images for Docker-in-Docker, follow these steps
 in addition to the steps in the
-[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) section:
+[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker) section:
 
 1. Update the `image` and `service` to point to your registry.
 1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
@@ -702,6 +705,23 @@ When [pushing a Docker manifest list](https://docs.docker.com/engine/reference/c
 For example, you may have two individual images, one for `amd64` and another for `arm64v8`, and you want to build a multi-arch image with them. The `amd64` and `arm64v8` images must be pushed to the same repository where you want to push the multi-arch image.
 
 As a workaround, you should include the architecture in the tag name of individual images. For example, use `mygroup/myapp:1.0.0-amd64` instead of using sub repositories, like `mygroup/myapp/amd64:1.0.0`. You can then tag the manifest list with `mygroup/myapp:1.0.0`.
+
+### The cleanup policy doesn't delete any tags
+
+In GitLab 13.6 and earlier, when you run the cleanup policy,
+you may expect it to delete tags and it does not.
+
+This issue occurs when the cleanup policy was saved without
+editing the value in the **Remove tags matching** field.
+
+This field had a grayed out `.*` value as a placeholder.
+Unless `.*` (or other regex pattern) was entered explicitly into the
+field, a `nil` value was submitted. This value prevents the
+saved cleanup policy from matching any tags.
+
+As a workaround, edit the cleanup policy. In the **Remove tags matching**
+field, enter `.*` and save. This value indicates that all tags should
+be removed.
 
 ### Troubleshoot as a GitLab server admin
 

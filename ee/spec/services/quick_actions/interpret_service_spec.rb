@@ -4,9 +4,11 @@ require 'spec_helper'
 
 RSpec.describe QuickActions::InterpretService do
   let(:current_user) { create(:user) }
+  let(:developer) { create(:user) }
+  let(:developer2) { create(:user) }
   let(:user) { create(:user) }
-  let(:user2) { create(:user) }
-  let(:user3) { create(:user) }
+  let_it_be(:user2) { create(:user) }
+  let_it_be(:user3) { create(:user) }
   let_it_be_with_refind(:group) { create(:group) }
   let_it_be_with_refind(:project) { create(:project, :repository, :public, group: group) }
   let_it_be_with_reload(:issue) { create(:issue, project: project) }
@@ -17,6 +19,7 @@ RSpec.describe QuickActions::InterpretService do
                            multiple_merge_request_assignees: true)
 
     project.add_developer(current_user)
+    project.add_developer(developer)
   end
 
   shared_examples 'quick action is unavailable' do |action|
@@ -42,6 +45,16 @@ RSpec.describe QuickActions::InterpretService do
           _, updates = service.execute("/unassign @#{user2.username}\n/assign @#{user3.username}", issue)
 
           expect(updates[:assignee_ids]).to match_array([user.id, user3.id])
+        end
+
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/assign @#{user3.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
         end
 
         context 'assign command with multiple assignees' do
@@ -88,6 +101,45 @@ RSpec.describe QuickActions::InterpretService do
               expect(updates[:assignee_ids]).to match_array([user2.id])
             end
           end
+        end
+      end
+    end
+
+    context 'assign_reviewer command' do
+      context 'with a merge request' do
+        let(:merge_request) { create(:merge_request, source_project: project) }
+
+        it 'fetches reviewers and populates them if content contains /assign_reviewer' do
+          merge_request.update(reviewer_ids: [user.id])
+
+          _, updates = service.execute("/assign_reviewer @#{user2.username}\n/assign_reviewer @#{user3.username}", merge_request)
+
+          expect(updates[:reviewer_ids]).to match_array([user.id, user2.id, user3.id])
+        end
+
+        context 'assign command with multiple reviewers' do
+          it 'assigns multiple reviewers while respecting previous assignments' do
+            merge_request.update(reviewer_ids: [user.id])
+
+            _, updates = service.execute("/assign_reviewer @#{user.username}\n/assign_reviewer @#{user2.username} @#{user3.username}", merge_request)
+
+            expect(updates[:reviewer_ids]).to match_array([user.id, user2.id, user3.id])
+          end
+        end
+      end
+    end
+
+    context 'unassign_reviewer command' do
+      let(:content) { '/unassign_reviewer' }
+      let(:merge_request) { create(:merge_request, source_project: project) }
+
+      context 'unassign_reviewer command with multiple assignees' do
+        it 'unassigns both reviewers if content contains /unassign_reviewer @user @user1' do
+          merge_request.update(reviewer_ids: [user.id, user2.id, user3.id])
+
+          _, updates = service.execute("/unassign_reviewer @#{user.username} @#{user2.username}", merge_request)
+
+          expect(updates[:reviewer_ids]).to match_array([user3.id])
         end
       end
     end
@@ -206,6 +258,16 @@ RSpec.describe QuickActions::InterpretService do
           _, updates = service.execute("/reassign @#{current_user.username}", issue)
 
           expect(updates[:assignee_ids]).to match_array([current_user.id])
+        end
+
+        context 'with test_case issue type' do
+          it 'does not mark to update assignee' do
+            test_case = create(:quality_test_case, project: project)
+
+            _, updates = service.execute("/reassign @#{current_user.username}", test_case)
+
+            expect(updates[:assignee_ids]).to eq(nil)
+          end
         end
       end
     end
@@ -969,6 +1031,18 @@ RSpec.describe QuickActions::InterpretService do
         let(:issuable) { build(:merge_request, source_project: project) }
       end
     end
+
+    context 'confidential command' do
+      context 'for test cases' do
+        it 'does not mark to update confidential attribute' do
+          issuable = create(:quality_test_case, project: project)
+
+          _, updates, _ = service.execute('/confidential', issuable)
+
+          expect(updates[:confidential]).to eq(nil)
+        end
+      end
+    end
   end
 
   describe '#explain' do
@@ -990,7 +1064,9 @@ RSpec.describe QuickActions::InterpretService do
       it 'includes only selected assignee references' do
         _, explanations = service.explain(content, issue)
 
-        expect(explanations).to eq(["Removes assignees @#{user.username} and @#{user3.username}."])
+        expect(explanations.first).to match(/Removes assignees/)
+        expect(explanations.first).to match("@#{user3.username}")
+        expect(explanations.first).to match("@#{user.username}")
       end
     end
 

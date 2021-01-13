@@ -27,7 +27,14 @@ module Groups::SecurityFeaturesHelper
       group_security_compliance_dashboard_path(group)
     elsif group_level_credentials_inventory_available?(group)
       group_security_credentials_path(group)
+    elsif group_level_audit_events_available?(group)
+      group_audit_events_path(group)
     end
+  end
+
+  def group_level_audit_events_available?(group)
+    group.feature_available?(:audit_events) &&
+      can?(current_user, :read_group_audit_events, group)
   end
 
   def group_level_security_dashboard_data(group)

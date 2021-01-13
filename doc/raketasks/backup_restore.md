@@ -268,10 +268,10 @@ You can exclude specific directories from the backup by adding the environment v
 - `pages` (Pages content)
 - `repositories` (Git repositories data)
 
-All wikis will be backed up as part of the `repositories` group. Non-existent wikis will be skipped during a backup.
-  
+All wikis are backed up as part of the `repositories` group. Non-existent wikis are skipped during a backup.
+
 NOTE:
-When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).   
+When [backing up and restoring Helm Charts](https://docs.gitlab.com/charts/architecture/backup-restore.html), there is an additional option `packages`, which refers to any packages managed by the GitLab [package registry](../user/packages/package_registry/index.md).
 For more information see [command line arguments](https://docs.gitlab.com/charts/architecture/backup-restore.html#command-line-arguments).
 
 All wikis are backed up as part of the `repositories` group. Non-existent
@@ -627,7 +627,7 @@ backups are copied to, and is created if it does not exist. If the
 directory that you want to copy the tarballs to is the root of your mounted
 directory, use `.` instead.
 
-Because file system performance may affect GitLab's overall performance,
+Because file system performance may affect overall GitLab performance,
 [GitLab doesn't recommend using EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 For Omnibus GitLab packages:
@@ -671,7 +671,7 @@ For installations from source:
 
 The backup archives created by GitLab (`1393513186_2014_02_27_gitlab_backup.tar`)
 have the owner/group `git`/`git` and 0600 permissions by default. This is
-meant to avoid other system users reading GitLab's data. If you need the backup
+meant to avoid other system users reading GitLab data. If you need the backup
 archives to have different permissions, you can use the `archive_permissions`
 setting.
 
@@ -890,7 +890,7 @@ Restoring repositories:
 Deleting tmp directories...[DONE]
 ```
 
-Next, restore `/home/git/gitlab/.secret` if necessary, as previously mentioned.
+Next, restore `/home/git/gitlab/.secret` if necessary, [as previously mentioned](#restore-prerequisites).
 
 Restart GitLab:
 
@@ -943,8 +943,16 @@ permissions on your Registry directory. This is a [known issue](https://gitlab.c
 On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
 
-Next, restore `/etc/gitlab/gitlab-secrets.json` if necessary, as previously
-mentioned.
+If there's a GitLab version mismatch between your backup tar file and the
+installed version of GitLab, the restore command aborts with an error
+message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
+and then try again.
+
+NOTE:
+There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
+
+Next, restore `/etc/gitlab/gitlab-secrets.json` if necessary,
+[as previously mentioned](#restore-prerequisites).
 
 Reconfigure, restart and check GitLab:
 
@@ -954,13 +962,13 @@ sudo gitlab-ctl restart
 sudo gitlab-rake gitlab:check SANITIZE=true
 ```
 
-If there's a GitLab version mismatch between your backup tar file and the
-installed version of GitLab, the restore command aborts with an error
-message. Install the [correct GitLab version](https://packages.gitlab.com/gitlab/),
-and then try again.
+On GitLab 13.1 and later, check [database values can be decrypted](../administration/raketasks/doctor.md)
+especially if `/etc/gitlab/gitlab-secrets.json` was restored, or if a different server is
+the target for the restore.
 
-NOTE:
-There is a known issue with restore not working with `pgbouncer`. [Read more about backup and restore with `pgbouncer`](#backup-and-restore-for-installations-using-pgbouncer).
+```shell
+sudo gitlab-rake gitlab:doctor:secrets
+```
 
 ### Restore for Docker image and GitLab Helm chart installations
 
@@ -1066,6 +1074,13 @@ following error message is shown:
 
 ```ruby
 ActiveRecord::StatementInvalid: PG::UndefinedTable
+```
+
+Each time the GitLab backup runs, GitLab will start generating 500 errors and errors about missing
+tables will [be logged by PostgreSQL](../administration/logs.md#postgresql-logs):
+
+```plaintext
+ERROR: relation "tablename" does not exist at character 123
 ```
 
 This happens because the task uses `pg_dump`, which [sets a null search

@@ -103,20 +103,14 @@ describe('EpicsSwimlanes', () => {
     });
 
     it('makes non preset lists draggable', () => {
-      expect(
-        wrapper
-          .findAll('[data-testid="board-header-container"]')
-          .at(1)
-          .classes(),
-      ).toContain('is-draggable');
+      expect(wrapper.findAll('[data-testid="board-header-container"]').at(1).classes()).toContain(
+        'is-draggable',
+      );
     });
 
     it('does not make preset lists draggable', () => {
       expect(
-        wrapper
-          .findAll('[data-testid="board-header-container"]')
-          .at(0)
-          .classes(),
+        wrapper.findAll('[data-testid="board-header-container"]').at(0).classes(),
       ).not.toContain('is-draggable');
     });
   });

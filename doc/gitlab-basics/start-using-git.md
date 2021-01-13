@@ -22,7 +22,7 @@ the command line and then push your changes to the remote server.
 
 This guide will help you get started with Git through the command line and can be your reference
 for Git commands in the future. If you're only looking for a quick reference of Git commands, you
-can download GitLab's [Git Cheat Sheet](https://about.gitlab.com/images/press/git-cheat-sheet.pdf).
+can download the GitLab [Git Cheat Sheet](https://about.gitlab.com/images/press/git-cheat-sheet.pdf).
 
 > For more information about the advantages of working with Git and GitLab:
 >
@@ -128,7 +128,7 @@ to our computer:
   - If you don't have 2FA enabled, use your account's password.
 
 NOTE:
-Authenticating via SSH is GitLab's recommended method. You can read more about credential storage
+Authenticating via SSH is the GitLab recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
 ## Git terminology
@@ -167,14 +167,13 @@ original repository if you'd like.
 
 ### Download vs clone
 
-To create a copy of a remote repository files on your computer, you can either
-**download** or **clone** it. If you download it, you cannot sync it with the
+To create a copy of a remote repository's files on your computer, you can either
+**download** or **clone**. If you download, you cannot sync it with the
 remote repository on GitLab.
 
-On the other hand, by cloning a repository, you'll download a copy of its
-files to your local computer, but preserve the Git connection with the remote
-repository, so that you can work on the its files on your computer and then
-upload the changes to GitLab.
+Cloning a repository is the same as downloading, except it preserves the Git connection
+with the remote repository. This allows you to modify the files locally and
+upload the changes to the remote repository on GitLab.
 
 ### Pull and push
 

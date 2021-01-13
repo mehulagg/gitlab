@@ -332,7 +332,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('refreshEpicDates', () => {
     it('should update epics after refreshing epic dates to match with updated timeframe', () => {
-      const epics = rawEpics.map(epic =>
+      const epics = rawEpics.map((epic) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           epic,
           state.timeframeStartDate,
@@ -747,7 +747,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('refreshMilestoneDates', () => {
     it('should update milestones after refreshing milestone dates to match with updated timeframe', () => {
-      const milestones = rawMilestones.map(milestone =>
+      const milestones = rawMilestones.map((milestone) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           milestone,
           state.timeframeStartDate,

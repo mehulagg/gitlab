@@ -16,7 +16,7 @@ RSpec.describe GitlabSchema.types['DastSiteValidation'] do
       },
       variables: {
         fullPath: project.full_path,
-        targetUrl: dast_site_validation.url_base
+        normalized_target_urls: [dast_site_validation.url_base]
       }
     ).as_json
   end
@@ -30,19 +30,17 @@ RSpec.describe GitlabSchema.types['DastSiteValidation'] do
 
   it { expect(described_class).to have_graphql_fields(fields) }
 
-  describe 'dast_site_validation' do
+  describe 'dast_site_validations' do
     before do
       project.add_developer(user)
     end
 
     let(:query) do
       %(
-        query project($fullPath: ID!, $targetUrl: String!) {
+        query project($fullPath: ID!, $normalizedTargetUrls: [String!]) {
           project(fullPath: $fullPath) {
-            dastSiteValidation(targetUrl: $targetUrl) {
-              id
-              status
-              normalizedTargetUrl
+            dastSiteValidations(normalizedTargetUrls: $normalizedTargetUrls) {
+              edges { node { id status normalizedTargetUrl } }
             }
           }
         }
@@ -50,7 +48,7 @@ RSpec.describe GitlabSchema.types['DastSiteValidation'] do
     end
 
     describe 'status field' do
-      subject { response.dig('data', 'project', 'dastSiteValidation', 'status') }
+      subject { response.dig('data', 'project', 'dastSiteValidations', 'edges', 0, 'node', 'status') }
 
       it { is_expected.to eq('PENDING_VALIDATION') }
     end

@@ -61,7 +61,7 @@ export default {
 
       if (selectiveSyncType === 'namespaces') {
         return sprintf(__('Groups (%{groups})'), {
-          groups: this.nodeDetails.namespaces.map(n => n.full_path).join(', '),
+          groups: this.nodeDetails.namespaces.map((n) => n.full_path).join(', '),
         });
       }
 

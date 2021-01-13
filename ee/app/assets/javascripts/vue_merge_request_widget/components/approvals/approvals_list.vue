@@ -38,20 +38,20 @@ export default {
         {
           id: uniqueId(),
           title: '',
-          rules: this.approvalRules.filter(rule => rule.rule_type !== RULE_TYPE_CODE_OWNER),
+          rules: this.approvalRules.filter((rule) => rule.rule_type !== RULE_TYPE_CODE_OWNER),
         },
         {
           id: uniqueId(),
           title: __('Code Owners'),
           rules: orderBy(
             this.approvalRules
-              .filter(rule => rule.rule_type === RULE_TYPE_CODE_OWNER)
-              .map(rule => ({ ...rule, nameClass: 'gl-font-monospace gl-word-break-all' })),
-            [o => o.section === 'codeowners', 'name', 'section'],
+              .filter((rule) => rule.rule_type === RULE_TYPE_CODE_OWNER)
+              .map((rule) => ({ ...rule, nameClass: 'gl-font-monospace gl-word-break-all' })),
+            [(o) => o.section === 'codeowners', 'name', 'section'],
             ['desc', 'asc', 'asc'],
           ),
         },
-      ].filter(x => x.rules.length);
+      ].filter((x) => x.rules.length);
     },
   },
   methods: {

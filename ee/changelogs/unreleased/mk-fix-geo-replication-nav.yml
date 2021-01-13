@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix replication details nav links to show any that are enabled'
-merge_request: 49731
-author:
-type: fixed

@@ -191,6 +191,11 @@ module Types
           description: 'Build pipeline of the project',
           resolver: Resolvers::ProjectPipelineResolver
 
+    field :ci_cd_settings,
+          Types::Ci::CiCdSettingType,
+          null: true,
+          description: 'CI/CD settings for the project'
+
     field :sentry_detailed_error,
           Types::ErrorTracking::SentryDetailedErrorType,
           null: true,
@@ -310,9 +315,6 @@ module Types
           description: 'Pipeline analytics',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
 
-    field :total_pipeline_duration, GraphQL::INT_TYPE, null: true,
-          description: 'Total pipeline duration for all of the pipelines in a project'
-
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
         LabelsFinder
@@ -355,10 +357,6 @@ module Types
 
     def container_repositories_count
       project.container_repositories.size
-    end
-
-    def total_pipeline_duration
-      object.all_pipelines.total_duration
     end
 
     private

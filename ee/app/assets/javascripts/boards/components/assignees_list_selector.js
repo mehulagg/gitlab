@@ -1,6 +1,6 @@
 import BoardsListSelector from './boards_list_selector/index';
 
-export default function() {
+export default function () {
   const $addListEl = document.querySelector('#js-add-list');
   return new BoardsListSelector({
     propsData: {

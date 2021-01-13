@@ -110,7 +110,7 @@ The scanning tools and vulnerabilities database are updated regularly.
 | Secure scanning tool                                         | Vulnerabilities database updates          |
 |:-------------------------------------------------------------|-------------------------------------------|
 | [Container Scanning](container_scanning/index.md)            | Uses `clair`. The latest `clair-db` version is used for each job by running the [`latest` Docker image tag](https://gitlab.com/gitlab-org/gitlab/blob/438a0a56dc0882f22bdd82e700554525f552d91b/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml#L37). The `clair-db` database [is updated daily according to the author](https://github.com/arminc/clair-local-scan#clair-server-or-local). |
-| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (GitLab's own tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
+| [Dependency Scanning](dependency_scanning/index.md)          | Relies on `bundler-audit` (for Ruby gems), `retire.js` (for NPM packages), and `gemnasium` (the GitLab tool for all libraries). Both `bundler-audit` and `retire.js` fetch their vulnerabilities data from GitHub repositories, so vulnerabilities added to `ruby-advisory-db` and `retire.js` are immediately available. The tools themselves are updated once per month if there's a new version. The [Gemnasium DB](https://gitlab.com/gitlab-org/security-products/gemnasium-db) is updated at least once a week. See our [current measurement of time from CVE being issued to our product being updated](https://about.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
 | [Dynamic Application Security Testing (DAST)](dast/index.md) | The scanning engine is updated on a periodic basis. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/master/Dockerfile#L1). The scanning rules are downloaded at scan runtime. |
 | [Static Application Security Testing (SAST)](sast/index.md)  | Relies exclusively on [the tools GitLab wraps](sast/index.md#supported-languages-and-frameworks). The underlying analyzers are updated at least once per month if a relevant update is available. The vulnerabilities database is updated by the upstream tools. |
 
@@ -200,6 +200,43 @@ HTTP request and response headers may contain sensitive information, including c
 authorization credentials. By default, content of specific headers are masked in DAST vulnerability
 reports. You can specify the list of all headers to be masked. For details, see
 [Hide sensitive information](dast/index.md#hide-sensitive-information).
+
+### View details of an API Fuzzing vulnerability
+
+> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
+
+Faults detected by API Fuzzing occur in the live web application, and require manual investigation
+to determine if they are vulnerabilities. Fuzzing faults are included as vulnerabilities with a
+severity of Unknown. To facilitate investigation of the fuzzing faults, detailed information is
+provided about the HTTP messages sent and received along with a description of the modification(s)
+made.
+
+Follow these steps to view details of a fuzzing fault:
+
+1. You can view faults in a project, or a merge request:
+
+   - In a project, go to the project's **{shield}** **Security & Compliance > Vulnerability Report**
+     page. This page shows all vulnerabilities from the default branch only.
+   - In a merge request, go the merge request's **Security** section and click the **Expand**
+     button. API Fuzzing faults are available in a section labeled
+     **API Fuzzing detected N potential vulnerabilities**. Click the title to display the fault
+     details.
+
+1. Click the fault's title to display the fault's details. The table below describes these details.
+
+| Field            | Description                                                        |
+|:-----------------|:------------------------------------------------------------------ |
+| Description      | Description of the fault including what was modified.              |
+| Project          | Namespace and project in which the vulnerability was detected.     |
+| Method           | HTTP method used to detect the vulnerability.                      |
+| URL              | URL at which the vulnerability was detected.                       |
+| Request          | The HTTP request that caused the fault.                       |
+| Unmodified Response | Response from an unmodified request. This is what a normal working response looks like. |
+| Actual Response  | Response received from fuzzed request.                             |
+| Evidence         | How we determined a fault occurred.                                |
+| Identifiers      | The fuzzing check used to find this fault.                         |
+| Severity         | Severity of the finding is always Unknown.                          |
+| Scanner Type     | Scanner used to perform testing.                                   |
 
 ### Dismissing a vulnerability
 

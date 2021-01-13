@@ -149,9 +149,7 @@ export default {
       <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
       <span v-else class="js-weight-collapsed-weight-label">
         {{ collapsedWeightLabel
-        }}<template v-if="weight > $options.maxDisplayWeight"
-          >&hellip;</template
-        >
+        }}<template v-if="weight > $options.maxDisplayWeight">&hellip;</template>
       </span>
     </div>
     <div class="title hide-collapsed">

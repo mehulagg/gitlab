@@ -7,7 +7,11 @@ export default {
   components: {
     SubscriptionTable,
   },
-  inject: ['planUpgradeHref', 'planRenewHref', 'namespaceId', 'customerPortalUrl', 'namespaceName'],
+  inject: {
+    namespaceId: {
+      default: '',
+    },
+  },
   created() {
     this.setNamespaceId(this.namespaceId);
   },
@@ -18,10 +22,5 @@ export default {
 </script>
 
 <template>
-  <subscription-table
-    :namespace-name="namespaceName"
-    :plan-upgrade-href="planUpgradeHref"
-    :plan-renew-href="planRenewHref"
-    :customer-portal-url="customerPortalUrl"
-  />
+  <subscription-table />
 </template>

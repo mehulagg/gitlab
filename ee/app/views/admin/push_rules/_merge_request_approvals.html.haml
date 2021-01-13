@@ -2,11 +2,11 @@
 %section.settings.merge-request-approval-settings.no-animate{ class: ('expanded' if expanded_by_default?) }
   .settings-header
     %h4
-      = _('Merge requests approvals')
+      = _('Merge request (MR) approvals')
     %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      = _('Settings to prevent self-approval across all projects in the instance. Only an administrator can modify these settings.')
+      = _('Regulate approvals by authors/committers. Affects all projects.')
 
   .settings-content
     %hr.clearfix.mt-0

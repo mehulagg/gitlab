@@ -23,6 +23,15 @@ describe('DevOps GraphQL resolvers', () => {
   });
 
   describe('groups query', () => {
+    it('only fetches top level groups', async () => {
+      mockAdapter.onGet(fetchGroupsUrl).reply(httpStatus.OK, groupData, pageData);
+      await mockClient.query({ query: getGroupsQuery });
+
+      expect(mockAdapter.history.get[0].params).toEqual(
+        expect.objectContaining({ top_level_only: true }),
+      );
+    });
+
     it('when receiving groups data', async () => {
       mockAdapter.onGet(fetchGroupsUrl).reply(httpStatus.OK, groupData, pageData);
       const result = await mockClient.query({ query: getGroupsQuery });

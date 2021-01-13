@@ -17,7 +17,7 @@ export default {
     resetPipelineMinutes() {
       axios
         .post(this.resetMinutesPath)
-        .then(resp => {
+        .then((resp) => {
           if (resp.status === statusCodes.OK) {
             this.$toast.show(__('User pipeline minutes were successfully reset.'));
           }

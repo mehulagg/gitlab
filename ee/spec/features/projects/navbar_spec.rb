@@ -34,21 +34,21 @@ RSpec.describe 'Project navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          s_('OnDemandScans|On-demand Scans'),
+          _('Configuration'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       stub_licensed_features(security_dashboard: true, security_on_demand_scans: true)
-
-      insert_after_nav_item(
-        _('CI / CD'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security Dashboard'),
-            _('Vulnerability Report'),
-            s_('OnDemandScans|On-demand Scans'),
-            _('Configuration')
-          ]
-        }
-      )
 
       visit project_path(project)
     end

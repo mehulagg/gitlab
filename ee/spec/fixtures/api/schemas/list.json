@@ -5,7 +5,7 @@
       "$ref": "../../../../../spec/fixtures/api/schemas/list.json"
     },
     {
-      "required": ["user"],
+      "required": ["user", "iteration"],
       "properties": {
         "user": {
           "type": [
@@ -42,6 +42,35 @@
             },
             "path": {
               "type": "string"
+            }
+          }
+        },
+        "iteration": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "id",
+            "title",
+            "description",
+            "state"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "state": {
+              "type": "integer"
             }
           }
         }

@@ -11,7 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 GitLab Issues are a tool for discussing ideas and planning and tracking work. However, your organization may already use Jira for these purposes, with
 extensive, established data and business processes they rely on.
 
-Although you can [migrate](../../../user/project/import/jira.md) your Jira issues and work exclusively in GitLab, you also have the option of continuing to use Jira by using GitLab's Jira integrations.
+Although you can [migrate](../../../user/project/import/jira.md) your Jira issues and work exclusively in GitLab, you also have the option of continuing to use Jira by using the GitLab Jira integrations.
 
 ## Integrations
 
@@ -30,6 +30,6 @@ The following Jira integrations allow different types of cross-referencing betwe
 | Mention of Jira issue ID in GitLab issue/MR is reflected in the Jira issue  | Yes, as a Jira comment with the GitLab issue/MR title and a link back to it. Its first mention also adds the GitLab page to the Jira issue under “Web links”. | Yes, in the issue’s Development panel                                                                                  |
 | Mention of Jira issue ID in GitLab commit message is reflected in the issue | Yes. The entire commit message is added to the Jira issue as a comment and under “Web links”, each with a link back to the commit in GitLab.                  | Yes, in the issue’s Development panel and optionally with a custom comment on the Jira issue using Jira Smart Commits. |
 | Mention of Jira issue ID in GitLab branch names is reflected in Jira issue  | No                                                                                                                                                            | Yes, in the issue’s Development panel                                                                                  |
-| Record Jira time tracking info against an issue                             | No                                                                                                                                                            | Yes. Time can be specified via Jira Smart Commits.                                                                     |
+| Record Jira time tracking information against an issue                      | No                                                                                                                                                            | Yes. Time can be specified via Jira Smart Commits.                                                                     |
 | Transition or close a Jira issue with a Git commit or merge request         | Yes. Only a single transition type, typically configured to close the issue by setting it to Done.                                                            | Yes. Transition to any state using Jira Smart Commits.                                                                 |
 | Display a list of Jira issues                                               | Yes **(PREMIUM)**                                                                                                                                             | No                                                                                                                     |

@@ -4,7 +4,7 @@ import { sprintf, __ } from '~/locale';
 import { sanitizeItem } from '~/frequent_items/utils';
 import { loadCSSFile } from '~/lib/utils/css_utils';
 
-const formatResult = selectedItem => {
+const formatResult = (selectedItem) => {
   if (selectedItem.path_with_namespace) {
     return `<div class='project-result'> <div class='project-name'>${selectedItem.name}</div> <div class='project-path'>${selectedItem.path_with_namespace}</div> </div>`;
   } else if (selectedItem.path) {
@@ -15,7 +15,7 @@ const formatResult = selectedItem => {
   )}</div> <div class='group-path'>${__('All groups and projects')}</div> </div>`;
 };
 
-const formatSelection = selectedItem => {
+const formatSelection = (selectedItem) => {
   if (selectedItem.path_with_namespace) {
     return sprintf(__('Project: %{name}'), { name: selectedItem.name });
   } else if (selectedItem.path) {
@@ -24,7 +24,7 @@ const formatSelection = selectedItem => {
   return __('All groups and projects');
 };
 
-const QueryAdmin = query => {
+const QueryAdmin = (query) => {
   const groupsFetch = Api.groups(query.term, {});
   const projectsFetch = Api.projects(query.term, {
     order_by: 'id',

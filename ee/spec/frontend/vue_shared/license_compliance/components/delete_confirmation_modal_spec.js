@@ -32,7 +32,7 @@ describe('DeleteConfirmationModal', () => {
     });
   };
 
-  const createComponent = initialState => {
+  const createComponent = (initialState) => {
     store = createStore(initialState);
 
     wrapper = shallowMount(Component, {

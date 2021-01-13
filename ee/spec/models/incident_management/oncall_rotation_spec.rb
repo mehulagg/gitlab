@@ -9,6 +9,7 @@ RSpec.describe IncidentManagement::OncallRotation do
     it { is_expected.to belong_to(:schedule) }
     it { is_expected.to have_many(:participants) }
     it { is_expected.to have_many(:users).through(:participants) }
+    it { is_expected.to have_many(:shifts) }
   end
 
   describe '.validations' do

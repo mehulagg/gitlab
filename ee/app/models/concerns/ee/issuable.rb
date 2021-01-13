@@ -6,7 +6,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def supports_epic?
-      is_a?(Issue) && issue_type_supports?(:epics) && project.group.present?
+      false
     end
 
     def supports_health_status?

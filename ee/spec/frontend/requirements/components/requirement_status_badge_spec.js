@@ -15,8 +15,8 @@ const createComponent = ({
     },
   });
 
-const findGlBadge = wrapper => wrapper.find(GlBadge);
-const findGlTooltip = wrapper => wrapper.find(GlTooltip);
+const findGlBadge = (wrapper) => wrapper.find(GlBadge);
+const findGlTooltip = (wrapper) => wrapper.find(GlTooltip);
 
 const successBadgeProps = {
   variant: 'success',

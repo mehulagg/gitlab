@@ -34,14 +34,14 @@ export default {
     },
     queryObject() {
       // This is the object used to update the querystring.
-      return { [this.filter.id]: this.selectedOptionsOrAll.map(x => x.id) };
+      return { [this.filter.id]: this.selectedOptionsOrAll.map((x) => x.id) };
     },
     filterObject() {
       // This is the object used by the GraphQL query.
-      return { [this.filter.id]: this.selectedOptions.map(x => x.id) };
+      return { [this.filter.id]: this.selectedOptions.map((x) => x.id) };
     },
     filteredOptions() {
-      return this.filter.options.filter(option =>
+      return this.filter.options.filter((option) =>
         option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
@@ -50,7 +50,7 @@ export default {
       return Array.isArray(ids) ? ids : [ids];
     },
     routeQueryOptions() {
-      const options = this.filter.options.filter(x => this.routeQueryIds.includes(x.id));
+      const options = this.filter.options.filter((x) => this.routeQueryIds.includes(x.id));
       const hasAllId = this.routeQueryIds.includes(this.filter.allOption.id);
 
       if (options.length && !hasAllId) {

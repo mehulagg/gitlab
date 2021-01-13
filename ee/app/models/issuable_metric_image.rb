@@ -16,10 +16,12 @@ class IssuableMetricImage < ApplicationRecord
   validate :validate_file_is_image
   validates :url, length: { maximum: 255 }, public_url: { allow_blank: true }
 
+  scope :order_created_at_asc, -> { order(created_at: :asc) }
+
   MAX_FILE_SIZE = 1.megabyte.freeze
 
   def self.available_for?(project)
-    project&.feature_available?(:incident_metric_upload)
+    Feature.enabled?(:incident_metric_upload_ui, project) && project&.feature_available?(:incident_metric_upload)
   end
 
   def filename

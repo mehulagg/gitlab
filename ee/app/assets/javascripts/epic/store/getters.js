@@ -4,24 +4,25 @@ import epicUtils from '../utils/epic_utils';
 
 import { statusType } from '../constants';
 
-export const isEpicOpen = state => state.state === statusType.open;
+export const isEpicOpen = (state) => state.state === statusType.open;
 
 export const isUserSignedIn = () => Boolean(gon.current_user_id);
 
-export const startDateTime = state => (state.startDate ? parsePikadayDate(state.startDate) : null);
+export const startDateTime = (state) =>
+  state.startDate ? parsePikadayDate(state.startDate) : null;
 
-export const startDateTimeFixed = state =>
+export const startDateTimeFixed = (state) =>
   state.startDateFixed ? parsePikadayDate(state.startDateFixed) : null;
 
-export const startDateTimeFromMilestones = state =>
+export const startDateTimeFromMilestones = (state) =>
   state.startDateFromMilestones ? parsePikadayDate(state.startDateFromMilestones) : null;
 
-export const dueDateTime = state => (state.dueDate ? parsePikadayDate(state.dueDate) : null);
+export const dueDateTime = (state) => (state.dueDate ? parsePikadayDate(state.dueDate) : null);
 
-export const dueDateTimeFixed = state =>
+export const dueDateTimeFixed = (state) =>
   state.dueDateFixed ? parsePikadayDate(state.dueDateFixed) : null;
 
-export const dueDateTimeFromMilestones = state =>
+export const dueDateTimeFromMilestones = (state) =>
   state.dueDateFromMilestones ? parsePikadayDate(state.dueDateFromMilestones) : null;
 
 export const startDateForCollapsedSidebar = (state, getters) =>
@@ -55,4 +56,4 @@ export const isDateInvalid = (state, getters) => {
   );
 };
 
-export const ancestors = state => (state.ancestors ? [...state.ancestors].reverse() : []);
+export const ancestors = (state) => (state.ancestors ? [...state.ancestors].reverse() : []);

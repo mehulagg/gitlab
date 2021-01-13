@@ -18,7 +18,7 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   before do
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}")
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}&namespace_id=#{group.id}")
       .with(headers: { 'Accept' => 'application/json' })
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
 
@@ -70,6 +70,7 @@ RSpec.describe 'Groups > Billing', :js do
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
         expect(page).to have_link("Add seats", href: extra_seats_url)
         expect(page).to have_link("Renew", href: renew_url)
+        expect(page).to have_link("See usage", href: group_seat_usage_path(group))
       end
     end
 

@@ -266,7 +266,10 @@ describe('Insights store actions', () => {
         actions.setActiveTab,
         key,
         state,
-        [{ type: 'SET_ACTIVE_TAB', payload: key }, { type: 'SET_ACTIVE_PAGE', payload: page }],
+        [
+          { type: 'SET_ACTIVE_TAB', payload: key },
+          { type: 'SET_ACTIVE_PAGE', payload: page },
+        ],
         [],
       );
     });

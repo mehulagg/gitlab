@@ -35,7 +35,7 @@ export default {
     },
     unmergedBlockingMergeRequests() {
       return Object.keys(this.visibleMergeRequests)
-        .filter(state => state !== 'merged')
+        .filter((state) => state !== 'merged')
         .reduce(
           (unmergedBlockingMRs, state) =>
             state === 'closed'

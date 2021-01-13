@@ -36,5 +36,5 @@ export function portSelectors({ portMatchMode, ports }) {
  Expects items in format "0.0.0.0/24 1.1.1.1/32"
 */
 export function splitItems(items) {
-  return items.split(/\s/).filter(item => item.length > 0);
+  return items.split(/\s/).filter((item) => item.length > 0);
 }

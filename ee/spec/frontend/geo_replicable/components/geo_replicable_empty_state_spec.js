@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils';
-import { getByRole, getByAltText } from '@testing-library/dom';
+import { getByRole } from '@testing-library/dom';
 import Vuex from 'vuex';
 import GeoReplicableEmptyState from 'ee/geo_replicable/components/geo_replicable_empty_state.vue';
 import createStore from 'ee/geo_replicable/store';
@@ -45,11 +45,9 @@ describe('GeoReplicableEmptyState', () => {
     });
 
     it('sets correct svg', () => {
-      expect(
-        getByAltText(wrapper.element, `There are no ${MOCK_REPLICABLE_TYPE} to show`).getAttribute(
-          'src',
-        ),
-      ).toBe(MOCK_GEO_REPLICATION_SVG_PATH);
+      expect(getByRole(wrapper.element, 'img').getAttribute('src')).toBe(
+        MOCK_GEO_REPLICATION_SVG_PATH,
+      );
     });
   });
 });

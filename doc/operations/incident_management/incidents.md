@@ -10,6 +10,9 @@ Incidents are critical entities in incident management workflows. They represent
 a service disruption or outage that needs to be restored urgently. GitLab provides
 tools for the triage, response, and remediation of incidents.
 
+Users with at least Guest [permissions](../../user/permissions.md) can access
+incidents [on public projects](../../user/permissions.md#project-members-permissions).
+
 ## Incident Creation
 
 You can create an incident manually or automatically.
@@ -49,7 +52,7 @@ With Maintainer or higher [permissions](../../user/permissions.md), you can enab
 1. Navigate to **Settings > Operations > Incidents** and expand **Incidents**.
 1. Check the **Create an incident** checkbox.
 1. To customize the incident, select an
-   [issue template](../../user/project/description_templates.md#creating-issue-templates).
+   [issue template](../../user/project/description_templates.md#create-an-issue-template).
 1. To send [an email notification](alert_notifications.md#email-notifications) to users
    with [Developer permissions](../../user/permissions.md), select
    **Send a separate email notification to Developers**. Email notifications are
@@ -126,7 +129,7 @@ For a live example of the incident list in action, visit this
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230847) in GitLab 13.4.
 
-Users with at least Reporter [permissions](../../user/permissions.md) can view
+Users with at least Guest [permissions](../../user/permissions.md) can view
 the Incident Details page. Navigate to **Operations > Incidents** in your project's
 sidebar, and select an incident from the list.
 

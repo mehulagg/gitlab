@@ -16,7 +16,7 @@ describe('Vulnerability Details', () => {
     description: 'vulnerability description',
   };
 
-  const createWrapper = vulnerabilityOverrides => {
+  const createWrapper = (vulnerabilityOverrides) => {
     const propsData = {
       vulnerability: { ...vulnerability, ...vulnerabilityOverrides },
     };
@@ -24,9 +24,9 @@ describe('Vulnerability Details', () => {
     wrapper = mount(VulnerabilityDetails, { propsData });
   };
 
-  const getById = id => wrapper.find(`[data-testid="${id}"]`);
-  const getAllById = id => wrapper.findAll(`[data-testid="${id}"]`);
-  const getText = id => getById(id).text();
+  const getById = (id) => wrapper.find(`[data-testid="${id}"]`);
+  const getAllById = (id) => wrapper.findAll(`[data-testid="${id}"]`);
+  const getText = (id) => getById(id).text();
 
   afterEach(() => {
     wrapper.destroy();
@@ -124,6 +124,41 @@ describe('Vulnerability Details', () => {
     identifiersData.forEach(checkIdentifier);
   });
 
+  it('shows the vulnerability assets if they exist', () => {
+    const assetsData = [
+      { name: 'Postman Collection', url: 'http://example.com/postman' },
+      { name: 'HTTP Messages', url: 'http://example.com/http-messages' },
+      { name: 'Foo' },
+      { name: 'Bar' },
+    ];
+
+    createWrapper({
+      assets: assetsData,
+    });
+
+    const assets = getAllById('asset');
+
+    expect(assets).toHaveLength(assetsData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
+      const asset = assets.at(index);
+
+      expect(asset.text()).toBe(name);
+
+      if (url) {
+        expect(asset.is(GlLink)).toBe(true);
+        expect(asset.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(asset.is(GlLink)).toBe(false);
+      }
+    };
+
+    assetsData.forEach(checkIdentifier);
+  });
+
   describe('file link', () => {
     const file = () => getById('file').find(GlLink);
 
@@ -190,10 +225,20 @@ describe('Vulnerability Details', () => {
   });
 
   describe('http data', () => {
-    const TEST_HEADERS = [{ name: 'Name1', value: 'Value1' }, { name: 'Name2', value: 'Value2' }];
+    const TEST_HEADERS = [
+      { name: 'Name1', value: 'Value1' },
+      { name: 'Name2', value: 'Value2' },
+    ];
     const EXPECT_REQUEST = {
       label: 'Sent request:',
       content: 'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_REQUEST_WITHOUT_BODY = {
+      label: 'Sent request:',
+      content:
+        'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
       isCode: true,
     };
 
@@ -203,23 +248,36 @@ describe('Vulnerability Details', () => {
       isCode: true,
     };
 
+    const EXPECT_RESPONSE_WITHOUT_BODY = {
+      label: 'Actual response:',
+      content:
+        '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
     const EXPECT_RECORDED_RESPONSE = {
       label: 'Unmodified response:',
       content: '200 OK\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
       isCode: true,
     };
 
-    const getTextContent = el => el.textContent.trim();
-    const getLabel = el => getTextContent(getByTestId(el, 'label'));
-    const getContent = el => getTextContent(getByTestId(el, 'value'));
-    const getSectionData = testId => {
+    const EXPECT_RECORDED_RESPONSE_WITHOUT_BODY = {
+      label: 'Unmodified response:',
+      content: '200 OK\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
+    const getTextContent = (el) => el.textContent.trim();
+    const getLabel = (el) => getTextContent(getByTestId(el, 'label'));
+    const getContent = (el) => getTextContent(getByTestId(el, 'value'));
+    const getSectionData = (testId) => {
       const section = getById(testId).element;
 
       if (!section) {
         return null;
       }
 
-      return getAllByRole(section, 'listitem').map(li => ({
+      return getAllByRole(section, 'listitem').map((li) => ({
         label: getLabel(li),
         content: getContent(li),
         ...(li.querySelector('code') ? { isCode: true } : {}),
@@ -235,6 +293,7 @@ describe('Vulnerability Details', () => {
       ${{ method: 'GET', url: 'http://www.gitlab.com' }}                                                  | ${null}
       ${{ method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }}                        | ${null}
       ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }} | ${[EXPECT_REQUEST]}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '' }}                 | ${[EXPECT_REQUEST_WITHOUT_BODY]}
     `('shows request data for $request', ({ request, expectedData }) => {
       createWrapper({ request });
       expect(getSectionData('request')).toEqual(expectedData);
@@ -248,6 +307,7 @@ describe('Vulnerability Details', () => {
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                           | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
+      ${{ headers: TEST_HEADERS, body: '', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}                 | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
@@ -264,6 +324,7 @@ describe('Vulnerability Details', () => {
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                             | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                        | ${null}
       ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '', statusCode: '200', reasonPhrase: 'OK' } }]}                 | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
     `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
       createWrapper({ supportingMessages });
       expect(getSectionData('recorded-response')).toEqual(expectedData);

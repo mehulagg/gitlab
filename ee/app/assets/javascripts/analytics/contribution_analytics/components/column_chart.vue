@@ -71,12 +71,12 @@ export default {
   methods: {
     setSvg(name) {
       return getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });

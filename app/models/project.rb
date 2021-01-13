@@ -34,6 +34,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include CanHousekeepRepository
   include EachBatch
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
@@ -200,6 +201,8 @@ class Project < ApplicationRecord
   # Packages
   has_many :packages, class_name: 'Packages::Package'
   has_many :package_files, through: :packages, class_name: 'Packages::PackageFile'
+  # debian_distributions must be destroyed by ruby code in order to properly remove carrierwave uploads
+  has_many :debian_distributions, class_name: 'Packages::Debian::ProjectDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_one :import_state, autosave: true, class_name: 'ProjectImportState', inverse_of: :project
   has_one :import_export_upload, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -342,7 +345,7 @@ class Project < ApplicationRecord
 
   has_many :daily_build_group_report_results, class_name: 'Ci::DailyBuildGroupReportResult'
 
-  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove'
+  has_many :repository_storage_moves, class_name: 'ProjectRepositoryStorageMove', inverse_of: :container
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
@@ -385,10 +388,10 @@ class Project < ApplicationRecord
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
     :merge_requests_enabled?, :forking_enabled?, :issues_enabled?,
-    :pages_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
+    :pages_enabled?, :analytics_enabled?, :snippets_enabled?, :public_pages?, :private_pages?,
     :merge_requests_access_level, :forking_access_level, :issues_access_level,
     :wiki_access_level, :snippets_access_level, :builds_access_level,
-    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level,
+    :repository_access_level, :pages_access_level, :metrics_dashboard_access_level, :analytics_access_level,
     :operations_enabled?, :operations_access_level, to: :project_feature, allow_nil: true
   delegate :show_default_award_emojis, :show_default_award_emojis=,
     :show_default_award_emojis?,
@@ -408,6 +411,7 @@ class Project < ApplicationRecord
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, to: :ci_cd_settings, prefix: :ci
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -829,6 +833,10 @@ class Project < ApplicationRecord
 
   def active_webide_pipelines(user:)
     webide_pipelines.running_or_pending.for_user(user)
+  end
+
+  def latest_pipeline_locked
+    ci_keep_latest_artifact? ? :artifacts_locked : :unlocked
   end
 
   def autoclose_referenced_issues
@@ -1331,19 +1339,11 @@ class Project < ApplicationRecord
   end
 
   def external_wiki
-    if has_external_wiki.nil?
-      cache_has_external_wiki
-    end
+    cache_has_external_wiki if has_external_wiki.nil?
 
-    if has_external_wiki
-      @external_wiki ||= services.external_wikis.first
-    else
-      nil
-    end
-  end
+    return unless has_external_wiki?
 
-  def cache_has_external_wiki
-    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
+    @external_wiki ||= services.external_wikis.first
   end
 
   def find_or_initialize_services
@@ -1829,6 +1829,15 @@ class Project < ApplicationRecord
     ensure_pages_metadatum.update!(pages_deployment: deployment)
   end
 
+  def set_first_pages_deployment!(deployment)
+    ensure_pages_metadatum
+
+    # where().update_all to perform update in the single transaction with check for null
+    ProjectPagesMetadatum
+      .where(project_id: id, pages_deployment_id: nil)
+      .update_all(pages_deployment_id: deployment.id)
+  end
+
   def write_repository_config(gl_full_path: full_path)
     # We'd need to keep track of project full path otherwise directory tree
     # created with hashed storage enabled cannot be usefully imported using
@@ -1980,6 +1989,7 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
+      .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
   def predefined_ci_server_variables
@@ -2111,18 +2121,6 @@ class Project < ApplicationRecord
     return [] unless auto_devops_enabled?
 
     (auto_devops || build_auto_devops)&.predefined_variables
-  end
-
-  def pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.get(pushes_since_gc_redis_shared_state_key).to_i }
-  end
-
-  def increment_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.incr(pushes_since_gc_redis_shared_state_key) }
-  end
-
-  def reset_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.del(pushes_since_gc_redis_shared_state_key) }
   end
 
   def route_map_for(commit_sha)
@@ -2430,10 +2428,6 @@ class Project < ApplicationRecord
     protected_branches.limit(limit)
   end
 
-  def alerts_service_activated?
-    alerts_service&.active?
-  end
-
   def self_monitoring?
     Gitlab::CurrentSettings.self_monitoring_project_id == id
   end
@@ -2486,16 +2480,12 @@ class Project < ApplicationRecord
   end
 
   def service_desk_custom_address
-    return unless service_desk_custom_address_enabled?
+    return unless Gitlab::ServiceDeskEmail.enabled?
 
     key = service_desk_setting&.project_key
     return unless key.present?
 
-    ::Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
-  end
-
-  def service_desk_custom_address_enabled?
-    ::Gitlab::ServiceDeskEmail.enabled? && ::Feature.enabled?(:service_desk_custom_address, self)
+    Gitlab::ServiceDeskEmail.address_for_key("#{full_path_slug}-#{key}")
   end
 
   def root_namespace
@@ -2633,10 +2623,6 @@ class Project < ApplicationRecord
     from && self != from
   end
 
-  def pushes_since_gc_redis_shared_state_key
-    "projects/#{id}/pushes_since_gc"
-  end
-
   def update_project_statistics
     stats = statistics || build_statistics
     stats.update(namespace_id: namespace_id)
@@ -2698,6 +2684,10 @@ class Project < ApplicationRecord
     [].tap do |out|
       objects.each_batch { |relation| out.concat(relation.pluck(:oid)) }
     end
+  end
+
+  def cache_has_external_wiki
+    update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
   end
 end
 

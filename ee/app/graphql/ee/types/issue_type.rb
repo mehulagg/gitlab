@@ -22,7 +22,7 @@ module EE
               description: 'Count of issues blocking this issue.'
 
         field :health_status, ::Types::HealthStatusEnum, null: true,
-              description: 'Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.'
+              description: 'Current health status.'
 
         field :status_page_published_incident, GraphQL::BOOLEAN_TYPE, null: true,
               description: 'Indicates whether an issue is published to the status page.'

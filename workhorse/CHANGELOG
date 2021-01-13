@@ -1,5 +1,19 @@
 # Changelog for gitlab-workhorse
 
+## v8.59.0
+
+### Fixed
+- Image scaling: strip out iCCP chunks in PNG files
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/673
+
+### Other
+- Extract logging concerns into a separate module
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/
+
+### Security
+- Reject unknown http methods
+  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/
+
 ## v8.58.0
 
 ### Added

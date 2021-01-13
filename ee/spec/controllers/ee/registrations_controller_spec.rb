@@ -126,4 +126,31 @@ RSpec.describe RegistrationsController do
       end
     end
   end
+
+  describe '#destroy' do
+    let(:user) { create(:user) }
+
+    before do
+      user.update!(password_automatically_set: true)
+      sign_in(user)
+    end
+
+    context 'on GitLab.com when the password is automatically set' do
+      before do
+        stub_application_setting(password_authentication_enabled_for_web: false)
+        stub_application_setting(password_authentication_enabled_for_git: false)
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      it 'redirects without deleting the account' do
+        expect(DeleteUserWorker).not_to receive(:perform_async)
+
+        post :destroy, params: { username: user.username }
+
+        expect(flash[:alert]).to eq 'Account could not be deleted. GitLab was unable to verify your identity.'
+        expect(response).to have_gitlab_http_status(:see_other)
+        expect(response).to redirect_to profile_account_path
+      end
+    end
+  end
 end

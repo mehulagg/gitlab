@@ -53,9 +53,12 @@ RSpec.describe Gitlab::UsageData do
       create(:status_page_setting, project: projects[0], enabled: true)
       create(:status_page_setting, project: projects[1], enabled: false)
       # 1 published issue on 1 projects with status page enabled
-      create(:issue, project: projects[0])
-      create(:issue, :published, project: projects[0])
+      issue_1 = create(:issue, project: projects[0])
+      issue_2 = create(:issue, :published, project: projects[0])
       create(:issue, :published, project: projects[1])
+
+      create(:epic_issue, issue: issue_2)
+      create(:epic_issue, issue: issue_1)
     end
 
     subject { described_class.data }
@@ -91,6 +94,7 @@ RSpec.describe Gitlab::UsageData do
         dependency_scanning_jobs
         epics
         epics_deepest_relationship_level
+        epic_issues
         feature_flags
         geo_nodes
         geo_event_log_max_id
@@ -126,6 +130,7 @@ RSpec.describe Gitlab::UsageData do
       expect(count_data[:status_page_issues]).to eq(1)
       expect(count_data[:issues_with_health_status]).to eq(2)
       expect(count_data[:projects_jira_issuelist_active]).to eq(1)
+      expect(count_data[:epic_issues]).to eq(2)
     end
 
     it 'has integer value for epic relationship level' do

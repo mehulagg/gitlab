@@ -100,7 +100,7 @@ export default {
 
 <template>
   <div>
-    <gl-button data-dismiss="modal" :disabled="disabled">
+    <gl-button :disabled="disabled" @click="$emit('cancel')">
       {{ __('Cancel') }}
     </gl-button>
 

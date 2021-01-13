@@ -91,6 +91,7 @@ module ApplicationSettingImplementation
         housekeeping_gc_period: 200,
         housekeeping_incremental_repack_period: 10,
         import_sources: Settings.gitlab['import_sources'],
+        invisible_captcha_enabled: false,
         issues_create_limit: 300,
         local_markdown_version: 0,
         login_recaptcha_protection_enabled: false,
@@ -104,6 +105,7 @@ module ApplicationSettingImplementation
         password_authentication_enabled_for_git: true,
         password_authentication_enabled_for_web: Settings.gitlab['signin_enabled'],
         performance_bar_allowed_group_id: nil,
+        personal_access_token_prefix: nil,
         plantuml_enabled: false,
         plantuml_url: nil,
         polling_interval_multiplier: 1,
@@ -171,7 +173,8 @@ module ApplicationSettingImplementation
         container_registry_delete_tags_service_timeout: 250,
         container_registry_expiration_policies_worker_capacity: 0,
         kroki_enabled: false,
-        kroki_url: nil
+        kroki_url: nil,
+        rate_limiting_response_text: nil
       }
     end
 

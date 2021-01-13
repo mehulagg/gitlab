@@ -14,7 +14,8 @@ module EE
           params '@user1 @user2'
           types Issue, MergeRequest
           condition do
-            quick_action_target.allows_multiple_assignees? &&
+            quick_action_target.supports_assignee? &&
+              quick_action_target.allows_multiple_assignees? &&
               quick_action_target.persisted? &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
           end

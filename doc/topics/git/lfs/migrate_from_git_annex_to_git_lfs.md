@@ -32,7 +32,7 @@ ones that GitLab developed.
 - Git Annex requires a more complex setup, but has much more options than Git
   LFS. You can compare the commands each one offers by running `man git-annex`
   and `man git-lfs`.
-- Annex files cannot be browsed directly in GitLab's interface, whereas LFS
+- Annex files cannot be browsed directly in the GitLab interface, whereas LFS
   files can.
 
 ## Migration steps
@@ -71,7 +71,7 @@ Fire up a terminal, navigate to your Git repository and:
    git push
    ```
 
-### Disabling Git Annex in your repo
+### Disabling Git Annex in your repository
 
 Before changing anything, make sure you have a backup of your repository first.
 There are a couple of ways to do that, but you can simply clone it to another
@@ -164,7 +164,7 @@ At this point, you have two options. Either add, commit and push the files
 directly back to GitLab or switch to Git LFS. We will tackle the LFS switch in
 the next section.
 
-### Enabling Git LFS in your repo
+### Enabling Git LFS in your repository
 
 Git LFS is enabled by default on all GitLab products (GitLab CE, GitLab EE,
 GitLab.com), therefore, you don't need to do anything server-side.

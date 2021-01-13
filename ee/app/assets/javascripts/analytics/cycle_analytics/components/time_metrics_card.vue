@@ -35,7 +35,7 @@ export default {
     requestType: {
       type: String,
       required: true,
-      validator: t => OVERVIEW_METRICS[t],
+      validator: (t) => OVERVIEW_METRICS[t],
     },
   },
   data() {

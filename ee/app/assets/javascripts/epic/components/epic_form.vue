@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     labelIds() {
-      return this.labels.map(label => label.id);
+      return this.labels.map((label) => label.id);
     },
   },
   i18n: {
@@ -102,7 +102,7 @@ export default {
       const ids = [];
       const allLabels = [...labels, ...this.labels];
 
-      this.labels = allLabels.filter(label => {
+      this.labels = allLabels.filter((label) => {
         const exists = ids.includes(label.id);
         ids.push(label.id);
 

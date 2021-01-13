@@ -10,7 +10,10 @@ describe('Insights helpers', () => {
       };
       const data = {
         labels: ['January', 'February'],
-        datasets: [{ label: 'Dataset 1', data: [1] }, { label: 'Dataset 2', data: [2] }],
+        datasets: [
+          { label: 'Dataset 1', data: [1] },
+          { label: 'Dataset 2', data: [2] },
+        ],
       };
 
       expect(transformChartDataForGlCharts(chart, data).xAxisTitle).toEqual('Months');
@@ -23,7 +26,10 @@ describe('Insights helpers', () => {
       };
       const data = {
         labels: ['January', 'February'],
-        datasets: [{ label: 'Dataset 1', data: [1] }, { label: 'Dataset 2', data: [2] }],
+        datasets: [
+          { label: 'Dataset 1', data: [1] },
+          { label: 'Dataset 2', data: [2] },
+        ],
       };
 
       expect(transformChartDataForGlCharts(chart, data).yAxisTitle).toEqual('Issues');
@@ -36,7 +42,10 @@ describe('Insights helpers', () => {
       };
       const data = {
         labels: ['January', 'February'],
-        datasets: [{ label: 'Dataset 1', data: [1] }, { label: 'Dataset 2', data: [2] }],
+        datasets: [
+          { label: 'Dataset 1', data: [1] },
+          { label: 'Dataset 2', data: [2] },
+        ],
       };
 
       expect(transformChartDataForGlCharts(chart, data).datasets).toEqual([
@@ -52,12 +61,27 @@ describe('Insights helpers', () => {
       };
       const data = {
         labels: ['January', 'February'],
-        datasets: [{ label: 'Dataset 1', data: [1, 2] }, { label: 'Dataset 2', data: [2, 3] }],
+        datasets: [
+          { label: 'Dataset 1', data: [1, 2] },
+          { label: 'Dataset 2', data: [2, 3] },
+        ],
       };
 
       expect(transformChartDataForGlCharts(chart, data).datasets).toStrictEqual([
-        { name: 'Dataset 1', data: [['January', 1], ['February', 2]] },
-        { name: 'Dataset 2', data: [['January', 2], ['February', 3]] },
+        {
+          name: 'Dataset 1',
+          data: [
+            ['January', 1],
+            ['February', 2],
+          ],
+        },
+        {
+          name: 'Dataset 2',
+          data: [
+            ['January', 2],
+            ['February', 3],
+          ],
+        },
       ]);
     });
 
@@ -72,7 +96,13 @@ describe('Insights helpers', () => {
       };
 
       expect(transformChartDataForGlCharts(chart, data).datasets).toEqual([
-        { name: 'all', data: [['January', 1], ['February', 2]] },
+        {
+          name: 'all',
+          data: [
+            ['January', 1],
+            ['February', 2],
+          ],
+        },
       ]);
     });
 
@@ -87,7 +117,10 @@ describe('Insights helpers', () => {
       };
 
       expect(transformChartDataForGlCharts(chart, data).datasets).toEqual({
-        all: [['January', 1], ['February', 2]],
+        all: [
+          ['January', 1],
+          ['February', 2],
+        ],
       });
     });
   });

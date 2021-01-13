@@ -12,16 +12,16 @@ module Mutations
 
         argument :project_path, GraphQL::ID_TYPE,
                  required: true,
-                 description: 'Full path of the associated project for this cluster agent'
+                 description: 'Full path of the associated project for this cluster agent.'
 
         argument :name, GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'Name of the cluster agent'
+                 description: 'Name of the cluster agent.'
 
         field :cluster_agent,
               Types::Clusters::AgentType,
               null: true,
-              description: 'Cluster agent created after mutation'
+              description: 'Cluster agent created after mutation.'
 
         def resolve(project_path:, name:)
           project = authorized_find!(full_path: project_path)

@@ -31,7 +31,7 @@ that you [connect with GitLab via SSH](../../../ssh/README.md).
 ## Files
 
 Use a repository to store your files in GitLab. In [GitLab 12.10 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/33806),
-you'll see on the repository's file tree an icon next to the file name
+you'll see on the repository's file tree an icon next to the filename
 according to its extension:
 
 ![Repository file icons](img/file_ext_icons_repo_v12_10.png)
@@ -48,7 +48,7 @@ to your repository's root.
 
 **From the user interface:**
 
-GitLab's UI allows you to perform lots of Git commands without having to
+The GitLab UI allows you to perform lots of Git commands without having to
 touch the command line. Even if you use the command line regularly, sometimes
 it's easier to do so [via GitLab UI](web_editor.md):
 
@@ -67,7 +67,7 @@ To get started with the command line, please read through the
 
 ### Find files
 
-Use GitLab's [file finder](file_finder.md) to search for files in a repository.
+Use the GitLab [file finder](file_finder.md) to search for files in a repository.
 
 ### Supported markup languages and extensions
 
@@ -141,7 +141,7 @@ their filenames include `openapi` or `swagger` and their extension is `yaml`,
 
 Then, to render them:
 
-1. Navigate to the OpenAPI file in your repository in GitLab's UI.
+1. Navigate to the OpenAPI file in your repository in the GitLab UI.
 1. Click the "Display OpenAPI" button which is located between the "Display source"
    and "Edit" buttons (when an OpenAPI file is found, it replaces the
    "Display rendered file" button).
@@ -236,18 +236,24 @@ lock your files to prevent any conflicting changes.
 
 You can access your repositories via [repository API](../../../api/repositories.md).
 
-## Clone in Apple Xcode
+## Clone a repository
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45820) in GitLab 11.0
+Learn how to [clone a repository through the command line](../../../gitlab-basics/start-using-git.md#clone-a-repository).
+
+Alternatively, clone directly into a code editor as documented below.
+
+### Clone to Apple Xcode
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45820) in GitLab 11.0.
 
 Projects that contain a `.xcodeproj` or `.xcworkspace` directory can now be cloned
-in Xcode using the new **Open in Xcode** button, located next to the Git URL
+into Xcode using the new **Open in Xcode** button, located next to the Git URL
 used for cloning your project. The button is only shown on macOS.
 
 ## Download Source Code
 
-> Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
-> Support for [including Git LFS blobs](../../../topics/git/lfs#lfs-objects-in-project-archives) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
+> - Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
+> - Support for [including Git LFS blobs](../../../topics/git/lfs#lfs-objects-in-project-archives) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
 
 The source code stored in a repository can be downloaded from the UI.
 By clicking the download icon, a dropdown will open with links to download the following:

@@ -5,9 +5,9 @@ import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_
 import AuditEventsApp from './components/audit_events_app.vue';
 import createStore from './store';
 
-export default selector => {
+export default (selector) => {
   const el = document.querySelector(selector);
-  const { events, isLastPage, filterTokenOptions, exportUrl } = el.dataset;
+  const { events, isLastPage, filterTokenOptions, exportUrl, showFilter = true } = el.dataset;
 
   const store = createStore();
   store.dispatch('initializeAuditEvents');
@@ -15,15 +15,16 @@ export default selector => {
   return new Vue({
     el,
     store,
-    render: createElement =>
+    render: (createElement) =>
       createElement(AuditEventsApp, {
         props: {
           events: JSON.parse(events),
           isLastPage: parseBoolean(isLastPage),
-          filterTokenOptions: JSON.parse(filterTokenOptions).map(filterTokenOption =>
+          filterTokenOptions: JSON.parse(filterTokenOptions).map((filterTokenOption) =>
             convertObjectPropsToCamelCase(filterTokenOption),
           ),
           exportUrl,
+          showFilter: parseBoolean(showFilter),
         },
       }),
   });

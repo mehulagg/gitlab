@@ -94,6 +94,31 @@ Note that the Java analyzers can also be used for variants like the
 [Grails](https://grails.org/),
 and the [Maven wrapper](https://github.com/takari/maven-wrapper).
 
+### Multi-project support
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4895) in GitLab 13.7.
+
+GitLab SAST can scan repositories that contain multiple projects. All projects must be in the same
+language.
+
+The following analyzers have multi-project support:
+
+- Bandit
+- ESLint
+- Gosec
+- Kubesec
+- NodeJsScan
+- MobSF
+- PMD
+- Security Code Scan
+- SpotBugs
+- Sobelow
+
+#### Enable multi-project support for Security Code Scan
+
+Multi-project support in the Security Code Scan requires a Solution (`.sln`) file in the root of
+the repository. For details on the Solution format, see the Microsoft reference [Solution (.sln) file](https://docs.microsoft.com/en-us/visualstudio/extensibility/internals/solution-dot-sln-file?view=vs-2019).
+
 ### Making SAST analyzers available to all GitLab tiers
 
 All open source (OSS) analyzers have been moved to the GitLab Core tier as of GitLab 13.3.
@@ -486,7 +511,7 @@ The SAST tool emits a JSON report file. For more information, see the
 [schema for this report](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json).
 
 The JSON report file can be downloaded from the CI pipelines page, or the
-pipelines tab on merge requests. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
+pipelines tab on merge requests by [setting `artifacts: paths`](../../../ci/pipelines/job_artifacts.md#defining-artifacts-in-gitlab-ciyml) to `gl-sast-report.json`. For more information see [Downloading artifacts](../../../ci/pipelines/job_artifacts.md).
 
 Here's an example SAST report:
 
@@ -702,3 +727,25 @@ against the given glob pattern. If the number of matches exceeds the maximum, th
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+
+### SpotBugs UTF-8 unmappable character errors
+
+These errors occur when UTF-8 encoding isn't enabled on a SpotBugs build and there are UTF-8
+characters in the source code. To fix this error, enable UTF-8 for your project's build tool.
+
+For Gradle builds, add the following to your `build.gradle` file:
+
+```gradle
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+```
+
+For Maven builds, add the following to your `pom.xml` file:
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+```

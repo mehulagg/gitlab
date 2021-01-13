@@ -55,7 +55,7 @@ export default {
       return this.metricTypes.length;
     },
     metricDropdownLabel() {
-      const foundMetric = this.metricTypes.find(m => m.key === this.selectedMetric);
+      const foundMetric = this.metricTypes.find((m) => m.key === this.selectedMetric);
       return foundMetric ? foundMetric.label : s__('MetricChart|Please select a metric');
     },
     isServerError() {

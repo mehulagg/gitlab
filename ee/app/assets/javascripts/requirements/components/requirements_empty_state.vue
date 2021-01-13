@@ -26,6 +26,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    showUploadCsv: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     emptyStateTitle() {
@@ -56,6 +61,14 @@ export default {
         <gl-button category="primary" variant="success" @click="$emit('click-new-requirement')">{{
           __('New requirement')
         }}</gl-button>
+        <gl-button
+          v-if="showUploadCsv"
+          category="secondary"
+          variant="default"
+          @click="$emit('click-import-requirements')"
+        >
+          {{ __('Import requirements') }}
+        </gl-button>
       </template>
     </gl-empty-state>
   </div>

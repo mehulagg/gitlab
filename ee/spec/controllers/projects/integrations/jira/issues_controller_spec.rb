@@ -5,28 +5,30 @@ require 'spec_helper'
 RSpec.describe Projects::Integrations::Jira::IssuesController do
   include ProjectForksHelper
 
-  let(:project) { create(:project) }
-  let(:user)    { create(:user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
+  let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: true, project_key: 'TEST') }
 
   before do
     stub_licensed_features(jira_issues_integration: true)
+    sign_in(user)
   end
 
   describe 'GET #index' do
-    before do
-      sign_in(user)
-      project.add_developer(user)
-      create(:jira_service, project: project)
-    end
-
     context 'when jira_issues_integration licensed feature is not available' do
-      it 'returns 404 status' do
+      before do
         stub_licensed_features(jira_issues_integration: false)
+      end
 
+      it 'returns 404 status' do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+
+    it_behaves_like 'unauthorized when external service denies access' do
+      subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
     end
 
     it 'renders the "index" template' do
@@ -48,7 +50,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       it 'redirects to the new issue tracker from the old one' do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to redirect_to(project_integrations_jira_issues_path(new_project))
+        expect(response).to redirect_to(Gitlab::Routing.url_helpers.project_integrations_jira_issues_path(new_project))
         expect(response).to have_gitlab_http_status(:moved_permanently)
       end
     end
@@ -168,18 +170,6 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
           end
         end
       end
-    end
-  end
-
-  context 'external authorization' do
-    before do
-      sign_in user
-      project.add_developer(user)
-      create(:jira_service, project: project)
-    end
-
-    it_behaves_like 'unauthorized when external service denies access' do
-      subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
     end
   end
 end

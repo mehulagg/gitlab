@@ -26,7 +26,7 @@ describe('GeoReplicableApp', () => {
     geoReplicableEmptySvgPath: MOCK_GEO_REPLICATION_SVG_PATH,
   };
 
-  const createStore = options => {
+  const createStore = (options) => {
     store = initStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null, ...options });
     jest.spyOn(store, 'dispatch').mockImplementation();
   };

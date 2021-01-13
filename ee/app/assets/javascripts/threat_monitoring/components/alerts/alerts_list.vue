@@ -12,9 +12,9 @@ import {
 import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-// TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
-import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
-import { FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
+import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
+import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
 
 export default {
@@ -26,6 +26,7 @@ export default {
   },
   components: {
     AlertStatus,
+    AlertFilters,
     GlAlert,
     GlIntersectionObserver,
     GlLink,
@@ -41,12 +42,13 @@ export default {
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
-      query: getAlerts,
+      query: getAlertsQuery,
       variables() {
         return {
           firstPageSize: this.$options.PAGE_SIZE,
           projectPath: this.projectPath,
           sort: this.sort,
+          ...this.filters,
         };
       },
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
@@ -63,6 +65,7 @@ export default {
       alerts: [],
       errored: false,
       errorMsg: '',
+      filters: DEFAULT_FILTERS,
       isErrorAlertDismissed: false,
       pageInfo: {},
       sort: 'STARTED_AT_DESC',
@@ -96,7 +99,7 @@ export default {
         this.$apollo.queries.alerts.fetchMore({
           variables: { nextPageCursor: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
+            const results = produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.alertManagementAlerts.nodes = [
                 ...previousResult.project.alertManagementAlerts.nodes,
@@ -118,6 +121,9 @@ export default {
       this.errored = true;
       this.errorMsg = msg;
     },
+    handleFilterChange(newFilters) {
+      this.filters = newFilters;
+    },
     handleStatusUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
@@ -126,6 +132,7 @@ export default {
 </script>
 <template>
   <div>
+    <alert-filters @filter-change="handleFilterChange" />
     <gl-alert v-if="showNoAlertsMsg" data-testid="threat-alerts-unconfigured" :dismissible="false">
       <gl-sprintf :message="$options.i18n.MESSAGES.CONFIGURE">
         <template #link="{ content }">

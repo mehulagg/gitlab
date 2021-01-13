@@ -206,7 +206,10 @@ describe('ThroughputChart', () => {
         selectedAssignee: { value: assigneeUsername, operator },
         selectedAuthor: { value: authorUsername, operator },
         selectedMilestone: { value: milestoneTitle, operator },
-        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+        selectedLabelList: [
+          { value: labels[0], operator },
+          { value: labels[1], operator },
+        ],
       });
       await wrapper.vm.$nextTick();
       expect(

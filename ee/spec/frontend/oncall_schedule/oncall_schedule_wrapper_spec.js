@@ -4,7 +4,7 @@ import OnCallScheduleWrapper, {
   i18n,
 } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
 import OnCallSchedule from 'ee/oncall_schedules/components/oncall_schedule.vue';
-import AddScheduleModal from 'ee/oncall_schedules/components/add_schedule_modal.vue';
+import AddScheduleModal from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import VueApollo from 'vue-apollo';

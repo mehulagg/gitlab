@@ -26,6 +26,10 @@ module EE
       issues_enabled || vulnerabilities_enabled
     end
 
+    def configured_to_create_issues_from_vulnerabilities?
+      active? && project_key.present? && vulnerabilities_issuetype.present? && jira_vulnerabilities_integration_enabled?
+    end
+
     def issue_types
       client
         .Issuetype
@@ -54,7 +58,7 @@ module EE
 
       jira_request do
         issue = client.Issue.build
-        issue.save!(
+        issue.save(
           fields: {
             project: { id: jira_project_id },
             issuetype: { id: vulnerabilities_issuetype },
@@ -62,9 +66,6 @@ module EE
             description: description
           }
         )
-        issue
-      rescue JIRA::HTTPError => e
-        issue.attrs[:errors] = ::Gitlab::Json.parse(e.response.read_body)
         issue
       end
     end

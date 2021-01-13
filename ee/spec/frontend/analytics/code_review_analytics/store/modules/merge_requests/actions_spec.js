@@ -91,7 +91,7 @@ describe('Code review analytics mergeRequests actions', () => {
         mock.onGet(/api\/(.*)\/analytics\/code_review/).replyOnce(500);
       });
 
-      it('dispatches error', done => {
+      it('dispatches error', (done) => {
         testAction(
           actions.fetchMergeRequests,
           null,

@@ -66,9 +66,11 @@ module Types
           description: 'Number of downvotes the epic has received'
 
     field :user_notes_count, GraphQL::INT_TYPE, null: false,
-          description: 'Number of user notes of the epic'
+          description: 'Number of user notes of the epic',
+          resolver: Resolvers::UserNotesCountResolver
     field :user_discussions_count, GraphQL::INT_TYPE, null: false,
-          description: 'Number of user discussions in the epic'
+          description: 'Number of user discussions in the epic',
+          resolver: Resolvers::UserDiscussionsCountResolver
 
     field :closed_at, Types::TimeType, null: true,
           description: 'Timestamp of when the epic was closed'
@@ -138,26 +140,6 @@ module Types
 
     field :health_status, Types::EpicHealthStatusType, null: true, complexity: 10,
           description: 'Current health status of the epic'
-
-    def user_notes_count
-      BatchLoader::GraphQL.for(object.id).batch(key: :epic_user_notes_count) do |ids, loader, args|
-        counts = Note.count_for_collection(ids, 'Epic').index_by(&:noteable_id)
-
-        ids.each do |id|
-          loader.call(id, counts[id]&.count || 0)
-        end
-      end
-    end
-
-    def user_discussions_count
-      BatchLoader::GraphQL.for(object.id).batch(key: :epic_user_discussions_count) do |ids, loader, args|
-        counts = Note.count_for_collection(ids, 'Epic', 'COUNT(DISTINCT discussion_id) as count').index_by(&:noteable_id)
-
-        ids.each do |id|
-          loader.call(id, counts[id]&.count || 0)
-        end
-      end
-    end
 
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|

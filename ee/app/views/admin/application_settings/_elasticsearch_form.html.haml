@@ -23,7 +23,7 @@
             .form-check
               = f.check_box :elasticsearch_indexing, class: 'form-check-input', data: { qa_selector: 'indexing_checkbox' }
               = f.label :elasticsearch_indexing, class: 'form-check-label' do
-                Elasticsearch indexing
+                = _('Elasticsearch indexing')
               - unless Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text.text-muted
                   = _('An empty index will be created if one does not already exist')
@@ -35,11 +35,16 @@
           .card-body
             .form-group
               .form-check
-                = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: !Gitlab::CurrentSettings.elasticsearch_indexing?
+                - pending_migrations = Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing? rescue false
+                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations
+                = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox
                 = f.label :elasticsearch_pause_indexing, class: 'form-check-label' do
-                  Pause Elasticsearch indexing
+                  = _('Pause Elasticsearch indexing')
                 .form-text.text-muted
                   = _('Changes are still tracked. Useful for cluster/index migrations.')
+                - if pending_migrations
+                  .form-text.text-warning
+                    = _('There are pending advanced search migrations. Indexing must remain paused until the migrations are completed.')
 
           .form-group
             .form-check
@@ -102,29 +107,31 @@
 
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'gl-button btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
-          .form-text.text-muted
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: "gl-button btn btn-info", disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }, method: :post
+          .form-text.gl-text-gray-600
             = _('This feature should be used with an index that was created after 13.0')
           - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
             .form-text.text-danger
-              = _("Unused, previous index '%{index_name}' will be deleted after %{time} automatically.") % { index_name: task.index_name_from, time: task.delete_original_index_at }
-              = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), method: :post
+              = _("Unused, previous indices: %{index_names} will be deleted after %{time} automatically.") % { index_names: task.subtasks.map(&:index_name_from).join(', '), time: task.delete_original_index_at }
+              = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), class: 'gl-mb-2', method: :post
           - if @elasticsearch_reindexing_task
-            - expected_documents = @elasticsearch_reindexing_task.documents_count
-            - processed_documents = @elasticsearch_reindexing_task.documents_count_target
-            %h5= _('Reindexing status')
-            %p= _('State: %{last_reindexing_task_state}') % { last_reindexing_task_state: @elasticsearch_reindexing_task.state }
-            - if @elasticsearch_reindexing_task.elastic_task
-              %p= _('Task ID: %{elastic_task}') % { elastic_task: @elasticsearch_reindexing_task.elastic_task }
+            %h5= _('Reindexing Status: %{status}') % { status: @elasticsearch_reindexing_task.state }
             - if @elasticsearch_reindexing_task.error_message
               %p= _('Error: %{error_message}') % { error_message: @elasticsearch_reindexing_task.error_message }
-            - if expected_documents
-              %p= _('Expected documents: %{expected_documents}') % { expected_documents: expected_documents }
-            - if processed_documents && expected_documents
-              - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
-              %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
-              .progress
-                .progress-bar.progress-bar-striped.bg-primary{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
+            - @elasticsearch_reindexing_task.subtasks.each do |subtask|
+              .card-body.form-group
+                %h5= subtask.alias_name
+                - expected_documents = subtask.documents_count
+                - if subtask.elastic_task
+                  %p= _('Task ID: %{elastic_task}') % { elastic_task: subtask.elastic_task }
+                - if expected_documents
+                  - processed_documents = subtask.documents_count_target
+                  %p= _('Expected documents: %{expected_documents}') % { expected_documents: expected_documents }
+                  - if processed_documents && expected_documents
+                    - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
+                    %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
+                    .progress
+                      .progress-bar{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
 
         .sub-section
           %h4= _('Elasticsearch indexing restrictions')

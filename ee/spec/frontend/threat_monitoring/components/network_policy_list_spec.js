@@ -8,7 +8,7 @@ import { useFakeDate } from 'helpers/fake_date';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mockPoliciesResponse } from '../mock_data';
 
-const mockData = mockPoliciesResponse.map(policy => convertObjectPropsToCamelCase(policy));
+const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
   useFakeDate();
@@ -129,9 +129,7 @@ spec:
     });
 
     it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable()
-        .findAll('[role="columnheader"]')
-        .at(1);
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });
@@ -143,9 +141,7 @@ spec:
   });
 
   it('renders opened editor drawer on row selection', () => {
-    findPoliciesTable()
-      .find('td')
-      .trigger('click');
+    findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
       const editorDrawer = findEditorDrawer();

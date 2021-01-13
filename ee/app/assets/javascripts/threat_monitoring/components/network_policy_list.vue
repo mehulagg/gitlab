@@ -58,7 +58,7 @@ export default {
     selectedPolicy() {
       if (!this.hasSelectedPolicy) return null;
 
-      return this.policiesWithDefaults.find(policy => policy.name === this.selectedPolicyName);
+      return this.policiesWithDefaults.find((policy) => policy.name === this.selectedPolicyName);
     },
     hasPolicyChanges() {
       if (!this.hasSelectedPolicy) return false;
@@ -69,7 +69,7 @@ export default {
       );
     },
     hasAutoDevopsPolicy() {
-      return this.policiesWithDefaults.some(policy => policy.isAutodevops);
+      return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
     },
     hasCiliumSelectedPolicy() {
       return this.hasSelectedPolicy

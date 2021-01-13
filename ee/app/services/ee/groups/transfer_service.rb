@@ -15,10 +15,9 @@ module EE
 
       override :post_update_hooks
       def post_update_hooks(updated_project_ids)
-        ::Project.id_in(updated_project_ids).find_each do |project|
-          project.maintain_elasticsearch_update(updated_attributes: [:visibility_level]) if project.maintaining_elasticsearch?
-        end
         super
+
+        update_elasticsearch_hooks(updated_project_ids)
       end
 
       def lost_groups
@@ -28,6 +27,24 @@ module EE
           group.ancestors_upto(new_parent_group)
         else
           ancestors
+        end
+      end
+
+      def update_elasticsearch_hooks(updated_project_ids)
+        project_ids = updated_project_ids
+
+        # Handle when group is moved to a new group. There is no way to know
+        # whether the group was using Elasticsearch before the transfer, so the ES cache is invalidated
+        # for each associated project. Otherwise, it is assumed all projects are indexed
+        # and only those with visibility changes have their ES cache entry invalidated
+        if ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?
+          project_ids = group.all_projects.select(:id)
+        end
+
+        ::Project.id_in(project_ids).find_each do |project|
+          project.invalidate_elasticsearch_indexes_cache!
+
+          project.maintain_elasticsearch_update(updated_attributes: [:visibility_level]) if project.maintaining_elasticsearch?
         end
       end
     end

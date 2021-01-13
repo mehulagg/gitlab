@@ -90,11 +90,11 @@ export default {
         },
       }));
 
-      this.trendsByDay.forEach(trend => {
+      this.trendsByDay.forEach((trend) => {
         const { date, ...severities } = trend;
 
         SEVERITIES.forEach(({ key }) => {
-          series.find(s => s.key === key).data.push([date, severities[key]]);
+          series.find((s) => s.key === key).data.push([date, severities[key]]);
         });
       });
 

@@ -63,7 +63,7 @@ and you can [customize the payload](#customize-the-alert-payload-outside-of-gitl
       for the webhook configuration. You must also input the URL and Authorization Key
       in your external service.
    1. _(Optional)_ To generate a test alert to test the new integration, enter a
-      sample payload, then click **Save and test alert payload**.Valid JSON is required.
+      sample payload, then click **Save and test alert payload**. Valid JSON is required.
    1. Click **Save Integration**.
 
 The new HTTP Endpoint displays in the [integrations list](#integrations-list).
@@ -170,13 +170,14 @@ If the existing alert is already `resolved`, GitLab creates a new alert instead.
 
 ## Link to your Opsgenie Alerts
 
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+
 WARNING:
 We are building deeper integration with Opsgenie and other alerting tools through
-[HTTP endpoint integrations](#single-http-endpoint) so you can see alerts within
+[HTTP endpoint integrations](#single-http-endpoint) so you can see alerts in
 the GitLab interface. As a result, the previous direct link to Opsgenie Alerts from
-the GitLab alerts list is scheduled for deprecation following the 13.7 release on December 22, 2020.
-
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+the GitLab alerts list is deprecated in
+GitLab versions [13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/273657).
 
 You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
 

@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 RSpec.describe EE::API::Helpers::MembersHelpers do
+  include SortingHelper
+
   let(:members_helpers) { Class.new.include(described_class).new }
 
   before do
@@ -34,51 +36,9 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
     end
   end
 
-  describe '#billed_users_for' do
-    let_it_be(:group) { create(:group) }
-    let_it_be(:maria) { create(:group_member, group: group, user: create(:user, name: 'Maria Gomez')) }
-    let_it_be(:john_smith) { create(:group_member, group: group, user: create(:user, name: 'John Smith')) }
-    let_it_be(:john_doe) { create(:group_member, group: group, user: create(:user, name: 'John Doe')) }
-    let_it_be(:sophie) { create(:group_member, group: group, user: create(:user, name: 'Sophie Dupont')) }
-    let(:search_term) { nil }
-    let(:order_by) { nil }
-
-    subject { members_helpers.billed_users_for(group, search_term, order_by) }
-
-    context 'when a search parameter is present' do
-      let(:search_term) { 'John' }
-
-      context 'when a sorting parameter is provided (eg name descending)' do
-        let(:order_by) { 'name_desc' }
-
-        it 'sorts results accordingly' do
-          expect(subject).to eq([john_smith, john_doe].map(&:user))
-        end
-      end
-
-      context 'when a sorting parameter is not provided' do
-        let(:order_by) { nil }
-
-        it 'sorts results by name ascending' do
-          expect(subject).to eq([john_doe, john_smith].map(&:user))
-        end
-      end
-    end
-
-    context 'when a search parameter is not present' do
-      it 'returns expected users in name asc order' do
-        allow(group).to receive(:billed_user_members).and_return([john_doe, john_smith, sophie, maria])
-
-        expect(subject).to eq([john_doe, john_smith, maria, sophie].map(&:user))
-      end
-
-      context 'and when a sorting parameter is provided (eg name descending)' do
-        let(:order_by) { 'name_desc' }
-
-        it 'sorts results accordingly' do
-          expect(subject).to eq([sophie, maria, john_smith, john_doe].map(&:user))
-        end
-      end
+  describe '.member_sort_options' do
+    it 'lists all keys available in group member view' do
+      expect(described_class.member_sort_options).to match_array(member_sort_options_hash.keys)
     end
   end
 end

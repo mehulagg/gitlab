@@ -8,7 +8,7 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
   before_action :authorize_read_requirement!
   before_action :authorize_import_access!, only: [:import_csv, :authorize]
   before_action do
-    push_frontend_feature_flag(:import_requirements_csv, project)
+    push_frontend_feature_flag(:import_requirements_csv, project, default_enabled: true)
   end
 
   feature_category :requirements_management
@@ -20,21 +20,24 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
   end
 
   def import_csv
-    verify_valid_file!
+    return render json: { message: invalid_file_message } unless file_is_valid?(params[:file])
 
-    if uploader = UploadService.new(project, params[:file]).execute
-      RequirementsManagement::ImportRequirementsCsvWorker.perform_async(current_user.id, project.id, uploader.upload.id) # rubocop:disable CodeReuse/Worker
+    uploader = UploadService.new(project, params[:file]).execute
+    message =
+      if uploader
+        RequirementsManagement::ImportRequirementsCsvWorker.perform_async(current_user.id, project.id, uploader.upload.id) # rubocop:disable CodeReuse/Worker
+        _("Your requirements are being imported. Once finished, you'll receive a confirmation email.")
+      else
+        _("File upload error.")
+      end
 
-      flash[:notice] = _("Your requirements are being imported. Once finished, you'll receive a confirmation email.")
-    else
-      flash[:alert] = _("File upload error.")
-    end
-
-    redirect_to project_requirements_management_requirements_path(project)
+    render json: { message: message }
   end
 
+  private
+
   def authorize_import_access!
-    render_404 unless Feature.enabled?(:import_requirements_csv, project, default_enabled: false)
+    render_404 unless Feature.enabled?(:import_requirements_csv, project, default_enabled: true)
 
     return if can?(current_user, :import_requirements, project)
 
@@ -45,13 +48,9 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
     end
   end
 
-  def verify_valid_file!
-    return if file_is_valid?(params[:file])
-
+  def invalid_file_message
     supported_file_extensions = ".#{EXTENSION_WHITELIST.join(', .')}"
-    flash[:alert] = _("The uploaded file was invalid. Supported file extensions are %{extensions}.") % { extensions: supported_file_extensions }
-
-    redirect_to project_requirements_management_requirements_path(project)
+    _("The uploaded file was invalid. Supported file extensions are %{extensions}.") % { extensions: supported_file_extensions }
   end
 
   def uploader_class

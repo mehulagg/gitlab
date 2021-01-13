@@ -32,7 +32,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   start_event_identifier = :merge_request_created
   end_event_identifier = :merge_request_merged
   start_label_event = :issue_label_added
-  stop_label_event = :issue_label_removed
+  end_label_event = :issue_label_removed
 
   let(:add_stage_button) { '.js-add-stage-button' }
   let(:params) { { name: custom_stage_name, start_event_identifier: start_event_identifier, end_event_identifier: end_event_identifier } }
@@ -57,11 +57,11 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   end
 
   def select_dropdown_option(name, value = start_event_identifier)
-    page.find("select[name='#{name}']").all('option').find { |item| item.value == value.to_s }.select_option
+    page.find("[data-testid='#{name}'] select").all('option').find { |item| item.value == value.to_s }.select_option
   end
 
   def select_dropdown_option_by_value(name, value, elem = 'option')
-    page.find("select[name='#{name}']").find("#{elem}[value=#{value}]").select_option
+    page.find("[data-testid='#{name}'] select").find("#{elem}[value=#{value}]").select_option
   end
 
   def wait_for_labels(field)
@@ -212,17 +212,16 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
         before do
           fill_in 'custom-stage-name', with: custom_stage_name
           select_dropdown_option 'custom-stage-start-event', start_event_identifier
-          select_dropdown_option 'custom-stage-stop-event', end_event_identifier
+          select_dropdown_option 'custom-stage-end-event', end_event_identifier
         end
 
         it 'does not have label dropdowns' do
           expect(page).not_to have_content(s_('CustomCycleAnalytics|Start event label'))
-          expect(page).not_to have_content(s_('CustomCycleAnalytics|Stop event label'))
+          expect(page).not_to have_content(s_('CustomCycleAnalytics|End event label'))
         end
 
         it 'submit button is disabled if a default name is used' do
           fill_in 'custom-stage-name', with: 'issue'
-          click_button(s_('CustomCycleAnalytics|Add stage'))
 
           expect(page).to have_button(s_('CustomCycleAnalytics|Add stage'), disabled: true)
         end
@@ -240,7 +239,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
         before do
           fill_in 'custom-stage-name', with: custom_stage_with_labels_name
           select_dropdown_option_by_value 'custom-stage-start-event', start_label_event
-          select_dropdown_option_by_value 'custom-stage-stop-event', stop_label_event
+          select_dropdown_option_by_value 'custom-stage-end-event', end_label_event
         end
 
         it 'submit button is disabled' do
@@ -249,11 +248,11 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
         context 'with labels available' do
           start_field = 'custom-stage-start-event-label'
-          end_field = 'custom-stage-stop-event-label'
+          end_field = 'custom-stage-end-event-label'
 
           it 'does not contain labels from outside the group' do
             wait_for_labels(start_field)
-            menu = page.find("[name=#{start_field}] .dropdown-menu")
+            menu = page.find("[data-testid=#{start_field}] .dropdown-menu")
 
             expect(menu).not_to have_content(other_label.name)
             expect(menu).to have_content(first_label.name)
@@ -279,10 +278,10 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   shared_examples 'can edit custom stages' do
     context 'Edit stage form' do
       let(:stage_form_class) { '.custom-stage-form' }
-      let(:stage_save_button) { '.js-save-stage' }
+      let(:stage_save_button) { '[data-testid="save-custom-stage"]' }
       let(:name_field) { 'custom-stage-name' }
       let(:start_event_field) { 'custom-stage-start-event' }
-      let(:end_event_field) { 'custom-stage-stop-event' }
+      let(:end_event_field) { 'custom-stage-end-event' }
       let(:updated_custom_stage_name) { 'Extra uber cool stage' }
 
       before do
@@ -413,7 +412,7 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
           open_recover_stage_dropdown
 
-          expect(page.find('.js-recover-hidden-stage-dropdown')).to have_text(s_('CycleAnalyticsStage|Issue'))
+          expect(page.find("[data-testid='recover-hidden-stage-dropdown']")).to have_text(s_('CycleAnalyticsStage|Issue'))
         end
       end
 

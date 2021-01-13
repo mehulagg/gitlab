@@ -1,6 +1,0 @@
----
-title: Move Project Export of templates into a separate sidekiq queue in order to
-  make project creation from group level custom templates faster
-merge_request: 48134
-author:
-type: changed

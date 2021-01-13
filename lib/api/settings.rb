@@ -91,6 +91,7 @@ module API
       optional :import_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce,
                                 values: %w[github bitbucket bitbucket_server gitlab google_code fogbugz git gitlab_project gitea manifest phabricator],
                                 desc: 'Enabled sources for code import during project creation. OmniAuth must be configured for GitHub, Bitbucket, and GitLab.com'
+      optional :invisible_captcha_enabled, type: Boolean, desc: 'Enable Invisible Captcha spam detection during signup.'
       optional :max_artifacts_size, type: Integer, desc: "Set the maximum file size for each job's artifacts"
       optional :max_attachment_size, type: Integer, desc: 'Maximum attachment size in MB'
       optional :max_import_size, type: Integer, desc: 'Maximum import size in MB'
@@ -103,6 +104,7 @@ module API
       optional :performance_bar_allowed_group_id, type: String, desc: 'Deprecated: Use :performance_bar_allowed_group_path instead. Path of the group that is allowed to toggle the performance bar.' # support legacy names, can be removed in v6
       optional :performance_bar_allowed_group_path, type: String, desc: 'Path of the group that is allowed to toggle the performance bar.'
       optional :performance_bar_enabled, type: String, desc: 'Deprecated: Pass `performance_bar_allowed_group_path: nil` instead. Allow enabling the performance.' # support legacy names, can be removed in v6
+      optional :personal_access_token_prefix, type: String, desc: 'Prefix to prepend to all personal access tokens'
       optional :kroki_enabled, type: Boolean, desc: 'Enable Kroki'
       given kroki_enabled: ->(val) { val } do
         requires :kroki_url, type: String, desc: 'The Kroki server URL'

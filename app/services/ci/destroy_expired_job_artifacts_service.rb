@@ -20,13 +20,29 @@ module Ci
     # which is scheduled every 7 minutes.
     def execute
       in_lock(EXCLUSIVE_LOCK_KEY, ttl: LOCK_TIMEOUT, retries: 1) do
-        loop_until(timeout: LOOP_TIMEOUT, limit: LOOP_LIMIT) do
-          destroy_artifacts_batch
+        if ::Feature.enabled?(:ci_slow_artifacts_removal)
+          destroy_job_and_pipeline_artifacts
+        else
+          loop_until(timeout: LOOP_TIMEOUT, limit: LOOP_LIMIT) do
+            destroy_artifacts_batch
+          end
         end
       end
     end
 
     private
+
+    def destroy_job_and_pipeline_artifacts
+      start_at = Time.current
+      destroy_job_artifacts_with_slow_iteration(start_at)
+
+      timeout = LOOP_TIMEOUT - (Time.current - start_at)
+      return false if timeout < 0
+
+      loop_until(timeout: timeout, limit: LOOP_LIMIT) do
+        destroy_pipeline_artifacts_batch
+      end
+    end
 
     def destroy_artifacts_batch
       destroy_job_artifacts_batch || destroy_pipeline_artifacts_batch
@@ -36,6 +52,7 @@ module Ci
       artifacts = Ci::JobArtifact
         .expired(BATCH_SIZE)
         .unlocked
+        .order_expired_desc
         .with_destroy_preloads
         .to_a
 
@@ -45,9 +62,21 @@ module Ci
       true
     end
 
+    def destroy_job_artifacts_with_slow_iteration(start_at)
+      Ci::JobArtifact.expired_before(start_at).each_batch(of: BATCH_SIZE, column: :expire_at, order: :desc) do |relation, index|
+        artifacts = relation.unlocked.with_destroy_preloads.to_a
+
+        parallel_destroy_batch(artifacts) if artifacts.any?
+        break if loop_timeout?(start_at)
+        break if index >= LOOP_LIMIT
+      end
+    end
+
     # TODO: Make sure this can also be parallelized
     # https://gitlab.com/gitlab-org/gitlab/-/issues/270973
     def destroy_pipeline_artifacts_batch
+      return false if ::Feature.enabled?(:ci_split_pipeline_artifacts_removal)
+
       artifacts = Ci::PipelineArtifact.expired(BATCH_SIZE).to_a
       return false if artifacts.empty?
 
@@ -87,6 +116,10 @@ module Ci
 
         ::Gitlab::Metrics.counter(name, comment)
       end
+    end
+
+    def loop_timeout?(start_at)
+      Time.current > start_at + LOOP_TIMEOUT
     end
   end
 end

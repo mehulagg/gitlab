@@ -15,7 +15,7 @@ describe('DirtyFormChecker', () => {
     });
 
     it('finds editable inputs', () => {
-      const editableInputs = dirtyFormChecker.editableInputs.map(input => input.name);
+      const editableInputs = dirtyFormChecker.editableInputs.map((input) => input.name);
 
       expect(editableInputs).toContain('saml_provider[sso_url]');
       expect(editableInputs).not.toContain('authenticity_token');

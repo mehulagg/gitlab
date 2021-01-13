@@ -1,7 +1,8 @@
-import { GlModal, GlFormGroup } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
+import { customStageEvents as formEvents } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,9 +26,17 @@ describe('ValueStreamForm', () => {
       actions: {
         createValueStream: createValueStreamMock,
       },
+      modules: {
+        customStages: {
+          namespaced: true,
+          state: {
+            formEvents,
+          },
+        },
+      },
     });
 
-  const createComponent = ({ data = {}, initialState = {} } = {}) =>
+  const createComponent = ({ props = {}, data = {}, initialState = {} } = {}) =>
     shallowMount(ValueStreamForm, {
       localVue,
       store: fakeStore({ initialState }),
@@ -35,6 +44,9 @@ describe('ValueStreamForm', () => {
         return {
           ...data,
         };
+      },
+      propsData: {
+        ...props,
       },
       mocks: {
         $toast: {
@@ -47,7 +59,7 @@ describe('ValueStreamForm', () => {
   const createSubmitButtonDisabledState = () =>
     findModal().props('actionPrimary').attributes[1].disabled;
   const submitModal = () => findModal().vm.$emit('primary', mockEvent);
-  const findFormGroup = () => wrapper.find(GlFormGroup);
+  const findExtendedFormFields = () => wrapper.find('[data-testid="extended-form-fields"]');
 
   afterEach(() => {
     wrapper.destroy();
@@ -56,11 +68,25 @@ describe('ValueStreamForm', () => {
 
   describe('default state', () => {
     beforeEach(() => {
-      wrapper = createComponent({ initialState: {} });
+      wrapper = createComponent();
     });
 
     it('submit button is disabled', () => {
       expect(createSubmitButtonDisabledState()).toBe(true);
+    });
+
+    it('does not include extended fields', () => {
+      expect(findExtendedFormFields().exists()).toBe(false);
+    });
+  });
+
+  describe('with hasExtendedFormFields=true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ props: { hasExtendedFormFields: true } });
+    });
+
+    it('has the extended fields', () => {
+      expect(findExtendedFormFields().exists()).toBe(true);
     });
   });
 
@@ -72,12 +98,6 @@ describe('ValueStreamForm', () => {
           createValueStreamErrors,
         },
       });
-    });
-
-    it('renders the error', () => {
-      expect(findFormGroup().attributes('invalid-feedback')).toEqual(
-        createValueStreamErrors.name.join('\n'),
-      );
     });
 
     it('submit button is disabled', () => {
@@ -102,6 +122,7 @@ describe('ValueStreamForm', () => {
       it('calls the "createValueStream" event when submitted', () => {
         expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
           name: streamName,
+          stages: [],
         });
       });
 

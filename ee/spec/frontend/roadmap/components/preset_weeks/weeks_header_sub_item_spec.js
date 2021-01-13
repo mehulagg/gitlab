@@ -44,7 +44,7 @@ describe('MonthsHeaderSubItemComponent', () => {
 
         expect(Array.isArray(vm.headerSubItems)).toBe(true);
         expect(vm.headerSubItems).toHaveLength(7);
-        vm.headerSubItems.forEach(subItem => {
+        vm.headerSubItems.forEach((subItem) => {
           expect(subItem instanceof Date).toBe(true);
         });
       });

@@ -216,10 +216,9 @@ describe('EE Approvals App', () => {
       findResetButton().vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(store.modules.approvals.actions.fetchRules).toHaveBeenLastCalledWith(
-          expect.anything(),
-          { targetBranch, resetToDefault: true },
-        );
+        expect(
+          store.modules.approvals.actions.fetchRules,
+        ).toHaveBeenLastCalledWith(expect.anything(), { targetBranch, resetToDefault: true });
         expect(showToast).toHaveBeenCalledWith('Approval rules reset to project defaults', {
           action: {
             text: 'Undo',

@@ -1,7 +1,7 @@
 <script>
 import { monthInWords } from '~/lib/utils/datetime_utility';
 import WeeksHeaderSubItem from './weeks_header_sub_item.vue';
-import CommonMixin from '../../mixins/common_mixin';
+import CommonMixin from '../../../../mixins/common_mixin';
 
 export default {
   components: {
@@ -34,10 +34,7 @@ export default {
       const timeframeItemDate = this.timeframeItem.getDate();
 
       if (this.timeframeIndex === 0 || (timeframeItemMonth === 0 && timeframeItemDate <= 7)) {
-        return `${this.timeframeItem.getFullYear()} ${monthInWords(
-          this.timeframeItem,
-          true,
-        )} ${timeframeItemDate}`;
+        return `${monthInWords(this.timeframeItem, true)} ${timeframeItemDate}`;
       }
 
       return `${monthInWords(this.timeframeItem, true)} ${timeframeItemDate}`;

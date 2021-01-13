@@ -3,8 +3,14 @@ namespace :gitlab do
     namespace :test do
       desc 'GitLab | Elasticsearch | Test | Measure space taken by ES indices'
       task index_size: :environment do
-        puts "===== Size stats for index: #{Project.__elasticsearch__.index_name} ====="
-        pp Gitlab::Elastic::Helper.default.index_size.slice(*%w(docs store))
+        helper = Gitlab::Elastic::Helper.default
+
+        indices = [helper.target_name]
+        indices += helper.standalone_indices_proxies.map(&:index_name) if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        indices.each do |index_name|
+          puts "===== Size stats for index: #{index_name} ====="
+          pp helper.index_size(index_name: index_name).slice(*%w(docs store))
+        end
       end
 
       desc 'GitLab | Elasticsearch | Test | Measure space taken by ES indices, reindex, and measure space taken again'

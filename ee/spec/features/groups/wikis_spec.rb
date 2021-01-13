@@ -23,4 +23,5 @@ RSpec.describe 'Group wikis' do
   it_behaves_like 'User views a wiki page'
   it_behaves_like 'User views wiki pages'
   it_behaves_like 'User views wiki sidebar'
+  it_behaves_like 'User views Git access wiki page'
 end

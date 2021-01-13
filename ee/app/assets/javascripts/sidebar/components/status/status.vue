@@ -1,7 +1,7 @@
 <script>
 import {
   GlIcon,
-  GlDeprecatedButton as GlButton,
+  GlButton,
   GlLoadingIcon,
   GlTooltipDirective as GlTooltip,
   GlDropdownItem,
@@ -26,6 +26,11 @@ export default {
   },
   mixins: [Tracking.mixin()],
   props: {
+    isOpen: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isEditable: {
       type: Boolean,
       required: false,
@@ -46,7 +51,7 @@ export default {
     return {
       isDropdownShowing: false,
       selectedStatus: this.status,
-      statusOptions: Object.keys(healthStatusTextMap).map(key => ({
+      statusOptions: Object.keys(healthStatusTextMap).map((key) => ({
         key,
         value: healthStatusTextMap[key],
       })),
@@ -74,7 +79,7 @@ export default {
       };
     },
     editTooltip() {
-      const tooltipText = !this.isEditable
+      const tooltipText = !this.isOpen
         ? s__('Health status cannot be edited because this issue is closed')
         : '';
 
@@ -147,12 +152,17 @@ export default {
     <div class="hide-collapsed">
       <p class="title gl-display-flex justify-content-between">
         <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
-        <span v-gl-tooltip.topleft="editTooltip" data-testid="editButtonTooltip" tabindex="0">
+        <span
+          v-if="isEditable"
+          v-gl-tooltip.topleft="editTooltip"
+          data-testid="editButtonTooltip"
+          tabindex="0"
+        >
           <gl-button
             ref="editButton"
             variant="link"
-            class="edit-link btn-link-hover"
-            :disabled="!isEditable"
+            class="edit-link btn-link-hover gl-text-black-normal!"
+            :disabled="!isOpen"
             @click.stop="toggleFormDropdown"
             @keydown.esc="hideDropdown"
           >
@@ -188,7 +198,7 @@ export default {
             <gl-dropdown-item @click="handleDropdownClick(null)">
               <gl-button
                 variant="link"
-                class="dropdown-item health-dropdown-item"
+                class="dropdown-item health-dropdown-item gl-px-8!"
                 :class="{ 'is-active': isSelected(null) }"
               >
                 {{ s__('Sidebar|No status') }}
@@ -204,7 +214,7 @@ export default {
             >
               <gl-button
                 variant="link"
-                class="dropdown-item health-dropdown-item"
+                class="dropdown-item health-dropdown-item gl-px-8!"
                 :class="{ 'is-active': isSelected(option.key) }"
               >
                 {{ option.value }}

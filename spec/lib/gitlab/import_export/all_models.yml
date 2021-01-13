@@ -87,6 +87,7 @@ label:
 - merge_requests
 - priorities
 - epic_board_labels
+- epic_lists
 milestone:
 - group
 - project
@@ -107,6 +108,7 @@ snippets:
 - user_mentions
 - snippet_repository
 - statistics
+- repository_storage_moves
 releases:
 - author
 - project
@@ -559,6 +561,7 @@ project:
 - alert_management_http_integrations
 - exported_protected_branches
 - incident_management_oncall_schedules
+- debian_distributions
 award_emoji:
 - awardable
 - user
@@ -721,6 +724,7 @@ epic:
 - user_mentions
 - note_authors
 - boards_epic_user_preferences
+- epic_board_positions
 epic_issue:
 - epic
 - issue

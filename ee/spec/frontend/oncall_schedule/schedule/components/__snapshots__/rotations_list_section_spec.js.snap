@@ -8,8 +8,42 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
     class="list-item list-item-empty clearfix"
   >
     <span
-      class="details-cell"
-    />
+      class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+    >
+      <span
+        class="gl-str-truncated"
+      >
+        Rotation 242
+      </span>
+       
+      <gl-button-group-stub
+        class="gl-px-2"
+      >
+        <gl-button-stub
+          aria-label="Edit rotation"
+          buttontextclasses=""
+          category="tertiary"
+          icon="pencil"
+          role="button"
+          size="medium"
+          tabindex="0"
+          title="Edit rotation"
+          variant="default"
+        />
+         
+        <gl-button-stub
+          aria-label="Delete rotation"
+          buttontextclasses=""
+          category="tertiary"
+          icon="remove"
+          role="button"
+          size="medium"
+          tabindex="0"
+          title="Delete rotation"
+          variant="default"
+        />
+      </gl-button-group-stub>
+    </span>
      
     <span
       class="timeline-cell"
@@ -18,6 +52,13 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
       <current-day-indicator-stub
         presettype="WEEKS"
         timeframeitem="Mon Jan 01 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
+      />
+       
+      <rotation-assignee-stub
+        assignee="[object Object]"
+        assigneeindex="0"
+        rotationlength="1"
+        rotationstartsat="2020-12-09T09:00:53Z"
       />
     </span>
     <span
@@ -28,7 +69,19 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
         presettype="WEEKS"
         timeframeitem="Mon Jan 08 2018 00:00:00 GMT+0000 (Greenwich Mean Time)"
       />
+       
+      <rotation-assignee-stub
+        assignee="[object Object]"
+        assigneeindex="1"
+        rotationlength="1"
+        rotationstartsat="2020-12-09T09:00:53Z"
+      />
     </span>
   </div>
+   
+  <delete-rotation-modal-stub
+    modalid="deleteRotationModal"
+    rotation="[object Object]"
+  />
 </div>
 `;

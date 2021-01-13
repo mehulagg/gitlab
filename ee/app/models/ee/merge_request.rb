@@ -79,7 +79,7 @@ module EE
         super.preload(:blocking_merge_requests)
       end
 
-      def sort_by_attribute(method, *args)
+      def sort_by_attribute(method, *args, **kwargs)
         if method.to_s == 'review_time_desc'
           order_review_time_desc
         else
@@ -275,7 +275,7 @@ module EE
     end
 
     def applicable_approval_rules_for_user(user_id)
-      approval_rules.applicable_to_branch(target_branch).select do |rule|
+      wrapped_approval_rules.select do |rule|
         rule.approvers.pluck(:id).include?(user_id)
       end
     end

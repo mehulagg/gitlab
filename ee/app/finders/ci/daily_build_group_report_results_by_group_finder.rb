@@ -9,7 +9,7 @@ module Ci
     # See thread: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37768#note_386839633
     GROUP_QUERY_RESULT_LIMIT = 1000.freeze
 
-    def initialize(current_user:, group:, project_ids: [], ref_path:, start_date:, end_date:, limit: nil)
+    def initialize(current_user:, group:, project_ids: [], ref_path: nil, start_date:, end_date:, limit: nil)
       super(current_user: current_user, project: nil, ref_path: ref_path, start_date: start_date, end_date: end_date, limit: limit)
 
       @group = group

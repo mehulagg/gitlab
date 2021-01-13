@@ -84,20 +84,20 @@ describe('Board List Header Component', () => {
     const hasSettings = [ListType.assignee, ListType.milestone, ListType.label];
     const hasNoSettings = [ListType.backlog, ListType.closed];
 
-    it.each(hasSettings)('does render for List Type `%s`', listType => {
+    it.each(hasSettings)('does render for List Type `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findSettingsButton().exists()).toBe(true);
     });
 
-    it.each(hasNoSettings)('does not render for List Type `%s`', listType => {
+    it.each(hasNoSettings)('does not render for List Type `%s`', (listType) => {
       createComponent({ listType });
 
       expect(findSettingsButton().exists()).toBe(false);
     });
 
     it('has a test for each list type', () => {
-      Object.values(ListType).forEach(value => {
+      Object.values(ListType).forEach((value) => {
         expect([...hasSettings, ...hasNoSettings]).toContain(value);
       });
     });

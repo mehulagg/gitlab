@@ -147,6 +147,10 @@ module EE
         links << :iterations
       end
 
+      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group) && @group.feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
+        links << :group_ci_cd_analytics
+      end
+
       links
     end
   end

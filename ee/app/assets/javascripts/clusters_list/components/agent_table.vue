@@ -45,7 +45,7 @@ export default {
     </div>
 
     <gl-table :items="agents" :fields="fields" stacked="md" data-testid="cluster-agent-list-table">
-      <template #cell(configuration)=" { item }">
+      <template #cell(configuration)="{ item }">
         <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
         <gl-link v-if="item.configFolder" :href="item.configFolder.webPath">
           .gitlab/agents/{{ item.name }}

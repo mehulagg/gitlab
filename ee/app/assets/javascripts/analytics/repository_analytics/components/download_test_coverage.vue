@@ -60,7 +60,7 @@ export default {
 
       // not including a project_ids param is the same as selecting all the projects
       if (!this.allProjectsSelected) {
-        this.selectedProjectIds.forEach(id => queryParams.append('project_ids[]', id));
+        this.selectedProjectIds.forEach((id) => queryParams.append('project_ids[]', id));
       }
 
       return `${this.groupAnalyticsCoverageReportsPath}&${queryParams.toString()}`;

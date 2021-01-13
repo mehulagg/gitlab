@@ -63,9 +63,9 @@ The following table depicts the various user permission levels in a project.
 | See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | See a job with [debug logging](../ci/variables/README.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
 | Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
+| Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
 | Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
 | See related issues                                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View [Releases](project/releases/index.md)        | ✓ (*6*) | ✓          | ✓           | ✓        | ✓      |
 | View requirements **(ULTIMATE)**                  | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Insights **(ULTIMATE)**                      | ✓       | ✓          | ✓           | ✓        | ✓      |
@@ -75,6 +75,7 @@ The following table depicts the various user permission levels in a project.
 | Manage user-starred metrics dashboards (*7*)      | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View confidential issues                          | (*2*)   | ✓          | ✓           | ✓        | ✓      |
 | Assign issues                                     |         | ✓          | ✓           | ✓        | ✓      |
+| Assign reviewers                                  |         | ✓          | ✓           | ✓        | ✓      |
 | Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
 | Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
 | Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
@@ -92,7 +93,13 @@ The following table depicts the various user permission levels in a project.
 | View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
 | Create new merge request                          |         | ✓          | ✓           | ✓        | ✓      |
 | View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
+| Archive/reopen requirements **(ULTIMATE)**        |         | ✓          | ✓           | ✓        | ✓      |
 | Create/edit requirements **(ULTIMATE)**           |         | ✓          | ✓           | ✓        | ✓      |
+| Import requirements **(ULTIMATE)**                |         | ✓          | ✓           | ✓        | ✓      |
+| Create new [test case](../ci/test_cases/index.md) |         | ✓          | ✓           | ✓        | ✓      |
+| Archive [test case](../ci/test_cases/index.md)    |         | ✓          | ✓           | ✓        | ✓      |
+| Move [test case](../ci/test_cases/index.md)       |         | ✓          | ✓           | ✓        | ✓      |
+| Reopen [test case](../ci/test_cases/index.md)     |         | ✓          | ✓           | ✓        | ✓      |
 | Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
@@ -163,7 +170,7 @@ The following table depicts the various user permission levels in a project.
 | Reposition comments on images (posted by any user)|✓ (*11*) | ✓ (*11*)   |  ✓ (*11*)   | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
-| View project Audit Events                         |         |            |             | ✓        | ✓      |
+| View project Audit Events                         |         |            |  ✓ (*12*)   | ✓        | ✓      |
 | Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
 | Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
@@ -191,6 +198,7 @@ The following table depicts the various user permission levels in a project.
    [Eligible approvers](project/merge_requests/merge_request_approvals.md#eligible-approvers).
 1. Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
 1. Applies only to comments on [Design Management](project/issues/design_management.md) designs.
+1. Users can only view events based on their individual actions.
 
 ## Project features permissions
 
@@ -275,7 +283,7 @@ group.
 | Delete group                                           |       |          |           |            | ✓     |
 | Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
 | Edit SAML SSO Billing **(SILVER ONLY)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
-| View group Audit Events                                |       |          |           |            | ✓     |
+| View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
 | View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Insights **(ULTIMATE)**                           | ✓     | ✓        | ✓         | ✓          | ✓     |
@@ -284,6 +292,7 @@ group.
 | View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Billing **(FREE ONLY)**                           |       |          |           |            | ✓ (4) |
 | View Usage Quotas **(FREE ONLY)**                      |       |          |           |            | ✓ (4) |
+| Filter members by 2FA status                           |       |          |           |            | ✓     |
 
 1. Groups can be set to [allow either Owners or Owners and
   Maintainers to create subgroups](group/subgroups/index.md#creating-a-subgroup)
@@ -294,6 +303,7 @@ group.
 1. Does not apply to subgroups.
 1. Developers can push commits to the default branch of a new project only if the [default branch protection](group/index.md#changing-the-default-branch-protection-of-a-group) is set to "Partially protected" or "Not protected".
 1. In addition, if your group is public or internal, all users who can see the group can also see group wiki pages.
+1. Users can only view events based on their individual actions.
 
 ### Subgroup permissions
 
@@ -313,7 +323,7 @@ project and should only have access to that project.
 
 External users:
 
-- Cannot create groups, projects, or personal snippets.
+- Cannot create projects (including forks), groups, or personal snippets.
 - Can only access public projects and projects to which they are explicitly granted access,
   thus hiding all other internal or private ones from them (like being
   logged out).

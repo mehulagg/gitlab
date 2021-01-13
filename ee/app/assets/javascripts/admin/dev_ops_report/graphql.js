@@ -13,6 +13,7 @@ export const resolvers = {
       const params = {
         per_page: Api.DEFAULT_PER_PAGE,
         search,
+        top_level_only: true,
       };
       if (nextPage) {
         params.page = nextPage;
@@ -26,7 +27,7 @@ export const resolvers = {
           // eslint-disable-next-line @gitlab/require-i18n-strings
           __typename: 'Groups',
           // eslint-disable-next-line @gitlab/require-i18n-strings
-          nodes: data.map(group => ({ ...group, __typename: 'Group' })),
+          nodes: data.map((group) => ({ ...group, __typename: 'Group' })),
           pageInfo,
         };
 

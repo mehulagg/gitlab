@@ -22,7 +22,7 @@ For information on how to contribute to the development of Value Stream Analytic
 
 Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
-Note: [Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
+[Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
 
 ## Default stages
 
@@ -315,15 +315,6 @@ To delete a custom value stream:
 1. Click the **Delete** button to confirm.
 
 ![Delete value stream](img/delete_value_stream_v13.4.png "Deleting a custom value stream")
-
-### Disabling custom value streams
-
-Custom value streams are enabled by default. If you have a self-managed instance, an
-administrator can open a Rails console and disable them with the following command:
-
-```ruby
-Feature.disable(:value_stream_analytics_create_multiple_value_streams)
-```
 
 ## Days to completion chart
 

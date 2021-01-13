@@ -33,7 +33,7 @@ export const fetchStatistics = ({ state, dispatch, rootState }) => {
     },
   })
     .then(({ data }) => dispatch('receiveStatisticsSuccess', data))
-    .catch(error => {
+    .catch((error) => {
       // A NOT_FOUND response from the endpoint means that there is no data for
       // the given parameters. There are various reasons *why* there could be
       // no data, but we can't distinguish between them, yet. So, just render

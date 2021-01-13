@@ -16,7 +16,7 @@ export const tributeConfig = {
     config: {
       trigger: '&',
       fillAttr: 'iid',
-      lookup: value => `${value.iid}${value.title}`,
+      lookup: (value) => `${value.iid}${value.title}`,
       menuItemTemplate: ({ original }) =>
         `<small>${original.iid}</small> ${escape(original.title)}`,
     },

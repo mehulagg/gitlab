@@ -87,12 +87,7 @@ describe('Insights component', () => {
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.find(GlDropdown).exists()).toBe(true);
-        expect(
-          wrapper
-            .find(GlDropdown)
-            .find(GlDropdownItem)
-            .text(),
-        ).toBe(title);
+        expect(wrapper.find(GlDropdown).find(GlDropdownItem).text()).toBe(title);
       });
 
       it('should not disable the tab selector', async () => {
@@ -118,12 +113,7 @@ describe('Insights component', () => {
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.find(GlDropdown).exists()).toBe(true);
-        expect(
-          wrapper
-            .find(GlDropdown)
-            .find(GlDropdownItem)
-            .text(),
-        ).toBe(title);
+        expect(wrapper.find(GlDropdown).find(GlDropdownItem).text()).toBe(title);
       });
 
       it('disables the tab selector', async () => {

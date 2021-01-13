@@ -263,7 +263,7 @@ export const BoardsMockData = {
   },
 };
 
-export const boardsMockInterceptor = config => {
+export const boardsMockInterceptor = (config) => {
   const body = BoardsMockData[config.method.toUpperCase()][config.url];
   return [200, body];
 };
@@ -318,7 +318,7 @@ export const mockLists = [mockList, mockLabelList];
 
 export const mockListsById = keyBy(mockLists, 'id');
 
-export const mockListsWithModel = mockLists.map(listMock =>
+export const mockListsWithModel = mockLists.map((listMock) =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
 );
 
@@ -350,3 +350,18 @@ export const issues = {
   [mockIssue3.id]: mockIssue3,
   [mockIssue4.id]: mockIssue4,
 };
+
+export const mockRawGroupProjects = [
+  {
+    id: 0,
+    name: 'Example Project',
+    name_with_namespace: 'Awesome Group / Example Project',
+    path_with_namespace: 'awesome-group/example-project',
+  },
+  {
+    id: 1,
+    name: 'Foobar Project',
+    name_with_namespace: 'Awesome Group / Foobar Project',
+    path_with_namespace: 'awesome-group/foobar-project',
+  },
+];

@@ -10,7 +10,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-const createComplianceFrameworksListApp = el => {
+const createComplianceFrameworksListApp = (el) => {
   if (!el) {
     return false;
   }

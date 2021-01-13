@@ -1,4 +1,4 @@
-import { setDeployBoard } from 'ee_else_ce/environments/stores/helpers';
+import { setDeployBoard } from './helpers';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 /**
@@ -46,9 +46,9 @@ export default class EnvironmentsStore {
    * @returns {Array}
    */
   storeEnvironments(environments = []) {
-    const filteredEnvironments = environments.map(env => {
+    const filteredEnvironments = environments.map((env) => {
       const oldEnvironmentState =
-        this.state.environments.find(element => {
+        this.state.environments.find((element) => {
           if (env.latest) {
             return element.id === env.latest.id;
           }
@@ -80,6 +80,17 @@ export default class EnvironmentsStore {
     });
 
     this.state.environments = filteredEnvironments;
+
+    /**
+     * Add the canary callout banner underneath the second environment listed.
+     *
+     * If there is only one environment, then add to it underneath the first.
+     */
+    if (this.state.environments.length >= 2) {
+      this.state.environments[1].showCanaryCallout = true;
+    } else if (this.state.environments.length === 1) {
+      this.state.environments[0].showCanaryCallout = true;
+    }
 
     return filteredEnvironments;
   }
@@ -135,12 +146,22 @@ export default class EnvironmentsStore {
 
   /**
    * Toggles deploy board visibility for the provided environment ID.
-   * Currently only works on EE.
    *
    * @param  {Object} environment
    * @return {Array}
    */
-  toggleDeployBoard() {
+  toggleDeployBoard(environmentID) {
+    const environments = this.state.environments.slice();
+
+    this.state.environments = environments.map((env) => {
+      let updated = { ...env };
+
+      if (env.id === environmentID) {
+        updated = { ...updated, isDeployBoardVisible: !env.isDeployBoardVisible };
+      }
+      return updated;
+    });
+
     return this.state.environments;
   }
 
@@ -163,7 +184,7 @@ export default class EnvironmentsStore {
    * @return {Object}
    */
   setfolderContent(folder, environments) {
-    const updatedEnvironments = environments.map(env => {
+    const updatedEnvironments = environments.map((env) => {
       let updated = env;
 
       if (env.latest) {
@@ -192,7 +213,7 @@ export default class EnvironmentsStore {
   updateEnvironmentProp(environment, prop, newValue) {
     const { environments } = this.state;
 
-    const updatedEnvironments = environments.map(env => {
+    const updatedEnvironments = environments.map((env) => {
       const updateEnv = { ...env };
       if (env.id === environment.id) {
         updateEnv[prop] = newValue;
@@ -207,6 +228,6 @@ export default class EnvironmentsStore {
   getOpenFolders() {
     const { environments } = this.state;
 
-    return environments.filter(env => env.isFolder && env.isOpen);
+    return environments.filter((env) => env.isFolder && env.isOpen);
   }
 }

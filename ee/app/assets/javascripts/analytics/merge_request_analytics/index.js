@@ -58,7 +58,7 @@ export default () => {
       fullPath,
       type,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement(MergeRequestAnalyticsApp, {
         props: {
           startDate: startDateParam.length

@@ -24,7 +24,7 @@ module Resolvers
 
     argument :scanner, [GraphQL::STRING_TYPE],
              required: false,
-             description: 'Filter vulnerabilities by scanner'
+             description: 'Filter vulnerabilities by VulnerabilityScanner.externalId'
 
     argument :sort, Types::VulnerabilitySortEnum,
              required: false,

@@ -30,7 +30,7 @@ describe('Vulnerability status description component', () => {
   const statusEl = () => wrapper.find('[data-testid="status"]');
 
   // Create a date using the passed-in string, or just use the current time if nothing was passed in.
-  const createDate = value => (value ? new Date(value) : new Date()).toISOString();
+  const createDate = (value) => (value ? new Date(value) : new Date()).toISOString();
 
   const createWrapper = (props = {}) => {
     const vulnerability = props.vulnerability || { pipeline: {} };
@@ -47,7 +47,7 @@ describe('Vulnerability status description component', () => {
   };
 
   describe('state text', () => {
-    it.each(ALL_STATES)('shows the correct string for the vulnerability state "%s"', state => {
+    it.each(ALL_STATES)('shows the correct string for the vulnerability state "%s"', (state) => {
       createWrapper({ vulnerability: { state, pipeline: {} } });
 
       expect(wrapper.text()).toMatch(new RegExp(`^${capitalize(state)}`));
@@ -78,9 +78,9 @@ describe('Vulnerability status description component', () => {
     });
 
     // The .map() is used to output the correct test name by doubling up the parameter, i.e. 'detected' -> ['detected', 'detected'].
-    it.each(NON_DETECTED_STATES.map(x => [x, x]))(
+    it.each(NON_DETECTED_STATES.map((x) => [x, x]))(
       'uses the "%s_at" property when the vulnerability state is "%s"',
-      state => {
+      (state) => {
         const expectedDate = createDate();
         createWrapper({
           vulnerability: {
@@ -106,7 +106,7 @@ describe('Vulnerability status description component', () => {
 
     it.each(NON_DETECTED_STATES)(
       'does not show the pipeline link when the vulnerability state is "%s"',
-      state => {
+      (state) => {
         createWrapper({
           vulnerability: { state, pipeline: { url: 'pipeline/url' } },
         });

@@ -1,8 +1,0 @@
----
-name: blocking_issues_counts
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32340
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/231325
-milestone: '13.1'
-type: development
-group: group::product planning
-default_enabled: false

@@ -8,7 +8,7 @@ type: howto
 # Numerous undo possibilities in Git
 
 In this tutorial, we will show you different ways of undoing your work in Git, for which
-we will assume you have a basic working knowledge of. Check GitLab's
+we will assume you have a basic working knowledge of. Check the GitLab
 [Git documentation](../index.md) for reference.
 
 Also, we will only provide some general information of the commands, which is enough
@@ -492,6 +492,8 @@ tasks (which is exactly what removing sensitive information file is about).
 An alternative is the open source community-maintained tool [BFG](https://rtyley.github.io/bfg-repo-cleaner/).
 Keep in mind that these tools are faster because they do not provide the same
 feature set as `git filter-branch` does, but focus on specific use cases.
+
+Refer [Reduce repository size](../../../user/project/repository/reducing_the_repo_size_using_git.md) page to know more about purging files from repository history & GitLab storage.
 
 ## Conclusion
 

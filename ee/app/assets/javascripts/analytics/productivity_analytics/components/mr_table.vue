@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     metricDropdownLabel() {
-      return this.columnOptions.find(option => option.key === this.metricType).label;
+      return this.columnOptions.find((option) => option.key === this.metricType).label;
     },
     showPagination() {
       return this.pageInfo && this.pageInfo.total;

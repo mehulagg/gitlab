@@ -24,6 +24,7 @@ namespace :admin do
       put :revoke
     end
   end
+  resources :user_permission_exports, controller: 'user_permission_exports', only: [:index]
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
@@ -47,6 +48,8 @@ namespace :admin do
     get '/designs', to: redirect(path: 'admin/geo/replication/designs')
 
     resources :nodes, only: [:index, :create, :new, :edit, :update]
+
+    resources :nodes_beta, only: [:index]
 
     scope '/replication' do
       get '/', to: redirect(path: 'admin/geo/replication/projects')

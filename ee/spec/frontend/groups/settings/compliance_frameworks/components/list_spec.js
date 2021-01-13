@@ -141,11 +141,7 @@ describe('List', () => {
     });
 
     it('shows the all tab', () => {
-      expect(
-        findTabs()
-          .at(0)
-          .attributes('title'),
-      ).toBe('All');
+      expect(findTabs().at(0).attributes('title')).toBe('All');
     });
 
     it('shows the disabled regulated tab', () => {
@@ -158,7 +154,7 @@ describe('List', () => {
     it('shows the list items with expect props', () => {
       expect(findListItems()).toHaveLength(2);
 
-      findListItems().wrappers.forEach(item =>
+      findListItems().wrappers.forEach((item) =>
         expect(item.props()).toEqual(
           expect.objectContaining({
             framework: {

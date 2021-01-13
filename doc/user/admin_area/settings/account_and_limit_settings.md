@@ -7,10 +7,18 @@ type: reference
 
 # Account and limit settings **(CORE ONLY)**
 
+## Default projects limit
+
+You can change the default maximum number of projects that users can create in their personal namespace.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
+You can increase or decrease that `Default projects limit` value.
+
+- If you set `Default projects limit` to 0, users are not allowed to create projects in their users personal namespace. However, projects can still be created within a group.
+
 ## Max attachment size
 
 You can change the maximum file size for attachments in comments and replies in GitLab.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum attachment size (MB)`.
 
 NOTE:
@@ -21,19 +29,38 @@ details.
 ## Max push size
 
 You can change the maximum push size for your repository.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum push size (MB)`.
 
 ## Max import size
 
 You can change the maximum file size for imports in GitLab.
-Navigate to **Admin Area (wrench icon) > Settings > General**, then expand **Account and Limit**.
+Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum import size (MB)`.
 
 NOTE:
 If you choose a size larger than what is currently configured for the web server,
 you will likely get errors. See the [troubleshooting section](#troubleshooting) for more
 details.
+
+## Personal Access Token prefix
+
+You can set a global prefix for all generated Personal Access Tokens.
+
+A prefix can help you identify PATs visually, as well as with automation tools.
+
+### Setting a prefix
+
+Only a GitLab administrator can set the prefix, which is a global setting applied
+to any PAT generated in the system by any user:
+
+1. Navigate to **Admin Area > Settings > General**.
+1. Expand the **Account and limit** section.
+1. Fill in the **Personal Access Token prefix** field.
+1. Click **Save changes**.
+
+It is also possible to configure the prefix via the [settings API](../../../api/settings.md)
+using the `personal_access_token_prefix` field.
 
 ## Repository size limit **(STARTER ONLY)**
 
@@ -71,7 +98,7 @@ These settings can be found within:
   1. From the Group's homepage, navigate to **Settings > General**.
   1. Fill in the **Repository size limit (MB)** field in the **Naming, visibility** section.
   1. Click **Save changes**.
-- GitLab's global settings:
+- GitLab global settings:
   1. From the Dashboard, navigate to **Admin Area > Settings > General**.
   1. Expand the **Account and limit** section.
   1. Fill in the **Size limit per repository (MB)** field.

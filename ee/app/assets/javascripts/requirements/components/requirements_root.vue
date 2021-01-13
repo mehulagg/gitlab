@@ -1,20 +1,24 @@
 <script>
 import { GlPagination } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
 import Api from '~/api';
-import createFlash from '~/flash';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import Tracking from '~/tracking';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import RequirementsTabs from './requirements_tabs.vue';
 import RequirementsLoading from './requirements_loading.vue';
 import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
+import ImportRequirementsModal from './import_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
@@ -40,7 +44,9 @@ export default {
     RequirementItem,
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
+    ImportRequirementsModal,
   },
+  mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
   props: {
     projectPath: {
       type: String,
@@ -68,8 +74,8 @@ export default {
     initialRequirementsCount: {
       type: Object,
       required: true,
-      validator: value =>
-        ['OPENED', 'ARCHIVED', 'ALL'].every(prop => typeof value[prop] === 'number'),
+      validator: (value) =>
+        ['OPENED', 'ARCHIVED', 'ALL'].every((prop) => typeof value[prop] === 'number'),
     },
     page: {
       type: Number,
@@ -95,6 +101,10 @@ export default {
       required: true,
     },
     requirementsWebUrl: {
+      type: String,
+      required: true,
+    },
+    importCsvPath: {
       type: String,
       required: true,
     },
@@ -140,7 +150,7 @@ export default {
       update(data) {
         const requirementsRoot = data.project?.requirements;
 
-        const list = requirementsRoot?.nodes.map(node => {
+        const list = requirementsRoot?.nodes.map((node) => {
           return {
             ...node,
             satisfied: node.lastTestReportState === TestReportStatus.Passed,
@@ -268,7 +278,7 @@ export default {
       ];
     },
     getFilteredSearchValue() {
-      const value = this.authorUsernames.map(author => ({
+      const value = this.authorUsernames.map((author) => ({
         type: 'author_username',
         value: { data: author },
       }));
@@ -368,13 +378,30 @@ export default {
             updateRequirementInput,
           },
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: errorFlashMessage,
             parent: flashMessageContainer,
             captureError: true,
           });
           throw e;
+        });
+    },
+    importCsv({ file }) {
+      const formData = new FormData();
+      formData.append('file', file);
+      return axios
+        .post(this.importCsvPath, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then(({ data }) => {
+          createFlash({ message: data?.message, type: FLASH_TYPES.NOTICE });
+        })
+        .catch((err) => {
+          const { data: { message = __('Something went wrong') } = {} } = err.response;
+          createFlash({ message });
         });
     },
     handleTabClick({ filterBy }) {
@@ -418,7 +445,7 @@ export default {
             },
           },
         })
-        .then(res => {
+        .then((res) => {
           const createReqMutation = res?.data?.createRequirement || {};
 
           if (createReqMutation.errors?.length === 0) {
@@ -434,7 +461,7 @@ export default {
             throw new Error(`Error creating a requirement ${res.message}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: __('Something went wrong while creating a requirement.'),
             parent: this.$el,
@@ -458,7 +485,7 @@ export default {
         errorFlashMessage: __('Something went wrong while updating a requirement.'),
         flashMessageContainer: this.$el,
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -485,7 +512,7 @@ export default {
             ? __('Something went wrong while reopening a requirement.')
             : __('Something went wrong while archiving a requirement.'),
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -519,7 +546,7 @@ export default {
       const authors = [];
       let textSearch = '';
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (typeof filter === 'string') {
           textSearch = filter;
         } else if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
@@ -533,6 +560,12 @@ export default {
       this.prevPageCursor = '';
       this.nextPageCursor = '';
 
+      if (textSearch || authors.length) {
+        this.track('filter', {
+          property: JSON.stringify(filters),
+        });
+      }
+
       this.updateUrl();
     },
     handleSortRequirements(sortBy) {
@@ -545,8 +578,9 @@ export default {
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.requirements.pageInfo;
+      const toNext = page > this.currentPage;
 
-      if (page > this.currentPage) {
+      if (toNext) {
         this.prevPageCursor = '';
         this.nextPageCursor = endCursor;
       } else {
@@ -554,9 +588,14 @@ export default {
         this.nextPageCursor = '';
       }
 
+      this.track('click_navigation', { label: toNext ? 'next' : 'prev' });
+
       this.currentPage = page;
 
       this.updateUrl();
+    },
+    handleImportRequirementsClick() {
+      this.$refs.modal.show();
     },
   },
 };
@@ -568,9 +607,11 @@ export default {
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
       :show-create-form="showRequirementCreateDrawer"
+      :show-upload-csv="glFeatures.importRequirementsCsv"
       :can-create-requirement="canCreateRequirement"
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -606,7 +647,9 @@ export default {
       :empty-state-path="emptyStatePath"
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
+      :show-upload-csv="glFeatures.importRequirementsCsv"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
     />
     <requirements-loading
       v-show="requirementsListLoading"
@@ -639,6 +682,12 @@ export default {
       align="center"
       class="gl-pagination gl-mt-3"
       @input="handlePageChange"
+    />
+    <import-requirements-modal
+      v-if="glFeatures.importRequirementsCsv"
+      ref="modal"
+      :project-path="projectPath"
+      @import="importCsv"
     />
   </div>
 </template>

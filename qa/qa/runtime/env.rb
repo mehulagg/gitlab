@@ -403,6 +403,14 @@ module QA
         ENV['GITLAB_QA_USER_AGENT']
       end
 
+      def geo_environment?
+        QA::Runtime::Scenario.attributes.include?(:geo_secondary_address)
+      end
+
+      def gitlab_agentk_version
+        ENV.fetch('GITLAB_AGENTK_VERSION', 'v13.7.0')
+      end
+
       private
 
       def remote_grid_credentials

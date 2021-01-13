@@ -53,7 +53,7 @@ describe('MergeRequestsGrid component', () => {
       const mergeRequest = createMergeRequests({ count: 1 });
       wrapper = createComponent(mergeRequest);
 
-      findStatuses().wrappers.forEach(status => {
+      findStatuses().wrappers.forEach((status) => {
         const { type, data } = status.props('status');
 
         switch (type) {

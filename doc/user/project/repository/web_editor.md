@@ -19,7 +19,7 @@ From a project's files page, click the '+' button to the right of the branch sel
 Choose **New file** from the dropdown.
 ![New file dropdown menu](img/web_editor_new_file_dropdown.png)
 
-Enter a file name in the **Filename** box. Then, add file content in the editor
+Enter a filename in the **Filename** box. Then, add file content in the editor
 area. Add a descriptive commit message and choose a branch. The branch field
 will default to the branch you were viewing in the file browser. If you enter
 a new branch name, a checkbox will appear, allowing you to start a new merge
@@ -94,7 +94,7 @@ the target branch. Click **Create directory** to finish.
 
 ## Create a new branch
 
-There are multiple ways to create a branch from GitLab's web interface.
+There are multiple ways to create a branch from the GitLab web interface.
 
 ### Create a new branch from an issue
 

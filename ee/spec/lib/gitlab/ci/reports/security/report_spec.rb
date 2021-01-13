@@ -5,10 +5,12 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Reports::Security::Report do
   let_it_be(:pipeline) { create(:ci_pipeline) }
 
-  let(:report) { described_class.new('sast', pipeline, created_at) }
   let(:created_at) { 2.weeks.ago }
 
+  subject(:report) { described_class.new('sast', pipeline, created_at) }
+
   it { expect(report.type).to eq('sast') }
+  it { is_expected.to delegate_method(:project_id).to(:pipeline) }
 
   describe '#add_scanner' do
     let(:scanner) { create(:ci_reports_security_scanner, external_id: 'find_sec_bugs') }

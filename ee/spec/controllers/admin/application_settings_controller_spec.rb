@@ -25,8 +25,7 @@ RSpec.describe Admin::ApplicationSettingsController do
         get :general
 
         expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
-        expect(response.body).to include('Reindexing status')
-        expect(response.body).to include("State: #{task.state}")
+        expect(response.body).to include("Reindexing Status: #{task.state}")
       end
     end
   end

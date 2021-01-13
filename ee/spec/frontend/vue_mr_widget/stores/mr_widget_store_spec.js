@@ -78,7 +78,7 @@ describe('MergeRequestStore', () => {
       'secret_scanning_comparison_path',
       'api_fuzzing_comparison_path',
       'coverage_fuzzing_comparison_path',
-    ])('should set %s path', property => {
+    ])('should set %s path', (property) => {
       // Ensure something is set in the mock data
       expect(property in mockData).toBe(true);
       const expectedValue = mockData[property];

@@ -445,17 +445,36 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         expect(results.issues_count).to eq 4
       end
 
-      it 'lists all issues for admin' do
-        results = described_class.new(admin, query, limit_project_ids)
-        issues = results.objects('issues')
+      context 'for admin users' do
+        context 'when admin mode enabled', :enable_admin_mode do
+          it 'lists all issues' do
+            results = described_class.new(admin, query, limit_project_ids)
+            issues = results.objects('issues')
 
-        expect(issues).to include @issue
-        expect(issues).to include @security_issue_1
-        expect(issues).to include @security_issue_2
-        expect(issues).to include @security_issue_3
-        expect(issues).to include @security_issue_4
-        expect(issues).to include @security_issue_5
-        expect(results.issues_count).to eq 6
+            expect(issues).to include @issue
+            expect(issues).to include @security_issue_1
+            expect(issues).to include @security_issue_2
+            expect(issues).to include @security_issue_3
+            expect(issues).to include @security_issue_4
+            expect(issues).to include @security_issue_5
+            expect(results.issues_count).to eq 6
+          end
+        end
+
+        context 'when admin mode disabled' do
+          it 'does not list confidential issues' do
+            results = described_class.new(admin, query, limit_project_ids)
+            issues = results.objects('issues')
+
+            expect(issues).to include @issue
+            expect(issues).not_to include @security_issue_1
+            expect(issues).not_to include @security_issue_2
+            expect(issues).not_to include @security_issue_3
+            expect(issues).not_to include @security_issue_4
+            expect(issues).not_to include @security_issue_5
+            expect(results.issues_count).to eq 1
+          end
+        end
       end
     end
 
@@ -530,17 +549,36 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         expect(results.issues_count).to eq 3
       end
 
-      it 'lists all issues for admin' do
-        results = described_class.new(admin, query, limit_project_ids)
-        issues = results.objects('issues')
+      context 'for admin users' do
+        context 'when admin mode enabled', :enable_admin_mode do
+          it 'lists all issues' do
+            results = described_class.new(admin, query, limit_project_ids)
+            issues = results.objects('issues')
 
-        expect(issues).to include @issue
-        expect(issues).not_to include @security_issue_1
-        expect(issues).not_to include @security_issue_2
-        expect(issues).to include @security_issue_3
-        expect(issues).to include @security_issue_4
-        expect(issues).to include @security_issue_5
-        expect(results.issues_count).to eq 4
+            expect(issues).to include @issue
+            expect(issues).not_to include @security_issue_1
+            expect(issues).not_to include @security_issue_2
+            expect(issues).to include @security_issue_3
+            expect(issues).to include @security_issue_4
+            expect(issues).to include @security_issue_5
+            expect(results.issues_count).to eq 4
+          end
+        end
+
+        context 'when admin mode disabled' do
+          it 'does not list confidential issues' do
+            results = described_class.new(admin, query, limit_project_ids)
+            issues = results.objects('issues')
+
+            expect(issues).to include @issue
+            expect(issues).not_to include @security_issue_1
+            expect(issues).not_to include @security_issue_2
+            expect(issues).not_to include @security_issue_3
+            expect(issues).not_to include @security_issue_4
+            expect(issues).not_to include @security_issue_5
+            expect(results.issues_count).to eq 1
+          end
+        end
       end
     end
   end
@@ -1095,18 +1133,20 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
           end
 
           context 'when user is admin' do
-            it 'returns right set of milestones' do
-              user.update(admin: true)
-              public_project.project_feature.update!(merge_requests_access_level: ProjectFeature::PRIVATE)
-              public_project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
-              internal_project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
-              internal_project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
-              ensure_elasticsearch_index!
+            context 'when admin mode enabled', :enable_admin_mode do
+              it 'returns right set of milestones' do
+                user.update(admin: true)
+                public_project.project_feature.update!(merge_requests_access_level: ProjectFeature::PRIVATE)
+                public_project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
+                internal_project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+                internal_project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
+                ensure_elasticsearch_index!
 
-              results = described_class.new(user, 'project', :any)
-              milestones = results.objects('milestones')
+                results = described_class.new(user, 'project', :any)
+                milestones = results.objects('milestones')
 
-              expect(milestones).to match_array([milestone_2, milestone_3, milestone_4])
+                expect(milestones).to match_array([milestone_2, milestone_3, milestone_4])
+              end
             end
           end
 

@@ -1,7 +1,9 @@
 import { GlIntersectionObserver, GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import AlertsList from 'ee/threat_monitoring/components/alerts/alerts_list.vue';
+import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
 import AlertStatus from 'ee/threat_monitoring/components/alerts/alert_status.vue';
+import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 import { mockAlerts } from '../../mock_data';
 
 const alerts = mockAlerts;
@@ -25,7 +27,9 @@ describe('AlertsList component', () => {
       },
     },
   };
+  const defaultProps = { filters: DEFAULT_FILTERS };
 
+  const findAlertFilters = () => wrapper.find(AlertFilters);
   const findUnconfiguredAlert = () => wrapper.find("[data-testid='threat-alerts-unconfigured']");
   const findErrorAlert = () => wrapper.find("[data-testid='threat-alerts-error']");
   const findStartedAtColumn = () => wrapper.find("[data-testid='threat-alerts-started-at']");
@@ -43,12 +47,14 @@ describe('AlertsList component', () => {
       mocks: {
         $apollo,
       },
+      propsData: defaultProps,
       provide: {
         documentationPath: '#',
         projectPath: '#',
       },
       stubs: {
         AlertStatus: true,
+        AlertFilters: true,
         GlAlert: true,
         GlLoadingIcon: true,
         GlIntersectionObserver: true,
@@ -68,6 +74,22 @@ describe('AlertsList component', () => {
   describe('default state', () => {
     beforeEach(() => {
       createWrapper({ data: { alerts, pageInfo } });
+    });
+
+    it('shows threat monitoring alert filters', () => {
+      expect(findAlertFilters().exists()).toBe(true);
+    });
+
+    it('does have the default filters initially', () => {
+      expect(wrapper.vm.filters).toEqual(DEFAULT_FILTERS);
+    });
+
+    it('does update its filters on filter event emitted', async () => {
+      const newFilters = { statuses: [] };
+      expect(wrapper.vm.filters).toEqual(DEFAULT_FILTERS);
+      findAlertFilters().vm.$emit('filter-change', newFilters);
+      await wrapper.vm.$nextTick();
+      expect(wrapper.vm.filters).toEqual(newFilters);
     });
 
     it('does show all columns', () => {

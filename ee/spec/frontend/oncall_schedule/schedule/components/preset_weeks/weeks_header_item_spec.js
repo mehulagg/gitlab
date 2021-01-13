@@ -48,7 +48,7 @@ describe('WeeksHeaderItemComponent', () => {
 
   describe('timelineHeaderLabel', () => {
     it('returns string containing Year, Month and Date for the first timeframe item in the entire timeframe', () => {
-      expect(findHeaderLabel().text()).toBe('2018 Jan 1');
+      expect(findHeaderLabel().text()).toBe('Jan 1');
     });
 
     it('returns string containing Year, Month and Date for timeframe item that is the first week of the year', () => {
@@ -57,7 +57,7 @@ describe('WeeksHeaderItemComponent', () => {
         timeframeItem: new Date(2019, 0, 6),
       });
 
-      expect(findHeaderLabel().text()).toBe('2019 Jan 6');
+      expect(findHeaderLabel().text()).toBe('Jan 6');
     });
 
     it('returns string containing only Month and Date when timeframe item is somewhere in the middle of the timeframe', () => {

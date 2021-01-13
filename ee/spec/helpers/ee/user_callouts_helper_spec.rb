@@ -141,10 +141,6 @@ RSpec.describe EE::UserCalloutsHelper do
     end
 
     context 'when user needs to upgrade to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(false)
-      end
-
       context 'when user has dismissed' do
         before do
           allow(helper).to receive(:user_dismissed?).and_return(true)
@@ -158,17 +154,8 @@ RSpec.describe EE::UserCalloutsHelper do
           allow(helper).to receive(:user_dismissed?).and_return(false)
         end
 
-        it { is_expected.to be_truthy }
+        it { is_expected.to be_falsey }
       end
-    end
-
-    context 'when user already has access to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(true)
-        allow(helper).to receive(:user_dismissed?).and_return(false)
-      end
-
-      it { is_expected.to be_falsey }
     end
   end
 

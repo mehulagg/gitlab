@@ -45,7 +45,7 @@ module API
 
         def create_list
           create_list_service =
-            ::Boards::Lists::CreateService.new(board_parent, current_user, create_list_params)
+            ::Boards::Lists::CreateService.new(board_parent, current_user, declared_params.compact.with_indifferent_access)
 
           response = create_list_service.execute(board)
 
@@ -54,10 +54,6 @@ module API
           else
             render_api_error!({ error: response.errors.first }, 400)
           end
-        end
-
-        def create_list_params
-          params.slice(:label_id)
         end
 
         def move_list(list)
@@ -84,10 +80,20 @@ module API
           requires :label_id, type: Integer, desc: 'The ID of an existing label'
         end
 
-        params :update_params do
+        params :update_params_ce do
+          optional :name, type: String, desc: 'The board name'
+          optional :hide_backlog_list, type: Grape::API::Boolean, desc: 'Hide the Open list'
+          optional :hide_closed_list, type: Grape::API::Boolean, desc: 'Hide the Closed list'
+        end
+
+        params :update_params_ee do
           # Configurable issue boards are not available in CE/EE Core.
           # https://docs.gitlab.com/ee/user/project/issue_board.html#configurable-issue-boards
-          optional :name, type: String, desc: 'The board name'
+        end
+
+        params :update_params do
+          use :update_params_ce
+          use :update_params_ee
         end
       end
     end

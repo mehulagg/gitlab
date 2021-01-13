@@ -48,8 +48,8 @@ RSpec.describe 'Projects > Audit Events', :js do
       expect(reqs.first.status_code).to eq(200)
     end
 
-    it 'does not have Audit Events button in head nav bar' do
-      visit edit_project_path(project)
+    it 'has Audit Events button in head nav bar' do
+      visit project_audit_events_path(project)
 
       expect(page).to have_link('Audit Events')
     end
@@ -62,7 +62,7 @@ RSpec.describe 'Projects > Audit Events', :js do
   end
 
   it 'has Audit Events button in head nav bar' do
-    visit edit_project_path(project)
+    visit project_audit_events_path(project)
 
     expect(page).to have_link('Audit Events')
   end
@@ -117,9 +117,10 @@ RSpec.describe 'Projects > Audit Events', :js do
         click_link 'Maintainer'
       end
 
-      find(:link, text: 'Settings').click
-
-      click_link 'Audit Events'
+      page.within('.qa-project-sidebar') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
       page.within('.audit-log-table') do
         expect(page).to have_content 'Changed access level from Developer to Maintainer'
@@ -148,7 +149,7 @@ RSpec.describe 'Projects > Audit Events', :js do
       end
 
       page.within('.qa-project-sidebar') do
-        find(:link, text: 'Settings').click
+        find(:link, text: 'Security & Compliance').click
         click_link 'Audit Events'
       end
 

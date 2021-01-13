@@ -38,7 +38,7 @@ export const fetchHasBillableGroupMembers = ({ dispatch, state }) => {
   dispatch('requestHasBillableGroupMembers');
 
   return Api.fetchBillableGroupMembersList(state.namespaceId, { per_page: 1, page: 1 })
-    .then(data => dispatch('receiveHasBillableGroupMembersSuccess', data))
+    .then((data) => dispatch('receiveHasBillableGroupMembersSuccess', data))
     .catch(() => dispatch('receiveHasBillableGroupMembersError'));
 };
 

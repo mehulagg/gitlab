@@ -1,43 +1,38 @@
 <script>
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
-import glFeaturesFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const createButtonProps = (text, href, testId) => ({ text, href, testId });
 
 export default {
   name: 'SubscriptionTable',
   components: {
-    SubscriptionTableRow,
+    GlButton,
     GlLoadingIcon,
+    SubscriptionTableRow,
   },
-  mixins: [glFeaturesFlagMixin()],
-  props: {
-    namespaceName: {
-      type: String,
-      required: true,
-    },
-    customerPortalUrl: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  mixins: [glFeatureFlagsMixin()],
+  inject: {
     planUpgradeHref: {
-      type: String,
-      required: false,
       default: '',
     },
     planRenewHref: {
-      type: String,
-      required: false,
       default: '',
     },
-  },
-  inject: {
+    namespaceId: {
+      default: '',
+    },
+    customerPortalUrl: {
+      default: '',
+    },
+    namespaceName: {
+      default: '',
+    },
     addSeatsHref: {
       default: '',
     },
@@ -65,12 +60,20 @@ export default {
     },
     addSeatsButton() {
       return this.canAddSeats
-        ? createButtonProps(s__('SubscriptionTable|Add seats'), this.addSeatsHref, 'add-seats')
+        ? createButtonProps(
+            s__('SubscriptionTable|Add seats'),
+            this.addSeatsHref,
+            'add-seats-button',
+          )
         : null;
     },
     upgradeButton() {
       return this.canUpgrade
-        ? createButtonProps(s__('SubscriptionTable|Upgrade'), this.upgradeButtonHref)
+        ? createButtonProps(
+            s__('SubscriptionTable|Upgrade'),
+            this.upgradeButtonHref,
+            'upgrade-button',
+          )
         : null;
     },
     upgradeButtonHref() {
@@ -78,12 +81,16 @@ export default {
     },
     renewButton() {
       return this.canRenew
-        ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref)
+        ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
         : null;
     },
     manageButton() {
       return !this.isFreePlan
-        ? createButtonProps(s__('SubscriptionTable|Manage'), this.customerPortalUrl)
+        ? createButtonProps(
+            s__('SubscriptionTable|Manage'),
+            this.customerPortalUrl,
+            'manage-button',
+          )
         : null;
     },
     buttons() {
@@ -108,6 +115,9 @@ export default {
   },
   methods: {
     ...mapActions(['fetchSubscription']),
+    isLast(index) {
+      return index === this.visibleRows.length - 1;
+    },
   },
 };
 </script>
@@ -118,29 +128,31 @@ export default {
       v-if="!isLoadingSubscription && !hasErrorSubscription"
       class="card gl-mt-3 subscription-table js-subscription-table"
     >
-      <div class="js-subscription-header card-header">
+      <div class="card-header" data-testid="subscription-header">
         <strong>{{ subscriptionHeader }}</strong>
         <div class="controls">
-          <a
+          <gl-button
             v-for="(button, index) in buttons"
             :key="button.text"
             :href="button.href"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-inverted-secondary"
             :class="{ 'gl-ml-3': index !== 0 }"
             :data-testid="button.testId"
-            >{{ button.text }}</a
+            category="secondary"
+            target="_blank"
+            variant="info"
+            >{{ button.text }}</gl-button
           >
         </div>
       </div>
-      <div class="card-body flex-grid d-flex flex-column flex-sm-row flex-md-row flex-lg-column">
+      <div
+        class="card-body gl-display-flex gl-flex-column gl-sm-flex-direction-row flex-lg-column flex-grid"
+      >
         <subscription-table-row
           v-for="(row, i) in visibleRows"
           :key="`subscription-rows-${i}`"
+          :last="isLast(i)"
           :header="row.header"
           :columns="row.columns"
-          :is-free-plan="isFreePlan"
         />
       </div>
     </div>

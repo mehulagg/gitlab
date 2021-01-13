@@ -8,7 +8,7 @@ type: howto
 # Installing GitLab on Amazon Web Services (AWS)
 
 This page offers a walkthrough of a common configuration
-for GitLab on AWS. You should customize it to accommodate your needs.
+for GitLab on AWS using the official GitLab Linux package. You should customize it to accommodate your needs.
 
 NOTE:
 For organizations with 1,000 users or less, the recommended AWS installation method is to launch an EC2 single box [Omnibus Installation](https://about.gitlab.com/install/) and implement a snapshot strategy for backing up the data. See the [1,000 user reference architecture](../../administration/reference_architectures/1k_users.md) for more.
@@ -44,22 +44,21 @@ Below is a diagram of the recommended architecture.
 
 ## AWS costs
 
-Here's a list of the AWS services we will use, with links to pricing information:
+GitLab uses the following AWS services, with links to pricing information:
 
-- **EC2**: GitLab will deployed on shared hardware which means
-  [on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
-  will apply. If you want to run it on a dedicated or reserved instance,
-  consult the [EC2 pricing page](https://aws.amazon.com/ec2/pricing/) for more
-  information on the cost.
-- **S3**: We will use S3 to store backups, artifacts, LFS objects, etc. See the
-  [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
-- **ELB**: A Classic Load Balancer will be used to route requests to the
-  GitLab instances. See the [Amazon ELB pricing](https://aws.amazon.com/elasticloadbalancing/pricing/).
-- **RDS**: An Amazon Relational Database Service using PostgreSQL will be used. See the
-  [Amazon RDS pricing](https://aws.amazon.com/rds/postgresql/pricing/).
-- **ElastiCache**: An in-memory cache environment will be used to provide a
-  Redis configuration. See the
-  [Amazon ElastiCache pricing](https://aws.amazon.com/elasticache/pricing/).
+- **EC2**: GitLab is deployed on shared hardware, for which
+  [on-demand pricing](https://aws.amazon.com/ec2/pricing/on-demand/) applies.
+  If you want to run GitLab on a dedicated or reserved instance, see the
+  [EC2 pricing page](https://aws.amazon.com/ec2/pricing/) for information about
+  its cost.
+- **S3**: GitLab uses S3 ([pricing page](https://aws.amazon.com/s3/pricing/)) to
+  store backups, artifacts, and LFS objects.
+- **ELB**: A Classic Load Balancer ([pricing page](https://aws.amazon.com/elasticloadbalancing/pricing/)),
+  used to route requests to the GitLab instances.
+- **RDS**: An Amazon Relational Database Service using PostgreSQL
+  ([pricing page](https://aws.amazon.com/rds/postgresql/pricing/)).
+- **ElastiCache**: An in-memory cache environment ([pricing page](https://aws.amazon.com/elasticache/pricing/)),
+  used to provide a Redis configuration.
 
 ## Create an IAM EC2 instance role and profile
 
@@ -470,7 +469,7 @@ Connect to your GitLab instance via **Bastion Host A** using [SSH Agent Forwardi
 
 #### Disable Let's Encrypt
 
-Since we're adding our SSL certificate at the load balancer, we do not need GitLab's built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
+Since we're adding our SSL certificate at the load balancer, we do not need the GitLab built-in support for Let's Encrypt. Let's Encrypt [is enabled by default](https://docs.gitlab.com/omnibus/settings/ssl.html#lets-encrypt-integration) when using an `https` domain in GitLab 10.7 and later, so we need to explicitly disable it:
 
 1. Open `/etc/gitlab/gitlab.rb` and disable it:
 
@@ -586,7 +585,7 @@ Let's create an EC2 instance where we'll install Gitaly:
 1. Finally, acknowledge that you have access to the selected private key file or create a new one. Click **Launch Instances**.
 
 NOTE:
-Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact GitLab’s performance. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+Instead of storing configuration _and_ repository data on the root volume, you can also choose to add an additional EBS volume for repository storage. Follow the same guidance as above. See the [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/). We do not recommend using EFS as it may negatively impact the performance of GitLab. You can review the [relevant documentation](../../administration/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
 
 Now that we have our EC2 instance ready, follow the [documentation to install GitLab and set up Gitaly on its own server](../../administration/gitaly/index.md#run-gitaly-on-its-own-server). Perform the client setup steps from that document on the [GitLab instance we created](#install-gitlab) above.
 

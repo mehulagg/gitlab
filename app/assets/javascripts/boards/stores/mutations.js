@@ -32,17 +32,19 @@ export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfter
 
 export default {
   [mutationTypes.SET_INITIAL_BOARD_DATA](state, data) {
-    const { boardType, disabled, ...endpoints } = data;
-    state.endpoints = endpoints;
+    const { boardType, disabled, boardId, fullPath, boardConfig } = data;
+    state.boardId = boardId;
+    state.fullPath = fullPath;
     state.boardType = boardType;
     state.disabled = disabled;
+    state.boardConfig = boardConfig;
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, lists) => {
     state.boardLists = lists;
   },
 
-  [mutationTypes.RECEIVE_BOARD_LISTS_FAILURE]: state => {
+  [mutationTypes.RECEIVE_BOARD_LISTS_FAILURE]: (state) => {
     state.error = s__(
       'Boards|An error occurred while fetching the board lists. Please reload the page.',
     );
@@ -57,15 +59,15 @@ export default {
     state.filterParams = filterParams;
   },
 
-  [mutationTypes.CREATE_LIST_FAILURE]: state => {
+  [mutationTypes.CREATE_LIST_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while creating the list. Please try again.');
   },
 
-  [mutationTypes.RECEIVE_LABELS_FAILURE]: state => {
+  [mutationTypes.RECEIVE_LABELS_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while fetching labels. Please reload the page.');
   },
 
-  [mutationTypes.GENERATE_DEFAULT_LISTS_FAILURE]: state => {
+  [mutationTypes.GENERATE_DEFAULT_LISTS_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while generating lists. Please reload the page.');
   },
 
@@ -127,8 +129,8 @@ export default {
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
   },
 
-  [mutationTypes.RESET_ISSUES]: state => {
-    Object.keys(state.issuesByListId).forEach(listId => {
+  [mutationTypes.RESET_ISSUES]: (state) => {
+    Object.keys(state.issuesByListId).forEach((listId) => {
       Vue.set(state.issuesByListId, listId, []);
     });
   },
@@ -204,7 +206,7 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.CREATE_ISSUE_FAILURE]: state => {
+  [mutationTypes.CREATE_ISSUE_FAILURE]: (state) => {
     state.error = s__('Boards|An error occurred while creating the issue. Please try again.');
   },
 

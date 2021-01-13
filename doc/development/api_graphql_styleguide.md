@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GraphQL API style guide
 
-This document outlines the style guide for GitLab's [GraphQL API](../api/graphql/index.md).
+This document outlines the style guide for the GitLab [GraphQL API](../api/graphql/index.md).
 
 ## How GitLab implements GraphQL
 
@@ -19,7 +19,7 @@ which is exposed as an API endpoint at `/api/graphql`.
 ## Deep Dive
 
 In March 2019, Nick Thomas hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`)
-on GitLab's [GraphQL API](../api/graphql/index.md) to share his domain specific knowledge
+on the GitLab [GraphQL API](../api/graphql/index.md) to share his domain specific knowledge
 with anyone who may work in this part of the codebase in the future. You can find the
 [recording on YouTube](https://www.youtube.com/watch?v=-9L_1MWrjkg), and the slides on
 [Google Slides](https://docs.google.com/presentation/d/1qOTxpkTdHIp1CRjuTvO-aXg0_rUtzE3ETfLUdnBB5uQ/edit)
@@ -44,7 +44,7 @@ add a `HTTP_PRIVATE_TOKEN` header.
 
 ## Global IDs
 
-GitLab's GraphQL API uses Global IDs (i.e: `"gid://gitlab/MyObject/123"`)
+The GitLab GraphQL API uses Global IDs (i.e: `"gid://gitlab/MyObject/123"`)
 and never database primary key IDs.
 
 Global ID is [a convention](https://graphql.org/learn/global-object-identification/)
@@ -154,7 +154,7 @@ Further reading:
 
 ### Exposing Global IDs
 
-In keeping with GitLab's use of [Global IDs](#global-ids), always convert
+In keeping with the GitLab use of [Global IDs](#global-ids), always convert
 database primary key IDs into Global IDs when you expose them.
 
 All fields named `id` are
@@ -403,11 +403,11 @@ end
 
 ## Deprecating fields and enum values
 
-GitLab's GraphQL API is versionless, which means we maintain backwards
+The GitLab GraphQL API is versionless, which means we maintain backwards
 compatibility with older versions of the API with every change. Rather
 than removing a field or [enum value](#enums), we need to _deprecate_ it instead.
 The deprecated parts of the schema can then be removed in a future release
-in accordance with [GitLab's deprecation process](../api/graphql/index.md#deprecation-process).
+in accordance with the [GitLab deprecation process](../api/graphql/index.md#deprecation-process).
 
 Fields and enum values are deprecated using the `deprecated` property.
 The value of the property is a `Hash` of:
@@ -760,7 +760,7 @@ To limit the amount of queries performed, we can use [BatchLoader](graphql_guide
 
 ### Writing resolvers
 
-Our code should aim to be thin declarative wrappers around finders and services. You can
+Our code should aim to be thin declarative wrappers around finders and [services](../development/reusing_abstractions.md#service-classes). You can
 repeat lists of arguments, or extract them to concerns. Composition is preferred over
 inheritance in most cases. Treat resolvers like controllers: resolvers should be a DSL
 that compose other application abstractions.
@@ -802,6 +802,32 @@ overhead. If you are writing:
 
 - A `Mutation`, feel free to lookup objects directly.
 - A `Resolver` or methods on a `BaseObject`, then you want to allow for batching.
+
+### Error handling
+
+Resolvers may raise errors, which will be converted to top-level errors as
+appropriate. All anticipated errors should be caught and transformed to an
+appropriate GraphQL error (see
+[`Gitlab::Graphql::Errors`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/graphql/errors.rb)).
+Any uncaught errors will be suppressed and the client will receive the message
+`Internal service error`.
+
+The one special case is permission errors. In the REST API we return
+`404 Not Found` for any resources that the user does not have permission to
+access. The equivalent behavior in GraphQL is for us to return `null` for
+all absent or unauthorized resources.
+Query resolvers **should not raise errors for unauthorized resources**.
+
+The rationale for this is that clients must not be able to distinguish between
+the absence of a record and the presence of one they do not have access to. To
+do so is a security vulnerability, since it leaks information we want to keep
+hidden.
+
+In most cases you don't need to worry about this - this is handled correctly by
+the resolver field authorization we declare with the `authorize` DSL calls. If
+you need to do something more custom however, remember, if you encounter an
+object the `current_user` does not have access to when resolving a field, then
+the entire field should resolve to `null`.
 
 ### Deriving resolvers (`BaseResolver.single` and `BaseResolver.last`)
 
@@ -1080,7 +1106,7 @@ are returned as the result of the mutation.
 
 #### Update mutation granularity
 
-GitLab's service-oriented architecture means that most mutations call a Create, Delete, or Update
+The service-oriented architecture in GitLab means that most mutations call a Create, Delete, or Update
 service, for example `UpdateMergeRequestService`.
 For Update mutations, a you might want to only update one aspect of an object, and thus only need a
 _fine-grained_ mutation, for example `MergeRequest::SetWip`.
@@ -1207,7 +1233,7 @@ These arguments automatically generate an input type called
 
 ### Object identifier arguments
 
-In keeping with GitLab's use of [Global IDs](#global-ids), mutation
+In keeping with the GitLab use of [Global IDs](#global-ids), mutation
 arguments should use Global IDs to identify an object and never database
 primary key IDs.
 
@@ -1229,6 +1255,10 @@ also added, this can be used by the client to identify the result of a
 single mutation when multiple are performed within a single request.
 
 ### The `resolve` method
+
+Similar to [writing resolvers](#writing-resolvers), the `resolve` method of a mutation
+should aim to be a thin declarative wrapper around a
+[service](../development/reusing_abstractions.md#service-classes).
 
 The `resolve` method receives the mutation's arguments as keyword arguments.
 From here, we can call the service that modifies the resource.
@@ -1326,6 +1356,7 @@ Key points:
 - Errors may be reported to users either at `$root.errors` (top-level error) or at
   `$root.data.mutationName.errors` (mutation errors). The location depends on what kind of error
   this is, and what information it holds.
+- Mutation fields [must have `null: true`](https://graphql-ruby.org/mutations/mutation_errors#nullable-mutation-payload-fields)
 
 Consider an example mutation `doTheThing` that returns a response with
 two fields: `errors: [String]`, and `thing: ThingType`. The specific nature of
@@ -1504,7 +1535,7 @@ In the future this may be able to be done using `InputUnions` if
 [this RFC](https://github.com/graphql/graphql-spec/blob/master/rfcs/InputUnion.md)
 is merged.
 
-## GitLab's custom scalars
+## GitLab custom scalars
 
 ### `Types::TimeType`
 
@@ -1669,7 +1700,7 @@ end
 
 ## Notes about Query flow and GraphQL infrastructure
 
-GitLab's GraphQL infrastructure can be found in `lib/gitlab/graphql`.
+The GitLab GraphQL infrastructure can be found in `lib/gitlab/graphql`.
 
 [Instrumentation](https://graphql-ruby.org/queries/instrumentation.html) is functionality
 that wraps around a query being executed. It is implemented as a module that uses the `Instrumentation` class.

@@ -6,8 +6,8 @@ RSpec.describe Projects::TransferService do
   include EE::GeoHelpers
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:group) { create(:group) }
-  let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
+  let_it_be(:group) { create(:group, :public) }
+  let(:project) { create(:project, :repository, :public, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }
 
@@ -61,6 +61,68 @@ RSpec.describe Projects::TransferService do
       end
 
       subject.execute(group)
+    end
+  end
+
+  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
+    before do
+      stub_ee_application_setting(elasticsearch_indexing: true)
+    end
+
+    context 'when visibility level changes' do
+      let_it_be(:group) { create(:group, :private) }
+
+      it 'reindexes the project and associated issues' do
+        expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+
+        subject.execute(group)
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is on' do
+      before do
+        stub_ee_application_setting(elasticsearch_limit_indexing: true)
+      end
+
+      context 'when transferring between a non-indexed namespace and an indexed namespace' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+        end
+
+        it 'invalidates the cache and indexes the project and associated issues' do
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+          subject.execute(group)
+        end
+      end
+
+      context 'when both namespaces are indexed' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+          create(:elasticsearch_indexed_namespace, namespace: project.namespace)
+        end
+
+        it 'does not invalidate the cache and reindexes the project only' do
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+          expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
+
+          subject.execute(group)
+        end
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is off' do
+      it 'does not invalidate the cache and reindexes the project only' do
+        expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+        expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+        expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+        subject.execute(group)
+      end
     end
   end
 end

@@ -19,7 +19,7 @@ describe('AuditEventsApp', () => {
   let store;
 
   const events = [{ foo: 'bar' }];
-  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map(type => ({ type }));
+  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map((type) => ({ type }));
   const exportUrl = 'http://example.com/audit_log_reports.csv';
 
   const initComponent = (props = {}) => {
@@ -30,6 +30,7 @@ describe('AuditEventsApp', () => {
         filterTokenOptions,
         events,
         exportUrl,
+        showFilter: true,
         ...props,
       },
       stubs: {
@@ -123,6 +124,16 @@ describe('AuditEventsApp', () => {
 
     it('does not render the audit events export button', () => {
       expect(wrapper.find(AuditEventsExportButton).exists()).toBe(false);
+    });
+  });
+
+  describe('when the show filter flag is disabled', () => {
+    beforeEach(() => {
+      initComponent({ showFilter: false });
+    });
+
+    it('does not render the audit events filter', () => {
+      expect(wrapper.find(AuditEventsFilter).exists()).toBe(false);
     });
   });
 });

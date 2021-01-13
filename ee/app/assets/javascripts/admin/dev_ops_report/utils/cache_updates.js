@@ -6,7 +6,7 @@ export const addSegmentToCache = (store, segment) => {
     query: devopsAdoptionSegmentsQuery,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.devopsAdoptionSegments.nodes = [...draftData.devopsAdoptionSegments.nodes, segment];
   });
@@ -22,7 +22,7 @@ export const deleteSegmentFromCache = (store, segmentId) => {
     query: devopsAdoptionSegmentsQuery,
   });
 
-  const updatedData = produce(sourceData, draftData => {
+  const updatedData = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
     draftData.devopsAdoptionSegments.nodes = draftData.devopsAdoptionSegments.nodes.filter(
       ({ id }) => id !== segmentId,

@@ -13,7 +13,13 @@
                 "name": "Gemnasium"
             },
             "location": {},
-            "identifiers": [],
+            "identifiers": [
+                {
+                    "type": "GitLab",
+                    "name": "Foo vulnerability",
+                    "value": "foo"
+                }
+            ],
             "links": [
                 {
                     "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1020"
@@ -52,7 +58,13 @@
                 "name": "Gemnasium"
             },
             "location": {},
-            "identifiers": [],
+            "identifiers": [
+                {
+                    "type": "GitLab",
+                    "name": "Bar vulnerability",
+                    "value": "bar"
+                }
+            ],
             "links": [
                 {
                   "name": "CVE-1030",

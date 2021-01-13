@@ -19,6 +19,7 @@ describe('Inline edit form component', () => {
     markdownPreviewPath: '/',
     markdownDocsPath: '/',
     projectPath: '/',
+    projectId: 1,
     projectNamespace: '/',
   };
 
@@ -26,7 +27,7 @@ describe('Inline edit form component', () => {
     vm.$destroy();
   });
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     const Component = Vue.extend(formComponent);
 
     vm = mountComponent(Component, {
@@ -42,7 +43,11 @@ describe('Inline edit form component', () => {
   });
 
   it('renders template selector when templates exists', () => {
-    createComponent({ issuableTemplates: ['test'] });
+    createComponent({
+      issuableTemplates: {
+        test: [{ name: 'test', id: 'test', project_path: 'test', namespace_path: 'test' }],
+      },
+    });
 
     expect(vm.$el.querySelector('.js-issuable-selector-wrap')).not.toBeNull();
   });

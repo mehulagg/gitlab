@@ -22,11 +22,11 @@ describe('isValidConfigurationEntity', () => {
     ...makeEntities(1, { defaultValue: undefined }),
   ];
 
-  it.each(validEntities)('returns true for a valid entity', entity => {
+  it.each(validEntities)('returns true for a valid entity', (entity) => {
     expect(isValidConfigurationEntity(entity)).toBe(true);
   });
 
-  it.each(invalidEntities)('returns false for an invalid entity', invalidEntity => {
+  it.each(invalidEntities)('returns false for an invalid entity', (invalidEntity) => {
     expect(isValidConfigurationEntity(invalidEntity)).toBe(false);
   });
 });
@@ -45,11 +45,11 @@ describe('isValidAnalyzerEntity', () => {
     ...makeAnalyzerEntities(1, { enabled: '' }),
   ];
 
-  it.each(validEntities)('returns true for a valid entity', entity => {
+  it.each(validEntities)('returns true for a valid entity', (entity) => {
     expect(isValidAnalyzerEntity(entity)).toBe(true);
   });
 
-  it.each(invalidEntities)('returns false for an invalid entity', invalidEntity => {
+  it.each(invalidEntities)('returns false for an invalid entity', (invalidEntity) => {
     expect(isValidAnalyzerEntity(invalidEntity)).toBe(false);
   });
 });

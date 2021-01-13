@@ -5,4 +5,4 @@
     .col-md-10
       = render "shared/buttons/project_feature_toggle", label: s_("ProtectedBranch|Toggle code owner approval"), class_list: "js-code-owner-toggle project-feature-toggle is-checked"
       .form-text.text-muted
-        = s_("ProtectedBranch|Pushes that change filenames matched by the CODEOWNERS file will be rejected")
+        = s_("ProtectedBranch|Reject code pushes that change files listed in the CODEOWNERS file.")

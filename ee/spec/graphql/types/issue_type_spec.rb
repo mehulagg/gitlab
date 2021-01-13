@@ -23,14 +23,19 @@ RSpec.describe GitlabSchema.types['Issue'] do
 
     shared_examples 'avoids N+1 queries on blocked' do
       specify do
+        # Warm up table schema and other data (e.g. SAML providers, license)
+        GitlabSchema.execute(query, context: { current_user: user })
+
         control_count = ActiveRecord::QueryRecorder.new { GitlabSchema.execute(query, context: { current_user: user }) }.count
 
         blocked_issue2 = create(:issue, project: project)
         blocking_issue2 = create(:issue, project: project)
         create :issue_link, source: blocked_issue2, target: blocking_issue2, link_type: IssueLink::TYPE_IS_BLOCKED_BY
 
-        # added the +1 due to an existing N+1 with issues
-        expect { GitlabSchema.execute(query, context: { current_user: user }) }.not_to exceed_query_limit(control_count + 1)
+        project2 = create(:project, :public, group: group)
+        create(:issue, project: project2)
+
+        expect { GitlabSchema.execute(query, context: { current_user: user }) }.not_to exceed_query_limit(control_count)
       end
     end
 

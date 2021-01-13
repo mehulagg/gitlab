@@ -76,7 +76,7 @@ export default {
 
     addToSlack() {
       GitlabSlackService.addToSlack(this.slackLinkPath, this.selectedProjectId)
-        .then(response => redirectTo(response.data.add_to_slack_link))
+        .then((response) => redirectTo(response.data.add_to_slack_link))
         .catch(() => Flash(__('Unable to build Slack link.')));
     },
   },

@@ -26,6 +26,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:epic_boards).inverse_of(:group) }
     it { is_expected.to have_many(:provisioned_user_details).inverse_of(:provisioned_by_group) }
     it { is_expected.to have_many(:provisioned_users) }
+    it { is_expected.to have_one(:group_merge_request_approval_setting) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -894,6 +895,44 @@ RSpec.describe Group do
         insights_config = group.insights_config
 
         expect(insights_config).to eq(key: 'monthlyBugsCreated')
+      end
+    end
+  end
+
+  describe "#execute_hooks" do
+    context "group_webhooks", :request_store do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
+      let(:data) { { some: 'info' } }
+
+      before do
+        group.clear_memoization(:feature_available)
+      end
+
+      context 'when group_webhooks feature is enabled' do
+        before do
+          stub_licensed_features(group_webhooks: true)
+        end
+
+        it 'executes the hook' do
+          expect_next_instance_of(WebHookService) do |service|
+            expect(service).to receive(:async_execute).once
+          end
+
+          group.execute_hooks(data, :member_hooks)
+        end
+      end
+
+      context 'when group_webhooks feature is disabled' do
+        before do
+          stub_licensed_features(group_webhooks: false)
+        end
+
+        it 'does not execute the hook' do
+          expect(WebHookService).not_to receive(:new)
+
+          group.execute_hooks(data, :member_hooks)
+        end
       end
     end
   end

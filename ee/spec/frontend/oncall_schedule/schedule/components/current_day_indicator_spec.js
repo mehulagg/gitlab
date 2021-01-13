@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/components/current_day_indicator.vue';
-import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/components/schedule/constants';
 import { useFakeDate } from 'helpers/fake_date';
+import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
 
 describe('CurrentDayIndicator', () => {
   let wrapper;
@@ -12,7 +12,7 @@ describe('CurrentDayIndicator', () => {
   // current indicator will be rendered
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
 
-  function mountComponent() {
+  function createComponent() {
     wrapper = shallowMount(CurrentDayIndicator, {
       propsData: {
         presetType: PRESET_TYPES.WEEKS,
@@ -22,13 +22,12 @@ describe('CurrentDayIndicator', () => {
   }
 
   beforeEach(() => {
-    mountComponent();
+    createComponent();
   });
 
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
   });
 

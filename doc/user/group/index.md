@@ -211,6 +211,61 @@ To remove a member from a group:
 1. (Optional) Select the **Also unassign this user from related issues and merge requests** checkbox.
 1. Click **Remove member**.
 
+## Filter and sort members in a group
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/21727) in GitLab 12.6.
+> - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/228675) in GitLab 13.7.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/289911) in GitLab 13.8.
+
+The following sections illustrate how you can filter and sort members in a group. To view these options,
+navigate to your desired group, go to **Members**, and include the noted search terms.
+
+### Membership filter
+
+By default, inherited and direct members are displayed. The [membership](subgroups/index.md#membership) filter can be used to display only inherited or only direct members.
+
+#### Only display inherited members
+
+Include `Membership` `=` `Inherited` in the search text box.
+
+![Group members filter inherited](img/group_members_filter_inherited_13_7.png)
+
+#### Only display direct members
+
+Include `Membership` `=` `Direct` in the search text box.
+
+![Group members filter direct](img/group_members_filter_direct_13_7.png)
+
+### 2FA filter
+
+[Owner](../permissions.md#group-members-permissions) permissions required.
+
+By default, members with 2FA enabled and disabled are displayed. The 2FA filter can be used to display only members with 2FA enabled or only members with 2FA disabled.
+
+#### Only display members with 2FA enabled
+
+Include `2FA` `=` `Enabled` in the search text box.
+
+![Group members filter 2FA enabled](img/group_members_filter_2fa_enabled_13_7.png)
+
+#### Only display members with 2FA disabled
+
+Include `2FA` `=` `Disabled` in the search text box.
+
+![Group members filter 2FA disabled](img/group_members_filter_2fa_disabled_13_7.png)
+
+### Search
+
+You can search for members by name, username, or email.
+
+![Group members search](img/group_members_search_13_7.png)
+
+### Sort
+
+You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in** in ascending or descending order.
+
+![Group members sort](img/group_members_sort_13_7.png)
+
 ## Changing the default branch protection of a group
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7583) in GitLab 12.9.
@@ -404,7 +459,7 @@ and above.
 
 There are a few limitations compared to project wikis:
 
-- Local Git access is not supported yet.
+- Git LFS is not supported.
 - Group wikis are not included in global search, group exports, backups, and Geo replication.
 - Changes to group wikis don't show up in the group's activity feed.
 - Group wikis [can't be moved](../../api/project_repository_storage_moves.md#limitations) using the project
@@ -582,6 +637,12 @@ request to add a new user to a project through API will not be possible.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate and Gold](https://about.gitlab.com/pricing/) 12.0.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium and Silver](https://about.gitlab.com/pricing/) in 13.1.
 
+NOTE:
+IP Access Restrictions are currently not functioning as expected on GitLab.com. Some users
+may experience blocked Git operations or have difficulties accessing projects. Please
+review the [following bug report](https://gitlab.com/gitlab-org/gitlab/-/issues/271673) for
+more information.
+
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
 underlying projects, issues, etc, by IP address. This can help ensure that
@@ -664,6 +725,9 @@ To enable this feature, navigate to the group settings page, expand the
 **Save group**.
 
 ![Group file template settings](img/group_file_template_settings.png)
+
+To learn how to create templates for issues and merge requests, visit
+[Description templates](../project/description_templates.md).
 
 #### Group-level project templates **(PREMIUM)**
 

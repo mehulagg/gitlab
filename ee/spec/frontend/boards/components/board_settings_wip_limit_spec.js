@@ -62,7 +62,7 @@ describe('BoardSettingsWipLimit', () => {
     });
   };
 
-  const triggerBlur = type => {
+  const triggerBlur = (type) => {
     if (type === 'blur') {
       findInput().vm.$emit('blur');
     }

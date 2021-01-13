@@ -17,6 +17,11 @@ upstream images.
 In the case of CI/CD, the Dependency Proxy receives a request and returns the
 upstream image from a registry, acting as a pull-through cache.
 
+NOTE:
+The Dependency Proxy is not compatible with Docker version 20.x and later.
+If you are using the Dependency Proxy, Docker version 19.x.x is recommended until
+[issue #290944](https://gitlab.com/gitlab-org/gitlab/-/issues/290944) is resolved.
+
 ## Prerequisites
 
 The Dependency Proxy must be [enabled by an administrator](../../../administration/packages/dependency_proxy.md).
@@ -52,14 +57,11 @@ You can use GitLab as a source for your Docker images.
 Prerequisites:
 
 - Your images must be stored on [Docker Hub](https://hub.docker.com/).
-- Docker Hub must be available. Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/241639)
-  for progress on accessing images when Docker Hub is down.
 
 ### Authenticate with the Dependency Proxy
 
-> - [Authentication and support for private groups](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
-> - It was [deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49519) on GitLab 13.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11582) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/packages/dependency_proxy.md#disabling-authentication). **(CORE ONLY)**
@@ -89,7 +91,7 @@ You can authenticate using:
 
 #### Authenticate within CI/CD
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/280582) in 13.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/280582) in GitLab 13.7.
 
 To work with the Dependency Proxy in [GitLab CI/CD](../../../ci/README.md), you can use:
 
@@ -113,6 +115,12 @@ dependency-proxy-pull-master:
     - docker login -u "$CI_DEPENDENCY_PROXY_USER" -p "$CI_DEPENDENCY_PROXY_PASSWORD" "$CI_DEPENDENCY_PROXY_SERVER"
   script:
     - docker pull "$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX"/alpine:latest
+```
+
+`CI_DEPENDENCY_PROXY_SERVER` and `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` include the server port. So if you use `CI_DEPENDENCY_PROXY_SERVER` to log in, for example, you must explicitly include the port in your pull command and vice-versa:
+
+```shell
+docker pull gitlab.example.com:443/my-group/dependency_proxy/containers/alpine:latest
 ```
 
 You can also use [custom environment variables](../../../ci/variables/README.md#custom-environment-variables) to store and access your personal access token or other valid credentials.
@@ -153,11 +161,23 @@ named `DOCKER_AUTH_CONFIG` with a value of:
    }
    ```
 
+   To use `$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` when referencing images, you must explicitly include the port in your `DOCKER_AUTH_CONFIG` value:
+
+   ```json
+   {
+       "auths": {
+           "https://gitlab.example.com:443": {
+               "auth": "(Base64 content from above)"
+           }
+       }
+   }
+   ```
+
 1. Now reference the Dependency Proxy in your base image:
 
    ```yaml
    # .gitlab-ci.yml
-   image: "$CI_SERVER_HOST":"$CI_SERVER_PORT"/groupname/dependency_proxy/containers/node:latest
+   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:latest
    ...
    ```
 
@@ -203,6 +223,9 @@ the [Dependency Proxy API](../../../api/dependency_proxy.md).
 ## Docker Hub rate limits and the Dependency Proxy
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241639) in [GitLab Core](https://about.gitlab.com/pricing/) 13.7.
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+Watch how to [use the Dependency Proxy to help avoid Docker Hub rate limits](https://youtu.be/Nc4nUo7Pq08).
 
 In November 2020, Docker introduced
 [rate limits on pull requests from Docker Hub](https://docs.docker.com/docker-hub/download-rate-limit/).

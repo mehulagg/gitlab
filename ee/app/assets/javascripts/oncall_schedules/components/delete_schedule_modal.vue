@@ -75,7 +75,7 @@ export default {
           }
           this.$refs.deleteScheduleModal.hide();
         })
-        .catch(error => {
+        .catch((error) => {
           this.error = error;
         })
         .finally(() => {

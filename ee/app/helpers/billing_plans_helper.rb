@@ -15,7 +15,7 @@ module BillingPlansHelper
     {
       namespace_id: namespace.id,
       namespace_name: namespace.name,
-      is_group: namespace.group?,
+      is_group: namespace.group?.to_s,
       add_seats_href: add_seats_url(namespace),
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
@@ -90,7 +90,7 @@ module BillingPlansHelper
     css_classes.join(' ')
   end
 
-  def available_plans(plans_data, current_plan)
+  def billing_available_plans(plans_data, current_plan)
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
     plans_data.filter { |plan_data| !plan_data.deprecated? || plan_data.code == current_plan&.code }

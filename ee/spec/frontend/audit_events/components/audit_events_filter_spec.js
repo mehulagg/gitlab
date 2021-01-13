@@ -10,7 +10,8 @@ describe('AuditEventsFilter', () => {
   const value = [{ type: 'project', value: { data: 1, operator: '=' } }];
   const findFilteredSearch = () => wrapper.find(GlFilteredSearch);
   const getAvailableTokens = () => findFilteredSearch().props('availableTokens');
-  const getAvailableTokenProps = type => getAvailableTokens().find(token => token.type === type);
+  const getAvailableTokenProps = (type) =>
+    getAvailableTokens().find((token) => token.type === type);
 
   const initComponent = (props = {}) => {
     wrapper = shallowMount(AuditEventsFilter, {

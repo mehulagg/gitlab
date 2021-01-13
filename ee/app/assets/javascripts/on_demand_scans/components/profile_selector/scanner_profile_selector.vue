@@ -9,13 +9,6 @@ export default {
     ProfileSelector,
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    profiles: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-  },
   inject: {
     scannerProfilesLibraryPath: {
       default: '',
@@ -24,10 +17,17 @@ export default {
       default: '',
     },
   },
+  props: {
+    profiles: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+  },
   computed: {
     formattedProfiles() {
-      return this.profiles.map(profile => {
-        const addSuffix = str =>
+      return this.profiles.map((profile) => {
+        const addSuffix = (str) =>
           this.glFeatures.securityOnDemandScansSiteValidation
             ? `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`
             : str;

@@ -29,6 +29,15 @@ export const siteProfiles = [
     normalizedTargetUrl: 'https://foo.com:443',
     editPath: '/site_profiles/edit/1',
     validationStatus: 'PENDING_VALIDATION',
+    auth: {
+      enabled: true,
+      url: 'https://foo.com/login',
+      usernameField: 'username',
+      passwordField: 'password',
+      username: 'admin',
+    },
+    excludedUrls: 'https://foo.com/logout,https://foo.com/send_mail',
+    requestHeaders: 'log-identifier: dast-active-scan',
   },
   {
     id: 'gid://gitlab/DastSiteProfile/2',
@@ -37,5 +46,10 @@ export const siteProfiles = [
     normalizedTargetUrl: 'https://bar.com:443',
     editPath: '/site_profiles/edit/2',
     validationStatus: 'PASSED_VALIDATION',
+    auth: {
+      enabled: false,
+    },
+    excludedUrls: 'https://bar.com/logout',
+    requestHeaders: 'auth: gitlab-dast',
   },
 ];

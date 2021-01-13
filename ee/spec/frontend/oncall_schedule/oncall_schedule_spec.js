@@ -5,7 +5,7 @@ import ScheduleTimelineSection from 'ee/oncall_schedules/components/schedule/com
 import RotationsListSection from 'ee/oncall_schedules/components/schedule/components/rotations_list_section.vue';
 import * as utils from 'ee/oncall_schedules/components/schedule/utils';
 import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
-import { PRESET_TYPES } from 'ee/oncall_schedules/components/schedule/constants';
+import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockTimezones from './mocks/mockTimezones.json';
 
@@ -22,7 +22,7 @@ describe('On-call schedule', () => {
   const mockWeeksTimeFrame = ['31 Dec 2020', '7 Jan 2021', '14 Jan 2021'];
   const formattedTimezone = '(UTC-09:00) AKST Alaska';
 
-  function mountComponent({ schedule } = {}) {
+  function createComponent({ schedule } = {}) {
     wrapper = extendedWrapper(
       shallowMount(OnCallSchedule, {
         propsData: {
@@ -42,12 +42,11 @@ describe('On-call schedule', () => {
   beforeEach(() => {
     jest.spyOn(utils, 'getTimeframeForWeeksView').mockReturnValue(mockWeeksTimeFrame);
     jest.spyOn(commonUtils, 'getFormattedTimezone').mockReturnValue(formattedTimezone);
-    mountComponent({ schedule: mockSchedule });
+    createComponent({ schedule: mockSchedule });
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');
@@ -63,11 +62,11 @@ describe('On-call schedule', () => {
   });
 
   it('shows timezone info', () => {
-    const shortTz = i18n.scheduleForTz.replace('%{tzShort}', lastTz.identifier);
-    const longTz = formattedTimezone;
+    const timezone = i18n.scheduleForTz.replace('%{timezone}', lastTz.identifier);
+    const offset = `(UTC ${lastTz.formatted_offset})`;
     const description = findSchedule().text();
-    expect(description).toContain(shortTz);
-    expect(description).toContain(longTz);
+    expect(description).toContain(timezone);
+    expect(description).toContain(offset);
   });
 
   it('renders rotations header', () => {

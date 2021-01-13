@@ -2,11 +2,16 @@
 
 module AlertManagement
   # Create alerts coming K8 through gitlab-agent
-  class NetworkAlertService < BaseService
+  class NetworkAlertService
     include Gitlab::Utils::StrongMemoize
     include ::IncidentManagement::Settings
 
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
+
+    def initialize(project, payload)
+      @project = project
+      @payload = payload
+    end
 
     # Users of this service need to check the agent token before calling `execute`.
     # https://gitlab.com/gitlab-org/gitlab/-/issues/292707 will handle token within the service.
@@ -24,8 +29,10 @@ module AlertManagement
 
     private
 
+    attr_reader :project, :payload
+
     def valid_payload_size?
-      Gitlab::Utils::DeepSize.new(params).valid?
+      Gitlab::Utils::DeepSize.new(payload).valid?
     end
 
     def process_request
@@ -78,7 +85,7 @@ module AlertManagement
       strong_memoize(:incoming_payload) do
         Gitlab::AlertManagement::Payload.parse(
           project,
-          params,
+          payload,
           monitoring_tool: MONITORING_TOOL
         )
       end

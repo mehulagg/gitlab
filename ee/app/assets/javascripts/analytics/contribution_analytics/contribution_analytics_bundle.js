@@ -3,12 +3,12 @@ import { sortBy } from 'lodash';
 import ColumnChart from './components/column_chart.vue';
 import { __ } from '~/locale';
 
-const sortByValue = data => sortBy(data, item => item[1]).reverse();
+const sortByValue = (data) => sortBy(data, (item) => item[1]).reverse();
 
-const allValuesEmpty = graphData =>
+const allValuesEmpty = (graphData) =>
   graphData.reduce((acc, data) => acc + Math.min(0, data[1]), 0) === 0;
 
-export default dataEl => {
+export default (dataEl) => {
   if (!dataEl) return;
 
   const data = JSON.parse(dataEl.innerHTML);
@@ -23,7 +23,7 @@ export default dataEl => {
     merge_requests_created: [],
   };
 
-  outputElIds.forEach(id => {
+  outputElIds.forEach((id) => {
     data[id].data.forEach((d, index) => {
       formattedData[id].push([data.labels[index], d]);
     });

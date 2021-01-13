@@ -141,7 +141,7 @@ export default {
       return {
         yAxis: {
           axisLabel: {
-            formatter: value => value,
+            formatter: (value) => value,
           },
           minInterval: 1,
         },
@@ -227,7 +227,7 @@ export default {
             :chart-data="getScatterPlotMainData"
             :selected-metric="getSelectedMetric(chartKeys.scatterplot)"
             @metricTypeChange="
-              metric => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
+              (metric) => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
             "
           >
             <scatterplot
@@ -252,7 +252,7 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.timeBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.timeBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.timeBasedHistogram })
               "
             >
@@ -278,7 +278,7 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.commitBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.commitBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.commitBasedHistogram })
               "
             >

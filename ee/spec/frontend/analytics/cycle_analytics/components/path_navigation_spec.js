@@ -6,7 +6,7 @@ import { transformedStagePathData, issueStage } from '../mock_data';
 describe('PathNavigation', () => {
   let wrapper = null;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     return mount(Component, {
       propsData: {
         stages: transformedStagePathData,
@@ -21,10 +21,8 @@ describe('PathNavigation', () => {
     return wrapper.findAll('.gl-path-button');
   };
 
-  const clickItemAt = index => {
-    pathNavigationItems()
-      .at(index)
-      .trigger('click');
+  const clickItemAt = (index) => {
+    pathNavigationItems().at(index).trigger('click');
   };
 
   beforeEach(() => {
@@ -44,7 +42,7 @@ describe('PathNavigation', () => {
     it('contains all the expected stages', () => {
       const html = wrapper.find(GlPath).html();
 
-      transformedStagePathData.forEach(stage => {
+      transformedStagePathData.forEach((stage) => {
         expect(html).toContain(stage.title);
       });
     });

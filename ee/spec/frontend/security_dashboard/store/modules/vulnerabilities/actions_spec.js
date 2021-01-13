@@ -57,7 +57,7 @@ describe('vulnerabilities count actions', () => {
 describe('vulnerabilities actions', () => {
   const data = mockDataVulnerabilities;
   const params = { filters: { severity: ['critical'] } };
-  const filteredData = mockDataVulnerabilities.filter(vuln => vuln.severity === 'critical');
+  const filteredData = mockDataVulnerabilities.filter((vuln) => vuln.severity === 'critical');
   const pageInfo = {
     page: 1,
     nextPage: 2,
@@ -164,6 +164,18 @@ describe('vulnerabilities actions', () => {
         return testAction(actions.fetchVulnerabilities, {}, state);
       });
     });
+
+    describe('pending request', () => {
+      it('cancels the pending request when a new one is made', () => {
+        const dispatch = jest.fn();
+        const cancel = jest.fn();
+        jest.spyOn(axios.CancelToken, 'source').mockImplementation(() => ({ cancel }));
+        actions.fetchVulnerabilities({ state, dispatch });
+        actions.fetchVulnerabilities({ state, dispatch });
+
+        expect(cancel).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('receiveVulnerabilitiesSuccess', () => {
@@ -222,7 +234,7 @@ describe('vulnerabilities actions', () => {
   });
 });
 
-describe('openModal', () => {
+describe('setModalData', () => {
   let state;
 
   beforeEach(() => {
@@ -232,7 +244,7 @@ describe('openModal', () => {
   it('should commit the SET_MODAL_DATA mutation', () => {
     const vulnerability = mockDataVulnerabilities[0];
 
-    return testAction(actions.openModal, { vulnerability }, state, [
+    return testAction(actions.setModalData, { vulnerability }, state, [
       {
         type: types.SET_MODAL_DATA,
         payload: { vulnerability },
@@ -590,7 +602,7 @@ describe('vulnerability dismissal', () => {
         );
       });
 
-      it('should load the previous page if there is no more vulnerabiliy on the current one and page > 1', () => {
+      it('should load the previous page if there are no more vulnerabilities on the current one and page > 1', () => {
         state.vulnerabilities = [mockDataVulnerabilities[0]];
         state.pageInfo.page = 3;
 
@@ -1044,7 +1056,7 @@ describe('hideDismissalDeleteButtons', () => {
 });
 
 describe('revert vulnerability dismissal', () => {
-  describe('undoDismiss', () => {
+  describe('revertDismissVulnerability', () => {
     const vulnerability = mockDataVulnerabilities[2];
     const url = vulnerability.dismissal_feedback.destroy_vulnerability_feedback_dismissal_path;
     let mock;
@@ -1064,7 +1076,7 @@ describe('revert vulnerability dismissal', () => {
 
       it('should dispatch the request and success actions', () => {
         return testAction(
-          actions.undoDismiss,
+          actions.revertDismissVulnerability,
           { vulnerability },
           {},
           [],
@@ -1085,7 +1097,7 @@ describe('revert vulnerability dismissal', () => {
         const flashError = false;
 
         return testAction(
-          actions.undoDismiss,
+          actions.revertDismissVulnerability,
           { vulnerability, flashError },
           {},
           [],

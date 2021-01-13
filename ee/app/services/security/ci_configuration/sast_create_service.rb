@@ -58,7 +58,7 @@ module Security
         action = attributes_for_commit[:actions].first
 
         Gitlab::Tracking.event(
-          self.class.to_s, action[:action], { label: action[:default_values_overwritten].to_s }
+          self.class.to_s, action[:action], label: action[:default_values_overwritten].to_s
         )
       end
     end

@@ -7,8 +7,8 @@ import { s__, sprintf } from '~/locale';
  * @param {Array} invalidProjects all the projects that failed to be added
  * @returns {String} the invalid projects formated in a user-friendly way
  */
-export const createInvalidProjectMessage = invalidProjects => {
-  const [firstProject, secondProject, ...rest] = invalidProjects.map(project => project.name);
+export const createInvalidProjectMessage = (invalidProjects) => {
+  const [firstProject, secondProject, ...rest] = invalidProjects.map((project) => project.name);
   const translationValues = {
     firstProject,
     secondProject,

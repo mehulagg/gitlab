@@ -186,6 +186,33 @@ RSpec.describe Gitlab::CodeOwners::File do
     end
   end
 
+  describe '#optional_section?' do
+    let(:file_content) do
+      <<~CONTENT
+      *.rb @ruby-owner
+
+      [Required]
+      *_spec.rb @gl-test
+
+      ^[Optional]
+      *_spec.rb @gl-test
+
+      [Partially optional]
+      *.md @gl-docs
+
+      ^[Partially optional]
+      doc/* @gl-docs
+      CONTENT
+    end
+
+    it 'returns whether a section is optional' do
+      expect(file.optional_section?('Required')).to eq(false)
+      expect(file.optional_section?('Optional')).to eq(true)
+      expect(file.optional_section?('Partially optional')).to eq(false)
+      expect(file.optional_section?('Does not exist')).to eq(false)
+    end
+  end
+
   describe '#entry_for_path' do
     shared_examples_for "returns expected matches" do
       context 'for a path without matches' do

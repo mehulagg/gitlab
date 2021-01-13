@@ -66,7 +66,7 @@ export default {
       update(data) {
         const { nodes: issues = [], count, pageInfo = {} } = data[this.namespaceType]?.issues || {};
 
-        const list = issues.map(issue => ({
+        const list = issues.map((issue) => ({
           ...issue,
           labels: issue?.labels?.nodes || [],
           assignees: issue?.assignees?.nodes || [],
@@ -96,7 +96,7 @@ export default {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
   },
   data() {

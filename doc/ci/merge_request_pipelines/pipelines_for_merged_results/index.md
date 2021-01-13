@@ -15,7 +15,9 @@ source branch into a target branch. By default, the CI pipeline runs jobs
 against the source branch.
 
 With *pipelines for merged results*, the pipeline runs as if the changes from
-the source branch have already been merged into the target branch.
+the source branch have already been merged into the target branch. The commit shown for the pipeline does not exist on the source or target branches but represents the combined target and source branches.
+
+![Merge request widget for merged results pipeline](img/merged_result_pipeline.png)
 
 If the pipeline fails due to a problem in the target branch, you can wait until the
 target is fixed and re-run the pipeline.
@@ -56,7 +58,7 @@ To enable pipelines for merged results for your project:
 1. [Configure your CI/CD configuration file](../index.md#configuring-pipelines-for-merge-requests)
    so that the pipeline or individual jobs run for merge requests.
 1. Visit your project's **Settings > General** and expand **Merge requests**.
-1. Check **Enable merged results pipelines.**.
+1. Check **Enable merged results pipelines**.
 1. Click **Save changes**.
 
 WARNING:

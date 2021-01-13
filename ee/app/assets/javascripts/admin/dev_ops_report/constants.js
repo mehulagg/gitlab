@@ -116,4 +116,12 @@ export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {
   DEPLOYS: 'deploysCol',
   ACTIONS: 'actionsCol',
   SCANNING: 'scanningCol',
+  LOCAL_STORAGE_SORT_BY: 'localStorageSortBy',
+  LOCAL_STORAGE_SORT_DESC: 'localStorageSortDesc',
 };
+
+export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY =
+  'devops_adoption_segments_table_sort_by';
+
+export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY =
+  'devops_adoption_segments_table_sort_desc';

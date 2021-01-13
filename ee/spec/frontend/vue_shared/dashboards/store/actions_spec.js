@@ -120,7 +120,7 @@ describe('actions', () => {
 
     const errorMessage =
       'This dashboard is available for public projects, and private projects in groups with a Silver plan.';
-    const selectProjects = count => {
+    const selectProjects = (count) => {
       for (let i = 0; i < count; i += 1) {
         store.dispatch('toggleSelectedProject', {
           id: i,
@@ -128,7 +128,7 @@ describe('actions', () => {
         });
       }
     };
-    const addInvalidProjects = invalid =>
+    const addInvalidProjects = (invalid) =>
       store.dispatch('receiveAddProjectsToDashboardSuccess', {
         added: [],
         invalid,
@@ -318,7 +318,7 @@ describe('actions', () => {
       const searchQueries = [null, undefined, false, NaN];
 
       return Promise.all(
-        searchQueries.map(searchQuery => {
+        searchQueries.map((searchQuery) => {
           store.state.searchQuery = searchQuery;
 
           return testAction(

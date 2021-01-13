@@ -7,7 +7,6 @@ module EE
     override :sidebar_settings_paths
     def sidebar_settings_paths
       super + %w[
-        audit_events#index
         operations#show
       ]
     end
@@ -167,6 +166,8 @@ module EE
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit
@@ -177,6 +178,7 @@ module EE
         projects/threat_monitoring#show
         projects/threat_monitoring#new
         projects/threat_monitoring#edit
+        projects/audit_events#index
       ]
     end
 
@@ -189,6 +191,8 @@ module EE
     def sidebar_on_demand_scans_paths
       %w[
         projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
       ]
     end
 
@@ -279,6 +283,20 @@ module EE
       tabs.any? { |tab| project_nav_tab?(tab) }
     end
 
+    def top_level_link(project)
+      return project_security_dashboard_index_path(project) if project_nav_tab?(:security)
+      return project_audit_events_path(project) if project_nav_tab?(:audit_events)
+
+      project_dependencies_path(project)
+    end
+
+    def top_level_qa_selector(project)
+      return 'security_dashboard_link' if project_nav_tab?(:security)
+      return 'audit_events_settings_link' if project_nav_tab?(:audit_events)
+
+      'dependency_list_link'
+    end
+
     def show_discover_project_security?(project)
       !!current_user &&
         ::Gitlab.com? &&
@@ -325,7 +343,16 @@ module EE
         nav_tabs << :threat_monitoring
       end
 
+      if show_audit_events?(project)
+        nav_tabs << :audit_events
+      end
+
       nav_tabs
+    end
+
+    def show_audit_events?(project)
+      can?(current_user, :read_project_audit_events, project) &&
+        (project.feature_available?(:audit_events) || show_promotions?(current_user))
     end
 
     def remove_message_data(project)

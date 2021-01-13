@@ -84,7 +84,7 @@ export default {
           size: uploadsSize,
         },
       ]
-        .filter(data => data.size !== 0)
+        .filter((data) => data.size !== 0)
         .sort((a, b) => b.size - a.size);
     },
   },

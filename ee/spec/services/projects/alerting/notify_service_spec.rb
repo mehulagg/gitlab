@@ -6,7 +6,7 @@ RSpec.describe Projects::Alerting::NotifyService do
   let_it_be(:project, refind: true) { create(:project) }
 
   describe '#execute' do
-    let(:service) { described_class.new(project, nil, payload) }
+    let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
       {

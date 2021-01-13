@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Metrics upload item render the metrics image component 1`] = `
+<gl-card-stub
+  bodyclass="gl-border-1,gl-border-t-solid,gl-border-gray-100,[object Object]"
+  class="collapsible-card border gl-p-0 gl-mb-5"
+  footerclass=""
+  headerclass="gl-display-flex gl-align-items-center gl-border-b-0 gl-py-3"
+>
+   
+  <div
+    class="gl-display-flex gl-flex-direction-column"
+    data-testid="metric-image-body"
+  >
+    <img
+      class="gl-max-w-full gl-align-self-center"
+      src="test_file_path"
+    />
+  </div>
+</gl-card-stub>
+`;

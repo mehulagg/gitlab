@@ -46,13 +46,13 @@ FactoryBot.define do
       severity { :low }
     end
 
-    ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys.each do |severity_level|
+    ::Enums::Vulnerability.severity_levels.keys.each do |severity_level|
       trait severity_level do
         severity { severity_level }
       end
     end
 
-    ::Vulnerabilities::Finding::REPORT_TYPES.keys.each do |report_type|
+    ::Enums::Vulnerability.report_types.keys.each do |report_type|
       trait report_type do
         report_type { report_type }
       end

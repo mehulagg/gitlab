@@ -21,17 +21,17 @@ RSpec.describe 'Admin interacts with merge requests approvals settings' do
 
   it 'updates instance-level merge request approval settings and enforces project-level ones' do
     page.within('.merge-request-approval-settings') do
-      check 'Prevent approval of merge requests by merge request author'
-      check 'Prevent approval of merge requests by merge request committers'
-      check 'Prevent users from modifying merge request approvers list'
+      check 'Prevent MR approvals by author.'
+      check 'Prevent MR approvals from users who make commits to the MR.'
+      check 'Prevent users from modifying MR approval rules.'
       click_button('Save changes')
     end
 
     visit(admin_push_rule_path)
 
-    expect(find_field('Prevent approval of merge requests by merge request author')).to be_checked
-    expect(find_field('Prevent approval of merge requests by merge request committers')).to be_checked
-    expect(find_field('Prevent users from modifying merge request approvers list')).to be_checked
+    expect(find_field('Prevent MR approvals by author.')).to be_checked
+    expect(find_field('Prevent MR approvals from users who make commits to the MR.')).to be_checked
+    expect(find_field('Prevent users from modifying MR approval rules.')).to be_checked
 
     visit edit_project_path(project)
 

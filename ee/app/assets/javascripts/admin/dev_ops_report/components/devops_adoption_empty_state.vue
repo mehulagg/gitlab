@@ -4,7 +4,6 @@ import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../co
 
 export default {
   name: 'DevopsAdoptionEmptyState',
-  inject: ['emptyStateSvgPath'],
   components: {
     GlEmptyState,
     GlButton,
@@ -12,6 +11,7 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
+  inject: ['emptyStateSvgPath'],
   i18n: DEVOPS_ADOPTION_STRINGS.emptyState,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   props: {

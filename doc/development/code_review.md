@@ -69,14 +69,17 @@ It picks reviewers and maintainers from the list at the
 [engineering projects](https://about.gitlab.com/handbook/engineering/projects/)
 page, with these behaviors:
 
-1. It doesn't pick people whose [GitLab status](../user/profile/index.md#current-status)
-   contains the string 'OOO', or the emoji is `:palm_tree:` or `:beach:`.
+1. It doesn't pick people whose Slack or [GitLab status](../user/profile/index.md#current-status):
+    - contains the string 'OOO', 'PTO', 'Parental Leave', or 'Friends and Family'
+    - emoji is `:palm_tree:`, `:beach:`, `:beach_umbrella:`, `:beach_with_umbrella:`, `:ferris_wheel:`, `:thermometer:`, `:face_with_thermometer:`, `:red_circle:`, `:bulb:`, `:sun_with_face:`.
 1. [Trainee maintainers](https://about.gitlab.com/handbook/engineering/workflow/code-review/#trainee-maintainer)
    are three times as likely to be picked as other reviewers.
-1. People whose [GitLab status](../user/profile/index.md#current-status) emoji
-   is `:large_blue_circle:` are more likely to be picked. This applies to both reviewers and trainee maintainers.
+1. Team members whose Slack or [GitLab status](../user/profile/index.md#current-status) emoji
+   is 🔵 `:large_blue_circle:` are more likely to be picked. This applies to both reviewers and trainee maintainers.
    - Reviewers with `:large_blue_circle:` are two times as likely to be picked as other reviewers.
    - Trainee maintainers with `:large_blue_circle:` are four times as likely to be picked as other reviewers.
+1. People whose [GitLab status](../user/profile/index.md#current-status) emoji
+   is 🔶 `:large_orange_diamond:` are half as likely to be picked. This applies to both reviewers and trainee maintainers.
 1. It always picks the same reviewers and maintainers for the same
    branch name (unless their OOO status changes, as in point 1). It
    removes leading `ce-` and `ee-`, and trailing `-ce` and `-ee`, so
@@ -116,7 +119,7 @@ with [domain expertise](#domain-experts).
    by a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors)**.
 1. If your merge request only includes end-to-end changes (*3*) **or** if the MR author is a [Software Engineer in Test](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa)**
 1. If your merge request includes a new or updated [application limit](https://about.gitlab.com/handbook/product/product-processes/#introducing-application-limits), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**.
-1. If your merge request includes Product Analytics (telemetry) changes, it should be reviewed and approved by a [Product analytics engineer](https://gitlab.com/gitlab-org/growth/product-analytics/engineers).
+1. If your merge request includes Product Intelligence (telemetry or analytics) changes, it should be reviewed and approved by a [Product Intelligence engineer](https://gitlab.com/gitlab-org/growth/product_intelligence/engineers).
 
 - (*1*): Please note that specs other than JavaScript specs are considered backend code.
 - (*2*): We encourage you to seek guidance from a database maintainer if your merge
@@ -505,7 +508,7 @@ and get on with their work quickly.
 
 If you think you are at capacity and are unable to accept any more reviews until
 some have been completed, communicate this through your GitLab status by setting
-the `:red_circle:` emoji and mentioning that you are at capacity in the status
+the 🔴 `:red_circle:` emoji and mentioning that you are at capacity in the status
 text. This guides contributors to pick a different reviewer, helping us to
 meet the SLO.
 

@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -36,7 +36,7 @@ command on your active database server:
 sudo -u gitlab-psql /opt/gitlab/embedded/bin/pg_dump -h /var/opt/gitlab/postgresql -p 5432 -U gitlab-psql -s -f /tmp/structure.sql gitlabhq_production
 ```
 
-If you're not using GitLab's Omnibus package you may have to adjust the paths to
+If you're not using the Omnibus GitLab package you may have to adjust the paths to
 `pg_dump` and the PostgreSQL installation directory to match the paths of your
 configuration.
 

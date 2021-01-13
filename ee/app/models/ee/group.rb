@@ -44,6 +44,7 @@ module EE
       has_many :provisioned_users, through: :provisioned_user_details, source: :user
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
       has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
+      has_one :group_merge_request_approval_setting, inverse_of: :group
 
       has_one :deletion_schedule, class_name: 'GroupDeletionSchedule'
       delegate :deleting_user, :marked_for_deletion_on, to: :deletion_schedule, allow_nil: true
@@ -446,6 +447,18 @@ module EE
         ::Project.select(calculate_sql)
         .where(namespace_id: self_and_descendants.select(:id)).to_sql
       )
+    end
+
+    override :execute_hooks
+    def execute_hooks(data, hooks_scope)
+      super
+
+      return unless feature_available?(:group_webhooks)
+
+      self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
+      self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
+        hook.async_execute(data, hooks_scope.to_s)
+      end
     end
 
     private

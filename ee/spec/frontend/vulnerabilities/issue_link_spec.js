@@ -5,7 +5,7 @@ import { getBinding, createMockDirective } from 'helpers/vue_mock_directive';
 describe('IssueLink component', () => {
   let wrapper;
 
-  const createIssue = options => ({
+  const createIssue = (options) => ({
     title: 'my-issue',
     iid: 12,
     webUrl: 'http://localhost/issues/~/12',
@@ -21,8 +21,8 @@ describe('IssueLink component', () => {
     });
   };
 
-  const findIssueLink = id => wrapper.find(`[data-testid="issue-link-${id}"]`);
-  const findIssueWithState = state =>
+  const findIssueLink = (id) => wrapper.find(`[data-testid="issue-link-${id}"]`);
+  const findIssueWithState = (state) =>
     wrapper.find(state === 'opened' ? 'issue-open-m' : 'issue-close');
 
   afterEach(() => {

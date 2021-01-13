@@ -14,6 +14,7 @@ class License < ApplicationRecord
   EES_FEATURES = %i[
     audit_events
     blocked_issues
+    board_iteration_lists
     code_owners
     code_review_analytics
     contribution_analytics
@@ -71,7 +72,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    deploy_board
     disable_name_update_for_users
     email_additional_text
     epics
@@ -87,6 +87,7 @@ class License < ApplicationRecord
     group_forking_protection
     group_ip_restriction
     group_merge_request_analytics
+    group_merge_request_approval_settings
     group_milestone_project_releases
     group_project_templates
     group_repository_analytics
@@ -98,7 +99,6 @@ class License < ApplicationRecord
     ide_schema_config
     issues_analytics
     jira_issues_integration
-    jira_vulnerabilities_integration
     ldap_group_sync_filter
     merge_pipelines
     merge_request_performance_metrics
@@ -110,7 +110,6 @@ class License < ApplicationRecord
     multiple_group_issue_boards
     object_storage
     operations_dashboard
-    opsgenie_integration
     package_forwarding
     pages_size_limit
     productivity_analytics
@@ -128,6 +127,7 @@ class License < ApplicationRecord
     ci_project_subscriptions
     incident_timeline_view
     oncall_schedules
+    export_user_permissions
   ]
   EEP_FEATURES.freeze
 
@@ -144,10 +144,12 @@ class License < ApplicationRecord
     enforce_pat_expiration
     enterprise_templates
     environment_alerts
+    group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management
     insights
     issuable_health_status
+    jira_vulnerabilities_integration
     license_scanning
     personal_access_token_expiration_policy
     project_activity_analytics
@@ -185,7 +187,6 @@ class License < ApplicationRecord
   # Add on codes that may occur in legacy licenses that don't have a plan yet.
   FEATURES_FOR_ADD_ONS = {
     'GitLab_Auditor_User' => :auditor_user,
-    'GitLab_DeployBoard' => :deploy_board,
     'GitLab_FileLocks' => :file_locks,
     'GitLab_Geo' => :geo
   }.freeze
@@ -239,6 +240,8 @@ class License < ApplicationRecord
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
 
+  CACHE_KEY = :current_license
+
   class << self
     def features_for_plan(plan)
       FEATURES_BY_PLAN.fetch(plan, [])
@@ -257,11 +260,12 @@ class License < ApplicationRecord
     end
 
     def current
-      if RequestStore.active?
-        RequestStore.fetch(:current_license) { load_license }
-      else
-        load_license
-      end
+      cache.fetch(CACHE_KEY, as: License, expires_in: 1.minute) { load_license }
+    end
+
+    def cache
+      Gitlab::SafeRequestStore[:license_cache] ||=
+        Gitlab::JsonCache.new(namespace: :ee, backend: ::Gitlab::ProcessMemoryCache.cache_backend)
     end
 
     def all_plans
@@ -271,7 +275,7 @@ class License < ApplicationRecord
     delegate :block_changes?, :feature_available?, to: :current, allow_nil: true
 
     def reset_current
-      RequestStore.delete(:current_license)
+      cache.expire(CACHE_KEY)
     end
 
     def load_license
@@ -471,7 +475,7 @@ class License < ApplicationRecord
   end
 
   def overage_with_historical_max
-    overage(historical_max_with_default_period)
+    overage(maximum_user_count)
   end
 
   def historical_max(from = nil, to = nil)
@@ -479,12 +483,7 @@ class License < ApplicationRecord
   end
 
   def maximum_user_count
-    [historical_max, daily_billable_users_count].max
-  end
-
-  def historical_max_with_default_period
-    @historical_max_with_default_period ||=
-      historical_max
+    [historical_max(starts_at), daily_billable_users_count].max
   end
 
   def update_trial_setting

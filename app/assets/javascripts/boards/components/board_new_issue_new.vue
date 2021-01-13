@@ -18,13 +18,13 @@ export default {
     GlButton,
   },
   mixins: [glFeatureFlagMixin()],
+  inject: ['groupId', 'weightFeatureAvailable', 'boardWeight'],
   props: {
     list: {
       type: Object,
       required: true,
     },
   },
-  inject: ['groupId', 'weightFeatureAvailable', 'boardWeight'],
   data() {
     return {
       title: '',
@@ -65,8 +65,8 @@ export default {
       return this.addListNewIssue({
         issueInput: {
           title,
-          labelIds: labels?.map(l => l.id),
-          assigneeIds: assignees?.map(a => a?.id),
+          labelIds: labels?.map((l) => l.id),
+          assigneeIds: assignees?.map((a) => a?.id),
           milestoneId: milestone?.id,
           projectPath: this.selectedProject.path,
           weight: weight >= 0 ? weight : null,

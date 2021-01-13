@@ -6,6 +6,7 @@ import { sprintf } from '~/locale';
 import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
 import { accessValue } from './accessors';
 import { REST } from './constants';
+import { reportToSentry } from './utils';
 
 /**
  * Renders the badge for the pipeline graph and the job's dropdown.
@@ -130,6 +131,9 @@ export default {
         : this.cssClassJobName;
     },
   },
+  errorCaptured(err, _vm, info) {
+    reportToSentry('job_item', `error: ${err}, info: ${info}`);
+  },
   methods: {
     hideTooltips() {
       this.$root.$emit('bv::hide::tooltip');
@@ -151,8 +155,7 @@ export default {
       :href="detailsPath"
       :title="tooltipText"
       :class="jobClasses"
-      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none
-      gl-focus-text-decoration-none gl-hover-text-decoration-none"
+      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none"
       data-testid="job-with-link"
       @click.stop="hideTooltips"
       @mouseout="hideTooltips"

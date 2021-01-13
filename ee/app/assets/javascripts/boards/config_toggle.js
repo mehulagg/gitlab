@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 
-export default boardsStore => {
+export default (boardsStore) => {
   const configEl = document.querySelector('.js-board-config');
 
   if (configEl) {
@@ -31,7 +31,7 @@ export default boardsStore => {
         },
       },
       methods: {
-        showPage: page => boardsStore.showPage(page),
+        showPage: (page) => boardsStore.showPage(page),
       },
       template: `
         <div class="gl-ml-3">

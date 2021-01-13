@@ -33,6 +33,7 @@ module EE
 
       def check_against_codeowners(project, branch, paths)
         return if paths.empty?
+        return if ::Feature.enabled?(:push_rules_supersede_code_owners, project, default_enabled: true)
 
         ::Gitlab::CodeOwners::Validator.new(project, branch, paths).execute
       end

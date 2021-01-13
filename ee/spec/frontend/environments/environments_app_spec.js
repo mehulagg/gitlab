@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import CanaryDeploymentBoard from 'ee/environments/components/canary_deployment_callout.vue';
-import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
+import CanaryDeploymentBoard from '~/environments/components/canary_deployment_callout.vue';
+import DeployBoard from '~/environments/components/deploy_board.vue';
 import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
 import { environment } from './mock_data';
@@ -31,7 +31,7 @@ describe('Environment', () => {
     return axios.waitForAll();
   };
 
-  const mockRequest = environmentList => {
+  const mockRequest = (environmentList) => {
     mock.onGet(mockData.endpoint).reply(
       200,
       {

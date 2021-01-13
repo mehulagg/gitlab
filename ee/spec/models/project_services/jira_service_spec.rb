@@ -172,7 +172,69 @@ RSpec.describe JiraService do
         expect(WebMock).to have_requested(:post, 'http://jira.example.com/rest/api/2/issue').with(
           body: { fields: { project: { id: '11223' }, issuetype: { id: '10001' }, summary: '', description: "*ID*: 2\n_Issue_: !" } }.to_json
         ).once
-        expect(issue.attrs[:errors]).to eq(errors)
+        expect(issue.errors).to eq('summary' => 'You must specify a summary of the issue.')
+      end
+    end
+  end
+
+  describe '#configured_to_create_issues_from_vulnerabilities?' do
+    subject(:configured_to_create_issues_from_vulnerabilities) { jira_service.configured_to_create_issues_from_vulnerabilities? }
+
+    context 'when is not active' do
+      before do
+        allow(jira_service).to receive(:active?).and_return(false)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when is active' do
+      before do
+        allow(jira_service).to receive(:active?).and_return(true)
+      end
+
+      context 'and jira_vulnerabilities_integration is disabled' do
+        before do
+          allow(jira_service).to receive(:jira_vulnerabilities_integration_enabled?).and_return(false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'and jira_vulnerabilities_integration is enabled' do
+        before do
+          allow(jira_service).to receive(:jira_vulnerabilities_integration_enabled?).and_return(true)
+        end
+
+        context 'and project key is missing' do
+          before do
+            allow(jira_service).to receive(:project_key).and_return('')
+          end
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'and project key is not missing' do
+          before do
+            allow(jira_service).to receive(:project_key).and_return('GV')
+          end
+
+          context 'and vulnerabilities issue type is missing' do
+            before do
+              allow(jira_service).to receive(:vulnerabilities_issuetype).and_return('')
+            end
+
+            it { is_expected.to be_falsey }
+          end
+
+          context 'and vulnerabilities issue type is not missing' do
+            before do
+              allow(jira_service).to receive(:vulnerabilities_issuetype).and_return('10001')
+            end
+
+            it { is_expected.to be_truthy }
+          end
+        end
       end
     end
   end

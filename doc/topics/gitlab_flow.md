@@ -22,7 +22,7 @@ It offers a simple, transparent, and effective way to work with Git.
 
 When converting to Git, you have to get used to the fact that it takes three steps to share a commit with colleagues.
 Most version control systems have only one step: committing from the working copy to a shared server.
-In Git, you add files from the working copy to the staging area. After that, you commit them to your local repo.
+In Git, you add files from the working copy to the staging area. After that, you commit them to your local repository.
 The third step is pushing to a shared remote repository.
 After getting used to these three steps, the next challenge is the branching model.
 
@@ -224,7 +224,7 @@ Not only does this rewrite history, but it also loses authorship information.
 Rebasing prevents the other authors from being attributed and sharing part of the [`git blame`](https://git-scm.com/docs/git-blame).
 
 If a merge involves many commits, it may seem more difficult to undo.
-You might consider solving this by squashing all the changes into one commit just before merging by using GitLab's [Squash-and-Merge](../user/project/merge_requests/squash_and_merge.md) feature.
+You might consider solving this by squashing all the changes into one commit just before merging by using the GitLab [Squash-and-Merge](../user/project/merge_requests/squash_and_merge.md) feature.
 Fortunately, there is an easy way to undo a merge with all its commits.
 The way to do this is by reverting the merge commit.
 Preserving this ability to revert a merge is a good reason to always use the "no fast-forward" (`--no-ff`) strategy when you merge manually.

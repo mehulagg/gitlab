@@ -14,7 +14,7 @@ export const dastScannerProfiles = (profiles = scannerProfiles) => ({
     project: {
       scannerProfiles: {
         ...defaults,
-        edges: profiles.map(profile => ({
+        edges: profiles.map((profile) => ({
           cursor: '',
           node: profile,
         })),
@@ -28,7 +28,7 @@ export const dastSiteProfiles = (profiles = siteProfiles) => ({
     project: {
       siteProfiles: {
         ...defaults,
-        edges: profiles.map(profile => ({
+        edges: profiles.map((profile) => ({
           cursor: '',
           node: profile,
         })),

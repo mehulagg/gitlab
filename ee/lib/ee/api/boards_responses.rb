@@ -7,22 +7,16 @@ module EE
 
       prepended do
         helpers do
-          # Overrides API::BoardsResponses create_list_params
-          def create_list_params
-            params.slice(:label_id, :milestone_id, :assignee_id)
-          end
-
           # Overrides API::BoardsResponses list_creation_params
           params :list_creation_params do
             optional :label_id, type: Integer, desc: 'The ID of an existing label'
             optional :milestone_id, type: Integer, desc: 'The ID of an existing milestone'
+            optional :iteration_id, type: Integer, desc: 'The ID of an assignee iteration'
             optional :assignee_id, type: Integer, desc: 'The ID of an assignee'
-            exactly_one_of :label_id, :milestone_id, :assignee_id
+            exactly_one_of :label_id, :milestone_id, :iteration_id, :assignee_id
           end
 
-          # Overrides API::BoardsResponses update_params
-          params :update_params do
-            optional :name, type: String, desc: 'The board name'
+          params :update_params_ee do
             optional :assignee_id, type: Integer, desc: 'The ID of a user to associate with board'
             optional :milestone_id, type: Integer, desc: 'The ID of a milestone to associate with board'
             optional :labels, type: String, desc: 'Comma-separated list of label names'

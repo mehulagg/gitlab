@@ -5,6 +5,7 @@ module EE
     module Settings
       module RepositoryController
         extend ActiveSupport::Concern
+        extend ::Gitlab::Utils::Override
 
         prepended do
           before_action :push_rule, only: [:show, :create_deploy_token]
@@ -24,7 +25,8 @@ module EE
         end
 
         # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        def acces_levels_options
+        override :access_levels_options
+        def access_levels_options
           super.merge(
             selected_merge_access_levels: @protected_branch.merge_access_levels.map { |access_level| access_level.user_id || access_level.access_level },
             selected_push_access_levels: @protected_branch.push_access_levels.map { |access_level| access_level.user_id || access_level.access_level },

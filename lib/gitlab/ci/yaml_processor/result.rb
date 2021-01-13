@@ -53,6 +53,10 @@ module Gitlab
           @stages ||= @ci_config.stages
         end
 
+        def included_templates
+          @included_templates ||= @ci_config.included_templates
+        end
+
         def build_attributes(name)
           job = jobs.fetch(name.to_sym, {})
 
@@ -77,6 +81,7 @@ module Gitlab
             options: {
               image: job[:image],
               services: job[:services],
+              allow_failure_criteria: job[:allow_failure_criteria],
               artifacts: job[:artifacts],
               dependencies: job[:dependencies],
               cross_dependencies: job.dig(:needs, :cross_dependency),

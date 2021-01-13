@@ -4,14 +4,16 @@ require 'spec_helper'
 
 RSpec.describe Admin::ElasticsearchController do
   let(:admin) { create(:admin) }
+  let(:helper) { Gitlab::Elastic::Helper.new }
 
   describe 'POST #enqueue_index' do
     before do
       sign_in(admin)
+      allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
     end
 
     it 'starts indexing' do
-      expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+      expect(helper).to(receive(:index_exists?)).and_return(true)
       expect_next_instance_of(::Elastic::IndexProjectsService) do |service|
         expect(service).to receive(:execute)
       end
