@@ -152,6 +152,7 @@ export default {
       },
       resetSamplePayloadConfirmed: false,
       customMapping: null,
+      mapping: [],
       parsingPayload: false,
       currentIntegration: null,
     };
@@ -199,10 +200,10 @@ export default {
         this.selectedIntegration === typeSet.http
       );
     },
-    mappingBuilderFields() {
+    parsedSamplePayload() {
       return this.customMapping?.samplePayload?.payloadAlerFields?.nodes;
     },
-    mappingBuilderMapping() {
+    savedMapping() {
       return this.customMapping?.storedMapping?.nodes;
     },
     hasSamplePayload() {
@@ -257,7 +258,12 @@ export default {
       const { name, apiUrl } = this.integrationForm;
       const variables =
         this.selectedIntegration === typeSet.http
-          ? { name, active: this.active }
+          ? {
+              name,
+              active: this.active,
+              payloadAttributeMappings: this.mapping,
+              payloadExample: this.integrationTestPayload.json,
+            }
           : { apiUrl, active: this.active };
       const integrationPayload = { type: this.selectedIntegration, variables };
 
@@ -335,6 +341,9 @@ export default {
         this.customMapping = res;
         this.integrationTestPayload.json = res?.samplePayload.body;
       });
+    },
+    updateMapping(mapping) {
+      this.mapping = mapping;
     },
   },
 };
@@ -541,8 +550,9 @@ export default {
         >
           <span>{{ $options.i18n.integrationFormSteps.step5.intro }}</span>
           <mapping-builder
-            :payload-fields="mappingBuilderFields"
-            :mapping="mappingBuilderMapping"
+            :parsed-payload="parsedSamplePayload"
+            :saved-mapping="savedMapping"
+            @onMappingUpdate="updateMapping"
           />
         </gl-form-group>
       </div>

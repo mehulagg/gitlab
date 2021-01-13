@@ -41,12 +41,12 @@ export default {
     GlTooltip,
   },
   props: {
-    payloadFields: {
+    parsedPayload: {
       type: Array,
       required: false,
       default: () => [],
     },
-    mapping: {
+    savedMapping: {
       type: Array,
       required: false,
       default: () => [],
@@ -63,13 +63,21 @@ export default {
     },
   },
   computed: {
+    payloadFields() {
+      return this.parsedPayload.map((field) => ({
+        ...field,
+        name: field.path.join('.'),
+      }));
+    },
     mappingData() {
       return this.gitlabFields.map((gitlabField) => {
+        // match by type
         const mappingFields = this.payloadFields.filter(({ type }) =>
-          type.some((t) => gitlabField.compatibleTypes.includes(t)),
+          gitlabField.compatibleTypes.includes(type),
         );
 
-        const foundMapping = this.mapping.find(
+        // find mapping if provided
+        const foundMapping = this.savedMapping.find(
           ({ alertFieldName }) => alertFieldName === gitlabField.name,
         );
 
@@ -85,12 +93,28 @@ export default {
         };
       });
     },
+    mapping() {
+      return this.mappingData.reduce((acc, field) => {
+        const mapped = field.mappingFields.find(({ name }) => name === field.mapping);
+        if (mapped) {
+          const { path, type, label } = mapped;
+          acc.push({
+            fieldName: field.name,
+            path,
+            type,
+            label,
+          });
+        }
+        return acc;
+      }, []);
+    },
   },
   methods: {
     setMapping(gitlabKey, mappingKey, valueKey) {
       const fieldIndex = this.gitlabFields.findIndex((field) => field.name === gitlabKey);
       const updatedField = { ...this.gitlabFields[fieldIndex], ...{ [valueKey]: mappingKey } };
       Vue.set(this.gitlabFields, fieldIndex, updatedField);
+      this.$emit('onMappingUpdate', this.mapping);
     },
     setSearchTerm(search = '', searchFieldKey, gitlabKey) {
       const fieldIndex = this.gitlabFields.findIndex((field) => field.name === gitlabKey);
