@@ -7,8 +7,6 @@ module Types
 
     authorize :create_on_demand_dast_scan
 
-    expose_permissions Types::PermissionTypes::DastSiteProfile
-
     field :id, ::Types::GlobalIDType[::DastScan], null: false,
           description: 'ID of the scan.'
 
