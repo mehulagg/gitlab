@@ -153,9 +153,8 @@ Users are notified of the following events:
 | Project access level changed | User                | Sent when user project access level is changed |
 | User added to group          | User                | Sent when user is added to group |
 | Group access level changed   | User                | Sent when user group access level is changed |
-| Personal Access Tokens expiring soon | User          | Security email, always sent. |
-<!-- Do not delete or lint this instance of future tense -->
-| Personal Access Tokens have expired | User         | Security email, always sent. |
+| Personal Access Token expires soon | User          | Security email, always sent. |
+| Personal Access Token has expired  | User          | Security email, always sent. |
 | Project moved                | Project members (1) | (1) not disabled             |
 | New release                  | Project members     | Custom notification          |
 
