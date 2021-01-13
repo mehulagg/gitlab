@@ -304,6 +304,20 @@ for more information.
 Additional metadata can be attached to a worker through the use of the [`ApplicationWorker#log_extra_metadata_on_done`](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/concerns/application_worker.rb#L31-34)
 method. Using this method will add metadata that will later be logged with the done job payload to Kibana.
 
+```ruby
+class MyExampleWorker
+  include ApplicationWorker
+
+  def perform(*args)
+    # Worker performs work
+    # ...
+    
+    # The contents of value will appear in Kibana under `json.extra.my_example_worker.my_key`
+    log_extra_metadata_on_done(:my_key, value)
+  end
+end
+```
+
 Please see [this example](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/ci/pipeline_artifacts/expire_artifacts_worker.rb#L20-21)
 which logs a count of how many artifacts were destroyed in a run of the `ExpireArtifactsWorker`.
 
