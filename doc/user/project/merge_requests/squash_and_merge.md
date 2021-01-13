@@ -133,31 +133,6 @@ NOTE: **Note:**
 If your project is set to **Do not allow** Squash and Merge, the users still have the option to
 squash commits locally through the command line and force-push to their remote branch before merging.
 
-### Enable or disable Squash Commit Options **(CORE ONLY)**
-
-Squash Commit Options is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-# Instance-wide
-Feature.enable(:squash_options)
-# or by project
-Feature.enable(:squash_options, Project.find(<project ID>))
-```
-
-To disable it:
-
-```ruby
-# Instance-wide
-Feature.disable(:squash_options)
-# or by project
-Feature.disable(:squash_options, Project.find(<project ID>))
-```
-
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
