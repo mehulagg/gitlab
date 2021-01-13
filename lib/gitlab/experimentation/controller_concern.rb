@@ -15,7 +15,8 @@ module Gitlab
 
       included do
         before_action :set_experimentation_subject_id_cookie, unless: :dnt_enabled?
-        helper_method :experiment_enabled?, :experiment_tracking_category_and_group, :tracking_label
+        helper_method :experiment_enabled?, :record_experiment_user, :record_experiment_subject,
+          :record_experiment_conversion_event, :experiment_tracking_category_and_group, :tracking_label
       end
 
       def set_experimentation_subject_id_cookie
@@ -65,15 +66,27 @@ module Gitlab
         return if dnt_enabled?
         return unless Experimentation.active?(experiment_key) && current_user
 
-        ::Experiment.add_user(experiment_key, tracking_group(experiment_key, nil, subject: current_user), current_user, context)
+        group_type = tracking_group(experiment_key, nil, subject: current_user)
+        ::Experiment.add_user(experiment_key, group_type, current_user, context)
       end
 
-      def record_experiment_conversion_event(experiment_key)
+      def record_experiment_subject(experiment_key, subject)
         return if dnt_enabled?
-        return unless current_user
+        return unless Experimentation.active?(experiment_key) && subject
+
+        variant = tracking_group(experiment_key, nil, subject: subject)
+        ::Experiment.add_subject(experiment_key, subject, variant)
+      end
+
+      def record_experiment_conversion_event(experiment_key, subject: nil)
+        have_subject = subject.present?
+
+        return if dnt_enabled?
+        return if !have_subject && !current_user
         return unless Experimentation.active?(experiment_key)
 
-        ::Experiment.record_conversion_event(experiment_key, current_user)
+        subject = have_subject? ? subject : current_user
+        ::Experiment.record_conversion_event(experiment_key, subject, as_subject: have_subject)
       end
 
       def experiment_tracking_category_and_group(experiment_key, subject: nil)
