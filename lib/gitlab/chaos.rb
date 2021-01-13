@@ -47,5 +47,10 @@ module Gitlab
     def self.kill
       Process.kill("KILL", Process.pid)
     end
+
+    def self.run_gc
+      GC.start
+      GC.stat
+    end
   end
 end
