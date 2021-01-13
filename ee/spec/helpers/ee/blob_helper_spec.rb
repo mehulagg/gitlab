@@ -32,7 +32,7 @@ RSpec.describe BlobHelper do
         .and_return([OpenStruct.new(key: 'name', name: 'Name')])
 
       expect(categories).to contain_exactly(:Popular, :Other, group_category)
-      expect(by_group).to contain_exactly({ id: 'name', name: 'Name', project_id: project.id })
+      expect(by_group).to contain_exactly({ id: 'name', name: 'Name' })
       expect(by_popular).to be_present
       expect(by_other).to be_present
     end
@@ -46,7 +46,7 @@ RSpec.describe BlobHelper do
         .and_return([OpenStruct.new(key: 'name', name: 'Name')])
 
       expect(categories).to contain_exactly(:Popular, :Other, 'Instance')
-      expect(by_instance).to contain_exactly({ id: 'name', name: 'Name', project_id: project.id })
+      expect(by_instance).to contain_exactly({ id: 'name', name: 'Name' })
       expect(by_popular).to be_present
       expect(by_other).to be_present
     end

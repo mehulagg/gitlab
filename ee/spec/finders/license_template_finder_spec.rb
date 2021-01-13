@@ -7,7 +7,7 @@ RSpec.describe LicenseTemplateFinder do
 
   let(:params) { {} }
   let(:fake_template_source) { double(::Gitlab::CustomFileTemplates) }
-  let(:custom_template) { ::LicenseTemplate.new(key: 'foo', name: 'foo', project: project, category: nil, content: 'Template') }
+  let(:custom_template) { ::LicenseTemplate.new(key: 'foo', name: 'foo', category: nil, content: 'Template') }
   let(:custom_templates) { [custom_template] }
 
   subject(:finder) { described_class.new(project, params) }
@@ -23,7 +23,7 @@ RSpec.describe LicenseTemplateFinder do
 
       allow(fake_template_source)
         .to receive(:find)
-        .with(custom_template.key, nil)
+        .with(custom_template.key)
         .and_return(custom_template)
 
       allow(fake_template_source)

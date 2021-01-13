@@ -20,8 +20,6 @@ RSpec.describe TemplateFinder do
       :dockerfiles    | ::Gitlab::Template::CustomDockerfileTemplate
       :gitignores     | ::Gitlab::Template::CustomGitignoreTemplate
       :gitlab_ci_ymls | ::Gitlab::Template::CustomGitlabCiYmlTemplate
-      :issues         | ::Gitlab::Template::IssueTemplate
-      :merge_requests | ::Gitlab::Template::MergeRequestTemplate
     end
 
     with_them do
@@ -35,7 +33,7 @@ RSpec.describe TemplateFinder do
 
         allow(fake_template_source)
           .to receive(:find)
-          .with(custom_template.key, nil)
+          .with(custom_template.key)
           .and_return(custom_template)
 
         allow(fake_template_source)

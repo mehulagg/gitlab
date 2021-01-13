@@ -19,7 +19,7 @@ module EE
       return super unless custom_templates?
 
       if params[:name]
-        custom_templates.find(params[:name], params[:source_template_project_id]) || super
+        custom_templates.find(params[:name]) || super
       else
         custom_templates.all + super
       end
