@@ -95,12 +95,12 @@ ensure that deployments do not happen unexpectedly.
   
 ## Setting appropriate roles to your project
  
-1. GitLab supports several different [roles](../../user/permissions.md#group-members-permissions) that can be assigned to your project members
-  1. Guest - Has the lowest level of permissions
-  1. Reporter
-  1. Developer
-  1. Maintainer - includes project settings (including protected configurations) - has access to production environment
-  1. Owner - Highest level of permissions - Full access to all project features
+GitLab supports several different [roles](../../user/permissions.md#group-members-permissions) that can be assigned to your project members
+1. Guest - Has the lowest level of permissions
+1. Reporter
+1. Developer
+1. Maintainer - includes project settings (including protected configurations) - has access to production environment
+1. Owner - Highest level of permissions - Full access to all project features
  
 [!7 tips to secure your pipelines]<iframe width="560" height="315" src="https://www.youtube.com/embed/Mq3C1KveDc0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
  
