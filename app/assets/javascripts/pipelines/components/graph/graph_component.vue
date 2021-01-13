@@ -116,21 +116,9 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
-      :id="containerId"
-      :ref="containerId"
       class="gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
       :class="{ 'gl-pipeline-min-h gl-py-5': !isLinkedPipeline }"
     >
-      <links-layer
-        :pipeline-data="graph"
-        :pipeline-id="pipeline.id"
-        :container-id="containerId"
-        :container-measurements="measurements"
-        :highlighted-job="hoveredJobName"
-        default-link-color="gl-stroke-transparent"
-        @error="onError"
-        @highlightedJobsChange="updateHighlightedJobs"
-      >
         <linked-graph-wrapper>
           <template #upstream>
             <linked-pipelines-column
@@ -142,19 +130,35 @@ export default {
             />
           </template>
           <template #main>
-            <stage-column-component
-              v-for="stage in graph"
-              :key="stage.name"
-              :title="stage.name"
-              :groups="stage.groups"
-              :action="stage.status.action"
-              :highlighted-jobs="highlightedJobs"
-              :job-hovered="hoveredJobName"
-              :pipeline-expanded="pipelineExpanded"
-              :pipeline-id="pipeline.id"
-              @refreshPipelineGraph="$emit('refreshPipelineGraph')"
-              @jobHover="setJob"
-            />
+            <div
+              :id="containerId"
+              :ref="containerId"
+            >
+              <links-layer
+                :pipeline-data="graph"
+                :pipeline-id="pipeline.id"
+                :container-id="containerId"
+                :container-measurements="measurements"
+                :highlighted-job="hoveredJobName"
+                default-link-color="gl-stroke-transparent"
+                @error="onError"
+                @highlightedJobsChange="updateHighlightedJobs"
+              >
+                <stage-column-component
+                  v-for="stage in graph"
+                  :key="stage.name"
+                  :title="stage.name"
+                  :groups="stage.groups"
+                  :action="stage.status.action"
+                  :highlighted-jobs="highlightedJobs"
+                  :job-hovered="hoveredJobName"
+                  :pipeline-expanded="pipelineExpanded"
+                  :pipeline-id="pipeline.id"
+                  @refreshPipelineGraph="$emit('refreshPipelineGraph')"
+                  @jobHover="setJob"
+                />
+              </links-layer>
+            </div>
           </template>
           <template #downstream>
             <linked-pipelines-column
@@ -168,7 +172,6 @@ export default {
             />
           </template>
         </linked-graph-wrapper>
-      </links-layer>
     </div>
   </div>
 </template>
