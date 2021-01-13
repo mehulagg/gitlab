@@ -3,7 +3,7 @@
 require 'fast_spec_helper'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/changelog'
+require_relative '../../../../danger/lib/gitlab/danger/changelog'
 
 RSpec.describe Gitlab::Danger::Changelog do
   include DangerSpecHelper

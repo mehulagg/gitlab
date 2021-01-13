@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/gitlab/danger/helper'
+require_relative '../lib/gitlab/danger/helper'
 
 module Danger
   # Common helper functions for our danger scripts. See Gitlab::Danger::Helper

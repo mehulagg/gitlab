@@ -2,9 +2,9 @@
 
 require 'webmock/rspec'
 require 'timecop'
-
-require 'gitlab/danger/roulette'
 require 'active_support/testing/time_helpers'
+
+require_relative '../../../../danger/lib/gitlab/danger/roulette'
 
 RSpec.describe Gitlab::Danger::Roulette do
   include ActiveSupport::Testing::TimeHelpers

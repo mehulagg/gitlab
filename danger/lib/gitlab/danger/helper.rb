@@ -56,7 +56,7 @@ module Gitlab
 
       def ee?
         # Support former project name for `dev` and support local Danger run
-        %w[gitlab gitlab-ee].include?(ENV['CI_PROJECT_NAME']) || Dir.exist?(File.expand_path('../../../ee', __dir__))
+        %w[gitlab gitlab-ee].include?(ENV['CI_PROJECT_NAME']) || Dir.exist?(File.expand_path('../../../../ee', __dir__))
       end
 
       def gitlab_helper
@@ -171,7 +171,7 @@ module Gitlab
         %r{\Alefthook.yml\z} => :engineering_productivity,
         %r{\A\.editorconfig\z} => :engineering_productivity,
         %r{Dangerfile\z} => :engineering_productivity,
-        %r{\A(ee/)?(danger/|lib/gitlab/danger/)} => :engineering_productivity,
+        %r{\Adanger/} => :engineering_productivity,
         %r{\A(ee/)?scripts/} => :engineering_productivity,
         %r{\Atooling/} => :engineering_productivity,
         %r{(CODEOWNERS)} => :engineering_productivity,

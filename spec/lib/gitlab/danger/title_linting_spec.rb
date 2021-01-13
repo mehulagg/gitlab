@@ -3,7 +3,7 @@
 require 'fast_spec_helper'
 require 'rspec-parameterized'
 
-require 'gitlab/danger/title_linting'
+require_relative '../../../../danger/lib/gitlab/danger/title_linting'
 
 RSpec.describe Gitlab::Danger::TitleLinting do
   using RSpec::Parameterized::TableSyntax

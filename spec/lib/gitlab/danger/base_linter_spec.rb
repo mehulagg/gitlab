@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 require 'rspec-parameterized'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/base_linter'
+require_relative '../../../../danger/lib/gitlab/danger/base_linter'
 
 RSpec.describe Gitlab::Danger::BaseLinter do
   let(:commit_class) do

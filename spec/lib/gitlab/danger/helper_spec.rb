@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 require 'rspec-parameterized'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/helper'
+require_relative '../../../../danger/lib/gitlab/danger/helper'
 
 RSpec.describe Gitlab::Danger::Helper do
   using RSpec::Parameterized::TableSyntax

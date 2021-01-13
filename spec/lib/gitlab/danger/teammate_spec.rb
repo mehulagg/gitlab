@@ -2,9 +2,9 @@
 
 require 'timecop'
 require 'rspec-parameterized'
-
-require 'gitlab/danger/teammate'
 require 'active_support/testing/time_helpers'
+
+require_relative '../../../../danger/lib/gitlab/danger/teammate'
 
 RSpec.describe Gitlab::Danger::Teammate do
   using RSpec::Parameterized::TableSyntax

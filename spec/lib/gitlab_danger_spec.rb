@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
+require_relative '../../danger/lib/gitlab_danger'
 
 RSpec.describe GitlabDanger do
   let(:gitlab_danger_helper) { nil }

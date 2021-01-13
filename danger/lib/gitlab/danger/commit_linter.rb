@@ -1,15 +1,7 @@
 # frozen_string_literal: true
 
-emoji_checker_path = File.expand_path('emoji_checker', __dir__)
-base_linter_path = File.expand_path('base_linter', __dir__)
-
-if defined?(Rails)
-  require_dependency(base_linter_path)
-  require_dependency(emoji_checker_path)
-else
-  require_relative(base_linter_path)
-  require_relative(emoji_checker_path)
-end
+require_relative 'base_linter'
+require_relative 'emoji_checker'
 
 module Gitlab
   module Danger

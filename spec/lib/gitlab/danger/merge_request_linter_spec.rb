@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 require 'rspec-parameterized'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/merge_request_linter'
+require_relative '../../../../danger/lib/gitlab/danger/merge_request_linter'
 
 RSpec.describe Gitlab::Danger::MergeRequestLinter do
   using RSpec::Parameterized::TableSyntax
