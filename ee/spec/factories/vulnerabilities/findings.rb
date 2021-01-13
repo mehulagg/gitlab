@@ -34,7 +34,7 @@ FactoryBot.define do
               diff: Base64.encode64(
                 File.read(
                   File.join(
-                    Rails.root.join('ee/spec/fixtures/security_reports/remediations'), "remediation.patch")
+                    Rails.root.join('spec/fixtures/security_reports/remediations'), "remediation.patch")
                 ))
             }
           ]

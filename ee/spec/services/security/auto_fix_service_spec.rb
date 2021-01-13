@@ -8,7 +8,7 @@ RSpec.describe Security::AutoFixService do
 
     let(:pipeline) { create(:ee_ci_pipeline, :success, project: project) }
     let(:project) { create(:project, :custom_repo, files: { 'yarn.lock' => yarn_lock_content }) }
-    let(:remediations_folder) { Rails.root.join('ee/spec/fixtures/security_reports/remediations') }
+    let(:remediations_folder) { Rails.root.join('spec/fixtures/security_reports/remediations') }
 
     let(:yarn_lock_content) do
       File.read(

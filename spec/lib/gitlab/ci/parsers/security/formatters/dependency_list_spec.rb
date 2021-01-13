@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
   let(:parsed_report) do
     Gitlab::Json.parse!(
       File.read(
-        Rails.root.join('ee/spec/fixtures/security_reports/dependency_list/gl-dependency-scanning-report.json')
+        Rails.root.join('spec/fixtures/security_reports/dependency_list/gl-dependency-scanning-report.json')
       )
     )
   end
