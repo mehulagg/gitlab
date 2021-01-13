@@ -200,7 +200,7 @@ class IssuableBaseService < BaseService
       issuable.assign_attributes(params)
 
       if has_title_or_description_changed?(issuable)
-        issuable.assign_attributes(last_edited_at: Time.current, last_edited_by: current_user)
+        issuable.assign_attributes(last_edited_at: (params[:updated_at] || Time.current), last_edited_by: current_user)
       end
 
       before_update(issuable)
