@@ -25,8 +25,12 @@ module EE
         end
       end
 
+      def group_relation
+        ::Group.includes(:route, :owners, group_wiki_repository: :shard) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
       def find_groups_in_batches(&block)
-        ::Group.find_each(batch_size: 1000) do |group| # rubocop: disable CodeReuse/ActiveRecord
+        group_relation.find_each(batch_size: 1000) do |group| # rubocop: disable CodeReuse/ActiveRecord
           yield(group)
         end
       end
@@ -64,7 +68,7 @@ module EE
       end
 
       def groups_in_storage(storage)
-        ::Group.id_in(GroupWikiRepository.for_repository_storage(storage).select(:group_id))
+        group_relation.id_in(GroupWikiRepository.for_repository_storage(storage).select(:group_id))
       end
     end
   end
