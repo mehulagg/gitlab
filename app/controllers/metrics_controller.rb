@@ -19,9 +19,6 @@ class MetricsController < ActionController::Base
   end
 
   def system
-    # perform a major mark-and-sweep before collecting stats
-    GC.start
-
     render json: system_metrics
   end
 
