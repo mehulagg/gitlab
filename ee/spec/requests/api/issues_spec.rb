@@ -713,6 +713,7 @@ RSpec.describe API::Issues, :mailer do
         subject
 
         expect(response).to have_gitlab_http_status(:no_content)
+        expect { image.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 
@@ -721,6 +722,7 @@ RSpec.describe API::Issues, :mailer do
         subject
 
         expect(response).to have_gitlab_http_status(:not_found)
+        expect(image.reload).to eq(image)
       end
     end
 
@@ -742,6 +744,23 @@ RSpec.describe API::Issues, :mailer do
       end
 
       it_behaves_like "#{params[:expected_status]}"
+    end
+
+    context 'user has access' do
+      before do
+        project.add_reporter(user2)
+      end
+
+      context 'metric image not found' do
+        subject { delete api("/projects/#{project.id}/issues/#{issue.iid}/metric_images/#{non_existing_record_id}", user2) }
+
+        it 'returns an error' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq('Metric image could not be deleted')
+        end
+      end
     end
   end
 

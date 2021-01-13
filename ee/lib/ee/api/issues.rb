@@ -84,7 +84,7 @@ module EE
               if metric_image&.destroy
                 no_content!
               else
-                render_api_error!('Metric image not found', 404)
+                render_api_error!('Metric image could not be deleted', 400)
               end
             end
           end
