@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative '../../../../tooling/lib/tooling/test_map_generator'
-require_relative '../../../support/helpers/file_read_helpers'
+require_relative '../../tooling/test_map_generator'
+require_relative '../support/helpers/file_read_helpers'
 
 RSpec.describe Tooling::TestMapGenerator do
   include FileReadHelpers

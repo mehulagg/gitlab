@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require_relative '../tooling/lib/tooling/test_map_packer'
+require_relative '../tooling/test_map_packer'
 
 packed_json_mapping, unpacked_json_mapping = ARGV.shift(2)
 unless packed_json_mapping && unpacked_json_mapping

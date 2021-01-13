@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../../tooling/lib/tooling/test_map_packer'
+require_relative '../../tooling/test_map_packer'
 
 RSpec.describe Tooling::TestMapPacker do
   subject { described_class.new }

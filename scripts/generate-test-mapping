@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require_relative '../tooling/lib/tooling/test_map_generator'
+require_relative '../tooling/test_map_generator'
 
 test_mapping_json = ARGV.shift
 crystalball_yamls = ARGV
