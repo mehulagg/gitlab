@@ -749,3 +749,7 @@ For Maven builds, add the following to your `pom.xml` file:
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 </properties>
 ```
+
+### Flawfinder Encoding Error
+
+This occurs when Flawfinder encounters invalid utf8 character. You can fix this by converting all the source code in your project to utf8. This can be done with [cvt2utf](https://github.com/x1angli/cvt2utf) or [iconv](https://www.gnu.org/software/libiconv/documentation/libiconv-1.13/iconv.1.html). 
