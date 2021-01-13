@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative '../../../lib/gitlab/popen' unless defined?(Gitlab::Popen)
-require_relative '../../../lib/gitlab/json' unless defined?(Gitlab::JSON)
+require_relative '../lib/gitlab/popen' unless defined?(Gitlab::Popen)
+require_relative '../lib/gitlab/json' unless defined?(Gitlab::JSON)
 
 module Tooling
   class KubernetesClient

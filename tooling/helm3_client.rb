@@ -2,7 +2,7 @@
 
 require 'time'
 require 'json'
-require_relative '../../../lib/gitlab/popen' unless defined?(Gitlab::Popen)
+require_relative '../lib/gitlab/popen' unless defined?(Gitlab::Popen)
 
 module Tooling
   class Helm3Client

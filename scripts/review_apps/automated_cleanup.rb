@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require 'gitlab'
-require_relative File.expand_path('../../tooling/lib/tooling/helm3_client.rb', __dir__)
-require_relative File.expand_path('../../tooling/lib/tooling/kubernetes_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/helm3_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/kubernetes_client.rb', __dir__)
 
 class AutomatedCleanup
   attr_reader :project_path, :gitlab_token

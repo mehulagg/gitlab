@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../../tooling/lib/tooling/kubernetes_client'
+require_relative '../../tooling/kubernetes_client'
 
 RSpec.describe Tooling::KubernetesClient do
   let(:namespace) { 'review-apps' }

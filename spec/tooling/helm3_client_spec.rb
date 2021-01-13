@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../../tooling/lib/tooling/helm3_client'
+require_relative '../../tooling/helm3_client'
 
 RSpec.describe Tooling::Helm3Client do
   let(:namespace) { 'review-apps' }
