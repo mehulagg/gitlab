@@ -17,18 +17,21 @@ RSpec.describe 'Creating a DAST Scan' do
       mutation_name,
       full_path: full_path,
       name: name,
-      dast_site_profile_id: dast_site_profile.to_global_id.to_s,
-      dast_scanner_profile_id: dast_scanner_profile.to_global_id.to_s,
+      dast_site_profile_id: global_id_of(dast_site_profile),
+      dast_scanner_profile_id: global_id_of(dast_scanner_profile),
       run_after_create: true
     )
   end
 
   it_behaves_like 'an on-demand scan mutation when user cannot run an on-demand scan'
   it_behaves_like 'an on-demand scan mutation when user can run an on-demand scan' do
-    it 'returns the dast_site_profile id' do
+    it 'returns dastScan.id and pipelineUrl' do
       subject
 
-      expect(mutation_response).to include('id' => global_id_of(dast_scan))
+      aggregate_failures do
+        expect(mutation_response.dig('dastScan', 'id')).to eq(global_id_of(dast_scan))
+        expect(mutation_response['pipelineUrl']).not_to be_empty
+      end
     end
   end
 end
