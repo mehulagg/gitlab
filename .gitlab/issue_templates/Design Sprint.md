@@ -191,8 +191,6 @@ Deciding which persona we are focusing on will be part of the Day 1 discussions 
  |  Activity  | Duration | Tool  | Description  |
 |---|---|---|---|
 | Prototype testing with 5 users | ~45 mins | Figma or code/Zoom | • Test the prototype with users. |
-| Analyse user testing results | ? | ? | • Analyse the results of the user testing sessions, create a report and share with the decider and the other Sprint participants. |
-
 
 ## Ground Rules
 *  Honor the Facilitator's directions. They're the guide for the entire process.
