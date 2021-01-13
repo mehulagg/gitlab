@@ -120,7 +120,7 @@ All maintainers of a project have access to production secrets. In case there is
 
 A `.gitlab-ci.yml` may contain rules to deploy application to production server and (ususally) runs automaticaly after pushing a merge request. In case you want to prevent developers from changing the `gitlab-ci.yml`, you can define the `.gitlab-ci.yml` in a different repository. The configuration can reference a file in another project with a completely different set of permissions (similar to [what was discussed under seperating project for deployments](#seperate-project-for-deployments)). The file will be publicly accessible, but can only be edited by users with appropriate permissions in the other project.
 
-For more information, see [Custom CI configuration path](../pipelines/settings.html#custom-ci-configuration-path).
+For more information, see [Custom CI configuration path](../pipelines/settings.md#custom-ci-configuration-path).
 
 ## Troubleshooting
  
