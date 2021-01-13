@@ -3,14 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::DastScans::Create do
-  let(:project) { create(:project, :repository) }
-  let(:developer) { create(:user, developer_projects: [project] ) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:developer) { create(:user, developer_projects: [project] ) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:full_path) { project.full_path }
   let(:name) { SecureRandom.hex }
   let(:description) { SecureRandom.hex }
-  let(:dast_site_profile) { create(:dast_site_profile, project: project) }
-  let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
   let(:run_after_create) { false }
 
   let(:dast_scan) { DastScan.find_by(project: project, name: name) }
@@ -35,7 +35,7 @@ RSpec.describe Mutations::DastScans::Create do
       )
     end
 
-    context 'when on demand scan feature is enabled' do
+    context 'when the feature is available' do
       context 'when the project does not exist' do
         let(:full_path) { SecureRandom.hex }
 
