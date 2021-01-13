@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import Component from '~/projects/pipelines/charts/components/app.vue';
 import StatisticsList from '~/projects/pipelines/charts/components/statistics_list.vue';

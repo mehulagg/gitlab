@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
+import { mockTracking } from 'helpers/tracking_helper';
 import JumpToNextDiscussionButton from '~/notes/components/discussion_jump_to_next_button.vue';
-import { mockTracking } from '../../helpers/tracking_helper';
 
 describe('JumpToNextDiscussionButton', () => {
   const fromDiscussionId = 'abc123';

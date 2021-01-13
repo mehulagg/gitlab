@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { GlModal, GlAlert } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import AddEditScheduleModal, {

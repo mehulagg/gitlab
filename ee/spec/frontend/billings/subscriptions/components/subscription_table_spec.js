@@ -6,7 +6,7 @@ import initialStore from 'ee/billings/subscriptions/store';
 import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 import Vuex from 'vuex';
-import { extendedWrapper } from '../../../../../../spec/frontend/helpers/vue_test_utils_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const namespaceName = 'GitLab.com';
 const customerPortalUrl = 'https://customers.gitlab.com/subscriptions';

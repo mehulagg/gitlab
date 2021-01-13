@@ -4,8 +4,8 @@ import TestCoverageTable from 'ee/analytics/repository_analytics/components/test
 import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
 import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
 import { useFakeDate } from 'helpers/fake_date';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 
