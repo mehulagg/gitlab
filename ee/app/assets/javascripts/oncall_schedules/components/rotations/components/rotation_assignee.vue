@@ -46,7 +46,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-absolute gl-h-7 gl-mt-2 gl-z-index-1" :style="rotationAssigneeStyle">
+  <div class="gl-absolute gl-h-7 gl-mt-2 gl-z-index-1 gl-overflow-hidden" :style="rotationAssigneeStyle">
     <gl-token
       :id="assignee.id"
       class="gl-w-full gl-h-full gl-align-items-center"

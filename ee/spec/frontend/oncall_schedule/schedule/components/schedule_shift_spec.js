@@ -16,6 +16,7 @@ const shift = {
 
 const CELL_WIDTH = 50;
 const timeframeItem = new Date(2021, 0, 13);
+const timeframe = [timeframeItem, timeframeItem];
 
 describe('ee/oncall_schedules/components/schedule/components/schedule_shift.vue', () => {
   let wrapper;
@@ -26,6 +27,7 @@ describe('ee/oncall_schedules/components/schedule/components/schedule_shift.vue'
         shift,
         shiftIndex: 0,
         timeframeItem,
+        timeframe,
         presetType: PRESET_TYPES.WEEKS,
         ...props,
       },

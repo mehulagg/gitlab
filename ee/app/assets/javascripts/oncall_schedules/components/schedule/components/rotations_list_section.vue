@@ -103,6 +103,7 @@ export default {
           :shift-index="shiftIndex"
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
+          :timeframe="timeframe"
         />
       </span>
     </div>
