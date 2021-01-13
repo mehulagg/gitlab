@@ -10,11 +10,6 @@ module EE
               description: 'Information about security analyzers used in the project',
               method: :itself
 
-        field :dast_scanner_profiles,
-              ::Types::DastScannerProfileType.connection_type,
-              null: true,
-              description: 'The DAST scanner profiles associated with the project'
-
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
               calls_gitaly: true,
               description: 'SAST CI configuration for the project'
@@ -65,6 +60,11 @@ module EE
               description: 'Find iterations',
               resolver: ::Resolvers::IterationsResolver
 
+        field :dast_scans,
+              ::Types::DastScanType.connection_type,
+              null: true,
+              description: 'The DAST scans with the project'
+
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
               null: true,
@@ -76,6 +76,11 @@ module EE
               null: true,
               description: 'DAST Site Profiles associated with the project',
               resolver: ::Resolvers::DastSiteProfileResolver
+
+        field :dast_scanner_profiles,
+              ::Types::DastScannerProfileType.connection_type,
+              null: true,
+              description: 'The DAST scanner profiles associated with the project'
 
         field :dast_site_validations,
               ::Types::DastSiteValidationType.connection_type,
@@ -119,6 +124,10 @@ module EE
               null: true,
               description: 'Incident Management On-call schedules of the project',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+      end
+
+      def dast_scan
+        DastScan.none
       end
 
       def dast_scanner_profiles

@@ -2,7 +2,7 @@
 
 module Types
   class DastScanType < BaseObject
-    graphql_name 'DastScanType'
+    graphql_name 'DastScan'
     description 'Represents a DAST Scan'
 
     authorize :create_on_demand_dast_scan
