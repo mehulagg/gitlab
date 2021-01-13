@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe DastScans::CreateService do
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:developer) { create(:user, developer_projects: [project] ) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
   let_it_be(:default_params) do
@@ -12,7 +13,7 @@ RSpec.describe DastScans::CreateService do
 
   let(:params) { default_params }
 
-  subject { described_class.new(container: project, params: params).execute }
+  subject { described_class.new(container: project, current_user: developer, params: params).execute }
 
   describe 'execute' do
     before do
@@ -55,6 +56,22 @@ RSpec.describe DastScans::CreateService do
 
       it 'creates a dast_scan' do
         expect { subject }.to change { DastScan.count }.by(1)
+      end
+
+      context 'when param run_after_create: true' do
+        let(:params) { default_params.merge(run_after_create: true) }
+
+        it 'calls DastOnDemandScans::CreateService' do
+          params = { dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile }
+
+          expect(DastOnDemandScans::CreateService).to receive(:new).with(hash_including(params: params)).and_call_original
+
+          subject
+        end
+
+        it 'creates a ci_pipeline' do
+          expect { subject }.to change { Ci::Pipeline.count }.by(1)
+        end
       end
 
       context 'when a param is missing' do
