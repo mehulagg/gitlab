@@ -714,28 +714,6 @@ consul['configuration'] = {
 
 The manual steps for this configuration are the same as for the [example recommended setup](#example-recommended-setup-manual-steps).
 
-### Manual failover procedure for Patroni
-
-While Patroni supports automatic failover, you also have the ability to perform
-a manual one, where you have two slightly different options:
-
-- **Failover**: allows you to perform a manual failover when there are no healthy nodes.
-  You can perform this action in any PostgreSQL node:
-
-  ```shell
-  sudo gitlab-ctl patroni failover
-  ```
-
-- **Switchover**: only works when the cluster is healthy and allows you to schedule a switchover (it can happen immediately).
-  You can perform this action in any PostgreSQL node:
-
-  ```shell
-  sudo gitlab-ctl patroni switchover
-  ```
-
-For further details on this subject, see the
-[Patroni documentation](https://patroni.readthedocs.io/en/latest/rest_api.html#switchover-and-failover-endpoints).
-
 ## Patroni
 
 NOTE:
@@ -827,6 +805,28 @@ Note that stopping or restarting Patroni service on the leader node will trigger
 want to signal Patroni to reload its configuration or restart PostgreSQL process without triggering the failover, you
 must use the `reload` or `restart` sub-commands of `gitlab-ctl patroni` instead. These two sub-commands are wrappers of
 the same `patronictl` commands.
+
+### Manual failover procedure for Patroni
+
+While Patroni supports automatic failover, you also have the ability to perform
+a manual one, where you have two slightly different options:
+
+- **Failover**: allows you to perform a manual failover when there are no healthy nodes.
+  You can perform this action in any PostgreSQL node:
+
+  ```shell
+  sudo gitlab-ctl patroni failover
+  ```
+
+- **Switchover**: only works when the cluster is healthy and allows you to schedule a switchover (it can happen immediately).
+  You can perform this action in any PostgreSQL node:
+
+  ```shell
+  sudo gitlab-ctl patroni switchover
+  ```
+
+For further details on this subject, see the
+[Patroni documentation](https://patroni.readthedocs.io/en/latest/rest_api.html#switchover-and-failover-endpoints).
 
 ### Recovering the Patroni cluster
 
