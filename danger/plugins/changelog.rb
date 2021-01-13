@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/gitlab/danger/changelog'
+require_relative '../../tooling/danger/changelog'
 
 module Danger
   class Changelog < Plugin

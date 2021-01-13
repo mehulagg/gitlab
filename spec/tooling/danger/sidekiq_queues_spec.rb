@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
 require 'rspec-parameterized'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/sidekiq_queues'
+require_relative '../../../tooling/danger/sidekiq_queues'
 
 RSpec.describe Gitlab::Danger::SidekiqQueues do
   using RSpec::Parameterized::TableSyntax

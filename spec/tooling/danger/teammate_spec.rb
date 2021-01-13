@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-require 'timecop'
-require 'rspec-parameterized'
-
-require 'gitlab/danger/teammate'
+require_relative '../../../tooling/danger/teammate'
 require 'active_support/testing/time_helpers'
 
 RSpec.describe Gitlab::Danger::Teammate do

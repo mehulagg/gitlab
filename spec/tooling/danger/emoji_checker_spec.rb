@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
 require 'rspec-parameterized'
 
-require 'gitlab/danger/emoji_checker'
+require_relative '../../../tooling/danger/emoji_checker'
 
 RSpec.describe Gitlab::Danger::EmojiChecker do
   using RSpec::Parameterized::TableSyntax

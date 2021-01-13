@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
 require 'rspec-parameterized'
 
-require 'gitlab/danger/title_linting'
+require_relative '../../../tooling/danger/title_linting'
 
 RSpec.describe Gitlab::Danger::TitleLinting do
   using RSpec::Parameterized::TableSyntax

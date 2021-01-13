@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../lib/gitlab/danger/sidekiq_queues'
+require_relative '../../tooling/danger/sidekiq_queues'
 
 module Danger
   class SidekiqQueues < Plugin

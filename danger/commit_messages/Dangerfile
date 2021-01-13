@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative File.expand_path('../../lib/gitlab/danger/commit_linter', __dir__)
-require_relative File.expand_path('../../lib/gitlab/danger/merge_request_linter', __dir__)
+require_relative File.expand_path('../../tooling/danger/commit_linter', __dir__)
+require_relative File.expand_path('../../tooling/danger/merge_request_linter', __dir__)
 
 COMMIT_MESSAGE_GUIDELINES = "https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#commit-messages-guidelines"
 MORE_INFO = "For more information, take a look at our [Commit message guidelines](#{COMMIT_MESSAGE_GUIDELINES})."

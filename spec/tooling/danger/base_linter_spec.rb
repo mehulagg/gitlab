@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
 require 'rspec-parameterized'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/base_linter'
+require_relative '../../../tooling/danger/base_linter'
 
 RSpec.describe Gitlab::Danger::BaseLinter do
   let(:commit_class) do

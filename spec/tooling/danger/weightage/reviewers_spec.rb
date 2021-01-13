@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'gitlab/danger/weightage/reviewers'
+require_relative '../../../../tooling/danger/weightage/reviewers'
 
 RSpec.describe Gitlab::Danger::Weightage::Reviewers do
   let(:multiplier) { Gitlab::Danger::Weightage::CAPACITY_MULTIPLIER }

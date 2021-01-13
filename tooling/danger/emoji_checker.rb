@@ -5,8 +5,8 @@ require 'json'
 module Gitlab
   module Danger
     class EmojiChecker
-      DIGESTS = File.expand_path('../../../fixtures/emojis/digests.json', __dir__)
-      ALIASES = File.expand_path('../../../fixtures/emojis/aliases.json', __dir__)
+      DIGESTS = File.expand_path('../../fixtures/emojis/digests.json', __dir__)
+      ALIASES = File.expand_path('../../fixtures/emojis/aliases.json', __dir__)
 
       # A regex that indicates a piece of text _might_ include an Emoji. The regex
       # alone is not enough, as we'd match `:foo:bar:baz`. Instead, we use this

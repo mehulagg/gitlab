@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
 require_relative 'danger_spec_helper'
 
-require 'gitlab/danger/changelog'
+require_relative '../../../tooling/danger/changelog'
 
 RSpec.describe Gitlab::Danger::Changelog do
   include DangerSpecHelper
