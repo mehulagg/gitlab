@@ -95,7 +95,6 @@ rules:
         - render
       - renderError
   vue/no-mutating-props: off
-  vue/one-component-per-file: off
   vue/no-lone-template: off
   vue/component-definition-name-casing: off
   # END eslint-plugin-vue@7 overrides
