@@ -2997,6 +2997,9 @@ msgstr ""
 msgid "An %{link_start}alert%{link_end} with the same fingerprint is already open. To change the status of this alert, resolve the linked alert."
 msgstr ""
 
+msgid "An Enterprise User GitLab account has been created for you by your organization:"
+msgstr ""
+
 msgid "An administrator changed the password for your GitLab account on %{link_to}."
 msgstr ""
 
@@ -4898,6 +4901,9 @@ msgid "Buy more Pipeline minutes"
 msgstr ""
 
 msgid "By %{user_name}"
+msgstr ""
+
+msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
 msgstr ""
 
 msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
@@ -13245,6 +13251,9 @@ msgid "GitLab export"
 msgstr ""
 
 msgid "GitLab for Slack"
+msgstr ""
+
+msgid "GitLab group: %{source_link}"
 msgstr ""
 
 msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way Development, Security, and Ops teams collaborate"
@@ -29511,6 +29520,9 @@ msgstr ""
 msgid "To define internal users, first enable new users set to external"
 msgstr ""
 
+msgid "To ensure no loss of personal content, an Individual User should create a separate account under their own personal email address, not tied to the Enterprise email domain or name-space."
+msgstr ""
+
 msgid "To further protect your account, consider configuring a %{mfa_link_start}two-factor authentication%{mfa_link_end} method."
 msgstr ""
 
@@ -29518,6 +29530,9 @@ msgid "To further protect your account, consider configuring a two-factor authen
 msgstr ""
 
 msgid "To get started you enter your FogBugz URL and login information below. In the next steps, you'll be able to map users and select the projects you want to import."
+msgstr ""
+
+msgid "To get started, click the link below to confirm your account."
 msgstr ""
 
 msgid "To get started, link this page to your Jaeger server, or find out how to %{link_start_tag}install Jaeger%{link_end_tag}"

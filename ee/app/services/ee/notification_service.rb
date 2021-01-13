@@ -62,6 +62,10 @@ module EE
       changed_iteration_resource_email(issue, new_iteration, current_user)
     end
 
+    def new_group_member_with_confirmation(group_member)
+      mailer.provisioned_member_access_granted_email(group_member.id).deliver_later
+    end
+
     private
 
     def add_mr_approvers_email(merge_request, approvers, current_user)
