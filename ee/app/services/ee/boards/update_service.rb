@@ -14,8 +14,6 @@ module EE
           params.delete(:label_ids)
           params.delete(:labels)
           params.delete(:weight)
-          params.delete(:hide_backlog_list)
-          params.delete(:hide_closed_list)
         end
 
         filter_assignee
