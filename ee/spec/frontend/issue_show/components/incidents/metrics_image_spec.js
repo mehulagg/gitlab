@@ -97,12 +97,6 @@ describe('Metrics upload item', () => {
       deleteImage();
 
       await waitForPromises();
-      await waitForPromises();
-      await waitForPromises();
-
-      console.log(findModal().html());
-      console.log(findModal().attributes());
-      console.log(findModal().props());
 
       expect(findModal().attributes('visible')).toBe('true');
     });
