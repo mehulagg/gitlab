@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../../../../tooling/lib/tooling/crystalball/coverage_lines_strategy'
+require_relative '../../../tooling/crystalball/coverage_lines_strategy'
 
 RSpec.describe Tooling::Crystalball::CoverageLinesStrategy do
   subject { described_class.new(execution_detector) }

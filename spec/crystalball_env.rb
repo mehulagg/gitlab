@@ -9,8 +9,8 @@ module CrystalballEnv
     return unless ENV['CRYSTALBALL'] && ENV['CI_PIPELINE_SOURCE'] == 'schedule' && ENV['FREQUENCY'] == '2-hourly'
 
     require 'crystalball'
-    require_relative '../tooling/lib/tooling/crystalball/coverage_lines_execution_detector'
-    require_relative '../tooling/lib/tooling/crystalball/coverage_lines_strategy'
+    require_relative '../tooling/crystalball/coverage_lines_execution_detector'
+    require_relative '../tooling/crystalball/coverage_lines_strategy'
 
     map_storage_path_base = ENV['CI_JOB_NAME'] || 'crystalball_data'
     map_storage_path = "crystalball/#{map_storage_path_base.gsub(%r{[/ ]}, '_')}.yml"
