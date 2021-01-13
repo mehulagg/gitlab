@@ -41,7 +41,7 @@ You can choose a different Rack server that better matches your performance need
 For instance, in multi-node setups that contain a large number of Prometheus scrapers
 but only a few monitoring nodes, you may decide to run a multi-threaded server such as Puma instead.
 
-For example, to change the server used to Puma:
+To change the Rack server to Puma:
 
 1. Edit `/etc/gitlab/gitlab.rb`.
 1. Add, or find and uncomment, the following line, and set it to `puma`:
