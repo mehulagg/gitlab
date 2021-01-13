@@ -17,7 +17,7 @@ troubleshooting), and the cost of hosting.
 Depending on your platform, select from the following available methods to
 install GitLab:
 
-- [_Omnibus GitLab_](#installing-gitlab-using-the-omnibus-gitlab-package-recommended):
+- [_Omnibus GitLab_](#installing-gitlab-on-linux-using-the-omnibus-gitlab-package-recommended):
   The official deb/rpm packages that contain a bundle of GitLab and the
   components it depends on, including PostgreSQL, Redis, and Sidekiq.
 - [_GitLab Helm chart_](#installing-gitlab-on-kubernetes-via-the-gitlab-helm-charts):
