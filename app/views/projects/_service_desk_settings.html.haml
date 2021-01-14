@@ -16,6 +16,6 @@
         selected_template: "#{@project.service_desk_setting&.issue_template_key}",
         outgoing_name: "#{@project.service_desk_setting&.outgoing_name}",
         project_key: "#{@project.service_desk_setting&.project_key}",
-        templates: issuable_templates_names(Issue.new) } }
+        templates: service_desk_templates_names(Issue.new) } }
     - elsif show_callout?('promote_service_desk_dismissed')
       = render 'shared/promotions/promote_servicedesk'

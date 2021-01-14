@@ -37,11 +37,15 @@ module IssuablesDescriptionTemplatesHelper
     end
   end
 
-  private
-
-  def issuable_templates_names(issuable)
-    issuable_templates(ref_project, issuable.to_ability_name).map { |template| template[:name] }
+  # This is being used by Service Desk Issue templates. Service Desk needs to apply templates in an async manner, so
+  # it would store the template key in the service_desk_settings#issue_template_key. Because Service Desk relies on
+  # the service_desk_settings#project_id to fetch the stored template based on `service_desk_settings` fow now we need
+  # to ensure that Service Desk can select only templates that are defined within its respective project, ie. service_desk_settings#project_id
+  def service_desk_templates_names(issuable)
+    issuable_templates(ref_project, issuable.to_ability_name)&.dig('Project Templates')&.map { |template| template&.dig(:name) }&.compact || []
   end
+
+  private
 
   def selected_template(issuable)
     params[:issuable_template] if issuable_templates(ref_project, issuable.to_ability_name).values.flatten.any? { |template| template[:name] == params[:issuable_template] }

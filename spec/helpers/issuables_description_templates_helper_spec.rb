@@ -40,4 +40,68 @@ RSpec.describe IssuablesDescriptionTemplatesHelper do
       end
     end
   end
+
+  describe '#service_desk_templates_names' do
+    context 'with project templates' do
+      let(:templates) {
+        {
+          "Project Templates" => [
+            { name: "another_issue_template", id: "another_issue_template", project_id: 25 },
+            { name: "custom_issue_template", id: "custom_issue_template", project_id: 25 }
+          ],
+          "Instance" => [
+            { name: "first_issue_issue_template", id: "first_issue_issue_template", project_id: 20 },
+            { name: "second_instance_issue_template", id: "second_instance_issue_template", project_id: 20 }
+          ]
+        }
+      }
+
+      it 'returns project templates only' do
+        allow(helper).to receive(:issuable_templates).and_return(templates)
+
+        expect(helper.service_desk_templates_names(Issue.new)).to eq(%w[another_issue_template custom_issue_template])
+      end
+    end
+  end
+
+  context 'without project templates' do
+    let(:templates) {
+      {
+        "" => [
+          { name: "another_issue_template", id: "another_issue_template", project_id: 25 },
+          { name: "custom_issue_template", id: "custom_issue_template", project_id: 25 }
+        ],
+        "Instance" => [
+          { name: "first_issue_issue_template", id: "first_issue_issue_template", project_id: 20 },
+          { name: "second_instance_issue_template", id: "second_instance_issue_template", project_id: 20 }
+        ]
+      }
+    }
+
+    it 'returns empty array' do
+      allow(helper).to receive(:issuable_templates).and_return(templates)
+
+      expect(helper.service_desk_templates_names(Issue.new)).to eq([])
+    end
+  end
+
+  context 'templates as empty hash' do
+    let(:templates) { {} }
+
+    it 'returns empty array' do
+      allow(helper).to receive(:issuable_templates).and_return(templates)
+
+      expect(helper.service_desk_templates_names(Issue.new)).to eq([])
+    end
+  end
+
+  context 'templates is nil' do
+    let(:templates) { nil }
+
+    it 'returns empty array' do
+      allow(helper).to receive(:issuable_templates).and_return(templates)
+
+      expect(helper.service_desk_templates_names(Issue.new)).to eq([])
+    end
+  end
 end
