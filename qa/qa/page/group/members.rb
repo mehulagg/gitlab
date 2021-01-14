@@ -4,7 +4,7 @@ module QA
   module Page
     module Group
       class Members < Page::Base
-        include QA::Page::Component::Select2
+        include Page::Component::InviteMembersModal
         include Page::Component::UsersSelect
 
         view 'app/assets/javascripts/vue_shared/components/remove_member_modal.vue' do

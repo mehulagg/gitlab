@@ -307,6 +307,7 @@ export default {
           ref="inviteButton"
           :disabled="!newUsersToInvite && !groupToBeSharedWith"
           variant="success"
+          data-qa-selector="invite_button"
           @click="sendInvite"
           >{{ $options.labels.inviteButtonText }}</gl-button
         >

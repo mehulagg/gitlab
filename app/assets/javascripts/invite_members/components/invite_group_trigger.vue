@@ -34,7 +34,7 @@ export default {
 </script>
 
 <template>
-  <gl-link :class="classes" @click="openModal">
+  <gl-link :class="classes" data-qa-selector="invite_group_modal_trigger" @click="openModal">
     <div v-if="icon" class="nav-icon-container">
       <gl-icon :size="16" :name="icon" />
     </div>
