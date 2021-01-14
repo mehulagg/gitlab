@@ -5,11 +5,15 @@ module DastSiteValidations
     def execute
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
-      normalized_target_url = params.fetch(:normalized_target_url)
+      finder = DastSiteValidationsFinder.new(
+        project_id: container.id,
+        url_base: params.fetch(:url_base),
+        state: :passed
+      )
 
-      ServiceResponse.success(payload: normalized_target_url)
-    rescue ActiveRecord::RecordInvalid => err
-      ServiceResponse.error(message: err.record.errors.full_messages)
+      result = finder.execute.delete_all
+
+      ServiceResponse.success(payload: { count: result })
     rescue KeyError => err
       ServiceResponse.error(message: err.message.capitalize)
     end

@@ -6,7 +6,7 @@ RSpec.describe DastSiteValidations::RevokeService do
   let_it_be(:dast_site_validation) { create(:dast_site_validation, state: :passed) }
   let_it_be(:project) { dast_site_validation.project }
 
-  let(:params) { { normalized_target_url: dast_site_validation.url_base } }
+  let(:params) { { url_base: dast_site_validation.url_base } }
 
   subject { described_class.new(container: project, params: params).execute }
 
@@ -59,7 +59,7 @@ RSpec.describe DastSiteValidations::RevokeService do
         it 'communicates failure' do
           aggregate_failures do
             expect(subject.status).to eq(:error)
-            expect(subject.message).to eq('Key not found: :normalized_target_url')
+            expect(subject.message).to eq('Key not found: :url_base')
           end
         end
       end
