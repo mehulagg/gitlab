@@ -44,7 +44,7 @@ export default {
       },
       skip() {
         return !this.shouldFetch;
-      }
+      },
     },
   },
   props: {
@@ -63,7 +63,7 @@ export default {
   },
   computed: {
     title() {
-      return this.currentIteration?.title || __('Select iteration')
+      return this.currentIteration?.title || __('Select iteration');
     },
   },
   mounted() {
@@ -73,19 +73,16 @@ export default {
   },
   methods: {
     onClick(iteration) {
-      if(iteration.id === this.currentIteration?.id) {
+      if (iteration.id === this.currentIteration?.id) {
         this.currentIteration = null;
       } else {
         this.currentIteration = iteration;
 
-        this.$emit('onIterationSelect', iteration)
+        this.$emit('onIterationSelect', iteration);
       }
-
     },
     isIterationChecked(id) {
-      return (
-        id === this.currentIteration?.id
-      );
+      return id === this.currentIteration?.id;
     },
   },
 };
@@ -93,11 +90,7 @@ export default {
 
 <template>
   <div data-qa-selector="iteration_container">
-    <gl-dropdown
-      ref="dropdown"
-      :text="title"
-      class="dropdown gl-w-full"
-    >
+    <gl-dropdown ref="dropdown" :text="title" class="dropdown gl-w-full">
       <gl-dropdown-section-header class="d-flex justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>

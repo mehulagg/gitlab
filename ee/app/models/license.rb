@@ -10,6 +10,7 @@ class License < ApplicationRecord
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0).freeze
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
+
   EES_FEATURES = %i[
     audit_events
     blocked_issues

@@ -26,19 +26,20 @@ export default function () {
     methods: {
       handleIterationSelect(iteration) {
         const unselectedIterationValue = '0';
-        const id = iteration.id === null ? unselectedIterationValue : getIdFromGraphQLId(iteration.id);
+        const id =
+          iteration.id === null ? unselectedIterationValue : getIdFromGraphQLId(iteration.id);
 
         iterationField.setAttribute('value', id);
       },
     },
-    render (createElement) {
+    render(createElement) {
       return createElement(IterationDropdown, {
         props: {
-          fullPath
+          fullPath,
         },
         on: {
           onIterationSelect: this.handleIterationSelect.bind(this),
-        }
+        },
       });
     },
   });
