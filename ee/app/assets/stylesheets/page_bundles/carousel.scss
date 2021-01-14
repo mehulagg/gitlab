@@ -1,3 +1,5 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
 // Notes on the classes:
 //
 // 1. .carousel.pointer-event should ideally be pan-y (to allow for users to scroll vertically)
@@ -59,25 +61,25 @@
 //
 
 .carousel-fade {
-  .carousel-item {
-    opacity: 0;
-    transition-property: opacity;
-    transform: none;
-  }
+.carousel-item {
+  opacity: 0;
+  transition-property: opacity;
+  transform: none;
+}
 
-  .carousel-item.active,
-  .carousel-item-next.carousel-item-left,
-  .carousel-item-prev.carousel-item-right {
-    z-index: 1;
-    opacity: 1;
-  }
+.carousel-item.active,
+.carousel-item-next.carousel-item-left,
+.carousel-item-prev.carousel-item-right {
+  z-index: 1;
+  opacity: 1;
+}
 
-  .active.carousel-item-left,
-  .active.carousel-item-right {
-    z-index: 0;
-    opacity: 0;
-    @include transition(0s $carousel-transition-duration opacity);
-  }
+.active.carousel-item-left,
+.active.carousel-item-right {
+  z-index: 0;
+  opacity: 0;
+  @include transition(0s $carousel-transition-duration opacity);
+}
 }
 
 
@@ -103,24 +105,24 @@
 
   // Hover/focus state
   @include hover-focus {
-    color: $carousel-control-color;
-    text-decoration: none;
-    outline: 0;
-    opacity: $carousel-control-hover-opacity;
+      color: $carousel-control-color;
+      text-decoration: none;
+      outline: 0;
+      opacity: $carousel-control-hover-opacity;
   }
 }
 
 .carousel-control-prev {
   left: 0;
   @if $enable-gradients {
-    background: linear-gradient(90deg, rgba($black, 0.25), rgba($black, 0.001));
+      background: linear-gradient(90deg, rgba($black, 0.25), rgba($black, 0.001));
   }
 }
 
 .carousel-control-next {
   right: 0;
   @if $enable-gradients {
-    background: linear-gradient(270deg, rgba($black, 0.25), rgba($black, 0.001));
+      background: linear-gradient(270deg, rgba($black, 0.25), rgba($black, 0.001));
   }
 }
 
@@ -180,7 +182,7 @@
   }
 
   .active {
-    opacity: 1;
+      opacity: 1;
   }
 }
 
@@ -200,3 +202,135 @@
   color: $carousel-caption-color;
   text-align: center;
 }
+
+  
+// TODO everything above here will live in GitLab UI
+// TODO when this is removed, this file has to be renamed
+.discover-box {
+    .discover-image-carousel {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      max-width: 1000px;
+  
+      @media (min-width: map-get($grid-breakpoints, lg)) {
+        padding-top: 30px;
+        padding-bottom: 30px;
+      }
+    }
+  
+    .discover-title {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+  
+    .discover-carousels {
+      padding-left: 30px;
+      padding-right: 30px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  
+    .discover-carousel-img {
+      margin-bottom: 12px;
+      border-radius: $border-radius-default;
+    }
+  
+    .discover-button {
+      width: 45% !important;
+    }
+  
+    .discover-buttons {
+      max-width: 280px;
+    }
+  
+    .discover-footer {
+      margin: 40px auto 2px;
+      max-width: 500px;
+    }
+  
+    .discover-feedback {
+      width: 30%;
+      bottom: 16px;
+      right: 16px;
+      text-align: right;
+    }
+  
+    .discover-feedback-icon {
+      padding-bottom: 0.5rem 0.7rem 0.7rem;
+  
+      &:hover {
+        color: $blue-500;
+      }
+    }
+  
+    .discover-text-carousel {
+      max-width: 650px;
+  
+      .carousel-caption {
+        height: 100%;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  
+    .carousel-control-next-icon,
+    .carousel-control-prev-icon {
+      width: 10px;
+  
+      @media (min-width: map-get($grid-breakpoints, md)) {
+        width: inherit;
+      }
+    }
+  
+    .carousel-control-next {
+      right: -5%;
+    }
+  
+    .carousel-control-prev {
+      left: -5%;
+    }
+  
+    .discover-carousel {
+      margin-bottom: 30px;
+  
+      .carousel-inner {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+  
+      .carousel-indicators {
+        bottom: -20px;
+  
+        @media (min-width: map-get($grid-breakpoints, lg)) {
+          bottom: -15px;
+        }
+  
+        li {
+          background-color: $gray-500;
+          width: 6px;
+          height: 6px;
+          border-radius: 100%;
+          margin-right: 16px;
+  
+          @media (min-width: map-get($grid-breakpoints, md)) {
+            width: $gl-spacing-scale-3;
+            height: $gl-spacing-scale-3;
+          }
+        }
+  
+        .active {
+          background-color: $gray-500;
+        }
+      }
+  
+      .carousel-control-prev-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666666' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+      }
+  
+      .carousel-control-next-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666666' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
+      }
+    }
+  }
