@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import {
   WEBIDE_MARK_APP_START,
@@ -30,6 +30,7 @@ export default {
   components: {
     IdeSidebar,
     RepoEditor,
+    GlAlert,
     GlButton,
     GlLoadingIcon,
     ErrorMessage: () => import(/* webpackChunkName: 'ide_runtime' */ './error_message.vue'),
@@ -59,6 +60,7 @@ export default {
       'loading',
     ]),
     ...mapGetters([
+      'canPushCode',
       'activeFile',
       'someUncommittedChanges',
       'isCommitModeActive',
@@ -118,6 +120,11 @@ export default {
     class="ide position-relative d-flex flex-column align-items-stretch"
     :class="{ [`theme-${themeName}`]: themeName }"
   >
+    <gl-alert v-if="!canPushCode" :dismissible="false">{{
+      __(
+        "You're not allowed to edit files in this project directly. Please fork this project, make your changes there, and submit a merge request.",
+      )
+    }}</gl-alert>
     <error-message v-if="errorMessage" :message="errorMessage" />
     <div class="ide-view flex-grow d-flex">
       <template v-if="loadDeferred">
