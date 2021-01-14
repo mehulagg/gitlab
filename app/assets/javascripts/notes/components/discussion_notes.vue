@@ -96,14 +96,14 @@ export default {
       return note.isPlaceholderNote ? note.notes[0] : note;
     },
     handleMouseEnter(discussion) {
-      if (this.glFeatures.multilineComments && discussion.position) {
+      if (discussion.position) {
         this.setSelectedCommentPositionHover(discussion.position.line_range);
       }
     },
     handleMouseLeave(discussion) {
-      // Even though position isn't used here we still don't want to unecessarily call a mutation
+      // Even though position isn't used here we still don't want to unnecessarily call a mutation
       // The lack of position tells us that highlighting is irrelevant in this context
-      if (this.glFeatures.multilineComments && discussion.position) {
+      if (discussion.position) {
         this.setSelectedCommentPositionHover();
       }
     },

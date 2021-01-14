@@ -169,25 +169,6 @@ above it.
 
 ![Multiline comment selection displayed above comment](img/multiline-comment-saved.png)
 
-### Enable or disable multiline comments **(CORE ONLY)**
-
-The multiline comments feature is under development but ready for production use.
-It is deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to enable it for your instance.
-
-To disable it:
-
-```ruby
-Feature.disable(:multiline_comments)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:multiline_comments)
-```
-
 ## Pipeline status in merge requests widgets
 
 If you've set up [GitLab CI/CD](../../../ci/README.md) in your project,

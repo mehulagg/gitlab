@@ -160,7 +160,6 @@ export default {
     },
     showMultiLineComment() {
       if (
-        !this.glFeatures.multilineComments ||
         !this.discussionRoot ||
         this.startLineNumber.length === 0 ||
         this.endLineNumber.length === 0

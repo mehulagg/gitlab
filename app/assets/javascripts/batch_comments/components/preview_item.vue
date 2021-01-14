@@ -90,16 +90,12 @@ export default {
   <span>
     <span class="review-preview-item-header">
       <gl-icon class="flex-shrink-0" :name="iconName" />
-      <span
-        class="bold text-nowrap"
-        :class="{ 'gl-align-items-center': glFeatures.multilineComments }"
-      >
+      <span class="bold text-nowrap gl-align-items-center">
         <span class="review-preview-item-header-text block-truncated">
           {{ titleText }}
         </span>
         <template v-if="showLinePosition">
-          <template v-if="!glFeatures.multilineComments">:{{ linePosition }}</template>
-          <template v-else-if="startLineNumber === endLineNumber">
+          <template if="startLineNumber === endLineNumber">
             :<span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
           </template>
           <gl-sprintf v-else :message="__(':%{startLine} to %{endLine}')">
