@@ -161,6 +161,51 @@ Feature.disable(:merge_request_reviewers)
 Feature.disable(:merge_request_reviewers, Project.find(<project id>))
 ```
 
+#### Reviewer Approval Rules
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233736) in 13.8.
+> - It was [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51183) on GitLab 13.8.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - It can be enabled or disabled for a single project.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-reviewer-approval-rules). **(CORE ONLY)**
+
+With the introduction of this feature, applicable [Approval Rules](merge_request_approvals.md#approval-rules) of reviewers in the user list of either on the sidebar or the merge request form will displayed. Any [Code Owners](../code_owners.md) will be displayed as `Codeowner` wihtout detail of the group at this stage. We'll continue to iterate on this to improve the usefulness of this feature further.
+
+Example sidebar:
+
+![Reviewer approval rules in sidebar](img/reviewer_approval_rules_sidebar.png)
+
+Example new/edit form:
+![Reviewer approval rules in new/edit form](img/reviewer_approval_rules_form.png)
+
+##### Enable or disable Reviewer Approval Rules **(CORE ONLY)**
+
+Merge Request Reviewers is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:reviewer_approval_rules)
+# For a single project
+Feature.enable(:reviewer_approval_rules, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:reviewer_approval_rules)
+# For a single project
+Feature.disable(:reviewer_approval_rules, Project.find(<project id>))
+```
+
+
+
 ### Merge requests to close issues
 
 If the merge request is being created to resolve an issue, you can
