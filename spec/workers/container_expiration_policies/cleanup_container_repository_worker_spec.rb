@@ -196,6 +196,10 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
       expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_before_truncate_size, service_response.payload[:cleanup_tags_service_before_truncate_size])
       expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_after_truncate_size, service_response.payload[:cleanup_tags_service_after_truncate_size])
       expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_before_delete_size, service_response.payload[:cleanup_tags_service_before_delete_size])
+      truncated = service_response.payload[:cleanup_tags_service_before_truncate_size] &&
+                    service_response.payload[:cleanup_tags_service_after_truncate_size] &&
+                    service_response.payload[:cleanup_tags_service_after_truncate_size] != service_response.payload[:cleanup_tags_service_before_truncate_size]
+      expect(worker).to receive(:log_extra_metadata_on_done).with(:cleanup_tags_service_truncated, truncated)
     end
   end
 
