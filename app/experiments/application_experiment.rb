@@ -19,12 +19,9 @@ class ApplicationExperiment < Gitlab::Experiment
   private
 
   def resolve_variant_name
-    if Feature.enabled?(name, self, type: :experiment)
-      variant_names.first
-    else
-      # Returning nil vs. :control is important for not caching and rollouts.
-      nil
-    end
+    return variant_names.first if Feature.enabled?(name, self, type: :experiment)
+
+    nil # Returning nil vs. :control is important for not caching and rollouts.
   end
 
   # Cache is an implementation on top of Gitlab::Redis::SharedState that also
