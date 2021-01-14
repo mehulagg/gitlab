@@ -31,7 +31,7 @@ module JiraConnect
         jira_response: response&.to_json
       }
 
-      if response && (response['errorMessages'] || response['rejectedBuilds'].present?)
+      if response && response['errorMessages']
         logger.error(message)
       else
         logger.info(message)

@@ -40,10 +40,17 @@ module Atlassian
 
         return if items.empty?
 
-        post('/rest/featureflags/0.1/bulk', {
+        r = post('/rest/featureflags/0.1/bulk', {
           flags: items,
           properties: { projectId: "project-#{project.id}" }
         })
+
+        if r['failedFeatureFlags'].present?
+          errors = r['failedFeatureFlags'].flat_map do |k, errs|
+            errs.map { |e| "#{k}: #{e['message']}" }
+          end
+          { 'errorMessages' => errors }
+        end
       end
 
       def store_deploy_info(project:, deployments:, **opts)
@@ -54,7 +61,8 @@ module Atlassian
 
         return if items.empty?
 
-        post('/rest/deployments/0.1/bulk', { deployments: items })
+        r = post('/rest/deployments/0.1/bulk', { deployments: items })
+        errors(r, 'rejectedDeployments')
       end
 
       def store_build_info(project:, pipelines:, update_sequence_id: nil)
@@ -71,7 +79,8 @@ module Atlassian
         end.compact
         return if builds.empty?
 
-        post('/rest/builds/0.1/bulk', { builds: builds })
+        r = post('/rest/builds/0.1/bulk', { builds: builds })
+        errors(r, 'rejectedBuilds')
       end
 
       def store_dev_info(project:, commits: nil, branches: nil, merge_requests: nil, update_sequence_id: nil)
@@ -102,6 +111,18 @@ module Atlassian
 
       def metadata
         { providerMetadata: { product: "GitLab #{Gitlab::VERSION}" } }
+      end
+
+      def errors(response, key)
+        messages = if r[k].present?
+                     r[k].flap_map do |rejection|
+                       rejection['errors'].map { |e| e['message'] }
+                     end
+                   else
+                     []
+                   end
+
+        { 'errorMessages' => messages }
       end
 
       def user_notes_count(merge_requests)
