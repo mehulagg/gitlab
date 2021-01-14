@@ -157,8 +157,8 @@ class JiraService < IssueTrackerService
     # support any events.
   end
 
-  def find_issue(issue)
-    jira_request { client.Issue.find(issue) }
+  def find_issue(issue_key)
+    jira_request { client.Issue.find(issue_key) }
   end
 
   def close_issue(entity, external_issue)
