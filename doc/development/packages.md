@@ -242,7 +242,7 @@ create the package record. Workhorse provides a variety of file metadata such as
 For testing purposes, you may want to [enable object storage](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/object_storage.md)
 in your local development environment.
 
-#### Rate Limits
+#### Rate Limits on GitLab.com
 
 Package manager clients can make rapid requests that exceed the
 [GitLab.com standard API rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits). 
