@@ -2,7 +2,7 @@
 
 module Gitlab
   module Experimentation
-    class Experiment
+    class LegacyExperiment
       FEATURE_FLAG_SUFFIX = "_experiment_percentage"
 
       attr_reader :key, :tracking_category, :use_backwards_compatible_subject_index

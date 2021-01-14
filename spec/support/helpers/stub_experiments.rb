@@ -34,6 +34,6 @@ module StubExperiments
   private
 
   def feature_flag_suffix
-    Gitlab::Experimentation::Experiment::FEATURE_FLAG_SUFFIX
+    Gitlab::Experimentation::LegacyExperiment::FEATURE_FLAG_SUFFIX
   end
 end

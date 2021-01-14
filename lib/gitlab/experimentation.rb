@@ -112,7 +112,7 @@ module Gitlab
       def get_experiment(experiment_key)
         return unless EXPERIMENTS.key?(experiment_key)
 
-        ::Gitlab::Experimentation::Experiment.new(experiment_key, **EXPERIMENTS[experiment_key])
+        ::Gitlab::Experimentation::LegacyExperiment.new(experiment_key, **EXPERIMENTS[experiment_key])
       end
 
       def active?(experiment_key)

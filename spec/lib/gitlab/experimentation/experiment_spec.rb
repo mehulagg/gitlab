@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Experimentation::Experiment do
+RSpec.describe Gitlab::Experimentation::LegacyExperiment do
   using RSpec::Parameterized::TableSyntax
 
   let(:percentage) { 50 }
