@@ -47,6 +47,7 @@ export default {
       deleteValueStreamError: 'deleteValueStreamError',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
+      initialFormErrors: 'createValueStreamErrors',
     }),
     hasValueStreams() {
       return Boolean(this.data.length);
@@ -123,7 +124,10 @@ export default {
     <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
       $options.I18N.CREATE_VALUE_STREAM
     }}</gl-button>
-    <value-stream-form :has-extended-form-fields="hasExtendedFormFields" />
+    <value-stream-form
+      :initial-form-errors="initialFormErrors"
+      :has-extended-form-fields="hasExtendedFormFields"
+    />
     <gl-modal
       data-testid="delete-value-stream-modal"
       modal-id="delete-value-stream-modal"

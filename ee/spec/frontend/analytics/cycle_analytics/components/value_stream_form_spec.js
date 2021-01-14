@@ -2,6 +2,9 @@ import { GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
+import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
+import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
+import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { customStageEvents as formEvents } from '../mock_data';
 
@@ -15,13 +18,20 @@ describe('ValueStreamForm', () => {
   const mockEvent = { preventDefault: jest.fn() };
   const mockToastShow = jest.fn();
   const streamName = 'Cool stream';
-  const createValueStreamErrors = { name: ['Name field required'] };
+  const initialFormErrors = { name: ['Name field required'] };
+  const initialFormStageErrors = {
+    stages: [
+      {
+        name: ['Name field is required'],
+        endEventIdentifier: ['Please select a start event first'],
+      },
+    ],
+  };
 
   const fakeStore = ({ initialState = {} }) =>
     new Vuex.Store({
       state: {
         isCreatingValueStream: false,
-        createValueStreamErrors: {},
         ...initialState,
       },
       actions: {
@@ -37,7 +47,7 @@ describe('ValueStreamForm', () => {
       },
     });
 
-  const createComponent = ({ props = {}, data = {}, initialState = {} } = {}) =>
+  const createComponent = ({ props = {}, data = {}, initialState = {}, stubs = {} } = {}) =>
     extendedWrapper(
       shallowMount(ValueStreamForm, {
         localVue,
@@ -55,6 +65,9 @@ describe('ValueStreamForm', () => {
             show: mockToastShow,
           },
         },
+        stubs: {
+          ...stubs,
+        },
       }),
     );
 
@@ -66,6 +79,8 @@ describe('ValueStreamForm', () => {
   const findBtn = (btn) => findModal().props(btn);
   const findSubmitDisabledAttribute = (attribute) =>
     findBtn('actionPrimary').attributes[1][attribute];
+  const expectFieldError = (testId, error = '') =>
+    expect(wrapper.findByTestId(testId).attributes('invalid-feedback')).toBe(error);
 
   afterEach(() => {
     wrapper.destroy();
@@ -124,30 +139,65 @@ describe('ValueStreamForm', () => {
         expect(wrapper.vm.stages.length).toBe(7);
       });
     });
+
+    describe.only('form errors', () => {
+      const commonExtendedData = {
+        props: {
+          hasExtendedFormFields: true,
+          initialFormErrors: initialFormStageErrors,
+        },
+      };
+
+      it('renders errors for a default stage name', () => {
+        wrapper = createComponent({
+          ...commonExtendedData,
+          stubs: {
+            DefaultStageFields,
+          },
+        });
+
+        expectFieldError('default-stage-name-0', initialFormStageErrors.stages[0].name[0]);
+      });
+
+      it('renders errors for a custom stage field', async () => {
+        wrapper = createComponent({
+          props: {
+            ...commonExtendedData.props,
+            initialPreset: PRESET_OPTIONS_BLANK,
+          },
+          stubs: {
+            CustomStageFields,
+          },
+        });
+
+        console.log('wrapper', wrapper.html());
+        expectFieldError('custom-stage-name-0', initialFormStageErrors.stages[0].name[0]);
+        expectFieldError(
+          'custom-stage-name-0',
+          initialFormStageErrors.stages[0].endEventIdentifier[0],
+        );
+      });
+    });
   });
 
   describe('form errors', () => {
     beforeEach(() => {
       wrapper = createComponent({
-        data: { name: streamName },
-        initialState: {
-          createValueStreamErrors,
+        data: { name: '' },
+        props: {
+          initialFormErrors,
         },
       });
     });
 
-    it('submit button is disabled', () => {
-      expect(findSubmitDisabledAttribute('disabled')).toBe(true);
+    it('renders errors for the name field', () => {
+      expectFieldError('create-value-stream-name', initialFormErrors.name[0]);
     });
   });
 
   describe('with valid fields', () => {
     beforeEach(() => {
       wrapper = createComponent({ data: { name: streamName } });
-    });
-
-    it('submit button is enabled', () => {
-      expect(findSubmitDisabledAttribute('disabled')).toBe(false);
     });
 
     describe('form submitted successfully', () => {
@@ -177,8 +227,8 @@ describe('ValueStreamForm', () => {
       beforeEach(() => {
         wrapper = createComponent({
           data: { name: streamName },
-          initialState: {
-            createValueStreamErrors,
+          props: {
+            initialFormErrors,
           },
         });
 

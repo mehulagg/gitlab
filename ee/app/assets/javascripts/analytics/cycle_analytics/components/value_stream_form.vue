@@ -22,6 +22,47 @@ const findStageIndexByName = (stages, target = '') =>
 const initializeStageErrors = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? DEFAULT_STAGE_CONFIG.map(() => ({})) : [{}];
 
+// Not great, we're mixing types
+// better to make everything arrays 🤔
+const maybeFirstElem = (arr = null) => {
+  if (Array.isArray(arr)) {
+    return arr.length ? arr[0] : null;
+  }
+  return arr || null;
+};
+
+// TODO: move to utils
+const formatStageData = (stages) => {
+  return stages
+    .filter(({ hidden = false }) => !hidden)
+    .map(
+      ({
+        startEventIdentifier,
+        endEventIdentifier,
+        startEventLabelId,
+        endEventLabelId,
+        custom = false,
+        name,
+        ...rest
+      }) => {
+        const additionalProps = custom
+          ? {
+              start_event_identifier: maybeFirstElem(startEventIdentifier),
+              end_event_identifier: maybeFirstElem(endEventIdentifier),
+              start_event_label_id: maybeFirstElem(startEventLabelId),
+              end_event_label_id: maybeFirstElem(endEventLabelId),
+            }
+          : {};
+        return {
+          ...rest,
+          ...additionalProps,
+          custom,
+          name,
+        };
+      },
+    );
+};
+
 export default {
   name: 'ValueStreamForm',
   components: {
@@ -40,6 +81,16 @@ export default {
       required: false,
       default: () => ({}),
     },
+    initialPreset: {
+      type: String,
+      required: false,
+      default: PRESET_OPTIONS_DEFAULT,
+    },
+    initialFormErrors: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
     hasExtendedFormFields: {
       type: Boolean,
       required: false,
@@ -47,41 +98,43 @@ export default {
     },
   },
   data() {
-    const { hasExtendedFormFields, initialData } = this;
+    const { hasExtendedFormFields, initialData, initialFormErrors, initialPreset } = this;
+    const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
           stages: DEFAULT_STAGE_CONFIG,
-          stageErrors: initializeStageErrors(PRESET_OPTIONS_DEFAULT),
+          stageErrors: stageErrors || initializeStageErrors(initialPreset),
           ...initialData,
         }
-      : { stages: [] };
+      : { stages: [], nameError }; // TODO: not sure if i should pass empty stages here
     return {
-      selectedPreset: PRESET_OPTIONS[0].value,
+      selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
       name: '',
-      nameError: { name: [] },
-      stageErrors: [{}],
+      nameError,
+      stageErrors,
       ...additionalFields,
     };
   },
   computed: {
     ...mapState({
-      initialFormErrors: 'createValueStreamErrors',
       isCreating: 'isCreatingValueStream',
     }),
     ...mapState('customStages', ['formEvents']),
     isValueStreamNameValid() {
-      return !this.nameError.name?.length;
+      return !this.nameError?.length;
     },
     invalidFeedback() {
-      return this.nameError.name?.join('\n');
+      return this.nameError?.length ? this.nameError.join('\n\n') : null;
     },
     hasInitialFormErrors() {
+      // TODO: do we need this + should we check the contained arrays instead
       const { initialFormErrors } = this;
       return Boolean(Object.keys(initialFormErrors).length);
     },
-    isValid() {
-      return this.isValueStreamNameValid && !this.hasInitialFormErrors;
+    isSuccessfullyCreated() {
+      // TODO: get this from state somehow
+      return false;
     },
     isLoading() {
       return this.isCreating;
@@ -91,7 +144,7 @@ export default {
         text: this.$options.I18N.FORM_TITLE,
         attributes: [
           { variant: 'success' },
-          { disabled: !this.isValid },
+          { disabled: this.isSuccessfullyCreated },
           { loading: this.isLoading },
         ],
       };
@@ -114,27 +167,19 @@ export default {
     },
   },
   watch: {
-    initialFormErrors(newErrors = {}) {
-      this.stageErrors = newErrors;
+    initialFormErrors({ name: nameError, stages: stageErrors }) {
+      Vue.set(this, 'nameError', nameError);
+      Vue.set(this, 'stageErrors', stageErrors);
     },
-  },
-  mounted() {
-    const { initialFormErrors } = this;
-    if (this.hasInitialFormErrors) {
-      this.stageErrors = initialFormErrors;
-    }
   },
   methods: {
     ...mapActions(['createValueStream']),
     onSubmit() {
       const { name, stages } = this;
+      // TODO: validate before submission
       return this.createValueStream({
         name,
-        stages: stages.map(({ name: stageName, ...rest }) => ({
-          name: stageName,
-          ...rest,
-          title: stageName,
-        })),
+        stages: formatStageData(stages),
       }).then(() => {
         if (!this.hasInitialFormErrors) {
           this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name }), {
@@ -178,7 +223,7 @@ export default {
       Vue.set(this.stageErrors, index, validateStage(this.activeStages[index]));
     },
     fieldErrors(index) {
-      return this.stageErrors[index];
+      return this.stageErrors && this.stageErrors[index] ? this.stageErrors[index] : {};
     },
     onHide(index) {
       const stage = this.stages[index];
@@ -242,6 +287,7 @@ export default {
   >
     <gl-form>
       <gl-form-group
+        data-testid="create-value-stream-name"
         label-for="create-value-stream-name"
         :label="$options.I18N.FORM_FIELD_NAME_LABEL"
         :invalid-feedback="invalidFeedback"
