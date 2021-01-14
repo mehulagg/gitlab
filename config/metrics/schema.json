@@ -1,10 +1,7 @@
 {
   "type": "object",
-  "required": ["name", "description", "value_type", "status", "default_generation", "full_path", "group", "time_frame", "data_source", "distribution", "tier"],
+  "required": ["description", "value_type", "status", "key_path", "group", "time_frame", "data_source", "distribution", "tier"],
   "properties": {
-    "name": {
-      "type": "string"
-    },
     "description": {
       "type": "string"
     },
@@ -22,11 +19,8 @@
       "type": ["string"],
       "enum": ["data_available", "planned", "in_progress", "implmented"]
     },
-    "default_generation": {
+    "key_path": {
       "type": "string"
-    },
-    "full_path": {
-      "type": "object"
     },
     "milestone": {
       "type": ["number", "null"]
