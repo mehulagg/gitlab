@@ -44,7 +44,8 @@ class Repository
                       gitlab_ci_yml branch_names tag_names branch_count
                       tag_count avatar exists? root_ref merged_branch_names
                       has_visible_content? issue_template_names merge_request_template_names
-                      user_defined_metrics_dashboard_paths xcode_project? has_ambiguous_refs?).freeze
+                      user_defined_metrics_dashboard_paths xcode_project? has_ambiguous_refs?
+                      inherited_issue_template_names merge_request_template_names).freeze
 
   # Methods that use cache_method but only memoize the value
   MEMOIZED_CACHED_METHODS = %i(license).freeze
@@ -597,6 +598,16 @@ class Repository
     TemplateFinder.template_names(project, :merge_requests)
   end
   cache_method :merge_request_template_names, fallback: []
+
+  def inherited_issue_template_names
+    TemplateFinder.template_names(project, :issues)
+  end
+  cache_method :inherited_issue_template_names, fallback: {}
+
+  def inherited_merge_request_template_names
+    TemplateFinder.template_names(project, :merge_requests)
+  end
+  cache_method :inherited_merge_request_template_names, fallback: {}
 
   def user_defined_metrics_dashboard_paths
     Gitlab::Metrics::Dashboard::RepoDashboardFinder.list_dashboards(project)

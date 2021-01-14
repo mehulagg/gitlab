@@ -102,7 +102,8 @@ GET /projects/:id/templates/:type/:name
 | `id`      | integer / string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `type`     | string | yes| The type `(dockerfiles|gitignores|gitlab_ci_ymls|licenses|issues|merge_requests)` of the template |
 | `name`     | string | yes      | The name of the template, as obtained from the collection endpoint |
-| `source_template_project_id`     | integer | yes      | The project id where a given template is being stored. This is useful when multiple templates from different projects have the same name || `project`  | string | no       | The project name to use when expanding placeholders in the template. Only affects licenses |
+| `source_template_project_id`     | integer | yes      | The project id where a given template is being stored. This is useful when multiple templates from different projects have the same name |
+| `project`  | string | no       | The project name to use when expanding placeholders in the template. Only affects licenses |
 | `fullname` | string | no       | The full name of the copyright holder to use when expanding placeholders in the template. Only affects licenses |
 
 Example response (Dockerfile):

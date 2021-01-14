@@ -34,11 +34,24 @@ module IssuablesDescriptionTemplatesHelper
   end
 
   def issuable_templates_names(issuable)
-    issuable_templates(ref_project, issuable.to_ability_name).map { |template| template[:name] }
+    all_templates = issuable_templates(ref_project, issuable.to_ability_name)
+
+    if(ref_project.inherited_issuable_templates_enabled?)
+      all_templates.values.flatten.map { |tpl| tpl[:name] if tpl[:project_id] == ref_project.id }.compact.uniq
+    else
+      all_templates.map { |template| template[:name] }
+    end
   end
 
   def selected_template(issuable)
-    params[:issuable_template] if issuable_templates(ref_project, issuable.to_ability_name).any? { |template| template[:name] == params[:issuable_template] }
+    all_templates = issuable_templates(ref_project, issuable.to_ability_name)
+
+    if(ref_project.inherited_issuable_templates_enabled?)
+      params[:issuable_template] if all_templates.values.flatten.any? { |template| template[:name] == params[:issuable_template] }
+    else
+      params[:issuable_template] if all_templates.any? { |template| template[:name] == params[:issuable_template] }
+    end
+
   end
 
   def template_names_path(parent, issuable)

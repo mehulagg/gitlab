@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Service Desk Setting', :js do
+  include IssuablesDescriptionTemplatesHelper
+
   let(:project) { create(:project_empty_repo, :private, service_desk_enabled: false) }
   let(:presenter) { project.present(current_user: user) }
   let(:user) { create(:user) }
@@ -65,6 +67,44 @@ RSpec.describe 'Service Desk Setting', :js do
       wait_for_requests
 
       expect(find('[data-testid="incoming-email"]').value).to eq('address-suffix@example.com')
+    end
+
+    context 'issue description templates' do
+      let_it_be(:issuable_project_template_files) do
+        {
+          '.gitlab/issue_templates/project-issue-bar.md' => 'Project Issue Template Bar',
+          '.gitlab/issue_templates/project-issue-foo.md' => 'Project Issue Template Foo'
+        }
+      end
+
+      let_it_be(:issuable_group_template_files) do
+        {
+          '.gitlab/issue_templates/group-issue-bar.md' => 'Group Issue Template Bar',
+          '.gitlab/issue_templates/group-issue-foo.md' => 'Group Issue Template Foo'
+        }
+      end
+
+      let_it_be(:group) { create(:group)}
+      let_it_be(:group_template_repo) { create(:project, :custom_repo, group: group, files: issuable_group_template_files) }
+      let_it_be(:project) { create(:project, :custom_repo, group: group, files: issuable_project_template_files) }
+
+      before do
+        stub_licensed_features(custom_file_templates_for_namespace: false, custom_file_templates: false)
+        group.update_columns(file_template_project_id: group_template_repo.id)
+        project.reload
+      end
+
+      it 'loads issue description templates from the project only' do
+        # issuable_templates does not returns group issue description templates on FOSS,
+        # we only need project issue description templates for Service Desk
+        template_names = issuable_templates(project, 'issues').values.flatten.map { |tpl| tpl[:name] }
+        expect(template_names).to match_array(%w[project-issue-bar project-issue-foo])
+
+        within('#service-desk-template-select') do
+          expect(page).to have_content('project-issue-bar')
+          expect(page).to have_content('project-issue-foo')
+        end
+      end
     end
   end
 end

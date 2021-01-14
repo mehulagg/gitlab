@@ -13,9 +13,9 @@ export default {
       required: true,
     },
     issuableTemplates: {
-      type: Array,
+      type: Object,
       required: false,
-      default: () => [],
+      default: () => {},
     },
     projectPath: {
       type: String,

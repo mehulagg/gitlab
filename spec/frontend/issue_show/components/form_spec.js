@@ -43,7 +43,12 @@ describe('Inline edit form component', () => {
   });
 
   it('renders template selector when templates exists', () => {
-    createComponent({ issuableTemplates: [{ name: 'test', id: 'test', project_path: 'test', namespace_path: 'test' }] });
+    // createComponent({ issuableTemplates: [{ name: 'test', id: 'test', project_path: 'test', namespace_path: 'test' }] });
+    createComponent({
+      issuableTemplates: {
+        test: [{ name: 'test', id: 'test', project_path: 'test', namespace_path: 'test' }],
+      },
+    });
 
     expect(vm.$el.querySelector('.js-issuable-selector-wrap')).not.toBeNull();
   });

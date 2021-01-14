@@ -2522,20 +2522,49 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  def inherited_issuable_templates_enabled?
+    Feature.enabled?(:inherited_issuable_templates, self, default_enabled: false)
+  end
+
   def issuable_template_names(issuable_type)
-    return [] unless repository.exists?
+    return {} unless repository.exists?
 
     case issuable_type.to_s
     when 'issue'
-      repository.issue_template_names
+      issue_template_names
     when 'merge_request'
-      repository.merge_request_template_names
+      merge_request_template_names
     else
-      []
+      {}
     end
   end
 
   private
+
+  # because we cache issue and merge request template names, we need a way to invalidate the cache
+  # when the FF is toggled.
+  #
+  # When FF is going to be removed we will need to run a redis cache cleanup migration to cleanup
+  # issue_template_names, merge_request_template_names and inherited_issue_template_names, inherited_merge_request_template_names.
+  def issue_template_names
+    if inherited_issuable_templates_enabled?
+      repository.expire_method_caches(%i(issue_template_names))
+      repository.inherited_issue_template_names
+    else
+      repository.expire_method_caches(%i(inherited_issue_template_names))
+      repository.issue_template_names
+    end
+  end
+
+  def merge_request_template_names
+    if inherited_issuable_templates_enabled?
+      repository.expire_method_caches(%i(merge_request_template_names))
+      repository.inherited_merge_request_template_names
+    else
+      repository.expire_method_caches(%i(inherited_merge_request_template_names))
+      repository.merge_request_template_names
+    end
+  end
 
   def find_service(services, name)
     services.find { |service| service.to_param == name }

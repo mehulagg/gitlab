@@ -28,7 +28,7 @@ class TemplateFinder
     # For issue and merge request description templates we return an array of templates for now,
     # instead of a hash of templates grouped by category
     def template_names(project, type)
-      return _template_names(project, type) unless %w[issues merge_requests].include?(type.to_s)
+      return _template_names(project, type) if !%w[issues merge_requests].include?(type.to_s) || project.inherited_issuable_templates_enabled?
 
       _template_names(project, type).values.flatten
     end
@@ -36,12 +36,12 @@ class TemplateFinder
     private
 
     def _template_names(project, type)
-      return {} if !VENDORED_TEMPLATES.key?(type.to_s) && type.to_s != 'licenses'
+     return {} if !VENDORED_TEMPLATES.key?(type.to_s) && type.to_s != 'licenses'
 
       template_names_by_category(build(type, project).execute)
     end
 
-    def template_names_by_category(items)
+   def template_names_by_category(items)
       grouped = items.group_by(&:category)
       categories = grouped.keys
 
