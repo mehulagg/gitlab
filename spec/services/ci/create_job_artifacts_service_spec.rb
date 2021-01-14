@@ -42,6 +42,12 @@ RSpec.describe Ci::CreateJobArtifactsService do
         expect(new_artifact.file_sha256).to eq(artifacts_sha256)
       end
 
+      it 'does not track the job user_id' do
+        expect(service).not_to receive(:track_usage_data)
+
+        subject
+      end
+
       context 'when metadata file is also uploaded' do
         let(:metadata_file) do
           file_to_upload('spec/fixtures/ci_build_artifacts_metadata.gz', sha256: artifacts_sha256)
@@ -171,6 +177,16 @@ RSpec.describe Ci::CreateJobArtifactsService do
 
           expect(subject[:status]).to eq(:success)
         end
+      end
+    end
+
+    context 'when artifact_type is metrics' do
+      let(:params) { { 'artifact_type' => 'metrics', 'artifact_format' => 'gzip' }.with_indifferent_access }
+
+      it 'tracks the job user_id' do
+        expect(service).to receive(:track_usage_data).with('i_testing_test_case_parsed', job.user_id)
+
+        subject
       end
     end
 
