@@ -27,6 +27,7 @@ module ResourceAccessTokens
       token_response = create_personal_access_token(user)
 
       if token_response.success?
+        log_event(token_response.payload[:personal_access_token])
         success(token_response.payload[:personal_access_token])
       else
         delete_failed_user(user)
@@ -104,6 +105,10 @@ module ResourceAccessTokens
 
     def create_membership(resource, user)
       resource.add_user(user, :maintainer, expires_at: params[:expires_at])
+    end
+
+    def log_event(token)
+      ::Gitlab::AppLogger.info "PROJECT ACCESS TOKEN CREATION: created_by: #{current_user.username}, project_id: #{resource.id}, token_user: #{token.user.name}, token_id: #{token.id}"
     end
 
     def error(message)
