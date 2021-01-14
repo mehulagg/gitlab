@@ -83,23 +83,11 @@ each job depends only on the previous stage being completed successfully.
 
 ### Enable or disable CI/CD configuration visualization **(CORE ONLY)**
 
-CI/CD configuration visualization is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 CI/CD configuration visualization is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can opt to disable it.
 
-To enable it:
-
-```ruby
-Feature.enable(:ci_config_visualization_tab)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_config_visualization_tab)
 To disable it:
 
 ```ruby
