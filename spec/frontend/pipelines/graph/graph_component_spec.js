@@ -1,5 +1,4 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import LinksLayer from '~/pipelines/components/graph_shared/links_layer.vue';
 import PipelineGraph from '~/pipelines/components/graph/graph_component.vue';
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import JobItem from '~/pipelines/components/graph/job_item.vue';
