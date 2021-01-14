@@ -41,7 +41,7 @@ export default {
 
     <div
       v-if="showNewUi"
-      class="gl-display-flex gl-justify-content-space-between gl-mt-5 gl-mb-5 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
+      class="gl-display-flex gl-justify-content-space-between gl-my-5 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
     >
       <h3 data-testid="new-jira-connect-ui-heading">{{ s__('Integrations|Linked namespaces') }}</h3>
       <gl-button

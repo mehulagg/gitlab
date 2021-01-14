@@ -7,7 +7,7 @@ module JiraConnectHelper
 
   def jira_connect_app_data
     {
-      groups_path: api_v4_groups_path(params: { min_access_level: 40 })
+      groups_path: api_v4_groups_path(params: { min_access_level: Gitlab::Access::MAINTAINER })
     }
   end
 end
