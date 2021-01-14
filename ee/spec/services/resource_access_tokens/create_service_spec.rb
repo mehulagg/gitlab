@@ -59,25 +59,26 @@ RSpec.describe ResourceAccessTokens::CreateService do
       let(:resource) { create(:project) }
 
       context 'when project access token is successfully created' do
-        let_it_be(:user) { create(:admin) }
-
         before do
           resource.add_maintainer(user)
         end
 
-        it 'logs audit event with project access token details' do
+        it 'logs audit event' do
           expect { subject }.to change { AuditEvent.count }.from(0).to(1)
+        end
+
+        it 'logs audit event with project access token details' do
+          response = subject
+
           expect(AuditEvent.last.author_id).to eq(user.id)
           expect(AuditEvent.last.entity_id).to eq(resource.id)
-          expect(AuditEvent.last.details[:custom_message]).to match(/Created project access token with id \d+/)
-          expect(AuditEvent.last.details[:target_details]).to match(/project_\d+_bot\d*/)
+          expect(AuditEvent.last.details[:custom_message]).to match(/Created project access token with id: \d+/)
+          expect(AuditEvent.last.details[:target_details]).to match(response.payload[:access_token].user.name)
         end
       end
 
       context 'when project access token is unsuccessfully created' do
         context 'with inadequate permissions' do
-          let_it_be(:user) { create(:user) }
-
           before do
             resource.add_developer(user)
           end
