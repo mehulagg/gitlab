@@ -1101,6 +1101,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: pipeline_background:ci_pipeline_artifacts_codequality_report
+  :feature_category: :code_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: pipeline_background:ci_pipeline_artifacts_coverage_report
   :feature_category: :code_testing
   :has_external_dependencies:

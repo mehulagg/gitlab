@@ -3524,6 +3524,12 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
         it { expect(subject).to be_truthy }
       end
+
+      context 'when feature is disabled' do
+        stub_feature_flags(codequality_mr_diff: false)
+
+        it { expect(subject).to be_falsey }
+      end
     end
 
     context 'when pipeline does not have builds with codequality reports' do
