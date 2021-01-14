@@ -4,6 +4,7 @@ import { GlButton, GlForm, GlFormInput, GlFormGroup, GlModal } from '@gitlab/ui'
 import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf } from '~/locale';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import {
   DEFAULT_STAGE_CONFIG,
   STAGE_SORT_DIRECTION,
@@ -22,6 +23,45 @@ const swapArrayItems = (arr, left, right) => [
 
 const findStageIndexByName = (stages, target = '') =>
   stages.findIndex(({ name }) => name === target);
+
+// Not great, we're mixing types
+const maybeFirstElem = (arr = null) => {
+  if (Array.isArray(arr)) {
+    return arr.length ? arr[0] : null;
+  }
+  return arr || null;
+};
+
+const formatStageData = (stages) => {
+  return stages
+    .filter(({ hidden = false }) => !hidden)
+    .map(
+      ({
+        startEventIdentifier,
+        endEventIdentifier,
+        startEventLabelId,
+        endEventLabelId,
+        custom = false,
+        name,
+        ...rest
+      }) => {
+        const additionalProps = custom
+          ? {
+              start_event_identifier: maybeFirstElem(startEventIdentifier),
+              end_event_identifier: maybeFirstElem(endEventIdentifier),
+              start_event_label_id: maybeFirstElem(startEventLabelId),
+              end_event_label_id: maybeFirstElem(endEventLabelId),
+            }
+          : {};
+        return {
+          ...rest,
+          ...additionalProps,
+          custom,
+          name: name.toLowerCase(),
+        };
+      },
+    );
+};
 
 export default {
   name: 'ValueStreamForm',
@@ -122,11 +162,15 @@ export default {
       const { name, stages } = this;
       return this.createValueStream({
         name,
-        stages: stages.map(({ name: stageName, ...rest }) => ({
-          name: stageName,
-          ...rest,
-          title: stageName,
-        })),
+        stages: formatStageData([
+          ...stages,
+          {
+            name: 'fake custom stage',
+            startEventIdentifier: 'issue_created',
+            endEventIdentifier: 'issue_closed',
+            custom: true,
+          },
+        ]),
       }).then(() => {
         if (!this.hasInitialFormErrors) {
           this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name }), {
