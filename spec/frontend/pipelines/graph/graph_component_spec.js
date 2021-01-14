@@ -22,7 +22,12 @@ describe('graph component', () => {
     pipeline: generateResponse(mockPipelineResponse, 'root/fungi-xoxo'),
   };
 
-  const createComponent = ({ data = {}, mountFn = shallowMount, props = {}, stubOverride = {} } = {}) => {
+  const createComponent = ({
+    data = {},
+    mountFn = shallowMount,
+    props = {},
+    stubOverride = {},
+  } = {}) => {
     wrapper = mountFn(PipelineGraph, {
       propsData: {
         ...defaultProps,
@@ -40,7 +45,7 @@ describe('graph component', () => {
         'job-item': true,
         'job-group-dropdown': true,
         ...stubOverride,
-      }
+      },
     });
   };
 
@@ -74,7 +79,11 @@ describe('graph component', () => {
 
     describe('when links are present', () => {
       beforeEach(async () => {
-        createComponent({ mountFn: mount, stubOverride: { 'job-item': false }, data: { hoveredJobName: 'test_a' } });
+        createComponent({
+          mountFn: mount,
+          stubOverride: { 'job-item': false },
+          data: { hoveredJobName: 'test_a' },
+        });
         findLinksLayer().vm.$emit('highlightedJobsChange', ['test_c', 'build_c']);
       });
 
@@ -82,8 +91,7 @@ describe('graph component', () => {
         const unrelatedJob = wrapper.find(JobItem);
         expect(findLinksLayer().emitted().highlightedJobsChange).toHaveLength(1);
         expect(unrelatedJob.classes('gl-opacity-3')).toBe(true);
-      })
-
+      });
     });
   });
 
