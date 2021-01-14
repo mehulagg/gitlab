@@ -25,7 +25,7 @@
             = f.label :autoclose_referenced_issues, class: 'form-check-label' do
               %strong= _("Auto-close referenced issues on default branch")
             .form-text.text-muted
-              = _("Issues referenced by merge requests and commits in the default branch are closed automatically")
+              = _("When merge requests and commits in the default branch close, any issues they reference also close.")
               = link_to sprite_icon('question-o'), help_page_path('user/project/issues/managing_issues.md', anchor: 'disabling-automatic-issue-closing'), target: '_blank'
 
       = f.submit _('Save changes'), class: "gl-button btn btn-success"
