@@ -26674,6 +26674,9 @@ msgstr ""
 msgid "Source Branch"
 msgstr ""
 
+msgid "Source Control"
+msgstr ""
+
 msgid "Source branch: %{source_branch_open}%{source_branch}%{source_branch_close}"
 msgstr ""
 
