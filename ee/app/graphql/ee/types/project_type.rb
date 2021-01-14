@@ -10,11 +10,6 @@ module EE
               description: 'Information about security analyzers used in the project',
               method: :itself
 
-        field :dast_scanner_profiles,
-              ::Types::DastScannerProfileType.connection_type,
-              null: true,
-              description: 'The DAST scanner profiles associated with the project'
-
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
               calls_gitaly: true,
               description: 'SAST CI configuration for the project'
@@ -76,6 +71,11 @@ module EE
               null: true,
               description: 'DAST Site Profiles associated with the project',
               resolver: ::Resolvers::DastSiteProfileResolver
+
+        field :dast_scanner_profiles,
+              ::Types::DastScannerProfileType.connection_type,
+              null: true,
+              description: 'The DAST scanner profiles associated with the project'
 
         field :dast_site_validations,
               ::Types::DastSiteValidationType.connection_type,
