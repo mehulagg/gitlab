@@ -60,6 +60,12 @@ module EE
               description: 'Find iterations',
               resolver: ::Resolvers::IterationsResolver
 
+        field :dast_scans,
+              ::Types::DastScans.connection_type,
+              null: true,
+              description: 'DAST Scans associated with the project',
+              resolver: ::Resolvers::DastSiteProfileResolver
+
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
               null: true,
@@ -119,6 +125,10 @@ module EE
               null: true,
               description: 'Incident Management On-call schedules of the project',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+      end
+
+      def dast_scans
+        DastScan.none
       end
 
       def dast_scanner_profiles
