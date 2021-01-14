@@ -5,15 +5,11 @@ module EE
     module CreateService
       def execute
         super.tap do |response|
-          log_audit_event(response.payload[:access_token], response)
+          audit_event_service(response.payload[:access_token], response)
         end
       end
 
       private
-
-      def log_audit_event(token, response)
-        audit_event_service(token, response).for_user(full_path: token&.user&.username, entity_id: token&.user&.id).security_event
-      end
 
       def audit_event_service(token, response)
         message = if response.success?
@@ -29,7 +25,7 @@ module EE
           action: :custom,
           custom_message: message,
           ip_address: ip_address
-        )
+        ).security_event
       end
     end
   end
