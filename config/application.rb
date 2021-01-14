@@ -370,11 +370,6 @@ module Gitlab
     end
 
     config.after_initialize do
-      # Devise (see initializers/8_devise.rb) already reloads routes if
-      # eager loading is enabled, so don't do this twice since it's
-      # expensive.
-      Rails.application.reload_routes! unless config.eager_load
-
       project_url_helpers = Module.new do
         extend ActiveSupport::Concern
 
@@ -392,6 +387,10 @@ module Gitlab
       # these methods available in the same places.
       Gitlab::Routing.add_helpers(project_url_helpers)
       Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)
+    end
+
+    config.before_eager_load do |config|
+      ::API::API
     end
   end
 end
