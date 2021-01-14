@@ -5,6 +5,12 @@
 - return if issuable.closed_or_merged_without_fork?
 
 - source_title, target_title = format_mr_branch_names(@merge_request)
+- source_vis = @merge_request.source_project.visibility_level
+- source_visibility = @merge_request.source_project.visibility
+- source_article = source_vis == 10 ? s_('MergeRequestBranchChooser|an ') : s_('MergeRequestBranchChooser|a ');
+- target_vis = @merge_request.target_project.visibility_level
+- target_visibility = @merge_request.target_project.visibility
+- target_article = target_vis == 10 ? s_('MergeRequestBranchChooser|an ') : s_('MergeRequestBranchChooser|a ');
 
 .form-group.row.d-flex.gl-px-5.branch-selector
   .align-self-center
@@ -24,4 +30,12 @@
       = form.hidden_field(:target_branch,
         { class: 'target_branch js-target-branch-select ref-name mw-xl',
           data: { placeholder: _('Select branch'), endpoint: refs_project_path(@project, sort: 'updated_desc', find: 'branches') }})
+
+- if source_vis < target_vis
+  .gl-alert.gl-alert-warning.mt-3
+    = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      = html_escape_once(_('This merge request is from %{source_article}%{source} project to %{target_article}%{target} project.') % { source_article: source_article, source: source_visibility, target_article: target_article, target: target_visibility } ).html_safe
+      %br
+      = html_escape_once(_('Review the target project before submitting to avoid exposing private changes.')).html_safe
 %hr
