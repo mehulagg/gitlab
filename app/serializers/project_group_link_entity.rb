@@ -1,23 +1,20 @@
 # frozen_string_literal: true
 
-class GroupGroupLinkEntity < GroupLinkEntity
+class ProjectGroupLinkEntity < GroupLinkEntity
   include RequestAwareEntity
+  include Projects::ProjectMembersHelper
 
   expose :can_update do |group_link|
-    can_manage?(group_link)
+    can_manage_project_members?(group_link.project)
   end
 
   expose :can_remove do |group_link|
-    can_manage?(group_link)
+    can_manage_project_members?(group_link.project)
   end
 
   private
 
   def current_user
     options[:current_user]
-  end
-
-  def can_manage?(group_link)
-    can?(current_user, :admin_group_member, group_link.shared_group)
   end
 end
