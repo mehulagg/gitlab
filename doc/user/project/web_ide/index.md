@@ -33,8 +33,8 @@ start seeing results.
 ## Command palette
 
 You can see all available commands for manipulating editor content by pressing
-the <kbd>F1</kbd> key when the editor is in focus. After that,
-you'll see a complete list of available commands for
+the <kbd>F1</kbd> key when the editor is in focus. After that, the editor displays
+a complete list of available commands for
 manipulating editor content. The editor supports commands for multi-cursor
 editing, code block folding, commenting, searching and replacing, navigating
 editor warnings and suggestions, and more.
@@ -78,7 +78,7 @@ All the themes GitLab supports for syntax highlighting are added to the Web IDE'
 You can pick a theme from your [profile preferences](../../profile/preferences.md).
 
 The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
+the [Solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
 which apply to the entire Web IDE screen.
 
 | Solarized Light Theme                                         | Solarized Dark Theme                                        | Dark Theme                              |
@@ -144,12 +144,13 @@ schemas:
 
 Each schema entry supports two properties:
 
-- `uri`: please provide an absolute URL for the schema definition file here. The schema from this URL
-is loaded when a matching file is open.
-- `match`: a list of matching paths or glob expressions. If a schema matches a particular path pattern,
-it will be applied to that file. Please enclose the pattern in quotes if it begins with an asterisk (`*`),
-it's be applied to that file. If a pattern begins with an asterisk (`*`), enclose it in quotation
-marks. Otherwise, the configuration file is not valid YAML.
+- `uri`: please provide an absolute URL for the schema definition file here.
+  The schema from this URL is loaded when a matching file is open.
+- `match`: a list of matching paths or glob expressions. If a schema matches a
+  particular path pattern, it is applied to that file. Please enclose the pattern
+  in quotes if it begins with an asterisk (`*`), it's be applied to that file.
+  If a pattern begins with an asterisk (`*`), enclose it in quotation marks.
+  Otherwise, the configuration file is not valid YAML.
 
 ## Configure the Web IDE
 
@@ -325,7 +326,7 @@ In order to enable the Web IDE terminals you need to create the file
 file is fairly similar to the [CI configuration file](../../../ci/yaml/README.md)
 syntax but with some restrictions:
 
-- No global blocks can be defined (i.e., `before_script` or `after_script`)
+- No global blocks (such as `before_script` or `after_script`) can be defined.
 - Only one job named `terminal` can be added to this file.
 - Only the keywords `image`, `services`, `tags`, `before_script`, `script`, and
   `variables` are allowed to be used to configure the job.
@@ -434,7 +435,7 @@ terminal is started, a **Terminal** status is visible in the status bar.
 Changes made to your files via the Web IDE sync to the running terminal
 when:
 
-- <kbd>Ctrl</kbd> + <kbd>S</kbd> (or <kbd>Cmd</kbd> + <kbd>S</kbd> on Mac)
+- <kbd>Control</kbd> + <kbd>S</kbd> (or <kbd>Command</kbd> + <kbd>S</kbd> on Mac)
   is pressed while editing a file.
 - Anything outside the file editor is clicked after editing a file.
 - A file or folder is created, deleted, or renamed.
@@ -446,7 +447,7 @@ The Web IDE has a few limitations:
 - Interactive Terminals is in a beta phase and continues to be improved in upcoming releases. In the meantime, please note that the user is limited to having only one
   active terminal at a time.
 
-- LFS files can be rendered and displayed but they cannot be updated and committed using the Web IDE. If an LFS file is modified and pushed to the repository, the LFS pointer in the repository will be overwritten with the modified LFS file content.
+- LFS files can be rendered and displayed but they cannot be updated and committed using the Web IDE. If an LFS file is modified and pushed to the repository, the LFS pointer in the repository is overwritten with the modified LFS file content.
 
 ### Troubleshooting
 
