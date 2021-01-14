@@ -4,6 +4,8 @@ module Gitlab
   module Experimentation
     class LegacyExperiment
       FEATURE_FLAG_SUFFIX = "_experiment_percentage"
+      TRACKING_CATEGORY = 'LegacyExperiment'
+      USE_BACKWARDS_COMPATIBLE_SUBJECT_INDEX = false
 
       attr_reader :key, :tracking_category, :use_backwards_compatible_subject_index
 
@@ -28,6 +30,11 @@ module Gitlab
       end
 
       private
+
+      def experiment_key
+        # TODO
+        class.name.split('Experiment').first.underscore
+      end
 
       def experiment_percentage
         feature_flag.percentage_of_time_value
