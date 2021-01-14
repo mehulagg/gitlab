@@ -197,7 +197,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       it 'logs the event' do
-        expect(Gitlab::AppLogger).to receive(:info).with(/PROJECT ACCESS TOKEN CREATION: created_by: #{current_user.username}, project_id: #{resource.id}, token_user: project_\d+_bot\d*, token_id: \d+/)
+        expect(Gitlab::AppLogger).to receive(:info).with(/PROJECT ACCESS TOKEN CREATION: created_by: #{user.username}, project_id: #{resource.id}, token_user: project_\d+_bot\d*, token_id: \d+/)
 
         subject
       end
