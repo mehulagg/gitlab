@@ -131,7 +131,8 @@ class Projects::IssuesController < Projects::ApplicationController
     service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
 
-    create_vulnerability_issue_link(issue)
+    # create_vulnerability_issue_link(issue)
+    create_vulnerability_issue_feedback(issue)
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
       flash[:notice] = if service.discussion_to_resolve_id
@@ -404,6 +405,8 @@ class Projects::IssuesController < Projects::ApplicationController
 
   # Overridden in EE
   def create_vulnerability_issue_link(issue); end
+
+  def create_vulnerability_issue_feedback(issue); end
 end
 
 Projects::IssuesController.prepend_if_ee('EE::Projects::IssuesController')

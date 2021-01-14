@@ -47,7 +47,7 @@ module Vulnerabilities
 
     def self.find_or_init_for(feedback_params)
       validate_enums(feedback_params)
-
+binding.pry
       record = find_or_initialize_by(feedback_params.slice(:category, :feedback_type, :project_fingerprint))
       record.assign_attributes(feedback_params)
       record

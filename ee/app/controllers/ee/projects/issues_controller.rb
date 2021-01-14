@@ -48,6 +48,18 @@ module EE
         end
       end
 
+      def create_vulnerability_issue_feedback(issue)
+        return unless issue.persisted? && vulnerability
+
+        result = VulnerabilityFeedback::CreateService.new(
+          issue.project,
+          current_user,
+          params.merge!({ issue: issue, feedback_type: 'issue' })
+        ).execute
+
+        flash[:alert] = render_vulnerability_link_alert if result[:status] == :error
+      end
+
       def create_vulnerability_issue_link(issue)
         return unless issue.persisted? && vulnerability
 
