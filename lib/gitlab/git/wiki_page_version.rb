@@ -14,7 +14,7 @@ module Gitlab
 
       def author_url
         author = ::User.find_by_any_email(author_email)
-        UserPresenter.new(author).web_url
+        author.nil? ? "mailto:#{author_email}" : Gitlab::UrlBuilder.build(author)
       end
     end
   end
