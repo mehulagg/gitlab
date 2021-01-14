@@ -208,7 +208,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
           response = subject
 
           expect(response.error?).to be true
-          expect(response.errors).to include("User does not have permission to create #{resource_type} Access Token")
+          expect(response.errors).to include("User does not have permission to create #{resource_type} access token")
         end
       end
 

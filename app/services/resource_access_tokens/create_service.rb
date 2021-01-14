@@ -11,7 +11,7 @@ module ResourceAccessTokens
     end
 
     def execute
-      return error("User does not have permission to create #{resource_type} Access Token") unless has_permission_to_create?
+      return error("User does not have permission to create #{resource_type} access token") unless has_permission_to_create?
 
       user = create_user
 
