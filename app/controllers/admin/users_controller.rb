@@ -15,6 +15,8 @@ class Admin::UsersController < Admin::ApplicationController
     @users = @users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
+
+    @cohorts = load_cohorts
   end
 
   def show
@@ -306,6 +308,16 @@ class Admin::UsersController < Admin::ApplicationController
 
   def log_impersonation_event
     Gitlab::AppLogger.info(_("User %{current_user_username} has started impersonating %{username}") % { current_user_username: current_user.username, username: user.username })
+  end
+
+  def load_cohorts
+    if Gitlab::CurrentSettings.usage_ping_enabled
+      cohorts_results = Rails.cache.fetch('cohorts', expires_in: 1.day) do
+        CohortsService.new.execute
+      end
+
+      CohortsSerializer.new.represent(cohorts_results)
+    end
   end
 end
 

@@ -172,4 +172,28 @@ RSpec.describe "Admin::Users" do
       end
     end
   end
+
+  describe 'Cohorts tab' do
+    context 'with usage ping enabled' do
+      it 'shows users count per month' do
+        stub_application_setting(usage_ping_enabled: true)
+
+        create_list(:user, 2)
+
+        visit admin_users_path
+
+        expect(page).to have_content("#{Time.now.strftime('%b %Y')} 3 0")
+      end
+    end
+
+    context 'with usage ping disabled' do
+      it 'shows empty state', :js do
+        stub_application_setting(usage_ping_enabled: false)
+
+        visit admin_users_path
+
+        expect(page).to have_selector(".js-cohorts-empty-state")
+      end
+    end
+  end
 end
