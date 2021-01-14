@@ -68,6 +68,10 @@ module QA
             element :new_note_form, 'new-note' # rubocop:disable QA/ElementWithPattern
             element :new_note_form, 'attr: :note' # rubocop:disable QA/ElementWithPattern
           end
+
+          base.view 'app/assets/javascripts/vue_shared/components/markdown/suggestion_diff_header.vue' do
+            element :apply_suggestion
+          end
         end
 
         def collapse_replies
@@ -107,6 +111,12 @@ module QA
 
         def noteable_note_item
           find_element(:noteable_note_container)
+        end
+
+        def apply_suggestion
+          within_element(:noteable_note_container) do
+            click_element :apply_suggestion
+          end
         end
 
         def reply_to_discussion(position, reply_text)

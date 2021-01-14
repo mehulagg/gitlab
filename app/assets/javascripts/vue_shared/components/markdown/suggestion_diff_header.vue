@@ -164,6 +164,7 @@ export default {
           :disabled="isDisableButton"
           variant="success"
           @click="applySuggestion"
+          data-qa-selector="apply_suggestion"
         >
           {{ __('Apply suggestion') }}
         </gl-button>

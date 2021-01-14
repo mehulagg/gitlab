@@ -174,6 +174,7 @@ export default {
               icon="doc-code"
               class="js-suggestion-btn"
               @click="handleSuggestDismissed"
+              data-qa-selector="insert_suggestion"
             />
             <gl-popover
               v-if="showSuggestPopover && $refs.suggestButton"

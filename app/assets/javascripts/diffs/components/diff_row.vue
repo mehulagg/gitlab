@@ -196,6 +196,7 @@ export default {
           :class="classNameMapCellLeft"
           data-testid="leftLineNumber"
           class="diff-td diff-line-num"
+          data-qa-selector="new_diff_line"
         >
           <template v-if="!isLeftConflictMarker">
             <span
