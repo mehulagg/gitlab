@@ -36,7 +36,7 @@ module ResourceAccessTokens
 
     private
 
-    attr_reader :resource_type, :resource
+    attr_reader :resource_type, :resource, :ip_address
 
     def has_permission_to_create?
       %w(project group).include?(resource_type) && can?(current_user, :admin_resource_access_tokens, resource)

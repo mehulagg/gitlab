@@ -28,7 +28,7 @@ module EE
           target_details: token&.user&.name,
           action: :custom,
           custom_message: message,
-          ip_address: @ip_address
+          ip_address: ip_address
         )
       end
     end
