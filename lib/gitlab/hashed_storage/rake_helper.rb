@@ -101,7 +101,7 @@ module Gitlab
         dry_run = !ENV['FORCE'].present?
 
         known_paths = Set.new
-        listing(name, relation) { |p| known_paths << "#{root}/#{p.repository.disk_path}" }
+        listing(relation_name, relation) { |p| known_paths << "#{root}/#{p.repository.disk_path}" }
 
         marked_for_deletion = Set.new
         prefix_length = Pathname.new(root).ascend.count
