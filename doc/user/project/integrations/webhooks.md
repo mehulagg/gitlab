@@ -96,6 +96,10 @@ attribute only contains the first 20 for performance reasons. Loading
 detailed commit data is expensive. Note that despite only 20 commits being
 present in the `commits` attribute, the `total_commits_count` attribute contains the actual total.
 
+NOTE:
+If a push event is a branch creation without new commits inctroduced, the `commits` 
+attribut in a payload is empty.
+
 Also, if a single push includes changes for more than three (by default, depending on
 [`push_event_hooks_limit` setting](../../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls))
 branches, this hook isn't executed.
