@@ -12,6 +12,7 @@ import {
   fullBoardId,
   formatListsPageInfo,
   formatIssue,
+  formatBoardConfig,
 } from '../boards_util';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
@@ -360,7 +361,15 @@ export default {
   },
 
   createNewIssue: ({ commit, state }, issueInput) => {
-    const input = issueInput;
+    const boardConfig = formatBoardConfig(state.boardConfig);
+
+    const input = {
+      ...issueInput,
+      labelIds: [...(issueInput.labelIds || []), ...boardConfig.labelIds],
+      assigneeIds: [...(issueInput.assigneeIds || []), ...boardConfig.assigneeIds],
+      milestoneId: issueInput.milestoneId || boardConfig.milestoneId,
+    };
+
     const { boardType, fullPath } = state;
     if (boardType === BoardType.project) {
       input.projectPath = fullPath;

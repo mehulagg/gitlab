@@ -15,8 +15,14 @@ import * as types from '~/boards/stores/mutation_types';
 import { inactiveId } from '~/boards/constants';
 import issueMoveListMutation from '~/boards/graphql/issue_move_list.mutation.graphql';
 import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
+import issueCreateMutation from '~/boards/graphql/issue_create.mutation.graphql';
 import updateAssignees from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
-import { fullBoardId, formatListIssues, formatBoardLists } from '~/boards/boards_util';
+import {
+  fullBoardId,
+  formatListIssues,
+  formatBoardLists,
+  formatBoardConfig,
+} from '~/boards/boards_util';
 import createFlash from '~/flash';
 
 jest.mock('~/flash');
@@ -727,6 +733,11 @@ describe('createNewIssue', () => {
   const state = {
     boardType: 'group',
     fullPath: 'gitlab-org/gitlab',
+    boardConfig: {
+      labelIds: [],
+      assigneeIds: [],
+      milestoneId: -1,
+    },
   };
 
   it('should return issue from API on success', async () => {
@@ -743,11 +754,41 @@ describe('createNewIssue', () => {
     expect(result).toEqual(mockIssue);
   });
 
+  it('should add board scope to the issue being created', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        createIssue: {
+          issue: mockIssue,
+          errors: [],
+        },
+      },
+    });
+
+    const stateWithBoardConfig = {
+      boardConfig: {
+        labelsIds: [5],
+        assigneeIds: [2],
+        milestoneId: 3,
+      },
+    };
+
+    await actions.createNewIssue({ state: stateWithBoardConfig }, mockIssue);
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: issueCreateMutation,
+      variables: {
+        input: {
+          ...mockIssue,
+          ...formatBoardConfig(stateWithBoardConfig.boardConfig),
+        },
+      },
+    });
+  });
+
   it('should commit CREATE_ISSUE_FAILURE mutation when API returns an error', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         createIssue: {
-          issue: {},
+          issue: mockIssue,
           errors: [{ foo: 'bar' }],
         },
       },

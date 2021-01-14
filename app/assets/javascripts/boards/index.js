@@ -127,8 +127,10 @@ export default () => {
           milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
           iterationId: parseInt($boardApp.dataset.boardIterationId, 10),
           iterationTitle: $boardApp.dataset.boardIterationTitle || '',
+          assigneeId: $boardApp.dataset.boardAssigneeId,
           assigneeUsername: $boardApp.dataset.boardAssigneeUsername,
           labels: $boardApp.dataset.labels ? JSON.parse($boardApp.dataset.labels || []) : [],
+          labelIds: $boardApp.dataset.labelIds ? JSON.parse($boardApp.dataset.labelIds || []) : [],
           weight: $boardApp.dataset.boardWeight
             ? parseInt($boardApp.dataset.boardWeight, 10)
             : null,
