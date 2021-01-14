@@ -4,10 +4,11 @@ require 'spec_helper'
 
 RSpec.describe DastSiteValidations::RevokeService do
   let_it_be(:dast_site_validation) { create(:dast_site_validation, state: :passed) }
+  let_it_be(:project) { dast_site_validation.project }
 
   let(:params) { { normalized_target_url: dast_site_validation.url_base } }
 
-  subject { described_class.new(container: dast_site_validation.project, params: params).execute }
+  subject { described_class.new(container: project, params: params).execute }
 
   describe 'execute', :clean_gitlab_redis_shared_state do
     before do
