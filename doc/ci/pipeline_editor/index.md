@@ -59,8 +59,8 @@ reflected in the CI lint. It displays the same results as the existing [CI Lint 
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241722) in GitLab 13.5.
 > - [Moved to **CI/CD > Editor**](https://gitlab.com/gitlab-org/gitlab/-/issues/263141) in GitLab 13.7.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-cicd-configuration-visualization). **(CORE ONLY)**
 
@@ -82,10 +82,9 @@ each job depends only on the previous stage being completed successfully.
 
 ### Enable or disable CI/CD configuration visualization **(CORE ONLY)**
 
-CI/CD configuration visualization is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+CI/CD configuration visualization is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can toggle it.
 
 To enable it:
 
