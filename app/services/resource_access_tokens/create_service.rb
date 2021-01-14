@@ -27,7 +27,6 @@ module ResourceAccessTokens
       token_response = create_personal_access_token(user)
 
       if token_response.success?
-        log_audit_event(token_response.payload[:personal_access_token])
         success(token_response.payload[:personal_access_token])
       else
         delete_failed_user(user)
@@ -107,16 +106,6 @@ module ResourceAccessTokens
       resource.add_user(user, :maintainer, expires_at: params[:expires_at])
     end
 
-    def log_audit_event(token)
-      message = "Created project access token with id: %{id}" % { id: token.id }
-      EE::AuditEvents::CustomAuditEventService.new(
-        current_user,
-        resource,
-        @ip_address,
-        message
-      ).for_project.security_event
-    end
-
     def error(message)
       ServiceResponse.error(message: message)
     end
@@ -126,3 +115,5 @@ module ResourceAccessTokens
     end
   end
 end
+
+ResourceAccessTokens::CreateService.prepend_if_ee('EE::ResourceAccessTokens::CreateService')
