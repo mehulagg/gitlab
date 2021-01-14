@@ -213,7 +213,7 @@ Before you import your file:
 
 - Consider importing a test file containing only a few requirements. There is no way to undo a large
   import without using the GitLab API.
-- Ensure your CSV file meets the [file format](#csv-file-format) requirements.
+- Ensure your CSV file meets the [file format](#imported-csv-file-format) requirements.
 
 To import requirements:
 
