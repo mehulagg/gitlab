@@ -242,15 +242,17 @@ create the package record. Workhorse provides a variety of file metadata such as
 For testing purposes, you may want to [enable object storage](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/object_storage.md)
 in your local development environment.
 
-#### Rate Limiting
+#### Rate Limits
 
-Package manager clients can make rapid requests that are often higher than 
-[GitLabs standard API rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits). 
-This will result in users receiving an error: `429 Too Many Requests`. We have opened a set of
-paths to allow for higher rate limits. Unless it is not possible, new package managers should
-follow these conventions so they will be able to take advantage of the expanded package rate limit.
+Package manager clients can make rapid requests that exceed the
+[GitLab.com standard API rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits). 
+This results in a `429 Too Many Requests` error. 
 
-These route prefixes will guarantee a higher rate limit:
+We have opened a set of paths to allow higher rate limits. Unless it is not possible,
+new package managers should follow these conventions so they can take advantage of the
+expanded package rate limit.
+
+These route prefixes guarantee a higher rate limit:
 
 ```plaintext
 /api/v4/packages/
