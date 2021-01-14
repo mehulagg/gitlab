@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
 import SettingsApp from './components/group_settings_app.vue';
-import { apolloProvider } from './graphql/index';
+import { apolloProvider } from './graphql';
 
 Vue.use(Translate);
 
