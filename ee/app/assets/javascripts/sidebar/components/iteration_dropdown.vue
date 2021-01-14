@@ -5,6 +5,7 @@ import {
   GlSearchBoxByType,
   GlDropdownSectionHeader,
   GlTooltipDirective,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import { __ } from '~/locale';
@@ -19,6 +20,7 @@ export default {
     GlDropdownItem,
     GlSearchBoxByType,
     GlDropdownSectionHeader,
+    GlLoadingIcon,
   },
   apollo: {
     iterations: {
@@ -40,6 +42,9 @@ export default {
 
         return iterationSelectTextMap.noIterationItem.concat(nodes);
       },
+      skip() {
+        return !this.shouldFetch;
+      }
     },
   },
   props: {
@@ -60,9 +65,11 @@ export default {
     title() {
       return this.currentIteration?.title || __('Select iteration')
     },
-    test() {
-      return this.shouldFetch;
-    }
+  },
+  mounted() {
+    this.$refs.dropdown.$root.$on('bv::dropdown::shown', () => {
+      this.shouldFetch = true;
+    });
   },
   methods: {
     onClick(iteration) {
@@ -87,6 +94,7 @@ export default {
 <template>
   <div data-qa-selector="iteration_container">
     <gl-dropdown
+      ref="dropdown"
       :text="title"
       class="dropdown gl-w-full"
     >
@@ -94,8 +102,10 @@ export default {
         __('Assign Iteration')
       }}</gl-dropdown-section-header>
       <gl-search-box-by-type ref="search" v-model="searchTerm" />
+      <gl-loading-icon v-if="$apollo.loading" />
       <gl-dropdown-item
         v-for="iterationItem in iterations"
+        v-else
         :key="iterationItem.id"
         :is-check-item="true"
         :is-checked="isIterationChecked(iterationItem.id)"
