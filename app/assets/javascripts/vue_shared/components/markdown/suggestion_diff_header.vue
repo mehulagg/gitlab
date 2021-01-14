@@ -163,8 +163,8 @@ export default {
           class="btn-inverted js-apply-btn btn-grouped"
           :disabled="isDisableButton"
           variant="success"
-          @click="applySuggestion"
           data-qa-selector="apply_suggestion"
+          @click="applySuggestion"
         >
           {{ __('Apply suggestion') }}
         </gl-button>

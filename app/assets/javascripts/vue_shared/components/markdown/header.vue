@@ -173,8 +173,8 @@ export default {
               :tag-content="lineContent"
               icon="doc-code"
               class="js-suggestion-btn"
-              @click="handleSuggestDismissed"
               data-qa-selector="insert_suggestion"
+              @click="handleSuggestDismissed"
             />
             <gl-popover
               v-if="showSuggestPopover && $refs.suggestButton"
