@@ -270,6 +270,8 @@ By exporting requirements, you and your team can import them into another tool o
 your customers. Exporting requirements can aid collaboration with higher-level systems, as well as
 audit and regulatory compliance tasks.
 
+Users with Reporter or higher [permissions](../../permissions.md) can export requirements.
+
 To export requirements:
 
 1. In a project, go to **Requirements**.
