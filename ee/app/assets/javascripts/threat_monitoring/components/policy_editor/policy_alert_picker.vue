@@ -1,11 +1,15 @@
 <script>
-import { GlAlert, GlButton, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLink, GlSprintf } from '@gitlab/ui';
+import getAgentCount from '../../graphql/queries/get_agent_count.query.graphql';
 import { s__ } from '~/locale';
 
 export default {
   i18n: {
     ACTION: s__(
       'NetworkPolicies|%{labelStart}And%{labelEnd} %{spanStart}send an Alert to GitLab.%{spanEnd}',
+    ),
+    AGENT_REQUIRED: s__(
+      'NetworkPolicies|Please %{installLinkStart}install%{installLinkEnd} and %{configureLinkStart}configure a Kubernetes Agent for this project%{configureLinkEnd} to enable alerts.',
     ),
     BUTTON_LABEL: s__('NetworkPolicies|+ Add alert'),
     HIGH_VOLUME_WARNING: s__(
@@ -15,13 +19,33 @@ export default {
   components: {
     GlAlert,
     GlButton,
+    GlLink,
     GlSprintf,
   },
+  inject: ['configureAgentHelpPath', 'createAgentHelpPath', 'projectPath'],
   props: {
     policyAlert: {
       type: Boolean,
       required: true,
     },
+  },
+  apollo: {
+    isAgentInstalled: {
+      query: getAgentCount,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        return Boolean(data?.project?.clusterAgents?.count);
+      },
+    },
+  },
+  data() {
+    return {
+      isAgentInstalled: false,
+    };
   },
 };
 </script>
@@ -31,15 +55,30 @@ export default {
     <gl-alert v-if="policyAlert" variant="warning" :dismissible="false" class="gl-mt-5">
       {{ $options.i18n.HIGH_VOLUME_WARNING }}
     </gl-alert>
+    <gl-alert v-if="!isAgentInstalled" variant="danger" :dismissible="false" class="gl-mt-5">
+      <gl-sprintf :message="$options.i18n.AGENT_REQUIRED">
+        <template #installLink="{ content }">
+          <gl-link :href="createAgentHelpPath" target="_blank">
+            {{ content }}
+          </gl-link>
+        </template>
+        <template #configureLink="{ content }">
+          <gl-link :href="configureAgentHelpPath" target="_blank">
+            {{ content }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <div
       class="gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5"
-      :class="{ 'gl-mt-5': !policyAlert }"
+      :class="{ 'gl-mt-5': !policyAlert && isAgentInstalled }"
     >
       <gl-button
         v-if="!policyAlert"
         variant="link"
         category="primary"
         data-testid="add-alert"
+        :disabled="!isAgentInstalled"
         @click="$emit('update-alert', !policyAlert)"
       >
         {{ $options.i18n.BUTTON_LABEL }}
@@ -51,9 +90,9 @@ export default {
         <span>
           <gl-sprintf :message="$options.i18n.ACTION">
             <template #label="{ content }">
-              <label for="actionType" class="text-uppercase gl-font-lg gl-mr-4 gl-mb-0">{{
-                content
-              }}</label>
+              <label for="actionType" class="text-uppercase gl-font-lg gl-mr-4 gl-mb-0">
+                {{ content }}
+              </label>
             </template>
             <template #span="{ content }">
               <span>{{ content }}</span>
