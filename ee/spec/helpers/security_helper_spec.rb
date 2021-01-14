@@ -15,7 +15,8 @@ RSpec.describe SecurityHelper do
         project_add_endpoint: security_projects_path,
         project_list_endpoint: security_projects_path,
         instance_dashboard_settings_path: settings_security_dashboard_path,
-        vulnerabilities_export_endpoint: api_v4_security_vulnerability_exports_path
+        vulnerabilities_export_endpoint: api_v4_security_vulnerability_exports_path,
+        report_types: ::Enums::Vulnerability::report_types.invert.to_json
       })
     end
   end

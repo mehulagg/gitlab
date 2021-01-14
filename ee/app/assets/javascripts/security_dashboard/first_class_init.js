@@ -28,7 +28,21 @@ export default (el, dashboardType) => {
     });
   }
 
-  const provide = {};
+  const reportTypes = JSON.parse(el.dataset.reportTypes);
+  const provide = {
+    dashboardDocumentation: el.dataset.dashboardDocumentation,
+    noVulnerabilitiesSvgPath: el.dataset.noVulnerabilitiesSvgPath,
+    emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+    notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
+    noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
+    hasVulnerabilities: parseBoolean(el.dataset.hasVulnerabilities),
+    dashboardType,
+    scanners: JSON.parse(el.dataset.scanners).map((scanner) => ({
+      ...scanner,
+      report_type: reportTypes[scanner.report_type].toUpperCase(),
+    })),
+  };
+
   const props = {
     securityDashboardHelpPath: el.dataset.securityDashboardHelpPath,
     projectAddEndpoint: el.dataset.projectAddEndpoint,
@@ -73,15 +87,7 @@ export default (el, dashboardType) => {
     store,
     router,
     apolloProvider,
-    provide: () => ({
-      dashboardDocumentation: el.dataset.dashboardDocumentation,
-      noVulnerabilitiesSvgPath: el.dataset.noVulnerabilitiesSvgPath,
-      emptyStateSvgPath: el.dataset.emptyStateSvgPath,
-      notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
-      noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
-      hasVulnerabilities: parseBoolean(el.dataset.hasVulnerabilities),
-      ...provide,
-    }),
+    provide,
     render(createElement) {
       return createElement(component, { props });
     },

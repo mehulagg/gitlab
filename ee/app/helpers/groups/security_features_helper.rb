@@ -44,7 +44,12 @@ module Groups::SecurityFeaturesHelper
       no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
       empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
       dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
-      vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id))
+      vulnerabilities_export_endpoint: expose_path(api_v4_security_groups_vulnerability_exports_path(id: group.id)),
+      report_types: ::Enums::Vulnerability::report_types.invert.to_json,
+      scanners: group.vulnerability_scanners
+                     .with_report_type
+                     .map(&Representation::VulnerabilityScannerEntry.method(:new))
+                     .to_json(only: [:external_id, :vendor, :report_type])
     }
   end
 end

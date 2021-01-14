@@ -251,7 +251,11 @@ module EE
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
-          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix'),
+          report_types: ::Enums::Vulnerability::report_types.invert.to_json,
+          scanners: project.vulnerability_scanners
+                           .with_report_type
+                           .map(&Representation::VulnerabilityScannerEntry.method(:new)).to_json(only: [:external_id, :vendor, :report_type])
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
