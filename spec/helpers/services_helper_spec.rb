@@ -52,7 +52,7 @@ RSpec.describe ServicesHelper do
       end
     end
 
-    context 'when integration is a new record' do
+    context 'when a new integration is not persisted' do
       let_it_be(:integration) { build(:jira_service) }
 
       it 'returns an empty string' do
