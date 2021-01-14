@@ -125,6 +125,7 @@ export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest
 }));
 
 export const PRESET_OPTIONS_DEFAULT = 'default';
+export const PRESET_OPTIONS_BLANK = 'blank';
 export const PRESET_OPTIONS = [
   {
     text: I18N.TEMPLATE_DEFAULT,
@@ -132,6 +133,6 @@ export const PRESET_OPTIONS = [
   },
   {
     text: I18N.TEMPLATE_BLANK,
-    value: 'blank',
+    value: PRESET_OPTIONS_BLANK,
   },
 ];

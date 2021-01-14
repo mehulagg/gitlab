@@ -67,7 +67,8 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
-    state.stages = transformRawStages(stages);
+    const transformedStages = transformRawStages(stages);
+    state.stages = transformedStages.sort((a, b) => a?.id > b?.id);
   },
   [types.REQUEST_UPDATE_STAGE](state) {
     state.isLoading = true;
@@ -120,9 +121,21 @@ export default {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { errors } = {}) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages }, errors = {} }) {
     state.isCreatingValueStream = false;
-    state.createValueStreamErrors = errors;
+
+    // TODO: move to utils + add additional specs
+    // TODO: should test that we end up with the same amount of errors as stages
+    // This is because the JSON response only includes failed stages with an index of the stage
+    const { stages: stageErrors = {}, ...rest } = errors;
+    const fullStageErrors = Object.keys(stageErrors).length
+      ? stages.map((_, index) => {
+          return convertObjectPropsToCamelCase(stageErrors[index]) || {};
+        })
+      : {};
+
+    // NOTE: BE currently returns the equivalent of a JS hash for the stages errors, an array simplifies things
+    state.createValueStreamErrors = { ...rest, stages: fullStageErrors };
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;

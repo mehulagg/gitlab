@@ -32,7 +32,7 @@ export default {
     errors: {
       type: Object,
       required: false,
-      default: () => {},
+      default: () => ({}),
     },
     stageEvents: {
       type: Array,

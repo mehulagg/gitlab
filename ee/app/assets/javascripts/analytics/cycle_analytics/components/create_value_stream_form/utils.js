@@ -115,15 +115,15 @@ export const validateStage = (fields) => {
  * returned as an array in a object with key`name`
  *
  * @param {Object} fields key value pair of form field values
- * @returns {Object} key value pair of form fields with an array of errors
+ * @returns {Array} an array of errors
  */
 export const validateValueStreamName = ({ name = '' }) => {
-  const errors = { name: [] };
+  const errors = [];
   if (name.length > NAME_MAX_LENGTH) {
-    errors.name.push(ERRORS.MAX_LENGTH);
+    errors.push(ERRORS.MAX_LENGTH);
   }
   if (!name.length) {
-    errors.name.push(ERRORS.VALUE_STREAM_NAME_MIN_LENGTH);
+    errors.push(ERRORS.VALUE_STREAM_NAME_MIN_LENGTH);
   }
   return errors;
 };
