@@ -127,7 +127,7 @@ module EE
       end
 
       def dast_scans
-        DastScan.none
+        DastScan.where(project: object).includes(:dast_site_profile, :dast_scanner_profile) # rubocop:disable CodeReuse/ActiveRecord
       end
 
       def dast_scanner_profiles
