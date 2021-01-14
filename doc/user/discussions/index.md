@@ -376,7 +376,8 @@ from any device you're logged into.
 
 ## Suggest Changes
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/18008) in GitLab 11.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/18008) in GitLab 11.6.
+> - Custom commit messages for suggestions were [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25381) in GitLab 13.8.
 
 As a reviewer, you're able to suggest code changes with a simple
 Markdown syntax in Merge Request Diff threads. Then, the
@@ -401,9 +402,11 @@ the merge request authored by the user that applied them.
 
    ![Apply suggestions](img/apply_suggestion_v13_8.png)
 
-1. A custom commit message can be specified. If no custom commit message is specified, the default commit message will be used.
+1. You can opt to add a custom commit message to describe your change. If you don't
+   specify it, the default commit message will be used. This is not supported for
+   [batch suggestions](#batch-suggestions).
 
-![Custom commit](img/custom_commit_v13_8.png)
+   ![Custom commit](img/custom_commit_v13_8.png)
 
 Once the author applies a Suggestion, it will be marked with the **Applied** label,
 the thread will be automatically resolved, and GitLab will create a new commit
