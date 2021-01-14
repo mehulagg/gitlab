@@ -303,11 +303,13 @@ GitLab provides `Gitlab::Tracking`, an interface that wraps the [Snowplow Ruby T
 
 Custom event tracking and instrumentation can be added by directly calling the `GitLab::Tracking.event` class method, which accepts the following arguments:
 
-| argument   | type   | default value | description                                                                                                                                                                                                                                                            |
-|:-----------|:-------|:--------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `category` | string | 'application' | Area or aspect of the application. This could be `HealthCheckController` or `Lfs::FileTransformer` for instance.                                                                                                                                                       |
-| `action`   | string | 'generic'     | The action being taken, which can be anything from a controller action like `create` to something like an Active Record callback.                                                                                                                                      |
-| `data`     | object | {}            | Additional data such as `label`, `property`, `value`, and `context` as described in [Structured event taxonomy](#structured-event-taxonomy). These are set as empty strings if you don't provide them. |
+| argument   | type   | default value | description                                                                                                                       |
+|-:----------|-:------|-:-------------|-:---------------------------------------------------------------------------------------------------------------------------------|
+| `category` | string |               | Area or aspect of the application. This could be `HealthCheckController` or `Lfs::FileTransformer` for instance.                  |
+| `action`   | string |               | The action being taken, which can be anything from a controller action like `create` to something like an Active Record callback. |
+| `label`    | string | nil           | See [Structured event taxonomy](#structured-event-taxonomy).                                                                      |
+| `property` | string | nil           | See [Structured event taxonomy](#structured-event-taxonomy).                                                                      |
+| `value`    | string | nil           | See [Structured event taxonomy](#structured-event-taxonomy).                                                                      |
 
 Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
