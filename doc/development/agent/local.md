@@ -57,37 +57,26 @@ for more targets.
 To learn more about how the repository is structured, see
 [GitLab Kubernetes Agent repository overview](https://www.youtube.com/watch?v=j8CyaCWroUY).
 
-## Running tests locally
+## Run tests locally
 
-### To run all the tests
+You can run all tests, or a subset of tests, locally.
 
-```shel
-make test
-```
+- **To run all tests**: Run the command `make test`.
+- **To run all test targets in the directory**: Run the command
+  `bazel test //internal/module/gitops/server:all`.
 
-### To run all test targets in the directory
+  You can use `*` in the command, instead of `all`, but it must be quoted to
+  avoid shell expansion: `bazel test '//internal/module/gitops/server:*'`.
+- **To run all tests in a directory and its subdirectories**: Run the command
+  `bazel test //internal/module/gitops/server/...`.
 
-```shell
-bazel test //internal/module/gitops/server:all
-```
+### Run specific test scenarios
 
-One can also use '*' instead of 'all', but then it must be quoted to avoid shell expansion
-
-```shell
-bazel test '//internal/module/gitops/server:*'
-```
-
-### To run all tests in a directory and nested directories too
-
-```shell
-bazel test //internal/module/gitops/server/...
-```
-
-### To run specific test scenarios
-
-Take the directory and the target name of the test you're interested in, then run it with Bazel. E.g.:
-
-To run the tests that live at `internal/module/gitops/server/module_test.go`, the `BUILD.bazel` file that defines the test's target name lives at `internal/module/gitops/server/BUILD.bazel`. In the latter, you'll see the target name defined like:
+To run only a specific test scenario, you need the directory name and the target
+name of the test. For example, to run the tests at
+`internal/module/gitops/server/module_test.go`, the `BUILD.bazel` file that
+defines the test's target name lives at `internal/module/gitops/server/BUILD.bazel`.
+In the latter, the target name is defined like:
 
 ```bazel
 go_test(
@@ -97,14 +86,15 @@ go_test(
         "module_test.go",
 ```
 
-Now you know the target name is `server_test` and the directory is `internal/module/gitops/server/`. Run the test scenario with:
+The target name is `server_test` and the directory is `internal/module/gitops/server/`.
+Run the test scenario with this command:
 
 ```shell
 bazel test //internal/module/gitops/server:server_test
 ```
 
-### Further reading if you need even more customization
+### Additional resources
 
-- Bazel docs about [specifying targets to build](https://docs.bazel.build/versions/master/guide.html#specifying-targets-to-build).
+- Bazel documentation about [specifying targets to build](https://docs.bazel.build/versions/master/guide.html#specifying-targets-to-build).
 - [The Bazel query](https://docs.bazel.build/versions/master/query.html)
 - [Bazel query how to](https://docs.bazel.build/versions/master/query-how-to.html)
