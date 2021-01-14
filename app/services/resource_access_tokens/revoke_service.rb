@@ -11,6 +11,7 @@ module ResourceAccessTokens
       @access_token = access_token
       @bot_user = access_token.user
       @resource = resource
+      @ip_address = current_user.current_sign_in_ip
     end
 
     def execute
@@ -29,7 +30,7 @@ module ResourceAccessTokens
 
     private
 
-    attr_reader :current_user, :access_token, :bot_user, :resource
+    attr_reader :current_user, :access_token, :bot_user, :resource, :ip_address
 
     def destroy_bot_user
       DeleteUserWorker.perform_async(current_user.id, bot_user.id, skip_authorization: true)
@@ -66,3 +67,5 @@ module ResourceAccessTokens
     end
   end
 end
+
+ResourceAccessTokens::RevokeService.prepend_if_ee('EE::ResourceAccessTokens::RevokeService')

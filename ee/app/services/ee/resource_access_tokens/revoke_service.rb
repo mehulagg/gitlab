@@ -2,10 +2,10 @@
 
 module EE
   module ResourceAccessTokens
-    module CreateService
+    module RevokeService
       def execute
         super.tap do |response|
-          audit_event_service(response.payload[:access_token], response)
+          audit_event_service(bot_user, response)
         end
       end
 
@@ -13,15 +13,15 @@ module EE
 
       def audit_event_service(token, response)
         message = if response.success?
-                    "Created #{resource_type} access token with id: #{token.user.id}"
+                    "Revoked #{resource.class.name.downcase} access token with id: #{bot_user.id}"
                   else
-                    "Attempted to create #{resource_type} access token but failed with message: #{response.message}"
+                    "Attempted to revoke #{resource.class.name.downcase} access token with id: #{bot_user.id}, but failed with message: #{response.message}"
                   end
 
         ::AuditEventService.new(
           current_user,
           resource,
-          target_details: token&.user&.name,
+          target_details: bot_user.name,
           action: :custom,
           custom_message: message,
           ip_address: ip_address
