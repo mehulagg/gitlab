@@ -246,7 +246,9 @@ The optional code owners section will be displayed in merge requests under the *
 
 ![MR widget - Optional Code Owners Sections](img/optional_code_owners_sections_v13_8.png)
 
-If a duplicated section is marked as optional:
+If a section is duplicated in the file, and one of them is marked as optional and the other isn't, the requirement prevails. 
+
+For example, the code owners of the "Documentation" section below will still be required to approve merge requests: 
 
 ```plaintext
 [Documentation]
