@@ -266,8 +266,9 @@ You can export GitLab requirements to a
 [CSV file](https://en.wikipedia.org/wiki/Comma-separated_values) sent to your default notification
 email as an attachment.
 
-By exporting requirements, you and your team can then import them into another tool or share them with your customers.
-Exporting requirements can aid collaboration with higher-level systems, as well as audit and regulatory compliance tasks.
+By exporting requirements, you and your team can import them into another tool or share them with
+your customers. Exporting requirements can aid collaboration with higher-level systems, as well as
+audit and regulatory compliance tasks.
 
 To export requirements:
 
