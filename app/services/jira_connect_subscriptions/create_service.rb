@@ -20,7 +20,7 @@ module JiraConnectSubscriptions
       subscription = JiraConnectSubscription.new(installation: jira_connect_installation, namespace: namespace)
 
       if subscription.save
-        schedule_sync_project_jobs
+        subscription.update(job_ids: schedule_sync_project_jobs)
 
         success
       else
@@ -35,14 +35,16 @@ module JiraConnectSubscriptions
     end
 
     def schedule_sync_project_jobs
+      job_ids = []
       namespace.all_projects.each_batch(of: MERGE_REQUEST_SYNC_BATCH_SIZE) do |projects, index|
-        JiraConnect::SyncProjectWorker.bulk_perform_in_with_contexts(
+        job_ids << JiraConnect::SyncProjectWorker.bulk_perform_in_with_contexts(
           index * MERGE_REQUEST_SYNC_BATCH_DELAY,
           projects,
           arguments_proc: -> (project) { [project.id, Atlassian::JiraConnect::Client.generate_update_sequence_id] },
           context_proc: -> (project) { { project: project } }
         )
       end
+      job_ids.flatten
     end
   end
 end

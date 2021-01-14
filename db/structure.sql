@@ -13465,7 +13465,8 @@ CREATE TABLE jira_connect_subscriptions (
     jira_connect_installation_id bigint NOT NULL,
     namespace_id integer NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    job_ids jsonb
 );
 
 CREATE SEQUENCE jira_connect_subscriptions_id_seq

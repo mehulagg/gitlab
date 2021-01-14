@@ -27,6 +27,21 @@ class JiraConnect::SubscriptionsController < JiraConnect::ApplicationController
     @subscriptions = current_jira_installation.subscriptions.preload_namespace_route
   end
 
+  def show
+    subscription = current_jira_installation.subscriptions.find(params[:id])
+    queue = Sidekiq::Queue.new('jira_connect:jira_connect_sync_project')
+    status = :done
+
+    subscription.job_ids.each do |job_id|
+      scheduled_job = Sidekiq::ScheduledSet.new.find_job(job_id)
+      queued_job = queue.find_job(job_id)
+
+      status = :in_progress if scheduled_job || queued_job
+    end
+
+    render json: { sync_status: status }
+  end
+
   def create
     result = create_service.execute
 
