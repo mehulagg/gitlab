@@ -264,9 +264,6 @@ For example, the code owners of the "Documentation" section below will still be 
 *.txt @root
 ```
 
-It will still be required as long as any other entry of the section name is not
-marked as optional.
-
 Optional sections in the code owners file are currently treated as optional only
 when changes are submitted via merge requests. If a change is submitted directly
 to the protected branch, approval from code owner will be required, even if the
