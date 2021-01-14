@@ -268,7 +268,7 @@ Optional sections in the code owners file are currently treated as optional only
 when changes are submitted via merge requests. If a change is submitted directly
 to the protected branch, approval from code owners will still be required, even if the
 section is marked as optional. We plan to change this in a
-iteration as part of [GitLab#297638](https://gitlab.com/gitlab-org/gitlab/-/issues/297638)
+[future release](https://gitlab.com/gitlab-org/gitlab/-/issues/297638),
 where direct pushes to the protected branch will be allowed for sections marked as optional.
 
 ## Example `CODEOWNERS` file
