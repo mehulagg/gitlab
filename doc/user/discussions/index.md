@@ -388,18 +388,22 @@ the merge request authored by the user that applied them.
 1. Choose a line of code to be changed, add a new comment, then click
    on the **Insert suggestion** icon in the toolbar:
 
-   ![Add a new comment](img/suggestion_button_v12_7.png)
+   ![Add a new comment](img/suggestion_button_v13_8.png)
 
 1. In the comment, add your suggestion to the pre-populated code block:
 
-   ![Add a suggestion into a code block tagged properly](img/make_suggestion_v12_7.png)
+   ![Add a suggestion into a code block tagged properly](img/make_suggestion_v13_8.png)
 
 1. Click either **Start a review** or **Add to review** to add your comment to a [review](#merge-request-reviews), or **Add comment now** to add the comment to the thread immediately.
 
    The Suggestion in the comment can be applied by the merge request author
    directly from the merge request:
 
-   ![Apply suggestions](img/apply_suggestion_v12_7.png)
+   ![Apply suggestions](img/apply_suggestion_v13_8.png)
+
+1. A custom commit message can be specified. If no custom commit message is specified, the default commit message will be used.
+
+![Custom commit](img/custom_commit_v13_8.png)
 
 Once the author applies a Suggestion, it will be marked with the **Applied** label,
 the thread will be automatically resolved, and GitLab will create a new commit
