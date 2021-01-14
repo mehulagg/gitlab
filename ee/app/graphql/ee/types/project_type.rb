@@ -63,31 +63,32 @@ module EE
         field :dast_scans,
               ::Types::DastScanType.connection_type,
               null: true,
-              description: 'DAST Scans associated with the project'
+              description: 'DAST Scans associated with the project. Will always return no nodes ' \
+                           'if `dast_saved_scans` is disabled.'
 
         field :dast_site_profile,
               ::Types::DastSiteProfileType,
               null: true,
               resolver: ::Resolvers::DastSiteProfileResolver.single,
-              description: 'DAST Site Profile associated with the project'
+              description: 'DAST Site Profile associated with the project.'
 
         field :dast_site_profiles,
               ::Types::DastSiteProfileType.connection_type,
               null: true,
-              description: 'DAST Site Profiles associated with the project',
+              description: 'DAST Site Profiles associated with the project.',
               resolver: ::Resolvers::DastSiteProfileResolver
 
         field :dast_scanner_profiles,
               ::Types::DastScannerProfileType.connection_type,
               null: true,
-              description: 'The DAST scanner profiles associated with the project'
+              description: 'The DAST scanner profiles associated with the project.'
 
         field :dast_site_validations,
               ::Types::DastSiteValidationType.connection_type,
               null: true,
               resolver: ::Resolvers::DastSiteValidationResolver,
               description: 'DAST Site Validations associated with the project. Will always return no nodes ' \
-                           'if `security_on_demand_scans_site_validation` is disabled'
+                           'if `security_on_demand_scans_site_validation` is disabled.'
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,
@@ -127,6 +128,8 @@ module EE
       end
 
       def dast_scans
+        return DastScan.none unless ::Feature.enabled?(:dast_saved_scans, object, default_enabled: :yaml)
+
         DastScan.where(project: object).includes(:dast_site_profile, :dast_scanner_profile) # rubocop:disable CodeReuse/ActiveRecord
       end
 

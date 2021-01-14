@@ -17656,7 +17656,7 @@ type Project {
   createdAt: Time
 
   """
-  The DAST scanner profiles associated with the project
+  The DAST scanner profiles associated with the project.
   """
   dastScannerProfiles(
     """
@@ -17681,7 +17681,7 @@ type Project {
   ): DastScannerProfileConnection
 
   """
-  DAST Scans associated with the project
+  DAST Scans associated with the project. Will always return no nodes if `dast_saved_scans` is disabled.
   """
   dastScans(
     """
@@ -17706,7 +17706,7 @@ type Project {
   ): DastScanConnection
 
   """
-  DAST Site Profile associated with the project
+  DAST Site Profile associated with the project.
   """
   dastSiteProfile(
     """
@@ -17716,7 +17716,7 @@ type Project {
   ): DastSiteProfile
 
   """
-  DAST Site Profiles associated with the project
+  DAST Site Profiles associated with the project.
   """
   dastSiteProfiles(
     """
@@ -17742,7 +17742,7 @@ type Project {
 
   """
   DAST Site Validations associated with the project. Will always return no nodes
-  if `security_on_demand_scans_site_validation` is disabled
+  if `security_on_demand_scans_site_validation` is disabled.
   """
   dastSiteValidations(
     """

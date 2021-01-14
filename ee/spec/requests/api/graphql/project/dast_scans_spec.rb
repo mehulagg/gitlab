@@ -71,6 +71,16 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidations' do
         [dast_scan4, dast_scan3, dast_scan2, dast_scan1].map { |validation| global_id_of(validation)}
       end
     end
+
+    context 'when the feature is disabled' do
+      it 'returns no nodes' do
+        stub_feature_flags(dast_saved_scans: false)
+
+        subject
+
+        expect(graphql_data_at(:project, :dast_scans, :nodes)).to be_empty
+      end
+    end
   end
 
   def pagination_query(arguments)

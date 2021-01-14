@@ -52194,7 +52194,7 @@
             },
             {
               "name": "dastScannerProfiles",
-              "description": "The DAST scanner profiles associated with the project",
+              "description": "The DAST scanner profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -52247,7 +52247,7 @@
             },
             {
               "name": "dastScans",
-              "description": "DAST Scans associated with the project",
+              "description": "DAST Scans associated with the project. Will always return no nodes if `dast_saved_scans` is disabled.",
               "args": [
                 {
                   "name": "after",
@@ -52300,7 +52300,7 @@
             },
             {
               "name": "dastSiteProfile",
-              "description": "DAST Site Profile associated with the project",
+              "description": "DAST Site Profile associated with the project.",
               "args": [
                 {
                   "name": "id",
@@ -52327,7 +52327,7 @@
             },
             {
               "name": "dastSiteProfiles",
-              "description": "DAST Site Profiles associated with the project",
+              "description": "DAST Site Profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -52380,7 +52380,7 @@
             },
             {
               "name": "dastSiteValidations",
-              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled",
+              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled.",
               "args": [
                 {
                   "name": "normalizedTargetUrls",
