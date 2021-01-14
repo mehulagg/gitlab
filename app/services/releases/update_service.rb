@@ -12,6 +12,12 @@ module Releases
         params[:milestones] = milestones
       end
 
+      # Temporary code - a real implementation will use a better pattern
+      if params[:assets].present?
+        params[:links_attributes] = params.dig(:assets, 'links')
+        params.delete(:assets)
+      end
+
       # transaction needed as Rails applies `save!` to milestone_releases
       # when it does assign_attributes instead of actual saving
       # this leads to the validation error being raised

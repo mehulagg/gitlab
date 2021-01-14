@@ -92,6 +92,16 @@ module API
         optional :description, type: String, desc: 'Release notes with markdown support'
         optional :released_at, type: DateTime, desc: 'The date when the release will be/was ready.'
         optional :milestones,  type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'The titles of the related milestones'
+        optional :assets, type: Hash do
+          optional :links, type: Array do
+            requires :name, type: String, desc: 'The name of the link'
+            requires :url, type: String, desc: 'The URL of the link'
+            optional :filepath, type: String, desc: 'The filepath of the link'
+            optional :link_type, type: String, desc: 'The link type, one of: "runbook", "image", "package" or "other"'
+            optional :id, type: Integer, desc: 'The ID of the link'
+            optional :_destroy, type: Boolean, desc: 'Whether or not to delete this link'
+          end
+        end
       end
       put ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
         authorize_update_release!
