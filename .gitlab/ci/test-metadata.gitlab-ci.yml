@@ -1,5 +1,5 @@
 .tests-metadata-state:
-  image: ruby:2.7
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/ruby:2.7
   before_script:
     - source scripts/utils.sh
   artifacts:

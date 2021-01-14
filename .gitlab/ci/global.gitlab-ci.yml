@@ -124,7 +124,7 @@
     FOSS_ONLY: '1'
 
 .use-docker-in-docker:
-  image: docker:${DOCKER_VERSION}
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:${DOCKER_VERSION}
   services:
     - docker:${DOCKER_VERSION}-dind
   variables:

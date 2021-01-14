@@ -2,7 +2,7 @@
   extends:
     - .default-retry
     - .docs:rules:review-docs
-  image: ruby:2.7-alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/ruby:2.7-alpine
   stage: review
   needs: []
   variables:

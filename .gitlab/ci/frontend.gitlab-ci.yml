@@ -259,13 +259,13 @@ coverage-frontend:
 
 qa-frontend-node:10:
   extends: .qa-frontend-node
-  image: node:dubnium
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:dubnium
 
 qa-frontend-node:latest:
   extends:
     - .qa-frontend-node
     - .frontend:rules:qa-frontend-node-latest
-  image: node:latest
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:latest
 
 webpack-dev-server:
   extends:

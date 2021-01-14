@@ -1,5 +1,5 @@
 .notify-slack:
-  image: alpine
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine
   stage: notify
   dependencies: []
   cache: {}
