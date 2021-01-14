@@ -61,10 +61,9 @@ module EE
               resolver: ::Resolvers::IterationsResolver
 
         field :dast_scans,
-              ::Types::DastScans.connection_type,
+              ::Types::DastScanType.connection_type,
               null: true,
-              description: 'DAST Scans associated with the project',
-              resolver: ::Resolvers::DastSiteProfileResolver
+              description: 'DAST Scans associated with the project'
 
         field :dast_site_profile,
               ::Types::DastSiteProfileType,

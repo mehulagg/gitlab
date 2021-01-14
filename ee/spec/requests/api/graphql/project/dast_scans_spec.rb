@@ -13,7 +13,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidations' do
   let_it_be(:dast_scan4) { create(:dast_scan, project: project) }
 
   subject do
-    fields = all_graphql_fields_for('DastSiteValidation')
+    fields = all_graphql_fields_for('DastScan')
 
     query = graphql_query_for(
       :project,
@@ -68,7 +68,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidations' do
       let(:first_param) { 3 }
 
       let(:expected_results) do
-        [ dast_scan4, dast_scan3, dast_scan2, dast_scan1].map { |validation| global_id_of(validation)}
+        [dast_scan4, dast_scan3, dast_scan2, dast_scan1].map { |validation| global_id_of(validation)}
       end
     end
   end
