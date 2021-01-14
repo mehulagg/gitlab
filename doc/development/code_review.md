@@ -83,7 +83,7 @@ page, with these behaviors:
 
    NOTE:
    If you are at reduced capacity, as noted by 🔶 `:large_orange_diamond:`, please review
-   this [Handbook page]((https://about.gitlab.com/handbook/total-rewards/benefits/covid-19/).
+   this [Handbook page](https://about.gitlab.com/handbook/total-rewards/benefits/covid-19/).
    You may also want to schedule a chat with your manager.
 
 1. It always picks the same reviewers and maintainers for the same
