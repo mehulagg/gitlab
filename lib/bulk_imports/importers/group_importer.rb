@@ -17,7 +17,7 @@ module BulkImports
           configuration: configuration
         )
 
-        pipelines.each { |pipeline| pipeline.new.run(context) }
+        pipelines.each { |pipeline| pipeline.new(context).run }
 
         entity.finish!
       end

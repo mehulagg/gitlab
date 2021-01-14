@@ -7,18 +7,35 @@ module EE
         class EpicsPipeline
           include ::BulkImports::Pipeline
 
-          extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
-            query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
+          def extract
+            ::BulkImports::Common::Extractors::GraphqlExtractor
+              .new(query: EE::BulkImports::Groups::Graphql::GetEpicsQuery)
+              .extract(context)
+          end
 
           transformer ::BulkImports::Common::Transformers::HashKeyDigger, key_path: %w[data group epics]
           transformer ::BulkImports::Common::Transformers::UnderscorifyKeysTransformer
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
 
-          loader EE::BulkImports::Groups::Loaders::EpicsLoader
+          def load(entry)
+            Array.wrap(entry['nodes']).each do |args|
+              ::Epics::CreateService.new(
+                context.entity.group,
+                context.current_user,
+                args
+              ).execute
+            end
 
-          after_run do |context|
+            context.entity.update_tracker_for(
+              relation: :epics,
+              has_next_page: entry.dig('page_info', 'has_next_page'),
+              next_page: entry.dig('page_info', 'end_cursor')
+            )
+          end
+
+          def after_run
             if context.entity.has_next_page?(:epics)
-              self.new.run(context)
+              run
             end
           end
         end
