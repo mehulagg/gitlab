@@ -1,0 +1,12 @@
+---
+- title: Auto rollback in case of failure
+  body: |
+    If you have a critical problem with a deployment, manual actions to fix it often take too long and lead to a degradation in production that impacts your users. Now, you can leverage an automatic rollback mechanism that reverts your deployment back to the last successful deployment. Also, when GitLab finds problems in production it automatically notifies you with an alert. This gives you peace of mind and precious development time to debug, investigate, and fix problems without causing downtime.
+  stage: Release
+  self-managed: true
+  gitlab-com: true
+  packages: [Ultimate]
+  url: https://docs.gitlab.com/ee/ci/environments/#auto-rollback
+  image_url: https://img.youtube.com/vi/G8fYYrxqF5E/hqdefault.jpg
+  published_at: 2021-01-22
+  release: 13.8
