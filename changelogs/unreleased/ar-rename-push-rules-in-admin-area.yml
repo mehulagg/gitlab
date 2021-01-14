@@ -1,5 +1,5 @@
 ---
 title: Change push rules to rules in admin area only
-merge_request: !51753
+merge_request: 51753
 author: Austin Regnery
 type: changed
