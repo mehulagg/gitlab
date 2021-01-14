@@ -16,10 +16,7 @@ export default {
 </script>
 <template>
   <div>
-    <div
-      class="gl-display-flex gl-align-items-center gl-w-full gl-mb-5"
-      :class="stageClasses"
-    >
+    <div class="gl-display-flex gl-align-items-center gl-w-full gl-mb-5" :class="stageClasses">
       <slot name="stages"> </slot>
     </div>
     <div

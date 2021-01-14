@@ -36,7 +36,7 @@ export default {
     highlightedJobs: {
       type: Array,
       required: false,
-      default: () => ([]),
+      default: () => [],
     },
     jobHovered: {
       type: String,
@@ -75,7 +75,11 @@ export default {
       return `ci-badge-${escape(group.name)}`;
     },
     isFadedOut(jobName) {
-      return this.jobHovered && this.highlightedJobs.length > 1 && !this.highlightedJobs.includes(jobName);
+      return (
+        this.jobHovered &&
+        this.highlightedJobs.length > 1 &&
+        !this.highlightedJobs.includes(jobName)
+      );
     },
   },
 };
@@ -116,11 +120,15 @@ export default {
           :pipeline-expanded="pipelineExpanded"
           :pipeline-id="pipelineId"
           css-class-job-name="gl-build-content"
-          :class="{'gl-opacity-3': isFadedOut(group.name)}"
+          :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
-        <job-group-dropdown v-else :group="group" :pipeline-id="pipelineId" :class="{'gl-opacity-3': isFadedOut(group.name)}"
-/>
+        <job-group-dropdown
+          v-else
+          :group="group"
+          :pipeline-id="pipelineId"
+          :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
+        />
       </div>
     </template>
   </main-graph-wrapper>

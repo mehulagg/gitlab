@@ -84,8 +84,8 @@ export default {
       }
     },
     highlightedJobs(jobs) {
-      this.$emit('highlightedJobsChange', jobs)
-    }
+      this.$emit('highlightedJobsChange', jobs);
+    },
   },
   mounted() {
     if (!isEmpty(this.pipelineData)) {

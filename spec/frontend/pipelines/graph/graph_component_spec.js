@@ -36,15 +36,11 @@ describe('graph component', () => {
       },
       stubs: {
         'links-inner': true,
-<<<<<<< HEAD
-      },
-=======
         'linked-pipeline': true,
         'job-item': true,
         'job-group-dropdown': true,
         ...stubOverride,
       }
->>>>>>> f57f6222db4 (Add links hover test)
     });
   };
 
