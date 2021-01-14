@@ -14,7 +14,7 @@ module Packages
           files = package&.package_files || []
           current_maven_files = files.map { |file| extname(file.file_name) }
 
-          if current_maven_files.compact.include?(extname(params[:file_name]))
+          if current_maven_files.compact.include?(extname(params[:file_name])) && !package.version.nil?
             return ServiceResponse.error(message: 'Duplicate package is not allowed')
           end
         end
