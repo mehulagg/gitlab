@@ -41,10 +41,6 @@ export default {
       type: Number,
       required: true,
     },
-    chartEmptyStateSvgPath: {
-      type: String,
-      required: true,
-    },
     emptyStateSvgPath: {
       type: String,
       required: true,

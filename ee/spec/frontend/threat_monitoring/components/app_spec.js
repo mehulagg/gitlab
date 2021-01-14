@@ -11,7 +11,6 @@ import axios from '~/lib/utils/axios_utils';
 const defaultEnvironmentId = 3;
 const documentationPath = '/docs';
 const newPolicyPath = '/policy/new';
-const chartEmptyStateSvgPath = '/chart-svgs';
 const emptyStateSvgPath = '/svgs';
 const wafNoDataSvgPath = '/waf-no-data-svg';
 const networkPolicyNoDataSvgPath = '/network-policy-no-data-svg';
@@ -39,7 +38,6 @@ describe('ThreatMonitoringApp component', () => {
     wrapper = shallowMount(ThreatMonitoringApp, {
       propsData: {
         defaultEnvironmentId,
-        chartEmptyStateSvgPath,
         emptyStateSvgPath,
         wafNoDataSvgPath,
         networkPolicyNoDataSvgPath,
