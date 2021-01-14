@@ -28,7 +28,7 @@ export default {
       debounce: 250,
       variables() {
         // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220381
-        const search = this.searchTerm === '' ? '' : `"${this.searchTerm}"`;
+        const search = this.searchTerm ? `"${this.searchTerm}"` : '';
 
         return {
           fullPath: this.fullPath,
@@ -67,7 +67,7 @@ export default {
     },
   },
   mounted() {
-    this.$refs.dropdown.$root.$on('bv::dropdown::shown', () => {
+    this.$root.$on('bv::dropdown::shown', () => {
       this.shouldFetch = true;
     });
   },
@@ -91,7 +91,7 @@ export default {
 <template>
   <div data-qa-selector="iteration_container">
     <gl-dropdown ref="dropdown" :text="title" class="dropdown gl-w-full">
-      <gl-dropdown-section-header class="d-flex justify-content-center">{{
+      <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>
       <gl-search-box-by-type ref="search" v-model="searchTerm" />

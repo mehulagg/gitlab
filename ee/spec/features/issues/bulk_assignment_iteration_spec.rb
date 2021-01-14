@@ -32,9 +32,6 @@ RSpec.describe 'Issues > Iteration bulk assignment' do
 
   context 'as an allowed user', :js do
     before do
-      # allow(group).to receive(:feature_enabled?).and_return(true)
-
-      # stub_licensed_features(iterations: true)
       group.add_maintainer(user)
 
       sign_in user

@@ -10,7 +10,7 @@ export default function () {
   const el = document.querySelector('.js-iteration-dropdown');
   const iterationField = document.getElementById('issue_iteration_id');
 
-  if (!el) {
+  if (!el || !iterationField) {
     return false;
   }
 
