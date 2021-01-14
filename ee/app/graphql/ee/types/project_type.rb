@@ -130,7 +130,7 @@ module EE
       def dast_scans
         return DastScan.none unless ::Feature.enabled?(:dast_saved_scans, object, default_enabled: :yaml)
 
-        DastScan.where(project: object).includes(:dast_site_profile, :dast_scanner_profile) # rubocop:disable CodeReuse/ActiveRecord
+        DastScansFinder.new(project_id: object.id).execute
       end
 
       def dast_scanner_profiles
