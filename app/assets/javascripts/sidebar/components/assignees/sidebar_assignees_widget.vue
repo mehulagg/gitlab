@@ -107,7 +107,7 @@ export default {
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
-    unSelectedFiltered() {
+    unselectedFiltered() {
       return this.participants.filter(({ username }) => {
         return !this.selectedUserNames.includes(username);
       });
