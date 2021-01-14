@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297257', type: :investigating } do
+  RSpec.describe 'Create' do
     describe 'batch comments in merge request' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -38,7 +38,7 @@ module QA
         end
       end
 
-      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638' do
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297257', type: :investigating } do
         Flow::Login.sign_in
 
         merge_request.visit!
