@@ -138,22 +138,7 @@ export default {
 </script>
 
 <template>
-  <gl-empty-state
-    v-if="!isSetUpMaybe"
-    ref="emptyState"
-    :title="s__('ThreatMonitoring|No environments detected')"
-    :svg-path="emptyStateSvgPath"
-  >
-    <template #description>
-      <gl-sprintf :message="$options.emptyStateDescription">
-        <template #link="{ content }">
-          <gl-link :href="documentationPath" target="_blank">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
-    </template>
-  </gl-empty-state>
-
-  <section v-else>
+  <section>
     <gl-alert
       v-if="showAlert"
       class="my-3"
@@ -190,45 +175,81 @@ export default {
         <alerts />
       </gl-tab>
       <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+        <gl-empty-state
+          v-if="!isSetUpMaybe"
+          ref="emptyState"
+          :title="s__('ThreatMonitoring|No environments detected')"
+          :svg-path="emptyStateSvgPath"
+        >
+          <template #description>
+            <gl-sprintf :message="$options.emptyStateDescription">
+              <template #link="{ content }">
+                <gl-link :href="documentationPath" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </template>
+        </gl-empty-state>
         <network-policy-list
+          v-else
           :documentation-path="documentationPath"
           :new-policy-path="newPolicyPath"
         />
       </gl-tab>
-      <gl-tab :title="s__('ThreatMonitoring|Statistics')">
-        <threat-monitoring-filters />
+      <gl-tab
+        :title="s__('ThreatMonitoring|Statistics')"
+        data-testid="threat-monitoring-statistics-tab"
+      >
+        <gl-empty-state
+          v-if="!isSetUpMaybe"
+          ref="emptyState"
+          :title="s__('ThreatMonitoring|No environments detected')"
+          :svg-path="emptyStateSvgPath"
+        >
+          <template #description>
+            <gl-sprintf :message="$options.emptyStateDescription">
+              <template #link="{ content }">
+                <gl-link :href="documentationPath" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </template>
+        </gl-empty-state>
+        <div v-else>
+          <threat-monitoring-filters />
 
-        <threat-monitoring-section
-          ref="wafSection"
-          store-namespace="threatMonitoringWaf"
-          :title="s__('ThreatMonitoring|Web Application Firewall')"
-          :subtitle="s__('ThreatMonitoring|Requests')"
-          :anomalous-title="s__('ThreatMonitoring|Anomalous Requests')"
-          :nominal-title="s__('ThreatMonitoring|Total Requests')"
-          :y-legend="s__('ThreatMonitoring|Requests')"
-          :chart-empty-state-title="s__('ThreatMonitoring|Application firewall not detected')"
-          :chart-empty-state-text="$options.wafChartEmptyStateDescription"
-          :chart-empty-state-svg-path="wafNoDataSvgPath"
-          :documentation-path="documentationPath"
-          documentation-anchor="web-application-firewall"
-        />
+          <threat-monitoring-section
+            ref="wafSection"
+            store-namespace="threatMonitoringWaf"
+            :title="s__('ThreatMonitoring|Web Application Firewall')"
+            :subtitle="s__('ThreatMonitoring|Requests')"
+            :anomalous-title="s__('ThreatMonitoring|Anomalous Requests')"
+            :nominal-title="s__('ThreatMonitoring|Total Requests')"
+            :y-legend="s__('ThreatMonitoring|Requests')"
+            :chart-empty-state-title="s__('ThreatMonitoring|Application firewall not detected')"
+            :chart-empty-state-text="$options.wafChartEmptyStateDescription"
+            :chart-empty-state-svg-path="wafNoDataSvgPath"
+            :documentation-path="documentationPath"
+            documentation-anchor="web-application-firewall"
+          />
 
-        <hr />
+          <hr />
 
-        <threat-monitoring-section
-          ref="networkPolicySection"
-          store-namespace="threatMonitoringNetworkPolicy"
-          :title="s__('ThreatMonitoring|Container Network Policy')"
-          :subtitle="s__('ThreatMonitoring|Packet Activity')"
-          :anomalous-title="s__('ThreatMonitoring|Dropped Packets')"
-          :nominal-title="s__('ThreatMonitoring|Total Packets')"
-          :y-legend="s__('ThreatMonitoring|Operations Per Second')"
-          :chart-empty-state-title="s__('ThreatMonitoring|Container NetworkPolicies not detected')"
-          :chart-empty-state-text="$options.networkPolicyChartEmptyStateDescription"
-          :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
-          :documentation-path="documentationPath"
-          documentation-anchor="container-network-policy"
-        />
+          <threat-monitoring-section
+            ref="networkPolicySection"
+            store-namespace="threatMonitoringNetworkPolicy"
+            :title="s__('ThreatMonitoring|Container Network Policy')"
+            :subtitle="s__('ThreatMonitoring|Packet Activity')"
+            :anomalous-title="s__('ThreatMonitoring|Dropped Packets')"
+            :nominal-title="s__('ThreatMonitoring|Total Packets')"
+            :y-legend="s__('ThreatMonitoring|Operations Per Second')"
+            :chart-empty-state-title="
+              s__('ThreatMonitoring|Container NetworkPolicies not detected')
+            "
+            :chart-empty-state-text="$options.networkPolicyChartEmptyStateDescription"
+            :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
+            :documentation-path="documentationPath"
+            documentation-anchor="container-network-policy"
+          />
+        </div>
       </gl-tab>
     </gl-tabs>
   </section>

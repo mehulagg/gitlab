@@ -1,9 +1,10 @@
-import { GlAlert, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlEmptyState, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
+import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
@@ -25,7 +26,7 @@ describe('ThreatMonitoringApp component', () => {
   let store;
   let wrapper;
 
-  const factory = ({ propsData, provide = {}, state, options } = {}) => {
+  const factory = ({ propsData, provide = {}, state, stubs = {} } = {}) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       environmentsEndpoint,
@@ -55,12 +56,13 @@ describe('ThreatMonitoringApp component', () => {
         ...provide,
       },
       store,
-      ...options,
+      stubs,
     });
   };
 
   const findAlert = () => wrapper.find(GlAlert);
   const findAlertsView = () => wrapper.find(ThreatMonitoringAlerts);
+  const findNetworkPolicyList = () => wrapper.find(NetworkPolicyList);
   const findFilters = () => wrapper.find(ThreatMonitoringFilters);
   const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
@@ -68,6 +70,7 @@ describe('ThreatMonitoringApp component', () => {
   const findEmptyStateMessage = () => wrapper.find(GlSprintf);
   const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
   const findAlertTab = () => wrapper.find('[data-testid="threat-monitoring-alerts-tab"]');
+  const findStatisticsTab = () => wrapper.find('[data-testid="threat-monitoring-statistics-tab"]');
 
   afterEach(() => {
     wrapper.destroy();
@@ -82,6 +85,7 @@ describe('ThreatMonitoringApp component', () => {
           propsData: {
             defaultEnvironmentId: invalidEnvironmentId,
           },
+          stubs: { GlEmptyState, GlTabs: false },
         });
       });
 
@@ -89,13 +93,25 @@ describe('ThreatMonitoringApp component', () => {
         expect(store.dispatch).not.toHaveBeenCalled();
       });
 
-      it('shows only the empty state', () => {
-        const emptyState = findEmptyState();
-        expect(wrapper.element).toBe(emptyState.element);
+      it('shows the empty state', () => {
+        expect(findEmptyState().exists()).toBe(true);
         expect(findEmptyStateMessage().exists()).toBe(true);
-        expect(emptyState.props()).toMatchObject({
+        expect(findEmptyState().props()).toMatchObject({
           svgPath: emptyStateSvgPath,
         });
+      });
+
+      it('shows the tabs', () => {
+        expect(findNetworkPolicyTab().exists()).toBe(true);
+        expect(findStatisticsTab().exists()).toBe(true);
+      });
+
+      it('does not show the network policy list', () => {
+        expect(findNetworkPolicyList().exists()).toBe(false);
+      });
+
+      it('does not show the threat monitoring section', () => {
+        expect(findNetworkPolicySection().exists()).toBe(false);
       });
     },
   );
