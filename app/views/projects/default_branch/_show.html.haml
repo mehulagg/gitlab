@@ -6,7 +6,7 @@
     %button.btn.js-settings-toggle
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = _('Set the default branch for this project. All merge requests and commits are automatically made against this branch unless you specify a different one.')
+      = _('Set the default branch for this project. All merge requests and commits are made against this branch unless you specify a different one.')
 
   .settings-content
     = form_for @project, remote: true, html: { multipart: true, anchor: 'default-branch-settings' }, authenticity_token: true do |f|
