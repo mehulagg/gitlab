@@ -9,6 +9,7 @@ module QA
       let(:developer_user) { Resource::User.fabricate_via_api! { |resource| resource.api_client = api_admin_user } }
       let(:file) { 'README.md' }
       let(:new_branch) { 'new_branch' }
+      let(:suggestion) { 'Change to this' }
       let(:project) { Resource::Project.fabricate_via_api! { |resource| resource.api_client = api_admin_user } }
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |mr|
@@ -43,7 +44,7 @@ module QA
             mr.click_diffs_tab
             mr.add_comment_to_diff(<<~TXT)
               ```suggestion:-0+0
-              Change to this
+              #{suggestion}
               ```
             TXT
             mr.comment_now
@@ -83,8 +84,11 @@ module QA
 
         project.visit!
 
-        Page::Project::Show.perform do |proj_page|
-          expect(proj_page).to have_file(file)
+        Page::Project::Show.perform do |project_page|
+          aggregate_failures do
+            expect(project_page).to have_file(file)
+            expect(project_page).to have_readme_content(suggestion)
+          end
         end
       end
     end
