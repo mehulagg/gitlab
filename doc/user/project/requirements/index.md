@@ -34,7 +34,7 @@ Users with Reporter or higher [permissions](../../permissions.md) can create req
 
 To create a requirement:
 
-1. From your project page, go to **Requirements**.
+1. In a project, go to **Requirements**.
 1. Select **New requirement**.
 1. Enter a title and description and select **Create requirement**.
 
@@ -200,10 +200,10 @@ requirements_confirmation:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/246857) in GitLab 13.7.
 
-You can import requirements to a project by uploading a CSV file with the columns
-`title` and `description`.
+You can import requirements to a project by uploading a [CSV file](https://en.wikipedia.org/wiki/Comma-separated_values)
+with the columns `title` and `description`.
 
-The user uploading the CSV file will be set as the author of the imported requirements.
+After the import, the user uploading the CSV file is set as the author of the imported requirements.
 
 Users with Reporter or higher [permissions](../../permissions.md) can import requirements.
 
@@ -217,16 +217,16 @@ Before you import your file:
 
 To import requirements:
 
-1. Navigate to a project's Requirements page.
-   - If the project already has existing requirements, click the import icon (**{import}**) at the
+1. In a project, go to **Requirements**.
+   - If the project already has existing requirements, select the import icon (**{import}**) in the
      top right.
-   - For a project without any requirements, click **Import CSV** in the middle of the page.
-1. Select the file and click **Import requirements**.
+   - For a project without any requirements, select **Import CSV** in the middle of the page.
+1. Select the file and select **Import requirements**.
 
 The file is processed in the background and a notification email is sent
 to you after the import is complete.
 
-### CSV file format
+### Imported CSV file format
 
 When importing requirements from a CSV file, it must be formatted in a certain way:
 
@@ -262,19 +262,29 @@ For GitLab.com, it is set to 10 MB.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290813) in GitLab 13.8.
 
-Requirements can be exported as CSV from GitLab and are sent to your default notification email as an attachment.
+You can export GitLab requirements to a
+[CSV file](https://en.wikipedia.org/wiki/Comma-separated_values) sent to your default notification
+email as an attachment.
 
-## Overview
+By exporting requirements, you and your team can then import them into another tool or share them with your customers.
+Exporting requirements can aid collaboration with higher-level systems, as well as audit and regulatory compliance tasks.
 
-**Export Requirements to CSV** enables you and your team to export all the data collected from Requirements into
-a **[comma-separated values](https://en.wikipedia.org/wiki/Comma-separated_values)** (CSV) file,
-which stores tabular data in plain text.
+To export requirements:
 
-> _CSVs are a handy way of getting data from one program to another where one program cannot read the other ones normal output._ [Ref](https://www.quora.com/What-is-a-CSV-file-and-its-uses)
+1. In a project, go to **Requirements**.
+1. Select the **Export as CSV** icon (**{export}**) in the top right. A confirmation modal appears.
+1. Select **Export requirements**. The exported CSV file is sent to the email address associated with your user.
 
-CSV files can be used with any plotter or spreadsheet-based program, such as Microsoft Excel,
-Open Office Calc, or Google Spreadsheets.
+### Exported CSV file format
 
-## Use cases
+You can preview the exported CSV file in a spreadsheet editor, such as Microsoft Excel,
+OpenOffice Calc, or Google Sheets.
 
-The export functionality of requirements can aid collaboration with higher level systems as well as audit and regulatory compliance tasks.
+The exported CSV file contains the following columns:
+
+- Requirement ID
+- Title
+- Description
+- Author Username
+- Latest Test Report State
+- Latest Test Report Created At (UTC)
