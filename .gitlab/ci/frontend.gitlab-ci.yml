@@ -33,15 +33,20 @@ compile-production-assets:
     RAILS_ENV: "production"
     WEBPACK_REPORT: "true"
   artifacts:
-    name: webpack-report
-    expire_in: 31d
+    name: testing-cache
+    expire_in: 1d
     paths:
-      # These assets are used in multiple locations:
-      # - in `build-assets-image` job to create assets image for packaging systems
-      # - GitLab UI for integration tests: https://gitlab.com/gitlab-org/gitlab-ui/-/blob/e88493b3c855aea30bf60baee692a64606b0eb1e/.storybook/preview-head.pug#L1
-      - public/assets/
-      - webpack-report/
+      - vendor/ruby/
+      - node_modules/
+      - assets-hash.txt
+      - public/assets/webpack/
+      - tmp/cache/assets/sprockets/
+      - tmp/cache/babel-loader/
+      - tmp/cache/vue-loader/
+      - tmp/cache/webpack-dlls/
     when: always
+  script:
+    - echo $FF_USE_FASTZIP
   after_script:
     - rm -f /etc/apt/sources.list.d/google*.list  # We don't need to update Chrome here
 
