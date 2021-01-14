@@ -140,12 +140,24 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
           expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set_but_analyzers)
         end
 
+        context 'analyzers are disabled' do
+          let(:gitlab_ci_content) { existing_gitlab_ci_and_single_template_with_sast_and_default_stage }
+
+          subject(:result) { described_class.new(auto_devops_enabled, params_with_analyzer_info, gitlab_ci_content).generate }
+
+          it 'writes SAST_EXCLUDED_ANALYZERS' do
+            stub_const('Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS', 'bandit, brakeman, flawfinder')
+
+            expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set_but_analyzers)
+          end
+        end
+
         context 'all analyzers are enabled' do
           let(:gitlab_ci_content) { existing_gitlab_ci_and_single_template_with_sast_and_default_stage }
 
           subject(:result) { described_class.new(auto_devops_enabled, params_with_all_analyzers_enabled, gitlab_ci_content).generate }
 
-          it 'does not write SAST_DEFAULT_ANALYZERS' do
+          it 'does not write SAST_DEFAULT_ANALYZERS or SAST_EXCLUDED_ANALYZERS' do
             stub_const('Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS', 'brakeman, flawfinder')
 
             expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set)
@@ -335,7 +347,7 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
     - test
     sast:
       variables:
-        SAST_DEFAULT_ANALYZERS: brakeman, flawfinder
+        SAST_EXCLUDED_ANALYZERS: bandit
         SAST_BRAKEMAN_LEVEL: '2'
       stage: test
     include:

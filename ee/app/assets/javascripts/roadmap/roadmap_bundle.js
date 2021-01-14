@@ -57,11 +57,17 @@ export default () => {
         supportedPresetTypes.indexOf(dataset.presetType) > -1
           ? dataset.presetType
           : PRESET_TYPES.MONTHS;
-      const filterParams = Object.assign(
-        convertObjectPropsToCamelCase(urlParamsToObject(window.location.search.substring(1)), {
+      const rawFilterParams = urlParamsToObject(window.location.search.substring(1));
+      const filterParams = {
+        ...convertObjectPropsToCamelCase(rawFilterParams, {
           dropKeys: ['scope', 'utf8', 'state', 'sort', 'layout'], // These keys are unsupported/unnecessary
         }),
-      );
+        // We shall put parsed value of `confidential` only
+        // when it is defined.
+        ...(rawFilterParams.confidential && {
+          confidential: parseBoolean(rawFilterParams.confidential),
+        }),
+      };
       const timeframe = getTimeframeForPreset(
         presetType,
         window.innerWidth - el.offsetLeft - EPIC_DETAILS_CELL_WIDTH,

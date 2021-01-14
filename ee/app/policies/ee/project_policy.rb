@@ -324,7 +324,7 @@ module EE
           .default_project_deletion_protection
       end
 
-      rule { needs_new_sso_session & ~admin }.policy do
+      rule { needs_new_sso_session & ~admin & ~auditor }.policy do
         prevent :guest_access
         prevent :reporter_access
         prevent :developer_access

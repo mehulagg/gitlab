@@ -51,15 +51,15 @@ module Security
           &.flat_map {|a| a['variables'] }
           &.collect {|v| [v['field'], v[key]] }.to_h
 
-        analyzer_variables['SAST_DEFAULT_ANALYZERS'] = if key == 'value'
-                                                         config['analyzers']
-                                                           &.select {|a| a['enabled'] }
-                                                           &.collect {|a| a['name'] }
-                                                           &.sort
-                                                           &.join(', ')
-                                                       else
-                                                         SAST_DEFAULT_ANALYZERS
-                                                       end
+        analyzer_variables['SAST_EXCLUDED_ANALYZERS'] = if key == 'value'
+                                                          config['analyzers']
+                                                          &.reject {|a| a['enabled'] }
+                                                          &.collect {|a| a['name'] }
+                                                          &.sort
+                                                          &.join(', ')
+                                                        else
+                                                          ''
+                                                        end
 
         analyzer_variables
       end
@@ -155,7 +155,7 @@ module Security
           SAST_ANALYZER_IMAGE_TAG
           SAST_EXCLUDED_PATHS
           SEARCH_MAX_DEPTH
-          SAST_DEFAULT_ANALYZERS
+          SAST_EXCLUDED_ANALYZERS
           SAST_BRAKEMAN_LEVEL
           SAST_BANDIT_EXCLUDED_PATHS
           SAST_FLAWFINDER_LEVEL

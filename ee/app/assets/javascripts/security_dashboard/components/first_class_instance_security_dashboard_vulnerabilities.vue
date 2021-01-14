@@ -3,7 +3,7 @@ import produce from 'immer';
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import VulnerabilityList from './vulnerability_list.vue';
-import vulnerabilitiesQuery from '../graphql/instance_vulnerabilities.graphql';
+import vulnerabilitiesQuery from '../graphql/queries/instance_vulnerabilities.query.graphql';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import { preparePageInfo } from '../helpers';
 

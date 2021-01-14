@@ -7,48 +7,48 @@ module Resolvers
 
     argument :iid, GraphQL::ID_TYPE,
              required: false,
-             description: 'IID of the epic, e.g., "1"'
+             description: 'IID of the epic, e.g., "1".'
 
     argument :iids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of IIDs of epics, e.g., [1, 2]'
+             description: 'List of IIDs of epics, e.g., [1, 2].'
 
     argument :state, Types::EpicStateEnum,
              required: false,
-             description: 'Filter epics by state'
+             description: 'Filter epics by state.'
 
     argument :search, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Search query for epic title or description'
+             description: 'Search query for epic title or description.'
 
     argument :sort, Types::EpicSortEnum,
              required: false,
-             description: 'List epics by sort order'
+             description: 'List epics by sort order.'
 
     argument :author_username, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by author'
+             description: 'Filter epics by author.'
 
     argument :label_name, [GraphQL::STRING_TYPE],
              required: false,
-             description: 'Filter epics by labels'
+             description: 'Filter epics by labels.'
 
     argument :milestone_title, GraphQL::STRING_TYPE,
              required: false,
-             description: "Filter epics by milestone title, computed from epic's issues"
+             description: "Filter epics by milestone title, computed from epic's issues."
 
     argument :iid_starts_with, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by IID for autocomplete'
+             description: 'Filter epics by IID for autocomplete.'
 
     argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
              required: false,
-             description: 'Include epics from descendant groups',
+             description: 'Include epics from descendant groups.',
              default_value: true
 
     argument :confidential, GraphQL::BOOLEAN_TYPE,
              required: false,
-             description: 'Filter epics by given confidentiality'
+             description: 'Filter epics by given confidentiality.'
 
     type Types::EpicType, null: true
 

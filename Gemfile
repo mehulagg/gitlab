@@ -113,7 +113,7 @@ gem 'carrierwave', '~> 1.3'
 gem 'mini_magick', '~> 4.10.1'
 
 # for backups
-gem 'fog-aws', '~> 3.7'
+gem 'fog-aws', '~> 3.8'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
@@ -309,7 +309,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.13.5'
+gem 'gitlab-labkit', '0.14.0'
 
 # I18n
 gem 'ruby_parser', '~> 3.15', require: false
@@ -478,7 +478,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.4'
+gem 'gitlab-experiment', '~> 0.4.5'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

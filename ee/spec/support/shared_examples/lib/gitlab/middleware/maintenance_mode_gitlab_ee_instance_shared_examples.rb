@@ -93,11 +93,18 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance in main
         end
       end
 
-      it "expects a POST to /users/sign_in URL to be allowed" do
-        response = request.post('/users/sign_in')
+      where(:description, :path) do
+        'sign in route'     | '/users/sign_in'
+        'oauth token route' | '/oauth/token'
+      end
 
-        expect(response).not_to be_redirect
-        expect(subject).not_to disallow_request
+      with_them do
+        it "expects a POST to #{description} URL to be allowed" do
+          response = request.post(path)
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
+        end
       end
     end
   end

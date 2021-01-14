@@ -6,9 +6,9 @@ import DashboardNotConfigured from './empty_states/group_dashboard_not_configure
 import SecurityChartsLayout from './security_charts_layout.vue';
 import VulnerabilityChart from './first_class_vulnerability_chart.vue';
 import VulnerabilitySeverities from './first_class_vulnerability_severities.vue';
-import vulnerabilityHistoryQuery from '../graphql/group_vulnerability_history.query.graphql';
-import vulnerabilityGradesQuery from '../graphql/group_vulnerability_grades.query.graphql';
-import vulnerableProjectsQuery from '../graphql/vulnerable_projects.query.graphql';
+import vulnerabilityHistoryQuery from '../graphql/queries/group_vulnerability_history.query.graphql';
+import vulnerabilityGradesQuery from '../graphql/queries/group_vulnerability_grades.query.graphql';
+import vulnerableProjectsQuery from '../graphql/queries/vulnerable_projects.query.graphql';
 
 export default {
   components: {

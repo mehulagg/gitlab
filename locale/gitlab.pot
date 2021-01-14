@@ -2215,6 +2215,9 @@ msgstr ""
 msgid "AdminUsers|Delete user and contributions"
 msgstr ""
 
+msgid "AdminUsers|Export permissions as CSV"
+msgstr ""
+
 msgid "AdminUsers|External"
 msgstr ""
 
@@ -2992,6 +2995,9 @@ msgid "Amount of time (in hours) that users are allowed to skip forced configura
 msgstr ""
 
 msgid "An %{link_start}alert%{link_end} with the same fingerprint is already open. To change the status of this alert, resolve the linked alert."
+msgstr ""
+
+msgid "An Enterprise User GitLab account has been created for you by your organization:"
 msgstr ""
 
 msgid "An administrator changed the password for your GitLab account on %{link_to}."
@@ -4576,6 +4582,9 @@ msgstr ""
 msgid "Boards|An error occurred while creating the list. Please try again."
 msgstr ""
 
+msgid "Boards|An error occurred while fetching group projects. Please try again."
+msgstr ""
+
 msgid "Boards|An error occurred while fetching issues. Please reload the page."
 msgstr ""
 
@@ -4897,6 +4906,9 @@ msgstr ""
 msgid "By %{user_name}"
 msgstr ""
 
+msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
+msgstr ""
+
 msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
 msgstr ""
 
@@ -4904,6 +4916,9 @@ msgid "By default GitLab sends emails in HTML and plain text formats so mail cli
 msgstr ""
 
 msgid "By default, all projects and groups will use the global notifications setting."
+msgstr ""
+
+msgid "By default, if any ref (branch, tag, or commit) on the remote mirror has diverged from the local repository, the entire push will fail, and nothing will be updated. Choose this option to override this behavior. After the mirror is created, this can only be modified via the API."
 msgstr ""
 
 msgid "ByAuthor|by"
@@ -8797,6 +8812,12 @@ msgstr ""
 msgid "DastProfiles|Could not create the site profile. Please try again."
 msgstr ""
 
+msgid "DastProfiles|Could not delete saved scan. Please refresh the page, or try again later."
+msgstr ""
+
+msgid "DastProfiles|Could not delete saved scans:"
+msgstr ""
+
 msgid "DastProfiles|Could not delete scanner profile. Please refresh the page, or try again later."
 msgstr ""
 
@@ -8809,6 +8830,9 @@ msgstr ""
 msgid "DastProfiles|Could not delete site profiles:"
 msgstr ""
 
+msgid "DastProfiles|Could not fetch saved scans. Please refresh the page, or try again later."
+msgstr ""
+
 msgid "DastProfiles|Could not fetch scanner profiles. Please refresh the page, or try again later."
 msgstr ""
 
@@ -8819,6 +8843,9 @@ msgid "DastProfiles|Could not update the scanner profile. Please try again."
 msgstr ""
 
 msgid "DastProfiles|Could not update the site profile. Please try again."
+msgstr ""
+
+msgid "DastProfiles|DAST Scan"
 msgstr ""
 
 msgid "DastProfiles|Debug messages"
@@ -8863,7 +8890,7 @@ msgstr ""
 msgid "DastProfiles|Include debug messages in the DAST console output."
 msgstr ""
 
-msgid "DastProfiles|Manage Profiles"
+msgid "DastProfiles|Manage DAST scans"
 msgstr ""
 
 msgid "DastProfiles|Manage profiles"
@@ -8873,9 +8900,6 @@ msgid "DastProfiles|Minimum = 0 (no timeout enabled), Maximum = 2880 minutes"
 msgstr ""
 
 msgid "DastProfiles|Minimum = 1 second, Maximum = 3600 seconds"
-msgstr ""
-
-msgid "DastProfiles|New Profile"
 msgstr ""
 
 msgid "DastProfiles|New scanner profile"
@@ -8917,6 +8941,12 @@ msgstr ""
 msgid "DastProfiles|Save profile"
 msgstr ""
 
+msgid "DastProfiles|Saved Scans"
+msgstr ""
+
+msgid "DastProfiles|Scan"
+msgstr ""
+
 msgid "DastProfiles|Scan mode"
 msgstr ""
 
@@ -8942,6 +8972,9 @@ msgid "DastProfiles|Site name"
 msgstr ""
 
 msgid "DastProfiles|Spider timeout"
+msgstr ""
+
+msgid "DastProfiles|Target"
 msgstr ""
 
 msgid "DastProfiles|Target URL"
@@ -10582,6 +10615,15 @@ msgid "EmailError|You are not allowed to perform this action. If you believe thi
 msgstr ""
 
 msgid "EmailError|Your account has been blocked. If you believe this is in error, contact a staff member."
+msgstr ""
+
+msgid "EmailParticipantsWarning|%{emails} will be notified of your comment."
+msgstr ""
+
+msgid "EmailParticipantsWarning|%{emails}, %{andMore} will be notified of your comment."
+msgstr ""
+
+msgid "EmailParticipantsWarning|and %{moreCount} more"
 msgstr ""
 
 msgid "EmailToken|reset it"
@@ -13226,6 +13268,9 @@ msgstr ""
 msgid "GitLab for Slack"
 msgstr ""
 
+msgid "GitLab group: %{source_link}"
+msgstr ""
+
 msgid "GitLab is a complete DevOps platform, delivered as a single application, fundamentally changing the way Development, Security, and Ops teams collaborate"
 msgstr ""
 
@@ -14424,6 +14469,9 @@ msgstr ""
 msgid "How do I configure runners?"
 msgstr ""
 
+msgid "How do I mirror repositories?"
+msgstr ""
+
 msgid "How does cleanup work?"
 msgstr ""
 
@@ -14563,6 +14611,9 @@ msgid "If enabled, GitLab will handle Object Storage replication using Geo. %{li
 msgstr ""
 
 msgid "If enabled, access to projects will be validated on an external service using their classification label."
+msgstr ""
+
+msgid "If enabled, only protected branches will be mirrored."
 msgstr ""
 
 msgid "If the YouTube URL is https://www.youtube.com/watch?v=0t1DgySidms then the video ID is %{id}"
@@ -14809,6 +14860,9 @@ msgid "Improve search with Advanced Search and GitLab Enterprise Edition."
 msgstr ""
 
 msgid "In %{time_to_now}"
+msgstr ""
+
+msgid "In case of pull mirroring, your user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches."
 msgstr ""
 
 msgid "In order to enable Service Desk for your instance, you must first set up incoming email."
@@ -15060,7 +15114,7 @@ msgstr ""
 msgid "Input host keys manually"
 msgstr ""
 
-msgid "Input your repository URL"
+msgid "Input the remote repository URL"
 msgstr ""
 
 msgid "Insert a code block"
@@ -17658,9 +17712,6 @@ msgstr ""
 msgid "MergeRequests|Failed to squash. Should be done manually."
 msgstr ""
 
-msgid "MergeRequests|Jump to next unresolved thread"
-msgstr ""
-
 msgid "MergeRequests|Reply..."
 msgstr ""
 
@@ -18296,6 +18347,9 @@ msgid "Minutes"
 msgstr ""
 
 msgid "Mirror direction"
+msgstr ""
+
+msgid "Mirror only protected branches"
 msgstr ""
 
 msgid "Mirror repository"
@@ -19863,9 +19917,6 @@ msgstr ""
 msgid "Only admins can delete project"
 msgstr ""
 
-msgid "Only mirror protected branches"
-msgstr ""
-
 msgid "Only policy:"
 msgstr ""
 
@@ -20607,6 +20658,9 @@ msgstr ""
 msgid "Pipeline Schedules"
 msgstr ""
 
+msgid "Pipeline cannot be run."
+msgstr ""
+
 msgid "Pipeline minutes quota"
 msgstr ""
 
@@ -20790,9 +20844,6 @@ msgstr ""
 msgid "Pipelines|More Information"
 msgstr ""
 
-msgid "Pipelines|No CI file found in this repository, please add one."
-msgstr ""
-
 msgid "Pipelines|No triggers have been created yet. Add one using the form above."
 msgstr ""
 
@@ -20803,9 +20854,6 @@ msgid "Pipelines|Pipeline Editor"
 msgstr ""
 
 msgid "Pipelines|Project cache successfully reset."
-msgstr ""
-
-msgid "Pipelines|Repository does not have a default branch, please set one."
 msgstr ""
 
 msgid "Pipelines|Revoke"
@@ -20827,6 +20875,9 @@ msgid "Pipelines|There are currently no finished pipelines."
 msgstr ""
 
 msgid "Pipelines|There are currently no pipelines."
+msgstr ""
+
+msgid "Pipelines|There is no %{filePath} file in this repository, please add one and visit the Pipeline Editor again."
 msgstr ""
 
 msgid "Pipelines|There was an error fetching the pipelines. Try again in a few moments or contact your support team."
@@ -20941,6 +20992,9 @@ msgid "Pipeline|Run Pipeline"
 msgstr ""
 
 msgid "Pipeline|Run for"
+msgstr ""
+
+msgid "Pipeline|Run for branch name or tag"
 msgstr ""
 
 msgid "Pipeline|Running"
@@ -28001,9 +28055,6 @@ msgstr[1] ""
 msgid "The fork relationship has been removed."
 msgstr ""
 
-msgid "The form contains the following error:"
-msgstr ""
-
 msgid "The form contains the following errors:"
 msgstr ""
 
@@ -29060,9 +29111,6 @@ msgstr ""
 msgid "This user is the author of this %{noteable}."
 msgstr ""
 
-msgid "This user will be the author of all events in the activity feed that are the result of an update, like new branches being created or new commits being pushed to existing branches."
-msgstr ""
-
 msgid "This variable can not be masked."
 msgstr ""
 
@@ -29499,6 +29547,9 @@ msgstr ""
 msgid "To define internal users, first enable new users set to external"
 msgstr ""
 
+msgid "To ensure no loss of personal content, an Individual User should create a separate account under their own personal email address, not tied to the Enterprise email domain or name-space."
+msgstr ""
+
 msgid "To further protect your account, consider configuring a %{mfa_link_start}two-factor authentication%{mfa_link_end} method."
 msgstr ""
 
@@ -29506,6 +29557,9 @@ msgid "To further protect your account, consider configuring a two-factor authen
 msgstr ""
 
 msgid "To get started you enter your FogBugz URL and login information below. In the next steps, you'll be able to map users and select the projects you want to import."
+msgstr ""
+
+msgid "To get started, click the link below to confirm your account."
 msgstr ""
 
 msgid "To get started, link this page to your Jaeger server, or find out how to %{link_start_tag}install Jaeger%{link_end_tag}"
@@ -29885,7 +29939,7 @@ msgstr ""
 msgid "Trigger pipelines for mirror updates"
 msgstr ""
 
-msgid "Trigger pipelines when branches or tags are updated from the upstream repository. Depending on the activity of the upstream repository, this may greatly increase the load on your CI runners. Only enable this if you know they can handle the load."
+msgid "Trigger pipelines when branches or tags are updated in the upstream repository. Depending on the activity of the upstream repository, this may greatly increase the load on your CI runners. Only enable this if you know they can handle the load."
 msgstr ""
 
 msgid "Trigger removed."
@@ -31748,6 +31802,9 @@ msgstr[1] ""
 msgid "When using the %{code_open}http://%{code_close} or %{code_open}https://%{code_close} protocols, please provide the exact URL to the repository. HTTP redirects will not be followed."
 msgstr ""
 
+msgid "When using the %{code_open}http://%{code_close} or %{code_open}https://%{code_close} protocols, provide the exact URL to the repository. HTTP redirects will not be followed."
+msgstr ""
+
 msgid "When:"
 msgstr ""
 
@@ -32175,6 +32232,9 @@ msgid "You can invite a new member to %{project_name} or invite another group."
 msgstr ""
 
 msgid "You can invite a new member to %{project_name}."
+msgstr ""
+
+msgid "You can invite a new member to %{strong_start}%{group_name}%{strong_end}."
 msgstr ""
 
 msgid "You can invite another group to %{project_name}."

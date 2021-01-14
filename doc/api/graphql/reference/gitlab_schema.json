@@ -3366,7 +3366,7 @@
               "args": [
                 {
                   "name": "issueFilters",
-                  "description": "Filters applied when selecting issues on the board",
+                  "description": "Filters applied when selecting issues on the board.",
                   "type": {
                     "kind": "INPUT_OBJECT",
                     "name": "BoardIssueInput",
@@ -3866,7 +3866,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the epic, e.g., \"1\"",
+                  "description": "IID of the epic, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -3876,7 +3876,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of epics, e.g., [1, 2]",
+                  "description": "List of IIDs of epics, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -3894,7 +3894,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter epics by state",
+                  "description": "Filter epics by state.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicState",
@@ -3904,7 +3904,7 @@
                 },
                 {
                   "name": "search",
-                  "description": "Search query for epic title or description",
+                  "description": "Search query for epic title or description.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -3914,7 +3914,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List epics by sort order",
+                  "description": "List epics by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicSort",
@@ -3924,7 +3924,7 @@
                 },
                 {
                   "name": "authorUsername",
-                  "description": "Filter epics by author",
+                  "description": "Filter epics by author.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -3934,7 +3934,7 @@
                 },
                 {
                   "name": "labelName",
-                  "description": "Filter epics by labels",
+                  "description": "Filter epics by labels.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -3952,7 +3952,7 @@
                 },
                 {
                   "name": "milestoneTitle",
-                  "description": "Filter epics by milestone title, computed from epic's issues",
+                  "description": "Filter epics by milestone title, computed from epic's issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -3962,7 +3962,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by IID for autocomplete",
+                  "description": "Filter epics by IID for autocomplete.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -3972,7 +3972,7 @@
                 },
                 {
                   "name": "includeDescendantGroups",
-                  "description": "Include epics from descendant groups",
+                  "description": "Include epics from descendant groups.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -3982,7 +3982,7 @@
                 },
                 {
                   "name": "confidential",
-                  "description": "Filter epics by given confidentiality",
+                  "description": "Filter epics by given confidentiality.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -6712,8 +6712,94 @@
           "description": null,
           "fields": [
             {
+              "name": "afterScript",
+              "description": "Override a set of commands that are executed after the job.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "allowFailure",
+              "description": "Allow job to fail.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "beforeScript",
+              "description": "Override a set of commands that are executed before the job.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "environment",
+              "description": "Name of an environment to which the job deploys.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "except",
+              "description": "Limit when jobs are not created.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiConfigJobRestriction",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "groupName",
-              "description": "Name of the job group",
+              "description": "Name of the job group.",
               "args": [
 
               ],
@@ -6727,7 +6813,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the job",
+              "description": "Name of the job.",
               "args": [
 
               ],
@@ -6741,7 +6827,7 @@
             },
             {
               "name": "needs",
-              "description": "Builds that must complete before the jobs run",
+              "description": "Builds that must complete before the jobs run.",
               "args": [
                 {
                   "name": "after",
@@ -6793,8 +6879,80 @@
               "deprecationReason": null
             },
             {
+              "name": "only",
+              "description": "Jobs are created when these conditions do not apply.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CiConfigJobRestriction",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "script",
+              "description": "Shell script that is executed by a runner.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "stage",
-              "description": "Name of the job stage",
+              "description": "Name of the job stage.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "tags",
+              "description": "List of tags that are used to select a runner.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "when",
+              "description": "When to run the job.",
               "args": [
 
               ],
@@ -6914,6 +7072,41 @@
                 "kind": "OBJECT",
                 "name": "CiConfigJob",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "CiConfigJobRestriction",
+          "description": null,
+          "fields": [
+            {
+              "name": "refs",
+              "description": "The Git refs the job restriction applies to.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -22391,7 +22584,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the epic, e.g., \"1\"",
+                  "description": "IID of the epic, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -22401,7 +22594,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of epics, e.g., [1, 2]",
+                  "description": "List of IIDs of epics, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -22419,7 +22612,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter epics by state",
+                  "description": "Filter epics by state.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicState",
@@ -22429,7 +22622,7 @@
                 },
                 {
                   "name": "search",
-                  "description": "Search query for epic title or description",
+                  "description": "Search query for epic title or description.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -22439,7 +22632,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List epics by sort order",
+                  "description": "List epics by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicSort",
@@ -22449,7 +22642,7 @@
                 },
                 {
                   "name": "authorUsername",
-                  "description": "Filter epics by author",
+                  "description": "Filter epics by author.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -22459,7 +22652,7 @@
                 },
                 {
                   "name": "labelName",
-                  "description": "Filter epics by labels",
+                  "description": "Filter epics by labels.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -22477,7 +22670,7 @@
                 },
                 {
                   "name": "milestoneTitle",
-                  "description": "Filter epics by milestone title, computed from epic's issues",
+                  "description": "Filter epics by milestone title, computed from epic's issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -22487,7 +22680,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by IID for autocomplete",
+                  "description": "Filter epics by IID for autocomplete.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -22497,7 +22690,7 @@
                 },
                 {
                   "name": "includeDescendantGroups",
-                  "description": "Include epics from descendant groups",
+                  "description": "Include epics from descendant groups.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -22507,7 +22700,7 @@
                 },
                 {
                   "name": "confidential",
-                  "description": "Filter epics by given confidentiality",
+                  "description": "Filter epics by given confidentiality.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -26648,7 +26841,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Filters registries by their ID",
+                  "description": "Filters registries by their ID.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -26747,7 +26940,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Filters registries by their ID",
+                  "description": "Filters registries by their ID.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -26935,7 +27128,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Filters registries by their ID",
+                  "description": "Filters registries by their ID.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -27020,7 +27213,7 @@
               "args": [
                 {
                   "name": "ids",
-                  "description": "Filters registries by their ID",
+                  "description": "Filters registries by their ID.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -27391,7 +27584,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch code coverage activity (maximum time window is set to 90 days)",
+                  "description": "First day for which to fetch code coverage activity (maximum time window is set to 90 days).",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -27745,7 +27938,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the epic, e.g., \"1\"",
+                  "description": "IID of the epic, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -27755,7 +27948,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of epics, e.g., [1, 2]",
+                  "description": "List of IIDs of epics, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -27773,7 +27966,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter epics by state",
+                  "description": "Filter epics by state.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicState",
@@ -27783,7 +27976,7 @@
                 },
                 {
                   "name": "search",
-                  "description": "Search query for epic title or description",
+                  "description": "Search query for epic title or description.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -27793,7 +27986,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List epics by sort order",
+                  "description": "List epics by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicSort",
@@ -27803,7 +27996,7 @@
                 },
                 {
                   "name": "authorUsername",
-                  "description": "Filter epics by author",
+                  "description": "Filter epics by author.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -27813,7 +28006,7 @@
                 },
                 {
                   "name": "labelName",
-                  "description": "Filter epics by labels",
+                  "description": "Filter epics by labels.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -27831,7 +28024,7 @@
                 },
                 {
                   "name": "milestoneTitle",
-                  "description": "Filter epics by milestone title, computed from epic's issues",
+                  "description": "Filter epics by milestone title, computed from epic's issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -27841,7 +28034,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by IID for autocomplete",
+                  "description": "Filter epics by IID for autocomplete.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -27851,7 +28044,7 @@
                 },
                 {
                   "name": "includeDescendantGroups",
-                  "description": "Include epics from descendant groups",
+                  "description": "Include epics from descendant groups.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -27861,7 +28054,7 @@
                 },
                 {
                   "name": "confidential",
-                  "description": "Filter epics by given confidentiality",
+                  "description": "Filter epics by given confidentiality.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -27884,7 +28077,7 @@
               "args": [
                 {
                   "name": "id",
-                  "description": "Find an epic board by ID",
+                  "description": "Find an epic board by ID.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -27994,7 +28187,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the epic, e.g., \"1\"",
+                  "description": "IID of the epic, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -28004,7 +28197,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of epics, e.g., [1, 2]",
+                  "description": "List of IIDs of epics, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -28022,7 +28215,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter epics by state",
+                  "description": "Filter epics by state.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicState",
@@ -28032,7 +28225,7 @@
                 },
                 {
                   "name": "search",
-                  "description": "Search query for epic title or description",
+                  "description": "Search query for epic title or description.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -28042,7 +28235,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List epics by sort order",
+                  "description": "List epics by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "EpicSort",
@@ -28052,7 +28245,7 @@
                 },
                 {
                   "name": "authorUsername",
-                  "description": "Filter epics by author",
+                  "description": "Filter epics by author.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -28062,7 +28255,7 @@
                 },
                 {
                   "name": "labelName",
-                  "description": "Filter epics by labels",
+                  "description": "Filter epics by labels.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -28080,7 +28273,7 @@
                 },
                 {
                   "name": "milestoneTitle",
-                  "description": "Filter epics by milestone title, computed from epic's issues",
+                  "description": "Filter epics by milestone title, computed from epic's issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -28090,7 +28283,7 @@
                 },
                 {
                   "name": "iidStartsWith",
-                  "description": "Filter epics by IID for autocomplete",
+                  "description": "Filter epics by IID for autocomplete.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -28100,7 +28293,7 @@
                 },
                 {
                   "name": "includeDescendantGroups",
-                  "description": "Include epics from descendant groups",
+                  "description": "Include epics from descendant groups.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -28110,7 +28303,7 @@
                 },
                 {
                   "name": "confidential",
-                  "description": "Filter epics by given confidentiality",
+                  "description": "Filter epics by given confidentiality.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -28566,7 +28759,7 @@
                 },
                 {
                   "name": "iterationId",
-                  "description": "Iterations applied to the issue",
+                  "description": "Iterations applied to the issue.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -28580,7 +28773,7 @@
                 },
                 {
                   "name": "epicId",
-                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -29368,7 +29561,7 @@
                 },
                 {
                   "name": "hasVulnerabilities",
-                  "description": "Returns only the projects which have vulnerabilities",
+                  "description": "Returns only the projects which have vulnerabilities.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -29565,7 +29758,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "List time logs within a date range where the logged date is equal to or after startDate",
+                  "description": "List time logs within a date range where the logged date is equal to or after startDate.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -29575,7 +29768,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "List time logs within a date range where the logged date is equal to or before endDate",
+                  "description": "List time logs within a date range where the logged date is equal to or before endDate.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -29585,7 +29778,7 @@
                 },
                 {
                   "name": "startTime",
-                  "description": "List time-logs within a time range where the logged time is equal to or after startTime",
+                  "description": "List time-logs within a time range where the logged time is equal to or after startTime.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -29595,7 +29788,7 @@
                 },
                 {
                   "name": "endTime",
-                  "description": "List time-logs within a time range where the logged time is equal to or before endTime",
+                  "description": "List time-logs within a time range where the logged time is equal to or before endTime.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Time",
@@ -29736,7 +29929,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -29754,7 +29947,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -29772,7 +29965,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -29790,7 +29983,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -29808,7 +30001,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId",
+                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -29826,7 +30019,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List vulnerabilities by sort order",
+                  "description": "List vulnerabilities by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "VulnerabilitySort",
@@ -29836,7 +30029,7 @@
                 },
                 {
                   "name": "hasResolution",
-                  "description": "Returns only the vulnerabilities which have been resolved on default branch",
+                  "description": "Returns only the vulnerabilities which have been resolved on default branch.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -29846,7 +30039,7 @@
                 },
                 {
                   "name": "hasIssues",
-                  "description": "Returns only the vulnerabilities which have linked issues",
+                  "description": "Returns only the vulnerabilities which have linked issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -29909,7 +30102,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch vulnerability history",
+                  "description": "First day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -29923,7 +30116,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "Last day for which to fetch vulnerability history",
+                  "description": "Last day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -29990,7 +30183,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch vulnerability history",
+                  "description": "First day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -30004,7 +30197,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "Last day for which to fetch vulnerability history",
+                  "description": "Last day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -30071,7 +30264,7 @@
               "args": [
                 {
                   "name": "includeSubgroups",
-                  "description": "Include grades belonging to subgroups",
+                  "description": "Include grades belonging to subgroups.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -30159,7 +30352,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -30177,7 +30370,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -30195,7 +30388,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -30213,7 +30406,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -30231,7 +30424,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by scanner",
+                  "description": "Filter vulnerabilities by scanner.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -31865,7 +32058,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -31883,7 +32076,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -31901,7 +32094,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -31919,7 +32112,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -31937,7 +32130,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by scanner",
+                  "description": "Filter vulnerabilities by scanner.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -46546,7 +46739,7 @@
                 },
                 {
                   "name": "hasVulnerabilities",
-                  "description": "Returns only the projects which have vulnerabilities",
+                  "description": "Returns only the projects which have vulnerabilities.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -48728,11 +48921,11 @@
         {
           "kind": "OBJECT",
           "name": "Package",
-          "description": "Represents a package",
+          "description": "Represents a package in the Package Registry",
           "fields": [
             {
               "name": "createdAt",
-              "description": "The created date",
+              "description": "The created date.",
               "args": [
 
               ],
@@ -48750,7 +48943,7 @@
             },
             {
               "name": "id",
-              "description": "The ID of the package",
+              "description": "The ID of the package.",
               "args": [
 
               ],
@@ -48768,7 +48961,7 @@
             },
             {
               "name": "name",
-              "description": "The name of the package",
+              "description": "The name of the package.",
               "args": [
 
               ],
@@ -48786,7 +48979,7 @@
             },
             {
               "name": "packageType",
-              "description": "The type of the package",
+              "description": "The type of the package.",
               "args": [
 
               ],
@@ -48803,8 +48996,132 @@
               "deprecationReason": null
             },
             {
+              "name": "pipelines",
+              "description": "Pipelines that built the package.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PipelineConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project where the package is stored.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Project",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "tags",
+              "description": "The package tags.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageTagConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "updatedAt",
-              "description": "The update date",
+              "description": "The updated date.",
               "args": [
 
               ],
@@ -48822,7 +49139,7 @@
             },
             {
               "name": "version",
-              "description": "The version of the package",
+              "description": "The version of the package.",
               "args": [
 
               ],
@@ -48830,6 +49147,489 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "versions",
+              "description": "The other versions of the package.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageComposerDetails",
+          "description": "Details of a Composer package",
+          "fields": [
+            {
+              "name": "composerMetadatum",
+              "description": "The Composer metadatum.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageComposerMetadatumType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "createdAt",
+              "description": "The created date.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "The ID of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "packageType",
+              "description": "The type of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "PackageTypeEnum",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelines",
+              "description": "Pipelines that built the package.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PipelineConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project where the package is stored.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Project",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "tags",
+              "description": "The package tags.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageTagConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "The updated date.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "version",
+              "description": "The version of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "versions",
+              "description": "The other versions of the package.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageComposerJsonType",
+          "description": "Represents a composer JSON file",
+          "fields": [
+            {
+              "name": "license",
+              "description": "The license set in the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name set in the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "type",
+              "description": "The type set in the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "version",
+              "description": "The version set in the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageComposerMetadatumType",
+          "description": "Composer metadatum",
+          "fields": [
+            {
+              "name": "composerJson",
+              "description": "Data of the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageComposerJsonType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "targetSha",
+              "description": "Target SHA of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -49245,6 +50045,203 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "PackageTag",
+          "description": "Represents a package tag",
+          "fields": [
+            {
+              "name": "createdAt",
+              "description": "The created date.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "The ID of the tag.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the tag.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "The updated date.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageTagConnection",
+          "description": "The connection type for PackageTag.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageTagEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageTag",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageTagEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageTag",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "PackageTypeEnum",
           "description": null,
@@ -49307,6 +50304,16 @@
               "deprecationReason": null
             }
           ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "PackagesPackageID",
+          "description": "Identifier of Packages::Package",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
           "possibleTypes": null
         },
         {
@@ -51303,7 +52310,7 @@
               "args": [
                 {
                   "name": "name",
-                  "description": "Name of the cluster agent",
+                  "description": "Name of the cluster agent.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -51626,7 +52633,7 @@
               "args": [
                 {
                   "name": "id",
-                  "description": "ID of the site profile",
+                  "description": "ID of the site profile.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -51706,7 +52713,7 @@
               "args": [
                 {
                   "name": "normalizedTargetUrls",
-                  "description": "Normalized URL of the target to be scanned",
+                  "description": "Normalized URL of the target to be scanned.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -52322,7 +53329,7 @@
                 },
                 {
                   "name": "iterationId",
-                  "description": "Iterations applied to the issue",
+                  "description": "Iterations applied to the issue.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -52336,7 +53343,7 @@
                 },
                 {
                   "name": "epicId",
-                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -52776,7 +53783,7 @@
                 },
                 {
                   "name": "iterationId",
-                  "description": "Iterations applied to the issue",
+                  "description": "Iterations applied to the issue.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -52790,7 +53797,7 @@
                 },
                 {
                   "name": "epicId",
-                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported",
+                  "description": "ID of an epic associated with the issues, \"none\" and \"any\" values are supported.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "String",
@@ -54200,7 +55207,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the requirement, e.g., \"1\"",
+                  "description": "IID of the requirement, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -54210,7 +55217,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of requirements, e.g., [1, 2]",
+                  "description": "List of IIDs of requirements, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54303,7 +55310,7 @@
                 },
                 {
                   "name": "iid",
-                  "description": "IID of the requirement, e.g., \"1\"",
+                  "description": "IID of the requirement, e.g., \"1\".",
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
@@ -54313,7 +55320,7 @@
                 },
                 {
                   "name": "iids",
-                  "description": "List of IIDs of requirements, e.g., [1, 2]",
+                  "description": "List of IIDs of requirements, e.g., [1, 2].",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54854,7 +55861,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54872,7 +55879,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54890,7 +55897,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54908,7 +55915,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54926,7 +55933,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId",
+                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -54944,7 +55951,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List vulnerabilities by sort order",
+                  "description": "List vulnerabilities by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "VulnerabilitySort",
@@ -54954,7 +55961,7 @@
                 },
                 {
                   "name": "hasResolution",
-                  "description": "Returns only the vulnerabilities which have been resolved on default branch",
+                  "description": "Returns only the vulnerabilities which have been resolved on default branch.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -54964,7 +55971,7 @@
                 },
                 {
                   "name": "hasIssues",
-                  "description": "Returns only the vulnerabilities which have linked issues",
+                  "description": "Returns only the vulnerabilities which have linked issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -55027,7 +56034,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch vulnerability history",
+                  "description": "First day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -55041,7 +56048,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "Last day for which to fetch vulnerability history",
+                  "description": "Last day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -55161,7 +56168,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -55179,7 +56186,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -55197,7 +56204,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -55215,7 +56222,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -55233,7 +56240,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by scanner",
+                  "description": "Filter vulnerabilities by scanner.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -57308,6 +58315,16 @@
                     }
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "dryRun",
+                  "description": "Run pipeline creation simulation, or only do static check.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": null
                 }
               ],
               "type": {
@@ -57729,6 +58746,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Namespace",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "packageComposerDetails",
+              "description": "Find a composer package",
+              "args": [
+                {
+                  "name": "id",
+                  "description": "The global ID of the package.",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "PackagesPackageID",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageComposerDetails",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -58255,7 +59299,7 @@
               "args": [
                 {
                   "name": "projectId",
-                  "description": "Filter vulnerabilities by project",
+                  "description": "Filter vulnerabilities by project.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -58273,7 +59317,7 @@
                 },
                 {
                   "name": "reportType",
-                  "description": "Filter vulnerabilities by report type",
+                  "description": "Filter vulnerabilities by report type.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -58291,7 +59335,7 @@
                 },
                 {
                   "name": "severity",
-                  "description": "Filter vulnerabilities by severity",
+                  "description": "Filter vulnerabilities by severity.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -58309,7 +59353,7 @@
                 },
                 {
                   "name": "state",
-                  "description": "Filter vulnerabilities by state",
+                  "description": "Filter vulnerabilities by state.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -58327,7 +59371,7 @@
                 },
                 {
                   "name": "scanner",
-                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId",
+                  "description": "Filter vulnerabilities by VulnerabilityScanner.externalId.",
                   "type": {
                     "kind": "LIST",
                     "name": null,
@@ -58345,7 +59389,7 @@
                 },
                 {
                   "name": "sort",
-                  "description": "List vulnerabilities by sort order",
+                  "description": "List vulnerabilities by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "VulnerabilitySort",
@@ -58355,7 +59399,7 @@
                 },
                 {
                   "name": "hasResolution",
-                  "description": "Returns only the vulnerabilities which have been resolved on default branch",
+                  "description": "Returns only the vulnerabilities which have been resolved on default branch.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -58365,7 +59409,7 @@
                 },
                 {
                   "name": "hasIssues",
-                  "description": "Returns only the vulnerabilities which have linked issues",
+                  "description": "Returns only the vulnerabilities which have linked issues.",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -58428,7 +59472,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch vulnerability history",
+                  "description": "First day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -58442,7 +59486,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "Last day for which to fetch vulnerability history",
+                  "description": "Last day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -58509,7 +59553,7 @@
               "args": [
                 {
                   "name": "startDate",
-                  "description": "First day for which to fetch vulnerability history",
+                  "description": "First day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -58523,7 +59567,7 @@
                 },
                 {
                   "name": "endDate",
-                  "description": "Last day for which to fetch vulnerability history",
+                  "description": "Last day for which to fetch vulnerability history.",
                   "type": {
                     "kind": "NON_NULL",
                     "name": null,
@@ -61089,7 +62133,7 @@
               "args": [
                 {
                   "name": "sort",
-                  "description": "List test reports by sort order",
+                  "description": "List test reports by sort order.",
                   "type": {
                     "kind": "ENUM",
                     "name": "Sort",
@@ -75723,7 +76767,7 @@
               "args": [
                 {
                   "name": "linkType",
-                  "description": "Filter issue links by link type",
+                  "description": "Filter issue links by link type.",
                   "type": {
                     "kind": "ENUM",
                     "name": "VulnerabilityIssueLinkType",

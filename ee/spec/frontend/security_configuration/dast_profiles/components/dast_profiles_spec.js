@@ -5,6 +5,7 @@ import { merge } from 'lodash';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
 
+const TEST_NEW_DAST_SAVED_SCAN_PATH = '/-/on_demand_scans/new';
 const TEST_NEW_DAST_SCANNER_PROFILE_PATH = '/-/on_demand_scans/scanner_profiles/new';
 const TEST_NEW_DAST_SITE_PROFILE_PATH = '/-/on_demand_scans/site_profiles/new';
 const TEST_PROJECT_FULL_PATH = '/namespace/project';
@@ -15,6 +16,7 @@ describe('EE - DastProfiles', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       createNewProfilePaths: {
+        savedScan: TEST_NEW_DAST_SAVED_SCAN_PATH,
         scannerProfile: TEST_NEW_DAST_SCANNER_PROFILE_PATH,
         siteProfile: TEST_NEW_DAST_SITE_PROFILE_PATH,
       },
@@ -24,6 +26,9 @@ describe('EE - DastProfiles', () => {
     const defaultMocks = {
       $apollo: {
         queries: {
+          savedScans: {
+            fetchMore: jest.fn().mockResolvedValue(),
+          },
           siteProfiles: {
             fetchMore: jest.fn().mockResolvedValue(),
           },
@@ -43,6 +48,11 @@ describe('EE - DastProfiles', () => {
         {
           propsData: defaultProps,
           mocks: defaultMocks,
+          provide: {
+            glFeatures: {
+              dastSavedScans: true,
+            },
+          },
         },
         options,
       ),
@@ -72,31 +82,26 @@ describe('EE - DastProfiles', () => {
     it('shows a heading that describes the purpose of the page', () => {
       createFullComponent();
 
-      const heading = withinComponent().getByRole('heading', { name: /manage profiles/i });
+      const heading = withinComponent().getByRole('heading', { name: /manage dast scans/i });
 
       expect(heading).not.toBe(null);
     });
 
-    it('has a "New Profile" dropdown menu', () => {
+    it('has a "New" dropdown menu', () => {
       createComponent();
 
-      expect(getDropdownComponent().props('text')).toBe('New Profile');
+      expect(getDropdownComponent().props('text')).toBe('New');
     });
 
-    it(`shows a "Site Profile" dropdown item that links to ${TEST_NEW_DAST_SITE_PROFILE_PATH}`, () => {
+    it.each`
+      itemName             | href
+      ${'DAST Scan'}       | ${TEST_NEW_DAST_SAVED_SCAN_PATH}
+      ${'Site Profile'}    | ${TEST_NEW_DAST_SITE_PROFILE_PATH}
+      ${'Scanner Profile'} | ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}
+    `('shows a "$itemName" dropdown item that links to $href', ({ itemName, href }) => {
       createComponent();
 
-      expect(getSiteProfilesDropdownItem('Site Profile').getAttribute('href')).toBe(
-        TEST_NEW_DAST_SITE_PROFILE_PATH,
-      );
-    });
-
-    it(`shows a "Scanner Profile" dropdown item that links to ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}`, () => {
-      createComponent();
-
-      expect(getSiteProfilesDropdownItem('Scanner Profile').getAttribute('href')).toBe(
-        TEST_NEW_DAST_SCANNER_PROFILE_PATH,
-      );
+      expect(getSiteProfilesDropdownItem(itemName).getAttribute('href')).toBe(href);
     });
   });
 
@@ -116,7 +121,8 @@ describe('EE - DastProfiles', () => {
 
       it.each`
         tabName               | shouldBeSelectedByDefault
-        ${'Site Profiles'}    | ${true}
+        ${'Saved Scans'}      | ${true}
+        ${'Site Profiles'}    | ${false}
         ${'Scanner Profiles'} | ${false}
       `(
         'shows a "$tabName" tab which has "selected" set to "$shouldBeSelectedByDefault"',
@@ -133,8 +139,9 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Site Profiles'}    | ${0}  | ${'site-profiles'}
-      ${'Scanner Profiles'} | ${1}  | ${'scanner-profiles'}
+      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
+      ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
+      ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {
       beforeEach(() => {
         setWindowLocation(`http://foo.com/index#${givenLocationHash}`);
@@ -166,6 +173,7 @@ describe('EE - DastProfiles', () => {
 
   describe.each`
     description                | profileType
+    ${'Saved Scans List'}      | ${'savedScans'}
     ${'Site Profiles List'}    | ${'siteProfiles'}
     ${'Scanner Profiles List'} | ${'scannerProfiles'}
   `('$description', ({ profileType }) => {
@@ -218,6 +226,35 @@ describe('EE - DastProfiles', () => {
       getProfilesComponent(profileType).vm.$emit('delete-profile');
 
       expect(mutate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dastSavedScans feature flag disabled', () => {
+    beforeEach(() => {
+      createFullComponent({
+        provide: {
+          glFeatures: {
+            dastSavedScans: false,
+          },
+        },
+      });
+    });
+
+    it('does not show a "DAST Scan" item in the dropdown', () => {
+      expect(getSiteProfilesDropdownItem('DAST Scan')).toBe(null);
+    });
+
+    it('shows only 2 tabs', () => {
+      expect(withinComponent().getAllByRole('tab')).toHaveLength(2);
+    });
+
+    it('"Site Profile" tab should be selected by default', () => {
+      const tab = getTab({
+        tabName: 'Site Profiles',
+        selected: true,
+      });
+
+      expect(tab).not.toBe(null);
     });
   });
 });

@@ -1,13 +1,7 @@
 - return unless show_trial_status_widget?(group)
 
 = nav_link do
-  = link_to group_billings_path(group), title: trial_days_remaining_in_words(group) do
-    .gl-display-flex.gl-flex-direction-column.gl-align-items-stretch.gl-w-full
-      %span.gl-display-flex.gl-align-items-center
-        %span.nav-icon-container.svg-container
-          = image_tag 'illustrations/golden_tanuki.svg', class: 'svg', size: 16
-        %span.nav-item-name.gl-white-space-normal
-          = trial_days_remaining_in_words(group)
-      %span.gl-display-flex.gl-align-items-stretch.gl-mt-4
-        .progress.gl-flex-grow-1{ value: trial_percentage_complete(group) }
-          .progress-bar{ role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': trial_percentage_complete(group), style: "width: #{trial_percentage_complete(group)}%" }
+  #js-trial-status-widget{ data: { href: group_billings_path(group),
+    nav_icon_image_path: image_path('illustrations/golden_tanuki.svg'),
+    title: trial_days_remaining_in_words(group),
+    percentage_complete: trial_percentage_complete(group) } }

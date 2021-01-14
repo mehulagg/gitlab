@@ -3,7 +3,7 @@ import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 import createFlash from '~/flash';
-import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
+import vulnerabilityDismiss from '../graphql/mutations/vulnerability_dismiss.mutation.graphql';
 
 const REASON_NONE = s__('SecurityReports|[No reason]');
 const REASON_WONT_FIX = s__("SecurityReports|Won't fix / Accept risk");

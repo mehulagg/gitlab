@@ -34,6 +34,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include CanHousekeepRepository
   include EachBatch
   extend Gitlab::Cache::RequestCache
   extend Gitlab::Utils::Override
@@ -411,6 +412,8 @@ class Project < ApplicationRecord
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
   delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
   delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, to: :ci_cd_settings, prefix: :ci
+  delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
+    to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -2122,18 +2125,6 @@ class Project < ApplicationRecord
     (auto_devops || build_auto_devops)&.predefined_variables
   end
 
-  def pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.get(pushes_since_gc_redis_shared_state_key).to_i }
-  end
-
-  def increment_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.incr(pushes_since_gc_redis_shared_state_key) }
-  end
-
-  def reset_pushes_since_gc
-    Gitlab::Redis::SharedState.with { |redis| redis.del(pushes_since_gc_redis_shared_state_key) }
-  end
-
   def route_map_for(commit_sha)
     @route_maps_by_commit ||= Hash.new do |h, sha|
       h[sha] = begin
@@ -2632,10 +2623,6 @@ class Project < ApplicationRecord
     return true if from.is_a?(Namespace)
 
     from && self != from
-  end
-
-  def pushes_since_gc_redis_shared_state_key
-    "projects/#{id}/pushes_since_gc"
   end
 
   def update_project_statistics

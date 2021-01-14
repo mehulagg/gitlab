@@ -5,7 +5,7 @@ import { s__ } from '~/locale';
 import SecurityReportsSummary from './security_reports_summary.vue';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import { fetchPolicies } from '~/lib/graphql';
-import pipelineSecurityReportSummaryQuery from '../graphql/pipeline_security_report_summary.query.graphql';
+import pipelineSecurityReportSummaryQuery from '../graphql/queries/pipeline_security_report_summary.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {

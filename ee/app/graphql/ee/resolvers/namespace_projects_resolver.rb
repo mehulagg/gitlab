@@ -9,7 +9,7 @@ module EE
         argument :has_vulnerabilities, GraphQL::BOOLEAN_TYPE,
                  required: false,
                  default_value: false,
-                 description: 'Returns only the projects which have vulnerabilities'
+                 description: 'Returns only the projects which have vulnerabilities.'
       end
 
       def resolve(include_subgroups:, search:, sort:, has_vulnerabilities: false)

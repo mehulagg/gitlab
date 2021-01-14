@@ -7,7 +7,7 @@ module Resolvers
     type Types::DastSiteValidationType.connection_type, null: true
 
     argument :normalized_target_urls, [GraphQL::STRING_TYPE], required: false,
-             description: 'Normalized URL of the target to be scanned'
+             description: 'Normalized URL of the target to be scanned.'
 
     def resolve(**args)
       return DastSiteValidation.none unless allowed?

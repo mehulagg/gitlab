@@ -3,7 +3,7 @@ import { GlLink } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import PipelineStatusBadge from './pipeline_status_badge.vue';
-import projectAutoFixMrsCountQuery from '../graphql/project_auto_fix_mrs_count.query.graphql';
+import projectAutoFixMrsCountQuery from '../graphql/queries/project_auto_fix_mrs_count.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
