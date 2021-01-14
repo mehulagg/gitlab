@@ -12,7 +12,7 @@
 
 .detail-page-header.border-bottom-0.pt-0.pb-0
   .detail-page-header-body
-    .issuable-status-box.status-box.js-mr-status-box{ class: status_box_class(@merge_request), data: { state: @merge_request.state } }
+    .issuable-status-box.status-box.js-mr-status-box{ class: status_box_class(@merge_request), data: { project_path: @merge_request.project.path_with_namespace, iid: @merge_request.iid, state: @merge_request.state } }
       = sprite_icon(state_icon_name, css_class: 'gl-display-block gl-display-sm-none!')
       %span.gl-display-none.gl-display-sm-block
         = state_human_name

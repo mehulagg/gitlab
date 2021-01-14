@@ -24,6 +24,7 @@ import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
 import CommentFieldLayout from './comment_field_layout.vue';
+import { methods } from '~/merge_request/components/status_box.vue';
 
 export default {
   name: 'CommentForm',
@@ -240,6 +241,7 @@ export default {
       const toggleState = this.isOpen ? this.closeIssuable : this.reopenIssuable;
 
       toggleState()
+        .then(() => methods.updateStatus())
         .then(refreshUserMergeRequestCounts)
         .catch(() => Flash(constants.toggleStateErrorMessage[this.noteableType][this.openState]));
     },

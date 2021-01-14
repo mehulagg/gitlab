@@ -1,6 +1,6 @@
 import { format } from 'timeago.js';
 import getStateKey from 'ee_else_ce/vue_merge_request_widget/stores/get_state_key';
-import mrEventHub from '~/merge_request/eventhub';
+import { methods } from '~/merge_request/components/status_box.vue';
 import { stateKey } from './state_maps';
 import { formatDate } from '../../lib/utils/datetime_utility';
 import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY, MWPS_MERGE_STRATEGY } from '../constants';
@@ -22,6 +22,10 @@ export default class MergeRequestStore {
 
   setData(data, isRebased) {
     this.initApprovals();
+
+    if (this.mergeRequestState !== data.state) {
+      methods.updateStatus();
+    }
 
     if (isRebased) {
       this.sha = data.diff_head_sha;
@@ -155,10 +159,6 @@ export default class MergeRequestStore {
     this.canRevertInCurrentMR = currentUser.can_revert_on_current_merge_request || false;
 
     this.setState();
-
-    mrEventHub.$emit('mr.state.updated', {
-      state: this.mergeRequestState,
-    });
   }
 
   setGraphqlData(project) {

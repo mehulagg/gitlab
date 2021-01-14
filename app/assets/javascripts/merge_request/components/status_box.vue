@@ -1,7 +1,16 @@
 <script>
+import Vue from 'vue';
 import { GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import mrEventHub from '../eventhub';
+import { fetchPolicies } from '~/lib/graphql';
+
+export const data = Vue.observable({
+  state: '',
+});
+
+export const methods = Vue.observable({
+  updateStatus: null,
+});
 
 const CLASSES = {
   opened: 'status-box-open',
@@ -25,10 +34,11 @@ export default {
       required: true,
     },
   },
+  inject: ['query', 'projectPath', 'iid'],
   data() {
-    return {
-      state: this.initialState,
-    };
+    data.state = this.initialState;
+
+    return data;
   },
   computed: {
     statusBoxClass() {
@@ -42,14 +52,23 @@ export default {
     },
   },
   created() {
-    mrEventHub.$on('mr.state.updated', this.updateState);
+    methods.updateStatus = this.fetchState;
   },
   beforeDestroy() {
-    mrEventHub.$off('mr.state.updated', this.updateState);
+    methods.updateStatus = null;
   },
   methods: {
-    updateState({ state }) {
-      this.state = state;
+    async fetchState() {
+      const res = await this.$apollo.query({
+        query: this.query,
+        variables: {
+          projectPath: this.projectPath,
+          iid: this.iid,
+        },
+        fetchPolicy: fetchPolicies.NO_CACHE,
+      });
+
+      data.state = res.data.project.issuable.state;
     },
   },
 };

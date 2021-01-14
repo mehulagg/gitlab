@@ -1,6 +1,7 @@
 import { flattenDeep, clone } from 'lodash';
 import * as constants from '../constants';
 import { collapseSystemNotes } from './collapse_utils';
+import { data as statusBoxState } from '~/merge_request/components/status_box.vue';
 
 export const discussions = (state) => {
   let discussionsInState = clone(state.discussions);
@@ -60,7 +61,7 @@ export const getBlockedByIssues = (state) => state.noteableData.blocked_by_issue
 
 export const userCanReply = (state) => Boolean(state.noteableData.current_user.can_create_note);
 
-export const openState = (state) => state.noteableData.state;
+export const openState = () => statusBoxState.state;
 
 export const getUserData = (state) => state.userData || {};
 
