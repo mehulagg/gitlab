@@ -3478,7 +3478,7 @@ job1:
 
 The coverage is shown in the UI if at least one line in the job output matches the regular expression.
 If there is more than one matched line in the job output, the last line is used.
-For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
+For the matched line, the first occurrence of `\d+(\.\d+)?` is the code coverage.
 Leading zeros are removed.
 
 Coverage output from [child pipelines](../parent_child_pipelines.md) is not recorded
