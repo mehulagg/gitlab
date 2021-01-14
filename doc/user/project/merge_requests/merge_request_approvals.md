@@ -183,8 +183,8 @@ This ability can be disabled in the [merge request approvals settings](#prevent-
 One possible scenario would be to add more approvers than were defined in the default
 settings.
 
-When creating or editing a merge request, find the **Approval rules** section, then follow
-the same steps as [Adding / editing a default approval rule](#adding--editing-a-default-approval-rule).
+When creating or editing a merge request, find the **Approval rules** section by expanding the **Approval Rules**.
+Then follow the same steps as [Adding / editing a default approval rule](#adding--editing-a-default-approval-rule).
 
 #### Set up an optional approval rule
 
