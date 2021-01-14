@@ -32,11 +32,13 @@ If applicable, any groups/projects that are happy to have this feature turned on
 ## Roll Out Steps
 
 - [ ] Confirm that QA tests pass with the feature flag enabled (if you're unsure how, contact the relevant [stable counterpart in the Quality department](https://about.gitlab.com/handbook/engineering/quality/#individual-contributors))
+- [ ] Review the [Feature Flags and the Change Management Process](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process) handbook page and determine whether you'll need to open a Production Change [issue](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/new?issuable_template=change_management).
+  - Work with an infrastructure Department SRE to review and approve the change. See [Change Request Workflows](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#change-request-workflows).
 - [ ] Enable on staging (`/chatops run feature set feature_name true --staging`)
 - [ ] Test on staging
 - [ ] Ensure that documentation has been updated
 - [ ] Enable on GitLab.com for individual groups/projects listed above and verify behaviour  (`/chatops run feature set --project=gitlab-org/gitlab feature_name true`)
-- [ ] Coordinate a time to enable the flag with the SRE oncall and release managers
+- [ ] Confirm approval for enabling the flag with the SRE oncall and release managers
   - In `#production` mention `@sre-oncall` and `@release-managers`. Once an SRE on call and Release Manager on call confirm, you can proceed with the rollout
 - [ ] Announce on the issue an estimated time this will be enabled on GitLab.com
 - [ ] Enable on GitLab.com by running chatops command in `#production` (`/chatops run feature set feature_name true`)
