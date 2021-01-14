@@ -8,7 +8,9 @@ module EE
       dockerfiles: ::Gitlab::Template::CustomDockerfileTemplate,
       gitignores: ::Gitlab::Template::CustomGitignoreTemplate,
       gitlab_ci_ymls: ::Gitlab::Template::CustomGitlabCiYmlTemplate,
-      metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate
+      metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate,
+      issues: ::Gitlab::Template::IssueTemplate,
+      merge_requests: ::Gitlab::Template::MergeRequestTemplate
     ).freeze
 
     attr_reader :custom_templates
@@ -28,7 +30,7 @@ module EE
       return super if custom_templates.nil? || !custom_templates.enabled?
 
       if params[:name]
-        custom_templates.find(params[:name]) || super
+        custom_templates.find(params[:name], params[:source_template_project_id]) || super
       else
         custom_templates.all + super
       end
