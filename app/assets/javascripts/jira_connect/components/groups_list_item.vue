@@ -1,15 +1,48 @@
 <script>
-import { GlIcon, GlAvatar } from '@gitlab/ui';
+import { mapActions } from 'vuex';
+import { GlAvatar, GlButton, GlIcon } from '@gitlab/ui';
+
+import { addSubscription } from '~/jira_connect/api';
 
 export default {
   components: {
-    GlIcon,
     GlAvatar,
+    GlButton,
+    GlIcon,
+  },
+  inject: {
+    subscriptionsPath: {
+      default: '',
+    },
   },
   props: {
     group: {
       type: Object,
       required: true,
+    },
+  },
+  data() {
+    return {
+      isLoading: false,
+    };
+  },
+  methods: {
+    ...mapActions(['setErrorMessage']),
+    onClick() {
+      this.isLoading = true;
+
+      AP.context.getToken((jwt) => {
+        addSubscription(this.subscriptionsPath, jwt, this.group.full_path)
+          .then(() => {
+            AP.navigator.reload();
+          })
+          .catch((error) => {
+            this.setErrorMessage(error.response.data.error);
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+      });
     },
   },
 };
@@ -36,6 +69,14 @@ export default {
             <p class="gl-mt-2! gl-mb-0 gl-text-gray-600" v-text="group.description"></p>
           </div>
         </div>
+
+        <gl-button
+          category="secondary"
+          variant="success"
+          :loading="isLoading"
+          @click.prevent="onClick"
+          >{{ __('Link') }}</gl-button
+        >
       </div>
     </div>
   </li>
