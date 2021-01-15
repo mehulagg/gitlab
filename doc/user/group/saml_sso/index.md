@@ -454,12 +454,15 @@ It can also help to compare the XML response from your provider with our [exampl
 With access to the rails log or `production_json.log` (available only to GitLab team members for GitLab.com),
 you should be able to find the base64 encoded SAML response by searching with the following filters:
 
-- `json.meta.caller_id`: `Groups::OmniauthCallbacksController` with `#group_saml` or `#failure`
+- `json.meta.caller_id`: `Groups::OmniauthCallbacksController#group_saml`
 - `json.meta.user` or `json.username`: `username`
 - `json.method`: `POST`
 - `json.path`: `/groups/GROUP-PATH/-/saml/callback`
 
 The `json.params` should provide a message with `"key": "SAMLResponse"` and the `"value"` as the response.
 Note that a valid message should also have `"value": "/group-path"` with `"key": "RelayState"` and `"key": "group_id"` with `"value": "group-path"`.
+
+In some cases, if the SAML response is lengthy, you may receive a `"key": "truncated"` `"value":"..."`.
+In these cases, please ask a group owner for a copy of the SAML response from when they click on the "Verify SAML Configuration" button on the group SSO Settings page.
 
 To see the SAML response itself, you will then need to use a base64 decoder.
