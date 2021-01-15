@@ -446,3 +446,18 @@ However, self-managed GitLab instances use a configuration file that supports mo
 Internally that uses the [`ruby-saml` library](https://github.com/onelogin/ruby-saml), so we sometimes check there to verify low level details of less commonly used options.
 
 It can also help to compare the XML response from your provider with our [example XML used for internal testing](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/spec/fixtures/saml/response.xml).
+
+### Searching Rails log
+
+With access to the rails log or `production_json.log` (available only to GitLab team members for GitLab.com),
+you should be able to find the base64 encoded SAML response by searching with the following filters:
+
+- `json.meta.caller_id`: `Groups::OmniauthCallbacksController#group_saml`
+- `json.meta.user` or `json.username`: `username`
+- `json.method`: `POST`
+- `json.path`: `/groups/GROUP-PATH/-/saml/callback`
+
+The `json.params` should provide a message with `"key": "SAMLResponse"` and the `"value"` as the response.
+Note that a valid message should also have `"value": "/group-path"` with `"key": "RelayState"` and `"key": "group_id"` with `"value": "group-path"`.
+
+To see the SAML response itself, you will then need to use a base64 decoder.
