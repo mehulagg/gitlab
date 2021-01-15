@@ -1,0 +1,5 @@
+---
+title: Add repository_read_only columns to the Group table
+merge_request: 51800
+author:
+type: added
