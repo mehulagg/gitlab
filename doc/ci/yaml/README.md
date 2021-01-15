@@ -170,6 +170,9 @@ default:
 variables:
   DOMAIN: example.com
   WEBHOOK_URL: https://my-webhook.example.com
+  ENVIRONMENT:
+    value: "production"
+    description: "The default value populated when pipeline is run manually"
 
 rubocop:
   inherit:
