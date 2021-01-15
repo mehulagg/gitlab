@@ -1,0 +1,15 @@
+---
+key_path: <%= key_path %>
+value_type:
+product_category:
+stage:
+status:
+milestone:
+introduced_by_url:
+group:
+time_frame: <%= time_frame %>
+data_source:
+# distribution: [ee, ce]
+distribution:
+# tier: ['free', 'starter', 'premium', 'ultimate', 'bronze', 'silver', 'gold']
+tier:
