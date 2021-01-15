@@ -372,17 +372,17 @@ are planned.
 Users with Maintainer and greater [permissions](../permissions.md) can use the
 following options to remove a state file:
 
-1. **GitLab UI**: Go to **Operations > Terraform**. In the **Actions** column,
-   click the vertical ellipsis (**{ellipsis_v}**) button and select
-   **Remove state file and versions**.
-1. **GitLab REST API**: You can remove a state file by making a request to the
-   REST API. For example:
+- **GitLab UI**: Go to **Operations > Terraform**. In the **Actions** column,
+  click the vertical ellipsis (**{ellipsis_v}**) button and select
+  **Remove state file and versions**.
+- **GitLab REST API**: You can remove a state file by making a request to the
+  REST API. For example:
 
-   ```shell
-   curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
-   ```
+  ```shell
+  curl --header "Private-Token: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/<your_project_id>/terraform/state/<your_state_name>"
+  ```
 
-1. [GitLab GraphQL API](#remove-a-state-file-with-the-gitlab-graphql-api)
+- [GitLab GraphQL API](#remove-a-state-file-with-the-gitlab-graphql-api).
 
 ### Remove a state file with the GitLab GraphQL API
 
