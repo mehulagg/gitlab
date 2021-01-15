@@ -434,6 +434,9 @@ rspec:deprecations:
     SETUP_DB: "false"
   script:
     - run_timed_command "bundle exec rubocop --only Lint/LastKeywordArgument --parallel"
+    - grep -R "keyword" deprecations/
+    - grep -h -R "keyword" deprecations/ | awk '{$1=$1};1' | sort | uniq -c | sort
+    - grep -R "keyword" deprecations/ | wc
   artifacts:
     expire_in: 31d
     when: always
