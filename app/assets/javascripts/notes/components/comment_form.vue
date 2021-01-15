@@ -386,7 +386,7 @@ export default {
                       class="btn btn-transparent"
                       @click.prevent="setNoteType('comment')"
                     >
-                      <gl-icon name="check" class="icon" />
+                      <gl-icon name="check" class="icon gl-flex-shrink-0 gl-flex-grow-0 gl-mr-0!" />
                       <div class="description">
                         <strong>{{ __('Comment') }}</strong>
                         <p>
@@ -405,7 +405,7 @@ export default {
                       data-qa-selector="discussion_menu_item"
                       @click.prevent="setNoteType('discussion')"
                     >
-                      <gl-icon name="check" class="icon" />
+                      <gl-icon name="check" class="icon gl-flex-shrink-0 gl-flex-grow gl-mr-0!" />
                       <div class="description">
                         <strong>{{ __('Start thread') }}</strong>
                         <p>{{ startDiscussionDescription }}</p>
