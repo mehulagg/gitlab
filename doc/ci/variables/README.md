@@ -85,6 +85,15 @@ variables:
   TEST: "HELLO WORLD"
 ```
 
+Alternatively, you can define a pre-defined variable that is able to be leveraged as a default variable for manual pipelines.
+
+```yaml
+variables:
+  TEST: 
+    value: "HELLO WORLD"
+    description: "Default value that will be pre-filled when running a manual pipeline"
+```
+
 You can then call its value in your script:
 
 ```yaml
