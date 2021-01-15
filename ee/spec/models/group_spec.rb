@@ -1263,4 +1263,10 @@ RSpec.describe Group do
       end
     end
   end
+
+  it_behaves_like 'can move repository storage' do
+    let_it_be(:container) { create(:group, :wiki_repo) }
+
+    let(:repository) { container.wiki.repository }
+  end
 end
