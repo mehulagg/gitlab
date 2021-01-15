@@ -353,7 +353,7 @@ contains these fields:
 
 ![Terraform state list](img/terraform_list_view_v13_8.png)
 
-- **Name**: The name of the environment, with a locked **{lock}** icon if the
+- **Name**: The name of the environment, with a locked (**{lock}**) icon if the
   state file is locked.
 - **Pipeline**: A link to the most recent pipeline and its status.
 - **Details**: Information about when the state file was created or changed.
