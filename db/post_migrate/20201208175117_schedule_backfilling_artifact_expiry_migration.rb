@@ -24,12 +24,14 @@ class ScheduleBackfillingArtifactExpiryMigration < ActiveRecord::Migration[6.0]
     # Needs to be removed in a later migration
     add_concurrent_index(:ci_job_artifacts, %i(id created_at), where: INDEX_CONDITION, name: INDEX_NAME)
 
-    queue_background_migration_jobs_by_range_at_intervals(
-      JobArtifact.without_expiry_date.before_switch,
-      ::Gitlab::BackgroundMigration::BackfillArtifactExpiryDate,
-      2.minutes,
-      batch_size: 200_000
-    )
+    # queue_background_migration_jobs_by_range_at_intervals(
+    #   JobArtifact.without_expiry_date.before_switch,
+    #   ::Gitlab::BackgroundMigration::BackfillArtifactExpiryDate,
+    #   2.minutes,
+    #   batch_size: 200_000
+    # )
+    # The scheduling code is wrong.
+    # This is commented out so it's a no-op to prevent errors.
   end
 
   def down
