@@ -53,6 +53,10 @@ module API
         def check_agent_token
           forbidden! unless agent_token
         end
+
+        def kubernetes_namespaces(project)
+          {}
+        end
       end
 
       namespace 'internal' do
@@ -75,7 +79,7 @@ module API
               agent_name: agent.name,
               gitaly_info: gitaly_info(project),
               gitaly_repository: gitaly_repository(project)
-            }
+            }.merge(kubernetes_namespaces(project)).compact
           end
 
           desc 'Gets project info' do

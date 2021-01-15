@@ -5,6 +5,18 @@ module EE
       module Kubernetes
         extend ActiveSupport::Concern
         prepended do
+          helpers do
+            extend ::Gitlab::Utils::Override
+
+            override :kubernetes_namespaces
+            def kubernetes_namespaces(project)
+              return {} unless project.feature_available?(:cilium_alerts)
+
+              {
+                namespaces: ::Clusters::KubernetesNamespaces::ListService.new(project: project).execute
+              }
+            end
+          end
           namespace 'internal' do
             namespace 'kubernetes' do
               before { check_agent_token }
