@@ -14,6 +14,7 @@ module EE
       include InsightsFeature
       include HasTimelogsReport
       include HasWiki
+      include CanMoveRepositoryStorage
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
@@ -459,6 +460,11 @@ module EE
       self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
         hook.async_execute(data, hooks_scope.to_s)
       end
+    end
+
+    override :git_transfer_in_progress?
+    def git_transfer_in_progress?
+      reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
     end
 
     private
