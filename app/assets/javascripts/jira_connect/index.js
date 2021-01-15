@@ -43,20 +43,24 @@ const initJiraFormHandlers = () => {
 
     e.preventDefault();
 
-    addSubscription(addPath, namespace)
-      .then(reqComplete)
-      .catch((err) => reqFailed(err.response.data, 'Failed to add namespace. Please try again.'));
+    AP.context.getToken((jwt) => {
+      addSubscription(addPath, jwt, namespace)
+        .then(reqComplete)
+        .catch((err) => reqFailed(err.response.data, 'Failed to add namespace. Please try again.'));
+    });
   });
 
   $('.remove-subscription').on('click', function onRemoveSubscriptionClick(e) {
     const removePath = $(this).attr('href');
     e.preventDefault();
 
-    removeSubscription(removePath)
-      .then(reqComplete)
-      .catch((err) =>
-        reqFailed(err.response.data, 'Failed to remove namespace. Please try again.'),
-      );
+    AP.context.getToken((jwt) => {
+      removeSubscription(removePath, jwt)
+        .then(reqComplete)
+        .catch((err) =>
+          reqFailed(err.response.data, 'Failed to remove namespace. Please try again.'),
+        );
+    });
   });
 };
 

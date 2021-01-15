@@ -1,21 +1,13 @@
 import axios from 'axios';
 
-const getJwt = async () => {
-  return AP.context.getToken();
-};
-
-export const addSubscription = async (addPath, namespace) => {
-  const jwt = await getJwt();
-
+export const addSubscription = async (addPath, jwt, namespace) => {
   return axios.post(addPath, {
     jwt,
     namespace_path: namespace,
   });
 };
 
-export const removeSubscription = async (removePath) => {
-  const jwt = await getJwt();
-
+export const removeSubscription = async (removePath, jwt) => {
   return axios.delete(removePath, {
     params: {
       jwt,
