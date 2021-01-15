@@ -664,6 +664,10 @@ class NotificationService
     end
   end
 
+  def in_product_marketing(user, group, track, series)
+    mailer.in_product_marketing_email(user.id, group.id, track, series).deliver_later
+  end
+
   protected
 
   def new_resource_email(target, method)
