@@ -261,7 +261,7 @@ For instance, the [bundler-audit](https://gitlab.com/gitlab-org/security-product
 uses the `debug` level to log the command line `bundle audit check --quiet`,
 and what `bundle audit` writes to the standard output.
 If the command line fails, then it should be logged with the `error` log level;
-this makes it possible to debug the problem with changing the log level to `debug` and rerunning the scanning job again.
+this makes it possible to debug the problem without having to change the log level to `debug` and rerun the scanning job.
 
 #### common logutil package
 
