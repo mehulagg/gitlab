@@ -60,6 +60,7 @@ export default {
       'getNoteableDataByProp',
       'getNotesData',
       'openState',
+      'hasDrafts',
     ]),
     ...mapState(['isToggleStateButtonLoading']),
     noteableDisplayName() {
@@ -69,7 +70,11 @@ export default {
       return this.getUserData.id;
     },
     commentButtonTitle() {
-      return this.noteType === constants.COMMENT ? __('Comment') : __('Start thread');
+      if (this.noteType === constants.COMMENT) return __('Comment');
+
+      if (this.noteType === constants.DRAFT) return __('Add To Review');
+
+      return __('Start thread');
     },
     startDiscussionDescription() {
       return this.getNoteableData.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
@@ -132,7 +137,10 @@ export default {
       return !this.isOpen && this.isLocked(this.getNoteableData);
     },
     endpoint() {
-      return this.getNoteableData.create_note_path;
+      return this.isDraft ? this.getNotesData.draftsPath : this.getNoteableData.create_note_path;
+    },
+    isDraft() {
+      return this.noteType === constants.DRAFT;
     },
     issuableTypeTitle() {
       return this.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
@@ -192,6 +200,7 @@ export default {
             },
             merge_request_diff_head_sha: this.getNoteableData.diff_head_sha,
           },
+          isDraft: this.isDraft,
         };
 
         if (this.noteType === constants.DISCUSSION) {
@@ -380,6 +389,25 @@ export default {
                 />
 
                 <ul class="note-type-dropdown dropdown-open-top dropdown-menu">
+                  <li :class="{ 'droplab-item-selected': noteType === 'draft' }">
+                    <button
+                      type="button"
+                      class="btn btn-transparent"
+                      @click.prevent="setNoteType('draft')"
+                    >
+                      <gl-icon name="check" class="icon" />
+                      <div class="description">
+                        <strong>{{ __('Add To Review') }}</strong>
+                        <p>
+                          {{
+                            sprintf(__('Add a draft comment to this %{noteableDisplayName}.'), {
+                              noteableDisplayName,
+                            })
+                          }}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
                   <li :class="{ 'droplab-item-selected': noteType === 'comment' }">
                     <button
                       type="button"

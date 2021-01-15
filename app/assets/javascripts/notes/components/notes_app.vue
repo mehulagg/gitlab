@@ -1,5 +1,5 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import * as constants from '../constants';
@@ -16,6 +16,8 @@ import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import { __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
+import draftNote from '../../batch_comments/components/draft_note.vue';
+import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 
 export default {
   name: 'NotesApp',
@@ -29,6 +31,8 @@ export default {
     skeletonLoadingContainer,
     discussionFilterNote,
     OrderedLayout,
+    draftNote,
+    TimelineEntryItem,
   },
   props: {
     noteableData: {
@@ -62,6 +66,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['batchComments']),
     ...mapGetters([
       'isNotesFetched',
       'discussions',
@@ -83,6 +88,11 @@ export default {
     },
     noteableType() {
       return this.noteableData.noteableType;
+    },
+    draftComments() {
+      return this.batchComments.drafts.filter(
+        (draft) => draft.line_code == null && draft.discussion_id == null,
+      );
     },
     allDiscussions() {
       if (this.isLoading) {
@@ -292,6 +302,9 @@ export default {
               :help-page-path="helpPagePath"
             />
           </template>
+          <timeline-entry-item v-for="draft in draftComments" :key="draft.id">
+            <draft-note :draft="draft" class="timeline-entry" />
+          </timeline-entry-item>
           <discussion-filter-note v-show="commentsDisabled" />
         </ul>
       </template>

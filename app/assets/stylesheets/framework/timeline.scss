@@ -31,7 +31,7 @@
   // [dark-theme]: only give background color to actual notes
   // in the timeline, the note form textarea has a background
   // of it's own
-  &:not(.note-form) {
+  &:not(.note-form):not(.draft-note-component):not(.draft-note) {
     background-color: $white;
   }
 

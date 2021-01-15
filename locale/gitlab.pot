@@ -1600,6 +1600,9 @@ msgstr ""
 msgid "Add README"
 msgstr ""
 
+msgid "Add To Review"
+msgstr ""
+
 msgid "Add Variable"
 msgstr ""
 
@@ -1625,6 +1628,9 @@ msgid "Add a bullet list"
 msgstr ""
 
 msgid "Add a comment to this line"
+msgstr ""
+
+msgid "Add a draft comment to this %{noteableDisplayName}."
 msgstr ""
 
 msgid "Add a general comment to this %{noteableDisplayName}."
