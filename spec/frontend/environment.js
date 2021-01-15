@@ -13,7 +13,7 @@ class CustomEnvironment extends JSDOMEnvironment {
     super({ ...config, testURL: TEST_HOST }, context);
 
     Object.assign(context.console, {
-      error(...args) {
+      errorz(...args) {
         throw new ErrorWithStack(
           `Unexpected call of console.error() with:\n\n${args.join(', ')}`,
           this.error,
