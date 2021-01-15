@@ -452,7 +452,7 @@ It can also help to compare the XML response from your provider with our [exampl
 With access to the rails log or `production_json.log` (available only to GitLab team members for GitLab.com),
 you should be able to find the base64 encoded SAML response by searching with the following filters:
 
-- `json.meta.caller_id`: `Groups::OmniauthCallbacksController#group_saml`
+- `json.meta.caller_id`: `Groups::OmniauthCallbacksController` with `#group_saml` or `#failure`
 - `json.meta.user` or `json.username`: `username`
 - `json.method`: `POST`
 - `json.path`: `/groups/GROUP-PATH/-/saml/callback`
