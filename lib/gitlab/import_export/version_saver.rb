@@ -10,7 +10,7 @@ module Gitlab
       end
 
       def save
-        mkdir_p(@shared.export_path)
+        mkdir_p(@shared.export_path) unless Dir.exist?(@shared.export_path)
 
         File.write(version_file, Gitlab::ImportExport.version, mode: 'w')
         File.write(gitlab_version_file, Gitlab::VERSION, mode: 'w')

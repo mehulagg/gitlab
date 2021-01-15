@@ -42,6 +42,10 @@ module Gitlab
       "project.wiki.bundle"
     end
 
+    def group_wiki_repo_bundle_filename
+      "group.wiki.bundle"
+    end
+
     def design_repo_bundle_filename
       'project.design.bundle'
     end
