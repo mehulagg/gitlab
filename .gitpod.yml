@@ -13,7 +13,10 @@ tasks:
       (
         set -e
         cd /workspace/gitlab-development-kit
-        [[ ! -L /workspace/gitlab-development-kit/gitlab ]] && ln -fs /workspace/gitlab /workspace/gitlab-development-kit/gitlab
+        # GitLab FOSS
+        [ -d /workspace/gitlab-foss && ! -L /workspace/gitlab-development-kit/gitlab ]] && ln -fs /workspace/gitlab-foss /workspace/gitlab-development-kit/gitlab
+        # GitLab
+        [ -d /workspace/gitlab && ! -L /workspace/gitlab-development-kit/gitlab ]] && ln -fs /workspace/gitlab /workspace/gitlab-development-kit/gitlab
         mv /workspace/gitlab-development-kit/secrets.yml /workspace/gitlab-development-kit/gitlab/config
         # reconfigure GDK
         echo "$(date) – Reconfiguring GDK" | tee -a /workspace/startup.log
