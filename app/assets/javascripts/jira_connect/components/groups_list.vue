@@ -62,7 +62,7 @@ export default {
     <gl-tab :title="__('Groups and subgroups')" class="gl-pt-3">
       <gl-loading-icon v-if="isLoading" size="md" />
       <div v-else-if="groups.length === 0" class="gl-text-center">
-        <h5 class="h5">{{ s__('Integrations|No available namespaces.') }}</h5>
+        <h5>{{ s__('Integrations|No available namespaces.') }}</h5>
         <p class="gl-mt-5">
           {{
             s__('Integrations|You must have owner or maintainer permissions to link namespaces.')

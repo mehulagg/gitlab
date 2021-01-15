@@ -19,7 +19,7 @@ export default {
   mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapState(['errorMessage']),
-    showNewUi() {
+    showNewUI() {
       return this.glFeatures.newJiraConnectUi;
     },
   },
@@ -40,7 +40,7 @@ export default {
     <h1>GitLab for Jira Configuration</h1>
 
     <div
-      v-if="showNewUi"
+      v-if="showNewUI"
       class="gl-display-flex gl-justify-content-space-between gl-my-5 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
     >
       <h3 data-testid="new-jira-connect-ui-heading">{{ s__('Integrations|Linked namespaces') }}</h3>
