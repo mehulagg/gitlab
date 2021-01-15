@@ -340,7 +340,7 @@ commands will detect it and remind you to do so if necessary.
 ```
 
 If you type `yes`, it copies your state from the old location to the new
-location. You can then go back to running it in GitLab CI.
+location. You can then go back to running it in GitLab CI/CD.
 
 ## Managing state files
 
