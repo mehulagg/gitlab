@@ -160,13 +160,19 @@ export default {
           <gl-button
             :loading="submitCommitLoading"
             class="float-left qa-commit-button"
+            data-testid="commit-button"
             category="primary"
             variant="success"
             @click="commit"
           >
             {{ __('Commit') }}
           </gl-button>
-          <gl-button v-if="!discardDraftButtonDisabled" class="float-right" @click="discardDraft">
+          <gl-button
+            v-if="!discardDraftButtonDisabled"
+            class="float-right"
+            data-testid="discard-draft"
+            @click="discardDraft"
+          >
             {{ __('Discard draft') }}
           </gl-button>
           <gl-button
