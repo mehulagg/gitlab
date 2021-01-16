@@ -2,14 +2,18 @@
 
 module Gitlab
   module Recaptcha
-    def self.load_configurations!
-      if Gitlab::CurrentSettings.recaptcha_enabled || enabled_on_login?
-        ::Recaptcha.configure do |config|
-          config.site_key = Gitlab::CurrentSettings.recaptcha_site_key
-          config.secret_key = Gitlab::CurrentSettings.recaptcha_private_key
-        end
+    extend Gitlab::Utils::StrongMemoize
 
-        true
+    def self.load_configurations!
+      strong_memoize(:recaptcha_load_configurations) do
+        if enabled? || enabled_on_login?
+          ::Recaptcha.configure do |config|
+            config.site_key = Gitlab::CurrentSettings.recaptcha_site_key
+            config.secret_key = Gitlab::CurrentSettings.recaptcha_private_key
+          end
+
+          true
+        end
       end
     end
 

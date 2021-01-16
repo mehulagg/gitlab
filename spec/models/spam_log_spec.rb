@@ -51,7 +51,7 @@ RSpec.describe SpamLog do
     let_it_be(:spam_log) { create(:spam_log, user: admin, recaptcha_verified: false) }
 
     context 'the record cannot be found' do
-      it 'updates nothing' do
+      it 'updates nothing' dor
         expect(instance_of(described_class)).not_to receive(:update!)
 
         described_class.verify_recaptcha!(id: spam_log.id, user_id: admin.id)
