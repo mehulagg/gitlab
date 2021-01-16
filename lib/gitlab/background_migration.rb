@@ -48,6 +48,12 @@ module Gitlab
         end
       end
 
+      def delete_remaining_jobs(steal_class)
+        existing_background_jobs(steal_class) do |job|
+          job.delete
+        end
+      end
+
       ##
       # Performs a background migration.
       #
@@ -113,6 +119,27 @@ module Gitlab
         end
 
         false
+      end
+
+      private
+
+      def existing_background_jobs(steal_class, &block)
+        queues = [
+          Sidekiq::ScheduledSet.new,
+          Sidekiq::Queue.new(self.queue)
+        ]
+
+        queues.each do |queue|
+          queue.each do |job|
+            migration_class, migration_args = job.args
+
+            next unless job.queue == self.queue
+            next unless migration_class == steal_class
+            next if block_given? && !(yield migration_args)
+
+            yield job
+          end
+        end
       end
     end
   end
