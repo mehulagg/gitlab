@@ -14,6 +14,9 @@ dast:
   stage: dast
   image:
     name: "$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION"
+  rules:
+    - if: $DAST_API_BETA
+      when: never
   variables:
     GIT_STRATEGY: none
   allow_failure: true
@@ -22,3 +25,231 @@ dast:
   artifacts:
     reports:
       dast: gl-dast-report.json
+
+dast_api:
+  stage: dast
+  image:
+    name: $DAST_API_IMAGE
+    entrypoint: ["/bin/bash", "-l", "-c"]
+  variables:
+    API_SECURITY_MODE: DAST
+    DAST_API_NEW_REPORT: 1
+    DAST_API_PROJECT: $CI_PROJECT_PATH
+    DAST_API_API: http://apisecurity:80
+    TZ: America/Los_Angeles
+  services:
+    - name: $DAST_API_IMAGE
+      alias: apisecurity
+      entrypoint: ["dotnet", "/peach/Peach.Web.dll"]
+  allow_failure: true
+  rules:
+  - if: $DAST_WEBSITE
+    when: never
+  - if: $DAST_API_BETA == null
+    when: never
+  script:
+    #
+    # Validate options
+    - |
+        if [ "$DAST_API_HAR$DAST_API_OPENAPI$DAST_API_POSTMAN_COLLECTION$DAST_API_SPECIFICATION" == "" ]; then \
+          echo "Error: One of DAST_API_HAR, DAST_API_OPENAPI, or DAST_API_POSTMAN_COLLECTION must be provided."; \
+          echo "See https://docs.gitlab.com/ee/user/application_security/dast_api/ for information on how to configure DAST API."; \
+          exit 1; \
+        fi
+    #
+    # Run user provided pre-script
+    - sh -c "$DAST_API_PRE_SCRIPT"
+    #
+    # Make sure asset path exists
+    - mkdir -p $DAST_API_REPORT_ASSET_PATH
+    #
+    # Start scanning
+    - worker-entry
+    #
+    # Run user provided post-script
+    - sh -c "$DAST_API_POST_SCRIPT"
+    #
+  artifacts:
+    when: always
+    paths:
+      - $DAST_API_REPORT_ASSET_PATH
+      - $DAST_API_REPORT
+    reports:
+      dast: $DAST_API_REPORT
+
+dast_api_dnd:
+  stage: dast
+  image: docker:19.03.12
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    DAST_API_PROJECT: $CI_PROJECT_PATH
+    DAST_API_API: http://apisecurity:80
+  allow_failure: true
+  rules:
+    - if: $DAST_WEBSITE
+      when: never
+    - if: $DAST_API_BETA == null
+      when: never
+    - if: $DAST_API_D_TARGET_IMAGE == null && $DAST_API_D_WORKER_IMAGE == null
+      when: never
+  services:
+    - docker:19.03.12-dind
+  script:
+    #
+    #
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    #
+    - docker network create --driver bridge $DAST_API_D_NETWORK
+    #
+    # Run user provided pre-script
+    - sh -c "$DAST_API_PRE_SCRIPT"
+    #
+    # Make sure asset path exists
+    - mkdir -p $DAST_API_REPORT_ASSET_PATH
+    #
+    # Start peach testing engine container
+    - |
+        docker run -d \
+        --name apisecurity \
+        --network $DAST_API_D_NETWORK \
+        -e Proxy:Port=8000 \
+        -e TZ=America/Los_Angeles \
+        -e GITLAB_FEATURES \
+        -p 80:80 \
+        -p 8000:8000 \
+        -p 514:514 \
+        --restart=no \
+        $DAST_API_IMAGE \
+        dotnet /peach/Peach.Web.dll
+    #
+    # Start target container
+    - |
+        if [ "$DAST_API_D_TARGET_IMAGE" != "" ]; then \
+          docker run -d \
+            --name target \
+            --network $DAST_API_D_NETWORK \
+            $DAST_API_D_TARGET_ENV \
+            $DAST_API_D_TARGET_PORTS \
+            $DAST_API_D_TARGET_VOLUME \
+            --restart=no \
+            $DAST_API_D_TARGET_IMAGE \
+          ; fi
+    #
+    # Start worker container if provided (optional)
+    - |
+        if [ "$DAST_API_D_WORKER_IMAGE" != "" ]; then \
+          echo "Starting worker image $DAST_API_D_WORKER_IMAGE"; \
+          docker run \
+            --name worker \
+            --network $DAST_API_D_NETWORK \
+            -e DAST_API_API=http://apisecurity:80 \
+            -e DAST_API_PROJECT \
+            -e DAST_API_PROFILE \
+            -e DAST_API_CONFIG \
+            -e DAST_API_REPORT \
+            -e DAST_API_REPORT_ASSET_PATH \
+            -e DAST_API_NEW_REPORT=1 \
+            -e DAST_API_HAR \
+            -e DAST_API_OPENAPI \
+            -e DAST_API_POSTMAN_COLLECTION \
+            -e DAST_API_TARGET_URL \
+            -e DAST_API_OVERRIDES_FILE \
+            -e DAST_API_OVERRIDES_ENV \
+            -e DAST_API_OVERRIDES_CMD \
+            -e DAST_API_OVERRIDES_INTERVAL \
+            -e DAST_API_TIMEOUT \
+            -e DAST_API_VERBOSE \
+            -e DAST_API_SERVICE_START_TIMEOUT \
+            -e DAST_API_HTTP_USERNAME \
+            -e DAST_API_HTTP_PASSWORD \
+            -e DAST_API_SPECIFICATION \
+            -e DAST_API_HOST_OVERRIDE \
+            -e DAST_REQUEST_HEADERS \
+            -e DAST_FULL_SCAN_ENABLED \
+            -e CI_PROJECT_URL \
+            -e CI_JOB_ID \
+            -e CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH} \
+            $DAST_API_D_WORKER_ENV \
+            $DAST_API_D_WORKER_PORTS \
+            $DAST_API_D_WORKER_VOLUME \
+            --restart=no \
+            $DAST_API_D_WORKER_IMAGE \
+          ; fi
+    #
+    # Start API Security provided worker if no other worker present
+    - |
+        if [ "$DAST_API_D_WORKER_IMAGE" == "" ]; then \
+          if [ "$DAST_API_HAR$DAST_API_OPENAPI$DAST_API_POSTMAN_COLLECTION$DAST_API_SPECIFICATION" == "" ]; then \
+            echo "Error: One of DAST_API_HAR, DAST_API_OPENAPI, or DAST_API_POSTMAN_COLLECTION must be provided."; \
+            echo "See https://docs.gitlab.com/ee/user/application_security/dast_api/ for information on how to configure DAST API."; \
+            exit 1; \
+          fi; \
+          docker run \
+            --name worker \
+            --network $DAST_API_D_NETWORK \
+            -e TZ=America/Los_Angeles \
+            -e DAST_API_API=http://apisecurity:80 \
+            -e DAST_API_PROJECT \
+            -e DAST_API_PROFILE \
+            -e DAST_API_CONFIG \
+            -e DAST_API_REPORT \
+            -e DAST_API_REPORT_ASSET_PATH \
+            -e DAST_API_NEW_REPORT=1 \
+            -e DAST_API_HAR \
+            -e DAST_API_OPENAPI \
+            -e DAST_API_POSTMAN_COLLECTION \
+            -e DAST_API_TARGET_URL \
+            -e DAST_API_OVERRIDES_FILE \
+            -e DAST_API_OVERRIDES_ENV \
+            -e DAST_API_OVERRIDES_CMD \
+            -e DAST_API_OVERRIDES_INTERVAL \
+            -e DAST_API_TIMEOUT \
+            -e DAST_API_VERBOSE \
+            -e DAST_API_SERVICE_START_TIMEOUT \
+            -e DAST_API_HTTP_USERNAME \
+            -e DAST_API_HTTP_PASSWORD \
+            -e DAST_API_SPECIFICATION \
+            -e DAST_API_HOST_OVERRIDE \
+            -e DAST_REQUEST_HEADERS \
+            -e DAST_FULL_SCAN_ENABLED \
+            -e CI_PROJECT_URL \
+            -e CI_JOB_ID \
+            -v $CI_PROJECT_DIR:/app \
+            -v `pwd`/$DAST_API_REPORT_ASSET_PATH:/app/$DAST_API_REPORT_ASSET_PATH:rw \
+            -p 81:80 \
+            -p 8001:8000 \
+            -p 515:514 \
+            --restart=no \
+            $DAST_API_IMAGE \
+            worker-entry \
+          ; fi
+    #
+    # Propagate exit code from api security scanner (if any)
+    - if [[ $(docker inspect apisecurity --format='{{.State.ExitCode}}') != "0" ]]; then echo "API Security scanner exited with an error. Logs are available as job artifacts."; exit 1; fi
+    #
+    # Run user provided post-script
+    - sh -c "$DAST_API_POST_SCRIPT"
+    #
+  after_script:
+    #
+    # Shutdown all containers
+    - echo "Stopping all containers"
+    - if [ "$DAST_API_D_TARGET_IMAGE" != "" ]; then docker stop target; fi
+    - docker stop worker
+    - docker stop apisecurity
+    #
+    # Save docker logs
+    - docker logs apisecurity &> gl-dast_api-logs.log
+    - if [ "$DAST_API_D_TARGET_IMAGE" != "" ]; then docker logs target &> gl-dast_api-target-logs.log; fi
+    - docker logs worker &> gl-dast_api-logs.log
+    #
+  artifacts:
+    when: always
+    paths:
+      - ./gl-dast_api*.log
+      - ./gl-dast_api*.zip
+      - $DAST_API_REPORT_ASSET_PATH
+      - $DAST_API_REPORT
+    reports:
+      dast: $DAST_API_REPORT
