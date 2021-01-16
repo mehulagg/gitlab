@@ -77,24 +77,24 @@ dast_api:
       entrypoint: ["dotnet", "/peach/Peach.Web.dll"]
   allow_failure: true
   rules:
-  - if: $DAST_DISABLED
-    when: never
-  - if: $DAST_WEBSITE
-    when: never
-  - if: $DAST_API_BETA == null
-    when: never
-  - if: $DAST_DISABLED_FOR_DEFAULT_BRANCH &&
-        $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
-    when: never
-  - if: $CI_DEFAULT_BRANCH != $CI_COMMIT_REF_NAME &&
-        $REVIEW_DISABLED && 
-        $DAST_API_SPECIFICATION == null &&
-        $DAST_API_OPENAPI == null &&
-        $DAST_API_POSTMAN_COLLECTION == null &&
-        $DAST_API_HAR == null
-    when: never
-  - if: $CI_COMMIT_BRANCH &&
-        $GITLAB_FEATURES =~ /\bdast\b/
+    - if: $DAST_DISABLED
+      when: never
+    - if: $DAST_WEBSITE
+      when: never
+    - if: $DAST_API_BETA == null
+      when: never
+    - if: $DAST_DISABLED_FOR_DEFAULT_BRANCH &&
+          $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
+      when: never
+    - if: $CI_DEFAULT_BRANCH != $CI_COMMIT_REF_NAME &&
+          $REVIEW_DISABLED && 
+          $DAST_API_SPECIFICATION == null &&
+          $DAST_API_OPENAPI == null &&
+          $DAST_API_POSTMAN_COLLECTION == null &&
+          $DAST_API_HAR == null
+      when: never
+    - if: $CI_COMMIT_BRANCH &&
+          $GITLAB_FEATURES =~ /\bdast\b/
   script:
     #
     # Validate options

@@ -43,10 +43,10 @@ dast_api:
       entrypoint: ["dotnet", "/peach/Peach.Web.dll"]
   allow_failure: true
   rules:
-  - if: $DAST_WEBSITE
-    when: never
-  - if: $DAST_API_BETA == null
-    when: never
+    - if: $DAST_WEBSITE
+      when: never
+    - if: $DAST_API_BETA == null
+      when: never
   script:
     #
     # Validate options
