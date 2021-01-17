@@ -23,7 +23,7 @@ providers:
 - [GitHub](../../integration/github.md)
 - [GitLab.com](../../integration/gitlab.md)
 - [Google OAuth](../../integration/google.md)
-- [Google Workspace SAML](../../integration/google_workspace_saml.md)
+- [Google Workspace SSO](../../integration/google_workspace_saml.md)
 - [JWT](jwt.md)
 - [Kerberos](../../integration/kerberos.md)
 - [LDAP](ldap/index.md): Includes Active Directory, Apple Open Directory, Open LDAP,
