@@ -1044,7 +1044,7 @@ The second facet presents the only real solution. For this, we developed
 Check [Gitaly timeouts](../../user/admin_area/settings/gitaly_timeouts.md) when troubleshooting
 Gitaly.
 
-### Checking versions when using standalone Gitaly servers
+### Check versions when using standalone Gitaly servers
 
 When using standalone Gitaly servers, you must make sure they are the same version
 as GitLab to ensure full compatibility. Check **Admin Area > Overview > Gitaly Servers** on
