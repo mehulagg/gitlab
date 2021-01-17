@@ -41,7 +41,7 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
 
 ## Configure GitLab
 
-1. See [Initial OmniAuth Configuration](../../integration/omniauth.md#initial-omniauth-configuration)
+1. See [Initial OmniAuth Configuration](../integration/omniauth.md#initial-omniauth-configuration)
    for initial settings.
 
 1. To allow your users to use Google Workspace to sign up without having to manually create
@@ -144,7 +144,7 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
      }
    ```
 
-1. [Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart](../restart_gitlab.md#installations-from-source) GitLab for Omnibus and installations
+1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart](../administration/restart_gitlab.md#installations-from-source) GitLab for Omnibus and installations
    from source respectively for the changes to take effect.
 
 You might want to try this out on an incognito browser window.
@@ -153,7 +153,7 @@ You might want to try this out on an incognito browser window.
 
 The Google Workspace documentation on [SAML app error messages](https://support.google.com/a/answer/6301076?hl=en) is helpful for debugging if you are seeing an error from Google while signing in.
 
-We also have a [Troubleshooting](../../integration/saml.md#troubleshooting) section in our main SAML OmniAuth Provider documentation.
+We also have a [Troubleshooting](../integration/saml.md#troubleshooting) section in our main SAML OmniAuth Provider documentation.
 
 ### 403 Error: `app_not_configured_for_user`
 
