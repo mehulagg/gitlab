@@ -447,6 +447,33 @@ If initially your LDAP configuration looked like:
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
+### Auto link existing users **(CORE ONLY)**
+
+You can automatically link LDAP users with existing GitLab users if their GitLab user email address matches
+the configured `uid` in the [basic configuration settings](#basic-configuration-settings).
+
+**Omnibus configuration**
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+    ```
+    gitlab_rails['omniauth_auto_link_ldap_user'] = true
+    ```
+
+1. [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**Source configuration**
+
+1. Edit `config/gitlab.yaml`:
+
+   ```yaml
+   production:
+     omniauth:
+        auto_link_ldap_user: true
+   ```
+
+1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
+
 ## Encryption **(CORE ONLY)**
 
 ### TLS Server Authentication
