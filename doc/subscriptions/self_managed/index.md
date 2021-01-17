@@ -203,12 +203,9 @@ An invoice is generated for the renewal and available for viewing or download on
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208832) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.9.
 
-NOTE:
-For Seat Link to work, your GitLab instance must be able to connect to the host `customers.gitlab.com` on port `443`.
-
 Seat Link allows GitLab Inc. to provide our self-managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
 
-Seat Link daily sends a count of all users in connected self-managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection.
+Seat Link daily sends a count of all users in connected self-managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection (port `443`) to `customers.gitlab.com`.
 
 Seat Link provides **only** the following information to GitLab:
 
