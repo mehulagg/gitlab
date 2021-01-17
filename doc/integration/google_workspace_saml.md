@@ -24,7 +24,7 @@ The following guidance is based on this Google Workspace article, on how to [Set
     - Download a copy of the **Certificate** as you will need this for the `idp_certificate_fingerprint` setting in GitLab.
 1. On the **Service provider details** page, configure the following and then click **Continue**.
     - **ACS URL** should be `https://<GITLAB_DOMAIN>/users/auth/saml/callback`
-    - **Entity ID** must be a unique to your SAML app - but you could use `https://<GITLAB_DOMAIN>` for example. Make a note of the **Entity ID** as you will need this for the `issuer` setting in GitLab.
+    - **Entity ID** must be a value unique to your SAML app - but you could use `https://<GITLAB_DOMAIN>` for example. Make a note of the **Entity ID** as you will need this for the `issuer` setting in GitLab.
     - **Name ID format** should be *EMAIL*
     - **Name ID** should be *Basic Information > Primary email*
 1. On the **Attributes** page, add the following mappings and then click **Finish**.
