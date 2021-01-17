@@ -456,7 +456,7 @@ the configured `uid` in the [basic configuration settings](#basic-configuration-
 
 1. Edit `/etc/gitlab/gitlab.rb`:
 
-    ```
+    ```ruby
     gitlab_rails['omniauth_auto_link_ldap_user'] = true
     ```
 
