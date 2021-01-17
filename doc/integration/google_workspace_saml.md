@@ -20,13 +20,13 @@ The following guidance is based on this Google Workspace article, on how to [Set
 1. Click on the **Add App** dropdown and select **Add custom SAML app**.
 1. On the **App details** page, enter a name for the SAML app eg. *GitLab* and click **Continue**.
 1. On the **Google Identity Provider details** page, complete the following and then click **Continue**.
-	- Make a note of the **SSO URL** as you will need this when configuring the `idp_sso_target_url` setting in GitLab.
-	- Download a copy of the **Certificate** as you will need this for the `idp_certificate_fingerprint` setting in GitLab.
+    - Make a note of the **SSO URL** as you will need this when configuring the `idp_sso_target_url` setting in GitLab.
+    - Download a copy of the **Certificate** as you will need this for the `idp_certificate_fingerprint` setting in GitLab.
 1. On the **Service provider details** page, configure the following and then click **Continue**.
-   - **ACS URL** should be `https://<GITLAB_DOMAIN>/users/auth/saml/callback`
-   - **Entity ID** must be a unique to your SAML app - but you could use `https://<GITLAB_DOMAIN>` for example. Make a note of the **Entity ID** as you will need this for the `issuer` setting in GitLab.
-   - **Name ID format** should be *EMAIL*
-   - **Name ID** should be *Basic Information > Primary email*
+    - **ACS URL** should be `https://<GITLAB_DOMAIN>/users/auth/saml/callback`
+    - **Entity ID** must be a unique to your SAML app - but you could use `https://<GITLAB_DOMAIN>` for example. Make a note of the **Entity ID** as you will need this for the `issuer` setting in GitLab.
+    - **Name ID format** should be *EMAIL*
+    - **Name ID** should be *Basic Information > Primary email*
 1. On the **Attributes** page, add the following mappings and then click **Finish**.
 
     | Google Directory attributes | App attributes |
