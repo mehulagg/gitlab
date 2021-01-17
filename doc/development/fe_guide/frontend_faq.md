@@ -202,4 +202,4 @@ To see what polyfills are being used:
 
 ### 9. Why is my page broken in dark mode?
 
-See [dark mode docs](./dark_mode.md)
+See [dark mode docs](dark_mode.md)

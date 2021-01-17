@@ -32,6 +32,15 @@ The CSS variables defined in `_dark.scss` are available in the browser though, s
 color: var(--gray-500, $gray-500);
 ```
 
+## Utility classes
+
+We generate a separate `utilities_dark.css` file for utility classes containing the inverted values. So a class
+such as `gl-text-white` will give text color of `#333` in dark mode. This is done intentionally so you are not
+required to add multiple classes every time you want to add a color.
+
+There is currently not a way to use a utility class only in dark mode, there is [an issue](https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1141)
+to add support for this.
+
 ## Using different values in light and dark mode
 
 Ideally we use the same values for both light and dark mode, for most things this works. There are some cases where we need a different value for some reason. The current preferred approach is still being decided, use your judgement when choosing what to do.
@@ -49,6 +58,7 @@ we could probably make this into a function or mixin:
 
 ```scss
 color: $gray-700;
+// NB: this does not actually exist yet
 @include dark-mode-override(color, --gray-500);
 ```
 
