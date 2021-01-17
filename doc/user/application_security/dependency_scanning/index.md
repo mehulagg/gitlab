@@ -70,8 +70,8 @@ The following languages and dependency managers are supported:
 | [setuptools](https://setuptools.readthedocs.io/en/latest/), [pip](https://pip.pypa.io/en/stable/), [Pipenv](https://pipenv.pypa.io/en/latest/) | Python | `setup.py`, `requirements.txt`, `requirements.pip`, `requires.txt`, `Pipfile`, `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 | [sbt](https://www.scala-sbt.org/) 1.2 and below ([Ivy](http://ant.apache.org/ivy/)) | Scala | `build.sbt` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
 
-[Pipenv](https://pipenv.pypa.io/en/latest/) projects are scanned when a `Pipfile` is present.
-Gemnasium scans the exact package versions listed in `Pipfile.lock` when this file is also present.
+1. [Pipenv](https://pipenv.pypa.io/en/latest/) projects are scanned when a `Pipfile` is present.
+   Gemnasium scans the exact package versions listed in `Pipfile.lock` when this file is also present.
 
 Plans are underway for supporting the following languages, dependency managers, and dependency files. For details, see the issue link for each.
 
