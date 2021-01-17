@@ -5,6 +5,7 @@ module InviteMembersHelper
 
   def invite_members_allowed?(group)
     Feature.enabled?(:invite_members_group_modal, group) && can?(current_user, :admin_group_member, group)
+    true
   end
 
   def directly_invite_members?
