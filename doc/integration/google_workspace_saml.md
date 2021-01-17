@@ -123,7 +123,7 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
                 issuer: 'https://<GITLAB_DOMAIN>',
                 name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:emailAddress'
               },
-       label: 'Google Workspace' # optional label for SAML login button, defaults to "Saml"
+       label: 'Google Workspace' # optional label for SAML log in button, defaults to "Saml"
      }
    ]
    ```
@@ -140,7 +140,7 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
               issuer: 'https://<GITLAB_DOMAIN>',
               name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:emailAddress'
             },
-       label: 'Google Workspace' # optional label for SAML login button, defaults to "Saml"
+       label: 'Google Workspace' # optional label for SAML log in button, defaults to "Saml"
      }
    ```
 
@@ -157,7 +157,7 @@ We also have a [Troubleshooting](../../integration/saml.md#troubleshooting) sect
 
 ### 403 Error: `app_not_configured_for_user`
 
-This error can happen if the user trying to login has a domain that is not configured in your Google Workspace domains ie. they might be trying to login with their personal Google account.
+This error can happen if the user trying to log in has a domain that is not configured in your Google Workspace domains ie. they might be trying to log in with their personal Google account.
 
 ### 403 Error: `app_not_configured`
 
