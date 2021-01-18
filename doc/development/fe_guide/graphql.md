@@ -340,8 +340,8 @@ export const gqClient = createGqClient(
 
 ### Working on GraphQL-based features when frontend and backend are not in sync
 
-Any feature that requires GraphQL queries/mutations to be created or updated should be carfully
-planned with backend counterparts in order to settle on a schema that satifies both client- and
+Any feature that requires GraphQL queries/mutations to be created or updated should be carefully
+planned with backend counterparts in order to settle on a schema that satisfies both client-side and
 server-side requirements and that will let both departments start implementing their parts without
 blocking each other.
 
