@@ -40,6 +40,7 @@ tasks:
         fi
         # start GDK
         echo "$(date) – Starting GDK" | tee -a /workspace/startup.log
+        export DEV_SERVER_DISABLE_HOST_CHECK=true
         export DEV_SERVER_PUBLIC_ADDR=$(gp url 3808)
         export RAILS_HOSTS=$(gp url 3000 | sed -e 's+^http[s]*://++')
         gdk start

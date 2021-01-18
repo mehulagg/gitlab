@@ -22,7 +22,14 @@ const DEV_SERVER_PUBLIC_ADDR = process.env.DEV_SERVER_PUBLIC_ADDR;
 const DEV_SERVER_ALLOWED_HOSTS =
   process.env.DEV_SERVER_ALLOWED_HOSTS && process.env.DEV_SERVER_ALLOWED_HOSTS.split(',');
 const DEV_SERVER_HTTPS = process.env.DEV_SERVER_HTTPS && process.env.DEV_SERVER_HTTPS !== 'false';
-const DEV_SERVER_LIVERELOAD = IS_DEV_SERVER && process.env.DEV_SERVER_LIVERELOAD && process.env.DEV_SERVER_LIVERELOAD !== 'false';
+const DEV_SERVER_LIVERELOAD =
+  IS_DEV_SERVER &&
+  process.env.DEV_SERVER_LIVERELOAD &&
+  process.env.DEV_SERVER_LIVERELOAD !== 'false';
+const DEV_SERVER_DISABLE_HOST_CHECK =
+  IS_DEV_SERVER &&
+  process.env.DEV_SERVER_DISABLE_HOST_CHECK &&
+  process.env.DEV_SERVER_DISABLE_HOST_CHECK === 'true';
 const WEBPACK_REPORT = process.env.WEBPACK_REPORT && process.env.WEBPACK_REPORT !== 'false';
 const WEBPACK_MEMORY_TEST =
   process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
@@ -587,6 +594,7 @@ module.exports = {
     stats: 'errors-only',
     hot: DEV_SERVER_LIVERELOAD,
     inline: DEV_SERVER_LIVERELOAD,
+    disableHostCheck: DEV_SERVER_DISABLE_HOST_CHECK,
   },
 
   devtool: NO_SOURCEMAPS ? false : devtool,
