@@ -1,4 +1,5 @@
-docker-build-master:
+# The project's default branch (master/main/etc.) builds the latest image.
+docker-build-default-branch:
   # Official docker image.
   image: docker:latest
   stage: build
@@ -9,9 +10,10 @@ docker-build-master:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE" .
     - docker push "$CI_REGISTRY_IMAGE"
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+# All other branches are tagged with the escaped branch name (commit ref slug)
 docker-build:
   # Official docker image.
   image: docker:latest
@@ -23,5 +25,5 @@ docker-build:
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
