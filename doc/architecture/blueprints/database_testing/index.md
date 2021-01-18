@@ -17,9 +17,9 @@ Developers are expected to test database migrations prior to deploying to any en
 
 The [code review phase](/ee/development/database_review.md) involves Database Reviewers and Maintainers to manually check the migrations committed. This often involves knowing and spotting problematic patterns and their particular behavior on GitLab.com from experience. There is no large-scale environment available that allows us to test database migrations before they are being merged.
 
-Testing in CI is done on a very small database. We mainly check forward/backward migration consistency, evaluate rubocop rules to detect well-known problematic behaviors (static code checking) and have a few other, rather technical checks in place (adding the right files etc).
+Testing in CI is done on a very small database. We mainly check forward/backward migration consistency, evaluate rubocop rules to detect well-known problematic behaviors (static code checking) and have a few other, rather technical checks in place (adding the right files etc). That is, we typically find code or other rather simple errors, but cannot surface any data related errors - which are also typically not covered by unit tests either.
 
-Once merged, migrations are being deployed to the staging environment. Its database size is less than 5% of the production database size as of January 2021 and its recent data distribution does not resemble the production site. Oftentimes, we see migrations succeed in staging but then fail in production due to query timeouts or other unexpected problems.
+Once merged, migrations are being deployed to the staging environment. Its database size is less than 5% of the production database size as of January 2021 and its recent data distribution does not resemble the production site. Oftentimes, we see migrations succeed in staging but then fail in production due to query timeouts or other unexpected problems. Even if we caught problems in staging, this is still expensive to reconcile and ideally we want to catch those problems as early as possible in the development cycle.
 
 Today, we have gained experience with working on a thin-cloned production database (more on this below) and already use it to provide developers with access to production query plans, automated query feedback and suggestions with optimizations. This is built around [Database Labs](https://gitlab.com/postgres-ai/database-lab) and [Joe](https://gitlab.com/postgres-ai/joe) and available through Slack (using chatops) and [postgres.ai](https://postgres.ai/).
 
@@ -40,13 +40,14 @@ For database queries, we can automatically gather
 1. Suggestions on optimizations from Joe
 1. Memory and IO statistics
 
-After having gotten that feedback, I go back and investigate a performance problem with the data migration. Once I have a fix pushed, I can repeat the above cycle and eventually send my Merge Request to review from a Database Reviewer and later a Database Maintainer.
+After having gotten that feedback, I can go back and investigate a performance problem with the data migration. Once I have a fix pushed, I can repeat the above cycle and eventually send my Merge Request for database review. During the database review, the database reviewer and maintainer have all the additional generated information available to them to make an informed decision on the performance of the introduced changes.
 
 This information gathering is done in a protected and safe environment, making sure that there is no unauthorized access to production data and we can safely execute code in this environment.
 
 The intended benefits include
 
 1. Shifting left: Allow developers to understand large-scale database performance and what to expect to happen on GitLab.com in a self-service manner
+1. Identify errors that are only generated when working against a production scale dataset with real data (with inconsistencies or unexpected patterns)
 1. Automate the information gathering phase to make it easier for everybody involved in code review (developer, reviewer, maintainer) by providing relevant details automatically and upfront.
 
 ## Technology and Next Steps
@@ -77,9 +78,9 @@ We implement a secured CI pipeline on ops.gitlab.net that adds the execution ste
 
 This is in principle achieved by locking down the GitLab Runner instance executing the code and its containers on a network level, such that no data can escape over the network. We make sure no communication can happen to the outside world from within the container executing the GitLab Rails code (and its database migrations).
 
-Furthermore, we limit the ability to view the results of the jobs (including the output printed from code) to Maintainer and Owner level on the ops.gitlab.net pipeline.
+Furthermore, we limit the ability to view the results of the jobs (including the output printed from code) to Maintainer and Owner level on the ops.gitlab.net pipeline and provide only a high level summary back to the original MR. If there are issues or errors in one of the jobs run, the database Maintainer assigned to review the MR can check the original job for more details. 
 
-With this step implemented, we already have the ability to execute database migrations on the thin-cloned GitLab.com database automatically from GitLab CI and provide feedback back to the Merge Request and developer. The content of that feedback is expected to evolve over time and we can continously add to this.
+With this step implemented, we already have the ability to execute database migrations on the thin-cloned GitLab.com database automatically from GitLab CI and provide feedback back to the Merge Request and the developer. The content of that feedback is expected to evolve over time and we can continously add to this.
 
 We already have a [MVC-style implementation for the pipeline](https://gitlab.com/gitlab-org/database-team/gitlab-com-migrations) for reference and an [example Merge Request with feedback](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50793#note_477815261) from the pipeline.
 
@@ -105,8 +106,9 @@ At the core of this problem lies the concern about executing (potentially arbitr
 
 An alternative approach we have discussed and abandoned is to "scrub" and anonymize production data. The idea is to remove any sensitive data from the database and use the resulting dataset for database testing. This has a lot of downsides which led us to abandon the idea:
 
-1. Anonymization is complex by nature - it is a hard problem to call a "scrubbed clone" actually safe to work with in public
-1. Annotating data as "sensitive" is error prone
+1. Anonymization is complex by nature - it is a hard problem to call a "scrubbed clone" actually safe to work with in public. Different data types may require different anonymization techniques (e.g. anonymizing sensitive information inside a json field) and only focusing on one attribute at a time does not guarantee that a dataset is fully anonymized (e.g. join attacks or using timestamps in conjunction to public profiles/projects to de-anonymize users by there activity)
+1. Anonymization requires an additional process to keep track and update the set of attributes considered as sensitive, ongoing maintenance and security reviews every time the database schema changes
+1. Annotating data as "sensitive" is error prone, with the wrong anonymization approach used for a data type or one sensitive attribute accidentally not marked as such possibly leading to a data breach
 1. Scrubbing not only removes sensitive data, but also changes data distribution - which greatly affects performance of migrations and queries
 1. Scrubbing heavily changes the database contents, potentially updating a lot of data - which leads to different data storage details (think MVCC bloat), affecting performance of migrations and queries
 
