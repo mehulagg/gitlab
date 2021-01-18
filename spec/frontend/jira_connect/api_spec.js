@@ -14,6 +14,14 @@ describe('JiraConnect API', () => {
   const mockJwt = 'jwt';
   const mockResponse = { success: true };
 
+  const tokenSpy = jest.fn((callback) => callback(mockJwt));
+
+  window.AP = {
+    context: {
+      getToken: tokenSpy,
+    },
+  };
+
   beforeEach(() => {
     mock = new MockAdapter(axios);
   });
@@ -24,7 +32,7 @@ describe('JiraConnect API', () => {
   });
 
   describe('addSubscription', () => {
-    const makeRequest = () => addSubscription(mockAddPath, mockJwt, mockNamespace);
+    const makeRequest = () => addSubscription(mockAddPath, mockNamespace);
 
     it('returns success response', async () => {
       jest.spyOn(axios, 'post');
@@ -37,6 +45,7 @@ describe('JiraConnect API', () => {
 
       response = await makeRequest();
 
+      expect(tokenSpy).toHaveBeenCalled();
       expect(axios.post).toHaveBeenCalledWith(mockAddPath, {
         jwt: mockJwt,
         namespace_path: mockNamespace,
@@ -46,7 +55,7 @@ describe('JiraConnect API', () => {
   });
 
   describe('removeSubscription', () => {
-    const makeRequest = () => removeSubscription(mockRemovePath, mockJwt);
+    const makeRequest = () => removeSubscription(mockRemovePath);
 
     it('returns success response', async () => {
       jest.spyOn(axios, 'delete');
@@ -54,6 +63,7 @@ describe('JiraConnect API', () => {
 
       response = await makeRequest();
 
+      expect(tokenSpy).toHaveBeenCalled();
       expect(axios.delete).toHaveBeenCalledWith(mockRemovePath, {
         params: {
           jwt: mockJwt,
