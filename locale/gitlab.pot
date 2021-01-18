@@ -16902,6 +16902,9 @@ msgstr[1] ""
 msgid "Line changes"
 msgstr ""
 
+msgid "Link"
+msgstr ""
+
 msgid "Link Prometheus monitoring to GitLab."
 msgstr ""
 
