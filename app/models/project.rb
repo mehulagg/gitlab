@@ -1314,8 +1314,6 @@ class Project < ApplicationRecord
   end
 
   def external_issue_tracker
-    cache_has_external_issue_tracker if has_external_issue_tracker.nil?
-
     return unless has_external_issue_tracker?
 
     @external_issue_tracker ||= services.external_issue_trackers.first
@@ -2679,10 +2677,6 @@ class Project < ApplicationRecord
 
   def cache_has_external_wiki
     update_column(:has_external_wiki, services.external_wikis.any?) if Gitlab::Database.read_write?
-  end
-
-  def cache_has_external_issue_tracker
-    update_column(:has_external_issue_tracker, services.external_issue_trackers.any?) if Gitlab::Database.read_write?
   end
 end
 

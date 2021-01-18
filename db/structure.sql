@@ -16008,7 +16008,7 @@ CREATE TABLE projects (
     last_repository_check_at timestamp without time zone,
     container_registry_enabled boolean,
     only_allow_merge_if_pipeline_succeeds boolean DEFAULT false NOT NULL,
-    has_external_issue_tracker boolean,
+    has_external_issue_tracker boolean DEFAULT false,
     repository_storage character varying DEFAULT 'default'::character varying NOT NULL,
     repository_read_only boolean,
     request_access_enabled boolean DEFAULT true NOT NULL,
@@ -19506,6 +19506,9 @@ ALTER TABLE ONLY chat_teams
 
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
+
+ALTER TABLE projects
+    ADD CONSTRAINT check_38eb20f8ef CHECK ((has_external_issue_tracker IS NOT NULL)) NOT VALID;
 
 ALTER TABLE group_import_states
     ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;

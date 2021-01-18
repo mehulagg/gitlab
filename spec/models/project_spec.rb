@@ -1039,19 +1039,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#external_issue_tracker' do
-    it 'sets Project#has_external_issue_tracker when it is nil' do
-      project_with_no_tracker = create(:project, has_external_issue_tracker: nil)
-      project_with_tracker = create(:redmine_project, has_external_issue_tracker: nil)
-
-      expect do
-        project_with_no_tracker.external_issue_tracker
-      end.to change { project_with_no_tracker.reload.has_external_issue_tracker }.from(nil).to(false)
-
-      expect do
-        project_with_tracker.external_issue_tracker
-      end.to change { project_with_tracker.reload.has_external_issue_tracker }.from(nil).to(true)
-    end
-
     it 'returns nil and does not query services when there is no external issue tracker' do
       project = create(:project)
 
