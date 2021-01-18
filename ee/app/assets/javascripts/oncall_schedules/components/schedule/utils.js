@@ -47,3 +47,18 @@ export const getTimeframeForWeeksView = (initialDate = new Date()) => {
 export const incrementDateByDays = (initial, increment) => {
   return new Date(new Date().setDate(initial.getDate() + increment));
 };
+
+/**
+ * A utility function which extends a given date value by a certain amount of days.
+ *
+ * @param {Date} initial - the initial date to extend.
+ * @param {Number} increment - the amount of days to extend by.
+ * @returns {Date}
+ *
+ * @example
+ * incrementDateByDays(new Date(2021, 0, 10), 6) => new Date(2021, 0, 16)
+ *
+ */
+export const incrementDateByHours = (initial, increment) => {
+  return initial.setHours(initial.getHours() + increment);
+};

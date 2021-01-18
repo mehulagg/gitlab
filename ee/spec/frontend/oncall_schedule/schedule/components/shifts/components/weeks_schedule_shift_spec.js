@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import ScheduleShift from 'ee/oncall_schedules/components/schedule/components/schedule_shift.vue';
+import WeeksScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue';
 import RotationsAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { incrementDateByDays } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
@@ -19,11 +19,11 @@ const CELL_WIDTH = 50;
 const timeframeItem = new Date(2021, 0, 13);
 const timeframe = [timeframeItem, incrementDateByDays(timeframeItem, DAYS_IN_WEEK)];
 
-describe('ee/oncall_schedules/components/schedule/components/schedule_shift.vue', () => {
+describe('ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue', () => {
   let wrapper;
 
   function createComponent({ props = {}, data = {} } = {}) {
-    wrapper = shallowMount(ScheduleShift, {
+    wrapper = shallowMount(WeeksScheduleShift, {
       propsData: {
         shift,
         shiftIndex: 0,

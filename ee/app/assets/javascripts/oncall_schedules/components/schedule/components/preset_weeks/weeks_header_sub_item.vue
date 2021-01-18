@@ -1,7 +1,9 @@
 <script>
+import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { GlResizeObserverDirective } from '@gitlab/ui';
+import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export default {
   directives: {
@@ -9,6 +11,10 @@ export default {
   },
   mixins: [CommonMixin],
   props: {
+    presetType: {
+      type: String,
+      required: true,
+    },
     timeframeItem: {
       type: Date,
       required: true,
@@ -16,6 +22,10 @@ export default {
   },
   computed: {
     headerSubItems() {
+      if (this.presetType === PRESET_TYPES.DAYS) {
+        return Array.from(Array(24).keys((val) => format24HourTimeStringFromInt(val)));
+      }
+
       const timeframeItem = new Date(this.timeframeItem.getTime());
       const headerSubItems = new Array(7)
         .fill()
@@ -36,6 +46,10 @@ export default {
   },
   methods: {
     getSubItemValueClass(subItem) {
+      if (this.presetType === PRESET_TYPES.DAYS) {
+        return '';
+      }
+
       // Show dark color text only for current & upcoming dates
       if (subItem.getTime() === this.$options.currentDate.getTime()) {
         return 'label-dark label-bold';
@@ -43,6 +57,13 @@ export default {
         return 'label-dark';
       }
       return '';
+    },
+    getSubItemValue(subItem) {
+      if (this.presetType === PRESET_TYPES.DAYS) {
+        return subItem;
+      }
+
+      return subItem.getDate();
     },
     updateShiftStyles() {
       this.$apollo.mutate({
@@ -69,7 +90,7 @@ export default {
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
       data-testid="sublabel-value"
-      >{{ subItem.getDate() }}</span
+      >{{ getSubItemValue(subItem) }}</span
     >
     <span
       v-if="hasToday"

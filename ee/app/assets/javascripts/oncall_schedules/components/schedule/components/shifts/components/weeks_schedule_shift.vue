@@ -6,9 +6,8 @@ import {
   DAYS_IN_DATE_WEEK,
   ASSIGNEE_SPACER,
 } from 'ee/oncall_schedules/constants';
-import getShiftTimeUnitWidthQuery from 'ee/oncall_schedules/graphql/queries/get_shift_time_unit_width.query.graphql';
 import { getOverlappingDaysInPeriods } from '~/lib/utils/datetime_utility';
-import { incrementDateByDays } from '../utils';
+import { incrementDateByDays } from '../../../utils';
 
 export default {
   components: {
@@ -35,15 +34,9 @@ export default {
       type: String,
       required: true,
     },
-  },
-  data() {
-    return {
-      shiftTimeUnitWidth: 0,
-    };
-  },
-  apollo: {
     shiftTimeUnitWidth: {
-      query: getShiftTimeUnitWidthQuery,
+      type: Number,
+      required: true,
     },
   },
   computed: {
