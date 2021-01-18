@@ -42,8 +42,8 @@ export default {
     },
     participantsQueryVariables() {
       return {
-        /* eslint-disable-next-line @gitlab/require-i18n-strings */
-        id: convertToGraphQLId('Issue', this.activeIssue.iid),
+        iid: this.activeIssue.iid,
+        fullPath: this.activeIssue.referencePath.split('#')[0],
       };
     },
     updateAssigneesVariables() {
@@ -79,7 +79,6 @@ export default {
         :participants-query-variables="participantsQueryVariables"
         :update-assignees-mutation="$options.updateAssigneesMutation"
         :update-assignees-variables="updateAssigneesVariables"
-        :assignees="activeIssue.assignees"
         @assigneesUpdated="updateAssignees"
       />
       <board-sidebar-epic-select />

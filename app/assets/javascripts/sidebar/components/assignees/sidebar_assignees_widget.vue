@@ -137,6 +137,9 @@ export default {
             assigneeUsernames,
           },
         })
+        .then(({ data }) => {
+          this.$emit('assigneesUpdated', data);
+        })
         .catch(() => {
           createFlash({ message: __('An error occurred while updating assignees.') });
         })
