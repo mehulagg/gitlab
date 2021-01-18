@@ -1,6 +1,7 @@
 <script>
 import { mapActions } from 'vuex';
 import { GlAvatar, GlButton, GlIcon } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 import { addSubscription } from '~/jira_connect/api';
 
@@ -36,7 +37,10 @@ export default {
           AP.navigator.reload();
         })
         .catch((error) => {
-          this.setErrorMessage(error.response.data.error);
+          this.setErrorMessage(
+            error?.response?.data?.error ||
+              s__('Integrations|Failed to add namespace. Please try again.'),
+          );
         })
         .finally(() => {
           this.isLoading = false;
