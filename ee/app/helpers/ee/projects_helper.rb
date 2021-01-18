@@ -162,6 +162,7 @@ module EE
       %w[
         projects/security/configuration#show
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
         projects/security/vulnerability_report#index
         projects/security/dashboard#index
@@ -200,6 +201,7 @@ module EE
       %w[
         projects/security/configuration#show
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/dast_profiles#show
         projects/security/dast_site_profiles#new
         projects/security/dast_site_profiles#edit

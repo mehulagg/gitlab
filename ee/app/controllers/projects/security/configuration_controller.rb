@@ -10,6 +10,7 @@ module Projects
       before_action only: [:show] do
         push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
         push_frontend_feature_flag(:sast_configuration_ui, project, default_enabled: true)
+        push_frontend_feature_flag(:api_fuzzing_configuration_ui, project, default_enabled: :yaml)
       end
 
       before_action only: [:auto_fix] do
