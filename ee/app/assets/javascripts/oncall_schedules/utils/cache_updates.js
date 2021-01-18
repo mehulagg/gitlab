@@ -157,11 +157,12 @@ const deleteRotationFromStore = (
   });
 
   const data = produce(sourceData, (draftData) => {
-    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
-      ({ iid }) => iid === scheduleIid,
-    );
     // eslint-disable-next-line no-param-reassign
-    scheduleToUpdate.rotations = scheduleToUpdate.rotations?.filter(({ id }) => id !== rotation.id);
+    draftData.project.incidentManagementOncallSchedules.nodes.find(
+      ({ iid }) => iid === scheduleIid,
+    ).rotations = draftData.project.incidentManagementOncallSchedules.nodes
+      .find(({ iid }) => iid === scheduleIid)
+      .rotations?.filter(({ id }) => id !== rotation.id);
   });
 
   store.writeQuery({
