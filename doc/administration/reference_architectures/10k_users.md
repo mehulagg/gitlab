@@ -19,93 +19,104 @@ full list of reference architectures, see
 |--------------------------------------------|-------------|-------------------------|-----------------|-------------|----------|
 | External load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
 | Consul                                     | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
-| PostgreSQL                                 | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
+| PostgreSQL                                 | 3           | 8 vCPU, 30 GB memory    | n1-standard-8   | m5.2xlarge  | D8s v3   |
 | PgBouncer                                  | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
 | Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
 | Redis - Cache                              | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
 | Redis - Queues / Shared State              | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
 | Redis Sentinel - Cache                     | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | t3.small    | B1MS     |
 | Redis Sentinel - Queues / Shared State     | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | t3.small    | B1MS     |
-| Gitaly                                     | 2 (minimum) | 16 vCPU, 60 GB memory   | n1-standard-16  | m5.4xlarge  | D16s v3  |
+| Gitaly Cluster                             | 3           | 16 vCPU, 60 GB memory   | n1-standard-16  | m5.4xlarge  | D16s v3  |
+| Praefect                                   | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
+| Praefect Postgres                          | 1+*         | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
 | Sidekiq                                    | 4           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
 | GitLab Rails                               | 3           | 32 vCPU, 28.8 GB memory | n1-highcpu-32   | c5.9xlarge  | F32s v2  |
 | Monitoring node                            | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
 | Object storage                             | n/a         | n/a                     | n/a             | n/a         | n/a      |
-| NFS server                                 | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
 
-```mermaid
-stateDiagram-v2
-    [*] --> LoadBalancer
-    LoadBalancer --> ApplicationServer
+```plantuml
+@startuml 10k
+card "**External Load Balancer**" as elb #6a9be7
+card "**Internal Load Balancer**" as ilb #9370DB
 
-    ApplicationServer --> BackgroundJobs
-    ApplicationServer --> Gitaly
-    ApplicationServer --> Redis_Cache
-    ApplicationServer --> Redis_Queues
-    ApplicationServer --> PgBouncer
-    PgBouncer --> Database
-    ApplicationServer --> ObjectStorage
-    BackgroundJobs --> ObjectStorage
+together {
+  collections "**GitLab Rails** x3" as gitlab #32CD32
+  collections "**Sidekiq** x4" as sidekiq #ff8dd1
+}
 
-    ApplicationMonitoring -->ApplicationServer
-    ApplicationMonitoring -->PgBouncer
-    ApplicationMonitoring -->Database
-    ApplicationMonitoring -->BackgroundJobs
+together {
+  collections "**Consul** x3" as consul #e76a9b
+  card "**Prometheus + Grafana**" as monitor #7FFFD4
+}
 
-    ApplicationServer --> Consul
+card "Gitaly Cluster" as gitaly_cluster {
+  collections "**Praefect** x3" as praefect #FF8C00
+  collections "**Gitaly Cluster** x3" as gitaly #FF8C00
+  card "**Praefect Postgres***" as praefect_postgres #FF8C00
+  
+  praefect -[#FF8C00]-> gitaly
+  praefect -[#FF8C00]-> praefect_postgres: **//Non fault-tolerant//**
+}
 
-    Consul --> Database
-    Consul --> PgBouncer
-    Redis_Cache --> Consul
-    Redis_Queues --> Consul
-    BackgroundJobs --> Consul
+card "Database" as database {
+  collections "**PGBouncer** x3" as pgbouncer #4EA7FF
+  card "**Postgres** (Primary)" as postgres_primary #4EA7FF
+  collections "**Postgres** (Secondary) x2" as postgres_secondary #4EA7FF
+  
+  pgbouncer -[#4EA7FF]-> postgres_primary
+  postgres_primary .[#4EA7FF]> postgres_secondary
+}
 
-    state Consul {
-      "Consul_1..3"
-    }
+card "redis" as redis {
+  collections "**Redis Persistent** x3" as redis_persistant #FF6347
+  collections "**Redis Cache** x3" as redis_cache #FF6347
+  collections "**Redis Persistent Sentinel** x3" as redis_persistant_sentinel #FF6347
+  collections "**Redis Cache Sentinel** x3"as redis_cache_sentinel #FF6347
+  
+  redis_persistant <.[#FF6347]- redis_persistant_sentinel
+  redis_cache <.[#FF6347]- redis_cache_sentinel
+}
 
-    state Database {
-      "PG_Primary_Node"
-      "PG_Secondary_Node_1..2"
-    }
+cloud "**Object Storage**" as object_storage #white
 
-    state Redis_Cache {
-      "R_Cache_Primary_Node"
-      "R_Cache_Replica_Node_1..2"
-      "R_Cache_Sentinel_1..3"
-    }
+elb -[#6a9be7]-> gitlab
+elb -[hidden]-> sidekiq
+elb -[#6a9be7]--> monitor
 
-    state Redis_Queues {
-      "R_Queues_Primary_Node"
-      "R_Queues_Replica_Node_1..2"
-      "R_Queues_Sentinel_1..3"
-    }
+gitlab -[#32CD32]> sidekiq
+gitlab -[#32CD32]--> ilb
+gitlab -[#32CD32]-> object_storage
+gitlab -[#32CD32]---> redis
+gitlab -[hidden]-> monitor
+gitlab -[hidden]-> consul
 
-    state Gitaly {
-      "Gitaly_1..2"
-    }
+sidekiq -[#ff8dd1]--> ilb
+sidekiq -[#ff8dd1]-> object_storage
+sidekiq -[#ff8dd1]---> redis
+sidekiq -[hidden]-> monitor
+sidekiq -[hidden]-> consul
 
-    state BackgroundJobs {
-      "Sidekiq_1..4"
-    }
+ilb -[#9370DB]-> database
+ilb -[#9370DB]-> gitaly_cluster
+ilb -[norank,hidden]-> redis
 
-    state ApplicationServer {
-      "GitLab_Rails_1..3"
-    }
+consul .[#e76a9b]u-> gitlab
+consul .[#e76a9b]u-> sidekiq
+consul .[#e76a9b]> monitor
+consul .[#e76a9b]-> database
+consul .[#e76a9b]-> gitaly_cluster
+consul .[#e76a9b]-> redis
 
-    state LoadBalancer {
-      "LoadBalancer_1"
-    }
+monitor .[#7FFFD4]u-> gitlab
+monitor .[#7FFFD4]u-> sidekiq
+monitor .[#7FFFD4]> consul
+monitor .[#7FFFD4]-> database
+monitor .[#7FFFD4]-> gitaly_cluster
+monitor .[#7FFFD4]-> redis
+monitor .[#7FFFD4]-> ilb
+monitor .[#7FFFD4,norank]u--> elb
 
-    state ApplicationMonitoring {
-      "Prometheus"
-      "Grafana"
-    }
-
-    state PgBouncer {
-      "Internal_Load_Balancer"
-      "PgBouncer_1..3"
-    }
+@enduml
 ```
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
