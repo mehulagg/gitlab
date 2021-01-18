@@ -8,6 +8,15 @@ module EE
       include PathLocksHelper
       include SubscribableBannerHelper
 
+      override :check_valid_actor!
+      def check_valid_actor!
+        super
+
+        if ::Key.expiration_enforced? && actor.expired?
+          raise ::Gitlab::GitAccess::ForbiddenError, "Your SSH key is no longer valid and expiration is enforced by your instance administrator."
+        end
+      end
+
       override :check
       def check(cmd, changes)
         check_maintenance_mode!(cmd)
