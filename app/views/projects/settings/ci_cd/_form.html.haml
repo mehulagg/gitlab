@@ -36,7 +36,7 @@
           %h5.gl-mt-0
             = _("Git strategy")
           %p
-            = _("Choose Git strategy to fetch the project.")
+            = _("Choose Git strategy to use when fetching the project.")
             = link_to sprite_icon('question-o'), help_page_path('ci/pipelines/settings', anchor: 'git-strategy'), target: '_blank'
           .form-check
             = f.radio_button :build_allow_git_fetch, 'false', { class: 'form-check-input' }
@@ -58,7 +58,8 @@
             = form.label :default_git_depth, _('Git shallow clone'), class: 'label-bold'
             = form.number_field :default_git_depth, { class: 'form-control', min: 0, max: 1000 }
             %p.form-text.text-muted
-              = _('The number of changes to fetch from GitLab when cloning a repository. This can speed up Pipelines execution. Keep empty or set to 0 to disable shallow clone by default and fetch all branches and tags each time.')
+              = html_escape(_('The number of changes to fetch from GitLab when cloning a repository. This can speed up Pipelines execution. Set to %{code_open}0%{code_close} or blank to disable shallow clone by default and fetch all branches and tags each time.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+              = link_to sprite_icon('question-o'), help_page_path('ci/pipelines/settings', anchor: 'git-shallow-clone'), target: '_blank'
 
         %hr
         .form-group
