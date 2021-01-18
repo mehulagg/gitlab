@@ -12,7 +12,7 @@ module Gitlab
 
       private
 
-      override :repository
+      override :bundle_filename
       def bundle_filename
         ::Gitlab::ImportExport.wiki_repo_bundle_filename
       end
