@@ -8,8 +8,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   let(:pipeline) { build(:ci_empty_pipeline, project: project, sha: head_sha) }
   let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage } }
   let(:previous_stages) { [] }
+  let(:current_stage) { double(seeds_names: [attributes[:name]]) }
 
-  let(:seed_build) { described_class.new(pipeline, attributes, previous_stages) }
+  let(:seed_build) { described_class.new(pipeline, attributes, previous_stages, current_stage) }
 
   describe '#attributes' do
     subject { seed_build.attributes }
@@ -984,6 +985,18 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
       end
 
       let(:previous_stages) { [stage_seed] }
+
+      it "is included" do
+        is_expected.to be_included
+      end
+
+      it "does not have errors" do
+        expect(subject.errors).to be_empty
+      end
+    end
+
+    context 'when build job is part of the same stage' do
+      let(:current_stage) { double(seeds_names: [attributes[:name], 'build']) }
 
       it "is included" do
         is_expected.to be_included

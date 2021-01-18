@@ -16,7 +16,7 @@ module Gitlab
             @previous_stages = previous_stages
 
             @builds = attributes.fetch(:builds).map do |attributes|
-              Seed::Build.new(@pipeline, attributes, previous_stages)
+              Seed::Build.new(@pipeline, attributes, previous_stages, self)
             end
           end
 
