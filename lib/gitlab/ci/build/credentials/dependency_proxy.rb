@@ -4,7 +4,7 @@ module Gitlab
   module Ci
     module Build
       module Credentials
-        class Registry < Base
+        class DependencyProxy < Base
           attr_reader :username, :password
 
           def initialize(build)
@@ -13,11 +13,11 @@ module Gitlab
           end
 
           def url
-            Gitlab.config.registry.host_port
+            "#{Gitlab.config.gitlab.host}:#{Gitlab.config.gitlab.port}"
           end
 
           def valid?
-            Gitlab.config.registry.enabled
+            Gitlab.config.dependency_proxy.enabled
           end
         end
       end
