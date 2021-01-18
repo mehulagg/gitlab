@@ -26,7 +26,7 @@ module Groups
       end
 
       def execute
-        if valid_user_permissions? && import_file && restorer.restore
+        if valid_user_permissions? && import_file && restorers.all?(&:restore)
           notify_success
 
           @group
@@ -49,22 +49,25 @@ module Groups
         )
       end
 
-      def restorer
-        @restorer ||=
-          if ndjson?
-            Gitlab::ImportExport::Group::TreeRestorer.new(
-              user: @current_user,
-              shared: @shared,
-              group: @group
-            )
-          else
-            Gitlab::ImportExport::Group::LegacyTreeRestorer.new(
-              user: @current_user,
-              shared: @shared,
-              group: @group,
-              group_hash: nil
-            )
-          end
+      def restorers
+        [tree_restorer]
+      end
+
+      def tree_restorer
+        if ndjson?
+          Gitlab::ImportExport::Group::TreeRestorer.new(
+            user: @current_user,
+            shared: @shared,
+            group: @group
+          )
+        else
+          Gitlab::ImportExport::Group::LegacyTreeRestorer.new(
+            user: @current_user,
+            shared: @shared,
+            group: @group,
+            group_hash: nil
+          )
+        end
       end
 
       def ndjson?
@@ -119,3 +122,5 @@ module Groups
     end
   end
 end
+
+Groups::ImportExport::ImportService.prepend_if_ee('EE::Groups::ImportExport::ImportService')

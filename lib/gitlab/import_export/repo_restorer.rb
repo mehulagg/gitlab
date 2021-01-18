@@ -5,8 +5,7 @@ module Gitlab
     class RepoRestorer
       include Gitlab::ImportExport::CommandLineUtil
 
-      def initialize(project:, shared:, path_to_bundle:)
-        @repository = project.repository
+      def initialize(exportable:, shared:, path_to_bundle:)
         @path_to_bundle = path_to_bundle
         @shared = shared
       end
@@ -24,7 +23,11 @@ module Gitlab
 
       private
 
-      attr_accessor :repository, :path_to_bundle, :shared
+      attr_accessor :exportable, :path_to_bundle, :shared
+
+      def repository
+        @repository ||= exportable.repository
+      end
 
       def ensure_repository_does_not_exist!
         if repository.exists?
