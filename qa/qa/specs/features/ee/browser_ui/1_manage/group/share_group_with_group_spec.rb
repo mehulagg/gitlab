@@ -32,6 +32,7 @@ module QA
 
       before do
         source_group_with_members.add_member(maintainer_user, Resource::Members::AccessLevel::MAINTAINER)
+        #target_group_with_project.invite_group(source_group_with_members, Resource::Members::AccessLevel::GUEST)
       end
 
       it 'can be shared with another group with correct access level', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/945' do
@@ -42,7 +43,6 @@ module QA
         Page::Group::Menu.perform(&:click_group_members_item)
         Page::Group::Members.perform do |members|
           members.invite_group(source_group_with_members.path)
-
           expect(members).to have_existing_group_share(source_group_with_members.path)
         end
 
