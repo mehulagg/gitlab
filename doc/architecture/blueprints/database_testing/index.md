@@ -69,7 +69,7 @@ Database Labs provides a API we can interact with to manage thin clones. In orde
 
 ### Short-term
 
-The short-term focus is on migration testing and using the existing Database Labs instance from postgres.ai for it.
+The short-term focus is on testing regular migrations (typically schema changes) and using the existing Database Labs instance from postgres.ai for it.
 
 We implement a secured CI pipeline on ops.gitlab.net that adds the execution steps outlined above. The goal is to secure this pipeline in order to solve the following problem:
 
@@ -78,7 +78,7 @@ We implement a secured CI pipeline on ops.gitlab.net that adds the execution ste
 
 This is in principle achieved by locking down the GitLab Runner instance executing the code and its containers on a network level, such that no data can escape over the network. We make sure no communication can happen to the outside world from within the container executing the GitLab Rails code (and its database migrations).
 
-Furthermore, we limit the ability to view the results of the jobs (including the output printed from code) to Maintainer and Owner level on the ops.gitlab.net pipeline and provide only a high level summary back to the original MR. If there are issues or errors in one of the jobs run, the database Maintainer assigned to review the MR can check the original job for more details. 
+Furthermore, we limit the ability to view the results of the jobs (including the output printed from code) to Maintainer and Owner level on the ops.gitlab.net pipeline and provide only a high level summary back to the original MR. If there are issues or errors in one of the jobs run, the database Maintainer assigned to review the MR can check the original job for more details.
 
 With this step implemented, we already have the ability to execute database migrations on the thin-cloned GitLab.com database automatically from GitLab CI and provide feedback back to the Merge Request and the developer. The content of that feedback is expected to evolve over time and we can continously add to this.
 
@@ -86,17 +86,19 @@ We already have a [MVC-style implementation for the pipeline](https://gitlab.com
 
 The short-term goal is detailed in [this epic](https://gitlab.com/groups/gitlab-org/database-team/-/epics/6).
 
-### Mid-term
+### Mid-term - Improved feedback, query testing and background migration testing
 
-Mid-term, we plan to expand the level of detail the testing pipeline reports back to the Merge Request and expand its scope to cover query testing as described above, too.
+Mid-term, we plan to expand the level of detail the testing pipeline reports back to the Merge Request and expand its scope to cover query testing, too. By doing so, we use our experience from database code reviews and using thin-clone technology and bring this back closer to the GitLab workflow. Instead of reaching out to different tools (postgres.ai, joe, Slack, plan visualizations etc.) we bring this back to GitLab and working directly on the Merge Request.
 
-By doing so, we use our experience from database code reviews and using thin-clone technology and bring this back closer to the GitLab workflow. Instead of reaching out to different tools (postgres.ai, joe, Slack, plan visualizations etc.) we bring this back to GitLab and working directly on the Merge Request.
+Secondly, we plan to cover background migrations testing, too. These are typically data migrations that are scheduled to run over a long period of time. The success of both the scheduling phase and the job execution phase typically depends a lot on data distribution - which only surfaces when running these migrations on actual production data. In order to become confident about a background migration, we plan to provide the following feedback:
 
-There are opportunities to discuss for extracting features from this into GitLab itself. For example, annotating the Merge Request with query examples and attaching feedback gathered from the testing run can become a first-class citizen instead of using Merge Request description and comments for it.
+1. Scheduling phase - query statistics (e.g. histogram of query execution times), job statistics (how many jobs, overall duration etc.), batch sizes
+1. Execution phase - using a few instances of a job as examples, we execute those to gather query and runtime statistics
 
-### Long-term
 
-Long-term, we envision using thin-clones to fully test application changes before they are being merged - providing developers with good confidence about deploying to a large-scale environment like GitLab.com. We are going to add high-quality details that allow us to ship application changes to our large-scale environment with confidence.
+### Long-term - incorporate into GitLab product
+
+There are opportunities to discuss for extracting features from this into GitLab itself. For example, annotating the Merge Request with query examples and attaching feedback gathered from the testing run can become a first-class citizen instead of using Merge Request description and comments for it. We plan to evaluate those ideas as we see those being used in earlier phases and bring our experience back into the product.
 
 In order to bring down licensing cost in the long run, we strive to move towards either using Database Labs Community Edition for thin-cloning or building our own solution.
 
