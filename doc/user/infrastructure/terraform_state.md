@@ -16,7 +16,7 @@ to securely store the state files in local storage (the default) or
 
 The GitLab managed Terraform state backend can store your Terraform state easily and
 securely, and spares you from setting up additional remote resources like
-Amazon S3 or Google Cloud Storage. Once [set up by the GitLab administrator](https://docs.gitlab.com/ee/administration/terraform_state.html), its features include:
+Amazon S3 or Google Cloud Storage. Once [set up by the GitLab administrator](../../administration/terraform_state.md), its features include:
 
 - Versioning of Terraform state files
 - Supporting encryption of the state file both in transit and at rest
