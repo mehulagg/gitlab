@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
 import $ from 'jquery';
 import setConfigs from '@gitlab/ui/dist/config';
 import Translate from '~/vue_shared/translate';
@@ -9,8 +8,6 @@ import JiraConnectApp from './components/app.vue';
 import { addSubscription, removeSubscription } from '~/jira_connect/api';
 import createStore from './store';
 import { SET_ERROR_MESSAGE } from './store/mutation_types';
-
-Vue.use(Vuex);
 
 const store = createStore();
 
