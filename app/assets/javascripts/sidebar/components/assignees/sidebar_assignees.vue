@@ -62,10 +62,7 @@ export default {
       return this.isIssue ? getIssueParticipants : getMrParticipants;
     },
     participantsQueryVariables() {
-      return this.isIssue
-        ? /* eslint-disable @gitlab/require-i18n-strings */
-          { id: convertToGraphQLId('Issue', this.issuableIid) }
-        : { iid: this.issuableIid, fullPath: this.projectPath };
+      return { iid: this.issuableIid, fullPath: this.projectPath };
     },
     updateAssigneesMutation() {
       return this.isIssue ? updateIssueAssigneesMutation : updateMrAssigneesMutation;
