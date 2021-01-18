@@ -30,7 +30,7 @@ As a developer, I am working on a GitLab code change that includes a data migrat
 For database migrations, the information gathered from execution on the clone includes
 
 1. Overall runtime
-1. Detailed statistics for queries being executed in the migration (normalizing queries and showing their frequencies and execution times, perhaps plotted)
+1. Detailed statistics for queries being executed in the migration (normalizing queries and showing their frequencies and execution times as plots)
 1. Dangerous locks held during the migration (which would cause blocking situations in production)
 
 For database queries, we can automatically gather
