@@ -4,9 +4,10 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Creating a username and password for Jira Server
+# Create a username and password for Jira Server
 
-We need to create a user in Jira to have access to all projects that need to integrate with GitLab.
+For [integrations with Jira](jira.md), we need to create a user in Jira to have access to all
+projects that need to integrate with GitLab.
 
 As an example, we create a user named `gitlab` and add it to a new group
 named `gitlab-developers`.
@@ -20,7 +21,7 @@ access to your Jira projects. This is covered in the process below.
 
    ![Jira user management link](img/jira_user_management_link.png)
 
-1. The next step is to create a new user (e.g., `gitlab`) who has write access
+1. The next step is to create a new user (for example, `gitlab`) who has write access
    to projects in Jira. Enter the user's name and a _valid_ e-mail address
    since Jira sends a verification e-mail to set up the password.
 
@@ -61,4 +62,4 @@ access to your Jira projects. This is covered in the process below.
    ![Jira group access](img/jira_group_access.png)
 
 The Jira configuration is complete. Write down the new Jira username and its
-password as they are needed when [configuring GitLab in the next section](jira.md#configuring-gitlab).
+password as they are needed when [configuring GitLab](jira.md#configure-gitlab).
