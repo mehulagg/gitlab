@@ -1,5 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
 import {
   sastDiffSuccessMock,
@@ -334,7 +334,7 @@ describe('ee merge request widget options', () => {
 
         vm.mr.browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE };
 
-        vm.$nextTick(() => {
+        nextTick(() => {
           expect(trimText(findBrowserPerformanceWidget().textContent)).toContain(
             'Loading browser-performance report',
           );
@@ -373,7 +373,7 @@ describe('ee merge request widget options', () => {
               vm.mr.browserPerformanceMetrics.degraded = [];
               vm.mr.browserPerformanceMetrics.same = [];
 
-              Vue.nextTick(() => {
+              nextTick(() => {
                 expect(
                   trimText(
                     vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
@@ -390,7 +390,7 @@ describe('ee merge request widget options', () => {
               vm.mr.browserPerformanceMetrics.improved = [];
               vm.mr.browserPerformanceMetrics.same = [];
 
-              Vue.nextTick(() => {
+              nextTick(() => {
                 expect(
                   trimText(
                     vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
@@ -505,7 +505,7 @@ describe('ee merge request widget options', () => {
 
         vm.mr.loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE };
 
-        vm.$nextTick(() => {
+        nextTick(() => {
           expect(trimText(findLoadPerformanceWidget().textContent)).toContain(
             'Loading load-performance report',
           );
@@ -541,7 +541,7 @@ describe('ee merge request widget options', () => {
             vm.mr.loadPerformanceMetrics.degraded = [];
             vm.mr.loadPerformanceMetrics.same = [];
 
-            Vue.nextTick(() => {
+            nextTick(() => {
               expect(
                 trimText(
                   vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
@@ -555,7 +555,7 @@ describe('ee merge request widget options', () => {
             vm.mr.loadPerformanceMetrics.improved = [];
             vm.mr.loadPerformanceMetrics.same = [];
 
-            Vue.nextTick(() => {
+            nextTick(() => {
               expect(
                 trimText(
                   vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
@@ -1098,7 +1098,7 @@ describe('ee merge request widget options', () => {
       vm.mr.shouldRemoveSourceBranch = true;
       vm.mr.state = 'readyToMerge';
 
-      vm.$nextTick(() => {
+      nextTick(() => {
         const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
@@ -1115,7 +1115,7 @@ describe('ee merge request widget options', () => {
       vm.mr.shouldRemoveSourceBranch = true;
       vm.mr.state = 'merged';
 
-      vm.$nextTick(() => {
+      nextTick(() => {
         expect(vm.$el.textContent).toContain('The source branch has been deleted');
         expect(vm.$el.textContent).not.toContain('Removes source branch');
 
@@ -1156,7 +1156,7 @@ describe('ee merge request widget options', () => {
         },
       );
 
-      vm.$nextTick(done);
+      nextTick(done);
     });
 
     it('renders multiple deployments', () => {
