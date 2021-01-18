@@ -84,13 +84,10 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  const findBrowserPerformanceWidget = () =>
-    wrapper.vm.$el.querySelector('.js-browser-performance-widget');
-  const findLoadPerformanceWidget = () =>
-    wrapper.vm.$el.querySelector('.js-load-performance-widget');
-  const findExtendedSecurityWidget = () => wrapper.vm.$el.querySelector('.js-security-widget');
-  const findBaseSecurityWidget = () =>
-    wrapper.vm.$el.querySelector('[data-testid="security-mr-widget"]');
+  const findBrowserPerformanceWidget = () => wrapper.find('.js-browser-performance-widget');
+  const findLoadPerformanceWidget = () => wrapper.find('.js-load-performance-widget');
+  const findExtendedSecurityWidget = () => wrapper.find('.js-security-widget');
+  const findBaseSecurityWidget = () => wrapper.find('[data-testid="security-mr-widget"]');
 
   const setBrowserPerformance = (data = {}) => {
     const browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE, ...data };
@@ -131,9 +128,9 @@ describe('ee merge request widget options', () => {
       });
 
       it('should render loading indicator', () => {
-        expect(
-          findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent.trim(),
-        ).toContain('SAST is loading');
+        expect(findExtendedSecurityWidget().find(SAST_SELECTOR).text()).toContain(
+          'SAST is loading',
+        );
       });
     });
 
@@ -148,9 +145,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${SAST_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${SAST_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual('SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others');
           done();
@@ -170,10 +167,10 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${SAST_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
-            ).trim(),
+              findExtendedSecurityWidget()
+                .find(`${SAST_SELECTOR} .report-block-list-issue-description`)
+                .text(),
+            ),
           ).toEqual('SAST detected no vulnerabilities.');
           done();
         });
@@ -190,9 +187,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            trimText(findExtendedSecurityWidget().querySelector(SAST_SELECTOR).textContent),
-          ).toContain('SAST: Loading resulted in an error');
+          expect(trimText(findExtendedSecurityWidget().find(SAST_SELECTOR).text())).toContain(
+            'SAST: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -224,9 +221,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          trimText(
-            findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
-          ),
+          trimText(findExtendedSecurityWidget().find(DEPENDENCY_SCANNING_SELECTOR).text()),
         ).toContain('Dependency scanning is loading');
       });
     });
@@ -243,9 +238,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual(
             'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
@@ -271,9 +266,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
@@ -293,9 +288,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
@@ -313,9 +308,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
-            trimText(
-              findExtendedSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent,
-            ),
+            trimText(findExtendedSecurityWidget().find(DEPENDENCY_SCANNING_SELECTOR).text()),
           ).toContain('Dependency scanning: Loading resulted in an error');
           done();
         });
@@ -340,7 +333,7 @@ describe('ee merge request widget options', () => {
         wrapper.vm.mr.browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE };
 
         nextTick(() => {
-          expect(trimText(findBrowserPerformanceWidget().textContent)).toContain(
+          expect(trimText(findBrowserPerformanceWidget().text())).toContain(
             'Loading browser-performance report',
           );
 
@@ -364,10 +357,7 @@ describe('ee merge request widget options', () => {
         it('should render provided data', (done) => {
           setImmediate(() => {
             expect(
-              trimText(
-                wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
-                  .textContent,
-              ),
+              trimText(wrapper.find('.js-browser-performance-widget .js-code-text').text()),
             ).toEqual('Browser performance test metrics: 2 degraded, 1 same, 1 improved');
             done();
           });
@@ -381,10 +371,7 @@ describe('ee merge request widget options', () => {
 
               nextTick(() => {
                 expect(
-                  trimText(
-                    wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
-                      .textContent,
-                  ),
+                  trimText(wrapper.find('.js-browser-performance-widget .js-code-text').text()),
                 ).toEqual('Browser performance test metrics: 1 improved');
                 done();
               });
@@ -398,10 +385,7 @@ describe('ee merge request widget options', () => {
 
               nextTick(() => {
                 expect(
-                  trimText(
-                    wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
-                      .textContent,
-                  ),
+                  trimText(wrapper.find('.js-browser-performance-widget .js-code-text').text()),
                 ).toEqual('Browser performance test metrics: 2 degraded');
                 done();
               });
@@ -425,11 +409,11 @@ describe('ee merge request widget options', () => {
 
           if (shouldExist) {
             it('should render widget when total score degradation is above threshold', () => {
-              expect(findBrowserPerformanceWidget()).toExist();
+              expect(findBrowserPerformanceWidget().exists()).toBe(true);
             });
           } else {
             it('should not render widget when total score degradation is below threshold', () => {
-              expect(findBrowserPerformanceWidget()).not.toExist();
+              expect(findBrowserPerformanceWidget().exists()).toBe(false);
             });
           }
         },
@@ -451,25 +435,20 @@ describe('ee merge request widget options', () => {
 
       it('should render provided data', () => {
         expect(
-          trimText(
-            wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
-              .textContent,
-          ),
+          trimText(wrapper.find('.js-browser-performance-widget .js-code-text').text()),
         ).toEqual('Browser performance test metrics: No changes');
       });
 
       it('does not show Expand button', () => {
-        const expandButton = wrapper.vm.$el.querySelector(
-          '.js-browser-performance-widget .js-collapse-btn',
-        );
+        const expandButton = wrapper.find('.js-browser-performance-widget .js-collapse-btn');
 
-        expect(expandButton).toBeNull();
+        expect(expandButton.exists()).toBe(false);
       });
 
       it('shows success icon', () => {
         expect(
-          wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-ci-status-icon-success'),
-        ).not.toBeNull();
+          wrapper.find('.js-browser-performance-widget .js-ci-status-icon-success').exists(),
+        ).toBe(true);
       });
     });
 
@@ -486,10 +465,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
-            trimText(
-              wrapper.vm.$el.querySelector('.js-browser-performance-widget .js-code-text')
-                .textContent,
-            ),
+            trimText(wrapper.find('.js-browser-performance-widget .js-code-text').text()),
           ).toContain('Failed to load browser-performance report');
           done();
         });
@@ -514,7 +490,7 @@ describe('ee merge request widget options', () => {
         wrapper.vm.mr.loadPerformance = { ...DEFAULT_LOAD_PERFORMANCE };
 
         nextTick(() => {
-          expect(trimText(findLoadPerformanceWidget().textContent)).toContain(
+          expect(trimText(findLoadPerformanceWidget().text())).toContain(
             'Loading load-performance report',
           );
 
@@ -539,11 +515,9 @@ describe('ee merge request widget options', () => {
         });
 
         it('should render provided data', () => {
-          expect(
-            trimText(
-              wrapper.vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
-            ),
-          ).toBe('Load performance test metrics: 1 degraded, 1 same, 2 improved');
+          expect(trimText(wrapper.find('.js-load-performance-widget .js-code-text').text())).toBe(
+            'Load performance test metrics: 1 degraded, 1 same, 2 improved',
+          );
         });
 
         describe('text connector', () => {
@@ -553,10 +527,7 @@ describe('ee merge request widget options', () => {
 
             nextTick(() => {
               expect(
-                trimText(
-                  wrapper.vm.$el.querySelector('.js-load-performance-widget .js-code-text')
-                    .textContent,
-                ),
+                trimText(wrapper.find('.js-load-performance-widget .js-code-text').text()),
               ).toBe('Load performance test metrics: 2 improved');
               done();
             });
@@ -568,10 +539,7 @@ describe('ee merge request widget options', () => {
 
             nextTick(() => {
               expect(
-                trimText(
-                  wrapper.vm.$el.querySelector('.js-load-performance-widget .js-code-text')
-                    .textContent,
-                ),
+                trimText(wrapper.find('.js-load-performance-widget .js-code-text').text()),
               ).toBe('Load performance test metrics: 1 degraded');
               done();
             });
@@ -594,25 +562,21 @@ describe('ee merge request widget options', () => {
       });
 
       it('should render provided data', () => {
-        expect(
-          trimText(
-            wrapper.vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
-          ),
-        ).toBe('Load performance test metrics: No changes');
+        expect(trimText(wrapper.find('.js-load-performance-widget .js-code-text').text())).toBe(
+          'Load performance test metrics: No changes',
+        );
       });
 
       it('does not show Expand button', () => {
-        const expandButton = wrapper.vm.$el.querySelector(
-          '.js-load-performance-widget .js-collapse-btn',
-        );
+        const expandButton = wrapper.find('.js-load-performance-widget .js-collapse-btn');
 
-        expect(expandButton).toBeNull();
+        expect(expandButton.exists()).toBe(false);
       });
 
       it('shows success icon', () => {
         expect(
-          wrapper.vm.$el.querySelector('.js-load-performance-widget .js-ci-status-icon-success'),
-        ).not.toBeNull();
+          wrapper.find('.js-load-performance-widget .js-ci-status-icon-success').exists(),
+        ).toBe(true);
       });
     });
 
@@ -629,9 +593,7 @@ describe('ee merge request widget options', () => {
       it('should render error indicator', (done) => {
         setImmediate(() => {
           expect(
-            trimText(
-              wrapper.vm.$el.querySelector('.js-load-performance-widget .js-code-text').textContent,
-            ),
+            trimText(wrapper.find('.js-load-performance-widget .js-code-text').text()),
           ).toContain('Failed to load load-performance report');
           done();
         });
@@ -664,9 +626,7 @@ describe('ee merge request widget options', () => {
 
       it('should render loading indicator', () => {
         expect(
-          trimText(
-            findExtendedSecurityWidget().querySelector(CONTAINER_SCANNING_SELECTOR).textContent,
-          ),
+          trimText(findExtendedSecurityWidget().find(CONTAINER_SCANNING_SELECTOR).text()),
         ).toContain('Container scanning is loading');
       });
     });
@@ -683,9 +643,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual(
             'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
@@ -705,11 +665,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            findExtendedSecurityWidget()
-              .querySelector(CONTAINER_SCANNING_SELECTOR)
-              .textContent.trim(),
-          ).toContain('Container scanning: Loading resulted in an error');
+          expect(findExtendedSecurityWidget().find(CONTAINER_SCANNING_SELECTOR).text()).toContain(
+            'Container scanning: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -740,9 +698,9 @@ describe('ee merge request widget options', () => {
       });
 
       it('should render loading indicator', () => {
-        expect(
-          findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
-        ).toContain('DAST is loading');
+        expect(findExtendedSecurityWidget().find(DAST_SELECTOR).text()).toContain(
+          'DAST is loading',
+        );
       });
     });
 
@@ -758,9 +716,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${DAST_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${DAST_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual('DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others');
           done();
@@ -778,9 +736,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            findExtendedSecurityWidget().querySelector(DAST_SELECTOR).textContent.trim(),
-          ).toContain('DAST: Loading resulted in an error');
+          expect(findExtendedSecurityWidget().find(DAST_SELECTOR).text()).toContain(
+            'DAST: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -816,9 +774,9 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
         createComponentWithFeatureFlag();
 
-        expect(
-          findExtendedSecurityWidget().querySelector(COVERAGE_FUZZING_SELECTOR).textContent.trim(),
-        ).toContain('Coverage fuzzing is loading');
+        expect(findExtendedSecurityWidget().find(COVERAGE_FUZZING_SELECTOR).text()).toContain(
+          'Coverage fuzzing is loading',
+        );
       });
     });
 
@@ -833,9 +791,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual(
             'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
@@ -854,11 +812,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            findExtendedSecurityWidget()
-              .querySelector(COVERAGE_FUZZING_SELECTOR)
-              .textContent.trim(),
-          ).toContain('Coverage fuzzing: Loading resulted in an error');
+          expect(findExtendedSecurityWidget().find(COVERAGE_FUZZING_SELECTOR).text()).toContain(
+            'Coverage fuzzing: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -891,9 +847,7 @@ describe('ee merge request widget options', () => {
         createComponent({ propsData: { mrData: gl.mrWidgetData } });
 
         expect(
-          trimText(
-            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent,
-          ),
+          trimText(findExtendedSecurityWidget().find(SECRET_SCANNING_SELECTOR).text()),
         ).toContain('Secret scanning is loading');
       });
     });
@@ -910,9 +864,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual(
             'Secret scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
@@ -932,9 +886,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            findExtendedSecurityWidget().querySelector(SECRET_SCANNING_SELECTOR).textContent.trim(),
-          ).toContain('Secret scanning: Loading resulted in an error');
+          expect(findExtendedSecurityWidget().find(SECRET_SCANNING_SELECTOR).text()).toContain(
+            'Secret scanning: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -963,9 +917,9 @@ describe('ee merge request widget options', () => {
 
         createComponent({ propsData: { mrData: gl.mrWidgetData } });
 
-        expect(
-          trimText(findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent),
-        ).toContain('API fuzzing is loading');
+        expect(trimText(findExtendedSecurityWidget().find(API_FUZZING_SELECTOR).text())).toContain(
+          'API fuzzing is loading',
+        );
       });
     });
 
@@ -981,9 +935,9 @@ describe('ee merge request widget options', () => {
         setImmediate(() => {
           expect(
             trimText(
-              findExtendedSecurityWidget().querySelector(
-                `${API_FUZZING_SELECTOR} .report-block-list-issue-description`,
-              ).textContent,
+              findExtendedSecurityWidget()
+                .find(`${API_FUZZING_SELECTOR} .report-block-list-issue-description`)
+                .text(),
             ),
           ).toEqual(
             'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
@@ -1003,9 +957,9 @@ describe('ee merge request widget options', () => {
 
       it('should render error indicator', (done) => {
         setImmediate(() => {
-          expect(
-            findExtendedSecurityWidget().querySelector(API_FUZZING_SELECTOR).textContent.trim(),
-          ).toContain('API fuzzing: Loading resulted in an error');
+          expect(findExtendedSecurityWidget().find(API_FUZZING_SELECTOR).text()).toContain(
+            'API fuzzing: Loading resulted in an error',
+          );
           done();
         });
       });
@@ -1029,7 +983,7 @@ describe('ee merge request widget options', () => {
 
       createComponent({ propsData: { mrData: gl.mrWidgetData } });
 
-      expect(wrapper.vm.$el.querySelector('.license-report-widget')).not.toBeNull();
+      expect(wrapper.find('.license-report-widget').exists()).toBe(true);
     });
 
     it('should not be rendered if license scanning data is not set', () => {
@@ -1040,7 +994,7 @@ describe('ee merge request widget options', () => {
 
       createComponent({ propsData: { mrData: gl.mrWidgetData } });
 
-      expect(wrapper.vm.$el.querySelector('.license-report-widget')).toBeNull();
+      expect(wrapper.find('.license-report-widget').exists()).toBe(false);
     });
   });
 
@@ -1070,7 +1024,7 @@ describe('ee merge request widget options', () => {
       });
 
       it(`${shouldRender ? 'renders' : 'does not render'} the CE security report`, () => {
-        expect(findBaseSecurityWidget()).toEqual(shouldRender ? expect.any(HTMLElement) : null);
+        expect(findBaseSecurityWidget().exists()).toBe(shouldRender);
       });
     });
   });
@@ -1124,10 +1078,10 @@ describe('ee merge request widget options', () => {
       wrapper.vm.mr.state = 'readyToMerge';
 
       nextTick(() => {
-        const tooltip = wrapper.vm.$el.querySelector('[data-testid="question-o-icon"]');
+        const tooltip = wrapper.find('[data-testid="question-o-icon"]');
 
-        expect(wrapper.vm.$el.textContent).toContain('Deletes source branch');
-        expect(tooltip.getAttribute('title')).toBe(
+        expect(wrapper.text()).toContain('Deletes source branch');
+        expect(tooltip.attributes('title')).toBe(
           'A user with write access to the source branch selected this option',
         );
 
@@ -1141,8 +1095,8 @@ describe('ee merge request widget options', () => {
       wrapper.vm.mr.state = 'merged';
 
       nextTick(() => {
-        expect(wrapper.vm.$el.textContent).toContain('The source branch has been deleted');
-        expect(wrapper.vm.$el.textContent).not.toContain('Removes source branch');
+        expect(wrapper.text()).toContain('The source branch has been deleted');
+        expect(wrapper.text()).not.toContain('Removes source branch');
 
         done();
       });
@@ -1187,7 +1141,7 @@ describe('ee merge request widget options', () => {
     });
 
     it('renders multiple deployments', () => {
-      expect(wrapper.vm.$el.querySelectorAll('.deploy-heading')).toHaveLength(2);
+      expect(wrapper.findAll('.deploy-heading')).toHaveLength(2);
     });
   });
 
@@ -1203,9 +1157,9 @@ describe('ee merge request widget options', () => {
         },
       });
 
-      const ciWidget = wrapper.vm.$el.querySelector('.mr-state-widget .label-branch');
+      const ciWidget = wrapper.find('.mr-state-widget .label-branch');
 
-      expect(ciWidget.innerHTML).toBe(sourceBranchLink);
+      expect(ciWidget.html()).toContain(sourceBranchLink);
     });
   });
 
@@ -1263,7 +1217,7 @@ describe('ee merge request widget options', () => {
 
         createComponent({ propsData: { mrData: gl.mrWidgetData } });
 
-        expect(findExtendedSecurityWidget()).toBe(null);
+        expect(findExtendedSecurityWidget().exists()).toBe(false);
       });
     });
   });
@@ -1282,7 +1236,7 @@ describe('ee merge request widget options', () => {
     });
 
     it('does not render the EE security report', () => {
-      expect(findExtendedSecurityWidget()).toBe(null);
+      expect(findExtendedSecurityWidget().exists()).toBe(false);
     });
   });
 });
