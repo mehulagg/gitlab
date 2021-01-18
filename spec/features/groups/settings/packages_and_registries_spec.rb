@@ -48,7 +48,7 @@ RSpec.describe 'Group Packages & Registries settings' do
       expect(sidebar).to have_link _('Packages & Registries')
     end
 
-    it 'has a Package Registry section', :js  do
+    it 'has a Package Registry section', :js do
       visit_settings_page
 
       expect(page).to have_content('Package Registry')
