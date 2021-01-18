@@ -1,7 +1,12 @@
 <script>
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 
-import { PACKAGE_SETTINGS_HEADER, PACKAGE_SETTINGS_DESCRIPTION } from '../constants';
+import {
+  PACKAGE_SETTINGS_HEADER,
+  PACKAGE_SETTINGS_DESCRIPTION,
+  PACKAGES_DOCS_PATH,
+} from '../constants';
 import getGroupPackagesSettingsQuery from '../graphql/queries/get_group_packages_settings.query.graphql';
 
 export default {
@@ -10,7 +15,12 @@ export default {
     PACKAGE_SETTINGS_HEADER,
     PACKAGE_SETTINGS_DESCRIPTION,
   },
+  links: {
+    PACKAGES_DOCS_PATH,
+  },
   components: {
+    GlSprintf,
+    GlLink,
     SettingsBlock,
   },
   inject: {
@@ -50,7 +60,15 @@ export default {
     <settings-block :default-expanded="defaultExpanded">
       <template #title> {{ $options.i18n.PACKAGE_SETTINGS_HEADER }}</template>
       <template #description>
-        {{ $options.i18n.PACKAGE_SETTINGS_DESCRIPTION }}
+        <span data-testid="description">
+          <gl-sprintf :message="$options.i18n.PACKAGE_SETTINGS_DESCRIPTION">
+            <template #link="{ content }">
+              <gl-link :href="$options.links.PACKAGES_DOCS_PATH" target="_blank">{{
+                content
+              }}</gl-link>
+            </template>
+          </gl-sprintf>
+        </span>
       </template>
     </settings-block>
   </div>

@@ -1,4 +1,5 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import component from '~/packages_and_registries/settings/group/components/group_settings_app.vue';
@@ -6,6 +7,7 @@ import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import {
   PACKAGE_SETTINGS_HEADER,
   PACKAGE_SETTINGS_DESCRIPTION,
+  PACKAGES_DOCS_PATH,
 } from '~/packages_and_registries/settings/group/constants';
 
 import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
@@ -37,6 +39,7 @@ describe('Group Settings App', () => {
       apolloProvider,
       provide,
       stubs: {
+        GlSprintf,
         SettingsBlock,
       },
     });
@@ -48,6 +51,8 @@ describe('Group Settings App', () => {
   });
 
   const findSettingsBlock = () => wrapper.find(SettingsBlock);
+  const findDescription = () => wrapper.find('[data-testid="description"');
+  const findLink = () => wrapper.find(GlLink);
 
   it('renders a settings block', () => {
     mountComponent();
@@ -70,7 +75,17 @@ describe('Group Settings App', () => {
   it('has the correct description text', () => {
     mountComponent();
 
-    expect(wrapper.text()).toContain(PACKAGE_SETTINGS_DESCRIPTION);
+    expect(findDescription().text()).toMatchInterpolatedText(PACKAGE_SETTINGS_DESCRIPTION);
+  });
+
+  it('has the correct link', () => {
+    mountComponent();
+
+    expect(findLink().attributes()).toMatchObject({
+      href: PACKAGES_DOCS_PATH,
+      target: '_blank',
+    });
+    expect(findLink().text()).toBe('More Information');
   });
 
   it('calls the graphql API with the proper variables', () => {
