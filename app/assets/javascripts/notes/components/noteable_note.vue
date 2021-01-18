@@ -24,7 +24,7 @@ import {
   formatLineRange,
 } from './multiline_comment_utils';
 import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
-import { assigneesWidgetMethods } from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
+import { assigneesWidgetState } from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 
 export default {
   name: 'NoteableNote',
@@ -182,6 +182,9 @@ export default {
       }
 
       return null;
+    },
+    assignees() {
+      return assigneesWidgetState.assignees;
     },
   },
   created() {
@@ -345,9 +348,8 @@ export default {
       this.updateAssignees(assignees);
     },
     async assignToRoot() {
-      if (assigneesWidgetMethods?.updateAssignees) {
-        const assignees = await assigneesWidgetMethods.updateAssignees(['root']);
-        console.log(assignees);
+      if (assigneesWidgetState?.updateAssignees) {
+        await assigneesWidgetState.updateAssignees(['root']);
       }
     },
   },
@@ -444,6 +446,7 @@ export default {
         />
       </div>
       <gl-button @click="assignToRoot">Assign to root</gl-button>
+      <span v-for="assignee in assignees" :key="assignee.username">{{ assignee.username }}</span>
     </div>
   </timeline-entry-item>
 </template>

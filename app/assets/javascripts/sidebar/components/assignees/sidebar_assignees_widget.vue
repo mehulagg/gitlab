@@ -16,8 +16,9 @@ import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue'
 import MultiSelectDropdown from '~/vue_shared/components/sidebar/multiselect_dropdown.vue';
 import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 
-export const assigneesWidgetMethods = Vue.observable({
+export const assigneesWidgetState = Vue.observable({
   updateAssignees: null,
+  assignees: null,
 });
 
 export default {
@@ -77,6 +78,7 @@ export default {
       },
       result() {
         this.selected = cloneDeep(this.assignees);
+        assigneesWidgetState.assignees = this.assignees;
       },
     },
     searchUsers: {
@@ -124,7 +126,7 @@ export default {
     },
   },
   created() {
-    assigneesWidgetMethods.updateAssignees = this.updateAssignees;
+    assigneesWidgetState.updateAssignees = this.updateAssignees;
   },
   methods: {
     updateAssignees(assigneeUsernames) {
