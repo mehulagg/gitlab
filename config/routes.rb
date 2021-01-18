@@ -290,3 +290,22 @@ Rails.application.routes.draw do
 
   get '*unmatched_route', to: 'application#route_not_found'
 end
+
+# Generates shorthand url helpers for the `projects` resource.
+project_url_helpers = Module.new do
+  extend ActiveSupport::Concern
+
+  Gitlab::Application.routes.named_routes.helper_names.each do |name|
+    next unless name.include?('namespace_project')
+
+    define_method(name.sub('namespace_project', 'project')) do |project, *args|
+      send(name, project&.namespace, project, *args)
+    end
+  end
+end
+
+# We add the MilestonesRoutingHelper because we know that this does not
+# conflict with the methods defined in `project_url_helpers`, and we want
+# these methods available in the same places.
+Gitlab::Routing.add_helpers(project_url_helpers)
+Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)
