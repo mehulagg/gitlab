@@ -43,7 +43,9 @@ export default {
 </script>
 
 <template>
-  <gl-tabs content-class="gl-display-none">
-    <repo-tab v-for="tab in files" :key="tab.key" :tab="tab" />
-  </gl-tabs>
+  <div class="multi-file-tabs">
+    <gl-tabs>
+      <repo-tab v-for="tab in files" :key="tab.key" :tab="tab" />
+    </gl-tabs>
+  </div>
 </template>
