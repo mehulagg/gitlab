@@ -21,8 +21,6 @@ export const assigneesWidgetMethods = Vue.observable({
 });
 
 export default {
-  noSearchDelay: 0,
-  searchDelay: 250,
   i18n: {
     unassigned: __('Unassigned'),
     assignee: __('Assignee'),
@@ -41,10 +39,6 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    assignees: {
-      type: Array,
-      required: true,
-    },
     participantsQuery: {
       type: Object,
       required: true,
@@ -61,56 +55,60 @@ export default {
       type: Object,
       required: true,
     },
-    loading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
       search: '',
-      participants: [],
-      selected: cloneDeep(this.assignees),
+      issuable: {},
+      selected: [],
       isSettingAssignees: false,
     };
   },
   apollo: {
-    participants: {
+    issuable: {
       query() {
-        return this.isSearchEmpty ? this.participantsQuery : searchUsers;
+        return this.participantsQuery;
       },
       variables() {
-        if (this.isSearchEmpty) {
-          return this.participantsQueryVariables;
-        }
-
+        return this.participantsQueryVariables;
+      },
+      update(data) {
+        return data.issuable || data.project?.issuable;
+      },
+      result() {
+        this.selected = cloneDeep(this.assignees);
+      },
+    },
+    searchUsers: {
+      query: searchUsers,
+      variables() {
         return {
           search: this.search,
         };
       },
       update(data) {
-        if (this.isSearchEmpty) {
-          return data.issue?.participants?.nodes || data.project?.mergeRequest?.participants?.nodes;
-        }
-
         return data.users?.nodes || [];
       },
-      debounce() {
-        const { noSearchDelay, searchDelay } = this.$options;
-
-        return this.isSearchEmpty ? noSearchDelay : searchDelay;
+      debounce: 250,
+      skip() {
+        return this.isSearchEmpty;
       },
     },
   },
   computed: {
+    assignees() {
+      return this.issuable?.assignees?.nodes;
+    },
+    participants() {
+      return this.isSearchEmpty ? this.issuable?.participants?.nodes : this.searchUsers;
+    },
     assigneeText() {
       return n__('Assignee', '%d Assignees', this.selected.length);
     },
     unselectedFiltered() {
-      return this.participants.filter(({ username }) => {
-        return !this.selectedUserNames.includes(username);
-      });
+      return this.participants
+        ? this.participants.filter(({ username }) => !this.selectedUserNames.includes(username))
+        : [];
     },
     selectedIsEmpty() {
       return this.selected.length === 0;
@@ -123,11 +121,6 @@ export default {
     },
     currentUser() {
       return gon?.current_username;
-    },
-  },
-  watch: {
-    assignees() {
-      this.selected = cloneDeep(this.assignees);
     },
   },
   created() {
@@ -187,7 +180,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="loading" class="gl-display-flex gl-align-items-center">
+  <div v-if="$apollo.queries.issuable.loading" class="gl-display-flex gl-align-items-center">
     {{ __('Assignee') }}
     <gl-loading-icon size="sm" class="gl-ml-2" />
   </div>
@@ -211,7 +204,10 @@ export default {
           <gl-search-box-by-type v-model.trim="search" />
         </template>
         <template #items>
-          <gl-loading-icon v-if="$apollo.queries.participants.loading" size="lg" />
+          <gl-loading-icon
+            v-if="$apollo.queries.searchUsers.loading || $apollo.queries.issuable.loading"
+            size="lg"
+          />
           <template v-else>
             <gl-dropdown-item
               :is-checked="selectedIsEmpty"
@@ -238,7 +234,7 @@ export default {
             </gl-dropdown-item>
             <gl-dropdown-divider v-if="!selectedIsEmpty" data-testid="selected-user-divider" />
             <gl-dropdown-item
-              v-for="unselectedUser in unSelectedFiltered"
+              v-for="unselectedUser in unselectedFiltered"
               :key="unselectedUser.id"
               :data-testid="`item_${unselectedUser.name}`"
               @click="selectAssignee(unselectedUser)"

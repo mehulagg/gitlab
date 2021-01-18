@@ -2,7 +2,7 @@
 
 query getMrParticipants($fullPath: ID!, $iid: String!) {
   project(fullPath: $fullPath) {
-    mergeRequest(iid: $iid) {
+    issuable: mergeRequest(iid: $iid) {
       id
       participants {
         nodes {

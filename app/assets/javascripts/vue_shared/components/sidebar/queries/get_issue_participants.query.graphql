@@ -1,8 +1,13 @@
 #import "~/graphql_shared/fragments/user.fragment.graphql"
 
 query issueParticipants($id: IssueID!) {
-  issue(id: $id) {
+  issuable: issue(id: $id) {
     participants {
+      nodes {
+        ...User
+      }
+    }
+    assignees {
       nodes {
         ...User
       }
