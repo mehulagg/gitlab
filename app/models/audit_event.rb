@@ -63,6 +63,8 @@ class AuditEvent < ApplicationRecord
   end
 
   def lazy_author
+    return default_author_value if undefined_author
+
     BatchLoader.for(author_id).batch(default_value: default_author_value, replace_methods: false) do |author_ids, loader|
       User.select(:id, :name, :username).where(id: author_ids).find_each do |user|
         loader.call(user.id, user)
@@ -77,6 +79,10 @@ class AuditEvent < ApplicationRecord
   end
 
   private
+  
+  def undefined_author
+    author_id == -1
+  end
 
   def default_author_value
     ::Gitlab::Audit::NullAuthor.for(author_id, (self[:author_name] || details[:author_name]))
