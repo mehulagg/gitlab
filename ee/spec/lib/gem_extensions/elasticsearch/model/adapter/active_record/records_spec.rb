@@ -5,36 +5,23 @@ require 'spec_helper'
 RSpec.describe Elasticsearch::Model::Adapter::ActiveRecord::Records, :elastic do
   describe '#records' do
     let(:user) { create(:user) }
-    let(:search_options) { { options: { current_user: user, project_ids: :any } } }
+    let(:search_options) { { options: { current_user: user, project_ids: :any, order_by: 'created_at', sort: 'desc' } } }
 
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
 
-      @middle_relevant = create(
-        :issue,
-        title: 'Sorting could improve', # Some keywords in title
-        description: 'I think you could make it better'
-      )
-      @least_relevant = create(
-        :issue,
-        title: 'I love GitLab', # No keywords in title
-        description: 'There is so much to love! For example, you could not possibly make sorting any better'
-      )
-
-      @most_relevant = create(
-        :issue,
-        title: 'Make sorting better', # All keywords in title
-        description: 'This issue is here to make the sorting better'
-      )
+      @new_issue = create(:issue)
+      @recent_issue = create(:issue, created_at: 1.hour.ago)
+      @old_issue = create(:issue, created_at: 7.days.ago)
 
       ensure_elasticsearch_index!
     end
 
     it 'returns results in the same sorted order as they come back from Elasticsearch' do
-      expect(Issue.elastic_search('make sorting better', **search_options).records.to_a).to eq([
-        @most_relevant,
-        @middle_relevant,
-        @least_relevant
+      expect(Issue.elastic_search('*', **search_options).records.to_a).to eq([
+        @new_issue,
+        @recent_issue,
+        @old_issue
       ])
     end
   end
