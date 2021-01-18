@@ -396,6 +396,26 @@ RSpec.describe Deployment do
       end
     end
 
+    describe '.finished_before' do
+      let!(:deployment1) { create(:deployment, finished_at: 1.day.ago) }
+      let!(:deployment2) { create(:deployment, finished_at: Time.current) }
+
+      it 'filters deployments by finished_at' do
+        expect(described_class.finished_before(1.hour.ago))
+          .to eq([deployment1])
+      end
+    end
+
+    describe '.finished_after' do
+      let!(:deployment1) { create(:deployment, finished_at: 1.day.ago) }
+      let!(:deployment2) { create(:deployment, finished_at: Time.current) }
+
+      it 'filters deployments by finished_at' do
+        expect(described_class.finished_after(1.hour.ago))
+          .to eq([deployment2])
+      end
+    end
+
     describe 'with_deployable' do
       subject { described_class.with_deployable }
 

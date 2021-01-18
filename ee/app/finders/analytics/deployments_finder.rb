@@ -2,23 +2,31 @@
 
 module Analytics
   class DeploymentsFinder
-    def initialize(project:, environment_name:, from:, to: nil)
-      @project = project
+    def initialize(project_or_group:, environment_name:, from:, to: nil)
+      @project_or_group = project_or_group
       @environment_name = environment_name
       @from = from
       @to = to
     end
 
-    attr_reader :project, :environment_name, :from, :to
+    attr_reader :project_or_group, :environment_name, :from, :to
 
     def execute
-      filter_deployments(project.deployments)
+      filter_deployments(all_deployments)
     end
 
     private
 
-    def filter_deployments(all_deployments)
-      deployments = filter_by_time(all_deployments)
+    def all_deployments
+      if project_or_group.is_a?(Group)
+        Deployment.for_projects(project_or_group.projects)
+      else
+        project_or_group.deployments
+      end
+    end
+
+    def filter_deployments(deployments)
+      deployments = filter_by_time(deployments)
       deployments = filter_by_success(deployments)
       deployments = filter_by_environment_name(deployments)
       # rubocop: disable CodeReuse/ActiveRecord

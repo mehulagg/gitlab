@@ -881,3 +881,13 @@ questions that you know someone might ask.
 Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
+
+## DORA4 analytics overview **(ULTIMATE ONLY)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/291747) in GitLab [Ultimate](https://about.gitlab.com/pricing/) 13.9 as a [Beta feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta).
+
+Group details include the following analytics:
+
+- Deployment Frequency
+
+For more information, see [DORA4 Project Analytics API](../../api/dora4_group_analytics.md).

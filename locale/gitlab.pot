@@ -9186,6 +9186,9 @@ msgstr ""
 msgid "Date range cannot exceed %{maxDateRange} days."
 msgstr ""
 
+msgid "Date range is greater than %{quarter_days} days"
+msgstr ""
+
 msgid "Day of month"
 msgstr ""
 
@@ -21029,6 +21032,12 @@ msgstr ""
 msgid "Parameter \"job_id\" cannot exceed length of %{job_id_max_size}"
 msgstr ""
 
+msgid "Parameter `from` must be specified"
+msgstr ""
+
+msgid "Parameter `to` is before the `from` date"
+msgstr ""
+
 msgid "Parent"
 msgstr ""
 
@@ -29493,6 +29502,9 @@ msgstr ""
 msgid "This group, its subgroups and projects will be removed on %{date} since its parent group '%{parent_group_name}'' has been scheduled for removal."
 msgstr ""
 
+msgid "This interval is not supported"
+msgstr ""
+
 msgid "This is a \"Ghost User\", created to hold all issues authored by users that have since been deleted. This user cannot be removed."
 msgstr ""
 
@@ -33055,6 +33067,9 @@ msgid "You do not have an active license"
 msgstr ""
 
 msgid "You do not have any subscriptions yet"
+msgstr ""
+
+msgid "You do not have permission to access deployment frequencies"
 msgstr ""
 
 msgid "You do not have permission to leave this %{namespaceType}."

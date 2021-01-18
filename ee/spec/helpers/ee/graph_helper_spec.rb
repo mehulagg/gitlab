@@ -12,11 +12,11 @@ RSpec.describe EE::GraphHelper do
     let(:is_user_authorized) { true }
 
     before do
-      stub_licensed_features(project_activity_analytics: is_feature_licensed)
+      stub_licensed_features(dora4_analytics: is_feature_licensed)
       stub_feature_flags(deployment_frequency_charts: is_flag_enabled)
       self.instance_variable_set(:@current_user, current_user)
       self.instance_variable_set(:@project, project)
-      allow(self).to receive(:can?).with(current_user, :read_project_activity_analytics, project).and_return(is_user_authorized)
+      allow(self).to receive(:can?).with(current_user, :read_dora4_analytics, project).and_return(is_user_authorized)
     end
 
     shared_examples 'returns true' do

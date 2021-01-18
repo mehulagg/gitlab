@@ -183,6 +183,26 @@ RSpec.describe GroupPolicy do
     it { is_expected.not_to be_allowed(:read_group_contribution_analytics) }
   end
 
+  context 'when dora4 analytics is available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
+  end
+
+  context 'when dora4 analytics is not available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(dora4_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
+  end
+
   context 'when group activity analytics is available' do
     let(:current_user) { developer }
 

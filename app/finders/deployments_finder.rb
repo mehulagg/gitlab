@@ -1,61 +1,82 @@
 # frozen_string_literal: true
 
 class DeploymentsFinder
-  attr_reader :project, :params
+  attr_reader :project_or_group, :params
 
-  ALLOWED_SORT_VALUES = %w[id iid created_at updated_at ref].freeze
+  ALLOWED_SORT_VALUES = %w[id iid created_at updated_at finished_at ref].freeze
   DEFAULT_SORT_VALUE = 'id'
 
   ALLOWED_SORT_DIRECTIONS = %w[asc desc].freeze
   DEFAULT_SORT_DIRECTION = 'asc'
 
-  def initialize(project, params = {})
-    @project = project
+  def initialize(project_or_group, params = {})
+    @project_or_group = project_or_group
     @params = params
   end
 
   def execute
     items = init_collection
     items = by_updated_at(items)
+    items = by_finished_at(items)
     items = by_environment(items)
     items = by_status(items)
-    sort(items)
+    items = sort(items) if should_sort?
+
+    items
   end
 
   private
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def init_collection
-    project
-      .deployments
-      .includes(
-        :user,
-        environment: [],
-        deployable: {
-          job_artifacts: [],
-          pipeline: {
+    if project_or_group.is_a?(Project)
+      # rubocop: disable CodeReuse/ActiveRecord
+      project_or_group
+        .deployments
+        .includes(
+          :user,
+          environment: [],
+          deployable: {
+            job_artifacts: [],
+            pipeline: {
+              project: {
+                route: [],
+                namespace: :route
+              }
+            },
             project: {
-              route: [],
               namespace: :route
             }
-          },
-          project: {
-            namespace: :route
           }
-        }
-      )
+        )
+      # rubocop: enable CodeReuse/ActiveRecord
+    else
+      Deployment.for_projects(project_or_group.all_projects)
+    end
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
-  # rubocop: disable CodeReuse/ActiveRecord
-  def sort(items)
-    items.order(sort_params)
+  def should_sort?
+    return true if project_or_group.is_a?(Project)
+
+    project_or_group.is_a?(Group) &&
+      Feature.enabled?(:dora4_sorted_group_deployment_frequency)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
+
+  def sort(items)
+    # rubocop: disable CodeReuse/ActiveRecord
+    items.order(sort_params)
+    # rubocop: enable CodeReuse/ActiveRecord
+  end
 
   def by_updated_at(items)
     items = items.updated_before(params[:updated_before]) if params[:updated_before].present?
     items = items.updated_after(params[:updated_after]) if params[:updated_after].present?
+
+    items
+  end
+
+  def by_finished_at(items)
+    items = items.finished_before(params[:finished_before]) if params[:finished_before].present?
+    items = items.finished_after(params[:finished_after]) if params[:finished_after].present?
 
     items
   end
