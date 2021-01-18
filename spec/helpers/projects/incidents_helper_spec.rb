@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Projects::IncidentsHelper do
-  include Gitlab::Routing.url_helpers
-
   let(:project) { create(:project) }
   let(:project_path) { project.full_path }
   let(:new_issue_path) { new_project_issue_path(project) }
