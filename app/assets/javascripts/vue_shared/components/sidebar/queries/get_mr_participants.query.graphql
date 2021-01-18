@@ -9,6 +9,11 @@ query getMrParticipants($fullPath: ID!, $iid: String!) {
           ...User
         }
       }
+      assignees {
+        nodes {
+          ...User
+        }
+      }
     }
   }
 }

@@ -9,6 +9,7 @@ mutation mergeRequestSetAssignees(
     input: { iid: $iid, assigneeUsernames: $assigneeUsernames, projectPath: $projectPath }
   ) {
     mergeRequest {
+      id
       assignees {
         nodes {
           ...User
