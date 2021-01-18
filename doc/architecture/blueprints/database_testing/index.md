@@ -127,7 +127,6 @@ This effort is owned and driven by the [GitLab Database Team](https://about.gitl
 | Engineering Leader           |    Craig Gomes          |
 | Domain Expert                |    Yannis Roussos       |
 | Domain Expert                |    Pat Bair             |
-| Domain Expert                |    (tbd)                |
 
 DRIs:
 
