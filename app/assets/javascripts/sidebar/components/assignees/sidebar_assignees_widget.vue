@@ -128,6 +128,10 @@ export default {
   created() {
     assigneesWidgetState.updateAssignees = this.updateAssignees;
   },
+  destroyed() {
+    assigneesWidgetState.updateAssignees = null;
+    assigneesWidgetState.assignees = null;
+  },
   methods: {
     updateAssignees(assigneeUsernames) {
       this.isSettingAssignees = true;
