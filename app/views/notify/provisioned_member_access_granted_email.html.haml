@@ -17,7 +17,7 @@
     %p
       = _('By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. ')
       = _('To ensure no loss of personal content, this account should only be used for matters related to %{group_name}.') % { group_name: member_source.human_name }
-      = _('For personal use, create a separate account under your own personal email address, not tied to the Enterprise email domain or group.')
+      = _('For individual use, create a separate account under your personal email address, not tied to the Enterprise email domain or group.')
     - unless @user.confirmed?
       %p
         = _('To get started, click the link below to confirm your account.')

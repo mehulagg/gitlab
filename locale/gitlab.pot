@@ -12650,6 +12650,9 @@ msgstr ""
 msgid "For help setting up the Service Desk for your instance, please contact an administrator."
 msgstr ""
 
+msgid "For individual use, create a separate account under your personal email address, not tied to the Enterprise email domain or group."
+msgstr ""
+
 msgid "For internal projects, any logged in user except external users can view pipelines and access job details (output logs and artifacts)"
 msgstr ""
 
@@ -12672,9 +12675,6 @@ msgid "For more information, see the documentation on %{deactivating_usage_ping_
 msgstr ""
 
 msgid "For more information, see the documentation on %{link_start}disabling Seat Link%{link_end}."
-msgstr ""
-
-msgid "For personal use, create a separate account under your own personal email address, not tied to the Enterprise email domain or group."
 msgstr ""
 
 msgid "For private projects, any member (guest or higher) can view pipelines and access job details (output logs and artifacts)"
