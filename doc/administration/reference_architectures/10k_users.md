@@ -45,8 +45,8 @@ together {
 }
 
 together {
-  collections "**Consul** x3" as consul #e76a9b
   card "**Prometheus + Grafana**" as monitor #7FFFD4
+  collections "**Consul** x3" as consul #e76a9b
 }
 
 card "Gitaly Cluster" as gitaly_cluster {
@@ -85,35 +85,35 @@ elb -[#6a9be7]--> monitor
 
 gitlab -[#32CD32]> sidekiq
 gitlab -[#32CD32]--> ilb
-gitlab -[#32CD32]-> object_storage
-gitlab -[#32CD32]---> redis
+gitlab -[#32CD32]--> object_storage
+gitlab -[#32CD32,norank]---> redis
 gitlab -[hidden]-> monitor
 gitlab -[hidden]-> consul
 
 sidekiq -[#ff8dd1]--> ilb
-sidekiq -[#ff8dd1]-> object_storage
-sidekiq -[#ff8dd1]---> redis
+sidekiq -[#ff8dd1]--> object_storage
+sidekiq -[#ff8dd1,norank]---> redis
 sidekiq -[hidden]-> monitor
 sidekiq -[hidden]-> consul
 
 ilb -[#9370DB]-> database
 ilb -[#9370DB]-> gitaly_cluster
-ilb -[norank,hidden]-> redis
+ilb -[hidden]-> redis
 
 consul .[#e76a9b]u-> gitlab
 consul .[#e76a9b]u-> sidekiq
 consul .[#e76a9b]> monitor
 consul .[#e76a9b]-> database
 consul .[#e76a9b]-> gitaly_cluster
-consul .[#e76a9b]-> redis
+consul .[#e76a9b,norank]--> redis
 
 monitor .[#7FFFD4]u-> gitlab
 monitor .[#7FFFD4]u-> sidekiq
 monitor .[#7FFFD4]> consul
 monitor .[#7FFFD4]-> database
 monitor .[#7FFFD4]-> gitaly_cluster
-monitor .[#7FFFD4]-> redis
-monitor .[#7FFFD4]-> ilb
+monitor .[#7FFFD4,norank]--> redis
+monitor .[#7FFFD4]> ilb
 monitor .[#7FFFD4,norank]u--> elb
 
 @enduml
