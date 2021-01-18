@@ -509,7 +509,6 @@ export const downstream = {
       id: 175,
       iid: '31',
       path: '/root/elemenohpee/-/pipelines/175',
-      __typename: 'Pipeline',
       status: {
         group: 'success',
         label: 'passed',
