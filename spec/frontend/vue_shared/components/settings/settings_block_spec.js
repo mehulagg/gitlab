@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlButton } from '@gitlab/ui';
 import component from '~/vue_shared/components/settings/settings_block.vue';
 
 describe('Settings Block', () => {
@@ -23,7 +24,7 @@ describe('Settings Block', () => {
   const findDefaultSlot = () => wrapper.find('[data-testid="default-slot"]');
   const findTitleSlot = () => wrapper.find('[data-testid="title-slot"]');
   const findDescriptionSlot = () => wrapper.find('[data-testid="description-slot"]');
-  const findExpandButton = () => wrapper.find('[data-testid="expand-button"]');
+  const findExpandButton = () => wrapper.find(GlButton);
 
   it('renders the correct markup', () => {
     mountComponent();
@@ -62,7 +63,7 @@ describe('Settings Block', () => {
       expect(wrapper.classes('expanded')).toBe(false);
       expect(findExpandButton().text()).toBe('Expand');
 
-      await findExpandButton().trigger('click');
+      await findExpandButton().vm.$emit('click');
 
       expect(wrapper.classes('expanded')).toBe(true);
       expect(findExpandButton().text()).toBe('Collapse');
@@ -73,11 +74,11 @@ describe('Settings Block', () => {
 
       expect(wrapper.classes('expanded')).toBe(true);
 
-      await findExpandButton().trigger('click');
+      await findExpandButton().vm.$emit('click');
 
       expect(wrapper.classes('expanded')).toBe(true);
 
-      await findExpandButton().trigger('click');
+      await findExpandButton().vm.$emit('click');
 
       expect(wrapper.classes('expanded')).toBe(true);
     });

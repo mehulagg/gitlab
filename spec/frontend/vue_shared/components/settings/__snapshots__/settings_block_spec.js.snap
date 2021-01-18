@@ -13,14 +13,17 @@ exports[`Settings Block renders the correct markup 1`] = `
       />
     </h4>
      
-    <button
-      class="btn"
-      data-testid="expand-button"
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
+      icon=""
+      size="medium"
+      variant="default"
     >
       
       Expand
     
-    </button>
+    </gl-button-stub>
      
     <p>
       <div

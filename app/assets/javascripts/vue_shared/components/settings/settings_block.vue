@@ -1,7 +1,9 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
+  components: { GlButton },
   props: {
     defaultExpanded: {
       type: Boolean,
@@ -29,9 +31,9 @@ export default {
   <section class="settings no-animate" :class="{ expanded }">
     <div class="settings-header">
       <h4><slot name="title"></slot></h4>
-      <button data-testid="expand-button" class="btn" @click="sectionExpanded = !sectionExpanded">
+      <gl-button @click="sectionExpanded = !sectionExpanded">
         {{ toggleText }}
-      </button>
+      </gl-button>
       <p>
         <slot name="description"></slot>
       </p>
