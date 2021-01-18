@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlAvatar } from '@gitlab/ui';
+import { GlAvatar, GlButton } from '@gitlab/ui';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+
 import { mockGroup1 } from '../mock_data';
 
 import GroupsListItem from '~/jira_connect/components/groups_list_item.vue';
@@ -8,11 +9,16 @@ import GroupsListItem from '~/jira_connect/components/groups_list_item.vue';
 describe('GroupsListItem', () => {
   let wrapper;
 
+  const mockSubscriptionPath = 'subscriptionPath';
+
   const createComponent = () => {
     wrapper = extendedWrapper(
       shallowMount(GroupsListItem, {
         propsData: {
           group: mockGroup1,
+        },
+        provide: {
+          subscriptionsPath: mockSubscriptionPath,
         },
       }),
     );
@@ -28,6 +34,7 @@ describe('GroupsListItem', () => {
   });
 
   const findGlAvatar = () => wrapper.find(GlAvatar);
+  const findLinkButton = () => wrapper.find(GlButton);
   const findGroupName = () => wrapper.findByTestId('group-list-item-name');
   const findGroupDescription = () => wrapper.findByTestId('group-list-item-description');
 
@@ -42,5 +49,10 @@ describe('GroupsListItem', () => {
 
   it('renders group description', () => {
     expect(findGroupDescription().text()).toBe(mockGroup1.description);
+  });
+
+  it('renders Link button', () => {
+    expect(findLinkButton().exists()).toBe(true);
+    expect(findLinkButton().text()).toBe('Link');
   });
 });
