@@ -1,0 +1,6 @@
+---
+title: Change projects.has_external_issue_tracker column to be not null and default
+  to false, and cleanup all null and incorrect data
+merge_request: 51855
+author:
+type: changed
