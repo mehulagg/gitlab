@@ -113,6 +113,10 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
 
       collection do
+        resources :boards, only: [:index, :show], as: 'epics_boards'
+      end
+
+      collection do
         post :bulk_update
       end
     end
