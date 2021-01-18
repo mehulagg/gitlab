@@ -39,6 +39,10 @@ export default {
       type: Array,
       required: true,
     },
+    scheduleIid: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -102,6 +106,7 @@ export default {
     <delete-rotation-modal
       :rotation="rotationToUpdate"
       :modal-id="$options.deleteRotationModalId"
+      :schedule-iid="scheduleIid"
       @set-rotation-to-update="setRotationToUpdate"
     />
   </div>

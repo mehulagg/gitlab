@@ -82,6 +82,7 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
   <delete-rotation-modal-stub
     modalid="deleteRotationModal"
     rotation="[object Object]"
+    scheduleiid="1"
   />
 </div>
 `;
