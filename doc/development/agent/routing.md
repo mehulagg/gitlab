@@ -134,90 +134,52 @@ of the `kas` receiving the request from the _external_ endpoint to retry and re-
 requests. This method ensures a single central component for each request can determine
 how a request is routed, rather than distributing the decision across several `kas` instances.
 
+### `agentk` -> `kas` reverse gRPC tunnel
+
+#### High level scheme
+
+```mermaid
+graph LR
+    subgraph agentk
+        agent-module-a[Agent side of module A] -- expose API on --> agent-internal-grpc-server[Internal gRPC server]
+        agent-module-b[Agent side of module B] -- expose API on --> agent-internal-grpc-server
+    end
+    subgraph kas
+        server-internal-grpc-server[Internal gRPC server] -- proxy request --> agent-internal-grpc-server
+        server-api-grpc-server[Public API gRPC server] -- proxy request --> agent-internal-grpc-server
+        server-module-a[Server side of module A] -- expose API on --> server-internal-grpc-server
+        server-module-b[Server side of module B] -- expose API on --> server-api-grpc-server
+    end
+```
+
+#### Implementation scheme
+
+```mermaid
+graph LR
+    subgraph kas
+        server-tunnel-module[Server tunnel module] -- "HandleTunnelConnection()" --> connection-registry[Connection registry]
+        server-internal-grpc-server[Internal gRPC server] -- "HandleIncomingConnection()" --> connection-registry
+        server-api-grpc-server[Public API gRPC server] -- "HandleIncomingConnection()" --> connection-registry
+        server-module-a[Server side of module A] -- expose API on --> server-internal-grpc-server
+        server-module-b[Server side of module B] -- expose API on --> server-api-grpc-server
+    end
+    subgraph agentk
+        agent-tunnel-module[agent tunnel module] -- establish tunnel, receive request ----> server-tunnel-module
+        agent-tunnel-module -- make request ---> agent-internal-grpc-server[Internal gRPC server]
+        agent-module-a[Agent side of module A] -- expose API on --> agent-internal-grpc-server
+        agent-module-b[Agent side of module B] -- expose API on --> agent-internal-grpc-server
+    end
+```
+
+`HandleTunnelConnection()` is called with server-side interface of the reverse tunnel. It registers the connection and
+blocks, waiting for a request to proxy through the connection.
+
+`HandleIncomingConnection()` is called with server-side interface of the incoming connection. It registers the
+connection and blocks, waiting for a matching tunnel to proxy the connection through.
+
 ### API definitions
 
-```proto
-syntax = "proto3";
-
-import "google/protobuf/timestamp.proto";
-
-message KasAddress {
-    string ip = 1;
-    uint32 port = 2;
-}
-
-message ConnectedAgentInfo {
-    // Agent id.
-    int64 id = 1;
-    // Identifies a particular agentk->kas connection. Randomly generated when agent connects.
-    int64 connection_id = 2;
-    string version = 3;
-    string commit = 4;
-    // Pod namespace.
-    string pod_namespace = 5;
-    // Pod name.
-    string pod_name = 6;
-    // When the connection was established.
-    google.protobuf.Timestamp connected_at = 7;
-    KasAddress kas_address = 8;
-    // What else do we need?
-}
-
-message KasInstanceInfo {
-    string version = 1;
-    string commit = 2;
-    KasAddress address = 3;
-    // What else do we need?
-}
-
-message ConnectedAgentsForProjectRequest {
-    int64 project_id = 1;
-}
-
-message ConnectedAgentsForProjectResponse {
-    // There may 0 or more agents with the same id, depending on the number of running Pods.
-    repeated ConnectedAgentInfo agents = 1;
-}
-
-message ConnectedAgentsByIdRequest {
-    int64 agent_id = 1;
-}
-
-message ConnectedAgentsByIdResponse {
-    repeated ConnectedAgentInfo agents = 1;
-}
-
-// API for use by GitLab.
-service KasApi {
-    // Connected agents for a particular configuration project.
-    rpc ConnectedAgentsForProject (ConnectedAgentsForProjectRequest) returns (ConnectedAgentsForProjectResponse) {
-    }
-    // Connected agents for a particular agent id.
-    rpc ConnectedAgentsById (ConnectedAgentsByIdRequest) returns (ConnectedAgentsByIdResponse) {
-    }
-    // Depends on the need, but here is the call from the example above.
-    rpc GetPods (GetPodsRequest) returns (GetPodsResponse) {
-    }
-}
-
-message Pod {
-    string namespace = 1;
-    string name = 2;
-}
-
-message GetPodsRequest {
-    int64 agent_id = 1;
-    int64 connection_id = 2;
-}
-
-message GetPodsResponse {
-    repeated Pod pods = 1;
-}
-
-// Internal API for use by kas for kas -> kas calls.
-service KasInternal {
-    // Depends on the need, but here is the call from the example above.
-    rpc GetPods (GetPodsRequest) returns (GetPodsResponse) {
-    }
-}
-```
+See:
+- [agent_tracker/agent_tracker.proto](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/agent_tracker/agent_tracker.proto)
+- [agent_tracker/rpc/rpc.proto](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/agent_tracker/rpc/rpc.proto)
+- [reverse_tunnel/rpc/rpc.proto](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/internal/module/reverse_tunnel/rpc/rpc.proto)
