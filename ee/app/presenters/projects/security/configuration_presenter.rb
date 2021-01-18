@@ -57,6 +57,7 @@ module Projects
           auto_devops_enabled: auto_devops_source?,
           auto_devops_help_page_path: help_page_path('topics/autodevops/index'),
           create_sast_merge_request_path: project_security_configuration_sast_path(project),
+          # api_fuzzing_configuration_path: project_security_configuration_api_fuzzing_path(project),
           auto_devops_path: auto_devops_settings_path(project),
           can_enable_auto_devops: can_enable_auto_devops?,
           features: features,
@@ -183,7 +184,8 @@ module Projects
       def configuration_path(type)
         {
           sast: project_security_configuration_sast_path(project),
-          dast_profiles: project_security_configuration_dast_profiles_path(project)
+          dast_profiles: project_security_configuration_dast_profiles_path(project),
+          api_fuzzing: project_security_configuration_api_fuzzing_path(project)
         }[type]
       end
     end

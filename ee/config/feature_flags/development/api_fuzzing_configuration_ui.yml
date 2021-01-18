@@ -1,0 +1,8 @@
+---
+name: api_fuzzing_configuration_ui
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.8'
+type: development
+group: group::fuzz testing
+default_enabled: false
