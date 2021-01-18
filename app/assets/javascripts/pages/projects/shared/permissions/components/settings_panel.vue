@@ -494,7 +494,7 @@ export default {
             <gl-sprintf
               :message="
                 s__(
-                  'ProjectSettings|LFS objects from this repository are still available to forks. %{linkStart}How do I remove them?%{linkEnd}',
+                  'ProjectSettings|LFS objects from this repository are available to forks. %{linkStart}How do I remove them?%{linkEnd}',
                 )
               "
             >
@@ -539,7 +539,7 @@ export default {
         v-if="requirementsAvailable"
         ref="requirements-settings"
         :label="s__('ProjectSettings|Requirements')"
-        :help-text="s__('ProjectSettings|Requirements management system for this project')"
+        :help-text="s__('ProjectSettings|Requirements management system')"
       >
         <project-feature-setting
           v-model="requirementsAccessLevel"
@@ -622,7 +622,7 @@ export default {
       </label>
       <span class="form-text text-muted">{{
         s__(
-          'ProjectSettings|Override user notification preferences for all project members.',
+          'ProjectSettings|Override user notification preferences for all project members',
         )
       }}</span>
     </project-setting-row>
@@ -639,7 +639,7 @@ export default {
         {{ s__('ProjectSettings|Show default award emojis') }}
         <template #help>{{
           s__(
-            'ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets.',
+            'ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets',
           )
         }}</template>
       </gl-form-checkbox>
@@ -658,7 +658,7 @@ export default {
         {{ s__('ProjectSettings|Allow editing commit messages') }}
         <template #help>{{
           s__(
-            'ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches.',
+            'ProjectSettings|Commit authors can edit commit messages on unprotected branches.',
           )
         }}</template>
       </gl-form-checkbox>
