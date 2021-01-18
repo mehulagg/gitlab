@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, api
 ---
 
-# Project Analytics API **(ULTIMATE ONLY)**
+# DORA4 Analytics Project API **(ULTIMATE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/279039) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.7.
 
@@ -13,7 +13,7 @@ All methods require reporter authorization.
 
 ## List project deployment frequencies
 
-Get a list of all project aliases:
+Get a list of all project deployment frequencies:
 
 ```plaintext
 GET /projects/:id/analytics/deployment_frequency?environment=:environment&from=:from&to=:to&interval=:interval

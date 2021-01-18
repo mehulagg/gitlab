@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Analytics::ProjectDeploymentFrequency do
+RSpec.describe API::Analytics::GroupDeploymentFrequency do
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:project) { create(:project, :repository, namespace: group) }
   let_it_be(:prod) { create(:environment, project: project, name: "prod") }
@@ -45,7 +45,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
   let(:dora4_analytics_enabled) { true }
   let(:current_user) { reporter }
   let(:params) { { from: Time.now, to: Time.now, interval: "all", environment: prod.name } }
-  let(:path) { api("/projects/#{project.id}/analytics/deployment_frequency", current_user) }
+  let(:path) { api("/groups/#{group.id}/analytics/deployment_frequency", current_user) }
   let(:request) { get path, params: params }
   let(:request_time) { nil }
 

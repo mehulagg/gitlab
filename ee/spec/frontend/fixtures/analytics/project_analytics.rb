@@ -30,7 +30,7 @@ RSpec.describe 'Project Analytics (JavaScript fixtures)' do
   end
 
   before do
-    stub_licensed_features(project_activity_analytics: true)
+    stub_licensed_features(dora4_analytics: true)
     project.add_reporter(reporter)
     sign_in(reporter)
   end

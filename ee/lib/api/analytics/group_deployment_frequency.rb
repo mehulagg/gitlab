@@ -2,7 +2,7 @@
 
 module API
   module Analytics
-    class ProjectDeploymentFrequency < ::API::Base
+    class GroupDeploymentFrequency < ::API::Base
       include Gitlab::Utils::StrongMemoize
       include PaginationParams
 
@@ -47,7 +47,7 @@ module API
         def deployments
           strong_memoize(:deployments) do
             ::Analytics::DeploymentsFinder.new(
-              project_or_group: user_project,
+              project_or_group: user_group,
               environment_name: environment_name,
               from: start_date,
               to: end_date
@@ -96,7 +96,7 @@ module API
         requires :id, type: String, desc: 'The ID of the project'
       end
 
-      resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
         namespace ':id/analytics' do
           desc 'List analytics for the project'
 
