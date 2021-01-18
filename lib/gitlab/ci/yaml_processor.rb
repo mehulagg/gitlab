@@ -101,8 +101,8 @@ module Gitlab
 
         # A dependency might be defined later in the configuration
         # with a stage that does not exist
-        unless dependency_stage_index.present? && dependency_stage_index < job_stage_index
-          error!("#{name} job: #{dependency_type} #{dependency} is not defined in prior stages")
+        unless dependency_stage_index.present? && dependency_stage_index <= job_stage_index
+          error!("#{name} job: #{dependency_type} #{dependency} is not defined in current or prior stages")
         end
       end
 

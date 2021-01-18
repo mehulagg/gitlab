@@ -11,11 +11,11 @@ module Gitlab
 
           delegate :dig, to: :@seed_attributes
 
-          def initialize(context, attributes, previous_stages)
+          def initialize(context, attributes, previous_stages, current_stage)
             @context = context
             @pipeline = context.pipeline
             @seed_attributes = attributes
-            @previous_stages = previous_stages
+            @previous_and_current_stages = previous_stages + [current_stage]
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
             @job_variables = @seed_attributes.delete(:job_variables)
@@ -148,7 +148,7 @@ module Gitlab
             @needs_attributes.flat_map do |need|
               next if ::Feature.enabled?(:ci_needs_optional, default_enabled: :yaml) && need[:optional]
 
-              result = @previous_stages.any? do |stage|
+              result = @previous_and_current_stages.any? do |stage|
                 stage.seeds_names.include?(need[:name])
               end
 

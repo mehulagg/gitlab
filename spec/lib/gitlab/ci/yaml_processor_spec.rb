@@ -599,7 +599,7 @@ module Gitlab
               EOYML
             end
 
-            it_behaves_like 'has warnings and expected error', /build job: need test is not defined in prior stages/
+            it_behaves_like 'has warnings and expected error', /build job: need test is not defined in current or prior stages/
           end
         end
 
@@ -2034,7 +2034,7 @@ module Gitlab
             build2: { stage: 'build', script: 'test' },
             test1: { stage: 'test', script: 'test', dependencies: dependencies },
             test2: { stage: 'test', script: 'test' },
-            deploy: { stage: 'test', script: 'test' }
+            deploy: { stage: 'deploy', script: 'test' }
           }
         end
 
@@ -2067,7 +2067,7 @@ module Gitlab
         context 'dependencies to deploy' do
           let(:dependencies) { ['deploy'] }
 
-          it_behaves_like 'returns errors', 'test1 job: dependency deploy is not defined in prior stages'
+          it_behaves_like 'returns errors', 'test1 job: dependency deploy is not defined in current or prior stages'
         end
 
         context 'when a job depends on another job that references a not-yet defined stage' do
@@ -2092,7 +2092,7 @@ module Gitlab
             }
           end
 
-          it_behaves_like 'returns errors', /is not defined in prior stages/
+          it_behaves_like 'returns errors', /is not defined in current or prior stages/
         end
       end
 
@@ -2107,7 +2107,7 @@ module Gitlab
             parallel: { stage: 'build', script: 'test', parallel: 2 },
             test1: { stage: 'test', script: 'test', needs: needs, dependencies: dependencies },
             test2: { stage: 'test', script: 'test' },
-            deploy: { stage: 'test', script: 'test' }
+            deploy: { stage: 'deploy', script: 'test' }
           }
         end
 
@@ -2272,7 +2272,7 @@ module Gitlab
         context 'needs to deploy' do
           let(:needs) { ['deploy'] }
 
-          it_behaves_like 'returns errors', 'test1 job: need deploy is not defined in prior stages'
+          it_behaves_like 'returns errors', 'test1 job: need deploy is not defined in current or prior stages'
         end
 
         context 'needs and dependencies that are mismatching' do
