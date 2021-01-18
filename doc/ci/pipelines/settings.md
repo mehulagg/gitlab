@@ -131,8 +131,19 @@ averaged.
 
 ![Build status coverage](img/pipelines_test_coverage_build.png)
 
-A few examples of known coverage tools for a variety of languages can be found
-in the pipelines settings page.
+| Coverage Tool                                  | Sample regular expression |
+|------------------------------------------------|---------------------------|
+| Simplecov (Ruby)                               | `\(\d+.\d+\%\) covered` |
+| pytest-cov (Python)                            | `^TOTAL.+?(\d+\%)$` |
+| Scoverage (Scala)                              | `Statement coverage[A-Za-z\.*]\s*:\s*([^%]+)` |
+| `phpunit --coverage-text --colors=never` (PHP) | `^\s*Lines:\s*\d+.\d+\%` |
+| gcovr (C/C++)                                  | `^TOTAL.*\s+(\d+\%)$` |
+| `tap --coverage-report=text-summary` (NodeJS)  | `^Statements\s*:\s*([^%]+)` |
+| `nyc npm test` (NodeJS)                        | `All files[^|]*\|[^|]*\s+([\d\.]+)` |
+| excoveralls (Elixir)                           | `\[TOTAL\]\s+(\d+\.\d+)%` |
+| `mix test --cover` (Elixir)                    | `\d+.\d+\%\s+\|\s+Total` |
+| JaCoCo (Java/Kotlin)                           | `Total.*?([0-9]{1,3})%` |
+| `go test -cover` (Go)                          | `coverage: \d+.\d+% of statements` |
 
 ### Code Coverage history
 
@@ -198,7 +209,7 @@ If **Public pipelines** is disabled:
 - For **private** projects, only project members (reporter or higher)
   can view the pipelines or access the related features.
 
-## Auto-cancel pending pipelines
+## Auto-cancel redundant pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9362) in GitLab 9.1.
 
@@ -206,7 +217,7 @@ You can set pending or running pipelines to cancel automatically when a new pipe
 
 1. Go to **Settings > CI / CD**.
 1. Expand **General Pipelines**.
-1. Check the **Auto-cancel redundant, pending pipelines** checkbox.
+1. Check the **Auto-cancel redundant pipelines** checkbox.
 1. Click **Save changes**.
 
 Use the [`interruptible`](../yaml/README.md#interruptible) keyword to indicate if a
