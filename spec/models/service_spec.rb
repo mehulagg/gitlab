@@ -864,20 +864,6 @@ RSpec.describe Service do
     end
   end
 
-  describe '#external_issue_tracker?' do
-    where(:category, :active, :result) do
-      :issue_tracker | true  | true
-      :issue_tracker | false | false
-      :common        | true  | false
-    end
-
-    with_them do
-      it 'returns the right result' do
-        expect(build(:service, category: category, active: active).external_issue_tracker?).to eq(result)
-      end
-    end
-  end
-
   describe '#external_wiki?' do
     where(:type, :active, :result) do
       'ExternalWikiService' | true  | true
