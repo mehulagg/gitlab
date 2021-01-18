@@ -7302,6 +7302,12 @@ msgstr ""
 msgid "ComplianceFrameworks|There are no compliance frameworks set up yet"
 msgstr ""
 
+msgid "ComplianceFrameworks|Unable to save this compliance framework. Please try again"
+msgstr ""
+
+msgid "ComplianceFrameworks|Unknown compliance framework given. Please try a different framework or refresh the page"
+msgstr ""
+
 msgid "ComplianceFramework|GDPR"
 msgstr ""
 
