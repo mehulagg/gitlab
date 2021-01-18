@@ -250,6 +250,7 @@ module Ci
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
           ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CodequalityReportWorker.perform_async(pipeline.id)
         end
       end
 
