@@ -44,6 +44,7 @@ module EE
         mount ::API::Analytics::CodeReviewAnalytics
         mount ::API::Analytics::GroupActivityAnalytics
         mount ::API::Analytics::ProjectDeploymentFrequency
+        mount ::API::Analytics::ProjectLeadTime
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
         mount ::API::ResourceIterationEvents

@@ -42,7 +42,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
   let_it_be(:deployment_2020_04_04) { make_deployment(DateTime.new(2020, 4, 4), prod) }
   let_it_be(:deployment_2020_04_05) { make_deployment(DateTime.new(2020, 4, 5), prod) }
 
-  let(:project_activity_analytics_enabled) { true }
+  let(:dora4_analytics_enabled) { true }
   let(:current_user) { reporter }
   let(:params) { { from: Time.now, to: Time.now, interval: "all", environment: prod.name } }
   let(:path) { api("/projects/#{project.id}/analytics/deployment_frequency", current_user) }
@@ -50,7 +50,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
   let(:request_time) { nil }
 
   before do
-    stub_licensed_features(project_activity_analytics: project_activity_analytics_enabled)
+    stub_licensed_features(dora4_analytics: dora4_analytics_enabled)
 
     if request_time
       travel_to(request_time) { request }
@@ -87,7 +87,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
     end
   end
 
-  context 'with params: from 2020/04/01 to request time' do
+  context 'with params: from 2020/04/02 to request time' do
     let(:request_time) { DateTime.new(2020, 4, 4) }
     let(:params) { { environment: prod.name, from: DateTime.new(2020, 4, 2) } }
 
@@ -193,7 +193,7 @@ RSpec.describe API::Analytics::ProjectDeploymentFrequency do
   end
 
   context 'when feature is not available in plan' do
-    let(:project_activity_analytics_enabled) { false }
+    let(:dora4_analytics_enabled) { false }
 
     context 'when user has access to the project' do
       it 'returns `forbidden`' do

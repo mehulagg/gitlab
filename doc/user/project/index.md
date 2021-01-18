@@ -376,15 +376,16 @@ project `https://gitlab.com/gitlab-org/gitlab`), you can clone the repository
 with the alias (e.g `git clone git@gitlab.com:gitlab.git` instead of
 `git clone git@gitlab.com:gitlab-org/gitlab.git`).
 
-## Project activity analytics overview **(ULTIMATE SELF)**
+## DORA4 analytics overview **(ULTIMATE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/279039) in GitLab [Ultimate](https://about.gitlab.com/pricing/) 13.7 as a [Beta feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta).
 
 Project details include the following analytics:
 
 - Deployment Frequency
+- Merge Request Lead Time
 
-For more information, see [Project Analytics API](../../api/project_analytics.md).
+For more information, see [DORA4 Project Analytics API](../../api/dora4_project_analytics.md).
 
 ## Project APIs
 
@@ -406,4 +407,4 @@ There are numerous [APIs](../../api/README.md) to use with your projects:
 - [Traffic](../../api/project_statistics.md)
 - [Variables](../../api/project_level_variables.md)
 - [Aliases](../../api/project_aliases.md)
-- [Analytics](../../api/project_analytics.md)
+- [DORA4 Analytics](../../api/dora4_project_analytics.md)

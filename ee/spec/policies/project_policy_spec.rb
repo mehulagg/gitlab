@@ -1388,24 +1388,24 @@ RSpec.describe ProjectPolicy do
     it { is_expected.to be_disallowed(:read_group_timelogs) }
   end
 
-  context 'when project activity analytics is available' do
+  context 'when dora4 analytics is available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: true)
+      stub_licensed_features(dora4_analytics: true)
     end
 
-    it { is_expected.to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.to be_allowed(:read_dora4_analytics) }
   end
 
-  context 'when project activity analytics is not available' do
+  context 'when dora4 analytics is not available' do
     let(:current_user) { developer }
 
     before do
-      stub_licensed_features(project_activity_analytics: false)
+      stub_licensed_features(dora4_analytics: false)
     end
 
-    it { is_expected.not_to be_allowed(:read_project_activity_analytics) }
+    it { is_expected.not_to be_allowed(:read_dora4_analytics) }
   end
 
   describe ':read_code_review_analytics' do
