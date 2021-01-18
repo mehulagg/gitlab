@@ -5,8 +5,6 @@ module Gitlab
     class DesignRepoRestorer < RepoRestorer
       extend ::Gitlab::Utils::Override
 
-      private
-
       override :repository
       def repository
         @repository ||= exportable.design_repository

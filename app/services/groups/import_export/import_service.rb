@@ -3,7 +3,7 @@
 module Groups
   module ImportExport
     class ImportService
-      attr_reader :current_user, :group, :params
+      attr_reader :current_user, :group, :params, :shared
 
       def initialize(group:, user:)
         @group = group
@@ -29,7 +29,7 @@ module Groups
         if valid_user_permissions? && import_file && restorers.all?(&:restore)
           notify_success
 
-          @group
+          group
         else
           notify_error!
         end
@@ -43,9 +43,9 @@ module Groups
 
       def import_file
         @import_file ||= Gitlab::ImportExport::FileImporter.import(
-          importable: @group,
+          importable: group,
           archive_file: nil,
-          shared: @shared
+          shared: shared
         )
       end
 
@@ -56,27 +56,27 @@ module Groups
       def tree_restorer
         if ndjson?
           Gitlab::ImportExport::Group::TreeRestorer.new(
-            user: @current_user,
-            shared: @shared,
-            group: @group
+            user: current_user,
+            shared: shared,
+            group: group
           )
         else
           Gitlab::ImportExport::Group::LegacyTreeRestorer.new(
-            user: @current_user,
-            shared: @shared,
-            group: @group,
+            user: current_user,
+            shared: shared,
+            group: group,
             group_hash: nil
           )
         end
       end
 
       def ndjson?
-        ::Feature.enabled?(:group_import_ndjson, @group&.parent, default_enabled: true) &&
-          File.exist?(File.join(@shared.export_path, 'tree/groups/_all.ndjson'))
+        ::Feature.enabled?(:group_import_ndjson, group&.parent, default_enabled: true) &&
+          File.exist?(File.join(shared.export_path, 'tree/groups/_all.ndjson'))
       end
 
       def remove_import_file
-        upload = @group.import_export_upload
+        upload = group.import_export_upload
 
         return unless upload&.import_file&.file
 
@@ -88,7 +88,7 @@ module Groups
         if current_user.can?(:admin_group, group)
           true
         else
-          @shared.error(::Gitlab::ImportExport::Error.permission_error(current_user, group))
+          shared.error(::Gitlab::ImportExport::Error.permission_error(current_user, group))
 
           false
         end
@@ -96,16 +96,16 @@ module Groups
 
       def notify_success
         @logger.info(
-          group_id:   @group.id,
-          group_name: @group.name,
+          group_id:   group.id,
+          group_name: group.name,
           message:    'Group Import/Export: Import succeeded'
         )
       end
 
       def notify_error
         @logger.error(
-          group_id:   @group.id,
-          group_name: @group.name,
+          group_id:   group.id,
+          group_name: group.name,
           message:    "Group Import/Export: Errors occurred, see '#{Gitlab::ErrorTracking::Logger.file_name}' for details"
         )
       end
@@ -113,11 +113,11 @@ module Groups
       def notify_error!
         notify_error
 
-        raise Gitlab::ImportExport::Error.new(@shared.errors.to_sentence)
+        raise Gitlab::ImportExport::Error.new(shared.errors.to_sentence)
       end
 
       def remove_base_tmp_dir
-        FileUtils.rm_rf(@shared.base_path)
+        FileUtils.rm_rf(shared.base_path)
       end
     end
   end

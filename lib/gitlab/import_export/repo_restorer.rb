@@ -8,6 +8,7 @@ module Gitlab
       def initialize(exportable:, shared:, path_to_bundle:)
         @path_to_bundle = path_to_bundle
         @shared = shared
+        @exportable = exportable
       end
 
       def restore
@@ -21,13 +22,13 @@ module Gitlab
         false
       end
 
-      private
-
-      attr_accessor :exportable, :path_to_bundle, :shared
-
       def repository
         @repository ||= exportable.repository
       end
+
+      private
+
+      attr_accessor :exportable, :path_to_bundle, :shared
 
       def ensure_repository_does_not_exist!
         if repository.exists?
