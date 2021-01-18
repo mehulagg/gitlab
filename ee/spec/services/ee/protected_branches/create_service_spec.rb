@@ -19,7 +19,7 @@ RSpec.describe ProtectedBranches::CreateService do
   end
 
   describe "#execute" do
-    subject(:service) { described_class.new(target_project, user, params) }
+    subject(:execute) { described_class.new(target_project, user, params).execute }
 
     before do
       target_project.add_user(user, :developer)
@@ -34,7 +34,7 @@ RSpec.describe ProtectedBranches::CreateService do
         end
 
         it "ignores incoming params and sets code_owner_approval_required to false" do
-          expect { service.execute }.to change(ProtectedBranch, :count).by(1)
+          expect { execute }.to change(ProtectedBranch, :count).by(1)
           expect(ProtectedBranch.last.code_owner_approval_required).to be_falsy
         end
       end
@@ -42,20 +42,31 @@ RSpec.describe ProtectedBranches::CreateService do
       context "when available" do
         before do
           stub_licensed_features(code_owner_approval_required: true)
+          params[:code_owner_approval_required] = code_owner_approval_required
         end
 
-        it "sets code_owner_approval_required to true when param is true" do
-          params[:code_owner_approval_required] = true
+        context "when code_owner_approval_required param is true" do
+          let(:code_owner_approval_required) { true }
 
-          expect { service.execute }.to change(ProtectedBranch, :count).by(1)
-          expect(ProtectedBranch.last.code_owner_approval_required).to be_truthy
+          it "sets code_owner_approval_required to true" do
+            expect { execute }.to change(ProtectedBranch, :count).by(1)
+            expect(ProtectedBranch.last.code_owner_approval_required).to be_truthy
+          end
+
+          it_behaves_like 'records an onboarding progress action', :code_owners_enabled do
+            let(:namespace) { source_project.namespace }
+          end
         end
 
-        it "sets code_owner_approval_required to false when param is false" do
-          params[:code_owner_approval_required] = false
+        context "when code_owner_approval_required param is false" do
+          let(:code_owner_approval_required) { false }
 
-          expect { service.execute }.to change(ProtectedBranch, :count).by(1)
-          expect(ProtectedBranch.last.code_owner_approval_required).to be_falsy
+          it "sets code_owner_approval_required to false" do
+            expect { execute }.to change(ProtectedBranch, :count).by(1)
+            expect(ProtectedBranch.last.code_owner_approval_required).to be_falsy
+          end
+
+          it_behaves_like 'does not record an onboarding progress action'
         end
       end
     end
@@ -71,7 +82,7 @@ RSpec.describe ProtectedBranches::CreateService do
 
       it "calls MergeRequest::SyncCodeOwnerApprovalRules to update open MRs" do
         expect(::MergeRequests::SyncCodeOwnerApprovalRules).to receive(:new).with(merge_request).and_call_original
-        expect { service.execute }.to change(ProtectedBranch, :count).by(1)
+        expect { execute }.to change(ProtectedBranch, :count).by(1)
       end
 
       context "when the branch is a wildcard" do
@@ -82,21 +93,21 @@ RSpec.describe ProtectedBranches::CreateService do
 
           it "calls MergeRequest::SyncCodeOwnerApprovalRules to update open MRs for #{wildcard}" do
             expect(::MergeRequests::SyncCodeOwnerApprovalRules).to receive(:new).with(merge_request).and_call_original
-            expect { service.execute }.to change(ProtectedBranch, :count).by(1)
+            expect { execute }.to change(ProtectedBranch, :count).by(1)
           end
         end
       end
     end
 
     it 'adds a security audit event entry' do
-      expect { service.execute }.to change(::AuditEvent, :count).by(1)
+      expect { execute }.to change(::AuditEvent, :count).by(1)
     end
 
     context 'with invalid params' do
       let(:params) { nil }
 
       it "doesn't add a security audit event entry" do
-        expect { service.execute }.not_to change(::AuditEvent, :count)
+        expect { execute }.not_to change(::AuditEvent, :count)
       end
     end
   end
