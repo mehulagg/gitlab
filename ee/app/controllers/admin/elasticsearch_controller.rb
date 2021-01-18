@@ -43,6 +43,19 @@ class Admin::ElasticsearchController < Admin::ApplicationController
     redirect_to redirect_path
   end
 
+  # POST
+  # Retry a halted migration
+  def retry_migration
+    migration = Elastic::DataMigrationService[params[:version].to_i]
+
+    Gitlab::Elastic::Helper.default.delete_migration_record(migration)
+    Elastic::DataMigrationService.drop_migration_halted_cache!(migration)
+
+    flash[:notice] = _('Migration has been scheduled to be retried')
+
+    redirect_to redirect_path
+  end
+
   private
 
   def redirect_path

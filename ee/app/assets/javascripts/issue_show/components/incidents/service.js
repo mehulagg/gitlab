@@ -10,3 +10,8 @@ export const uploadMetricImage = async (payload) => {
   const response = await Api.uploadIssueMetricImage(payload);
   return convertObjectPropsToCamelCase(response.data);
 };
+
+export const deleteMetricImage = async (payload) => {
+  const response = await Api.deleteMetricImage(payload);
+  return convertObjectPropsToCamelCase(response.data);
+};

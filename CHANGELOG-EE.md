@@ -1,5 +1,9 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.7.4 (2021-01-13)
+
+- No changes.
+
 ## 13.7.3 (2021-01-08)
 
 - No changes.
@@ -169,6 +173,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Convert group settings expand button to gl-button. !49857
 - Rename code coverage analytics sections. !49931
 
+
+## 13.6.5 (2021-01-13)
+
+- No changes.
 
 ## 13.6.4 (2021-01-07)
 
@@ -368,6 +376,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Remove duplicated BS display properties from Quality Test Case. !47044 (Takuya Noguchi)
 - Remove duplicated BS display properties from member overriding UI. !47126 (Takuya Noguchi)
 
+
+## 13.5.7 (2021-01-13)
+
+- No changes.
 
 ## 13.5.6 (2021-01-07)
 

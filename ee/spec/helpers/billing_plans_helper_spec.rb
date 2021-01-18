@@ -152,6 +152,18 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
+  describe '#plan_feature_list' do
+    let(:plan) do
+      Hashie::Mash.new(features: (1..3).map { |i| { title: "feat 0#{i}", highlight: i.even? } })
+    end
+
+    it 'returns features list sorted by highlight attribute' do
+      expect(helper.plan_feature_list(plan)).to eq([{ 'title' => 'feat 02', 'highlight' => true },
+                                                    { 'title' => 'feat 01', 'highlight' => false },
+                                                    { 'title' => 'feat 03', 'highlight' => false }])
+    end
+  end
+
   describe '#seats_data_last_update_info' do
     before do
       allow(UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker).to receive(:last_enqueue_time).and_return(enqueue_time)

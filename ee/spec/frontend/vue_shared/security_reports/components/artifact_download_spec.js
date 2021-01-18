@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   expectedDownloadDropdownProps,
   securityReportDownloadPathsQueryResponse,

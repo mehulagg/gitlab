@@ -81,5 +81,6 @@ namespace :admin do
     post :enqueue_index
     post :trigger_reindexing
     post :cancel_index_deletion
+    post :retry_migration
   end
 end

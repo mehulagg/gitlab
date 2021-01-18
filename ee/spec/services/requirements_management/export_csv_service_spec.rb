@@ -71,7 +71,7 @@ RSpec.describe RequirementsManagement::ExportCsvService do
     end
 
     specify 'latest test report state' do
-      expect(csv[0]['Latest Test Report State']).to eq "passed"
+      expect(csv[0]['Latest Test Report State']).to eq "Passed"
     end
 
     specify 'latest test report created at' do

@@ -61,6 +61,7 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
     fullPath,
     iterationId,
     iterationIid,
+    labelsFetchPath,
     editIterationPath,
     previewMarkdownPath,
   } = el.dataset;
@@ -75,6 +76,7 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
           fullPath,
           iterationId,
           iterationIid,
+          labelsFetchPath,
           canEdit,
           editIterationPath,
           namespaceType,

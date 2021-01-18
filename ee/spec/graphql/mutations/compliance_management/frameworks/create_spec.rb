@@ -8,7 +8,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
   let(:params) { valid_params }
   let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
 
-  subject { mutation.resolve(params) }
+  subject { mutation.resolve(**params) }
 
   describe '#resolve' do
     context 'feature is unlicensed' do
@@ -84,7 +84,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
         end
 
         context 'framework parameters are invalid' do
-          subject { mutation.resolve(invalid_color_params) }
+          subject { mutation.resolve(**invalid_color_params) }
 
           it 'does not create a new compliance framework' do
             expect { subject }.not_to change { namespace.compliance_management_frameworks.count }

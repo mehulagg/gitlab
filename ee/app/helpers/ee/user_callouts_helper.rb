@@ -6,7 +6,6 @@ module EE
 
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
     ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
-    CANARY_DEPLOYMENT              = 'canary_deployment'
     GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
     GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
     GOLD_TRIAL                     = 'gold_trial'
@@ -14,10 +13,6 @@ module EE
     NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     THREAT_MONITORING_INFO         = 'threat_monitoring_info'
-
-    def show_canary_deployment_callout?(project)
-      false
-    end
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?

@@ -79,4 +79,29 @@ RSpec.describe EE::Issuable do
       it { is_expected.to eq(weight_available) }
     end
   end
+
+  describe '#supports_iterations?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :supports_iterations) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, true],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.supports_iterations? }
+
+      it { is_expected.to eq(supports_iterations) }
+    end
+  end
 end

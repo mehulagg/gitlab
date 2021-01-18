@@ -157,6 +157,7 @@ module EE
       !incident?
     end
 
+    override :supports_iterations?
     def supports_iterations?
       !incident?
     end

@@ -100,12 +100,22 @@ RSpec.describe Projects::UpdateMirrorService do
     end
 
     context "updating tags" do
-      it "creates new tags" do
+      it "creates new tags, expiring cache if there are tag changes" do
         stub_fetch_mirror(project)
+
+        expect(project.repository).to receive(:expire_tags_cache).and_call_original
 
         service.execute
 
         expect(project.repository.tag_names).to include('new-tag')
+      end
+
+      it 'does not expire cache if there are no tag changes' do
+        stub_fetch_mirror(project, tags_changed: false)
+
+        expect(project.repository).not_to receive(:expire_tags_cache)
+
+        service.execute
       end
 
       it "only invokes Git::TagPushService for tags pointing to commits" do
@@ -429,11 +439,11 @@ RSpec.describe Projects::UpdateMirrorService do
     end
   end
 
-  def stub_fetch_mirror(project, repository: project.repository)
-    allow(project).to receive(:fetch_mirror) { fetch_mirror(repository) }
+  def stub_fetch_mirror(project, repository: project.repository, tags_changed: true )
+    allow(project).to receive(:fetch_mirror) { fetch_mirror(repository, tags_changed: tags_changed) }
   end
 
-  def fetch_mirror(repository)
+  def fetch_mirror(repository, tags_changed: true)
     rugged = rugged_repo(repository)
     masterrev = repository.find_branch("master").dereferenced_target.id
 
@@ -457,6 +467,8 @@ RSpec.describe Projects::UpdateMirrorService do
 
     # New tag that point to a blob
     rugged.references.create('refs/tags/new-tag-on-blob', 'c74175afd117781cbc983664339a0f599b5bb34e')
+
+    Gitaly::FetchRemoteResponse.new(tags_changed: tags_changed)
   end
 
   def modify_tag(repository, tag_name)

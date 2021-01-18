@@ -205,6 +205,12 @@ To enable Advanced Search, you need to have admin access to GitLab:
    **Admin Area > Settings > General > Advanced Search** and click **Save
    changes**.
 
+NOTE:
+When your Elasticsearch cluster is down while Elasticsearch is enabled,
+you might have problems updating documents such as issues because your
+instance queues a job to index the change, but cannot find a valid
+Elasticsearch cluster.
+
 ### Advanced Search configuration
 
 The following Elasticsearch settings are available:
@@ -507,6 +513,15 @@ This should return something similar to:
 ```
 
 In order to debug issues with the migrations you can check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog).
+
+### Retry a halted migration
+
+Some migrations are built with a retry limit. If the migration cannot finish within the retry limit,
+it will be halted and a notification will be displayed in the Advanced Search integration settings.
+It is recommended to check the [`elasticsearch.log` file](../administration/logs.md#elasticsearchlog) to
+debug why the migration was halted and make any changes before retrying the migration. Once you believe you've 
+fixed the cause of the failure, click "Retry migration", and the migration will be scheduled to be retried 
+in the background.
 
 ## GitLab Advanced Search Rake tasks
 

@@ -19,9 +19,14 @@ module IncidentManagement
 
     validates :name, presence: true, uniqueness: { scope: :oncall_schedule_id }, length: { maximum: NAME_LENGTH }
     validates :starts_at, presence: true
-    validates :length, presence: true
+    validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
 
     delegate :project, to: :schedule
+
+    def shift_duration
+      # As length_unit is an enum, input is guaranteed to be appropriate
+      length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
+    end
   end
 end

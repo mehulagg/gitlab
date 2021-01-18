@@ -3,7 +3,7 @@ import VueApollo from 'vue-apollo';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 
 import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 
 import getComplianceFrameworkQuery from 'ee/groups/settings/compliance_frameworks/graphql/queries/get_compliance_framework.query.graphql';
 import List from 'ee/groups/settings/compliance_frameworks/components/list.vue';

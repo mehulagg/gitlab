@@ -16,6 +16,7 @@ export default {
     MetricsImage,
     UploadDropzone,
   },
+  inject: ['canUpdate', 'projectId', 'iid'],
   data() {
     return {
       currentFiles: [],
@@ -23,7 +24,6 @@ export default {
       modalUrl: '',
     };
   },
-  inject: ['canUpdate', 'projectId', 'iid'],
   store: createStore(),
   computed: {
     ...mapState(['metricImages', 'isLoadingMetricImages', 'isUploadingImage']),
@@ -89,7 +89,7 @@ export default {
       :action-cancel="{ text: $options.i18n.modalCancel }"
       :title="$options.i18n.modalTitle"
       :visible="modalVisible"
-      @canceled="clearInputs"
+      @hidden="clearInputs"
       @primary.prevent="onUpload"
     >
       <p>{{ $options.i18n.modalDescription }}</p>

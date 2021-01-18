@@ -19,10 +19,10 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
 
       find('.header-help-dropdown-toggle').click
 
-      expect(page).to have_button(text: "See what's new at GitLab")
+      expect(page).to have_button(text: "What's new")
       expect(page).to have_selector('.js-whats-new-notification-count')
 
-      find('button', text: "See what's new at GitLab").click
+      find('button', text: "What's new").click
     end
 
     find('.whats-new-drawer .gl-drawer-close-button').click
@@ -30,7 +30,7 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
 
     page.within '.header-help' do
       expect(page).not_to have_selector('.notification-dot', visible: true)
-      expect(page).to have_button(text: "See what's new at GitLab")
+      expect(page).to have_button(text: "What's new")
       expect(page).not_to have_selector('.js-whats-new-notification-count')
     end
   end

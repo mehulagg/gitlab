@@ -7,7 +7,22 @@ exports[`Metrics upload item render the metrics image component 1`] = `
   footerclass=""
   headerclass="gl-display-flex gl-align-items-center gl-border-b-0 gl-py-3"
 >
-   
+  <gl-modal-stub
+    actioncancel="[object Object]"
+    actionprimary="[object Object]"
+    body-class="gl-pb-0! gl-min-h-6!"
+    dismisslabel="Close"
+    modalclass=""
+    modalid="delete-metric-modal"
+    size="sm"
+    titletag="h4"
+  >
+     
+    <p>
+      Are you sure you wish to delete this image?
+    </p>
+  </gl-modal-stub>
+    
   <div
     class="gl-display-flex gl-flex-direction-column"
     data-testid="metric-image-body"

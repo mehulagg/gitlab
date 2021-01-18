@@ -42,6 +42,7 @@ exports[`AddEditScheduleForm renders modal layout 1`] = `
       category="primary"
       class="timezone-dropdown gl-w-full"
       headertext="Select timezone"
+      hideheaderborder="true"
       id="schedule-timezone"
       size="medium"
       text="(UTC -12:00) -12 International Date Line West"

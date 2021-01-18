@@ -26,7 +26,7 @@ RSpec.describe Admin::ElasticsearchController do
 
     context 'without an index' do
       before do
-        allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
+        allow(helper).to(receive(:index_exists?)).and_return(false)
       end
 
       it 'does nothing and returns 404' do
@@ -77,6 +77,29 @@ RSpec.describe Admin::ElasticsearchController do
 
       expect(task.reload.delete_original_index_at).to be_nil
       expect(controller).to set_flash[:notice].to include('deletion is canceled')
+      expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+    end
+  end
+
+  describe 'POST #retry_migration' do
+    before do
+      sign_in(admin)
+    end
+
+    let(:migration) { Elastic::DataMigrationService.migrations.last }
+    let(:migration_version) { migration.version.to_i }
+
+    it 'deletes the migration record and drops the halted cache' do
+      allow(Elastic::MigrationRecord).to receive(:new).and_call_original
+      allow(Elastic::MigrationRecord).to receive(:new).with(version: migration.version, name: migration.name, filename: migration.filename).and_return(migration)
+      allow(Elastic::DataMigrationService).to receive(:migration_halted?).and_return(false)
+      allow(Elastic::DataMigrationService).to receive(:migration_halted?).with(migration).and_return(true, false)
+      expect(Elastic::DataMigrationService.halted_migrations?).to be_truthy
+
+      post :retry_migration, params: { version: migration.version }
+
+      expect(Elastic::DataMigrationService.halted_migrations?).to be_falsey
+      expect(controller).to set_flash[:notice].to include('Migration has been scheduled to be retried')
       expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
     end
   end
