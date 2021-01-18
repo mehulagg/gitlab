@@ -8,7 +8,7 @@ module EE
 
         private
 
-        override :repository
+        override :bundle_filename
         def bundle_filename
           if exportable.is_a?(Group)
             ::Gitlab::ImportExport.group_wiki_repo_bundle_filename
