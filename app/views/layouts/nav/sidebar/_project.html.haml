@@ -345,7 +345,7 @@
         = render 'layouts/nav/sidebar/wiki_link', wiki_url: wiki_path(@project.wiki)
 
       - if project_nav_tab?(:external_wiki)
-        - external_wiki_url = @project.external_wiki.external_wiki_url
+        - external_wiki_url = @project.external_wiki_service.external_wiki_url
         = nav_link do
           = link_to external_wiki_url, class: 'shortcuts-external_wiki' do
             .nav-icon-container

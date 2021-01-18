@@ -1339,12 +1339,6 @@ class Project < ApplicationRecord
     wiki_enabled? || has_external_wiki?
   end
 
-  def external_wiki
-    return unless has_external_wiki?
-
-    @external_wiki ||= services.external_wikis.first
-  end
-
   def find_or_initialize_services
     available_services_names = Service.available_services_names - disabled_services
 

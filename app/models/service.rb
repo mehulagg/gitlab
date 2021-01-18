@@ -64,7 +64,6 @@ class Service < ApplicationRecord
   validate :validate_belongs_to_project_or_group
 
   scope :external_issue_trackers, -> { where(category: 'issue_tracker').active }
-  scope :external_wikis, -> { where(type: 'ExternalWikiService').active }
   scope :active, -> { where(active: true) }
   scope :by_type, -> (type) { where(type: type) }
   scope :by_active_flag, -> (flag) { where(active: flag) }
@@ -440,10 +439,6 @@ class Service < ApplicationRecord
 
   def external_issue_tracker?
     category == :issue_tracker && active?
-  end
-
-  def external_wiki?
-    type == 'ExternalWikiService' && active?
   end
 
   # override if needed

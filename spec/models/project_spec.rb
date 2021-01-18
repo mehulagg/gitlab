@@ -1103,26 +1103,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#external_wiki' do
-    let_it_be(:project) { create(:project) }
-
-    def subject
-      project.reload.external_wiki
-    end
-
-    it 'returns an active external wiki' do
-      create(:service, project: project, type: 'ExternalWikiService', active: true)
-
-      is_expected.to be_kind_of(ExternalWikiService)
-    end
-
-    it 'does not return an inactive external wiki' do
-      create(:service, project: project, type: 'ExternalWikiService', active: false)
-
-      is_expected.to eq(nil)
-    end
-  end
-
   describe '#has_external_wiki' do
     let_it_be(:project) { create(:project) }
 

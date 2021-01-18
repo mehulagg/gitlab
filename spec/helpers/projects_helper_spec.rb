@@ -441,7 +441,7 @@ RSpec.describe ProjectsHelper do
 
     context 'when project does not have external wiki' do
       it 'does not include external wiki tab' do
-        expect(project.external_wiki).to be_nil
+        expect(project.external_wiki_service).to be_nil
         is_expected.not_to include(:external_wiki)
       end
     end

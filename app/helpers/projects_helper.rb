@@ -430,7 +430,7 @@ module ProjectsHelper
 
   def apply_external_nav_tabs(nav_tabs, project)
     nav_tabs << :external_issue_tracker if project.external_issue_tracker
-    nav_tabs << :external_wiki if project.external_wiki
+    nav_tabs << :external_wiki if project.has_external_wiki?
 
     if project.has_confluence?
       nav_tabs.delete(:wiki)
