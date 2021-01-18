@@ -67,6 +67,10 @@ Database Labs provides a API we can interact with to manage thin clones. In orde
 1. Post back the results of the migration and query testing to the Merge Request
 1. Destroy the thin-clone
 
+## Security
+
+In order to secure this process and meet compliance goals, the runner environment will be treated as a *production* environment and similarly locked down, monitored and audited. Only Database Maintainers will have access to the CI pipeline and its job output. Everyone else will only be able to see the results and statistics posted back on the Merge Request.
+
 ### Short-term
 
 The short-term focus is on testing regular migrations (typically schema changes) and using the existing Database Labs instance from postgres.ai for it.
