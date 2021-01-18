@@ -21,7 +21,7 @@ class WhatsNewController < ApplicationController
   private
 
   def check_feature_flag
-    render_404 unless Feature.enabled?(:whats_new_drawer, current_user)
+    render_404 unless Feature.enabled?(:whats_new_dropdown, current_user)
   end
 
   def check_valid_page_param

@@ -7,9 +7,9 @@ RSpec.describe WhatsNewController do
     let(:item) { double(:item) }
     let(:highlights) { double(:highlight, items: [item], map: [item].map, next_page: 2) }
 
-    context 'with whats_new_drawer feature enabled' do
+    context 'with whats_new_dropdown feature enabled' do
       before do
-        stub_feature_flags(whats_new_drawer: true)
+        stub_feature_flags(whats_new_dropdown: true)
       end
 
       context 'with no page param' do
@@ -51,9 +51,9 @@ RSpec.describe WhatsNewController do
       end
     end
 
-    context 'with whats_new_drawer feature disabled' do
+    context 'with whats_new_dropdown feature disabled' do
       before do
-        stub_feature_flags(whats_new_drawer: false)
+        stub_feature_flags(whats_new_dropdown: false)
       end
 
       it 'returns a 404' do

@@ -6,7 +6,7 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
   let_it_be(:user) { create(:user) }
 
   before do
-    stub_feature_flags(whats_new_dropdown: true, whats_new_drawer: true)
+    stub_feature_flags(whats_new_dropdown: true)
 
     sign_in(user)
   end
