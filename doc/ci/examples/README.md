@@ -31,7 +31,7 @@ The following table lists examples with step-by-step tutorials that are containe
 | End-to-end testing            | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md). |
 | Game development              | [DevOps and Game Dev with GitLab CI/CD](devops_and_game_dev_with_gitlab_ci_cd/index.md). |
 | Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md). |
-| Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](deploy_spring_boot_to_cloud_foundry/index.md). |
+| Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](https://gitlab.com/gitlab-examples/spring-gitlab-cf-deploy-demo). |
 | Load performance testing      | [Load Performance Testing with the k6 container](../../user/project/merge_requests/load_performance_testing.md). |
 | Multi project pipeline        | [Build, test deploy using multi project pipeline](https://gitlab.com/gitlab-examples/upstream-project). |
 | NPM with semantic-release     | [Publish NPM packages to the GitLab Package Registry using semantic-release](semantic-release.md). |
