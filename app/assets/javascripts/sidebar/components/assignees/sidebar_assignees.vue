@@ -1,6 +1,5 @@
 <script>
 import Store from '~/sidebar/stores/sidebar_store';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
@@ -94,13 +93,10 @@ export default {
       :mediator="mediator"
     />
     <sidebar-assignees-widget
-      :loading="store.isFetching.assignees"
-      :assignees="store.assignees"
       :participants-query="participantsQuery"
       :participants-query-variables="participantsQueryVariables"
       :update-assignees-mutation="updateAssigneesMutation"
       :update-assignees-variables="updateAssigneesVariables"
-      @assigneesUpdated="saveAssignees"
     />
   </div>
 </template>

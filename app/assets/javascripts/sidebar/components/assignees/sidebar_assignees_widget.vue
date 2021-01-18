@@ -137,12 +137,6 @@ export default {
             assigneeUsernames,
           },
         })
-        .then(({ data }) => {
-          this.$emit('assigneesUpdated', data);
-          // this is necessary if we want to use a result of updateAssignees method
-          // outside the widget's parent app
-          return data;
-        })
         .catch(() => {
           createFlash({ message: __('An error occurred while updating assignees.') });
         })

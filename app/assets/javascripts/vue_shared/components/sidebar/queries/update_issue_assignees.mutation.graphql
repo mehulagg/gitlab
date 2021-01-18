@@ -5,6 +5,7 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $proje
     input: { iid: $iid, assigneeUsernames: $assigneeUsernames, projectPath: $projectPath }
   ) {
     issue {
+      id
       assignees {
         nodes {
           ...User

@@ -3,6 +3,7 @@
 query issueParticipants($fullPath: ID!, $iid: String!) {
   project(fullPath: $fullPath) {
     issuable: issue(iid: $iid) {
+      id
       participants {
         nodes {
           ...User
