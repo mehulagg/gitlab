@@ -1,4 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import component from '~/packages_and_registries/settings/group/components/group_settings_app.vue';
 import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import {
@@ -6,14 +8,34 @@ import {
   PACKAGE_SETTINGS_DESCRIPTION,
 } from '~/packages_and_registries/settings/group/constants';
 
+import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
+import { groupPackageSettingsMock } from '../mock_data';
+
+const localVue = createLocalVue();
+
 describe('Group Settings App', () => {
   let wrapper;
+  let apolloProvider;
 
-  const mountComponent = (defaultExpanded = false) => {
+  const defaultProvide = {
+    defaultExpanded: false,
+    groupPath: 'foo_group_path',
+  };
+
+  const mountComponent = ({
+    provide = defaultProvide,
+    resolver = jest.fn().mockResolvedValue(groupPackageSettingsMock),
+  } = {}) => {
+    localVue.use(VueApollo);
+
+    const requestHandlers = [[getGroupPackagesSettingsQuery, resolver]];
+
+    apolloProvider = createMockApollo(requestHandlers);
+
     wrapper = shallowMount(component, {
-      provide: {
-        defaultExpanded,
-      },
+      localVue,
+      apolloProvider,
+      provide,
       stubs: {
         SettingsBlock,
       },
@@ -49,5 +71,14 @@ describe('Group Settings App', () => {
     mountComponent();
 
     expect(wrapper.text()).toContain(PACKAGE_SETTINGS_DESCRIPTION);
+  });
+
+  it('calls the graphql API with the proper variables', () => {
+    const resolver = jest.fn().mockResolvedValue(groupPackageSettingsMock);
+    mountComponent({ resolver });
+
+    expect(resolver).toHaveBeenCalledWith({
+      fullPath: defaultProvide.groupPath,
+    });
   });
 });
