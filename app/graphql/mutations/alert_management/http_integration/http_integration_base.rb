@@ -27,3 +27,5 @@ module Mutations
     end
   end
 end
+
+Mutations::AlertManagement::HttpIntegration::HttpIntegrationBase.prepend_if_ee('::EE::Mutations::AlertManagement::HttpIntegration::HttpIntegrationBase')

@@ -24,10 +24,19 @@ module Mutations
           response ::AlertManagement::HttpIntegrations::UpdateService.new(
             integration,
             current_user,
-            args.slice(:name, :active)
+            http_integration_params(integration.project, args)
           ).execute
+        end
+
+        private
+
+        # overriden in EE
+        def http_integration_params(_project, args)
+          args.slice(:name, :active)
         end
       end
     end
   end
 end
+
+Mutations::AlertManagement::HttpIntegration::Update.prepend_if_ee('::EE::Mutations::AlertManagement::HttpIntegration::Update')

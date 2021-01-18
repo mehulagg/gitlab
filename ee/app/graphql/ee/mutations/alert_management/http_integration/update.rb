@@ -4,7 +4,7 @@ module EE
   module Mutations
     module AlertManagement
       module HttpIntegration
-        module Create
+        module Update
           extend ActiveSupport::Concern
           extend ::Gitlab::Utils::Override
 

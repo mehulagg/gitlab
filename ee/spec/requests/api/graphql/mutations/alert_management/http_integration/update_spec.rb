@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Creating a new HTTP Integration' do
+RSpec.describe 'Updating an existing HTTP Integration' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
+  let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
 
   let(:payload_example) do
     {
@@ -22,48 +23,41 @@ RSpec.describe 'Creating a new HTTP Integration' do
     ]
   end
 
-  let(:variables) do
-    {
-      project_path: project.full_path,
+  let(:mutation) do
+    variables = {
+      id: GitlabSchema.id_from_object(integration).to_s,
+      name: 'Modified Name',
       active: false,
-      name: 'New HTTP Integration',
       payload_example: payload_example,
       payload_attribute_mappings: payload_attribute_mappings
     }
-  end
-
-  let(:mutation) do
-    graphql_mutation(:http_integration_create, variables) do
+    graphql_mutation(:http_integration_update, variables) do
       <<~QL
          clientMutationId
          errors
          integration {
            id
-           type
            name
            active
-           token
            url
-           apiUrl
          }
       QL
     end
   end
 
-  let(:mutation_response) { graphql_mutation_response(:http_integration_create) }
+  let(:mutation_response) { graphql_mutation_response(:http_integration_update) }
 
   shared_examples 'ignoring the custom mapping' do
-    it 'creates integration without the custom mapping params' do
+    it 'updates integration without the custom mapping params' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      new_integration = ::AlertManagement::HttpIntegration.last!
       integration_response = mutation_response['integration']
+      # integration.reload
 
       expect(response).to have_gitlab_http_status(:success)
-      expect(integration_response['id']).to eq(GitlabSchema.id_from_object(new_integration).to_s)
 
-      expect(new_integration.payload_example).to eq({})
-      expect(new_integration.payload_attribute_mapping).to eq({})
+      expect(integration.payload_example).to eq({})
+      expect(integration.payload_attribute_mapping).to eq({})
     end
   end
 
@@ -74,31 +68,9 @@ RSpec.describe 'Creating a new HTTP Integration' do
     stub_feature_flags(multiple_http_integrations_custom_mapping: project)
   end
 
-  it_behaves_like 'creating a new HTTP integration'
-
-  it 'stores the custom mapping params' do
-    post_graphql_mutation(mutation, current_user: current_user)
-
-    new_integration = ::AlertManagement::HttpIntegration.last!
-
-    expect(new_integration.payload_example).to eq(Gitlab::Json.parse(payload_example))
-    expect(new_integration.payload_attribute_mapping).to eq(
-      {
-        'title' => { 'path' => %w[alert name], 'type' => 'string', 'label' => nil },
-        'start_time' => { 'path' => %w[started_at], 'type' => 'datetime', 'label' => 'Start time' }
-      }
-    )
-  end
-
-  [:project_path, :active, :name].each do |argument|
-    context "without required argument #{argument}" do
-      before do
-        variables.delete(argument)
-      end
-
-      it_behaves_like 'an invalid argument to the mutation', argument_name: argument
-    end
-  end
+  it_behaves_like 'updating an existing HTTP integration'
+  it_behaves_like 'validating the payload_example'
+  it_behaves_like 'validating the payload_attribute_mappings'
 
   context 'with the custom mappings feature unavailable' do
     before do
@@ -115,7 +87,4 @@ RSpec.describe 'Creating a new HTTP Integration' do
 
     it_behaves_like 'ignoring the custom mapping'
   end
-
-  it_behaves_like 'validating the payload_example'
-  it_behaves_like 'validating the payload_attribute_mappings'
 end
