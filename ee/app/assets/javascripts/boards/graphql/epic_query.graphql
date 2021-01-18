@@ -1,0 +1,14 @@
+query Epic($fullPath: ID!, $iid: ID!) {
+  group(fullPath: $fullPath) {
+    epic(iid: $iid) {
+      id
+      iid
+      title
+      state
+      reference
+      webUrl
+      createdAt
+      closedAt
+    }
+  }
+}
