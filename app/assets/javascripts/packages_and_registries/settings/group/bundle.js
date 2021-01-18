@@ -16,6 +16,7 @@ export default () => {
     apolloProvider,
     provide: {
       defaultExpanded: parseBoolean(el.dataset.defaultExpanded),
+      groupPath: el.dataset.groupPath,
     },
     render(createElement) {
       return createElement(SettingsApp);
