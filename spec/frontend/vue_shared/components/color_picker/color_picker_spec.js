@@ -63,11 +63,12 @@ describe('ColorPicker', () => {
       expect(wrapper.vm.$data.selectedColor).toBe(setColor);
     });
 
-    it('emits input event from component when a color is selected', async () => {
+    it('emits input and validation events from component when a color is selected', async () => {
       createComponent();
       await colorInput().setValue(setColor);
 
-      expect(wrapper.emitted().input[0]).toEqual([setColor]);
+      expect(wrapper.emitted().input[0]).toStrictEqual([setColor]);
+      expect(wrapper.emitted().validation[0]).toStrictEqual([true]);
     });
 
     it('trims spaces from submitted colors', async () => {
@@ -85,6 +86,7 @@ describe('ColorPicker', () => {
         'Please enter a valid hex (#RRGGBB or #RGB) color value',
       );
       expect(wrapper.emitted().input).toBe(undefined);
+      expect(wrapper.emitted().validation[0]).toStrictEqual([false]);
     });
 
     it('shows an invalid feedback border on the preview when an invalid color is used', async () => {

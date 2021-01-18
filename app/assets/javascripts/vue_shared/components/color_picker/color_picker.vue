@@ -80,10 +80,13 @@ export default {
   methods: {
     handleColorChange(color) {
       this.selectedColor = color.trim();
+      const valid = this.isValidColor;
 
-      if (this.isValidColor) {
+      if (valid) {
         this.$emit('input', this.selectedColor);
       }
+
+      this.$emit('validation', valid);
     },
   },
   i18n: {
