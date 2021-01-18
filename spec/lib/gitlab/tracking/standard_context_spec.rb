@@ -10,10 +10,8 @@ RSpec.describe Gitlab::Tracking::StandardContext do
 
   describe '#to_context' do
     context 'with no arguments' do
-      it 'creates a Snowplow context with no data' do
-        snowplow_context.to_json[:data].each do |_, v|
-          expect(v).to be_nil
-        end
+      it 'contains environment' do
+        expect(snowplow_context.to_json.dig(:data, :environment)).to eq('development')
       end
     end
 
