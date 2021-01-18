@@ -31,18 +31,16 @@ export default {
     onClick() {
       this.isLoading = true;
 
-      AP.context.getToken((jwt) => {
-        addSubscription(this.subscriptionsPath, jwt, this.group.full_path)
-          .then(() => {
-            AP.navigator.reload();
-          })
-          .catch((error) => {
-            this.setErrorMessage(error.response.data.error);
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      });
+      addSubscription(this.subscriptionsPath, this.group.full_path)
+        .then(() => {
+          AP.navigator.reload();
+        })
+        .catch((error) => {
+          this.setErrorMessage(error.response.data.error);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
     },
   },
 };
