@@ -23,6 +23,14 @@ module Gitlab
         SnowplowTracker::SelfDescribingJson.new(GITLAB_STANDARD_SCHEMA_URL, to_h)
       end
 
+      def environment
+        return 'development' if Gitlab.dev_or_test_env?
+
+        return 'staging' if Gitlab.staging?
+
+        'production' if Gitlab.com_and_canary?
+      end
+
       private
 
       def namespace
