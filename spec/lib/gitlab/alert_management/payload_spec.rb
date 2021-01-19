@@ -26,6 +26,13 @@ RSpec.describe Gitlab::AlertManagement::Payload do
         end
       end
 
+      context 'with the payload specifying Cilium' do
+        let(:tool_name) { Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:cilium] }
+        let(:payload) { { 'monitoring_tool' => tool_name } }
+
+        it { is_expected.to be_a Gitlab::AlertManagement::Payload::Cilium }
+      end
+
       context 'with the payload specifying an unknown tool' do
         let(:payload) { { 'monitoring_tool' => 'Custom Tool' } }
 

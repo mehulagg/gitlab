@@ -35,6 +35,8 @@ module Gitlab
             else
               ::Gitlab::AlertManagement::Payload::Prometheus
             end
+          elsif monitoring_tool == MONITORING_TOOLS[:cilium]
+            ::Gitlab::AlertManagement::Payload::Cilium
           else
             ::Gitlab::AlertManagement::Payload::Generic
           end
