@@ -24,6 +24,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
+import epicQuery from '../graphql/epic.query.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
@@ -150,6 +151,7 @@ export default {
 
         if (!withLists) {
           commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
+          commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
         } else {
           if (lists) {
             commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
@@ -160,6 +162,7 @@ export default {
               epics: epicsFormatted,
               canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
             });
+            commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
           }
         }
 
@@ -332,7 +335,36 @@ export default {
     commit(types.RESET_EPICS);
   },
 
-  setActiveIssueEpic: async ({ getters }, input) => {
+  fetchEpicForActiveIssue: async ({ state, commit, getters }) => {
+    const {
+      referencePath = '',
+      epic: { id, iid },
+    } = getters.activeIssue;
+    const groupFullPath = referencePath.slice(0, referencePath.indexOf('/'));
+
+    if (state.epicsCache[id]) {
+      return;
+    }
+
+    commit(types.SET_EPIC_FETCH_IN_PROGRESS, true);
+
+    const {
+      data: {
+        group: { epic },
+      },
+    } = await gqlClient.query({
+      query: epicQuery,
+      variables: {
+        fullPath: groupFullPath,
+        iid,
+      },
+    });
+
+    commit(types.UPDATE_CACHED_EPICS, [epic]);
+    commit(types.SET_EPIC_FETCH_IN_PROGRESS, false);
+  },
+
+  setActiveIssueEpic: async ({ state, commit, getters }, input) => {
     const { data } = await gqlClient.mutate({
       mutation: issueSetEpicMutation,
       variables: {
@@ -348,7 +380,18 @@ export default {
       throw new Error(data.issueSetEpic.errors);
     }
 
-    return data.issueSetEpic.issue.epic;
+    const { epic } = data.issueSetEpic.issue;
+
+    if (epic !== null) {
+      commit(types.RECEIVE_FIRST_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
+      commit(types.UPDATE_CACHED_EPICS, [epic]);
+    }
+
+    commit(typesCE.UPDATE_ISSUE_BY_ID, {
+      issueId: getters.activeIssue.id,
+      prop: 'epic',
+      value: epic ? { id: epic.id, iid: epic.iid } : null,
+    });
   },
 
   setActiveIssueWeight: async ({ commit, getters }, input) => {
