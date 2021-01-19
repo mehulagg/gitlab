@@ -134,6 +134,11 @@ export default {
       return this.initialAssignees.length === 0 && this.$apollo.queries.issuable.loading;
     },
   },
+  watch: {
+    initialAssignees() {
+      assigneesWidgetState.assignees = null;
+    },
+  },
   created() {
     assigneesWidgetState.updateAssignees = this.updateAssignees;
   },
@@ -192,7 +197,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="$apollo.queries.issuable.loading" class="gl-display-flex gl-align-items-center">
+  <div v-if="assigneesLoading" class="gl-display-flex gl-align-items-center">
     {{ __('Assignee') }}
     <gl-loading-icon size="sm" class="gl-ml-2" />
   </div>
