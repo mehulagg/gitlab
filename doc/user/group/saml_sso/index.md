@@ -462,10 +462,14 @@ you should be able to find the base64 encoded SAML response by searching with th
 - `json.method`: `POST`
 - `json.path`: `/groups/GROUP-PATH/-/saml/callback`
 
-The `json.params` should provide a message with `"key": "SAMLResponse"` and the `"value"` as the response.
-Note that a valid message should also have `"value": "/group-path"` with `"key": "RelayState"` and `"key": "group_id"` with `"value": "group-path"`.
+In a relevant log entry, the `json.params` should provide a valid response with:
 
-In some cases, if the SAML response is lengthy, you may receive a `"key": "truncated"` `"value":"..."`.
-In these cases, please ask a group owner for a copy of the SAML response from when they click on the "Verify SAML Configuration" button on the group SSO Settings page.
+- `"key": "SAMLResponse"` and the `"value": (full SAML response)`,
+- `"key": "RelayState"` with `"value": "/group-path"`, and
+- `"key": "group_id"` with `"value": "group-path"`.
 
-To see the SAML response itself, you will then need to use a base64 decoder.
+In some cases, if the SAML response is lengthy, you may receive a `"key": "truncated"` with `"value":"..."`.
+In these cases, please ask a group owner for a copy of the SAML response from when they select
+the "Verify SAML Configuration" button on the group SSO Settings page.
+
+Use a base64 decoder to see a human-readable version of the SAML response.
