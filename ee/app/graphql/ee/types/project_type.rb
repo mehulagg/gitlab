@@ -15,6 +15,9 @@ module EE
               null: true,
               description: 'The DAST scanner profiles associated with the project'
 
+        field :fuzzing_ci_configuration, ::Types::CiConfiguration::Fuzzing::Type, null: true,
+              description: 'Fuzzing CI configuration for the project'
+
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
               calls_gitaly: true,
               description: 'SAST CI configuration for the project'
@@ -129,6 +132,13 @@ module EE
         return unless Ability.allowed?(current_user, :read_requirement, object)
 
         Hash.new(0).merge(object.requirements.counts_by_state)
+      end
+
+      def fuzzing_ci_configuration
+        {
+          scan_modes: ::Types::CiConfiguration::Fuzzing::ScanModeType.values.values.map(&:value),
+          scan_profiles: ::Types::CiConfiguration::Fuzzing::ScanProfileType.values.values.map(&:value)
+        }
       end
 
       def sast_ci_configuration
