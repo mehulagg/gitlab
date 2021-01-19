@@ -254,6 +254,36 @@ describe('createList', () => {
   });
 });
 
+describe('fetchLabels', () => {
+  it('should commit mutation RECEIVE_LABELS_SUCCESS on success', (done) => {
+    const queryResponse = {
+      data: {
+        group: {
+          labels: {
+            nodes: labels,
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchLabels,
+      {},
+      { boardType: 'group' },
+      [{ type: types.RECEIVE_LABELS_SUCCESS, payload: labels }],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutation RECEIVE_LABELS_FAILURE on failure', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(actions.fetchLabels, {}, {}, [{ type: types.RECEIVE_LABELS_FAILURE }], [], done);
+  });
+});
+
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', (done) => {
     const initialBoardListsState = {

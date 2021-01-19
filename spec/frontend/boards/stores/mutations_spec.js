@@ -1,7 +1,14 @@
 import mutations from '~/boards/stores/mutations';
 import * as types from '~/boards/stores/mutation_types';
 import defaultState from '~/boards/stores/state';
-import { mockLists, rawIssue, mockIssue, mockIssue2, mockGroupProjects } from '../mock_data';
+import {
+  mockLists,
+  rawIssue,
+  mockIssue,
+  mockIssue2,
+  mockGroupProjects,
+  labels,
+} from '../mock_data';
 
 const expectNotImplemented = (action) => {
   it('is not implemented', () => {
@@ -96,6 +103,14 @@ describe('Board Store Mutations', () => {
       mutations.CREATE_LIST_FAILURE(state);
 
       expect(state.error).toEqual('An error occurred while creating the list. Please try again.');
+    });
+  });
+
+  describe('RECEIVE_LABELS_SUCCESS', () => {
+    it('sets labels on state', () => {
+      mutations.RECEIVE_LABELS_SUCCESS(state, labels);
+
+      expect(state.labels).toEqual(labels);
     });
   });
 
