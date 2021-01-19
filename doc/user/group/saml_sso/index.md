@@ -418,7 +418,10 @@ This can be prevented by configuring the [NameID](#nameid) to return a consisten
 
 Ensure that the user who is trying to link their GitLab account has been added as a user within the identity provider's SAML app.
 
-This message may also be a result of the SAML response missing the `InResponseTo` attribute in the `samlp:Response` tag, which is [expected by the SAML gem](https://github.com/onelogin/ruby-saml/blob/9f710c5028b069bfab4b9e2b66891e0549765af5/lib/onelogin/ruby-saml/response.rb#L307-L316). The identity provider administrator should ensure that it is a Service Provider initiated login (instead of Identity Provider initiated).
+Alternatively, the SAML response may be missing the `InResponseTo` attribute in the
+`samlp:Response` tag, which is [expected by the SAML gem](https://github.com/onelogin/ruby-saml/blob/9f710c5028b069bfab4b9e2b66891e0549765af5/lib/onelogin/ruby-saml/response.rb#L307-L316).
+The [Identity Provider](#glossary) administrator should ensure that the login should be
+initiated by the Service Provider (typically GitLab) and not the Identity Provider.
 
 ### Stuck in a login "loop"
 
