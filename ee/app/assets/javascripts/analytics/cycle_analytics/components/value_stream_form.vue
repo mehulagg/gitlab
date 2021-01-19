@@ -4,6 +4,7 @@ import { GlButton, GlForm, GlFormInput, GlFormGroup, GlModal } from '@gitlab/ui'
 import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf } from '~/locale';
+import { swapArrayItems } from '~/lib/utils/array_utility';
 import {
   DEFAULT_STAGE_CONFIG,
   STAGE_SORT_DIRECTION,
@@ -12,13 +13,6 @@ import {
 import { validateValueStreamName, validateStage } from './create_value_stream_form/utils';
 import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
-
-const swapArrayItems = (arr, left, right) => [
-  ...arr.slice(0, left),
-  arr[right],
-  arr[left],
-  ...arr.slice(right + 1, arr.length),
-];
 
 const findStageIndexByName = (stages, target = '') =>
   stages.findIndex(({ name }) => name === target);
@@ -153,8 +147,8 @@ export default {
     handleMove({ index, direction }) {
       const newStages =
         direction === STAGE_SORT_DIRECTION.UP
-          ? swapArrayItems(this.stages, index - 1, index)
-          : swapArrayItems(this.stages, index, index + 1);
+          ? swapArrayItems({ target: this.stages, leftIndex: index - 1, rightIndex: index })
+          : swapArrayItems({ target: this.stages, leftIndex: index, rightIndex: index + 1 });
 
       Vue.set(this, 'stages', newStages);
     },
