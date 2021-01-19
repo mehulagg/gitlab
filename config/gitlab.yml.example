@@ -166,7 +166,7 @@ production: &base
     # disable_animations: true
 
     ## Application settings cache timeout. (default: 60)
-    # application_settings_cache_secs: 60
+    # application_settings_cache_seconds: 60
 
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
