@@ -79,6 +79,7 @@ export default {
         :participants-query-variables="participantsQueryVariables"
         :update-assignees-mutation="$options.updateAssigneesMutation"
         :update-assignees-variables="updateAssigneesVariables"
+        :initial-assignees="activeIssue.assignees"
         @assigneesUpdated="updateAssignees"
       />
       <board-sidebar-epic-select />

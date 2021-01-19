@@ -56,6 +56,11 @@ export default {
       type: Object,
       required: true,
     },
+    initialAssignees: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -76,9 +81,10 @@ export default {
       update(data) {
         return data.issuable || data.project?.issuable;
       },
-      result() {
-        this.selected = cloneDeep(this.assignees);
-        assigneesWidgetState.assignees = this.assignees;
+      result(res) {
+        const issuable = res.data.issuable || res.data.project?.issuable;
+        this.selected = cloneDeep(issuable.assignees.nodes);
+        assigneesWidgetState.assignees = issuable.assignees.nodes;
       },
     },
     searchUsers: {
@@ -99,7 +105,7 @@ export default {
   },
   computed: {
     assignees() {
-      return this.issuable?.assignees?.nodes;
+      return assigneesWidgetState.assignees || this.initialAssignees;
     },
     participants() {
       return this.isSearchEmpty ? this.issuable?.participants?.nodes : this.searchUsers;
@@ -123,6 +129,9 @@ export default {
     },
     currentUser() {
       return gon?.current_username;
+    },
+    assigneesLoading() {
+      return this.initialAssignees.length === 0 && this.$apollo.queries.issuable.loading;
     },
   },
   created() {
@@ -208,7 +217,7 @@ export default {
         </template>
         <template #items>
           <gl-loading-icon
-            v-if="$apollo.queries.searchUsers.loading || $apollo.queries.issuable.loading"
+            v-if="$apollo.queries.searchUsers.loading || assigneesLoading"
             size="lg"
           />
           <template v-else>
