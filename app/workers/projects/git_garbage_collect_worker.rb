@@ -38,6 +38,8 @@ module Projects
     def update_repository_statistics(resource)
       super
 
+      return if Gitlab::Database.read_only? # GitGarbageCollectWorker may be run on a Geo secondary
+
       Projects::UpdateStatisticsService.new(resource, nil, statistics: [:repository_size, :lfs_objects_size]).execute
     end
   end

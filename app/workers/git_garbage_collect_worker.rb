@@ -12,6 +12,6 @@ class GitGarbageCollectWorker # rubocop:disable Scalability/IdempotentWorker
   loggable_arguments 1, 2, 3
 
   def perform(resource_id, task = :gc, lease_key = nil, lease_uuid = nil)
-    Projects::GitGarbageCollectWorker.perform(resource_id, task, lease_key, lease_uid)
+    Projects::GitGarbageCollectWorker.new.perform(resource_id, task, lease_key, lease_uuid)
   end
 end

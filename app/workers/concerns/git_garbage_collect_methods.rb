@@ -16,7 +16,7 @@ module GitGarbageCollectMethods
 
   def perform(resource_id, task = :gc, lease_key = nil, lease_uuid = nil)
     resource = find_resource(resource_id)
-    lease_key ||= default_lease_key(resource)
+    lease_key ||= default_lease_key(task, resource)
     active_uuid = get_lease_uuid(lease_key)
 
     if active_uuid
@@ -115,7 +115,6 @@ module GitGarbageCollectMethods
 
   def update_repository_statistics(resource)
     resource.repository.expire_statistics_caches
-    return if Gitlab::Database.read_only? # GitGarbageCollectWorker may be run on a Geo secondary
   end
 
   def bitmaps_enabled?
