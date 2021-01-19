@@ -50,4 +50,9 @@ class GroupWiki < Wiki
     # TODO: Update group wiki storage
     # https://gitlab.com/gitlab-org/gitlab/-/issues/230465
   end
+
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    GroupWikis::GitGarbageCollectWorker
+  end
 end

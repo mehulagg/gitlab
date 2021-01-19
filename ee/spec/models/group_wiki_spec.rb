@@ -133,5 +133,6 @@ RSpec.describe GroupWiki do
     let_it_be(:resource) { create(:group_wiki) }
 
     let(:resource_key) { 'group_wikis' }
+    let(:expected_worker_class) { ::GroupWikis::GitGarbageCollectWorker }
   end
 end

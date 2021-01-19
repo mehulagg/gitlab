@@ -2532,6 +2532,11 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    Projects::GitGarbageCollectWorker
+  end
+
   private
 
   def find_service(services, name)
