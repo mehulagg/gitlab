@@ -37,7 +37,9 @@ module EE
 
     override :alerts_settings_data
     def alerts_settings_data(disabled: false)
-      super.merge(alert_management_multiple_integrations_data)
+      super
+        .merge(alert_management_multiple_integrations_data)
+        .merge(custom_mapping_data)
     end
 
     override :operations_settings_data
@@ -64,6 +66,14 @@ module EE
     def alert_management_multiple_integrations_data
       {
         'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
+      }
+    end
+
+    def custom_mapping_data
+      return {} unless ::Gitlab::AlertManagement.custom_mapping_available?(@project)
+
+      {
+        'custom_mapping_data' => ::Gitlab::AlertManagement.custom_mapping_data.to_json
       }
     end
   end
