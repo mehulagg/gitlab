@@ -31,6 +31,7 @@ export default (el) => {
     url,
     projectPath,
     multiIntegrations,
+    alertFields,
   } = el.dataset;
 
   return new Vue({
@@ -57,6 +58,7 @@ export default (el) => {
       },
       projectPath,
       multiIntegrations: parseBoolean(multiIntegrations),
+      gitlabAlertFields: JSON.parse(alertFields),
     },
     apolloProvider,
     render(createElement) {

@@ -40,11 +40,7 @@ export default {
   directives: {
     GlTooltip,
   },
-  inject: {
-    gitlabAlertFields: {
-      default: gitlabFieldsMock,
-    },
-  },
+  inject: ['gitlabAlertFields'],
   props: {
     payloadFields: {
       type: Array,
@@ -66,7 +62,7 @@ export default {
     mappingData() {
       return this.gitlabFields.map((gitlabField) => {
         const mappingFields = this.payloadFields.filter(({ type }) =>
-          type.some((t) => gitlabField.compatibleTypes.includes(t)),
+          type.some((t) => gitlabField.types.includes(t)),
         );
 
         const foundMapping = this.mapping.find(
@@ -111,8 +107,8 @@ export default {
         this.$options.i18n.makeSelection
       );
     },
-    getFieldValue({ label, type }) {
-      return `${label} (${type.join(__(' or '))})`;
+    getFieldValue({ label, types }) {
+      return `${label} (${types.join(__(' or '))})`;
     },
     noResults(searchTerm, fields) {
       return !this.filterFields(searchTerm, fields).length;
