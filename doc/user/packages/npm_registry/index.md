@@ -263,6 +263,7 @@ Prerequisites:
 
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention). It must match exactly, including the case.
 
 To work with NPM commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
@@ -297,7 +298,8 @@ the same version more than once, even if it has been deleted.
 ## Install a package
 
 NPM packages are commonly-installed by using the `npm` or `yarn` commands
-in a JavaScript project.
+in a JavaScript project. You can install a package from a project, group,
+or instance.
 
 1. Set the URL for scoped packages by running:
 
@@ -456,7 +458,7 @@ If you get this error, ensure that:
 
 - Your token is not expired and has appropriate permissions.
 - [Your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
-- A package with the same name doesn't already exist within the given scope.
+- A package with the same name or version doesn't already exist within the given scope.
 - The scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.example.com/api/v4/packages/npm/`
   - Incorrect: `//gitlab.example.com/api/v4/packages/npm`
