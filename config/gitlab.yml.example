@@ -165,7 +165,7 @@ production: &base
     ## Disable jQuery and CSS animations
     # disable_animations: true
 
-    ## Application settings cache timeout. (default: 60)
+    ## Application settings cache expiry in seconds (default: 60)
     # application_settings_cache_seconds: 60
 
   ## Reply by email
