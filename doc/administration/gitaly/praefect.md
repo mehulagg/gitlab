@@ -80,7 +80,28 @@ For more information, see:
 - [Gitaly architecture](index.md#architecture).
 - Geo [use cases](../geo/index.md#use-cases) and [architecture](../geo/index.md#architecture).
 
-## Cluster or shard
+## Components
+
+A Gitaly Cluster comprises multiple components, each one layered on the next:
+
+- [Repositories](../../user/project/repository/index.md), stored on a single virtual storage.
+- Virtual storage, served by two or more Gitaly nodes. GitLab sees a single storage location.
+- [Gitaly](index.md) nodes. Instances of Gitaly that provide Git access to the virtual storage.
+- Physical storage. Shared by Gitaly nodes to store data and are
+  [repository storage paths](../repository_storage_paths.md) of a specific
+  [repository storage type](../repository_storage_paths.md).
+
+![Cluster example](img/cluster_example_v13_3.png)
+
+In this example:
+
+- Repositories are stored on a virtual storage called `storage-1`.
+- `storage-1` is provided Git access by three Gitaly nodes: `gitaly-1`, `gitaly-2`, and `gitaly-3`.
+- The three Gitaly nodes store data in three shared physical storage locations.
+
+Shards can be used as an alternative to virtual storage and clustering.
+
+### Cluster or shard
 
 Gitaly supports multiple models of scaling:
 
@@ -90,9 +111,15 @@ Gitaly supports multiple models of scaling:
 - Sharding using [repository storage paths](../repository_storage_paths.md), where each repository
   is stored on the assigned Gitaly node. All requests are routed to this node.
 
-| Cluster                                           | Shard                                         |
-|:--------------------------------------------------|:----------------------------------------------|
-| ![Cluster example](img/cluster_example_v13_3.png) | ![Shard example](img/shard_example_v13_3.png) |
+The following is Gitaly set up to use sharding instead of Gitaly Cluster:
+
+![Shard example](img/shard_example_v13_3.png)
+
+In this example:
+
+- Each repository is stored on one of three storages: `storage-1`, `storage-2`, or `storage-3`.
+- Each storage is serviced by a Gitaly node.
+- The three Gitaly nodes store data in three separate physical storage locations.
 
 Generally, Gitaly Cluster can replace sharded configurations, at the expense of additional storage
 needed to store each repository on multiple Gitaly nodes. The benefit of using Gitaly Cluster over
