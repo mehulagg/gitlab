@@ -16,6 +16,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { Namespace } from '../constants';
 import iterationIssuesQuery from '../queries/iteration_issues.query.graphql';
 import iterationIssuesWithLabelFilterQuery from '../queries/iteration_issues_with_label_filter.query.graphql';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 
 const states = {
   opened: 'opened',
@@ -92,6 +93,11 @@ export default {
       type: String,
       required: true,
     },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     iterationId: {
       type: String,
       required: true,
@@ -163,6 +169,9 @@ export default {
     nextPage() {
       return Number(this.issues.pageInfo.hasNextPage);
     },
+    tbodyTrClass() {
+      return this.label.title ? 'gl-bg-gray-10' : '';
+    },
   },
   methods: {
     tooltipText(assignee) {
@@ -194,6 +203,9 @@ export default {
         };
       }
     },
+    shouldShowScopedLabel(label) {
+      return this.hasScopedLabelsFeature && isScopedLabel(label);
+    },
     toggleIsExpanded() {
       this.isExpanded = !this.isExpanded;
     },
@@ -207,7 +219,7 @@ export default {
       {{ error }}
     </gl-alert>
 
-    <div v-if="label.title" class="gl-display-flex gl-align-items-center">
+    <div v-if="label.title" class="gl-display-flex gl-align-items-center gl-mb-2">
       <gl-button
         category="tertiary"
         :icon="accordionIcon"
@@ -218,7 +230,7 @@ export default {
         class="gl-ml-1"
         :background-color="label.color"
         :description="label.description"
-        :scoped="label.scoped"
+        :scoped="shouldShowScopedLabel(label)"
         :title="label.title"
       />
       <gl-badge class="gl-ml-2" size="sm" variant="muted">
@@ -235,21 +247,32 @@ export default {
       :show-empty="true"
       fixed
       stacked="sm"
+      :tbody-tr-class="tbodyTrClass"
       data-qa-selector="iteration_issues_container"
     >
-      <template #cell(title)="{ item: { iid, title, webUrl } }">
+      <template #cell(title)="{ item: { iid, labels, title, webUrl } }">
         <div class="gl-text-truncate">
           <gl-link
             class="gl-text-gray-900 gl-font-weight-bold"
             :href="webUrl"
+            :title="title"
             data-qa-selector="iteration_issue_link"
             :data-qa-issue-title="title"
             >{{ title }}
           </gl-link>
-          <!-- TODO: add references.relative (project name) -->
-          <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
-          <div class="gl-text-secondary">#{{ iid }}</div>
         </div>
+        <!-- TODO: add references.relative (project name) -->
+        <!-- Depends on https://gitlab.com/gitlab-org/gitlab/-/issues/222763 -->
+        <div class="gl-text-secondary">#{{ iid }}</div>
+        <gl-label
+          v-for="l in labels"
+          :key="l.id"
+          class="gl-mt-2 gl-mr-2"
+          :background-color="l.color"
+          :description="l.description"
+          :scoped="shouldShowScopedLabel(l)"
+          :title="l.title"
+        />
       </template>
 
       <template #cell(status)="{ item: { state, assignees = [] } }">

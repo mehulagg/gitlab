@@ -59,6 +59,7 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
 
   const {
     fullPath,
+    hasScopedLabelsFeature,
     iterationId,
     iterationIid,
     labelsFetchPath,
@@ -74,6 +75,7 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
       return createElement(IterationReport, {
         props: {
           fullPath,
+          hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
           iterationId,
           iterationIid,
           labelsFetchPath,

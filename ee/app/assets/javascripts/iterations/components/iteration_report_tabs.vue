@@ -32,6 +32,11 @@ export default {
       type: String,
       required: true,
     },
+    hasScopedLabelsFeature: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     iterationId: {
       type: String,
       required: true,
@@ -113,7 +118,7 @@ export default {
             :allow-label-create="false"
             :allow-label-edit="true"
             :allow-multiselect="true"
-            :allow-scoped-labels="true"
+            :allow-scoped-labels="hasScopedLabelsFeature"
             :labels-fetch-path="labelsFetchPath"
             :selected-labels="selectedLabels"
             :variant="$options.variant"
@@ -127,6 +132,7 @@ export default {
         :key="label.id"
         class="gl-mb-6"
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iterationId"
         :label="label"
         :namespace-type="namespaceType"
@@ -136,6 +142,7 @@ export default {
       <iteration-report-issues
         v-show="!selectedLabels.length"
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iterationId"
         :namespace-type="namespaceType"
         @issueCount="handleIssueCount"
