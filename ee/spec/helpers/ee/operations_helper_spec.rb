@@ -84,12 +84,33 @@ RSpec.describe OperationsHelper, :routing do
         let(:multi_integrations) { true }
 
         it { is_expected.to include('multi_integrations' => 'true') }
+
+        context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
+          before do
+            stub_feature_flags(multiple_http_integrations_custom_mapping: true)
+          end
+
+          it do
+            is_expected.to include(
+              'alert_fields' => ::Gitlab::AlertManagement.alert_fields.map { |f| f.slice(:name, :label, :types) }.to_json
+            )
+          end
+        end
+
+        context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
+          before do
+            stub_feature_flags(multiple_http_integrations_custom_mapping: false)
+          end
+
+          it { is_expected.not_to have_key('alert_fields') }
+        end
       end
 
       context 'when not available' do
         let(:multi_integrations) { false }
 
         it { is_expected.to include('multi_integrations' => 'false') }
+        it { is_expected.not_to have_key('alert_fields') }
       end
     end
   end
