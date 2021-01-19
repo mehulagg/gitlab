@@ -47,18 +47,6 @@ export default {
             <slot name="title"></slot>
           </h3>
         </div>
-        <div class="col-5 gl-text-right">
-          <gl-button
-            :href="profiles.length ? libraryPath : null"
-            :disabled="!profiles.length"
-            variant="success"
-            category="secondary"
-            size="small"
-            data-testid="manage-profiles-link"
-          >
-            {{ s__('OnDemandScans|Manage profiles') }}
-          </gl-button>
-        </div>
       </div>
     </template>
     <gl-form-group v-if="profiles.length">

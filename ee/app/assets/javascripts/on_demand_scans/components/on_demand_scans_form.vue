@@ -106,6 +106,9 @@ export default {
     dastSiteValidationDocsPath: {
       default: '',
     },
+    profilesLibraryPath: {
+      default: '',
+    },
   },
   props: {
     helpPagePath: {
@@ -164,6 +167,11 @@ export default {
       return this.isEdit
         ? s__('OnDemandScans|Edit on-demand DAST scan')
         : s__('OnDemandScans|New on-demand DAST scan');
+    },
+    manageProfilesLabel() {
+      return this.glFeatures.dastSavedScans
+        ? s__('OnDemandScans|Manage DAST scans')
+        : s__('OnDemandScans|Manage profiles');
     },
     selectedScannerProfile() {
       return this.selectedScannerProfileId
@@ -304,7 +312,12 @@ export default {
 <template>
   <gl-form novalidate @submit.prevent="onSubmit()">
     <header class="gl-mb-6">
-      <h2>{{ title }}</h2>
+      <div class="gl-mt-6 gl-display-flex">
+        <h2 class="gl-flex-grow-1 gl-my-0">{{ title }}</h2>
+        <gl-button :href="profilesLibraryPath" data-testid="manage-profiles-link">
+          {{ manageProfilesLabel }}
+        </gl-button>
+      </div>
       <p>
         <gl-sprintf
           :message="
