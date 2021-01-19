@@ -122,6 +122,57 @@ sequenceDiagram
    the hostname is `version.gitlab.com`, the protocol is `TCP`, and the port number is `443`,
    the required URL is <https://version.gitlab.com/>.
 
+## Usage Ping Metric Life cycle
+
+### 1. New metrics addition
+
+Please follow [Implementing Usage Ping](#implementing-usage-ping) guide
+
+### 2. Existing metric change
+
+Because we hold no control over how quickly self-hosted instance will update GitLab version that they are running on,
+any changes to the logic used to calculate any metric is **HIGHLY DISCOURAGED**. Such changes will cause modified metric to be
+reported in inconsistent matter among multiple GitLab instances. If some metrics calculation is identified as not sufficient, or faulty
+instead of changing logic one should retire existing metric and add new one, with updated calculation implementation.
+
+Example: 
+Lets consider following change. Prior 12.6 release `example_metric` was implemented as:
+
+```ruby
+{
+  ...
+  example_metric: distinct_count(Project, :creator_id)
+}
+```
+
+and at 12.6 it was changed to filter out archived projects:
+
+```ruby
+{
+  ...
+  example_metric: distinct_count(Project.non_archived, :creator_id)
+}
+```
+
+In such scenario all instances running 12.5 and previous versions will keep reporting `example_metric` with inclusion of archived projects, while all
+instances running versions 12.6 and higher will filter such projects out. Because Usage Ping data is collected from all reporting instances, regardless of
+the version that they are running on, resulting dataset will consist of mixed data, which will distort any following business analysis.
+
+Correct approach to described example would be to add new metric at 12.6 release with updated logic:
+
+```ruby
+{
+  ...
+  example_metric_without_archived: distinct_count(Project.non_archived, :creator_id)
+}
+```
+
+and update existing business analysis artefacts to use `example_metric_without_archived` instead of `example_metric`
+
+### 3. Metrics retiring
+
+Metrics retiring process is currently under development, for more information one can look up corresponding [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/284637)
+
 ## Implementing Usage Ping
 
 Usage Ping consists of two kinds of data, counters and observations. Counters track how often a certain event
