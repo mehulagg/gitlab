@@ -485,7 +485,7 @@ These instructions assume that the Agent is already set up as described in the
 
 ## Management interfaces
 
-Note:
+NOTE:
 We are currently working on shipping more management interfaces around the GitLab Kubernetes Agent. Please, [provide more feedback in the related epic](https://gitlab.com/groups/gitlab-org/-/epics/4739).
 
 ![GitLab Kubernetes Agent list UI](../img/kubernetes-agent-ui-list.png)
