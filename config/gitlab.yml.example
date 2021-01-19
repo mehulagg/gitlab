@@ -407,6 +407,11 @@ production: &base
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
 
+  ## GitLab Docs
+  gitlab_docs:
+    enabled: false
+    host: 'https://docs.example.com'
+
   ## Mattermost
   ## For enabling Add to Mattermost button
   mattermost:
