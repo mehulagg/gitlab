@@ -39,6 +39,7 @@ templates of the default branch are taken into account.
   images guidelines, link to the related issue, reviewer name, and so on.
 - You can also create issues and merge request templates for different
   stages of your workflow, for example, feature proposal, feature improvement, or a bug report.
+- You can use a description template as a [Service Desk email template](service_desk.md#general-email-template).
 
 ## Creating issue templates
 
@@ -80,7 +81,7 @@ to the issue description field. The **Reset template** button discards any
 changes you made after picking the template and returns it to its initial status.
 
 NOTE:
-You can create short-cut links to create an issue using a designated template. For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal`.
+You can create shortcut links to create an issue using a designated template. For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Feature%20proposal`.
 
 ![Description templates](img/description_templates.png)
 
