@@ -108,8 +108,6 @@ With Service Desk, you can use:
 - [New note email](#new-note-email) template
 - [General email template](#general-email-template)
 
-Additionally, if you have templates in your project's `.gitlab/issue_templates/` directory,
-
 #### Thank you email
 
 When a user submits an issue through Service Desk, GitLab sends a **thank you email**.
