@@ -35,6 +35,10 @@ module Gitlab
         snowplow.self_describing_event(schema_url, data: data, context: context)
       end
 
+      def for(...)
+        StandardContext.new(...)
+      end
+
       def snowplow_options(group)
         additional_features = Feature.enabled?(:additional_snowplow_tracking, group)
         {

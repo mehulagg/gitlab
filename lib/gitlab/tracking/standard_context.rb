@@ -23,6 +23,10 @@ module Gitlab
         SnowplowTracker::SelfDescribingJson.new(GITLAB_STANDARD_SCHEMA_URL, to_h)
       end
 
+      def event(category, action, label: nil, property: nil, value: nil, context: [])
+        Tracking.event(category, action, label: label, property: property, value: value, context: context, standard_context: self)
+      end
+
       private
 
       def namespace
