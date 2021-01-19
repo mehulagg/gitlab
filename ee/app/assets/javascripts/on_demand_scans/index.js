@@ -13,6 +13,7 @@ export default () => {
     dastSiteValidationDocsPath,
     projectPath,
     defaultBranch,
+    profilesLibraryPath,
     scannerProfilesLibraryPath,
     siteProfilesLibraryPath,
     newSiteProfilePath,
@@ -25,6 +26,7 @@ export default () => {
     el,
     apolloProvider,
     provide: {
+      profilesLibraryPath,
       scannerProfilesLibraryPath,
       siteProfilesLibraryPath,
       newScannerProfilePath,
