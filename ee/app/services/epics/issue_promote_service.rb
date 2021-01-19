@@ -34,7 +34,8 @@ module Epics
     def track_event
       ::Gitlab::Tracking
         .for(namespace: @parent_group, project: issue.project, user: current_user, foo: 'bar')
-        .event('epics', 'promote', property: 'issue_id', value: original_entity.id)    end
+        .event('epics', 'promote', property: 'issue_id', value: original_entity.id)
+    end
 
     def create_new_entity
       @new_entity = Epics::CreateService.new(parent_group, current_user, params).execute
