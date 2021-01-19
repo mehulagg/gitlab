@@ -136,8 +136,8 @@ module EE
 
       def fuzzing_ci_configuration
         {
-          scan_modes: ::Types::CiConfiguration::Fuzzing::ScanModeType.values.values.map(&:value),
-          scan_profiles: ::Types::CiConfiguration::Fuzzing::ScanProfileType.values.values.map(&:value)
+          scan_modes: ::Types::CiConfiguration::Fuzzing::ScanModeEnum.values.values.map(&:value),
+          scan_profiles: ::Security::Fuzzing::ScanProfile.all
         }
       end
 

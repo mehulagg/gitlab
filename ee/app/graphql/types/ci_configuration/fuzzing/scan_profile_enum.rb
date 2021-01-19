@@ -7,6 +7,8 @@ module Types
         graphql_name 'FuzzingScanProfile'
         description 'The default API fuzzing configurations provided by GitLab'
 
+        value 'QUICK', value: 'Quick',
+          description: 'Fuzzes occasionally times per parameter'
         value 'QUICK_10', value: 'Quick-10',
           description: 'Fuzzes 10 times per parameter'
         value 'MEDIUM_20', value: 'Medium-20',

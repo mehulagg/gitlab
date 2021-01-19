@@ -7,10 +7,10 @@ module Types
         graphql_name 'FuzzingCiConfiguration'
         description "Represents the CI configuration for a project's fuzzing scans."
 
-        field :scan_modes, [ScanModeType], null: true,
+        field :scan_modes, [ScanModeEnum], null: true,
           description: 'All possible scan modes.'
 
-        field :scan_profiles, [ScanProfileType], null: true,
+        field :scan_profiles, [ScanProfileEnum], null: true,
           description: 'Default scan profiles provided by GitLab.'
       end
     end
