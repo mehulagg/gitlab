@@ -24,18 +24,25 @@ RSpec.describe Members::UpdateService do
     it 'updates the member' do
       expect(TodosDestroyer::EntityLeaveWorker).not_to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, member.user_id, member.source_id, source.class.name)
 
-      updated_member = described_class.new(current_user, params).execute(member, permission: permission)
+      updated_member = described_class.new(current_user, params).execute(member, permission: permission).fetch(:member)
 
       expect(updated_member).to be_valid
       expect(updated_member.access_level).to eq(Gitlab::Access::MAINTAINER)
     end
+
+    it 'returns success status' do
+      result = described_class.new(current_user, params).execute(member, permission: permission).fetch(:status)
+
+      expect(result).to eq(:success)
+    end
+
 
     context 'when member is downgraded to guest' do
       shared_examples 'schedules to delete confidential todos' do
         it do
           expect(TodosDestroyer::EntityLeaveWorker).to receive(:perform_in).with(Todo::WAIT_FOR_DELETE, member.user_id, member.source_id, source.class.name).once
 
-          updated_member = described_class.new(current_user, params).execute(member, permission: permission)
+          updated_member = described_class.new(current_user, params).execute(member, permission: permission).fetch(:member)
 
           expect(updated_member).to be_valid
           expect(updated_member.access_level).to eq(Gitlab::Access::GUEST)
@@ -60,6 +67,16 @@ RSpec.describe Members::UpdateService do
 
       it 'raises an error' do
         expect { described_class.new(current_user, params) }.to raise_error(ArgumentError, 'invalid value for Integer(): "invalid"')
+      end
+    end
+
+    context 'when member is not valid' do
+      let(:params) { { expires_at: 2.days.ago } }
+
+      it 'returns error status' do
+        result = described_class.new(current_user, params).execute(member, permission: permission)
+
+        expect(result[:status]).to eq(:error)
       end
     end
   end

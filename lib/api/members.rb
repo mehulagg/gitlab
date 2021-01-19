@@ -137,15 +137,17 @@ module API
           authorize_admin_source!(source_type, source)
 
           member = source_members(source).find_by!(user_id: params[:user_id])
-          updated_member =
-            ::Members::UpdateService
-              .new(current_user, declared_params(include_missing: false))
-              .execute(member)
 
-          if updated_member.valid?
+          result = ::Members::UpdateService
+            .new(current_user, declared_params(include_missing: false))
+            .execute(member)
+
+          updated_member = result.fetch(:member, nil)
+
+          if result[:status] == :success
             present_members updated_member
           else
-            render_validation_error!(updated_member)
+            render_validation_error!(member)
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord
