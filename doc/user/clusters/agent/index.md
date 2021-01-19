@@ -483,6 +483,17 @@ These instructions assume that the Agent is already set up as described in the
 
 1. Push your `manifest.yaml` to your manifest repository.
 
+## Management interfaces
+
+Note:
+We are currently working on shipping more management interfaces around the GitLab Kubernetes Agent. Please, [provide more feedback in the related epic](https://gitlab.com/groups/gitlab-org/-/epics/4739).
+
+![GitLab Kubernetes Agent list UI](../img/kubernetes-agent-ui-list.png)
+
+The management UI is under Operations/Kubernetes. This page lists all the registered agents of the current project, and shows the configuration directory of the agents.
+
+To access the management UI at least developer role is required.
+
 ## Troubleshooting
 
 If you face any issues while using GitLab Kubernetes Agent, you can read the
