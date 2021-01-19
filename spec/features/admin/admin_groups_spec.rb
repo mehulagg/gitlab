@@ -180,7 +180,7 @@ RSpec.describe 'Admin Groups' do
 
       visit admin_group_edit_path(group)
 
-      admin_note_field = find('input#group_admin_note_attributes_note')
+      admin_note_field = find('#group_admin_note_attributes_note')
       expect(admin_note_field.value).to eq(admin_note_text)
 
       fill_in 'group_admin_note_attributes_note', with: new_admin_note_text
