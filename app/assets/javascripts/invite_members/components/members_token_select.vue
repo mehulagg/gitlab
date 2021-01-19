@@ -51,7 +51,7 @@ export default {
       this.hideDropdownWithNoItems = false;
       this.query = query;
       this.loading = true;
-      this.retrieveUsers();
+      this.retrieveUsers(query);
     },
     retrieveUsers: debounce(function debouncedRetrieveUsers() {
       return getUsers(this.query, this.$options.queryOptions)
@@ -101,7 +101,7 @@ export default {
     :hide-dropdown-with-no-items="hideDropdownWithNoItems"
     :placeholder="placeholderText"
     :aria-labelledby="ariaLabelledby"
-    data-qa-text-input-selector="invite_members_input"
+    data-qa-selector="invite_members_input"
     @blur="handleBlur"
     @text-input="handleTextInput"
     @input="handleInput"

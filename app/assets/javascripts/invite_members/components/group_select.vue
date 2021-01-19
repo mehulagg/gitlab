@@ -88,7 +88,7 @@ export default {
 <template>
   <div>
     <gl-dropdown
-      data-testid="group-select-dropdown"
+      data-testid="group_select_dropdown"
       :text="selectedGroupName"
       block
       menu-class="gl-w-full!"
@@ -96,7 +96,6 @@ export default {
     >
       <gl-search-box-by-type
         v-model.trim="searchTerm"
-        debounce="250"
         :placeholder="$options.i18n.searchPlaceholder"
       />
       <gl-dropdown-item

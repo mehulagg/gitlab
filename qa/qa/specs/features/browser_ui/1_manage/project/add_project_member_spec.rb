@@ -39,7 +39,7 @@ module QA
         Page::Project::Menu.perform(&:click_members)
 
         Page::Project::Members.perform do |members|
-          members.invite_member(group, user, Resource::Members::AccessLevel::MAINTAINER)
+          members.add_member(user.username)
 
           expect(members).to have_content(/@#{user.username}( Is using seat)?(\n| )?Given access/)
         end
