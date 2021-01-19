@@ -9,6 +9,7 @@ RSpec.describe 'Creating a DAST Site Token' do
   let!(:dast_site_validation) { create(:dast_site_validation, state: :passed, dast_site_token: dast_site_token)}
 
   let(:mutation_name) { :dast_site_validation_revoke }
+
   let(:mutation) do
     graphql_mutation(
       mutation_name,
@@ -18,6 +19,7 @@ RSpec.describe 'Creating a DAST Site Token' do
   end
 
   it_behaves_like 'an on-demand scan mutation when user cannot run an on-demand scan'
+
   it_behaves_like 'an on-demand scan mutation when user can run an on-demand scan' do
     it 'deletes dast_site_validations where state=passed' do
       expect { subject }.to change { DastSiteValidation.count }.from(1).to(0)

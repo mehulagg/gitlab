@@ -3,6 +3,8 @@
 module Mutations
   module DastSiteValidations
     class Revoke < BaseMutation
+      FEATURE_FLAG = :security_on_demand_scans_site_validation
+
       include FindsProject
 
       graphql_name 'DastSiteValidationRevoke'
@@ -19,7 +21,7 @@ module Mutations
 
       def resolve(full_path:, normalized_target_url:)
         project = authorized_find!(full_path)
-        raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
+        raise Gitlab::Graphql::Errors::ResourceNotAvailable, "Feature disabled: #{FEATURE_FLAG}" unless allowed?(project)
 
         response = ::DastSiteValidations::RevokeService.new(
           container: project,
@@ -34,7 +36,7 @@ module Mutations
       private
 
       def allowed?(project)
-        Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
+        Feature.enabled?(FEATURE_FLAG, project, default_enabled: :yaml)
       end
 
       def error_response(errors)

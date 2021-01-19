@@ -8,6 +8,8 @@ RSpec.describe Mutations::DastSiteValidations::Revoke do
   let_it_be(:project) { dast_site_validation1.project }
   let_it_be(:user) { create(:user) }
 
+  let(:full_path) { project.full_path }
+
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   before do
@@ -19,7 +21,7 @@ RSpec.describe Mutations::DastSiteValidations::Revoke do
   describe '#resolve' do
     subject do
       mutation.resolve(
-        full_path: project.full_path,
+        full_path: full_path,
         normalized_target_url: dast_site_validation1.url_base
       )
     end
@@ -54,11 +56,15 @@ RSpec.describe Mutations::DastSiteValidations::Revoke do
           subject
         end
 
+        context 'when the project'
+
         context 'when on demand scan site validations feature is not enabled' do
           it 'raises an exception' do
             stub_feature_flags(security_on_demand_scans_site_validation: false)
 
-            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+            expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable) do |err|
+              expect(err.message).to eq('Feature disabled: security_on_demand_scans_site_validation')
+            end
           end
         end
       end
