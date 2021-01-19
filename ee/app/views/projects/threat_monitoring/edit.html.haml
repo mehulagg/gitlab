@@ -1,13 +1,6 @@
 - add_to_breadcrumbs s_("ThreatMonitoring|Threat Monitoring"), project_threat_monitoring_path(@project)
 - breadcrumb_title @policy_name
 - page_title s_("NetworkPolicies|Policy editor")
+- policy_details = policy_details(@project, @policy, @environment)
 
-#js-policy-builder-app{ data: { network_policies_endpoint: project_security_network_policies_path(@project),
-  configure_agent_help_path: help_page_url('user/clusters/agent/repository.html'),
-  create_agent_help_path: help_page_url('user/clusters/agent/index.md', anchor: 'create-an-agent-record-in-gitlab'),
-  environments_endpoint: project_environments_path(@project),
-  threat_monitoring_path: project_threat_monitoring_path(@project),
-  policy: @policy.to_json,
-  project_path: @project.full_path,
-  environment_id: @environment.id,
-} }
+#js-policy-builder-app{ data: policy_details }
