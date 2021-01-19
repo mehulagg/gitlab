@@ -645,7 +645,7 @@ more information.
 
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
-underlying subgroups,projects, issues, etc, by IP address. This can help ensure that
+underlying subgroups, projects, issues, etc, by IP address. This can help ensure that
 particular content doesn't leave the premises, while not blocking off access to
 the entire instance. IP access restrictions can only be configured at the group level.
 
