@@ -3,7 +3,6 @@ import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { GlResizeObserverDirective } from '@gitlab/ui';
-import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
 
 export default {
   directives: {
@@ -23,7 +22,7 @@ export default {
   computed: {
     headerSubItems() {
       if (this.presetType === PRESET_TYPES.DAYS) {
-        return Array.from(Array(24).keys((val) => format24HourTimeStringFromInt(val)));
+        return Array.from(Array(24).keys());
       }
 
       const timeframeItem = new Date(this.timeframeItem.getTime());

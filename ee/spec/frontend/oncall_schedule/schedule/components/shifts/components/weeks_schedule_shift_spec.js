@@ -30,6 +30,7 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
         timeframeItem,
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
+        shiftTimeUnitWidth: 0,
         ...props,
       },
       data() {

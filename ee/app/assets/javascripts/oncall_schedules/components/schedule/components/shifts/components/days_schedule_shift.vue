@@ -1,6 +1,8 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { DAYS_IN_WEEK, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
+import { HOURS_IN_DAY, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
+import { getOverlapDateInPeriods } from '~/lib/utils/datetime_utility';
+import { incrementDateByDays } from '../../../utils';
 
 export default {
   components: {
@@ -33,14 +35,54 @@ export default {
     },
   },
   computed: {
+    currentTimeframeEndsAt() {
+      return incrementDateByDays(this.timeframeItem, 1);
+    },
+    hoursUntilEndOfTimeFrame() {
+      return HOURS_IN_DAY - new Date(this.shiftRangeOverlap.overlapStartDate).getHours();
+    },
     rotationAssigneeStyle() {
+      const startHour = this.shiftStartsAt.getHours();
+      const isFirstCell = startHour === 0;
+      const width =
+        this.shiftEndsAt.getTime() > this.currentTimeframeEndsAt.getTime()
+          ? 24
+          : this.shiftRangeOverlap.hoursOverlap;
+
+      const left =
+        isFirstCell || this.shiftStartHourOutOfRange
+          ? '0px'
+          : `${
+              (HOURS_IN_DAY - this.hoursUntilEndOfTimeFrame) * this.shiftTimeUnitWidth +
+              ASSIGNEE_SPACER
+            }px`;
+
       return {
-        left: `0px`,
-        width: `0px`,
+        left,
+        width: `${this.shiftTimeUnitWidth * width}px`,
       };
     },
+    shiftStartsAt() {
+      return new Date(this.shift.startsAt);
+    },
+    shiftEndsAt() {
+      return new Date(this.shift.endsAt);
+    },
+    shiftRangeOverlap() {
+      try {
+        return getOverlapDateInPeriods(
+          { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
+          { start: this.shiftStartsAt, end: this.shiftEndsAt },
+        );
+      } catch (error) {
+        return { hoursOverlap: 0 };
+      }
+    },
+    shiftStartHourOutOfRange() {
+      return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
+    },
     shiftShouldRender() {
-      return true;
+      return Boolean(this.shiftRangeOverlap.hoursOverlap);
     },
   },
 };
