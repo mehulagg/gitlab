@@ -135,7 +135,7 @@ doesn't require you to provision and maintain a node.
 It's also worth noting that at this time [Praefect requires it's own database server][Gitaly Cluster](../gitaly/praefect.md#postgresql) and
 that to achieve full High Availability a third party PostgreSQL database solution will be required.
 We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
-can be set up via GitLab Omnibus, which the above specs reflect.
+can be set up via Omnibus GitLab, which the above specs reflect.
 
 ## Setup components
 
@@ -200,7 +200,7 @@ The following list includes descriptions of each server and its assigned IP:
 - `10.6.0.131`: Praefect 1
 - `10.6.0.132`: Praefect 2
 - `10.6.0.134`: Praefect 3
-- `10.6.0.141`: Praefect Postgres 1 (non HA)
+- `10.6.0.141`: Praefect PostgreSQL 1 (non HA)
 - `10.6.0.101`: Sidekiq 1
 - `10.6.0.102`: Sidekiq 2
 - `10.6.0.103`: Sidekiq 3
@@ -1346,7 +1346,7 @@ To configure the Sentinel Queues server:
 
 ## Configure Gitaly Cluster
 
-[Gitaly Cluster](../gitaly/praefect.html) is GitLab's recommended fault tolerant solution for storing Git repositories.
+[Gitaly Cluster](../gitaly/praefect.md) is a GitLab provided and recommended fault tolerant solution for storing Git repositories.
 In this configuration every Git repository is stored on every Gitaly node in the cluster, with one being designated the primary, and failover occurs automatically if the primary node goes down. 
 
 The recommended Cluster setup includes the following components:
@@ -1358,7 +1358,7 @@ The recommended Cluster setup includes the following components:
 
 A load balancer is also required for Praefect. In this guide we use the Internal Load Balancer node for this.
 
-This section will detail how to configure the recommended standard setup in order. For more advanced setups please refer to the [Gitaly Cluster documentation](../gitaly/praefect.html).
+This section will detail how to configure the recommended standard setup in order. For more advanced setups please refer to the [Gitaly Cluster documentation](../gitaly/praefect.md).
 
 ### Configure Praefect PostgreSQL
 
@@ -1368,7 +1368,7 @@ Praefect, the routing and transaction manager for Gitaly Cluster, requires a dat
 In addition to this it should be noted that Praefect also currently requires it's own separate database server.
 
 We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
-can be set up via GitLab Omnibus, which this section will detail.
+can be set up via Omnibus GitLab, which this section will detail.
 
 #### Standalone non HA PostgreSQL using Omnibus GitLab
 
@@ -1381,7 +1381,6 @@ the Linux GitLab package **on each node**. Following the steps,
 install the necessary dependencies from step 1, and add the
 GitLab package repository from step 2. When installing GitLab
 in the second step, do not supply the `EXTERNAL_URL` value.
-
 
 ```ruby
 # Disable all components except PostgreSQL and Consul
@@ -1492,7 +1491,7 @@ After the Praefect PostgreSQL server has been set up you'll then need to configu
 We recommend the user be named `praefect` and the database `praefect_production` and these can be configured as standard in PostgreSQL.
 The password for the user is the same as the one you configured earlier - `<praefect_postgresql_password>`.
 
-An example of how this would work with a GitLab Omnibus PostgreSQL set up is below.
+An example of how this would work with a Omnibus GitLab PostgreSQL set up is below.
 
 1. SSH in to the PostgreSQL node.
 
@@ -1530,22 +1529,126 @@ An example of how this would work with a GitLab Omnibus PostgreSQL set up is bel
 
 ### Configure Praefect
 
+Praefect is the router and transaction manager for Gitaly Cluster and all connections to Gitaly go through
+it. This section details how to configure it.
+
+It should note that Praefect requires several secret tokens to secure communications across the Cluster:
+
+- `praefect_external_token`: Repositories hosted on your Praefect cluster can only be accessed by Gitaly clients that carry this token.
+- `praefect_internal_token`: This token is used for replication traffic inside your Praefect cluster. This is distinct from `praefect_external_token` because Gitaly clients must not be able to access internal nodes of the Praefect cluster directly; that could lead to data loss.
+
+It's also worth noting that the `praefect_postgresql_password` defined in the previous section is
+also required as part of this setup.
+
+Gitaly Cluster nodes are configured in Praefect via a `virtual storage`. Each storage contains
+the details of each Gitaly node that makes up the cluster. Each Storage is also given a name
+and this name is used in several areas of config. In this guide the name of the storage will be
+`default`. Note that this guide is geared towards new installs, if upgrading an existing environment
+to use Gitaly Cluster you may need to use a different name.
+Please refer to the [docs](../gitaly/praefect.md#praefect) for more info.
+
+To configure the Praefect nodes, on each one:
+
+1. SSH in to the Praefect server.
+1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
+   package of your choice. Be sure to follow _only_ installation steps 1 and 2
+   on the page.
+1. Edit the `/etc/gitlab/gitlab.rb` file to configure Praefect:
+   
+   ```ruby
+   # Avoid running unnecessary services on the Gitaly server
+   postgresql['enable'] = false
+   redis['enable'] = false
+   nginx['enable'] = false
+   puma['enable'] = false
+   unicorn['enable'] = false
+   sidekiq['enable'] = false
+   gitlab_workhorse['enable'] = false
+   grafana['enable'] = false
+
+   # If you run a separate monitoring node you can disable these services
+   alertmanager['enable'] = false
+   prometheus['enable'] = false
+
+   # Praefect Configuration
+   praefect['enable'] = true
+   praefect['listen_addr'] = '0.0.0.0:2305'
+
+   gitlab_rails['rake_cache_clear'] = false
+   gitlab_rails['auto_migrate'] = false
+
+   # Configure the Consul agent
+   consul['enable'] = true
+   ## Enable service discovery for Prometheus
+   consul['monitoring_service_discovery'] =  true
+
+   # START user configuration
+   # Please set the real values as explained in Required Information section
+   #
+
+   # Praefect External Token
+   # This is needed by clients outside the cluster (like GitLab Shell) to communicate with the Praefect cluster
+   praefect['auth_token'] = '<praefect_external_token>'
+
+   # Praefect Database Settings
+   praefect['database_host'] = '10.142.0.141'
+   praefect['database_port'] = 5432
+   praefect['database_host_no_proxy'] = '10.142.0.141'
+   praefect['database_port_no_proxy'] = 5432
+   praefect['database_dbname'] = 'praefect_production'
+   praefect['database_user'] = 'praefect'
+   praefect['database_password'] = '<praefect_postgresql_password>'
+
+   # Praefect Virtual Storage config
+   # Name of storage hash must match storage name in git_data_dirs on GitLab
+   # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
+   praefect['virtual_storages'] = {
+     'default' => {
+       'gitaly-1' => {
+         'address' => 'tcp://10.142.0.91:8075',
+         'token'   => '<praefect_internal_token>',
+         'primary' => true
+       },
+       'gitaly-2' => {
+         'address' => 'tcp://10.142.0.92:8075',
+         'token'   => '<praefect_internal_token>'
+       },
+       'gitaly-3' => {
+         'address' => 'tcp://10.142.0.93:8075',
+         'token'   => '<praefect_internal_token>'
+       },
+     }
+   }
+
+   # Set the network addresses that the exporters will listen on for monitoring
+   node_exporter['listen_address'] = '0.0.0.0:9100'
+   praefect['prometheus_listen_addr'] = '0.0.0.0:9652'
+   
+   ## The IPs of the Consul server nodes
+   ## You can also use FQDNs and intermix them with IPs
+   consul['configuration'] = {
+      retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13),
+   }
+   #
+   # END user configuration
+   ```
+
+   1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and
+      then replace the file of the same name on this server. If that file isn't on
+      this server, add the file from your Consul server to this server.
+
+   1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
 ### Configure Gitaly
 
-NOTE:
-[Gitaly Cluster](../gitaly/praefect.md) support
-for the Reference Architectures is being
-worked on as a [collaborative effort](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/1) between the Quality Engineering and Gitaly teams. When this component has been verified
-some Architecture specs will likely change as a result to support the new
-and improved designed.
-
-[Gitaly](../gitaly/index.md) server node requirements are dependent on data,
-specifically the number of projects and those projects' sizes. It's recommended
-that a Gitaly server node stores no more than 5 TB of data. Depending on your
-repository storage requirements, you may require additional Gitaly server nodes.
+The [Gitaly](../gitaly/index.md) server nodes that make up the cluster have
+requirements that are dependent on data, specifically the number of projects
+and those projects' sizes. It's recommended that a Gitaly Cluster stores
+no more than 5 TB of data on each node. Depending on your
+repository storage requirements, you may require additional Gitaly Clusters.
 
 Due to Gitaly having notable input and output requirements, we strongly
-recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs
+recommend that all Gitaly Cluster nodes use solid-state drives (SSDs). These SSDs
 should have a throughput of at least 8,000
 input/output operations per second (IOPS) for read operations and 2,000 IOPS for
 write operations. These IOPS values are initial recommendations, and may be
@@ -1553,36 +1656,15 @@ adjusted to greater or lesser values depending on the scale of your
 environment's workload. If you're running the environment on a Cloud provider,
 refer to their documentation about how to configure IOPS correctly.
 
-Be sure to note the following items:
+Gitaly servers must not be exposed to the public internet, as Gitaly's network
+traffic is unencrypted by default. The use of a firewall is highly recommended
+to restrict access to the Gitaly server. Another option is to
+[use TLS](#gitaly-cluster-tls-support).
 
-- The GitLab Rails application shards repositories into
-  [repository storage paths](../repository_storage_paths.md).
-- A Gitaly server can host one or more storage paths.
-- A GitLab server can use one or more Gitaly server nodes.
-- Gitaly addresses must be specified to be correctly resolvable for all Gitaly
-  clients.
-- Gitaly servers must not be exposed to the public internet, as Gitaly's network
-  traffic is unencrypted by default. The use of a firewall is highly recommended
-  to restrict access to the Gitaly server. Another option is to
-  [use TLS](#gitaly-tls-support).
+For configuring Gitaly you should note the following:
 
-NOTE:
-The token referred to throughout the Gitaly documentation is an arbitrary
-password selected by the administrator. This token is unrelated to tokens
-created for the GitLab API or other similar web API tokens.
-
-This section describes how to configure two Gitaly servers, with the following
-IPs and domain names:
-
-- `10.6.0.91`: Gitaly 1 (`gitaly1.internal`)
-- `10.6.0.92`: Gitaly 2 (`gitaly2.internal`)
-
-Assumptions about your servers include having the secret token be `gitalysecret`,
-and that your GitLab installation has three repository storages:
-
-- `default` on Gitaly 1
-- `storage1` on Gitaly 1
-- `storage2` on Gitaly 2
+- `git_data_dirs` should be configured to reflect the storage path for the specific Gitaly node
+- `auth_token` should be the same as `praefect_internal_token`
 
 On each node:
 
@@ -1592,20 +1674,8 @@ On each node:
 1. Edit the Gitaly server node's `/etc/gitlab/gitlab.rb` file to configure
    storage paths, enable the network listener, and to configure the token:
 
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
-
    ```ruby
    # /etc/gitlab/gitlab.rb
-
-   # Gitaly and GitLab use two shared secrets for authentication, one to authenticate gRPC requests
-   # to Gitaly, and a second for authentication callbacks from GitLab-Shell to the GitLab internal API.
-   # The following two values must be the same as their respective values
-   # of the GitLab Rails application setup
-   gitaly['auth_token'] = 'gitalysecret'
-   gitlab_shell['secret_token'] = 'shellsecret'
 
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
@@ -1635,36 +1705,42 @@ On each node:
    # firewalls to restrict access to this address/port.
    # Comment out following line if you only want to support TLS connections
    gitaly['listen_addr'] = "0.0.0.0:8075"
+
+   # Gitaly Auth Token
+   # Should be the same as praefect_internal_token
+   gitaly['auth_token'] = '<praefect_internal_token>'
    ```
 
 1. Append the following to `/etc/gitlab/gitlab.rb` for each respective server:
-   - On `gitaly1.internal`:
+   - On Gitaly Cluster node 1:
 
      ```ruby
      git_data_dirs({
-       'default' => {
-         'path' => '/var/opt/gitlab/git-data'
-       },
-       'storage1' => {
-         'path' => '/mnt/gitlab/git-data'
-       },
+       "gitaly-1" => {
+         "path" => "/var/opt/gitlab/git-data"
+        }
      })
      ```
 
-   - On `gitaly2.internal`:
+   - On Gitaly Cluster node 2:
 
      ```ruby
      git_data_dirs({
-       'storage2' => {
-         'path' => '/mnt/gitlab/git-data'
-       },
+       "gitaly-2" => {
+         "path" => "/var/opt/gitlab/git-data"
+        }
      })
      ```
 
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
+   - On Gitaly Cluster node 3:
+
+     ```ruby
+     git_data_dirs({
+       "gitaly-3" => {
+         "path" => "/var/opt/gitlab/git-data"
+        }
+     })
+     ```
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and
    then replace the file of the same name on this server. If that file isn't on
@@ -1674,32 +1750,44 @@ On each node:
 
 ### Gitaly TLS support
 
-Gitaly supports TLS encryption. To be able to communicate
-with a Gitaly instance that listens for secure connections you will need to use `tls://` URL
-scheme in the `gitaly_address` of the corresponding storage entry in the GitLab configuration.
+Praefect supports TLS encryption. To communicate with a Praefect instance that listens
+for secure connections, you must:
 
-You will need to bring your own certificates as this isn't provided automatically.
-The certificate, or its certificate authority, must be installed on all Gitaly
-nodes (including the Gitaly node using the certificate) and on all client nodes
-that communicate with it following the procedure described in
-[GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
+- Use a `tls://` URL scheme in the `gitaly_address` of the corresponding storage entry
+  in the GitLab configuration.
+- Bring your own certificates because this isn't provided automatically. The certificate
+  corresponding to each Praefect server must be installed on that Praefect server.
 
-NOTE:
-The self-signed certificate must specify the address you use to access the
-Gitaly server. If you are addressing the Gitaly server by a hostname, you can
-either use the Common Name field for this, or add it as a Subject Alternative
-Name. If you are addressing the Gitaly server by its IP address, you must add it
-as a Subject Alternative Name to the certificate.
-[gRPC does not support using an IP address as Common Name in a certificate](https://github.com/grpc/grpc/issues/2691).
+Additionally the certificate, or its certificate authority, must be installed on all Gitaly servers
+and on all Praefect clients that communicate with it following the procedure described in
+[GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates) (and repeated below).
 
-It's possible to configure Gitaly servers with both an unencrypted listening
-address (`listen_addr`) and an encrypted listening address (`tls_listen_addr`)
-at the same time. This allows you to do a gradual transition from unencrypted to
-encrypted traffic, if necessary.
+Note the following:
 
-To configure Gitaly with TLS:
+- The certificate must specify the address you use to access the Praefect server. If
+  addressing the Praefect server by:
 
-1. Create the `/etc/gitlab/ssl` directory and copy your key and certificate there:
+  - Hostname, you can either use the Common Name field for this, or add it as a Subject
+    Alternative Name.
+  - IP address, you must add it as a Subject Alternative Name to the certificate.
+
+- You can configure Praefect servers with both an unencrypted listening address
+  `listen_addr` and an encrypted listening address `tls_listen_addr` at the same time.
+  This allows you to do a gradual transition from unencrypted to encrypted traffic, if
+  necessary.
+
+- The Internal Load Balancer will also access to the certificates and need to be configured
+  to allow for TLS passthrough.
+  Refer to the load balancers documentation on how to configure this.
+
+To configure Praefect with TLS:
+
+**For Omnibus GitLab**
+
+1. Create certificates for Praefect servers.
+
+1. On the Praefect servers, create the `/etc/gitlab/ssl` directory and copy your key
+   and certificate there:
 
    ```shell
    sudo mkdir -p /etc/gitlab/ssl
@@ -1708,27 +1796,34 @@ To configure Gitaly with TLS:
    sudo chmod 644 key.pem cert.pem
    ```
 
-1. Copy the cert to `/etc/gitlab/trusted-certs` so Gitaly will trust the cert when
-   calling into itself:
-
-   ```shell
-   sudo cp /etc/gitlab/ssl/cert.pem /etc/gitlab/trusted-certs/
-   ```
-
 1. Edit `/etc/gitlab/gitlab.rb` and add:
 
-   <!--
-   updates to following example must also be made at
-   https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
-   -->
-
    ```ruby
-   gitaly['tls_listen_addr'] = "0.0.0.0:9999"
-   gitaly['certificate_path'] = "/etc/gitlab/ssl/cert.pem"
-   gitaly['key_path'] = "/etc/gitlab/ssl/key.pem"
+   praefect['tls_listen_addr'] = "0.0.0.0:3305"
+   praefect['certificate_path'] = "/etc/gitlab/ssl/cert.pem"
+   praefect['key_path'] = "/etc/gitlab/ssl/key.pem"
    ```
 
-1. Delete `gitaly['listen_addr']` to allow only encrypted connections.
+1. Save the file and [reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
+1. On the Praefect clients (including each Gitaly server), copy the certificates,
+   or their certificate authority, into `/etc/gitlab/trusted-certs`:
+
+   ```shell
+   sudo cp cert.pem /etc/gitlab/trusted-certs/
+   ```
+
+1. On the Praefect clients (except Gitaly servers), edit `git_data_dirs` in
+   `/etc/gitlab/gitlab.rb` as follows:
+
+   ```ruby
+   git_data_dirs({
+     "default" => {
+       "gitaly_address" => 'tls://LOAD_BALANCER_SERVER_ADDRESS:2305',
+       "gitaly_token" => 'PRAEFECT_EXTERNAL_TOKEN'
+     }
+   })
+   ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -1814,17 +1909,20 @@ To configure the Sidekiq nodes, on each one:
    ###              Gitaly             ###
    #######################################
 
+   # git_data_dirs get configured for the Praefect virtual storage
+   # Address is Internal Load Balancer for Praefect
+   # Token is praefect_external_token
    git_data_dirs({
-     'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
+     "default" => {
+       "gitaly_address" => "tcp://10.6.0.40:2305", # internal load balancer IP
+       "gitaly_token" => '<praefect_external_token>'
+     }
    })
-   gitlab_rails['gitaly_token'] = 'YOUR_TOKEN'
 
    #######################################
    ###            Postgres             ###
    #######################################
-   gitlab_rails['db_host'] = '10.6.0.20' # internal load balancer IP
+   gitlab_rails['db_host'] = '10.6.0.40' # internal load balancer IP
    gitlab_rails['db_port'] = 6432
    gitlab_rails['db_password'] = '<postgresql_user_password>'
    gitlab_rails['db_adapter'] = 'postgresql'
@@ -1897,17 +1995,14 @@ On each node perform the following:
    ```ruby
    external_url 'https://gitlab.example.com'
 
-   # Gitaly and GitLab use two shared secrets for authentication, one to authenticate gRPC requests
-   # to Gitaly, and a second for authentication callbacks from GitLab-Shell to the GitLab internal API.
-   # The following two values must be the same as their respective values
-   # of the Gitaly setup
-   gitlab_rails['gitaly_token'] = 'gitalysecret'
-   gitlab_shell['secret_token'] = 'shellsecret'
-
+   # git_data_dirs get configured for the Praefect virtual storage
+   # Address is Interal Load Balancer for Praefect
+   # Token is praefect_external_token
    git_data_dirs({
-     'default' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage1' => { 'gitaly_address' => 'tcp://gitaly1.internal:8075' },
-     'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
+     "default" => {
+       "gitaly_address" => "tcp://10.6.0.40:2305", # internal load balancer IP
+       "gitaly_token" => '<praefect_external_token>'
+     }
    })
 
    ## Disable components that will not be on the GitLab application server
@@ -1967,14 +2062,15 @@ On each node perform the following:
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. If you're using [Gitaly with TLS support](#gitaly-tls-support), make sure the
+1. If you're using [Gitaly with TLS support](#gitaly-cluster-tls-support), make sure the
    `git_data_dirs` entry is configured with `tls` instead of `tcp`:
 
    ```ruby
    git_data_dirs({
-     'default' => { 'gitaly_address' => 'tls://gitaly1.internal:9999' },
-     'storage1' => { 'gitaly_address' => 'tls://gitaly1.internal:9999' },
-     'storage2' => { 'gitaly_address' => 'tls://gitaly2.internal:9999' },
+     "default" => {
+       "gitaly_address" => "tls://10.6.0.40:2305", # internal load balancer IP
+       "gitaly_token" => '<praefect_external_token>'
+     }
    })
    ```
 
