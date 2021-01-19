@@ -86,7 +86,7 @@ class Projects::ForksController < Projects::ApplicationController
 
   def fork_service
     strong_memoize(:fork_service) do
-      ::Projects::ForkService.new(project, current_user, namespace: fork_namespace)
+      ::Projects::ForkService.new(project, current_user, fork_params)
     end
   end
 
@@ -94,6 +94,10 @@ class Projects::ForksController < Projects::ApplicationController
     strong_memoize(:fork_namespace) do
       Namespace.find(params[:namespace_key]) if params[:namespace_key].present?
     end
+  end
+
+  def fork_params
+    params.permit(:path, :name).tap { |p| p[:namespace] = fork_namespace }
   end
 
   def authorize_fork_namespace!
