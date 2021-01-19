@@ -186,10 +186,11 @@ published to the GitLab Package Registry.
 
 ## Authenticate to the Package Registry with Maven
 
-To authenticate to the Package Registry, you need either a personal access token or deploy token.
+To authenticate to the Package Registry, you need one of the following:
 
-- If you use a [personal access token](../../../user/profile/personal_access_tokens.md), set the scope to `api`.
-- If you use a [deploy token](../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
+- A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
+- A [deploy token](../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
+- A [CI_JOB_TOKEN](#authenticate-with-a-ci-job-token-in-maven).
 
 ### Authenticate with a personal access token in Maven
 
