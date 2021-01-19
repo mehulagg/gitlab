@@ -161,6 +161,14 @@ export default {
         @click="setValidatingProfile(profile)"
         >{{ validateBtnLabel(profile.validationStatus) }}</gl-button
       >
+      <gl-button
+        v-if="glFeatures.securityOnDemandScansSiteValidation"
+        variant="info"
+        category="tertiary"
+        size="small"
+        @click="revokeValidation(profile)"
+        >{{ s__('DastSiteValidation|Revoke validation') }}</gl-button
+      >
     </template>
 
     <dast-site-validation-modal
@@ -169,6 +177,14 @@ export default {
       :full-path="fullPath"
       :target-url="validatingProfile.targetUrl"
       @primary="startValidatingProfile(validatingProfile)"
+    />
+
+    <dast-site-validation-revoke-modal
+      v-if="revokingValidation"
+      ref="dast-site-validation-revoke-modal"
+      :full-path="fullPath"
+      :target-url="revokingValidationProfile.targetUrl"
+      @primary="revokeValidation(revokingValidationProfile)"
     />
   </profiles-list>
 </template>
