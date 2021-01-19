@@ -242,6 +242,12 @@ describe('Vulnerability Details', () => {
       isCode: true,
     };
 
+    const EXPECT_REQUEST_WITH_EMPTY_STRING = {
+      label: 'Sent request:',
+      content: 'GET http://www.gitlab.com\nName1: Value1\nName2: Value2',
+      isCode: true,
+    };
+
     const EXPECT_RESPONSE = {
       label: 'Actual response:',
       content: '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
@@ -255,6 +261,12 @@ describe('Vulnerability Details', () => {
       isCode: true,
     };
 
+    const EXPECT_RESPONSE_WITH_EMPTY_STRING = {
+      label: 'Actual response:',
+      content: '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2',
+      isCode: true,
+    };
+
     const EXPECT_RECORDED_RESPONSE = {
       label: 'Unmodified response:',
       content: '200 OK\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
@@ -264,6 +276,12 @@ describe('Vulnerability Details', () => {
     const EXPECT_RECORDED_RESPONSE_WITHOUT_BODY = {
       label: 'Unmodified response:',
       content: '200 OK\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
+    const EXPECT_RECORDED_RESPONSE_WITH_EMPTY_STRING = {
+      label: 'Unmodified response:',
+      content: '200 OK\nName1: Value1\nName2: Value2',
       isCode: true,
     };
 
@@ -293,7 +311,9 @@ describe('Vulnerability Details', () => {
       ${{ method: 'GET', url: 'http://www.gitlab.com' }}                                                  | ${null}
       ${{ method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }}                        | ${null}
       ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }} | ${[EXPECT_REQUEST]}
-      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '' }}                 | ${[EXPECT_REQUEST_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: null }}               | ${[EXPECT_REQUEST_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: undefined }}          | ${[EXPECT_REQUEST_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '' }}                 | ${[EXPECT_REQUEST_WITH_EMPTY_STRING]}
     `('shows request data for $request', ({ request, expectedData }) => {
       createWrapper({ request });
       expect(getSectionData('request')).toEqual(expectedData);
@@ -307,7 +327,9 @@ describe('Vulnerability Details', () => {
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                           | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
-      ${{ headers: TEST_HEADERS, body: '', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}                 | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, body: null, statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}               | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, body: undefined, statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}          | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
+      ${{ headers: TEST_HEADERS, body: '', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}                 | ${[EXPECT_RESPONSE_WITH_EMPTY_STRING]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
@@ -324,7 +346,9 @@ describe('Vulnerability Details', () => {
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                             | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                        | ${null}
       ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
-      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '', statusCode: '200', reasonPhrase: 'OK' } }]}                 | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: null, statusCode: '200', reasonPhrase: 'OK' } }]}               | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: undefined, statusCode: '200', reasonPhrase: 'OK' } }]}          | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '', statusCode: '200', reasonPhrase: 'OK' } }]}                 | ${[EXPECT_RECORDED_RESPONSE_WITH_EMPTY_STRING]}
     `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
       createWrapper({ supportingMessages });
       expect(getSectionData('recorded-response')).toEqual(expectedData);
