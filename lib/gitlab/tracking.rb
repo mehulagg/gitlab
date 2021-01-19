@@ -35,8 +35,8 @@ module Gitlab
         snowplow.self_describing_event(schema_url, data: data, context: context)
       end
 
-      def for(...)
-        StandardContext.new(...)
+      def for(namespace: nil, project: nil, **data)
+        StandardContext.new(namespace: namespace, project: project, **data)
       end
 
       def snowplow_options(group)
