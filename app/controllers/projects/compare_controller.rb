@@ -36,17 +36,15 @@ class Projects::CompareController < Projects::ApplicationController
     render_diff_for_path(compare.diffs(diff_options))
   end
 
+  # TODO: Do we want to use `remote:branch`-style params instead of adding `source_project_id`?
   def create
     if params[:from].blank? || params[:to].blank?
       flash[:alert] = "You must select a Source and a Target revision"
-      from_to_vars = {
-        from: params[:from].presence,
-        to: params[:to].presence
-      }
-      redirect_to project_compare_index_path(@project, from_to_vars)
+
+      from_to_vars = params.slice(:from, :to, :source_project_id)
+      redirect_to project_compare_index_path(target_project, from_to_vars)
     else
-      redirect_to project_compare_path(@project,
-                                               params[:from], params[:to])
+      redirect_to project_compare_path(target_project, params[:from], params[:to], source_project_id: params[:source_project_id])
     end
   end
 
@@ -73,19 +71,35 @@ class Projects::CompareController < Projects::ApplicationController
     return if valid.all?
 
     flash[:alert] = "Invalid branch name"
-    redirect_to project_compare_index_path(@project)
+    redirect_to project_compare_index_path(target_project)
+  end
+
+  def source_project
+    strong_memoize(:source_project) do
+      if params.key?(:source_project_id)
+        Project.find(params[:source_project_id])
+      else
+       target_project
+      end
+    end
+  end
+
+  def target_project
+    @project
   end
 
   def compare
     return @compare if defined?(@compare)
 
-    @compare = CompareService.new(@project, head_ref).execute(@project, start_ref)
+    @compare = CompareService.new(source_project, head_ref).execute(target_project, start_ref)
   end
 
+  # start_ref = from = target
   def start_ref
     @start_ref ||= Addressable::URI.unescape(params[:from])
   end
 
+  # head_ref = to = source
   def head_ref
     return @ref if defined?(@ref)
 
@@ -100,11 +114,12 @@ class Projects::CompareController < Projects::ApplicationController
     @diffs = compare.present? ? compare.diffs(diff_options) : []
   end
 
+  # FIXME: check if we want to be using source or target project here
   def define_environment
     if compare
-      environment_params = @repository.branch_exists?(head_ref) ? { ref: head_ref } : { commit: compare.commit }
+      environment_params = source_project.repository.branch_exists?(head_ref) ? { ref: head_ref } : { commit: compare.commit }
       environment_params[:find_latest] = true
-      @environment = EnvironmentsFinder.new(@project, current_user, environment_params).execute.last
+      @environment = EnvironmentsFinder.new(source_project, current_user, environment_params).execute.last
     end
   end
 
@@ -114,8 +129,8 @@ class Projects::CompareController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def merge_request
-    @merge_request ||= MergeRequestsFinder.new(current_user, project_id: @project.id).execute.opened
-      .find_by(source_project: @project, source_branch: head_ref, target_branch: start_ref)
+    @merge_request ||= MergeRequestsFinder.new(current_user, project_id: target_project.id).execute.opened
+      .find_by(source_project: source_project, source_branch: head_ref, target_branch: start_ref)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end
