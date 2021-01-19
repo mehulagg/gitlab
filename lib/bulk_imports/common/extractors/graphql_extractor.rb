@@ -9,6 +9,8 @@ module BulkImports
         end
 
         def extract(context)
+          raise ArgumentError
+
           client = graphql_client(context)
 
           client.execute(

@@ -9,7 +9,7 @@ module BulkImports
         end
 
         def transform(_, data)
-          raise ArgumentError, "Given data must be a Hash" unless data.is_a?(Hash)
+          raise ArgumentError, "Given data must be a Hash" unless data.is_a?(Array)
 
           data.dig(*Array.wrap(key_path))
         end

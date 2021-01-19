@@ -72,6 +72,26 @@ RSpec.describe BulkImportWorker do
           expect(bulk_import.entities.map(&:status_name)).to contain_exactly(:created, :started)
         end
       end
+
+      context 'when exception occurs' do
+        let(:bulk_import) { create(:bulk_import, :created) }
+
+        before do
+          allow(bulk_import).to receive(:start!) { raise StandardError }
+
+          (described_class::DEFAULT_BATCH_SIZE + 1).times { |_| create(:bulk_import_entity, :created, bulk_import: bulk_import) }
+        end
+
+        it 'tracks the exception & marks import as failed' do
+          expect(Gitlab::ErrorTracking)
+            .to receive(:track_exception)
+            .with(kind_of(StandardError), bulk_import_id: bulk_import.id)
+
+          subject.perform(bulk_import.id)
+
+          expect(bulk_import.reload.failed?).to eq(true)
+        end
+      end
     end
   end
 end
