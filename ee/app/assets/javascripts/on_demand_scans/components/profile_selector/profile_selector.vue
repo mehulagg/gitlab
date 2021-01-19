@@ -5,6 +5,7 @@ import {
   GlFormGroup,
   GlDropdown,
   GlDropdownItem,
+  GlDropdownDivider,
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
@@ -17,6 +18,7 @@ export default {
     GlFormGroup,
     GlDropdown,
     GlDropdownItem,
+    GlDropdownDivider,
     GlIcon,
   },
   directives: {
@@ -83,6 +85,13 @@ export default {
         class="mw-460"
         data-testid="profiles-dropdown"
       >
+        <gl-dropdown-item :href="newProfilePath">
+          <slot name="new-profile"></slot>
+        </gl-dropdown-item>
+        <gl-dropdown-item :href="libraryPath">
+          <slot name="manage-profile"></slot>
+        </gl-dropdown-item>
+        <gl-dropdown-divider />
         <gl-dropdown-item
           v-for="profile in profiles"
           :key="profile.id"
