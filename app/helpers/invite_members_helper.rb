@@ -31,7 +31,7 @@ module InviteMembersHelper
     link_to invite_members_url(form_model),
             data: {
               'track-event': 'click_link',
-              'track-label': tracking_label,
+              'track-label': tracking_label(nil),
               'track-property': experiment_tracking_category_and_group(:invite_members_new_dropdown)
             } do
       invite_member_link_content
