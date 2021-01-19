@@ -1,46 +1,31 @@
 <script>
-import { uniqueId } from 'lodash';
-import {
-  GlIcon,
-  GlButton,
-  GlCollapse,
-  GlCollapseToggleDirective,
-  GlSafeHtmlDirective,
-} from '@gitlab/ui';
+import { GlSafeHtmlDirective, GlAccordion, GlAccordionItem } from '@gitlab/ui';
 import { mapState } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __, n__, sprintf } from '~/locale';
+import { __, n__, sprintf, s__ } from '~/locale';
 import App from '../app.vue';
 import MrRules from './mr_rules.vue';
 import MrRulesHiddenInputs from './mr_rules_hidden_inputs.vue';
 
 export default {
   components: {
-    GlIcon,
-    GlButton,
-    GlCollapse,
+    GlAccordion,
+    GlAccordionItem,
     App,
     MrRules,
     MrRulesHiddenInputs,
   },
   directives: {
-    CollapseToggle: GlCollapseToggleDirective,
     SafeHtml: GlSafeHtmlDirective,
   },
   mixins: [glFeatureFlagsMixin()],
-  data() {
-    return {
-      collapseId: uniqueId('approval-rules-expandable-section-'),
-      isCollapsed: false,
-    };
-  },
   computed: {
     ...mapState({
       rules: (state) => state.approvals.rules,
       canOverride: (state) => state.settings.canOverride,
     }),
-    toggleIcon() {
-      return this.isCollapsed ? 'chevron-down' : 'chevron-right';
+    accordionTitle() {
+      return s__('ApprovalRule|Approval rules');
     },
     isCollapseFeatureEnabled() {
       return this.glFeatures.mergeRequestReviewers && this.glFeatures.mrCollapsedApprovalRules;
@@ -120,26 +105,15 @@ export default {
       class="gl-mb-0 gl-text-gray-500"
       data-testid="collapsedSummaryText"
     ></p>
-    <gl-button
-      v-if="canOverride"
-      v-collapse-toggle="collapseId"
-      variant="link"
-      button-text-classes="flex"
-    >
-      <gl-icon :name="toggleIcon" class="mr-1" />
-      <span>{{ s__('ApprovalRule|Approval rules') }}</span>
-    </gl-button>
 
-    <gl-collapse
-      :id="collapseId"
-      v-model="isCollapsed"
-      class="gl-mt-3 gl-ml-5 gl-mb-5 gl-transition-medium"
-    >
-      <app>
-        <mr-rules slot="rules" />
-        <mr-rules-hidden-inputs slot="footer" />
-      </app>
-    </gl-collapse>
+    <gl-accordion>
+      <gl-accordion-item :title="accordionTitle">
+        <app>
+          <mr-rules slot="rules" />
+          <mr-rules-hidden-inputs slot="footer" />
+        </app>
+      </gl-accordion-item>
+    </gl-accordion>
   </div>
   <app v-else>
     <mr-rules slot="rules" />
