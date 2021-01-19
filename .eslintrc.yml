@@ -19,6 +19,7 @@ settings:
 rules:
   import/no-commonjs: error
   import/no-default-export: off
+  import/no-deprecated: error
   no-underscore-dangle:
     - error
     - allow:
