@@ -82,7 +82,7 @@ module Groups
       end
 
       def remove_base_tmp_dir
-        FileUtils.rm_rf(shared.base_path) if shared&.base_path
+        FileUtils.rm_rf(shared.archive_path) if shared&.archive_path
       end
 
       def notify_error!

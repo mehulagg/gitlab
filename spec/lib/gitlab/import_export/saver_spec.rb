@@ -6,7 +6,8 @@ require 'fileutils'
 RSpec.describe Gitlab::ImportExport::Saver do
   let!(:project) { create(:project, :public, name: 'project') }
   let(:base_path) { "#{Dir.tmpdir}/project_tree_saver_spec" }
-  let(:export_path) { "#{base_path}/project_tree_saver_spec/export" }
+  let(:archive_path) { "#{base_path}/archive" }
+  let(:export_path) { "#{archive_path}/export" }
   let(:shared) { project.import_export_shared }
 
   subject { described_class.new(exportable: project, shared: shared) }
@@ -36,9 +37,11 @@ RSpec.describe Gitlab::ImportExport::Saver do
   end
 
   it 'removes tmp files' do
+    allow(shared).to receive(:archive_path).and_return(archive_path)
+
     subject.save
 
-    expect(FileUtils).to have_received(:rm_rf).with(base_path)
-    expect(Dir.exist?(base_path)).to eq(false)
+    expect(FileUtils).to have_received(:rm_rf).with(archive_path)
+    expect(Dir.exist?(archive_path)).to eq(false)
   end
 end
