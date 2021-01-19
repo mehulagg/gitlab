@@ -1262,4 +1262,6 @@ RSpec.describe Group do
       end
     end
   end
+
+  it_behaves_like 'can pick repository storage'
 end

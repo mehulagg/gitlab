@@ -14,6 +14,7 @@ module EE
       include InsightsFeature
       include HasTimelogsReport
       include HasWiki
+      include CanPickRepositoryStorage
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
