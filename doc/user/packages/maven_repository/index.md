@@ -354,12 +354,13 @@ repositories {
 
 To use the GitLab endpoint for Maven packages, choose an option:
 
-- **Project-level**: Use when you have few Maven packages and they are not in
-  the same GitLab group.
-- **Group-level**: Use when you have many Maven packages in the same GitLab
-  group.
-- **Instance-level**: Use when you have many Maven packages in different
-  GitLab groups or in their own namespace.
+- **Project-level**: To publish Maven packages to a project, use a project-level endpoint.
+  To install Maven packages, use a project-level endpoint when you have few Maven packages
+  and they are not in the same GitLab group.
+- **Group-level**: Use a group-level endpoint when you want to install packages from
+  many different projects in the same GitLab group.
+- **Instance-level**: Use an instance-level endpoint when you want to install many
+  packages from different GitLab groups or in their own namespace.
 
 The option you choose determines the settings you add to your `pom.xml` file.
 
@@ -533,7 +534,7 @@ repositories {
 
 After you have set up the [remote and authentication](#authenticate-to-the-package-registry-with-maven)
 and [configured your project](#use-the-gitlab-endpoint-for-maven-packages),
-publish a Maven artifact from your project.
+publish a Maven package to your project.
 
 ### Publish by using Maven
 
@@ -604,11 +605,20 @@ To publish a package by using Gradle:
 
 Now navigate to your project's **Packages & Registries** page and view the published artifacts.
 
+### Publishing a package with the same name or version
+
+When you publish a package with the same name or version as an existing package,
+the existing package is overwritten.
+
 ## Install a package
 
 To install a package from the GitLab Package Registry, you must configure
 the [remote and authenticate](#authenticate-to-the-package-registry-with-maven).
-When this is completed, there are two ways to install a package.
+When this is completed, you can install a package from a project,
+group, or namespace.
+
+If multiple packages have the same name and version, when you install
+a package, the most recently-published package is retrieved.
 
 ### Use Maven with `mvn install`
 
