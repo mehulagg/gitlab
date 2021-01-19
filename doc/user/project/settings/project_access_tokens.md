@@ -81,9 +81,6 @@ the following table.
 
 ### Enable or disable project access tokens
 
-WARNING:
-This feature flag may not be available to you. As of GitLab 13.5, [we have removed the ability to Disable the Project Access Tokens feature.](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43199).
-
 Project access tokens are deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
 can disable it for your instance, globally or by project.
