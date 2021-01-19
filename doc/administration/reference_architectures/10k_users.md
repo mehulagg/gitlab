@@ -52,10 +52,10 @@ together {
 card "Gitaly Cluster" as gitaly_cluster {
   collections "**Praefect** x3" as praefect #FF8C00
   collections "**Gitaly Cluster** x3" as gitaly #FF8C00
-  card "**Praefect Postgres***" as praefect_postgres #FF8C00
+  card "**Praefect Postgres***\n//Non fault-tolerant//" as praefect_postgres #FF8C00
   
   praefect -[#FF8C00]-> gitaly
-  praefect -[#FF8C00]-> praefect_postgres: **//Non fault-tolerant//**
+  praefect -[#FF8C00]> praefect_postgres
 }
 
 card "Database" as database {
@@ -68,37 +68,35 @@ card "Database" as database {
 }
 
 card "redis" as redis {
-  collections "**Redis Persistent** x3" as redis_persistant #FF6347
+  collections "**Redis Persistent** x3" as redis_persistent #FF6347
   collections "**Redis Cache** x3" as redis_cache #FF6347
-  collections "**Redis Persistent Sentinel** x3" as redis_persistant_sentinel #FF6347
+  collections "**Redis Persistent Sentinel** x3" as redis_persistent_sentinel #FF6347
   collections "**Redis Cache Sentinel** x3"as redis_cache_sentinel #FF6347
   
-  redis_persistant <.[#FF6347]- redis_persistant_sentinel
+  redis_persistent <.[#FF6347]- redis_persistent_sentinel
   redis_cache <.[#FF6347]- redis_cache_sentinel
 }
 
 cloud "**Object Storage**" as object_storage #white
 
 elb -[#6a9be7]-> gitlab
-elb -[hidden]-> sidekiq
 elb -[#6a9be7]--> monitor
 
 gitlab -[#32CD32]> sidekiq
 gitlab -[#32CD32]--> ilb
-gitlab -[#32CD32]--> object_storage
-gitlab -[#32CD32,norank]---> redis
+gitlab -[#32CD32]-> object_storage
+gitlab -[#32CD32]---> redis
 gitlab -[hidden]-> monitor
 gitlab -[hidden]-> consul
 
 sidekiq -[#ff8dd1]--> ilb
-sidekiq -[#ff8dd1]--> object_storage
-sidekiq -[#ff8dd1,norank]---> redis
+sidekiq -[#ff8dd1]-> object_storage
+sidekiq -[#ff8dd1]---> redis
 sidekiq -[hidden]-> monitor
 sidekiq -[hidden]-> consul
 
-ilb -[#9370DB]-> database
 ilb -[#9370DB]-> gitaly_cluster
-ilb -[hidden]-> redis
+ilb -[#9370DB]-> database
 
 consul .[#e76a9b]u-> gitlab
 consul .[#e76a9b]u-> sidekiq
