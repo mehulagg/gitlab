@@ -668,7 +668,6 @@ To enable this feature:
 1. Expand the **Permissions, LFS, 2FA** section, and enter IP address ranges into **Allow access to the following IP addresses** field.
 1. Click **Save changes**.
 
-
 ![Domain restriction by IP address](img/restrict-by-ip.gif)
 
 #### Allowed domain restriction **(PREMIUM)**
