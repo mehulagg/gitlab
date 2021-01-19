@@ -7,6 +7,8 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import MrWidgetAuthorTime from '../mr_widget_author_time.vue';
 import statusIcon from '../mr_widget_status_icon.vue';
 import eventHub from '../../event_hub';
+import modalEventHub from '~/projects/commit/event_hub';
+import { OPEN_REVERT_MODAL } from '~/projects/commit/constants';
 
 export default {
   name: 'MRWidgetMerged',
@@ -98,6 +100,9 @@ export default {
           Flash(__('Something went wrong. Please try again.'));
         });
     },
+    openRevertModal() {
+      modalEventHub.$emit(OPEN_REVERT_MODAL);
+    },
   },
 };
 </script>
@@ -119,9 +124,7 @@ export default {
           size="small"
           category="secondary"
           variant="warning"
-          href="#modal-revert-commit"
-          data-toggle="modal"
-          data-container="body"
+          @click="openRevertModal"
         >
           {{ revertLabel }}
         </gl-button>

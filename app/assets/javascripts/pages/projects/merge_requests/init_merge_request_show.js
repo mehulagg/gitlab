@@ -9,6 +9,7 @@ import loadAwardsHandler from '~/awards_handler';
 import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
 import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
 import StatusBox from '~/merge_request/components/status_box.vue';
+import initRevertCommitModal from '~/projects/commit/init_revert_commit_modal';
 
 export default function () {
   new ZenMode(); // eslint-disable-line no-new
@@ -20,6 +21,7 @@ export default function () {
   loadAwardsHandler();
   initInviteMemberModal();
   initInviteMemberTrigger();
+  initRevertCommitModal();
 
   const el = document.querySelector('.js-mr-status-box');
   // eslint-disable-next-line no-new
