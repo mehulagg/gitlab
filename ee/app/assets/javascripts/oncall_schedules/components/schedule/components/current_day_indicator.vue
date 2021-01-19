@@ -19,8 +19,7 @@ export default {
 <template>
   <span
     v-if="hasToday"
-    :style="getIndicatorStyles()"
-    data-testid="current-day-indicator"
+    :style="getIndicatorStyles(presetType)"
     class="current-day-indicator"
   ></span>
 </template>

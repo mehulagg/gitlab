@@ -1,20 +1,15 @@
 <script>
-import { PRESET_TYPES, TIMELINE_CELL_WIDTH } from 'ee/oncall_schedules/constants';
+import { TIMELINE_CELL_WIDTH } from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { monthInWords } from '~/lib/utils/datetime_utility';
-import HeaderSubItem from './weeks_header_sub_item.vue';
+import WeeksHeaderSubItem from './weeks_header_sub_item.vue';
 
 export default {
-  PRESET_TYPES,
   components: {
-    HeaderSubItem,
+    WeeksHeaderSubItem,
   },
   mixins: [CommonMixin],
   props: {
-    presetType: {
-      type: String,
-      required: true,
-    },
     timeframeIndex: {
       type: Number,
       required: true,
@@ -59,10 +54,8 @@ export default {
       return '';
     },
     timelineHeaderStyles() {
-      const length = this.presetType === this.$options.PRESET_TYPES.DAYS ? 1 : 2;
-
       return {
-        width: `calc((${100}% - ${TIMELINE_CELL_WIDTH}px) / ${length})`,
+        width: `calc((${100}% - ${TIMELINE_CELL_WIDTH}px) / ${2})`,
       };
     },
   },
@@ -78,6 +71,6 @@ export default {
     >
       {{ timelineHeaderLabel }}
     </div>
-    <header-sub-item :timeframe-item="timeframeItem" :preset-type="presetType" />
+    <weeks-header-sub-item :timeframe-item="timeframeItem" />
   </span>
 </template>

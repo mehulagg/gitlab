@@ -5,15 +5,12 @@ import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { GlResizeObserverDirective } from '@gitlab/ui';
 
 export default {
+  PRESET_TYPES,
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
   mixins: [CommonMixin],
   props: {
-    presetType: {
-      type: String,
-      required: true,
-    },
     timeframeItem: {
       type: Date,
       required: true,
@@ -21,10 +18,6 @@ export default {
   },
   computed: {
     headerSubItems() {
-      if (this.presetType === PRESET_TYPES.DAYS) {
-        return Array.from(Array(24).keys());
-      }
-
       const timeframeItem = new Date(this.timeframeItem.getTime());
       const headerSubItems = new Array(7)
         .fill()
@@ -45,10 +38,6 @@ export default {
   },
   methods: {
     getSubItemValueClass(subItem) {
-      if (this.presetType === PRESET_TYPES.DAYS) {
-        return '';
-      }
-
       // Show dark color text only for current & upcoming dates
       if (subItem.getTime() === this.$options.currentDate.getTime()) {
         return 'label-dark label-bold';
@@ -58,10 +47,6 @@ export default {
       return '';
     },
     getSubItemValue(subItem) {
-      if (this.presetType === PRESET_TYPES.DAYS) {
-        return subItem;
-      }
-
       return subItem.getDate();
     },
     updateShiftStyles() {
@@ -93,7 +78,7 @@ export default {
     >
     <span
       v-if="hasToday"
-      :style="getIndicatorStyles()"
+      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS)"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

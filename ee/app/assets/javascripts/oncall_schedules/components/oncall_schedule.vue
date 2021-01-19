@@ -80,7 +80,11 @@ export default {
       return getTimeframeForWeeksView();
     },
     scheduleRange() {
-      const range = { start: this.timeframe[0], end: this.timeframe[this.timeframe.length - 1] };
+      const end =
+        this.presetType === this.$options.PRESET_TYPES.DAYS
+          ? this.timeframe[0]
+          : this.timeframe[this.timeframe.length - 1];
+      const range = { start: this.timeframe[0], end };
 
       return `${formatDate(range.start, 'mmmm d')} - ${formatDate(range.end, 'mmmm d, yyyy')}`;
     },

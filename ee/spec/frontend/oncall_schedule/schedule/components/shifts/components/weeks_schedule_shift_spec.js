@@ -22,7 +22,7 @@ const timeframe = [timeframeItem, incrementDateByDays(timeframeItem, DAYS_IN_WEE
 describe('ee/oncall_schedules/components/schedule/components/shifts/components/weeks_schedule_shift.vue', () => {
   let wrapper;
 
-  function createComponent({ props = {}, data = {} } = {}) {
+  function createComponent({ props = {} } = {}) {
     wrapper = shallowMount(WeeksScheduleShift, {
       propsData: {
         shift,
@@ -30,21 +30,8 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/w
         timeframeItem,
         timeframe,
         presetType: PRESET_TYPES.WEEKS,
-        shiftTimeUnitWidth: 0,
+        shiftTimeUnitWidth: CELL_WIDTH,
         ...props,
-      },
-      data() {
-        return {
-          shiftTimeUnitWidth: 0,
-          ...data,
-        };
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            shiftTimeUnitWidth: 0,
-          },
-        },
       },
     });
   }

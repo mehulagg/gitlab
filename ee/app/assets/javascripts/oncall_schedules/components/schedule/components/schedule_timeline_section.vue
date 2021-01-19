@@ -1,10 +1,13 @@
 <script>
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
-import HeaderItem from './preset_weeks/weeks_header_item.vue';
+import DaysHeaderItem from './preset_days/days_header_item.vue';
+import WeeksHeaderItem from './preset_weeks/weeks_header_item.vue';
 
 export default {
+  PRESET_TYPES,
   components: {
-    HeaderItem,
+    DaysHeaderItem,
+    WeeksHeaderItem,
   },
   props: {
     presetType: {
@@ -16,28 +19,24 @@ export default {
       required: true,
     },
   },
-  computed: {
-    timeframeToDraw() {
-      if (this.presetType === PRESET_TYPES.DAYS) {
-        return [this.timeframe[0]];
-      }
-
-      return this.timeframe;
-    },
-  },
 };
 </script>
 
 <template>
   <div class="timeline-section clearfix">
     <span class="timeline-header-blank"></span>
-    <header-item
-      v-for="(timeframeItem, index) in timeframeToDraw"
-      :key="index"
-      :timeframe-index="index"
-      :timeframe-item="timeframeItem"
-      :timeframe="timeframe"
-      :preset-type="presetType"
-    />
+    <div v-if="presetType === $options.PRESET_TYPES.DAYS">
+      <days-header-item :timeframe-item="timeframe[0]" />
+    </div>
+    <div v-else>
+      <weeks-header-item
+        v-for="(timeframeItem, index) in timeframe"
+        :key="index"
+        :timeframe-index="index"
+        :timeframe-item="timeframeItem"
+        :timeframe="timeframe"
+        :preset-type="presetType"
+      />
+    </div>
   </div>
 </template>
