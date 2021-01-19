@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::Lint do
+  include ProjectForksHelper
+
   describe 'POST /ci/lint' do
     context 'with valid .gitlab-ci.yaml content' do
       let(:yaml_content) do
@@ -381,6 +383,9 @@ RSpec.describe API::Lint do
 
       context 'when project is public' do
         before do
+          forked_project = fork_project(project, api_user, repository: true)
+          forked_project.add_developer(api_user)
+          create(:merge_request, source_project: forked_project, target_project: project, allow_collaboration: true)
           project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
         end
 

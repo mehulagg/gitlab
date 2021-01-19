@@ -56,7 +56,7 @@ module API
         optional :dry_run, type: Boolean, default: false, desc: 'Run pipeline creation simulation, or only do static check.'
       end
       post ':id/ci/lint' do
-        authorize! :download_code, user_project
+        authorize! :create_pipeline, user_project
 
         result = Gitlab::Ci::Lint
           .new(project: user_project, current_user: current_user)
