@@ -170,13 +170,13 @@ convention.
 
 ## Authenticate to the Package Registry
 
-To authenticate to the Package Registry, you need either a personal access token
-or deploy token.
+To authenticate to the Package Registry, you need either:
 
-- If you use a [personal access token](../../../user/profile/personal_access_tokens.md),
-  set the scope to `api`.
-- If you use a [deploy token](../../project/deploy_tokens/index.md), set the
-  scope to `read_package_registry`, `write_package_registry`, or both.
+- A [personal access token](../../../user/profile/personal_access_tokens.md)
+  with the scope set to `api`.
+- A [deploy token](../../project/deploy_tokens/index.md) with the
+  scope set to `read_package_registry`, `write_package_registry`, or both.
+- A [CI job token](#publish-a-conan-package-by-using-cicd).
 
 ### Add your credentials to the GitLab remote
 
@@ -235,7 +235,8 @@ remote in your commands:
 ## Publish a Conan package
 
 Publish a Conan package to the Package Registry, so that anyone who can access
-the project can use the package as a dependency.
+the project can use the package as a dependency. You can publish the package
+to your project or instance.
 
 Prerequisites:
 
@@ -281,7 +282,7 @@ Additional Conan images to use as the basis of your CI file are available in the
 ## Install a Conan package
 
 Install a Conan package from the Package Registry so you can use it as a
-dependency.
+dependency. You can install a package from your instance or your project.
 
 WARNING:
 Project-level packages [cannot be downloaded currently](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).
