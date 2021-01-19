@@ -1,5 +1,13 @@
 <script>
-import { GlButton, GlCard, GlFormGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCard,
+  GlFormGroup,
+  GlDropdown,
+  GlDropdownItem,
+  GlIcon,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 
 export default {
   name: 'OnDemandScansProfileSelector',
@@ -9,6 +17,10 @@ export default {
     GlFormGroup,
     GlDropdown,
     GlDropdownItem,
+    GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     libraryPath: {
@@ -53,6 +65,15 @@ export default {
       <template #label>
         <slot name="label"></slot>
       </template>
+      <gl-button
+        v-if="selectedProfile"
+        v-gl-tooltip
+        category="tertiary"
+        icon="pencil"
+        :title="s__('DastProfiles|Edit profile')"
+        :href="selectedProfile.editPath"
+        class="gl-absolute gl-right-7"
+      />
       <gl-dropdown
         :text="
           selectedProfile
