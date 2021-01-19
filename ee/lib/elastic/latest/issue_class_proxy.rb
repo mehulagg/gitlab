@@ -28,6 +28,10 @@ module Elastic
         search(query_hash, options)
       end
 
+      def elastic_count(query, options: {})
+        elastic_search(query, options: options)
+      end
+
       private
 
       # Builds an elasticsearch query that will select documents from a

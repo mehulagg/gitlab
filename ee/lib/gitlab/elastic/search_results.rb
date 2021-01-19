@@ -113,7 +113,12 @@ module Gitlab
       end
 
       def merge_requests_count
-        @merge_requests_count ||= merge_requests.total_count
+        @merge_requests_count ||= begin
+          if strong_memoized?(:merge_requests)
+            merge_requests.total_count
+          else
+          end
+        end
       end
 
       def milestones_count
@@ -208,6 +213,21 @@ module Gitlab
         }
       end
 
+      def scope_options(scope)
+        case scope
+        when :merge_requests
+          base_options.merge(filters.slice(:order_by, :sort, :state))
+        when :issues
+          base_options.merge(filters.slice(:order_by, :sort, :confidential, :state))
+        when :milestones
+          # Must pass 'issues' and 'merge_requests' to check
+          # if any of the features is available for projects in ApplicationClassProxy#project_ids_query
+          # Otherwise it will ignore project_ids and return milestones
+          # from projects with milestones disabled.
+          base_options.merge(features: [:issues, :merge_requests])
+        end
+      end
+
       def projects
         strong_memoize(:projects) do
           Project.elastic_search(query, options: base_options)
@@ -216,30 +236,19 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options.merge(filters.slice(:order_by, :sort, :confidential, :state))
-
-          Issue.elastic_search(query, options: options)
+          Issue.elastic_search(query, options: scope_options(:issues))
         end
       end
 
       def milestones
         strong_memoize(:milestones) do
-          # Must pass 'issues' and 'merge_requests' to check
-          # if any of the features is available for projects in ApplicationClassProxy#project_ids_query
-          # Otherwise it will ignore project_ids and return milestones
-          # from projects with milestones disabled.
-          options = base_options
-          options[:features] = [:issues, :merge_requests]
-
-          Milestone.elastic_search(query, options: options)
+          Milestone.elastic_search(query, options: scope_options(:milestones))
         end
       end
 
       def merge_requests
         strong_memoize(:merge_requests) do
-          options = base_options.merge(filters.slice(:order_by, :sort, :state))
-
-          MergeRequest.elastic_search(query, options: options)
+          MergeRequest.elastic_search(query, options: scope_options(:merge_requests))
         end
       end
 
