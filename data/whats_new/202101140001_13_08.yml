@@ -21,36 +21,36 @@
   stage: release
   body: |
     Knowing and monitoring deployment frequency is a starting point for organizations adopting DevOps. We are proud to introduce the deployment frequency charts at the project level so that you and your development teams can monitor the efficiency of deployments over time, find bottlenecks, and make improvements when necessary. This is the first of the DORA metrics that we are making available within GitLab out of the box.
-- title: Scope a board to the current iteration 
-  body: | 
+- title: Scope a board to the current iteration
+  body: |
     Many teams use boards to manage issues during an iteration. In 13.6, we added support for [filtering issues on a board to a specific Iteration](https://gitlab.com/gitlab-org/gitlab/-/issues/118742), but it is cumbersome to remember to apply that filter every time you go to your board. In this release, we've added the ability to scope your board to the currently active iteration.
   stage: plan
   self-managed: true
   gitlab-com: true
-  packages: [starter, premium, ultimate]
+  packages: [Starter, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/project/issue_board.html#configurable-issue-boards
   image_url: https://about.gitlab.com/images/13_8/scope_board_to_current_iteration.png
-  published_at: 2021-01-22 
-  release: 13.8 
+  published_at: 2021-01-22
+  release: 13.8
 - title: Download artifacts directly from the merge request widget
-  body: | 
+  body: |
     We added the ability to download build artifacts directly from the MR widget. This is especially useful for mobile development. An example of this is where users want to test an Android package of a specific build created on a physical device or an emulator. You can now access these artifacts directly from the merge request widget without having to find the artifacts buried in the pipeline view.
   stage: release
   self-managed: true
   gitlab-com: true
-  packages: [core, starter, premium, ultimate]
+  packages: [Core, Starter, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html#downloading-artifacts
   image_url: https://about.gitlab.com/images/13_8/artifact_mr.png
-  published_at: 2021-01-22 
+  published_at: 2021-01-22
   release: 13.8
 - title: Send an email to an issue
-  body: | 
+  body: |
     To more efficiently integrate GitLab into your email workflows, each issue now has a unique email address. Emailing an issue creates a new comment on your behalf. You can now say goodbye to manually copying email content and attachments into your GitLab issues.
   stage: plan
   self-managed: true
   gitlab-com: true
-  packages: [core, starter, premium, ultimate]
+  packages: [Core, Starter, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/project/issues/issue_data_and_actions.html#email
   image_url: https://about.gitlab.com/images/13_8/issue-email.png
-  published_at: 2021-01-22 
+  published_at: 2021-01-22
   release: 13.8
