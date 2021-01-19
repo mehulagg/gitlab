@@ -87,6 +87,82 @@ RSpec.describe Release do
 
       expect(release.released_at).to eq(released_at)
     end
+
+    it 'creates with links' do
+      # A link is created with the release creation
+      puts "#{self.class.name}##{__method__} A link is created with the release creation"
+      release = described_class.create!(project: project, author: user, tag: "v1.1.0",
+        links_attributes: [{ name: 'test', url: 'https://www.google.com/'}])
+
+      expect(release.links.count).to eq(1)
+      expect(release.links.first.name).to eq('test')
+      expect(release.links.first.url).to eq('https://www.google.com/')
+
+      # Updating the link name of the release
+      puts "#{self.class.name}##{__method__} Updating the link name of the release"
+      release.reload
+      release.update!(links_attributes: [{ id: release.links.first.id, name: 'test1' }])
+
+      expect(release.links.count).to eq(1)
+      expect(release.links.first.name).to eq('test1')
+      expect(release.links.first.url).to eq('https://www.google.com/')
+
+      # Removing the link from the release
+      puts "#{self.class.name}##{__method__} Removing the link from the release"
+      release.reload
+      release.update!(links_attributes: [{ id: release.links.first.id, _destroy: true }])
+
+      expect(release.links.count).to eq(0)
+
+      # Adding two links to the release
+      puts "#{self.class.name}##{__method__} Adding two links to the release"
+      release.reload
+      release.update!(links_attributes:
+        [
+          { name: 'test1', url: 'https://www.google1.com/'},
+          { name: 'test2', url: 'https://www.google2.com/'}
+        ]
+      )
+
+      expect(release.links.count).to eq(2)
+      expect(release.links.first.name).to eq('test1')
+      expect(release.links.first.url).to eq('https://www.google1.com/')
+      expect(release.links.second.name).to eq('test2')
+      expect(release.links.second.url).to eq('https://www.google2.com/')
+
+      # Removing and re-adding the same link
+      puts "#{self.class.name}##{__method__} Removing and re-adding the same link"
+      release.reload
+      release.update!(links_attributes:
+        [
+          { id: release.links.second.id, _destroy: true },
+          { name: 'test2', url: 'https://www.google2.com/'},
+        ]
+      )
+
+      expect(release.links.count).to eq(2)
+      expect(release.links.first.name).to eq('test1')
+      expect(release.links.first.url).to eq('https://www.google1.com/')
+      expect(release.links.second.name).to eq('test2')
+      expect(release.links.second.url).to eq('https://www.google2.com/')
+
+      # Swapping the names of links
+      # puts "#{self.class.name}##{__method__} Swapping the names of links"
+      # release.reload
+      # release.update!(links_attributes:
+      #   [
+      #     { id: release.links.first.id, name: 'test2' },
+      #     { id: release.links.second.id, name: 'test1' },
+      #   ]
+      # )
+      # This causes a unique violation on PostgreSQL.
+      # ```
+      # ActiveRecord::RecordNotUnique:
+      # PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint "index_release_links_on_release_id_and_name"
+      # DETAIL:  Key (release_id, name)=(36, test2) already exists.
+      # ```
+      # This is to be supported in the future.
+    end
   end
 
   describe '#sources' do
