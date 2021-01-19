@@ -29,7 +29,7 @@ The following table lists examples with step-by-step tutorials that are containe
 | Deployment with Dpl           | [Using `dpl` as deployment tool](deployment/README.md). |
 | GitLab Pages                  | See the [GitLab Pages](../../user/project/pages/index.md) documentation for a complete example of deploying a static site. |
 | End-to-end testing            | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md). |
-| Game development              | [DevOps and Game Dev with GitLab CI/CD](devops_and_game_dev_with_gitlab_ci_cd/index.md). |
+| Game development              | [DevOps and Game Dev with GitLab CI/CD](https://gitlab.com/gitlab-examples/gitlab-game-demo/). |
 | Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md). |
 | Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](deploy_spring_boot_to_cloud_foundry/index.md). |
 | Load performance testing      | [Load Performance Testing with the k6 container](../../user/project/merge_requests/load_performance_testing.md). |
