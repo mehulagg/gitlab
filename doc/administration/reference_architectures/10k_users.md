@@ -1408,8 +1408,6 @@ node_exporter['listen_address'] = '0.0.0.0:9100'
 postgres_exporter['listen_address'] = '0.0.0.0:9187'
 ```
 
-TODO: Copy and paste steps from Gitaly Cluster docs
-
 1. SSH in to the PostgreSQL node.
 1. Create a strong password to be used for the Praefect PostgreSQL user. Take note of this password as `<praefect_postgresql_password>`.
 1. Generate the password hash for the Praefect PostgreSQL username/password pair. This assumes you will use the default
@@ -1477,12 +1475,14 @@ are supported and can be added if needed.
 
 #### Configure your own Praefect PostgreSQL server
 
-TODO: Guidance on how to set up a HA PostgreSQL server for Praefect?
+As noted elsewhere in this guide, currently a third party PostgreSQL solution for Praefect's database is recommended if aiming for full High Availability.
 
-Input from Gitaly team may be required but any solution must have a static IP address that doesn't change when failover occurs as Praefect's database connection settings
-can't be changed automatically.
+There are many third party solutions for PostgreSQL HA. Note that the solution selected must have the following to work with Praefect:
 
-Examples could include [Google's Cloud SQL offering](https://cloud.google.com/sql/docs/postgres/high-availability#normal)
+- For HA the solution must have a static IP for all connections that doesn't change on failover
+- [`LISTEN`](https://www.postgresql.org/docs/12/sql-listen.html) SQL functionality must be supported
+
+Examples of the above could include [Google's Cloud SQL](https://cloud.google.com/sql/docs/postgres/high-availability#normal) or [Amazon RDS](https://aws.amazon.com/rds/).
 
 #### Praefect PostgreSQL post-configuration
 
@@ -1593,6 +1593,7 @@ To configure the Praefect nodes, on each one:
    # Praefect Database Settings
    praefect['database_host'] = '10.142.0.141'
    praefect['database_port'] = 5432
+   # `no_proxy` settings must always be a direct connection for caching
    praefect['database_host_no_proxy'] = '10.142.0.141'
    praefect['database_port_no_proxy'] = 5432
    praefect['database_dbname'] = 'praefect_production'
@@ -1748,7 +1749,7 @@ On each node:
 
 1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-### Gitaly TLS support
+### Gitaly Cluster TLS support
 
 Praefect supports TLS encryption. To communicate with a Praefect instance that listens
 for secure connections, you must:
