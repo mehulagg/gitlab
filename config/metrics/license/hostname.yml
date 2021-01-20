@@ -1,0 +1,21 @@
+---
+key_path: hostname
+description: Host name of GitLab instance
+value_type: string
+product_category: collection
+stage:
+status: data_available
+group: growth.product_intelligence
+time_frame: none
+data_source:
+distribution:
+- free
+- starter
+- bronze
+- premium
+- silver
+- ultimate
+- gold
+tier:
+- ce
+- ee

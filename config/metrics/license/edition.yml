@@ -1,0 +1,21 @@
+---
+key_path: edition
+description: Edition of GitLab such as EE, CE, Bronze, Silver, Gold
+value_type: string
+product_category: collection
+stage:
+status: data_available
+group: enablement.enablement.distribution
+time_frame: none
+data_source:
+distribution:
+- free
+- starter
+- bronze
+- premium
+- silver
+- ultimate
+- gold
+tier:
+- ce
+- ee

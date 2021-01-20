@@ -1,0 +1,21 @@
+---
+key_path: installation_type
+description: The installation method used to install GitLab (Omnibus, Helm, etc)
+value_type: string
+product_category: collection
+stage:
+status: data_available
+group: enablement.enablement.distribution
+time_frame: none
+data_source:
+distribution:
+- free
+- starter
+- bronze
+- premium
+- silver
+- ultimate
+- gold
+tier:
+- ce
+- ee

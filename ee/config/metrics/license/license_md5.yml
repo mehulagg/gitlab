@@ -1,0 +1,20 @@
+---
+key_path: license_md5
+description: The license key of the GitLab instance
+value_type: string
+product_category: collection
+stage:
+status: data_available
+group: growth.product_intelligence
+time_frame: none
+data_source:
+distribution:
+- free
+- starter
+- bronze
+- premium
+- silver
+- ultimate
+- gold
+tier:
+- ee
