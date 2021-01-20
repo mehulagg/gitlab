@@ -98,7 +98,7 @@
   self-managed: true
   gitlab-com: true
   packages: [Ultimate]
-  url: 'https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#interacting-with-the-vulnerabilities
+  url: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#interacting-with-the-vulnerabilities
   image_url: https://about.gitlab.com/images/13_8/api_vuln_results.png
   published_at: 2021-01-22
   release: 13.8
