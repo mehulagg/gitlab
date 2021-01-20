@@ -244,7 +244,8 @@ Prerequisites:
 
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
-- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention). It must match exactly, including the case.
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
+  It must match exactly, including the case. The NPM naming convention requires it.
 
 To upload an NPM package to your project, run this command:
 
@@ -263,7 +264,8 @@ Prerequisites:
 
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
-- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention). It must match exactly, including the case.
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
+  It must match exactly, including the case. The NPM naming convention requires it.
 
 To work with NPM commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
@@ -298,7 +300,7 @@ the same version more than once, even if it has been deleted.
 ## Install a package
 
 NPM packages are commonly-installed by using the `npm` or `yarn` commands
-in a JavaScript project. You can install a package from a project, group,
+in a JavaScript project. You can install a package from the scope of a project, group,
 or instance.
 
 1. Set the URL for scoped packages by running:
