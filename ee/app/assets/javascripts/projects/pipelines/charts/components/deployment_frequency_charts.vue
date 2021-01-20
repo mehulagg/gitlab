@@ -6,6 +6,8 @@ import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
 import { nDaysBefore, nMonthsBefore, getDatesInRange } from '~/lib/utils/datetime_utility';
 import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd_analytics_area_chart.vue';
+import { allChartDefinitions } from './static_data';
+import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 export default {
   name: 'DeploymentFrequencyCharts',
@@ -19,79 +21,17 @@ export default {
     },
   },
   data() {
-    // Compute all relative dates based on the _beginning_ of today
-    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
-    const lastWeek = new Date(nDaysBefore(startOfToday, 7));
-    const lastMonth = new Date(nMonthsBefore(startOfToday, 1));
-    const last90Days = new Date(nDaysBefore(startOfToday, 90));
-    const apiDateFormatString = 'isoDateTime';
-    const titleDateFormatString = 'mmm d';
-    const sharedRequestParams = {
-      environment: 'production',
-      interval: 'daily',
-
-      // We will never have more than 91 records (1 record per day), so we
-      // don't have to worry about making multiple requests to get all the results
-      per_page: 100,
-    };
-
     return {
-      charts: [
-        {
-          title: sprintf(
-            s__(
-              'DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})',
-            ),
-            {
-              startDate: dateFormat(lastWeek, titleDateFormatString),
-              endDate: dateFormat(startOfToday, titleDateFormatString),
-            },
-          ),
-          startDate: lastWeek,
-          requestParams: {
-            ...sharedRequestParams,
-            from: dateFormat(lastWeek, apiDateFormatString),
-          },
-          isLoading: true,
-          data: [],
-        },
-        {
-          title: sprintf(
-            s__(
-              'DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})',
-            ),
-            {
-              startDate: dateFormat(lastMonth, titleDateFormatString),
-              endDate: dateFormat(startOfToday, titleDateFormatString),
-            },
-          ),
-          startDate: lastMonth,
-          requestParams: {
-            ...sharedRequestParams,
-            from: dateFormat(lastMonth, apiDateFormatString),
-          },
-          isLoading: true,
-          data: [],
-        },
-        {
-          title: sprintf(
-            s__(
-              'DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})',
-            ),
-            {
-              startDate: dateFormat(last90Days, titleDateFormatString),
-              endDate: dateFormat(startOfToday, titleDateFormatString),
-            },
-          ),
-          startDate: last90Days,
-          requestParams: {
-            ...sharedRequestParams,
-            from: dateFormat(last90Days, apiDateFormatString),
-          },
-          isLoading: true,
-          data: [],
-        },
-      ],
+      chartData: {
+        [LAST_WEEK]: [],
+        [LAST_MONTH]: [],
+        [LAST_90_DAYS]: [],
+      },
+      chartLoadingStatus: {
+        [LAST_WEEK]: false,
+        [LAST_MONTH]: false,
+        [LAST_90_DAYS]: false,
+      },
     };
   },
   async mounted() {
@@ -174,15 +114,16 @@ export default {
       minInterval: 1,
     },
   },
+  allChartDefinitions,
 };
 </script>
 <template>
   <div>
     <h4 class="gl-my-4">{{ s__('DeploymentFrequencyCharts|Deployments charts') }}</h4>
     <ci-cd-analytics-area-chart
-      v-for="(chart, index) in charts"
-      :key="index"
-      :chart-data="chart.data"
+      v-for="chart in $options.allChartDefinitions"
+      :key="chart.id"
+      :chart-data="chartData[chart.id]"
       :area-chart-options="$options.areaChartOptions"
     >
       {{ chart.title }}
