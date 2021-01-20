@@ -280,10 +280,17 @@ create_package:
 Additional Conan images to use as the basis of your CI file are available in the
 [Conan docs](https://docs.conan.io/en/latest/howtos/run_conan_in_docker.html#available-docker-images).
 
+### Publishing a package with the same name or version
+
+When you publish a package with the same name or version as an existing package,
+the existing package is overwritten.
+
 ## Install a Conan package
 
 Install a Conan package from the Package Registry so you can use it as a
 dependency. You can install a package from your instance or your project.
+If multiple packages have the same name and version, when you install
+a package, the most recently-published package is retrieved.
 
 WARNING:
 Project-level packages [cannot be downloaded currently](https://gitlab.com/gitlab-org/gitlab/-/issues/270129).
