@@ -21,21 +21,29 @@ module EE
                     hasNextPage
                   }
                   nodes {
-                    title
-                    description
-                    state
-                    createdAt
-                    closedAt
-                    startDate
-                    startDateFixed
-                    startDateIsFixed
-                    dueDateFixed
-                    dueDateIsFixed
-                    relativePosition
-                    confidential
+                    ...epicFields
+                    hasParent
+                    parent {
+                      ...epicFields
+                    }
                   }
                 }
               }
+            }
+
+            fragment epicFields on Epic {
+              title
+              description
+              state
+              createdAt
+              closedAt
+              startDate
+              startDateFixed
+              startDateIsFixed
+              dueDateFixed
+              dueDateIsFixed
+              relativePosition
+              confidential
             }
             GRAPHQL
           end
