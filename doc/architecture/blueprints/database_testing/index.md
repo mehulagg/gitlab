@@ -9,7 +9,7 @@ We have identified [common themes of reverted migrations](https://gitlab.com/git
 
 From a developer's perspective, it is hard if not unfeasible to validate a migration on a large enough dataset before it goes into production.
 
-Our primary goal is to **provide developers with immediate feedback for new migrations and other database-related changes tested on a full copy of the production database**, and to do so with high levels of efficiency (particularly in terms of infrastructure costs).
+Our primary goal is to **provide developers with immediate feedback for new migrations and other database-related changes tested on a full copy of the production database**, and to do so with high levels of efficiency (particularly in terms of infrastructure costs) and security.
 
 ## Current day
 
