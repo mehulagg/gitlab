@@ -98,7 +98,8 @@ For more details about creating and managing Conan packages, see the
 ## Add the Package Registry as a Conan remote
 
 To run `conan` commands, you must add the Package Registry as a Conan remote for
-your project or instance.
+your project or instance. Then you can publish packages to
+and install packages from the Package Registry.
 
 ### Add a remote for your project
 
