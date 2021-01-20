@@ -2,12 +2,12 @@
 
 - if group_packages_nav?
   = nav_link(controller: ['groups/packages', 'groups/registry/repositories', 'groups/dependency_proxies']) do
-    = link_to packages_link, title: _('Packages') do
+    = link_to packages_link, title: _('Packages'), data: { qa_selector: 'group_packages_item' } do
       .nav-icon-container
         = sprite_icon('package')
       %span.nav-item-name
         = _('Packages & Registries')
-    %ul.sidebar-sub-level-items
+    %ul.sidebar-sub-level-items{ data: { qa_selector: 'group_packages_submenu' } }
       = nav_link(controller: [:packages, :repositories], html_options: { class: "fly-out-top-item" } ) do
         = link_to packages_link, title: _('Packages & Registries') do
           %strong.fly-out-top-item-name
@@ -15,7 +15,7 @@
       %li.divider.fly-out-top-item
       - if group_packages_list_nav?
         = nav_link(controller: 'groups/packages') do
-          = link_to group_packages_path(@group), title: _('Packages') do
+          = link_to group_packages_path(@group), title: _('Packages'), data: { qa_selector: 'group_packages_link' } do
             %span= _('Package Registry')
       - if group_container_registry_nav?
         = nav_link(controller: 'groups/registry/repositories') do

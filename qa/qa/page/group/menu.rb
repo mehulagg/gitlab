@@ -19,6 +19,12 @@ module QA
           element :analytics_sidebar_submenu
         end
 
+        view 'app/views/groups/sidebar/_packages.html.haml' do
+          element :group_packages_item
+          element :group_packages_link
+          element :group_packages_submenu
+        end
+
         def click_group_members_item
           within_sidebar do
             click_element(:group_members_item)
