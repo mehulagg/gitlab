@@ -1,0 +1,8 @@
+---
+name: vue_project_members_list
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.8'
+type: development
+group: group::access
+default_enabled: true
