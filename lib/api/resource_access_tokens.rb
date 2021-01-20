@@ -27,12 +27,12 @@ module API
         end
 
         get ":id/access_tokens" do
-         # source = find_source(source_type, params[:id])
-        #  PersonalAccessTokensFinder.new({ user: source.bots, impersonation: false}.merge(state: 'active')).execute
-          source = Project.find(20)
-          members = paginate(PersonalAccessTokensFinder.new({ user: source.bots, impersonation: false}.merge(state: 'active')).execute)
-
-          present_members members
+          bot_users = Project.find(20).bots
+      
+          tokens = PersonalAccessTokensFinder.new({ user: bot_users, impersonation: false }.merge(state: 'active')).execute
+         
+          present paginate(tokens), with: Entities::PersonalAccessToken
+          
         end
       end
     end
