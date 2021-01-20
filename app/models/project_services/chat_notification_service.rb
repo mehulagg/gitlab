@@ -11,7 +11,7 @@ class ChatNotificationService < Service
     tag_push pipeline wiki_page deployment
   ].freeze
 
-  SUPPORTED_EVENTS_FOR_LABEL_FILTER = %w[issue confidential_issue merge_request note confidential_note]
+  SUPPORTED_EVENTS_FOR_LABEL_FILTER = %w[issue confidential_issue merge_request note confidential_note].freeze
 
   EVENT_CHANNEL = proc { |event| "#{event}_channel" }
 
@@ -123,7 +123,7 @@ class ChatNotificationService < Service
   def labels_to_be_notified_list
     return [] if labels_to_be_notified.nil?
 
-    labels_to_be_notified.gsub('~', '').split(',')
+    labels_to_be_notified.delete('~').split(',')
   end
 
   def notify_label?(data)
@@ -131,7 +131,7 @@ class ChatNotificationService < Service
 
     issue_labels = data.dig(:issue, :labels) || []
     merge_request_labels = data.dig(:merge_request, :labels) || []
-    label_titles = (issue_labels + merge_request_labels).map{|labels| labels[:title]}
+    label_titles = (issue_labels + merge_request_labels).map { |labels| labels[:title] }
 
     (labels_to_be_notified_list & label_titles).any?
   end

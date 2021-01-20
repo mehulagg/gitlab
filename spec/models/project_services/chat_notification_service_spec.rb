@@ -94,7 +94,7 @@ RSpec.describe ChatNotificationService do
 
           allow(project).to receive(:full_name).and_return('Project Name')
           expect(chat_service).not_to receive(:get_message).with(any_args, hash_including(project_name: 'Project Name'))
-  
+
           chat_service.execute(data)
         end
 
@@ -103,7 +103,7 @@ RSpec.describe ChatNotificationService do
 
           allow(project).to receive(:full_name).and_return('Project Name')
           expect(chat_service).to receive(:get_message).with(any_args, hash_including(project_name: 'Project Name'))
-  
+
           chat_service.execute(data)
         end
       end
