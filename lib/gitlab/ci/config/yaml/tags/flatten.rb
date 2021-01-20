@@ -18,8 +18,20 @@ module Gitlab
 
             def _resolve(config)
               data[:seq]
-                .map { |object| resolve_wrapper(object, config) }
+                .map { |object| symbolize_names! resolve_wrapper(object, config) }
                 .flatten
+            end
+
+            def symbolize_names!(result)
+              case result
+              when Hash
+                result.keys.each do |key|
+                  result[key.to_sym] = symbolize_names!(result.delete(key))
+                end
+              when Array
+                result.map!(&method(:symbolize_names!))
+              end
+              result
             end
           end
         end

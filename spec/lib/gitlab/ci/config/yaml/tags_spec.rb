@@ -21,7 +21,7 @@ RSpec.describe Gitlab::Ci::Config::YAML::Tags do
     end
 
     context 'when tags are not loaded into Psych' do
-      it { is_expected.to match({ a: ['b', 'c'], b: { c: 1 }, d: [1, [2], [3, [4]]] }) }
+      it { is_expected.to match({ a: %w[b c], b: { c: 1 }, d: [1, [2], [3, [4]]] }) }
     end
 
     context 'when tags are loaded into Psych' do
@@ -156,6 +156,37 @@ RSpec.describe Gitlab::Ci::Config::YAML::Tags do
         it 'raises an exception about circular references' do
           expect { subject }.to raise_error Gitlab::Ci::Config::YAML::Tags::CircularReferenceError, '!reference ["job-3", "script"] is part of a circular chain'
         end
+      end
+    end
+
+    context 'with rules' do
+      let(:yaml) do
+        <<~YML
+        .skip-merge-requests:
+          rules:
+            - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+              when: never
+
+        .skip-schedules:
+          rules:
+            - if: '$CI_PIPELINE_SOURCE == "schedule"'
+              when: never
+
+        job:
+          script: 'echo hello world'
+          rules: !flatten
+            - !reference [.skip-merge-requests, rules]
+            - !reference [.skip-schedules, rules]
+            - when: on_success
+        YML
+      end
+
+      it 'merges rules' do
+        expect(subject[:job][:rules]).to eq([
+          { if: '$CI_PIPELINE_SOURCE == "merge_request_event"', when: 'never' },
+          { if: '$CI_PIPELINE_SOURCE == "schedule"', when: 'never' },
+          { when: 'on_success' }
+        ])
       end
     end
   end
