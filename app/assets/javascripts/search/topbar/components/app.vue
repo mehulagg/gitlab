@@ -24,6 +24,11 @@ export default {
       required: false,
       default: () => ({}),
     },
+    scopeTabs: {
+      type: Object,
+      required: false,
+      default: () => ([]),
+    },
   },
   computed: {
     ...mapState(['query']),
@@ -46,26 +51,29 @@ export default {
 </script>
 
 <template>
-  <gl-form class="search-page-form" @submit.prevent="applyQuery">
-    <section class="gl-display-lg-flex gl-align-items-flex-end">
-      <div class="gl-flex-fill-1 gl-mb-4 gl-lg-mb-0 gl-lg-mr-2">
-        <label>{{ __('What are you searching for?') }}</label>
-        <gl-search-box-by-type
-          id="dashboard_search"
-          v-model="search"
-          name="search"
-          :placeholder="__(`Search for projects, issues, etc.`)"
-        />
-      </div>
-      <div v-if="showFilters" class="gl-mb-4 gl-lg-mb-0 gl-lg-mx-2">
-        <label class="gl-display-block">{{ __('Group') }}</label>
-        <group-filter :initial-data="groupInitialData" />
-      </div>
-      <div v-if="showFilters" class="gl-mb-4 gl-lg-mb-0 gl-lg-mx-2">
-        <label class="gl-display-block">{{ __('Project') }}</label>
-        <project-filter :initial-data="projectInitialData" />
-      </div>
-      <gl-button class="btn-search" variant="success" type="submit">{{ __('Search') }}</gl-button>
-    </section>
-  </gl-form>
+  <section>
+    <gl-form class="search-page-form" @submit.prevent="applyQuery">
+      <section class="gl-display-lg-flex gl-align-items-flex-end">
+        <div class="gl-flex-fill-1 gl-mb-4 gl-lg-mb-0 gl-lg-mr-2">
+          <label>{{ __('What are you searching for?') }}</label>
+          <gl-search-box-by-type
+            id="dashboard_search"
+            v-model="search"
+            name="search"
+            :placeholder="__(`Search for projects, issues, etc.`)"
+          />
+        </div>
+        <div v-if="showFilters" class="gl-mb-4 gl-lg-mb-0 gl-lg-mx-2">
+          <label class="gl-display-block">{{ __('Group') }}</label>
+          <group-filter :initial-data="groupInitialData" />
+        </div>
+        <div v-if="showFilters" class="gl-mb-4 gl-lg-mb-0 gl-lg-mx-2">
+          <label class="gl-display-block">{{ __('Project') }}</label>
+          <project-filter :initial-data="projectInitialData" />
+        </div>
+        <gl-button class="btn-search" variant="success" type="submit">{{ __('Search') }}</gl-button>
+      </section>
+    </gl-form>
+    <scope-tabs :scope-tabs="scopeTabs" />
+  </section>
 </template>
