@@ -1,5 +1,11 @@
 <script>
-import { GlButton, GlFormRadio, GlFormRadioGroup, GlSearchBoxByType } from '@gitlab/ui';
+import {
+  GlButton,
+  GlFormRadio,
+  GlFormRadioGroup,
+  GlSearchBoxByType,
+  GlSkeletonLoader,
+} from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { __ } from '~/locale';
 
@@ -13,28 +19,39 @@ export default {
     GlFormRadio,
     GlFormRadioGroup,
     GlSearchBoxByType,
+    GlSkeletonLoader,
   },
   data() {
     return {
+      labels: [],
+      loading: false,
       searchTerm: '',
       selectedLabel: null,
-      labels: [],
     };
   },
   created() {
     this.filterLabels();
   },
   methods: {
-    ...mapActions(['fetchLabels']),
+    ...mapActions(['createList', 'fetchLabels']),
+    addList() {
+      if (this.selectedLabel) {
+        this.createList({ labelId: this.selectedLabel });
+      }
+    },
     filterLabels() {
+      this.loading = true;
       this.fetchLabels(this.searchTerm)
         .then((labels) => {
           this.labels = labels;
         })
         .catch((e) => {
           this.labels = [];
-          this.error = __('Unable to load labels or something');
+          this.error = __('Unable to load labels');
           throw e;
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
   },
@@ -47,7 +64,7 @@ export default {
     data-qa-selector="board_add_new_list"
   >
     <div
-      class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
+      class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base gl-bg-white"
     >
       <h4 class="gl-px-3 gl-pb-3 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100">
         {{ __('New label list') }}
@@ -66,11 +83,21 @@ export default {
           @input="filterLabels"
         />
 
-        <gl-form-radio-group class="gl-overflow-y-auto gl-mr-n4">
-          <label v-for="label in labels" :key="label.id" class="gl-display-flex">
-            <gl-form-radio v-model="selectedLabel" />
+        <gl-skeleton-loader v-if="loading" :width="500" :height="172">
+          <rect width="480" height="20" x="10" y="15" rx="4" />
+          <rect width="380" height="20" x="10" y="50" rx="4" />
+          <rect width="430" height="20" x="10" y="85" rx="4" />
+        </gl-skeleton-loader>
+
+        <gl-form-radio-group v-else v-model="selectedLabel" class="gl-overflow-y-auto gl-mr-n4">
+          <label
+            v-for="label in labels"
+            :key="label.id"
+            class="gl-display-flex gl-flex-align-items-center gl-mb-4"
+          >
+            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3" />
             <span
-              class="dropdown-label-box"
+              class="dropdown-label-box gl-top-0"
               :style="{
                 backgroundColor: label.color,
               }"
@@ -80,9 +107,11 @@ export default {
         </gl-form-radio-group>
       </div>
 
-      <div class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100">
+      <div
+        class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-50"
+      >
         <gl-button class="gl-ml-auto gl-mr-4">{{ __('Cancel') }}</gl-button>
-        <gl-button variant="success" class="gl-mr-4">{{ __('Add') }}</gl-button>
+        <gl-button variant="success" class="gl-mr-4" @click="addList">{{ __('Add') }}</gl-button>
       </div>
     </div>
   </div>
