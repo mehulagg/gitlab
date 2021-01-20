@@ -123,18 +123,20 @@ module Gitlab
               stage: stage_value,
               extends: extends,
               rules: rules_value,
-              variables: root_and_job_variables_value,
+              variables: job_variables,
+              root_variables: root_variables,
               only: only_value,
               except: except_value }.compact
           end
 
-          def root_and_job_variables_value
-            root_variables = @root_variables_value.to_h # rubocop:disable Gitlab/ModuleWithInstanceVariables
-            root_variables = root_variables.select do |key, _|
+          def root_variables
+            @root_variables_value.to_h.select do |key, _| # rubocop:disable Gitlab/ModuleWithInstanceVariables
               inherit_entry&.variables_entry&.inherit?(key)
             end
+          end
 
-            root_variables.merge(variables_value.to_h)
+          def job_variables
+            variables_value.to_h
           end
 
           def manual_action?

@@ -69,6 +69,7 @@ module Gitlab
             environment: job[:environment_name],
             coverage_regex: job[:coverage],
             yaml_variables: transform_to_yaml_variables(job[:variables]),
+            root_variables: transform_to_yaml_variables(job[:root_variables]),
             needs_attributes: job.dig(:needs, :job),
             interruptible: job[:interruptible],
             only: job[:only],

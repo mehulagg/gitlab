@@ -200,17 +200,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
       Gitlab::Ci::Build::Rules::Result.new(when_value, start_in, allow_failure, variables)
     end
 
-    describe '#build_attributes' do
-      let(:seed_attributes) { {} }
-
-      subject(:build_attributes) do
-        result.build_attributes(seed_attributes)
-      end
-
-      it 'compacts nil values' do
-        is_expected.to eq(options: {}, when: 'on_success')
-      end
-
+    shared_examples 'yaml variables calculation' do
       context 'when there are variables in rules' do
         let(:variables) { { VAR1: 'new var 1', VAR3: 'var 3' } }
 
@@ -235,6 +225,55 @@ RSpec.describe Gitlab::Ci::Build::Rules do
           end
         end
       end
+
+      context 'when there no variable in rules' do
+        let(:variables) { }
+
+        context 'when there are seed variables' do
+          let(:seed_attributes) do
+            { yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                               { key: 'VAR2', value: 'var 2', public: true }] }
+          end
+
+          it 'does not return yaml_variables' do
+            is_expected.not_to have_key(:yaml_variables)
+          end
+        end
+
+        context 'when there is not seed variables' do
+          it 'does not return yaml_variables' do
+            is_expected.not_to have_key(:yaml_variables)
+          end
+        end
+      end
+    end
+
+    describe '#build_attributes' do
+      let(:seed_attributes) { {} }
+
+      subject(:build_attributes) do
+        result.build_attributes(seed_attributes)
+      end
+
+      it 'compacts nil values' do
+        is_expected.to eq(options: {}, when: 'on_success')
+      end
+
+      it_behaves_like 'yaml variables calculation'
+    end
+
+    describe '#pipeline_attributes' do
+      let(:seed_attributes) { {} }
+
+      subject(:pipeline_attributes) do
+        result.pipeline_attributes(seed_attributes)
+      end
+
+      it 'compacts nil values' do
+        is_expected.to eq({})
+      end
+
+      it_behaves_like 'yaml variables calculation'
     end
 
     describe '#pass?' do

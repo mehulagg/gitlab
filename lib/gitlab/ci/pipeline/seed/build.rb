@@ -13,7 +13,7 @@ module Gitlab
 
           def initialize(pipeline, attributes, previous_stages)
             @pipeline = pipeline
-            @seed_attributes = attributes
+            @seed_attributes = build_seed_attributes(attributes)
             @previous_stages = previous_stages
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
@@ -193,6 +193,22 @@ module Gitlab
             return {} unless @seed_attributes.dig(:options, :allow_failure_criteria)
 
             { options: { allow_failure_criteria: nil } }
+          end
+
+          def build_seed_attributes(attributes)
+            attributes[:yaml_variables] = calculate_yaml_variables(attributes)
+            attributes
+          end
+
+          def calculate_yaml_variables(attributes)
+            indexed_job_vars = attributes.delete(:yaml_variables).to_a.index_by { |var| var[:key] }
+            indexed_root_vars = attributes.delete(:root_variables).to_a.index_by { |var| var[:key] }
+            indexed_ruled_root_vars = @pipeline.yaml_variables.to_a.index_by { |var| var[:key] }
+
+            indexed_root_vars
+              .merge(indexed_ruled_root_vars.slice(*indexed_root_vars.keys))
+              .merge(indexed_job_vars)
+              .values
           end
         end
       end

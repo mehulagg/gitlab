@@ -27,6 +27,16 @@ module Gitlab
           def persist_pipeline?
             command.save_incompleted && !pipeline.readonly?
           end
+
+          def merge_variables(current_variables, new_variables)
+            return unless current_variables && new_variables
+
+            indexed_current_variables = current_variables.deep_dup.index_by { |var| var[:key] }
+
+            result = new_variables.each_with_object(indexed_current_variables) do |var, hash|
+              hash[var[0].to_s] = { key: var[0].to_s, value: var[1], public: true }
+            end.values
+          end
         end
       end
     end

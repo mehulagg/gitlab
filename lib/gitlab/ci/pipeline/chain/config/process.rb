@@ -29,6 +29,7 @@ module Gitlab
               end
 
               @pipeline.merged_yaml = result.merged_yaml
+              @pipeline.yaml_variables = result.workflow_attributes[:yaml_variables]
 
             rescue => ex
               Gitlab::ErrorTracking.track_exception(ex,
