@@ -94,6 +94,8 @@ GEM
     attr_encrypted (3.1.0)
       encryptor (~> 3.0.0)
     attr_required (1.0.1)
+    autoprefixer-rails (10.2.0.0)
+      execjs
     awesome_print (1.8.0)
     awrence (1.1.1)
     aws-eventstream (1.1.0)
@@ -1285,6 +1287,7 @@ DEPENDENCIES
   asciidoctor-plantuml (~> 0.0.12)
   atlassian-jwt (~> 0.2.0)
   attr_encrypted (~> 3.1.0)
+  autoprefixer-rails (= 10.2.0.0)
   awesome_print
   aws-sdk-cloudformation (~> 1)
   aws-sdk-core (~> 3)
