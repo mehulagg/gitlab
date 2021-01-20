@@ -155,8 +155,7 @@ export default {
       .then(({ data }) => {
         const labels = data[boardType]?.labels;
         return labels.nodes;
-      })
-      .catch(() => commit(types.RECEIVE_LABELS_FAILURE));
+      });
   },
 
   moveList: (
