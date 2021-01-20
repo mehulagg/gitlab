@@ -236,8 +236,7 @@ remote in your commands:
 ## Publish a Conan package
 
 Publish a Conan package to the Package Registry, so that anyone who can access
-the project can use the package as a dependency. You can publish the package
-to your project or instance.
+the project can use the package as a dependency.
 
 Prerequisites:
 
