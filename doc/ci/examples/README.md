@@ -29,7 +29,6 @@ The following table lists examples with step-by-step tutorials that are containe
 | Deployment with Dpl           | [Using `dpl` as deployment tool](deployment/README.md). |
 | GitLab Pages                  | See the [GitLab Pages](../../user/project/pages/index.md) documentation for a complete example of deploying a static site. |
 | End-to-end testing            | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md). |
-| Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md). |
 | Load performance testing      | [Load Performance Testing with the k6 container](../../user/project/merge_requests/load_performance_testing.md). |
 | Multi project pipeline        | [Build, test deploy using multi project pipeline](https://gitlab.com/gitlab-examples/upstream-project). |
 | NPM with semantic-release     | [Publish NPM packages to the GitLab Package Registry using semantic-release](semantic-release.md). |
@@ -49,6 +48,7 @@ are hosted externally or in separate example projects:
 | Use case                      | Resource |
 |-------------------------------|----------|
 | Game development              | [DevOps and Game Dev with GitLab CI/CD](https://gitlab.com/gitlab-examples/gitlab-game-demo/). |
+| Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](https://gitlab.com/gitlab-examples/maven/simple-maven-example). |
 | Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](https://gitlab.com/gitlab-examples/spring-gitlab-cf-deploy-demo). |
 | Parallel testing Ruby & JS    | [GitLab CI/CD parallel jobs testing for Ruby & JavaScript projects](https://docs.knapsackpro.com/2019/how-to-run-parallel-jobs-for-rspec-tests-on-gitlab-ci-pipeline-and-speed-up-ruby-javascript-testing). |
 | Scala on Heroku               | [Test and deploy a Scala application to Heroku](https://gitlab.com/gitlab-examples/scala-sbt). |
