@@ -94,7 +94,7 @@ export default {
       <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>
-      <gl-search-box-by-type ref="search" v-model="searchTerm" />
+      <gl-search-box-by-type v-model="searchTerm" />
       <gl-loading-icon v-if="$apollo.loading" />
       <gl-dropdown-item
         v-for="iterationItem in iterations"

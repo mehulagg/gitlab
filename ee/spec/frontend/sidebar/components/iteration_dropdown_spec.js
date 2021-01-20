@@ -15,6 +15,17 @@ describe('IterationDropdown', () => {
   let wrapper;
   let fakeApollo;
   let groupIterationsSpy;
+  const iterations = [
+    {
+      username: 'root',
+      name: 'root',
+      webUrl: '',
+      avatarUrl: '',
+      id: 'id',
+      title: 'title',
+      state: '',
+    },
+  ];
 
   const createComponent = ({ data = {}, props = {}, loading = false }) => {
     wrapper = shallowMount(IterationDropdown, {
@@ -64,6 +75,7 @@ describe('IterationDropdown', () => {
   };
 
   afterEach(() => {
+    jest.restoreAllMocks();
     wrapper.destroy();
     wrapper = null;
   });
@@ -94,17 +106,7 @@ describe('IterationDropdown', () => {
         data: {
           group: {
             iterations: {
-              nodes: [
-                {
-                  username: 'root',
-                  name: 'root',
-                  webUrl: '',
-                  avatarUrl: '',
-                  id: 'id',
-                  title: 'title',
-                  state: '',
-                },
-              ],
+              nodes: iterations,
             },
           },
         },
@@ -121,6 +123,20 @@ describe('IterationDropdown', () => {
       jest.advanceTimersByTime(250);
 
       expect(groupIterationsSpy).toHaveBeenCalledTimes(times);
+    });
+  });
+
+  describe('on mount', () => {
+    describe('when bootstrap dropdown event is emitted', () => {
+      it('changes shouldFetch to be true', async () => {
+        createComponent({});
+
+        expect(wrapper.vm.shouldFetch).toBe(false);
+
+        wrapper.vm.$root.$emit('bv::dropdown::shown');
+
+        expect(wrapper.vm.shouldFetch).toBe(true);
+      });
     });
   });
 
@@ -161,17 +177,7 @@ describe('IterationDropdown', () => {
         data: {
           group: {
             iterations: {
-              nodes: [
-                {
-                  username: 'root',
-                  name: 'root',
-                  webUrl: '',
-                  avatarUrl: '',
-                  id: 'id',
-                  title: 'title',
-                  state: '',
-                },
-              ],
+              nodes: iterations,
             },
           },
         },
@@ -179,30 +185,15 @@ describe('IterationDropdown', () => {
     });
 
     describe('when currentIteration id is equal to iteration id', () => {
-      // it('does not call setIssueIteration mutation', async () => {
-      //   createComponentWithApollo({
-      //     shouldFetch: true,
-      //     currentIteration: { id: 'id', title: 'title' },
-      //   });
-
-      //   // jest.runOnlyPendingTimers();
-      //   await waitForPromises();
-      //   wrapper
-      //     .findAll(GlDropdownItem)
-      //     .filter((w) => w.text() === 'title')
-      //     .at(0)
-      //     .vm.$emit('click');
-
-      //   expect(groupIterationsSpy).toHaveBeenCalledTimes(0);
-      // });
-
       it('does not emit event', async () => {
         createComponentWithApollo({
           shouldFetch: true,
           currentIteration: { id: 'id', title: 'title' },
         });
 
+        jest.advanceTimersByTime(250);
         await waitForPromises();
+
         wrapper
           .findAll(GlDropdownItem)
           .filter((w) => w.text() === 'title')
@@ -220,6 +211,7 @@ describe('IterationDropdown', () => {
           currentIteration: { id: '', title: 'title' },
         });
 
+        jest.advanceTimersByTime(250);
         await waitForPromises();
 
         wrapper
@@ -244,80 +236,6 @@ describe('IterationDropdown', () => {
       await wrapper.vm.$nextTick();
 
       expect(wrapper.vm.searchTerm).toBe('testing');
-    });
-  });
-});
-
-describe.skip('apollo schema', () => {
-  describe('iterations', () => {
-    describe('when iterations is passed the wrong data object', () => {
-      beforeEach(() => {
-        createComponent({});
-      });
-
-      it.each([
-        [{}, iterationSelectTextMap.noIterationItem],
-        [{ group: {} }, iterationSelectTextMap.noIterationItem],
-        [{ group: { iterations: {} } }, iterationSelectTextMap.noIterationItem],
-        [
-          { group: { iterations: { nodes: ['nodes'] } } },
-          [...iterationSelectTextMap.noIterationItem, 'nodes'],
-        ],
-      ])('when %j as an argument it returns %j', (data, value) => {
-        const { update } = wrapper.vm.$options.apollo.iterations;
-
-        expect(update(data)).toEqual(value);
-      });
-    });
-
-    it('contains debounce', () => {
-      createComponent({});
-
-      const { debounce } = wrapper.vm.$options.apollo.iterations;
-
-      expect(debounce).toBe(250);
-    });
-
-    it('returns the correct values based on the schema', () => {
-      createComponent({});
-
-      const { update } = wrapper.vm.$options.apollo.iterations;
-      // needed to access this.$options in update
-      const boundUpdate = update.bind(wrapper.vm);
-
-      expect(boundUpdate({ group: { iterations: { nodes: [] } } })).toEqual(
-        iterationSelectTextMap.noIterationItem,
-      );
-    });
-  });
-
-  describe('currentIteration', () => {
-    describe('when passes an object that doesnt contain the correct values', () => {
-      beforeEach(() => {
-        createComponent({});
-      });
-
-      it.each([
-        [{}, undefined],
-        [{ project: { issue: {} } }, undefined],
-        [{ project: { issue: { iteration: {} } } }, {}],
-      ])('when %j as an argument it returns %j', (data, value) => {
-        const { update } = wrapper.vm.$options.apollo.currentIteration;
-
-        expect(update(data)).toEqual(value);
-      });
-    });
-
-    describe('when iteration has an id', () => {
-      it('returns the id', () => {
-        createComponent({});
-
-        const { update } = wrapper.vm.$options.apollo.currentIteration;
-
-        expect(update({ project: { issue: { iteration: { id: '123' } } } })).toEqual({
-          id: '123',
-        });
-      });
     });
   });
 });
