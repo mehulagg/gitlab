@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Resource access tokens API
 
-You can read more about [resource access tokens](../user/project/settings/project_access_tokens).
+You can read more about [resource access tokens](../user/project/settings/project_access_tokens.md).
 
 ## List resource access tokens
 
@@ -57,7 +57,6 @@ DELETE /:id/access_tokens/:token_id
 |-----------|---------|----------|---------------------|
 | `id` | integer/string | yes | The ID of the project or group  |
 | `token_id` | integer/string | yes | The ID of resource access token |
-
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/<project_id>/access_tokens/<token_id>"
