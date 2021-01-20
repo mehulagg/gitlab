@@ -288,8 +288,8 @@ the existing package is overwritten.
 ## Install a Conan package
 
 Install a Conan package from the Package Registry so you can use it as a
-dependency. You can install a package from your instance or your project.
-If multiple packages have the same name and version, when you install
+dependency. You can install a package from the scope of your instance or your project.
+If multiple packages have the same recipe, when you install
 a package, the most recently-published package is retrieved.
 
 WARNING:
