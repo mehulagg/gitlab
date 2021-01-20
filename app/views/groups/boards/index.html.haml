@@ -1,1 +1,4 @@
-= render "shared/boards/show", board: @boards.first
+- if @board_type == 'epic'
+  = render "groups/epic_boards/show", board: @boards.first
+- else
+  = render "shared/boards/show", board: @boards.first
