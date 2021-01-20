@@ -20,6 +20,8 @@ export const scatterChartLineProps = {
 
 export const DATE_RANGE_LIMIT = 180;
 
+export const ONE_YEAR_DATE_RANGE_LIMIT = 365;
+
 export const OFFSET_DATE_BY_ONE = 1;
 
 export const NO_DRAG_CLASS = 'no-drag';
