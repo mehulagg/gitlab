@@ -396,4 +396,22 @@ RSpec.describe 'getting merge request listings nested in a project' do
       end
     end
   end
+
+  context 'when only the count is requested' do
+    context 'when merged at filter is present' do
+      it '' do
+        query = graphql_query_for(:project, { full_path: project.full_path },
+          <<~QUERY
+          mergeRequests(mergedAfter: "2020-01-01", first: 0) {
+            count
+          }
+          QUERY
+        )
+        post_graphql(query, current_user: current_user)
+
+        byebug
+        expect(results).to eq('')
+      end
+    end
+  end
 end
