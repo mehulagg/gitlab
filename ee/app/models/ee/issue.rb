@@ -247,6 +247,19 @@ module EE
       SQL
     end
 
+    def related_feature_flags(current_user, preload:)
+      if Ability.allowed?(current_user, :read_feature_flag, project, { scope: :user })
+        ::Operations::FeatureFlag
+          .select('operations_feature_flags.*, operations_feature_flags_issues.id AS link_id')
+          .joins(:feature_flag_issues)
+          .where('operations_feature_flags_issues.issue_id = ?', id)
+          .order('operations_feature_flags_issues.id ASC')
+          .includes(preload)
+      else
+        []
+      end
+    end
+
     override :relocation_target
     def relocation_target
       super || promoted_to_epic

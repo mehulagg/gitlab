@@ -67,6 +67,10 @@ module Operations
       end
     end
 
+    def self.reference_prefix
+      '^'
+    end
+
     def related_issues(current_user, preload:)
       issues = ::Issue
         .select('issues.*, operations_feature_flags_issues.id AS link_id')
@@ -76,6 +80,13 @@ module Operations
         .includes(preload)
 
       Ability.issues_readable_by_user(issues, current_user)
+    end
+
+    # `from` argument can be a Namespace or Project.
+    def to_reference(from = nil, full: false)
+      reference = "#{self.class.reference_prefix}#{iid}"
+
+      "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
     def execute_hooks(current_user)
