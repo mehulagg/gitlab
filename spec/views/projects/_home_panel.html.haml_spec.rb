@@ -16,33 +16,39 @@ RSpec.describe 'projects/_home_panel' do
       allow(project).to receive(:license_anchor_data).and_return(false)
     end
 
-    context 'when user is signed in' do
-      let(:user) { create(:user) }
-
+    context 'when the feature flag is disabled' do
       before do
-        notification_settings = user.notification_settings_for(project)
-        assign(:notification_setting, notification_settings)
+        stub_feature_flags(vue_notification_dropdown: false)
       end
 
-      it 'makes it possible to set notification level' do
-        render
+      context 'when user is signed in' do
+        let(:user) { create(:user) }
 
-        expect(view).to render_template('shared/notifications/_new_button')
-        expect(rendered).to have_selector('.notification-dropdown')
+        before do
+          notification_settings = user.notification_settings_for(project)
+          assign(:notification_setting, notification_settings)
+        end
+
+        it 'makes it possible to set notification level' do
+          render
+
+          expect(view).to render_template('shared/notifications/_new_button')
+          expect(rendered).to have_selector('.notification-dropdown')
+        end
       end
-    end
 
-    context 'when user is signed out' do
-      let(:user) { nil }
+      context 'when user is signed out' do
+        let(:user) { nil }
 
-      before do
-        assign(:notification_setting, nil)
-      end
+        before do
+          assign(:notification_setting, nil)
+        end
 
-      it 'is not possible to set notification level' do
-        render
+        it 'is not possible to set notification level' do
+          render
 
-        expect(rendered).not_to have_selector('.notification_dropdown')
+          expect(rendered).not_to have_selector('.notification_dropdown')
+        end
       end
     end
   end

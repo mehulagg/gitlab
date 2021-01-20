@@ -125,4 +125,17 @@ module NotificationsHelper
   def can_read_project?(project)
     can?(current_user, :read_project, project)
   end
+
+  def notification_dropdown_items(notification_setting)
+    items = []
+
+    NotificationSetting.levels.each_key do |level|
+      next if level == "custom"
+      next if level == "global" && notification_setting.source.nil?
+
+      items << level
+    end
+
+    items
+  end
 end
