@@ -107,6 +107,7 @@ You can now add a new source to NuGet with:
 #### Project-level endpoint
 
 A project-level endpoint is required to publish NuGet packages to the Package Registry.
+A project-level endpoint is also required to install NuGet packages from a project.
 
 To use the [project-level](#use-the-gitlab-endpoint-for-nuget-packages) NuGet endpoint, add the Package Registry as a source with `nuget`:
 
@@ -124,7 +125,7 @@ nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/proje
 
 #### Group-level endpoint
 
-To install a package from a group, use a group-level endpoint.
+To install a NuGet package from a group, use a group-level endpoint.
 
 To use the [group-level](#use-the-gitlab-endpoint-for-nuget-packages) NuGet endpoint, add the Package Registry as a source with `nuget`:
 
@@ -145,6 +146,7 @@ nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/group
 #### Project-level endpoint
 
 A project-level endpoint is required to publish NuGet packages to the Package Registry.
+A project-level endpoint is also required to install NuGet packages from a project.
 
 To use the [project-level](#use-the-gitlab-endpoint-for-nuget-packages) NuGet endpoint, add the Package Registry as a source with Visual Studio:
 
@@ -205,6 +207,7 @@ If you get a warning, ensure that the **Location**, **Username**, and
 #### Project-level endpoint
 
 A project-level endpoint is required to publish NuGet packages to the Package Registry.
+A project-level endpoint is also required to install NuGet packages from a project.
 
 To use the [project-level](#use-the-gitlab-endpoint-for-nuget-packages) Package Registry as a source for .NET:
 
