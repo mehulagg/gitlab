@@ -20,7 +20,7 @@ class GroupWiki < Wiki
   override :repository_storage
   def repository_storage
     strong_memoize(:repository_storage) do
-      container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
+      container.group_wiki_repository&.shard_name || Gitlab::CurrentSettings.pick_repository_storage(expire: true)
     end
   end
 

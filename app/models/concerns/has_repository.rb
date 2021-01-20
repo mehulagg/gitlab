@@ -10,7 +10,6 @@
 module HasRepository
   extend ActiveSupport::Concern
   include Referable
-  include CanPickRepositoryStorage
   include Gitlab::ShellAdapter
   include Gitlab::Utils::StrongMemoize
 

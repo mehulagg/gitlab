@@ -46,7 +46,7 @@ RSpec.shared_examples 'handles repository moves' do
       subject { build(repository_storage_factory_key) }
 
       it 'picks storage from ApplicationSetting' do
-        expect(Gitlab::CurrentSettings).to receive(:pick_repository_storage).and_return('picked').at_least(:once)
+        expect(Gitlab::CurrentSettings).to receive(:pick_repository_storage).with(expire: true).and_return('picked').at_least(:once)
 
         expect(subject.destination_storage_name).to eq('picked')
       end

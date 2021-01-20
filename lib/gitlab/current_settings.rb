@@ -16,6 +16,12 @@ module Gitlab
         @in_memory_application_settings = nil
       end
 
+      def pick_repository_storage(expire: false)
+        expire_current_application_settings if expire
+
+        super()
+      end
+
       def method_missing(name, *args, **kwargs, &block)
         current_application_settings.send(name, *args, **kwargs, &block) # rubocop:disable GitlabSecurity/PublicSend
       end

@@ -152,6 +152,4 @@ RSpec.shared_examples 'model with repository' do
     it { is_expected.to respond_to(:disk_path) }
     it { is_expected.to respond_to(:gitlab_shell) }
   end
-
-  it_behaves_like 'can pick repository storage'
 end

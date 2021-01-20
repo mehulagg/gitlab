@@ -317,7 +317,9 @@ class Snippet < ApplicationRecord
   end
 
   def repository_storage
-    snippet_repository&.shard_name || self.class.pick_repository_storage
+    # We need to ensure application settings are fresh when we pick
+    # a repository storage to use.
+    snippet_repository&.shard_name || Gitlab::CurrentSettings.pick_repository_storage(expire: true)
   end
 
   # Repositories are created by default with the `master` branch.
