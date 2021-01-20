@@ -224,6 +224,7 @@ should disable **Pipelines must succeed** so you can accept merge requests.
 
 ### "The pipeline for this merge request did not complete. Push a new commit to fix the failure or check the troubleshooting documentation to see other possible actions." message
 
+This message is shown if the merge request pipeline or merge train pipeline has either failed or been canceled. If the merge train pipeline has failed, check the failure and determine if you need to re-add the MR to the train or push a commit to fix the failure. If the merge train pipeline was canceled try re-adding it to the train or use the shortcut command `/merge`. If the merge request pipeline was canceled or failed, please retry the job or push a new commit to fix the failure.
 
 ## Pipeline warnings
 
