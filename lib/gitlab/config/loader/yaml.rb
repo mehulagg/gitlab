@@ -13,7 +13,7 @@ module Gitlab
         MAX_YAML_DEPTH = 100
 
         def initialize(config)
-          @config = YAML.safe_load(config, [Symbol], [], true)
+          @config = YAML.safe_load(config, [Symbol, *Gitlab::Ci::Config::YAML::Tags.available_tags], [], true)
         rescue Psych::Exception => e
           raise Loader::FormatError, e.message
         end
