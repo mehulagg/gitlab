@@ -31,6 +31,7 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable('invite_members_group_modal', group: target_group_with_project)
         source_group_with_members.add_member(maintainer_user, Resource::Members::AccessLevel::MAINTAINER)
       end
 

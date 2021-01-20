@@ -9,7 +9,6 @@ import { initMembersApp } from '~/members/index';
 import { groupMemberRequestFormatter } from '~/groups/members/utils';
 import { groupLinkRequestFormatter } from '~/members/utils';
 import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
-import { memberRequestFormatter, groupLinkRequestFormatter } from '~/groups/members/utils';
 import { s__ } from '~/locale';
 
 function mountRemoveMemberModal() {

@@ -41,22 +41,6 @@ module QA
           element :invite_group_button
         end
 
-        def select_group(group_name)
-          click_element :group_select_field
-          search_and_select(group_name)
-        end
-
-        def invite_group(group_name)
-          click_element :invite_group_tab
-          select_group(group_name)
-          click_element :invite_group_button
-        end
-
-        def add_member(username)
-          select_user :member_select_field, username
-          click_element :invite_member_button
-        end
-
         def update_access_level(username, access_level)
           within_element(:member_row, text: username) do
             click_element :access_level_dropdown

@@ -101,7 +101,6 @@ export default {
     :hide-dropdown-with-no-items="hideDropdownWithNoItems"
     :placeholder="placeholderText"
     :aria-labelledby="ariaLabelledby"
-    data-qa-selector="invite_members_input"
     @blur="handleBlur"
     @text-input="handleTextInput"
     @input="handleInput"

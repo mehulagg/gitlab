@@ -97,6 +97,7 @@ export default {
       <gl-search-box-by-type
         v-model.trim="searchTerm"
         :placeholder="$options.i18n.searchPlaceholder"
+        data-qa-selector="group_select_dropdown_search"
       />
       <gl-dropdown-item
         v-for="group in groups"

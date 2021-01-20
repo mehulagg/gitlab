@@ -27,14 +27,6 @@ module QA
           element :delete_group_access_link
         end
 
-        def open_invite_members_modal
-          click_element :invite_members_modal_trigger
-        end
-
-        def open_invite_group_modal
-          click_element :invite_group_modal_trigger
-        end
-
         def remove_group(group_name)
           click_element :groups_list_tab
           page.accept_alert do

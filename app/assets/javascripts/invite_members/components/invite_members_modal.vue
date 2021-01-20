@@ -254,7 +254,12 @@ export default {
 
       <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.accessLevel }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full">
-        <gl-dropdown class="gl-shadow-none gl-w-full" v-bind="$attrs" :text="selectedRoleName">
+        <gl-dropdown
+          class="gl-shadow-none gl-w-full"
+          data-qa-selector="access_level_dropdown"
+          v-bind="$attrs"
+          :text="selectedRoleName"
+        >
           <template v-for="(key, item) in accessLevels">
             <gl-dropdown-item
               :key="key"

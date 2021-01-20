@@ -11,41 +11,57 @@ module QA
 
           base.view 'app/assets/javascripts/invite_members/components/invite_members_modal.vue' do
             element :invite_button
-          end
-
-          base.view 'app/assets/javascripts/invite_members/components/members_token_select.vue' do
-            element :invite_members_input, /gl-token-selector-input/ # rubocop:disable QA/ElementWithPattern
+            element :access_level_dropdown
           end
 
           base.view 'app/assets/javascripts/invite_members/components/group_select.vue' do
-            element :group_select_dropdown
+            element :group_select_dropdown_search
           end
+        end
+
+        def open_invite_members_modal
+          click_element :invite_members_modal_trigger
+        end
+
+        def open_invite_group_modal
+          click_element :invite_group_modal_trigger
         end
 
         def add_member(username, access_level = Resource::Members::AccessLevel::DEVELOPER)
           open_invite_members_modal
 
-          click_element :invite_members_input
-          fill_in :invite_members_input, with: username
+          fill_element :access_level_dropdown, with: access_level
+
+          fill_in 'Search for members to invite', with: username
 
           Support::WaitForRequests.wait_for_requests
 
-          find_element('.gl-avatar-labeled-sublabel', text: username).click
+          click_button username
 
           click_element :invite_button
+
+          Support::WaitForRequests.wait_for_requests
+
+          page.refresh
         end
 
         def invite_group(group_name, group_access = Resource::Members::AccessLevel::GUEST)
           open_invite_group_modal
 
-          click_element :group_select_dropdown
-          fill_in :group_select_dropdown, with: group_name
+          fill_element :access_level_dropdown, with: group_access
+
+          click_button 'Select a group'
+          fill_element :group_select_dropdown_search, group_name
 
           Support::WaitForRequests.wait_for_requests
 
-          find_element('.gl-new-dropdown-item-text-primary', text: group_name).click
+          click_button group_name
 
           click_element :invite_button
+
+          Support::WaitForRequests.wait_for_requests
+
+          page.refresh
         end
       end
     end
