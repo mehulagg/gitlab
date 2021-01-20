@@ -13,7 +13,7 @@ namespace :gitlab do
         raise "Please supply the list of ids through the SNIPPET_IDS env var"
       end
 
-      raise "Invalid limit value" if limit == 0
+      raise "Invalid limit value" if snippet_task_limit == 0
 
       if migration_running?
         raise "There are already snippet migrations running. Please wait until they are finished."
@@ -41,8 +41,8 @@ namespace :gitlab do
         end
       end
 
-      if ids.size > limit
-        raise "The number of ids provided is higher than #{limit}. You can update this limit by using the env var `LIMIT`"
+      if ids.size > snippet_task_limit
+        raise "The number of ids provided is higher than #{snippet_task_limit}. You can update this limit by using the env var `LIMIT`"
       end
 
       ids
@@ -84,7 +84,7 @@ namespace :gitlab do
     end
 
     # There are problems with the specs if we memoize this value
-    def limit
+    def snippet_task_limit
       ENV['LIMIT'] ? ENV['LIMIT'].to_i : DEFAULT_LIMIT
     end
   end
