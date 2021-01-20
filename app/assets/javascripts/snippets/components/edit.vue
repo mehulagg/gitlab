@@ -23,6 +23,8 @@ import SnippetBlobActionsEdit from './snippet_blob_actions_edit.vue';
 import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
 import SnippetDescriptionEdit from './snippet_description_edit.vue';
 
+import NewRecaptchaModal from '~/captcha/new_recaptcha_modal.vue';
+
 eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
 export default {
@@ -32,6 +34,7 @@ export default {
     SnippetBlobActionsEdit,
     TitleField,
     FormFooterActions,
+    NewRecaptchaModal,
     GlButton,
     GlLoadingIcon,
   },
@@ -66,6 +69,10 @@ export default {
         description: '',
         visibilityLevel: this.selectedLevel,
       },
+      recaptchaResponse: '',
+      needsRecaptchaResponse: false,
+      recaptchaSiteKey: '',
+      spamLogId: '',
     };
   },
   computed: {
@@ -88,6 +95,9 @@ export default {
         description: this.snippet.description,
         visibilityLevel: this.snippet.visibilityLevel,
         blobActions: this.actions,
+        // TODO: Is there a cleaner or more idiomatic way to do this conditional assignment in ES6?
+        ...(this.spamLogId && { spamLogId: this.spamLogId }),
+        ...(this.recaptchaResponse && { captchaResponse: this.recaptchaResponse }),
       };
     },
     saveButtonLabel() {
@@ -159,6 +169,18 @@ export default {
         .then(({ data }) => {
           const baseObj = this.newSnippet ? data?.createSnippet : data?.updateSnippet;
 
+          // NOTE: The mutation uses 'captcha' instead of 'recaptcha', so that they can be applied
+          // to future alternative captcha implementations other than reCAPTCHA (e.g. FriendlyCaptcha)
+          // without having to change the names and descriptions in the API. However, this modal and
+          // its usage is (for now) specific to the reCAPTCHA implementation, so the 'recaptcha'
+          // naming convention is used throughout.
+          if (baseObj.needsCaptchaResponse) {
+            // If we need a reCAPTCHA response, obtain it via showing the modal. The form will
+            // be resubmitted after the response is obtained.
+            this.requestRecaptchaResponse(baseObj.captchaSiteKey, baseObj.spamLogId);
+            return;
+          }
+
           const errors = baseObj?.errors;
           if (errors.length) {
             this.flashAPIFailure(errors[0]);
@@ -172,6 +194,47 @@ export default {
     },
     updateActions(actions) {
       this.actions = actions;
+    },
+    /**
+     * Obtain a recaptchaResponse by showing the recaptcha modal.
+     *
+     * Sets `needsRecaptchaResponse` to true, which will trigger the recaptcha modal to be shown.
+     * The form will be resubmitted if the reCAPTCHA is completed.
+     *
+     * @param recaptchaSiteKey The recaptchaSiteKey which will be stored in data and used by the
+     *   modal to display the reCAPTCHA.
+     * @param spamLogId The spamLogId which will be stored in data and included when the form
+     *   is re-submitted.
+     */
+    requestRecaptchaResponse(recaptchaSiteKey, spamLogId) {
+      this.recaptchaSiteKey = recaptchaSiteKey;
+      this.spamLogId = spamLogId;
+      this.needsRecaptchaResponse = true;
+    },
+    /**
+     * Handles the recaptchaResponse value obtained via the recaptcha modal:
+     *
+     * 1. Sets `needsRecaptchaResponse` to false, causing the modal to hide.
+     * 2. Sets the obtained recaptchaResponse value in the data.
+     * 3. If the recaptchaResponse is not blank, re-submit the form. If it is blank, reset the
+     *    isUpdating flag to false.
+     *
+     * @param recaptchaResponse The recaptchaResponse value emitted from the modal.
+     */
+    receivedRecaptchaResponse(recaptchaResponse) {
+      // Set needsRecaptchaResponse to false to trigger the modal to close
+      this.needsRecaptchaResponse = false;
+      this.recaptchaResponse = recaptchaResponse;
+
+      if (this.recaptchaResponse) {
+        // If the obtained recaptchaResponse is not empty (if the user solved the reCAPTCHA and didn't
+        // just close or cancel the modal), resubmit the form using the recaptchaResponse value
+        this.handleFormSubmit();
+      } else {
+        // if the user didn't solve the reCAPTCHA (i.e. if they just closed the modal),
+        // finish the update and allow them to continue editing or manually resubmit the form.
+        this.isUpdating = false;
+      }
     },
   },
 };
@@ -190,6 +253,11 @@ export default {
       class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
+      <new-recaptcha-modal
+        :recaptcha-site-key="recaptchaSiteKey"
+        :needs-recaptcha-response="needsRecaptchaResponse"
+        @receivedRecaptchaResponse="receivedRecaptchaResponse"
+      />
       <title-field
         id="snippet-title"
         v-model="snippet.title"
