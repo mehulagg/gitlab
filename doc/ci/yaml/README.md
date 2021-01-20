@@ -377,7 +377,7 @@ NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
-#### Variables with `include`
+#### Variables with `include` **(CORE ONLY)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
 > - It was [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
