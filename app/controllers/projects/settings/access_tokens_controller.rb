@@ -62,7 +62,9 @@ module Projects
       end
 
       def bot_users
-        @project.bots
+        project = Project.find(20)
+        project.bots
+        #@project.bots
       end
 
       def key_identity
