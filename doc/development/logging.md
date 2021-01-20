@@ -302,7 +302,7 @@ for more information.
 ### Logging context metadata (through workers)
 
 Additional metadata can be attached to a worker through the use of the [`ApplicationWorker#log_extra_metadata_on_done`](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/concerns/application_worker.rb#L31-34)
-method. Using this method will add metadata that will later be logged with the done job payload to Kibana.
+method. Using this method adds metadata that is later logged to Kibana with the done job payload.
 
 ```ruby
 class MyExampleWorker
