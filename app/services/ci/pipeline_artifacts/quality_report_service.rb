@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module Ci
   module PipelineArtifacts
-    class CodequalityReportService
+    class QualityReportService
       def execute(pipeline)
         return unless pipeline.can_generate_codequality_reports?
         return if pipeline.has_codequality_reports?
