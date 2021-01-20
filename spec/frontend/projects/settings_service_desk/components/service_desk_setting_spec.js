@@ -1,6 +1,7 @@
 import { shallowMount, mount } from '@vue/test-utils';
 import { GlButton, GlFormSelect, GlLoadingIcon, GlToggle } from '@gitlab/ui';
 import { nextTick } from 'vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import ServiceDeskSetting from '~/projects/settings_service_desk/components/service_desk_setting.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
@@ -9,19 +10,21 @@ describe('ServiceDeskSetting', () => {
 
   const findButton = () => wrapper.find(GlButton);
   const findClipboardButton = () => wrapper.find(ClipboardButton);
-  const findIncomingEmail = () => wrapper.find('[data-testid="incoming-email"]');
-  const findIncomingEmailLabel = () => wrapper.find('[data-testid="incoming-email-describer"]');
+  const findIncomingEmail = () => wrapper.findByTestId('incoming-email');
+  const findIncomingEmailLabel = () => wrapper.findByTestId('incoming-email-describer');
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findTemplateDropdown = () => wrapper.find(GlFormSelect);
   const findToggle = () => wrapper.find(GlToggle);
 
   const createComponent = ({ props = {}, mountFunction = shallowMount } = {}) =>
-    mountFunction(ServiceDeskSetting, {
-      propsData: {
-        isEnabled: true,
-        ...props,
-      },
-    });
+    extendedWrapper(
+      mountFunction(ServiceDeskSetting, {
+        propsData: {
+          isEnabled: true,
+          ...props,
+        },
+      }),
+    );
 
   afterEach(() => {
     if (wrapper) {

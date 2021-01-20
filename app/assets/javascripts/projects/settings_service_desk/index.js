@@ -6,7 +6,7 @@ export default () => {
   const el = document.querySelector('.js-service-desk-setting-root');
 
   if (!el) {
-    return undefined;
+    return false;
   }
 
   const {

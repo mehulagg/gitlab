@@ -109,7 +109,7 @@ export default {
       <div class="col-md-9 mb-0">
         <strong
           id="incoming-email-describer"
-          class="d-block mb-1"
+          class="gl-display-block gl-mb-1"
           data-testid="incoming-email-describer"
         >
           {{ __('Email address to use for Support Desk') }}
