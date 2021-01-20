@@ -7,7 +7,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Resource access tokens API
 
 You can read more about [resource access tokens](../user/project/settings/project_access_tokens).
-https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html
 
 ## List resource access tokens
 
