@@ -11,11 +11,10 @@ RSpec.describe 'Issues > Iteration bulk assignment' do
   let_it_be(:iteration) { create(:iteration, group: group, title: "Iteration 1") }
 
   shared_examples 'bulk edit iteration' do |context|
-    before do
-      enable_bulk_update(context)
-    end
-
     context 'iteration', :js do
+      before do
+        enable_bulk_update(context)
+      end
       context 'to all issues' do
         before do
           check 'check-all-issues'
@@ -26,6 +25,18 @@ RSpec.describe 'Issues > Iteration bulk assignment' do
         it 'updates the iteration' do
           expect(issue1.reload.iteration.name).to eq 'Iteration 1'
         end
+      end
+    end
+
+    context 'cannot find iteration', :js do
+      before do
+        stub_licensed_features(iterations: false)
+
+        enable_bulk_update(context)
+      end
+
+      it 'cannot find iteration dropdown' do
+        expect(page).not_to have_selector('[data-qa-selector="iteration_container"]')
       end
     end
   end
