@@ -3,6 +3,7 @@ import { mapState, mapActions } from 'vuex';
 import { GlForm, GlSearchBoxByType, GlButton } from '@gitlab/ui';
 import GroupFilter from './group_filter.vue';
 import ProjectFilter from './project_filter.vue';
+import ScopeTabs from './scope_tabs.vue';
 
 export default {
   name: 'GlobalSearchTopbar',
@@ -12,6 +13,7 @@ export default {
     GroupFilter,
     ProjectFilter,
     GlButton,
+    ScopeTabs,
   },
   props: {
     groupInitialData: {
@@ -25,9 +27,19 @@ export default {
       default: () => ({}),
     },
     scopeTabs: {
-      type: Object,
+      type: Array,
       required: false,
-      default: () => ([]),
+      default: () => [],
+    },
+    scope: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    term: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   computed: {
@@ -74,6 +86,6 @@ export default {
         <gl-button class="btn-search" variant="success" type="submit">{{ __('Search') }}</gl-button>
       </section>
     </gl-form>
-    <scope-tabs :scope-tabs="scopeTabs" />
+    <scope-tabs :scope-tabs="scopeTabs" :term="term" :scope="scope" />
   </section>
 </template>

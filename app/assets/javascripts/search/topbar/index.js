@@ -12,6 +12,7 @@ export const initTopbar = (store) => {
   }
 
   let { groupInitialData, projectInitialData, scopeTabs } = el.dataset;
+  const { term, scope } = el.dataset;
 
   groupInitialData = JSON.parse(groupInitialData);
   projectInitialData = JSON.parse(projectInitialData);
@@ -25,7 +26,9 @@ export const initTopbar = (store) => {
         props: {
           groupInitialData,
           projectInitialData,
-          scopeTabs
+          scopeTabs,
+          term,
+          scope,
         },
       });
     },
