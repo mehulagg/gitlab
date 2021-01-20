@@ -2,8 +2,8 @@
 - form_params = { trial_onboarding_flow: params[:trial_onboarding_flow], glm_source: params[:glm_source], glm_content: params[:glm_content] }
 
 .row.flex-grow-1
-  .d-flex.flex-column.align-items-center.p-3.mw-460.mx-auto
-    .d-flex.flex-column.align-items-center.pt-5
+  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-p-4.mw-460.gl-mx-auto
+    .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-pt-6
       - unless in_trial_onboarding_flow?
         #progress-bar
       %h2.center= _('Create your group')
