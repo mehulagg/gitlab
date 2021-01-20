@@ -56,7 +56,7 @@ export default {
   data() {
     return {
       searchTerm: '',
-      iterations: iterationSelectTextMap.noIterationItem,
+      iterations: [],
       currentIteration: null,
       shouldFetch: false,
     };
