@@ -21106,7 +21106,7 @@ CREATE UNIQUE INDEX index_ci_builds_metadata_on_build_id ON ci_builds_metadata U
 
 CREATE INDEX index_ci_builds_metadata_on_build_id_and_has_exposed_artifacts ON ci_builds_metadata USING btree (build_id) WHERE (has_exposed_artifacts IS TRUE);
 
-CREATE INDEX index_ci_builds_metadata_on_build_id_and_interruptible ON ci_builds_metadata USING btree (build_id) WHERE (interruptible = true);
+CREATE INDEX index_ci_builds_metadata_on_build_id_and_interruptible_covering ON ci_builds_metadata USING btree (build_id) INCLUDE (id) WHERE (interruptible = true);
 
 CREATE INDEX index_ci_builds_metadata_on_project_id ON ci_builds_metadata USING btree (project_id);
 
