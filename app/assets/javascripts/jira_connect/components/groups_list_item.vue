@@ -37,9 +37,10 @@ export default {
           AP.navigator.reload();
         })
         .catch((error) => {
-          this.setErrorMessage(
+          this.$emit(
+            'error',
             error?.response?.data?.error ||
-              s__('Integrations|Failed to add namespace. Please try again.'),
+              s__('Integrations|Failed to link namespace. Please try again.'),
           );
         })
         .finally(() => {
