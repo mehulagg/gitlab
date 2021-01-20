@@ -313,6 +313,10 @@ export default {
     state.isLoading = value;
   },
 
+  [types.SET_NOTES_FETCHING_STATE](state, value) {
+    state.isFetching = value;
+  },
+
   [types.SET_DISCUSSION_DIFF_LINES](state, { discussionId, diffLines }) {
     const discussion = utils.findNoteObjectById(state.discussions, discussionId);
 

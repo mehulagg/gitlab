@@ -294,6 +294,40 @@ describe('Actions Notes Store', () => {
           ],
         ));
     });
+
+    describe('paginated notes feature flag enabled', () => {
+      const lastFetchedAt = '12358';
+
+      beforeEach(() => {
+        window.gon = { features: { paginatedNotes: true } };
+
+        axiosMock.onGet(notesDataMock.notesPath).replyOnce(200, {
+          notes: discussionMock.notes,
+          more: false,
+          last_fetched_at: lastFetchedAt,
+        });
+      });
+
+      afterEach(() => {
+        window.gon = null;
+      });
+
+      it('should dispatch setFetchingState, setNotesFetchedState, setLoadingState, updateOrCreateNotes, startTaskList and commit SET_LAST_FETCHED_AT', () => {
+        return testAction(
+          actions.fetchData,
+          null,
+          { notesData: notesDataMock, isFetching: true },
+          [{ type: 'SET_LAST_FETCHED_AT', payload: lastFetchedAt }],
+          [
+            { type: 'setFetchingState', payload: false },
+            { type: 'setNotesFetchedState', payload: true },
+            { type: 'setLoadingState', payload: false },
+            { type: 'updateOrCreateNotes', payload: discussionMock.notes },
+            { type: 'startTaskList' },
+          ],
+        );
+      });
+    });
   });
 
   describe('poll', () => {
@@ -1350,6 +1384,19 @@ describe('Actions Notes Store', () => {
         updatedPosition,
         { state: { discussions: [] } },
         [{ type: mutationTypes.UPDATE_DISCUSSION_POSITION, payload: updatedPosition }],
+        [],
+        done,
+      );
+    });
+  });
+
+  describe('setFetchingState', () => {
+    it('commits SET_NOTES_FETCHING_STATE', (done) => {
+      testAction(
+        actions.setFetchingState,
+        true,
+        null,
+        [{ type: mutationTypes.SET_NOTES_FETCHING_STATE, payload: true }],
         [],
         done,
       );

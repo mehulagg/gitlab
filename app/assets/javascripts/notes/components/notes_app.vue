@@ -1,5 +1,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import * as constants from '../constants';
@@ -30,6 +31,7 @@ export default {
     discussionFilterNote,
     OrderedLayout,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     noteableData: {
       type: Object,
@@ -57,7 +59,6 @@ export default {
   },
   data() {
     return {
-      isFetching: false,
       currentFilter: null,
     };
   },
@@ -68,6 +69,7 @@ export default {
       'convertedDisscussionIds',
       'getNotesDataByProp',
       'isLoading',
+      'isFetching',
       'commentsDisabled',
       'getNoteableData',
       'userCanReply',
@@ -153,6 +155,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'setFetchingState',
       'setLoadingState',
       'fetchDiscussions',
       'poll',
@@ -183,7 +186,11 @@ export default {
     fetchNotes() {
       if (this.isFetching) return null;
 
-      this.isFetching = true;
+      this.setFetchingState(true);
+
+      if (this.glFeatures.paginatedNotes) {
+        return this.initPolling();
+      }
 
       return this.fetchDiscussions(this.getFetchDiscussionsConfig())
         .then(this.initPolling)
@@ -191,7 +198,7 @@ export default {
           this.setLoadingState(false);
           this.setNotesFetchedState(true);
           eventHub.$emit('fetchedNotesData');
-          this.isFetching = false;
+          this.setFetchingState(false);
         })
         .then(this.$nextTick)
         .then(this.startTaskList)

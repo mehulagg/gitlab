@@ -12,6 +12,7 @@ import loadAwardsHandler from '../../awards_handler';
 import sidebarTimeTrackingEventHub from '../../sidebar/event_hub';
 import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
 import { mergeUrlParams } from '../../lib/utils/url_utility';
+import eventHub from '../event_hub';
 import mrWidgetEventHub from '../../vue_merge_request_widget/event_hub';
 import updateIssueConfidentialMutation from '~/sidebar/components/confidential/mutations/update_issue_confidential.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
@@ -420,9 +421,19 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
     .catch(processErrors);
 };
 
+export const setFetchingState = ({ commit }, fetchingState) =>
+  commit(types.SET_NOTES_FETCHING_STATE, fetchingState);
+
 const pollSuccessCallBack = (resp, commit, state, getters, dispatch) => {
   if (state.isResolvingDiscussion) {
     return null;
+  }
+
+  if (window.gon?.features?.paginatedNotes && !resp.more && state.isFetching) {
+    eventHub.$emit('fetchedNotesData');
+    dispatch('setFetchingState', false);
+    dispatch('setNotesFetchedState', true);
+    dispatch('setLoadingState', false);
   }
 
   if (resp.notes?.length) {
