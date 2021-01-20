@@ -3,7 +3,9 @@
 module Types
   module Packages
     module Composer
-      class DetailsType < Types::Packages::PackageType
+      class DetailsType < ::Types::BaseObject
+        implements ::Types::Packages::PackageType
+
         graphql_name 'PackageComposerDetails'
         description 'Details of a Composer package'
 

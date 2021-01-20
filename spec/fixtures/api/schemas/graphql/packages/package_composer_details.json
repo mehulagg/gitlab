@@ -1,12 +1,28 @@
 {
   "type": "object",
-  "allOf": [{ "$ref": "./package_details.json" }],
-  "properties": {
-    "target_sha": {
-      "type": "string"
-    },
-    "composer_json": {
-      "type": "object"
+  "allOf": [
+    { "$ref": "./package_details.json" },
+    {
+      "properties": {
+        "composerMetadatum": {
+          "type": "object",
+          "properties": {
+            "targetSha": {
+              "type": "string"
+            },
+            "composerJson": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "license": { "type": "string" },
+                "version": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
     }
-  }
+  ]
 }

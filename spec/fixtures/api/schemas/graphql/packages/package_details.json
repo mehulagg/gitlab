@@ -16,7 +16,7 @@
     "version": {
       "type": ["string", "null"]
     },
-    "package_type": {
+    "packageType": {
       "type": ["string"],
       "enum": ["MAVEN", "NPM", "CONAN", "NUGET", "PYPI", "COMPOSER", "GENERIC", "GOLANG", "DEBIAN"]
     },

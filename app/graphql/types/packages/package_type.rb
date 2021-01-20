@@ -2,13 +2,13 @@
 
 module Types
   module Packages
-    class PackageType < BaseObject
+    module PackageType
+      include Types::BaseInterface
+
       graphql_name 'Package'
       description 'Represents a package in the Package Registry'
 
-      authorize :read_package
-
-      field :id, GraphQL::ID_TYPE, null: false, description: 'The ID of the package.'
+      field :id, ::Types::GlobalIDType[::Packages::Package], null: false, description: 'The ID of the package.'
       field :name, GraphQL::STRING_TYPE, null: false, description: 'The name of the package.'
       field :created_at, Types::TimeType, null: false, description: 'The created date.'
       field :updated_at, Types::TimeType, null: false, description: 'The updated date.'
@@ -22,6 +22,15 @@ module Types
       def project
         Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find
       end
+
+      definition_methods do
+        def resolve_type(object, context)
+          mod = ::Types::Packages.const_get(object.package_type.classify, false)
+          mod::DetailsType
+        end
+      end
+
+      orphan_types Composer::DetailsType
     end
   end
 end
