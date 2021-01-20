@@ -152,13 +152,7 @@ To avoid caching issues, test the result on an incognito or private browser wind
 ## Troubleshooting
 
 The Google Workspace documentation on [SAML app error messages](https://support.google.com/a/answer/6301076?hl=en) is helpful for debugging if you are seeing an error from Google while signing in.
+Pay particular attention to the following 403 errors:
 
-We also have a [Troubleshooting](../integration/saml.md#troubleshooting) section in our main SAML OmniAuth Provider documentation.
-
-### 403 Error: `app_not_configured_for_user`
-
-This error can happen if the user trying to log in has a domain that is not configured in your Google Workspace domains ie. they might be trying to log in with their personal Google account.
-
-### 403 Error: `app_not_configured`
-
-Double check that the value of the `issuer` setting in your `gitlab.rb` file matches the value of the **Entity ID** setting in the Google Workspace SAML app.
+- `app_not_configured`
+- `app_not_configured_for_user`
