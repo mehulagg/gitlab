@@ -2,6 +2,8 @@ import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
+import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';
+import api from '~/api';
 
 import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
 
@@ -27,4 +29,10 @@ export const fetchReport = ({ state, dispatch }) => {
       dispatch('receiveReportError', error);
       createFlash(s__('ciReport|There was an error fetching the codequality report.'));
     });
+};
+
+export const createViewTrackingEvent = () => {
+  if (gon.features[VIEW_EVENT_FEATURE_FLAG]) {
+    api.trackRedisHllUserEvent(VIEW_EVENT_NAME);
+  }
 };

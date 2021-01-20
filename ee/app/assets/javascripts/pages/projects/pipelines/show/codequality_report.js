@@ -11,6 +11,7 @@ export default () => {
 
   if (tabsElement && codequalityTab) {
     const fetchReportAction = 'fetchReport';
+    const createViewTrackingEventAction = 'createViewTrackingEvent';
     const { codequalityReportDownloadPath, blobPath } = codequalityTab.dataset;
     const store = createStore({ endpoint: codequalityReportDownloadPath, blobPath });
 
@@ -20,10 +21,12 @@ export default () => {
 
     if (isCodequalityTabActive) {
       store.dispatch(fetchReportAction);
+      store.dispatch(createViewTrackingEventAction);
     } else {
       const tabClickHandler = (e) => {
         if (e.target.className === 'codequality-tab') {
           store.dispatch(fetchReportAction);
+          store.dispatch(createViewTrackingEventAction);
           tabsElement.removeEventListener('click', tabClickHandler);
         }
       };
