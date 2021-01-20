@@ -4465,7 +4465,7 @@ job1:
     - *some-script-before
   script:
     - *some-script
-+    - echo "Execute something, for this job only"
+    - echo "Execute something, for this job only"
   after_script:
     - *some-script-after
 
