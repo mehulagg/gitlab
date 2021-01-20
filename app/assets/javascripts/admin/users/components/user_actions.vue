@@ -7,7 +7,8 @@ import {
   GlDropdownDivider,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import { generateUserPaths, arrayToCamelCase } from '../utils';
+import { convertArrayToCamelCase } from '~/lib/utils/common_utils';
+import { generateUserPaths } from '../utils';
 
 export default {
   components: {
@@ -29,7 +30,7 @@ export default {
   },
   computed: {
     camelCaseActions() {
-      return arrayToCamelCase(this.user.actions);
+      return convertArrayToCamelCase(this.user.actions);
     },
     dropdownActions() {
       return this.camelCaseActions.filter((a) => a !== 'edit');
@@ -51,6 +52,11 @@ export default {
     },
     userPaths() {
       return generateUserPaths(this.paths, this.user.username);
+    },
+  },
+  methods: {
+    isLdapAction(action) {
+      return action === 'ldapBlocked';
     },
   },
   i18n: {
@@ -86,7 +92,7 @@ export default {
       <gl-dropdown-section-header>{{ $options.i18n.settings }}</gl-dropdown-section-header>
 
       <template v-for="action in dropdownSafeActions">
-        <gl-dropdown-item v-if="action === 'ldapBlocked'" :key="action" :data-testid="action">
+        <gl-dropdown-item v-if="isLdapAction(action)" :key="action" :data-testid="action">
           {{ $options.i18n.ldap }}
         </gl-dropdown-item>
         <gl-dropdown-item v-else :key="action" :href="userPaths[action]" :data-testid="action">
