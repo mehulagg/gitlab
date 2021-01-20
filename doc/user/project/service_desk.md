@@ -134,7 +134,7 @@ You can use these placeholders to be automatically replaced in each email:
 
 #### General email template
 
-If you have [description templates](description_templates.md) in your repository's
+If you have [issue description templates](description_templates.md#creating-issue-templates) in your repository's
 `.gitlab/issue_templates/` directory, you can select one **per project** to be appended to each
 Service Desk email.
 
