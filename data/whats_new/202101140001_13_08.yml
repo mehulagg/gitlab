@@ -12,6 +12,17 @@
   image_url: https://img.youtube.com/vi/MQpSyvMpsHA/hqdefault.jpg
   published_at: 2021-01-22
   release: 13.8
+- title: Visualization of pipeline configuration
+  body: |
+    A complex CI configuration can be difficult to understand as a developer, especially when trying to predict how your pipeline might behave (or misbehave). Without a visual aid, it is challenging to form a mental image of the relationships between all of the jobs and determine how they are interconnected. In our first iteration of a pipeline visualization, you can now see a graphic representation of your `.gitlab-ci.yml` configuration to better understand and predict how your pipelines will perform.
+  stage: verify
+  self-managed: true
+  gitlab-com: true
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/ci/yaml/visualization.html
+  image_url: https://about.gitlab.com/images/13_8/pipeline_visual_builder.png
+  published_at: 2021-01-22
+  release: 13.8
 - title: Deployment frequency charts
   packages: [Ultimate]
   self-managed: true
@@ -41,6 +52,54 @@
   packages: [Core, Starter, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html#downloading-artifacts
   image_url: https://about.gitlab.com/images/13_8/artifact_mr.png
+  published_at: 2021-01-22
+  release: 13.8
+- title: Rebase quick action for merge requests
+  body: |
+    Rebase is a Git command used to reapply commits on top of a new commit. In practice, this means reapplying commits from a feature branch on top of the latest version of the target branch (e.g. `main`). In this way, it is possible to bring the feature branch up to date and resolve any conflicts without using a merge commit with the benefit of a simpler linear Git history.
+
+    GitLab 13.8 brings the ability to execute the rebase quick action in merge requests, allowing you to quickly invoke the rebase Git utility.
+  stage: create
+  self-managed: true
+  gitlab-com: true
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/user/project/quick_actions.html#quick-actions-for-issues-merge-requests-and-epics
+  image_url: https://about.gitlab.com/images/13_8/rebase_comment.png
+  published_at: 2021-01-22
+  release: 13.8
+- title: GitLab Pages is now available for Kubernetes deployments of GitLab
+  body: |
+    GitLab Pages is a popular static-site hosting service built into GitLab, and we are excited to announce that it is now available for GitLab instances running on Kubernetes. Pages was one of the last remaining feature gaps compared to an Omnibus deployment.
+  stage: enablement
+  self-managed: true
+  gitlab-com: false
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/charts/charts/gitlab/gitlab-pages/index.html
+  image_url: https://about.gitlab.com/images/home/kubernetes.png
+  published_at: 2021-01-22
+  release: 13.8
+- title: Deploy Boards are available in Core
+  body: |
+    Deploy Boards offer a consolidated view of the current health and status of each CI environment running on Kubernetes, displaying the status of the pods in the deployment. Developers and other teammates can view the progress and status of a rollout, pod by pod, in the workflow they already use without any need to access Kubernetes.
+  stage: configure
+  self-managed: true
+  gitlab-com: true
+  packages: [Core, Starter, Premium, Ultimate]
+  url: https://docs.gitlab.com/ee/user/project/deploy_boards.html
+  image_url: https://docs.gitlab.com/ee/user/project/img/deploy_boards_landing_page.png
+  published_at: 2021-01-22
+  release: 13.8
+- title: API Fuzz Testing results now visible in Security Dashboard
+  body: |
+    API fuzz testing results are now shown in the Security Dashboard and all other locations that security scanners show their results. You can now triage API fuzz testing results, create issues for them, and engage with your teams just like you can with other scanners.
+
+   We're incredibly excited to bring these results out of the **Tests** tab so that you can integrate API fuzz testing alongside other security scanners and truly shift security left.
+  stage: secure
+  self-managed: true
+  gitlab-com: true
+  packages: [Ultimate]
+  url: 'https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#interacting-with-the-vulnerabilities
+  image_url: https://about.gitlab.com/images/13_8/api_vuln_results.png
   published_at: 2021-01-22
   release: 13.8
 - title: Send an email to an issue
