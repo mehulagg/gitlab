@@ -13,6 +13,7 @@ class Groups::GroupMembersController < Groups::ApplicationController
 
   # Authorize
   before_action :authorize_admin_group_member!, except: admin_not_required_endpoints
+  before_action :authorize_read_group_members!, only: admin_not_required_endpoints
 
   skip_before_action :check_two_factor_requirement, only: :leave
   skip_cross_project_access_check :index, :create, :update, :destroy, :request_access,

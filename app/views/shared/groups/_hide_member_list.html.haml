@@ -1,0 +1,6 @@
+- label_class = local_assigns.fetch(:bold_label, false) ? 'font-weight-bold' : ''
+
+.form-check
+  = form.check_box :member_list_invisible, class: 'form-check-input', data: { qa_selector: 'member_list_invisible_checkbox' }
+  = form.label :member_list_invisible, class: 'form-check-label' do
+    %span{ class: label_class }= _('Hide member list of top-level and sub-group from outside of the group')

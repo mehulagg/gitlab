@@ -203,10 +203,10 @@ module GroupsHelper
   end
 
   def get_group_sidebar_links
-    links = [:overview, :group_members]
+    links = [:overview]
 
     resources = [:activity, :issues, :boards, :labels, :milestones,
-                 :merge_requests]
+                 :merge_requests, :members]
     links += resources.select do |resource|
       can?(current_user, "read_group_#{resource}".to_sym, @group)
     end

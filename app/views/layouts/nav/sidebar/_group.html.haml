@@ -128,7 +128,7 @@
       - if group_sidebar_link?(:wiki)
         = render 'layouts/nav/sidebar/wiki_link', wiki_url: @group.wiki.web_url
 
-      - if group_sidebar_link?(:group_members)
+      - if group_sidebar_link?(:members)
         = nav_link(path: 'group_members#index') do
           = link_to group_group_members_path(@group) do
             .nav-icon-container

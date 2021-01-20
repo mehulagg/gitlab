@@ -100,7 +100,6 @@ class GroupPolicy < BasePolicy
     enable :read_list
     enable :read_label
     enable :read_board
-    enable :read_group_member
     enable :read_custom_emoji
   end
 
@@ -130,6 +129,7 @@ class GroupPolicy < BasePolicy
     enable :read_prometheus
     enable :read_package
     enable :read_package_settings
+    enable :read_group_members
   end
 
   rule { maintainer }.policy do

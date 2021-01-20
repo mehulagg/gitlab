@@ -101,6 +101,7 @@ class Admin::GroupsController < Admin::ApplicationController
       :name,
       :path,
       :request_access_enabled,
+      :member_list_invisible,
       :visibility_level,
       :require_two_factor_authentication,
       :two_factor_grace_period,
