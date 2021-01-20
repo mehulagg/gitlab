@@ -6,7 +6,9 @@ RSpec.describe RequirementsManagement::ExportCsvService do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, :public, group: group) }
-  let_it_be(:requirement) { create(:requirement, state: :opened, project: project) }
+  let_it_be(:requirement) do
+    create(:requirement, state: :opened, project: project, created_at: DateTime.new(2015, 4, 1, 2, 1, 0))
+  end
 
   subject { described_class.new(RequirementsManagement::Requirement.all, project) }
 
@@ -67,15 +69,38 @@ RSpec.describe RequirementsManagement::ExportCsvService do
     end
 
     specify 'author username' do
-      expect(csv[0]['Author Username']).to eq requirement.author.username
+      puts requirement.author
+      expect(csv[0]['Created By']).to eq requirement.author.username
+    end
+
+    specify 'created date' do
+      expect(csv[0]['Created Date']).to eq '2015-04-01 02:01:00 UTC'
     end
 
     specify 'latest test report state' do
-      expect(csv[0]['Latest Test Report State']).to eq "Passed"
+      expect(csv[0]['Satisfied / Failed State']).to eq 'Satisfied'
     end
 
     specify 'latest test report created at' do
-      expect(csv[0]['Latest Test Report Created At (UTC)']).to eq '2015-04-03 02:01:00 UTC'
+      expect(csv[0]['Satisfied / Failed Date']).to eq '2015-04-03 02:01:00 UTC'
+    end
+
+    context 'when last test report failed' do
+      before do
+        create(
+          :test_report, requirement: requirement,
+          state: :failed, build: nil,
+          created_at: DateTime.new(2015, 4, 4, 2, 1, 0)
+        )
+      end
+
+      specify 'latest test report state' do
+        expect(csv[0]['Satisfied / Failed State']).to eq 'Failed'
+      end
+
+      specify 'latest test report created at' do
+        expect(csv[0]['Satisfied / Failed Date']).to eq '2015-04-04 02:01:00 UTC'
+      end
     end
   end
 end
