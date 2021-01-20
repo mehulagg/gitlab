@@ -36,7 +36,9 @@ export default {
   },
   methods: {
     setDateRange({ startDate, endDate }) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.startDate = startDate;
+      // eslint-disable-next-line vue/no-mutating-props
       this.endDate = endDate;
     },
   },

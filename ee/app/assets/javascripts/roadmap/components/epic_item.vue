@@ -115,6 +115,7 @@ export default {
       if (this.epic.newEpic) {
         this.$nextTick(() => {
           delay(() => {
+            // eslint-disable-next-line vue/no-mutating-props
             this.epic.newEpic = false;
           }, EPIC_HIGHLIGHT_REMOVE_AFTER);
         });
@@ -142,7 +143,7 @@ export default {
         class="epic-timeline-cell"
         data-qa-selector="epic_timeline_cell"
       >
-        <!-- 
+        <!--
           CurrentDayIndicator internally checks if a given timeframeItem is for today.
           However, we are doing a duplicate check (index === todaysIndex) here -
           so that the the indicator is rendered once.

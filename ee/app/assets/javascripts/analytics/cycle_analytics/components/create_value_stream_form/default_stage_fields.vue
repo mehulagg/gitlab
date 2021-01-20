@@ -69,6 +69,7 @@ export default {
         :state="isValid('name')"
         :invalid-feedback="renderError('name')"
       >
+        <!-- eslint-disable vue/no-mutating-props -->
         <gl-form-input
           v-model.trim="stage.name"
           :name="`create-value-stream-stage-${index}`"
@@ -76,6 +77,7 @@ export default {
           required
           @input="$emit('input', $event)"
         />
+        <!-- eslint-enable vue/no-mutating-props -->
       </gl-form-group>
       <stage-field-actions
         :index="index"

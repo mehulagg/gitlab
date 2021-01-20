@@ -83,6 +83,7 @@ export default {
       },
       set(value) {
         const { field } = this.currentRuleComponent;
+        // eslint-disable-next-line vue/no-mutating-props
         this.rule[field] = value;
       },
     },
@@ -158,12 +159,14 @@ export default {
         </template>
 
         <template #ruleDirection>
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-select
             id="direction"
             v-model="rule.direction"
             class="gl-mr-4 gl-mb-5"
             :options="$options.trafficDirections"
           />
+          <!-- eslint-enable vue/no-mutating-props -->
         </template>
 
         <template #ruleSelector>
@@ -212,6 +215,7 @@ export default {
         </template>
 
         <template #ports>
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-select
             id="portMatch"
             v-model="rule.portMatchMode"
@@ -228,6 +232,7 @@ export default {
             placeholder="80/tcp"
           />
           <!-- eslint-enable @gitlab/vue-require-i18n-attribute-strings -->
+          <!-- eslint-enable vue/no-mutating-props -->
         </template>
       </gl-sprintf>
     </gl-form>

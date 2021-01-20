@@ -94,6 +94,7 @@ export default {
           :state="hasFieldErrors('startEventIdentifier')"
           :invalid-feedback="fieldErrorMessage('startEventIdentifier')"
         >
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-select
             v-model="fields.startEventIdentifier"
             name="custom-stage-start-event"
@@ -101,6 +102,7 @@ export default {
             :options="startEvents"
             @input="handleUpdateField('startEventIdentifier', $event)"
           />
+          <!-- eslint-enable vue/no-mutating-props -->
         </gl-form-group>
       </div>
       <div v-if="startEventRequiresLabel" class="gl-w-half gl-ml-2">
@@ -128,6 +130,7 @@ export default {
           :state="hasFieldErrors('endEventIdentifier')"
           :invalid-feedback="fieldErrorMessage('endEventIdentifier')"
         >
+          <!-- eslint-disable vue/no-mutating-props -->
           <gl-form-select
             v-model="fields.endEventIdentifier"
             name="custom-stage-end-event"
@@ -136,6 +139,7 @@ export default {
             :disabled="!hasStartEvent"
             @input="handleUpdateField('endEventIdentifier', $event)"
           />
+          <!-- eslint-enable vue/no-mutating-props -->
         </gl-form-group>
       </div>
       <div v-if="endEventRequiresLabel" class="gl-w-half gl-ml-2">
