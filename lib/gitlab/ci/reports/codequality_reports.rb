@@ -10,7 +10,7 @@ module Gitlab
 
         def initialize
           @degradations = {}.with_indifferent_access
-          @error_message = nil
+          @error_message = ""
         end
 
         def add_degradation(degradation)
