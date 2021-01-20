@@ -78,38 +78,4 @@
   image_url: https://about.gitlab.com/images/home/kubernetes.png
   published_at: 2021-01-22
   release: 13.8
-- title: Deploy Boards are available in Core
-  body: |
-    Deploy Boards offer a consolidated view of the current health and status of each CI environment running on Kubernetes, displaying the status of the pods in the deployment. Developers and other teammates can view the progress and status of a rollout, pod by pod, in the workflow they already use without any need to access Kubernetes.
-  stage: configure
-  self-managed: true
-  gitlab-com: true
-  packages: [Core, Starter, Premium, Ultimate]
-  url: https://docs.gitlab.com/ee/user/project/deploy_boards.html
-  image_url: https://docs.gitlab.com/ee/user/project/img/deploy_boards_landing_page.png
-  published_at: 2021-01-22
-  release: 13.8
-- title: API Fuzz Testing results now visible in Security Dashboard
-  body: |
-    API fuzz testing results are now shown in the Security Dashboard and all other locations that security scanners show their results. You can now triage API fuzz testing results, create issues for them, and engage with your teams just like you can with other scanners.
 
-   We're incredibly excited to bring these results out of the **Tests** tab so that you can integrate API fuzz testing alongside other security scanners and truly shift security left.
-  stage: secure
-  self-managed: true
-  gitlab-com: true
-  packages: [Ultimate]
-  url: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#interacting-with-the-vulnerabilities
-  image_url: https://about.gitlab.com/images/13_8/api_vuln_results.png
-  published_at: 2021-01-22
-  release: 13.8
-- title: Send an email to an issue
-  body: |
-    To more efficiently integrate GitLab into your email workflows, each issue now has a unique email address. Emailing an issue creates a new comment on your behalf. You can now say goodbye to manually copying email content and attachments into your GitLab issues.
-  stage: plan
-  self-managed: true
-  gitlab-com: true
-  packages: [Core, Starter, Premium, Ultimate]
-  url: https://docs.gitlab.com/ee/user/project/issues/issue_data_and_actions.html#email
-  image_url: https://about.gitlab.com/images/13_8/issue-email.png
-  published_at: 2021-01-22
-  release: 13.8
