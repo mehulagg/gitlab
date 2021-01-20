@@ -147,7 +147,7 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
 1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart](../administration/restart_gitlab.md#installations-from-source) GitLab for Omnibus and installations
    from source respectively for the changes to take effect.
 
-You might want to try this out on an incognito browser window.
+To avoid caching issues, test the result on an incognito or private browser window.
 
 ## Troubleshooting
 
