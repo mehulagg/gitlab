@@ -534,6 +534,18 @@ export default {
     commit(types.SET_SELECTED_PROJECT, project);
   },
 
+  toggleBoardItemMultiSelection: ({ commit, state }, boardItem) => {
+    const { selectedBoardItems } = state;
+    const selectedBoardItemIds = selectedBoardItems.map((item) => item.id);
+    const index = selectedBoardItemIds.indexOf(boardItem.id);
+
+    if (index === -1) {
+      commit(types.ADD_BOARD_ITEM_TO_SELECTION, boardItem);
+    } else {
+      commit(types.REMOVE_BOARD_ITEM_FROM_SELECTION, boardItem);
+    }
+  },
+
   fetchBacklog: () => {
     notImplemented();
   },

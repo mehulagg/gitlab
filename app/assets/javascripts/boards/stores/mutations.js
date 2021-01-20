@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { pull, union } from 'lodash';
+import { pull, union, without } from 'lodash';
 import { formatIssue, moveIssueListHelper } from '../boards_util';
 import * as mutationTypes from './mutation_types';
 import { s__ } from '~/locale';
@@ -257,5 +257,13 @@ export default {
 
   [mutationTypes.SET_SELECTED_PROJECT]: (state, project) => {
     state.selectedProject = project;
+  },
+
+  [mutationTypes.ADD_BOARD_ITEM_TO_SELECTION]: (state, boardItem) => {
+    state.selectedBoardItems = [...state.selectedBoardItems, boardItem];
+  },
+
+  [mutationTypes.REMOVE_BOARD_ITEM_FROM_SELECTION]: (state, boardItem) => {
+    Vue.set(state, 'selectedBoardItems', without(state.selectedBoardItems, boardItem));
   },
 };
