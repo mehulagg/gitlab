@@ -173,7 +173,7 @@ Feature.disable(:merge_request_reviewers, Project.find(<project id>))
 
 When editing the **Reviewers** field in a new or existing merge request, this feature
 displays the name of the matching [approval rule](merge_request_approvals.md#approval-rules)
-below the name of each suggested reviewer. [Code Owners](../code_owners.md) are displayed as `Codeowner` without group detail. We intend to iterate on this feature in future releases.
+below the name of each suggested reviewer. [Code Owners](../code_owners.md) are displayed as `Codeowner` without group detail.
 
 This example shows reviewers and approval rules when creating a new merge request:
 
