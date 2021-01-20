@@ -32,6 +32,7 @@ class PipelineEntity < Grape::Entity
     expose :failure_reason?, as: :failure_reason
     expose :detached_merge_request_pipeline?, as: :detached_merge_request_pipeline
     expose :merge_request_pipeline?, as: :merge_request_pipeline
+    expose :merge_train_pipeline?, as: :merge_train_pipeline
   end
 
   expose :details do

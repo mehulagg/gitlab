@@ -28958,6 +28958,9 @@ msgstr ""
 msgid "This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize."
 msgstr ""
 
+msgid "This is a merge train pipeline"
+msgstr ""
+
 msgid "This is a security log of important events involving your account."
 msgstr ""
 
@@ -34463,6 +34466,9 @@ msgid "to list"
 msgstr ""
 
 msgid "toggle collapse"
+msgstr ""
+
+msgid "train"
 msgstr ""
 
 msgid "triggered"
