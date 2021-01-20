@@ -281,7 +281,7 @@ Additional Conan images to use as the basis of your CI file are available in the
 
 ### Publishing a package with the same name or version
 
-When you publish a packages that has the same recipe (`package-name/version@user/channel`)
+When you publish a package that has the same recipe (`package-name/version@user/channel`)
 as an existing package, the duplicate files are uploaded successfully. However,
 when the package is installed, only the most recently-published set is returned.
 
