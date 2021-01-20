@@ -1,0 +1,5 @@
+---
+title: Enable variables_in_include_section_ci feature by default
+merge_request: 52108
+author:
+type: added

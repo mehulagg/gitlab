@@ -99,7 +99,7 @@ module Gitlab
           end
 
           def expand_variables(data)
-            return data unless ::Feature.enabled?(:variables_in_include_section_ci)
+            return data unless ::Feature.enabled?(:variables_in_include_section_ci, default_enabled: true)
 
             if data.is_a?(String)
               expand(data)
