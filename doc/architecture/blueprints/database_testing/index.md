@@ -102,8 +102,6 @@ Secondly, we plan to cover background migrations testing, too. These are typical
 
 There are opportunities to discuss for extracting features from this into GitLab itself. For example, annotating the Merge Request with query examples and attaching feedback gathered from the testing run can become a first-class citizen instead of using Merge Request description and comments for it. We plan to evaluate those ideas as we see those being used in earlier phases and bring our experience back into the product.
 
-In order to bring down licensing cost in the long run, we strive to move towards either using Database Labs Community Edition for thin-cloning or building our own solution.
-
 ## An alternative discussed: Anonymization
 
 At the core of this problem lies the concern about executing (potentially arbitrary) code on a production dataset and making sure the production data is well protected. The approach discussed above solves this by strongly limiting access to the output of said code.
