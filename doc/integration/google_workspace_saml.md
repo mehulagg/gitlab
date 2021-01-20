@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Google Workspace (formerly G Suite) is a [Single Sign-on provider](https://support.google.com/a/answer/60224?hl=en) that can be used to authenticate
 with GitLab.
 
-The following documentation enables Google Workspace as a SAML provider.
+The following documentation enables Google Workspace as a SAML provider for GitLab.
 
 ## Configure the Google Workspace SAML app
 
