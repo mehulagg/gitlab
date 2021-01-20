@@ -15,19 +15,9 @@ exports[`PipelineFailed should display correctly 1`] = `
     <span
       class="bold"
     >
-      
-      The pipeline for this merge request did not complete. Push a new commit to fix the failure or refer to documentation to see the recommended action based on the pipeline type.
-      
-      <gl-link-stub
-        class="gl-ml-2"
-        href=""
-        target="_blank"
-      >
-        <gl-icon-stub
-          name="question"
-          size="16"
-        />
-      </gl-link-stub>
+      <gl-sprintf-stub
+        message="The pipeline for this merge request did not complete. Push a new commit to fix the failure or check the %{linkStart}troubleshooting documentation%{linkEnd} to see other possible actions."
+      />
     </span>
   </div>
 </div>

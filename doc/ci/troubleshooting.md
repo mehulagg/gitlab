@@ -222,6 +222,9 @@ This also applies if the pipeline has not been created yet, or if you are waitin
 for an external CI service. If you don't use pipelines for your project, then you
 should disable **Pipelines must succeed** so you can accept merge requests.
 
+### "The pipeline for this merge request did not complete. Push a new commit to fix the failure or check the troubleshooting documentation to see other possible actions." message
+
+
 ## Pipeline warnings
 
 Pipeline configuration warnings are shown when you:
