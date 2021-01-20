@@ -1,0 +1,14 @@
+- breadcrumb_title _("Epic Boards")
+- page_title("#{board.name}", _("Boards"))
+- add_page_specific_style 'page_bundles/boards'
+
+- content_for :page_specific_javascripts do
+
+  %script#js-board-modal-filter{ type: "text/x-template" }= render "shared/issuable/search_bar", type: :boards_modal, show_sorting_dropdown: false
+
+#board-app.boards-app.position-relative{ "v-cloak" => "true", data: board_data, ":class" => "{ 'is-compact': detailIssueVisible }" }
+  %board-content{ "v-cloak" => "true",
+    "ref" => "board_content"}
+  = render "shared/boards/components/sidebar", group: @group
+
+%h1 It's an epic board!
