@@ -115,15 +115,11 @@ class SystemHooksService
   end
 
   def group_data(model)
-    owner = model.owner
-
     {
       name: model.name,
       path: model.path,
       full_path: model.full_path,
-      group_id: model.id,
-      owner_name: owner.try(:name),
-      owner_email: owner.try(:email)
+      group_id: model.id
     }
   end
 
