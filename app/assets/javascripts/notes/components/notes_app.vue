@@ -105,6 +105,13 @@ export default {
     },
   },
   watch: {
+    async isFetching() {
+      if (!this.isFetching) {
+        await this.$nextTick();
+        await this.startTaskList();
+        await this.checkLocationHash();
+      }
+    },
     shouldShow() {
       if (!this.isNotesFetched) {
         this.fetchNotes();
@@ -200,9 +207,6 @@ export default {
           eventHub.$emit('fetchedNotesData');
           this.setFetchingState(false);
         })
-        .then(this.$nextTick)
-        .then(this.startTaskList)
-        .then(this.checkLocationHash)
         .catch(() => {
           this.setLoadingState(false);
           this.setNotesFetchedState(true);
