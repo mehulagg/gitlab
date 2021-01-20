@@ -22,7 +22,7 @@ module MembershipActions
       .new(current_user, update_params)
       .execute(member)
 
-    member = result.fetch(:member)
+    member = result.fetch(:member, nil)
 
     if result[:status] == :success
       if member.expires?
@@ -35,7 +35,7 @@ module MembershipActions
         render json: {}
       end
     else
-      render json: result[:message], status: :unprocessable_entity
+      render json:  { message: result[:message] }, status: :unprocessable_entity
     end
   end
 

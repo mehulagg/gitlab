@@ -36,7 +36,6 @@ RSpec.describe Members::UpdateService do
       expect(result).to eq(:success)
     end
 
-
     context 'when member is downgraded to guest' do
       shared_examples 'schedules to delete confidential todos' do
         it do
