@@ -241,8 +241,8 @@ RSpec.describe BillingPlansHelper do
   end
 
   describe '#billing_available_plans' do
-    let(:plan) { double('Plan', deprecated?: false, code: 'silver') }
-    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze') }
+    let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: false) }
+    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: false) }
     let(:plans_data) { [plan, deprecated_plan] }
 
     context 'when namespace is on an active plan' do
@@ -256,6 +256,15 @@ RSpec.describe BillingPlansHelper do
 
       it 'returns plans with a deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq(plans_data)
+      end
+    end
+
+    context 'when namespace is on a deprecated plan that has hide_deprecated_card set to true' do
+      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+      let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true) }
+
+      it 'returns plans without the deprecated plan' do
+        expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
       end
     end
   end
