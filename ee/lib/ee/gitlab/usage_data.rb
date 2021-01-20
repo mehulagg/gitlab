@@ -410,8 +410,8 @@ module EE
             scans_table = ::Security::Scan.arel_table
             inner_relation = ::Security::Scan.select(:id)
                                .where(
-                                 to_date_arel_node(Arel.sql('date_range_source'))
-                                   .eq(to_date_arel_node(scans_table[time_period.keys[0]]))
+                                 ::Gitlab::Database::DateTime.to_utc_date('date_range_source')
+                                   .eq(::Gitlab::Database::DateTime.to_utc_date(scans_table[time_period.keys[0]]))
                                )
 
             outer_relation = ::Security::Scan
@@ -459,11 +459,6 @@ module EE
           pipelines_with_secure_jobs
         end
         # rubocop: enable UsageData/LargeTable
-
-        def to_date_arel_node(column)
-          locked_timezone = Arel::Nodes::NamedFunction.new('TIMEZONE', [Arel.sql("'UTC'"), column])
-          Arel::Nodes::NamedFunction.new('DATE', [locked_timezone])
-        end
 
         def approval_merge_request_rule_minimum_id
           strong_memoize(:approval_merge_request_rule_minimum_id) do
