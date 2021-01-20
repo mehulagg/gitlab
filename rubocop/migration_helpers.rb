@@ -12,6 +12,7 @@ module RuboCop
       users
       projects
       ci_builds
+      namespaces
     ].freeze
 
     # List of helpers that add new columns, either directly (ADD_COLUMN_METHODS)
