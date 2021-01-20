@@ -319,7 +319,7 @@ end
 ```
 
 Please see [this example](https://gitlab.com/gitlab-org/gitlab/-/blob/16ecc33341a3f6b6bebdf78d863c5bce76b040d3/app/workers/ci/pipeline_artifacts/expire_artifacts_worker.rb#L20-21)
-which logs a count of how many artifacts were destroyed in a run of the `ExpireArtifactsWorker`.
+which logs a count of how many artifacts are destroyed per run of the `ExpireArtifactsWorker`.
 
 ## Exception Handling
 
