@@ -7,7 +7,7 @@ RSpec.describe 'Pipeline', :js do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
-    stub_feature_flags(graphql_pipeline_details: false)
+    # stub_feature_flags(graphql_pipeline_details: false)
     sign_in(user)
 
     project.add_developer(user)
@@ -41,6 +41,8 @@ RSpec.describe 'Pipeline', :js do
         it 'expands the upstream on click' do
           subject
 
+          # live_debug
+          wait_for_all_requests
           page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
           wait_for_requests
           expect(page).to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
