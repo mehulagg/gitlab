@@ -41,9 +41,9 @@ The following table lists examples with step-by-step tutorials that are containe
 
 ### Contributed examples
 
-You can help GitLab and your favorite programming language users by submitting a
-merge request with a guide for that language. These examples of contributed guides
-are hosted externally or in separate example projects:
+You can help people that use your favorite programming language by submitting a link
+to a guide for that language. These contributed guides are hosted externally or in
+separate example projects:
 
 | Use case                      | Resource |
 |-------------------------------|----------|
