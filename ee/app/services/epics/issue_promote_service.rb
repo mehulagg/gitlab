@@ -33,7 +33,7 @@ module Epics
 
     def track_event
       ::Gitlab::Tracking
-        .for(namespace: @parent_group, project: issue.project, user: current_user, foo: 'bar')
+        .for(namespace: @parent_group, project: issue.project)
         .event('epics', 'promote', property: 'issue_id', value: original_entity.id)
     end
 
