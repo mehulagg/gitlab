@@ -54,7 +54,7 @@ describe('AdminUserActions component', () => {
         initComponent({ actions: [] });
       });
 
-      it('renders the edit button linking to the user edit path', () => {
+      it('does not render the edit button linking to the user edit path', () => {
         expect(findEditButton().exists()).toBe(false);
       });
     });
