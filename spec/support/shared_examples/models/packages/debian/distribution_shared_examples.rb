@@ -7,6 +7,7 @@ RSpec.shared_examples 'Debian Distribution' do |factory, container, can_freeze|
   let_it_be(:distribution_with_same_container, freeze: can_freeze) { create(factory, container: distribution_with_suite.container ) }
   let_it_be(:distribution_with_same_codename, freeze: can_freeze) { create(factory, codename: distribution_with_suite.codename ) }
   let_it_be(:distribution_with_same_suite, freeze: can_freeze) { create(factory, suite: distribution_with_suite.suite ) }
+  let_it_be(:distribution_with_codename_and_suite_flipped, freeze: can_freeze) { create(factory, codename: distribution_with_suite.suite, suite: distribution_with_suite.codename) }
 
   let_it_be_with_refind(:distribution) { create(factory, container: distribution_with_suite.container ) }
 
@@ -15,6 +16,8 @@ RSpec.shared_examples 'Debian Distribution' do |factory, container, can_freeze|
   describe 'relationships' do
     it { is_expected.to belong_to(container) }
     it { is_expected.to belong_to(:creator).class_name('User') }
+
+    it { is_expected.to have_many(:architectures).class_name("Packages::Debian::#{container.capitalize}Architecture").inverse_of(:distribution) }
   end
 
   describe 'validations' do
@@ -145,7 +148,7 @@ RSpec.shared_examples 'Debian Distribution' do |factory, container, can_freeze|
       subject { described_class.with_container(distribution_with_suite.container) }
 
       it 'does not return other distributions' do
-        expect(subject.to_a).to eq([distribution_with_suite, distribution, distribution_with_same_container])
+        expect(subject).to match_array([distribution_with_suite, distribution, distribution_with_same_container])
       end
     end
 
@@ -153,7 +156,7 @@ RSpec.shared_examples 'Debian Distribution' do |factory, container, can_freeze|
       subject { described_class.with_codename(distribution_with_suite.codename) }
 
       it 'does not return other distributions' do
-        expect(subject.to_a).to eq([distribution_with_suite, distribution_with_same_codename])
+        expect(subject).to match_array([distribution_with_suite, distribution_with_same_codename])
       end
     end
 
@@ -161,7 +164,25 @@ RSpec.shared_examples 'Debian Distribution' do |factory, container, can_freeze|
       subject { described_class.with_suite(distribution_with_suite.suite) }
 
       it 'does not return other distributions' do
-        expect(subject.to_a).to eq([distribution_with_suite, distribution_with_same_suite])
+        expect(subject).to match_array([distribution_with_suite, distribution_with_same_suite])
+      end
+    end
+
+    describe '.with_codename_or_suite' do
+      describe 'passing codename' do
+        subject { described_class.with_codename_or_suite(distribution_with_suite.codename) }
+
+        it 'does not return other distributions' do
+          expect(subject.to_a).to eq([distribution_with_suite, distribution_with_same_codename, distribution_with_codename_and_suite_flipped])
+        end
+      end
+
+      describe 'passing suite' do
+        subject { described_class.with_codename_or_suite(distribution_with_suite.suite) }
+
+        it 'does not return other distributions' do
+          expect(subject.to_a).to eq([distribution_with_suite, distribution_with_same_suite, distribution_with_codename_and_suite_flipped])
+        end
       end
     end
   end

@@ -99,7 +99,6 @@ class License < ApplicationRecord
     ide_schema_config
     issues_analytics
     jira_issues_integration
-    jira_vulnerabilities_integration
     ldap_group_sync_filter
     merge_pipelines
     merge_request_performance_metrics
@@ -150,6 +149,7 @@ class License < ApplicationRecord
     incident_management
     insights
     issuable_health_status
+    jira_vulnerabilities_integration
     license_scanning
     personal_access_token_expiration_policy
     project_activity_analytics
@@ -386,6 +386,11 @@ class License < ApplicationRecord
   # keep `add_ons`.
   def add_ons
     restricted_attr(:add_ons, {})
+  end
+
+  # License zuora_subscription_id
+  def subscription_id
+    restricted_attr(:subscription_id)
   end
 
   def features_from_add_ons

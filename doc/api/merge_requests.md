@@ -14,6 +14,8 @@ type: reference, api
 > - `author_username` and `author_username` were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 12.10.
 > - `reference` was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354) in GitLab 12.10 in favour of `references`.
 > - `with_merge_status_recheck` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) in GitLab 13.0.
+> - `reviewer_username` and `reviewer_id` were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49341) in GitLab 13.8.
+> - `reviewer_ids` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51186) in GitLab 13.8.
 
 Every API call to merge requests must be authenticated.
 
@@ -92,13 +94,15 @@ Parameters:
 | `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. |
 | `approver_ids` **(STARTER)**    | integer array  | no       | Returns merge requests which have specified all the users with the given `id`s as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. |
 | `approved_by_ids` **(STARTER)** | integer array  | no       | Returns merge requests which have been approved by all the users with the given `id`s (Max: 5). `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. |
+| `reviewer_id`                   | integer        | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#reviewer) with the given user `id`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_username`.  |
+| `reviewer_username`             | string         | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#reviewer) with the given `username`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_id`. |
 | `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `source_branch`                 | string         | no       | Return merge requests with the given source branch.                                                                     |
 | `target_branch`                 | string         | no       | Return merge requests with the given target branch.                                                                     |
 | `search`                        | string         | no       | Search merge requests against their `title` and `description`.                                                          |
 | `in`                            | string         | no       | Modify the scope of the `search` attribute. `title`, `description`, or a string joining them with comma. Default is `title,description`. |
 | `wip`                           | string         | no       | Filter merge requests against their `wip` status. `yes` to return *only* WIP merge requests, `no` to return *non* WIP merge requests. |
-| `not`                           | Hash           | no       | Return merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `my_reaction_emoji`. |
+| `not`                           | Hash           | no       | Return merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `reviewer_id`, `reviewer_username`, `my_reaction_emoji`. |
 | `environment`                   | string         | no       | Returns merge requests deployed to the given environment. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `deployed_before`               | datetime       | no       | Return merge requests deployed before the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
 | `deployed_after`                | datetime       | no       | Return merge requests deployed after the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`) |
@@ -152,6 +156,14 @@ Parameters:
       "state": "active",
       "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
       "web_url": "https://gitlab.example.com/axel.block"
+    }],
+    "reviewers": [{
+      "id": 2,
+      "name": "Sam Bauch",
+      "username": "kenyatta_oconnell",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/956c92487c6f6f7616b536927e22c9a0?s=80&d=identicon",
+      "web_url": "http://gitlab.example.com//kenyatta_oconnell"
     }],
     "source_project_id": 2,
     "target_project_id": 3,
@@ -268,11 +280,15 @@ Parameters:
 | `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. |
 | `approver_ids` **(STARTER)**    | integer array  | no       | Returns merge requests which have specified all the users with the given `id`s as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. |
 | `approved_by_ids` **(STARTER)** | integer array  | no       | Returns merge requests which have been approved by all the users with the given `id`s (Max: 5). `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. |
+| `reviewer_id`                   | integer        | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#reviewer) with the given user `id`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_username`.  |
+| `reviewer_username`             | string         | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#reviewer) with the given `username`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_id`. |
+
 | `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `source_branch`                 | string         | no       | Return merge requests with the given source branch.                                                                             |
 | `target_branch`                 | string         | no       | Return merge requests with the given target branch.                                                                             |
 | `search`                        | string         | no       | Search merge requests against their `title` and `description`.                                                                  |
 | `wip`                           | string         | no       | Filter merge requests against their `wip` status. `yes` to return *only* WIP merge requests, `no` to return *non* WIP merge requests. |
+| `not`                           | Hash           | no       | Return merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `reviewer_id`, `reviewer_username`, `my_reaction_emoji`. |
 
 ```json
 [
@@ -323,6 +339,14 @@ Parameters:
       "state": "active",
       "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
       "web_url": "https://gitlab.example.com/axel.block"
+    }],
+    "reviewers": [{
+      "id": 2,
+      "name": "Sam Bauch",
+      "username": "kenyatta_oconnell",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/956c92487c6f6f7616b536927e22c9a0?s=80&d=identicon",
+      "web_url": "http://gitlab.example.com//kenyatta_oconnell"
     }],
     "source_project_id": 2,
     "target_project_id": 3,
@@ -432,11 +456,14 @@ Parameters:
 | `assignee_id`                   | integer        | no       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13060) in GitLab 9.5)_. |
 | `approver_ids` **(STARTER)**    | integer array  | no       | Returns merge requests which have specified all the users with the given `id`s as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. |
 | `approved_by_ids` **(STARTER)** | integer array  | no       | Returns merge requests which have been approved by all the users with the given `id`s (Max: 5). `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. |
+| `reviewer_id`                   | integer        | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#enable-or-disable-merge-request-reviewers) with the given user `id`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_username`.  |
+| `reviewer_username`             | string         | no       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/getting_started.md#enable-or-disable-merge-request-reviewers) with the given `username`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_id`. |
 | `my_reaction_emoji`             | string         | no       | Return merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. _([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14016) in GitLab 10.0)_. |
 | `source_branch`                 | string         | no       | Return merge requests with the given source branch.                                                                             |
 | `target_branch`                 | string         | no       | Return merge requests with the given target branch.                                                                             |
 | `search`                        | string         | no       | Search merge requests against their `title` and `description`. |
 | `non_archived`                  | boolean        | no       | Return merge requests from non archived projects only. Default is true. _(Introduced in [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23809))_.  |
+| `not`                           | Hash           | no       | Return merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `reviewer_id`, `reviewer_username`, `my_reaction_emoji`. |
 
 ```json
 [
@@ -487,6 +514,14 @@ Parameters:
       "state": "active",
       "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
       "web_url": "https://gitlab.example.com/axel.block"
+    }],
+    "reviewers": [{
+      "id": 2,
+      "name": "Sam Bauch",
+      "username": "kenyatta_oconnell",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/956c92487c6f6f7616b536927e22c9a0?s=80&d=identicon",
+      "web_url": "http://gitlab.example.com//kenyatta_oconnell"
     }],
     "source_project_id": 2,
     "target_project_id": 3,
@@ -617,6 +652,14 @@ Parameters:
     "state": "active",
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
+    "id": 2,
+    "name": "Sam Bauch",
+    "username": "kenyatta_oconnell",
+    "state": "active",
+    "avatar_url": "https://www.gravatar.com/avatar/956c92487c6f6f7616b536927e22c9a0?s=80&d=identicon",
+    "web_url": "http://gitlab.example.com//kenyatta_oconnell"
   }],
   "source_project_id": 2,
   "target_project_id": 3,
@@ -842,6 +885,14 @@ Parameters:
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
   }],
+  "reviewers": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
   "source_project_id": 4,
   "target_project_id": 4,
   "labels": [ ],
@@ -1010,6 +1061,8 @@ POST /projects/:id/merge_requests
 | `title`                    | string  | yes      | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | Assignee user ID.                                                                |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. If set to `0` or left empty, there will be no assignees added.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) added as a reviewer to the MR. If set to `0` or left empty, there will be no reviewers added.  |
 | `description`              | string  | no       | Description of MR. Limited to 1,048,576 characters. |
 | `target_project_id`        | integer | no       | The target project (numeric ID).                                                 |
 | `labels`                   | string  | no       | Labels for MR as a comma-separated list.                                         |
@@ -1158,6 +1211,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid
 | `title`                    | string  | no       | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | The ID of the user to assign the merge request to. Set to `0` or provide an empty value to unassign all assignees.  |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) set as a reviewer to the MR. Set the value to `0` or provide an empty value to unset all reviewers.  |
 | `milestone_id`             | integer | no       | The global ID of a milestone to assign the merge request to. Set to `0` or provide an empty value to unassign a milestone.|
 | `labels`                   | string  | no       | Comma-separated label names for a merge request. Set to an empty string to unassign all labels.                    |
 | `add_labels`               | string  | no       | Comma-separated label names to add to a merge request.                          |
@@ -1203,6 +1257,14 @@ Must include at least one non-required attribute from above.
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -1387,6 +1449,14 @@ Parameters:
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
   }],
+  "reviewers": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
   "source_project_id": 2,
   "target_project_id": 3,
   "labels": [
@@ -1560,6 +1630,14 @@ Parameters:
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -1860,6 +1938,14 @@ Example response:
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
   }],
+  "reviewers": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
   "source_project_id": 2,
   "target_project_id": 3,
   "labels": [
@@ -2004,6 +2090,14 @@ Example response:
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -2175,6 +2269,14 @@ Example response:
       "web_url": "https://gitlab.example.com/barrett.krajcik"
     },
     "assignees": [{
+      "name": "Miss Monserrate Beier",
+      "username": "axel.block",
+      "id": 12,
+      "state": "active",
+      "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+      "web_url": "https://gitlab.example.com/axel.block"
+    }],
+    "reviewers": [{
       "name": "Miss Monserrate Beier",
       "username": "axel.block",
       "id": 12,

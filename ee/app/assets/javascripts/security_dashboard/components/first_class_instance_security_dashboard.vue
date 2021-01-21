@@ -1,7 +1,7 @@
 <script>
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
-import projectsQuery from 'ee/security_dashboard/graphql/get_instance_security_dashboard_projects.query.graphql';
+import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_security_dashboard_projects.query.graphql';
 import createFlash from '~/flash';
 import { createProjectLoadingError } from '../helpers';
 import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';

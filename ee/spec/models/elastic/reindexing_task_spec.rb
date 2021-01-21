@@ -3,6 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Elastic::ReindexingTask, type: :model do
+  let(:helper) { Gitlab::Elastic::Helper.new }
+
+  before do
+    allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
+  end
+
   describe 'relations' do
     it { is_expected.to have_many(:subtasks) }
   end
@@ -32,11 +38,11 @@ RSpec.describe Elastic::ReindexingTask, type: :model do
 
     it 'deletes the correct indices' do
       other_tasks.each do |task|
-        expect(Gitlab::Elastic::Helper.default).not_to receive(:delete_index).with(index_name: task.subtasks.first.index_name_from)
+        expect(helper).not_to receive(:delete_index).with(index_name: task.subtasks.first.index_name_from)
       end
 
       tasks_for_deletion.each do |task|
-        expect(Gitlab::Elastic::Helper.default).to receive(:delete_index).with(index_name: task.subtasks.first.index_name_from).and_return(true)
+        expect(helper).to receive(:delete_index).with(index_name: task.subtasks.first.index_name_from).and_return(true)
       end
 
       described_class.drop_old_indices!

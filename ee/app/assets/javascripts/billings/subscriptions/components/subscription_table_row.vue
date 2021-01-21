@@ -11,6 +11,7 @@ export default {
     GlIcon,
     Popover,
   },
+  inject: ['billableSeatsHref', 'isGroup'],
   props: {
     header: {
       type: Object,
@@ -26,7 +27,6 @@ export default {
       default: false,
     },
   },
-  inject: ['billableSeatsHref', 'isGroup'],
   computed: {
     ...mapState(['hasBillableGroupMembers']),
     ...mapGetters(['isFreePlan']),

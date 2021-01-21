@@ -32,7 +32,7 @@
           = image_tag avatar_icon_for_user(@user, 160), alt: '', class: 'avatar s160'
       %h5.gl-mt-0= s_("Profiles|Upload new avatar")
       .gl-mt-2.gl-mb-3
-        %button.btn.js-choose-user-avatar-button{ type: 'button' }= s_("Profiles|Choose file...")
+        %button.gl-button.btn.js-choose-user-avatar-button{ type: 'button' }= s_("Profiles|Choose file...")
         %span.avatar-file-name.gl-ml-3.js-avatar-filename= s_("Profiles|No file chosen")
         = f.file_field_without_bootstrap :avatar, class: 'js-user-avatar-input hidden', accept: 'image/*'
       .form-text.text-muted= s_("Profiles|The maximum file size allowed is 200KB.")
@@ -70,7 +70,7 @@
           prepend: emoji_button,
           append: reset_message_button,
           placeholder: s_("Profiles|What's your status?")
-        - if Feature.enabled?(:set_user_availability_status, @user)
+        - if Feature.enabled?(:set_user_availability_status, @user, default_enabled: :yaml)
           .checkbox-icon-inline-wrapper
             = status_form.check_box :availability, { data: { testid: "user-availability-checkbox" }, label: s_("Profiles|Busy"), wrapper_class: 'gl-mr-0 gl-font-weight-bold' }, availability["busy"], availability["not_set"]
             .gl-text-gray-600.gl-ml-5= s_('Profiles|"Busy" will be shown next to your name')

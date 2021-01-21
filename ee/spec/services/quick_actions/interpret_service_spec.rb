@@ -16,6 +16,7 @@ RSpec.describe QuickActions::InterpretService do
 
   before do
     stub_licensed_features(multiple_issue_assignees: true,
+                           multiple_merge_request_reviewers: true,
                            multiple_merge_request_assignees: true)
 
     project.add_developer(current_user)
@@ -107,11 +108,6 @@ RSpec.describe QuickActions::InterpretService do
 
     context 'assign_reviewer command' do
       context 'with a merge request' do
-        before_all do
-          project.add_developer(user2)
-          project.add_developer(user3)
-        end
-
         let(:merge_request) { create(:merge_request, source_project: project) }
 
         it 'fetches reviewers and populates them if content contains /assign_reviewer' do
@@ -273,6 +269,43 @@ RSpec.describe QuickActions::InterpretService do
 
             expect(updates[:assignee_ids]).to eq(nil)
           end
+        end
+      end
+    end
+
+    context 'reassign_reviewer command' do
+      let(:content) { "/reassign_reviewer @#{current_user.username}" }
+
+      context "if the 'merge_request_reviewers' feature flag is on" do
+        context 'unlicensed' do
+          before do
+            stub_licensed_features(multiple_merge_request_reviewers: false)
+          end
+
+          it 'does not recognize /reassign_reviewer @user' do
+            content = "/reassign_reviewer @#{current_user.username}"
+            _, updates = service.execute(content, merge_request)
+
+            expect(updates).to be_empty
+          end
+        end
+
+        it 'reassigns reviewer if content contains /reassign_reviewer @user' do
+          _, updates = service.execute("/reassign_reviewer @#{current_user.username}", merge_request)
+
+          expect(updates[:reviewer_ids]).to match_array([current_user.id])
+        end
+      end
+
+      context "if the 'merge_request_reviewers' feature flag is off" do
+        before do
+          stub_feature_flags(merge_request_reviewers: false)
+        end
+
+        it 'does not recognize /reassign_reviewer @user' do
+          _, updates = service.execute(content, merge_request)
+
+          expect(updates).to be_empty
         end
       end
     end
@@ -1069,7 +1102,9 @@ RSpec.describe QuickActions::InterpretService do
       it 'includes only selected assignee references' do
         _, explanations = service.explain(content, issue)
 
-        expect(explanations).to eq(["Removes assignees @#{user3.username} and @#{user.username}."])
+        expect(explanations.first).to match(/Removes assignees/)
+        expect(explanations.first).to match("@#{user3.username}")
+        expect(explanations.first).to match("@#{user.username}")
       end
     end
 

@@ -66,7 +66,7 @@ class GroupPolicy < BasePolicy
   with_scope :subject
   condition(:has_project_with_service_desk_enabled) { @subject.has_project_with_service_desk_enabled? }
 
-  rule { design_management_enabled }.policy do
+  rule { can?(:read_group) & design_management_enabled }.policy do
     enable :read_design_activity
   end
 
@@ -122,6 +122,7 @@ class GroupPolicy < BasePolicy
   rule { reporter }.policy do
     enable :reporter_access
     enable :read_container_image
+    enable :admin_board
     enable :admin_label
     enable :admin_list
     enable :admin_issue

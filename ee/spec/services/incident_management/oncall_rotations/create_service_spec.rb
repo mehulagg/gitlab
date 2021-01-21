@@ -85,18 +85,20 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
       end
     end
 
-    context 'participants do not have access to the project' do
+    context 'when participant cannot read project' do
+      let_it_be(:other_user) { create(:user) }
+
       let(:participants) do
         [
           {
-            user: create(:user),
+            user: other_user,
             color_palette: 'blue',
             color_weight: '500'
           }
         ]
       end
 
-      it_behaves_like 'error response', 'User does not have access to the project'
+      it_behaves_like 'error response', 'A participant has insufficient permissions to access the project'
     end
 
     context 'participant is included multiple times' do

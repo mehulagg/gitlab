@@ -436,11 +436,7 @@
   padding: 6px 16px;
   margin: 0 0 0 -15px;
   height: 46px;
-
-  i {
-    font-size: 20px;
-    color: $gl-text-color-secondary;
-  }
+  color: $gl-text-color;
 
   @include media-breakpoint-down(sm) {
     display: flex;
@@ -475,7 +471,7 @@
       background-color: $black-transparent;
       height: 100%;
       width: 100%;
-      z-index: 300;
+      z-index: $zindex-dropdown-menu;
     }
   }
 }

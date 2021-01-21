@@ -207,9 +207,9 @@ Some examples fail if incorrect capitalization is used:
 Additionally, commands, parameters, values, filenames, and so on must be
 included in backticks. For example:
 
-- "Change the `needs` keyword in your `.gitlab.yml`..."
-  - `needs` is a parameter, and `.gitlab.yml` is a file, so both need backticks.
-    Additionally, `.gitlab.yml` without backticks fails markdownlint because it
+- "Change the `needs` keyword in your `.gitlab-ci.yml`..."
+  - `needs` is a parameter, and `.gitlab-ci.yml` is a file, so both need backticks.
+    Additionally, `.gitlab-ci.yml` without backticks fails markdownlint because it
     does not have capital G or L.
 - "Run `git clone` to clone a Git repository..."
   - `git clone` is a command, so it must be lowercase, while Git is the product,
@@ -332,7 +332,7 @@ GitLab documentation should be clear and easy to understand.
 ### Trademark
 
 Only use the GitLab name and trademarks in accordance with
-[GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/inbound-marketing/digital-experience/brand-guidelines/#trademark).
+[GitLab Brand Guidelines](https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/brand-guidelines/#trademark).
 
 Don't use the possessive form of the word GitLab (`GitLab's`).
 
@@ -512,8 +512,7 @@ You can use these fake tokens as examples:
 
 | Token type            | Token value                                                        |
 |:----------------------|:-------------------------------------------------------------------|
-| Private user token    | `<your_access_token>`                                              |
-| Personal access token | `n671WNGecHugsdEDPsyo`                                             |
+| Personal access token | `<your_access_token>`                                             |
 | Application ID        | `2fcb195768c39e9a94cec2c2e32c59c0aad7a3365c10892e8116b5d83d4096b6` |
 | Application secret    | `04f294d1eaca42b8692017b426d53bbc8fe75f827734f0260710b83a556082df` |
 | CI/CD variable        | `Li8j-mLUVA3eZYjPfd_H`                                             |
@@ -530,11 +529,11 @@ You can use these fake tokens as examples:
 | Usage                 | Guidance |
 |-----------------------|----------|
 | above                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **previously** instead. |
-| admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. |
+| admin, admin area     | Use **administration**, **administrator**, **administer**, or **Admin Area** instead. ([Vale](../testing.md#vale) rule: [`Admin.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/Admin.yml)) |
 | allow, enable         | Try to avoid, unless you are talking about security-related features. For example, instead of "This feature allows you to create a pipeline," use "Use this feature to create a pipeline." This phrasing is more active and is from the user perspective, rather than the person who implemented the feature. [View details](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/a/allow-allows). |
 | and/or                | Use **or** instead, or another sensible construction. |
 | below                 | Try to avoid extra words when referring to an example or table in a documentation page, but if required, use **following** instead. |
-| currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. |
+| currently             | Do not use when talking about the product or its features. The documentation describes the product as it is today. ([Vale](../testing.md#vale) rule: [`CurrentStatus.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/CurrentStatus.yml)) |
 | easily                | Do not use. If the user doesn't find the process to be these things, we lose their trust. |
 | e.g.                  | Do not use Latin abbreviations. Use **for example**, **such as**, **for instance**, or **like** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml)) |
 | future tense          | When possible, use present tense instead. For example, use `after you execute this command, GitLab displays the result` instead of `after you execute this command, GitLab will display the result`. ([Vale](../testing.md#vale) rule: [`FutureTense.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/FutureTense.yml)) |

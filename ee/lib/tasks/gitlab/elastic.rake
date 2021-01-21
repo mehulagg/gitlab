@@ -78,7 +78,7 @@ namespace :gitlab do
           puts "Alias '#{alias_name}' -> '#{index_name}' has been created.".color(:green)
         end
 
-        helper.create_migrations_index unless helper.index_exists?(index_name: helper.migrations_index_name)
+        helper.create_migrations_index unless helper.migrations_index_exists?
         ::Elastic::DataMigrationService.mark_all_as_completed!
       end
 
@@ -103,6 +103,12 @@ namespace :gitlab do
         else
           puts "Index '#{index_name}' with alias '#{alias_name}' was not found".color(:green)
         end
+      end
+
+      if helper.delete_migrations_index
+        puts "Index/alias '#{helper.migrations_index_name}' has been deleted".color(:green)
+      else
+        puts "Index/alias '#{helper.migrations_index_name}' was not found".color(:green)
       end
     end
 

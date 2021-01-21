@@ -7,7 +7,7 @@ module Resolvers
     argument :include_subgroups, GraphQL::BOOLEAN_TYPE,
               required: false,
               default_value: false,
-              description: 'Include grades belonging to subgroups'
+              description: 'Include grades belonging to subgroups.'
 
     def resolve(**args)
       ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate

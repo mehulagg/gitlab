@@ -1,6 +1,6 @@
 <script>
 import { GlToken, GlAvatarLabeled, GlPopover } from '@gitlab/ui';
-import { assigneeScheduleDateStart } from 'ee/oncall_schedules/utils/common_utils';
+import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 
 export default {
@@ -10,20 +10,20 @@ export default {
     GlPopover,
   },
   props: {
-    assigneeIndex: {
-      type: Number,
-      required: true,
-    },
     assignee: {
       type: Object,
       required: true,
     },
-    rotationLength: {
-      type: Number,
+    rotationAssigneeStartsAt: {
+      type: String,
       required: true,
     },
-    rotationStartsAt: {
+    rotationAssigneeEndsAt: {
       type: String,
+      required: true,
+    },
+    rotationAssigneeStyle: {
+      type: Object,
       required: true,
     },
   },
@@ -32,44 +32,43 @@ export default {
       return `gl-bg-data-viz-${this.assignee.colorPalette}-${this.assignee.colorWeight}`;
     },
     startsAt() {
-      const startsAt = assigneeScheduleDateStart(
-        new Date(this.rotationStartsAt),
-        this.rotationLength * 7 * this.assigneeIndex,
-      ).toLocaleString();
-      return sprintf(__('Starts at %{startsAt}'), { startsAt });
+      return sprintf(__('Starts: %{startsAt}'), {
+        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, hh:mm'),
+      });
     },
     endsAt() {
-      const endsAt = assigneeScheduleDateStart(
-        new Date(this.rotationStartsAt),
-        this.rotationLength * 7 * this.assigneeIndex + this.rotationLength * 7,
-      ).toLocaleString();
-      return sprintf(__('Ends at %{endsAt}'), { endsAt });
+      return sprintf(__('Ends: %{endsAt}'), {
+        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, hh:mm'),
+      });
     },
   },
 };
 </script>
 
 <template>
-  <div class="gl-w-full gl-mt-3 gl-px-3">
+  <div
+    class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
+    :style="rotationAssigneeStyle"
+  >
     <gl-token
-      :id="assignee.user.id"
-      class="gl-w-full gl-align-items-center"
+      :id="assignee.id"
+      class="gl-w-full gl-h-6 gl-align-items-center"
       :class="chevronClass"
       :view-only="true"
     >
       <gl-avatar-labeled
         shape="circle"
         :size="16"
-        :src="assignee.user.avatarUrl"
+        :src="assignee.avatarUrl"
         :label="assignee.user.username"
         :title="assignee.user.username"
       />
     </gl-token>
     <gl-popover
-      :target="assignee.user.id"
+      :target="assignee.id"
       :title="assignee.user.username"
       triggers="hover"
-      placement="left"
+      placement="top"
     >
       <p class="gl-m-0" data-testid="rotation-assignee-starts-at">{{ startsAt }}</p>
       <p class="gl-m-0" data-testid="rotation-assignee-ends-at">{{ endsAt }}</p>

@@ -1,17 +1,20 @@
 import { file } from 'jest/ide/helpers';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import testAction from 'helpers/vuex_action_helper';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { createStore } from '~/ide/stores';
 import service from '~/ide/services';
 import { createRouter } from '~/ide/ide_router';
 import eventHub from '~/ide/eventhub';
-import consts from '~/ide/stores/modules/commit/constants';
+import {
+  COMMIT_TO_CURRENT_BRANCH,
+  COMMIT_TO_NEW_BRANCH,
+} from '~/ide/stores/modules/commit/constants';
 import * as mutationTypes from '~/ide/stores/modules/commit/mutation_types';
 import * as actions from '~/ide/stores/modules/commit/actions';
 import { createUnexpectedCommitError } from '~/ide/lib/errors';
 import { commitActionTypes, PERMISSION_CREATE_MR } from '~/ide/constants';
-import testAction from '../../../../helpers/vuex_action_helper';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   ...jest.requireActual('~/lib/utils/url_utility'),
@@ -19,6 +22,17 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const TEST_COMMIT_SHA = '123456789';
+const COMMIT_RESPONSE = {
+  id: '123456',
+  short_id: '123',
+  message: 'test message',
+  committed_date: 'date',
+  parent_ids: [],
+  stats: {
+    additions: '1',
+    deletions: '2',
+  },
+};
 
 describe('IDE commit module actions', () => {
   let mock;
@@ -32,7 +46,9 @@ describe('IDE commit module actions', () => {
     mock = new MockAdapter(axios);
     jest.spyOn(router, 'push').mockImplementation();
 
-    mock.onGet('/api/v1/projects/abcproject/repository/branches/master').reply(200);
+    mock
+      .onGet('/api/v1/projects/abcproject/repository/branches/master')
+      .reply(200, { commit: COMMIT_RESPONSE });
   });
 
   afterEach(() => {
@@ -329,18 +345,6 @@ describe('IDE commit module actions', () => {
     });
 
     describe('success', () => {
-      const COMMIT_RESPONSE = {
-        id: '123456',
-        short_id: '123',
-        message: 'test message',
-        committed_date: 'date',
-        parent_ids: '321',
-        stats: {
-          additions: '1',
-          deletions: '2',
-        },
-      };
-
       beforeEach(() => {
         jest.spyOn(service, 'commit').mockResolvedValue({ data: COMMIT_RESPONSE });
       });
@@ -424,12 +428,12 @@ describe('IDE commit module actions', () => {
       });
 
       it('resets stores commit actions', (done) => {
-        store.state.commit.commitAction = consts.COMMIT_TO_NEW_BRANCH;
+        store.state.commit.commitAction = COMMIT_TO_NEW_BRANCH;
 
         store
           .dispatch('commit/commitChanges')
           .then(() => {
-            expect(store.state.commit.commitAction).not.toBe(consts.COMMIT_TO_NEW_BRANCH);
+            expect(store.state.commit.commitAction).not.toBe(COMMIT_TO_NEW_BRANCH);
           })
           .then(done)
           .catch(done.fail);
@@ -449,7 +453,7 @@ describe('IDE commit module actions', () => {
         it('redirects to new merge request page', (done) => {
           jest.spyOn(eventHub, '$on').mockImplementation();
 
-          store.state.commit.commitAction = consts.COMMIT_TO_NEW_BRANCH;
+          store.state.commit.commitAction = COMMIT_TO_NEW_BRANCH;
           store.state.commit.shouldCreateMR = true;
 
           store
@@ -467,7 +471,7 @@ describe('IDE commit module actions', () => {
         it('does not redirect to new merge request page when shouldCreateMR is not checked', (done) => {
           jest.spyOn(eventHub, '$on').mockImplementation();
 
-          store.state.commit.commitAction = consts.COMMIT_TO_NEW_BRANCH;
+          store.state.commit.commitAction = COMMIT_TO_NEW_BRANCH;
           store.state.commit.shouldCreateMR = false;
 
           store
@@ -482,7 +486,7 @@ describe('IDE commit module actions', () => {
         it('does not redirect to merge request page if shouldCreateMR is checked, but branch is the default branch', async () => {
           jest.spyOn(eventHub, '$on').mockImplementation();
 
-          store.state.commit.commitAction = consts.COMMIT_TO_CURRENT_BRANCH;
+          store.state.commit.commitAction = COMMIT_TO_CURRENT_BRANCH;
           store.state.commit.shouldCreateMR = true;
 
           await store.dispatch('commit/commitChanges');
@@ -544,18 +548,6 @@ describe('IDE commit module actions', () => {
     });
 
     describe('first commit of a branch', () => {
-      const COMMIT_RESPONSE = {
-        id: '123456',
-        short_id: '123',
-        message: 'test message',
-        committed_date: 'date',
-        parent_ids: [],
-        stats: {
-          additions: '1',
-          deletions: '2',
-        },
-      };
-
       it('commits TOGGLE_EMPTY_STATE mutation on empty repo', (done) => {
         jest.spyOn(service, 'commit').mockResolvedValue({ data: COMMIT_RESPONSE });
         jest.spyOn(store, 'commit');

@@ -134,7 +134,7 @@ module Gitlab
                 stage.seeds_names.include?(need[:name])
               end
 
-              "#{name}: needs '#{need[:name]}'" unless result
+              "'#{name}' job needs '#{need[:name]}' job, but it was not added to the pipeline" unless result
             end.compact
           end
 
@@ -188,7 +188,6 @@ module Gitlab
           # we need to prevent the exit codes from being persisted because they
           # would break the behavior defined by `rules:allow_failure`.
           def allow_failure_criteria_attributes
-            return {} unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes_enabled?
             return {} if rules_attributes[:allow_failure].nil?
             return {} unless @seed_attributes.dig(:options, :allow_failure_criteria)
 

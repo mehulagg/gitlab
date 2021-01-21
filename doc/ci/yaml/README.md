@@ -363,8 +363,6 @@ use the [`extends` keyword](#extends).
 | [`remote`](#includeremote)      | Include a file from a remote URL. Must be publicly accessible.    |
 | [`template`](#includetemplate)  | Include templates that are provided by GitLab.                    |
 
-The `include` methods do not support [variable expansion](../variables/where_variables_can_be_used.md#variables-usage).
-
 `.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
 The configuration is a snapshot in time and persisted in the database. Any changes to
 referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
@@ -378,6 +376,48 @@ The files defined by `include` are:
 NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
+
+#### Variables with `include`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's disabled on GitLab.com.
+> - It's not recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-includepredefined-project-variables). **(CORE ONLY)**
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+You can [use some predefined variables in `include` sections](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+in your `.gitlab-ci.yml`:
+
+```yaml
+include:
+  project: '$CI_PROJECT_PATH'
+  file: '.compliance-gitlab-ci.yml'
+```
+
+For an example of how you can include these predefined variables, and their impact on CI jobs,
+see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
+
+##### Enable or disable include:predefined-project-variables **(CORE ONLY)**
+
+Use of predefined project variables in `include` section of `.gitlab-ci.yml` is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:variables_in_include_section_ci)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:variables_in_include_section_ci)
+```
 
 #### `include:local`
 
@@ -2275,6 +2315,33 @@ job3:
     - deploy_to_staging
 ```
 
+#### `allow_failure:exit_codes`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273157) in GitLab 13.8.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292024) in GitLab 13.9.
+
+Use `allow_failure:exit_codes` to dynamically control if a job should be allowed
+to fail. You can list which exit codes are not considered failures. The job fails
+for any other exit code:
+
+```yaml
+test_job_1:
+  script:
+    - echo "Run a script that results in exit code 1. This job fails."
+    - exit 1
+  allow_failure:
+    exit_codes: 137
+
+test_job_2:
+  script:
+    - echo "Run a script that results in exit code 137. This job is allowed to fail."
+    - exit 137
+  allow_failure:
+    exit_codes:
+      - 137
+      - 255
+```
+
 ### `when`
 
 `when` is used to implement jobs that are run in case of failure or despite the
@@ -2966,8 +3033,6 @@ larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-ci
 Job artifacts are only collected for successful jobs by default, and
 artifacts are restored after [caches](#cache).
 
-[Not all executors can use caches](https://docs.gitlab.com/runner/executors/#compatibility-chart).
-
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
 #### `artifacts:paths`
@@ -3271,7 +3336,7 @@ job:
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4.
+in GitLab 13.4. In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
 
 #### `artifacts:reports`
 
@@ -3390,6 +3455,10 @@ The coverage is shown in the UI if at least one line in the job output matches t
 If there is more than one matched line in the job output, the last line is used.
 For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
 Leading zeros are removed.
+
+Coverage output from [child pipelines](../parent_child_pipelines.md) is not recorded
+or displayed. Check [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/280818)
+for more details.
 
 ### `retry`
 
@@ -4381,21 +4450,30 @@ You can use [YAML anchors](#anchors) with [script](#script), [`before_script`](#
 and [`after_script`](#after_script) to use predefined commands in multiple jobs:
 
 ```yaml
-.some-script: &some-script
-  - echo "Execute this script in `before_script` sections"
-
 .some-script-before: &some-script-before
-  - echo "Execute this script in `script` sections"
+  - echo "Execute this script first"
+
+.some-script: &some-script
+  - echo "Execute this script second"
+  - echo "Execute this script too"
 
 .some-script-after: &some-script-after
-  - echo "Execute this script in `after_script` sections"
+  - echo "Execute this script last"
 
-job_name:
+job1:
   before_script:
     - *some-script-before
   script:
     - *some-script
+    - echo "Execute something, for this job only"
   after_script:
+    - *some-script-after
+
+job2:
+  script:
+    - *some-script-before
+    - *some-script
+    - echo "Execute something else, for this job only"
     - *some-script-after
 ```
 

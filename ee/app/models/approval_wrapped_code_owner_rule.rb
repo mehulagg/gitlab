@@ -22,7 +22,7 @@ class ApprovalWrappedCodeOwnerRule < ApprovalWrappedRule
   end
 
   def section_optional?
-    return false unless Feature.enabled?(:optional_code_owners_sections, project)
+    return false unless Feature.enabled?(:optional_code_owners_sections, project, default_enabled: true)
 
     Gitlab::CodeOwners.optional_section?(project, merge_request.target_branch, section)
   end

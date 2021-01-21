@@ -4,9 +4,10 @@ exports[`AddEditRotationModal renders rotation modal layout 1`] = `
 <gl-modal-stub
   actioncancel="[object Object]"
   actionprimary="[object Object]"
-  modalclass=""
+  dismisslabel="Close"
+  modalclass="rotations-modal"
   modalid="addRotationModal"
-  size="sm"
+  size="md"
   title="Add rotation"
   titletag="h4"
 >

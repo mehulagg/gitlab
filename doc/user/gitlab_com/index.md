@@ -114,7 +114,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
 | [Repository size including LFS](../admin_area/settings/account_and_limit_settings.md) | 10 GB       | Unlimited     |
-| Maximum import size           | 5 GB        | 50 MB         |
+| Maximum import size           | 5 GB        | Unlimited ([Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to unlimited in GitLab 13.8.    |
 
 NOTE:
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
@@ -131,6 +131,23 @@ For outgoing connections from CI/CD runners we are not providing static IP addre
 All our runners are deployed into Google Cloud Platform (GCP) - any IP based
 firewall can be configured by looking up all
 [IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#where_can_i_find_product_name_short_ip_ranges).
+
+## Hostname list
+
+To configure allow-lists in local HTTP(S) proxies, or other
+web-blocking software that govern end-user machines,
+pages on GitLab.com will attempt to load content from
+the following hostnames:
+
+- `gitlab.com`
+- `*.gitlab.com`
+- `*.gitlab-static.net`
+- `*.gitlab.io`
+- `*.gitlab.net`
+
+Documentation and Company pages served over `docs.gitlab.com`
+and `about.gitlab.com` will attempt to also load certain page
+content directly from common public CDN hostnames.
 
 ## Webhooks
 
@@ -604,13 +621,6 @@ dropped and users get
 ### Import/export
 
 To help avoid abuse, project and group imports, exports, and export downloads are rate limited. See [Project import/export rate limits](../../user/project/settings/import_export.md#rate-limits) and [Group import/export rate limits](../../user/group/settings/import_export.md#rate-limits) for details.
-
-GitLab.com Import/Export Rate Limits are set to the default except:
-
-| Setting                                          | GitLab.com | Default |
-|:-------------------------------------------------|:-----------|:--------|
-| Max Project Export requests per minute per user  | 1          | 6       |
-| Max Group Export requests per minute per user    | 1          | 6       |
 
 ### Non-configurable limits
 

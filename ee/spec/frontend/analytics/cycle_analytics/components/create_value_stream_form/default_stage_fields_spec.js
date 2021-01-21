@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlFormGroup } from '@gitlab/ui';
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
+import { customStageEvents as stageEvents } from '../../mock_data';
 
 let wrapper = null;
 
@@ -9,10 +10,12 @@ const defaultStageIndex = 0;
 const totalStages = 5;
 const stageNameError = 'Name is required';
 const defaultErrors = { name: [stageNameError] };
+const ISSUE_CREATED = { id: 'issue_created', name: 'Issue created' };
+const ISSUE_CLOSED = { id: 'issue_closed', name: 'Issue closed' };
 const defaultStage = {
   name: 'Cool new stage',
-  startEventIdentifier: 'some_start_event',
-  endEventIdentifier: 'some_end_event',
+  startEventIdentifier: [ISSUE_CREATED.id],
+  endEventIdentifier: [ISSUE_CLOSED.id],
   endEventLabel: 'some_label',
 };
 
@@ -24,6 +27,7 @@ describe('DefaultStageFields', () => {
         totalStages,
         stage,
         errors,
+        stageEvents,
       },
       stubs: {
         'labels-selector': false,
@@ -54,12 +58,12 @@ describe('DefaultStageFields', () => {
 
   it('renders the field start event', () => {
     expect(findStartEvent().exists()).toBe(true);
-    expect(findStartEvent().html()).toContain(defaultStage.startEventIdentifier);
+    expect(findStartEvent().html()).toContain(ISSUE_CREATED.name);
   });
 
   it('renders the field end event', () => {
     const content = findEndEvent().html();
-    expect(content).toContain(defaultStage.endEventIdentifier);
+    expect(content).toContain(ISSUE_CLOSED.name);
     expect(content).toContain(defaultStage.endEventLabel);
   });
 

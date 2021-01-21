@@ -94,6 +94,36 @@ RSpec.describe BillingPlansHelper do
         is_expected.to be(result)
       end
     end
+
+    context 'when the group is on a plan eligible for the new purchase flow' do
+      let(:namespace) do
+        create(
+          :namespace,
+          type: Group,
+          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create(:free_plan))
+        )
+      end
+
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      context 'when the user has a last name' do
+        let(:user) { build(:user, last_name: 'Lastname') }
+
+        it 'returns true' do
+          expect(helper.use_new_purchase_flow?(namespace)).to eq true
+        end
+      end
+
+      context 'when the user does not have a last name' do
+        let(:user) { build(:user, last_name: nil, name: 'Firstname') }
+
+        it 'returns false' do
+          expect(helper.use_new_purchase_flow?(namespace)).to eq false
+        end
+      end
+    end
   end
 
   describe '#show_contact_sales_button?' do
@@ -149,6 +179,18 @@ RSpec.describe BillingPlansHelper do
           }
         })
       end
+    end
+  end
+
+  describe '#plan_feature_list' do
+    let(:plan) do
+      Hashie::Mash.new(features: (1..3).map { |i| { title: "feat 0#{i}", highlight: i.even? } })
+    end
+
+    it 'returns features list sorted by highlight attribute' do
+      expect(helper.plan_feature_list(plan)).to eq([{ 'title' => 'feat 02', 'highlight' => true },
+                                                    { 'title' => 'feat 01', 'highlight' => false },
+                                                    { 'title' => 'feat 03', 'highlight' => false }])
     end
   end
 

@@ -1,0 +1,5 @@
+---
+title: Automatically redirect users to SAML provider after 7 day expiration
+merge_request: 50914
+author:
+type: changed

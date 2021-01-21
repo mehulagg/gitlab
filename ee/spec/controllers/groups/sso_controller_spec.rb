@@ -100,6 +100,30 @@ RSpec.describe Groups::SsoController do
         expect(response).to redirect_to(sso_group_saml_providers_path(group))
       end
     end
+
+    context 'when current user has a SAML provider configured' do
+      let(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
+      let(:identity) { create(:group_saml_identity, saml_provider: saml_provider) }
+
+      before do
+        sign_out(user)
+        sign_in(identity.user)
+      end
+
+      it 'renders `devise_empty` template' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to render_template('devise_empty')
+      end
+    end
+
+    context 'when current user does not have a SAML provider configured' do
+      it 'renders `devise` template' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to render_template('devise')
+      end
+    end
   end
 
   context 'saml_provider is unconfigured for the group' do

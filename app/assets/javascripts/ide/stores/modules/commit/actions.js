@@ -4,7 +4,7 @@ import * as rootTypes from '../../mutation_types';
 import { createCommitPayload, createNewMergeRequestUrl } from '../../utils';
 import service from '../../../services';
 import * as types from './mutation_types';
-import consts from './constants';
+import { COMMIT_TO_CURRENT_BRANCH } from './constants';
 import { leftSidebarViews } from '../../../constants';
 import eventHub from '../../../eventhub';
 import { parseCommitError } from '../../../lib/errors';
@@ -112,7 +112,7 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
   // Pull commit options out because they could change
   // During some of the pre and post commit processing
   const { shouldCreateMR, shouldHideNewMrOption, isCreatingNewBranch, branchName } = getters;
-  const newBranch = state.commitAction !== consts.COMMIT_TO_CURRENT_BRANCH;
+  const newBranch = state.commitAction !== COMMIT_TO_CURRENT_BRANCH;
   const stageFilesPromise = rootState.stagedFiles.length
     ? Promise.resolve()
     : dispatch('stageAllChanges', null, { root: true });
@@ -204,26 +204,25 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
           } else {
             dispatch('updateActivityBarView', leftSidebarViews.edit.name, { root: true });
             dispatch('updateViewer', 'editor', { root: true });
-
-            if (rootGetters.activeFile) {
-              dispatch(
-                'router/push',
-                `/project/${rootState.currentProjectId}/blob/${branchName}/-/${rootGetters.activeFile.path}`,
-                { root: true },
-              );
-            }
           }
         })
-        .then(() => dispatch('updateCommitAction', consts.COMMIT_TO_CURRENT_BRANCH))
-        .then(() =>
-          dispatch(
+        .then(() => dispatch('updateCommitAction', COMMIT_TO_CURRENT_BRANCH))
+        .then(() => {
+          if (newBranch) {
+            const path = rootGetters.activeFile ? rootGetters.activeFile.path : '';
+
+            return dispatch(
+              'router/push',
+              `/project/${rootState.currentProjectId}/blob/${branchName}/-/${path}`,
+              { root: true },
+            );
+          }
+
+          return dispatch(
             'refreshLastCommitData',
-            {
-              projectId: rootState.currentProjectId,
-              branchId: rootState.currentBranchId,
-            },
+            { projectId: rootState.currentProjectId, branchId: branchName },
             { root: true },
-          ),
-        );
+          );
+        });
     });
 };

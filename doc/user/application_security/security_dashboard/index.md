@@ -92,7 +92,7 @@ the **Failed jobs** tab of the pipeline page.
 
 The Vulnerability Report next displays the total number of vulnerabilities by severity (for example,
 Critical, High, Medium, Low, Info, Unknown). Below this, a table shows each vulnerability's status, severity,
-description and if there is a Merge Request related to it. Clicking a vulnerability takes you to its 
+description and if there is a Merge Request related to it. Clicking a vulnerability takes you to its
 [Vulnerability Details](../vulnerabilities)
 page to view more information about that vulnerability.
 
@@ -267,7 +267,7 @@ To create an issue associated with the vulnerability, click the **Create Issue**
 
 ![Create an issue for the vulnerability](img/vulnerability_details_create_issue_v13_7.png)
 
-Once you create the issue, the linked issue icon in the vulnerability list:
+After you create the issue, the linked issue icon in the vulnerability list:
 
 - Indicates that an issue has been created for that vulnerability.
 - Shows a tooltip that contains a link to the issue.

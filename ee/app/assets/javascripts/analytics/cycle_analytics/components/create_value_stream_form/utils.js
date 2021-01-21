@@ -1,5 +1,5 @@
 import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
-import { I18N, ERRORS, defaultErrors, defaultFields } from './constants';
+import { I18N, ERRORS, defaultErrors, defaultFields, NAME_MAX_LENGTH } from './constants';
 import { DEFAULT_STAGE_NAMES } from '../../constants';
 
 /**
@@ -82,13 +82,20 @@ export const initializeFormData = ({ fields, errors }) => {
  * @param {Object} fields key value pair of form field values
  * @returns {Object} key value pair of form fields with an array of errors
  */
-export const validateFields = (fields) => {
+export const validateStage = (fields) => {
   const newErrors = {};
 
   if (fields?.name) {
-    newErrors.name = DEFAULT_STAGE_NAMES.includes(fields?.name.toLowerCase())
-      ? [ERRORS.STAGE_NAME_EXISTS]
-      : [];
+    if (fields.name.length > NAME_MAX_LENGTH) {
+      newErrors.name = [ERRORS.MAX_LENGTH];
+    } else {
+      newErrors.name =
+        fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())
+          ? [ERRORS.STAGE_NAME_EXISTS]
+          : [];
+    }
+  } else {
+    newErrors.name = [ERRORS.MIN_LENGTH];
   }
 
   if (fields?.startEventIdentifier) {
@@ -101,4 +108,22 @@ export const validateFields = (fields) => {
     newErrors.endEventIdentifier = [];
   }
   return newErrors;
+};
+
+/**
+ * Validates the name of a value stream Any errors will be
+ * returned as an array in a object with key`name`
+ *
+ * @param {Object} fields key value pair of form field values
+ * @returns {Object} key value pair of form fields with an array of errors
+ */
+export const validateValueStreamName = ({ name = '' }) => {
+  const errors = { name: [] };
+  if (name.length > NAME_MAX_LENGTH) {
+    errors.name.push(ERRORS.MAX_LENGTH);
+  }
+  if (!name.length) {
+    errors.name.push(ERRORS.MIN_LENGTH);
+  }
+  return errors;
 };

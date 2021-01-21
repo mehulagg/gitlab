@@ -270,8 +270,7 @@ class MergeRequest < ApplicationRecord
         by_commit_sha(sha),
         by_squash_commit_sha(sha),
         by_merge_commit_sha(sha)
-      ],
-      remove_duplicates: false
+      ]
     )
   end
   scope :by_cherry_pick_sha, -> (sha) do
@@ -1591,26 +1590,6 @@ class MergeRequest < ApplicationRecord
     notes_association = notes_with_associations.where('created_at >= ?', cutoff)
 
     !merge_commit.has_been_reverted?(current_user, notes_association)
-  end
-
-  def reverted_by_merge_request?(current_user)
-    reverting_merge_request(current_user).present?
-  end
-
-  def reverting_merge_request(current_user)
-    return unless merge_commit
-    return unless merged_at
-
-    reverting_commit = merge_commit.reverting_commit(current_user, notes_with_associations)
-
-    if reverting_commit
-      MergeRequestsFinder.new(
-        current_user,
-        project_id: project.id,
-        commit_sha: reverting_commit.sha,
-        state: 'merged'
-      ).execute.first
-    end
   end
 
   def merged_at

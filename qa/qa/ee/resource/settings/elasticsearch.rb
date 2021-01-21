@@ -17,15 +17,14 @@ module QA
 
           def fabricate!
             QA::Page::Main::Menu.perform(&:go_to_admin_area)
-            QA::Page::Admin::Menu.perform(&:go_to_general_settings)
-            QA::EE::Page::Admin::Settings::Elasticsearch.perform do |settings|
-              settings.expand_elasticsearch do |es|
-                es.check_indexing if @es_indexing
-                es.check_search if @es_enabled
-                es.enter_link(@es_url)
-                es.click_submit
-              end
+            QA::Page::Admin::Menu.perform(&:go_to_advanced_search)
+            QA::EE::Page::Admin::Settings::Component::Elasticsearch.perform do |es|
+              es.check_indexing if @es_indexing
+              es.check_search if @es_enabled
+              es.enter_link(@es_url)
+              es.click_submit
             end
+
             sleep(90)
             # wait for the change to propagate before inserting records or else
             # Gitlab::CurrentSettings.elasticsearch_indexing and

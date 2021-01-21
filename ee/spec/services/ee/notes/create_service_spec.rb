@@ -4,11 +4,12 @@ require 'spec_helper'
 
 RSpec.describe Notes::CreateService do
   context 'note with commands' do
+    let(:project) { create(:project) }
+    let(:note_params) { opts }
+
     context 'for issues' do
-      let(:project) { create(:project) }
       let(:issuable) { create(:issue, project: project, weight: 10) }
       let(:opts) { { noteable_type: 'Issue', noteable_id: issuable.id } }
-      let(:note_params) { opts }
 
       it_behaves_like 'issuable quick actions' do
         let(:quick_actions) do
@@ -27,6 +28,31 @@ RSpec.describe Notes::CreateService do
                 else
                   expect(noteable.weight).not_to be_nil
                 end
+              }
+            )
+          ]
+        end
+      end
+    end
+
+    context 'for merge_requests' do
+      let(:issuable) { create(:merge_request, project: project, source_project: project) }
+      let(:developer) { create(:user) }
+      let(:user) { create(:user) }
+      let(:opts) { { noteable_type: 'MergeRequest', noteable_id: issuable.id } }
+
+      it_behaves_like 'issuable quick actions' do
+        let(:quick_actions) do
+          [
+            QuickAction.new(
+              before_action: -> {
+                project.add_developer(developer)
+                issuable.update!(reviewers: [user])
+              },
+
+              action_text: "/reassign_reviewer #{developer.to_reference}",
+              expectation: ->(issuable, can_use_quick_action) {
+                expect(issuable.reviewers == [developer]).to eq(can_use_quick_action)
               }
             )
           ]

@@ -86,6 +86,20 @@ variables:
   DAST_WEBSITE: https://example.com
 ```
 
+### Latest template
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254325) in GitLab 13.8
+
+To use the latest version of the DAST template, include
+`DAST.latest.gitlab-ci.yml` instead of `DAST.gitlab-ci.yml`.
+See the CI [docs](../../../development/cicd/templates.md#latest-version)
+on template versioning for more information.
+
+Please note that the latest version may include breaking changes. Check the
+[DAST troubleshooting guide](#troubleshooting) if you experience problems.
+
+### Template options
+
 There are two ways to define the URL to be scanned by DAST:
 
 1. Set the `DAST_WEBSITE` [variable](../../../ci/yaml/README.md#variables).
@@ -200,7 +214,7 @@ variables:
   DAST_PASSWORD_FIELD: session[password]  # the name of password field at the sign-in HTML form
   DAST_SUBMIT_FIELD: login # the `id` or `name` of the element that when clicked will submit the login form or the password form of a multi-page login process
   DAST_FIRST_SUBMIT_FIELD: next # the `id` or `name` of the element that when clicked will submit the username form of a multi-page login process
-  DAST_AUTH_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
+  DAST_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
   DAST_AUTH_VALIDATION_URL: http://example.com/loggedin_page  # optional, a URL only accessible to logged in users that DAST can use to confirm successful authentication
 ```
 
@@ -556,7 +570,7 @@ DAST can be [configured](#customizing-the-dast-settings) using environment varia
 | `DAST_PASSWORD_FIELD` | string | The name of password field at the sign-in HTML form. |
 | `DAST_SKIP_TARGET_CHECK` | boolean | Set to `true` to prevent DAST from checking that the target is available before scanning. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229067) in GitLab 13.8. |
 | `DAST_MASK_HTTP_HEADERS` | string | Comma-separated list of request and response headers to be masked (GitLab 13.1). Must contain **all** headers to be masked. Refer to [list of headers that are masked by default](#hide-sensitive-information). |
-| `DAST_AUTH_EXCLUDE_URLS` | URLs | The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
+| `DAST_EXCLUDE_URLS` | URLs | The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 | `DAST_FULL_SCAN_ENABLED` | boolean | Set to `true` to run a [ZAP Full Scan](https://github.com/zaproxy/zaproxy/wiki/ZAP-Full-Scan) instead of a [ZAP Baseline Scan](https://github.com/zaproxy/zaproxy/wiki/ZAP-Baseline-Scan). Default: `false` |
 | `DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED` | boolean | Set to `true` to require [domain validation](#domain-validation) when running DAST full scans. Not supported for API scans. Default: `false` |
 | `DAST_AUTO_UPDATE_ADDONS` | boolean | ZAP add-ons are pinned to specific versions in the DAST Docker image. Set to `true` to download the latest versions when the scan starts. Default: `false` |
@@ -576,6 +590,7 @@ DAST can be [configured](#customizing-the-dast-settings) using environment varia
 | `DAST_FIRST_SUBMIT_FIELD` | string | The `id` or `name` of the element that when clicked submits the username form of a multi-page login process. [Introduced](https://gitlab.com/gitlab-org/gitlab-ee/issues/9894) in GitLab 12.4. |
 | `DAST_ZAP_CLI_OPTIONS` | string | ZAP server command-line options. For example, `-Xmx3072m` would set the Java maximum memory allocation pool size. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_ZAP_LOG_CONFIGURATION` | string | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
+| `DAST_AUTH_EXCLUDE_URLS` | URLs | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/289959) in GitLab 13.8, to be removed in 14.0, and replaced by `DAST_EXCLUDE_URLS`. The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 
 ### DAST command-line options
 
@@ -1039,6 +1054,25 @@ If your DAST job exceeds the job timeout and you need to reduce the scan duratio
 ### Getting warning message `gl-dast-report.json: no matching files`
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
+
+### Getting error `dast job: chosen stage does not exist` when including DAST CI template
+
+Newer versions of the DAST CI template do not define stages in order to avoid
+overwriting stages from other CI files. If you've recently started using
+`DAST.latest.gitlab-ci.yml` or upgraded to a new major release of GitLab and
+began receiving this error, you will need to define a `dast` stage with your
+other stages. Please note that you must have a running application for DAST to
+scan. If your application is set up in your pipeline, it must be deployed
+ in a stage _before_ the `dast` stage:
+
+```yaml
+stages:
+  - deploy  # DAST needs a running application to scan
+  - dast
+
+include:
+  - template: DAST.latest.gitlab-ci.yml
+```
 
 <!-- ## Troubleshooting
 

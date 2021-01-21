@@ -464,11 +464,34 @@ RSpec.describe GroupPolicy do
 
           context 'as a group owner' do
             before do
+              create(:group_saml_identity, user: current_user, saml_provider: saml_provider)
               group.add_owner(current_user)
             end
 
-            it 'prevents access without a SAML session' do
-              is_expected.not_to allow_action(:read_group)
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+
+            it 'prevents access without a SAML session for subgroup' do
+              subgroup = create(:group, :private, parent: group)
+
+              expect(described_class.new(current_user, subgroup)).not_to allow_action(:read_group)
+            end
+          end
+
+          context 'as an admin' do
+            let(:current_user) { admin }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+          end
+
+          context 'as an auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
             end
           end
 

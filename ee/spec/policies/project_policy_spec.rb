@@ -358,6 +358,24 @@ RSpec.describe ProjectPolicy do
           end
         end
 
+        context 'as a group maintainer' do
+          before do
+            group.add_maintainer(current_user)
+          end
+
+          it 'prevents access without a SAML session' do
+            is_expected.not_to allow_action(:read_project)
+          end
+        end
+
+        context 'as an auditor' do
+          let(:current_user) { create(:user, :auditor) }
+
+          it 'allows access without a SAML session' do
+            is_expected.to allow_action(:read_project)
+          end
+        end
+
         context 'with public access' do
           let(:group) { create(:group, :public) }
           let(:project) { create(:project, :public, group: saml_provider.group) }
@@ -539,6 +557,7 @@ RSpec.describe ProjectPolicy do
         create_merge_request_in
         create_vulnerability_feedback
         read_project
+        admin_merge_request
       )
     end
 

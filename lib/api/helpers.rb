@@ -372,7 +372,7 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
@@ -521,7 +521,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
         sendfile path
       end
@@ -537,7 +537,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body ""
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 

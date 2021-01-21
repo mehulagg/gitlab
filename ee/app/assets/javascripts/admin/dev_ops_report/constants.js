@@ -21,45 +21,45 @@ export const DEVOPS_ADOPTION_STRINGS = {
       'DevopsAdoption|There was an error fetching Groups. Please refresh the page to try again.',
     ),
     [DEVOPS_ADOPTION_ERROR_KEYS.segments]: s__(
-      'DevopsAdoption|There was an error fetching Segments. Please refresh the page to try again.',
+      'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page to try again.',
     ),
     tableHeader: {
       text: s__(
         'DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}.',
       ),
-      button: s__('DevopsAdoption|Add new segment'),
-      buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} segments allowed'), {
+      button: s__('DevopsAdoption|Add Group'),
+      buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'), {
         maxSegments: MAX_SEGMENTS,
       }),
     },
   },
   emptyState: {
-    title: s__('DevopsAdoption|Add a segment to get started'),
+    title: s__('DevopsAdoption|Add a group to get started'),
     description: s__(
-      'DevopsAdoption|DevOps adoption uses segments to track adoption across key features. Segments are a way to track multiple related projects and groups at once. For example, you could create a segment for the engineering department or a particular product team.',
+      'DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin.',
     ),
-    button: s__('DevopsAdoption|Add new segment'),
+    button: s__('DevopsAdoption|Add Group'),
   },
   modal: {
-    addingTitle: s__('DevopsAdoption|New segment'),
-    editingTitle: s__('DevopsAdoption|Edit segment'),
-    addingButton: s__('DevopsAdoption|Create new segment'),
+    addingTitle: s__('DevopsAdoption|Add Group'),
+    editingTitle: s__('DevopsAdoption|Edit Group'),
+    addingButton: s__('DevopsAdoption|Add Group'),
     editingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
-    namePlaceholder: s__('DevopsAdoption|My segment'),
+    namePlaceholder: s__('DevopsAdoption|My group'),
     filterPlaceholder: s__('DevopsAdoption|Filter by name'),
     nameLabel: s__('DevopsAdoption|Name'),
-    selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected (20 max)'),
-    selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected (20 max)'),
-    error: s__('DevopsAdoption|An error occured while saving the segment. Please try again.'),
+    selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected'),
+    selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected'),
+    error: s__('DevopsAdoption|An error occured while saving the group. Please try again.'),
     noResults: s__('DevopsAdoption|No filter results.'),
   },
   table: {
-    editButton: s__('DevopsAdoption|Edit segment'),
-    deleteButton: s__('DevopsAdoption|Delete segment'),
+    editButton: s__('DevopsAdoption|Edit Group'),
+    deleteButton: s__('DevopsAdoption|Delete Group'),
     headers: {
       name: {
-        label: s__('DevopsAdoption|Segment'),
+        label: __('Group'),
       },
       issueOpened: {
         label: s__('DevopsAdoption|Issues'),
@@ -90,14 +90,14 @@ export const DEVOPS_ADOPTION_STRINGS = {
         tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
       },
     },
-    pendingTooltip: s__('DevopsAdoption|Segment data pending until the start of next month'),
+    pendingTooltip: s__('DevopsAdoption|Group data pending until the start of next month'),
   },
   deleteModal: {
-    title: s__('DevopsAdoption|Confirm delete segment'),
+    title: s__('DevopsAdoption|Confirm delete Group'),
     confirmationMessage: s__('DevopsAdoption|Are you sure that you would like to delete %{name}?'),
     cancel: __('Cancel'),
-    confirm: s__('DevopsAdoption|Delete segment'),
-    error: s__('DevopsAdoption|An error occured while deleting the segment. Please try again.'),
+    confirm: s__('DevopsAdoption|Delete Group'),
+    error: s__('DevopsAdoption|An error occured while deleting the group. Please try again.'),
   },
   tableCell: {
     trueText: s__('DevopsAdoption|Adopted'),

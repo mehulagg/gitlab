@@ -1,5 +1,6 @@
 <script>
 import Api from '~/api';
+import { getUser } from '~/rest_api';
 
 import AuditFilterToken from './shared/audit_filter_token.vue';
 
@@ -10,7 +11,7 @@ export default {
   inheritAttrs: false,
   tokenMethods: {
     fetchItem(id) {
-      return Api.user(id).then((res) => res.data);
+      return getUser(id).then((res) => res.data);
     },
     fetchSuggestions(term) {
       const { groupId, projectPath } = this.config;

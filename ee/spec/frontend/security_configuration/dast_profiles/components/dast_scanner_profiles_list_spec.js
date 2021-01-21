@@ -10,7 +10,7 @@ describe('EE - DastScannerProfileList', () => {
   const defaultProps = {
     profiles: [],
     tableLabel: 'Scanner profiles',
-    fields: ['profileName'],
+    fields: [{ key: 'profileName' }, { key: 'scanType' }],
     profilesPerPage: 10,
     errorMessage: '',
     errorDetails: [],
@@ -30,7 +30,6 @@ describe('EE - DastScannerProfileList', () => {
       ),
     );
   };
-  const createComponent = wrapperFactory();
   const createFullComponent = wrapperFactory(mount);
 
   const findProfileList = () => wrapper.find(ProfilesList);
@@ -40,7 +39,7 @@ describe('EE - DastScannerProfileList', () => {
   });
 
   it('renders profile list properly', () => {
-    createComponent({
+    createFullComponent({
       propsData: { profiles: scannerProfiles },
     });
 
@@ -55,7 +54,7 @@ describe('EE - DastScannerProfileList', () => {
 
   it('sets listeners on profile list component', () => {
     const inputHandler = jest.fn();
-    createComponent({
+    createFullComponent({
       listeners: {
         input: inputHandler,
       },

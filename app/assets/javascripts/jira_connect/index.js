@@ -1,23 +1,21 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import $ from 'jquery';
 import setConfigs from '@gitlab/ui/dist/config';
 import Translate from '~/vue_shared/translate';
 import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
 
-import App from './components/app.vue';
+import JiraConnectApp from './components/app.vue';
 import { addSubscription, removeSubscription } from '~/jira_connect/api';
+import createStore from './store';
+import { SET_ERROR_MESSAGE } from './store/mutation_types';
 
-const store = {
-  state: {
-    error: '',
-  },
-  setErrorMessage(errorMessage) {
-    this.state.error = errorMessage;
-  },
-};
+Vue.use(Vuex);
+
+const store = createStore();
 
 /**
- * Initialize necessary form handlers for the Jira Connect app
+ * Initialize form handlers for the Jira Connect app
  */
 const initJiraFormHandlers = () => {
   const reqComplete = () => {
@@ -25,11 +23,9 @@ const initJiraFormHandlers = () => {
   };
 
   const reqFailed = (res, fallbackErrorMessage) => {
-    const { responseJSON: { error = fallbackErrorMessage } = {} } = res || {};
+    const { error = fallbackErrorMessage } = res || {};
 
-    store.setErrorMessage(error);
-    // eslint-disable-next-line no-alert
-    alert(error);
+    store.commit(SET_ERROR_MESSAGE, error);
   };
 
   if (typeof AP.getLocation === 'function') {
@@ -77,13 +73,16 @@ function initJiraConnect() {
   Vue.use(Translate);
   Vue.use(GlFeatureFlagsPlugin);
 
+  const { groupsPath } = el.dataset;
+
   return new Vue({
     el,
-    data: {
-      state: store.state,
+    store,
+    provide: {
+      groupsPath,
     },
     render(createElement) {
-      return createElement(App, {});
+      return createElement(JiraConnectApp);
     },
   });
 }

@@ -38,7 +38,7 @@ module Gitlab
         end
 
         def default
-          @default ||= self.new
+          self.new
         end
       end
 
@@ -93,14 +93,24 @@ module Gitlab
         migrations_index_name
       end
 
-      def standalone_indices_proxies
-        ES_SEPARATE_CLASSES.map do |class_name|
+      def delete_migration_record(migration)
+        result = client.delete(index: migrations_index_name, type: '_doc', id: migration.version)
+        result['result'] == 'deleted'
+      rescue ::Elasticsearch::Transport::Transport::Errors::NotFound => e
+        Gitlab::ErrorTracking.log_exception(e)
+        false
+      end
+
+      def standalone_indices_proxies(target_classes: nil)
+        classes = target_classes.presence || ES_SEPARATE_CLASSES
+        classes.map do |class_name|
           ::Elastic::Latest::ApplicationClassProxy.new(class_name, use_separate_indices: true)
         end
       end
 
-      def create_standalone_indices(with_alias: true, options: {})
-        standalone_indices_proxies.each_with_object({}) do |proxy, indices|
+      def create_standalone_indices(with_alias: true, options: {}, target_classes: nil)
+        proxies = standalone_indices_proxies(target_classes: target_classes)
+        proxies.each_with_object({}) do |proxy, indices|
           alias_name = proxy.index_name
           new_index_name = "#{alias_name}-#{Time.now.strftime("%Y%m%d-%H%M")}"
 
@@ -139,6 +149,14 @@ module Gitlab
 
           [index_name, proxy.index_name, result]
         end
+      end
+
+      def delete_migrations_index
+        delete_index(index_name: migrations_index_name)
+      end
+
+      def migrations_index_exists?
+        index_exists?(index_name: migrations_index_name)
       end
 
       def create_empty_index(with_alias: true, options: {})

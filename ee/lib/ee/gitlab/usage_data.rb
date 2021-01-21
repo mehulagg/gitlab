@@ -102,6 +102,7 @@ module EE
             usage_data[:license_plan] = license.plan
             usage_data[:license_add_ons] = license.add_ons
             usage_data[:license_trial] = license.trial?
+            usage_data[:license_subscription_id] = alt_usage_data(fallback: nil) { license.subscription_id }
           end
 
           usage_data

@@ -1,15 +1,10 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import AxiosMockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
 import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header.vue';
 import getters from 'ee/boards/stores/getters';
-import { TEST_HOST } from 'helpers/test_constants';
-import { listObj } from 'jest/boards/mock_data';
+import { mockLabelList } from 'jest/boards/mock_data';
 import { ListType, inactiveId } from '~/boards/constants';
-import List from '~/boards/models/list';
-import axios from '~/lib/utils/axios_utils';
 import sidebarEventHub from '~/sidebar/event_hub';
 
 const localVue = createLocalVue();
@@ -19,20 +14,15 @@ localVue.use(Vuex);
 describe('Board List Header Component', () => {
   let store;
   let wrapper;
-  let axiosMock;
 
   beforeEach(() => {
-    window.gon = {};
-    axiosMock = new AxiosMockAdapter(axios);
-    axiosMock.onGet(`${TEST_HOST}/lists/1/issues`).reply(200, { issues: [] });
     store = new Vuex.Store({ state: { activeId: inactiveId }, getters });
     jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
   afterEach(() => {
-    axiosMock.restore();
-
     wrapper.destroy();
+    wrapper = null;
 
     localStorage.clear();
   });
@@ -41,26 +31,25 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
+    isSwimlanesHeader = false,
+    weightFeatureAvailable = false,
   } = {}) => {
     const boardId = '1';
 
     const listMock = {
-      ...listObj,
-      list_type: listType,
+      ...mockLabelList,
+      listType,
       collapsed,
     };
 
     if (listType === ListType.assignee) {
       delete listMock.label;
-      listMock.user = {};
+      listMock.assignee = {};
     }
-
-    // Making List reactive
-    const list = Vue.observable(new List(listMock));
 
     if (withLocalStorage) {
       localStorage.setItem(
-        `boards.${boardId}.${list.type}.${list.id}.expanded`,
+        `boards.${boardId}.${listMock.listType}.${listMock.id}.expanded`,
         (!collapsed).toString(),
       );
     }
@@ -70,10 +59,12 @@ describe('Board List Header Component', () => {
       localVue,
       propsData: {
         disabled: false,
-        list,
+        list: listMock,
+        isSwimlanesHeader,
       },
       provide: {
         boardId,
+        weightFeatureAvailable,
       },
     });
   };
@@ -97,6 +88,8 @@ describe('Board List Header Component', () => {
     });
 
     it('has a test for each list type', () => {
+      createComponent();
+
       Object.values(ListType).forEach((value) => {
         expect([...hasSettings, ...hasNoSettings]).toContain(value);
       });
@@ -116,12 +109,34 @@ describe('Board List Header Component', () => {
       });
 
       it('does not emit event when there is an active List', () => {
-        store.state.activeId = listObj.id;
+        store.state.activeId = mockLabelList.id;
         createComponent({ listType: hasSettings[0] });
         wrapper.vm.openSidebarSettings();
 
         expect(sidebarEventHub.$emit).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Swimlanes header', () => {
+    it('when collapsed, it displays info icon', () => {
+      createComponent({ isSwimlanesHeader: true, collapsed: true });
+
+      expect(wrapper.find('.board-header-collapsed-info-icon').exists()).toBe(true);
+    });
+  });
+
+  describe('weightFeatureAvailable', () => {
+    it('weightFeatureAvailable is true', () => {
+      createComponent({ weightFeatureAvailable: true });
+
+      expect(wrapper.find({ ref: 'weightTooltip' }).exists()).toBe(true);
+    });
+
+    it('weightFeatureAvailable is false', () => {
+      createComponent();
+
+      expect(wrapper.find({ ref: 'weightTooltip' }).exists()).toBe(false);
     });
   });
 });

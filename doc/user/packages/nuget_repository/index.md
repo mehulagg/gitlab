@@ -62,6 +62,8 @@ NuGet CLI.
 
 ## Use the GitLab endpoint for NuGet Packages
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36423) group-level endpoint in GitLab 13.8.
+
 To use the GitLab endpoint for NuGet Packages, choose an option:
 
 - **Project-level**: Use when you have few NuGet packages and they are not in
@@ -72,7 +74,7 @@ To use the GitLab endpoint for NuGet Packages, choose an option:
 Some features such as [publishing](#publish-a-nuget-package) a package are only available on the project-level endpoint.
 
 WARNING:
-Because of how NuGet handles credentials, the Package Registry rejects anonymous requests on the group-level endpoint. 
+Because of how NuGet handles credentials, the Package Registry rejects anonymous requests on the group-level endpoint.
 To work around this limitation, set up [authentication](#add-the-package-registry-as-a-source-for-nuget-packages).
 
 ## Add the Package Registry as a source for NuGet packages
@@ -90,7 +92,7 @@ Prerequisites:
     with the scope set to `read_package_registry`, `write_package_registry`, or
     both.
 - A name for your source.
-- Depending on the [endpoint level](#use-the-gitlab-endpoint-for-nuget-packages) you use, either: 
+- Depending on the [endpoint level](#use-the-gitlab-endpoint-for-nuget-packages) you use, either:
   - Your project ID, which is found on your project's home page.
   - Your group ID, which is found on your group's home page.
 
@@ -123,7 +125,7 @@ nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/proje
 To use the [group-level](#use-the-gitlab-endpoint-for-nuget-packages) NuGet endpoint, add the Package Registry as a source with `nuget`:
 
 ```shell
-nuget source Add -Name <source_name> -Source "https://gitlab.example.com/api/v4/groups/<your_group_id>/packages/nuget/index.json" -UserName <gitlab_username or deploy_token_username> -Password <gitlab_personal_access_token or deploy_token>
+nuget source Add -Name <source_name> -Source "https://gitlab.example.com/api/v4/groups/<your_group_id>/-/packages/nuget/index.json" -UserName <gitlab_username or deploy_token_username> -Password <gitlab_personal_access_token or deploy_token>
 ```
 
 - `<source_name>` is the desired source name.
@@ -131,7 +133,7 @@ nuget source Add -Name <source_name> -Source "https://gitlab.example.com/api/v4/
 For example:
 
 ```shell
-nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/groups/23/packages/nuget/index.json" -UserName carol -Password 12345678asdf
+nuget source Add -Name "GitLab" -Source "https://gitlab.example.com/api/v4/groups/23/-/packages/nuget/index.json" -UserName carol -Password 12345678asdf
 ```
 
 ### Add a source with Visual Studio
@@ -173,7 +175,7 @@ To use the [group-level](#use-the-gitlab-endpoint-for-nuget-packages) NuGet endp
 1. Select **Add**.
 1. Complete the following fields:
    - **Name**: Name for the source.
-   - **Location**: `https://gitlab.example.com/api/v4/group/<your_group_id>/packages/nuget/index.json`,
+   - **Location**: `https://gitlab.example.com/api/v4/groups/<your_group_id>/-/packages/nuget/index.json`,
      where `<your_group_id>` is your group ID, and `gitlab.example.com` is
      your domain name.
    - **Username**: Your GitLab username or deploy token username.
@@ -227,7 +229,7 @@ To use the [group-level](#use-the-gitlab-endpoint-for-nuget-packages) Package Re
    <configuration>
     <packageSources>
         <clear />
-        <add key="gitlab" value="https://gitlab.example.com/api/v4/group/<your_group_id>/packages/nuget/index.json" />
+        <add key="gitlab" value="https://gitlab.example.com/api/v4/groups/<your_group_id>/-/packages/nuget/index.json" />
     </packageSources>
     <packageSourceCredentials>
         <gitlab>

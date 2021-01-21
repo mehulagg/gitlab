@@ -19,12 +19,12 @@ export const i18n = {
 
 export default {
   i18n,
-  inject: ['projectPath', 'timezones'],
   components: {
     GlModal,
     GlAlert,
     AddEditScheduleForm,
   },
+  inject: ['projectPath', 'timezones'],
   props: {
     modalId: {
       type: String,

@@ -1,7 +1,6 @@
 - if @project.feature_available?(:code_owner_approval_required)
   .form-group.row
-    %label.col-md-2.text-right{ for: 'code_owner_approval_required' }
-      = s_("ProtectedBranch|Require approval from code owners:")
+    = f.label :code_owner_approval_required, s_("ProtectedBranch|Require approval from code owners:"), class: 'col-md-2 text-left text-md-right'
     .col-md-10
       = render "shared/buttons/project_feature_toggle", label: s_("ProtectedBranch|Toggle code owner approval"), class_list: "js-code-owner-toggle project-feature-toggle is-checked"
       .form-text.text-muted

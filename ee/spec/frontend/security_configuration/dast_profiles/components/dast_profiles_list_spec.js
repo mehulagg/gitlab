@@ -15,7 +15,7 @@ describe('EE - DastProfilesList', () => {
     const defaultProps = {
       profiles: [],
       tableLabel: 'Profiles Table',
-      fields: ['profileName', 'targetUrl', 'validationStatus'],
+      fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
       hasMorePages: false,
       profilesPerPage: 10,
       errorMessage: '',

@@ -4,9 +4,6 @@ gem 'rails', '~> 6.0.3.1'
 
 gem 'bootsnap', '~> 1.4.6'
 
-# Improves copy-on-write performance for MRI
-gem 'nakayoshi_fork', '~> 0.0.4'
-
 # Responders respond_to and respond_with
 gem 'responders', '~> 3.0'
 
@@ -19,7 +16,7 @@ gem 'default_value_for', '~> 3.3.0'
 gem 'pg', '~> 1.1'
 
 gem 'rugged', '~> 0.28'
-gem 'grape-path-helpers', '~> 1.5'
+gem 'grape-path-helpers', '~> 1.6.1'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
@@ -28,7 +25,7 @@ gem 'marginalia', '~> 1.10.0'
 gem 'devise', '~> 4.7.2'
 # TODO: verify ARM compile issue on 3.1.13+ version (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18828)
 gem 'bcrypt', '3.1.12'
-gem 'doorkeeper', '~> 5.3.0'
+gem 'doorkeeper', '~> 5.4.0'
 gem 'doorkeeper-openid_connect', '~> 1.7.4'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
@@ -57,7 +54,7 @@ gem 'gssapi', group: :kerberos
 # Spam and anti-bot protection
 gem 'recaptcha', '~> 4.11', require: 'recaptcha/rails'
 gem 'akismet', '~> 3.0'
-gem 'invisible_captcha', '~> 0.12.1'
+gem 'invisible_captcha', '~> 1.1.0'
 
 # Two-factor authentication
 gem 'devise-two-factor', '~> 3.1.0'
@@ -84,9 +81,7 @@ gem 'gitlab_omniauth-ldap', '~> 2.1.1', require: 'omniauth-ldap'
 gem 'net-ldap', '~> 0.16.3'
 
 # API
-# Locked at Grape v1.4.0 until https://github.com/ruby-grape/grape/pull/2088 is merged
-# Remove config/initializers/grape_patch.rb
-gem 'grape', '= 1.4.0'
+gem 'grape', '~> 1.5.1'
 gem 'grape-entity', '~> 0.7.1'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
@@ -115,7 +110,7 @@ gem 'carrierwave', '~> 1.3'
 gem 'mini_magick', '~> 4.10.1'
 
 # for backups
-gem 'fog-aws', '~> 3.7'
+gem 'fog-aws', '~> 3.8'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
@@ -184,8 +179,8 @@ group :unicorn do
 end
 
 group :puma do
-  gem 'gitlab-puma', '~> 4.3.3.gitlab.2', require: false
-  gem 'gitlab-puma_worker_killer', '~> 0.1.1.gitlab.1', require: false
+  gem 'puma', '~> 5.1.1', require: false
+  gem 'puma_worker_killer', '~> 0.3.1', require: false
 end
 
 # State machine
@@ -311,7 +306,7 @@ gem 'pg_query', '~> 1.3.0'
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '0.13.5'
+gem 'gitlab-labkit', '0.14.0'
 
 # I18n
 gem 'ruby_parser', '~> 3.15', require: false
@@ -354,8 +349,9 @@ end
 group :development, :test do
   gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.0'
-  gem 'pry-byebug', '~> 3.9.0', platform: :mri
+  gem 'gitlab-pry-byebug', platform: :mri, require: ['pry-byebug', 'pry-byebug/pry_remote_ext']
   gem 'pry-rails', '~> 0.3.9'
+  gem 'pry-remote'
 
   gem 'awesome_print', require: false
 
@@ -372,7 +368,7 @@ group :development, :test do
   gem 'spring', '~> 2.1.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
-  gem 'gitlab-styles', '~> 5.4.0', require: false
+  gem 'gitlab-styles', '~> 6.0.0', require: false
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
@@ -410,7 +406,7 @@ group :test do
   gem 'rspec_profiling', '~> 0.0.6'
   gem 'rspec-parameterized', require: false
 
-  gem 'capybara', '~> 3.33.0'
+  gem 'capybara', '~> 3.34.0'
   gem 'capybara-screenshot', '~> 1.0.22'
   gem 'selenium-webdriver', '~> 3.142'
 
@@ -466,7 +462,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.7.0.pre.rc1'
+gem 'gitaly', '~> 13.8.0.pre.rc3'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -479,7 +475,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.4'
+gem 'gitlab-experiment', '~> 0.4.5'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

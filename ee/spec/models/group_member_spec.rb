@@ -345,6 +345,37 @@ RSpec.describe GroupMember do
     end
   end
 
+  context 'group member welcome email', :sidekiq_inline do
+    let_it_be(:group) { create(:group_with_plan, plan: :gold_plan) }
+    let(:user) { create(:user) }
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.update!(provisioned_by_group_id: group.id)
+      end
+
+      it 'schedules the welcome email with confirmation' do
+        expect_next_instance_of(NotificationService) do |notification|
+          expect(notification).to receive(:new_group_member_with_confirmation)
+          expect(notification).not_to receive(:new_group_member)
+        end
+
+        group.add_developer(user)
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'schedules plain welcome to the group email' do
+        expect_next_instance_of(NotificationService) do |notification|
+          expect(notification).to receive(:new_group_member)
+          expect(notification).not_to receive(:new_group_member_with_confirmation)
+        end
+
+        group.add_developer(user)
+      end
+    end
+  end
+
   def webhook_data(group_member, event)
     {
       headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },

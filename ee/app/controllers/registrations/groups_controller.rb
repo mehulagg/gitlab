@@ -29,7 +29,7 @@ module Registrations
 
         url_params[:trial_onboarding_flow] = true
       else
-        record_experiment_user(:trial_during_signup, trial_chosen: trial)
+        record_experiment_user(:trial_during_signup, trial_chosen: trial, namespace_id: @group.id)
 
         if experiment_enabled?(:trial_during_signup)
           if trial
@@ -43,6 +43,12 @@ module Registrations
       end
 
       redirect_to new_users_sign_up_project_path(url_params)
+    end
+
+    protected
+
+    def show_confirm_warning?
+      false
     end
 
     private

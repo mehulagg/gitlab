@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Webhooks
 
-Project webhooks allow you to trigger a URL if for example new code is pushed or
+Project webhooks allow you to trigger a percent-encoded URL if, for example, new code is pushed or
 a new issue is created. You can configure webhooks to listen for specific events
 like pushes, issues or merge requests. GitLab sends a POST request with data
 to the webhook URL.
@@ -95,6 +95,10 @@ When more than 20 commits are pushed at once, the `commits` webhook
 attribute only contains the first 20 for performance reasons. Loading
 detailed commit data is expensive. Note that despite only 20 commits being
 present in the `commits` attribute, the `total_commits_count` attribute contains the actual total.
+
+NOTE:
+If a branch creation push event is generated without new commits being introduced, the
+`commits` attribute in the payload is empty.
 
 Also, if a single push includes changes for more than three (by default, depending on
 [`push_event_hooks_limit` setting](../../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls))

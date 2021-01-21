@@ -1,9 +1,9 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { generateLinksData } from '../graph_shared/drawing_utils';
 import JobPill from './job_pill.vue';
 import StagePill from './stage_pill.vue';
-import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { DRAW_FAILURE, DEFAULT, INVALID_CI_CONFIG, EMPTY_PIPELINE_DATA } from '../../constants';
 import { createJobsHash, generateJobNeedsDict } from '../../utils';
@@ -105,9 +105,7 @@ export default {
     highlightedJobs() {
       // If you are hovering on a job, then the jobs we want to highlight are:
       // The job you are currently hovering + all of its needs.
-      return this.hasHighlightedJob
-        ? [this.highlightedJob, ...this.needsObject[this.highlightedJob]]
-        : [];
+      return [this.highlightedJob, ...this.needsObject[this.highlightedJob]];
     },
     highlightedLinks() {
       // If you are hovering on a job, then the links we want to highlight are:
@@ -126,32 +124,21 @@ export default {
     },
   },
   watch: {
-    isPipelineDataEmpty: {
+    pipelineData: {
       immediate: true,
-      handler(isDataEmpty) {
-        if (isDataEmpty) {
+      handler() {
+        if (this.isPipelineDataEmpty) {
           this.reportFailure(EMPTY_PIPELINE_DATA);
-        }
-      },
-    },
-    isInvalidCiConfig: {
-      immediate: true,
-      handler(isInvalid) {
-        if (isInvalid) {
+        } else if (this.isInvalidCiConfig) {
           this.reportFailure(INVALID_CI_CONFIG);
+        } else {
+          this.$nextTick(() => {
+            this.computeGraphDimensions();
+            this.prepareLinkData();
+          });
         }
       },
     },
-  },
-  mounted() {
-    if (!this.isPipelineDataEmpty && !this.isInvalidCiConfig) {
-      // This guarantee that all sub-elements are rendered
-      // https://v3.vuejs.org/api/options-lifecycle-hooks.html#mounted
-      this.$nextTick(() => {
-        this.getGraphDimensions();
-        this.prepareLinkData();
-      });
-    }
   },
   methods: {
     prepareLinkData() {
@@ -194,7 +181,7 @@ export default {
     removeHighlightNeeds() {
       this.highlightedJob = null;
     },
-    getGraphDimensions() {
+    computeGraphDimensions() {
       this.width = `${this.$refs[this.$options.CONTAINER_REF].scrollWidth}`;
       this.height = `${this.$refs[this.$options.CONTAINER_REF].scrollHeight}`;
     },

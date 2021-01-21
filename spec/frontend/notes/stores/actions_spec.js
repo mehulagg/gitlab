@@ -1,5 +1,6 @@
 import { TEST_HOST } from 'spec/test_constants';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import * as actions from '~/notes/stores/actions';
@@ -8,7 +9,6 @@ import * as mutationTypes from '~/notes/stores/mutation_types';
 import * as notesConstants from '~/notes/constants';
 import createStore from '~/notes/stores';
 import mrWidgetEventHub from '~/vue_merge_request_widget/event_hub';
-import testAction from '../../helpers/vuex_action_helper';
 import { resetStore } from '../helpers';
 import {
   discussionMock,
@@ -918,7 +918,6 @@ describe('Actions Notes Store', () => {
       testSubmitSuggestion(done, () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, { discussionId, noteId, suggestionId }],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
         ]);
 
@@ -1001,8 +1000,6 @@ describe('Actions Notes Store', () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_APPLYING_BATCH_STATE, true],
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[0]],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[1]],
           [mutationTypes.CLEAR_SUGGESTION_BATCH],
           [mutationTypes.SET_APPLYING_BATCH_STATE, false],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],
@@ -1066,8 +1063,6 @@ describe('Actions Notes Store', () => {
         expect(commit.mock.calls).toEqual([
           [mutationTypes.SET_APPLYING_BATCH_STATE, true],
           [mutationTypes.SET_RESOLVING_DISCUSSION, true],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[0]],
-          [mutationTypes.APPLY_SUGGESTION, batchSuggestionsInfo[1]],
           [mutationTypes.CLEAR_SUGGESTION_BATCH],
           [mutationTypes.SET_APPLYING_BATCH_STATE, false],
           [mutationTypes.SET_RESOLVING_DISCUSSION, false],

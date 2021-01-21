@@ -15,10 +15,6 @@ module EE
               null: true,
               description: 'The DAST scanner profiles associated with the project'
 
-        field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
-              calls_gitaly: true,
-              description: 'SAST CI configuration for the project'
-
         field :vulnerabilities,
               ::Types::VulnerabilityType.connection_type,
               null: true,
@@ -129,12 +125,6 @@ module EE
         return unless Ability.allowed?(current_user, :read_requirement, object)
 
         Hash.new(0).merge(object.requirements.counts_by_state)
-      end
-
-      def sast_ci_configuration
-        return unless Ability.allowed?(current_user, :download_code, object)
-
-        ::Security::CiConfiguration::SastParserService.new(object).configuration
       end
 
       def security_dashboard_path

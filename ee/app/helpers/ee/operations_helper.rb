@@ -47,12 +47,6 @@ module EE
 
     private
 
-    def alerts_service
-      strong_memoize(:alerts_service) do
-        @project.find_or_initialize_service(::AlertsService.to_param)
-      end
-    end
-
     def incident_sla_data
       setting = project_incident_management_setting
 

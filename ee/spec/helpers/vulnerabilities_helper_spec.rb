@@ -144,6 +144,22 @@ RSpec.describe VulnerabilitiesHelper do
         expect(subject[:pipeline]).to be_nil
       end
     end
+
+    describe '[:has_mr]' do
+      subject { helper.vulnerability_details(vulnerability, pipeline)[:has_mr] }
+
+      context 'with existing merge request feedback' do
+        before do
+          create(:vulnerability_feedback, :merge_request, project: project, pipeline: pipeline, project_fingerprint: finding.project_fingerprint)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'without feedback' do
+        it { is_expected.to be_falsey }
+      end
+    end
   end
 
   describe '#create_jira_issue_url_for' do

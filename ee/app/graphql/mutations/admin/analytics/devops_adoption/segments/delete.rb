@@ -12,7 +12,7 @@ module Mutations
 
             argument :id, ::Types::GlobalIDType[::Analytics::DevopsAdoption::Segment],
               required: true,
-              description: "ID of the segment"
+              description: "ID of the segment."
 
             def resolve(id:, **)
               response = ::Analytics::DevopsAdoption::Segments::DeleteService

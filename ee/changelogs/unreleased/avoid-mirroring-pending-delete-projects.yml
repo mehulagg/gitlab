@@ -1,0 +1,5 @@
+---
+title: Avoid scheduling mirrors for pending_delete projects
+merge_request: 50820
+author:
+type: changed

@@ -102,6 +102,11 @@ export default {
       );
     },
   },
+  inject: {
+    dastSiteValidationDocsPath: {
+      default: '',
+    },
+  },
   props: {
     helpPagePath: {
       type: String,
@@ -120,11 +125,6 @@ export default {
       type: Object,
       required: false,
       default: null,
-    },
-  },
-  inject: {
-    dastSiteValidationDocsPath: {
-      default: '',
     },
   },
   data() {

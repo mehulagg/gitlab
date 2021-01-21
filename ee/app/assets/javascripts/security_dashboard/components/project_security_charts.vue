@@ -7,7 +7,7 @@ import { formatDate, getDateInPast } from '~/lib/utils/datetime_utility';
 import { createProjectLoadingError } from '../helpers';
 import DashboardNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityChartsLayout from './security_charts_layout.vue';
-import projectsHistoryQuery from '../graphql/project_vulnerabilities_by_day_and_count.graphql';
+import projectsHistoryQuery from '../graphql/queries/project_vulnerabilities_by_day_and_count.query.graphql';
 
 const MAX_DAYS = 100;
 const ISO_DATE = 'isoDate';

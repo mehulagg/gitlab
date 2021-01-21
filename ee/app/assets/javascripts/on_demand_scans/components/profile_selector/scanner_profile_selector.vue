@@ -9,19 +9,19 @@ export default {
     ProfileSelector,
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    profiles: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-  },
   inject: {
     scannerProfilesLibraryPath: {
       default: '',
     },
     newScannerProfilePath: {
       default: '',
+    },
+  },
+  props: {
+    profiles: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
   },
   computed: {

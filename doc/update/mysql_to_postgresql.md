@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -142,7 +142,7 @@ new PostgreSQL one:
    sudo -u gitlab-psql pgloader commands.load
    ```
 
-1. Once the migration finishes, you should see a summary table that looks like
+1. After the migration finishes, you should see a summary table that looks like
    the following:
 
    ```plaintext
@@ -243,7 +243,7 @@ new PostgreSQL one:
    sudo -u postgres pgloader commands.load
    ```
 
-1. Once the migration finishes, you should see a summary table that looks like
+1. After the migration finishes, you should see a summary table that looks like
    the following:
 
    ```plaintext

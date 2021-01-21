@@ -55,7 +55,7 @@ RSpec.describe Gitlab::ApplicationContext do
       specify do
         # Build a hash that has all `provided_options` as keys, and `nil` as value
         provided_values = provided_options.map { |key| [key, nil] }.to_h
-        context = described_class.new(provided_values)
+        context = described_class.new(**provided_values)
 
         expect(context.to_lazy_hash.keys).to contain_exactly(*expected_context_keys)
       end
