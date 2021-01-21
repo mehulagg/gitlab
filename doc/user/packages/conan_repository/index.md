@@ -282,8 +282,9 @@ Additional Conan images to use as the basis of your CI file are available in the
 ### Re-publishing a package with the same recipe
 
 When you publish a package that has the same recipe (`package-name/version@user/channel`)
-as an existing package, the duplicate files are uploaded successfully and are accessible through the UI. However,
-when the package is installed, only the most recently-published set is returned.
+as an existing package, the duplicate files are uploaded successfully and
+are accessible through the UI. However, when the package is installed,
+only the most recently-published package is returned.
 
 ## Install a Conan package
 
