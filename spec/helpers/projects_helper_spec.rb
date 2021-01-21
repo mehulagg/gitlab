@@ -398,6 +398,20 @@ RSpec.describe ProjectsHelper do
       helper.send(:get_project_nav_tabs, project, user)
     end
 
+    context 'security configuration' do
+      context 'when feature flag is enabled' do
+        it { is_expected.to include(:security_configuration) }
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          allow(helper).to receive(:can?).with(user, :read_security_configuration, project) { false }
+        end
+
+        it { is_expected.not_to include(:security_configuration) }
+      end
+    end
+
     context 'when builds feature is enabled' do
       before do
         allow(project).to receive(:builds_enabled?).and_return(true)

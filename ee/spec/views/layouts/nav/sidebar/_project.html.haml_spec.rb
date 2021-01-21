@@ -93,6 +93,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       allow(view).to receive(:can?).with(nil, :read_dependencies, project).and_return(can_read_dependencies)
       allow(view).to receive(:can?).with(nil, :read_project_security_dashboard, project).and_return(can_read_dashboard)
       allow(view).to receive(:can?).with(nil, :read_project_audit_events, project).and_return(can_read_project_audit_events)
+      allow(view).to receive(:can?).with(nil, :read_security_configuration, project).and_return(can_read_security_configuration)
       render
     end
 
@@ -100,6 +101,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_dashboard) { true }
       let(:can_read_dependencies) { true }
       let(:can_read_project_audit_events) { true }
+      let(:can_read_security_configuration) { true }
 
       it 'top level navigation link is visible' do
         expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
@@ -126,6 +128,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_dashboard) { true }
       let(:can_read_dependencies) { false }
       let(:can_read_project_audit_events) { false }
+      let(:can_read_security_configuration) { true }
 
       it 'top level navigation link is visible' do
         expect(rendered).to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
@@ -152,6 +155,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_dashboard) { false }
       let(:can_read_dependencies) { true }
       let(:can_read_project_audit_events) { false }
+      let(:can_read_security_configuration) { false }
 
       it 'top level navigation link is visible' do
         expect(rendered).to have_link('Security & Compliance', href: project_dependencies_path(project))
@@ -178,6 +182,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_dashboard) { false }
       let(:can_read_dependencies) { false }
       let(:can_read_project_audit_events) { true }
+      let(:can_read_security_configuration) { false }
 
       it 'top level navigation link is visible' do
         expect(rendered).to have_link('Security & Compliance', href: project_audit_events_path(project))
@@ -204,6 +209,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:can_read_dependencies) { false }
       let(:can_read_dashboard) { false }
       let(:can_read_project_audit_events) { false }
+      let(:can_read_security_configuration) { false }
 
       it 'top level navigation link is visible' do
         expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
