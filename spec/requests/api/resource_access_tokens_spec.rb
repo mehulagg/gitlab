@@ -193,6 +193,23 @@ RSpec.describe API::ResourceAccessTokens do
           expect(response.body).to include("User does not have permission to create project Access Token")
         end
       end
+
+      context "when a project access token tries to create another project access token" do
+        let_it_be(:params) { { name: 'test', scopes: ["api"], expires_at: Date.today + 1.month } }
+        let_it_be(:project_bot) { create(:user, :project_bot) }
+        let_it_be(:access_tokens) { create_list(:personal_access_token, 3, user: project_bot) }
+
+        before do
+          project.add_maintainer(project_bot)
+        end
+
+        it 'does not allow a project access token to create another project access token' do
+          post api("/projects/#{project.id}/access_tokens", project_bot), params: params
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(response.body).to include("User does not have permission to create project Access Token")
+        end
+      end
     end
   end
 end

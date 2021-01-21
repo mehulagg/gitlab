@@ -16,6 +16,17 @@ RSpec.shared_examples 'Self-managed Core resource access tokens' do
 
     it { is_expected.not_to be_allowed(:admin_resource_access_tokens) }
   end
+
+  context 'with project bot' do
+    let(:project_bot) { create(:user, :project_bot) }
+    let(:current_user) { project_bot }
+
+    before do
+      project.add_maintainer(project_bot)
+    end
+
+    it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+  end
 end
 
 RSpec.shared_examples 'GitLab.com Core resource access tokens' do

@@ -30,6 +30,9 @@ class ProjectPolicy < BasePolicy
   desc "User has maintainer access"
   condition(:maintainer) { team_access_level >= Gitlab::Access::MAINTAINER }
 
+  desc "User is a project bot"
+  condition(:project_bot) { user.project_bot? }
+
   desc "Project is public"
   condition(:public_project, scope: :subject, score: 0) { project.public? }
 
@@ -616,7 +619,7 @@ class ProjectPolicy < BasePolicy
     prevent :read_project
   end
 
-  rule { resource_access_token_available & can?(:admin_project) }.policy do
+  rule { resource_access_token_available & can?(:admin_project) & ~project_bot }.policy do
     enable :admin_resource_access_tokens
   end
 
