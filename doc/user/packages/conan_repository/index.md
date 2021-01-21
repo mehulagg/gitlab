@@ -279,10 +279,10 @@ create_package:
 Additional Conan images to use as the basis of your CI file are available in the
 [Conan docs](https://docs.conan.io/en/latest/howtos/run_conan_in_docker.html#available-docker-images).
 
-### Publishing a package with the same name or version
+### Re-publishing a package with the same recipe
 
 When you publish a package that has the same recipe (`package-name/version@user/channel`)
-as an existing package, the duplicate files are uploaded successfully. However,
+as an existing package, the duplicate files are uploaded successfully and are accessible through the UI. However,
 when the package is installed, only the most recently-published set is returned.
 
 ## Install a Conan package
