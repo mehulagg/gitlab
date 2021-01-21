@@ -93,11 +93,12 @@ RSpec.describe API::ResourceAccessTokens do
     end
 
     describe "DELETE /:id/access_tokens/:token_id" do
-      subject(:delete_token) { delete api("/projects/#{project_id}/access_tokens/#{token.id}", user) }
+      subject(:delete_token) { delete api("/projects/#{project_id}/access_tokens/#{token_id}", user) }
 
       let_it_be(:project_bot) { create(:user, :project_bot) }
       let_it_be(:token) { create(:personal_access_token, user: project_bot) }
       let_it_be(:project_id) { project.id }
+      let_it_be(:token_id) { token.id }
 
       before do
         project.add_maintainer(project_bot)
@@ -115,7 +116,17 @@ RSpec.describe API::ResourceAccessTokens do
         end
 
         context "when attempting to delete a non-existent project access token" do
-          let_it_be(:project_id) { 1337 }
+          let_it_be(:token_id) { 1337369 }
+
+          it "does not delete the token, and returns 404" do
+            delete_token
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+
+        context "when attempting to delete a token from a different project" do
+          let_it_be(:project_id) { other_project.id }
 
           it "does not delete the token, and returns 404" do
             delete_token
