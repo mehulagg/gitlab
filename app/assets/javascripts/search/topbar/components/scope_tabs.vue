@@ -1,5 +1,5 @@
 <script>
-import { GlTabs, GlTab } from '@gitlab/ui';
+import { GlTabs, GlTab, GlBadge } from '@gitlab/ui';
 import { mapState } from 'vuex';
 import { ALL_SCOPE_TABS } from '../constants';
 
@@ -8,6 +8,7 @@ export default {
   components: {
     GlTabs,
     GlTab,
+    GlBadge,
   },
   props: {
     scopeTabs: {
@@ -46,16 +47,21 @@ export default {
 </script>
 
 <template>
-  <div v-if="shouldShowTabs">
-<!--    SCOPE TABS = {{scopeTabs}}<br>-->
-<!--    ALL TABS = {{$options.ALL_SCOPE_TABS}}<br>-->
-<!--    SELECTED TABS = {{$options.ALL_SCOPE_TABS[scopeTabs[0]]}}<br>-->
+  <div v-if="shouldShowTabs" class="scrolling-tabs-container inner-page-scroll-tabs is-smaller">
     <gl-tabs class="nav-links search-filter scrolling-tabs nav nav-tabs">
       <gl-tab
         v-for="tab in scopeTabs"
         :key="$options.ALL_SCOPE_TABS[tab].scope"
         :active="isTabActive($options.ALL_SCOPE_TABS[tab].scope)"
-        :title="$options.ALL_SCOPE_TABS[tab].title"/>
+        >
+        <template #title>
+          <span> {{ $options.ALL_SCOPE_TABS[tab].title }} </span>
+          <gl-badge
+            :variant="isTabActive($options.ALL_SCOPE_TABS[tab].scope) ? 'neutral' : 'muted'" size="md">
+            {{ count }}
+          </gl-badge>
+        </template>
+      </gl-tab>
     </gl-tabs>
   </div>
 </template>
