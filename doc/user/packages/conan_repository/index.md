@@ -171,7 +171,7 @@ convention.
 
 ## Authenticate to the Package Registry
 
-To authenticate to the Package Registry, you need either:
+To authenticate to the Package Registry, you need one of the following:
 
 - A [personal access token](../../../user/profile/personal_access_tokens.md)
   with the scope set to `api`.
