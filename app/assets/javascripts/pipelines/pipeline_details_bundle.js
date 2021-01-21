@@ -2,12 +2,9 @@ import Vue from 'vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import Translate from '~/vue_shared/translate';
 import { __ } from '~/locale';
-import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
 import createDagApp from './pipeline_details_dag';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
-import legacyPipelineHeader from './components/legacy_header_component.vue';
-import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
 import createTestReportsStore from './stores/test_reports';
 import { reportToSentry } from './components/graph/utils';
@@ -59,58 +56,6 @@ const createLegacyPipelinesDetailApp = (mediator) => {
   });
 };
 
-const createLegacyPipelineHeaderApp = (mediator) => {
-  if (!document.querySelector(SELECTORS.PIPELINE_HEADER)) {
-    return;
-  }
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: SELECTORS.PIPELINE_HEADER,
-    components: {
-      legacyPipelineHeader,
-    },
-    data() {
-      return {
-        mediator,
-      };
-    },
-    created() {
-      eventHub.$on('headerPostAction', this.postAction);
-      eventHub.$on('headerDeleteAction', this.deleteAction);
-    },
-    beforeDestroy() {
-      eventHub.$off('headerPostAction', this.postAction);
-      eventHub.$off('headerDeleteAction', this.deleteAction);
-    },
-    errorCaptured(err, _vm, info) {
-      reportToSentry('pipeline_details_bundle_legacy', `error: ${err}, info: ${info}`);
-    },
-    methods: {
-      postAction(path) {
-        this.mediator.service
-          .postAction(path)
-          .then(() => this.mediator.refreshPipeline())
-          .catch(() => Flash(__('An error occurred while making the request.')));
-      },
-      deleteAction(path) {
-        this.mediator.stopPipelinePoll();
-        this.mediator.service
-          .deleteAction(path)
-          .then(({ request }) => redirectTo(setUrlFragment(request.responseURL, 'delete_success')))
-          .catch(() => Flash(__('An error occurred while deleting the pipeline.')));
-      },
-    },
-    render(createElement) {
-      return createElement('legacy-pipeline-header', {
-        props: {
-          isLoading: this.mediator.state.isLoading,
-          pipeline: this.mediator.store.state.pipeline,
-        },
-      });
-    },
-  });
-};
-
 const createTestDetails = () => {
   const el = document.querySelector(SELECTORS.PIPELINE_TESTS);
   const { summaryEndpoint, suiteEndpoint } = el?.dataset || {};
@@ -142,7 +87,7 @@ export default async function () {
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
-  if (!gon.features.graphqlPipelineHeader || !canShowNewPipelineDetails) {
+  if (!canShowNewPipelineDetails) {
     try {
       const { default: PipelinesMediator } = await import(
         /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
@@ -169,16 +114,12 @@ export default async function () {
     createLegacyPipelinesDetailApp(mediator);
   }
 
-  if (gon.features.graphqlPipelineHeader) {
-    try {
-      const { createPipelineHeaderApp } = await import(
-        /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
-      );
-      createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
-    } catch {
-      Flash(__('An error occurred while loading a section of this page.'));
-    }
-  } else {
-    createLegacyPipelineHeaderApp(mediator);
+  try {
+    const { createPipelineHeaderApp } = await import(
+      /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+    );
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
+  } catch {
+    Flash(__('An error occurred while loading a section of this page.'));
   }
 }

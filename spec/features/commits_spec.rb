@@ -140,7 +140,6 @@ RSpec.describe 'Commits' do
 
       context 'when accessing internal project with disallowed access', :js do
         before do
-          stub_feature_flags(graphql_pipeline_header: false)
           project.update(
             visibility_level: Gitlab::VisibilityLevel::INTERNAL,
             public_builds: false)
@@ -151,7 +150,6 @@ RSpec.describe 'Commits' do
         it do
           expect(page).to have_content pipeline.sha[0..7]
           expect(page).to have_content pipeline.git_commit_message.gsub!(/\s+/, ' ')
-          expect(page).to have_content pipeline.user.name
 
           expect(page).not_to have_link('Cancel running')
           expect(page).not_to have_link('Retry')
