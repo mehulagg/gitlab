@@ -10,8 +10,39 @@ RSpec.describe Gitlab::Tracking::StandardContext do
 
   describe '#to_context' do
     context 'with no arguments' do
-      it 'contains environment' do
-        expect(snowplow_context.to_json.dig(:data, :environment)).to eq('development')
+      context 'environment' do
+        shared_examples 'contains environment' do |expected_environment|
+          it 'contains environment' do
+            expect(snowplow_context.to_json.dig(:data, :environment)).to eq(expected_environment)
+          end
+        end
+
+        context 'development or test' do
+          before do
+            allow(Gitlab).to receive(:dev_or_test_env?).and_return(true)
+          end
+
+          include_examples 'contains environment', 'development'
+        end
+
+        context 'staging' do
+          before do
+            allow(Gitlab).to receive(:dev_or_test_env?).and_return(false)
+            allow(Gitlab).to receive(:staging?).and_return(true)
+          end
+
+          include_examples 'contains environment', 'staging'
+        end
+
+        context 'production' do
+          before do
+            allow(Gitlab).to receive(:dev_or_test_env?).and_return(false)
+            allow(Gitlab).to receive(:staging?).and_return(false)
+            allow(Gitlab).to receive(:com_and_canary?).and_return(true)
+          end
+
+          include_examples 'contains environment', 'production'
+        end
       end
     end
 
