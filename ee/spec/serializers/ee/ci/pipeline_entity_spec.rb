@@ -3,11 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe PipelineEntity do
-  include Gitlab::Routing
-
-  let(:project) { build_stubbed(:project) }
+  let(:user) { build_stubbed(:user) }
   let(:pipeline) { build_stubbed(:ci_empty_pipeline) }
-  let(:request) { double('request', current_user: project.owner, project: project) }
+  let(:request) { double('request', current_user: user) }
   let(:entity) { described_class.represent(pipeline, request: request) }
 
   describe '#as_json' do
