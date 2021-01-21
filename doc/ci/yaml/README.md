@@ -2318,13 +2318,7 @@ job3:
 #### `allow_failure:exit_codes`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273157) in GitLab 13.8.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-allow_failureexit_codes). **(CORE ONLY)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292024) in GitLab 13.9.
 
 Use `allow_failure:exit_codes` to dynamically control if a job should be allowed
 to fail. You can list which exit codes are not considered failures. The job fails
@@ -2346,25 +2340,6 @@ test_job_2:
     exit_codes:
       - 137
       - 255
-```
-
-##### Enable or disable `allow_failure:exit_codes` **(CORE ONLY)**
-
-`allow_failure:exit_codes` is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_allow_failure_with_exit_codes)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_allow_failure_with_exit_codes)
 ```
 
 ### `when`
@@ -4475,21 +4450,30 @@ You can use [YAML anchors](#anchors) with [script](#script), [`before_script`](#
 and [`after_script`](#after_script) to use predefined commands in multiple jobs:
 
 ```yaml
-.some-script: &some-script
-  - echo "Execute this script in `before_script` sections"
-
 .some-script-before: &some-script-before
-  - echo "Execute this script in `script` sections"
+  - echo "Execute this script first"
+
+.some-script: &some-script
+  - echo "Execute this script second"
+  - echo "Execute this script too"
 
 .some-script-after: &some-script-after
-  - echo "Execute this script in `after_script` sections"
+  - echo "Execute this script last"
 
-job_name:
+job1:
   before_script:
     - *some-script-before
   script:
     - *some-script
+    - echo "Execute something, for this job only"
   after_script:
+    - *some-script-after
+
+job2:
+  script:
+    - *some-script-before
+    - *some-script
+    - echo "Execute something else, for this job only"
     - *some-script-after
 ```
 

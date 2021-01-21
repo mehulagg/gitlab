@@ -167,6 +167,7 @@ GitHub
 GitLab
 gitlabsos
 Gitleaks
+Gitpod
 Gitter
 globals
 Gmail
@@ -233,6 +234,7 @@ Kubecost
 kubectl
 Kubernetes
 Kubesec
+Kustomize
 Laravel
 ldapsearch
 Lefthook

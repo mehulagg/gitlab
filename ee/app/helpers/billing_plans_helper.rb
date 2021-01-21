@@ -25,6 +25,10 @@ module BillingPlansHelper
   end
 
   def use_new_purchase_flow?(namespace)
+    # new flow requires the user to already have a last name.
+    # This can be removed once https://gitlab.com/gitlab-org/gitlab/-/issues/298715 is complete.
+    return false unless current_user.last_name.present?
+
     namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
   end
 

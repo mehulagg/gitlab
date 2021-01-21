@@ -557,6 +557,7 @@ RSpec.describe ProjectPolicy do
         create_merge_request_in
         create_vulnerability_feedback
         read_project
+        admin_merge_request
       )
     end
 

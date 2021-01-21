@@ -67,6 +67,24 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
     end
 
+    context 'when report data includes all raw_metadata' do
+      let(:trait) { :dependency_scanning_remediation }
+
+      it 'inserts top level finding data', :aggregate_failures do
+        subject
+
+        finding = Vulnerabilities::Finding.last
+        finding.raw_metadata = nil
+
+        expect(finding.metadata).to be_blank
+        expect(finding.cve).not_to be_nil
+        expect(finding.description).not_to be_nil
+        expect(finding.location).not_to be_nil
+        expect(finding.message).not_to be_nil
+        expect(finding.solution).not_to be_nil
+      end
+    end
+
     context 'invalid data' do
       let(:artifact) { create(:ee_ci_job_artifact, :sast) }
       let(:finding_without_name) { build(:ci_reports_security_finding, name: nil) }

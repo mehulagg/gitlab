@@ -10,6 +10,26 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE FUNCTION set_has_external_issue_tracker() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+UPDATE projects SET has_external_issue_tracker = (
+  EXISTS
+  (
+    SELECT 1
+    FROM services
+    WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
+      AND active = TRUE
+      AND category = 'issue_tracker'
+    )
+  )
+WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
+RETURN NULL;
+
+END
+$$;
+
 CREATE FUNCTION set_has_external_wiki() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -13863,7 +13883,8 @@ CREATE TABLE merge_request_context_commits (
     committer_name text,
     committer_email text,
     message text,
-    merge_request_id bigint
+    merge_request_id bigint,
+    trailers jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE SEQUENCE merge_request_context_commits_id_seq
@@ -13885,7 +13906,8 @@ CREATE TABLE merge_request_diff_commits (
     author_email text,
     committer_name text,
     committer_email text,
-    message text
+    message text,
+    trailers jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE TABLE merge_request_diff_details (
@@ -14309,7 +14331,8 @@ CREATE TABLE namespaces (
     shared_runners_enabled boolean DEFAULT true NOT NULL,
     allow_descendants_override_disabled_shared_runners boolean DEFAULT false NOT NULL,
     traversal_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
-    delayed_project_removal boolean DEFAULT false NOT NULL
+    delayed_project_removal boolean DEFAULT false NOT NULL,
+    repository_read_only boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE namespaces_id_seq
@@ -18009,7 +18032,16 @@ CREATE TABLE vulnerability_occurrences (
     metadata_version character varying NOT NULL,
     raw_metadata text NOT NULL,
     vulnerability_id bigint,
-    details jsonb DEFAULT '{}'::jsonb NOT NULL
+    details jsonb DEFAULT '{}'::jsonb NOT NULL,
+    description text,
+    message text,
+    solution text,
+    cve text,
+    location jsonb,
+    CONSTRAINT check_4a3a60f2ba CHECK ((char_length(solution) <= 7000)),
+    CONSTRAINT check_ade261da6b CHECK ((char_length(description) <= 15000)),
+    CONSTRAINT check_df6dd20219 CHECK ((char_length(message) <= 3000)),
+    CONSTRAINT check_f602da68dd CHECK ((char_length(cve) <= 48400))
 );
 
 CREATE SEQUENCE vulnerability_occurrences_id_seq
@@ -23627,6 +23659,12 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_delete AFTER DELETE ON services FOR EACH ROW WHEN ((((old.category)::text = 'issue_tracker'::text) AND (old.active = true) AND (old.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_insert AFTER INSERT ON services FOR EACH ROW WHEN ((((new.category)::text = 'issue_tracker'::text) AND (new.active = true) AND (new.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_update AFTER UPDATE ON services FOR EACH ROW WHEN ((((new.category)::text = 'issue_tracker'::text) AND (old.active <> new.active) AND (new.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
 
 CREATE TRIGGER trigger_has_external_wiki_on_delete AFTER DELETE ON services FOR EACH ROW WHEN ((((old.type)::text = 'ExternalWikiService'::text) AND (old.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_wiki();
 

@@ -29,7 +29,7 @@ module Registrations
 
         url_params[:trial_onboarding_flow] = true
       else
-        record_experiment_user(:trial_during_signup, trial_chosen: trial)
+        record_experiment_user(:trial_during_signup, trial_chosen: trial, namespace_id: @group.id)
 
         if experiment_enabled?(:trial_during_signup)
           if trial

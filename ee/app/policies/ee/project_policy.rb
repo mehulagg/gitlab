@@ -234,6 +234,7 @@ module EE
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
+        enable :admin_merge_request
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do

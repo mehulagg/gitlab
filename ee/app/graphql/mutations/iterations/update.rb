@@ -68,7 +68,7 @@ module Mutations
 
       def find_object(parent:, id:)
         ::Resolvers::IterationsResolver.new(object: parent, context: context, field: nil)
-          .resolve(id: id).items.first
+          .resolve(id: id).first
       end
 
       def validate_arguments!(args)

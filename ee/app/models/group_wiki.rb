@@ -8,8 +8,12 @@ class GroupWiki < Wiki
   def create_wiki_repository
     super
 
+    track_wiki_repository(repository.shard)
+  end
+
+  def track_wiki_repository(shard)
     storage_record = container.group_wiki_repository || container.build_group_wiki_repository
-    storage_record.update!(shard_name: repository.shard, disk_path: storage.disk_path)
+    storage_record.update!(shard_name: shard, disk_path: storage.disk_path)
   end
 
   override :storage

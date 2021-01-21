@@ -1020,8 +1020,6 @@ module Ci
     end
 
     def debug_mode?
-      return false unless Feature.enabled?(:restrict_access_to_build_debug_mode, default_enabled: true)
-
       # TODO: Have `debug_mode?` check against data on sent back from runner
       # to capture all the ways that variables can be set.
       # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
@@ -1124,7 +1122,6 @@ module Ci
     end
 
     def conditionally_allow_failure!(exit_code)
-      return unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes_enabled?
       return unless exit_code
 
       if allowed_to_fail_with_code?(exit_code)

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RotationsListSectionComponent renders component layout 1`] = `
+exports[`RotationsListSectionComponent when the timeframe includes today renders component layout 1`] = `
 <div
   class="list-section"
 >
@@ -70,6 +70,7 @@ exports[`RotationsListSectionComponent renders component layout 1`] = `
     >
       <span
         class="current-day-indicator"
+        data-testid="current-day-indicator"
         style="left: 7.142857142857143%;"
       />
        
