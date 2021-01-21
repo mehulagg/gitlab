@@ -276,7 +276,7 @@ RSpec.describe API::Environments do
         new_stopped_other_env  = create(:environment, :stopped, project: project)
         old_active_other_env   = create(:environment, :available, created_at: 31.days.ago, project: project)
 
-        delete api("/projects/#{project.id}/environments/stale", user)
+        delete api("/projects/#{project.id}/environments/stale", user), params: { dry_run: false }
         project.environments.reload
 
         expect(response).to have_gitlab_http_status(:ok)
