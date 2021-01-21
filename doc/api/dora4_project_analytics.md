@@ -50,3 +50,44 @@ Example response:
   }
 ]
 ```
+
+## List project lead times
+
+Get a list of all project merge request lead times:
+
+```plaintext
+GET /projects/:id/analytics/lead_time?from=:from&to=:to&interval=:interval
+```
+
+| Attribute    | Type   | Required | Description           |
+|--------------|--------|----------|-----------------------|
+| `id`         | string | yes      | The ID of the project |
+
+| Parameter    | Type   | Required | Description           |
+|--------------|--------|----------|-----------------------|
+| `from`       | string | yes      | Datetime range to start from, inclusive, ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`) |
+| `to`         | string | no       | Datetime range to end at, exclusive, ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`) |
+| `interval`   | string | no       | The bucketing interval (`all`, `monthly`, `daily`) |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/analytics/lead_time?from=:from&to=:to&interval=:interval"
+```
+
+Example response:
+
+Response values are given as the average number of hours between merge request creation and merge time.
+
+```json
+[
+  {
+    "from": "2017-01-01",
+    "to": "2017-01-02",
+    "value": 24
+  },
+  {
+    "from": "2017-01-02",
+    "to": "2017-01-03",
+    "value": 8
+  }
+]
+```

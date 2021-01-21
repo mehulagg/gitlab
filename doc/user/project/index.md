@@ -383,6 +383,7 @@ with the alias (e.g `git clone git@gitlab.com:gitlab.git` instead of
 Project details include the following analytics:
 
 - Deployment Frequency
+- Merge Request Lead Time
 
 For more information, see [DORA4 Project Analytics API](../../api/dora4_project_analytics.md).
 
