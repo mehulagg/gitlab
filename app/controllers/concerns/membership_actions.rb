@@ -35,7 +35,7 @@ module MembershipActions
         render json: {}
       end
     else
-      render json:  { message: result[:message] }, status: :unprocessable_entity
+      render json: { message: result[:message] }, status: :unprocessable_entity
     end
   end
 
