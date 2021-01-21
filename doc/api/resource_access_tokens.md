@@ -63,7 +63,7 @@ POST /:id/access_tokens
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 --header "Content-Type:application/json" \
 --data '{ "name":"test_token", "scopes":["api", "read_repository"], "expires_at":"2021-01-31" }' \
-"http://127.0.0.1:3000/api/v4/projects/20/access_tokens"
+"https://gitlab.example.com/api/v4/projects/<project_id>/access_tokens"
 ```
 
 ```json
