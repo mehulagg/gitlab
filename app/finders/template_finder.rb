@@ -21,6 +21,36 @@ class TemplateFinder
         new(type, project, params)
       end
     end
+
+    # This method is going to be replaced by _template_names once we introduce issue and merge request templates at group level
+    # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51692
+    #
+    # For issue and merge request description templates we return an array of templates for now,
+    # instead of a hash of templates grouped by category
+    def template_names(project, type)
+      return _template_names(project, type) unless %w[issues merge_requests].include?(type.to_s)
+
+      _template_names(project, type).values.flatten
+    end
+
+    private
+
+    def _template_names(project, type)
+      return {} if !VENDORED_TEMPLATES.key?(type.to_s) && type.to_s != 'licenses'
+
+      template_names_by_category(build(type, project).execute)
+    end
+
+    def template_names_by_category(items)
+      grouped = items.group_by(&:category)
+      categories = grouped.keys
+
+      categories.each_with_object({}) do |category, hash|
+        hash[category] = grouped[category].map do |item|
+          { name: item.name, id: item.key, project_id: item.try(:project_id) }
+        end
+      end
+    end
   end
 
   attr_reader :type, :project, :params

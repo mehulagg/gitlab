@@ -589,12 +589,12 @@ class Repository
   cache_method :avatar
 
   def issue_template_names
-    Gitlab::Template::IssueTemplate.dropdown_names(project)
+    TemplateFinder.template_names(project, :issues)
   end
   cache_method :issue_template_names, fallback: []
 
   def merge_request_template_names
-    Gitlab::Template::MergeRequestTemplate.dropdown_names(project)
+    TemplateFinder.template_names(project, :merge_requests)
   end
   cache_method :merge_request_template_names, fallback: []
 
