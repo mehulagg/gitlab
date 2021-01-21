@@ -1,5 +1,5 @@
 ---
 title: Remove implicit FF check on `Featurable`
-merge_request:
+merge_request: 52223
 author:
 type: removed
