@@ -117,7 +117,7 @@ describe('GroupsListItem', () => {
           .mockRejectedValue(mockError);
       });
 
-      it('shows error message', async () => {
+      it('dispatches `setErrorMessage` action', async () => {
         clickLinkButton();
 
         await waitForPromises();
