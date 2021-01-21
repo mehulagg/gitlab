@@ -43,16 +43,21 @@ describe('Base editor', () => {
     let instanceSpy;
     let setModel;
     let dispose;
+    let modelsStorage;
 
     beforeEach(() => {
       setModel = jest.fn();
       dispose = jest.fn();
+      modelsStorage = new Map();
       modelSpy = jest.spyOn(monacoEditor, 'createModel').mockImplementation(() => fakeModel);
       instanceSpy = jest.spyOn(monacoEditor, 'create').mockImplementation(() => ({
         setModel,
         dispose,
         onDidDispose: jest.fn(),
       }));
+      jest.spyOn(monacoEditor, 'getModel').mockImplementation((uri) => {
+        return modelsStorage.get(uri.path);
+      });
     });
 
     it('throws an error if no dom element is supplied', () => {
@@ -70,6 +75,18 @@ describe('Base editor', () => {
 
       expect(modelSpy).toHaveBeenCalledWith(blobContent, undefined, createUri(blobPath));
       expect(setModel).toHaveBeenCalledWith(fakeModel);
+    });
+
+    it('does not create a new model if a model for the path already exists', () => {
+      modelSpy = jest
+        .spyOn(monacoEditor, 'createModel')
+        .mockImplementation((content, lang, uri) => modelsStorage.set(uri.path, content));
+      const instanceOptions = { el: editorEl, blobPath, blobContent, blobGlobalId: '' };
+      const a = editor.createInstance(instanceOptions);
+      const b = editor.createInstance(instanceOptions);
+
+      expect(a === b).toBe(false);
+      expect(modelSpy).toHaveBeenCalledTimes(1);
     });
 
     it('initializes the instance on a supplied DOM node', () => {

@@ -73,6 +73,47 @@ export default class EditorLite {
     });
   }
 
+  static prepareInstance(el) {
+    if (!el) {
+      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
+    }
+
+    clearDomElement(el);
+
+    monacoEditor.onDidCreateEditor(() => {
+      delete el.dataset.editorLoading;
+    });
+  }
+
+  static manageDefaultExtensions(instance, el, extensions) {
+    EditorLite.loadExtensions(extensions, instance)
+      .then((modules) => {
+        if (modules) {
+          modules.forEach((module) => {
+            instance.use(module.default);
+          });
+        }
+      })
+      .then(() => {
+        el.dispatchEvent(new Event('editor-ready'));
+      })
+      .catch((e) => {
+        throw e;
+      });
+  }
+
+  static createEditorModel({ blobPath, blobContent, blobGlobalId, instance } = {}) {
+    let model = null;
+    if (instance) {
+      const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+      const uri = Uri.file(uriFilePath);
+      const existingModel = monacoEditor.getModel(uri);
+      model = existingModel || monacoEditor.createModel(blobContent, undefined, uri);
+      instance.setModel(model);
+    }
+    return model;
+  }
+
   /**
    * Creates a monaco instance with the given options.
    *
@@ -90,25 +131,15 @@ export default class EditorLite {
     extensions = [],
     ...instanceOptions
   } = {}) {
-    if (!el) {
-      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
-    }
-
-    clearDomElement(el);
-
-    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
-
-    const model = monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
-
-    monacoEditor.onDidCreateEditor(() => {
-      delete el.dataset.editorLoading;
-    });
+    EditorLite.prepareInstance(el);
 
     const instance = monacoEditor.create(el, {
       ...this.options,
       ...instanceOptions,
     });
-    instance.setModel(model);
+
+    const model = EditorLite.createEditorModel({ blobGlobalId, blobPath, blobContent, instance });
+
     instance.onDidDispose(() => {
       const index = this.instances.findIndex((inst) => inst === instance);
       this.instances.splice(index, 1);
@@ -117,20 +148,7 @@ export default class EditorLite {
     instance.updateModelLanguage = (path) => EditorLite.updateModelLanguage(path, instance);
     instance.use = (args) => this.use(args, instance);
 
-    EditorLite.loadExtensions(extensions, instance)
-      .then((modules) => {
-        if (modules) {
-          modules.forEach((module) => {
-            instance.use(module.default);
-          });
-        }
-      })
-      .then(() => {
-        el.dispatchEvent(new Event('editor-ready'));
-      })
-      .catch((e) => {
-        throw e;
-      });
+    EditorLite.manageDefaultExtensions(instance, el, extensions);
 
     this.instances.push(instance);
     return instance;
