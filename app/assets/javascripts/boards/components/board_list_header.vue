@@ -96,6 +96,11 @@ export default {
         this.listType === ListType.assignee && (!this.list.collapsed || !this.isSwimlanesHeader)
       );
     },
+    showIterationListDetails() {
+      return (
+        this.listType === ListType.iteration && (!this.list.collapsed || !this.isSwimlanesHeader)
+      );
+    },
     issuesCount() {
       return this.list.issuesCount;
     },
@@ -214,6 +219,17 @@ export default {
         }"
       >
         <gl-icon name="timer" />
+      </span>
+
+      <span
+        v-if="showIterationListDetails"
+        aria-hidden="true"
+        :class="{
+          'gl-mt-3 gl-rotate-90': list.collapsed,
+          'gl-mr-2': !list.collapsed,
+        }"
+      >
+        <gl-icon name="iteration" />
       </span>
 
       <a
