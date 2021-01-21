@@ -43,6 +43,45 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 ]
 ```
 
+## Create a resource access token
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/238991) in GitLab 13.9.
+
+Create a resource access token. 
+
+```plaintext
+POST /:id/access_tokens
+```
+
+| Attribute | Type    | required | Description         |
+|-----------|---------|----------|---------------------|
+| `name` | String | yes | The name of the resource access token  |
+| `scopes` | Array[String] | yes | The scopes of the resource access token |
+| `expires_at` | Date | no | The expiration date of the resource access token |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+--header "Content-Type:application/json" \
+--data '{ "name":"test_token", "scopes":["api", "read_repository"], "expires_at":"2021-01-31" }' \
+"http://127.0.0.1:3000/api/v4/projects/20/access_tokens"
+```
+
+```json
+{
+   "scopes" : [
+      "api",
+      "read_repository"
+   ],
+   "active" : true,
+   "name" : "test",
+   "revoked" : false,
+   "created_at" : "2021-01-21T19:35:37.921Z",
+   "user_id" : 166,
+   "id" : 58,
+   "expires_at" : "2021-01-31"
+}
+```
+
 ## Revoke a resource access token
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/238991) in GitLab 13.9.
@@ -56,7 +95,7 @@ DELETE /:id/access_tokens/:token_id
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
 | `id` | integer/string | yes | The ID of the project or group  |
-| `token_id` | integer/string | yes | The ID of resource access token |
+| `token_id` | integer/string | yes | The ID of the resource access token |
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/<project_id>/access_tokens/<token_id>"

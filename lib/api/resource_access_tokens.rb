@@ -57,7 +57,7 @@ module API
         params do
           requires :name, type: String, desc: "Resource access token name"
           requires :scopes, type: Array[String], desc: "The permissions of the token"
-          optional :expires_at, type: DateTime, desc: "The expiration date of the token"
+          optional :expires_at, type: Date, desc: "The expiration date of the token"
         end
         post ':id/access_tokens' do
           resource = find_source(source_type, params[:id])
@@ -68,7 +68,11 @@ module API
             declared_params
           ).execute
 
-          token_response.success? ? token_response.payload[:access_token] : token_response.message
+          if token_response.success?
+            present token_response.payload[:access_token], with: Entities::PersonalAccessToken
+          else
+            token_response.message
+          end
         end
       end
     end
