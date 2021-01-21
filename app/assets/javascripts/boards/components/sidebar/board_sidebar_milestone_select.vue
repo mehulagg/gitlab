@@ -34,7 +34,6 @@ export default {
   },
   apollo: {
     milestones: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query: groupMilestones,
       debounce: 250,
       skip() {
@@ -42,14 +41,14 @@ export default {
       },
       variables() {
         return {
-          fullPath: this.groupFullPath,
+          fullPath: this.projectPath,
           searchTitle: this.searchTitle,
           state: 'active',
-          includeDescendants: true,
+          includeAncestors: true,
         };
       },
       update(data) {
-        const edges = data?.group?.milestones?.edges ?? [];
+        const edges = data?.project?.milestones?.edges ?? [];
         return edges.map((item) => item.node);
       },
       error() {
