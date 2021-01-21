@@ -11748,7 +11748,7 @@ msgstr ""
 msgid "Expires"
 msgstr ""
 
-msgid "Expires at (optional)"
+msgid "Expires at"
 msgstr ""
 
 msgid "Expires in %{expires_at}"
@@ -21720,7 +21720,7 @@ msgstr ""
 msgid "Profiles|Enter your name, so people you know can recognize you"
 msgstr ""
 
-msgid "Profiles|Expires at (optional)"
+msgid "Profiles|Expires at"
 msgstr ""
 
 msgid "Profiles|Expires:"
