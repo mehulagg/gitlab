@@ -316,13 +316,13 @@ or instance.
 1. In your project, to install a package, run:
 
    ```shell
-   npm install @my-project-scope/my-package
+   npm install @my-scope/my-package
    ```
 
    Or if you're using Yarn:
 
    ```shell
-   yarn add @my-project-scope/my-package
+   yarn add @my-scope/my-package
    ```
 
 In [GitLab 12.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/55344),
