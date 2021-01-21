@@ -1,0 +1,2 @@
+class ReconciliationForeseeAddOnCharge < ApplicationRecord
+end
