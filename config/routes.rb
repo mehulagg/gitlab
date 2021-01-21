@@ -158,6 +158,7 @@ Rails.application.routes.draw do
         get :db_spin
         get :sleep
         get :kill
+        post :gc
       end
     end
 
@@ -279,7 +280,8 @@ Rails.application.routes.draw do
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/210024
   scope as: 'deprecated' do
     draw :snippets
-    draw :profile
+
+    Gitlab::Routing.redirect_legacy_paths(self, :profile)
   end
 
   Gitlab.ee do

@@ -144,40 +144,38 @@ export default {
       </slot>
     </template>
 
-    <template>
-      <slot name="label-dropdown-list-header">
-        <gl-dropdown-section-header>{{ __('Select a label') }} </gl-dropdown-section-header>
-      </slot>
-      <div class="mb-3 px-3">
-        <gl-search-box-by-type v-model.trim="searchTerm" />
+    <slot name="label-dropdown-list-header">
+      <gl-dropdown-section-header>{{ __('Select a label') }} </gl-dropdown-section-header>
+    </slot>
+    <div class="mb-3 px-3">
+      <gl-search-box-by-type v-model.trim="searchTerm" />
+    </div>
+    <div class="mb-3 px-3">
+      <gl-dropdown-item
+        v-for="label in labels"
+        :key="label.id"
+        :class="{
+          'pl-4': multiselect && !isSelectedLabel(label.id),
+          'cursor-not-allowed': disabled,
+        }"
+        :active="isSelectedLabel(label.id)"
+        @click.prevent="$emit('selectLabel', label.id, selectedLabelIds)"
+      >
+        <gl-icon
+          v-if="multiselect && isSelectedLabel(label.id)"
+          class="text-gray-700 mr-1 vertical-align-middle"
+          name="mobile-issue-close"
+        />
+        <span :style="{ backgroundColor: label.color }" class="d-inline-block dropdown-label-box">
+        </span>
+        {{ labelTitle(label) }}
+      </gl-dropdown-item>
+      <div v-show="loading" class="text-center">
+        <gl-loading-icon :inline="true" size="md" />
       </div>
-      <div class="mb-3 px-3">
-        <gl-dropdown-item
-          v-for="label in labels"
-          :key="label.id"
-          :class="{
-            'pl-4': multiselect && !isSelectedLabel(label.id),
-            'cursor-not-allowed': disabled,
-          }"
-          :active="isSelectedLabel(label.id)"
-          @click.prevent="$emit('selectLabel', label.id, selectedLabelIds)"
-        >
-          <gl-icon
-            v-if="multiselect && isSelectedLabel(label.id)"
-            class="text-gray-700 mr-1 vertical-align-middle"
-            name="mobile-issue-close"
-          />
-          <span :style="{ backgroundColor: label.color }" class="d-inline-block dropdown-label-box">
-          </span>
-          {{ labelTitle(label) }}
-        </gl-dropdown-item>
-        <div v-show="loading" class="text-center">
-          <gl-loading-icon :inline="true" size="md" />
-        </div>
-        <div v-show="noMatchingLabels" class="text-secondary">
-          {{ __('No matching labels') }}
-        </div>
+      <div v-show="noMatchingLabels" class="text-secondary">
+        {{ __('No matching labels') }}
       </div>
-    </template>
+    </div>
   </gl-dropdown>
 </template>

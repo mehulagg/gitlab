@@ -13,7 +13,7 @@ import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_
 import { FEEDBACK_TYPES, VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
 import UsersMockHelper from 'helpers/user_mock_data_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';

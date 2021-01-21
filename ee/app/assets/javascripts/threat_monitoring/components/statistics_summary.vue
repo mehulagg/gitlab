@@ -22,14 +22,14 @@ export default {
         {
           key: 'anomalousTraffic',
           title: anomalous.title,
-          value: `${Math.round(anomalous.value * 100)}%`,
+          value: `${Math.round(anomalous.value * 100)}`,
+          unit: '%',
           variant: 'warning',
         },
         {
           key: 'totalTraffic',
           title: nominal.title,
           value: engineeringNotation(nominal.value),
-          variant: 'secondary',
         },
       ];
     },

@@ -32,22 +32,21 @@ RSpec.describe 'Merge request > User edits MR with multiple reviewers' do
         expect(page).to have_content(rule_name)
       end
     end
-  end
 
-  context 'when reviewer_approval_rules feature flag off' do
-    let(:rule_name) { 'some-custom-rule' }
-    let!(:mr_rule) { create(:approval_merge_request_rule, merge_request: merge_request, users: [user], name: rule_name, approvals_required: 1 )}
+    context 'when reviewer_approval_rules feature flag off' do
+      before do
+        stub_feature_flags(reviewer_approval_rules: false)
 
-    before do
-      stub_feature_flags(reviewer_approval_rules: false)
-    end
+        visit edit_project_merge_request_path(target_project, merge_request)
+      end
 
-    it 'is not shown in reviewer dropdown' do
-      find('.js-reviewer-search').click
-      wait_for_requests
+      it 'is not shown in reviewer dropdown' do
+        find('.js-reviewer-search').click
+        wait_for_requests
 
-      page.within '.dropdown-menu-reviewer' do
-        expect(page).not_to have_content(rule_name)
+        page.within '.dropdown-menu-reviewer' do
+          expect(page).not_to have_content(rule_name)
+        end
       end
     end
   end

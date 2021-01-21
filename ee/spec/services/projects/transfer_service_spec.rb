@@ -90,9 +90,9 @@ RSpec.describe Projects::TransferService do
           create(:elasticsearch_indexed_namespace, namespace: group)
         end
 
-        it 'invalidates the cache and indexes the project and associated issues' do
-          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+        it 'invalidates the cache and indexes the project and all associated data' do
+          expect(Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
           expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
 
           subject.execute(group)
@@ -105,9 +105,9 @@ RSpec.describe Projects::TransferService do
           create(:elasticsearch_indexed_namespace, namespace: project.namespace)
         end
 
-        it 'does not invalidate the cache and reindexes the project only' do
-          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
-          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+        it 'does not invalidate the cache does not index or delete anything' do
+          expect(Elastic::ProcessInitialBookkeepingService).not_to receive(:backfill_projects!).with(project)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
           expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
 
           subject.execute(group)

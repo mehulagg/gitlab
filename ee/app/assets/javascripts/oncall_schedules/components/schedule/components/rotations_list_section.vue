@@ -1,10 +1,10 @@
 <script>
 import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
+import { editRotationModalId, deleteRotationModalId } from 'ee/oncall_schedules/constants';
 import { s__ } from '~/locale';
 import CurrentDayIndicator from './current_day_indicator.vue';
-import RotationAssignee from '../../rotations/components/rotation_assignee.vue';
-import DeleteRotationModal from '../../rotations/components/delete_rotation_modal.vue';
-import { editRotationModalId, deleteRotationModalId } from '../../../constants';
+import ScheduleShift from './schedule_shift.vue';
 
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
@@ -19,8 +19,8 @@ export default {
     GlButtonGroup,
     GlButton,
     CurrentDayIndicator,
-    RotationAssignee,
     DeleteRotationModal,
+    ScheduleShift,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -43,11 +43,15 @@ export default {
   data() {
     return {
       rotationToUpdate: {},
+      shiftWidths: 0,
     };
   },
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
+    },
+    isLastCell(index) {
+      return index + 1 === this.timeframe.length;
     },
   },
 };
@@ -87,15 +91,19 @@ export default {
       <span
         v-for="(timeframeItem, index) in timeframe"
         :key="index"
-        class="timeline-cell"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+        :class="{ 'gl-overflow-hidden': isLastCell(index) }"
         data-testid="timelineCell"
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-        <rotation-assignee
-          :assignee="rotation.participants.nodes[index]"
-          :assignee-index="index"
-          :rotation-length="rotation.length"
-          :rotation-starts-at="rotation.startsAt"
+        <schedule-shift
+          v-for="(shift, shiftIndex) in rotation.shifts.nodes"
+          :key="shift.startAt"
+          :shift="shift"
+          :shift-index="shiftIndex"
+          :preset-type="presetType"
+          :timeframe-item="timeframeItem"
+          :timeframe="timeframe"
         />
       </span>
     </div>

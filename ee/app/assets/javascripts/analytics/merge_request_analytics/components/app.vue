@@ -3,6 +3,7 @@ import dateFormat from 'dateformat';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import DateRange from '../../shared/components/daterange.vue';
 import { dateFormats } from '../../shared/constants';
+import { DEFAULT_NUMBER_OF_DAYS } from '../constants';
 import FilterBar from './filter_bar.vue';
 import ThroughputChart from './throughput_chart.vue';
 import ThroughputTable from './throughput_table.vue';
@@ -40,6 +41,7 @@ export default {
       this.endDate = endDate;
     },
   },
+  dateRangeLimit: DEFAULT_NUMBER_OF_DAYS,
 };
 </script>
 <template>
@@ -52,6 +54,7 @@ export default {
       <date-range
         :start-date="startDate"
         :end-date="endDate"
+        :max-date-range="$options.dateRangeLimit"
         class="gl-lg-mx-3"
         @change="setDateRange"
       />

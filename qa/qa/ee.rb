@@ -81,7 +81,6 @@ module QA
 
         module Settings
           autoload :Templates, 'qa/ee/page/admin/settings/templates'
-          autoload :Elasticsearch, 'qa/ee/page/admin/settings/elasticsearch'
           autoload :Preferences, 'qa/ee/page/admin/settings/preferences'
 
           module Component

@@ -3,8 +3,16 @@
 #
 # Do not edit it manually!
 ---
+- :name: auto_merge:merge_trains_refresh
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 3
+  :idempotent: true
+  :tags: []
 - :name: cronjob:active_user_count_threshold
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -204,7 +212,7 @@
   :idempotent: true
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -276,7 +284,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -863,7 +871,7 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :provision
+  :feature_category: :license
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown

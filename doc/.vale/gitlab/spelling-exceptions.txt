@@ -45,6 +45,7 @@ backtraces
 backtracing
 badging
 Bamboo
+Bazel
 Bitbucket
 blockquote
 blockquoted
@@ -94,6 +95,7 @@ crosslinking
 crosslinks
 Crossplane
 CrowdIn
+CSV
 Dangerfile
 datetime
 Debian
@@ -165,6 +167,7 @@ GitHub
 GitLab
 gitlabsos
 Gitleaks
+Gitpod
 Gitter
 globals
 Gmail
@@ -231,6 +234,7 @@ Kubecost
 kubectl
 Kubernetes
 Kubesec
+Kustomize
 Laravel
 ldapsearch
 Lefthook

@@ -72,6 +72,7 @@ RSpec.describe Gitlab::UsageData do
         license_starts_at
         license_user_count
         license_trial
+        license_subscription_id
         licensee
         license_md5
         license_id
@@ -189,6 +190,7 @@ RSpec.describe Gitlab::UsageData do
       expect(subject[:license_expires_at]).to eq(license.expires_at)
       expect(subject[:license_add_ons]).to eq(license.add_ons)
       expect(subject[:license_trial]).to eq(license.trial?)
+      expect(subject[:license_subscription_id]).to eq(license.subscription_id)
     end
   end
 

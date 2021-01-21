@@ -93,4 +93,48 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
     it_behaves_like 'when response code is 422'
     it_behaves_like 'when response code is 500'
   end
+
+  describe '#activate' do
+    let(:authentication_token) { 'authentication_token' }
+
+    it 'returns success' do
+      expect(described_class).to receive(:http_post).and_return(
+        {
+          success: true,
+          data: {
+            "data" => {
+              "cloudActivationActivate" => {
+                "authenticationToken" => authentication_token,
+                "errors" => []
+              }
+            }
+          }
+        }
+      )
+
+      result = described_class.activate('activation_code_abc')
+
+      expect(result).to eq({ authentication_token: authentication_token, success: true })
+    end
+
+    it 'returns failure' do
+      expect(described_class).to receive(:http_post).and_return(
+        {
+          success: true,
+          data: {
+            "data" => {
+              "cloudActivationActivate" => {
+                "authenticationToken" => nil,
+                "errors" => ["invalid activation code"]
+              }
+            }
+          }
+        }
+      )
+
+      result = described_class.activate('activation_code_abc')
+
+      expect(result).to eq({ errors: ["invalid activation code"], success: false })
+    end
+  end
 end

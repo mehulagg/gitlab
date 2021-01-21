@@ -2,7 +2,9 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import CodequalityReportApp from 'ee/codequality_report/codequality_report.vue';
 import { parsedIssues } from './mock_data';
+import Api from '~/api';
 
+jest.mock('~/api.js');
 jest.mock('~/flash');
 
 const localVue = createLocalVue();
@@ -12,7 +14,7 @@ describe('Codequality report app', () => {
   let wrapper;
   let store;
 
-  const createComponent = (state = {}, issues = []) => {
+  const createComponent = (state = {}, issues = [], glFeatures = {}) => {
     store = new Vuex.Store({
       state: {
         pageInfo: {},
@@ -27,6 +29,9 @@ describe('Codequality report app', () => {
     wrapper = mount(CodequalityReportApp, {
       localVue,
       store,
+      provide: {
+        glFeatures,
+      },
     });
   };
 
@@ -94,6 +99,24 @@ describe('Codequality report app', () => {
       expect(findSuccessIcon().exists()).toBe(true);
       expect(findStatus().text()).toBe('No code quality issues found');
       expect(wrapper.findAll('.report-block-list-issue')).toHaveLength(0);
+    });
+  });
+
+  describe('usage ping tracking', () => {
+    describe('with feature flag enabled', () => {
+      it('tracks an event when mounted', () => {
+        createComponent({}, [], { usageDataITestingFullCodeQualityReportTotal: true });
+
+        expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(wrapper.vm.$options.mountEvent);
+      });
+    });
+
+    describe('with feature flag disabled', () => {
+      it('does not track an event when mounted', () => {
+        createComponent({}, [], { usageDataIFullCodeQualityReportTotal: false });
+
+        expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
+      });
     });
   });
 });

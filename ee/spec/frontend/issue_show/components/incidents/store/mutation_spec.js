@@ -10,8 +10,9 @@ const defaultState = {
 };
 
 const testImages = [
-  { filename: 'test.filename', id: 0, filePath: 'test/file/path', url: null },
-  { filename: 'second.filename', id: 1, filePath: 'second/file/path', url: 'test/url' },
+  { filename: 'test.filename', id: 5, filePath: 'test/file/path', url: null },
+  { filename: 'second.filename', id: 6, filePath: 'second/file/path', url: 'test/url' },
+  { filename: 'third.filename', id: 7, filePath: 'third/file/path', url: 'test/url' },
 ];
 
 describe('Metric images mutations', () => {
@@ -97,6 +98,20 @@ describe('Metric images mutations', () => {
 
     it('should unset the loading state', () => {
       expect(state.isUploadingImage).toBe(false);
+    });
+  });
+
+  describe('RECEIVE_METRIC_DELETE_SUCCESS', () => {
+    const deletedImageId = testImages[1].id;
+    const expectedResult = [testImages[0], testImages[2]];
+
+    beforeEach(() => {
+      createState({ metricImages: [...testImages] });
+      mutations[types.RECEIVE_METRIC_DELETE_SUCCESS](state, deletedImageId);
+    });
+
+    it('should remove the correct metric image', () => {
+      expect(state.metricImages).toEqual(expectedResult);
     });
   });
 

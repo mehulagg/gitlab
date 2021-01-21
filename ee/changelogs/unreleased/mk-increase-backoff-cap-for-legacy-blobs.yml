@@ -1,5 +1,0 @@
----
-title: 'Geo: Increase backoff cap for Job artifacts, LFS objects, and Uploads which are missing on primary'
-merge_request: 50812
-author:
-type: changed

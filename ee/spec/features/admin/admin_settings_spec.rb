@@ -53,11 +53,11 @@ RSpec.describe 'Admin updates EE-only settings' do
   end
 
   context 'Elasticsearch settings' do
+    let(:elastic_search_license) { true }
+
     before do
-      visit general_admin_application_settings_path
-      page.within('.as-elasticsearch') do
-        click_button 'Expand'
-      end
+      stub_licensed_features(elastic_search: elastic_search_license)
+      visit advanced_search_admin_application_settings_path
     end
 
     it 'changes elasticsearch settings' do
@@ -138,14 +138,12 @@ RSpec.describe 'Admin updates EE-only settings' do
       namespace = create(:elasticsearch_indexed_namespace).namespace
       project = create(:elasticsearch_indexed_project).project
 
-      visit general_admin_application_settings_path
+      visit advanced_search_admin_application_settings_path
 
       expect(ElasticsearchIndexedNamespace.count).to be > 0
       expect(ElasticsearchIndexedProject.count).to be > 0
 
       page.within('.as-elasticsearch') do
-        click_button 'Expand'
-
         expect(page).to have_content('Namespaces to index')
         expect(page).to have_content('Projects to index')
         expect(page).to have_content(namespace.full_path)
@@ -174,6 +172,14 @@ RSpec.describe 'Admin updates EE-only settings' do
       text = page.driver.browser.switch_to.alert.text
       expect(text).to eq 'Are you sure you want to reindex?'
       page.driver.browser.switch_to.alert.accept
+    end
+
+    context 'when not licensed' do
+      let(:elastic_search_license) { false }
+
+      it 'cannot access the page' do
+        expect(page).not_to have_content("Advanced Search with Elasticsearch")
+      end
     end
   end
 

@@ -10,6 +10,26 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE FUNCTION set_has_external_issue_tracker() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+UPDATE projects SET has_external_issue_tracker = (
+  EXISTS
+  (
+    SELECT 1
+    FROM services
+    WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
+      AND active = TRUE
+      AND category = 'issue_tracker'
+    )
+  )
+WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
+RETURN NULL;
+
+END
+$$;
+
 CREATE FUNCTION set_has_external_wiki() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -11437,9 +11457,11 @@ CREATE TABLE compliance_management_frameworks (
     color text NOT NULL,
     namespace_id integer NOT NULL,
     regulated boolean DEFAULT true NOT NULL,
+    pipeline_configuration_full_path text,
     CONSTRAINT check_08cd34b2c2 CHECK ((char_length(color) <= 10)),
     CONSTRAINT check_1617e0b87e CHECK ((char_length(description) <= 255)),
-    CONSTRAINT check_ab00bc2193 CHECK ((char_length(name) <= 255))
+    CONSTRAINT check_ab00bc2193 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_e7a9972435 CHECK ((char_length(pipeline_configuration_full_path) <= 255))
 );
 
 CREATE SEQUENCE compliance_management_frameworks_id_seq
@@ -11568,6 +11590,30 @@ CREATE SEQUENCE custom_emoji_id_seq
     CACHE 1;
 
 ALTER SEQUENCE custom_emoji_id_seq OWNED BY custom_emoji.id;
+
+CREATE TABLE dast_profiles (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    dast_site_profile_id bigint NOT NULL,
+    dast_scanner_profile_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    CONSTRAINT check_5fcf73bf61 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_c34e505c24 CHECK ((char_length(description) <= 255))
+);
+
+COMMENT ON TABLE dast_profiles IS '{"owner":"group::dynamic analysis","description":"Profile used to run a DAST on-demand scan"}';
+
+CREATE SEQUENCE dast_profiles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_profiles_id_seq OWNED BY dast_profiles.id;
 
 CREATE TABLE dast_scanner_profiles (
     id bigint NOT NULL,
@@ -13863,7 +13909,8 @@ CREATE TABLE merge_request_context_commits (
     committer_name text,
     committer_email text,
     message text,
-    merge_request_id bigint
+    merge_request_id bigint,
+    trailers jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE SEQUENCE merge_request_context_commits_id_seq
@@ -13885,7 +13932,8 @@ CREATE TABLE merge_request_diff_commits (
     author_email text,
     committer_name text,
     committer_email text,
-    message text
+    message text,
+    trailers jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE TABLE merge_request_diff_details (
@@ -18009,7 +18057,16 @@ CREATE TABLE vulnerability_occurrences (
     metadata_version character varying NOT NULL,
     raw_metadata text NOT NULL,
     vulnerability_id bigint,
-    details jsonb DEFAULT '{}'::jsonb NOT NULL
+    details jsonb DEFAULT '{}'::jsonb NOT NULL,
+    description text,
+    message text,
+    solution text,
+    cve text,
+    location jsonb,
+    CONSTRAINT check_4a3a60f2ba CHECK ((char_length(solution) <= 7000)),
+    CONSTRAINT check_ade261da6b CHECK ((char_length(description) <= 15000)),
+    CONSTRAINT check_df6dd20219 CHECK ((char_length(message) <= 3000)),
+    CONSTRAINT check_f602da68dd CHECK ((char_length(cve) <= 48400))
 );
 
 CREATE SEQUENCE vulnerability_occurrences_id_seq
@@ -18541,6 +18598,8 @@ ALTER TABLE ONLY conversational_development_index_metrics ALTER COLUMN id SET DE
 ALTER TABLE ONLY csv_issue_imports ALTER COLUMN id SET DEFAULT nextval('csv_issue_imports_id_seq'::regclass);
 
 ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_id_seq'::regclass);
+
+ALTER TABLE ONLY dast_profiles ALTER COLUMN id SET DEFAULT nextval('dast_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
 
@@ -19690,6 +19749,9 @@ ALTER TABLE ONLY csv_issue_imports
 
 ALTER TABLE ONLY custom_emoji
     ADD CONSTRAINT custom_emoji_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY dast_profiles
+    ADD CONSTRAINT dast_profiles_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY dast_scanner_profiles
     ADD CONSTRAINT dast_scanner_profiles_pkey PRIMARY KEY (id);
@@ -21514,6 +21576,12 @@ CREATE UNIQUE INDEX index_custom_emoji_on_namespace_id_and_name ON custom_emoji 
 
 CREATE UNIQUE INDEX index_daily_build_group_report_results_unique_columns ON ci_daily_build_group_report_results USING btree (project_id, ref_path, date, group_name);
 
+CREATE INDEX index_dast_profiles_on_dast_scanner_profile_id ON dast_profiles USING btree (dast_scanner_profile_id);
+
+CREATE INDEX index_dast_profiles_on_dast_site_profile_id ON dast_profiles USING btree (dast_site_profile_id);
+
+CREATE UNIQUE INDEX index_dast_profiles_on_project_id_and_name ON dast_profiles USING btree (project_id, name);
+
 CREATE UNIQUE INDEX index_dast_scanner_profiles_on_project_id_and_name ON dast_scanner_profiles USING btree (project_id, name);
 
 CREATE INDEX index_dast_site_profiles_on_dast_site_id ON dast_site_profiles USING btree (dast_site_id);
@@ -22884,6 +22952,8 @@ CREATE INDEX index_security_findings_on_severity ON security_findings USING btre
 
 CREATE UNIQUE INDEX index_security_findings_on_uuid_and_scan_id ON security_findings USING btree (uuid, scan_id);
 
+CREATE INDEX index_security_scans_on_date_created_at_and_id ON security_scans USING btree (date(timezone('UTC'::text, created_at)), id);
+
 CREATE INDEX index_self_managed_prometheus_alert_events_on_environment_id ON self_managed_prometheus_alert_events USING btree (environment_id);
 
 CREATE INDEX index_sent_notifications_on_noteable_type_noteable_id ON sent_notifications USING btree (noteable_id) WHERE ((noteable_type)::text = 'Issue'::text);
@@ -23348,6 +23418,8 @@ CREATE INDEX temporary_index_vulnerabilities_on_id ON vulnerabilities USING btre
 
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
+CREATE INDEX tmp_idx_deduplicate_vulnerability_occurrences ON vulnerability_occurrences USING btree (project_id, report_type, location_fingerprint, primary_identifier_id, id);
+
 CREATE INDEX tmp_index_oauth_applications_on_id_where_trusted ON oauth_applications USING btree (id) WHERE (trusted = true);
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
@@ -23627,6 +23699,12 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_delete AFTER DELETE ON services FOR EACH ROW WHEN ((((old.category)::text = 'issue_tracker'::text) AND (old.active = true) AND (old.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_insert AFTER INSERT ON services FOR EACH ROW WHEN ((((new.category)::text = 'issue_tracker'::text) AND (new.active = true) AND (new.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
+
+CREATE TRIGGER trigger_has_external_issue_tracker_on_update AFTER UPDATE ON services FOR EACH ROW WHEN ((((new.category)::text = 'issue_tracker'::text) AND (old.active <> new.active) AND (new.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_issue_tracker();
 
 CREATE TRIGGER trigger_has_external_wiki_on_delete AFTER DELETE ON services FOR EACH ROW WHEN ((((old.type)::text = 'ExternalWikiService'::text) AND (old.project_id IS NOT NULL))) EXECUTE PROCEDURE set_has_external_wiki();
 
@@ -24056,6 +24134,9 @@ ALTER TABLE ONLY merge_requests
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_aa5798e761 FOREIGN KEY (closed_by_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY dast_profiles
+    ADD CONSTRAINT fk_aa76ef30e9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_aad61aedca FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE SET NULL;
@@ -24530,6 +24611,9 @@ ALTER TABLE ONLY service_desk_settings
 
 ALTER TABLE ONLY saml_group_links
     ADD CONSTRAINT fk_rails_22e312c530 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_profiles
+    ADD CONSTRAINT fk_rails_23cae5abe1 FOREIGN KEY (dast_scanner_profile_id) REFERENCES dast_scanner_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -25604,6 +25688,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY snippet_statistics
     ADD CONSTRAINT fk_rails_ebc283ccf1 FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_profiles
+    ADD CONSTRAINT fk_rails_ed1e66fbbf FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_security_settings
     ADD CONSTRAINT fk_rails_ed4abe1338 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

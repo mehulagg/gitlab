@@ -4,8 +4,8 @@ import VueApollo from 'vue-apollo';
 import TestCoverageSummary from 'ee/analytics/repository_analytics/components/test_coverage_summary.vue';
 import getGroupTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_group_test_coverage.query.graphql';
 import { useFakeDate } from 'helpers/fake_date';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 

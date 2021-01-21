@@ -21,7 +21,7 @@ class IssuableMetricImage < ApplicationRecord
   MAX_FILE_SIZE = 1.megabyte.freeze
 
   def self.available_for?(project)
-    Feature.enabled?(:incident_metric_upload_ui, project) && project&.feature_available?(:incident_metric_upload)
+    project&.feature_available?(:incident_metric_upload)
   end
 
   def filename

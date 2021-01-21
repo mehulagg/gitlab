@@ -50,7 +50,8 @@ module Security
       end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
-      vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
+      entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
+      vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
 

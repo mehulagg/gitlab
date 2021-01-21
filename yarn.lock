@@ -866,20 +866,20 @@
   resolved "https://registry.yarnpkg.com/@gitlab/favicon-overlay/-/favicon-overlay-2.0.0.tgz#2f32d0b6a4d5b8ac44e2927083d9ab478a78c984"
   integrity sha512-GNcORxXJ98LVGzOT9dDYKfbheqH6lNgPDD72lyXRnQIH7CjgGyos8i17aSBPq1f4s3zF3PyedFiAR4YEZbva2Q==
 
-"@gitlab/svgs@1.178.0":
-  version "1.178.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.178.0.tgz#069edb8abb4c7137d48f527592476655f066538b"
-  integrity sha512-m1xe5SPgpi9lSFCHHTkkGeScxkqhi7aD8qApL5F4MqCGeKF9IhELIVoMD1R6vkfjzFJh0BwFREPkuwjnAOMKfA==
+"@gitlab/svgs@1.179.0":
+  version "1.179.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.179.0.tgz#c90032bf5aa611c53d1bfc0cdc0c23d74792b470"
+  integrity sha512-GspNQY1BuAn0VxvJnKA4jssLiqGstodHLxoc70y9ev3kiApMJzn6lHdiV+ecBZ/gD8Xo+8JeqyfxrToVbwuxtQ==
 
 "@gitlab/tributejs@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@25.8.0":
-  version "25.8.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-25.8.0.tgz#038090bc56215d2b0e5526097e1a16b0089ba5f4"
-  integrity sha512-h84StVkrviIm1cMDmGb2+Q8R+U6wCjddz7IXKpgkTNitxYzAcwPSIp7cS1FkZ6eWEG9dVeB6uj7JpUhGqAzvfw==
+"@gitlab/ui@26.0.0":
+  version "26.0.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-26.0.0.tgz#7fa93726478042b1570b2bd3b909217a31177b36"
+  integrity sha512-X22mc3qVBAkfAZ2DRqbPnJ6upzjWlzGLWmHR4l+3MhOBbMBi4EXIuF19nixC5u8bjCMGkK3wMIiZj3C3HsmQ7A==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -8424,7 +8424,7 @@ mkdirp@1.x, mkdirp@^1.0.4, mkdirp@~1.0.3:
 
 "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
   version "0.5.1"
-  resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   dependencies:
     minimist "0.0.8"

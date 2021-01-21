@@ -1910,6 +1910,177 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "AlertManagementPayloadAlertFieldInput",
+          "description": "Field that are available while modifying the custom mapping attributes for an HTTP integration",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "fieldName",
+              "description": "A GitLab alert field name.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementPayloadAlertFieldName",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "path",
+              "description": "Path to value inside payload JSON.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "label",
+              "description": "Human-readable label of the payload path.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "type",
+              "description": "Type of the parsed value.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AlertManagementPayloadAlertFieldType",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "AlertManagementPayloadAlertFieldName",
+          "description": "Values for alert field names used in the custom mapping",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "TITLE",
+              "description": "The title of the incident.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DESCRIPTION",
+              "description": "A high-level summary of the problem.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "START_TIME",
+              "description": "The time of the incident.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "END_TIME",
+              "description": "The resolved time of the incident.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SERVICE",
+              "description": "The affected service.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "MONITORING_TOOL",
+              "description": "The name of the associated monitoring tool.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "HOSTS",
+              "description": "One or more hosts, as to where this incident occurred.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SEVERITY",
+              "description": "The severity of the alert.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "FINGERPRINT",
+              "description": "The unique identifier of the alert. This can be used to group occurrences of the same alert.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "GITLAB_ENVIRONMENT_NAME",
+              "description": "The name of the associated GitLab environment.",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "ENUM",
+          "name": "AlertManagementPayloadAlertFieldType",
+          "description": "Values for alert field types used in the custom mapping",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "ARRAY",
+              "description": "Array field type",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "DATETIME",
+              "description": "DateTime field type",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "STRING",
+              "description": "String field type",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "AlertManagementPrometheusIntegration",
           "description": "An endpoint and credentials used to accept Prometheus alerts for a project",
@@ -10199,6 +10370,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "pipelineConfigurationFullPath",
+              "description": "Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/compliance/soc2/.gitlab-ci.yml`.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -10349,6 +10534,16 @@
             {
               "name": "color",
               "description": "New color representation of the compliance framework in hex format. e.g. #FCA121.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "pipelineConfigurationFullPath",
+              "description": "Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/compliance/soc2/.gitlab-ci.yml`.",
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
@@ -16744,6 +16939,108 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "DastSiteValidationRevokeInput",
+          "description": "Autogenerated input type of DastSiteValidationRevoke",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "fullPath",
+              "description": "The project the site validation belongs to.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "normalizedTargetUrl",
+              "description": "Normalized URL of the target to be revoked.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastSiteValidationRevokePayload",
+          "description": "Autogenerated return type of DastSiteValidationRevoke",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "ENUM",
           "name": "DastSiteValidationStrategyEnum",
           "description": null,
@@ -21493,7 +21790,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "DiscussionID",
                   "ofType": null
                 }
               },
@@ -21568,7 +21865,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "DiscussionID",
                   "ofType": null
                 }
               },
@@ -27325,6 +27622,94 @@
           "possibleTypes": null
         },
         {
+          "kind": "INPUT_OBJECT",
+          "name": "GitlabSubscriptionActivateInput",
+          "description": "Autogenerated input type of GitlabSubscriptionActivate",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "activationCode",
+              "description": "Activation code received after purchasing a GitLab subscription.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "GitlabSubscriptionActivatePayload",
+          "description": "Autogenerated return type of GitlabSubscriptionActivate",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "GrafanaIntegration",
           "description": null,
@@ -30958,6 +31343,34 @@
               "defaultValue": null
             },
             {
+              "name": "payloadExample",
+              "description": "The example of an alert payload.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "JsonString",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "payloadAttributeMappings",
+              "description": "The custom mapping of GitLab alert attributes to fields from the payload_example.",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "AlertManagementPayloadAlertFieldInput",
+                    "ofType": null
+                  }
+                }
+              },
+              "defaultValue": null
+            },
+            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {
@@ -31518,6 +31931,87 @@
               "deprecationReason": null
             },
             {
+              "name": "shifts",
+              "description": "Blocks of time for which a participant is on-call within a given timeframe. Timeframe cannot exceed one month.",
+              "args": [
+                {
+                  "name": "startTime",
+                  "description": "Start of timeframe to include shifts for.",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Time",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "endTime",
+                  "description": "End of timeframe to include shifts for. Cannot exceed one month after start.",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "Time",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallShiftConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "startsAt",
               "description": "Start date of the on-call rotation.",
               "args": [
@@ -31898,6 +32392,173 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "IncidentManagementOncallSchedule",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "IncidentManagementOncallShift",
+          "description": "A block of time for which a participant is on-call.",
+          "fields": [
+            {
+              "name": "endsAt",
+              "description": "End time of the on-call shift.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "participant",
+              "description": "Participant assigned to the on-call shift.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "OncallParticipantType",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "startsAt",
+              "description": "Start time of the on-call shift.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "IncidentManagementOncallShiftConnection",
+          "description": "The connection type for IncidentManagementOncallShift.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "IncidentManagementOncallShiftEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "IncidentManagementOncallShift",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "IncidentManagementOncallShiftEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallShift",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -37233,6 +37894,16 @@
               "deprecationReason": null
             }
           ],
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "JsonString",
+          "description": "JSON object as raw string",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
           "possibleTypes": null
         },
         {
@@ -43797,6 +44468,33 @@
               "deprecationReason": null
             },
             {
+              "name": "dastSiteValidationRevoke",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DastSiteValidationRevokeInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastSiteValidationRevokePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "deleteAnnotation",
               "description": null,
               "args": [
@@ -44304,6 +45002,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "ExportRequirementsPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "gitlabSubscriptionActivate",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "GitlabSubscriptionActivateInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "GitlabSubscriptionActivatePayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -45087,6 +45812,33 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "OncallRotationCreatePayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "oncallRotationDestroy",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "OncallRotationDestroyInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "OncallRotationDestroyPayload",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -47392,7 +48144,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "NoteID",
                   "ofType": null
                 }
               },
@@ -47537,6 +48289,20 @@
                   "name": "Time",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "url",
+              "description": "URL to view this Note in the Web UI",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -48400,6 +49166,136 @@
             }
           ],
           "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "OncallRotationDestroyInput",
+          "description": "Autogenerated input type of OncallRotationDestroy",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project to remove the on-call schedule from.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "scheduleIid",
+              "description": "The IID of the on-call schedule to the on-call rotation belongs to.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "id",
+              "description": "The ID of the on-call rotation to remove.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "IncidentManagementOncallRotationID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "OncallRotationDestroyPayload",
+          "description": "Autogenerated return type of OncallRotationDestroy",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "oncallRotation",
+              "description": "The on-call rotation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "IncidentManagementOncallRotation",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
           "enumValues": null,
           "possibleTypes": null
         },
@@ -55771,8 +56667,35 @@
               "deprecationReason": null
             },
             {
+              "name": "terraformState",
+              "description": "Find a single Terraform state by name.",
+              "args": [
+                {
+                  "name": "name",
+                  "description": "Name of the Terraform state.",
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "TerraformState",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "terraformStates",
-              "description": "Terraform states associated with the project",
+              "description": "Terraform states associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -59243,6 +60166,16 @@
                     "ofType": null
                   },
                   "defaultValue": null
+                },
+                {
+                  "name": "admins",
+                  "description": "Return only admin users.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "false"
                 },
                 {
                   "name": "after",
@@ -63647,7 +64580,7 @@
           "fields": [
             {
               "name": "description",
-              "description": "Analyzer description that is displayed on the form",
+              "description": "Analyzer description that is displayed on the form.",
               "args": [
 
               ],
@@ -63661,7 +64594,7 @@
             },
             {
               "name": "enabled",
-              "description": "Indicates whether an analyzer is enabled",
+              "description": "Indicates whether an analyzer is enabled.",
               "args": [
 
               ],
@@ -63675,7 +64608,7 @@
             },
             {
               "name": "label",
-              "description": "Analyzer label used in the config UI",
+              "description": "Analyzer label used in the config UI.",
               "args": [
 
               ],
@@ -63689,7 +64622,7 @@
             },
             {
               "name": "name",
-              "description": "Name of the analyzer",
+              "description": "Name of the analyzer.",
               "args": [
 
               ],
@@ -63703,7 +64636,7 @@
             },
             {
               "name": "variables",
-              "description": "List of supported variables",
+              "description": "List of supported variables.",
               "args": [
                 {
                   "name": "after",
@@ -63882,7 +64815,7 @@
           "inputFields": [
             {
               "name": "name",
-              "description": "Name of analyzer",
+              "description": "Name of analyzer.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -63896,7 +64829,7 @@
             },
             {
               "name": "enabled",
-              "description": "State of the analyzer",
+              "description": "State of the analyzer.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -63910,7 +64843,7 @@
             },
             {
               "name": "variables",
-              "description": "List of variables for the analyzer",
+              "description": "List of variables for the analyzer.",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -64215,7 +65148,7 @@
           "inputFields": [
             {
               "name": "field",
-              "description": "CI keyword of entity",
+              "description": "CI keyword of entity.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64229,7 +65162,7 @@
             },
             {
               "name": "defaultValue",
-              "description": "Default value that is used if value is empty",
+              "description": "Default value that is used if value is empty.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64243,7 +65176,7 @@
             },
             {
               "name": "value",
-              "description": "Current value of the entity",
+              "description": "Current value of the entity.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -64268,7 +65201,7 @@
           "inputFields": [
             {
               "name": "global",
-              "description": "List of global entities related to SAST configuration",
+              "description": "List of global entities related to SAST configuration.",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -64286,7 +65219,7 @@
             },
             {
               "name": "pipeline",
-              "description": "List of pipeline entities related to SAST configuration",
+              "description": "List of pipeline entities related to SAST configuration.",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -64304,7 +65237,7 @@
             },
             {
               "name": "analyzers",
-              "description": "List of analyzers and related variables for the SAST configuration",
+              "description": "List of analyzers and related variables for the SAST configuration.",
               "type": {
                 "kind": "LIST",
                 "name": null,
@@ -66648,12 +67581,6 @@
           "inputFields": null,
           "interfaces": null,
           "enumValues": [
-            {
-              "name": "ALERTS_SERVICE",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "ASANA_SERVICE",
               "description": null,
@@ -76544,6 +77471,32 @@
               "deprecationReason": null
             },
             {
+              "name": "details",
+              "description": "Details of the vulnerability",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "VulnerabilityDetail",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "detectedAt",
               "description": "Timestamp of when the vulnerability was first detected",
               "args": [
@@ -77276,6 +78229,1259 @@
                   "name": "PageInfo",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "UNION",
+          "name": "VulnerabilityDetail",
+          "description": "Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": [
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailBase",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailBoolean",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailCode",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailCommit",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailDiff",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailFileLocation",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailInt",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailList",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailMarkdown",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailModuleLocation",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailTable",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailText",
+              "ofType": null
+            },
+            {
+              "kind": "OBJECT",
+              "name": "VulnerabilityDetailUrl",
+              "ofType": null
+            }
+          ]
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailBase",
+          "description": "Represents the vulnerability details base",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailBoolean",
+          "description": "Represents the vulnerability details boolean value",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "Value of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailCode",
+          "description": "Represents the vulnerability details code field",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lang",
+              "description": "Language of the code.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "Source code.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailCommit",
+          "description": "Represents the vulnerability details commit field",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "The commit SHA value.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailDiff",
+          "description": "Represents the vulnerability details diff field",
+          "fields": [
+            {
+              "name": "after",
+              "description": "Value of the field after the change.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "before",
+              "description": "Value of the field before the change.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailFileLocation",
+          "description": "Represents the vulnerability details location within a file in the project",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fileName",
+              "description": "File name.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lineEnd",
+              "description": "End line number of the file location.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lineStart",
+              "description": "Start line number of the file location.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailInt",
+          "description": "Represents the vulnerability details integer value",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "Value of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailList",
+          "description": "Represents the vulnerability details list value",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "items",
+              "description": "List of details.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "VulnerabilityDetail",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailMarkdown",
+          "description": "Represents the vulnerability details Markdown field",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "Value of the Markdown field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailModuleLocation",
+          "description": "Represents the vulnerability details location within a file in the project",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "moduleName",
+              "description": "Module name.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "offset",
+              "description": "Offset of the module location.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailTable",
+          "description": "Represents the vulnerability details table value",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "headers",
+              "description": "Table headers.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "VulnerabilityDetail",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "rows",
+              "description": "Table rows.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "VulnerabilityDetail",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailText",
+          "description": "Represents the vulnerability details text field",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "value",
+              "description": "Value of the text field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "VulnerabilityDetailUrl",
+          "description": "Represents the vulnerability details URL field",
+          "fields": [
+            {
+              "name": "description",
+              "description": "Description of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "fieldName",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "href",
+              "description": "Href of the URL.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the field.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "text",
+              "description": "Text of the URL.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null

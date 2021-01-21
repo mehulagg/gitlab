@@ -7,5 +7,5 @@ Errors found on line <%= 'number'.pluralize(@results[:error_lines].size) %>: <%=
 <% end %>
 
 <% if @results[:parse_error] %>
-Error parsing CSV file. Please make sure it has the correct format (<%= help_page_url('user/project/requirements/index.html', anchor: 'csv-file-format') %>).
+Error parsing CSV file. Please make sure it has the correct format (<%= help_page_url('user/project/requirements/index.html', anchor: 'imported-csv-file-format') %>).
 <% end %>

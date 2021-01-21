@@ -58,7 +58,7 @@ describe('Metrics tab', () => {
   const findImages = () => wrapper.findAll(MetricsImage);
   const findModal = () => wrapper.find(GlModal);
   const submitModal = () => findModal().vm.$emit('primary', mockEvent);
-  const cancelModal = () => findModal().vm.$emit('canceled');
+  const cancelModal = () => findModal().vm.$emit('hidden');
 
   describe('empty state', () => {
     beforeEach(() => {

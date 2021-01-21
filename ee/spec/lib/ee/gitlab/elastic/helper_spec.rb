@@ -75,7 +75,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#create_standalone_indices' do
+  describe '#create_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     after do
       @indices.each do |index_name, _|
         helper.delete_index(index_name: index_name)
@@ -103,7 +103,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#delete_standalone_indices' do
+  describe '#delete_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     before do
       helper.create_standalone_indices
     end
@@ -318,6 +318,44 @@ RSpec.describe Gitlab::Elastic::Helper do
         alias_name = helper.target_name
 
         expect(helper.documents_count(index_name: alias_name)).to eq(0)
+      end
+    end
+  end
+
+  describe '#delete_migration_record', :elastic do
+    let(:migration) { ::Elastic::DataMigrationService.migrations.last }
+
+    subject { helper.delete_migration_record(migration) }
+
+    context 'when record exists' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when record does not exist' do
+      before do
+        allow(migration).to receive(:version).and_return(1)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#standalone_indices_proxies' do
+    subject { helper.standalone_indices_proxies(target_classes: classes) }
+
+    context 'when target_classes is not provided' do
+      let(:classes) { nil }
+
+      it 'creates proxies for each separate class' do
+        expect(subject.count).to eq(Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES.count)
+      end
+    end
+
+    context 'when target_classes is provided' do
+      let(:classes) { [Issue] }
+
+      it 'creates proxies for only the target classes' do
+        expect(subject.count).to eq(1)
       end
     end
   end

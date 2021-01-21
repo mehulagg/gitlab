@@ -42,7 +42,7 @@ module EE
         if old_namespace.use_elasticsearch? != new_namespace.use_elasticsearch?
           project.invalidate_elasticsearch_indexes_cache!
 
-          project.maintain_elasticsearch_update(updated_attributes: [:visibility_level]) if project.maintaining_elasticsearch?
+          ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(project) if project.maintaining_elasticsearch?
         end
       end
     end

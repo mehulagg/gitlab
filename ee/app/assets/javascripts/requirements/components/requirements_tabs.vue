@@ -1,5 +1,5 @@
 <script>
-import { GlBadge, GlButton, GlTabs, GlTab } from '@gitlab/ui';
+import { GlBadge, GlButton, GlButtonGroup, GlTabs, GlTab } from '@gitlab/ui';
 
 import { FilterState } from '../constants';
 
@@ -10,6 +10,7 @@ export default {
     GlButton,
     GlTabs,
     GlTab,
+    GlButtonGroup,
   },
   props: {
     filterBy: {
@@ -85,15 +86,24 @@ export default {
       </gl-tab>
     </gl-tabs>
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
-      <gl-button
-        v-if="showUploadCsv"
-        category="secondary"
-        variant="default"
-        class="js-import-requirements qa-import-requirements-button"
-        :disabled="showCreateForm"
-        icon="import"
-        @click="$emit('click-import-requirements')"
-      />
+      <gl-button-group>
+        <gl-button
+          v-if="showUploadCsv"
+          category="secondary"
+          :disabled="showCreateForm"
+          icon="export"
+          @click="$emit('click-export-requirements')"
+        />
+        <gl-button
+          v-if="showUploadCsv"
+          category="secondary"
+          class="js-import-requirements qa-import-requirements-button"
+          :disabled="showCreateForm"
+          icon="import"
+          @click="$emit('click-import-requirements')"
+        />
+      </gl-button-group>
+
       <gl-button
         category="primary"
         variant="success"

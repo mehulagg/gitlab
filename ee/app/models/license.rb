@@ -388,6 +388,11 @@ class License < ApplicationRecord
     restricted_attr(:add_ons, {})
   end
 
+  # License zuora_subscription_id
+  def subscription_id
+    restricted_attr(:subscription_id)
+  end
+
   def features_from_add_ons
     add_ons.map { |name, count| FEATURES_FOR_ADD_ONS[name] if count.to_i > 0 }.compact
   end

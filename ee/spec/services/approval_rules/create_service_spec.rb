@@ -62,6 +62,15 @@ RSpec.describe ApprovalRules::CreateService do
 
         expect(result[:status]).to eq(:error)
       end
+
+      it_behaves_like 'does not record an onboarding progress action' do
+        subject do
+          described_class.new(target, user, {
+            name: nil,
+            approvals_required: 1
+          }).execute
+        end
+      end
     end
 
     context 'when user does not have right to admin project' do
@@ -112,6 +121,19 @@ RSpec.describe ApprovalRules::CreateService do
 
         it 'does not remove any approval rule' do
           expect { subject.execute }.not_to change(target.approval_rules.any_approver, :count)
+        end
+      end
+
+      it_behaves_like 'records an onboarding progress action', :required_mr_approvals_enabled do
+        let(:namespace) { project.namespace }
+
+        subject do
+          described_class.new(target, user, {
+            name: 'security',
+            approvals_required: 1,
+            user_ids: new_approvers.map(&:id),
+            group_ids: new_groups.map(&:id)
+          }).execute
         end
       end
     end

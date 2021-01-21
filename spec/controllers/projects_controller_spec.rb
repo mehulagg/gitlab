@@ -483,14 +483,14 @@ RSpec.describe ProjectsController do
   describe '#housekeeping' do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, group: group) }
-    let(:housekeeping) { Projects::HousekeepingService.new(project) }
+    let(:housekeeping) { Repositories::HousekeepingService.new(project) }
 
     context 'when authenticated as owner' do
       before do
         group.add_owner(user)
         sign_in(user)
 
-        allow(Projects::HousekeepingService).to receive(:new).with(project, :gc).and_return(housekeeping)
+        allow(Repositories::HousekeepingService).to receive(:new).with(project, :gc).and_return(housekeeping)
       end
 
       it 'forces a full garbage collection' do
@@ -733,7 +733,7 @@ RSpec.describe ProjectsController do
   describe '#transfer', :enable_admin_mode do
     render_views
 
-    let_it_be(:project, reload: true) { create(:project, :repository) }
+    let_it_be(:project, reload: true) { create(:project) }
     let_it_be(:admin) { create(:admin) }
     let_it_be(:new_namespace) { create(:namespace) }
 

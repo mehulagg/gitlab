@@ -7,7 +7,7 @@ import GroupSecurityCharts from 'ee/security_dashboard/components/group_security
 import SecurityChartsLayout from 'ee/security_dashboard/components/security_charts_layout.vue';
 import vulnerabilityGradesQuery from 'ee/security_dashboard/graphql/queries/group_vulnerability_grades.query.graphql';
 import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/queries/group_vulnerability_history.query.graphql';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import { TEST_HOST } from 'helpers/test_constants';
 
 jest.mock('ee/security_dashboard/graphql/queries/group_vulnerability_grades.query.graphql', () => ({
   mockGrades: true,

@@ -171,7 +171,7 @@ export default {
             <slot name="actions" :profile="item"></slot>
 
             <gl-dropdown
-              class="gl-display-none gl-display-sm-inline-flex!"
+              class="gl-display-none gl-md-display-inline-flex!"
               toggle-class="gl-border-0! gl-shadow-none!"
               no-caret
               right
@@ -201,7 +201,7 @@ export default {
               v-if="item.editPath"
               :href="item.editPath"
               category="tertiary"
-              class="gl-ml-3 gl-my-1 gl-display-sm-none"
+              class="gl-ml-3 gl-my-1 gl-display-md-none"
               size="small"
               >{{ __('Edit') }}</gl-button
             >
@@ -211,7 +211,7 @@ export default {
               icon="remove"
               variant="danger"
               size="small"
-              class="gl-mx-3 gl-my-1 gl-display-sm-none"
+              class="gl-mx-3 gl-my-1 gl-display-md-none"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />

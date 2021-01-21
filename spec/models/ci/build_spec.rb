@@ -3605,7 +3605,7 @@ RSpec.describe Ci::Build do
 
     context 'when validates for dependencies is enabled' do
       before do
-        stub_feature_flags(ci_disable_validates_dependencies: false)
+        stub_feature_flags(ci_validate_build_dependencies_override: false)
       end
 
       let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
@@ -3633,7 +3633,7 @@ RSpec.describe Ci::Build do
       let(:options) { { dependencies: ['test'] } }
 
       before do
-        stub_feature_flags(ci_disable_validates_dependencies: true)
+        stub_feature_flags(ci_validate_build_dependencies_override: true)
       end
 
       it_behaves_like 'validation is not active'
@@ -4775,22 +4775,6 @@ RSpec.describe Ci::Build do
   describe '#debug_mode?' do
     subject { build.debug_mode? }
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(restrict_access_to_build_debug_mode: false)
-      end
-
-      it { is_expected.to eq false }
-
-      context 'when in variables' do
-        before do
-          create(:ci_instance_variable, key: 'CI_DEBUG_TRACE', value: 'true')
-        end
-
-        it { is_expected.to eq false }
-      end
-    end
-
     context 'when CI_DEBUG_TRACE=true is in variables' do
       context 'when in instance variables' do
         before do
@@ -4935,14 +4919,6 @@ RSpec.describe Ci::Build do
 
       context 'when exit_code is nil' do
         let(:exit_code) {}
-
-        it_behaves_like 'drops the build without changing allow_failure'
-      end
-
-      context 'when ci_allow_failure_with_exit_codes is disabled' do
-        before do
-          stub_feature_flags(ci_allow_failure_with_exit_codes: false)
-        end
 
         it_behaves_like 'drops the build without changing allow_failure'
       end

@@ -1,11 +1,11 @@
 - page_title _('Your first project')
 - visibility_level = selected_visibility_level(@project, params.dig(:project, :visibility_level))
 
-- if params[:trial] == 'true'
-  .row.bg-gray-light
-    .d-flex.flex-column.align-items-center.w-100
+- if in_trial_during_signup_flow? || in_trial_onboarding_flow?
+  .row
+    .d-flex.flex-column.align-items-center.w-100.gl-mt-3
       = render 'trial_is_activated_banner'
-.row.flex-grow-1.bg-gray-light
+.row.gl-flex-grow-1
   .d-flex.flex-column.align-items-center.w-100.p-3
     .new-project.d-flex.flex-column.align-items-center.pt-5
       - unless in_trial_onboarding_flow?

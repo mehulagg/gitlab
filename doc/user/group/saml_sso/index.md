@@ -110,7 +110,8 @@ When [configuring your identify provider](#configuring-your-identity-provider), 
 ### Azure setup notes
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For a demo of the Azure SAML setup including SCIM, see [SCIM Provisioning on Azure Using SAML SSO for Groups Demo](https://youtu.be/24-ZxmTeEBU). Please note that the video is outdated in regards to objectID mapping and the [SCIM documentation should be followed](scim_setup.md#azure-configuration-steps).
+For a demo of the Azure SAML setup including SCIM, see [SCIM Provisioning on Azure Using SAML SSO for Groups Demo](https://youtu.be/24-ZxmTeEBU). Please note that the video is outdated in regard to
+objectID mapping and the [SCIM documentation should be followed](scim_setup.md#azure-configuration-steps).
 
 | GitLab Setting | Azure Field |
 |--------------|----------------|
@@ -169,7 +170,7 @@ Your identity provider may have relevant documentation. It may be generic SAML d
 
 - [ADFS (Active Directory Federation Services)](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/create-a-relying-party-trust)
 - [Auth0](https://auth0.com/docs/protocols/saml-configuration-options/configure-auth0-as-saml-identity-provider)
-- [G Suite](https://support.google.com/a/answer/6087519?hl=en)
+- [Google Workspace](https://support.google.com/a/answer/6087519?hl=en)
 - [JumpCloud](https://support.jumpcloud.com/support/s/article/single-sign-on-sso-with-gitlab-2019-08-21-10-36-47)
 - [PingOne by Ping Identity](https://docs.pingidentity.com/bundle/pingone/page/xsh1564020480660-1.html)
 
@@ -343,7 +344,7 @@ access.
 |------|-------------|
 | Identity Provider | The service which manages your user identities such as ADFS, Okta, Onelogin, or Ping Identity. |
 | Service Provider | SAML considers GitLab to be a service provider. |
-| Assertion | A piece of information about a user's identity, such as their name or role. Also know as claims or attributes. |
+| Assertion | A piece of information about a user's identity, such as their name or role. Also known as claims or attributes. |
 | SSO | Single Sign On. |
 | Assertion consumer service URL | The callback on GitLab where users are redirected after successfully authenticating with the identity provider. |
 | Issuer | How GitLab identifies itself to the identity provider. Also known as a "Relying party trust identifier". |
@@ -418,6 +419,11 @@ This can be prevented by configuring the [NameID](#nameid) to return a consisten
 
 Ensure that the user who is trying to link their GitLab account has been added as a user within the identity provider's SAML app.
 
+Alternatively, the SAML response may be missing the `InResponseTo` attribute in the
+`samlp:Response` tag, which is [expected by the SAML gem](https://github.com/onelogin/ruby-saml/blob/9f710c5028b069bfab4b9e2b66891e0549765af5/lib/onelogin/ruby-saml/response.rb#L307-L316).
+The [Identity Provider](#glossary) administrator should ensure that the login should be
+initiated by the Service Provider (typically GitLab) and not the Identity Provider.
+
 ### Stuck in a login "loop"
 
 Ensure that the **GitLab single sign-on URL** has been configured as "Login URL" (or similarly named field) in the identity provider's SAML app.
@@ -446,3 +452,25 @@ However, self-managed GitLab instances use a configuration file that supports mo
 Internally that uses the [`ruby-saml` library](https://github.com/onelogin/ruby-saml), so we sometimes check there to verify low level details of less commonly used options.
 
 It can also help to compare the XML response from your provider with our [example XML used for internal testing](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/spec/fixtures/saml/response.xml).
+
+### Searching Rails log
+
+With access to the rails log or `production_json.log` (available only to GitLab team members for GitLab.com),
+you should be able to find the base64 encoded SAML response by searching with the following filters:
+
+- `json.meta.caller_id`: `Groups::OmniauthCallbacksController#group_saml`
+- `json.meta.user` or `json.username`: `username`
+- `json.method`: `POST`
+- `json.path`: `/groups/GROUP-PATH/-/saml/callback`
+
+In a relevant log entry, the `json.params` should provide a valid response with:
+
+- `"key": "SAMLResponse"` and the `"value": (full SAML response)`,
+- `"key": "RelayState"` with `"value": "/group-path"`, and
+- `"key": "group_id"` with `"value": "group-path"`.
+
+In some cases, if the SAML response is lengthy, you may receive a `"key": "truncated"` with `"value":"..."`.
+In these cases, please ask a group owner for a copy of the SAML response from when they select
+the "Verify SAML Configuration" button on the group SSO Settings page.
+
+Use a base64 decoder to see a human-readable version of the SAML response.

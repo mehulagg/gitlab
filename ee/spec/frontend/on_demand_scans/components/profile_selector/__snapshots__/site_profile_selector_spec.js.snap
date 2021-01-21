@@ -101,88 +101,98 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             role="menu"
             tabindex="-1"
           >
-            <!---->
-             
-            <li
-              class="gl-new-dropdown-item"
-              role="presentation"
+            <div
+              class="gl-new-dropdown-inner"
             >
-              <button
-                class="dropdown-item"
-                role="menuitem"
-                type="button"
+              <!---->
+               
+              <div
+                class="gl-new-dropdown-contents"
               >
-                <svg
-                  aria-hidden="true"
-                  class="gl-icon s16 gl-new-dropdown-item-check-icon"
-                  data-testid="mobile-issue-close-icon"
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
                 >
-                  <use
-                    href="#mobile-issue-close"
-                  />
-                </svg>
-                 
-                <!---->
-                 
-                <!---->
-                 
-                <div
-                  class="gl-new-dropdown-item-text-wrapper"
-                >
-                  <p
-                    class="gl-new-dropdown-item-text-primary"
+                  <button
+                    class="dropdown-item"
+                    role="menuitem"
+                    type="button"
                   >
-                    
+                    <svg
+                      aria-hidden="true"
+                      class="gl-icon s16 gl-new-dropdown-item-check-icon"
+                      data-testid="mobile-issue-close-icon"
+                    >
+                      <use
+                        href="#mobile-issue-close"
+                      />
+                    </svg>
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        
         Site profile #1
       
-                  </p>
-                   
-                  <!---->
-                </div>
-                 
-                <!---->
-              </button>
-            </li>
-            <li
-              class="gl-new-dropdown-item"
-              role="presentation"
-            >
-              <button
-                class="dropdown-item"
-                role="menuitem"
-                type="button"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
-                  data-testid="mobile-issue-close-icon"
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </button>
+                </li>
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
                 >
-                  <use
-                    href="#mobile-issue-close"
-                  />
-                </svg>
-                 
-                <!---->
-                 
-                <!---->
-                 
-                <div
-                  class="gl-new-dropdown-item-text-wrapper"
-                >
-                  <p
-                    class="gl-new-dropdown-item-text-primary"
+                  <button
+                    class="dropdown-item"
+                    role="menuitem"
+                    type="button"
                   >
-                    
+                    <svg
+                      aria-hidden="true"
+                      class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
+                      data-testid="mobile-issue-close-icon"
+                    >
+                      <use
+                        href="#mobile-issue-close"
+                      />
+                    </svg>
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        
         Site profile #2
       
-                  </p>
-                   
-                  <!---->
-                </div>
-                 
-                <!---->
-              </button>
-            </li>
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </button>
+                </li>
+              </div>
+               
+              <!---->
+            </div>
              
           </ul>
         </div>

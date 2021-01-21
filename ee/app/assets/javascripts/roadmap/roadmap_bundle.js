@@ -41,8 +41,8 @@ export default () => {
     });
   }
 
-  Vue.component('epic-item', EpicItem);
-  Vue.component('epic-item-container', EpicItemContainer);
+  Vue.component('EpicItem', EpicItem);
+  Vue.component('EpicItemContainer', EpicItemContainer);
 
   return new Vue({
     el,

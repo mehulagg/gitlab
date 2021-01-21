@@ -7,7 +7,7 @@ module Admin
 
       before_action :require_license, only: :show
 
-      feature_category :provision
+      feature_category :license
 
       def show
         historical_data = HistoricalData.in_license_term(license)

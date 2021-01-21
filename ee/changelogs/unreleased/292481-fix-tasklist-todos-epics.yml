@@ -1,5 +1,0 @@
----
-title: Fix todo creation on epics when toggling tasks
-merge_request: 50827
-author:
-type: fixed

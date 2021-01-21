@@ -1,13 +1,14 @@
 - return unless merge_trains_available?
 
 .form-check
-  = form.check_box :merge_trains_enabled, class: 'form-check-input', data: { qa_selector: 'merge_trains_checkbox' }
-  = form.label :merge_trains_enabled, class: 'form-check-label' do
-    = s_('ProjectSettings|Enable merge trains.')
-    .text-secondary.mb-2
-      = s_('ProjectSettings|When approved for merge, merge requests are queued and pipelines validate the combined results of the source and target branches before merge.')
-      = link_to sprite_icon('question-o'),
-        help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md',
-        anchor: 'merge-trains'),
-        target: '_blank',
-        rel: 'noopener noreferer'
+  .gl-pl-6
+    = form.check_box :merge_trains_enabled, class: 'form-check-input js-merge-options-merge-trains gl-pl-6', data: { qa_selector: 'merge_trains_checkbox' }
+    = form.label :merge_trains_enabled, class: 'form-check-label' do
+      = s_('ProjectSettings|Enable merge trains.')
+      .text-secondary.mb-2
+        = s_('ProjectSettings|When approved for merge, merge requests are queued and pipelines validate the combined results of the source and target branches before merge.')
+        = link_to sprite_icon('question-o'),
+          help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md',
+          anchor: 'merge-trains'),
+          target: '_blank',
+          rel: 'noopener noreferer'

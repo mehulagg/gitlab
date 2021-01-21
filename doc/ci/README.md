@@ -160,8 +160,6 @@ Its feature set is listed on the table below according to DevOps stages.
 Find example project code and tutorials for using GitLab CI/CD with a variety of app frameworks, languages, and platforms
 on the [CI Examples](examples/README.md) page.
 
-GitLab also provides [example projects](https://gitlab.com/gitlab-examples) pre-configured to use GitLab CI/CD.
-
 ## Administration **(CORE ONLY)**
 
 As a GitLab administrator, you can change the default behavior
@@ -221,11 +219,3 @@ been necessary. These are:
 #### 10.0
 
 - No breaking changes.
-
-#### 9.0
-
-- [CI variables renaming for GitLab 9.0](variables/deprecated_variables.md#gitlab-90-renamed-variables). Read about the
-  deprecated CI variables and what you should use for GitLab 9.0+.
-- [New CI job permissions model](../user/project/new_ci_build_permissions_model.md).
-  See what changed in GitLab 8.12 and how that affects your jobs.
-  There's a new way to access your Git submodules and LFS objects in jobs.

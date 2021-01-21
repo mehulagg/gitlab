@@ -22,7 +22,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         labels: [],
         reporter: double(displayName: 'User', accountId: '10000'),
         assignee: nil,
-        client: double(options: { site: nil })
+        client: double(options: { site: 'http://jira.com/' })
       )
     end
 
@@ -37,10 +37,10 @@ RSpec.describe Resolvers::ExternalIssueResolver do
         'labels' => [],
         'author' => {
           'name' => 'User',
-          'web_url' => 'people/10000'
+          'web_url' => 'http://jira.com/people/10000'
         },
         'assignees' => [],
-        'web_url' => 'browse/GV-1',
+        'web_url' => 'http://jira.com/browse/GV-1',
         'references' => {
           'relative' => 'GV-1'
         },

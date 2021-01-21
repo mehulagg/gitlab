@@ -4,6 +4,8 @@ import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import ReportSection from '~/reports/components/report_section.vue';
 import PaginationLinks from '~/vue_shared/components/pagination_links.vue';
+import api from '~/api';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { n__, s__, sprintf } from '~/locale';
 
 export default {
@@ -11,7 +13,7 @@ export default {
     ReportSection,
     PaginationLinks,
   },
-  mixins: [reportsMixin],
+  mixins: [reportsMixin, glFeatureFlagsMixin()],
   componentNames,
   computed: {
     ...mapState(['isLoadingCodequality', 'loadingCodequalityFailed', 'pageInfo']),
@@ -41,6 +43,11 @@ export default {
       return this.checkReportStatus(this.isLoadingCodequality, this.loadingCodequalityFailed);
     },
   },
+  mounted() {
+    if (this.glFeatures.usageDataITestingFullCodeQualityReportTotal) {
+      api.trackRedisHllUserEvent(this.$options.mountEvent);
+    }
+  },
   i18n: {
     subHeading: s__('ciReport|This report contains all Code Quality issues in the source branch.'),
   },
@@ -57,6 +64,7 @@ export default {
       };
     },
   },
+  mountEvent: 'i_testing_full_code_quality_report_total',
 };
 </script>
 

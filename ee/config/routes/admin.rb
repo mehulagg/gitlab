@@ -35,7 +35,7 @@ namespace :admin do
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do
     get :seat_link_payload
-    match :templates, via: [:get, :patch]
+    match :templates, :advanced_search, via: [:get, :patch]
     get :geo, to: "geo/settings#show"
   end
 
@@ -81,5 +81,6 @@ namespace :admin do
     post :enqueue_index
     post :trigger_reindexing
     post :cancel_index_deletion
+    post :retry_migration
   end
 end

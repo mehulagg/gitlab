@@ -4,9 +4,6 @@ gem 'rails', '~> 6.0.3.1'
 
 gem 'bootsnap', '~> 1.4.6'
 
-# Improves copy-on-write performance for MRI
-gem 'nakayoshi_fork', '~> 0.0.4'
-
 # Responders respond_to and respond_with
 gem 'responders', '~> 3.0'
 
@@ -28,7 +25,7 @@ gem 'marginalia', '~> 1.10.0'
 gem 'devise', '~> 4.7.2'
 # TODO: verify ARM compile issue on 3.1.13+ version (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18828)
 gem 'bcrypt', '3.1.12'
-gem 'doorkeeper', '~> 5.3.0'
+gem 'doorkeeper', '~> 5.4.0'
 gem 'doorkeeper-openid_connect', '~> 1.7.4'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
@@ -465,7 +462,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.7.0.pre.rc1'
+gem 'gitaly', '~> 13.8.0.pre.rc3'
 
 gem 'grpc', '~> 1.30.2'
 
