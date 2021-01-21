@@ -4,8 +4,10 @@ import { __ } from '~/locale';
 
 export default {
   milestone: 'milestone',
+  iteration: 'iteration',
   assignee: 'assignee',
   labelMilestoneText: __('Milestone'),
+  labelIterationText: __('Iteration'),
   labelAssigneeText: __('Assignee'),
   components: {
     GlLink,
@@ -29,6 +31,9 @@ export default {
     activeListMilestone() {
       return this.activeList.milestone;
     },
+    activeListIteration() {
+      return this.activeList.iteration;
+    },
     listTypeTitle() {
       switch (this.boardListType) {
         case this.$options.milestone: {
@@ -36,6 +41,9 @@ export default {
         }
         case this.$options.assignee: {
           return this.$options.labelAssigneeText;
+        }
+        case this.$options.iteration: {
+          return this.$options.labelIterationText;
         }
         default: {
           return '';
@@ -54,6 +62,11 @@ export default {
       class="js-milestone"
       :href="activeListMilestone.webUrl"
       >{{ activeListMilestone.title }}</gl-link
+    >
+    <gl-link
+      v-else-if="boardListType === $options.iteration"
+      :href="activeListIteration.webUrl"
+      >{{ activeListIteration.title }}</gl-link
     >
     <gl-avatar-link
       v-else-if="boardListType === $options.assignee"

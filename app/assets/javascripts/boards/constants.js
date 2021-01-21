@@ -6,6 +6,7 @@ export const BoardType = {
 export const ListType = {
   assignee: 'assignee',
   milestone: 'milestone',
+  iteration: 'iteration',
   backlog: 'backlog',
   closed: 'closed',
   label: 'label',
