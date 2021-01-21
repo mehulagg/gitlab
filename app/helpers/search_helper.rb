@@ -291,7 +291,7 @@ module SearchHelper
       end
     end
 
-    tabs << :users
+    tabs << :users if show_user_search_tab?
   end
 
   def search_filter_link(scope, label, data: {}, search: {})

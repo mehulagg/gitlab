@@ -26,15 +26,15 @@ export default {
       required: true,
     }
   },
+  computed: {
+    ...mapState(['query']),
+  },
   mounted() {
     this.$nextTick(() => {
       const elements = Array.from(this.$el.querySelectorAll('.js-search-counts'));
 
       return Promise.all(elements.map(this.refreshCount));
     })
-  },
-  computed: {
-    ...mapState(['query']),
   },
   methods: {
     handleTabChange(scope) {
