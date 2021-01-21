@@ -40,6 +40,9 @@ module Discussions
       discussion.resolve!(current_user)
       @resolved_count += 1
 
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+        .track_resolve_thread_action(user: current_user)
+
       MergeRequests::ResolvedDiscussionNotificationService.new(project, current_user).execute(merge_request) if merge_request
       SystemNoteService.discussion_continued_in_issue(discussion, project, current_user, follow_up_issue) if follow_up_issue
     end
