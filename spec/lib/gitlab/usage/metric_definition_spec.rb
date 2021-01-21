@@ -12,7 +12,7 @@ RSpec.describe Gitlab::Usage::MetricDefinition do
       status: 'data_available',
       default_generation: 'generation_1',
       key_path: 'uuid',
-      group: 'group::product analytics',
+      group: 'group::product intelligence',
       time_frame: 'none',
       data_source: 'database',
       distribution: %w(ee ce),
