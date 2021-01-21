@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User closes/reopens a merge request', :js do
+RSpec.describe 'User closes/reopens a merge request', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297500' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
 

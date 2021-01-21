@@ -4,6 +4,7 @@ import Api from 'ee/api';
 import * as analyticsMockData from 'ee_jest/analytics/cycle_analytics/mock_data';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
+import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 
 describe('Api', () => {
   const dummyApiVersion = 'v3000';
@@ -815,6 +816,60 @@ describe('Api', () => {
         return Api.fetchBillableGroupMembersList(namespaceId).then(({ data }) => {
           expect(data).toEqual([]);
         });
+      });
+    });
+  });
+
+  describe('Project analytics: deployment frequency', () => {
+    const projectPath = 'test/project';
+    const encodedProjectPath = encodeURIComponent(projectPath);
+    const params = { environment: 'production' };
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${encodedProjectPath}/analytics/deployment_frequency`;
+
+    describe('deploymentFrequencies', () => {
+      it('GETs the right url', async () => {
+        mock.onGet(expectedUrl, { params }).replyOnce(httpStatus.OK, []);
+
+        const { data } = await Api.deploymentFrequencies(projectPath, params);
+
+        expect(data).toEqual([]);
+      });
+    });
+  });
+
+  describe('Issue metric images', () => {
+    const projectId = 1;
+    const issueIid = '2';
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/issues/${issueIid}/metric_images`;
+
+    describe('fetchIssueMetricImages', () => {
+      it('fetches a list of images', async () => {
+        jest.spyOn(axios, 'get');
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        await Api.fetchIssueMetricImages({ issueIid, id: projectId }).then(({ data }) => {
+          expect(data).toEqual([]);
+          expect(axios.get).toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('uploadIssueMetricImage', () => {
+      const file = 'mock file';
+      const url = 'mock url';
+
+      it('uploads an image', async () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, {});
+
+        await Api.uploadIssueMetricImage({ issueIid, id: projectId, file, url }).then(
+          ({ data }) => {
+            expect(data).toEqual({});
+            expect(axios.post.mock.calls[0][2]).toEqual({
+              headers: { ...ContentTypeMultipartFormData },
+            });
+          },
+        );
       });
     });
   });

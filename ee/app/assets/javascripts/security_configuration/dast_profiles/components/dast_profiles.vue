@@ -2,10 +2,11 @@
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -14,6 +15,7 @@ export default {
     GlTab,
     GlTabs,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     createNewProfilePaths: {
       type: Object,
@@ -37,6 +39,7 @@ export default {
 
       return getProfileSettings({
         createNewProfilePaths,
+        isDastSavedScansEnabled: this.glFeatures.dastSavedScans,
       });
     },
     tabIndex: {
@@ -210,8 +213,8 @@ export default {
   },
   profilesPerPage: 10,
   i18n: {
-    heading: s__('DastProfiles|Manage Profiles'),
-    newProfileDropdownLabel: s__('DastProfiles|New Profile'),
+    heading: s__('DastProfiles|Manage DAST scans'),
+    newProfileDropdownLabel: __('New'),
     subHeading: s__(
       'DastProfiles|Save commonly used configurations for target sites and scan specifications as profiles. Use these with an on-demand scan.',
     ),

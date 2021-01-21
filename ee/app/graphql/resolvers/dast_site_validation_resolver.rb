@@ -7,7 +7,7 @@ module Resolvers
     type Types::DastSiteValidationType.connection_type, null: true
 
     argument :normalized_target_urls, [GraphQL::STRING_TYPE], required: false,
-             description: 'Normalized URL of the target to be scanned'
+             description: 'Normalized URL of the target to be scanned.'
 
     def resolve(**args)
       return DastSiteValidation.none unless allowed?
@@ -18,7 +18,7 @@ module Resolvers
     private
 
     def allowed?
-      ::Feature.enabled?(:security_on_demand_scans_site_validation, project)
+      ::Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
     end
   end
 end

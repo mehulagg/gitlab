@@ -1,8 +1,9 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import { mergeUrlParams, redirectTo } from '~/lib/utils/url_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import CiLint from './components/lint/ci_lint.vue';
@@ -23,17 +24,17 @@ const COMMIT_FAILURE = 'COMMIT_FAILURE';
 const COMMIT_SUCCESS = 'COMMIT_SUCCESS';
 const DEFAULT_FAILURE = 'DEFAULT_FAILURE';
 const LOAD_FAILURE_NO_FILE = 'LOAD_FAILURE_NO_FILE';
-const LOAD_FAILURE_NO_REF = 'LOAD_FAILURE_NO_REF';
 const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
 
 export default {
   components: {
-    CommitForm,
     CiLint,
+    CommitForm,
     EditorTab,
     GlAlert,
     GlLoadingIcon,
     GlTabs,
+    GlTab,
     PipelineGraph,
     TextEditor,
     ValidationSegment,
@@ -124,6 +125,9 @@ export default {
     isBlobContentLoading() {
       return this.$apollo.queries.content.loading;
     },
+    isBlobContentError() {
+      return this.failureType === LOAD_FAILURE_NO_FILE;
+    },
     isCiConfigDataLoading() {
       return this.$apollo.queries.ciConfigData.loading;
     },
@@ -143,14 +147,11 @@ export default {
     },
     failure() {
       switch (this.failureType) {
-        case LOAD_FAILURE_NO_REF:
-          return {
-            text: this.$options.alertTexts[LOAD_FAILURE_NO_REF],
-            variant: 'danger',
-          };
         case LOAD_FAILURE_NO_FILE:
           return {
-            text: this.$options.alertTexts[LOAD_FAILURE_NO_FILE],
+            text: sprintf(this.$options.alertTexts[LOAD_FAILURE_NO_FILE], {
+              filePath: this.ciConfigPath,
+            }),
             variant: 'danger',
           };
         case LOAD_FAILURE_UNKNOWN:
@@ -181,9 +182,8 @@ export default {
     [COMMIT_FAILURE]: s__('Pipelines|The GitLab CI configuration could not be updated.'),
     [COMMIT_SUCCESS]: __('Your changes have been successfully committed.'),
     [DEFAULT_FAILURE]: __('Something went wrong on our end.'),
-    [LOAD_FAILURE_NO_FILE]: s__('Pipelines|No CI file found in this repository, please add one.'),
-    [LOAD_FAILURE_NO_REF]: s__(
-      'Pipelines|Repository does not have a default branch, please set one.',
+    [LOAD_FAILURE_NO_FILE]: s__(
+      'Pipelines|There is no %{filePath} file in this repository, please add one and visit the Pipeline Editor again.',
     ),
     [LOAD_FAILURE_UNKNOWN]: s__('Pipelines|The CI configuration was not loaded, please try again.'),
   },
@@ -192,12 +192,13 @@ export default {
       const { networkError } = error;
 
       const { response } = networkError;
-      if (response?.status === 404) {
-        // 404 for missing CI file
+      // 404 for missing CI file
+      // 400 for blank projects with no repository
+      if (
+        response?.status === httpStatusCodes.NOT_FOUND ||
+        response?.status === httpStatusCodes.BAD_REQUEST
+      ) {
         this.reportFailure(LOAD_FAILURE_NO_FILE);
-      } else if (response?.status === 400) {
-        // 400 for a missing ref when no default branch is set
-        this.reportFailure(LOAD_FAILURE_NO_REF);
       } else {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       }
@@ -298,9 +299,9 @@ export default {
         <li v-for="reason in failureReasons" :key="reason">{{ reason }}</li>
       </ul>
     </gl-alert>
-    <div class="gl-mt-4">
-      <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
-      <div v-else class="file-editor gl-mb-3">
+    <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
+    <div v-else-if="!isBlobContentError" class="gl-mt-4">
+      <div class="file-editor gl-mb-3">
         <div class="info-well gl-display-none gl-display-sm-block">
           <validation-segment
             class="well-segment"
@@ -317,16 +318,15 @@ export default {
               :commit-sha="lastCommitSha"
             />
           </editor-tab>
-          <editor-tab
+          <gl-tab
             v-if="glFeatures.ciConfigVisualizationTab"
             :lazy="true"
             :title="$options.i18n.tabGraph"
-            :title-link-attributes="{ 'data-testid': 'visualization-tab-btn' }"
             data-testid="visualization-tab"
           >
             <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
             <pipeline-graph v-else :pipeline-data="ciConfigData" />
-          </editor-tab>
+          </gl-tab>
 
           <editor-tab :title="$options.i18n.tabLint">
             <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />

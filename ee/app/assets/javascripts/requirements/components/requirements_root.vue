@@ -19,11 +19,13 @@ import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
 import ImportRequirementsModal from './import_requirements_modal.vue';
+import ExportRequirementsModal from './export_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
 import createRequirement from '../queries/createRequirement.mutation.graphql';
 import updateRequirement from '../queries/updateRequirement.mutation.graphql';
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
 
 import {
   FilterState,
@@ -45,6 +47,7 @@ export default {
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
     ImportRequirementsModal,
+    ExportRequirementsModal,
   },
   mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
   props: {
@@ -105,6 +108,10 @@ export default {
       required: true,
     },
     importCsvPath: {
+      type: String,
+      required: true,
+    },
+    currentUserEmail: {
       type: String,
       required: true,
     },
@@ -404,6 +411,27 @@ export default {
           createFlash({ message });
         });
     },
+    exportCsv() {
+      return this.$apollo
+        .mutate({
+          mutation: exportRequirement,
+          variables: {
+            projectPath: this.projectPath,
+            state: this.filterBy,
+            authorUsername: this.authorUsernames,
+            search: this.textSearch,
+            sortBy: this.sortBy,
+          },
+        })
+        .catch((e) => {
+          createFlash({
+            message: __('Something went wrong while exporting requirements'),
+            captureError: true,
+            error: e,
+          });
+          throw e;
+        });
+    },
     handleTabClick({ filterBy }) {
       this.filterBy = filterBy;
       this.prevPageCursor = '';
@@ -612,6 +640,7 @@ export default {
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
+      @click-export-requirements="$refs.exportModal.show()"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -688,6 +717,13 @@ export default {
       ref="modal"
       :project-path="projectPath"
       @import="importCsv"
+    />
+    <export-requirements-modal
+      v-if="glFeatures.importRequirementsCsv"
+      ref="exportModal"
+      :requirement-count="totalRequirementsForCurrentTab"
+      :email="currentUserEmail"
+      @export="exportCsv"
     />
   </div>
 </template>

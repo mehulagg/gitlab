@@ -2,9 +2,9 @@
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import produce from 'immer';
 import { __ } from '~/locale';
-import securityScannersQuery from '../graphql/project_security_scanners.graphql';
-import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.query.graphql';
-import vulnerabilitiesQueryAutoFix from '../graphql/project_vulnerabilities_autofix.query.graphql';
+import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
+import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
+import vulnerabilitiesQueryAutoFix from '../graphql/queries/project_vulnerabilities_autofix.query.graphql';
 import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import VulnerabilityList from './vulnerability_list.vue';

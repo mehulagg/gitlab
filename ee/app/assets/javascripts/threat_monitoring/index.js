@@ -46,6 +46,7 @@ export default () => {
     el,
     provide: {
       documentationPath,
+      emptyStateSvgPath,
       projectPath,
     },
     store,
@@ -53,7 +54,6 @@ export default () => {
       return createElement(ThreatMonitoringApp, {
         props: {
           chartEmptyStateSvgPath,
-          emptyStateSvgPath,
           wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),

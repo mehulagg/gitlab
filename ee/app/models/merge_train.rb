@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class MergeTrain < ApplicationRecord
+  include Gitlab::Utils::StrongMemoize
   include AfterCommitQueue
 
   ACTIVE_STATUSES = %w[idle stale fresh].freeze
@@ -10,6 +11,8 @@ class MergeTrain < ApplicationRecord
   belongs_to :merge_request, inverse_of: :merge_train
   belongs_to :user
   belongs_to :pipeline, class_name: 'Ci::Pipeline'
+
+  alias_attribute :project, :target_project
 
   after_destroy do |merge_train|
     run_after_commit do
@@ -148,12 +151,32 @@ class MergeTrain < ApplicationRecord
     all_prev.count
   end
 
-  def first_in_train?
-    !follower_in_train?
+  def previous_ref
+    prev&.train_ref_path || merge_request.target_branch_ref
   end
 
-  def follower_in_train?
-    all_prev.exists?
+  def previous_ref_sha
+    project.repository.commit(previous_ref)&.sha
+  end
+
+  def requires_new_pipeline?
+    !has_pipeline? || stale?
+  end
+
+  def pipeline_not_succeeded?
+    has_pipeline? && pipeline.complete? && !pipeline.success?
+  end
+
+  def cancel_pipeline!(new_pipeline)
+    pipeline&.auto_cancel_running(new_pipeline, retries: 1)
+  rescue ActiveRecord::StaleObjectError
+    # Often the pipeline has already been canceled by the default cancellation
+    # mechanizm `Ci::CreatePipelineService#cancel_pending_pipelines`. In this
+    # case, we can ignore the exception as it's already canceled.
+  end
+
+  def mergeable?
+    has_pipeline? && pipeline&.success? && first_in_train?
   end
 
   def cleanup_ref
@@ -166,5 +189,15 @@ class MergeTrain < ApplicationRecord
 
   def refresh_async
     AutoMergeProcessWorker.perform_async(merge_request_id)
+  end
+
+  private
+
+  def has_pipeline?
+    pipeline_id.present? && pipeline
+  end
+
+  def first_in_train?
+    all_prev.none?
   end
 end

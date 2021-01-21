@@ -40,5 +40,9 @@ module EE
     def supports_metric_images?
       incident?
     end
+
+    def supports_iterations?
+      false
+    end
   end
 end

@@ -124,6 +124,11 @@ export default {
       required: false,
       default: false,
     },
+    defaultSuggestionCommitMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
     mrReviews: {
       type: Object,
       required: false,
@@ -268,6 +273,7 @@ export default {
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
       viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
+      defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
       mrReviews: this.mrReviews || {},
     });
 
@@ -425,7 +431,7 @@ export default {
         }
       });
 
-      if (this.commit && this.glFeatures.mrCommitNeighborNav) {
+      if (this.commit) {
         Mousetrap.bind('c', () => this.moveToNeighboringCommit({ direction: 'next' }));
         Mousetrap.bind('x', () => this.moveToNeighboringCommit({ direction: 'previous' }));
       }

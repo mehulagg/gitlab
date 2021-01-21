@@ -285,7 +285,7 @@ export const setMockEndpoints = (opts = {}) => {
 export const mockList = {
   id: 'gid://gitlab/List/1',
   title: 'Backlog',
-  position: null,
+  position: -Infinity,
   listType: 'backlog',
   collapsed: false,
   label: null,
@@ -363,5 +363,20 @@ export const mockRawGroupProjects = [
     name: 'Foobar Project',
     name_with_namespace: 'Awesome Group / Foobar Project',
     path_with_namespace: 'awesome-group/foobar-project',
+  },
+];
+
+export const mockGroupProjects = [
+  {
+    id: 0,
+    name: 'Example Project',
+    nameWithNamespace: 'Awesome Group / Example Project',
+    fullPath: 'awesome-group/example-project',
+  },
+  {
+    id: 1,
+    name: 'Foobar Project',
+    nameWithNamespace: 'Awesome Group / Foobar Project',
+    fullPath: 'awesome-group/foobar-project',
   },
 ];

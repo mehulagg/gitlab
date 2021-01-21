@@ -5,6 +5,7 @@ exports[`DeleteRotationModal renders delete rotation modal layout 1`] = `
   actioncancel="[object Object]"
   actionprimary="[object Object]"
   data-testid="delete-rotation-modal-gid://gitlab/IncidentManagement::OncallRotation/2"
+  dismisslabel="Close"
   modalclass=""
   modalid="deleteRotationModal"
   size="sm"

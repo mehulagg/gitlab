@@ -129,7 +129,6 @@ module EE
 
       rule { reporter }.policy do
         enable :admin_list
-        enable :admin_board
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs
@@ -348,8 +347,9 @@ module EE
     def sso_enforcement_prevents_access?
       return false unless subject.persisted?
       return false if user&.admin?
+      return false if user&.auditor?
 
-      ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject)
+      ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject, user: user)
     end
 
     # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse

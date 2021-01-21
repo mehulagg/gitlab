@@ -75,7 +75,7 @@ input AddProjectToSecurityDashboardInput {
   clientMutationId: String
 
   """
-  ID of the project to be added to Instance Security Dashboard
+  ID of the project to be added to Instance Security Dashboard.
   """
   id: ProjectID!
 }
@@ -95,7 +95,7 @@ type AddProjectToSecurityDashboardPayload {
   errors: [String!]!
 
   """
-  Project that was added to the Instance Security Dashboard
+  Project that was added to the Instance Security Dashboard.
   """
   project: Project
 }
@@ -354,7 +354,7 @@ type AlertManagementAlert implements Noteable {
   """
   todos(
     """
-    The action to be filtered
+    The action to be filtered.
     """
     action: [TodoActionEnum!]
 
@@ -364,7 +364,7 @@ type AlertManagementAlert implements Noteable {
     after: String
 
     """
-    The ID of an author
+    The ID of an author.
     """
     authorId: [ID!]
 
@@ -379,7 +379,7 @@ type AlertManagementAlert implements Noteable {
     first: Int
 
     """
-    The ID of a group
+    The ID of a group.
     """
     groupId: [ID!]
 
@@ -389,17 +389,17 @@ type AlertManagementAlert implements Noteable {
     last: Int
 
     """
-    The ID of a project
+    The ID of a project.
     """
     projectId: [ID!]
 
     """
-    The state of the todo
+    The state of the todo.
     """
     state: [TodoStateEnum!]
 
     """
-    The type of the todo
+    The type of the todo.
     """
     type: [TodoTargetEnum!]
   ): TodoConnection
@@ -600,7 +600,7 @@ Filters the alerts based on given domain
 """
 enum AlertManagementDomainFilter {
   """
-  Alerts for operations domain 
+  Alerts for operations domain
   """
   operations
 
@@ -740,6 +740,106 @@ enum AlertManagementIntegrationType {
   Prometheus integration
   """
   PROMETHEUS
+}
+
+"""
+Field that are available while modifying the custom mapping attributes for an HTTP integration
+"""
+input AlertManagementPayloadAlertFieldInput {
+  """
+  A GitLab alert field name.
+  """
+  fieldName: AlertManagementPayloadAlertFieldName!
+
+  """
+  Human-readable label of the payload path.
+  """
+  label: String
+
+  """
+  Path to value inside payload JSON.
+  """
+  path: [String!]!
+
+  """
+  Type of the parsed value.
+  """
+  type: AlertManagementPayloadAlertFieldType!
+}
+
+"""
+Values for alert field names used in the custom mapping
+"""
+enum AlertManagementPayloadAlertFieldName {
+  """
+  A high-level summary of the problem.
+  """
+  DESCRIPTION
+
+  """
+  The resolved time of the incident.
+  """
+  END_TIME
+
+  """
+  The unique identifier of the alert. This can be used to group occurrences of the same alert.
+  """
+  FINGERPRINT
+
+  """
+  The name of the associated GitLab environment.
+  """
+  GITLAB_ENVIRONMENT_NAME
+
+  """
+  One or more hosts, as to where this incident occurred.
+  """
+  HOSTS
+
+  """
+  The name of the associated monitoring tool.
+  """
+  MONITORING_TOOL
+
+  """
+  The affected service.
+  """
+  SERVICE
+
+  """
+  The severity of the alert.
+  """
+  SEVERITY
+
+  """
+  The time of the incident.
+  """
+  START_TIME
+
+  """
+  The title of the incident.
+  """
+  TITLE
+}
+
+"""
+Values for alert field types used in the custom mapping
+"""
+enum AlertManagementPayloadAlertFieldType {
+  """
+  Array field type
+  """
+  ARRAY
+
+  """
+  DateTime field type
+  """
+  DATETIME
+
+  """
+  String field type
+  """
+  STRING
 }
 
 """
@@ -1280,7 +1380,7 @@ type Board {
     first: Int
 
     """
-    Filters applied when selecting issues on the board
+    Filters applied when selecting issues on the board.
     """
     issueFilters: BoardIssueInput
 
@@ -1355,12 +1455,12 @@ type Board {
     first: Int
 
     """
-    Find a list by its global ID
+    Find a list by its global ID.
     """
     id: ListID
 
     """
-    Filters applied when getting issue metadata in the board list
+    Filters applied when getting issue metadata in the board list.
     """
     issueFilters: BoardIssueInput
 
@@ -1450,7 +1550,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     after: String
 
     """
-    Filter epics by author
+    Filter epics by author.
     """
     authorUsername: String
 
@@ -1458,6 +1558,11 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filter epics by given confidentiality.
+    """
+    confidential: Boolean
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
@@ -1471,27 +1576,27 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     first: Int
 
     """
-    IID of the epic, e.g., "1"
+    IID of the epic, e.g., "1".
     """
     iid: ID
 
     """
-    Filter epics by IID for autocomplete
+    Filter epics by IID for autocomplete.
     """
     iidStartsWith: String
 
     """
-    List of IIDs of epics, e.g., [1, 2]
+    List of IIDs of epics, e.g., [1, 2].
     """
     iids: [ID!]
 
     """
-    Include epics from descendant groups
+    Include epics from descendant groups.
     """
     includeDescendantGroups: Boolean = true
 
     """
-    Filter epics by labels
+    Filter epics by labels.
     """
     labelName: [String!]
 
@@ -1501,17 +1606,17 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     last: Int
 
     """
-    Filter epics by milestone title, computed from epic's issues
+    Filter epics by milestone title, computed from epic's issues.
     """
     milestoneTitle: String
 
     """
-    Search query for epic title or description
+    Search query for epic title or description.
     """
     search: String
 
     """
-    List epics by sort order
+    List epics by sort order.
     """
     sort: EpicSort
 
@@ -1523,12 +1628,12 @@ type BoardEpic implements CurrentUserTodos & Noteable {
     startDate: Time
 
     """
-    Filter epics by state
+    Filter epics by state.
     """
     state: EpicState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
   ): EpicConnection
@@ -2030,7 +2135,7 @@ type BoardList {
     before: String
 
     """
-    Filters applied when selecting issues in the board list
+    Filters applied when selecting issues in the board list.
     """
     filters: BoardIssueInput
 
@@ -2126,7 +2231,7 @@ Autogenerated input type of BoardListCreate
 """
 input BoardListCreateInput {
   """
-  Global ID of an existing user
+  Global ID of an existing user.
   """
   assigneeId: UserID
 
@@ -2146,7 +2251,7 @@ input BoardListCreateInput {
   clientMutationId: String
 
   """
-  Global ID of an existing iteration
+  Global ID of an existing iteration.
   """
   iterationId: IterationID
 
@@ -2156,7 +2261,7 @@ input BoardListCreateInput {
   labelId: LabelID
 
   """
-  Global ID of an existing milestone
+  Global ID of an existing milestone.
   """
   milestoneId: MilestoneID
 }
@@ -2241,7 +2346,7 @@ type BoardListUpdateLimitMetricsPayload {
   errors: [String!]!
 
   """
-  The updated list
+  The updated list.
   """
   list: BoardList
 }
@@ -2338,6 +2443,41 @@ type CiBuildNeedEdge {
   The item at the end of the edge.
   """
   node: CiBuildNeed
+}
+
+"""
+Autogenerated input type of CiCdSettingsUpdate
+"""
+input CiCdSettingsUpdateInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Full Path of the project the settings belong to.
+  """
+  fullPath: ID!
+
+  """
+  Indicates if the latest artifact should be kept for this project.
+  """
+  keepLatestArtifact: Boolean
+}
+
+"""
+Autogenerated return type of CiCdSettingsUpdate
+"""
+type CiCdSettingsUpdatePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
 }
 
 type CiConfig {
@@ -2456,17 +2596,42 @@ type CiConfigGroupEdge {
 
 type CiConfigJob {
   """
-  Name of the job group
+  Override a set of commands that are executed after the job.
+  """
+  afterScript: [String!]
+
+  """
+  Allow job to fail.
+  """
+  allowFailure: Boolean
+
+  """
+  Override a set of commands that are executed before the job.
+  """
+  beforeScript: [String!]
+
+  """
+  Name of an environment to which the job deploys.
+  """
+  environment: String
+
+  """
+  Limit when jobs are not created.
+  """
+  except: CiConfigJobRestriction
+
+  """
+  Name of the job group.
   """
   groupName: String
 
   """
-  Name of the job
+  Name of the job.
   """
   name: String
 
   """
-  Builds that must complete before the jobs run
+  Builds that must complete before the jobs run.
   """
   needs(
     """
@@ -2491,9 +2656,29 @@ type CiConfigJob {
   ): CiConfigNeedConnection
 
   """
-  Name of the job stage
+  Jobs are created when these conditions do not apply.
+  """
+  only: CiConfigJobRestriction
+
+  """
+  Shell script that is executed by a runner.
+  """
+  script: [String!]
+
+  """
+  Name of the job stage.
   """
   stage: String
+
+  """
+  List of tags that are used to select a runner.
+  """
+  tags: [String!]
+
+  """
+  When to run the job.
+  """
+  when: String
 }
 
 """
@@ -2529,6 +2714,13 @@ type CiConfigJobEdge {
   The item at the end of the edge.
   """
   node: CiConfigJob
+}
+
+type CiConfigJobRestriction {
+  """
+  The Git refs the job restriction applies to.
+  """
+  refs: [String!]
 }
 
 type CiConfigNeed {
@@ -3050,7 +3242,7 @@ input ClusterAgentDeleteInput {
   clientMutationId: String
 
   """
-  Global ID of the cluster agent that will be deleted
+  Global ID of the cluster agent that will be deleted.
   """
   id: ClustersAgentID!
 }
@@ -3137,7 +3329,7 @@ input ClusterAgentTokenCreateInput {
   clientMutationId: String
 
   """
-  Global ID of the cluster agent that will be associated with the new token
+  Global ID of the cluster agent that will be associated with the new token.
   """
   clusterAgentId: ClustersAgentID!
 }
@@ -3157,12 +3349,12 @@ type ClusterAgentTokenCreatePayload {
   errors: [String!]!
 
   """
-  Token secret value. Make sure you save it - you won't be able to access it again
+  Token secret value. Make sure you save it - you won't be able to access it again.
   """
   secret: String
 
   """
-  Token created after mutation
+  Token created after mutation.
   """
   token: ClusterAgentToken
 }
@@ -3177,7 +3369,7 @@ input ClusterAgentTokenDeleteInput {
   clientMutationId: String
 
   """
-  Global ID of the cluster agent token that will be deleted
+  Global ID of the cluster agent token that will be deleted.
   """
   id: ClustersAgentTokenID!
 }
@@ -3373,17 +3565,17 @@ type Commit {
     last: Int
 
     """
-    Filter pipelines by the ref they are run for
+    Filter pipelines by the ref they are run for.
     """
     ref: String
 
     """
-    Filter pipelines by the sha of the commit they are run for
+    Filter pipelines by the sha of the commit they are run for.
     """
     sha: String
 
     """
-    Filter pipelines by their status
+    Filter pipelines by their status.
     """
     status: PipelineStatusEnum
   ): PipelineConnection
@@ -3685,12 +3877,12 @@ input ConfigureSastInput {
   clientMutationId: String
 
   """
-  SAST CI configuration for the project
+  SAST CI configuration for the project.
   """
   configuration: SastCiConfigurationInput!
 
   """
-  Full path of the project
+  Full path of the project.
   """
   projectPath: ID!
 }
@@ -3710,12 +3902,12 @@ type ConfigureSastPayload {
   errors: [String!]!
 
   """
-  Status of creating the commit for the supplied SAST CI configuration
+  Status of creating the commit for the supplied SAST CI configuration.
   """
   status: String!
 
   """
-  Redirect path to use when the response is successful
+  Redirect path to use when the response is successful.
   """
   successPath: String
 }
@@ -4421,12 +4613,12 @@ input CreateClusterAgentInput {
   clientMutationId: String
 
   """
-  Name of the cluster agent
+  Name of the cluster agent.
   """
   name: String!
 
   """
-  Full path of the associated project for this cluster agent
+  Full path of the associated project for this cluster agent.
   """
   projectPath: ID!
 }
@@ -4441,7 +4633,7 @@ type CreateClusterAgentPayload {
   clientMutationId: String
 
   """
-  Cluster agent created after mutation
+  Cluster agent created after mutation.
   """
   clusterAgent: ClusterAgent
 
@@ -4546,12 +4738,12 @@ input CreateDevopsAdoptionSegmentInput {
   clientMutationId: String
 
   """
-  The array of group IDs to set for the segment
+  The array of group IDs to set for the segment.
   """
   groupIds: [GroupID!]
 
   """
-  Name of the segment
+  Name of the segment.
   """
   name: String!
 }
@@ -4571,7 +4763,7 @@ type CreateDevopsAdoptionSegmentPayload {
   errors: [String!]!
 
   """
-  The segment after mutation
+  The segment after mutation.
   """
   segment: DevopsAdoptionSegment
 }
@@ -4641,27 +4833,27 @@ input CreateEpicInput {
   clientMutationId: String
 
   """
-  Indicates if the epic is confidential
+  Indicates if the epic is confidential.
   """
   confidential: Boolean
 
   """
-  The description of the epic
+  The description of the epic.
   """
   description: String
 
   """
-  The end date of the epic
+  The end date of the epic.
   """
   dueDateFixed: String
 
   """
-  Indicates end date should be sourced from due_date_fixed field not the issue milestones
+  Indicates end date should be sourced from due_date_fixed field not the issue milestones.
   """
   dueDateIsFixed: Boolean
 
   """
-  The group the epic to mutate is in
+  The group the epic to mutate is in.
   """
   groupPath: ID!
 
@@ -4671,17 +4863,17 @@ input CreateEpicInput {
   removeLabelIds: [ID!]
 
   """
-  The start date of the epic
+  The start date of the epic.
   """
   startDateFixed: String
 
   """
-  Indicates start date should be sourced from start_date_fixed field not the issue milestones
+  Indicates start date should be sourced from start_date_fixed field not the issue milestones.
   """
   startDateIsFixed: Boolean
 
   """
-  The title of the epic
+  The title of the epic.
   """
   title: String
 }
@@ -4696,7 +4888,7 @@ type CreateEpicPayload {
   clientMutationId: String
 
   """
-  The created epic
+  The created epic.
   """
   epic: Epic
 
@@ -4796,12 +4988,12 @@ input CreateIssueInput {
   dueDate: ISO8601Date
 
   """
-  The ID of an epic to associate the issue with
+  The ID of an epic to associate the issue with.
   """
   epicId: EpicID
 
   """
-  The desired health status
+  The desired health status.
   """
   healthStatus: HealthStatus
 
@@ -4846,7 +5038,7 @@ input CreateIssueInput {
   title: String!
 
   """
-  The weight of the issue
+  The weight of the issue.
   """
   weight: Int
 }
@@ -4881,32 +5073,32 @@ input CreateIterationInput {
   clientMutationId: String
 
   """
-  The description of the iteration
+  The description of the iteration.
   """
   description: String
 
   """
-  The end date of the iteration
+  The end date of the iteration.
   """
   dueDate: String
 
   """
-  The target group for the iteration
+  The target group for the iteration.
   """
   groupPath: ID
 
   """
-  The target project for the iteration
+  The target project for the iteration.
   """
   projectPath: ID
 
   """
-  The start date of the iteration
+  The start date of the iteration.
   """
   startDate: String
 
   """
-  The title of the iteration
+  The title of the iteration.
   """
   title: String
 }
@@ -4926,7 +5118,7 @@ type CreateIterationPayload {
   errors: [String!]!
 
   """
-  The created iteration
+  The created iteration.
   """
   iteration: Iteration
 }
@@ -4991,17 +5183,17 @@ input CreateRequirementInput {
   clientMutationId: String
 
   """
-  Description of the requirement
+  Description of the requirement.
   """
   description: String
 
   """
-  Full project path the requirement is associated with
+  Full project path the requirement is associated with.
   """
   projectPath: ID!
 
   """
-  Title of the requirement
+  Title of the requirement.
   """
   title: String
 }
@@ -5021,7 +5213,7 @@ type CreateRequirementPayload {
   errors: [String!]!
 
   """
-  Requirement after mutation
+  Requirement after mutation.
   """
   requirement: Requirement
 }
@@ -5101,7 +5293,7 @@ input CreateTestCaseInput {
   clientMutationId: String
 
   """
-  The test case description
+  The test case description.
   """
   description: String
 
@@ -5111,12 +5303,12 @@ input CreateTestCaseInput {
   labelIds: [ID!]
 
   """
-  The project full path to create the test case
+  The project full path to create the test case.
   """
   projectPath: ID!
 
   """
-  The test case title
+  The test case title.
   """
   title: String!
 }
@@ -5136,7 +5328,7 @@ type CreateTestCasePayload {
   errors: [String!]!
 
   """
-  The test case created
+  The test case created.
   """
   testCase: Issue
 }
@@ -5983,6 +6175,41 @@ Identifier of DastSiteValidation
 """
 scalar DastSiteValidationID
 
+"""
+Autogenerated input type of DastSiteValidationRevoke
+"""
+input DastSiteValidationRevokeInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  The project the site validation belongs to.
+  """
+  fullPath: ID!
+
+  """
+  Normalized URL of the target to be revoked.
+  """
+  normalizedTargetUrl: String!
+}
+
+"""
+Autogenerated return type of DastSiteValidationRevoke
+"""
+type DastSiteValidationRevokePayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
 enum DastSiteValidationStrategyEnum {
   """
   Header validation
@@ -6130,7 +6357,7 @@ input DeleteDevopsAdoptionSegmentInput {
   clientMutationId: String
 
   """
-  ID of the segment
+  ID of the segment.
   """
   id: AnalyticsDevopsAdoptionSegmentID!
 }
@@ -6319,12 +6546,12 @@ type Design implements CurrentUserTodos & DesignFields & Noteable {
     before: String
 
     """
-    The Global ID of the most recent acceptable version
+    The Global ID of the most recent acceptable version.
     """
     earlierOrEqualToId: DesignManagementVersionID
 
     """
-    The SHA256 of the most recent acceptable version
+    The SHA256 of the most recent acceptable version.
     """
     earlierOrEqualToSha: String
 
@@ -6454,12 +6681,12 @@ type DesignCollection {
   """
   design(
     """
-    Find a design by its filename
+    Find a design by its filename.
     """
     filename: String
 
     """
-    Find a design by its ID
+    Find a design by its ID.
     """
     id: DesignManagementDesignID
   ): Design
@@ -6469,7 +6696,7 @@ type DesignCollection {
   """
   designAtVersion(
     """
-    The Global ID of the design at this version
+    The Global ID of the design at this version.
     """
     id: DesignManagementDesignAtVersionID!
   ): DesignAtVersion
@@ -6495,7 +6722,7 @@ type DesignCollection {
     before: String
 
     """
-    Filters designs by their filename
+    Filters designs by their filename.
     """
     filenames: [String!]
 
@@ -6505,7 +6732,7 @@ type DesignCollection {
     first: Int
 
     """
-    Filters designs by their ID
+    Filters designs by their ID.
     """
     ids: [DesignManagementDesignID!]
 
@@ -6530,12 +6757,12 @@ type DesignCollection {
   """
   version(
     """
-    The Global ID of the version
+    The Global ID of the version.
     """
     id: DesignManagementVersionID
 
     """
-    The SHA256 of a specific version
+    The SHA256 of a specific version.
     """
     sha: String
   ): DesignVersion
@@ -6555,12 +6782,12 @@ type DesignCollection {
     before: String
 
     """
-    The Global ID of the most recent acceptable version
+    The Global ID of the most recent acceptable version.
     """
     earlierOrEqualToId: DesignManagementVersionID
 
     """
-    The SHA256 of the most recent acceptable version
+    The SHA256 of the most recent acceptable version.
     """
     earlierOrEqualToSha: String
 
@@ -6689,7 +6916,7 @@ type DesignManagement {
   """
   designAtVersion(
     """
-    The Global ID of the design at this version
+    The Global ID of the design at this version.
     """
     id: DesignManagementDesignAtVersionID!
   ): DesignAtVersion
@@ -6699,7 +6926,7 @@ type DesignManagement {
   """
   version(
     """
-    The Global ID of the version
+    The Global ID of the version.
     """
     id: DesignManagementVersionID!
   ): DesignVersion
@@ -6869,17 +7096,17 @@ type DesignVersion {
   """
   designAtVersion(
     """
-    The ID of a specific design
+    The ID of a specific design.
     """
     designId: DesignManagementDesignID
 
     """
-    The filename of a specific design
+    The filename of a specific design.
     """
     filename: String
 
     """
-    The ID of the DesignAtVersion
+    The ID of the DesignAtVersion.
     """
     id: DesignManagementDesignAtVersionID
   ): DesignAtVersion!
@@ -6924,7 +7151,7 @@ type DesignVersion {
     before: String
 
     """
-    Filters designs by their filename
+    Filters designs by their filename.
     """
     filenames: [String!]
 
@@ -6934,7 +7161,7 @@ type DesignVersion {
     first: Int
 
     """
-    Filters designs by their ID
+    Filters designs by their ID.
     """
     ids: [DesignManagementDesignID!]
 
@@ -7095,7 +7322,7 @@ input DestroyComplianceFrameworkInput {
   clientMutationId: String
 
   """
-  The global ID of the compliance framework to destroy
+  The global ID of the compliance framework to destroy.
   """
   id: ComplianceManagementFrameworkID!
 }
@@ -7651,7 +7878,7 @@ type Discussion implements ResolvableInterface {
   """
   ID of this discussion
   """
-  id: ID!
+  id: DiscussionID!
 
   """
   All notes in the discussion
@@ -7681,7 +7908,7 @@ type Discussion implements ResolvableInterface {
   """
   ID used to reply to this discussion
   """
-  replyId: ID!
+  replyId: DiscussionID!
 
   """
   Indicates if the object can be resolved
@@ -7794,17 +8021,17 @@ input DismissVulnerabilityInput {
   clientMutationId: String
 
   """
-  Comment why vulnerability should be dismissed
+  Comment why vulnerability should be dismissed.
   """
   comment: String
 
   """
-  Reason why vulnerability should be dismissed
+  Reason why vulnerability should be dismissed.
   """
   dismissalReason: VulnerabilityDismissalReason
 
   """
-  ID of the vulnerability to be dismissed
+  ID of the vulnerability to be dismissed.
   """
   id: VulnerabilityID!
 }
@@ -7824,7 +8051,7 @@ type DismissVulnerabilityPayload {
   errors: [String!]!
 
   """
-  The vulnerability after dismissal
+  The vulnerability after dismissal.
   """
   vulnerability: Vulnerability
 }
@@ -7889,7 +8116,7 @@ type Environment {
   """
   metricsDashboard(
     """
-    Path to a file which defines metrics dashboard eg: 'config/prometheus/common_metrics.yml'
+    Path to a file which defines metrics dashboard eg: 'config/prometheus/common_metrics.yml'.
     """
     path: String!
   ): MetricsDashboard
@@ -8004,7 +8231,7 @@ type Epic implements CurrentUserTodos & Noteable {
     after: String
 
     """
-    Filter epics by author
+    Filter epics by author.
     """
     authorUsername: String
 
@@ -8012,6 +8239,11 @@ type Epic implements CurrentUserTodos & Noteable {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filter epics by given confidentiality.
+    """
+    confidential: Boolean
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
@@ -8025,27 +8257,27 @@ type Epic implements CurrentUserTodos & Noteable {
     first: Int
 
     """
-    IID of the epic, e.g., "1"
+    IID of the epic, e.g., "1".
     """
     iid: ID
 
     """
-    Filter epics by IID for autocomplete
+    Filter epics by IID for autocomplete.
     """
     iidStartsWith: String
 
     """
-    List of IIDs of epics, e.g., [1, 2]
+    List of IIDs of epics, e.g., [1, 2].
     """
     iids: [ID!]
 
     """
-    Include epics from descendant groups
+    Include epics from descendant groups.
     """
     includeDescendantGroups: Boolean = true
 
     """
-    Filter epics by labels
+    Filter epics by labels.
     """
     labelName: [String!]
 
@@ -8055,17 +8287,17 @@ type Epic implements CurrentUserTodos & Noteable {
     last: Int
 
     """
-    Filter epics by milestone title, computed from epic's issues
+    Filter epics by milestone title, computed from epic's issues.
     """
     milestoneTitle: String
 
     """
-    Search query for epic title or description
+    Search query for epic title or description.
     """
     search: String
 
     """
-    List epics by sort order
+    List epics by sort order.
     """
     sort: EpicSort
 
@@ -8077,12 +8309,12 @@ type Epic implements CurrentUserTodos & Noteable {
     startDate: Time
 
     """
-    Filter epics by state
+    Filter epics by state.
     """
     state: EpicState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
   ): EpicConnection
@@ -8438,22 +8670,22 @@ input EpicAddIssueInput {
   clientMutationId: String
 
   """
-  The group the epic to mutate belongs to
+  The group the epic to mutate belongs to.
   """
   groupPath: ID!
 
   """
-  The IID of the epic to mutate
+  The IID of the epic to mutate.
   """
   iid: ID!
 
   """
-  The IID of the issue to be added
+  The IID of the issue to be added.
   """
   issueIid: String!
 
   """
-  The full path of the project the issue belongs to
+  The full path of the project the issue belongs to.
   """
   projectPath: ID!
 }
@@ -8468,12 +8700,12 @@ type EpicAddIssuePayload {
   clientMutationId: String
 
   """
-  The epic after mutation
+  The epic after mutation.
   """
   epic: Epic
 
   """
-  The epic-issue relation
+  The epic-issue relation.
   """
   epicIssue: EpicIssue
 
@@ -9268,17 +9500,17 @@ input EpicSetSubscriptionInput {
   clientMutationId: String
 
   """
-  The group the epic to mutate belongs to
+  The group the epic to mutate belongs to.
   """
   groupPath: ID!
 
   """
-  The IID of the epic to mutate
+  The IID of the epic to mutate.
   """
   iid: ID!
 
   """
-  The desired state of the subscription
+  The desired state of the subscription.
   """
   subscribedState: Boolean!
 }
@@ -9293,7 +9525,7 @@ type EpicSetSubscriptionPayload {
   clientMutationId: String
 
   """
-  The epic after mutation
+  The epic after mutation.
   """
   epic: Epic
 
@@ -9382,7 +9614,7 @@ Autogenerated input type of EpicTreeReorder
 """
 input EpicTreeReorderInput {
   """
-  The ID of the base epic of the tree
+  The ID of the base epic of the tree.
   """
   baseEpicId: EpicID!
 
@@ -9392,7 +9624,7 @@ input EpicTreeReorderInput {
   clientMutationId: String
 
   """
-  Parameters for updating the tree positions
+  Parameters for updating the tree positions.
   """
   moved: EpicTreeNodeFieldsInputType!
 }
@@ -9430,6 +9662,56 @@ enum EpicWildcardId {
   No epic is assigned
   """
   NONE
+}
+
+"""
+Autogenerated input type of ExportRequirements
+"""
+input ExportRequirementsInput {
+  """
+  Filter requirements by author username.
+  """
+  authorUsername: [String!]
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Full project path the requirements are associated with.
+  """
+  projectPath: ID!
+
+  """
+  Search query for requirement title.
+  """
+  search: String
+
+  """
+  List requirements by sort order.
+  """
+  sort: Sort
+
+  """
+  Filter requirements by state.
+  """
+  state: RequirementState
+}
+
+"""
+Autogenerated return type of ExportRequirements
+"""
+type ExportRequirementsPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
 }
 
 """
@@ -9518,7 +9800,7 @@ type GeoNode {
     first: Int
 
     """
-    Filters registries by their ID
+    Filters registries by their ID.
     """
     ids: [ID!]
 
@@ -9558,7 +9840,7 @@ type GeoNode {
     first: Int
 
     """
-    Filters registries by their ID
+    Filters registries by their ID.
     """
     ids: [ID!]
 
@@ -9633,7 +9915,7 @@ type GeoNode {
     first: Int
 
     """
-    Filters registries by their ID
+    Filters registries by their ID.
     """
     ids: [ID!]
 
@@ -9668,7 +9950,7 @@ type GeoNode {
     first: Int
 
     """
-    Filters registries by their ID
+    Filters registries by their ID.
     """
     ids: [ID!]
 
@@ -9747,7 +10029,7 @@ type Group {
   """
   board(
     """
-    The board's ID
+    The board's ID.
     """
     id: BoardID!
   ): Board
@@ -9772,7 +10054,7 @@ type Group {
     first: Int
 
     """
-    Find a board by its ID
+    Find a board by its ID.
     """
     id: BoardID
 
@@ -9807,7 +10089,7 @@ type Group {
     last: Int
 
     """
-    First day for which to fetch code coverage activity (maximum time window is set to 90 days)
+    First day for which to fetch code coverage activity (maximum time window is set to 90 days).
     """
     startDate: Date!
   ): CodeCoverageActivityConnection
@@ -9868,7 +10150,7 @@ type Group {
     last: Int
 
     """
-    Filter the container repositories by their name
+    Filter the container repositories by their name.
     """
     name: String
   ): ContainerRepositoryConnection
@@ -9928,9 +10210,14 @@ type Group {
   """
   epic(
     """
-    Filter epics by author
+    Filter epics by author.
     """
     authorUsername: String
+
+    """
+    Filter epics by given confidentiality.
+    """
+    confidential: Boolean
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
@@ -9939,42 +10226,42 @@ type Group {
     endDate: Time
 
     """
-    IID of the epic, e.g., "1"
+    IID of the epic, e.g., "1".
     """
     iid: ID
 
     """
-    Filter epics by IID for autocomplete
+    Filter epics by IID for autocomplete.
     """
     iidStartsWith: String
 
     """
-    List of IIDs of epics, e.g., [1, 2]
+    List of IIDs of epics, e.g., [1, 2].
     """
     iids: [ID!]
 
     """
-    Include epics from descendant groups
+    Include epics from descendant groups.
     """
     includeDescendantGroups: Boolean = true
 
     """
-    Filter epics by labels
+    Filter epics by labels.
     """
     labelName: [String!]
 
     """
-    Filter epics by milestone title, computed from epic's issues
+    Filter epics by milestone title, computed from epic's issues.
     """
     milestoneTitle: String
 
     """
-    Search query for epic title or description
+    Search query for epic title or description.
     """
     search: String
 
     """
-    List epics by sort order
+    List epics by sort order.
     """
     sort: EpicSort
 
@@ -9986,12 +10273,12 @@ type Group {
     startDate: Time
 
     """
-    Filter epics by state
+    Filter epics by state.
     """
     state: EpicState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
   ): Epic
@@ -10001,7 +10288,7 @@ type Group {
   """
   epicBoard(
     """
-    Find an epic board by ID
+    Find an epic board by ID.
     """
     id: BoardsEpicBoardID!
   ): EpicBoard
@@ -10041,7 +10328,7 @@ type Group {
     after: String
 
     """
-    Filter epics by author
+    Filter epics by author.
     """
     authorUsername: String
 
@@ -10049,6 +10336,11 @@ type Group {
     Returns the elements in the list that come before the specified cursor.
     """
     before: String
+
+    """
+    Filter epics by given confidentiality.
+    """
+    confidential: Boolean
 
     """
     List items overlapping a time frame defined by startDate..endDate (if one
@@ -10062,27 +10354,27 @@ type Group {
     first: Int
 
     """
-    IID of the epic, e.g., "1"
+    IID of the epic, e.g., "1".
     """
     iid: ID
 
     """
-    Filter epics by IID for autocomplete
+    Filter epics by IID for autocomplete.
     """
     iidStartsWith: String
 
     """
-    List of IIDs of epics, e.g., [1, 2]
+    List of IIDs of epics, e.g., [1, 2].
     """
     iids: [ID!]
 
     """
-    Include epics from descendant groups
+    Include epics from descendant groups.
     """
     includeDescendantGroups: Boolean = true
 
     """
-    Filter epics by labels
+    Filter epics by labels.
     """
     labelName: [String!]
 
@@ -10092,17 +10384,17 @@ type Group {
     last: Int
 
     """
-    Filter epics by milestone title, computed from epic's issues
+    Filter epics by milestone title, computed from epic's issues.
     """
     milestoneTitle: String
 
     """
-    Search query for epic title or description
+    Search query for epic title or description.
     """
     search: String
 
     """
-    List epics by sort order
+    List epics by sort order.
     """
     sort: EpicSort
 
@@ -10114,12 +10406,12 @@ type Group {
     startDate: Time
 
     """
-    Filter epics by state
+    Filter epics by state.
     """
     state: EpicState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
   ): EpicConnection
@@ -10164,12 +10456,12 @@ type Group {
     last: Int
 
     """
-    Filter members by the given member relations
+    Filter members by the given member relations.
     """
     relations: [GroupMemberRelation!] = [DIRECT, INHERITED]
 
     """
-    Search query
+    Search query.
     """
     search: String
   ): GroupMemberConnection
@@ -10199,22 +10491,22 @@ type Group {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values are supported
+    ID of a user assigned to the issues, "none" and "any" values are supported.
     """
     assigneeId: String
 
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
     """
-    Usernames of users assigned to the issue
+    Usernames of users assigned to the issue.
     """
     assigneeUsernames: [String!]
 
     """
-    Username of the author of the issue
+    Username of the author of the issue.
     """
     authorUsername: String
 
@@ -10224,27 +10516,27 @@ type Group {
     before: String
 
     """
-    Issues closed after this date
+    Issues closed after this date.
     """
     closedAfter: Time
 
     """
-    Issues closed before this date
+    Issues closed before this date.
     """
     closedBefore: Time
 
     """
-    Issues created after this date
+    Issues created after this date.
     """
     createdAfter: Time
 
     """
-    Issues created before this date
+    Issues created before this date.
     """
     createdBefore: Time
 
     """
-    ID of an epic associated with the issues, "none" and "any" values are supported
+    ID of an epic associated with the issues, "none" and "any" values are supported.
     """
     epicId: String
 
@@ -10254,12 +10546,12 @@ type Group {
     first: Int
 
     """
-    IID of the issue. For example, "1"
+    IID of the issue. For example, "1".
     """
     iid: String
 
     """
-    List of IIDs of issues. For example, [1, 2]
+    List of IIDs of issues. For example, [1, 2].
     """
     iids: [String!]
 
@@ -10269,12 +10561,12 @@ type Group {
     includeSubgroups: Boolean = false
 
     """
-    Iterations applied to the issue
+    Iterations applied to the issue.
     """
     iterationId: [ID]
 
     """
-    Labels applied to this issue
+    Labels applied to this issue.
     """
     labelName: [String]
 
@@ -10284,37 +10576,37 @@ type Group {
     last: Int
 
     """
-    Milestone applied to this issue
+    Milestone applied to this issue.
     """
     milestoneTitle: [String]
 
     """
-    Search query for issue title or description
+    Search query for issue title or description.
     """
     search: String
 
     """
-    Sort issues by this criteria
+    Sort issues by this criteria.
     """
     sort: IssueSort = created_desc
 
     """
-    Current state of this issue
+    Current state of this issue.
     """
     state: IssuableState
 
     """
-    Filter issues by the given issue types
+    Filter issues by the given issue types.
     """
     types: [IssueType!]
 
     """
-    Issues updated after this date
+    Issues updated after this date.
     """
     updatedAfter: Time
 
     """
-    Issues updated before this date
+    Issues updated before this date.
     """
     updatedBefore: Time
   ): IssueConnection
@@ -10377,7 +10669,7 @@ type Group {
     state: IterationState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
 
@@ -10447,12 +10739,12 @@ type Group {
     after: String
 
     """
-    Username of the assignee
+    Username of the assignee.
     """
     assigneeUsername: String
 
     """
-    Username of the author
+    Username of the author.
     """
     authorUsername: String
 
@@ -10467,7 +10759,7 @@ type Group {
     first: Int
 
     """
-    Array of IIDs of merge requests, for example `[1, 2]`
+    Array of IIDs of merge requests, for example `[1, 2]`.
     """
     iids: [String!]
 
@@ -10487,22 +10779,22 @@ type Group {
     last: Int
 
     """
-    Merge requests merged after this date
+    Merge requests merged after this date.
     """
     mergedAfter: Time
 
     """
-    Merge requests merged before this date
+    Merge requests merged before this date.
     """
     mergedBefore: Time
 
     """
-    Title of the milestone
+    Title of the milestone.
     """
     milestoneTitle: String
 
     """
-    Sort merge requests by this criteria
+    Sort merge requests by this criteria.
     """
     sort: MergeRequestSort = created_desc
 
@@ -10537,7 +10829,7 @@ type Group {
     before: String
 
     """
-    A date that the milestone contains
+    A date that the milestone contains.
     """
     containingDate: Time
 
@@ -10553,12 +10845,12 @@ type Group {
     first: Int
 
     """
-    Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1"
+    Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1".
     """
     ids: [ID!]
 
     """
-    Also return milestones in all subgroups and subprojects
+    Also return milestones in all subgroups and subprojects.
     """
     includeDescendants: Boolean
 
@@ -10568,7 +10860,7 @@ type Group {
     last: Int
 
     """
-    A search string for the title
+    A search string for the title.
     """
     searchTitle: String
 
@@ -10580,17 +10872,17 @@ type Group {
     startDate: Time
 
     """
-    Filter milestones by state
+    Filter milestones by state.
     """
     state: MilestoneStateEnum
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
 
     """
-    The title of the milestone
+    The title of the milestone.
     """
     title: String
   ): MilestoneConnection
@@ -10640,12 +10932,12 @@ type Group {
     first: Int
 
     """
-    Returns only the projects which have vulnerabilities
+    Returns only the projects which have vulnerabilities.
     """
     hasVulnerabilities: Boolean = false
 
     """
-    Include also subgroup projects
+    Include also subgroup projects.
     """
     includeSubgroups: Boolean = false
 
@@ -10655,12 +10947,12 @@ type Group {
     last: Int
 
     """
-    Search project with most similar names or paths
+    Search project with most similar names or paths.
     """
     search: String = null
 
     """
-    Sort projects by this criteria
+    Sort projects by this criteria.
     """
     sort: NamespaceProjectSort = null
   ): ProjectConnection!
@@ -10725,12 +11017,12 @@ type Group {
     before: String
 
     """
-    List time logs within a date range where the logged date is equal to or before endDate
+    List time logs within a date range where the logged date is equal to or before endDate.
     """
     endDate: Time
 
     """
-    List time-logs within a time range where the logged time is equal to or before endTime
+    List time-logs within a time range where the logged time is equal to or before endTime.
     """
     endTime: Time
 
@@ -10745,12 +11037,12 @@ type Group {
     last: Int
 
     """
-    List time logs within a date range where the logged date is equal to or after startDate
+    List time logs within a date range where the logged date is equal to or after startDate.
     """
     startDate: Time
 
     """
-    List time-logs within a time range where the logged time is equal to or after startTime
+    List time-logs within a time range where the logged time is equal to or after startTime.
     """
     startTime: Time
   ): TimelogConnection!
@@ -10800,12 +11092,12 @@ type Group {
     first: Int
 
     """
-    Returns only the vulnerabilities which have linked issues
+    Returns only the vulnerabilities which have linked issues.
     """
     hasIssues: Boolean
 
     """
-    Returns only the vulnerabilities which have been resolved on default branch
+    Returns only the vulnerabilities which have been resolved on default branch.
     """
     hasResolution: Boolean
 
@@ -10815,32 +11107,32 @@ type Group {
     last: Int
 
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by VulnerabilityScanner.externalId
+    Filter vulnerabilities by VulnerabilityScanner.externalId.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    List vulnerabilities by sort order
+    List vulnerabilities by sort order.
     """
     sort: VulnerabilitySort = severity_desc
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilityConnection
@@ -10860,7 +11152,7 @@ type Group {
     before: String
 
     """
-    Last day for which to fetch vulnerability history
+    Last day for which to fetch vulnerability history.
     """
     endDate: ISO8601Date!
 
@@ -10875,7 +11167,7 @@ type Group {
     last: Int
 
     """
-    First day for which to fetch vulnerability history
+    First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayConnection
@@ -10896,7 +11188,7 @@ type Group {
     before: String
 
     """
-    Last day for which to fetch vulnerability history
+    Last day for which to fetch vulnerability history.
     """
     endDate: ISO8601Date!
 
@@ -10911,7 +11203,7 @@ type Group {
     last: Int
 
     """
-    First day for which to fetch vulnerability history
+    First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
@@ -10921,7 +11213,7 @@ type Group {
   """
   vulnerabilityGrades(
     """
-    Include grades belonging to subgroups
+    Include grades belonging to subgroups.
     """
     includeSubgroups: Boolean = false
   ): [VulnerableProjectsByGrade!]!
@@ -10956,27 +11248,27 @@ type Group {
   """
   vulnerabilitySeveritiesCount(
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by scanner
+    Filter vulnerabilities by scanner.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilitySeveritiesCount
@@ -11158,6 +11450,16 @@ input HttpIntegrationCreateInput {
   The name of the integration.
   """
   name: String!
+
+  """
+  The custom mapping of GitLab alert attributes to fields from the payload_example.
+  """
+  payloadAttributeMappings: [AlertManagementPayloadAlertFieldInput!]
+
+  """
+  The example of an alert payload.
+  """
+  payloadExample: JsonString
 
   """
   The project to create the integration in.
@@ -11551,27 +11853,27 @@ type InstanceSecurityDashboard {
   """
   vulnerabilitySeveritiesCount(
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by scanner
+    Filter vulnerabilities by scanner.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilitySeveritiesCount
@@ -12164,7 +12466,7 @@ input IssueMoveListInput {
   clientMutationId: String
 
   """
-  The ID of the parent epic. NULL when removing the association
+  The ID of the parent epic. NULL when removing the association.
   """
   epicId: EpicID
 
@@ -12669,7 +12971,7 @@ input IssueSetWeightInput {
   projectPath: ID!
 
   """
-  The desired weight for the issue
+  The desired weight for the issue.
   """
   weight: Int!
 }
@@ -13290,7 +13592,7 @@ type JiraService implements Service {
     last: Int
 
     """
-    Project name or key
+    Project name or key.
     """
     name: String
   ): JiraProjectConnection
@@ -13374,6 +13676,11 @@ enum JobArtifactFileType {
   TERRAFORM
   TRACE
 }
+
+"""
+JSON object as raw string
+"""
+scalar JsonString
 
 type Label {
   """
@@ -13767,6 +14074,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   autoMergeEnabled: Boolean!
 
   """
+  Selected auto merge strategy
+  """
+  autoMergeStrategy: String
+
+  """
   Array of available auto merge strategies
   """
   availableAutoMergeStrategies: [String!]
@@ -14006,6 +14318,11 @@ type MergeRequest implements CurrentUserTodos & Noteable {
   mergeTrainsCount: Int
 
   """
+  User who merged this merge request
+  """
+  mergeUser: User
+
+  """
   Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS)
   """
   mergeWhenPipelineSucceeds: Boolean
@@ -14106,17 +14423,17 @@ type MergeRequest implements CurrentUserTodos & Noteable {
     last: Int
 
     """
-    Filter pipelines by the ref they are run for
+    Filter pipelines by the ref they are run for.
     """
     ref: String
 
     """
-    Filter pipelines by the sha of the commit they are run for
+    Filter pipelines by the sha of the commit they are run for.
     """
     sha: String
 
     """
-    Filter pipelines by their status
+    Filter pipelines by their status.
     """
     status: PipelineStatusEnum
   ): PipelineConnection
@@ -15051,7 +15368,7 @@ type MetricsDashboard {
     first: Int
 
     """
-    Timestamp marking date and time from which annotations need to be fetched
+    Timestamp marking date and time from which annotations need to be fetched.
     """
     from: Time!
 
@@ -15061,7 +15378,7 @@ type MetricsDashboard {
     last: Int
 
     """
-    Timestamp marking date and time to which annotations need to be fetched
+    Timestamp marking date and time to which annotations need to be fetched.
     """
     to: Time
   ): MetricsDashboardAnnotationConnection
@@ -15305,6 +15622,7 @@ type Mutation {
   awardEmojiToggle(input: AwardEmojiToggleInput!): AwardEmojiTogglePayload
   boardListCreate(input: BoardListCreateInput!): BoardListCreatePayload
   boardListUpdateLimitMetrics(input: BoardListUpdateLimitMetricsInput!): BoardListUpdateLimitMetricsPayload
+  ciCdSettingsUpdate(input: CiCdSettingsUpdateInput!): CiCdSettingsUpdatePayload
   clusterAgentDelete(input: ClusterAgentDeleteInput!): ClusterAgentDeletePayload
   clusterAgentTokenCreate(input: ClusterAgentTokenCreateInput!): ClusterAgentTokenCreatePayload
   clusterAgentTokenDelete(input: ClusterAgentTokenDeleteInput!): ClusterAgentTokenDeletePayload
@@ -15340,6 +15658,7 @@ type Mutation {
   dastSiteProfileUpdate(input: DastSiteProfileUpdateInput!): DastSiteProfileUpdatePayload
   dastSiteTokenCreate(input: DastSiteTokenCreateInput!): DastSiteTokenCreatePayload
   dastSiteValidationCreate(input: DastSiteValidationCreateInput!): DastSiteValidationCreatePayload
+  dastSiteValidationRevoke(input: DastSiteValidationRevokeInput!): DastSiteValidationRevokePayload
   deleteAnnotation(input: DeleteAnnotationInput!): DeleteAnnotationPayload
   deleteDevopsAdoptionSegment(input: DeleteDevopsAdoptionSegmentInput!): DeleteDevopsAdoptionSegmentPayload
   designManagementDelete(input: DesignManagementDeleteInput!): DesignManagementDeletePayload
@@ -15362,6 +15681,7 @@ type Mutation {
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
+  exportRequirements(input: ExportRequirementsInput!): ExportRequirementsPayload
   httpIntegrationCreate(input: HttpIntegrationCreateInput!): HttpIntegrationCreatePayload
   httpIntegrationDestroy(input: HttpIntegrationDestroyInput!): HttpIntegrationDestroyPayload
   httpIntegrationResetToken(input: HttpIntegrationResetTokenInput!): HttpIntegrationResetTokenPayload
@@ -15597,12 +15917,12 @@ type Namespace {
     first: Int
 
     """
-    Returns only the projects which have vulnerabilities
+    Returns only the projects which have vulnerabilities.
     """
     hasVulnerabilities: Boolean = false
 
     """
-    Include also subgroup projects
+    Include also subgroup projects.
     """
     includeSubgroups: Boolean = false
 
@@ -15612,12 +15932,12 @@ type Namespace {
     last: Int
 
     """
-    Search project with most similar names or paths
+    Search project with most similar names or paths.
     """
     search: String = null
 
     """
-    Sort projects by this criteria
+    Sort projects by this criteria.
     """
     sort: NamespaceProjectSort = null
   ): ProjectConnection!
@@ -15713,7 +16033,7 @@ input NamespaceIncreaseStorageTemporarilyInput {
   clientMutationId: String
 
   """
-  The global ID of the namespace to mutate
+  The global ID of the namespace to mutate.
   """
   id: NamespaceID!
 }
@@ -15733,7 +16053,7 @@ type NamespaceIncreaseStorageTemporarilyPayload {
   errors: [String!]!
 
   """
-  The namespace after mutation
+  The namespace after mutation.
   """
   namespace: Namespace
 }
@@ -15834,7 +16154,7 @@ type Note implements ResolvableInterface {
   """
   ID of the note
   """
-  id: ID!
+  id: NoteID!
 
   """
   The position of this note on a diff
@@ -15880,6 +16200,11 @@ type Note implements ResolvableInterface {
   Timestamp of the note's last activity
   """
   updatedAt: Time!
+
+  """
+  URL to view this Note in the Web UI
+  """
+  url: String
 
   """
   Permissions for the current user on the resource
@@ -16196,22 +16521,22 @@ input OncallScheduleCreateInput {
   clientMutationId: String
 
   """
-  The description of the on-call schedule
+  The description of the on-call schedule.
   """
   description: String
 
   """
-  The name of the on-call schedule
+  The name of the on-call schedule.
   """
   name: String!
 
   """
-  The project to create the on-call schedule in
+  The project to create the on-call schedule in.
   """
   projectPath: ID!
 
   """
-  The timezone of the on-call schedule
+  The timezone of the on-call schedule.
   """
   timezone: String!
 }
@@ -16231,7 +16556,7 @@ type OncallScheduleCreatePayload {
   errors: [String!]!
 
   """
-  The on-call schedule
+  The on-call schedule.
   """
   oncallSchedule: IncidentManagementOncallSchedule
 }
@@ -16246,12 +16571,12 @@ input OncallScheduleDestroyInput {
   clientMutationId: String
 
   """
-  The on-call schedule internal ID to remove
+  The on-call schedule internal ID to remove.
   """
   iid: String!
 
   """
-  The project to remove the on-call schedule from
+  The project to remove the on-call schedule from.
   """
   projectPath: ID!
 }
@@ -16271,7 +16596,7 @@ type OncallScheduleDestroyPayload {
   errors: [String!]!
 
   """
-  The on-call schedule
+  The on-call schedule.
   """
   oncallSchedule: IncidentManagementOncallSchedule
 }
@@ -16286,27 +16611,27 @@ input OncallScheduleUpdateInput {
   clientMutationId: String
 
   """
-  The description of the on-call schedule
+  The description of the on-call schedule.
   """
   description: String
 
   """
-  The on-call schedule internal ID to update
+  The on-call schedule internal ID to update.
   """
   iid: String!
 
   """
-  The name of the on-call schedule
+  The name of the on-call schedule.
   """
   name: String
 
   """
-  The project to update the on-call schedule in
+  The project to update the on-call schedule in.
   """
   projectPath: ID!
 
   """
-  The timezone of the on-call schedule
+  The timezone of the on-call schedule.
   """
   timezone: String
 }
@@ -16326,7 +16651,7 @@ type OncallScheduleUpdatePayload {
   errors: [String!]!
 
   """
-  The on-call schedule
+  The on-call schedule.
   """
   oncallSchedule: IncidentManagementOncallSchedule
 }
@@ -16352,38 +16677,278 @@ input OncallUserInputType {
 }
 
 """
-Represents a package
+Represents a package in the Package Registry
 """
 type Package {
   """
-  The created date
+  The created date.
   """
   createdAt: Time!
 
   """
-  The ID of the package
+  The ID of the package.
   """
   id: ID!
 
   """
-  The name of the package
+  The name of the package.
   """
   name: String!
 
   """
-  The type of the package
+  The type of the package.
   """
   packageType: PackageTypeEnum!
 
   """
-  The update date
+  Pipelines that built the package.
+  """
+  pipelines(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PipelineConnection
+
+  """
+  Project where the package is stored.
+  """
+  project: Project!
+
+  """
+  The package tags.
+  """
+  tags(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PackageTagConnection
+
+  """
+  The updated date.
   """
   updatedAt: Time!
 
   """
-  The version of the package
+  The version of the package.
   """
   version: String
+
+  """
+  The other versions of the package.
+  """
+  versions(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PackageConnection
+}
+
+"""
+Details of a Composer package
+"""
+type PackageComposerDetails {
+  """
+  The Composer metadatum.
+  """
+  composerMetadatum: PackageComposerMetadatumType!
+
+  """
+  The created date.
+  """
+  createdAt: Time!
+
+  """
+  The ID of the package.
+  """
+  id: ID!
+
+  """
+  The name of the package.
+  """
+  name: String!
+
+  """
+  The type of the package.
+  """
+  packageType: PackageTypeEnum!
+
+  """
+  Pipelines that built the package.
+  """
+  pipelines(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PipelineConnection
+
+  """
+  Project where the package is stored.
+  """
+  project: Project!
+
+  """
+  The package tags.
+  """
+  tags(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PackageTagConnection
+
+  """
+  The updated date.
+  """
+  updatedAt: Time!
+
+  """
+  The version of the package.
+  """
+  version: String
+
+  """
+  The other versions of the package.
+  """
+  versions(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): PackageConnection
+}
+
+"""
+Represents a composer JSON file
+"""
+type PackageComposerJsonType {
+  """
+  The license set in the Composer JSON file.
+  """
+  license: String
+
+  """
+  The name set in the Composer JSON file.
+  """
+  name: String
+
+  """
+  The type set in the Composer JSON file.
+  """
+  type: String
+
+  """
+  The version set in the Composer JSON file.
+  """
+  version: String
+}
+
+"""
+Composer metadatum
+"""
+type PackageComposerMetadatumType {
+  """
+  Data of the Composer JSON file.
+  """
+  composerJson: PackageComposerJsonType!
+
+  """
+  Target SHA of the package.
+  """
+  targetSha: String!
 }
 
 """
@@ -16517,6 +17082,66 @@ type PackageSettings {
   mavenDuplicatesAllowed: Boolean!
 }
 
+"""
+Represents a package tag
+"""
+type PackageTag {
+  """
+  The created date.
+  """
+  createdAt: Time!
+
+  """
+  The ID of the tag.
+  """
+  id: ID!
+
+  """
+  The name of the tag.
+  """
+  name: String!
+
+  """
+  The updated date.
+  """
+  updatedAt: Time!
+}
+
+"""
+The connection type for PackageTag.
+"""
+type PackageTagConnection {
+  """
+  A list of edges.
+  """
+  edges: [PackageTagEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [PackageTag]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type PackageTagEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: PackageTag
+}
+
 enum PackageTypeEnum {
   """
   Packages from the Composer package manager
@@ -16563,6 +17188,11 @@ enum PackageTypeEnum {
   """
   PYPI
 }
+
+"""
+Identifier of Packages::Package
+"""
+scalar PackagesPackageID
 
 """
 Information about pagination in a connection.
@@ -16702,7 +17332,7 @@ type Pipeline {
     last: Int
 
     """
-    Filter jobs by the type of security report they produce
+    Filter jobs by the type of security report they produce.
     """
     securityReportTypes: [SecurityReportTypeEnum!]
   ): CiJobConnection
@@ -17039,17 +17669,17 @@ type Project {
   """
   alertManagementAlert(
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
     """
-    Filter query for given domain
+    Filter query for given domain.
     """
     domain: AlertManagementDomainFilter! = operations
 
     """
-    IID of the alert. For example, "1"
+    IID of the alert. For example, "1".
     """
     iid: String
 
@@ -17059,12 +17689,12 @@ type Project {
     search: String
 
     """
-    Sort alerts by this criteria
+    Sort alerts by this criteria.
     """
     sort: AlertManagementAlertSort
 
     """
-    Alerts with the specified statues. For example, [TRIGGERED]
+    Alerts with the specified statues. For example, [TRIGGERED].
     """
     statuses: [AlertManagementStatus!]
   ): AlertManagementAlert
@@ -17074,7 +17704,7 @@ type Project {
   """
   alertManagementAlertStatusCounts(
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
@@ -17094,7 +17724,7 @@ type Project {
     after: String
 
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
@@ -17104,7 +17734,7 @@ type Project {
     before: String
 
     """
-    Filter query for given domain
+    Filter query for given domain.
     """
     domain: AlertManagementDomainFilter! = operations
 
@@ -17114,7 +17744,7 @@ type Project {
     first: Int
 
     """
-    IID of the alert. For example, "1"
+    IID of the alert. For example, "1".
     """
     iid: String
 
@@ -17129,12 +17759,12 @@ type Project {
     search: String
 
     """
-    Sort alerts by this criteria
+    Sort alerts by this criteria.
     """
     sort: AlertManagementAlertSort
 
     """
-    Alerts with the specified statues. For example, [TRIGGERED]
+    Alerts with the specified statues. For example, [TRIGGERED].
     """
     statuses: [AlertManagementStatus!]
   ): AlertManagementAlertConnection
@@ -17190,7 +17820,7 @@ type Project {
   """
   board(
     """
-    The board's ID
+    The board's ID.
     """
     id: BoardID!
   ): Board
@@ -17215,7 +17845,7 @@ type Project {
     first: Int
 
     """
-    Find a board by its ID
+    Find a board by its ID.
     """
     id: BoardID
 
@@ -17235,7 +17865,7 @@ type Project {
   """
   clusterAgent(
     """
-    Name of the cluster agent
+    Name of the cluster agent.
     """
     name: String!
   ): ClusterAgent
@@ -17330,7 +17960,7 @@ type Project {
     last: Int
 
     """
-    Filter the container repositories by their name
+    Filter the container repositories by their name.
     """
     name: String
   ): ContainerRepositoryConnection
@@ -17375,7 +18005,7 @@ type Project {
   """
   dastSiteProfile(
     """
-    ID of the site profile
+    ID of the site profile.
     """
     id: DastSiteProfileID!
   ): DastSiteProfile
@@ -17431,7 +18061,7 @@ type Project {
     last: Int
 
     """
-    Normalized URL of the target to be scanned
+    Normalized URL of the target to be scanned.
     """
     normalizedTargetUrls: [String!]
   ): DastSiteValidationConnection
@@ -17451,17 +18081,17 @@ type Project {
   """
   environment(
     """
-    Name of the environment
+    Name of the environment.
     """
     name: String
 
     """
-    Search query for environment name
+    Search query for environment name.
     """
     search: String
 
     """
-    States of environments that should be included in result
+    States of environments that should be included in result.
     """
     states: [String!]
   ): Environment
@@ -17491,17 +18121,17 @@ type Project {
     last: Int
 
     """
-    Name of the environment
+    Name of the environment.
     """
     name: String
 
     """
-    Search query for environment name
+    Search query for environment name.
     """
     search: String
 
     """
-    States of environments that should be included in result
+    States of environments that should be included in result.
     """
     states: [String!]
   ): EnvironmentConnection
@@ -17571,102 +18201,102 @@ type Project {
   """
   issue(
     """
-    ID of a user assigned to the issues, "none" and "any" values are supported
+    ID of a user assigned to the issues, "none" and "any" values are supported.
     """
     assigneeId: String
 
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
     """
-    Usernames of users assigned to the issue
+    Usernames of users assigned to the issue.
     """
     assigneeUsernames: [String!]
 
     """
-    Username of the author of the issue
+    Username of the author of the issue.
     """
     authorUsername: String
 
     """
-    Issues closed after this date
+    Issues closed after this date.
     """
     closedAfter: Time
 
     """
-    Issues closed before this date
+    Issues closed before this date.
     """
     closedBefore: Time
 
     """
-    Issues created after this date
+    Issues created after this date.
     """
     createdAfter: Time
 
     """
-    Issues created before this date
+    Issues created before this date.
     """
     createdBefore: Time
 
     """
-    ID of an epic associated with the issues, "none" and "any" values are supported
+    ID of an epic associated with the issues, "none" and "any" values are supported.
     """
     epicId: String
 
     """
-    IID of the issue. For example, "1"
+    IID of the issue. For example, "1".
     """
     iid: String
 
     """
-    List of IIDs of issues. For example, [1, 2]
+    List of IIDs of issues. For example, [1, 2].
     """
     iids: [String!]
 
     """
-    Iterations applied to the issue
+    Iterations applied to the issue.
     """
     iterationId: [ID]
 
     """
-    Labels applied to this issue
+    Labels applied to this issue.
     """
     labelName: [String]
 
     """
-    Milestone applied to this issue
+    Milestone applied to this issue.
     """
     milestoneTitle: [String]
 
     """
-    Search query for issue title or description
+    Search query for issue title or description.
     """
     search: String
 
     """
-    Sort issues by this criteria
+    Sort issues by this criteria.
     """
     sort: IssueSort = created_desc
 
     """
-    Current state of this issue
+    Current state of this issue.
     """
     state: IssuableState
 
     """
-    Filter issues by the given issue types
+    Filter issues by the given issue types.
     """
     types: [IssueType!]
 
     """
-    Issues updated after this date
+    Issues updated after this date.
     """
     updatedAfter: Time
 
     """
-    Issues updated before this date
+    Issues updated before this date.
     """
     updatedBefore: Time
   ): Issue
@@ -17676,82 +18306,82 @@ type Project {
   """
   issueStatusCounts(
     """
-    ID of a user assigned to the issues, "none" and "any" values are supported
+    ID of a user assigned to the issues, "none" and "any" values are supported.
     """
     assigneeId: String
 
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
     """
-    Usernames of users assigned to the issue
+    Usernames of users assigned to the issue.
     """
     assigneeUsernames: [String!]
 
     """
-    Username of the author of the issue
+    Username of the author of the issue.
     """
     authorUsername: String
 
     """
-    Issues closed after this date
+    Issues closed after this date.
     """
     closedAfter: Time
 
     """
-    Issues closed before this date
+    Issues closed before this date.
     """
     closedBefore: Time
 
     """
-    Issues created after this date
+    Issues created after this date.
     """
     createdAfter: Time
 
     """
-    Issues created before this date
+    Issues created before this date.
     """
     createdBefore: Time
 
     """
-    IID of the issue. For example, "1"
+    IID of the issue. For example, "1".
     """
     iid: String
 
     """
-    List of IIDs of issues. For example, [1, 2]
+    List of IIDs of issues. For example, [1, 2].
     """
     iids: [String!]
 
     """
-    Labels applied to this issue
+    Labels applied to this issue.
     """
     labelName: [String]
 
     """
-    Milestone applied to this issue
+    Milestone applied to this issue.
     """
     milestoneTitle: [String]
 
     """
-    Search query for issue title or description
+    Search query for issue title or description.
     """
     search: String
 
     """
-    Filter issues by the given issue types
+    Filter issues by the given issue types.
     """
     types: [IssueType!]
 
     """
-    Issues updated after this date
+    Issues updated after this date.
     """
     updatedAfter: Time
 
     """
-    Issues updated before this date
+    Issues updated before this date.
     """
     updatedBefore: Time
   ): IssueStatusCountsType
@@ -17766,22 +18396,22 @@ type Project {
     after: String
 
     """
-    ID of a user assigned to the issues, "none" and "any" values are supported
+    ID of a user assigned to the issues, "none" and "any" values are supported.
     """
     assigneeId: String
 
     """
-    Username of a user assigned to the issue
+    Username of a user assigned to the issue.
     """
     assigneeUsername: String
 
     """
-    Usernames of users assigned to the issue
+    Usernames of users assigned to the issue.
     """
     assigneeUsernames: [String!]
 
     """
-    Username of the author of the issue
+    Username of the author of the issue.
     """
     authorUsername: String
 
@@ -17791,27 +18421,27 @@ type Project {
     before: String
 
     """
-    Issues closed after this date
+    Issues closed after this date.
     """
     closedAfter: Time
 
     """
-    Issues closed before this date
+    Issues closed before this date.
     """
     closedBefore: Time
 
     """
-    Issues created after this date
+    Issues created after this date.
     """
     createdAfter: Time
 
     """
-    Issues created before this date
+    Issues created before this date.
     """
     createdBefore: Time
 
     """
-    ID of an epic associated with the issues, "none" and "any" values are supported
+    ID of an epic associated with the issues, "none" and "any" values are supported.
     """
     epicId: String
 
@@ -17821,22 +18451,22 @@ type Project {
     first: Int
 
     """
-    IID of the issue. For example, "1"
+    IID of the issue. For example, "1".
     """
     iid: String
 
     """
-    List of IIDs of issues. For example, [1, 2]
+    List of IIDs of issues. For example, [1, 2].
     """
     iids: [String!]
 
     """
-    Iterations applied to the issue
+    Iterations applied to the issue.
     """
     iterationId: [ID]
 
     """
-    Labels applied to this issue
+    Labels applied to this issue.
     """
     labelName: [String]
 
@@ -17846,37 +18476,37 @@ type Project {
     last: Int
 
     """
-    Milestone applied to this issue
+    Milestone applied to this issue.
     """
     milestoneTitle: [String]
 
     """
-    Search query for issue title or description
+    Search query for issue title or description.
     """
     search: String
 
     """
-    Sort issues by this criteria
+    Sort issues by this criteria.
     """
     sort: IssueSort = created_desc
 
     """
-    Current state of this issue
+    Current state of this issue.
     """
     state: IssuableState
 
     """
-    Filter issues by the given issue types
+    Filter issues by the given issue types.
     """
     types: [IssueType!]
 
     """
-    Issues updated after this date
+    Issues updated after this date.
     """
     updatedAfter: Time
 
     """
-    Issues updated before this date
+    Issues updated before this date.
     """
     updatedBefore: Time
   ): IssueConnection
@@ -17944,7 +18574,7 @@ type Project {
     state: IterationState
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
 
@@ -18044,7 +18674,7 @@ type Project {
   """
   mergeRequest(
     """
-    IID of the merge request, for example `1`
+    IID of the merge request, for example `1`.
     """
     iid: String!
   ): MergeRequest
@@ -18059,12 +18689,12 @@ type Project {
     after: String
 
     """
-    Username of the assignee
+    Username of the assignee.
     """
     assigneeUsername: String
 
     """
-    Username of the author
+    Username of the author.
     """
     authorUsername: String
 
@@ -18079,7 +18709,7 @@ type Project {
     first: Int
 
     """
-    Array of IIDs of merge requests, for example `[1, 2]`
+    Array of IIDs of merge requests, for example `[1, 2]`.
     """
     iids: [String!]
 
@@ -18094,27 +18724,27 @@ type Project {
     last: Int
 
     """
-    Merge requests merged after this date
+    Merge requests merged after this date.
     """
     mergedAfter: Time
 
     """
-    Merge requests merged before this date
+    Merge requests merged before this date.
     """
     mergedBefore: Time
 
     """
-    Title of the milestone
+    Title of the milestone.
     """
     milestoneTitle: String
 
     """
-    Username of the reviewer
+    Username of the reviewer.
     """
     reviewerUsername: String
 
     """
-    Sort merge requests by this criteria
+    Sort merge requests by this criteria.
     """
     sort: MergeRequestSort = created_desc
 
@@ -18161,7 +18791,7 @@ type Project {
     before: String
 
     """
-    A date that the milestone contains
+    A date that the milestone contains.
     """
     containingDate: Time
 
@@ -18177,12 +18807,12 @@ type Project {
     first: Int
 
     """
-    Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1"
+    Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1".
     """
     ids: [ID!]
 
     """
-    Also return milestones in the project's parent group and its ancestors
+    Also return milestones in the project's parent group and its ancestors.
     """
     includeAncestors: Boolean
 
@@ -18192,7 +18822,7 @@ type Project {
     last: Int
 
     """
-    A search string for the title
+    A search string for the title.
     """
     searchTitle: String
 
@@ -18204,17 +18834,17 @@ type Project {
     startDate: Time
 
     """
-    Filter milestones by state
+    Filter milestones by state.
     """
     state: MilestoneStateEnum
 
     """
-    List items overlapping the given timeframe
+    List items overlapping the given timeframe.
     """
     timeframe: Timeframe
 
     """
-    The title of the milestone
+    The title of the milestone.
     """
     title: String
   ): MilestoneConnection
@@ -18284,7 +18914,7 @@ type Project {
   """
   pipeline(
     """
-    IID of the Pipeline, e.g., "1"
+    IID of the Pipeline, e.g., "1".
     """
     iid: ID!
   ): Pipeline
@@ -18319,17 +18949,17 @@ type Project {
     last: Int
 
     """
-    Filter pipelines by the ref they are run for
+    Filter pipelines by the ref they are run for.
     """
     ref: String
 
     """
-    Filter pipelines by the sha of the commit they are run for
+    Filter pipelines by the sha of the commit they are run for.
     """
     sha: String
 
     """
-    Filter pipelines by their status
+    Filter pipelines by their status.
     """
     status: PipelineStatusEnum
   ): PipelineConnection
@@ -18365,12 +18995,12 @@ type Project {
     last: Int
 
     """
-    Filter members by the given member relations
+    Filter members by the given member relations.
     """
     relations: [ProjectMemberRelation!] = [DIRECT, INHERITED]
 
     """
-    Search query
+    Search query.
     """
     search: String
   ): MemberInterfaceConnection
@@ -18385,7 +19015,7 @@ type Project {
   """
   release(
     """
-    The name of the tag associated to the release
+    The name of the tag associated to the release.
     """
     tagName: String!
   ): Release
@@ -18415,7 +19045,7 @@ type Project {
     last: Int
 
     """
-    Sort releases by this criteria
+    Sort releases by this criteria.
     """
     sort: ReleaseSort = RELEASED_AT_DESC
   ): ReleaseConnection
@@ -18445,32 +19075,32 @@ type Project {
   """
   requirement(
     """
-    Filter requirements by author username
+    Filter requirements by author username.
     """
     authorUsername: [String!]
 
     """
-    IID of the requirement, e.g., "1"
+    IID of the requirement, e.g., "1".
     """
     iid: ID
 
     """
-    List of IIDs of requirements, e.g., [1, 2]
+    List of IIDs of requirements, e.g., [1, 2].
     """
     iids: [ID!]
 
     """
-    Search query for requirement title
+    Search query for requirement title.
     """
     search: String
 
     """
-    List requirements by sort order
+    List requirements by sort order.
     """
     sort: Sort
 
     """
-    Filter requirements by state
+    Filter requirements by state.
     """
     state: RequirementState
   ): Requirement
@@ -18490,7 +19120,7 @@ type Project {
     after: String
 
     """
-    Filter requirements by author username
+    Filter requirements by author username.
     """
     authorUsername: [String!]
 
@@ -18505,12 +19135,12 @@ type Project {
     first: Int
 
     """
-    IID of the requirement, e.g., "1"
+    IID of the requirement, e.g., "1".
     """
     iid: ID
 
     """
-    List of IIDs of requirements, e.g., [1, 2]
+    List of IIDs of requirements, e.g., [1, 2].
     """
     iids: [ID!]
 
@@ -18520,17 +19150,17 @@ type Project {
     last: Int
 
     """
-    Search query for requirement title
+    Search query for requirement title.
     """
     search: String
 
     """
-    List requirements by sort order
+    List requirements by sort order.
     """
     sort: Sort
 
     """
-    Filter requirements by state
+    Filter requirements by state.
     """
     state: RequirementState
   ): RequirementConnection
@@ -18555,7 +19185,7 @@ type Project {
   """
   sentryDetailedError(
     """
-    ID of the Sentry issue
+    ID of the Sentry issue.
     """
     id: GitlabErrorTrackingDetailedErrorID!
   ): SentryDetailedError
@@ -18580,7 +19210,7 @@ type Project {
   """
   services(
     """
-    Indicates if the service is active
+    Indicates if the service is active.
     """
     active: Boolean
 
@@ -18605,7 +19235,7 @@ type Project {
     last: Int
 
     """
-    Class name of the service
+    Class name of the service.
     """
     type: ServiceType
   ): ServiceConnection
@@ -18635,7 +19265,7 @@ type Project {
     first: Int
 
     """
-    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1"
+    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1".
     """
     ids: [SnippetID!]
 
@@ -18645,7 +19275,7 @@ type Project {
     last: Int
 
     """
-    The visibility of the snippet
+    The visibility of the snippet.
     """
     visibility: VisibilityScopesEnum
   ): SnippetConnection
@@ -18686,7 +19316,17 @@ type Project {
   tagList: String
 
   """
-  Terraform states associated with the project
+  Find a single Terraform state by name.
+  """
+  terraformState(
+    """
+    Name of the Terraform state.
+    """
+    name: String!
+  ): TerraformState
+
+  """
+  Terraform states associated with the project.
   """
   terraformStates(
     """
@@ -18740,12 +19380,12 @@ type Project {
     first: Int
 
     """
-    Returns only the vulnerabilities which have linked issues
+    Returns only the vulnerabilities which have linked issues.
     """
     hasIssues: Boolean
 
     """
-    Returns only the vulnerabilities which have been resolved on default branch
+    Returns only the vulnerabilities which have been resolved on default branch.
     """
     hasResolution: Boolean
 
@@ -18755,32 +19395,32 @@ type Project {
     last: Int
 
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by VulnerabilityScanner.externalId
+    Filter vulnerabilities by VulnerabilityScanner.externalId.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    List vulnerabilities by sort order
+    List vulnerabilities by sort order.
     """
     sort: VulnerabilitySort = severity_desc
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilityConnection
@@ -18800,7 +19440,7 @@ type Project {
     before: String
 
     """
-    Last day for which to fetch vulnerability history
+    Last day for which to fetch vulnerability history.
     """
     endDate: ISO8601Date!
 
@@ -18815,7 +19455,7 @@ type Project {
     last: Int
 
     """
-    First day for which to fetch vulnerability history
+    First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayConnection
@@ -18850,27 +19490,27 @@ type Project {
   """
   vulnerabilitySeveritiesCount(
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by scanner
+    Filter vulnerabilities by scanner.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilitySeveritiesCount
@@ -18887,6 +19527,11 @@ type Project {
 }
 
 type ProjectCiCdSetting {
+  """
+  Whether to keep the latest builds artifacts.
+  """
+  keepLatestArtifact: Boolean
+
   """
   Whether merge pipelines are enabled.
   """
@@ -19467,7 +20112,7 @@ input PromoteToEpicInput {
   clientMutationId: String
 
   """
-  The group the promoted epic will belong to
+  The group the promoted epic will belong to.
   """
   groupPath: ID
 
@@ -19492,7 +20137,7 @@ type PromoteToEpicPayload {
   clientMutationId: String
 
   """
-  The epic after issue promotion
+  The epic after issue promotion.
   """
   epic: Epic
 
@@ -19513,12 +20158,17 @@ type Query {
   """
   ciConfig(
     """
-    Contents of .gitlab-ci.yml
+    Contents of '.gitlab-ci.yml'.
     """
     content: String!
 
     """
-    The project of the CI config
+    Run pipeline creation simulation, or only do static check.
+    """
+    dryRun: Boolean
+
+    """
+    The project of the CI config.
     """
     projectPath: ID!
   ): CiConfig
@@ -19573,7 +20223,7 @@ type Query {
   """
   echo(
     """
-    Text to echo back
+    Text to echo back.
     """
     text: String!
   ): String!
@@ -19593,7 +20243,7 @@ type Query {
   """
   group(
     """
-    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss"
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Group
@@ -19623,7 +20273,7 @@ type Query {
     first: Int
 
     """
-    The type of measurement/statistics to retrieve
+    The type of measurement/statistics to retrieve.
     """
     identifier: MeasurementIdentifier!
 
@@ -19633,12 +20283,12 @@ type Query {
     last: Int
 
     """
-    Measurement recorded after this date
+    Measurement recorded after this date.
     """
     recordedAfter: Time
 
     """
-    Measurement recorded before this date
+    Measurement recorded before this date.
     """
     recordedBefore: Time
   ): InstanceStatisticsMeasurementConnection
@@ -19683,17 +20333,27 @@ type Query {
   """
   namespace(
     """
-    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss"
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Namespace
+
+  """
+  Find a composer package
+  """
+  packageComposerDetails(
+    """
+    The global ID of the package.
+    """
+    id: PackagesPackageID!
+  ): PackageComposerDetails
 
   """
   Find a project
   """
   project(
     """
-    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss"
+    The full path of the project, group or namespace, e.g., "gitlab-org/gitlab-foss".
     """
     fullPath: ID!
   ): Project
@@ -19718,7 +20378,7 @@ type Query {
     first: Int
 
     """
-    Filter projects by IDs
+    Filter projects by IDs.
     """
     ids: [ID!]
 
@@ -19728,22 +20388,22 @@ type Query {
     last: Int
 
     """
-    Limit projects that the current user is a member of
+    Limit projects that the current user is a member of.
     """
     membership: Boolean
 
     """
-    Search query for project name, path, or description
+    Search query for project name, path, or description.
     """
     search: String
 
     """
-    Include namespace in project search
+    Include namespace in project search.
     """
     searchNamespaces: Boolean
 
     """
-    Sort order of results
+    Sort order of results.
     """
     sort: String
   ): ProjectConnection
@@ -19778,22 +20438,22 @@ type Query {
   """
   runnerSetup(
     """
-    Architecture to generate the instructions for
+    Architecture to generate the instructions for.
     """
     architecture: String!
 
     """
-    Group to register the runner for
+    Group to register the runner for.
     """
     groupId: GroupID
 
     """
-    Platform to generate the instructions for
+    Platform to generate the instructions for.
     """
     platform: String!
 
     """
-    Project to register the runner for
+    Project to register the runner for.
     """
     projectId: ProjectID
   ): RunnerSetup
@@ -19808,7 +20468,7 @@ type Query {
     after: String
 
     """
-    The ID of an author
+    The ID of an author.
     """
     authorId: UserID
 
@@ -19818,7 +20478,7 @@ type Query {
     before: String
 
     """
-    Explore personal snippets
+    Explore personal snippets.
     """
     explore: Boolean
 
@@ -19828,7 +20488,7 @@ type Query {
     first: Int
 
     """
-    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1"
+    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1".
     """
     ids: [SnippetID!]
 
@@ -19838,17 +20498,17 @@ type Query {
     last: Int
 
     """
-    The ID of a project
+    The ID of a project.
     """
     projectId: ProjectID
 
     """
-    The type of snippet
+    The type of snippet.
     """
     type: TypeEnum
 
     """
-    The visibility of the snippet
+    The visibility of the snippet.
     """
     visibility: VisibilityScopesEnum
   ): SnippetConnection
@@ -19858,12 +20518,12 @@ type Query {
   """
   user(
     """
-    ID of the User
+    ID of the User.
     """
     id: UserID
 
     """
-    Username of the User
+    Username of the User.
     """
     username: String
   ): User
@@ -19872,6 +20532,11 @@ type Query {
   Find users
   """
   users(
+    """
+    Return only admin users.
+    """
+    admins: Boolean = false
+
     """
     Returns the elements in the list that come after the specified cursor.
     """
@@ -19888,7 +20553,7 @@ type Query {
     first: Int
 
     """
-    List of user Global IDs
+    List of user Global IDs.
     """
     ids: [ID!]
 
@@ -19903,12 +20568,12 @@ type Query {
     search: String
 
     """
-    Sort users by this criteria
+    Sort users by this criteria.
     """
     sort: Sort = created_desc
 
     """
-    List of usernames
+    List of usernames.
     """
     usernames: [String!]
   ): UserConnection
@@ -19933,12 +20598,12 @@ type Query {
     first: Int
 
     """
-    Returns only the vulnerabilities which have linked issues
+    Returns only the vulnerabilities which have linked issues.
     """
     hasIssues: Boolean
 
     """
-    Returns only the vulnerabilities which have been resolved on default branch
+    Returns only the vulnerabilities which have been resolved on default branch.
     """
     hasResolution: Boolean
 
@@ -19948,32 +20613,32 @@ type Query {
     last: Int
 
     """
-    Filter vulnerabilities by project
+    Filter vulnerabilities by project.
     """
     projectId: [ID!]
 
     """
-    Filter vulnerabilities by report type
+    Filter vulnerabilities by report type.
     """
     reportType: [VulnerabilityReportType!]
 
     """
-    Filter vulnerabilities by VulnerabilityScanner.externalId
+    Filter vulnerabilities by VulnerabilityScanner.externalId.
     """
     scanner: [String!]
 
     """
-    Filter vulnerabilities by severity
+    Filter vulnerabilities by severity.
     """
     severity: [VulnerabilitySeverity!]
 
     """
-    List vulnerabilities by sort order
+    List vulnerabilities by sort order.
     """
     sort: VulnerabilitySort = severity_desc
 
     """
-    Filter vulnerabilities by state
+    Filter vulnerabilities by state.
     """
     state: [VulnerabilityState!]
   ): VulnerabilityConnection
@@ -19993,7 +20658,7 @@ type Query {
     before: String
 
     """
-    Last day for which to fetch vulnerability history
+    Last day for which to fetch vulnerability history.
     """
     endDate: ISO8601Date!
 
@@ -20008,7 +20673,7 @@ type Query {
     last: Int
 
     """
-    First day for which to fetch vulnerability history
+    First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayConnection
@@ -20030,7 +20695,7 @@ type Query {
     before: String
 
     """
-    Last day for which to fetch vulnerability history
+    Last day for which to fetch vulnerability history.
     """
     endDate: ISO8601Date!
 
@@ -20045,7 +20710,7 @@ type Query {
     last: Int
 
     """
-    First day for which to fetch vulnerability history
+    First day for which to fetch vulnerability history.
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3.")
@@ -20823,7 +21488,7 @@ input RemoveProjectFromSecurityDashboardInput {
   clientMutationId: String
 
   """
-  ID of the project to remove from the Instance Security Dashboard
+  ID of the project to remove from the Instance Security Dashboard.
   """
   id: ProjectID!
 }
@@ -20904,17 +21569,17 @@ type Repository {
   """
   tree(
     """
-    The path to get the tree for. Default value is the root of the repository
+    The path to get the tree for. Default value is the root of the repository.
     """
     path: String = ""
 
     """
-    Used to get a recursive tree. Default is false
+    Used to get a recursive tree. Default is false.
     """
     recursive: Boolean = false
 
     """
-    The commit ref to get the tree for. Default value is HEAD
+    The commit ref to get the tree for. Default value is HEAD.
     """
     ref: String = "head"
   ): Tree
@@ -20999,7 +21664,7 @@ type Requirement {
     last: Int
 
     """
-    List test reports by sort order
+    List test reports by sort order.
     """
     sort: Sort
   ): TestReportConnection
@@ -21145,7 +21810,7 @@ input RevertVulnerabilityToDetectedInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be reverted
+  ID of the vulnerability to be reverted.
   """
   id: VulnerabilityID!
 }
@@ -21165,7 +21830,7 @@ type RevertVulnerabilityToDetectedPayload {
   errors: [String!]!
 
   """
-  The vulnerability after revert
+  The vulnerability after revert.
   """
   vulnerability: Vulnerability
 }
@@ -21483,27 +22148,27 @@ Represents an analyzer entity in SAST CI configuration
 """
 type SastCiConfigurationAnalyzersEntity {
   """
-  Analyzer description that is displayed on the form
+  Analyzer description that is displayed on the form.
   """
   description: String
 
   """
-  Indicates whether an analyzer is enabled
+  Indicates whether an analyzer is enabled.
   """
   enabled: Boolean
 
   """
-  Analyzer label used in the config UI
+  Analyzer label used in the config UI.
   """
   label: String
 
   """
-  Name of the analyzer
+  Name of the analyzer.
   """
   name: String
 
   """
-  List of supported variables
+  List of supported variables.
   """
   variables(
     """
@@ -21568,17 +22233,17 @@ Represents the analyzers entity in SAST CI configuration
 """
 input SastCiConfigurationAnalyzersEntityInput {
   """
-  State of the analyzer
+  State of the analyzer.
   """
   enabled: Boolean!
 
   """
-  Name of analyzer
+  Name of analyzer.
   """
   name: String!
 
   """
-  List of variables for the analyzer
+  List of variables for the analyzer.
   """
   variables: [SastCiConfigurationEntityInput!]
 }
@@ -21688,17 +22353,17 @@ Represents an entity in SAST CI configuration
 """
 input SastCiConfigurationEntityInput {
   """
-  Default value that is used if value is empty
+  Default value that is used if value is empty.
   """
   defaultValue: String!
 
   """
-  CI keyword of entity
+  CI keyword of entity.
   """
   field: String!
 
   """
-  Current value of the entity
+  Current value of the entity.
   """
   value: String!
 }
@@ -21708,17 +22373,17 @@ Represents a CI configuration of SAST
 """
 input SastCiConfigurationInput {
   """
-  List of analyzers and related variables for the SAST configuration
+  List of analyzers and related variables for the SAST configuration.
   """
   analyzers: [SastCiConfigurationAnalyzersEntityInput!]
 
   """
-  List of global entities related to SAST configuration
+  List of global entities related to SAST configuration.
   """
   global: [SastCiConfigurationEntityInput!]
 
   """
-  List of pipeline entities related to SAST configuration
+  List of pipeline entities related to SAST configuration.
   """
   pipeline: [SastCiConfigurationEntityInput!]
 }
@@ -22231,7 +22896,7 @@ type SentryErrorCollection {
   """
   detailedError(
     """
-    ID of the Sentry issue
+    ID of the Sentry issue.
     """
     id: GitlabErrorTrackingDetailedErrorID!
   ): SentryDetailedError
@@ -22241,7 +22906,7 @@ type SentryErrorCollection {
   """
   errorStackTrace(
     """
-    ID of the Sentry issue
+    ID of the Sentry issue.
     """
     id: GitlabErrorTrackingDetailedErrorID!
   ): SentryErrorStackTrace
@@ -22271,12 +22936,12 @@ type SentryErrorCollection {
     last: Int
 
     """
-    Search query for the Sentry error details
+    Search query for the Sentry error details.
     """
     searchTerm: String
 
     """
-    Attribute to sort on. Options are frequency, first_seen, last_seen. last_seen is default
+    Attribute to sort on. Options are frequency, first_seen, last_seen. last_seen is default.
     """
     sort: String
   ): SentryErrorConnection
@@ -22487,7 +23152,6 @@ type ServiceEdge {
 }
 
 enum ServiceType {
-  ALERTS_SERVICE
   ASANA_SERVICE
   ASSEMBLA_SERVICE
   BAMBOO_SERVICE
@@ -22565,7 +23229,7 @@ type Snippet implements Noteable {
     last: Int
 
     """
-    Paths of the blobs
+    Paths of the blobs.
     """
     paths: [String!]
   ): SnippetBlobConnection
@@ -24277,7 +24941,7 @@ Autogenerated input type of UpdateBoardEpicUserPreferences
 """
 input UpdateBoardEpicUserPreferencesInput {
   """
-  The board global ID
+  The board global ID.
   """
   boardId: BoardID!
 
@@ -24287,12 +24951,12 @@ input UpdateBoardEpicUserPreferencesInput {
   clientMutationId: String
 
   """
-  Whether the epic should be collapsed in the board
+  Whether the epic should be collapsed in the board.
   """
   collapsed: Boolean!
 
   """
-  ID of an epic to set preferences for
+  ID of an epic to set preferences for.
   """
   epicId: EpicID!
 }
@@ -24307,7 +24971,7 @@ type UpdateBoardEpicUserPreferencesPayload {
   clientMutationId: String
 
   """
-  User preferences for the epic in the board after mutation
+  User preferences for the epic in the board after mutation.
   """
   epicUserPreferences: BoardEpicUserPreferences
 
@@ -24557,17 +25221,17 @@ input UpdateDevopsAdoptionSegmentInput {
   clientMutationId: String
 
   """
-  The array of group IDs to set for the segment
+  The array of group IDs to set for the segment.
   """
   groupIds: [GroupID!]
 
   """
-  ID of the segment
+  ID of the segment.
   """
   id: AnalyticsDevopsAdoptionSegmentID!
 
   """
-  Name of the segment
+  Name of the segment.
   """
   name: String!
 }
@@ -24587,7 +25251,7 @@ type UpdateDevopsAdoptionSegmentPayload {
   errors: [String!]!
 
   """
-  The segment after mutation
+  The segment after mutation.
   """
   segment: DevopsAdoptionSegment
 }
@@ -24629,32 +25293,32 @@ input UpdateEpicInput {
   clientMutationId: String
 
   """
-  Indicates if the epic is confidential
+  Indicates if the epic is confidential.
   """
   confidential: Boolean
 
   """
-  The description of the epic
+  The description of the epic.
   """
   description: String
 
   """
-  The end date of the epic
+  The end date of the epic.
   """
   dueDateFixed: String
 
   """
-  Indicates end date should be sourced from due_date_fixed field not the issue milestones
+  Indicates end date should be sourced from due_date_fixed field not the issue milestones.
   """
   dueDateIsFixed: Boolean
 
   """
-  The group the epic to mutate is in
+  The group the epic to mutate is in.
   """
   groupPath: ID!
 
   """
-  The IID of the epic to mutate
+  The IID of the epic to mutate.
   """
   iid: ID!
 
@@ -24664,22 +25328,22 @@ input UpdateEpicInput {
   removeLabelIds: [ID!]
 
   """
-  The start date of the epic
+  The start date of the epic.
   """
   startDateFixed: String
 
   """
-  Indicates start date should be sourced from start_date_fixed field not the issue milestones
+  Indicates start date should be sourced from start_date_fixed field not the issue milestones.
   """
   startDateIsFixed: Boolean
 
   """
-  State event for the epic
+  State event for the epic.
   """
   stateEvent: EpicStateEvent
 
   """
-  The title of the epic
+  The title of the epic.
   """
   title: String
 }
@@ -24694,7 +25358,7 @@ type UpdateEpicPayload {
   clientMutationId: String
 
   """
-  The epic after mutation
+  The epic after mutation.
   """
   epic: Epic
 
@@ -24779,12 +25443,12 @@ input UpdateIssueInput {
   dueDate: ISO8601Date
 
   """
-  The ID of the parent epic. NULL when removing the association
+  The ID of the parent epic. NULL when removing the association.
   """
   epicId: EpicID
 
   """
-  The desired health status
+  The desired health status.
   """
   healthStatus: HealthStatus
 
@@ -24824,7 +25488,7 @@ input UpdateIssueInput {
   title: String
 
   """
-  The weight of the issue
+  The weight of the issue.
   """
   weight: Int
 }
@@ -25010,32 +25674,32 @@ input UpdateRequirementInput {
   clientMutationId: String
 
   """
-  Description of the requirement
+  Description of the requirement.
   """
   description: String
 
   """
-  The IID of the requirement to update
+  The IID of the requirement to update.
   """
   iid: String!
 
   """
-  Creates a test report for the requirement with the given state
+  Creates a test report for the requirement with the given state.
   """
   lastTestReportState: TestReportState
 
   """
-  Full project path the requirement is associated with
+  Full project path the requirement is associated with.
   """
   projectPath: ID!
 
   """
-  State of the requirement
+  State of the requirement.
   """
   state: RequirementState
 
   """
-  Title of the requirement
+  Title of the requirement.
   """
   title: String
 }
@@ -25055,7 +25719,7 @@ type UpdateRequirementPayload {
   errors: [String!]!
 
   """
-  Requirement after mutation
+  Requirement after mutation.
   """
   requirement: Requirement
 }
@@ -25133,7 +25797,7 @@ type User {
     after: String
 
     """
-    Username of the author
+    Username of the author.
     """
     authorUsername: String
 
@@ -25148,7 +25812,7 @@ type User {
     first: Int
 
     """
-    Array of IIDs of merge requests, for example `[1, 2]`
+    Array of IIDs of merge requests, for example `[1, 2]`.
     """
     iids: [String!]
 
@@ -25163,17 +25827,17 @@ type User {
     last: Int
 
     """
-    Merge requests merged after this date
+    Merge requests merged after this date.
     """
     mergedAfter: Time
 
     """
-    Merge requests merged before this date
+    Merge requests merged before this date.
     """
     mergedBefore: Time
 
     """
-    Title of the milestone
+    Title of the milestone.
     """
     milestoneTitle: String
 
@@ -25188,12 +25852,12 @@ type User {
     projectPath: String
 
     """
-    Username of the reviewer
+    Username of the reviewer.
     """
     reviewerUsername: String
 
     """
-    Sort merge requests by this criteria
+    Sort merge requests by this criteria.
     """
     sort: MergeRequestSort = created_desc
 
@@ -25223,7 +25887,7 @@ type User {
     after: String
 
     """
-    Username of the assignee
+    Username of the assignee.
     """
     assigneeUsername: String
 
@@ -25238,7 +25902,7 @@ type User {
     first: Int
 
     """
-    Array of IIDs of merge requests, for example `[1, 2]`
+    Array of IIDs of merge requests, for example `[1, 2]`.
     """
     iids: [String!]
 
@@ -25253,17 +25917,17 @@ type User {
     last: Int
 
     """
-    Merge requests merged after this date
+    Merge requests merged after this date.
     """
     mergedAfter: Time
 
     """
-    Merge requests merged before this date
+    Merge requests merged before this date.
     """
     mergedBefore: Time
 
     """
-    Title of the milestone
+    Title of the milestone.
     """
     milestoneTitle: String
 
@@ -25278,12 +25942,12 @@ type User {
     projectPath: String
 
     """
-    Username of the reviewer
+    Username of the reviewer.
     """
     reviewerUsername: String
 
     """
-    Sort merge requests by this criteria
+    Sort merge requests by this criteria.
     """
     sort: MergeRequestSort = created_desc
 
@@ -25398,12 +26062,12 @@ type User {
     after: String
 
     """
-    Username of the assignee
+    Username of the assignee.
     """
     assigneeUsername: String
 
     """
-    Username of the author
+    Username of the author.
     """
     authorUsername: String
 
@@ -25418,7 +26082,7 @@ type User {
     first: Int
 
     """
-    Array of IIDs of merge requests, for example `[1, 2]`
+    Array of IIDs of merge requests, for example `[1, 2]`.
     """
     iids: [String!]
 
@@ -25433,17 +26097,17 @@ type User {
     last: Int
 
     """
-    Merge requests merged after this date
+    Merge requests merged after this date.
     """
     mergedAfter: Time
 
     """
-    Merge requests merged before this date
+    Merge requests merged before this date.
     """
     mergedBefore: Time
 
     """
-    Title of the milestone
+    Title of the milestone.
     """
     milestoneTitle: String
 
@@ -25458,7 +26122,7 @@ type User {
     projectPath: String
 
     """
-    Sort merge requests by this criteria
+    Sort merge requests by this criteria.
     """
     sort: MergeRequestSort = created_desc
 
@@ -25498,7 +26162,7 @@ type User {
     first: Int
 
     """
-    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1"
+    Array of global snippet ids, e.g., "gid://gitlab/ProjectSnippet/1".
     """
     ids: [SnippetID!]
 
@@ -25508,12 +26172,12 @@ type User {
     last: Int
 
     """
-    The type of snippet
+    The type of snippet.
     """
     type: TypeEnum
 
     """
-    The visibility of the snippet
+    The visibility of the snippet.
     """
     visibility: VisibilityScopesEnum
   ): SnippetConnection
@@ -25543,7 +26207,7 @@ type User {
     last: Int
 
     """
-    Search query
+    Search query.
     """
     search: String
   ): ProjectConnection
@@ -25563,7 +26227,7 @@ type User {
   """
   todos(
     """
-    The action to be filtered
+    The action to be filtered.
     """
     action: [TodoActionEnum!]
 
@@ -25573,7 +26237,7 @@ type User {
     after: String
 
     """
-    The ID of an author
+    The ID of an author.
     """
     authorId: [ID!]
 
@@ -25588,7 +26252,7 @@ type User {
     first: Int
 
     """
-    The ID of a group
+    The ID of a group.
     """
     groupId: [ID!]
 
@@ -25598,17 +26262,17 @@ type User {
     last: Int
 
     """
-    The ID of a project
+    The ID of a project.
     """
     projectId: [ID!]
 
     """
-    The state of the todo
+    The state of the todo.
     """
     state: [TodoStateEnum!]
 
     """
-    The type of the todo
+    The type of the todo.
     """
     type: [TodoTargetEnum!]
   ): TodoConnection!
@@ -25895,6 +26559,11 @@ type Vulnerability implements Noteable {
   description: String
 
   """
+  Details of the vulnerability
+  """
+  details: [VulnerabilityDetail!]!
+
+  """
   Timestamp of when the vulnerability was first detected
   """
   detectedAt: Time!
@@ -25999,7 +26668,7 @@ type Vulnerability implements Noteable {
     last: Int
 
     """
-    Filter issue links by link type
+    Filter issue links by link type.
     """
     linkType: VulnerabilityIssueLinkType
   ): VulnerabilityIssueLinkConnection!
@@ -26117,7 +26786,7 @@ input VulnerabilityConfirmInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be confirmed
+  ID of the vulnerability to be confirmed.
   """
   id: VulnerabilityID!
 }
@@ -26137,7 +26806,7 @@ type VulnerabilityConfirmPayload {
   errors: [String!]!
 
   """
-  The vulnerability after state change
+  The vulnerability after state change.
   """
   vulnerability: Vulnerability
 }
@@ -26163,6 +26832,366 @@ type VulnerabilityConnection {
 }
 
 """
+Represents a vulnerability detail field. The fields with data will depend on the vulnerability detail type
+"""
+union VulnerabilityDetail = VulnerabilityDetailBase | VulnerabilityDetailBoolean | VulnerabilityDetailCode | VulnerabilityDetailCommit | VulnerabilityDetailDiff | VulnerabilityDetailFileLocation | VulnerabilityDetailInt | VulnerabilityDetailList | VulnerabilityDetailMarkdown | VulnerabilityDetailModuleLocation | VulnerabilityDetailTable | VulnerabilityDetailText | VulnerabilityDetailUrl
+
+"""
+Represents the vulnerability details base
+"""
+type VulnerabilityDetailBase {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+}
+
+"""
+Represents the vulnerability details boolean value
+"""
+type VulnerabilityDetailBoolean {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Value of the field.
+  """
+  value: Boolean!
+}
+
+"""
+Represents the vulnerability details code field
+"""
+type VulnerabilityDetailCode {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Language of the code.
+  """
+  lang: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Source code.
+  """
+  value: String!
+}
+
+"""
+Represents the vulnerability details commit field
+"""
+type VulnerabilityDetailCommit {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  The commit SHA value.
+  """
+  value: String!
+}
+
+"""
+Represents the vulnerability details diff field
+"""
+type VulnerabilityDetailDiff {
+  """
+  Value of the field after the change.
+  """
+  after: String!
+
+  """
+  Value of the field before the change.
+  """
+  before: String!
+
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+}
+
+"""
+Represents the vulnerability details location within a file in the project
+"""
+type VulnerabilityDetailFileLocation {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  File name.
+  """
+  fileName: String!
+
+  """
+  End line number of the file location.
+  """
+  lineEnd: Int!
+
+  """
+  Start line number of the file location.
+  """
+  lineStart: Int!
+
+  """
+  Name of the field.
+  """
+  name: String!
+}
+
+"""
+Represents the vulnerability details integer value
+"""
+type VulnerabilityDetailInt {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Value of the field.
+  """
+  value: Int!
+}
+
+"""
+Represents the vulnerability details list value
+"""
+type VulnerabilityDetailList {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  List of details.
+  """
+  items: [VulnerabilityDetail!]!
+
+  """
+  Name of the field.
+  """
+  name: String!
+}
+
+"""
+Represents the vulnerability details Markdown field
+"""
+type VulnerabilityDetailMarkdown {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Value of the Markdown field.
+  """
+  value: String!
+}
+
+"""
+Represents the vulnerability details location within a file in the project
+"""
+type VulnerabilityDetailModuleLocation {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Module name.
+  """
+  moduleName: String!
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Offset of the module location.
+  """
+  offset: Int!
+}
+
+"""
+Represents the vulnerability details table value
+"""
+type VulnerabilityDetailTable {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Table headers.
+  """
+  headers: [VulnerabilityDetail!]!
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Table rows.
+  """
+  rows: [VulnerabilityDetail!]!
+}
+
+"""
+Represents the vulnerability details text field
+"""
+type VulnerabilityDetailText {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Value of the text field.
+  """
+  value: String!
+}
+
+"""
+Represents the vulnerability details URL field
+"""
+type VulnerabilityDetailUrl {
+  """
+  Description of the field.
+  """
+  description: String!
+
+  """
+  Name of the field.
+  """
+  fieldName: String
+
+  """
+  Href of the URL.
+  """
+  href: String!
+
+  """
+  Name of the field.
+  """
+  name: String!
+
+  """
+  Text of the URL.
+  """
+  text: String
+}
+
+"""
 Autogenerated input type of VulnerabilityDismiss
 """
 input VulnerabilityDismissInput {
@@ -26172,17 +27201,17 @@ input VulnerabilityDismissInput {
   clientMutationId: String
 
   """
-  Comment why vulnerability should be dismissed
+  Comment why vulnerability should be dismissed.
   """
   comment: String
 
   """
-  Reason why vulnerability should be dismissed
+  Reason why vulnerability should be dismissed.
   """
   dismissalReason: VulnerabilityDismissalReason
 
   """
-  ID of the vulnerability to be dismissed
+  ID of the vulnerability to be dismissed.
   """
   id: VulnerabilityID!
 }
@@ -26202,7 +27231,7 @@ type VulnerabilityDismissPayload {
   errors: [String!]!
 
   """
-  The vulnerability after dismissal
+  The vulnerability after dismissal.
   """
   vulnerability: Vulnerability
 }
@@ -26734,7 +27763,7 @@ input VulnerabilityResolveInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be resolved
+  ID of the vulnerability to be resolved.
   """
   id: VulnerabilityID!
 }
@@ -26754,7 +27783,7 @@ type VulnerabilityResolvePayload {
   errors: [String!]!
 
   """
-  The vulnerability after state change
+  The vulnerability after state change.
   """
   vulnerability: Vulnerability
 }
@@ -26769,7 +27798,7 @@ input VulnerabilityRevertToDetectedInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be reverted
+  ID of the vulnerability to be reverted.
   """
   id: VulnerabilityID!
 }
@@ -26789,7 +27818,7 @@ type VulnerabilityRevertToDetectedPayload {
   errors: [String!]!
 
   """
-  The vulnerability after revert
+  The vulnerability after revert.
   """
   vulnerability: Vulnerability
 }

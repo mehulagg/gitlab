@@ -234,6 +234,7 @@ module EE
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
+        enable :admin_merge_request
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
@@ -324,7 +325,7 @@ module EE
           .default_project_deletion_protection
       end
 
-      rule { needs_new_sso_session & ~admin }.policy do
+      rule { needs_new_sso_session & ~admin & ~auditor }.policy do
         prevent :guest_access
         prevent :reporter_access
         prevent :developer_access
@@ -364,6 +365,7 @@ module EE
         enable :admin_requirement
         enable :update_requirement
         enable :import_requirements
+        enable :export_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement

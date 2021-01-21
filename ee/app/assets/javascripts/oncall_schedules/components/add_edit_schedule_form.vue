@@ -38,7 +38,6 @@ export const i18n = {
 
 export default {
   i18n,
-  inject: ['projectPath', 'timezones'],
   components: {
     GlForm,
     GlFormGroup,
@@ -47,6 +46,7 @@ export default {
     GlDropdownItem,
     GlSearchBoxByType,
   },
+  inject: ['projectPath', 'timezones'],
   props: {
     form: {
       type: Object,

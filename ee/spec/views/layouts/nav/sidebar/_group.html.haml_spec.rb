@@ -16,20 +16,20 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     let!(:gitlab_subscription) { create(:gitlab_subscription, :active_trial, namespace: group) }
 
     context 'when the experiment is off' do
-      it 'is not visible' do
+      it 'is not rendered' do
         render
 
-        expect(rendered).not_to have_text /Gold Trial – \d+ days left/
+        expect(rendered).not_to have_selector '#js-trial-status-widget'
       end
     end
 
     context 'when the experiment is on' do
       let(:show_trial_status_widget) { true }
 
-      it 'is visible' do
+      it 'is rendered' do
         render
 
-        expect(rendered).to have_text 'Gold Trial – 15 days left'
+        expect(rendered).to have_selector '#js-trial-status-widget'
       end
     end
   end

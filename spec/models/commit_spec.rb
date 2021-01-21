@@ -428,6 +428,19 @@ eos
       allow(commit).to receive(:safe_message).and_return(message)
       expect(commit.description).to eq(message)
     end
+
+    it 'truncates html representation if more than 1Mib' do
+      # Commit message is over 2MiB
+      huge_commit_message = ['panic', ('panic ' * 350000), 'trailing text'].join("\n")
+
+      allow(commit).to receive(:safe_message).and_return(huge_commit_message)
+
+      commit.refresh_markdown_cache
+      description_html = commit.description_html
+
+      expect(description_html.bytesize).to be < 2.megabytes
+      expect(description_html).not_to include('trailing text')
+    end
   end
 
   describe "delegation" do
@@ -747,27 +760,6 @@ eos
       expect(x509_signed_commit.has_signature?).to be_truthy
       expect(unsigned_commit.has_signature?).to be_falsey
       expect(commit.has_signature?).to be_falsey
-    end
-  end
-
-  describe '#reverting_commit' do
-    let(:user) { create(:user) }
-    let(:issue) { create(:issue, author: user, project: project) }
-
-    it 'returns the reverting commit' do
-      create(:note_on_issue,
-             noteable: issue,
-             system: true,
-             note: commit.revert_description(user),
-             project: issue.project)
-
-      expect_next_instance_of(Commit) do |revert_commit|
-        expect(revert_commit).to receive(:reverts_commit?)
-          .with(commit, user)
-          .and_return(true)
-      end
-
-      expect(commit.reverting_commit(user, issue.notes_with_associations)).to eq(commit)
     end
   end
 

@@ -36,6 +36,8 @@ module IncidentManagement
           break error_in_validation(oncall_rotation) unless oncall_rotation.persisted?
 
           participants = participants_for(oncall_rotation)
+          break error_participant_has_no_permission if participants.nil?
+
           first_invalid_participant = participants.find(&:invalid?)
           break error_in_validation(first_invalid_participant) if first_invalid_participant
 
@@ -65,6 +67,8 @@ module IncidentManagement
 
       def participants_for(rotation)
         participants_params.map do |participant|
+          break unless participant[:user].can?(:read_project, project)
+
           OncallParticipant.new(
             rotation: rotation,
             user: participant[:user],
@@ -100,6 +104,10 @@ module IncidentManagement
 
       def success(oncall_rotation)
         ServiceResponse.success(payload: { oncall_rotation: oncall_rotation })
+      end
+
+      def error_participant_has_no_permission
+        error('A participant has insufficient permissions to access the project')
       end
 
       def error_too_many_participants

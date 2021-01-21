@@ -12,6 +12,10 @@ module EE
         limit = params.delete(:repository_size_limit)
         application_setting.repository_size_limit = ::Gitlab::Utils.try_megabytes_to_bytes(limit) if limit
 
+        if params[:maintenance_mode] == false || params[:maintenance_mode_message] == ''
+          params[:maintenance_mode_message] = nil
+        end
+
         elasticsearch_namespace_ids = params.delete(:elasticsearch_namespace_ids)
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 

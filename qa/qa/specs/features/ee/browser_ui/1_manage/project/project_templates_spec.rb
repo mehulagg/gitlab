@@ -73,7 +73,7 @@ module QA
         before do
           Flow::Login.sign_in_as_admin
 
-          Support::Retrier.retry_until do
+          Support::Retrier.retry_until(retry_on_exception: true) do
             Page::Main::Menu.perform(&:go_to_admin_area)
             Page::Admin::Menu.perform(&:go_to_template_settings)
 
@@ -84,7 +84,7 @@ module QA
             Page::Admin::Menu.perform(&:go_to_template_settings)
 
             EE::Page::Admin::Settings::Templates.perform do |templates|
-              templates.current_custom_project_template.include? @template_container_group_name
+              Support::Waiter.wait_until(max_duration: 10) { templates.current_custom_project_template.include? @template_container_group_name }
             end
           end
 

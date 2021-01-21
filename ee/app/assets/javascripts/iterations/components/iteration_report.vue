@@ -88,6 +88,11 @@ export default {
       required: false,
       default: false,
     },
+    labelsFetchPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     namespaceType: {
       type: String,
       required: false,
@@ -226,6 +231,7 @@ export default {
       <iteration-report-tabs
         :full-path="fullPath"
         :iteration-id="iteration.id"
+        :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
       />
     </template>

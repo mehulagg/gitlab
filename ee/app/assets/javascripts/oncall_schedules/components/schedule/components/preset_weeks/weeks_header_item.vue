@@ -58,7 +58,11 @@ export default {
 
 <template>
   <span class="timeline-header-item">
-    <div :class="timelineHeaderClass" class="item-label" data-testid="timeline-header-label">
+    <div
+      :class="timelineHeaderClass"
+      class="item-label gl-pl-6 gl-py-4"
+      data-testid="timeline-header-label"
+    >
       {{ timelineHeaderLabel }}
     </div>
     <weeks-header-sub-item :timeframe-item="timeframeItem" />

@@ -10,19 +10,19 @@ export default {
     ProfileSelector,
   },
   mixins: [glFeatureFlagsMixin()],
-  props: {
-    profiles: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-  },
   inject: {
     siteProfilesLibraryPath: {
       default: '',
     },
     newSiteProfilePath: {
       default: '',
+    },
+  },
+  props: {
+    profiles: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
   },
   computed: {

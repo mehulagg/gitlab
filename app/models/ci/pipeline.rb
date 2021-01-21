@@ -262,8 +262,6 @@ module Ci
       end
 
       after_transition any => any do |pipeline|
-        next unless Feature.enabled?(:jira_sync_builds, pipeline.project)
-
         pipeline.run_after_commit do
           # Passing the seq-id ensures this is idempotent
           seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
@@ -997,11 +995,19 @@ module Ci
     end
 
     def has_coverage_reports?
-      pipeline_artifacts&.has_code_coverage?
+      pipeline_artifacts&.has_report?(:code_coverage)
     end
 
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
+    end
+
+    def has_codequality_reports?
+      pipeline_artifacts&.has_report?(:code_quality)
+    end
+
+    def can_generate_codequality_reports?
+      has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
     def test_report_summary

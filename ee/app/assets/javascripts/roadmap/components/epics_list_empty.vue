@@ -1,5 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlButton } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
@@ -9,6 +10,9 @@ import { emptyStateDefault, emptyStateWithFilters } from '../constants';
 import initEpicCreate from '../../epic/epic_bundle';
 
 export default {
+  components: {
+    GlButton,
+  },
   mixins: [CommonMixin],
   props: {
     presetType: {
@@ -139,9 +143,9 @@ export default {
             id="epic-create-root"
             :data-endpoint="newEpicEndpoint"
           ></div>
-          <a :title="__('List')" :href="newEpicEndpoint" class="btn btn-default">
-            <span>{{ s__('View epics list') }}</span>
-          </a>
+          <gl-button :title="__('List')" :href="newEpicEndpoint">{{
+            s__('View epics list')
+          }}</gl-button>
         </div>
       </div>
     </div>

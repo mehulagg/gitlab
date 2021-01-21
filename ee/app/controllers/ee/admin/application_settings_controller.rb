@@ -7,17 +7,18 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        before_action :elasticsearch_reindexing_task, only: [:general]
+        before_action :elasticsearch_reindexing_task, only: [:advanced_search]
 
         feature_category :provision, [:seat_link_payload]
         feature_category :source_code_management, [:templates]
+        feature_category :global_search, [:advanced_search]
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
         end
       end
 
-      EE_VALID_SETTING_PANELS = %w(templates).freeze
+      EE_VALID_SETTING_PANELS = %w(advanced_search templates).freeze
 
       EE_VALID_SETTING_PANELS.each do |action|
         define_method(action) { perform_update if submitted? }

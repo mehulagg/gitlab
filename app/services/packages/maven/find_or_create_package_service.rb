@@ -10,6 +10,15 @@ module Packages
           ::Packages::Maven::PackageFinder.new(params[:path], current_user, project: project)
                                           .execute
 
+        unless Namespace::PackageSetting.duplicates_allowed?(package)
+          files = package&.package_files || []
+          current_maven_files = files.map { |file| extname(file.file_name) }
+
+          if current_maven_files.compact.include?(extname(params[:file_name]))
+            return ServiceResponse.error(message: 'Duplicate package is not allowed')
+          end
+        end
+
         unless package
           # Maven uploads several files during `mvn deploy` in next order:
           #   - my-company/my-app/1.0-SNAPSHOT/my-app.jar
@@ -48,7 +57,15 @@ module Packages
 
         package.build_infos.safe_find_or_create_by!(pipeline: params[:build].pipeline) if params[:build].present?
 
-        package
+        ServiceResponse.success(payload: { package: package })
+      end
+
+      private
+
+      def extname(filename)
+        return if filename.blank?
+
+        File.extname(filename)
       end
     end
   end

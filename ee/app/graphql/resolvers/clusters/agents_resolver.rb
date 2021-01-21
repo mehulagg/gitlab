@@ -12,7 +12,7 @@ module Resolvers
       when_single do
         argument :name, GraphQL::STRING_TYPE,
             required: true,
-            description: 'Name of the cluster agent'
+            description: 'Name of the cluster agent.'
       end
 
       alias_method :project, :object

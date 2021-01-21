@@ -7,7 +7,7 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
 
   describe '#save!' do
     it 'creates an index if it is not found' do
-      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.delete_migrations_index
 
       expect { record.save!(completed: true) }.to raise_error(/index is not found/)
     end
@@ -52,7 +52,7 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     let(:in_progress_migration) { described_class.new(version: 10, name: 10, filename: nil) }
 
     before do
-      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.delete_migrations_index
       es_helper.create_migrations_index
       completed_versions.each { |migration| migration.save!(completed: true) }
       in_progress_migration.save!(completed: false)
@@ -66,7 +66,7 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
 
     it 'returns empty array if no index present' do
-      es_helper.delete_index(index_name: es_helper.migrations_index_name)
+      es_helper.delete_migrations_index
 
       expect(described_class.persisted_versions(completed: true)).to eq([])
       expect(described_class.persisted_versions(completed: false)).to eq([])

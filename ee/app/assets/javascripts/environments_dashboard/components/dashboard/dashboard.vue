@@ -108,7 +108,7 @@ export default {
     },
   },
   watch: {
-    currentPage: () => {
+    currentPage() {
       window.scrollTo(0, 0);
     },
   },

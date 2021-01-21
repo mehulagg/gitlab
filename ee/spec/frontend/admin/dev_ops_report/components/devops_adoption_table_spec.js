@@ -119,7 +119,7 @@ describe('DevopsAdoptionTable', () => {
             const tooltip = getBinding(icon.element, 'gl-tooltip');
 
             expect(tooltip).toBeDefined();
-            expect(tooltip.value).toBe('Segment data pending until the start of next month');
+            expect(tooltip.value).toBe('Group data pending until the start of next month');
           });
         });
       });

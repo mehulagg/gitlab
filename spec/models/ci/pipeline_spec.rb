@@ -1261,26 +1261,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
             pipeline.send(event)
           end
-
-          context 'the feature is disabled' do
-            it 'does not trigger a worker' do
-              stub_feature_flags(jira_sync_builds: false)
-
-              expect(worker).not_to receive(:perform_async)
-
-              pipeline.send(event)
-            end
-          end
-
-          context 'the feature is enabled for this project' do
-            it 'does trigger a worker' do
-              stub_feature_flags(jira_sync_builds: pipeline.project)
-
-              expect(worker).to receive(:perform_async)
-
-              pipeline.send(event)
-            end
-          end
         end
       end
     end
@@ -3499,6 +3479,54 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
 
     context 'when pipeline does not have builds with coverage reports' do
+      before do
+        create(:ci_build, :artifacts, pipeline: pipeline, project: project)
+      end
+
+      let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+      it { expect(subject).to be_falsey }
+    end
+  end
+
+  describe '#has_codequality_reports?' do
+    subject { pipeline.has_codequality_reports? }
+
+    context 'when pipeline has a codequality artifact' do
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_report_artifact, :running, project: project) }
+
+      it { expect(subject).to be_truthy }
+    end
+
+    context 'when pipeline does not have a codequality artifact' do
+      let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+      it { expect(subject).to be_falsey }
+    end
+  end
+
+  describe '#can_generate_codequality_reports?' do
+    subject { pipeline.can_generate_codequality_reports? }
+
+    context 'when pipeline has builds with codequality reports' do
+      before do
+        create(:ci_build, :codequality_reports, pipeline: pipeline, project: project)
+      end
+
+      context 'when pipeline status is running' do
+        let(:pipeline) { create(:ci_pipeline, :running, project: project) }
+
+        it { expect(subject).to be_falsey }
+      end
+
+      context 'when pipeline status is success' do
+        let(:pipeline) { create(:ci_pipeline, :success, project: project) }
+
+        it { expect(subject).to be_truthy }
+      end
+    end
+
+    context 'when pipeline does not have builds with codequality reports' do
       before do
         create(:ci_build, :artifacts, pipeline: pipeline, project: project)
       end

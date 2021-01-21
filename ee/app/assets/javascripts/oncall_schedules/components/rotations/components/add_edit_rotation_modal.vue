@@ -27,12 +27,12 @@ export const i18n = {
 export default {
   i18n,
   LENGTH_ENUM,
-  inject: ['projectPath'],
   components: {
     GlModal,
     GlAlert,
     AddEditRotationForm,
   },
+  inject: ['projectPath'],
   props: {
     modalId: {
       type: String,
@@ -79,6 +79,14 @@ export default {
         startsAt: {
           date: null,
           time: 0,
+        },
+        endsOn: {
+          date: null,
+          time: 0,
+        },
+        restrictedTo: {
+          from: 0,
+          to: 0,
         },
       },
       error: '',
@@ -241,10 +249,10 @@ export default {
   <gl-modal
     ref="addEditScheduleRotationModal"
     :modal-id="modalId"
-    size="sm"
     :title="title"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
+    modal-class="rotations-modal"
     @primary.prevent="isEditMode ? editRotation() : createRotation()"
   >
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">

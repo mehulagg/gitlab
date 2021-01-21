@@ -24,6 +24,27 @@ module Gitlab
           http_get("api/payment_methods/#{id}", admin_headers)
         end
 
+        def activate(activation_code)
+          uuid = Gitlab::CurrentSettings.uuid
+
+          query = <<~GQL
+            mutation {
+              cloudActivationActivate(input: { activationCode: "#{activation_code}", instanceIdentifier: "#{uuid}" }) {
+                authenticationToken
+                errors
+              }
+            }
+          GQL
+
+          response = http_post("graphql", admin_headers, { query: query }).dig(:data, 'data', 'cloudActivationActivate')
+
+          if response['errors'].blank?
+            { success: true, authentication_token: response['authenticationToken'] }
+          else
+            { success: false, errors: response['errors'] }
+          end
+        end
+
         private
 
         def http_get(path, headers)

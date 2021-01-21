@@ -451,6 +451,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       it { is_expected.to be_empty }
     end
+
+    context 'when commit is part of the merge request and a squash commit at the same time' do
+      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:sha) { merge_request.commits.first.id }
+
+      before do
+        merge_request.update!(squash_commit_sha: sha)
+      end
+
+      it { is_expected.to eq([merge_request]) }
+    end
   end
 
   describe '.by_cherry_pick_sha' do
@@ -754,9 +765,8 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     context 'when both internal and external issue trackers are enabled' do
       before do
-        subject.project.has_external_issue_tracker = true
-        subject.project.save!
         create(:jira_service, project: subject.project)
+        subject.project.reload
       end
 
       it 'does not cache issues from external trackers' do
@@ -1263,8 +1273,9 @@ RSpec.describe MergeRequest, factory_default: :keep do
   describe '#issues_mentioned_but_not_closing' do
     let(:closing_issue) { create :issue, project: subject.project }
     let(:mentioned_issue) { create :issue, project: subject.project }
-
     let(:commit) { double('commit', safe_message: "Fixes #{closing_issue.to_reference}") }
+
+    subject { create(:merge_request, source_project: create(:project)) }
 
     it 'detects issues mentioned in description but not closed' do
       subject.project.add_developer(subject.author)
@@ -1279,13 +1290,12 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     context 'when the project has an external issue tracker' do
-      subject { create(:merge_request, source_project: create(:project, :repository)) }
-
       before do
         subject.project.add_developer(subject.author)
         commit = double(:commit, safe_message: 'Fixes TEST-3')
 
         create(:jira_service, project: subject.project)
+        subject.project.reload
 
         allow(subject).to receive(:commits).and_return([commit])
         allow(subject).to receive(:description).and_return('Is related to TEST-2 and TEST-3')
@@ -1469,6 +1479,8 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#default_merge_commit_message' do
+    subject { create(:merge_request, source_project: create(:project)) }
+
     it 'includes merge information as the title' do
       request = build(:merge_request, source_branch: 'source', target_branch: 'target')
 
@@ -1645,7 +1657,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   it_behaves_like 'an editable mentionable' do
-    subject { create(:merge_request, :simple) }
+    subject { create(:merge_request, :simple, source_project: create(:project, :repository)) }
 
     let(:backref_text) { "merge request #{subject.to_reference}" }
     let(:set_mentionable_text) { ->(txt) { subject.description = txt } }
@@ -2451,85 +2463,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       it 'returns shortened merged_commit_sha' do
         expect(subject.short_merged_commit_sha).to eq('f7ce827c')
-      end
-    end
-  end
-
-  describe '#reverting_merge_request' do
-    subject { create(:merge_request, source_project: create(:project, :repository)) }
-
-    context 'when there is no merge_commit for the MR' do
-      before do
-        subject.metrics.update!(merged_at: Time.current.utc)
-      end
-
-      it 'returns nil' do
-        expect(subject.reverting_merge_request(nil)).to be_nil
-      end
-    end
-
-    context 'when the MR has been merged' do
-      before do
-        MergeRequests::MergeService
-          .new(subject.target_project, subject.author, { sha: subject.diff_head_sha })
-          .execute(subject)
-      end
-
-      context 'when there is no revert commit' do
-        it 'returns nil' do
-          expect(subject.reverting_merge_request(nil)).to be_nil
-        end
-      end
-
-      context 'when there is no merged_at for the MR' do
-        before do
-          subject.metrics.update!(merged_at: nil)
-        end
-
-        it 'returns nil' do
-          expect(subject.reverting_merge_request(nil)).to be_nil
-        end
-      end
-
-      context 'when there is a revert commit by MR' do
-        let(:current_user) { subject.author }
-        let(:branch) { subject.source_branch }
-        let(:project) { subject.source_project }
-
-        let(:revert_commit_id) do
-          params = {
-            commit: subject.merge_commit,
-            branch_name: branch,
-            start_branch: branch
-          }
-
-          Commits::RevertService.new(project, current_user, params).execute[:result]
-        end
-
-        let(:revert_merge_request) do
-          create(
-            :merge_request,
-            author: subject.author,
-            target_project: subject.target_project,
-            source_project: subject.source_project,
-            merge_commit_sha: revert_commit_id,
-            description: "This reverts merge request !#{subject.id}")
-        end
-
-        it 'returns the reverting merge request' do
-          ProcessCommitWorker.new.perform(project.id,
-                                          current_user.id,
-                                          project.commit(revert_commit_id).to_hash,
-                                          project.default_branch == branch)
-
-          MergeRequests::MergeService.new(
-            subject.target_project,
-            subject.author,
-            { sha: revert_merge_request.diff_head_sha }
-          ).execute(revert_merge_request)
-
-          expect(subject.reverting_merge_request(current_user)).to eq(revert_merge_request)
-        end
       end
     end
   end

@@ -92,36 +92,10 @@ RSpec.describe ProjectsHelper do
       expect(helper.can_change_visibility_level?(project, user)).to be_falsey
     end
 
-    it "returns true if there are permissions and it is not fork" do
+    it "returns true if there are permissions" do
       allow(helper).to receive(:can?) { true }
 
       expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    it 'allows visibility level to be changed if the project is forked' do
-      allow(helper).to receive(:can?).with(user, :change_visibility_level, project) { true }
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-      fork_project(project)
-
-      expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    context "forks" do
-      it "returns false if there are permissions and origin project is PRIVATE" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_falsey
-      end
-
-      it "returns true if there are permissions and origin project is INTERNAL" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_truthy
-      end
     end
   end
 
@@ -459,6 +433,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has external wiki' do
       it 'includes external wiki tab' do
         project.create_external_wiki_service(active: true, properties: { 'external_wiki_url' => 'https://gitlab.com' })
+        project.reload
 
         is_expected.to include(:external_wiki)
       end
@@ -879,16 +854,36 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#can_import_members?' do
-    let(:owner) { project.owner }
+    context 'when user is project owner' do
+      before do
+        allow(helper).to receive(:current_user) { project.owner }
+      end
 
-    it 'returns false if user cannot admin_project_member' do
-      allow(helper).to receive(:current_user) { user }
-      expect(helper.can_import_members?).to eq false
+      it 'returns true for owner of project' do
+        expect(helper.can_import_members?).to eq true
+      end
     end
 
-    it 'returns true if user can admin_project_member' do
-      allow(helper).to receive(:current_user) { owner }
-      expect(helper.can_import_members?).to eq true
+    context 'when user is not a project owner' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:user_project_role, :can_import) do
+        :maintainer | true
+        :developer | false
+        :reporter | false
+        :guest | false
+      end
+
+      with_them do
+        before do
+          project.add_role(user, user_project_role)
+          allow(helper).to receive(:current_user) { user }
+        end
+
+        it 'resolves if the user can import members' do
+          expect(helper.can_import_members?).to eq can_import
+        end
+      end
     end
   end
 

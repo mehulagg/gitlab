@@ -22,6 +22,8 @@ describe('QuartersPresetMixin', () => {
         timeframe,
         timeframeItem,
         epic,
+        startDate: epic.startDate,
+        endDate: epic.endDate,
       },
     });
   };

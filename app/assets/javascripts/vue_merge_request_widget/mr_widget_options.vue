@@ -48,7 +48,6 @@ import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grou
 import getStateQuery from './queries/get_state.query.graphql';
 
 export default {
-  el: '#js-vue-mr-widget',
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'MRWidget',
@@ -191,9 +190,13 @@ export default {
         mergeError = mergeError.slice(0, -1);
       }
 
-      return sprintf(s__('mrWidget|Merge failed: %{mergeError}. Please try again.'), {
-        mergeError,
-      });
+      return sprintf(
+        s__('mrWidget|Merge failed: %{mergeError}. Please try again.'),
+        {
+          mergeError,
+        },
+        false,
+      );
     },
     shouldShowAccessibilityReport() {
       return this.mr.accessibilityReportPath;
@@ -307,8 +310,7 @@ export default {
         callback: this.checkStatus,
         startingInterval: this.startingPollInterval,
         maxInterval: this.startingPollInterval + secondsToMilliseconds(4 * 60),
-        hiddenInterval:
-          window.gon?.features?.widgetVisibilityPolling && secondsToMilliseconds(6 * 60),
+        hiddenInterval: secondsToMilliseconds(6 * 60),
         incrementByFactorOf: 2,
       });
     },

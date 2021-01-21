@@ -35,13 +35,19 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
 
     context 'elasticsearch_indexing update' do
+      let(:helper) { Gitlab::Elastic::Helper.new }
+
+      before do
+        allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
+      end
+
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 
         context 'when index exists' do
           it 'skips creating a new index' do
-            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
-            expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
+            expect(helper).to(receive(:index_exists?)).and_return(true)
+            expect(helper).not_to(receive(:create_empty_index))
 
             service.execute
           end
@@ -49,8 +55,8 @@ RSpec.describe ApplicationSettings::UpdateService do
 
         context 'when index does not exist' do
           it 'creates a new index' do
-            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
-            expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
+            expect(helper).to(receive(:index_exists?)).and_return(false)
+            expect(helper).to(receive(:create_empty_index))
 
             service.execute
           end

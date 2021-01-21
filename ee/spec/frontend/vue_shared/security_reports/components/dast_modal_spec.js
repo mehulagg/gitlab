@@ -45,7 +45,7 @@ describe('DAST Modal', () => {
 
   it('should contain the dynamic title', () => {
     createWrapper({ scannedResourcesCount: 20 });
-    expect(wrapper.attributes('title')).toBe('20 Scanned URLs');
+    expect(wrapper.find(GlModal).props('title')).toBe('20 Scanned URLs');
   });
 
   it('should not show download button when link is not present', () => {

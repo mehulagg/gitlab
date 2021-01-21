@@ -1,0 +1,5 @@
+---
+title: Fix halted migrations unpausing
+merge_request: 51326
+author:
+type: fixed

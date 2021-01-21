@@ -113,6 +113,12 @@ module EE
     def post_create_hook
       super
 
+      if provisioned_by_this_group?
+        run_after_commit_or_now do
+          notification_service.new_group_member_with_confirmation(self)
+        end
+      end
+
       execute_hooks_for(:create)
     end
 
@@ -139,6 +145,15 @@ module EE
         data = ::Gitlab::HookData::GroupMemberBuilder.new(self).build(event)
         self.source.execute_hooks(data, :member_hooks)
       end
+    end
+
+    override :send_welcome_email?
+    def send_welcome_email?
+      !provisioned_by_this_group?
+    end
+
+    def provisioned_by_this_group?
+      user.user_detail.provisioned_by_group_id == source_id
     end
   end
 end

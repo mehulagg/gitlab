@@ -389,12 +389,8 @@ module Ci
       end
 
       after_transition any => [:skipped, :canceled] do |build, transition|
-        if Feature.enabled?(:cd_skipped_deployment_status, build.project)
-          if transition.to_name == :skipped
-            build.deployment&.skip
-          else
-            build.deployment&.cancel
-          end
+        if transition.to_name == :skipped
+          build.deployment&.skip
         else
           build.deployment&.cancel
         end
@@ -730,13 +726,7 @@ module Ci
     end
 
     def any_runners_online?
-      project.any_runners? do |runner|
-        if Feature.enabled?(:ci_build_stuck_badge_performance_experiment, project, type: :development, default_enabled: false)
-          runner.active? && runner.online?
-        else
-          runner.active? && runner.online? && runner.can_pick?(self)
-        end
-      end
+      project.any_runners? { |runner| runner.active? && runner.online? && runner.can_pick?(self) }
     end
 
     def stuck?
@@ -1030,8 +1020,6 @@ module Ci
     end
 
     def debug_mode?
-      return false unless Feature.enabled?(:restrict_access_to_build_debug_mode, default_enabled: true)
-
       # TODO: Have `debug_mode?` check against data on sent back from runner
       # to capture all the ways that variables can be set.
       # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
@@ -1134,7 +1122,6 @@ module Ci
     end
 
     def conditionally_allow_failure!(exit_code)
-      return unless ::Gitlab::Ci::Features.allow_failure_with_exit_codes_enabled?
       return unless exit_code
 
       if allowed_to_fail_with_code?(exit_code)

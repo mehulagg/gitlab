@@ -24,7 +24,7 @@ module Elastic
           break false
         end
 
-        unless helper.index_exists?(index_name: helper.migrations_index_name)
+        unless helper.migrations_index_exists?
           logger.info 'MigrationWorker: creating migrations index'
           helper.create_migrations_index
         end
@@ -88,9 +88,12 @@ module Elastic
     def unpause_indexing!(migration)
       return unless migration.pause_indexing?
       return unless migration.load_state[:pause_indexing]
+      return if migration.load_state[:halted_indexing_unpaused]
 
       logger.info 'MigrationWorker: unpausing indexing'
       Gitlab::CurrentSettings.update!(elasticsearch_pause_indexing: false)
+
+      migration.save_state!(halted_indexing_unpaused: true) if migration.halted?
     end
 
     def helper

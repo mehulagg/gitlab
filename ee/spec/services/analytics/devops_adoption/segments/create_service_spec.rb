@@ -23,6 +23,14 @@ RSpec.describe Analytics::DevopsAdoption::Segments::CreateService do
     expect(segment.groups).to eq([group])
   end
 
+  it 'schedules for snapshot creation' do
+    allow(Analytics::DevopsAdoption::CreateSnapshotWorker).to receive(:perform_async).and_call_original
+
+    subject
+
+    expect(Analytics::DevopsAdoption::CreateSnapshotWorker).to have_received(:perform_async).with(Analytics::DevopsAdoption::Segment.last.id, nil)
+  end
+
   context 'when user is not an admin' do
     let(:user) { build(:user) }
 

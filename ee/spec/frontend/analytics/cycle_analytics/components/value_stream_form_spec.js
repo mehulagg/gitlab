@@ -1,7 +1,8 @@
-import { GlModal, GlFormGroup } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
+import { customStageEvents as formEvents } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -24,6 +25,14 @@ describe('ValueStreamForm', () => {
       },
       actions: {
         createValueStream: createValueStreamMock,
+      },
+      modules: {
+        customStages: {
+          namespaced: true,
+          state: {
+            formEvents,
+          },
+        },
       },
     });
 
@@ -50,7 +59,6 @@ describe('ValueStreamForm', () => {
   const createSubmitButtonDisabledState = () =>
     findModal().props('actionPrimary').attributes[1].disabled;
   const submitModal = () => findModal().vm.$emit('primary', mockEvent);
-  const findFormGroup = () => wrapper.find(GlFormGroup);
   const findExtendedFormFields = () => wrapper.find('[data-testid="extended-form-fields"]');
 
   afterEach(() => {
@@ -92,12 +100,6 @@ describe('ValueStreamForm', () => {
       });
     });
 
-    it('renders the error', () => {
-      expect(findFormGroup().attributes('invalid-feedback')).toEqual(
-        createValueStreamErrors.name.join('\n'),
-      );
-    });
-
     it('submit button is disabled', () => {
       expect(createSubmitButtonDisabledState()).toBe(true);
     });
@@ -120,6 +122,7 @@ describe('ValueStreamForm', () => {
       it('calls the "createValueStream" event when submitted', () => {
         expect(createValueStreamMock).toHaveBeenCalledWith(expect.any(Object), {
           name: streamName,
+          stages: [],
         });
       });
 

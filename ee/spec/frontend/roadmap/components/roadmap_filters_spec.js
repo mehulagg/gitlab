@@ -1,4 +1,4 @@
-import { GlSegmentedControl, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlSegmentedControl, GlDropdown, GlDropdownItem, GlFilteredSearchToken } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 
@@ -89,6 +89,7 @@ describe('RoadmapFilters', () => {
           authorUsername: 'root',
           labelName: ['Bug'],
           milestoneTitle: '4.0',
+          confidential: true,
         });
         wrapper.vm.$store.dispatch('setSortedBy', 'end_date_asc');
 
@@ -97,7 +98,7 @@ describe('RoadmapFilters', () => {
         wrapper.vm.updateUrl();
 
         expect(global.window.location.href).toBe(
-          `${TEST_HOST}/?state=${EPICS_STATES.CLOSED}&sort=end_date_asc&author_username=root&milestone_title=4.0&label_name%5B%5D=Bug`,
+          `${TEST_HOST}/?state=${EPICS_STATES.CLOSED}&sort=end_date_asc&author_username=root&milestone_title=4.0&label_name%5B%5D=Bug&confidential=true`,
         );
       });
     });
@@ -144,8 +145,16 @@ describe('RoadmapFilters', () => {
           value: { data: 'root' },
         },
         {
+          type: 'milestone_title',
+          value: { data: '4.0' },
+        },
+        {
           type: 'label_name',
           value: { data: 'Bug' },
+        },
+        {
+          type: 'confidential',
+          value: { data: true },
         },
       ];
       let filteredSearchBar;
@@ -192,6 +201,18 @@ describe('RoadmapFilters', () => {
             operators: [{ value: '=', description: 'is', default: 'true' }],
             fetchMilestones: expect.any(Function),
           },
+          {
+            type: 'confidential',
+            icon: 'eye-slash',
+            title: 'Confidential',
+            unique: true,
+            token: GlFilteredSearchToken,
+            operators: [{ value: '=', description: 'is', default: 'true' }],
+            options: [
+              { icon: 'eye-slash', value: true, title: 'Yes' },
+              { icon: 'eye', value: false, title: 'No' },
+            ],
+          },
         ]);
       });
 
@@ -220,6 +241,8 @@ describe('RoadmapFilters', () => {
         wrapper.vm.$store.dispatch('setFilterParams', {
           authorUsername: 'root',
           labelName: ['Bug'],
+          milestoneTitle: '4.0',
+          confidential: true,
         });
 
         await wrapper.vm.$nextTick();
@@ -241,6 +264,8 @@ describe('RoadmapFilters', () => {
         expect(wrapper.vm.setFilterParams).toHaveBeenCalledWith({
           authorUsername: 'root',
           labelName: ['Bug'],
+          milestoneTitle: '4.0',
+          confidential: true,
         });
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
         expect(wrapper.vm.updateUrl).toHaveBeenCalled();

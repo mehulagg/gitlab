@@ -559,7 +559,7 @@ export const updateResolvableDiscussionsCounts = ({ commit }) =>
 
 export const submitSuggestion = (
   { commit, dispatch },
-  { discussionId, noteId, suggestionId, flashContainer },
+  { discussionId, suggestionId, flashContainer, message },
 ) => {
   const dispatchResolveDiscussion = () =>
     dispatch('resolveDiscussion', { discussionId }).catch(() => {});
@@ -567,8 +567,7 @@ export const submitSuggestion = (
   commit(types.SET_RESOLVING_DISCUSSION, true);
   dispatch('stopPolling');
 
-  return Api.applySuggestion(suggestionId)
-    .then(() => commit(types.APPLY_SUGGESTION, { discussionId, noteId, suggestionId }))
+  return Api.applySuggestion(suggestionId, message)
     .then(dispatchResolveDiscussion)
     .catch((err) => {
       const defaultMessage = __(
@@ -590,11 +589,6 @@ export const submitSuggestion = (
 export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContainer }) => {
   const suggestionIds = state.batchSuggestionsInfo.map(({ suggestionId }) => suggestionId);
 
-  const applyAllSuggestions = () =>
-    state.batchSuggestionsInfo.map((suggestionInfo) =>
-      commit(types.APPLY_SUGGESTION, suggestionInfo),
-    );
-
   const resolveAllDiscussions = () =>
     state.batchSuggestionsInfo.map((suggestionInfo) => {
       const { discussionId } = suggestionInfo;
@@ -606,7 +600,6 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
   dispatch('stopPolling');
 
   return Api.applySuggestionBatch(suggestionIds)
-    .then(() => Promise.all(applyAllSuggestions()))
     .then(() => Promise.all(resolveAllDiscussions()))
     .then(() => commit(types.CLEAR_SUGGESTION_BATCH))
     .catch((err) => {

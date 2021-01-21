@@ -431,7 +431,8 @@ The following are Docker image-related variables.
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `SECURE_ANALYZERS_PREFIX` | Override the name of the Docker registry providing the default images (proxy). Read more about [customizing analyzers](analyzers.md). |
 | `SAST_ANALYZER_IMAGE_TAG` | **DEPRECATED:** Override the Docker tag of the default images. Read more about [customizing analyzers](analyzers.md).                 |
-| `SAST_DEFAULT_ANALYZERS`  | Override the names of default images. Read more about [customizing analyzers](analyzers.md).                                          |
+| `SAST_DEFAULT_ANALYZERS`  | **DEPRECATED:** Override the names of default images. Scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777).                          |
+| `SAST_EXCLUDED_ANALYZERS` | Names of default images that should never run. Read more about [customizing analyzers](analyzers.md).                                 |
 
 #### Vulnerability filters
 
@@ -727,3 +728,25 @@ against the given glob pattern. If the number of matches exceeds the maximum, th
 parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
 triggered even if the scanner doesn't support your project. For more details about this issue, see
 the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).
+
+### SpotBugs UTF-8 unmappable character errors
+
+These errors occur when UTF-8 encoding isn't enabled on a SpotBugs build and there are UTF-8
+characters in the source code. To fix this error, enable UTF-8 for your project's build tool.
+
+For Gradle builds, add the following to your `build.gradle` file:
+
+```gradle
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+```
+
+For Maven builds, add the following to your `pom.xml` file:
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+```

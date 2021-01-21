@@ -77,8 +77,8 @@ Prerequisites:
 
 - A package in a GitLab repository. Composer packages should be versioned based on
   the [Composer specification](https://getcomposer.org/doc/04-schema.md#version).
-  If the version is not valid, for example, it has three dots (`1.0.0.0`), an 
-  error (`Validation failed: Version is invalid`) occurs when you publish. 
+  If the version is not valid, for example, it has three dots (`1.0.0.0`), an
+  error (`Validation failed: Version is invalid`) occurs when you publish.
 - A valid `composer.json` file.
 - The Packages feature is enabled in a GitLab repository.
 - The project ID, which is on the project's home page.
@@ -272,6 +272,6 @@ Output indicates that the package has been successfully installed.
 
 WARNING:
 Never commit the `auth.json` file to your repository. To install packages from a CI/CD job,
-consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#authentication) tool with your personal access token
+consider using the [`composer config`](https://getcomposer.org/doc/articles/handling-private-packages.md#satis) tool with your personal access token
 stored in a [GitLab CI/CD environment variable](../../../ci/variables/README.md) or in
 [HashiCorp Vault](../../../ci/secrets/index.md).

@@ -29,7 +29,6 @@ export default {
   mockRotations,
   i18n,
   addScheduleModalId,
-  inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   components: {
     GlAlert,
     GlButton,
@@ -41,6 +40,7 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
+  inject: ['emptyOncallSchedulesSvgPath', 'projectPath'],
   data() {
     return {
       schedule: {},

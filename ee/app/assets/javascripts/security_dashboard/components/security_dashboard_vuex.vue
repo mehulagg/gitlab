@@ -66,7 +66,6 @@ export default {
   created() {
     this.setPipelineId(this.pipelineId);
     this.setVulnerabilitiesEndpoint(this.vulnerabilitiesEndpoint);
-    this.fetchVulnerabilities({ ...this.filters, page: this.pageInfo.page });
     this.fetchPipelineJobs();
   },
   methods: {
@@ -74,7 +73,6 @@ export default {
       'closeDismissalCommentBox',
       'createIssue',
       'createMergeRequest',
-      'fetchVulnerabilities',
       'openDismissalCommentBox',
       'setPipelineId',
       'setVulnerabilitiesEndpoint',
