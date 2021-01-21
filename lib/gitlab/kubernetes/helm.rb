@@ -3,7 +3,7 @@
 module Gitlab
   module Kubernetes
     module Helm
-      KUBECTL_VERSION = '1.13.12'
+      KUBECTL_VERSION = '1.15.12'
       NAMESPACE = 'gitlab-managed-apps'
       NAMESPACE_LABELS = { 'app.gitlab.com/managed_by' => :gitlab }.freeze
       SERVICE_ACCOUNT = 'tiller'
