@@ -38,9 +38,7 @@ export default {
       },
       update(data) {
         // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220379
-        const nodes = data.group?.iterations?.nodes || [];
-
-        return nodes;
+        return data.group?.iterations?.nodes || [];
       },
       result({ data }) {
         const nodes = data.group?.iterations?.nodes || [];

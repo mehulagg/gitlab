@@ -73,6 +73,18 @@ describe('IterationDropdown', () => {
     });
   };
 
+  const createQuerySpy = () => {
+    groupIterationsSpy = jest.fn().mockResolvedValue({
+      data: {
+        group: {
+          iterations: {
+            nodes: iterations,
+          },
+        },
+      },
+    });
+  };
+
   afterEach(() => {
     jest.restoreAllMocks();
     wrapper.destroy();
@@ -101,15 +113,7 @@ describe('IterationDropdown', () => {
     ${false}    | ${false}
   `('when shouldFetch query is $shouldFetch', ({ shouldFetch, called }) => {
     beforeEach(() => {
-      groupIterationsSpy = jest.fn().mockResolvedValue({
-        data: {
-          group: {
-            iterations: {
-              nodes: iterations,
-            },
-          },
-        },
-      });
+      createQuerySpy();
 
       createComponentWithApollo({
         shouldFetch,
@@ -119,7 +123,7 @@ describe('IterationDropdown', () => {
     it(`groupIterations query called ${called}`, () => {
       const times = called ? 1 : 0;
 
-      jest.advanceTimersByTime(250);
+      jest.runAllTimers();
 
       expect(groupIterationsSpy).toHaveBeenCalledTimes(times);
     });
@@ -127,13 +131,15 @@ describe('IterationDropdown', () => {
 
   describe('when bootstrap dropdown event is emitted', () => {
     it('changes shouldFetch to be true', async () => {
-      createComponent({});
-
-      expect(wrapper.vm.shouldFetch).toBe(false);
+      createQuerySpy();
+      createComponentWithApollo({});
 
       wrapper.vm.$root.$emit('bv::dropdown::shown');
 
-      expect(wrapper.vm.shouldFetch).toBe(true);
+      await waitForPromises();
+      jest.runAllTimers();
+
+      expect(groupIterationsSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -170,15 +176,7 @@ describe('IterationDropdown', () => {
 
   describe('when clicking on dropdown item', () => {
     beforeEach(() => {
-      groupIterationsSpy = jest.fn().mockResolvedValue({
-        data: {
-          group: {
-            iterations: {
-              nodes: iterations,
-            },
-          },
-        },
-      });
+      createQuerySpy();
     });
 
     describe('when currentIteration id is equal to iteration id', () => {
@@ -188,7 +186,7 @@ describe('IterationDropdown', () => {
           currentIteration: { id: 'id', title: 'title' },
         });
 
-        jest.advanceTimersByTime(250);
+        jest.runAllTimers();
         await waitForPromises();
 
         wrapper
@@ -208,7 +206,7 @@ describe('IterationDropdown', () => {
           currentIteration: { id: '', title: 'title' },
         });
 
-        jest.advanceTimersByTime(250);
+        jest.runAllTimers();
         await waitForPromises();
 
         wrapper
@@ -224,15 +222,30 @@ describe('IterationDropdown', () => {
 
   describe('when a user is searching', () => {
     beforeEach(() => {
-      createComponent({});
+      createQuerySpy();
+
+      createComponentWithApollo({ shouldFetch: true });
     });
 
     it('sets the search term', async () => {
-      wrapper.find(GlSearchBoxByType).vm.$emit('input', 'testing');
+      const searchString = 'testing';
 
       await wrapper.vm.$nextTick();
+      jest.runAllTimers();
 
-      expect(wrapper.vm.searchTerm).toBe('testing');
+      // reset spy from call on mount
+      groupIterationsSpy.mockClear();
+
+      wrapper.find(GlSearchBoxByType).vm.$emit('input', searchString);
+
+      await wrapper.vm.$nextTick();
+      jest.runAllTimers();
+
+      expect(groupIterationsSpy).toHaveBeenCalledWith({
+        fullPath: '',
+        state: 'opened',
+        title: `"${searchString}"`,
+      });
     });
   });
 });
