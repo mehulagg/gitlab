@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { escape } from 'lodash';
-import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml, GlSprintf } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -10,7 +10,7 @@ import notesEventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
-import { collapsedType, isCollapsed } from '../utils/diff_file';
+import { collapsedType, isCollapsed, getShortShaFromFile } from '../utils/diff_file';
 import {
   DIFF_FILE_AUTOMATIC_COLLAPSE,
   DIFF_FILE_MANUAL_COLLAPSE,
@@ -27,6 +27,7 @@ export default {
     DiffContent,
     GlButton,
     GlLoadingIcon,
+    GlSprintf,
   },
   directives: {
     SafeHtml,
@@ -81,15 +82,11 @@ export default {
     ...mapState('diffs', ['currentDiffFileId']),
     ...mapGetters(['isNotesFetched']),
     ...mapGetters('diffs', ['getDiffFileDiscussions']),
-    viewBlobLink() {
-      return sprintf(
-        this.$options.i18n.blobView,
-        {
-          linkStart: `<a href="${escape(this.file.view_path)}">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
+    viewBlobHref() {
+      return escape(this.file.view_path);
+    },
+    shortSha() {
+      return getShortShaFromFile(this.file);
     },
     showLoadingIcon() {
       return this.isLoadingCollapsedDiff || (!this.file.renderIt && !this.isCollapsed);
@@ -98,7 +95,7 @@ export default {
       return hasDiff(this.file);
     },
     isFileTooLarge() {
-      return this.file.viewer.error === diffViewerErrors.too_large;
+      return !this.manuallyCollapsed && this.file.viewer.error === diffViewerErrors.too_large;
     },
     errorMessage() {
       return !this.manuallyCollapsed ? this.file.viewer.error_message : '';
@@ -308,8 +305,21 @@ export default {
           class="diff-content loading gl-my-0 gl-pt-3"
           data-testid="loader-icon"
         />
-        <div v-else-if="errorMessage" class="diff-viewer">
-          <div v-safe-html="errorMessage" class="nothing-here-block"></div>
+        <div v-else-if="errorMessage || isFileTooLarge" class="diff-viewer">
+          <div
+            v-if="isFileTooLarge"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
+          >
+            <p class="gl-mb-5">
+              {{ $options.i18n.tooLarge }}
+            </p>
+            <gl-button data-testid="blob-button" category="secondary" :href="viewBlobHref">
+              <gl-sprintf :message="$options.i18n.blobView">
+                <template #sha>{{ shortSha }}</template>
+              </gl-sprintf>
+            </gl-button>
+          </div>
+          <div v-else v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
           <div
