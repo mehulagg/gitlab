@@ -2028,3 +2028,57 @@ See the [troubleshooting documentation](troubleshooting.md).
     Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
   </a>
 </div>
+
+## Cloud Native Deployment (optional)
+
+For users looking to leverage the benefits of running workloads in a cloud native environment,
+the information below outlines our recommendations for running eligible GitLab components in Kubernetes.
+
+We only recommend deploying the Sidekiq and Webservice components in Kubernetes,
+keeping the remaining components on traditional servers as documented above.
+
+### Cluster topology
+
+As a starting point for reference, the recommended infrastructure configuration for the cluster is below.
+Note that this example references Google Cloud's Kubernetes Engine (GKE) and associated machine types, but the
+memory and CPU totals should translate to most systems.
+
+- 2x `n1-standard-4` nodes for non-GitLab-related resources, including Grafana, NGINX, and Prometheus
+- 4x `n1-standard-4` nodes for GitLab Sidekiq-related resources
+- 4x `n1-highcpu-32` nodes for GitLab Webservice-related resources
+
+### Resource usage settings
+
+In this section, formulas are provided to help calculate how many pods can be deployed within resource constraints.
+The [ref/10k example values file](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/ref/10k.yaml)
+documents the relevant configuration to provide to the Helm Chart for this reference architecture tier.
+
+#### Sidekiq
+
+Generally, each Sidekiq pod should have about 1 vCPU and 2 GB of memory.
+
+Given the network topology above, the four Sidekiq nodes
+in the cluster total to 16 vCPUs and 60 GB of memory, excluding the overhead of Kubernetes components. Once those components
+are accounted for, there is around 15.5 vCPUs and 50 GB of memory allocatable to workloads.
+
+With these constraints identified, the available resources allow us to deploy up to 16 Sidekiq pods. If more pods are needed, the
+available resources must expand approximately at the 1 vCPU to 2 GB of memory ratio for each pod added.
+
+#### Webservice
+
+Generally, each Webservice pod should have about 1 vCPU and 1.25 GB of memory _per worker_.
+Note that the default number of worker processes is currently 2.
+
+Given the network topology above, the four Webservice nodes
+in the cluster total to 128 vCPUs and 128 GB of memory, excluding the overhead of Kubernetes components. Once those components
+are accounted for, there is around 127.5 vCPUs and 104 GB of memory allocatable to workloads.
+
+With these constraints identified, the available resources allow us to deploy up to 28 Webservice pods. If more pods are needed, the
+available resources must expand approximately at the 1 vCPU to 1.25 GB of memory _per worker_ ratio for each pod added.
+
+#### Further reading
+
+For further documentation on resource usage, see the following documentation:
+
+- [Webservice resources](https://docs.gitlab.com/charts/charts/gitlab/webservice/#resources)
+- [Sidekiq resources](https://docs.gitlab.com/charts/charts/gitlab/sidekiq/#resources)
