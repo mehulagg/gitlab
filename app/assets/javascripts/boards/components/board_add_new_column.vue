@@ -6,8 +6,11 @@ import {
   GlSearchBoxByType,
   GlSkeletonLoader,
 } from '@gitlab/ui';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
+import { fullLabelId } from '../boards_util';
+import boardsStore from '../stores/boards_store';
 import { __ } from '~/locale';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 
 export default {
   i18n: {
@@ -26,24 +29,70 @@ export default {
       labels: [],
       loading: false,
       searchTerm: '',
-      selectedLabel: null,
+      selectedLabelId: null,
     };
+  },
+  computed: {
+    ...mapGetters(['getListByLabelId', 'shouldUseGraphQL']),
   },
   created() {
     this.filterLabels();
   },
   methods: {
     ...mapActions(['createList', 'fetchLabels']),
+    columnExists(label) {
+      if (this.shouldUseGraphQL) {
+        return this.getListByLabelId(fullLabelId(label));
+      }
+      return boardsStore.findListByLabelId(label.id);
+    },
     addList() {
-      if (this.selectedLabel) {
-        this.createList({ labelId: this.selectedLabel });
+      if (!this.selectedLabelId) {
+        return;
+      }
+
+      if (this.shouldUseGraphQL) {
+        if (this.columnExists({ id: this.selectedLabelId })) {
+          return;
+        }
+
+        this.createList({ labelId: this.selectedLabelId });
+      } else {
+        const label = this.labels.find(({ id }) => id === this.selectedLabelId);
+        const labelColumn = boardsStore.findListByLabelId(label.id);
+
+        // if label doesn't exist or already has a column
+        if (!label || labelColumn) {
+          return;
+        }
+
+        boardsStore.new({
+          title: label.title,
+          position: boardsStore.state.lists.length - 2,
+          list_type: 'label',
+          label: {
+            id: label.id,
+            title: label.title,
+            color: label.color,
+          },
+        });
       }
     },
+
     filterLabels() {
       this.loading = true;
       this.fetchLabels(this.searchTerm)
         .then((labels) => {
-          this.labels = labels;
+          if (this.shouldUseGraphQL) {
+            this.labels = labels;
+          } else {
+            this.labels = labels.map((label) => {
+              return {
+                ...label,
+                id: getIdFromGraphQLId(label.id),
+              };
+            });
+          }
         })
         .catch((e) => {
           this.labels = [];
@@ -89,13 +138,18 @@ export default {
           <rect width="430" height="20" x="10" y="85" rx="4" />
         </gl-skeleton-loader>
 
-        <gl-form-radio-group v-else v-model="selectedLabel" class="gl-overflow-y-auto gl-mr-n4">
+        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-mr-n4">
           <label
             v-for="label in labels"
             :key="label.id"
+            :disabled="columnExists(label)"
             class="gl-display-flex gl-flex-align-items-center gl-mb-4"
           >
-            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3" />
+            <gl-form-radio
+              :value="label.id"
+              :disabled="columnExists(label)"
+              class="gl-mb-0 gl-mr-3"
+            />
             <span
               class="dropdown-label-box gl-top-0"
               :style="{
