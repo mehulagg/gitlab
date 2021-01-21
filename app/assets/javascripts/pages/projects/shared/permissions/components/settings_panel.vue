@@ -431,9 +431,7 @@ export default {
         <project-setting-row
           ref="fork-settings"
           :label="s__('ProjectSettings|Forks')"
-          :help-text="
-            s__('ProjectSettings|Users can copy the repository to a new project')
-          "
+          :help-text="s__('ProjectSettings|Users can copy the repository to a new project')"
         >
           <project-feature-setting
             v-model="forkingAccessLevel"
@@ -599,11 +597,7 @@ export default {
         <project-setting-row
           ref="metrics-visibility-settings"
           :label="__('Metrics Dashboard')"
-          :help-text="
-            s__(
-              'ProjectSettings|Visualize the project\'s performance metrics',
-            )
-          "
+          :help-text="s__('ProjectSettings|Visualize the project\'s performance metrics')"
         >
           <project-feature-setting
             v-model="metricsDashboardAccessLevel"
@@ -621,9 +615,7 @@ export default {
         {{ s__('ProjectSettings|Disable email notifications') }}
       </label>
       <span class="form-text text-muted">{{
-        s__(
-          'ProjectSettings|Override user notification preferences for all project members',
-        )
+        s__('ProjectSettings|Override user notification preferences for all project members')
       }}</span>
     </project-setting-row>
     <project-setting-row class="mb-3">
@@ -657,9 +649,7 @@ export default {
       <gl-form-checkbox v-model="allowEditingCommitMessages">
         {{ s__('ProjectSettings|Allow editing commit messages') }}
         <template #help>{{
-          s__(
-            'ProjectSettings|Commit authors can edit commit messages on unprotected branches.',
-          )
+          s__('ProjectSettings|Commit authors can edit commit messages on unprotected branches.')
         }}</template>
       </gl-form-checkbox>
     </project-setting-row>

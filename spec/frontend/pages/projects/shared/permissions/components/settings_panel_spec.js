@@ -530,7 +530,7 @@ describe('Settings Panel', () => {
 
     it('should contain help text', () => {
       expect(wrapper.find({ ref: 'metrics-visibility-settings' }).props().helpText).toBe(
-        'Visualize the project\'s performance metrics',
+        "Visualize the project's performance metrics",
       );
     });
 
