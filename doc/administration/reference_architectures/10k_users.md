@@ -2061,19 +2061,19 @@ documents the relevant configuration to provide to the Helm Chart for this refer
 
 #### Sidekiq
 
-Generally, each Sidekiq pod should have about 1 vCPU and 2 GB of memory.
+Generally, each Sidekiq pod should have about **1 vCPU and 2 GB of memory**.
 
-Given the available resources in the table above, up to 16 Sidekiq pods can be deployed. If more pods are needed, the
+Given the available resources in the table above, up to **16** Sidekiq pods can be deployed. If more pods are needed, the
 available resources must expand approximately at the 1 vCPU to 2 GB of memory ratio for each pod added.
 
 #### Webservice
 
-Generally, each Webservice pod should have about 1 vCPU and 1.25 GB of memory _per worker_.
+Generally, each Webservice pod should have about **1 vCPU and 1.25 GB of memory _per worker_**.
 Note that the default number of worker processes is currently 2.
 This means that each Webservice pod should have about 2 vCPUs and 2.5 GB of memory with the default
 number of worker processes configured.
 
-With these constraints identified, the available resources allow us to deploy up to 28 Webservice pods. If more pods are needed, the
+With these constraints identified, the available resources allow us to deploy up to **28** Webservice pods. If more pods are needed, the
 available resources must expand approximately at the 1 vCPU to 1.25 GB of memory _per worker_ ratio for each pod added.
 
 #### Further reading
