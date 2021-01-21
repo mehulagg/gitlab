@@ -31,6 +31,12 @@ module Projects
           end
         end
 
+        def show
+          respond_to do |format|
+            format.html
+          end
+        end
+
         private
 
         def issues_json
