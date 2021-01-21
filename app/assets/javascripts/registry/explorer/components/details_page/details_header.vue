@@ -1,5 +1,5 @@
 <script>
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlButton } from '@gitlab/ui';
 import { sprintf, n__ } from '~/locale';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
@@ -24,7 +24,7 @@ import {
 
 export default {
   name: 'DetailsHeader',
-  components: { GlSprintf, TitleArea, MetadataItem },
+  components: { GlSprintf, GlButton, TitleArea, MetadataItem },
   mixins: [timeagoMixin],
   props: {
     image: {
@@ -35,6 +35,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+      required: false,
     },
   },
   computed: {
@@ -75,11 +80,13 @@ export default {
 <template>
   <title-area :metadata-loading="metadataLoading">
     <template #title>
-      <gl-sprintf :message="$options.i18n.DETAILS_PAGE_TITLE">
-        <template #imageName>
-          {{ image.name }}
-        </template>
-      </gl-sprintf>
+      <span data-testid="title">
+        <gl-sprintf :message="$options.i18n.DETAILS_PAGE_TITLE">
+          <template #imageName>
+            {{ image.name }}
+          </template>
+        </gl-sprintf>
+      </span>
     </template>
     <template #metadata-tags-count>
       <metadata-item icon="tag" :text="tagCountText" data-testid="tags-count" />
@@ -102,6 +109,16 @@ export default {
         size="xl"
         data-testid="updated-and-visibility"
       />
+    </template>
+    <template #right-actions>
+      <gl-button
+        v-if="!metadataLoading"
+        variant="danger"
+        :disabled="disabled"
+        @click="$emit('delete')"
+      >
+        {{ __('Delete') }}
+      </gl-button>
     </template>
   </title-area>
 </template>

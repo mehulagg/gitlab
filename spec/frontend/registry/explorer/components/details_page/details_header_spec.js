@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlButton } from '@gitlab/ui';
 import { useFakeDate } from 'helpers/fake_date';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import component from '~/registry/explorer/components/details_page/details_header.vue';
@@ -36,8 +36,10 @@ describe('Details Header', () => {
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   const findLastUpdatedAndVisibility = () => findByTestId('updated-and-visibility');
+  const findTitle = () => findByTestId('title');
   const findTagsCount = () => findByTestId('tags-count');
   const findCleanup = () => findByTestId('cleanup');
+  const findDeleteButton = () => wrapper.find(GlButton);
 
   const waitForMetadataItems = async () => {
     // Metadata items are printed by a loop in the title-area and it takes two ticks for them to be available
@@ -45,11 +47,9 @@ describe('Details Header', () => {
     await wrapper.vm.$nextTick();
   };
 
-  const mountComponent = (image = defaultImage) => {
+  const mountComponent = (propsData = { image: defaultImage }) => {
     wrapper = shallowMount(component, {
-      propsData: {
-        image,
-      },
+      propsData,
       stubs: {
         GlSprintf,
         TitleArea,
@@ -63,13 +63,50 @@ describe('Details Header', () => {
   });
 
   it('has the correct title ', () => {
-    mountComponent({ ...defaultImage, name: '' });
-    expect(wrapper.text()).toMatchInterpolatedText(DETAILS_PAGE_TITLE);
+    mountComponent({ image: { ...defaultImage, name: '' } });
+    expect(findTitle().text()).toMatchInterpolatedText(DETAILS_PAGE_TITLE);
   });
 
   it('shows imageName in the title', () => {
     mountComponent();
-    expect(wrapper.text()).toContain('foo');
+    expect(findTitle().text()).toContain('foo');
+  });
+
+  describe('delete button', () => {
+    it('exists', () => {
+      mountComponent();
+
+      expect(findDeleteButton().exists()).toBe(true);
+    });
+
+    it('is hidden while loading', () => {
+      mountComponent({ image: defaultImage, metadataLoading: true });
+
+      expect(findDeleteButton().exists()).toBe(false);
+    });
+
+    it('has the correct text', () => {
+      mountComponent();
+
+      expect(findDeleteButton().text()).toBe('Delete');
+    });
+
+    it('has the correct props', () => {
+      mountComponent();
+
+      expect(findDeleteButton().props()).toMatchObject({
+        variant: 'danger',
+        disabled: false,
+      });
+    });
+
+    it('emits the correct event', () => {
+      mountComponent();
+
+      findDeleteButton().vm.$emit('click');
+
+      expect(wrapper.emitted('delete')).toEqual([[]]);
+    });
   });
 
   describe('metadata items', () => {
@@ -82,7 +119,7 @@ describe('Details Header', () => {
       });
 
       it('when there is one tag has the correct text', async () => {
-        mountComponent({ ...defaultImage, tagsCount: 1 });
+        mountComponent({ image: { ...defaultImage, tagsCount: 1 } });
         await waitForMetadataItems();
 
         expect(findTagsCount().props('text')).toBe('1 tag');
@@ -124,10 +161,12 @@ describe('Details Header', () => {
         'when the status is $status the text is $text and the tooltip is $tooltip',
         async ({ status, text, tooltip }) => {
           mountComponent({
-            ...defaultImage,
-            expirationPolicyCleanupStatus: status,
-            project: {
-              containerExpirationPolicy: { enabled: true, nextRunAt: '2021-01-03T14:29:21Z' },
+            image: {
+              ...defaultImage,
+              expirationPolicyCleanupStatus: status,
+              project: {
+                containerExpirationPolicy: { enabled: true, nextRunAt: '2021-01-03T14:29:21Z' },
+              },
             },
           });
           await waitForMetadataItems();
@@ -156,7 +195,7 @@ describe('Details Header', () => {
           expect(findLastUpdatedAndVisibility().props('icon')).toBe('eye');
         });
         it('shows an eye slashed when the project is not public', async () => {
-          mountComponent({ ...defaultImage, project: { visibility: 'private' } });
+          mountComponent({ image: { ...defaultImage, project: { visibility: 'private' } } });
           await waitForMetadataItems();
 
           expect(findLastUpdatedAndVisibility().props('icon')).toBe('eye-slash');
