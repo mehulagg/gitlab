@@ -51,18 +51,25 @@ export default {
         return;
       }
 
-      if (this.shouldUseGraphQL) {
-        if (this.columnExists({ id: this.selectedLabelId })) {
-          return;
-        }
+      if (this.columnExists({ id: this.selectedLabelId })) {
+        // TODO: highlight and scroll to column
+        this.setAddColumnFormVisibility(false);
+        return;
+      }
 
-        this.createList({ labelId: this.selectedLabelId });
+      if (this.shouldUseGraphQL) {
+        this.createList({ labelId: this.selectedLabelId })
+          .then(() => {
+            this.setAddColumnFormVisibility(false);
+          })
+          .catch((e) => {
+            // create list failed, reopen form and show error
+          });
       } else {
         const label = this.labels.find(({ id }) => id === this.selectedLabelId);
-        const labelColumn = boardsStore.findListByLabelId(label.id);
 
-        // if label doesn't exist or already has a column
-        if (!label || labelColumn) {
+        // if label doesn't exist
+        if (!label) {
           return;
         }
 

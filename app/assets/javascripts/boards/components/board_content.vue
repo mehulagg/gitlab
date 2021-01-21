@@ -62,20 +62,13 @@ export default {
       return this.canDragColumns ? options : {};
     },
   },
-
-  watch: {
-    addColumnFormVisible(formVisible) {
-      if (formVisible) {
-        Vue.nextTick()
-          .then(() => {
-            this.$refs.list.scrollTo(this.$refs.list.scrollWidth, 0);
-          })
-          .catch(() => {});
-      }
-    },
-  },
   methods: {
     ...mapActions(['moveList']),
+    afterFormEnters() {
+      // todo: apparently no safari support for using scrollTo with options obj
+      this.$refs.list.scrollTo({ left: this.$refs.list.scrollWidth, behavior: 'smooth' });
+      // todo: set focus to form field
+    },
     handleDragOnStart() {
       sortableStart();
     },
@@ -124,7 +117,9 @@ export default {
         />
       </transition-group>
 
-      <board-add-new-column v-if="addColumnFormVisible" />
+      <transition name="slide" @after-enter="afterFormEnters">
+        <board-add-new-column v-if="addColumnFormVisible" />
+      </transition>
     </component>
 
     <epics-swimlanes
