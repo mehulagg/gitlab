@@ -165,7 +165,7 @@ is no longer supported. When overriding the template, you must use [`rules`](../
 The [`GIT_DEPTH` variable](../../../ci/runners/README.md#shallow-cloning) affects Secret Detection.
 The Secret Detection analyzer relies on generating patches between commits to scan content for
 secrets. If you override the default, ensure the value is greater than 1. If the number of commits
-in an MR is greater than the GIT_DEPTH value, Secret Detection may fail to detect secrets.
+in an MR is greater than the GIT_DEPTH value, Secret Detection will [fail to detect secrets](#error-couldnt-run-the-gitleaks-command-exit-status-2).
 
 #### Custom settings example
 
