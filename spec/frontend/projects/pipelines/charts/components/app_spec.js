@@ -3,11 +3,18 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import { GlTabs, GlTab } from '@gitlab/ui';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { TEST_HOST } from 'helpers/test_constants';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import Component from '~/projects/pipelines/charts/components/app.vue';
 import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_charts.vue';
 import getPipelineCountByStatus from '~/projects/pipelines/charts/graphql/queries/get_pipeline_count_by_status.query.graphql';
 import getProjectPipelineStatistics from '~/projects/pipelines/charts/graphql/queries/get_project_pipeline_statistics.query.graphql';
 import { mockPipelineCount, mockPipelineStatistics } from '../mock_data';
+
+jest.mock('~/lib/utils/url_utility');
+
+
 
 const projectPath = 'gitlab-org/gitlab';
 const localVue = createLocalVue();
@@ -115,6 +122,63 @@ describe('ProjectsPipelinesChartsApp', () => {
       expect(findGlTabAt(1).attributes('title')).toBe('Deployments');
       expect(findDeploymentFrequencyCharts().exists()).toBe(true);
     });
+
+    it('sets the tab and url when a tab is clicked', async () => {
+      let chartsPath;
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts`);
+
+      mergeUrlParams.mockImplementation(({ chart }, path) => {
+        expect(chart).toBe('deployments');
+        expect(path).toBe(window.location.pathname);
+        chartsPath = `${path}?chart=${chart}`;
+        return chartsPath;
+      });
+
+      updateHistory.mockImplementation(({ url }) => {
+        expect(url).toBe(chartsPath)
+      });
+      const tabs = findGlTabs();
+
+      expect(tabs.attributes('value')).toBe('0')
+
+      tabs.vm.$emit('input', 1);
+
+      await wrapper.vm.$nextTick();
+
+      expect(tabs.attributes('value')).toBe('1')
+    });
+  });
+
+  describe('when provided with a query param', () => {
+    it('shows the correct tab on create', () => {
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts?chart=deployments`);
+      getParameterValues.mockImplementation((name, url) => {
+        expect(name).toBe('chart')
+        return ['deployments'];
+      });
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+      expect(findGlTabs().attributes('value')).toBe('1');
+    });
+
+    it('defaults to the pipelines chart if a bad value is present', () => {
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts?chart=fake`);
+      getParameterValues.mockImplementation((name) => {
+        expect(name).toBe('chart')
+        return ['fake'];
+      });
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+      expect(findGlTabs().attributes('value')).toBe('0');
+    })
+
+    it('defaults to the pipelines chart if no value is present', () => {
+      setWindowLocation(`${TEST_HOST}/gitlab-org/gitlab-test/-/pipelines/charts`);
+      getParameterValues.mockImplementation((name) => {
+        expect(name).toBe('chart')
+        return [];
+      });
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
+      expect(findGlTabs().attributes('value')).toBe('0');
+    })
   });
 
   describe('when shouldRenderDeploymentFrequencyCharts is false', () => {
