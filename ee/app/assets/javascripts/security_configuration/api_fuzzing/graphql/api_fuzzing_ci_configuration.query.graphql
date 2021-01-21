@@ -1,0 +1,12 @@
+query apiFuzzingCiConfiguration($fullPath: String!) {
+  project(fullPath: $fullPath) @client {
+    apiFuzzingCiConfiguration {
+      scanModes
+      scanProfiles {
+        name
+        description
+        yaml
+      }
+    }
+  }
+}
