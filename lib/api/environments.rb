@@ -75,6 +75,30 @@ module API
         end
       end
 
+      desc "Delete stale, stopped, review environments" do
+        detail "Remove multiple stopped, but not protected, review environments older than a specific age"
+        success Entities::Environment
+      end
+      params do
+        optional :before, type: Time, desc: "The timestamp before which environments can be deleted. Defaults to 30 days ago.", default: -> { 30.days.ago }
+        optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100
+        optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to false.", default: false
+      end
+      delete ":id/environments/stale" do
+        authorize! :read_environment, user_project
+
+        environments = user_project.environments.stopped.in_review_folder.where("created_at < ?", params[:before]).limit(params[:limit])
+        destroyed_environments = []
+
+        environments.find_each do |env|
+          authorize! :destroy_environment, env
+          destroyed_environments << env if params[:dry_run] || destroy_conditionally!(env)
+        end
+
+        status 200
+        present Entities::Environment.represent(destroyed_environments), current_user: current_user
+      end
+
       desc 'Deletes an existing environment' do
         detail 'This feature was introduced in GitLab 8.11.'
         success Entities::Environment

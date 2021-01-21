@@ -265,4 +265,36 @@ RSpec.describe API::Environments do
       end
     end
   end
+
+  describe "DELETE /projects/:id/environments/stale" do
+    context "as a maintainer" do
+      it "deletes the old stopped review apps" do
+        old_stopped_review_env = create(:environment, :with_review_app, :stopped, created_at: 31.days.ago, project: project)
+        new_stopped_review_env = create(:environment, :with_review_app, :stopped, project: project)
+        old_active_review_env  = create(:environment, :with_review_app, :available, created_at: 31.days.ago, project: project)
+        old_stopped_other_env  = create(:environment, :stopped, created_at: 31.days.ago, project: project)
+        new_stopped_other_env  = create(:environment, :stopped, project: project)
+        old_active_other_env   = create(:environment, :available, created_at: 31.days.ago, project: project)
+
+        delete api("/projects/#{project.id}/environments/stale", user)
+        project.environments.reload
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(project.environments).not_to include(old_stopped_review_env)
+        expect(project.environments).to include(new_stopped_review_env)
+        expect(project.environments).to include(old_active_review_env)
+        expect(project.environments).to include(old_stopped_other_env)
+        expect(project.environments).to include(new_stopped_other_env)
+        expect(project.environments).to include(old_active_other_env)
+      end
+    end
+
+    context "as a non member" do
+      it "rejects the request" do
+        delete api("/projects/#{project.id}/environments/stale", non_member)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
 end
