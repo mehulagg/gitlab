@@ -13803,8 +13803,8 @@
           "fields": null,
           "inputFields": [
             {
-              "name": "groupPath",
-              "description": "The target group for the iteration.",
+              "name": "projectPath",
+              "description": "The project full path the resource is associated with.",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",
@@ -13813,8 +13813,8 @@
               "defaultValue": null
             },
             {
-              "name": "projectPath",
-              "description": "The target project for the iteration.",
+              "name": "groupPath",
+              "description": "The group full path the resource is associated with.",
               "type": {
                 "kind": "SCALAR",
                 "name": "ID",

@@ -5083,12 +5083,12 @@ input CreateIterationInput {
   dueDate: String
 
   """
-  The target group for the iteration.
+  The group full path the resource is associated with.
   """
   groupPath: ID
 
   """
-  The target project for the iteration.
+  The project full path the resource is associated with.
   """
   projectPath: ID
 

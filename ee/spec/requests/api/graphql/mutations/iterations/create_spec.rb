@@ -128,7 +128,7 @@ RSpec.describe 'Creating an Iteration' do
         let(:params) { {} }
 
         it_behaves_like 'a mutation that returns top-level errors',
-                        errors: ['Either group_path or project_path is required']
+                        errors: ['Exactly one of group_path or project_path arguments is required']
 
         it 'does not create the iteration' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)
@@ -139,7 +139,7 @@ RSpec.describe 'Creating an Iteration' do
         let(:params) { { group_path: group.full_path, project_path: 'doesnotreallymatter' } }
 
         it_behaves_like 'a mutation that returns top-level errors',
-                        errors: ['Only one of group_path or project_path can be provided']
+                        errors: ['Exactly one of group_path or project_path arguments is required']
 
         it 'does not create the iteration' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)
