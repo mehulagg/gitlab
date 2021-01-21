@@ -195,10 +195,8 @@
         #js-board-labels-toggle
         .js-board-config{ data: { can_admin_list: user_can_admin_list, has_scope: board.scoped? } }
         - if user_can_admin_list
-          - if true # feature flag goes here
-            %button.gl-button.btn-success.gl-ml-3.js-create-column-trigger{ type: "button", data: board_list_data }
-              .gl-button-text
-                = _('Create list')
+          - if Feature.enabled?(:board_new_list, board.resource_parent)
+            .js-create-column-trigger{ data: board_list_data }
           - else
             = render 'shared/issuable/board_create_list_dropdown', board: board
           - if @project

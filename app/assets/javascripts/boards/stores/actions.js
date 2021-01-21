@@ -530,6 +530,10 @@ export default {
       .catch(() => commit(types.RECEIVE_GROUP_PROJECTS_FAILURE));
   },
 
+  setAddColumnFormVisibility: ({ state }, visible) => {
+    state.addColumnFormVisible = visible;
+  },
+
   setSelectedProject: ({ commit }, project) => {
     commit(types.SET_SELECTED_PROJECT, project);
   },

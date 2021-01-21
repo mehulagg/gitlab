@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { sortBy } from 'lodash';
@@ -34,7 +35,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['boardLists', 'error']),
+    ...mapState(['boardLists', 'error', 'addColumnFormVisible']),
     ...mapGetters(['isSwimlanesOn']),
     boardListsToUse() {
       return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn
@@ -59,6 +60,18 @@ export default {
       };
 
       return this.canDragColumns ? options : {};
+    },
+  },
+
+  watch: {
+    addColumnFormVisible(formVisible) {
+      if (formVisible) {
+        Vue.nextTick()
+          .then(() => {
+            this.$refs.list.scrollTo(this.$refs.list.scrollWidth, 0);
+          })
+          .catch(() => {});
+      }
     },
   },
   methods: {
@@ -100,16 +113,18 @@ export default {
       @start="handleDragOnStart"
       @end="handleDragOnEnd"
     >
-      <board-column
-        v-for="list in boardListsToUse"
-        :key="list.id"
-        ref="board"
-        :can-admin-list="canAdminList"
-        :list="list"
-        :disabled="disabled"
-      />
+      <transition-group name="slide">
+        <board-column
+          v-for="list in boardListsToUse"
+          :key="list.id"
+          ref="board"
+          :can-admin-list="canAdminList"
+          :list="list"
+          :disabled="disabled"
+        />
+      </transition-group>
 
-      <board-add-new-column />
+      <board-add-new-column v-if="addColumnFormVisible" />
     </component>
 
     <epics-swimlanes

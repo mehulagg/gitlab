@@ -39,7 +39,7 @@ export default {
     this.filterLabels();
   },
   methods: {
-    ...mapActions(['createList', 'fetchLabels']),
+    ...mapActions(['createList', 'fetchLabels', 'setAddColumnFormVisibility']),
     columnExists(label) {
       if (this.shouldUseGraphQL) {
         return Boolean(this.getListByLabelId(fullLabelId(label)));
@@ -144,14 +144,9 @@ export default {
           <label
             v-for="label in labels"
             :key="label.id"
-            :class="{ 'gl-text-gray-500': columnExists(label) }"
             class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
           >
-            <gl-form-radio
-              :value="label.id"
-              :disabled="columnExists(label)"
-              class="gl-mb-0 gl-mr-3 gl-outline-0"
-            />
+            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3 gl-outline-0" />
             <span
               class="dropdown-label-box gl-top-0"
               :style="{
@@ -166,7 +161,9 @@ export default {
       <div
         class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10"
       >
-        <gl-button class="gl-ml-auto gl-mr-3">{{ __('Cancel') }}</gl-button>
+        <gl-button class="gl-ml-auto gl-mr-3" @click="setAddColumnFormVisibility(false)">{{
+          __('Cancel')
+        }}</gl-button>
         <gl-button variant="success" class="gl-mr-4" @click="addList">{{ __('Add') }}</gl-button>
       </div>
     </div>
