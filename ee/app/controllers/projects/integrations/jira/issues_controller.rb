@@ -31,6 +31,14 @@ module Projects
           end
         end
 
+        def show
+          render_404 unless Feature.enabled?(:jira_issue_detail_view)
+
+          respond_to do |format|
+            format.html
+          end
+        end
+
         private
 
         def issues_json

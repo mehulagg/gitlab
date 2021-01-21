@@ -11,6 +11,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
 
   before do
     stub_licensed_features(jira_issues_integration: true)
+    stub_feature_flags(jira_issue_detail_view: false)
     sign_in(user)
   end
 
@@ -169,6 +170,26 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
             let(:expected_params) { { 'state' => 'opened', 'sort' => 'created_date' } }
           end
         end
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    it 'returns 404 status' do
+      get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    context 'when `jira_issues_integration` feature is enabled' do
+      before do
+        stub_feature_flags(jira_issue_detail_view: true)
+      end
+
+      it 'renders `show` template' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+
+        expect(response).to render_template(:show)
       end
     end
   end
