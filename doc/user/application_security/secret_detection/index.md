@@ -345,7 +345,7 @@ is set to 50, the Secret Detection job fails as the clone is not deep enough to 
 relevant commits.
 
 To confirm this as the cause of the error, set the
-[logging level](../../application_security/secret_detection/index.md#logging-level) to `debug, then
+[logging level](../../application_security/secret_detection/index.md#logging-level) to `debug`, then
 rerun the pipeline. The logs should look similar to the following example. The text "object not
 found" is a symptom of this error.
 
