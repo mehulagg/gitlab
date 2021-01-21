@@ -9,16 +9,40 @@ RSpec.describe Projects::Security::ConfigurationController do
   describe 'GET #show' do
     subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project } }
 
-    it_behaves_like SecurityDashboardsPermissions do
-      let(:vulnerable) { project }
-      let(:security_dashboard_action) { request }
+    let(:user) { create(:user) }
+
+    render_views
+
+    context 'with developer and security dashboard feature disabled' do
+      before do
+        group.add_developer(user)
+        sign_in(user)
+      end
+
+      it "renders data on the project's security configuration basic" do
+        request
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:show)
+        expect(response.body).to have_css('div#js-security-configuration-static')
+      end
     end
 
-    context 'with user' do
-      let(:user) { create(:user) }
+    context 'with guest and security dashboard feature is enabled' do
+      before do
+        stub_licensed_features(security_dashboard: true)
+        group.add_guest(user)
+        sign_in(user)
+      end
 
-      render_views
+      it 'denies access' do
+        request
 
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'with developer and security dashboard feature enabled' do
       before do
         stub_licensed_features(security_dashboard: true)
 

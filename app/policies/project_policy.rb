@@ -97,6 +97,11 @@ class ProjectPolicy < BasePolicy
   end
 
   with_scope :subject
+  condition(:ce_security_configuration_enabled) do
+    ::Feature.enabled?(:secure_security_and_compliance_configuration_page_on_ce, @subject, default_enabled: :yaml)
+  end
+
+  with_scope :subject
   condition(:design_management_disabled) do
     !@subject.design_management_enabled?
   end
@@ -576,6 +581,10 @@ class ProjectPolicy < BasePolicy
     enable :read_design
     enable :read_design_activity
     enable :read_issue_link
+  end
+
+  rule { ce_security_configuration_enabled & can?(:developer_access) }.policy do
+    enable :read_security_configuration
   end
 
   # Design abilities could also be prevented in the issue policy.

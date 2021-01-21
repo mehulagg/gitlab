@@ -139,6 +139,10 @@ module ProjectsHelper
     project_nav_tabs.include? name
   end
 
+  def any_project_nav_tab?(tabs)
+    tabs.any? { |tab| project_nav_tab?(tab) }
+  end
+
   def project_for_deploy_key(deploy_key)
     if deploy_key.has_access_to?(@project)
       @project
@@ -374,12 +378,17 @@ module ProjectsHelper
 
   private
 
+  # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
     unless project.empty_repo?
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
+    end
+
+    if can?(current_user, :read_security_configuration, project)
+      nav_tabs << :security_configuration
     end
 
     if project.repo_exists? && can?(current_user, :read_merge_request, project)
@@ -415,6 +424,7 @@ module ProjectsHelper
 
     nav_tabs
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def package_nav_tabs(project, current_user)
     [].tap do |tabs|
@@ -695,6 +705,12 @@ module ProjectsHelper
     "#{request.path}?#{options.to_param}"
   end
 
+  def sidebar_security_configuration_paths
+    %w[
+      projects/security/configuration#show
+    ]
+  end
+
   def sidebar_projects_paths
     %w[
       projects#show
@@ -757,6 +773,10 @@ module ProjectsHelper
       tracings
       terraform
     ]
+  end
+
+  def sidebar_security_paths
+    %w[projects/security/configuration#show]
   end
 
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)

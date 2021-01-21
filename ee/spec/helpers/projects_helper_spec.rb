@@ -267,12 +267,13 @@ RSpec.describe ProjectsHelper do
     using RSpec::Parameterized::TableSyntax
 
     where(:ability, :nav_tabs) do
-      :read_dependencies                          | [:dependencies]
-      :read_feature_flag                          | [:operations]
-      :read_licenses                              | [:licenses]
-      :read_project_security_dashboard            | [:security, :security_configuration]
-      :read_threat_monitoring                     | [:threat_monitoring]
-      :read_incident_management_oncall_schedule   | [:oncall_schedule]
+      :read_dependencies                        | [:dependencies]
+      :read_feature_flag                        | [:operations]
+      :read_licenses                            | [:licenses]
+      :read_security_configuration              | [:security_configuration]
+      :read_project_security_dashboard          | [:security]
+      :read_threat_monitoring                   | [:threat_monitoring]
+      :read_incident_management_oncall_schedule | [:oncall_schedule]
     end
 
     with_them do

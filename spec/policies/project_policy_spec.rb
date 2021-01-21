@@ -822,6 +822,36 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  context 'security configuration feature' do
+    describe 'with feature_flag disabled' do
+      let(:current_user) { developer }
+
+      before do
+        allow(::Feature).to receive(:enabled?).with(:secure_security_and_compliance_configuration_page_on_ce, anything, default_enabled: :yaml).and_return(false)
+      end
+
+      it 'prevents to read security configuration' do
+        expect_disallowed(:read_security_configuration)
+      end
+    end
+
+    describe 'for developer access' do
+      let(:current_user) { developer }
+
+      it 'allows to read security configuration' do
+        expect_allowed(:read_security_configuration)
+      end
+    end
+
+    describe 'for guest user' do
+      let(:current_user) { guest }
+
+      it 'prevents to read security configuration' do
+        expect_disallowed(:read_security_configuration)
+      end
+    end
+  end
+
   describe 'design permissions' do
     let(:current_user) { guest }
 
