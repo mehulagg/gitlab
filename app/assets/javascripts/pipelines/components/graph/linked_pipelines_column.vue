@@ -28,6 +28,7 @@ export default {
     return {
       currentPipeline: null,
       loadingPipelineId: null,
+      minWidth: 0,
       pipelineExpanded: false,
     };
   },
@@ -82,7 +83,7 @@ export default {
         },
         result() {
           this.loadingPipelineId = null;
-          // this.$emit('scrollContainer');
+          this.$emit('scrollContainer');
         },
         error(err, _vm, _key, type) {
           this.$emit('error', LOAD_FAILURE);
@@ -107,6 +108,7 @@ export default {
       if (this.currentPipeline?.id === pipeline.id) {
         this.pipelineExpanded = false;
         this.currentPipeline = null;
+        this.minWidth = 0;
         return;
       }
 
@@ -120,6 +122,7 @@ export default {
         this will be a no-op, but that doesn't matter.
       */
       this.pipelineExpanded = true;
+      this.minWidth = '180px';
 
       this.getPipelineData(pipeline);
     },
@@ -153,7 +156,6 @@ export default {
         >
           <linked-pipeline
             class="gl-display-inline-block"
-            :style="{marginRight: rightMarginVal}"
             :is-loading="isLoadingPipeline(pipeline.id)"
             :pipeline="pipeline"
             :column-title="columnTitle"
@@ -163,7 +165,7 @@ export default {
             @pipelineClicked="onPipelineClick(pipeline)"
             @pipelineExpandToggle="onPipelineExpandToggle"
           />
-          <div v-if="isExpanded(pipeline.id)" class="gl-display-inline-block">
+          <div v-if="!isUpstream" :style="{ minWidth }" class="gl-display-inline-block">
             <pipeline-graph
               v-if="currentPipeline"
               :type="type"
