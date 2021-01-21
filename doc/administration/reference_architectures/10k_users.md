@@ -2043,7 +2043,7 @@ As a starting point for reference, the recommended infrastructure configuration 
 Note that this example references Google Cloud's Kubernetes Engine (GKE) and associated machine types, but the
 memory and CPU totals should translate to most systems.
 
-Machine count | Machine type | Allocatable vCPUs* | Allocatable memory (GB)* | Purpose
+Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Purpose
 -|-|-|-|-
 2 | `n1-standard-4` | 15.5 | 50  | Non-GitLab resources, including Grafana, NGINX, and Prometheus
 4 | `n1-standard-4` | 15.5 | 50  | GitLab Sidekiq pods
