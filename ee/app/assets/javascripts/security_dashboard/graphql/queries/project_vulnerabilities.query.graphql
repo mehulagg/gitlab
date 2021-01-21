@@ -23,6 +23,13 @@ query project(
     ) {
       nodes {
         ...Vulnerability
+        hasSolutions
+        mergeRequest {
+          webUrl
+          state
+          securityAutoFix
+          iid
+        }
       }
       pageInfo {
         ...PageInfo
