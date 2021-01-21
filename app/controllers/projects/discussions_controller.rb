@@ -20,6 +20,9 @@ class Projects::DiscussionsController < Projects::ApplicationController
   def unresolve
     discussion.unresolve!
 
+    Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+      .track_unresolve_thread_action(user: current_user)
+
     render_discussion
   end
 
