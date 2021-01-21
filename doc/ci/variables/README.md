@@ -70,7 +70,8 @@ When you need a specific custom environment variable, you can
 or directly [in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
 
 The variables are used by the runner any time the pipeline runs.
-You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs).
+You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
+or have them [prefilled in manual pipelines](#prefill-variables-in-manual-pipelines).
 
 There are two types of variables: **Variable** and **File**. You cannot set types in
 the `.gitlab-ci.yml` file, but you can set them in the UI and API.
@@ -83,15 +84,6 @@ define the variable/value pair under `variables`:
 ```yaml
 variables:
   TEST: "HELLO WORLD"
-```
-
-Alternatively, you can define a pre-defined variable that is able to be leveraged as a default variable for manual pipelines.
-
-```yaml
-variables:
-  TEST: 
-    value: "HELLO WORLD"
-    description: "Default value that will be pre-filled when running a manual pipeline"
 ```
 
 You can then call its value in your script:
@@ -413,6 +405,17 @@ variables:
   FLAGS: '-al'
 script:
   - 'eval $LS_CMD'  # will execute 'ls -al $TMP_DIR'
+```
+
+Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
+keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
+
+```yaml
+variables:
+  DEPLOY_ENVIRONMENT:
+    value: "staging"  # Deploy to staging by default
+    description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
 ```
 
 ## Group-level environment variables
