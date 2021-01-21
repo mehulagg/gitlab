@@ -16,6 +16,7 @@ RSpec.describe 'layouts/nav/sidebar/_project_security_link' do
 
     it "activates Security & Compliance tab" do
       render
+      
       expect(rendered).to have_css('li.active', text: 'Security & Compliance')
     end
 
