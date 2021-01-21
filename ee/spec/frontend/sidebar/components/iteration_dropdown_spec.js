@@ -3,7 +3,6 @@ import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import IterationDropdown from 'ee/sidebar/components/iteration_dropdown.vue';
-import { iterationSelectTextMap } from 'ee/sidebar/constants';
 import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
 
@@ -126,17 +125,15 @@ describe('IterationDropdown', () => {
     });
   });
 
-  describe('on mount', () => {
-    describe('when bootstrap dropdown event is emitted', () => {
-      it('changes shouldFetch to be true', async () => {
-        createComponent({});
+  describe('when bootstrap dropdown event is emitted', () => {
+    it('changes shouldFetch to be true', async () => {
+      createComponent({});
 
-        expect(wrapper.vm.shouldFetch).toBe(false);
+      expect(wrapper.vm.shouldFetch).toBe(false);
 
-        wrapper.vm.$root.$emit('bv::dropdown::shown');
+      wrapper.vm.$root.$emit('bv::dropdown::shown');
 
-        expect(wrapper.vm.shouldFetch).toBe(true);
-      });
+      expect(wrapper.vm.shouldFetch).toBe(true);
     });
   });
 
