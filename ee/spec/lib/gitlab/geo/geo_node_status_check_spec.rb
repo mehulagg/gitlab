@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
-  let(:current_node) { create(:geo_node) }
-  let(:geo_node_status) do
+  let_it_be(:current_node) { create(:geo_node) }
+
+  let_it_be(:geo_node_status) do
     build(:geo_node_status, :replicated_and_verified, geo_node: current_node)
   end
 
@@ -34,7 +35,7 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
       end
     end
 
-    context 'Replicators' do
+    context 'replicators' do
       let(:replicators) { Gitlab::Geo.enabled_replicator_classes }
 
       context 'replication' do
@@ -77,7 +78,13 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
     end
 
     context 'when replication is up-to-date' do
-      it 'returns true' do
+      it 'returns true when all replicables have data to sync' do
+        expect(subject.replication_verification_complete?).to be_truthy
+      end
+
+      it 'returns true when some replicables does not have data to sync' do
+        geo_node_status.update!(lfs_objects_count: 0, lfs_objects_synced_count: 0, lfs_objects_failed_count: 0)
+
         expect(subject.replication_verification_complete?).to be_truthy
       end
     end

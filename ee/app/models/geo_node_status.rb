@@ -404,6 +404,10 @@ class GeoNodeStatus < ApplicationRecord
     public_send("#{replicator_class.replicable_name_plural}_checksummed_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
   end
 
+  def count_for(replicator_class)
+    public_send("#{replicator_class.replicable_name_plural}_count")
+  end
+
   def storage_shards_match?
     return true if geo_node.primary?
     return false unless storage_configuration_digest && primary_storage_digest

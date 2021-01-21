@@ -61,26 +61,40 @@ module Gitlab
       end
 
       def replication_verification_complete?
-        success_status = [
-          current_node_status.repositories_synced_in_percentage,
-          current_node_status.repositories_checksummed_in_percentage,
-          current_node_status.wikis_synced_in_percentage,
-          current_node_status.wikis_checksummed_in_percentage,
-          current_node_status.lfs_objects_synced_in_percentage,
-          current_node_status.job_artifacts_synced_in_percentage,
-          current_node_status.attachments_synced_in_percentage,
-          current_node_status.replication_slots_used_in_percentage,
-          current_node_status.design_repositories_synced_in_percentage
-        ] + conditional_checks_status
+        success_status =
+          [].tap do |status|
+            status.push repositories_checks_status
+            status.push wikis_checks_status
+            status.push current_node_status.lfs_objects_synced_in_percentage if current_node_status.lfs_objects_count.to_i > 0
+            status.push current_node_status.job_artifacts_synced_in_percentage if current_node_status.job_artifacts_count.to_i > 0
+            status.push current_node_status.attachments_synced_in_percentage if current_node_status.attachments_count.to_i > 0
+            status.push current_node_status.design_repositories_synced_in_percentage if current_node_status.design_repositories_count.to_i > 0
+          end
 
-        success_status.all? { |percentage| percentage == 100 }
+        binding.pry
+
+        (success_status + conditional_checks_status).compact.flatten.all? { |percentage| percentage == 100 }
       end
 
       private
 
+      def repositories_checks_status
+        return if current_node_status.repositories_count.to_i > 0
+
+        [current_node_status.repositories_synced_in_percentage, current_node_status.repositories_checksummed_in_percentage]
+      end
+
+      def wikis_checks_status
+        return if current_node_status.wikis_count.to_i > 0
+
+        [current_node_status.wikis_synced_in_percentage, current_node_status.wikis_checksummed_in_percentage]
+      end
+
       def conditional_checks_status
         [].tap do |status|
           Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+            next if current_node_status.count_for(replicator_class).to_i > 0
+
             status.push current_node_status.synced_in_percentage_for(replicator_class)
 
             if replicator_class.verification_enabled?
@@ -93,11 +107,11 @@ module Gitlab
             status.push current_node_status.wikis_verified_in_percentage
           end
 
-          if ::Geo::ContainerRepositoryRegistry.replication_enabled?
+          if ::Geo::ContainerRepositoryRegistry.replication_enabled? && current_node_status.container_repositories_count.to_i > 0
             status.push current_node_status.container_repositories_synced_in_percentage
           end
 
-          if Gitlab::CurrentSettings.repository_checks_enabled
+          if Gitlab::CurrentSettings.repository_checks_enabled && current_node_status.repositories_count.to_i > 0
             status.push current_node_status.repositories_checked_in_percentage
           end
         end
