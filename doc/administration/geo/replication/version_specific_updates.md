@@ -11,6 +11,11 @@ Check this document if it includes instructions for the version you are updating
 These steps go together with the [general steps](updating_the_geo_nodes.md#general-update-steps)
 for updating Geo nodes.
 
+## Updating to GitLab 13.8
+
+WARNING:
+We've detected an issue with the `FetchRemove` call that is used by Geo secondaries. This causes performance issues as we execute reference transaction hooks for each updated reference. Please hold off upgrading until this is in [the next 13.8 patch release.](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/3002). More details are available [in this issue](https://gitlab.com/gitlab-org/git/-/issues/79).
+
 ## Updating to GitLab 13.7
 
 WARNING:
