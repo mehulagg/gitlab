@@ -2043,9 +2043,15 @@ As a starting point for reference, the recommended infrastructure configuration 
 Note that this example references Google Cloud's Kubernetes Engine (GKE) and associated machine types, but the
 memory and CPU totals should translate to most systems.
 
-- 2x `n1-standard-4` nodes for non-GitLab-related resources, including Grafana, NGINX, and Prometheus
-- 4x `n1-standard-4` nodes for GitLab Sidekiq-related resources
-- 4x `n1-highcpu-32` nodes for GitLab Webservice-related resources
+Machine count | Machine type | Allocatable vCPUs* | Allocatable memory (GB)* | Purpose
+-|-|-|-|-
+2 | `n1-standard-4` | 15.5 | 50  | Non-GitLab resources, including Grafana, NGINX, and Prometheus
+4 | `n1-standard-4` | 15.5 | 50  | GitLab Sidekiq pods
+4 | `n1-highcpu-32` | 128  | 128 | GitLab Webservice pods
+
+Note that "allocatable" in this table refers to the amount of resources available to
+be used by workloads deployed to Kubernetes after accounting for the overhead of
+running Kubernetes itself.
 
 ### Resource usage settings
 
@@ -2057,21 +2063,15 @@ documents the relevant configuration to provide to the Helm Chart for this refer
 
 Generally, each Sidekiq pod should have about 1 vCPU and 2 GB of memory.
 
-Given the network topology above, the four Sidekiq nodes
-in the cluster total to 16 vCPUs and 60 GB of memory, excluding the overhead of Kubernetes components. Once those components
-are accounted for, there is around 15.5 vCPUs and 50 GB of memory allocatable to workloads.
-
-With these constraints identified, the available resources allow us to deploy up to 16 Sidekiq pods. If more pods are needed, the
+Given the available resources in the table above, up to 16 Sidekiq pods can be deployed. If more pods are needed, the
 available resources must expand approximately at the 1 vCPU to 2 GB of memory ratio for each pod added.
 
 #### Webservice
 
 Generally, each Webservice pod should have about 1 vCPU and 1.25 GB of memory _per worker_.
 Note that the default number of worker processes is currently 2.
-
-Given the network topology above, the four Webservice nodes
-in the cluster total to 128 vCPUs and 128 GB of memory, excluding the overhead of Kubernetes components. Once those components
-are accounted for, there is around 127.5 vCPUs and 104 GB of memory allocatable to workloads.
+This means that each Webservice pod should have about 2 vCPUs and 2.5 GB of memory with the default
+number of worker processes configured.
 
 With these constraints identified, the available resources allow us to deploy up to 28 Webservice pods. If more pods are needed, the
 available resources must expand approximately at the 1 vCPU to 1.25 GB of memory _per worker_ ratio for each pod added.
