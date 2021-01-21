@@ -1,5 +1,7 @@
 <script>
 import { GlTabs, GlTab } from '@gitlab/ui';
+import { mapState } from 'vuex';
+import { ALL_SCOPE_TABS } from '../constants';
 
 export default {
   name: 'ScopeTabs',
@@ -10,21 +12,14 @@ export default {
   props: {
     scopeTabs: {
       type: Array,
-      required: false,
-      default: () => [],
+      required: true,
     },
-    scope: {
+    count: {
       type: String,
-      required: false,
-      default: null,
-    },
-    term: {
-        type: String,
-        required: false,
-        default: null,
-      },
-    },
-    mounted() {
+      required: true,
+    }
+  },
+  mounted() {
       // const url = `${scopeTabs[0].url}`
       //
       // return api
@@ -35,23 +30,32 @@ export default {
       //     console.error(`Failed to fetch search count from '${url}'.`, e);
       //   });
     },
-    methods: {
-      isTabActive(tabScope) {
-        return tabScope === this.scope;
-      }
-    }
-  }
+  computed: {
+    ...mapState(['query']),
+  },
+  methods: {
+    isTabActive(tab) {
+      return tab === this.query.scope;
+    },
+    shouldShowTabs() {
+      return this.query.search && this.query.search !== 0;
+    },
+  },
+  ALL_SCOPE_TABS
+};
 </script>
 
 <template>
-  <div v-if="term">
+  <div v-if="shouldShowTabs">
+<!--    SCOPE TABS = {{scopeTabs}}<br>-->
+<!--    ALL TABS = {{$options.ALL_SCOPE_TABS}}<br>-->
+<!--    SELECTED TABS = {{$options.ALL_SCOPE_TABS[scopeTabs[0]]}}<br>-->
     <gl-tabs class="nav-links search-filter scrolling-tabs nav nav-tabs">
       <gl-tab
         v-for="tab in scopeTabs"
-        :key="tab.scope"
-        :active="isTabActive(tab.scope)"
-        :title="__(tab.title)"/>
+        :key="$options.ALL_SCOPE_TABS[tab].scope"
+        :active="isTabActive($options.ALL_SCOPE_TABS[tab].scope)"
+        :title="$options.ALL_SCOPE_TABS[tab].title"/>
     </gl-tabs>
-    test
   </div>
 </template>

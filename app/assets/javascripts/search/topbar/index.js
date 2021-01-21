@@ -12,7 +12,7 @@ export const initTopbar = (store) => {
   }
 
   let { groupInitialData, projectInitialData, scopeTabs } = el.dataset;
-  const { term, scope } = el.dataset;
+  const { count } = el.dataset;
 
   groupInitialData = JSON.parse(groupInitialData);
   projectInitialData = JSON.parse(projectInitialData);
@@ -27,8 +27,7 @@ export const initTopbar = (store) => {
           groupInitialData,
           projectInitialData,
           scopeTabs,
-          term,
-          scope,
+          count,
         },
       });
     },

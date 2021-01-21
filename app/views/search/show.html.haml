@@ -6,7 +6,6 @@
 - if params[:project_id].present?
   = hidden_field_tag :project_id, params[:project_id]
 - project_attributes = @project&.attributes&.slice('id', 'namespace_id', 'name')&.merge(name_with_namespace: @project&.name_with_namespace)
-- scope_tabs = [{ scope: 'blobs', title: 'Code', qa_selector: 'code_tab' }, { scope: 'issues', title: 'Issues' }]
 
 - if @search_results
   - page_description(_("%{count} %{scope} for term '%{term}'") % { count: @search_results.formatted_count(@scope), scope: @scope, term: @search_term })
@@ -15,9 +14,8 @@
 .page-title-holder.d-flex.flex-wrap.justify-content-between
   %h1.page-title.mr-3= _('Search')
   = render_if_exists 'search/form_elasticsearch', attrs: { class: 'mb-2 mb-sm-0 align-self-center' }
-
 .gl-mt-3
-  #js-search-topbar{ data: { "group-initial-data": @group.to_json, "project-initial-data": project_attributes.to_json, "scope-tabs": scope_tabs.to_json, term: @search_term, scope: @scope } }
+  #js-search-topbar{ data: { "group-initial-data": @group.to_json, "project-initial-data": project_attributes.to_json, "scope-tabs": search_nav_tabs.to_json, count: @search_results.formatted_count(@scope) } }
 - if @search_term
   = render 'search/category'
   = render 'search/results'

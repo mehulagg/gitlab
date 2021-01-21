@@ -273,27 +273,25 @@ module SearchHelper
 
   def search_nav_tabs
     tabs = []
-    project_tabs = {
-      blobs: { scope: 'blobs', title: 'Code', qa_selector: 'code_tab' },
-      issues: { scope: 'issues', title: 'Issue' },
-      merge_requests: { scope: 'merge_requests', title: 'Merge requests' },
-      milestones: { scope: 'milestones', title: 'Milestones' },
-      notes: { scope: 'notes', title: 'Comments' },
-      wiki: { scope: 'wiki_blobs', title: 'Wiki' },
-      commits: { scope: 'commits', title: 'Commits' }
-    }
+
+    return [:snippets] if @show_snippets
 
     if @project
-      project_tabs.each do |key, tab|
-        if project_search_tabs?(key)
-          tabs.push(tab)
-        end
+      project_tabs = [:blobs, :issues, :merge_requests, :milestones, :notes, :wiki, :commits]
+      tabs = project_tabs.select do |scope|
+        project_search_tabs?(scope)
       end
-    elsif @show_snippets
-      tabs.push({ scope: 'snippet_titles', title: "Titles and Descriptions", search: { snippets: true, group_id: nil, project_id: nil }})
     else
+      group_tabs = [:projects, :issues, :merge_requests, :milestones]
+      tabs.concat(group_tabs)
+      tabs << :epics if search_service.show_epics?
 
+      if search_service.use_elasticsearch?
+        tabs.concat([:notes, :blobs, :commits, :wiki])
+      end
     end
+
+    tabs << :users
   end
 
   def search_filter_link(scope, label, data: {}, search: {})

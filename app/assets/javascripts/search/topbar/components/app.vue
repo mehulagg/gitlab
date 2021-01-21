@@ -31,15 +31,9 @@ export default {
       required: false,
       default: () => [],
     },
-    scope: {
+    count: {
       type: String,
-      required: false,
-      default: null,
-    },
-    term: {
-      type: String,
-      required: false,
-      default: null,
+      required: true,
     },
   },
   computed: {
@@ -86,6 +80,6 @@ export default {
         <gl-button class="btn-search" variant="success" type="submit">{{ __('Search') }}</gl-button>
       </section>
     </gl-form>
-    <scope-tabs :scope-tabs="scopeTabs" :term="term" :scope="scope" />
+    <scope-tabs :scope-tabs="scopeTabs" :count="count"/>
   </section>
 </template>
