@@ -88,4 +88,17 @@ RSpec.describe Gitlab::Tracking do
       described_class.self_describing_event('iglu:com.gitlab/foo/jsonschema/1-0-0', data: { foo: 'bar' })
     end
   end
+
+  describe '.for' do
+    it 'creates a StandardContext with the given data' do
+      namespace = double(:namespace)
+      project = double(:project)
+
+      expect(Gitlab::Tracking::StandardContext)
+        .to receive(:new)
+        .with(namespace: namespace, project: project, foo: 'bar')
+
+      Gitlab::Tracking.for(namespace: namespace, project: project, foo: 'bar')
+    end
+  end
 end
