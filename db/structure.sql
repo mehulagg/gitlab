@@ -9012,6 +9012,7 @@ CREATE TABLE analytics_devops_adoption_segments (
     last_recorded_at timestamp with time zone,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    namespace_id integer,
     CONSTRAINT check_4be7a006fd CHECK ((char_length(name) <= 255))
 );
 
@@ -21073,6 +21074,8 @@ CREATE INDEX index_analytics_cycle_analytics_group_stages_custom_only ON analyti
 
 CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_name ON analytics_devops_adoption_segments USING btree (name);
 
+CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
+
 CREATE INDEX index_application_settings_on_custom_project_templates_group_id ON application_settings USING btree (custom_project_templates_group_id);
 
 CREATE INDEX index_application_settings_on_file_template_project_id ON application_settings USING btree (file_template_project_id);
@@ -25742,6 +25745,9 @@ ALTER TABLE ONLY board_group_recent_visits
 
 ALTER TABLE ONLY resource_state_events
     ADD CONSTRAINT fk_rails_f5827a7ccd FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY analytics_devops_adoption_segments
+    ADD CONSTRAINT fk_rails_f5aa768998 FOREIGN KEY (namespace_id) REFERENCES namespaces(id);
 
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT fk_rails_f6eef06841 FOREIGN KEY (participant_id) REFERENCES incident_management_oncall_participants(id) ON DELETE CASCADE;

@@ -9,6 +9,7 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
     it { is_expected.to have_many(:segment_selections) }
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:snapshots) }
+    it { is_expected.to belong_to(:namespace) }
   end
 
   describe 'validation' do
@@ -16,6 +17,7 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:namespace) }
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
 
     context 'limit the number of segments' do

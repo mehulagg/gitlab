@@ -3,6 +3,8 @@
 class Analytics::DevopsAdoption::Segment < ApplicationRecord
   ALLOWED_SEGMENT_COUNT = 20
 
+  belongs_to :namespace
+
   has_many :segment_selections
   has_many :groups, through: :segment_selections
   has_many :projects, through: :segment_selections
@@ -10,6 +12,8 @@ class Analytics::DevopsAdoption::Segment < ApplicationRecord
   has_one :latest_snapshot, -> { order(recorded_at: :desc) }, inverse_of: :segment, class_name: 'Snapshot'
 
   validates :name, presence: true, uniqueness: true, length: { maximum: 255 }
+  validates :namespace, uniqueness: true
+
   validate :validate_segment_count, on: :create
 
   accepts_nested_attributes_for :segment_selections, allow_destroy: true
