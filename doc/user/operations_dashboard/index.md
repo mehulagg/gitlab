@@ -26,7 +26,7 @@ To add a project to the dashboard:
 1. Search and add one or more projects using the **Search your projects** field.
 1. Click the **Add projects** button.
 
-Once added, the dashboard displays the project's number of active alerts assigned to active environments,
+Once added, the dashboard displays the project's number of active alerts (These alerts need to be tied to environments in order to be displayed),
 last commit, pipeline status, and when it was last deployed.
 
 The Operations and [Environments](../../ci/environments/environments_dashboard.md) dashboards share the same list of projects. Adding or removing a project from one adds or removes the project from the other.
