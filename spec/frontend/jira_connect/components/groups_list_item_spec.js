@@ -7,12 +7,9 @@ import { mockGroup1 } from '../mock_data';
 
 import GroupsListItem from '~/jira_connect/components/groups_list_item.vue';
 import * as JiraConnectApi from '~/jira_connect/api';
-import createStore from '~/jira_connect/store';
 
 describe('GroupsListItem', () => {
   let wrapper;
-  let store;
-
   const mockSubscriptionPath = 'subscriptionPath';
 
   const reloadSpy = jest.fn();
@@ -24,11 +21,8 @@ describe('GroupsListItem', () => {
   };
 
   const createComponent = ({ mountFn = shallowMount } = {}) => {
-    store = createStore();
-
     wrapper = extendedWrapper(
       mountFn(GroupsListItem, {
-        store,
         propsData: {
           group: mockGroup1,
         },
@@ -81,8 +75,6 @@ describe('GroupsListItem', () => {
       createComponent({ mountFn: mount });
 
       addSubscriptionSpy = jest.spyOn(JiraConnectApi, 'addSubscription').mockResolvedValue();
-
-      jest.spyOn(store, 'dispatch');
     });
 
     it('sets button to loading and sends request', async () => {
@@ -102,8 +94,8 @@ describe('GroupsListItem', () => {
         clickLinkButton();
 
         await waitForPromises();
+
         expect(reloadSpy).toHaveBeenCalled();
-        expect(store.dispatch).not.toHaveBeenCalled();
       });
     });
 
@@ -117,13 +109,13 @@ describe('GroupsListItem', () => {
           .mockRejectedValue(mockError);
       });
 
-      it('dispatches `setErrorMessage` action', async () => {
+      it('emits `error` event', async () => {
         clickLinkButton();
 
         await waitForPromises();
 
         expect(reloadSpy).not.toHaveBeenCalled();
-        expect(store.dispatch).toHaveBeenCalledWith('setErrorMessage', mockErrorMessage);
+        expect(wrapper.emitted('error')[0][0]).toBe(mockErrorMessage);
       });
     });
   });

@@ -15365,7 +15365,7 @@ msgstr ""
 msgid "Integrations|Enable comments"
 msgstr ""
 
-msgid "Integrations|Failed to add namespace. Please try again."
+msgid "Integrations|Failed to link namespace. Please try again."
 msgstr ""
 
 msgid "Integrations|Failed to load namespaces. Please try again."

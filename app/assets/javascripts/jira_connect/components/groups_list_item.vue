@@ -1,5 +1,4 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlAvatar, GlButton, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
@@ -28,7 +27,6 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['setErrorMessage']),
     onClick() {
       this.isLoading = true;
 
@@ -37,9 +35,10 @@ export default {
           AP.navigator.reload();
         })
         .catch((error) => {
-          this.setErrorMessage(
+          this.$emit(
+            'error',
             error?.response?.data?.error ||
-              s__('Integrations|Failed to add namespace. Please try again.'),
+              s__('Integrations|Failed to link namespace. Please try again.'),
           );
         })
         .finally(() => {
