@@ -35,6 +35,10 @@ export default {
       type: String,
       required: true,
     },
+    countPath: {
+      type: String,
+      required: true,
+    }
   },
   computed: {
     ...mapState(['query']),
@@ -80,6 +84,6 @@ export default {
         <gl-button class="btn-search" variant="success" type="submit">{{ __('Search') }}</gl-button>
       </section>
     </gl-form>
-    <scope-tabs :scope-tabs="scopeTabs" :count="count"/>
+    <scope-tabs :scope-tabs="scopeTabs" :count="count" :count-path="countPath"/>
   </section>
 </template>
