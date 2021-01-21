@@ -2522,6 +2522,19 @@ class Project < ApplicationRecord
     tracing_setting&.external_url
   end
 
+  def issuable_template_names(issuable_type)
+    return [] unless repository.exists?
+
+    case issuable_type.to_s
+    when 'issue'
+      repository.issue_template_names
+    when 'merge_request'
+      repository.merge_request_template_names
+    else
+      []
+    end
+  end
+
   private
 
   def find_service(services, name)
