@@ -12,11 +12,7 @@ module Types
           field :id, GraphQL::ID_TYPE, null: false,
                 description: "ID of the segment"
 
-          field :name, GraphQL::STRING_TYPE, null: false,
-            description: 'Name of the segment'
-
-          field :groups, [Types::GroupType], null: true,
-                description: 'Assigned groups'
+          field :namespace, Types::NamespaceType, null: true, description: 'Segment namespace'
 
           field :latest_snapshot, SnapshotType, null: true,
                 description: 'The latest adoption metrics for the segment'

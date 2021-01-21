@@ -7,8 +7,7 @@ RSpec.describe Analytics::DevopsAdoption::Segments::DeleteService do
 
   let_it_be(:user) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:other_group) { create(:group) }
-  let(:segment) { create(:devops_adoption_segment, name: 'segment', segment_selections: [build(:devops_adoption_segment_selection, :group, group: group)]) }
+  let(:segment) { create(:devops_adoption_segment, namespace: group) }
 
   subject { described_class.new(segment: segment, current_user: user).execute }
 
