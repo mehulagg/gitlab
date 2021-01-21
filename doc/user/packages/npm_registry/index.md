@@ -245,7 +245,8 @@ Prerequisites:
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
 - Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
-  It must match exactly, including the case. This diverges from the NPM naming convention, but it is required to work with the GitLab Package Registry.
+  It must match exactly, including the case. This is different than the
+  NPM naming convention, but it is required to work with the GitLab Package Registry.
 
 To upload an NPM package to your project, run this command:
 
