@@ -248,6 +248,12 @@ describe('Vulnerability Details', () => {
       isCode: true,
     };
 
+    const EXPECT_RESPONSE_WITHOUT_REASON_PHRASE = {
+      label: 'Actual response:',
+      content: '500 \nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
     const EXPECT_RESPONSE_WITHOUT_BODY = {
       label: 'Actual response:',
       content:
@@ -258,6 +264,12 @@ describe('Vulnerability Details', () => {
     const EXPECT_RECORDED_RESPONSE = {
       label: 'Unmodified response:',
       content: '200 OK\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_RECORDED_RESPONSE_WITHOUT_REASON_PHRASE = {
+      label: 'Unmodified response:',
+      content: '200 \nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
       isCode: true,
     };
 
@@ -305,7 +317,7 @@ describe('Vulnerability Details', () => {
       ${{}}                                                                                                            | ${null}
       ${{ headers: TEST_HEADERS }}                                                                                     | ${null}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                           | ${null}
-      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${[EXPECT_RESPONSE_WITHOUT_REASON_PHRASE]}
       ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
       ${{ headers: TEST_HEADERS, body: '', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}                 | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
     `('shows response data for $response', ({ response, expectedData }) => {
@@ -323,6 +335,7 @@ describe('Vulnerability Details', () => {
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                 | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                             | ${null}
       ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                        | ${null}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200' } }]}                     | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_REASON_PHRASE]}
       ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
       ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '', statusCode: '200', reasonPhrase: 'OK' } }]}                 | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
     `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
