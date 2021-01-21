@@ -1,0 +1,5 @@
+---
+title: Restrict overlapping iterations dates to iteration cadence container.
+merge_request: 52403
+author:
+type: changed
