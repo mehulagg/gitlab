@@ -1,6 +1,0 @@
----
-title: Revert breaking changes to allow conan_sources.tgz and conan_export.tgz files
-  in the Conan repository
-merge_request: 33435
-author:
-type: fixed

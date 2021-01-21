@@ -29,13 +29,7 @@ describe('DropdownSearchInputComponent', () => {
     });
 
     it('renders search icon element', () => {
-      expect(wrapper.find('.fa-search.dropdown-input-search').exists()).toBe(true);
-    });
-
-    it('renders clear search icon element', () => {
-      expect(wrapper.find('.fa-times.dropdown-input-clear.js-dropdown-input-clear').exists()).toBe(
-        true,
-      );
+      expect(wrapper.find('.dropdown-input-search[data-testid="search-icon"]').exists()).toBe(true);
     });
 
     it('displays custom placeholder text', () => {

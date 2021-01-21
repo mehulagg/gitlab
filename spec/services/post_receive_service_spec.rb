@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe PostReceiveService do
+RSpec.describe PostReceiveService do
   include Gitlab::Routing
+  include AfterNextHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
@@ -45,6 +46,12 @@ describe PostReceiveService do
     it 'does not return error' do
       expect(subject).to be_empty
     end
+
+    it 'does not record an onboarding progress action' do
+      expect_next(OnboardingProgressService).not_to receive(:execute)
+
+      subject
+    end
   end
 
   context 'when repository is nil' do
@@ -79,6 +86,13 @@ describe PostReceiveService do
       expect(reference_counter).to receive(:decrease).and_return(true)
 
       expect(response.reference_counter_decreased).to be(true)
+    end
+
+    it 'records an onboarding progress action' do
+      expect_next(OnboardingProgressService, project.namespace)
+        .to receive(:execute).with(action: :git_write)
+
+      subject
     end
   end
 
@@ -166,41 +180,6 @@ describe PostReceiveService do
         expect(subject).to include(build_alert_message(message))
       end
     end
-
-    context 'storage size limit alerts' do
-      let(:check_storage_size_response) { ServiceResponse.success }
-
-      before do
-        expect_next_instance_of(Namespaces::CheckStorageSizeService, project.namespace, user) do |check_storage_size_service|
-          expect(check_storage_size_service).to receive(:execute).and_return(check_storage_size_response)
-        end
-      end
-
-      context 'when there is no payload' do
-        it 'adds no alert' do
-          expect(subject.size).to eq(1)
-        end
-      end
-
-      context 'when there is payload' do
-        let(:check_storage_size_response) do
-          ServiceResponse.success(
-            payload: {
-              alert_level: :info,
-              usage_message: "Usage",
-              explanation_message: "Explanation"
-            }
-          )
-        end
-
-        it 'adds an alert' do
-          response = subject
-
-          expect(response.size).to eq(2)
-          expect(response).to include(build_alert_message("##### INFO #####\nUsage\nExplanation"))
-        end
-      end
-    end
   end
 
   context 'with PersonalSnippet' do
@@ -264,6 +243,49 @@ describe PostReceiveService do
       allow(BroadcastMessage).to receive(:current).and_return(nil)
 
       expect(has_alert_messages?(subject)).to be_falsey
+    end
+  end
+
+  context "broadcast message has a target_path" do
+    let!(:older_scoped_message) do
+      create(:broadcast_message, message: "Old top secret", target_path: "/company/sekrit-project")
+    end
+
+    let!(:latest_scoped_message) do
+      create(:broadcast_message, message: "Top secret", target_path: "/company/sekrit-project")
+    end
+
+    let!(:unscoped_message) do
+      create(:broadcast_message, message: "Hi")
+    end
+
+    context "no project path matches" do
+      it "does not output the scoped broadcast messages" do
+        expect(subject).not_to include(build_alert_message(older_scoped_message.message))
+        expect(subject).not_to include(build_alert_message(latest_scoped_message.message))
+      end
+
+      it "does output another message that doesn't have a target_path" do
+        expect(subject).to include(build_alert_message(unscoped_message.message))
+      end
+    end
+
+    context "project path matches" do
+      before do
+        allow(project).to receive(:full_path).and_return("/company/sekrit-project")
+      end
+
+      it "does output the latest scoped broadcast message" do
+        expect(subject).to include(build_alert_message(latest_scoped_message.message))
+      end
+
+      it "does not output the older scoped broadcast message" do
+        expect(subject).not_to include(build_alert_message(older_scoped_message.message))
+      end
+
+      it "does not output another message that doesn't have a target_path" do
+        expect(subject).not_to include(build_alert_message(unscoped_message.message))
+      end
     end
   end
 

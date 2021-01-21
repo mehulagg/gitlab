@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 # rubocop:disable RSpec/FactoriesInMigrationSpecs
-describe Gitlab::BackgroundMigration::BackfillProjectRepositories do
+RSpec.describe Gitlab::BackgroundMigration::BackfillProjectRepositories do
   let(:group) { create(:group, name: 'foo', path: 'foo') }
 
   describe described_class::ShardFinder do
@@ -81,7 +81,7 @@ describe Gitlab::BackgroundMigration::BackfillProjectRepositories do
         end
 
         it 'returns the correct disk_path using the route entry' do
-          project_legacy_storage_5.route.update(path: 'zoo/new-test')
+          project_legacy_storage_5.route.update!(path: 'zoo/new-test')
           project = described_class.find(project_legacy_storage_5.id)
 
           expect(project.disk_path).to eq('zoo/new-test')
@@ -93,8 +93,8 @@ describe Gitlab::BackgroundMigration::BackfillProjectRepositories do
           subgroup.update_column(:parent_id, non_existing_record_id)
 
           project = described_class.find(project_orphaned_namespace.id)
-          project.route.destroy
-          subgroup.route.destroy
+          project.route.destroy!
+          subgroup.route.destroy!
 
           expect { project.reload.disk_path }
             .to raise_error(Gitlab::BackgroundMigration::BackfillProjectRepositories::OrphanedNamespaceError)

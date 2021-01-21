@@ -3,7 +3,7 @@ import { __ } from '~/locale';
 import StatusIcon from '~/vue_merge_request_widget/components/mr_widget_status_icon.vue';
 import Popover from '~/vue_shared/components/help_popover.vue';
 import IssuesList from './issues_list.vue';
-import { status } from '../constants';
+import { status, SLOT_SUCCESS, SLOT_LOADING, SLOT_ERROR } from '../constants';
 
 export default {
   name: 'ReportSection',
@@ -91,6 +91,11 @@ export default {
       required: false,
       default: undefined,
     },
+    shouldEmitToggleEvent: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
 
   data() {
@@ -147,16 +152,19 @@ export default {
     },
     slotName() {
       if (this.isSuccess) {
-        return 'success';
+        return SLOT_SUCCESS;
       } else if (this.isLoading) {
-        return 'loading';
+        return SLOT_LOADING;
       }
 
-      return 'error';
+      return SLOT_ERROR;
     },
   },
   methods: {
     toggleCollapsed() {
+      if (this.shouldEmitToggleEvent) {
+        this.$emit('toggleEvent');
+      }
       this.isCollapsed = !this.isCollapsed;
     },
   },
@@ -171,16 +179,17 @@ export default {
           <div>
             {{ headerText }}
             <slot :name="slotName"></slot>
-            <popover v-if="hasPopover" :options="popoverOptions" class="prepend-left-5" />
+            <popover v-if="hasPopover" :options="popoverOptions" class="gl-ml-2" />
           </div>
-          <slot name="subHeading"></slot>
+          <slot name="sub-heading"></slot>
         </div>
 
-        <slot name="actionButtons"></slot>
+        <slot name="action-buttons"></slot>
 
         <button
           v-if="isCollapsible"
           type="button"
+          data-testid="report-section-expand-button"
           class="js-collapse-btn btn float-right btn-sm align-self-center qa-expand-report-button"
           @click="toggleCollapsed"
         >

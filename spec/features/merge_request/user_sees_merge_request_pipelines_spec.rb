@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees pipelines triggered by merge request', :js do
+RSpec.describe 'Merge request > User sees pipelines triggered by merge request', :js do
   include ProjectForksHelper
   include TestReportsHelper
 
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
-  let(:enable_mr_tabs_position_flag) { true }
 
   let(:config) do
     {
@@ -27,16 +26,14 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
   end
 
   before do
-    stub_feature_flags(mr_tabs_position: enable_mr_tabs_position_flag)
     stub_application_setting(auto_devops_enabled: false)
-    stub_feature_flags(ci_merge_request_pipeline: true)
     stub_ci_pipeline_yaml_file(YAML.dump(config))
     project.add_maintainer(user)
     sign_in(user)
   end
 
   context 'when a user created a merge request in the parent project' do
-    let(:merge_request) do
+    let!(:merge_request) do
       create(:merge_request,
               source_project: project,
               target_project: project,
@@ -53,7 +50,6 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       Ci::CreatePipelineService.new(project, user, ref: 'feature')
                                 .execute(:merge_request_event, merge_request: merge_request)
     end
-    let(:enable_mr_tabs_position_flag) { false }
 
     before do
       visit project_merge_request_path(project, merge_request)
@@ -66,27 +62,15 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
     it 'sees branch pipelines and detached merge request pipelines in correct order' do
       page.within('.ci-table') do
         expect(page).to have_selector('.ci-pending', count: 2)
-        expect(first('.js-pipeline-url-link')).to have_content("##{detached_merge_request_pipeline.id}")
+        expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
-    context 'when merge request tabs feature flag is disabled' do
-      it 'sees the latest detached merge request pipeline as the head pipeline', :sidekiq_might_not_need_inline do
-        page.within('.ci-widget-content') do
-          expect(page).to have_content("##{detached_merge_request_pipeline.id}")
-        end
-      end
-    end
+    it 'sees the latest detached merge request pipeline as the head pipeline', :sidekiq_might_not_need_inline do
+      click_link "Overview"
 
-    context 'when merge request tabs feature flag is enabled' do
-      let(:enable_mr_tabs_position_flag) { true }
-
-      it 'sees the latest detached merge request pipeline as the head pipeline', :sidekiq_might_not_need_inline do
-        click_link "Overview"
-
-        page.within('.ci-widget-content') do
-          expect(page).to have_content("##{detached_merge_request_pipeline.id}")
-        end
+      page.within('.ci-widget-content') do
+        expect(page).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
@@ -113,16 +97,16 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 4)
 
-          expect(all('.js-pipeline-url-link')[0])
+          expect(all('[data-testid="pipeline-url-link"]')[0])
             .to have_content("##{detached_merge_request_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[1])
+          expect(all('[data-testid="pipeline-url-link"]')[1])
             .to have_content("##{detached_merge_request_pipeline.id}")
 
-          expect(all('.js-pipeline-url-link')[2])
+          expect(all('[data-testid="pipeline-url-link"]')[2])
             .to have_content("##{push_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[3])
+          expect(all('[data-testid="pipeline-url-link"]')[3])
             .to have_content("##{push_pipeline.id}")
         end
       end
@@ -144,6 +128,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       end
 
       it 'sees the latest detached merge request pipeline as the head pipeline' do
+        click_link 'Overview'
+
         page.within('.ci-widget-content') do
           expect(page).to have_content("##{detached_merge_request_pipeline_2.id}")
         end
@@ -152,6 +138,7 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
 
     context 'when a user merges a merge request in the parent project', :sidekiq_might_not_need_inline do
       before do
+        click_link 'Overview'
         click_button 'Merge when pipeline succeeds'
 
         wait_for_requests
@@ -179,6 +166,7 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
 
       context 'when branch pipeline succeeds' do
         before do
+          click_link 'Overview'
           push_pipeline.succeed!
 
           wait_for_requests
@@ -209,11 +197,13 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       it 'sees a branch pipeline in pipeline tab' do
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 1)
-          expect(first('.js-pipeline-url-link')).to have_content("##{push_pipeline.id}")
+          expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{push_pipeline.id}")
         end
       end
 
       it 'sees the latest branch pipeline as the head pipeline', :sidekiq_might_not_need_inline do
+        click_link 'Overview'
+
         page.within('.ci-widget-content') do
           expect(page).to have_content("##{push_pipeline.id}")
         end
@@ -256,27 +246,15 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
     it 'sees branch pipelines and detached merge request pipelines in correct order' do
       page.within('.ci-table') do
         expect(page).to have_selector('.ci-pending', count: 2)
-        expect(first('.js-pipeline-url-link')).to have_content("##{detached_merge_request_pipeline.id}")
+        expect(first('[data-testid="pipeline-url-link"]')).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
-    context 'when merge request tabs feature flag is enabled' do
-      it 'sees the latest detached merge request pipeline as the head pipeline' do
-        click_link "Overview"
+    it 'sees the latest detached merge request pipeline as the head pipeline' do
+      click_link "Overview"
 
-        page.within('.ci-widget-content') do
-          expect(page).to have_content("##{detached_merge_request_pipeline.id}")
-        end
-      end
-    end
-
-    context 'when merge request tabs feature flag is disabled' do
-      let(:enable_mr_tabs_position_flag) { false }
-
-      it 'sees the latest detached merge request pipeline as the head pipeline' do
-        page.within('.ci-widget-content') do
-          expect(page).to have_content("##{detached_merge_request_pipeline.id}")
-        end
+      page.within('.ci-widget-content') do
+        expect(page).to have_content("##{detached_merge_request_pipeline.id}")
       end
     end
 
@@ -309,16 +287,16 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
         page.within('.ci-table') do
           expect(page).to have_selector('.ci-pending', count: 4)
 
-          expect(all('.js-pipeline-url-link')[0])
+          expect(all('[data-testid="pipeline-url-link"]')[0])
             .to have_content("##{detached_merge_request_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[1])
+          expect(all('[data-testid="pipeline-url-link"]')[1])
             .to have_content("##{detached_merge_request_pipeline.id}")
 
-          expect(all('.js-pipeline-url-link')[2])
+          expect(all('[data-testid="pipeline-url-link"]')[2])
             .to have_content("##{push_pipeline_2.id}")
 
-          expect(all('.js-pipeline-url-link')[3])
+          expect(all('[data-testid="pipeline-url-link"]')[3])
             .to have_content("##{push_pipeline.id}")
         end
       end

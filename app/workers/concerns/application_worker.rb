@@ -10,6 +10,7 @@ module ApplicationWorker
   include Sidekiq::Worker # rubocop:disable Cop/IncludeSidekiqWorker
   include WorkerAttributes
   include WorkerContext
+  include Gitlab::SidekiqVersioning::Worker
 
   LOGGING_EXTRA_KEY = 'extra'
 
@@ -18,7 +19,7 @@ module ApplicationWorker
 
     def structured_payload(payload = {})
       context = Labkit::Context.current.to_h.merge(
-        'class' => self.class,
+        'class' => self.class.name,
         'job_status' => 'running',
         'queue' => self.class.queue,
         'jid' => jid
@@ -74,6 +75,22 @@ module ApplicationWorker
 
     def queue
       get_sidekiq_options['queue'].to_s
+    end
+
+    # Set/get which arguments can be logged and sent to Sentry.
+    #
+    # Numeric arguments are logged by default, so there is no need to
+    # list those.
+    #
+    # Non-numeric arguments must be listed by position, as Sidekiq
+    # cannot see argument names.
+    #
+    def loggable_arguments(*args)
+      if args.any?
+        @loggable_arguments = args
+      else
+        @loggable_arguments || []
+      end
     end
 
     def queue_size

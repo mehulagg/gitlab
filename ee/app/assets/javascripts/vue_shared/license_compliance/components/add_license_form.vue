@@ -1,6 +1,6 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlButton, GlFormRadioGroup, GlFormRadio } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
 import AddLicenseFormDropdown from './add_license_form_dropdown.vue';
 import { s__ } from '~/locale';
@@ -9,19 +9,35 @@ export default {
   name: 'AddLicenseForm',
   components: {
     AddLicenseFormDropdown,
-    GlDeprecatedButton,
-    LoadingButton,
+    GlButton,
+    GlFormRadioGroup,
+    GlFormRadio,
   },
+  mixins: [glFeatureFlagsMixin()],
   LICENSE_APPROVAL_STATUS,
   approvalStatusOptions: [
-    { value: LICENSE_APPROVAL_STATUS.ALLOWED, label: s__('LicenseCompliance|Allow') },
-    { value: LICENSE_APPROVAL_STATUS.DENIED, label: s__('LicenseCompliance|Deny') },
+    {
+      value: LICENSE_APPROVAL_STATUS.ALLOWED,
+      label: s__('LicenseCompliance|Allow'),
+      description: s__('LicenseCompliance|Acceptable license to be used in the project'),
+    },
+    {
+      value: LICENSE_APPROVAL_STATUS.DENIED,
+      label: s__('LicenseCompliance|Deny'),
+      description: s__(
+        'LicenseCompliance|Disallow merge request if detected and will instruct developer to remove',
+      ),
+    },
   ],
   props: {
     managedLicenses: {
       type: Array,
       required: false,
       default: () => [],
+    },
+    knownLicenses: {
+      type: Array,
+      required: true,
     },
     loading: {
       type: Boolean,
@@ -41,6 +57,9 @@ export default {
     },
     submitDisabled() {
       return this.isInvalidLicense || this.licenseName.trim() === '' || this.approvalStatus === '';
+    },
+    isDescriptionEnabled() {
+      return Boolean(this.glFeatures.licenseComplianceDeniesMr);
     },
   },
   methods: {
@@ -65,6 +84,7 @@ export default {
       <add-license-form-dropdown
         id="js-license-dropdown"
         v-model="licenseName"
+        :known-licenses="knownLicenses"
         :placeholder="s__('LicenseCompliance|License name')"
       />
       <div class="invalid-feedback" :class="{ 'd-block': isInvalidLicense }">
@@ -72,36 +92,37 @@ export default {
       </div>
     </div>
     <div class="form-group">
-      <div v-for="option in $options.approvalStatusOptions" :key="option.value" class="form-check">
-        <input
-          :id="`js-${option.value}-license-radio`"
-          v-model="approvalStatus"
-          class="form-check-input"
-          type="radio"
-          :data-qa-selector="`${option.value}_license_radio`"
+      <gl-form-radio-group v-model="approvalStatus" name="approvalStatus">
+        <gl-form-radio
+          v-for="option in $options.approvalStatusOptions"
+          :key="option.value"
           :value="option.value"
-        />
-        <label :for="`js-${option.value}-license-radio`" class="form-check-label">
-          {{ option.label }}
-        </label>
-      </div>
+          :data-qa-selector="`${option.value}_license_radio`"
+          :aria-describedby="`js-${option.value}-license-radio`"
+          :class="{ 'mb-3': isDescriptionEnabled }"
+        >
+          <template>{{ option.label }}</template>
+          <div v-if="isDescriptionEnabled" class="text-secondary">
+            {{ option.description }}
+          </div>
+        </gl-form-radio>
+      </gl-form-radio-group>
     </div>
-    <loading-button
-      class="js-submit"
-      :disabled="submitDisabled"
-      :loading="loading"
-      container-class="btn btn-success btn-align-content d-inline-flex"
-      :label="s__('LicenseCompliance|Submit')"
-      data-qa-selector="add_license_submit_button"
-      @click="addLicense"
-    />
-    <gl-deprecated-button
-      class="js-cancel"
-      variant="default"
-      :disabled="loading"
-      @click="closeForm"
-    >
-      {{ s__('LicenseCompliance|Cancel') }}
-    </gl-deprecated-button>
+    <div class="gl-display-flex">
+      <gl-button
+        class="js-submit"
+        :disabled="submitDisabled"
+        :loading="loading"
+        category="primary"
+        variant="success"
+        data-qa-selector="add_license_submit_button"
+        @click="addLicense"
+      >
+        {{ __('Submit') }}
+      </gl-button>
+      <gl-button class="js-cancel ml-2" :disabled="loading" @click="closeForm">
+        {{ __('Cancel') }}
+      </gl-button>
+    </div>
   </div>
 </template>

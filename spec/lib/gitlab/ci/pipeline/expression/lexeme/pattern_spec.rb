@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Expression::Lexeme::Pattern do
+RSpec.describe Gitlab::Ci::Pipeline::Expression::Lexeme::Pattern do
   describe '.build' do
     it 'creates a new instance of the token' do
       expect(described_class.build('/.*/'))
@@ -70,7 +70,7 @@ describe Gitlab::Ci::Pipeline::Expression::Lexeme::Pattern do
         .to eq Gitlab::UntrustedRegexp.new('pattern')
     end
 
-    it 'is a eager scanner for regexp boundaries' do
+    it 'is an eager scanner for regexp boundaries' do
       scanner = StringScanner.new('/some .* / pattern/')
 
       token = described_class.scan(scanner)

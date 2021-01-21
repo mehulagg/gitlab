@@ -4,6 +4,8 @@ module Gitlab
   module Metrics
     module Samplers
       class UnicornSampler < BaseSampler
+        DEFAULT_SAMPLING_INTERVAL_SECONDS = 5
+
         def metrics
           @metrics ||= init_metrics
         end
@@ -54,7 +56,7 @@ module Gitlab
         end
 
         def unicorn_workers_count
-          http_servers.sum(&:worker_processes) # rubocop: disable CodeReuse/ActiveRecord
+          http_servers.sum(&:worker_processes)
         end
 
         # Traversal of ObjectSpace is expensive, on fully loaded application

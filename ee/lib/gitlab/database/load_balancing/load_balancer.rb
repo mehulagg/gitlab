@@ -28,6 +28,8 @@ module Gitlab
           conflict_retried = 0
 
           while host
+            ensure_caching!
+
             begin
               return yield host.connection
             rescue => error
@@ -95,7 +97,11 @@ module Gitlab
 
         # Releases the host and connection for the current thread.
         def release_host
-          RequestStore[CACHE_KEY]&.release_connection
+          if host = RequestStore[CACHE_KEY]
+            host.disable_query_cache!
+            host.release_connection
+          end
+
           RequestStore.delete(CACHE_KEY)
         end
 
@@ -105,17 +111,13 @@ module Gitlab
 
         # Returns the transaction write location of the primary.
         def primary_write_location
-          read_write do |connection|
-            row = connection
-              .select_all("SELECT #{Gitlab::Database.pg_current_wal_insert_lsn}()::text AS location")
-              .first
-
-            if row
-              row['location']
-            else
-              raise 'Failed to determine the write location of the primary database'
-            end
+          location = read_write do |connection|
+            ::Gitlab::Database.get_write_location(connection)
           end
+
+          return location if location
+
+          raise 'Failed to determine the write location of the primary database'
         end
 
         # Returns true if all hosts have caught up to the given transaction
@@ -172,6 +174,12 @@ module Gitlab
           else
             error.is_a?(PG::TRSerializationFailure)
           end
+        end
+
+        private
+
+        def ensure_caching!
+          host.enable_query_cache! unless host.query_cache_enabled
         end
       end
     end

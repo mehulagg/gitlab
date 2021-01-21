@@ -20,7 +20,7 @@
     width: 100%;
   }
 
-  $image-widths: 80 130 150 250 306 394 430;
+  $image-widths: 80 130 150 225 250 306 394 430;
   @each $width in $image-widths {
     &.svg-#{$width} {
       img,
@@ -47,5 +47,13 @@ svg {
     &.s#{$svg-size} {
       @include svg-size(#{$svg-size}px);
     }
+  }
+
+  &.s12 {
+    vertical-align: -1px;
+  }
+
+  &.s16 {
+    vertical-align: -3px;
   }
 }

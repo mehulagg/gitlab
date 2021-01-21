@@ -9,9 +9,10 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
   respectDoNotTrack: true,
   forceSecureTracker: true,
   eventMethod: 'post',
-  contexts: { webPage: true },
+  contexts: { webPage: true, performanceTiming: true },
   formTracking: false,
   linkClickTracking: false,
+  pageUnloadTimer: 10,
 };
 
 const createEventPayload = (el, { suffix = '' } = {}) => {
@@ -42,7 +43,7 @@ const eventHandler = (e, func, opts = {}) => {
 };
 
 const eventHandlers = (category, func) => {
-  const handler = opts => e => eventHandler(e, func, { ...{ category }, ...opts });
+  const handler = (opts) => (e) => eventHandler(e, func, { ...{ category }, ...opts });
   const handlers = [];
   handlers.push({ name: 'click', func: handler() });
   handlers.push({ name: 'show.bs.dropdown', func: handler({ suffix: '_show' }) });
@@ -78,7 +79,7 @@ export default class Tracking {
     parent.trackingBound = true;
 
     const handlers = eventHandlers(category, (...args) => this.event(...args));
-    handlers.forEach(event => parent.addEventListener(event.name, event.func));
+    handlers.forEach((event) => parent.addEventListener(event.name, event.func));
     return handlers;
   }
 
@@ -87,7 +88,7 @@ export default class Tracking {
 
     const loadEvents = parent.querySelectorAll('[data-track-event="render"]');
 
-    loadEvents.forEach(element => {
+    loadEvents.forEach((element) => {
       const { action, data } = createEventPayload(element);
       this.event(category, action, data);
     });
@@ -126,14 +127,18 @@ export function initUserTracking() {
   const opts = { ...DEFAULT_SNOWPLOW_OPTIONS, ...window.snowplowOptions };
   window.snowplow('newTracker', opts.namespace, opts.hostname, opts);
 
+  document.dispatchEvent(new Event('SnowplowInitialized'));
+}
+
+export function initDefaultTrackers() {
+  if (!Tracking.enabled()) return;
+
   window.snowplow('enableActivityTracking', 30, 30);
   window.snowplow('trackPageView'); // must be after enableActivityTracking
 
-  if (opts.formTracking) window.snowplow('enableFormTracking');
-  if (opts.linkClickTracking) window.snowplow('enableLinkClickTracking');
+  if (window.snowplowOptions.formTracking) window.snowplow('enableFormTracking');
+  if (window.snowplowOptions.linkClickTracking) window.snowplow('enableLinkClickTracking');
 
   Tracking.bindDocument();
   Tracking.trackLoadEvents();
-
-  document.dispatchEvent(new Event('SnowplowInitialized'));
 }

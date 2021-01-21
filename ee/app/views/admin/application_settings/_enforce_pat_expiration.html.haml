@@ -1,0 +1,9 @@
+- return unless enforce_pat_expiration_feature_available?
+
+- form = local_assigns.fetch(:form)
+
+.form-group
+  .form-check
+    = form.check_box :enforce_pat_expiration, class: 'form-check-input'
+    = form.label :enforce_pat_expiration, class: 'form-check-label' do
+      = _('Enforce personal access token expiration')

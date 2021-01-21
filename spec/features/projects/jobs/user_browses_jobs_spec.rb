@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User browses jobs' do
+RSpec.describe 'User browses jobs' do
   let!(:build) { create(:ci_build, :coverage, pipeline: pipeline) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.sha, ref: 'master') }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -26,7 +26,7 @@ describe 'User browses jobs' do
 
   it 'shows the "CI Lint" button' do
     page.within('.nav-controls') do
-      ci_lint_tool_link = page.find_link('CI lint')
+      ci_lint_tool_link = page.find_link('CI Lint')
 
       expect(ci_lint_tool_link[:href]).to end_with(project_ci_lint_path(project))
     end

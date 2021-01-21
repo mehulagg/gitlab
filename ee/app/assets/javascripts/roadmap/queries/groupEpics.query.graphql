@@ -8,6 +8,8 @@ query groupEpics(
   $dueDate: Time
   $labelName: [String!] = []
   $authorUsername: String = ""
+  $milestoneTitle: String = ""
+  $confidential: Boolean
   $search: String = ""
 ) {
   group(fullPath: $fullPath) {
@@ -20,12 +22,16 @@ query groupEpics(
       endDate: $dueDate
       labelName: $labelName
       authorUsername: $authorUsername
+      milestoneTitle: $milestoneTitle
+      confidential: $confidential
       search: $search
     ) {
       edges {
         node {
           ...BaseEpic
-          parent { id }
+          parent {
+            id
+          }
         }
       }
     }

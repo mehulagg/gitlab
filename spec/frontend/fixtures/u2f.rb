@@ -2,13 +2,17 @@
 
 require 'spec_helper'
 
-context 'U2F' do
+RSpec.context 'U2F' do
   include JavaScriptFixturesHelpers
 
   let(:user) { create(:user, :two_factor_via_u2f, otp_secret: 'otpsecret:coolkids') }
 
   before(:all) do
     clean_frontend_fixtures('u2f/')
+  end
+
+  before do
+    stub_feature_flags(webauthn: false)
   end
 
   describe SessionsController, '(JavaScript fixtures)', type: :controller do

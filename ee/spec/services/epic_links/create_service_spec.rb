@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe EpicLinks::CreateService do
+  include NestedEpicsHelper
+
   describe '#execute' do
     let(:group) { create(:group) }
     let(:user) { create(:user) }
@@ -12,6 +14,10 @@ RSpec.describe EpicLinks::CreateService do
     let(:expected_code) { 404 }
 
     let(:valid_reference) { epic_to_add.to_reference(full: true) }
+
+    before do
+      stub_const('Epic', ::Epic, transfer_nested_constants: true)
+    end
 
     shared_examples 'system notes created' do
       it 'creates system notes' do
@@ -85,7 +91,7 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when an epic from another group is given' do
               let(:other_group) { create(:group) }
-              let(:expected_error) { "This epic can't be added because it must belong to the same group as the parent, or subgroup of the parent epic’s group" }
+              let(:expected_error) { "This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic." }
               let(:expected_code) { 409 }
 
               before do
@@ -97,7 +103,7 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when hierarchy is cyclic' do
               context 'when given child epic is the same as given parent' do
-                let(:expected_error) { 'Cannot add an epic as a child of itself' }
+                let(:expected_error) { "This epic cannot be added. An epic cannot be added to itself." }
                 let(:expected_code) { 409 }
 
                 subject { add_epic([epic.to_reference(full: true)]) }
@@ -106,7 +112,7 @@ RSpec.describe EpicLinks::CreateService do
               end
 
               context 'when given child epic is parent of the given parent' do
-                let(:expected_error) { "This epic can't be added as it is already assigned to this epic's ancestor" }
+                let(:expected_error) { "This epic cannot be added. It is already an ancestor of the parent epic." }
                 let(:expected_code) { 409 }
 
                 before do
@@ -117,7 +123,7 @@ RSpec.describe EpicLinks::CreateService do
               end
 
               context 'when new child epic is an ancestor of the given parent' do
-                let(:expected_error) { "This epic can't be added as it is already assigned to this epic's ancestor" }
+                let(:expected_error) { "This epic cannot be added. It is already an ancestor of the parent epic." }
                 let(:expected_code) { 409 }
 
                 before do
@@ -136,7 +142,7 @@ RSpec.describe EpicLinks::CreateService do
                 epic_to_add.update(parent: epic)
               end
 
-              let(:expected_error) { "This epic can't be added as it is already assigned to the parent" }
+              let(:expected_error) { "This epic cannot be added. It is already assigned to the parent epic." }
               let(:expected_code) { 409 }
 
               include_examples 'returns an error'
@@ -144,34 +150,25 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when adding to an Epic that is already at maximum depth' do
               before do
-                epic1 = create(:epic, group: group)
-                epic2 = create(:epic, group: group, parent: epic1)
-                epic3 = create(:epic, group: group, parent: epic2)
-                epic4 = create(:epic, group: group, parent: epic3)
-
-                epic.update(parent: epic4)
+                add_parents_to(epic: epic, count: 6)
               end
 
-              let(:expected_error) { "This epic can't be added because the parent is already at the maximum depth from its most distant ancestor" }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               include_examples 'returns an error'
             end
 
             context 'when total depth after adding would exceed depth limit' do
-              let(:expected_error) { "This epic can't be added as the maximum depth of nested epics would be exceeded" }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               before do
-                epic1 = create(:epic, group: group)
+                add_parents_to(epic: epic, count: 1) # epic is on level 2
 
-                epic.update(parent: epic1) # epic is on level 2
-
-                # epic_to_add has 3 children (level 4 including epic_to_add)
-                # that would mean level 6 after relating epic_to_add on epic
-                epic2 = create(:epic, group: group, parent: epic_to_add)
-                epic3 = create(:epic, group: group, parent: epic2)
-                create(:epic, group: group, parent: epic3)
+                # epic_to_add has 5 children (level 6 including epic_to_add)
+                # that would mean level 8 after relating epic_to_add on epic
+                add_children_to(epic: epic_to_add, count: 5)
               end
 
               include_examples 'returns an error'
@@ -211,15 +208,11 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when total depth after adding would exceed limit' do
               before do
-                epic1 = create(:epic, group: group)
+                add_parents_to(epic: epic, count: 1) # epic is on level 2
 
-                epic.update(parent: epic1) # epic is on level 2
-
-                # epic_to_add has 3 children (level 4 including epic_to_add)
-                # that would mean level 6 after relating epic_to_add on epic
-                epic2 = create(:epic, group: group, parent: epic_to_add)
-                epic3 = create(:epic, group: group, parent: epic2)
-                create(:epic, group: group, parent: epic3)
+                # epic_to_add has 5 children (level 6 including epic_to_add)
+                # that would mean level 8 after relating epic_to_add on epic
+                add_children_to(epic: epic_to_add, count: 5)
               end
 
               let(:another_epic) { create(:epic) }
@@ -257,6 +250,34 @@ RSpec.describe EpicLinks::CreateService do
               subject { add_epic([]) }
 
               include_examples 'returns an error'
+            end
+
+            context 'when there are invalid references' do
+              let(:epic) { create(:epic, confidential: true, group: group) }
+              let(:invalid_epic1) { create(:epic, group: group) }
+              let(:valid_epic) { create(:epic, :confidential, group: group) }
+              let(:invalid_epic2) { create(:epic, group: group) }
+
+              subject do
+                add_epic([invalid_epic1.to_reference(full: true),
+                          valid_epic.to_reference(full: true),
+                          invalid_epic2.to_reference(full: true)])
+              end
+
+              it 'adds only valid references' do
+                subject
+
+                expect(epic.reload.children).to match_array([valid_epic])
+              end
+
+              it 'returns error status' do
+                expect(subject).to eq(
+                  status: :error,
+                  http_status: 422,
+                  message: "#{invalid_epic1.to_reference} cannot be added: A non-confidential epic cannot be assigned to a confidential parent epic. "\
+                           "#{invalid_epic2.to_reference} cannot be added: A non-confidential epic cannot be assigned to a confidential parent epic"
+                )
+              end
             end
           end
         end

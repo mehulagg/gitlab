@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -11,6 +11,17 @@ View and resolve abuse reports from GitLab users.
 
 GitLab administrators can view and [resolve](#resolving-abuse-reports) abuse
 reports in the Admin Area.
+
+## Receiving notifications of abuse reports
+
+To receive notifications of new abuse reports by e-mail, follow these steps:
+
+1. Select **Admin Area > Settings >  Reporting**.
+1. Expand the **Abuse reports** section.
+1. Provide an email address.
+
+The notification email address can also be set and retrieved
+[using the API](../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls).
 
 ## Reporting abuse
 
@@ -23,14 +34,14 @@ To access abuse reports, go to **Admin Area > Abuse Reports**.
 
 There are 3 ways to resolve an abuse report, with a button for each method:
 
-- Remove user & report. This will:
-  - [Delete the reported user](../profile/account/delete_account.md) from the
+- Remove user & report. This:
+  - [Deletes the reported user](../profile/account/delete_account.md) from the
     instance.
-  - Remove the abuse report from the list.
+  - Removes the abuse report from the list.
 - [Block user](#blocking-users).
-- Remove report. This will:
-  - Remove the abuse report from the list.
-  - Remove access restrictions for the reported user.
+- Remove report. This:
+  - Removes the abuse report from the list.
+  - Removes access restrictions for the reported user.
 
 The following is an example of the **Abuse Reports** page:
 
@@ -46,8 +57,7 @@ Blocking a user:
 - Leaves them in the abuse report list.
 - Changes the **Block user** button to a disabled **Already blocked** button.
 
-The user will be notified with the
-[following message](https://gitlab.com/gitlab-org/gitlab/blob/master/app/workers/email_receiver_worker.rb#L38):
+The user is notified with the following message:
 
 ```plaintext
 Your account has been blocked. If you believe this is in error, contact a staff member.
@@ -63,7 +73,7 @@ page:
 
 ![abuse-report-blocked-user-image](img/abuse_report_blocked_user.png)
 
-NOTE: **Note:**
+NOTE:
 Users can be [blocked](../../api/users.md#block-user) and
 [unblocked](../../api/users.md#unblock-user) using the GitLab API.
 

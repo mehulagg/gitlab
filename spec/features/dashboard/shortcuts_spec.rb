@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard shortcuts', :js do
+RSpec.describe 'Dashboard shortcuts', :js do
   context 'logged in' do
     let(:user) { create(:user) }
     let(:project) { create(:project) }
@@ -13,7 +13,7 @@ describe 'Dashboard shortcuts', :js do
       visit root_dashboard_path
     end
 
-    it 'Navigate to tabs' do
+    it 'navigate to tabs' do
       find('body').send_keys([:shift, 'I'])
 
       check_page_title('Issues')
@@ -45,7 +45,7 @@ describe 'Dashboard shortcuts', :js do
       visit explore_root_path
     end
 
-    it 'Navigate to tabs' do
+    it 'navigate to tabs' do
       find('body').send_keys([:shift, 'G'])
 
       find('.nothing-here-block')
@@ -59,7 +59,7 @@ describe 'Dashboard shortcuts', :js do
       find('body').send_keys([:shift, 'P'])
 
       find('.nothing-here-block')
-      expect(page).to have_content("This user doesn't have any personal projects")
+      expect(page).to have_content('Explore public groups to find projects to contribute to.')
     end
   end
 

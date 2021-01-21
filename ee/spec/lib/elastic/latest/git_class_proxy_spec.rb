@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe Elastic::Latest::GitClassProxy do
+RSpec.describe Elastic::Latest::GitClassProxy, :elastic do
   let_it_be(:project) { create(:project, :repository) }
   let(:included_class) { Elastic::Latest::RepositoryClassProxy }
 
   subject { included_class.new(project.repository) }
 
-  describe '#elastic_search_as_found_blob', :elastic do
+  describe '#elastic_search_as_found_blob' do
     before do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
@@ -30,5 +30,12 @@ RSpec.describe Elastic::Latest::GitClassProxy do
       expect(result.data).to include('Popen')
       expect(result.project).to eq(project)
     end
+  end
+
+  it "names elasticsearch queries" do
+    subject.elastic_search_as_found_blob('*')
+
+    assert_named_queries('doc:is_a:blob',
+                         'blob:match:search_terms')
   end
 end

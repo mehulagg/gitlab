@@ -3,18 +3,18 @@ import {
   designUploadSkippedWarning,
 } from '~/design_management/utils/error_messages';
 
-const mockFilenames = n =>
+const mockFilenames = (n) =>
   Array(n)
     .fill(0)
     .map((_, i) => ({ filename: `${i + 1}.jpg` }));
 
 describe('Error message', () => {
   describe('designDeletionError', () => {
-    const singularMsg = 'Could not delete a design. Please try again.';
-    const pluralMsg = 'Could not delete designs. Please try again.';
+    const singularMsg = 'Could not archive a design. Please try again.';
+    const pluralMsg = 'Could not archive designs. Please try again.';
 
     describe('when [singular=true]', () => {
-      it.each([[undefined], [true]])('uses singular grammar', singularOption => {
+      it.each([[undefined], [true]])('uses singular grammar', (singularOption) => {
         expect(designDeletionError({ singular: singularOption })).toEqual(singularMsg);
       });
     });
@@ -55,7 +55,7 @@ describe('Error message', () => {
       'Upload skipped. Some of the designs you tried uploading did not change: 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg, and 2 more.',
     ],
   ])('designUploadSkippedWarning', (uploadedFiles, skippedFiles, expected) => {
-    test('returns expected warning message', () => {
+    it('returns expected warning message', () => {
       expect(designUploadSkippedWarning(uploadedFiles, skippedFiles)).toBe(expected);
     });
   });

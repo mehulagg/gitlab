@@ -10,21 +10,25 @@ module ResourceAccessTokens
     end
 
     def execute
-      return unless feature_enabled?
       return error("User does not have permission to create #{resource_type} Access Token") unless has_permission_to_create?
 
-      # We skip authorization by default, since the user creating the bot is not an admin
-      # and project/group bot users are not created via sign-up
       user = create_user
 
       return error(user.errors.full_messages.to_sentence) unless user.persisted?
-      return error("Failed to provide maintainer access") unless provision_access(resource, user)
+
+      member = create_membership(resource, user)
+
+      unless member.persisted?
+        delete_failed_user(user)
+        return error("Could not provision maintainer access to project access token")
+      end
 
       token_response = create_personal_access_token(user)
 
       if token_response.success?
         success(token_response.payload[:personal_access_token])
       else
+        delete_failed_user(user)
         error(token_response.message)
       end
     end
@@ -33,23 +37,21 @@ module ResourceAccessTokens
 
     attr_reader :resource_type, :resource
 
-    def feature_enabled?
-      ::Feature.enabled?(:resource_access_token, resource)
-    end
-
     def has_permission_to_create?
-      case resource_type
-      when 'project'
-        can?(current_user, :admin_project, resource)
-      when 'group'
-        can?(current_user, :admin_group, resource)
-      else
-        false
-      end
+      %w(project group).include?(resource_type) && can?(current_user, :admin_resource_access_tokens, resource)
     end
 
     def create_user
+      # Even project maintainers can create project access tokens, which in turn
+      # creates a bot user, and so it becomes necessary to  have `skip_authorization: true`
+      # since someone like a project maintainer does not inherently have the ability
+      # to create a new user in the system.
+
       Users::CreateService.new(current_user, default_user_params).execute(skip_authorization: true)
+    end
+
+    def delete_failed_user(user)
+      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true)
     end
 
     def default_user_params
@@ -57,7 +59,8 @@ module ResourceAccessTokens
         name: params[:name] || "#{resource.name.to_s.humanize} bot",
         email: generate_email,
         username: generate_username,
-        user_type: "#{resource_type}_bot".to_sym
+        user_type: "#{resource_type}_bot".to_sym,
+        skip_confirmation: true # Bot users should always have their emails confirmed.
       }
     end
 
@@ -80,7 +83,9 @@ module ResourceAccessTokens
     end
 
     def create_personal_access_token(user)
-      PersonalAccessTokens::CreateService.new(user, personal_access_token_params).execute
+      PersonalAccessTokens::CreateService.new(
+        current_user: user, target_user: user, params: personal_access_token_params
+      ).execute
     end
 
     def personal_access_token_params
@@ -96,8 +101,8 @@ module ResourceAccessTokens
       Gitlab::Auth.resource_bot_scopes
     end
 
-    def provision_access(resource, user)
-      resource.add_maintainer(user)
+    def create_membership(resource, user)
+      resource.add_user(user, :maintainer, expires_at: params[:expires_at])
     end
 
     def error(message)

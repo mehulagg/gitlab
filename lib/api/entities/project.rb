@@ -35,6 +35,7 @@ module API
         end
       end
 
+      expose :packages_enabled
       expose :empty_repo?, as: :empty_repo
       expose :archived?, as: :archived
       expose :visibility
@@ -51,6 +52,8 @@ module API
       expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:current_user]) }
       expose(:jobs_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
+      expose :service_desk_enabled
+      expose :service_desk_address
 
       expose(:can_create_merge_request_in) do |project, options|
         Ability.allowed?(options[:current_user], :create_merge_request_in, project)
@@ -64,6 +67,8 @@ module API
       expose(:builds_access_level) { |project, options| project.project_feature.string_access_level(:builds) }
       expose(:snippets_access_level) { |project, options| project.project_feature.string_access_level(:snippets) }
       expose(:pages_access_level) { |project, options| project.project_feature.string_access_level(:pages) }
+      expose(:operations_access_level) { |project, options| project.project_feature.string_access_level(:operations) }
+      expose(:analytics_access_level) { |project, options| project.project_feature.string_access_level(:analytics) }
 
       expose :emails_disabled
       expose :shared_runners_enabled
@@ -81,6 +86,7 @@ module API
       expose :open_issues_count, if: lambda { |project, options| project.feature_available?(:issues, options[:current_user]) }
       expose :runners_token, if: lambda { |_project, options| options[:user_can_admin_project] }
       expose :ci_default_git_depth
+      expose :ci_forward_deployment_enabled
       expose :public_builds, as: :public_jobs
       expose :build_git_strategy, if: lambda { |project, options| options[:user_can_admin_project] } do |project, options|
         project.build_allow_git_fetch ? 'fetch' : 'clone'
@@ -93,6 +99,8 @@ module API
         SharedGroupWithProject.represent(project.project_group_links, options)
       end
       expose :only_allow_merge_if_pipeline_succeeds
+      expose :allow_merge_on_skipped_pipeline
+      expose :restrict_user_defined_variables
       expose :request_access_enabled
       expose :only_allow_merge_if_all_discussions_are_resolved
       expose :remove_source_branch_after_merge
@@ -119,6 +127,7 @@ module API
         # MR describing the solution: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20555
         super(projects_relation).preload(:group)
                                 .preload(:ci_cd_settings)
+                                .preload(:project_setting)
                                 .preload(:container_expiration_policy)
                                 .preload(:auto_devops)
                                 .preload(project_group_links: { group: :route },

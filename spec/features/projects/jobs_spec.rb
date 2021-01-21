@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'tempfile'
 
-describe 'Jobs', :clean_gitlab_redis_shared_state do
+RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   include Gitlab::Routing
   include ProjectForksHelper
 
@@ -25,72 +25,113 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   describe "GET /:project/jobs" do
-    let!(:job) { create(:ci_build, pipeline: pipeline) }
-
-    context "Pending scope" do
+    context 'with no jobs' do
       before do
-        visit project_jobs_path(project, scope: :pending)
-      end
+        stub_experiment(jobs_empty_state: experiment_active)
+        stub_experiment_for_subject(jobs_empty_state: in_experiment_group)
 
-      it "shows Pending tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Pending')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Running scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :running)
-      end
-
-      it "shows Running tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Running')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Finished scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :finished)
-      end
-
-      it "shows Finished tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Finished')
-        expect(page).to have_content 'No jobs to show'
-      end
-    end
-
-    context "All jobs" do
-      before do
-        project.builds.running_or_pending.each(&:success)
         visit project_jobs_path(project)
       end
 
-      it "shows All tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'All')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
+      context 'when experiment not active' do
+        let(:experiment_active) { false }
+        let(:in_experiment_group) { false }
+
+        it 'shows the empty state control page' do
+          expect(page).to have_content('No jobs to show')
+          expect(page).to have_link('Get started with Pipelines')
+        end
+      end
+
+      context 'when experiment active and user in control group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { false }
+
+        it 'shows the empty state control page' do
+          expect(page).to have_content('No jobs to show')
+          expect(page).to have_link('Get started with Pipelines')
+        end
+      end
+
+      context 'when experiment active and user in experimental group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { true }
+
+        it 'shows the empty state experiment page' do
+          expect(page).to have_content('Use jobs to automate your tasks')
+          expect(page).to have_link('Create CI/CD configuration file')
+        end
       end
     end
 
-    context "when visiting old URL" do
-      let(:jobs_url) do
-        project_jobs_path(project)
+    context 'with a job' do
+      let!(:job) { create(:ci_build, pipeline: pipeline) }
+
+      context "Pending scope" do
+        before do
+          visit project_jobs_path(project, scope: :pending)
+        end
+
+        it "shows Pending tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Pending')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      before do
-        visit jobs_url.sub('/-/jobs', '/builds')
+      context "Running scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :running)
+        end
+
+        it "shows Running tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Running')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      it "redirects to new URL" do
-        expect(page.current_path).to eq(jobs_url)
+      context "Finished scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :finished)
+        end
+
+        it "shows Finished tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Finished')
+          expect(page).to have_content 'No jobs to show'
+        end
+      end
+
+      context "All jobs" do
+        before do
+          project.builds.running_or_pending.each(&:success)
+          visit project_jobs_path(project)
+        end
+
+        it "shows All tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'All')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
+      end
+
+      context "when visiting old URL" do
+        let(:jobs_url) do
+          project_jobs_path(project)
+        end
+
+        before do
+          visit jobs_url.sub('/-/jobs', '/builds')
+        end
+
+        it "redirects to new URL" do
+          expect(page.current_path).to eq(jobs_url)
+        end
       end
     end
   end
@@ -282,7 +323,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
           href = new_project_issue_path(project, options)
 
           page.within('.build-sidebar') do
-            expect(find('.js-new-issue')['href']).to include(href)
+            expect(find('[data-testid="job-new-issue"]')['href']).to include(href)
           end
         end
       end
@@ -373,13 +414,29 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:expire_at) { Time.now + 7.days }
 
         context 'when user has ability to update job' do
-          it 'keeps artifacts when keep button is clicked' do
-            expect(page).to have_content 'The artifacts will be removed in'
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
 
-            click_link 'Keep'
+            it 'keeps artifacts when keep button is clicked' do
+              expect(page).to have_content 'The artifacts will be removed in'
 
-            expect(page).to have_no_link 'Keep'
-            expect(page).to have_no_content 'The artifacts will be removed in'
+              click_link 'Keep'
+
+              expect(page).to have_no_link 'Keep'
+              expect(page).to have_no_content 'The artifacts will be removed in'
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'shows the keep button' do
+              expect(page).to have_link 'Keep'
+            end
           end
         end
 
@@ -395,9 +452,26 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
       context 'when artifacts expired' do
         let(:expire_at) { Time.now - 7.days }
 
-        it 'does not have the Keep button' do
-          expect(page).to have_content 'The artifacts were removed'
-          expect(page).not_to have_link 'Keep'
+        context 'when artifacts are unlocked' do
+          before do
+            job.pipeline.unlocked!
+          end
+
+          it 'does not have the Keep button' do
+            expect(page).to have_content 'The artifacts were removed'
+            expect(page).not_to have_link 'Keep'
+          end
+        end
+
+        context 'when artifacts are locked' do
+          before do
+            job.pipeline.artifacts_locked!
+          end
+
+          it 'has the Keep button' do
+            expect(page).not_to have_content 'The artifacts were removed'
+            expect(page).to have_link 'Keep'
+          end
         end
       end
     end
@@ -425,7 +499,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
       it do
         wait_for_all_requests
-        expect(page).to have_css('.js-raw-link-controller')
+        expect(page).to have_css('[data-testid="job-raw-link-controller"]')
       end
     end
 
@@ -551,7 +625,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
         it 'shows deployment message' do
           expect(page).to have_content 'This job is deployed to production'
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
 
         context 'when there is a cluster used for the deployment' do
@@ -583,7 +657,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
         it 'shows a link for the job' do
           expect(page).to have_link environment.name
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
       end
 
@@ -593,7 +667,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         it 'shows a link to latest deployment' do
           expect(page).to have_link environment.name
           expect(page).to have_content 'This job is creating a deployment'
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
         end
       end
     end
@@ -645,15 +719,15 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         end
 
         it 'renders a link to the most recent deployment' do
-          expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
-          expect(find('.js-job-deployment-link')['href']).to include(second_deployment.deployable.project.path, second_deployment.deployable_id.to_s)
+          expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
+          expect(find('[data-testid="job-deployment-link"]')['href']).to include(second_deployment.deployable.project.path, second_deployment.deployable_id.to_s)
         end
 
         context 'when deployment does not have a deployable' do
           let!(:second_deployment) { create(:deployment, :success, environment: environment, deployable: nil) }
 
           it 'has an empty href' do
-            expect(find('.js-job-deployment-link')['href']).to be_empty
+            expect(find('[data-testid="job-deployment-link"]')['href']).to be_empty
           end
         end
       end
@@ -679,7 +753,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
             expected_text = 'This job is creating a deployment to staging'
 
             expect(page).to have_css('.environment-information', text: expected_text)
-            expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+            expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
           end
 
           context 'when it has deployment' do
@@ -690,7 +764,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
               expect(page).to have_css('.environment-information', text: expected_text)
               expect(page).to have_css('.environment-information', text: 'latest deployment')
-              expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+              expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
             end
           end
         end
@@ -705,7 +779,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
               '.environment-information', text: expected_text)
             expect(page).not_to have_css(
               '.environment-information', text: 'latest deployment')
-            expect(find('.js-environment-link')['href']).to match("environments/#{environment.id}")
+            expect(find('[data-testid="job-environment-link"]')['href']).to match("environments/#{environment.id}")
           end
         end
       end
@@ -837,7 +911,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
         it 'renders empty state' do
           expect(page).to have_content(job.detailed_status(user).illustration[:title])
-          expect(page).not_to have_selector('.js-build-trace')
+          expect(page).not_to have_selector('.job-log')
           expect(page).to have_content('This job has been canceled')
         end
       end
@@ -852,7 +926,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
 
       it 'renders empty state' do
         expect(page).to have_content(job.detailed_status(user).illustration[:title])
-        expect(page).not_to have_selector('.js-build-trace')
+        expect(page).not_to have_selector('.job-log')
         expect(page).to have_content('This job has been skipped')
       end
     end
@@ -875,7 +949,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        page.within('.js-job-erased-block') do
+        page.within('[data-testid="job-erased-block"]') do
           expect(page).to have_content('Job has been erased')
         end
       end
@@ -888,7 +962,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        expect(page).not_to have_css('.js-job-erased-block')
+        expect(page).not_to have_css('[data-testid="job-erased-block"]')
       end
     end
 
@@ -901,8 +975,8 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        expect(page).to have_css('.js-job-sidebar.right-sidebar-collapsed', visible: false)
-        expect(page).not_to have_css('.js-job-sidebar.right-sidebar-expanded', visible: false)
+        expect(page).to have_css('[data-testid="job-sidebar"].right-sidebar-collapsed', visible: false)
+        expect(page).not_to have_css('[data-testid="job-sidebar"].right-sidebar-expanded', visible: false)
       end
     end
 
@@ -913,8 +987,8 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        expect(page).to have_css('.js-job-sidebar.right-sidebar-expanded')
-        expect(page).not_to have_css('.js-job-sidebar.right-sidebar-collapsed')
+        expect(page).to have_css('[data-testid="job-sidebar"].right-sidebar-expanded')
+        expect(page).not_to have_css('[data-testid="job-sidebar"].right-sidebar-collapsed')
       end
     end
 
@@ -929,7 +1003,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:job) { create(:ci_build, :pending, pipeline: pipeline, runner: runner) }
 
         it 'renders message about job being stuck because no runners are active' do
-          expect(page).to have_css('.js-stuck-no-active-runner')
+          expect(page).to have_selector('[data-testid="job-stuck-no-active-runners"]')
           expect(page).to have_content("This job is stuck because you don't have any active runners that can run this job.")
         end
       end
@@ -939,7 +1013,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:job) { create(:ci_build, :pending, pipeline: pipeline, runner: runner, tag_list: %w(docker linux)) }
 
         it 'renders message about job being stuck because of no runners with the specified tags' do
-          expect(page).to have_css('.js-stuck-with-tags')
+          expect(page).to have_selector('[data-testid="job-stuck-with-tags"')
           expect(page).to have_content("This job is stuck because you don't have any active runners online or available with any of these tags assigned to them:")
         end
       end
@@ -949,7 +1023,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:job) { create(:ci_build, :pending, pipeline: pipeline, runner: runner, tag_list: %w(docker linux)) }
 
         it 'renders message about job being stuck because of no runners with the specified tags' do
-          expect(page).to have_css('.js-stuck-with-tags')
+          expect(page).to have_selector('[data-testid="job-stuck-with-tags"')
           expect(page).to have_content("This job is stuck because you don't have any active runners online or available with any of these tags assigned to them:")
         end
       end
@@ -957,8 +1031,8 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
       context 'without any runners available' do
         let(:job) { create(:ci_build, :pending, pipeline: pipeline) }
 
-        it 'renders message about job being stuck because not runners are available' do
-          expect(page).to have_css('.js-stuck-no-active-runner')
+        it 'renders message about job being stuck because no runners are available' do
+          expect(page).to have_selector('[data-testid="job-stuck-no-active-runners"]')
           expect(page).to have_content("This job is stuck because you don't have any active runners that can run this job.")
         end
       end
@@ -968,7 +1042,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:job) { create(:ci_build, :pending, pipeline: pipeline, runner: runner) }
 
         it 'renders message about job being stuck because runners are offline' do
-          expect(page).to have_css('.js-stuck-no-runners')
+          expect(page).to have_selector('[data-testid="job-stuck-no-runners"')
           expect(page).to have_content("This job is stuck because the project doesn't have any runners online assigned to it.")
         end
       end
@@ -980,7 +1054,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
       before do
         job.run!
         visit project_job_path(project, job)
-        find('.js-cancel-job').click
+        find('[data-testid="cancel-button"]').click
       end
 
       it 'loads the page and shows all needed controls' do
@@ -997,7 +1071,7 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        find('.js-retry-button').click
+        find('[data-testid="retry-button"]').click
       end
 
       it 'shows the right status and buttons' do
@@ -1021,6 +1095,31 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
       it 'does not show the Retry button' do
         page.within('aside.right-sidebar') do
           expect(page).not_to have_content 'Retry'
+        end
+      end
+    end
+
+    context "Job that failed because of a forward deployment failure" do
+      let(:job) { create(:ci_build, :forward_deployment_failure, pipeline: pipeline) }
+
+      before do
+        visit project_job_path(project, job)
+        wait_for_requests
+
+        find('[data-testid="retry-button"]').click
+      end
+
+      it 'shows a modal to warn the user' do
+        page.within('.modal-header') do
+          expect(page).to have_content 'Are you sure you want to retry this job?'
+        end
+      end
+
+      it 'retries the job' do
+        find('[data-testid="retry-button-modal"]').click
+
+        within '[data-testid="ci-header-content"]' do
+          expect(page).to have_content('pending')
         end
       end
     end
@@ -1113,9 +1212,11 @@ describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   describe "GET /:project/jobs/:id/trace.json" do
+    let(:build) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
+
     context "Job from project" do
       before do
-        visit trace_project_job_path(project, job, format: :json)
+        visit trace_project_job_path(project, build, format: :json)
       end
 
       it { expect(page.status_code).to eq(200) }

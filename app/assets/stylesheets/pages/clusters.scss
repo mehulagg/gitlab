@@ -58,22 +58,6 @@
   }
 }
 
-.cluster-application-banner {
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cluster-application-banner-close {
-  align-self: flex-start;
-  font-weight: 500;
-  font-size: 20px;
-  color: $orange-900;
-  opacity: 1;
-  margin: $gl-padding-8 14px 0 0;
-}
-
 .cluster-application-description {
   flex: 1;
 }
@@ -124,7 +108,7 @@
       background-color: none;
       border: 0;
       font-weight: bold;
-      color: $gl-gray-500;
+      color: $gray-500;
     }
   }
 }
@@ -156,7 +140,7 @@
 }
 
 .cluster-deployments-warning {
-  color: $orange-600;
+  color: $orange-500;
 }
 
 .badge.pods-badge {
@@ -166,6 +150,6 @@
 
 .cluster-status-indicator {
   &.disabled {
-    background-color: $gray-600;
+    background-color: $gray-400;
   }
 }

@@ -85,11 +85,12 @@ module UsageDataHelpers
       projects
       projects_imported_from_github
       projects_asana_active
+      projects_jenkins_active
       projects_jira_active
       projects_jira_server_active
       projects_jira_cloud_active
-      projects_slack_notifications_active
-      projects_slack_slash_active
+      projects_jira_dvcs_cloud_active
+      projects_jira_dvcs_server_active
       projects_slack_active
       projects_slack_slash_commands_active
       projects_custom_issue_tracker_active
@@ -98,7 +99,9 @@ module UsageDataHelpers
       projects_with_repositories_enabled
       projects_with_error_tracking_enabled
       projects_with_alerts_service_enabled
+      projects_with_enabled_alert_integrations
       projects_with_prometheus_alerts
+      projects_with_tracing_enabled
       projects_with_expiration_policy_enabled
       projects_with_expiration_policy_disabled
       projects_with_expiration_policy_enabled_with_keep_n_unset
@@ -121,6 +124,7 @@ module UsageDataHelpers
       projects_with_terraform_states
       pages_domains
       protected_branches
+      protected_branches_except_default
       releases
       remote_mirrors
       snippets
@@ -132,11 +136,13 @@ module UsageDataHelpers
       todos
       uploads
       web_hooks
+      user_preferences_user_gitpod_enabled
     ).push(*SMAU_KEYS)
 
   USAGE_DATA_KEYS = %i(
       active_user_count
       counts
+      counts_monthly
       recorded_at
       edition
       version
@@ -156,16 +162,20 @@ module UsageDataHelpers
       git
       gitaly
       database
-      avg_cycle_analytics
       prometheus_metrics_enabled
       web_ide_clientside_preview_enabled
       ingress_modsecurity_enabled
       object_store
+      topology
     ).freeze
 
   def stub_usage_data_connections
     allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
     allow(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(false)
+  end
+
+  def clear_memoized_values(values)
+    values.each { |v| described_class.clear_memoization(v) }
   end
 
   def stub_object_store_settings
@@ -219,5 +229,17 @@ module UsageDataHelpers
            'background_upload' => true,
            'proxy_download' => false } }
       )
+  end
+
+  def expect_prometheus_client_to(*receive_matchers)
+    receive_matchers.each { |m| expect(prometheus_client).to m }
+  end
+
+  def for_defined_days_back(days: [31, 3])
+    days.each do |n|
+      travel_to(n.days.ago) do
+        yield
+      end
+    end
   end
 end

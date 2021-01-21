@@ -7,8 +7,10 @@ module Gitlab
         ##
         # Entry that represents a set of needs dependencies.
         #
-        class Needs < ::Gitlab::Config::Entry::Node
+        class Needs < ::Gitlab::Config::Entry::ComposableArray
           include ::Gitlab::Config::Entry::Validatable
+
+          NEEDS_CROSS_PIPELINE_DEPENDENCIES_LIMIT = 5
 
           validations do
             validate do
@@ -27,28 +29,26 @@ module Gitlab
                 errors.add(:config, "uses invalid types: #{extra_keys.join(', ')}")
               end
             end
-          end
 
-          def compose!(deps = nil)
-            super(deps) do
-              [@config].flatten.each_with_index do |need, index|
-                @entries[index] = ::Gitlab::Config::Entry::Factory.new(Entry::Need)
-                  .value(need)
-                  .with(key: "need", parent: self, description: "need definition.") # rubocop:disable CodeReuse/ActiveRecord
-                  .create!
-              end
+            validate on: :composed do
+              cross_dependencies = value[:cross_dependency].to_a
+              cross_pipeline_dependencies = cross_dependencies.select { |dep| dep[:pipeline] }
 
-              @entries.each_value do |entry|
-                entry.compose!(deps)
+              if cross_pipeline_dependencies.size > NEEDS_CROSS_PIPELINE_DEPENDENCIES_LIMIT
+                errors.add(:config, "must be less than or equal to #{NEEDS_CROSS_PIPELINE_DEPENDENCIES_LIMIT}")
               end
             end
           end
 
           def value
-            values = @entries.values.select(&:type)
+            values = @entries.select(&:type)
             values.group_by(&:type).transform_values do |values|
               values.map(&:value)
             end
+          end
+
+          def composable_class
+            Entry::Need
           end
         end
       end

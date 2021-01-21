@@ -6,12 +6,9 @@ export default {
   components: {
     GlEmptyState,
   },
+  inject: ['emptyStateSvgPath'],
   props: {
     helpPath: {
-      type: String,
-      required: true,
-    },
-    svgPath: {
       type: String,
       required: true,
     },
@@ -25,7 +22,7 @@ export default {
 <template>
   <gl-empty-state
     :title="s__('SecurityReports|Monitor vulnerabilities in your code')"
-    :svg-path="svgPath"
+    :svg-path="emptyStateSvgPath"
     :description="$options.DESCRIPTION"
     :primary-button-link="helpPath"
     :primary-button-text="__('Learn more')"

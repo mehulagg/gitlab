@@ -2,7 +2,7 @@
   .settings-header
     %h4
       = _('External authentication')
-    %button.btn.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
       = _('External Classification Policy Authorization')
@@ -19,7 +19,7 @@
               = _('Enable classification control using an external service')
           %span.form-text.text-muted
             = external_authorization_description
-            = link_to icon('question-circle'), help_page_path('user/admin_area/settings/external_authorization')
+            = link_to sprite_icon('question-o'), help_page_path('user/admin_area/settings/external_authorization')
         .form-group
           = f.label :external_authorization_service_url, _('Service URL'), class: 'label-bold'
           = f.text_field :external_authorization_service_url, class: 'form-control'
@@ -47,5 +47,4 @@
         .form-group
           = f.label :external_authorization_service_default_label, _('Default classification label'), class: 'label-bold'
           = f.text_field :external_authorization_service_default_label, class: 'form-control'
-
-      = f.submit 'Save changes', class: "btn btn-success"
+      = f.submit 'Save changes', class: "gl-button btn btn-success"

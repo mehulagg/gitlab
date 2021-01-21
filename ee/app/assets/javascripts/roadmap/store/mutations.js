@@ -2,6 +2,12 @@ import Vue from 'vue';
 
 import * as types from './mutation_types';
 
+const resetEpics = (state) => {
+  state.epics = [];
+  state.childrenFlags = {};
+  state.epicIds = [];
+};
+
 export default {
   [types.SET_INITIAL_DATA](state, data) {
     Object.assign(state, { ...data });
@@ -38,7 +44,7 @@ export default {
     state.epicsFetchInProgress = false;
     state.epicsFetchForTimeframeInProgress = false;
     state.epicsFetchFailure = true;
-    Object.keys(state.childrenEpics).forEach(id => {
+    Object.keys(state.childrenEpics).forEach((id) => {
       Vue.set(state.childrenFlags, id, {
         itemChildrenFetchInProgress: false,
       });
@@ -54,7 +60,7 @@ export default {
   },
 
   [types.INIT_EPIC_CHILDREN_FLAGS](state, { epics }) {
-    epics.forEach(item => {
+    epics.forEach((item) => {
       Vue.set(state.childrenFlags, item.id, {
         itemExpanded: false,
         itemChildrenFetchInProgress: false,
@@ -102,5 +108,21 @@ export default {
 
   [types.SET_BUFFER_SIZE](state, bufferSize) {
     state.bufferSize = bufferSize;
+  },
+
+  [types.SET_FILTER_PARAMS](state, filterParams) {
+    state.filterParams = filterParams;
+    state.hasFiltersApplied = Boolean(filterParams);
+    resetEpics(state);
+  },
+
+  [types.SET_EPICS_STATE](state, epicsState) {
+    state.epicsState = epicsState;
+    resetEpics(state);
+  },
+
+  [types.SET_SORTED_BY](state, sortedBy) {
+    state.sortedBy = sortedBy;
+    resetEpics(state);
   },
 };

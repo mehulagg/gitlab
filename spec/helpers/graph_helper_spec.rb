@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GraphHelper do
+RSpec.describe GraphHelper do
   describe '#get_refs' do
     let(:project) { create(:project, :repository) }
     let(:commit)  { project.commit("master") }
@@ -13,6 +13,18 @@ describe GraphHelper do
       refs = refs(project.repository, commit)
 
       expect(refs).to match('master')
+    end
+  end
+
+  describe '#should_render_deployment_frequency_charts' do
+    let(:project) { create(:project, :private) }
+
+    before do
+      self.instance_variable_set(:@project, project)
+    end
+
+    it 'always returns false' do
+      expect(should_render_deployment_frequency_charts).to be(false)
     end
   end
 end

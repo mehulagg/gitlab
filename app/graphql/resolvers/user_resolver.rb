@@ -6,13 +6,13 @@ module Resolvers
 
     type Types::UserType, null: true
 
-    argument :id, GraphQL::ID_TYPE,
+    argument :id, Types::GlobalIDType[User],
              required: false,
-             description: 'ID of the User'
+             description: 'ID of the User.'
 
     argument :username, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Username of the User'
+             description: 'Username of the User.'
 
     def ready?(id: nil, username: nil)
       unless id.present? ^ username.present?

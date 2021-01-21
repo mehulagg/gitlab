@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard > User filters projects' do
+RSpec.describe 'Dashboard > User filters projects' do
   let(:user) { create(:user) }
   let(:project) { create(:project, name: 'Victorialand', namespace: user.namespace, created_at: 2.seconds.ago, updated_at: 2.seconds.ago) }
   let(:user2) { create(:user) }
@@ -173,11 +173,11 @@ describe 'Dashboard > User filters projects' do
         end
       end
 
-      it 'defaults to "Last updated"', :js do
+      it 'defaults to "Name"', :js do
         page.find('.filtered-search-block #filtered-search-sorting-dropdown').click
         active_sorting_option = page.first('.filtered-search-block #filtered-search-sorting-dropdown .is-active')
 
-        expect(active_sorting_option).to have_content 'Last updated'
+        expect(active_sorting_option).to have_content 'Name'
       end
 
       context 'Sorting by name' do

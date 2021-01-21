@@ -47,6 +47,11 @@ RSpec.describe Groups::Security::ComplianceDashboardsController do
             expect(assigns(:merge_requests)).not_to be_empty
           end
         end
+
+        it_behaves_like 'tracking unique visits', :show do
+          let(:request_params) { { group_id: group.to_param } }
+          let(:target_id) { 'g_compliance_dashboard' }
+        end
       end
 
       context 'when user is not allowed to access group compliance dashboard' do

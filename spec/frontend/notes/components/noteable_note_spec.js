@@ -34,7 +34,13 @@ describe('issue_note', () => {
         note,
       },
       localVue,
-      stubs: ['note-header', 'user-avatar-link', 'note-actions', 'note-body'],
+      stubs: [
+        'note-header',
+        'user-avatar-link',
+        'note-actions',
+        'note-body',
+        'multiline-comment-form',
+      ],
     });
   });
 
@@ -46,12 +52,30 @@ describe('issue_note', () => {
     it('should render if has multiline comment', () => {
       const position = {
         line_range: {
-          start_line_code: 'abc_1_1',
-          end_line_code: 'abc_2_2',
+          start: {
+            line_code: 'abc_1_1',
+            type: null,
+            old_line: '1',
+            new_line: '1',
+          },
+          end: {
+            line_code: 'abc_2_2',
+            type: null,
+            old_line: '2',
+            new_line: '2',
+          },
         },
+      };
+      const line = {
+        line_code: 'abc_1_1',
+        type: null,
+        old_line: '1',
+        new_line: '1',
       };
       wrapper.setProps({
         note: { ...note, position },
+        discussionRoot: true,
+        line,
       });
 
       return wrapper.vm.$nextTick().then(() => {
@@ -59,15 +83,67 @@ describe('issue_note', () => {
       });
     });
 
-    it('should not render if has single line comment', () => {
+    it('should only render if it has everything it needs', () => {
       const position = {
         line_range: {
-          start_line_code: 'abc_1_1',
-          end_line_code: 'abc_1_1',
+          start: {
+            line_code: 'abc_1_1',
+            type: null,
+            old_line: '',
+            new_line: '',
+          },
+          end: {
+            line_code: 'abc_2_2',
+            type: null,
+            old_line: '2',
+            new_line: '2',
+          },
         },
+      };
+      const line = {
+        line_code: 'abc_1_1',
+        type: null,
+        old_line: '1',
+        new_line: '1',
       };
       wrapper.setProps({
         note: { ...note, position },
+        discussionRoot: true,
+        line,
+      });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findMultilineComment().exists()).toBe(false);
+      });
+    });
+
+    it('should not render if has single line comment', () => {
+      const position = {
+        line_range: {
+          start: {
+            line_code: 'abc_1_1',
+            type: null,
+            old_line: '1',
+            new_line: '1',
+          },
+          end: {
+            line_code: 'abc_1_1',
+            type: null,
+            old_line: '1',
+            new_line: '1',
+          },
+        },
+      };
+      const line = {
+        line_code: 'abc_1_1',
+        type: null,
+        old_line: '1',
+        new_line: '1',
+      };
+      wrapper.setProps({
+        note: { ...note, position },
+        discussionRoot: true,
+        line,
       });
 
       return wrapper.vm.$nextTick().then(() => {
@@ -132,13 +208,14 @@ describe('issue_note', () => {
     expect(noteBodyProps.helpPagePath).toBe('');
   });
 
-  it('prevents note preview xss', done => {
+  it('prevents note preview xss', (done) => {
     const imgSrc = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const noteBody = `<img src="${imgSrc}" onload="alert(1)" />`;
     const alertSpy = jest.spyOn(window, 'alert');
     store.hotUpdate({
       actions: {
         updateNote() {},
+        setSelectedCommentPositionHover() {},
       },
     });
     const noteBodyComponent = wrapper.find(NoteBody);
@@ -153,7 +230,7 @@ describe('issue_note', () => {
   });
 
   describe('cancel edit', () => {
-    it('restores content of updated note', done => {
+    it('restores content of updated note', (done) => {
       const updatedText = 'updated note text';
       store.hotUpdate({
         actions: {

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::CloseService do
+RSpec.describe Issues::CloseService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user, email: "user@example.com") }
   let(:user2) { create(:user, email: "user2@example.com") }
@@ -67,6 +67,15 @@ describe Issues::CloseService do
 
       service.execute(issue)
     end
+
+    context 'issue is incident type' do
+      let(:issue) { create(:incident, project: project) }
+      let(:current_user) { user }
+
+      subject { service.execute(issue) }
+
+      it_behaves_like 'an incident management tracked event', :incident_management_incident_closed
+    end
   end
 
   describe '#close_issue' do
@@ -75,6 +84,7 @@ describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:jira_service, project: project) }
 
         it 'closes the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -85,6 +95,7 @@ describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:jira_service, project: project, active: false) }
 
         it 'does not close the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -95,6 +106,7 @@ describe Issues::CloseService do
         let!(:external_issue_tracker) { create(:bugzilla_service, project: project) }
 
         it 'does not close the issue on the external issue tracker' do
+          project.reload
           expect(project.external_issue_tracker).not_to receive(:close_issue)
 
           described_class.new(project, user).close_issue(external_issue)
@@ -103,10 +115,14 @@ describe Issues::CloseService do
     end
 
     context "closed by a merge request", :sidekiq_might_not_need_inline do
-      it 'mentions closure via a merge request' do
+      subject(:close_issue) do
         perform_enqueued_jobs do
           described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request)
         end
+      end
+
+      it 'mentions closure via a merge request' do
+        close_issue
 
         email = ActionMailer::Base.deliveries.last
 
@@ -115,12 +131,15 @@ describe Issues::CloseService do
         expect(email.body.parts.map(&:body)).to all(include(closing_merge_request.to_reference))
       end
 
+      it_behaves_like 'records an onboarding progress action', :issue_auto_closed do
+        let(:namespace) { project.namespace }
+      end
+
       context 'when user cannot read merge request' do
         it 'does not mention merge request' do
           project.project_feature.update_attribute(:repository_access_level, ProjectFeature::DISABLED)
-          perform_enqueued_jobs do
-            described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request)
-          end
+
+          close_issue
 
           email = ActionMailer::Base.deliveries.last
           body_text = email.body.parts.map(&:body).join(" ")
@@ -132,13 +151,11 @@ describe Issues::CloseService do
       end
 
       context 'updating `metrics.first_mentioned_in_commit_at`' do
-        subject { described_class.new(project, user).close_issue(issue, closed_via: closing_merge_request) }
-
         context 'when `metrics.first_mentioned_in_commit_at` is not set' do
           it 'uses the first commit authored timestamp' do
             expected = closing_merge_request.commits.first.authored_date
 
-            subject
+            close_issue
 
             expect(issue.metrics.first_mentioned_in_commit_at).to eq(expected)
           end
@@ -150,7 +167,7 @@ describe Issues::CloseService do
           end
 
           it 'does not update the metrics' do
-            expect { subject }.not_to change { issue.metrics.first_mentioned_in_commit_at }
+            expect { close_issue }.not_to change { issue.metrics.first_mentioned_in_commit_at }
           end
         end
 
@@ -158,7 +175,7 @@ describe Issues::CloseService do
           let(:closing_merge_request) { create(:merge_request, :without_diffs, source_project: project) }
 
           it 'does not update the metrics' do
-            subject
+            close_issue
 
             expect(issue.metrics.first_mentioned_in_commit_at).to be_nil
           end
@@ -197,7 +214,7 @@ describe Issues::CloseService do
     end
 
     context "valid params" do
-      def close_issue
+      subject(:close_issue) do
         perform_enqueued_jobs do
           described_class.new(project, user).close_issue(issue)
         end
@@ -224,26 +241,11 @@ describe Issues::CloseService do
         expect(email.subject).to include(issue.title)
       end
 
-      context 'when resource state events are disabled' do
-        before do
-          stub_feature_flags(track_resource_state_change_events: false)
-        end
+      it 'creates resource state event about the issue being closed' do
+        close_issue
 
-        it 'creates system note about the issue being closed' do
-          close_issue
-
-          note = issue.notes.last
-          expect(note.note).to include "closed"
-        end
-      end
-
-      context 'when resource state events are enabled' do
-        it 'creates resource state event about the issue being closed' do
-          close_issue
-
-          event = issue.resource_state_events.last
-          expect(event.state).to eq('closed')
-        end
+        event = issue.resource_state_events.last
+        expect(event.state).to eq('closed')
       end
 
       it 'marks todos as done' do
@@ -252,8 +254,43 @@ describe Issues::CloseService do
         expect(todo.reload).to be_done
       end
 
+      context 'when there is an associated Alert Management Alert' do
+        context 'when alert can be resolved' do
+          let!(:alert) { create(:alert_management_alert, issue: issue, project: project) }
+
+          it 'resolves an alert and sends a system note' do
+            expect_next_instance_of(SystemNotes::AlertManagementService) do |notes_service|
+              expect(notes_service).to receive(:closed_alert_issue).with(issue)
+            end
+
+            close_issue
+
+            expect(alert.reload.resolved?).to eq(true)
+          end
+        end
+
+        context 'when alert cannot be resolved' do
+          let!(:alert) { create(:alert_management_alert, :with_validation_errors, issue: issue, project: project) }
+
+          before do
+            allow(Gitlab::AppLogger).to receive(:warn).and_call_original
+          end
+
+          it 'writes a warning into the log' do
+            close_issue
+
+            expect(Gitlab::AppLogger).to have_received(:warn).with(
+              message: 'Cannot resolve an associated Alert Management alert',
+              issue_id: issue.id,
+              alert_id: alert.id,
+              alert_errors: { hosts: ['hosts array is over 255 chars'] }
+            )
+          end
+        end
+      end
+
       it 'deletes milestone issue counters cache' do
-        issue.update(milestone: create(:milestone, project: project))
+        issue.update!(milestone: create(:milestone, project: project))
 
         expect_next_instance_of(Milestones::ClosedIssuesCountService, issue.milestone) do |service|
           expect(service).to receive(:delete_cache).and_call_original
@@ -261,6 +298,8 @@ describe Issues::CloseService do
 
         close_issue
       end
+
+      it_behaves_like 'does not record an onboarding progress action'
     end
 
     context 'when issue is not confidential' do

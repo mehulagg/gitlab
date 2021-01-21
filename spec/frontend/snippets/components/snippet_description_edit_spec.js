@@ -1,5 +1,6 @@
-import SnippetDescriptionEdit from '~/snippets/components/snippet_description_edit.vue';
 import { shallowMount } from '@vue/test-utils';
+import SnippetDescriptionEdit from '~/snippets/components/snippet_description_edit.vue';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 
 describe('Snippet Description Edit component', () => {
   let wrapper;
@@ -14,6 +15,9 @@ describe('Snippet Description Edit component', () => {
         value,
         markdownPreviewPath,
         markdownDocsPath,
+      },
+      stubs: {
+        MarkdownField,
       },
     });
   }

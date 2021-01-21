@@ -1,6 +1,12 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Geo Rake Tasks **(PREMIUM ONLY)**
 
-The following Rake tasks are for [Geo installations](../geo/replication/index.md).
+The following Rake tasks are for [Geo installations](../geo/index.md).
 
 ## Git housekeeping
 

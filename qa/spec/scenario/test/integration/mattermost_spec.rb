@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe QA::Scenario::Test::Integration::Mattermost do
+RSpec.describe QA::Scenario::Test::Integration::Mattermost do
   describe '#perform' do
     it_behaves_like 'a QA scenario class' do
       let(:args) { %w[gitlab_address mattermost_address] }
@@ -10,6 +10,7 @@ describe QA::Scenario::Test::Integration::Mattermost do
           mattermost_address: 'http://mattermost_address'
         }
       end
+
       let(:named_options) { %w[--address http://gitlab_address --mattermost-address http://mattermost_address] }
       let(:tags) { [:mattermost] }
       let(:options) { ['path1']}

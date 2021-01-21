@@ -2,40 +2,54 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::GroupSearchResults do
-  subject(:results) { described_class.new(user, nil, nil, group, query, nil) }
-
+RSpec.describe Gitlab::Elastic::GroupSearchResults, :elastic do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:guest) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::GUEST) } }
+  let(:filters) { {} }
+  let(:query) { '*' }
+
+  subject(:results) { described_class.new(user, query, Project.all.pluck_primary_key, group: group, filters: filters) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
-  context 'user search' do
-    let(:query) { guest.username }
+  context 'issues search', :sidekiq_inline do
+    let!(:project) { create(:project, :public, group: group) }
+    let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
+    let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+    let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
+
+    let(:query) { 'foo' }
+    let(:scope) { 'issues' }
 
     before do
-      expect(Gitlab::GroupSearchResults).to receive(:new).and_call_original
+      project.add_developer(user)
+
+      ensure_elasticsearch_index!
     end
 
-    it { expect(results.objects('users')).to eq([guest]) }
-    it { expect(results.limited_users_count).to eq(1) }
+    include_examples 'search results filtered by state'
+    include_examples 'search results filtered by confidential'
+  end
 
-    describe 'pagination' do
-      let(:query) {}
+  context 'merge_requests search', :sidekiq_inline do
+    let!(:project) { create(:project, :public, group: group) }
+    let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
+    let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
 
-      let_it_be(:user2) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::REPORTER) } }
+    let(:query) { 'foo' }
+    let(:scope) { 'merge_requests' }
 
-      it 'returns the correct page of results' do
-        expect(results.objects('users', page: 1, per_page: 1)).to eq([user2])
-        expect(results.objects('users', page: 2, per_page: 1)).to eq([guest])
-      end
-
-      it 'returns the correct number of results for one page' do
-        expect(results.objects('users', page: 1, per_page: 2).count).to eq(2)
+    include_examples 'search results filtered by state' do
+      before do
+        ensure_elasticsearch_index!
       end
     end
+  end
+
+  context 'query performance' do
+    include_examples 'does not hit Elasticsearch twice for objects and counts', %w|projects notes blobs wiki_blobs commits issues merge_requests milestones|
   end
 end

@@ -2,11 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Projects > Files > User creates files', :js do
+RSpec.describe 'Projects > Files > User creates files', :js do
+  include BlobSpecHelpers
+
   let(:fork_message) do
     "You're not allowed to make changes to this project directly. "\
     "A fork of this project has been created that you can make changes in, so you can submit a merge request."
   end
+
   let(:project) { create(:project, :repository, name: 'Shop') }
   let(:project2) { create(:project, :repository, name: 'Another Project', path: 'another-project') }
   let(:project_tree_path_root_ref) { project_tree_path(project, project.repository.root_ref) }
@@ -14,8 +17,6 @@ describe 'Projects > Files > User creates files', :js do
   let(:user) { create(:user) }
 
   before do
-    stub_feature_flags(web_ide_default: false, code_navigation: false)
-
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -67,7 +68,7 @@ describe 'Projects > Files > User creates files', :js do
         file_name = find('#file_name')
         file_name.set options[:file_name] || 'README.md'
 
-        find('.ace_text-input', visible: false).send_keys.native.send_keys options[:file_content] || 'Some content'
+        find('.monaco-editor textarea').send_keys.native.send_keys options[:file_content] || 'Some content'
 
         click_button 'Commit changes'
       end
@@ -89,7 +90,7 @@ describe 'Projects > Files > User creates files', :js do
 
       it 'creates and commit a new file' do
         find('#editor')
-        execute_script("ace.edit('editor').setValue('*.rbca')")
+        execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
         fill_in(:file_name, with: 'not_a_file.md')
         fill_in(:commit_message, with: 'New commit message', visible: true)
         click_button('Commit changes')
@@ -104,8 +105,10 @@ describe 'Projects > Files > User creates files', :js do
       end
 
       it 'creates and commit a new file with new lines at the end of file' do
+        set_default_button('edit')
+
         find('#editor')
-        execute_script('ace.edit("editor").setValue("Sample\n\n\n")')
+        execute_script('monaco.editor.getModels()[0].setValue("Sample\n\n\n")')
         fill_in(:file_name, with: 'not_a_file.md')
         fill_in(:commit_message, with: 'New commit message', visible: true)
         click_button('Commit changes')
@@ -114,10 +117,10 @@ describe 'Projects > Files > User creates files', :js do
 
         expect(current_path).to eq(new_file_path)
 
-        find('.js-edit-blob').click
+        click_link('Edit')
 
         find('#editor')
-        expect(evaluate_script('ace.edit("editor").getValue()')).to eq("Sample\n\n\n")
+        expect(evaluate_script('monaco.editor.getModels()[0].getValue()')).to eq("Sample\n\n\n")
       end
 
       it 'creates and commit a new file with a directory name' do
@@ -126,7 +129,7 @@ describe 'Projects > Files > User creates files', :js do
         expect(page).to have_selector('.file-editor')
 
         find('#editor')
-        execute_script("ace.edit('editor').setValue('*.rbca')")
+        execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
         fill_in(:commit_message, with: 'New commit message', visible: true)
         click_button('Commit changes')
 
@@ -141,7 +144,7 @@ describe 'Projects > Files > User creates files', :js do
         expect(page).to have_selector('.file-editor')
 
         find('#editor')
-        execute_script("ace.edit('editor').setValue('*.rbca')")
+        execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
         fill_in(:file_name, with: 'not_a_file.md')
         fill_in(:commit_message, with: 'New commit message', visible: true)
         fill_in(:branch_name, with: 'new_branch_name', visible: true)
@@ -176,7 +179,7 @@ describe 'Projects > Files > User creates files', :js do
         expect(page).to have_selector('.file-editor')
 
         find('#editor')
-        execute_script("ace.edit('editor').setValue('*.rbca')")
+        execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
 
         fill_in(:file_name, with: 'not_a_file.md')
         fill_in(:commit_message, with: 'New commit message', visible: true)

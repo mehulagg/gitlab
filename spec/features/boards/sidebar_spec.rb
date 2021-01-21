@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards', :js do
+RSpec.describe 'Issue Boards', :js do
   include BoardHelpers
   include FilteredSearchHelpers
 
@@ -23,7 +23,7 @@ describe 'Issue Boards', :js do
   let(:application_settings) { {} }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do
@@ -72,7 +72,7 @@ describe 'Issue Boards', :js do
     end
   end
 
-  it 'removes card from board when clicking ' do
+  it 'removes card from board when clicking' do
     click_card(card)
 
     page.within('.issue-boards-sidebar') do
@@ -229,7 +229,7 @@ describe 'Issue Boards', :js do
   end
 
   context 'time tracking' do
-    let(:compare_meter_tooltip) { find('.time-tracking .time-tracking-content .compare-meter')['data-original-title'] }
+    let(:compare_meter_tooltip) { find('.time-tracking .time-tracking-content .compare-meter')['title'] }
 
     before do
       issue2.timelogs.create(time_spent: 14400, user: user)

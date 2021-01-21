@@ -9,11 +9,11 @@ module QA
             include QA::Page::Settings::Common
 
             view 'app/views/admin/application_settings/preferences.html.haml' do
-              element :email_section
+              element :email_content
             end
 
             def expand_email_settings(&block)
-              expand_section(:email_section) do
+              expand_content(:email_content) do
                 Component::Email.perform(&block)
               end
             end

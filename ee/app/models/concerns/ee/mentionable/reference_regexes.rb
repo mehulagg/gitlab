@@ -11,7 +11,8 @@ module EE
         override :other_patterns
         def other_patterns
           super.unshift(
-            ::Epic.reference_pattern
+            ::Epic.reference_pattern,
+            ::Vulnerability.reference_pattern
           )
         end
       end

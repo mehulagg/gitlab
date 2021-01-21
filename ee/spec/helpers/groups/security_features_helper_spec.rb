@@ -10,6 +10,7 @@ RSpec.describe Groups::SecurityFeaturesHelper do
 
   before do
     allow(helper).to receive(:current_user).and_return(user)
+    allow(helper).to receive(:can?).and_return(false)
   end
 
   describe '#group_level_security_dashboard_available?' do
@@ -74,6 +75,27 @@ RSpec.describe Groups::SecurityFeaturesHelper do
     end
   end
 
+  describe '#group_level_audit_events_available?' do
+    where(:audit_events_feature_enabled, :read_group_audit_events_permission, :result) do
+      true  | false | false
+      true  | true  | true
+      false | false | false
+      false | true  | false
+    end
+
+    with_them do
+      before do
+        stub_licensed_features(audit_events: audit_events_feature_enabled)
+        allow(helper).to receive(:can?).with(user, :read_group_audit_events, group)
+          .and_return(read_group_audit_events_permission)
+      end
+
+      it 'returns the expected result' do
+        expect(helper.group_level_audit_events_available?(group)).to eq(result)
+      end
+    end
+  end
+
   describe '#primary_group_level_security_feature_path' do
     subject { helper.primary_group_level_security_feature_path(group) }
 
@@ -107,11 +129,22 @@ RSpec.describe Groups::SecurityFeaturesHelper do
       end
     end
 
+    context 'group_level_audit_events is available' do
+      before do
+        allow(helper).to receive(:group_level_audit_events_available?).with(group).and_return(true)
+      end
+
+      it 'returns path to audit events' do
+        expect(subject).to eq(group_audit_events_path(group))
+      end
+    end
+
     context 'when no security features are available' do
       before do
         allow(helper).to receive(:group_level_security_dashboard_available?).with(group).and_return(false)
         allow(helper).to receive(:group_level_compliance_dashboard_available?).with(group).and_return(false)
         allow(helper).to receive(:group_level_credentials_inventory_available?).with(group).and_return(false)
+        allow(helper).to receive(:group_level_audit_events_available?).with(group).and_return(false)
       end
 
       it 'returns nil' do
@@ -123,14 +156,11 @@ RSpec.describe Groups::SecurityFeaturesHelper do
   describe '#group_level_security_dashboard_data' do
     let(:expected_data) do
       {
-        vulnerabilities_endpoint: "/groups/#{group.full_path}/-/security/vulnerability_findings",
-        vulnerabilities_history_endpoint: "/groups/#{group.full_path}/-/security/vulnerability_findings/history",
         projects_endpoint: "http://localhost/api/v4/groups/#{group.id}/projects",
         group_full_path: group.full_path,
-        vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
+        no_vulnerabilities_svg_path: '/images/illustrations/issues.svg',
         empty_state_svg_path: '/images/illustrations/security-dashboard-empty-state.svg',
         dashboard_documentation: '/help/user/application_security/security_dashboard/index',
-        vulnerable_projects_endpoint: "/groups/#{group.full_path}/-/security/vulnerable_projects",
         vulnerabilities_export_endpoint: "/api/v4/security/groups/#{group.id}/vulnerability_exports"
       }
     end

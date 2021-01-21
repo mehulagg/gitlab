@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PreviewMarkdownService do
+RSpec.describe PreviewMarkdownService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -25,12 +25,14 @@ describe PreviewMarkdownService do
     let(:merge_request) do
       create(:merge_request, target_project: project, source_project: project)
     end
+
     let(:text) { "```suggestion\nfoo\n```" }
     let(:params) do
       suggestion_params.merge(text: text,
                               target_type: 'MergeRequest',
                               target_id: merge_request.iid)
     end
+
     let(:service) { described_class.new(project, user, params) }
 
     context 'when preview markdown param is present' do
@@ -106,6 +108,7 @@ describe PreviewMarkdownService do
         target_id: issue.id
       }
     end
+
     let(:service) { described_class.new(project, user, params) }
 
     it 'removes quick actions from text' do
@@ -128,6 +131,7 @@ describe PreviewMarkdownService do
         target_type: 'MergeRequest'
       }
     end
+
     let(:service) { described_class.new(project, user, params) }
 
     it 'removes quick actions from text' do
@@ -153,6 +157,7 @@ describe PreviewMarkdownService do
         target_id: commit.id
       }
     end
+
     let(:service) { described_class.new(project, user, params) }
 
     it 'removes quick actions from text' do

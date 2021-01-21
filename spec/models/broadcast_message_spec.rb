@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BroadcastMessage do
+RSpec.describe BroadcastMessage do
   subject { build(:broadcast_message) }
 
   it { is_expected.to be_valid }
@@ -160,6 +160,12 @@ describe BroadcastMessage do
       create(:broadcast_message, target_path: "*/issues/*", broadcast_type: broadcast_type)
 
       expect(subject.call('/group/issues/test').length).to eq(1)
+    end
+
+    it "does not return message if the target path is set but no current path is provided" do
+      create(:broadcast_message, target_path: "*/issues/*", broadcast_type: broadcast_type)
+
+      expect(subject.call.length).to eq(0)
     end
   end
 

@@ -2,14 +2,15 @@
 
 require 'spec_helper'
 
-describe NotificationsHelper do
+RSpec.describe NotificationsHelper do
   describe 'notification_icon' do
-    it { expect(notification_icon(:disabled)).to match('class="fa fa-microphone-slash fa-fw"') }
-    it { expect(notification_icon(:owner_disabled)).to match('class="fa fa-microphone-slash fa-fw"') }
-    it { expect(notification_icon(:participating)).to match('class="fa fa-volume-up fa-fw"') }
-    it { expect(notification_icon(:mention)).to match('class="fa fa-at fa-fw"') }
-    it { expect(notification_icon(:global)).to match('class="fa fa-globe fa-fw"') }
-    it { expect(notification_icon(:watch)).to match('class="fa fa-eye fa-fw"') }
+    it { expect(notification_icon(:disabled)).to match('data-testid="notifications-off-icon"') }
+    it { expect(notification_icon(:owner_disabled)).to match('data-testid="notifications-off-icon"') }
+    it { expect(notification_icon(:participating)).to match('data-testid="notifications-icon"') }
+    it { expect(notification_icon(:mention)).to match('data-testid="at-icon"') }
+    it { expect(notification_icon(:global)).to match('data-testid="earth-icon') }
+    it { expect(notification_icon(:watch)).to match('data-testid="eye-icon"') }
+    it { expect(notification_icon(:custom)).to equal('') }
   end
 
   describe 'notification_title' do
@@ -19,9 +20,19 @@ describe NotificationsHelper do
   end
 
   describe '#notification_event_name' do
-    it { expect(notification_event_name(:success_pipeline)).to match('Successful pipeline') }
-    it { expect(notification_event_name(:failed_pipeline)).to match('Failed pipeline') }
-    it { expect(notification_event_name(:fixed_pipeline)).to match('Fixed pipeline') }
+    context 'for success_pipeline' do
+      it 'returns the custom name' do
+        expect(FastGettext).to receive(:cached_find).with('NotificationEvent|Successful pipeline')
+        expect(notification_event_name(:success_pipeline)).to eq('Successful pipeline')
+      end
+    end
+
+    context 'for everything else' do
+      it 'returns a humanized name' do
+        expect(FastGettext).to receive(:cached_find).with('NotificationEvent|Failed pipeline')
+        expect(notification_event_name(:failed_pipeline)).to eq('Failed pipeline')
+      end
+    end
   end
 
   describe '#notification_icon_level' do

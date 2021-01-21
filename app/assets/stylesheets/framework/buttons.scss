@@ -112,7 +112,7 @@
 }
 
 @mixin btn-orange {
-  @include btn-color($orange-500, $orange-600, $orange-600, $orange-700, $orange-700, $orange-800, $white);
+  @include btn-color($orange-500, $orange-600, $orange-500, $orange-600, $orange-600, $orange-800, $white);
 }
 
 @mixin btn-red {
@@ -166,23 +166,21 @@
     line-height: $gl-btn-xs-line-height;
   }
 
-  &.btn-success,
-  &.btn-register {
+  &.btn-success {
     @include btn-green;
   }
 
-  &.btn-inverted {
+  &.btn-inverted:not(.disabled):not(:disabled) {
     &.btn-success {
       @include btn-outline($white, $green-600, $green-500, $green-100, $green-700, $green-500, $green-200, $green-600, $green-800);
     }
 
-    &.btn-remove,
     &.btn-danger {
       @include btn-outline($white, $red-500, $red-500, $red-100, $red-700, $red-500, $red-200, $red-600, $red-800);
     }
 
     &.btn-warning {
-      @include btn-outline($white, $orange-500, $orange-500, $orange-100, $orange-700, $orange-500, $orange-200, $orange-600, $orange-800);
+      @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
     }
 
     &.btn-primary,
@@ -200,18 +198,11 @@
     @include btn-orange;
   }
 
-  &.btn-close,
-  &.btn-close-color {
-    @include btn-outline($white, $orange-600, $orange-500, $orange-100, $orange-700, $orange-500, $orange-200, $orange-600, $orange-800);
+  &.btn-close {
+    @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
   }
 
-  &.btn-spam {
-    @include btn-outline($white, $red-500, $red-500, $red-100, $red-700, $red-500, $red-200, $red-600, $red-800);
-  }
-
-  &.btn-danger,
-  &.btn-remove,
-  &.btn-red {
+  &.btn-danger {
     @include btn-red;
   }
 
@@ -219,28 +210,12 @@
     float: right;
   }
 
-  &.btn-reopen,
-  .btn-reopen-color {
-    /* should be same as parent class for now */
-  }
-
   &.btn-grouped {
     @include btn-with-margin;
   }
 
   &.btn-icon {
-    color: $gl-gray-700;
-  }
-
-  .fa-caret-down,
-  .fa-chevron-down {
-    margin-left: 5px;
-  }
-
-  &.dropdown-toggle {
-    .fa-caret-down {
-      margin-left: 3px;
-    }
+    color: $gray-700;
   }
 
   &.btn-text-field {
@@ -274,15 +249,10 @@
   svg {
     height: 15px;
     width: 15px;
-    position: relative;
-    top: 2px;
   }
 
-  svg,
-  .fa {
-    &:not(:last-child) {
-      margin-right: 5px;
-    }
+  svg:not(:last-child) {
+    margin-right: 5px;
   }
 }
 
@@ -372,23 +342,14 @@
 
 .btn-loading {
   &:not(.disabled) {
-    .fa,
     .spinner {
       display: none;
     }
-  }
-
-  .fa {
-    margin-right: 5px;
   }
 }
 
 .btn-build {
   margin-left: 10px;
-
-  i {
-    color: $gl-text-color-secondary;
-  }
 
   svg {
     fill: $gl-text-color-secondary;
@@ -396,7 +357,7 @@
 }
 
 .clone-dropdown-btn a {
-  color: $gl-gray-700;
+  color: $gray-700;
 
   &:hover {
     text-decoration: none;
@@ -416,12 +377,6 @@
 .btn-inverted {
   &-secondary {
     @include btn-outline($white, $blue-500, $blue-500, $blue-100, $blue-700, $blue-500, $blue-200, $blue-600, $blue-800);
-  }
-}
-
-@include media-breakpoint-down(xs) {
-  .btn-wide-on-xs {
-    width: 100%;
   }
 }
 
@@ -495,24 +450,29 @@
   }
 }
 
+// The .btn-svg class is available for legacy icon buttons to
+// preserve a 34px height and have 16x16 icons at the same time.
+// Once a button is migrated (to the current 32px height)
+// please remove this class from the new button.
 .btn-svg svg {
   @include btn-svg;
 }
 
 // All disabled buttons, regardless of color, type, etc
 %disabled {
-  background-color: $gray-light !important;
-  border-color: $gray-200 !important;
-  color: $gl-text-color-disabled !important;
-  opacity: 1 !important;
-  cursor: default !important;
+  background-color: $gray-light;
+  border-color: $gray-100;
+  color: $gl-text-color-disabled;
+  opacity: 1;
+  text-decoration: none;
+  cursor: default;
 
   &.cursor-not-allowed {
-    cursor: not-allowed !important;
+    cursor: not-allowed;
   }
 
   i {
-    color: $gl-text-color-disabled !important;
+    color: $gl-text-color-disabled;
   }
 }
 
@@ -526,6 +486,10 @@ fieldset[disabled] .btn,
   &:hover {
     @extend %disabled;
   }
+
+  &.btn-link {
+    background-color: transparent;
+  }
 }
 
 [readonly] {
@@ -534,4 +498,14 @@ fieldset[disabled] .btn,
 
 .btn-no-padding {
   padding: 0;
+}
+
+// This class helps convert `.gl-button` children so that they consistently
+// match the style of `.btn` elements which might be around them. Ideally we
+// wouldn't need this class.
+//
+// Remove by upgrading all buttons in a container to use the new `.gl-button` style.
+.gl-button-deprecated-adapter .gl-button {
+  box-shadow: none;
+  border-width: 1px;
 }

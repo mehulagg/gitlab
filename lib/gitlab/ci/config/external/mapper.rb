@@ -33,6 +33,8 @@ module Gitlab
             locations
               .compact
               .map(&method(:normalize_location))
+              .flat_map(&method(:expand_project_files))
+              .map(&method(:expand_variables))
               .each(&method(:verify_duplicates!))
               .map(&method(:select_first_matching))
           end
@@ -46,9 +48,18 @@ module Gitlab
           # convert location if String to canonical form
           def normalize_location(location)
             if location.is_a?(String)
-              normalize_location_string(location)
+              expanded_location = expand_variables(location)
+              normalize_location_string(expanded_location)
             else
               location.deep_symbolize_keys
+            end
+          end
+
+          def expand_project_files(location)
+            return location unless location[:project]
+
+            Array.wrap(location[:file]).map do |file|
+              location.merge(file: file)
             end
           end
 
@@ -85,6 +96,33 @@ module Gitlab
             raise AmbigiousSpecificationError, "Include `#{location.to_json}` needs to match exactly one accessor!" unless matching.one?
 
             matching.first
+          end
+
+          def expand_variables(data)
+            return data unless ::Feature.enabled?(:variables_in_include_section_ci)
+
+            if data.is_a?(String)
+              expand(data)
+            else
+              transform(data)
+            end
+          end
+
+          def transform(data)
+            data.transform_values do |values|
+              case values
+              when Array
+                values.map { |value| expand(value.to_s) }
+              when String
+                expand(values)
+              else
+                values
+              end
+            end
+          end
+
+          def expand(data)
+            ExpandVariables.expand(data, context.variables)
           end
         end
       end

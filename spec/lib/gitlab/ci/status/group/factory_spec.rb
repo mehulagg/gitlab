@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::Group::Factory do
+RSpec.describe Gitlab::Ci::Status::Group::Factory do
   it 'inherits from the core factory' do
     expect(described_class)
       .to be < Gitlab::Ci::Status::Factory
@@ -11,5 +11,10 @@ describe Gitlab::Ci::Status::Group::Factory do
   it 'exposes group helpers' do
     expect(described_class.common_helpers)
       .to eq Gitlab::Ci::Status::Group::Common
+  end
+
+  it 'exposes extended statuses' do
+    expect(described_class.extended_statuses)
+      .to eq([[Gitlab::Ci::Status::SuccessWarning]])
   end
 end

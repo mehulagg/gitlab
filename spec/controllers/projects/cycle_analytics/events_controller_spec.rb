@@ -11,7 +11,7 @@ RSpec.describe Projects::CycleAnalytics::EventsController do
     project.add_maintainer(user)
   end
 
-  describe 'cycle analytics not set up flag' do
+  describe 'value stream analytics not set up flag' do
     context 'with no data' do
       it 'is empty' do
         get_issue
@@ -56,6 +56,8 @@ RSpec.describe Projects::CycleAnalytics::EventsController do
       end
     end
   end
+
+  include_examples GracefulTimeoutHandling
 
   def get_issue(additional_params: {})
     params = additional_params.merge(namespace_id: project.namespace, project_id: project)

@@ -1,10 +1,10 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import MRRules from 'ee/approvals/components/mr_edit/mr_rules.vue';
+import RuleControls from 'ee/approvals/components/rule_controls.vue';
+import Rules from 'ee/approvals/components/rules.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import MRRules from 'ee/approvals/components/mr_edit/mr_rules.vue';
-import Rules from 'ee/approvals/components/rules.vue';
-import RuleControls from 'ee/approvals/components/rule_controls.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import { createEmptyRule, createMRRule, createMRRuleWithSource } from '../../mock_data';
 
@@ -27,26 +27,16 @@ describe('EE Approvals MRRules', () => {
     wrapper = mount(localVue.extend(MRRules), {
       localVue,
       store: new Vuex.Store(store),
-      attachToDocument: true,
+      attachTo: document.body,
     });
   };
 
-  const findHeaders = () => wrapper.findAll('thead th').wrappers.map(x => x.text());
+  const findHeaders = () => wrapper.findAll('thead th').wrappers.map((x) => x.text());
   const findRuleName = () => wrapper.find('.js-name');
   const findRuleIndicator = () => wrapper.find({ ref: 'indicator' });
-  const findRuleMembers = () =>
-    wrapper
-      .find('td.js-members')
-      .find(UserAvatarList)
-      .props('items');
+  const findRuleMembers = () => wrapper.find('td.js-members').find(UserAvatarList).props('items');
   const findRuleControls = () => wrapper.find('td.js-controls').find(RuleControls);
-  const setTargetBranchInputValue = () => {
-    const value = 'new value';
-    const element = document.querySelector('#merge_request_target_branch');
-    element.value = value;
-    return value;
-  };
-  const callTargetBranchHandler = MutationObserverSpy => {
+  const callTargetBranchHandler = (MutationObserverSpy) => {
     const onTargetBranchMutationHandler = MutationObserverSpy.mock.calls[0][0];
     return onTargetBranchMutationHandler();
   };
@@ -55,12 +45,13 @@ describe('EE Approvals MRRules', () => {
     OriginalMutationObserver = global.MutationObserver;
     global.MutationObserver = jest
       .fn()
-      .mockImplementation(args => new OriginalMutationObserver(args));
+      .mockImplementation((args) => new OriginalMutationObserver(args));
 
     store = createStoreOptions(MREditModule());
     store.modules.approvals.state = {
       hasLoaded: true,
       rules: [],
+      targetBranch: 'master',
     };
     store.modules.approvals.actions.putRule = jest.fn();
   });
@@ -87,6 +78,7 @@ describe('EE Approvals MRRules', () => {
         fetchRules: jest.fn(),
         addEmptyRule: jest.fn(),
         setEmptyRule: jest.fn(),
+        setTargetBranch: jest.fn(),
       };
       store.state.settings.mrSettingsPath = 'some/path';
       store.state.settings.eligibleApproversDocsPath = 'some/path';
@@ -97,24 +89,19 @@ describe('EE Approvals MRRules', () => {
       targetBranchInputElement.parentNode.removeChild(targetBranchInputElement);
     });
 
-    it('sets the target branch data to be the same value as the target branch dropdown', () => {
-      factory();
-
-      expect(wrapper.vm.targetBranch).toBe(initialTargetBranch);
-    });
-
     it('updates the target branch data when the target branch dropdown is changed', () => {
       factory();
-      const newValue = setTargetBranchInputValue();
       callTargetBranchHandler(global.MutationObserver);
-      expect(wrapper.vm.targetBranch).toBe(newValue);
+      expect(store.modules.approvals.actions.setTargetBranch).toHaveBeenCalled();
     });
 
     it('re-fetches rules when target branch has changed', () => {
       factory();
-      setTargetBranchInputValue();
-      callTargetBranchHandler(global.MutationObserver);
-      expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalled();
+      store.modules.approvals.state.targetBranch = 'master123';
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(store.modules.approvals.actions.fetchRules).toHaveBeenCalled();
+      });
     });
 
     it('disconnects MutationObserver when component gets destroyed', () => {
@@ -170,7 +157,7 @@ describe('EE Approvals MRRules', () => {
       factory();
 
       const anyApproverCount = store.modules.approvals.state.rules.filter(
-        rule => rule.ruleType === 'any_approver',
+        (rule) => rule.ruleType === 'any_approver',
       );
 
       expect(anyApproverCount).toHaveLength(1);

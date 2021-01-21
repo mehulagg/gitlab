@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DraftNotes::DestroyService do
+RSpec.describe DraftNotes::DestroyService do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.target_project }
   let(:user) { merge_request.author }
@@ -22,7 +22,7 @@ describe DraftNotes::DestroyService do
   it 'destroys all draft notes for a user in a merge request' do
     create_list(:draft_note, 2, merge_request: merge_request, author: user)
 
-    expect { destroy }.to change { DraftNote.count }.by(-2)
+    expect { destroy }.to change { DraftNote.count }.by(-2) # rubocop:disable Rails/SaveBang
     expect(DraftNote.count).to eq(0)
   end
 
@@ -45,7 +45,7 @@ describe DraftNotes::DestroyService do
         allow_any_instance_of(DraftNote).to receive_message_chain(:diff_file, :unfolded?) { true }
         expect(merge_request).to receive_message_chain(:diffs, :clear_cache)
 
-        destroy
+        destroy # rubocop:disable Rails/SaveBang
       end
     end
   end

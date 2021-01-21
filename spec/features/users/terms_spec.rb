@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Users > Terms' do
+RSpec.describe 'Users > Terms' do
   include TermsHelper
 
   let!(:term) { create(:term, terms: 'By accepting, you promise to be nice!') }
@@ -24,6 +24,21 @@ describe 'Users > Terms' do
     expect(page).not_to have_content('Accept terms')
     expect(page).not_to have_content('Decline and sign out')
     expect(page).not_to have_content('Continue')
+  end
+
+  context 'when user is a project bot' do
+    let(:project_bot) { create(:user, :project_bot) }
+
+    before do
+      enforce_terms
+    end
+
+    it 'auto accepts the terms' do
+      visit terms_path
+
+      expect(page).not_to have_content('Accept terms')
+      expect(project_bot.terms_accepted?).to be(true)
+    end
   end
 
   context 'when signed in' do

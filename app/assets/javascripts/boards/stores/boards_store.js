@@ -1,10 +1,8 @@
 /* eslint-disable no-shadow, no-param-reassign,consistent-return */
 /* global List */
-
-import $ from 'jquery';
+/* global ListIssue */
 import { sortBy } from 'lodash';
 import Vue from 'vue';
-import Cookies from 'js-cookie';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
 import {
   urlParamsToObject,
@@ -12,9 +10,10 @@ import {
   parseBoolean,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
+import createDefaultClient from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '../eventhub';
 import { ListType } from '../constants';
 import IssueProject from '../models/project';
@@ -23,6 +22,8 @@ import ListAssignee from '../models/assignee';
 import ListMilestone from '../models/milestone';
 
 const PER_PAGE = 20;
+export const gqlClient = createDefaultClient();
+
 const boardsStore = {
   disabled: false,
   timeTracking: {
@@ -81,7 +82,7 @@ const boardsStore = {
   showPage(page) {
     this.state.currentPage = page;
   },
-  addList(listObj) {
+  updateListPosition(listObj) {
     const listType = listObj.listType || listObj.list_type;
     let { position } = listObj;
     if (listType === ListType.closed) {
@@ -91,12 +92,16 @@ const boardsStore = {
     }
 
     const list = new List({ ...listObj, position });
+    return list;
+  },
+  addList(listObj) {
+    const list = this.updateListPosition(listObj);
     this.state.lists = sortBy([...this.state.lists, list], 'position');
     return list;
   },
   new(listObj) {
     const list = this.addList(listObj);
-    const backlogList = this.findList('type', 'backlog', 'backlog');
+    const backlogList = this.findList('type', 'backlog');
 
     list
       .save()
@@ -109,36 +114,17 @@ const boardsStore = {
       .catch(() => {
         // https://gitlab.com/gitlab-org/gitlab-foss/issues/30821
       });
-    this.removeBlankState();
   },
+
   updateNewListDropdown(listId) {
-    $(`.js-board-list-${listId}`).removeClass('is-active');
-  },
-  shouldAddBlankState() {
-    // Decide whether to add the blank state
-    return !this.state.lists.filter(list => list.type !== 'backlog' && list.type !== 'closed')[0];
-  },
-  addBlankState() {
-    if (!this.shouldAddBlankState() || this.welcomeIsHidden() || this.disabled) return;
-
-    this.addList({
-      id: 'blank',
-      list_type: 'blank',
-      title: __('Welcome to your Issue Board!'),
-      position: 0,
-    });
-  },
-  removeBlankState() {
-    this.removeList('blank');
-
-    Cookies.set('issue_board_welcome_hidden', 'true', {
-      expires: 365 * 10,
-      path: '',
-    });
+    // eslint-disable-next-line no-unused-expressions
+    document
+      .querySelector(`.js-board-list-${getIdFromGraphQLId(listId)}`)
+      ?.classList.remove('is-active');
   },
 
   findIssueLabel(issue, findLabel) {
-    return issue.labels.find(label => label.id === findLabel.id);
+    return issue.labels.find((label) => label.id === findLabel.id);
   },
 
   goToNextPage(list) {
@@ -196,18 +182,15 @@ const boardsStore = {
     }
   },
   findListIssue(list, id) {
-    return list.issues.find(issue => issue.id === id);
+    return list.issues.find((issue) => issue.id === id);
   },
 
-  welcomeIsHidden() {
-    return parseBoolean(Cookies.get('issue_board_welcome_hidden'));
-  },
-  removeList(id, type = 'blank') {
-    const list = this.findList('id', id, type);
+  removeList(id) {
+    const list = this.findList('id', id);
 
     if (!list) return;
 
-    this.state.lists = this.state.lists.filter(list => list.id !== id);
+    this.state.lists = this.state.lists.filter((list) => list.id !== id);
   },
   moveList(listFrom, orderLists) {
     orderLists.forEach((id, i) => {
@@ -222,7 +205,7 @@ const boardsStore = {
     let moveBeforeId = null;
     let moveAfterId = null;
 
-    const listHasIssues = issues.every(issue => list.findIssue(issue.id));
+    const listHasIssues = issues.every((issue) => list.findIssue(issue.id));
 
     if (!listHasIssues) {
       if (newIndex !== undefined) {
@@ -240,21 +223,21 @@ const boardsStore = {
       }
 
       if (list.label) {
-        issues.forEach(issue => issue.addLabel(list.label));
+        issues.forEach((issue) => issue.addLabel(list.label));
       }
 
       if (list.assignee) {
         if (listFrom && listFrom.type === 'assignee') {
-          issues.forEach(issue => issue.removeAssignee(listFrom.assignee));
+          issues.forEach((issue) => issue.removeAssignee(listFrom.assignee));
         }
-        issues.forEach(issue => issue.addAssignee(list.assignee));
+        issues.forEach((issue) => issue.addAssignee(list.assignee));
       }
 
       if (IS_EE && list.milestone) {
         if (listFrom && listFrom.type === 'milestone') {
-          issues.forEach(issue => issue.removeMilestone(listFrom.milestone));
+          issues.forEach((issue) => issue.removeMilestone(listFrom.milestone));
         }
-        issues.forEach(issue => issue.addMilestone(list.milestone));
+        issues.forEach((issue) => issue.addMilestone(list.milestone));
       }
 
       if (listFrom) {
@@ -266,8 +249,22 @@ const boardsStore = {
   },
 
   removeListIssues(list, removeIssue) {
-    list.issues = list.issues.filter(issue => {
+    list.issues = list.issues.filter((issue) => {
       const matchesRemove = removeIssue.id === issue.id;
+
+      if (matchesRemove) {
+        list.issuesSize -= 1;
+        issue.removeLabel(list.label);
+      }
+
+      return !matchesRemove;
+    });
+  },
+  removeListMultipleIssues(list, removeIssues) {
+    const ids = removeIssues.map((issue) => issue.id);
+
+    list.issues = list.issues.filter((issue) => {
+      const matchesRemove = ids.includes(issue.id);
 
       if (matchesRemove) {
         list.issuesSize -= 1;
@@ -282,10 +279,19 @@ const boardsStore = {
     Object.assign(this.moving, { list, issue });
   },
 
+  onNewListIssueResponse(list, issue, data) {
+    issue.refreshData(data);
+
+    if (list.issues.length > 1) {
+      const moveBeforeId = list.issues[1].id;
+      this.moveIssue(issue.id, null, null, null, moveBeforeId);
+    }
+  },
+
   moveMultipleIssuesToList({ listFrom, listTo, issues, newIndex }) {
-    const issueTo = issues.map(issue => listTo.findIssue(issue.id));
-    const issueLists = issues.map(issue => issue.getLists()).flat();
-    const listLabels = issueLists.map(list => list.label);
+    const issueTo = issues.map((issue) => listTo.findIssue(issue.id));
+    const issueLists = issues.map((issue) => issue.getLists()).flat();
+    const listLabels = issueLists.map((list) => list.label);
     const hasMoveableIssues = issueTo.filter(Boolean).length > 0;
 
     if (!hasMoveableIssues) {
@@ -293,30 +299,30 @@ const boardsStore = {
       if (
         listTo.type === ListType.assignee &&
         listFrom.type === ListType.assignee &&
-        issues.some(issue => issue.findAssignee(listTo.assignee))
+        issues.some((issue) => issue.findAssignee(listTo.assignee))
       ) {
-        const targetIssues = issues.map(issue => listTo.findIssue(issue.id));
-        targetIssues.forEach(targetIssue => targetIssue.removeAssignee(listFrom.assignee));
+        const targetIssues = issues.map((issue) => listTo.findIssue(issue.id));
+        targetIssues.forEach((targetIssue) => targetIssue.removeAssignee(listFrom.assignee));
       } else if (listTo.type === 'milestone') {
-        const currentMilestones = issues.map(issue => issue.milestone);
+        const currentMilestones = issues.map((issue) => issue.milestone);
         const currentLists = this.state.lists
-          .filter(list => list.type === 'milestone' && list.id !== listTo.id)
-          .filter(list =>
-            list.issues.some(listIssue => issues.some(issue => listIssue.id === issue.id)),
+          .filter((list) => list.type === 'milestone' && list.id !== listTo.id)
+          .filter((list) =>
+            list.issues.some((listIssue) => issues.some((issue) => listIssue.id === issue.id)),
           );
 
-        issues.forEach(issue => {
-          currentMilestones.forEach(milestone => {
+        issues.forEach((issue) => {
+          currentMilestones.forEach((milestone) => {
             issue.removeMilestone(milestone);
           });
         });
 
-        issues.forEach(issue => {
+        issues.forEach((issue) => {
           issue.addMilestone(listTo.milestone);
         });
 
-        currentLists.forEach(currentList => {
-          issues.forEach(issue => {
+        currentLists.forEach((currentList) => {
+          issues.forEach((issue) => {
             currentList.removeIssue(issue);
           });
         });
@@ -328,36 +334,36 @@ const boardsStore = {
       }
     } else {
       listTo.updateMultipleIssues(issues, listFrom);
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeLabel(listFrom.label);
       });
     }
 
     if (listTo.type === ListType.closed && listFrom.type !== ListType.backlog) {
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
 
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeLabels(listLabels);
       });
     } else if (listTo.type === ListType.backlog && listFrom.type === ListType.assignee) {
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeAssignee(listFrom.assignee);
       });
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
     } else if (listTo.type === ListType.backlog && listFrom.type === ListType.milestone) {
-      issues.forEach(issue => {
+      issues.forEach((issue) => {
         issue.removeMilestone(listFrom.milestone);
       });
-      issueLists.forEach(list => {
-        issues.forEach(issue => {
+      issueLists.forEach((list) => {
+        issues.forEach((issue) => {
           list.removeIssue(issue);
         });
       });
@@ -374,8 +380,8 @@ const boardsStore = {
     if (issues.length === 1) return true;
 
     // Create list of ids for issues involved.
-    const listIssueIds = list.issues.map(issue => issue.id);
-    const movedIssueIds = issues.map(issue => issue.id);
+    const listIssueIds = list.issues.map((issue) => issue.id);
+    const movedIssueIds = issues.map((issue) => issue.id);
 
     // Check if moved issue IDs is sub-array
     // of source list issue IDs (i.e. contiguous selection).
@@ -385,7 +391,7 @@ const boardsStore = {
   moveIssueToList(listFrom, listTo, issue, newIndex) {
     const issueTo = listTo.findIssue(issue.id);
     const issueLists = issue.getLists();
-    const listLabels = issueLists.map(listIssue => listIssue.label);
+    const listLabels = issueLists.map((listIssue) => listIssue.label);
 
     if (!issueTo) {
       // Check if target list assignee is already present in this issue
@@ -399,12 +405,12 @@ const boardsStore = {
       } else if (listTo.type === 'milestone') {
         const currentMilestone = issue.milestone;
         const currentLists = this.state.lists
-          .filter(list => list.type === 'milestone' && list.id !== listTo.id)
-          .filter(list => list.issues.some(listIssue => issue.id === listIssue.id));
+          .filter((list) => list.type === 'milestone' && list.id !== listTo.id)
+          .filter((list) => list.issues.some((listIssue) => issue.id === listIssue.id));
 
         issue.removeMilestone(currentMilestone);
         issue.addMilestone(listTo.milestone);
-        currentLists.forEach(currentList => currentList.removeIssue(issue));
+        currentLists.forEach((currentList) => currentList.removeIssue(issue));
         listTo.addIssue(issue, listFrom, newIndex);
       } else {
         // Add to new lists issues if it doesn't already exist
@@ -416,7 +422,7 @@ const boardsStore = {
     }
 
     if (listTo.type === 'closed' && listFrom.type !== 'backlog') {
-      issueLists.forEach(list => {
+      issueLists.forEach((list) => {
         list.removeIssue(issue);
       });
       issue.removeLabels(listLabels);
@@ -455,18 +461,11 @@ const boardsStore = {
       moveAfterId: afterId,
     });
   },
-  findList(key, val, type = 'label') {
-    const filteredList = this.state.lists.filter(list => {
-      const byType = type
-        ? list.type === type || list.type === 'assignee' || list.type === 'milestone'
-        : true;
-
-      return list[key] === val && byType;
-    });
-    return filteredList[0];
+  findList(key, val) {
+    return this.state.lists.find((list) => list[key] === val);
   },
   findListByLabelId(id) {
-    return this.state.lists.find(list => list.type === 'label' && list.label.id === id);
+    return this.state.lists.find((list) => list.type === 'label' && list.label.id === id);
   },
 
   toggleFilter(filter) {
@@ -506,6 +505,10 @@ const boardsStore = {
     this.timeTracking.limitToHours = parseBoolean(limitToHours);
   },
 
+  generateBoardGid(boardId) {
+    return `gid://gitlab/Board/${boardId}`;
+  },
+
   generateBoardsPath(id) {
     return `${this.state.endpoints.boardsEndpoint}${id ? `/${id}` : ''}.json`;
   },
@@ -526,10 +529,6 @@ const boardsStore = {
 
   all() {
     return axios.get(this.state.endpoints.listsEndpoint);
-  },
-
-  generateDefaultLists() {
-    return axios.post(this.state.endpoints.listsEndpointGenerate, {});
   },
 
   createList(entityId, entityType) {
@@ -583,8 +582,8 @@ const boardsStore = {
     }
 
     return this.createList(entity.id, entityType)
-      .then(res => res.data)
-      .then(data => {
+      .then((res) => res.data)
+      .then((data) => {
         list.id = data.id;
         list.type = data.list_type;
         list.position = data.position;
@@ -601,7 +600,7 @@ const boardsStore = {
     };
 
     if (list.label && data.label_name) {
-      data.label_name = data.label_name.filter(label => label !== list.label.title);
+      data.label_name = data.label_name.filter((label) => label !== list.label.title);
     }
 
     if (emptyIssues) {
@@ -609,8 +608,8 @@ const boardsStore = {
     }
 
     return this.getIssuesForList(list.id, data)
-      .then(res => res.data)
-      .then(data => {
+      .then((res) => res.data)
+      .then((data) => {
         list.loading = false;
         list.issuesSize = data.size;
 
@@ -618,7 +617,9 @@ const boardsStore = {
           list.issues = [];
         }
 
-        list.createIssues(data.issues);
+        data.issues.forEach((issueObj) => {
+          list.addIssue(new ListIssue(issueObj));
+        });
 
         return data;
       });
@@ -626,7 +627,7 @@ const boardsStore = {
 
   getIssuesForList(id, filter = {}) {
     const data = { id };
-    Object.keys(filter).forEach(key => {
+    Object.keys(filter).forEach((key) => {
       data[key] = filter[key];
     });
 
@@ -661,7 +662,26 @@ const boardsStore = {
     });
   },
 
+  moveListMultipleIssues({ list, issues, oldIndicies, newIndex, moveBeforeId, moveAfterId }) {
+    oldIndicies.reverse().forEach((index) => {
+      list.issues.splice(index, 1);
+    });
+    list.issues.splice(newIndex, 0, ...issues);
+
+    return this.moveMultipleIssues({
+      ids: issues.map((issue) => issue.id),
+      fromListId: null,
+      toListId: null,
+      moveBeforeId,
+      moveAfterId,
+    });
+  },
+
   newIssue(id, issue) {
+    if (typeof id === 'string') {
+      id = getIdFromGraphQLId(id);
+    }
+
     return axios.post(this.generateIssuesPath(id), {
       issue,
     });
@@ -670,10 +690,14 @@ const boardsStore = {
   newListIssue(list, issue) {
     list.addIssue(issue, null, 0);
     list.issuesSize += 1;
+    let listId = list.id;
+    if (typeof listId === 'string') {
+      listId = getIdFromGraphQLId(listId);
+    }
 
     return this.newIssue(list.id, issue)
-      .then(res => res.data)
-      .then(data => list.onNewIssueResponse(issue, data));
+      .then((res) => res.data)
+      .then((data) => list.onNewIssueResponse(issue, data));
   },
 
   getBacklog(data) {
@@ -684,11 +708,20 @@ const boardsStore = {
       ),
     );
   },
+  removeIssueLabel(issue, removeLabel) {
+    if (removeLabel) {
+      issue.labels = issue.labels.filter((label) => removeLabel.id !== label.id);
+    }
+  },
 
   addIssueAssignee(issue, assignee) {
     if (!issue.findAssignee(assignee)) {
       issue.assignees.push(new ListAssignee(assignee));
     }
+  },
+
+  removeIssueLabels(issue, labels) {
+    labels.forEach(issue.removeLabel.bind(issue));
   },
 
   bulkUpdate(issueIds, extraData = {}) {
@@ -713,38 +746,12 @@ const boardsStore = {
     return axios.get(this.state.endpoints.recentBoardsEndpoint);
   },
 
-  createBoard(board) {
-    const boardPayload = { ...board };
-    boardPayload.label_ids = (board.labels || []).map(b => b.id);
-
-    if (boardPayload.label_ids.length === 0) {
-      boardPayload.label_ids = [''];
-    }
-
-    if (boardPayload.assignee) {
-      boardPayload.assignee_id = boardPayload.assignee.id;
-    }
-
-    if (boardPayload.milestone) {
-      boardPayload.milestone_id = boardPayload.milestone.id;
-    }
-
-    if (boardPayload.id) {
-      return axios.put(this.generateBoardsPath(boardPayload.id), { board: boardPayload });
-    }
-    return axios.post(this.generateBoardsPath(), { board: boardPayload });
-  },
-
-  deleteBoard({ id }) {
-    return axios.delete(this.generateBoardsPath(id));
-  },
-
   setCurrentBoard(board) {
     this.state.currentBoard = board;
   },
 
   toggleMultiSelect(issue) {
-    const selectedIssueIds = this.multiSelect.list.map(issue => issue.id);
+    const selectedIssueIds = this.multiSelect.list.map((issue) => issue.id);
     const index = selectedIssueIds.indexOf(issue.id);
 
     if (index === -1) {
@@ -759,8 +766,12 @@ const boardsStore = {
   },
   removeIssueAssignee(issue, removeAssignee) {
     if (removeAssignee) {
-      issue.assignees = issue.assignees.filter(assignee => assignee.id !== removeAssignee.id);
+      issue.assignees = issue.assignees.filter((assignee) => assignee.id !== removeAssignee.id);
     }
+  },
+
+  findIssueAssignee(issue, findAssignee) {
+    return issue.assignees.find((assignee) => assignee.id === findAssignee.id);
   },
 
   clearMultiSelect() {
@@ -771,20 +782,39 @@ const boardsStore = {
     issue.assignees = [];
   },
 
+  addIssueMilestone(issue, milestone) {
+    const miletoneId = issue.milestone ? issue.milestone.id : null;
+    if (IS_EE && milestone.id !== miletoneId) {
+      issue.milestone = new ListMilestone(milestone);
+    }
+  },
+
+  setIssueLoadingState(issue, key, value) {
+    issue.isLoading[key] = value;
+  },
+
+  updateIssueData(issue, newData) {
+    Object.assign(issue, newData);
+  },
+
+  setIssueFetchingState(issue, key, value) {
+    issue.isFetching[key] = value;
+  },
+
+  removeIssueMilestone(issue, removeMilestone) {
+    if (IS_EE && removeMilestone && removeMilestone.id === issue.milestone.id) {
+      issue.milestone = {};
+    }
+  },
+
   refreshIssueData(issue, obj) {
-    issue.id = obj.id;
-    issue.iid = obj.iid;
-    issue.title = obj.title;
-    issue.confidential = obj.confidential;
-    issue.dueDate = obj.due_date;
-    issue.sidebarInfoEndpoint = obj.issue_sidebar_endpoint;
-    issue.referencePath = obj.reference_path;
-    issue.path = obj.real_path;
-    issue.toggleSubscriptionEndpoint = obj.toggle_subscription_endpoint;
+    const convertedObj = convertObjectPropsToCamelCase(obj, {
+      dropKeys: ['issue_sidebar_endpoint', 'real_path', 'webUrl'],
+    });
+    convertedObj.sidebarInfoEndpoint = obj.issue_sidebar_endpoint;
+    issue.path = obj.real_path || obj.webUrl;
     issue.project_id = obj.project_id;
-    issue.timeEstimate = obj.time_estimate;
-    issue.assignableLabelsEndpoint = obj.assignable_labels_endpoint;
-    issue.blocked = obj.blocked;
+    Object.assign(issue, convertedObj);
 
     if (obj.project) {
       issue.project = new IssueProject(obj.project);
@@ -796,11 +826,16 @@ const boardsStore = {
     }
 
     if (obj.labels) {
-      issue.labels = obj.labels.map(label => new ListLabel(label));
+      issue.labels = obj.labels.map((label) => new ListLabel(label));
     }
 
     if (obj.assignees) {
-      issue.assignees = obj.assignees.map(a => new ListAssignee(a));
+      issue.assignees = obj.assignees.map((a) => new ListAssignee(a));
+    }
+  },
+  addIssueLabel(issue, label) {
+    if (!issue.findLabel(label)) {
+      issue.labels.push(new ListLabel(label));
     }
   },
   updateIssue(issue) {

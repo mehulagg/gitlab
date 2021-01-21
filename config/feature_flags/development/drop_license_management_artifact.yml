@@ -1,0 +1,8 @@
+---
+name: drop_license_management_artifact
+introduced_by_url: 
+rollout_issue_url: 
+milestone: 
+type: development
+group: group::composition analysis
+default_enabled: true

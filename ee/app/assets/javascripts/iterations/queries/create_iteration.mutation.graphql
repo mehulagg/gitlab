@@ -1,10 +1,11 @@
 mutation createIteration($input: CreateIterationInput!) {
   createIteration(input: $input) {
     iteration {
-      title,
-      description,
-      startDate,
-      dueDate,
+      title
+      description
+      descriptionHtml
+      startDate
+      dueDate
       webUrl
     }
     errors

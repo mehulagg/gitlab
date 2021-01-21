@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IgnorableColumns do
+RSpec.describe IgnorableColumns do
   let(:record_class) do
     Class.new(ApplicationRecord) do
       include IgnorableColumns
@@ -57,6 +57,14 @@ describe IgnorableColumns do
       let(:columns) { %i[name created_at] }
 
       it_behaves_like 'storing removal information'
+    end
+
+    context 'when called on a subclass without setting the ignored columns' do
+      let(:subclass) { Class.new(record_class) }
+
+      it 'does not raise Deadlock error' do
+        expect { subclass.ignored_columns_details }.not_to raise_error
+      end
     end
 
     it 'defaults to empty Hash' do

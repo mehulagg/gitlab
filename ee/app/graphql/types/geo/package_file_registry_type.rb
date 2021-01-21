@@ -7,7 +7,7 @@ module Types
       include ::Types::Geo::RegistryType
 
       graphql_name 'PackageFileRegistry'
-      description 'Represents the sync and verification state of a package file'
+      description 'Represents the Geo sync and verification state of a package file'
 
       field :package_file_id, GraphQL::ID_TYPE, null: false, description: 'ID of the PackageFile'
     end

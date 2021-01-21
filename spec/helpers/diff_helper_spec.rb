@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DiffHelper do
+RSpec.describe DiffHelper do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -126,6 +126,38 @@ describe DiffHelper do
             expect(diff_line_content('@@ -6,12 +6,18 @@ module Popen')).not_to be_html_safe
           end
         end
+      end
+    end
+  end
+
+  describe "#diff_link_number" do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:line) do
+      double(:line, type: line_type)
+    end
+
+    # This helper is used to generate the line numbers on the
+    # diff lines. It essentially just returns a blank string
+    # on the old/new lines. The following table tests all the
+    # possible permutations for clarity.
+
+    where(:line_type, :match, :line_number, :expected_return_value) do
+      "new"           | "new" | 1  | " "
+      "new"           | "old" | 2  | 2
+      "old"           | "new" | 3  | 3
+      "old"           | "old" | 4  | " "
+      "new-nonewline" | "new" | 5  | 5
+      "new-nonewline" | "old" | 6  | 6
+      "old-nonewline" | "new" | 7  | 7
+      "old-nonewline" | "old" | 8  | 8
+      "match"         | "new" | 9  | 9
+      "match"         | "old" | 10 | 10
+    end
+
+    with_them do
+      it "returns the expected value" do
+        expect(helper.diff_link_number(line.type, match, line_number)).to eq(expected_return_value)
       end
     end
   end
@@ -300,6 +332,20 @@ describe DiffHelper do
 
         expect(render_overflow_warning?(diffs_collection)).to be false
       end
+    end
+  end
+
+  describe '#diff_file_html_data' do
+    let(:project) { build(:project) }
+    let(:path) { 'path/to/file' }
+    let(:sha) { '1234567890' }
+
+    subject do
+      helper.diff_file_html_data(project, path, sha)
+    end
+
+    it 'returns data for project files' do
+      expect(subject).to include(blob_diff_path: helper.project_blob_diff_path(project, "#{sha}/#{path}"))
     end
   end
 

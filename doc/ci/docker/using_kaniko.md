@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -14,16 +14,16 @@ container images from a Dockerfile, inside a container or Kubernetes cluster.
 
 kaniko solves two problems with using the
 [Docker-in-Docker
-build](using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) method:
+build](using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker) method:
 
 - Docker-in-Docker requires [privileged mode](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
-  in order to function, which is a significant security concern.
+  to function, which is a significant security concern.
 - Docker-in-Docker generally incurs a performance penalty and can be quite slow.
 
 ## Requirements
 
-In order to utilize kaniko with GitLab, a [GitLab Runner](https://docs.gitlab.com/runner/)
-using one of the following executors is required:
+To use kaniko with GitLab, [a runner](https://docs.gitlab.com/runner/) with one
+of the following executors is required:
 
 - [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html).
 - [Docker](https://docs.gitlab.com/runner/executors/docker.html).
@@ -37,8 +37,8 @@ few important details:
 - The kaniko debug image is recommended (`gcr.io/kaniko-project/executor:debug`)
   because it has a shell, and a shell is required for an image to be used with
   GitLab CI/CD.
-- The entrypoint will need to be [overridden](using_docker_images.md#overriding-the-entrypoint-of-an-image),
-  otherwise the build script will not run.
+- The entrypoint needs to be [overridden](using_docker_images.md#overriding-the-entrypoint-of-an-image),
+  otherwise the build script doesn't run.
 - A Docker `config.json` file needs to be created with the authentication
   information for the desired container registry.
 
@@ -47,7 +47,7 @@ In the following example, kaniko is used to:
 1. Build a Docker image.
 1. Then push it to [GitLab Container Registry](../../user/packages/container_registry/index.md).
 
-The job will run only when a tag is pushed. A `config.json` file is created under
+The job runs only when a tag is pushed. A `config.json` file is created under
 `/kaniko/.docker` with the needed GitLab Container Registry credentials taken from the
 [environment variables](../variables/README.md#predefined-environment-variables)
 GitLab CI/CD provides.
@@ -63,8 +63,42 @@ build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
+    - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
+```
+
+### Building an image with kaniko behind a proxy
+
+If you use a custom GitLab Runner behind an http(s) proxy, kaniko needs to be set
+up accordingly. This means:
+
+- Adding the proxy to `/kaniko/.docker/config.json`
+- Passing the `http_proxy` environment variables as build args so the Dockerfile
+  instructions can use the proxy when building the image.
+
+The previous example can be extended as follows:
+
+```yaml
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - |-
+       KANIKOPROXYBUILDARGS=""
+       KANIKOCFG="{ \"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}"
+       if [ "x${http_proxy}" != "x" -o "x${https_proxy}" != "x" ]; then
+         KANIKOCFG="${KANIKOCFG}, \"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}"
+         KANIKOPROXYBUILDARGS="--build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} --build-arg no_proxy=${no_proxy}"
+       fi
+       KANIKOCFG="${KANIKOCFG} }"
+       echo "${KANIKOCFG}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile $KANIKOPROXYBUILDARGS --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
     - tags
 ```
@@ -84,13 +118,13 @@ This can be solved by adding your CA's certificate to the kaniko certificate
 store:
 
 ```yaml
-  before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - |
-      echo "-----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----" >> /kaniko/ssl/certs/ca-certificates.crt
+before_script:
+  - mkdir -p /kaniko/.docker
+  - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  - |
+    echo "-----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----" >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
 ```
 
 ## Video walkthrough of a working example
@@ -99,20 +133,16 @@ The [Least Privilege Container Builds with Kaniko on GitLab](https://www.youtube
 video is a walkthrough of the [Kaniko Docker Build](https://gitlab.com/guided-explorations/containers/kaniko-docker-build)
 Guided Exploration project pipeline. It was tested on:
 
-- [GitLab.com Shared Runners](../../user/gitlab_com/index.md#shared-runners)
-- [The Kubernetes Runner executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
+- [GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners)
+- [The Kubernetes runner executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
 
 The example can be copied to your own group or instance for testing. More details
 on what other GitLab CI patterns are demonstrated are available at the project page.
 
-<!-- ## Troubleshooting
+## Troubleshooting
 
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
+### 403 error: "error checking push permissions"
 
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
+If you receive this error, it might be due to an outside proxy. Setting the `http_proxy`
+and `https_proxy` [environment variables](../../administration/packages/container_registry.md#running-the-docker-daemon-with-a-proxy)
+can fix the problem.

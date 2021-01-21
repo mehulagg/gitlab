@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { TEST_HOST } from 'spec/test_constants';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
@@ -9,13 +9,13 @@ const TEST_BREAKPOINT = 5;
 const TEST_EMPTY_MESSAGE = 'Lorem ipsum empty';
 const DEFAULT_EMPTY_MESSAGE = 'None';
 
-const createUser = id => ({
+const createUser = (id) => ({
   id,
   name: 'Lorem',
   web_url: `${TEST_HOST}/${id}`,
   avatar_url: `${TEST_HOST}/${id}/avatar`,
 });
-const createList = n =>
+const createList = (n) =>
   Array(n)
     .fill(1)
     .map((x, id) => createUser(id));
@@ -37,7 +37,7 @@ describe('UserAvatarList', () => {
   };
 
   const clickButton = () => {
-    const button = wrapper.find(GlDeprecatedButton);
+    const button = wrapper.find(GlButton);
     button.vm.$emit('click');
   };
 
@@ -79,10 +79,10 @@ describe('UserAvatarList', () => {
       factory({ propsData: { items } });
 
       const links = wrapper.findAll(UserAvatarLink);
-      const linkProps = links.wrappers.map(x => x.props());
+      const linkProps = links.wrappers.map((x) => x.props());
 
       expect(linkProps).toEqual(
-        items.map(x =>
+        items.map((x) =>
           expect.objectContaining({
             linkHref: x.web_url,
             imgSrc: x.avatar_url,
@@ -112,7 +112,7 @@ describe('UserAvatarList', () => {
     it('does not show button', () => {
       factory();
 
-      expect(wrapper.find(GlDeprecatedButton).exists()).toBe(false);
+      expect(wrapper.find(GlButton).exists()).toBe(false);
     });
   });
 

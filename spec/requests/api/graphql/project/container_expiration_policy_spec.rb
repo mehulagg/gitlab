@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting a repository in a project' do
+RSpec.describe 'getting a repository in a project' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -13,6 +13,7 @@ describe 'getting a repository in a project' do
       #{all_graphql_fields_for('container_expiration_policy'.classify)}
     QUERY
   end
+
   let(:query) do
     graphql_query_for(
       'project',

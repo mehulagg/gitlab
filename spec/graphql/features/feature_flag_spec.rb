@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Graphql Field feature flags' do
+RSpec.describe 'Graphql Field feature flags' do
   include GraphqlHelpers
 
   let_it_be(:user) { create(:user) }
@@ -12,6 +12,10 @@ describe 'Graphql Field feature flags' do
   let(:query_string) { '{ item { name } }' }
   let(:result) { execute_query(query_type)['data'] }
 
+  before do
+    skip_feature_flags_yaml_validation
+  end
+
   subject { result }
 
   describe 'Feature flagged field' do
@@ -19,7 +23,7 @@ describe 'Graphql Field feature flags' do
 
     let(:query_type) do
       query_factory do |query|
-        query.field :item, type, null: true, feature_flag: feature_flag, resolve: ->(obj, args, ctx) { test_object }
+        query.field :item, type, null: true, feature_flag: feature_flag, resolver: simple_resolver(test_object)
       end
     end
 

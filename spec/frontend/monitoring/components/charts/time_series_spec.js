@@ -2,83 +2,70 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { setTestTimeout } from 'helpers/timeout';
 import timezoneMock from 'timezone-mock';
 import { GlLink } from '@gitlab/ui';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import { TEST_HOST } from 'helpers/test_constants';
 import {
   GlAreaChart,
   GlLineChart,
   GlChartSeriesLabel,
   GlChartLegend,
 } from '@gitlab/ui/dist/charts';
-import { cloneDeep } from 'lodash';
 import { shallowWrapperContainsSlotText } from 'helpers/vue_test_utils_helper';
-import { createStore } from '~/monitoring/stores';
 import { panelTypes, chartHeight } from '~/monitoring/constants';
 import TimeSeries from '~/monitoring/components/charts/time_series.vue';
-import * as types from '~/monitoring/stores/mutation_types';
-import { deploymentData, mockProjectDir, annotationsData } from '../../mock_data';
 import {
-  metricsDashboardPayload,
-  metricsDashboardViewModel,
-  metricResultStatus,
-} from '../../fixture_data';
+  deploymentData,
+  mockProjectDir,
+  annotationsData,
+  mockFixedTimeRange,
+} from '../../mock_data';
+
+import { timeSeriesGraphData } from '../../graph_data';
 
 jest.mock('lodash/throttle', () =>
   // this throttle mock executes immediately
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.cancel = jest.fn();
     return func;
   }),
 );
 jest.mock('~/lib/utils/icon_utils', () => ({
-  getSvgIconPathContent: jest.fn().mockImplementation(icon => Promise.resolve(`${icon}-content`)),
+  getSvgIconPathContent: jest.fn().mockImplementation((icon) => Promise.resolve(`${icon}-content`)),
 }));
 
 describe('Time series component', () => {
-  let mockGraphData;
-  let store;
+  const defaultGraphData = timeSeriesGraphData();
   let wrapper;
 
   const createWrapper = (
-    { graphData = mockGraphData, ...props } = {},
+    { graphData = defaultGraphData, ...props } = {},
     mountingMethod = shallowMount,
   ) => {
     wrapper = mountingMethod(TimeSeries, {
       propsData: {
         graphData,
-        deploymentData: store.state.monitoringDashboard.deploymentData,
-        annotations: store.state.monitoringDashboard.annotations,
+        deploymentData,
+        annotations: annotationsData,
         projectPath: `${TEST_HOST}${mockProjectDir}`,
+        timeRange: mockFixedTimeRange,
         ...props,
       },
-      store,
       stubs: {
         GlPopover: true,
       },
+      attachTo: document.body,
     });
   };
 
+  beforeEach(() => {
+    setTestTimeout(1000);
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   describe('With a single time series', () => {
-    beforeEach(() => {
-      setTestTimeout(1000);
-
-      store = createStore();
-
-      store.commit(
-        `monitoringDashboard/${types.RECEIVE_METRICS_DASHBOARD_SUCCESS}`,
-        metricsDashboardPayload,
-      );
-
-      store.commit(`monitoringDashboard/${types.RECEIVE_DEPLOYMENTS_DATA_SUCCESS}`, deploymentData);
-
-      store.commit(
-        `monitoringDashboard/${types.RECEIVE_METRIC_RESULT_SUCCESS}`,
-        metricResultStatus,
-      );
-      // dashboard is a dynamically generated fixture and stored at environment_metrics_dashboard.json
-      [mockGraphData] = store.state.monitoringDashboard.dashboard.panelGroups[1].panels;
-    });
-
     describe('general functions', () => {
       const findChart = () => wrapper.find({ ref: 'chart' });
 
@@ -87,19 +74,19 @@ describe('Time series component', () => {
         return wrapper.vm.$nextTick();
       });
 
-      it('allows user to override max value label text using prop', () => {
-        wrapper.setProps({ legendMaxText: 'legendMaxText' });
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.props().legendMaxText).toBe('legendMaxText');
+      it('allows user to override legend label texts using props', () => {
+        const legendRelatedProps = {
+          legendMinText: 'legendMinText',
+          legendMaxText: 'legendMaxText',
+          legendAverageText: 'legendAverageText',
+          legendCurrentText: 'legendCurrentText',
+        };
+        wrapper.setProps({
+          ...legendRelatedProps,
         });
-      });
-
-      it('allows user to override average value label text using prop', () => {
-        wrapper.setProps({ legendAverageText: 'averageText' });
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.props().legendAverageText).toBe('averageText');
+          expect(findChart().props()).toMatchObject(legendRelatedProps);
         });
       });
 
@@ -135,7 +122,7 @@ describe('Time series component', () => {
                   },
                 ],
               }),
-              off: jest.fn(eChartEvent => {
+              off: jest.fn((eChartEvent) => {
                 delete eChartMock.handlers[eChartEvent];
               }),
               on: jest.fn((eChartEvent, fn) => {
@@ -206,7 +193,7 @@ describe('Time series component', () => {
           it('does not throw error if data point is outside the zoom range', () => {
             const seriesDataWithoutValue = {
               ...mockLineSeriesData(),
-              seriesData: mockLineSeriesData().seriesData.map(data => ({
+              seriesData: mockLineSeriesData().seriesData.map((data) => ({
                 ...data,
                 value: undefined,
               })),
@@ -226,19 +213,20 @@ describe('Time series component', () => {
             });
 
             it('formats tooltip content', () => {
-              const name = 'Status Code';
+              const name = 'Metric 1';
               const value = '5.556';
               const dataIndex = 0;
               const seriesLabel = wrapper.find(GlChartSeriesLabel);
 
               expect(seriesLabel.vm.color).toBe('');
+
               expect(shallowWrapperContainsSlotText(seriesLabel, 'default', name)).toBe(true);
               expect(wrapper.vm.tooltip.content).toEqual([
                 { name, value, dataIndex, color: undefined },
               ]);
 
               expect(
-                shallowWrapperContainsSlotText(wrapper.find(GlAreaChart), 'tooltipContent', value),
+                shallowWrapperContainsSlotText(wrapper.find(GlLineChart), 'tooltip-content', value),
               ).toBe(true);
             });
 
@@ -282,7 +270,7 @@ describe('Time series component', () => {
             beforeEach(() => {
               wrapper.vm.formatTooltipText({
                 ...mockAnnotationsSeriesData,
-                seriesData: mockAnnotationsSeriesData.seriesData.map(data => ({
+                seriesData: mockAnnotationsSeriesData.seriesData.map((data) => ({
                   ...data,
                   data: annotationsMetadata,
                 })),
@@ -380,10 +368,8 @@ describe('Time series component', () => {
           });
 
           it('utilizes all data points', () => {
-            const { values } = mockGraphData.metrics[0].result[0];
-
             expect(chartData.length).toBe(1);
-            expect(seriesData().data.length).toBe(values.length);
+            expect(seriesData().data.length).toBe(3);
           });
 
           it('creates valid data', () => {
@@ -402,12 +388,37 @@ describe('Time series component', () => {
         });
 
         describe('chartOptions', () => {
+          describe('x-Axis bounds', () => {
+            it('is set to the time range bounds', () => {
+              expect(getChartOptions().xAxis).toMatchObject({
+                min: mockFixedTimeRange.start,
+                max: mockFixedTimeRange.end,
+              });
+            });
+
+            it('is not set if time range is not set or incorrectly set', () => {
+              wrapper.setProps({
+                timeRange: {},
+              });
+              return wrapper.vm.$nextTick(() => {
+                expect(getChartOptions().xAxis).not.toHaveProperty('min');
+                expect(getChartOptions().xAxis).not.toHaveProperty('max');
+              });
+            });
+          });
+
           describe('dataZoom', () => {
             it('renders with scroll handle icons', () => {
               expect(getChartOptions().dataZoom).toHaveLength(1);
               expect(getChartOptions().dataZoom[0]).toMatchObject({
                 handleIcon: 'path://scroll-handle-content',
               });
+            });
+          });
+
+          describe('xAxis pointer', () => {
+            it('snap is set to false by default', () => {
+              expect(getChartOptions().xAxis.axisPointer.snap).toBe(false);
             });
           });
 
@@ -535,14 +546,14 @@ describe('Time series component', () => {
         describe('xAxisLabel', () => {
           const mockDate = Date.UTC(2020, 4, 26, 20); // 8:00 PM in GMT
 
-          const useXAxisFormatter = date => {
+          const useXAxisFormatter = (date) => {
             const { xAxis } = getChartOptions();
             const { formatter } = xAxis.axisLabel;
             return formatter(date);
           };
 
-          it('x-axis is formatted correctly in AM/PM format', () => {
-            expect(useXAxisFormatter(mockDate)).toEqual('8:00 PM');
+          it('x-axis is formatted correctly in m/d h:MM TT format', () => {
+            expect(useXAxisFormatter(mockDate)).toEqual('5/26 8:00 PM');
           });
 
           describe('when in PT timezone', () => {
@@ -556,17 +567,17 @@ describe('Time series component', () => {
 
             it('by default, values are formatted in PT', () => {
               createWrapper();
-              expect(useXAxisFormatter(mockDate)).toEqual('1:00 PM');
+              expect(useXAxisFormatter(mockDate)).toEqual('5/26 1:00 PM');
             });
 
             it('when the chart uses local timezone, y-axis is formatted in PT', () => {
               createWrapper({ timezone: 'LOCAL' });
-              expect(useXAxisFormatter(mockDate)).toEqual('1:00 PM');
+              expect(useXAxisFormatter(mockDate)).toEqual('5/26 1:00 PM');
             });
 
             it('when the chart uses UTC, y-axis is formatted in UTC', () => {
               createWrapper({ timezone: 'UTC' });
-              expect(useXAxisFormatter(mockDate)).toEqual('8:00 PM');
+              expect(useXAxisFormatter(mockDate)).toEqual('5/26 8:00 PM');
             });
           });
         });
@@ -591,13 +602,9 @@ describe('Time series component', () => {
           it('constructs a label for the chart y-axis', () => {
             const { yAxis } = getChartOptions();
 
-            expect(yAxis[0].name).toBe('Requests / Sec');
+            expect(yAxis[0].name).toBe('Y Axis');
           });
         });
-      });
-
-      afterEach(() => {
-        wrapper.destroy();
       });
     });
 
@@ -613,21 +620,20 @@ describe('Time series component', () => {
         },
       ];
 
-      glChartComponents.forEach(dynamicComponent => {
+      glChartComponents.forEach((dynamicComponent) => {
         describe(`GitLab UI: ${dynamicComponent.chartType}`, () => {
           const findChartComponent = () => wrapper.find(dynamicComponent.component);
 
           beforeEach(() => {
             createWrapper(
-              { graphData: { ...mockGraphData, type: dynamicComponent.chartType } },
+              { graphData: timeSeriesGraphData({ type: dynamicComponent.chartType }) },
               mount,
             );
             return wrapper.vm.$nextTick();
           });
 
-          it('is a Vue instance', () => {
+          it('exists', () => {
             expect(findChartComponent().exists()).toBe(true);
-            expect(findChartComponent().isVueInstance()).toBe(true);
           });
 
           it('receives data properties needed for proper chart render', () => {
@@ -645,7 +651,7 @@ describe('Time series component', () => {
 
             return wrapper.vm.$nextTick(() => {
               expect(
-                shallowWrapperContainsSlotText(findChartComponent(), 'tooltipTitle', mockTitle),
+                shallowWrapperContainsSlotText(findChartComponent(), 'tooltip-title', mockTitle),
               ).toBe(true);
             });
           });
@@ -665,7 +671,7 @@ describe('Time series component', () => {
 
             it('uses deployment title', () => {
               expect(
-                shallowWrapperContainsSlotText(findChartComponent(), 'tooltipTitle', 'Deployed'),
+                shallowWrapperContainsSlotText(findChartComponent(), 'tooltip-title', 'Deployed'),
               ).toBe(true);
             });
 
@@ -689,25 +695,17 @@ describe('Time series component', () => {
   describe('with multiple time series', () => {
     describe('General functions', () => {
       beforeEach(() => {
-        store = createStore();
-        const graphData = cloneDeep(metricsDashboardViewModel.panelGroups[0].panels[3]);
-        graphData.metrics.forEach(metric =>
-          Object.assign(metric, { result: metricResultStatus.result }),
-        );
+        const graphData = timeSeriesGraphData({ type: panelTypes.AREA_CHART, multiMetric: true });
 
-        createWrapper({ graphData: { ...graphData, type: 'area-chart' } }, mount);
+        createWrapper({ graphData }, mount);
         return wrapper.vm.$nextTick();
-      });
-
-      afterEach(() => {
-        wrapper.destroy();
       });
 
       describe('Color match', () => {
         let lineColors;
 
         beforeEach(() => {
-          lineColors = wrapper.find(GlAreaChart).vm.series.map(item => item.lineStyle.color);
+          lineColors = wrapper.find(GlAreaChart).vm.series.map((item) => item.lineStyle.color);
         });
 
         it('should contain different colors for contiguous time series', () => {
@@ -729,12 +727,49 @@ describe('Time series component', () => {
           const legendColors = wrapper
             .find(GlChartLegend)
             .props('seriesInfo')
-            .map(item => item.color);
+            .map((item) => item.color);
 
           lineColors.forEach((color, index) => {
             expect(color).toBe(legendColors[index]);
           });
         });
+      });
+    });
+  });
+
+  describe('legend layout', () => {
+    const findLegend = () => wrapper.find(GlChartLegend);
+
+    beforeEach(() => {
+      createWrapper({}, mount);
+      return wrapper.vm.$nextTick();
+    });
+
+    it('should render a tabular legend layout by default', () => {
+      expect(findLegend().props('layout')).toBe('table');
+    });
+
+    describe('when inline legend layout prop is set', () => {
+      beforeEach(() => {
+        wrapper.setProps({
+          legendLayout: 'inline',
+        });
+      });
+
+      it('should render an inline legend layout', () => {
+        expect(findLegend().props('layout')).toBe('inline');
+      });
+    });
+
+    describe('when table legend layout prop is set', () => {
+      beforeEach(() => {
+        wrapper.setProps({
+          legendLayout: 'table',
+        });
+      });
+
+      it('should render a tabular legend layout', () => {
+        expect(findLegend().props('layout')).toBe('table');
       });
     });
   });

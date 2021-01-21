@@ -3,6 +3,9 @@
 class ContainerRepository < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include Gitlab::SQL::Pattern
+  include EachBatch
+
+  WAITING_CLEANUP_STATUSES = %i[cleanup_scheduled cleanup_unfinished].freeze
 
   belongs_to :project
 
@@ -10,15 +13,23 @@ class ContainerRepository < ApplicationRecord
   validates :name, uniqueness: { scope: :project_id }
 
   enum status: { delete_scheduled: 0, delete_failed: 1 }
+  enum expiration_policy_cleanup_status: { cleanup_unscheduled: 0, cleanup_scheduled: 1, cleanup_unfinished: 2, cleanup_ongoing: 3 }
 
   delegate :client, to: :registry
 
   scope :ordered, -> { order(:name) }
   scope :with_api_entity_associations, -> { preload(project: [:route, { namespace: :route }]) }
   scope :for_group_and_its_subgroups, ->(group) do
-    where(project_id: Project.for_group_and_its_subgroups(group).with_container_registry.select(:id))
+    project_scope = Project
+      .for_group_and_its_subgroups(group)
+      .with_container_registry
+      .select(:id)
+
+    joins("INNER JOIN (#{project_scope.to_sql}) projects on projects.id=container_repositories.project_id")
   end
+  scope :for_project_id, ->(project_id) { where(project_id: project_id) }
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
+  scope :waiting_for_cleanup, -> { where(expiration_policy_cleanup_status: WAITING_CLEANUP_STATUSES) }
 
   def self.exists_by_path?(path)
     where(
@@ -99,6 +110,14 @@ class ContainerRepository < ApplicationRecord
 
   def delete_tag_by_name(name)
     client.delete_repository_tag_by_name(self.path, name)
+  end
+
+  def reset_expiration_policy_started_at!
+    update!(expiration_policy_started_at: nil)
+  end
+
+  def start_expiration_policy!
+    update!(expiration_policy_started_at: Time.zone.now)
   end
 
   def self.build_from_path(path)

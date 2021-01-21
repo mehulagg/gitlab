@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group CI/CD settings' do
+RSpec.describe 'Group CI/CD settings' do
   include WaitForRequests
 
   let(:user) { create(:user) }
@@ -28,7 +28,7 @@ describe 'Group CI/CD settings' do
       let(:page_token) { find('#registration_token').text }
 
       before do
-        click_button 'Reset runners registration token'
+        click_button 'Reset registration token'
       end
 
       it 'changes registration token' do

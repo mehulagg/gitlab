@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Grafana::TimeWindow do
+RSpec.describe Grafana::TimeWindow do
   let(:from) { '1552799400000' }
   let(:to) { '1552828200000' }
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 17, 13, 10)) { example.run }
+    travel_to(Time.utc(2019, 3, 17, 13, 10)) { example.run }
   end
 
   describe '#formatted' do
@@ -32,12 +32,12 @@ describe Grafana::TimeWindow do
   end
 end
 
-describe Grafana::RangeWithDefaults do
+RSpec.describe Grafana::RangeWithDefaults do
   let(:from) { Grafana::Timestamp.from_ms_since_epoch('1552799400000') }
   let(:to) { Grafana::Timestamp.from_ms_since_epoch('1552828200000') }
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 17, 13, 10)) { example.run }
+    travel_to(Time.utc(2019, 3, 17, 13, 10)) { example.run }
   end
 
   describe '#to_hash' do
@@ -78,11 +78,11 @@ describe Grafana::RangeWithDefaults do
   end
 end
 
-describe Grafana::Timestamp do
+RSpec.describe Grafana::Timestamp do
   let(:timestamp) { Time.at(1552799400) }
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 17, 13, 10)) { example.run }
+    travel_to(Time.utc(2019, 3, 17, 13, 10)) { example.run }
   end
 
   describe '#formatted' do

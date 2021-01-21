@@ -1,5 +1,0 @@
----
-title: Add viewer and linker for go.mod and go.sum
-merge_request: 28262
-author: Ethan Reesor @firelizzard
-type: added

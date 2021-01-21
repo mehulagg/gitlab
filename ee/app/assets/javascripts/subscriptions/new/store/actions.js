@@ -1,7 +1,7 @@
+import Api from 'ee/api';
 import * as types from './mutation_types';
 import { sprintf, s__ } from '~/locale';
-import createFlash from '~/flash';
-import Api from 'ee/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { STEPS, PAYMENT_FORM_ID } from '../constants';
 
@@ -49,7 +49,7 @@ export const fetchCountries = ({ dispatch }) =>
     .catch(() => dispatch('fetchCountriesError'));
 
 export const fetchCountriesSuccess = ({ commit }, data = []) => {
-  const countries = data.map(country => ({ text: country[0], value: country[1] }));
+  const countries = data.map((country) => ({ text: country[0], value: country[1] }));
 
   commit(types.UPDATE_COUNTRY_OPTIONS, countries);
 };
@@ -71,7 +71,7 @@ export const fetchStates = ({ state, dispatch }) => {
 };
 
 export const fetchStatesSuccess = ({ commit }, data = {}) => {
-  const states = Object.keys(data).map(state => ({ text: state, value: data[state] }));
+  const states = Object.keys(data).map((state) => ({ text: state, value: data[state] }));
 
   commit(types.UPDATE_STATE_OPTIONS, states);
 };
@@ -120,9 +120,13 @@ export const fetchPaymentFormParams = ({ dispatch }) =>
 export const fetchPaymentFormParamsSuccess = ({ commit }, data) => {
   if (data.errors) {
     createFlash(
-      sprintf(s__('Checkout|Credit card form failed to load: %{message}'), {
-        message: data.errors,
-      }),
+      sprintf(
+        s__('Checkout|Credit card form failed to load: %{message}'),
+        {
+          message: data.errors,
+        },
+        false,
+      ),
     );
   } else {
     commit(types.UPDATE_PAYMENT_FORM_PARAMS, data);
@@ -159,6 +163,7 @@ export const paymentFormSubmittedError = (_, response) => {
         'Checkout|Submitting the credit card form failed with code %{errorCode}: %{errorMessage}',
       ),
       response,
+      false,
     ),
   );
 };

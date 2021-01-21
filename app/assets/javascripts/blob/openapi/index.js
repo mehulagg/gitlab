@@ -1,5 +1,5 @@
 import { SwaggerUIBundle } from 'swagger-ui-dist';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
 export default () => {
@@ -12,7 +12,7 @@ export default () => {
         dom_id: '#js-openapi-viewer',
       });
     })
-    .catch(error => {
+    .catch((error) => {
       flash(__('Something went wrong while initializing the OpenAPI viewer'));
       throw error;
     });

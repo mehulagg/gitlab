@@ -1,6 +1,5 @@
 <script>
 import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
-import { mapState } from 'vuex';
 
 export default {
   name: 'GroupEmptyState',
@@ -9,19 +8,16 @@ export default {
     GlSprintf,
     GlLink,
   },
-  computed: {
-    ...mapState(['config']),
-  },
+  inject: ['config'],
 };
 </script>
 <template>
   <gl-empty-state
     :title="s__('ContainerRegistry|There are no container images available in this group')"
     :svg-path="config.noContainersImage"
-    class="container-message"
   >
     <template #description>
-      <p class="js-no-container-images-text">
+      <p>
         <gl-sprintf
           :message="
             s__(
@@ -29,7 +25,7 @@ export default {
             )
           "
         >
-          <template #docLink="{content}">
+          <template #docLink="{ content }">
             <gl-link :href="config.helpPagePath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>

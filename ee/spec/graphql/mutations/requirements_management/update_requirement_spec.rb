@@ -21,13 +21,15 @@ RSpec.describe Mutations::RequirementsManagement::UpdateRequirement do
         project_path: project.full_path,
         iid: requirement.iid.to_s,
         title: 'foo',
-        state: 'archived'
+        description: 'some desc',
+        state: 'archived',
+        last_test_report_state: 'passed'
       )
     end
 
     it_behaves_like 'requirements not available'
 
-    context 'when the user can update the epic' do
+    context 'when the user can update the requirement' do
       before do
         project.add_developer(user)
       end
@@ -40,17 +42,11 @@ RSpec.describe Mutations::RequirementsManagement::UpdateRequirement do
         it 'updates new requirement', :aggregate_failures do
           expect(subject[:requirement]).to have_attributes(
             title: 'foo',
-            state: 'archived'
+            description: 'some desc',
+            state: 'archived',
+            last_test_report_state: 'passed'
           )
           expect(subject[:errors]).to be_empty
-        end
-
-        context 'when requirements_management flag is disabled' do
-          before do
-            stub_feature_flags(requirements_management: false)
-          end
-
-          it_behaves_like 'requirements not available'
         end
       end
 

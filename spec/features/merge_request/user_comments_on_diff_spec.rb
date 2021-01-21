@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User comments on a diff', :js do
+RSpec.describe 'User comments on a diff', :js do
   include MergeRequestDiffHelpers
   include RepoHelpers
 
@@ -10,6 +10,7 @@ describe 'User comments on a diff', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:user) { create(:user) }
 
   before do
@@ -30,10 +31,11 @@ describe 'User comments on a diff', :js do
             click_button('Add comment now')
           end
 
-          page.within('.diff-files-holder > div:nth-child(3)') do
+          page.within('.diff-files-holder > div:nth-child(6)') do
             expect(page).to have_content('Line is wrong')
 
-            find('.js-btn-vue-toggle-comments').click
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
@@ -51,7 +53,7 @@ describe 'User comments on a diff', :js do
 
           wait_for_requests
 
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
@@ -65,29 +67,31 @@ describe 'User comments on a diff', :js do
           wait_for_requests
 
           # Hide the comment.
-          page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+          page.within('.diff-files-holder > div:nth-child(6)') do
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
 
           # At this moment a user should see only one comment.
           # The other one should be hidden.
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
           # Show the comment.
-          page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+          page.within('.diff-files-holder > div:nth-child(6)') do
+            find('.js-diff-more-actions').click
+            click_button 'Show comments on this file'
           end
 
           # Now both the comments should be shown.
-          page.within('.diff-files-holder > div:nth-child(3) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(6) .note-body > .note-text') do
             expect(page).to have_content('Line is wrong')
           end
 
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
@@ -98,11 +102,11 @@ describe 'User comments on a diff', :js do
 
           wait_for_requests
 
-          page.within('.diff-files-holder > div:nth-child(3) .parallel .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(6) .parallel .note-body > .note-text') do
             expect(page).to have_content('Line is wrong')
           end
 
-          page.within('.diff-files-holder > div:nth-child(2) .parallel .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .parallel .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
         end
@@ -117,9 +121,52 @@ describe 'User comments on a diff', :js do
   context 'when adding multiline comments' do
     it 'saves a multiline comment' do
       click_diff_line(find("[id='#{sample_commit.line_code}']"))
+      add_comment('-13', '+14')
+    end
 
+    context 'when in side-by-side view' do
+      before do
+        visit(diffs_project_merge_request_path(project, merge_request, view: 'parallel'))
+      end
+
+      # In `files/ruby/popen.rb`
+      it 'allows comments for changes involving both sides' do
+        # click +15, select -13 add and verify comment
+        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .new_line a[data-linenumber="15"]').find(:xpath, '../..'), 'right')
+        add_comment('-13', '+15')
+      end
+
+      it 'allows comments on previously hidden lines at the top of a file', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/285294' do
+        # Click -9, expand up, select 1 add and verify comment
+        page.within('[data-path="files/ruby/popen.rb"]') do
+          all('.js-unfold-all')[0].click
+        end
+        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .old_line a[data-linenumber="9"]').find(:xpath, '../..'), 'left')
+        add_comment('1', '-9')
+      end
+
+      it 'allows comments on previously hidden lines the middle of a file' do
+        # Click 27, expand up, select 18, add and verify comment
+        page.within('[data-path="files/ruby/popen.rb"]') do
+          all('.js-unfold-all')[1].click
+        end
+        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .old_line a[data-linenumber="21"]').find(:xpath, '../..'), 'left')
+        add_comment('18', '21')
+      end
+
+      it 'allows comments on previously hidden lines at the bottom of a file' do
+        # Click +28, expand down, select 37 add and verify comment
+        page.within('[data-path="files/ruby/popen.rb"]') do
+          all('.js-unfold-down')[1].click
+        end
+        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .old_line a[data-linenumber="30"]').find(:xpath, '../..'), 'left')
+        add_comment('+28', '37')
+      end
+    end
+
+    def add_comment(start_line, end_line)
       page.within('.discussion-form') do
-        find('#comment-line-start option', text: '-13').select_option
+        find('#comment-line-start option', exact_text: start_line).select_option
       end
 
       page.within('.js-discussion-note-form') do
@@ -131,7 +178,7 @@ describe 'User comments on a diff', :js do
 
       page.within('.notes_holder') do
         expect(page).to have_content('Line is wrong')
-        expect(page).to have_content('Comment on lines -13 to +14')
+        expect(page).to have_content("Comment on lines #{start_line} to #{end_line}")
       end
 
       visit(merge_request_path(merge_request))
@@ -157,7 +204,7 @@ describe 'User comments on a diff', :js do
         click_button('Add comment now')
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         find('.js-note-edit').click
 
         page.within('.current-note-edit-form') do
@@ -168,7 +215,7 @@ describe 'User comments on a diff', :js do
         expect(page).not_to have_button('Save comment', disabled: true)
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         expect(page).to have_content('Typo, please fix').and have_no_content('Line is wrong')
       end
     end
@@ -187,7 +234,7 @@ describe 'User comments on a diff', :js do
         expect(page).to have_content('1')
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         find('.more-actions').click
         find('.more-actions .dropdown-menu li', match: :first)
 

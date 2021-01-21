@@ -21,8 +21,6 @@ RSpec.describe Projects::IssuesController do
 
     context 'with blocking issues' do
       before do
-        stub_feature_flags(prevent_closing_blocked_issues: true)
-
         get_show # Warm the cache
       end
 
@@ -33,7 +31,7 @@ RSpec.describe Projects::IssuesController do
 
         other_project_issue = create(:issue)
         other_project_issue.project.add_developer(user)
-        create(:issue_link, source: issue, target: other_project_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+        create(:issue_link, source: other_project_issue, target: issue, link_type: IssueLink::TYPE_BLOCKS)
 
         expect { get_show }.not_to exceed_query_limit(control)
       end

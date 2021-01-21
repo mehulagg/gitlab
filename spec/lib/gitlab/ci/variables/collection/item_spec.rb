@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Variables::Collection::Item do
+RSpec.describe Gitlab::Ci::Variables::Collection::Item do
   let(:variable_key) { 'VAR' }
   let(:variable_value) { 'something' }
   let(:expected_value) { variable_value }
@@ -15,14 +15,14 @@ describe Gitlab::Ci::Variables::Collection::Item do
     context 'when unknown keyword is specified' do
       it 'raises error' do
         expect { described_class.new(key: variable_key, value: 'abc', files: true) }
-          .to raise_error ArgumentError, 'unknown keyword: files'
+          .to raise_error ArgumentError, 'unknown keyword: :files'
       end
     end
 
     context 'when required keywords are not specified' do
       it 'raises error' do
         expect { described_class.new(key: variable_key) }
-          .to raise_error ArgumentError, 'missing keyword: value'
+          .to raise_error ArgumentError, 'missing keyword: :value'
       end
     end
 

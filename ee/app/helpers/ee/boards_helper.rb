@@ -18,7 +18,10 @@ module EE
       data = {
         board_milestone_title: board.milestone&.name,
         board_milestone_id: board.milestone_id,
+        board_iteration_title: board.iteration&.title,
+        board_iteration_id: board.iteration_id,
         board_assignee_username: board.assignee&.username,
+        board_assignee_id: board.assignee&.id,
         label_ids: board.label_ids,
         labels: board.labels.to_json(only: [:id, :title, :color, :text_color] ),
         board_weight: board.weight,

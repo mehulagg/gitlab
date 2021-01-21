@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SentryIssue do
+RSpec.describe SentryIssue do
   describe 'associations' do
     it { is_expected.to belong_to(:issue) }
   end
@@ -26,6 +26,12 @@ describe SentryIssue do
 
       expect(duplicate_sentry_issue).to be_invalid
       expect(duplicate_sentry_issue.errors.full_messages.first).to include('is already associated')
+    end
+
+    describe 'when importing' do
+      subject { create(:sentry_issue, importing: true) }
+
+      it { is_expected.not_to validate_presence_of(:issue) }
     end
   end
 

@@ -26,16 +26,16 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
     end
 
-    def handle_merge_request_wip
-      prefix = noteable.work_in_progress? ? "marked" : "unmarked"
+    def handle_merge_request_draft
+      action = noteable.work_in_progress? ? "draft" : "ready"
 
-      body = "#{prefix} as a **Work In Progress**"
+      body = "marked this merge request as **#{action}**"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
 
-    def add_merge_request_wip_from_commit(commit)
-      body = "marked as a **Work In Progress** from #{commit.to_reference(project)}"
+    def add_merge_request_draft_from_commit(commit)
+      body = "marked this merge request as **draft** from #{commit.to_reference(project)}"
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
@@ -150,7 +150,24 @@ module SystemNotes
 
       create_note(summary)
     end
+
+    # Called when the merge request is approved by user
+    #
+    # Example Note text:
+    #
+    #   "approved this merge request"
+    #
+    # Returns the created Note object
+    def approve_mr
+      body = "approved this merge request"
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'approved'))
+    end
+
+    def unapprove_mr
+      body = "unapproved this merge request"
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'unapproved'))
+    end
   end
 end
-
-SystemNotes::MergeRequestsService.prepend_if_ee('::EE::SystemNotes::MergeRequestsService')

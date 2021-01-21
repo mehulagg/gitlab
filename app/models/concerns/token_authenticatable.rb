@@ -4,6 +4,10 @@ module TokenAuthenticatable
   extend ActiveSupport::Concern
 
   class_methods do
+    def encrypted_token_authenticatable_fields
+      @encrypted_token_authenticatable_fields ||= []
+    end
+
     private
 
     def add_authentication_token_field(token_field, options = {})
@@ -12,6 +16,7 @@ module TokenAuthenticatable
       end
 
       token_authenticatable_fields.push(token_field)
+      encrypted_token_authenticatable_fields.push(token_field) if options[:encrypted]
 
       attr_accessor :cleartext_tokens
 
@@ -51,6 +56,13 @@ module TokenAuthenticatable
       mod.define_method("#{token_field}_matches?") do |other_token|
         token = read_attribute(token_field)
         token.present? && ActiveSupport::SecurityUtils.secure_compare(other_token, token)
+      end
+
+      # Base strategy delegates to this method for formatting a token before
+      # calling set_token. Can be overridden in models to e.g. add a prefix
+      # to the tokens
+      mod.define_method("format_#{token_field}") do |token|
+        token
       end
     end
 

@@ -2,8 +2,10 @@
 
 module API
   module Admin
-    class Sidekiq < Grape::API
+    class Sidekiq < ::API::Base
       before { authenticated_as_admin! }
+
+      feature_category :not_owned
 
       namespace 'admin' do
         namespace 'sidekiq' do

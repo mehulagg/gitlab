@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import navControlsComp from '~/pipelines/components/nav_controls.vue';
-import mountComponent from '../helpers/vue_mount_component_helper';
+import mountComponent from 'helpers/vue_mount_component_helper';
+import navControlsComp from '~/pipelines/components/pipelines_list/nav_controls.vue';
 
 describe('Pipelines Nav Controls', () => {
   let NavControlsComponent;

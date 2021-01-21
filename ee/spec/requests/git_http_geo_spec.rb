@@ -54,7 +54,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns an OK response with JSON data' do
         is_expected.to have_gitlab_http_status(:ok)
 
-        expect(response.content_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
         expect(json_response).to include('ShowAllRefs' => true)
       end
     end
@@ -70,7 +70,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns an OK response with binary data' do
         is_expected.to have_gitlab_http_status(:ok)
 
-        expect(response.content_type).to eq('application/octet-stream')
+        expect(response.media_type).to eq('application/octet-stream')
       end
     end
   end
@@ -87,7 +87,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns a redirect response' do
         is_expected.to have_gitlab_http_status(:redirect)
 
-        expect(response.content_type).to eq('text/html')
+        expect(response.media_type).to eq('text/html')
         expect(response.headers['Location']).to eq(redirect_url)
       end
     end

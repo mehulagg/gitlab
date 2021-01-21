@@ -1,8 +1,0 @@
-- return unless show_buy_ci_minutes?(project, namespace)
-
-%li
-  = link_to profile_usage_quotas_path,
-    class: 'ci-minutes-emoji js-buy-ci-minutes-link',
-    data: { 'track-event': 'click_buy_ci_minutes', 'track-label': current_user.namespace.actual_plan_name, 'track-property': 'user_dropdown' } do
-    = s_("CurrentUser|Buy CI minutes")
-    = emoji_icon('clock9', 'aria-hidden': true)

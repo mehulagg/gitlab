@@ -56,6 +56,28 @@ describe('Diff File Row component', () => {
     );
   });
 
+  it.each`
+    fileType  | isViewed | expected
+    ${'blob'} | ${false} | ${'gl-font-weight-bold'}
+    ${'blob'} | ${true}  | ${''}
+    ${'tree'} | ${false} | ${''}
+    ${'tree'} | ${true}  | ${''}
+  `(
+    'with (fileType="$fileType", isViewed=$isViewed), sets fileClasses="$expected"',
+    ({ fileType, isViewed, expected }) => {
+      createComponent({
+        file: {
+          type: fileType,
+          fileHash: '#123456789',
+        },
+        level: 0,
+        hideFileStats: false,
+        viewedFiles: isViewed ? { '#123456789': true } : {},
+      });
+      expect(wrapper.find(FileRow).props('fileClasses')).toBe(expected);
+    },
+  );
+
   describe('FileRowStats components', () => {
     it.each`
       type      | hideFileStats | value    | desc
@@ -72,5 +94,16 @@ describe('Diff File Row component', () => {
       });
       expect(wrapper.find(FileRowStats).exists()).toEqual(value);
     });
+  });
+
+  it('adds is-active class when currentDiffFileId matches file_hash', () => {
+    createComponent({
+      level: 0,
+      currentDiffFileId: '123',
+      file: { fileHash: '123' },
+      hideFileStats: false,
+    });
+
+    expect(wrapper.classes('is-active')).toBe(true);
   });
 });

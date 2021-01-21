@@ -20,7 +20,7 @@ RSpec.describe AwardEmojis::DestroyService do
       end
 
       context 'with recognized emoji' do
-        let(:name) { StatusPage::AWARD_EMOJI }
+        let(:name) { Gitlab::StatusPage::AWARD_EMOJI }
 
         include_examples 'trigger status page publish'
       end

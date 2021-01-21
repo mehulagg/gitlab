@@ -1,10 +1,10 @@
-import { nextTick } from 'vue';
+import { GlBadge, GlButton, GlLink, GlSkeletonLoader } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import { GlBadge, GlButton, GlLink, GlSkeletonLoading } from '@gitlab/ui';
-import stubChildren from 'helpers/stub_children';
+import { nextTick } from 'vue';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
 import DependencyLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
 import DependencyVulnerabilities from 'ee/dependencies/components/dependency_vulnerabilities.vue';
+import stubChildren from 'helpers/stub_children';
 import { makeDependency } from './utils';
 
 describe('DependenciesTable component', () => {
@@ -14,7 +14,7 @@ describe('DependenciesTable component', () => {
     wrapper = mount(DependenciesTable, {
       ...options,
       propsData: { ...propsData },
-      stubs: { ...stubChildren(DependenciesTable), GlTable: false },
+      stubs: { ...stubChildren(DependenciesTable), GlTable: false, DependencyLocation: false },
     });
   };
 
@@ -25,7 +25,7 @@ describe('DependenciesTable component', () => {
   const findTableRows = () => wrapper.findAll('tbody > tr');
   const findRowToggleButtons = () => wrapper.findAll(GlButton);
   const findDependencyVulnerabilities = () => wrapper.find(DependencyVulnerabilities);
-  const normalizeWhitespace = string => string.replace(/\s+/g, ' ');
+  const normalizeWhitespace = (string) => string.replace(/\s+/g, ' ');
 
   const expectDependencyRow = (rowWrapper, dependency) => {
     const [
@@ -54,7 +54,7 @@ describe('DependenciesTable component', () => {
     });
 
     const isVulnerableCellText = normalizeWhitespace(isVulnerableCell.text());
-    if (dependency.vulnerabilities.length) {
+    if (dependency?.vulnerabilities?.length) {
       expect(isVulnerableCellText).toContain(`${dependency.vulnerabilities.length} vuln`);
     } else {
       expect(isVulnerableCellText).toBe('');
@@ -75,7 +75,7 @@ describe('DependenciesTable component', () => {
     });
 
     it('renders the loading skeleton', () => {
-      expect(wrapper.contains(GlSkeletonLoading)).toBe(true);
+      expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
     });
 
     it('does not render any dependencies', () => {
@@ -97,7 +97,7 @@ describe('DependenciesTable component', () => {
       const expectedLabels = DependenciesTable.fields.map(({ label }) => label);
       const headerCells = wrapper.findAll('thead th').wrappers;
 
-      expect(headerCells.map(cell => cell.text())).toEqual(expectedLabels);
+      expect(headerCells.map((cell) => cell.text())).toEqual(expectedLabels);
     });
 
     it('does not render any rows', () => {
@@ -105,13 +105,17 @@ describe('DependenciesTable component', () => {
     });
   });
 
-  describe('given dependencies with no vulnerabilities', () => {
+  describe.each`
+    description                                                             | vulnerabilitiesPayload
+    ${'given dependencies with no vulnerabilities'}                         | ${{ vulnerabilities: [] }}
+    ${'given dependencies when user is not allowed to see vulnerabilities'} | ${{}}
+  `('$description', ({ vulnerabilitiesPayload }) => {
     let dependencies;
 
     beforeEach(() => {
       dependencies = [
-        makeDependency({ vulnerabilities: [] }),
-        makeDependency({ name: 'foo', vulnerabilities: [] }),
+        makeDependency({ ...vulnerabilitiesPayload }),
+        makeDependency({ name: 'foo', ...vulnerabilitiesPayload }),
       ];
 
       createComponent({
@@ -185,7 +189,9 @@ describe('DependenciesTable component', () => {
       let rowIndexWithVulnerabilities;
 
       beforeEach(() => {
-        rowIndexWithVulnerabilities = dependencies.findIndex(dep => dep.vulnerabilities.length > 0);
+        rowIndexWithVulnerabilities = dependencies.findIndex(
+          (dep) => dep.vulnerabilities.length > 0,
+        );
       });
 
       it('can be displayed by clicking on the toggle button', () => {
@@ -200,9 +206,7 @@ describe('DependenciesTable component', () => {
       });
 
       it('can be displayed by clicking on the vulnerabilities badge', () => {
-        const badge = findTableRows()
-          .at(rowIndexWithVulnerabilities)
-          .find(GlBadge);
+        const badge = findTableRows().at(rowIndexWithVulnerabilities).find(GlBadge);
         badge.trigger('click');
 
         return nextTick().then(() => {

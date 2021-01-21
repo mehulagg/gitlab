@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import Pager from '~/pager';
 import { removeParams } from '~/lib/utils/url_utility';
@@ -32,7 +33,7 @@ describe('pager', () => {
     });
 
     it('should use data-href attribute from list element', () => {
-      const href = `${gl.TEST_HOST}/some_list.json`;
+      const href = `${TEST_HOST}/some_list.json`;
       setFixtures(`<div class="content_list" data-href="${href}"></div>`);
       Pager.init();
 
@@ -40,7 +41,7 @@ describe('pager', () => {
     });
 
     it('should use current url if data-href attribute not provided', () => {
-      const href = `${gl.TEST_HOST}/some_list`;
+      const href = `${TEST_HOST}/some_list`;
       removeParams.mockReturnValue(href);
       Pager.init();
 
@@ -56,7 +57,7 @@ describe('pager', () => {
 
     it('keeps extra query parameters from url', () => {
       window.history.replaceState({}, null, '?filter=test&offset=100');
-      const href = `${gl.TEST_HOST}/some_list?filter=test`;
+      const href = `${TEST_HOST}/some_list?filter=test`;
       removeParams.mockReturnValue(href);
       Pager.init();
 
@@ -88,7 +89,7 @@ describe('pager', () => {
       Pager.init();
     });
 
-    it('shows loader while loading next page', done => {
+    it('shows loader while loading next page', (done) => {
       mockSuccess();
 
       jest.spyOn(Pager.loading, 'show').mockImplementation(() => {});
@@ -101,7 +102,7 @@ describe('pager', () => {
       });
     });
 
-    it('hides loader on success', done => {
+    it('hides loader on success', (done) => {
       mockSuccess();
 
       jest.spyOn(Pager.loading, 'hide').mockImplementation(() => {});
@@ -114,7 +115,7 @@ describe('pager', () => {
       });
     });
 
-    it('hides loader on error', done => {
+    it('hides loader on error', (done) => {
       mockError();
 
       jest.spyOn(Pager.loading, 'hide').mockImplementation(() => {});
@@ -127,7 +128,7 @@ describe('pager', () => {
       });
     });
 
-    it('sends request to url with offset and limit params', done => {
+    it('sends request to url with offset and limit params', (done) => {
       Pager.offset = 100;
       Pager.limit = 20;
       Pager.getOld();
@@ -148,7 +149,7 @@ describe('pager', () => {
       });
     });
 
-    it('disables if return count is less than limit', done => {
+    it('disables if return count is less than limit', (done) => {
       Pager.offset = 0;
       Pager.limit = 20;
 

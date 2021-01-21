@@ -80,6 +80,7 @@ export default class GlFieldError {
 
     // hidden when injected into DOM
     errorAnchor.after(this.fieldErrorElement);
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.inputElement.off('invalid').on('invalid', this.handleInvalidSubmit.bind(this));
     this.scopedSiblings = this.safelySelectSiblings();
   }
@@ -114,9 +115,10 @@ export default class GlFieldError {
     this.state.empty = currentValue === '';
     this.state.submitted = true;
     this.renderValidity();
-    this.form.focusOnFirstInvalid.apply(this.form);
+    this.form.focusInvalid.apply(this.form);
 
     // For UX, wait til after first invalid submission to check each keyup
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.inputElement
       .off('keyup.fieldValidator')
       .on('keyup.fieldValidator', this.updateValidity.bind(this));

@@ -11,6 +11,7 @@ RSpec.describe 'admin Geo Replication Nav', :js, :geo do
   before do
     stub_licensed_features(geo: true)
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     stub_secondary_node
   end
 
@@ -44,21 +45,20 @@ RSpec.describe 'admin Geo Replication Nav', :js, :geo do
     end
   end
 
-  describe 'visit admin/geo/replication/package_files' do
-    it_behaves_like 'active sidebar link', 'Package Files' do
-      let(:path) { admin_geo_package_files_path }
+  describe 'visit admin/geo/replication/*' do
+    Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+      it_behaves_like 'active sidebar link', replicator_class.replicable_title_plural do
+        let(:path) { admin_geo_replicables_path(replicable_name_plural: replicator_class.replicable_name_plural) }
+      end
     end
 
-    context 'when geo_self_service_framework feature is disabled' do
-      before do
-        stub_feature_flags(geo_self_service_framework: false)
+    it 'displays enable replicator replication details nav links' do
+      visit admin_geo_replicables_path(replicable_name_plural: 'projects')
 
-        visit admin_geo_projects_path
-        wait_for_requests
-      end
+      Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+        navbar = page.find(".nav-links.nav.nav-tabs")
 
-      it 'does not render navigational element' do
-        expect(page).not_to have_selector("a[title=\"Package Files\"]")
+        expect(navbar).to have_link replicator_class.replicable_title_plural
       end
     end
   end

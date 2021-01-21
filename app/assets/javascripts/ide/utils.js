@@ -1,18 +1,19 @@
-import { SIDE_LEFT, SIDE_RIGHT } from './constants';
 import { languages } from 'monaco-editor';
-import { flatten } from 'lodash';
+import { flatten, isString } from 'lodash';
+import { SIDE_LEFT, SIDE_RIGHT } from './constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
 
-const toLowerCase = x => x.toLowerCase();
+const toLowerCase = (x) => x.toLowerCase();
 
 const monacoLanguages = languages.getLanguages();
 const monacoExtensions = new Set(
-  flatten(monacoLanguages.map(lang => lang.extensions?.map(toLowerCase) || [])),
+  flatten(monacoLanguages.map((lang) => lang.extensions?.map(toLowerCase) || [])),
 );
 const monacoMimetypes = new Set(
-  flatten(monacoLanguages.map(lang => lang.mimetypes?.map(toLowerCase) || [])),
+  flatten(monacoLanguages.map((lang) => lang.mimetypes?.map(toLowerCase) || [])),
 );
 const monacoFilenames = new Set(
-  flatten(monacoLanguages.map(lang => lang.filenames?.map(toLowerCase) || [])),
+  flatten(monacoLanguages.map((lang) => lang.filenames?.map(toLowerCase) || [])),
 );
 
 const KNOWN_TYPES = [
@@ -42,31 +43,33 @@ const KNOWN_TYPES = [
   },
 ];
 
-export function isTextFile(content, mimeType, fileName) {
-  const knownType = KNOWN_TYPES.find(type => type.isMatch(mimeType, fileName));
-
+export function isTextFile({ name, raw, content, mimeType = '' }) {
+  const knownType = KNOWN_TYPES.find((type) => type.isMatch(mimeType, name));
   if (knownType) return knownType.isText;
 
   // does the string contain ascii characters only (ranges from space to tilde, tabs and new lines)
   const asciiRegex = /^[ -~\t\n\r]+$/;
+
+  const fileContents = raw || content;
+
   // for unknown types, determine the type by evaluating the file contents
-  return asciiRegex.test(content);
+  return isString(fileContents) && (fileContents === '' || asciiRegex.test(fileContents));
 }
 
-export const createPathWithExt = p => {
+export const createPathWithExt = (p) => {
   const ext = p.lastIndexOf('.') >= 0 ? p.substring(p.lastIndexOf('.') + 1) : '';
 
   return `${p.substring(1, p.lastIndexOf('.') + 1 || p.length)}${ext || '.js'}`;
 };
 
-export const trimPathComponents = path =>
+export const trimPathComponents = (path) =>
   path
     .split('/')
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .join('/');
 
 export function registerLanguages(def, ...defs) {
-  if (defs.length) defs.forEach(lang => registerLanguages(lang));
+  defs.forEach((lang) => registerLanguages(lang));
 
   const languageId = def.id;
 
@@ -75,14 +78,23 @@ export function registerLanguages(def, ...defs) {
   languages.setLanguageConfiguration(languageId, def.conf);
 }
 
-export const otherSide = side => (side === SIDE_RIGHT ? SIDE_LEFT : SIDE_RIGHT);
+export function registerSchema(schema) {
+  const defaults = [languages.json.jsonDefaults, languages.yaml.yamlDefaults];
+  defaults.forEach((d) =>
+    d.setDiagnosticsOptions({
+      validate: true,
+      enableSchemaRequest: true,
+      hover: true,
+      completion: true,
+      schemas: [schema],
+    }),
+  );
+}
+
+export const otherSide = (side) => (side === SIDE_RIGHT ? SIDE_LEFT : SIDE_RIGHT);
 
 export function trimTrailingWhitespace(content) {
   return content.replace(/[^\S\r\n]+$/gm, '');
-}
-
-export function insertFinalNewline(content, eol = '\n') {
-  return content.slice(-eol.length) !== eol ? `${content}${eol}` : content;
 }
 
 export function getPathParents(path, maxDepth = Infinity) {
@@ -113,9 +125,54 @@ export function getPathParent(path) {
  * @param {File} file
  */
 export function readFileAsDataURL(file) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.addEventListener('load', e => resolve(e.target.result), { once: true });
+    reader.addEventListener('load', (e) => resolve(e.target.result), { once: true });
     reader.readAsDataURL(file);
   });
 }
+
+export function getFileEOL(content = '') {
+  return content.includes('\r\n') ? 'CRLF' : 'LF';
+}
+
+/**
+ * Adds or increments the numeric suffix to a filename/branch name.
+ * Retains underscore or dash before the numeric suffix if it already exists.
+ *
+ * Examples:
+ *  hello -> hello-1
+ *  hello-2425 -> hello-2425
+ *  hello.md -> hello-1.md
+ *  hello_2.md -> hello_3.md
+ *  hello_ -> hello_1
+ *  master-patch-22432 -> master-patch-22433
+ *  patch_332 -> patch_333
+ *
+ * @param {string} filename File name or branch name
+ * @param {number} [randomize] Should randomize the numeric suffix instead of auto-incrementing?
+ */
+export function addNumericSuffix(filename, randomize = false) {
+  return filename.replace(/([ _-]?)(\d*)(\..+?$|$)/, (_, before, number, after) => {
+    const n = randomize ? Math.random().toString().substring(2, 7).slice(-5) : Number(number) + 1;
+    return `${before || '-'}${n}${after}`;
+  });
+}
+
+export const measurePerformance = (
+  mark,
+  measureName,
+  measureStart = undefined,
+  measureEnd = mark,
+) => {
+  performanceMarkAndMeasure({
+    mark,
+    measures: [
+      {
+        name: measureName,
+        start: measureStart,
+        end: measureEnd,
+      },
+    ],
+  });
+};

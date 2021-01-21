@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "Compare", :js do
+RSpec.describe "Compare", :js do
   let(:user)    { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -113,7 +113,7 @@ describe "Compare", :js do
 
         click_button('Compare')
 
-        page.within('.alert') do
+        page.within('.gl-alert') do
           expect(page).to have_text("Too many changes to show. To preserve performance only 3 of 3+ files are displayed.")
         end
       end

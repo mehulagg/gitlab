@@ -15,21 +15,27 @@ namespace :admin do
     end
   end
 
-  get :instance_review, to: 'instance_review#index'
-
   resource :push_rule, only: [:show, :update]
   resource :email, only: [:show, :create]
   resources :audit_logs, controller: 'audit_logs', only: [:index]
-  resources :credentials, only: [:index]
+  resources :audit_log_reports, only: [:index], constraints: { format: :csv }
+  resources :credentials, only: [:index, :destroy] do
+    member do
+      put :revoke
+    end
+  end
+  resources :user_permission_exports, controller: 'user_permission_exports', only: [:index]
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+
+    resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
 
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do
     get :seat_link_payload
-    match :templates, via: [:get, :patch]
+    match :templates, :advanced_search, via: [:get, :patch]
     get :geo, to: "geo/settings#show"
   end
 
@@ -42,6 +48,8 @@ namespace :admin do
     get '/designs', to: redirect(path: 'admin/geo/replication/designs')
 
     resources :nodes, only: [:index, :create, :new, :edit, :update]
+
+    resources :nodes_beta, only: [:index]
 
     scope '/replication' do
       get '/', to: redirect(path: 'admin/geo/replication/projects')
@@ -60,9 +68,10 @@ namespace :admin do
       end
 
       resources :designs, only: [:index]
-      resources :package_files, only: [:index]
 
       resources :uploads, only: [:index, :destroy]
+
+      get '/:replicable_name_plural', to: 'replicables#index', as: 'replicables'
     end
 
     resource :settings, only: [:show, :update]
@@ -70,5 +79,8 @@ namespace :admin do
 
   namespace :elasticsearch do
     post :enqueue_index
+    post :trigger_reindexing
+    post :cancel_index_deletion
+    post :retry_migration
   end
 end

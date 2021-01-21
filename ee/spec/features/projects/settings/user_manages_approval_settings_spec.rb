@@ -13,7 +13,7 @@ RSpec.describe 'EE > Projects > Settings > User manages approval rule settings' 
     sign_in(user)
     stub_licensed_features(licensed_features)
 
-    project.project_feature.update(project_features)
+    project.project_feature.update!(project_features)
 
     visit path
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuePresenter do
+RSpec.describe IssuePresenter do
   include Gitlab::Routing.url_helpers
 
   let(:user)      { create(:user) }
@@ -38,6 +38,22 @@ describe IssuePresenter do
   describe '#issue_path' do
     it 'returns correct path' do
       expect(presenter.issue_path).to eq("/#{group.name}/#{project.name}/-/issues/#{issue.iid}")
+    end
+  end
+
+  describe '#project_emails_disabled?' do
+    subject { presenter.project_emails_disabled? }
+
+    it 'returns false when emails notifications is enabled for project' do
+      is_expected.to be(false)
+    end
+
+    context 'when emails notifications is disabled for project' do
+      before do
+        allow(project).to receive(:emails_disabled?).and_return(true)
+      end
+
+      it { is_expected.to be(true) }
     end
   end
 end

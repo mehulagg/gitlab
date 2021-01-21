@@ -7,7 +7,7 @@ RSpec.describe Banzai::ReferenceParser::IterationParser do
 
   let(:project) { create(:project, :public) }
   let(:user) { create(:user) }
-  let(:iteration) { create(:iteration, project: project) }
+  let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
   subject { described_class.new(Banzai::RenderContext.new(project, user)) }
 
   let(:link) { empty_html_link }

@@ -18,7 +18,7 @@ const defaultClient = createDefaultClient(
   {
     Query: {
       commit(_, { path, fileName, type }) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           fetchLogsTree(defaultClient, path, '0', {
             resolve,
             entry: {
@@ -30,7 +30,7 @@ const defaultClient = createDefaultClient(
       },
       readme(_, { url }) {
         return axios
-          .get(url, { params: { viewer: 'rich', format: 'json' } })
+          .get(url, { params: { format: 'json', viewer: 'rich' } })
           .then(({ data }) => ({ ...data, __typename: 'ReadmeFile' }));
       },
     },
@@ -38,7 +38,7 @@ const defaultClient = createDefaultClient(
   {
     cacheConfig: {
       fragmentMatcher,
-      dataIdFromObject: obj => {
+      dataIdFromObject: (obj) => {
         /* eslint-disable @gitlab/require-i18n-strings */
         // eslint-disable-next-line no-underscore-dangle
         switch (obj.__typename) {
@@ -58,6 +58,7 @@ const defaultClient = createDefaultClient(
         /* eslint-enable @gitlab/require-i18n-strings */
       },
     },
+    assumeImmutableResults: true,
   },
 );
 

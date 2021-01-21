@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DiffFileEntity do
+RSpec.describe DiffFileEntity do
   include RepoHelpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -66,6 +66,17 @@ describe DiffFileEntity do
       lines.each do |parallel_line|
         expect(parallel_line[:left].as_json).to match_schema('entities/diff_line') if parallel_line[:left]
         expect(parallel_line[:right].as_json).to match_schema('entities/diff_line') if parallel_line[:right]
+      end
+    end
+  end
+
+  describe '#is_fully_expanded' do
+    context 'file with a conflict' do
+      let(:options) { { conflicts: { diff_file.new_path => double(diff_lines_for_serializer: []) } } }
+
+      it 'returns false' do
+        expect(diff_file).not_to receive(:fully_expanded?)
+        expect(subject[:is_fully_expanded]).to eq(false)
       end
     end
   end

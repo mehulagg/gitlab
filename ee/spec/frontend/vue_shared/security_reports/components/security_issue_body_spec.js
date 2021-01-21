@@ -1,8 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
-import { STATUS_FAILED } from '~/reports/constants';
+import {
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import SecurityIssueBody from 'ee/vue_shared/security_reports/components/security_issue_body.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import ReportLink from '~/reports/components/report_link.vue';
+import { STATUS_FAILED } from '~/reports/constants';
 import {
   sastParsedIssues,
   dockerReportParsed,
@@ -16,7 +22,7 @@ describe('Security Issue Body', () => {
 
   const findReportLink = () => wrapper.find(ReportLink);
 
-  const createComponent = issue => {
+  const createComponent = (issue) => {
     wrapper = shallowMount(SecurityIssueBody, {
       propsData: {
         issue,
@@ -31,11 +37,11 @@ describe('Security Issue Body', () => {
   });
 
   describe.each([
-    ['SAST', sastParsedIssues[0], true, 'High'],
-    ['DAST', parsedDast[0], false, 'Low'],
-    ['Container Scanning', dockerReportParsed.vulnerabilities[0], false, 'Medium'],
+    ['SAST', sastParsedIssues[0], true, HIGH],
+    ['DAST', parsedDast[0], false, LOW],
+    ['Container Scanning', dockerReportParsed.vulnerabilities[0], false, MEDIUM],
     ['Dependency Scanning', dependencyScanningIssues[0], true],
-    ['Secret Scanning', secretScanningParsedIssues[0], false, 'Critical'],
+    ['Secret Scanning', secretScanningParsedIssues[0], false, CRITICAL],
   ])('for a %s vulnerability', (name, vuln, hasReportLink, severity) => {
     beforeEach(() => {
       createComponent(vuln);
@@ -47,7 +53,7 @@ describe('Security Issue Body', () => {
       });
     } else {
       it(`does not show SeverityBadge if severity is not present`, () => {
-        expect(wrapper.contains(SeverityBadge)).toBe(false);
+        expect(wrapper.find(SeverityBadge).exists()).toBe(false);
       });
     }
 

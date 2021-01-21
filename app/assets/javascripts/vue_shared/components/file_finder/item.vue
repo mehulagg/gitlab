@@ -1,6 +1,6 @@
 <script>
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import FileIcon from '../file_icon.vue';
 import ChangedFileIcon from '../changed_file_icon.vue';
 
@@ -8,7 +8,7 @@ const MAX_PATH_LENGTH = 60;
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     ChangedFileIcon,
     FileIcon,
   },
@@ -88,7 +88,7 @@ export default {
         >
         </span>
       </strong>
-      <span class="diff-changed-file-path prepend-top-5">
+      <span class="diff-changed-file-path gl-mt-2">
         <span
           v-for="(char, charIndex) in pathWithEllipsis.split('')"
           :key="charIndex + char"
@@ -103,10 +103,10 @@ export default {
     <span v-if="file.changed || file.tempFile" v-once class="diff-changed-stats">
       <span v-if="showDiffStats">
         <span class="cgreen bold">
-          <icon name="file-addition" class="align-text-top" /> {{ file.addedLines }}
+          <gl-icon name="file-addition" class="align-text-top" /> {{ file.addedLines }}
         </span>
         <span class="cred bold ml-1">
-          <icon name="file-deletion" class="align-text-top" /> {{ file.removedLines }}
+          <gl-icon name="file-deletion" class="align-text-top" /> {{ file.removedLines }}
         </span>
       </span>
       <changed-file-icon v-else :file="file" />

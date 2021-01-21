@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::EncodingHelper do
+RSpec.describe Gitlab::EncodingHelper do
   let(:ext_class) { Class.new { extend Gitlab::EncodingHelper } }
   let(:binary_string) { File.read(Rails.root + "spec/fixtures/dk.png") }
 
@@ -138,6 +138,7 @@ describe Gitlab::EncodingHelper do
       let(:test_string) do
         "refs/heads/FixSymbolsTitleDropdown".encode("ASCII-8BIT")
       end
+
       let(:expected_string) do
         "refs/heads/FixSymbolsTitleDropdown".encode("UTF-8")
       end

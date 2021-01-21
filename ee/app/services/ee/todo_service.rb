@@ -27,7 +27,17 @@ module EE
     end
 
     def update_epic(epic, current_user, skip_users = [])
-      create_mention_todos(nil, epic, current_user, nil, skip_users)
+      update_issuable(epic, current_user, skip_users)
+    end
+
+    # When a merge train is aborted for some reason, we should:
+    #
+    #  * create a todo for each merge request participant
+    #
+    def merge_train_removed(merge_request)
+      merge_request.merge_participants.each do |user|
+        create_merge_train_removed_todo(merge_request, user)
+      end
     end
 
     private
@@ -54,6 +64,11 @@ module EE
       end
 
       create_todos(approvers, attributes)
+    end
+
+    def create_merge_train_removed_todo(merge_request, user)
+      attributes = attributes_for_todo(merge_request.project, merge_request, user, ::Todo::MERGE_TRAIN_REMOVED)
+      create_todos(user, attributes)
     end
   end
 end

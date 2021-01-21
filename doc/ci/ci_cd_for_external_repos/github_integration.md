@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -14,29 +14,28 @@ GitLab.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 Watch a video on [Using GitLab CI/CD pipelines with GitHub repositories](https://www.youtube.com/watch?v=qgl3F2j-1cI).
 
-NOTE: **Note:**
+NOTE:
 Because of [GitHub limitations](https://gitlab.com/gitlab-org/gitlab/-/issues/9147),
 [GitHub OAuth](../../integration/github.md#enabling-github-oauth)
 cannot be used to authenticate with GitHub as an external CI/CD repository.
 
 ## Connect with Personal Access Token
 
-NOTE: **Note:**
 Personal access tokens can only be used to connect GitHub.com
-repositories to GitLab, and the GitHub user must have the [owner role](https://help.github.com/en/github/getting-started-with-github/access-permissions-on-github).
+repositories to GitLab, and the GitHub user must have the [owner role](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/access-permissions-on-github).
 
 To perform a one-off authorization with GitHub to grant GitLab access your
 repositories:
 
 1. Open <https://github.com/settings/tokens/new> to create a **Personal Access
-   Token**. This token will be used to access your repository and push commit
+   Token**. This token is used to access your repository and push commit
    statuses to GitHub.
 
    The `repo` and `admin:repo_hook` should be enable to allow GitLab access to
    your project, update commit statuses, and create a web hook to notify
    GitLab of new commits.
 
-1. In GitLab, go to the [new project page](../../gitlab-basics/create-project.md#create-a-project-in-gitlab), select the **CI/CD for external repo** tab, and then click
+1. In GitLab, go to the [new project page](../../gitlab-basics/create-project.md#create-a-project-in-gitlab), select the **CI/CD for external repository** tab, and then click
    **GitHub**.
 
 1. Paste the token into the **Personal access token** field and click **List
@@ -44,22 +43,21 @@ repositories:
 
 1. In GitHub, add a `.gitlab-ci.yml` to [configure GitLab CI/CD](../quick_start/README.md).
 
-GitLab will:
+GitLab:
 
-1. Import the project.
-1. Enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter)
-1. Enable [GitHub project integration](../../user/project/integrations/github.md)
-1. Create a web hook on GitHub to notify GitLab of new commits.
+1. Imports the project.
+1. Enables [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository)
+1. Enables [GitHub project integration](../../user/project/integrations/github.md)
+1. Creates a web hook on GitHub to notify GitLab of new commits.
 
 ## Connect manually
 
-NOTE: **Note:**
 To use **GitHub Enterprise** with **GitLab.com**, use this method.
 
 To manually enable GitLab CI/CD for your repository:
 
 1. In GitHub open <https://github.com/settings/tokens/new> create a **Personal
-   Access Token.** GitLab will use this token to access your repository and
+   Access Token.** GitLab uses this token to access your repository and
    push commit statuses.
 
    Enter a **Token description** and update the scope to allow:
@@ -70,7 +68,7 @@ To manually enable GitLab CI/CD for your repository:
    URL for your GitHub repository. If your project is private, use the personal
    access token you just created for authentication.
 
-   GitLab will automatically configure polling-based pull mirroring.
+   GitLab automatically configures polling-based pull mirroring.
 
 1. Still in GitLab, enable the [GitHub project integration](../../user/project/integrations/github.md)
    from **Settings > Integrations.**
@@ -85,7 +83,7 @@ To manually enable GitLab CI/CD for your repository:
    new commits.
 
    The web hook URL should be set to the GitLab API to
-   [trigger pull mirroring](../../api/projects.md#start-the-pull-mirroring-process-for-a-project-starter),
+   [trigger pull mirroring](../../api/projects.md#start-the-pull-mirroring-process-for-a-project),
    using the GitLab personal access token we just created:
 
    ```plaintext

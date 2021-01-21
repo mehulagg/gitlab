@@ -1,50 +1,13 @@
 import MergeRequestStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
-import filterByKey from 'ee/vue_shared/security_reports/store/utils/filter_by_key';
-import mockData, {
-  headIssues,
-  baseIssues,
-  parsedBaseIssues,
-  parsedHeadIssues,
-} from 'ee_jest/vue_mr_widget/mock_data';
+import mockData from 'ee_jest/vue_mr_widget/mock_data';
 import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
+import { convertToCamelCase } from '~/lib/utils/text_utility';
 
 describe('MergeRequestStore', () => {
   let store;
 
   beforeEach(() => {
     store = new MergeRequestStore(mockData);
-  });
-
-  describe('compareCodeclimateMetrics', () => {
-    beforeEach(() => {
-      // mock worker response
-      jest.spyOn(MergeRequestStore, 'doCodeClimateComparison').mockImplementation(() =>
-        Promise.resolve({
-          newIssues: filterByKey(parsedHeadIssues, parsedBaseIssues, 'fingerprint'),
-          resolvedIssues: filterByKey(parsedBaseIssues, parsedHeadIssues, 'fingerprint'),
-        }),
-      );
-
-      return store.compareCodeclimateMetrics(headIssues, baseIssues, 'headPath', 'basePath');
-    });
-
-    it('should return the new issues', () => {
-      expect(store.codeclimateMetrics.newIssues[0]).toEqual(parsedHeadIssues[0]);
-    });
-
-    it('should return the resolved issues', () => {
-      expect(store.codeclimateMetrics.resolvedIssues[0]).toEqual(parsedBaseIssues[0]);
-    });
-  });
-
-  describe('parseCodeclimateMetrics', () => {
-    it('should parse the received issues', () => {
-      const codequality = MergeRequestStore.parseCodeclimateMetrics(baseIssues, 'path')[0];
-
-      expect(codequality.name).toEqual(baseIssues[0].check_name);
-      expect(codequality.path).toEqual(baseIssues[0].location.path);
-      expect(codequality.line).toEqual(baseIssues[0].location.lines.begin);
-    });
   });
 
   describe('isNothingToMergeState', () => {
@@ -102,6 +65,27 @@ describe('MergeRequestStore', () => {
 
         expect(store.mergeTrainIndex).toBeUndefined();
       });
+    });
+  });
+
+  describe('setPaths', () => {
+    it.each([
+      'discover_project_security_path',
+      'container_scanning_comparison_path',
+      'dependency_scanning_comparison_path',
+      'sast_comparison_path',
+      'dast_comparison_path',
+      'secret_scanning_comparison_path',
+      'api_fuzzing_comparison_path',
+      'coverage_fuzzing_comparison_path',
+    ])('should set %s path', (property) => {
+      // Ensure something is set in the mock data
+      expect(property in mockData).toBe(true);
+      const expectedValue = mockData[property];
+
+      store.setPaths({ ...mockData });
+
+      expect(store[convertToCamelCase(property)]).toBe(expectedValue);
     });
   });
 });

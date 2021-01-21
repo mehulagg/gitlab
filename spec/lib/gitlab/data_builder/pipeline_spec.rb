@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DataBuilder::Pipeline do
+RSpec.describe Gitlab::DataBuilder::Pipeline do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -21,9 +21,10 @@ describe Gitlab::DataBuilder::Pipeline do
     let(:data) { described_class.build(pipeline) }
     let(:attributes) { data[:object_attributes] }
     let(:build_data) { data[:builds].first }
+    let(:runner_data) { build_data[:runner] }
     let(:project_data) { data[:project] }
 
-    it 'has correct attributes' do
+    it 'has correct attributes', :aggregate_failures do
       expect(attributes).to be_a(Hash)
       expect(attributes[:ref]).to eq(pipeline.ref)
       expect(attributes[:sha]).to eq(pipeline.sha)
@@ -36,14 +37,28 @@ describe Gitlab::DataBuilder::Pipeline do
       expect(build_data[:id]).to eq(build.id)
       expect(build_data[:status]).to eq(build.status)
       expect(build_data[:allow_failure]).to eq(build.allow_failure)
+      expect(runner_data).to eq(nil)
       expect(project_data).to eq(project.hook_attrs(backward: false))
       expect(data[:merge_request]).to be_nil
       expect(data[:user]).to eq({
+        id: user.id,
         name: user.name,
         username: user.username,
         avatar_url: user.avatar_url(only_path: false),
         email: user.email
         })
+    end
+
+    context 'build with runner' do
+      let!(:build) { create(:ci_build, pipeline: pipeline, runner: ci_runner) }
+      let(:ci_runner) { create(:ci_runner) }
+
+      it 'has runner attributes', :aggregate_failures do
+        expect(runner_data[:id]).to eq(ci_runner.id)
+        expect(runner_data[:description]).to eq(ci_runner.description)
+        expect(runner_data[:active]).to eq(ci_runner.active)
+        expect(runner_data[:is_shared]).to eq(ci_runner.instance_type?)
+      end
     end
 
     context 'pipeline without variables' do

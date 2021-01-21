@@ -16,13 +16,13 @@ export default {
 </script>
 
 <template>
-  <li :data-testid="valueName">
+  <li :data-testid="valueName" class="gl-list-style-none gl-ml-0! gl-mb-4">
     <gl-sprintf :message="sprintfMessage">
       <template #label="{ content }">
-        <strong>{{ content }}</strong>
+        <strong data-testid="label">{{ content }}</strong>
       </template>
       <template #[valueName]>
-        <slot></slot>
+        <span data-testid="value"><slot></slot></span>
       </template>
     </gl-sprintf>
   </li>

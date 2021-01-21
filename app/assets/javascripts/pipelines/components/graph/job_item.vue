@@ -4,6 +4,9 @@ import ActionComponent from './action_component.vue';
 import JobNameComponent from './job_name_component.vue';
 import { sprintf } from '~/locale';
 import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
+import { accessValue } from './accessors';
+import { REST } from './constants';
+import { reportToSentry } from './utils';
 
 /**
  * Renders the badge for the pipeline graph and the job's dropdown.
@@ -31,6 +34,7 @@ import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
  */
 
 export default {
+  hoverClass: 'gl-shadow-x0-y0-b3-s1-blue-500',
   components: {
     ActionComponent,
     JobNameComponent,
@@ -40,6 +44,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [delayedJobMixin],
+  inject: {
+    dataMethod: {
+      default: REST,
+    },
+  },
   props: {
     job: {
       type: Object,
@@ -55,15 +64,38 @@ export default {
       required: false,
       default: Infinity,
     },
+    jobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    pipelineExpanded: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
+    pipelineId: {
+      type: Number,
+      required: false,
+      default: -1,
+    },
   },
   computed: {
     boundary() {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
+    detailsPath() {
+      return accessValue(this.dataMethod, 'detailsPath', this.status);
+    },
+    hasDetails() {
+      return accessValue(this.dataMethod, 'hasDetails', this.status);
+    },
+    computedJobId() {
+      return this.pipelineId > -1 ? `${this.job.name}-${this.pipelineId}` : '';
+    },
     status() {
       return this.job && this.job.status ? this.job.status : {};
     },
-
     tooltipText() {
       const textBuilder = [];
       const { name: jobName } = this.job;
@@ -95,8 +127,25 @@ export default {
     hasAction() {
       return this.job.status && this.job.status.action && this.job.status.action.path;
     },
+    relatedDownstreamHovered() {
+      return this.job.name === this.jobHovered;
+    },
+    relatedDownstreamExpanded() {
+      return this.job.name === this.pipelineExpanded.jobName && this.pipelineExpanded.expanded;
+    },
+    jobClasses() {
+      return this.relatedDownstreamHovered || this.relatedDownstreamExpanded
+        ? `${this.$options.hoverClass} ${this.cssClassJobName}`
+        : this.cssClassJobName;
+    },
+  },
+  errorCaptured(err, _vm, info) {
+    reportToSentry('job_item', `error: ${err}, info: ${info}`);
   },
   methods: {
+    hideTooltips() {
+      this.$root.$emit('bv::hide::tooltip');
+    },
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
     },
@@ -104,26 +153,35 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-component">
+  <div
+    :id="computedJobId"
+    class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between"
+    data-qa-selector="job_item_container"
+  >
     <gl-link
-      v-if="status.has_details"
-      v-gl-tooltip="{ boundary, placement: 'bottom' }"
-      :href="status.details_path"
+      v-if="hasDetails"
+      v-gl-tooltip="{ boundary, placement: 'bottom', customClass: 'gl-pointer-events-none' }"
+      :href="detailsPath"
       :title="tooltipText"
-      :class="cssClassJobName"
-      class="js-pipeline-graph-job-link qa-job-link menu-item"
+      :class="jobClasses"
+      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none"
+      data-testid="job-with-link"
+      @click.stop="hideTooltips"
+      @mouseout="hideTooltips"
     >
-      <job-name-component :name="job.name" :status="job.status" />
+      <job-name-component :name="job.name" :status="job.status" :icon-size="24" />
     </gl-link>
 
     <div
       v-else
-      v-gl-tooltip="{ boundary, placement: 'bottom' }"
+      v-gl-tooltip="{ boundary, placement: 'bottom', customClass: 'gl-pointer-events-none' }"
       :title="tooltipText"
-      :class="cssClassJobName"
-      class="js-job-component-tooltip non-details-job-component"
+      :class="jobClasses"
+      class="js-job-component-tooltip non-details-job-component menu-item"
+      data-testid="job-without-link"
+      @mouseout="hideTooltips"
     >
-      <job-name-component :name="job.name" :status="job.status" />
+      <job-name-component :name="job.name" :status="job.status" :icon-size="24" />
     </div>
 
     <action-component
@@ -131,6 +189,7 @@ export default {
       :tooltip-text="status.action.title"
       :link="status.action.path"
       :action-icon="status.action.icon"
+      data-qa-selector="action_button"
       @pipelineActionRequestComplete="pipelineActionRequestComplete"
     />
   </div>

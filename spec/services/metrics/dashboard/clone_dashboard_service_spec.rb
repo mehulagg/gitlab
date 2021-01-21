@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_store_caching do
+RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_store_caching do
   include MetricsDashboardHelpers
 
   let_it_be(:user) { create(:user) }
@@ -81,7 +81,20 @@ describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_stor
           allow(::Gitlab::Metrics::Dashboard::Processor).to receive(:new).and_return(double(process: file_content_hash))
         end
 
-        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH, [::Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter, ::Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter, ::Gitlab::Metrics::Dashboard::Stages::Sorter]
+        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH,
+                        [
+                          ::Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
+                          ::Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter
+                        ]
+
+        it_behaves_like 'valid dashboard cloning process', ::Metrics::Dashboard::ClusterDashboardService::DASHBOARD_PATH,
+                        [
+                          ::Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter
+                        ]
+
+        it_behaves_like 'valid dashboard cloning process',
+          ::Metrics::Dashboard::SelfMonitoringDashboardService::DASHBOARD_PATH,
+          [::Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter]
 
         context 'selected branch already exists' do
           let(:branch) { 'existing_branch' }
@@ -133,7 +146,7 @@ describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memory_stor
         it 'extends dashboard template path to absolute url' do
           allow(::Files::CreateService).to receive(:new).and_return(double(execute: { status: :success }))
 
-          expect(File).to receive(:read).with(Rails.root.join('config/prometheus/common_metrics.yml')).and_return('')
+          expect_file_read(Rails.root.join('config/prometheus/common_metrics.yml'), content: '')
 
           service_call
         end

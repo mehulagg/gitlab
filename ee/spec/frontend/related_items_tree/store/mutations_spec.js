@@ -1,7 +1,6 @@
+import * as types from 'ee/related_items_tree/store/mutation_types';
 import mutations from 'ee/related_items_tree/store/mutations';
 import createDefaultState from 'ee/related_items_tree/store/state';
-
-import * as types from 'ee/related_items_tree/store/mutation_types';
 
 describe('RelatedItemsTree', () => {
   describe('store', () => {
@@ -119,7 +118,7 @@ describe('RelatedItemsTree', () => {
 
           mutations[types.SET_ITEM_CHILDREN_FLAGS](state, data);
 
-          data.children.forEach(item => {
+          data.children.forEach((item) => {
             expect(state.childrenFlags[item.reference]).toEqual(
               expect.objectContaining({
                 itemExpanded: false,
@@ -682,7 +681,10 @@ describe('RelatedItemsTree', () => {
 
       describe(types.RECIEVE_PROJECTS_SUCCESS, () => {
         it('should set `projectsFetchInProgress` to false and provided `projects` param as it is within the state', () => {
-          const projects = [{ id: 1, name: 'foo' }, { id: 2, name: 'bar' }];
+          const projects = [
+            { id: 1, name: 'foo' },
+            { id: 2, name: 'bar' },
+          ];
 
           mutations[types.RECIEVE_PROJECTS_SUCCESS](state, projects);
 

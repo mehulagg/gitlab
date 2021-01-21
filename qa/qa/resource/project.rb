@@ -12,6 +12,8 @@ module QA
       attr_accessor :repository_storage # requires admin access
       attr_writer :initialize_with_readme
       attr_writer :auto_devops_enabled
+      attr_writer :github_personal_access_token
+      attr_writer :github_repository_path
 
       attribute :id
       attribute :name
@@ -21,6 +23,11 @@ module QA
       attribute :runners_token
       attribute :visibility
       attribute :template_name
+      attribute :import
+
+      attribute :default_branch do
+        api_response[:default_branch] || Runtime::Env.default_branch
+      end
 
       attribute :group do
         Group.fabricate!
@@ -56,6 +63,7 @@ module QA
         @auto_devops_enabled = false
         @visibility = :public
         @template_name = nil
+        @import = false
 
         self.name = "the_awesome_project"
       end
@@ -65,17 +73,21 @@ module QA
       end
 
       def fabricate!
+        return if @import
+
         unless @standalone
           group.visit!
           Page::Group::Show.perform(&:go_to_new_project)
         end
 
         if @template_name
+          QA::Flow::Project.go_to_create_project_from_template
           Page::Project::New.perform do |new_page|
-            new_page.click_create_from_template_tab
             new_page.use_template_for_project(@template_name)
           end
         end
+
+        Page::Project::NewExperiment.perform(&:click_blank_project_link) if Page::Project::NewExperiment.perform(&:shown?)
 
         Page::Project::New.perform do |new_page|
           new_page.choose_test_namespace
@@ -94,7 +106,29 @@ module QA
       end
 
       def has_file?(file_path)
-        repository_tree.any? { |file| file[:path] == file_path }
+        response = repository_tree
+
+        raise ResourceNotFoundError, "#{response[:message]}" if response.is_a?(Hash) && response.has_key?(:message)
+
+        response.any? { |file| file[:path] == file_path }
+      end
+
+      def has_branch?(branch)
+        has_branches?(Array(branch))
+      end
+
+      def has_branches?(branches)
+        branches.all? do |branch|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_branches_path}/#{branch}").url)
+          response.code == HTTP_STATUS_OK
+        end
+      end
+
+      def has_tags?(tags)
+        tags.all? do |tag|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_tags_path}/#{tag}").url)
+          response.code == HTTP_STATUS_OK
+        end
       end
 
       def api_get_path
@@ -113,12 +147,24 @@ module QA
         "#{api_get_path}/members"
       end
 
+      def api_merge_requests_path
+        "#{api_get_path}/merge_requests"
+      end
+
       def api_runners_path
         "#{api_get_path}/runners"
       end
 
+      def api_commits_path
+        "#{api_get_path}/repository/commits"
+      end
+
       def api_repository_branches_path
         "#{api_get_path}/repository/branches"
+      end
+
+      def api_repository_tags_path
+        "#{api_get_path}/repository/tags"
       end
 
       def api_repository_tree_path
@@ -157,6 +203,10 @@ module QA
         post_body
       end
 
+      def api_delete_path
+        "/projects/#{id}"
+      end
+
       def change_repository_storage(new_storage)
         put_body = { repository_storage: new_storage }
         response = put Runtime::API::Request.new(api_client, api_put_path).url, put_body
@@ -168,6 +218,10 @@ module QA
         wait_until(sleep_interval: 1) { Runtime::API::RepositoryStorageMoves.has_status?(self, 'finished', new_storage) }
       rescue Support::Repeater::RepeaterConditionExceededError
         raise Runtime::API::RepositoryStorageMoves::RepositoryStorageMovesError, 'Timed out while waiting for the repository storage move to finish'
+      end
+
+      def commits
+        parse_body(get(Runtime::API::Request.new(api_client, api_commits_path).url))
       end
 
       def import_status
@@ -184,6 +238,14 @@ module QA
         result[:import_status]
       end
 
+      def merge_requests
+        parse_body(get(Runtime::API::Request.new(api_client, api_merge_requests_path).url))
+      end
+
+      def merge_request_with_title(title)
+        merge_requests.find { |mr| mr[:title] == title }
+      end
+
       def runners(tag_list: nil)
         response = if tag_list
                      get Runtime::API::Request.new(api_client, "#{api_runners_path}?tag_list=#{tag_list.compact.join(',')}").url
@@ -196,6 +258,10 @@ module QA
 
       def repository_branches
         parse_body(get(Runtime::API::Request.new(api_client, api_repository_branches_path).url))
+      end
+
+      def repository_tags
+        parse_body(get(Runtime::API::Request.new(api_client, api_repository_tags_path).url))
       end
 
       def repository_tree

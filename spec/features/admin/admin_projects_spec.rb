@@ -11,6 +11,7 @@ RSpec.describe "Admin::Projects" do
 
   before do
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
   end
 
   describe "GET /admin/projects" do
@@ -93,6 +94,7 @@ RSpec.describe "Admin::Projects" do
   describe 'add admin himself to a project' do
     before do
       project.add_maintainer(user)
+      stub_feature_flags(invite_members_group_modal: false)
     end
 
     it 'adds admin a to a project as developer', :js do
@@ -126,7 +128,7 @@ RSpec.describe "Admin::Projects" do
         expect(page).to have_content('Developer')
       end
 
-      find(:css, '.content-list li', text: current_user.name).find(:css, 'a.btn-remove').click
+      find(:css, '.content-list li', text: current_user.name).find(:css, 'a.btn-danger').click
 
       expect(page).not_to have_selector(:css, '.content-list')
     end

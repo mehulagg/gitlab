@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::External::File::Project do
+RSpec.describe Gitlab::Ci::Config::External::File::Project do
   let_it_be(:context_project) { create(:project) }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
@@ -16,7 +16,8 @@ describe Gitlab::Ci::Config::External::File::Project do
       project: context_project,
       sha: '12345',
       user: context_user,
-      parent_pipeline: parent_pipeline
+      parent_pipeline: parent_pipeline,
+      variables: project.predefined_variables.to_runner_variables
     }
   end
 
@@ -165,7 +166,8 @@ describe Gitlab::Ci::Config::External::File::Project do
         user: user,
         project: project,
         sha: project.commit('master').id,
-        parent_pipeline: parent_pipeline)
+        parent_pipeline: parent_pipeline,
+        variables: project.predefined_variables.to_runner_variables)
     end
   end
 

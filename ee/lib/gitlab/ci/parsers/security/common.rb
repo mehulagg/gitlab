@@ -7,13 +7,23 @@ module Gitlab
         class Common
           SecurityReportParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
 
-          def parse!(json_data, report)
-            report_data = parse_report(json_data)
+          def self.parse!(json_data, report)
+            new(json_data, report).parse!
+          end
+
+          def initialize(json_data, report)
+            @json_data = json_data
+            @report = report
+          end
+
+          def parse!
             raise SecurityReportParserError, "Invalid report format" unless report_data.is_a?(Hash)
 
-            collate_remediations(report_data).each do |vulnerability|
-              create_vulnerability(report, vulnerability, report_data["version"])
-            end
+            create_scanner
+            create_scan
+            collate_remediations.each { |vulnerability| create_vulnerability(vulnerability) }
+
+            report_data
           rescue JSON::ParserError
             raise SecurityReportParserError, 'JSON parsing failed'
           rescue => e
@@ -21,25 +31,38 @@ module Gitlab
             raise SecurityReportParserError, "#{report.type} security report parsing failed"
           end
 
-          protected
+          private
 
-          def parse_report(json_data)
-            Gitlab::Json.parse!(json_data)
+          attr_reader :json_data, :report
+
+          def report_data
+            @report_data ||= Gitlab::Json.parse!(json_data)
+          end
+
+          def report_version
+            @report_version ||= report_data['version']
+          end
+
+          def top_level_scanner
+            @top_level_scanner ||= report_data.dig('scan', 'scanner')
+          end
+
+          def scan_data
+            @scan_data ||= report_data.dig('scan')
           end
 
           # map remediations to relevant vulnerabilities
-          def collate_remediations(report_data)
+          def collate_remediations
             return report_data["vulnerabilities"] || [] unless report_data["remediations"]
 
-            fixes = fixes_from(report_data)
             report_data["vulnerabilities"].map do |vulnerability|
               remediation = fixes[vulnerability['id']] || fixes[vulnerability['cve']]
               vulnerability.merge("remediations" => [remediation])
             end
           end
 
-          def fixes_from(report_data)
-            report_data['remediations'].each_with_object({}) do |item, memo|
+          def fixes
+            @fixes ||= report_data['remediations'].each_with_object({}) do |item, memo|
               item['fixes'].each do |fix|
                 id = fix['id'] || fix['cve']
                 memo[id] = item if id
@@ -48,42 +71,54 @@ module Gitlab
             end
           end
 
-          def create_vulnerability(report, data, version)
-            scanner = create_scanner(report, data['scanner'] || mutate_scanner_tool(data['tool']))
-            identifiers = create_identifiers(report, data['identifiers'])
-            report.add_occurrence(
-              ::Gitlab::Ci::Reports::Security::Occurrence.new(
-                uuid: SecureRandom.uuid,
+          def create_vulnerability(data)
+            identifiers = create_identifiers(data['identifiers'])
+            links = create_links(data['links'])
+            location = create_location(data['location'] || {})
+            remediations = create_remediations(data['remediations'])
+
+            report.add_finding(
+              ::Gitlab::Ci::Reports::Security::Finding.new(
+                uuid: calculate_uuid_v5(identifiers.first, location),
                 report_type: report.type,
-                name: data['message'],
+                name: finding_name(data, identifiers, location),
                 compare_key: data['cve'] || '',
-                location: create_location(data['location'] || {}),
-                severity: parse_severity_level(data['severity']&.downcase),
-                confidence: parse_confidence_level(data['confidence']&.downcase),
-                scanner: scanner,
+                location: location,
+                severity: parse_severity_level(data['severity']),
+                confidence: parse_confidence_level(data['confidence']),
+                scanner: create_scanner(data['scanner']),
+                scan: report&.scan,
                 identifiers: identifiers,
+                links: links,
+                remediations: remediations,
                 raw_metadata: data.to_json,
-                metadata_version: version))
+                metadata_version: report_version,
+                details: data['details'] || {}))
           end
 
-          def create_scanner(report, scanner)
-            return unless scanner.is_a?(Hash)
+          def create_scan
+            return unless scan_data.is_a?(Hash)
+
+            report.scan = ::Gitlab::Ci::Reports::Security::Scan.new(scan_data)
+          end
+
+          def create_scanner(scanner_data = top_level_scanner)
+            return unless scanner_data.is_a?(Hash)
 
             report.add_scanner(
               ::Gitlab::Ci::Reports::Security::Scanner.new(
-                external_id: scanner['id'],
-                name: scanner['name']))
+                external_id: scanner_data['id'],
+                name: scanner_data['name'],
+                vendor: scanner_data.dig('vendor', 'name')))
           end
 
-          def create_identifiers(report, identifiers)
+          def create_identifiers(identifiers)
             return [] unless identifiers.is_a?(Array)
 
-            identifiers.map do |identifier|
-              create_identifier(report, identifier)
-            end.compact
+            identifiers.map { |identifier| create_identifier(identifier) }.compact
           end
 
-          def create_identifier(report, identifier)
+          def create_identifier(identifier)
             return unless identifier.is_a?(Hash)
 
             report.add_identifier(
@@ -94,25 +129,60 @@ module Gitlab
                 url: identifier['url']))
           end
 
-          # TODO: this can be removed as of `12.0`
-          def mutate_scanner_tool(tool)
-            { 'id' => tool, 'name' => tool.capitalize } if tool
+          def create_links(links)
+            return [] unless links.is_a?(Array)
+
+            links.map { |link| create_link(link) }.compact
+          end
+
+          def create_link(link)
+            return unless link.is_a?(Hash)
+
+            ::Gitlab::Ci::Reports::Security::Link.new(name: link['name'], url: link['url'])
+          end
+
+          def create_remediations(remediations_data)
+            remediations_data.to_a.compact.map do |remediation_data|
+              ::Gitlab::Ci::Reports::Security::Remediation.new(remediation_data['summary'], remediation_data['diff'])
+            end
           end
 
           def parse_severity_level(input)
-            return input if ::Vulnerabilities::Occurrence::SEVERITY_LEVELS.key?(input)
-
-            'unknown'
+            input&.downcase.then { |value| ::Enums::Vulnerability.severity_levels.key?(value) ? value : 'unknown' }
           end
 
           def parse_confidence_level(input)
-            return input if ::Vulnerabilities::Occurrence::CONFIDENCE_LEVELS.key?(input)
-
-            'unknown'
+            input&.downcase.then { |value| ::Enums::Vulnerability.confidence_levels.key?(value) ? value : 'unknown' }
           end
 
           def create_location(location_data)
             raise NotImplementedError
+          end
+
+          def finding_name(data, identifiers, location)
+            return data['message'] if data['message'].present?
+            return data['name'] if data['name'].present?
+
+            identifier = identifiers.find(&:cve?) || identifiers.find(&:cwe?) || identifiers.first
+            "#{identifier.name} in #{location&.fingerprint_path}"
+          end
+
+          def calculate_uuid_v5(primary_identifier, location)
+            uuid_v5_name_components = {
+              report_type: report.type,
+              primary_identifier_fingerprint: primary_identifier&.fingerprint,
+              location_fingerprint: location&.fingerprint,
+              project_id: report.project_id
+            }
+
+            if uuid_v5_name_components.values.any?(&:nil?)
+              Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
+              return
+            end
+
+            name = uuid_v5_name_components.values.join('-')
+
+            Gitlab::UUID.v5(name)
           end
         end
       end

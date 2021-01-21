@@ -25,7 +25,6 @@ devise_for :users, controllers: { omniauth_callbacks: :omniauth_callbacks,
                                   confirmations: :confirmations }
 
 devise_scope :user do
-  get '/users/auth/:provider/omniauth_error' => 'omniauth_callbacks#omniauth_error', as: :omniauth_error
   get '/users/almost_there' => 'confirmations#almost_there'
 end
 
@@ -55,8 +54,11 @@ scope(constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }) d
 end
 
 constraints(::Constraints::UserUrlConstrainer.new) do
-  # Get all keys of user
-  get ':username.keys' => 'profiles/keys#get_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
+  # Get all SSH keys of user
+  get ':username.keys' => 'users#ssh_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
+
+  # Get all GPG keys of user
+  get ':username.gpg' => 'users#gpg_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
 
   scope(path: ':username',
         as: :user,

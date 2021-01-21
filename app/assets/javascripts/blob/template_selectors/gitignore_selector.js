@@ -1,4 +1,5 @@
 import FileTemplateSelector from '../file_template_selector';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class BlobGitignoreSelector extends FileTemplateSelector {
   constructor({ mediator }) {
@@ -14,15 +15,15 @@ export default class BlobGitignoreSelector extends FileTemplateSelector {
   }
 
   initDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.$dropdown.data('data'),
       filterable: true,
       selectable: true,
       search: {
         fields: ['name'],
       },
-      clicked: options => this.reportSelectionName(options),
-      text: item => item.name,
+      clicked: (options) => this.reportSelectionName(options),
+      text: (item) => item.name,
     });
   }
 }

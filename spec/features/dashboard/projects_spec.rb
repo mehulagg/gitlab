@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard Projects' do
+RSpec.describe 'Dashboard Projects' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, name: 'awesome stuff') }
   let(:project2) { create(:project, :public, name: 'Community project') }
@@ -125,7 +125,7 @@ describe 'Dashboard Projects' do
   end
 
   context 'when on Starred projects tab', :js do
-    it 'shows the empty state when there are no starred projects' do
+    it 'shows the empty state when there are no starred projects', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222357' do
       visit(starred_dashboard_projects_path)
 
       element = page.find('.row.empty-state')
@@ -205,6 +205,14 @@ describe 'Dashboard Projects' do
 
       it_behaves_like 'hidden pipeline status'
     end
+
+    context "when last_pipeline is missing" do
+      before do
+        project.last_pipeline.delete
+      end
+
+      it_behaves_like 'hidden pipeline status'
+    end
   end
 
   context 'last push widget', :use_clean_rails_memory_store_caching do
@@ -251,7 +259,7 @@ describe 'Dashboard Projects' do
     # 4. ProjectsHelper#load_pipeline_status
     # 5. RendersMemberAccess#preload_max_member_access_for_collection
     # 6. User#max_member_access_for_project_ids
-    # 7. CommitWithPipeline#last_pipeline
+    # 7. Ci::CommitWithPipeline#last_pipeline
 
     expect { visit dashboard_projects_path }.not_to exceed_query_limit(control_count + 7)
   end

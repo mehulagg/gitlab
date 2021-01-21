@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::PopulateCanonicalEmails, :migration, schema: 20200312053852 do
+RSpec.describe Gitlab::BackgroundMigration::PopulateCanonicalEmails, :migration, schema: 20200312053852 do
   let(:migration) { described_class.new }
 
   let_it_be(:users_table) { table(:users) }
@@ -63,7 +63,7 @@ describe Gitlab::BackgroundMigration::PopulateCanonicalEmails, :migration, schem
   describe 'gracefully handles existing records, some of which may have an already-existing identical canonical_email field' do
     let_it_be(:user_one) { create_user(email: "example.user@gmail.com", id: 1) }
     let_it_be(:user_two) { create_user(email: "exampleuser@gmail.com", id: 2) }
-    let_it_be(:user_email_one) { user_canonical_emails.create(canonical_email: "exampleuser@gmail.com", user_id: user_one.id) }
+    let_it_be(:user_email_one) { user_canonical_emails.create!(canonical_email: "exampleuser@gmail.com", user_id: user_one.id) }
 
     subject { migration.perform(1, 2) }
 
@@ -79,7 +79,7 @@ describe Gitlab::BackgroundMigration::PopulateCanonicalEmails, :migration, schem
         projects_limit: 0
     }
 
-    users.create(default_attributes.merge!(attributes))
+    users.create!(default_attributes.merge!(attributes))
   end
 
   def canonical_emails(user_id: nil)

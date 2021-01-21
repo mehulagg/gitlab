@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190506135400_schedule_sync_issuables_state_id_where_nil')
 
-describe ScheduleSyncIssuablesStateIdWhereNil do
+RSpec.describe ScheduleSyncIssuablesStateIdWhereNil do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:merge_requests) { table(:merge_requests) }
@@ -20,7 +20,7 @@ describe ScheduleSyncIssuablesStateIdWhereNil do
 
     it 'correctly schedules issuable sync background migration' do
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(migration).to be_scheduled_delayed_migration(120.seconds, resource_1.id, resource_3.id)

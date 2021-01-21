@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200204113223_schedule_recalculate_project_authorizations.rb')
 
-describe ScheduleRecalculateProjectAuthorizations do
+RSpec.describe ScheduleRecalculateProjectAuthorizations do
   let(:users_table) { table(:users) }
   let(:namespaces_table) { table(:namespaces) }
   let(:projects_table) { table(:projects) }
@@ -26,7 +26,7 @@ describe ScheduleRecalculateProjectAuthorizations do
 
   it 'schedules background migration' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(BackgroundMigrationWorker.jobs.size).to eq(2)
@@ -45,7 +45,7 @@ describe ScheduleRecalculateProjectAuthorizations do
                                          access_level: 30)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(BackgroundMigrationWorker.jobs.size).to eq(2)

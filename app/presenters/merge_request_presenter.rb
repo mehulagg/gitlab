@@ -8,6 +8,8 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
   include ChecksCollaboration
   include Gitlab::Utils::StrongMemoize
 
+  APPROVALS_WIDGET_BASE_TYPE = 'base'
+
   presents :merge_request
 
   def ci_status
@@ -35,7 +37,7 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def remove_wip_path
-    if work_in_progress? && can?(current_user, :update_merge_request, merge_request.project)
+    if can?(current_user, :update_merge_request, merge_request.project)
       remove_wip_project_merge_request_path(project, merge_request)
     end
   end
@@ -177,7 +179,7 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     return false unless source_branch_exists?
 
     !!::Gitlab::UserAccess
-      .new(current_user, project: source_project)
+      .new(current_user, container: source_project)
       .can_push_to_branch?(source_branch)
   end
 
@@ -200,10 +202,6 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     end
   end
 
-  def web_url
-    Gitlab::UrlBuilder.build(merge_request)
-  end
-
   def subscribed?
     merge_request.subscribed?(current_user, merge_request.target_project)
   end
@@ -222,6 +220,22 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     else
       content_tag(:span, target_branch, class: 'ref-name')
     end
+  end
+
+  def api_approvals_path
+    expose_path(api_v4_projects_merge_requests_approvals_path(id: project.id, merge_request_iid: merge_request.iid))
+  end
+
+  def api_approve_path
+    expose_path(api_v4_projects_merge_requests_approve_path(id: project.id, merge_request_iid: merge_request.iid))
+  end
+
+  def api_unapprove_path
+    expose_path(api_v4_projects_merge_requests_unapprove_path(id: project.id, merge_request_iid: merge_request.iid))
+  end
+
+  def approvals_widget_type
+    APPROVALS_WIDGET_BASE_TYPE
   end
 
   private

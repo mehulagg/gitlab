@@ -17,7 +17,7 @@ RSpec.describe 'Project mirror', :js do
 
     context 'when mirror was updated successfully' do
       before do
-        import_state.update(last_successful_update_at: 5.minutes.ago)
+        import_state.update!(last_successful_update_at: 5.minutes.ago)
       end
 
       it 'shows the last successful at timestamp' do
@@ -31,7 +31,7 @@ RSpec.describe 'Project mirror', :js do
 
     context 'when mirror was never updated successfully' do
       before do
-        import_state.update(last_successful_update_at: nil)
+        import_state.update!(last_successful_update_at: nil)
       end
 
       it 'shows that mirror has never been updated' do
@@ -47,12 +47,12 @@ RSpec.describe 'Project mirror', :js do
       let(:timestamp) { Time.now }
 
       before do
-        import_state.update(last_update_at: 6.minutes.ago, next_execution_timestamp: timestamp + 10.minutes)
+        import_state.update!(last_update_at: 6.minutes.ago, next_execution_timestamp: timestamp + 10.minutes)
       end
 
       context 'when able to force update' do
         it 'forces import' do
-          Timecop.freeze(timestamp) do
+          travel_to(timestamp) do
             visit project_mirror_path(project)
           end
 
@@ -66,13 +66,13 @@ RSpec.describe 'Project mirror', :js do
 
       context 'when unable to force update' do
         before do
-          import_state.update(next_execution_timestamp: timestamp - 1.minute)
+          import_state.update!(next_execution_timestamp: timestamp - 1.minute)
         end
 
         let(:disabled_updating_button) { '[data-qa-selector="updating_button"].disabled' }
 
         it 'disables Update now button' do
-          Timecop.freeze(timestamp) do
+          travel_to(timestamp) do
             visit project_mirror_path(project)
           end
 

@@ -6,8 +6,16 @@
 
 require 'securerandom'
 require 'socket'
+require 'logger'
 
 module GitalyTest
+  LOGGER = begin
+             default_name = ENV['CI'] ? 'DEBUG' : 'WARN'
+             level_name = ENV['GITLAB_TESTING_LOG_LEVEL']&.upcase
+             level = Logger.const_get(level_name || default_name, true) # rubocop: disable Gitlab/ConstGetInheritFalse
+             Logger.new(STDOUT, level: level, formatter: ->(_, _, _, msg) { msg })
+           end
+
   def tmp_tests_gitaly_dir
     File.expand_path('../tmp/tests/gitaly', __dir__)
   end
@@ -33,7 +41,7 @@ module GitalyTest
       'HOME' => File.expand_path('tmp/tests'),
       'GEM_PATH' => Gem.path.join(':'),
       'BUNDLE_APP_CONFIG' => File.join(File.dirname(gemfile), '.bundle/config'),
-      'BUNDLE_FLAGS' => "--jobs=4 --retry=3 --quiet",
+      'BUNDLE_FLAGS' => "--jobs=4 --retry=3",
       'BUNDLE_INSTALL_FLAGS' => nil,
       'BUNDLE_GEMFILE' => gemfile,
       'RUBYOPT' => nil,
@@ -54,13 +62,36 @@ module GitalyTest
     case service
     when :gitaly
       File.join(tmp_tests_gitaly_dir, 'config.toml')
+    when :gitaly2
+      File.join(tmp_tests_gitaly_dir, 'gitaly2.config.toml')
     when :praefect
       File.join(tmp_tests_gitaly_dir, 'praefect.config.toml')
     end
   end
 
+  def service_binary(service)
+    case service
+    when :gitaly, :gitaly2
+      'gitaly'
+    when :praefect
+      'praefect'
+    end
+  end
+
+  def install_gitaly_gems
+    system(env, "make #{tmp_tests_gitaly_dir}/.ruby-bundle", chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
+  end
+
+  def build_gitaly
+    system(env, 'make', chdir: tmp_tests_gitaly_dir) # rubocop:disable GitlabSecurity/SystemCommandInjection
+  end
+
   def start_gitaly
     start(:gitaly)
+  end
+
+  def start_gitaly2
+    start(:gitaly2)
   end
 
   def start_praefect
@@ -68,7 +99,7 @@ module GitalyTest
   end
 
   def start(service)
-    args = ["#{tmp_tests_gitaly_dir}/#{service}"]
+    args = ["#{tmp_tests_gitaly_dir}/#{service_binary(service)}"]
     args.push("-config") if service == :praefect
     args.push(config_path(service))
     pid = spawn(env, *args, [:out, :err] => "log/#{service}-test.log")
@@ -98,7 +129,7 @@ module GitalyTest
   end
 
   def check_gitaly_config!
-    puts "Checking gitaly-ruby Gemfile..."
+    LOGGER.debug "Checking gitaly-ruby Gemfile...\n"
 
     unless File.exist?(gemfile)
       message = "#{gemfile} does not exist."
@@ -106,8 +137,9 @@ module GitalyTest
       abort message
     end
 
-    puts 'Checking gitaly-ruby bundle...'
-    abort 'bundle check failed' unless system(env, 'bundle', 'check', chdir: File.dirname(gemfile))
+    LOGGER.debug "Checking gitaly-ruby bundle...\n"
+    out = ENV['CI'] ? STDOUT : '/dev/null'
+    abort 'bundle check failed' unless system(env, 'bundle', 'check', out: out, chdir: File.dirname(gemfile))
   end
 
   def read_socket_path(service)
@@ -126,22 +158,22 @@ module GitalyTest
   end
 
   def try_connect!(service)
-    print "Trying to connect to #{service}: "
+    LOGGER.debug "Trying to connect to #{service}: "
     timeout = 20
     delay = 0.1
     socket = read_socket_path(service)
 
     Integer(timeout / delay).times do
       UNIXSocket.new(socket)
-      puts ' OK'
+      LOGGER.debug " OK\n"
 
       return
     rescue Errno::ENOENT, Errno::ECONNREFUSED
-      print '.'
+      LOGGER.debug '.'
       sleep delay
     end
 
-    puts ' FAILED'
+    LOGGER.warn " FAILED to connect to #{service}\n"
 
     raise "could not connect to #{socket}"
   end

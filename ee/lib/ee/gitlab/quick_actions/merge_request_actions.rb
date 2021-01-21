@@ -8,17 +8,19 @@ module EE
         include ::Gitlab::QuickActions::Dsl
 
         included do
-          desc _('Approve a merge request')
-          explanation _('Approve the current merge request.')
+          desc _('Change reviewer(s)')
+          explanation _('Change reviewer(s).')
+          execution_message _('Changed reviewer(s).')
+          params '@user1 @user2'
           types MergeRequest
           condition do
-            quick_action_target.persisted? && quick_action_target.can_approve?(current_user) && !quick_action_target.project.require_password_to_approve?
+            quick_action_target.allows_multiple_reviewers? &&
+              ::Feature.enabled?(:merge_request_reviewers, project, default_enabled: :yaml) &&
+              quick_action_target.persisted? &&
+              current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
           end
-          command :approve do
-            if quick_action_target.can_approve?(current_user)
-              ::MergeRequests::ApprovalService.new(quick_action_target.project, current_user).execute(quick_action_target)
-              @execution_message[:approve] = _('Approved the current merge request.')
-            end
+          command :reassign_reviewer do |reassign_param|
+            @updates[:reviewer_ids] = extract_users(reassign_param).map(&:id)
           end
         end
       end

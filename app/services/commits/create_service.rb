@@ -21,6 +21,7 @@ module Commits
       @start_sha = params[:start_sha]
       @branch_name = params[:branch_name]
       @force = params[:force] || false
+      @dry_run = params[:dry_run] || false
     end
 
     def execute
@@ -30,12 +31,14 @@ module Commits
 
       success(result: new_commit)
     rescue ChangeError => ex
+      Gitlab::ErrorTracking.log_exception(ex)
       error(ex.message, pass_back: { error_code: ex.error_code })
     rescue ValidationError,
            Gitlab::Git::Index::IndexError,
            Gitlab::Git::CommitError,
            Gitlab::Git::PreReceiveError,
            Gitlab::Git::CommandError => ex
+      Gitlab::ErrorTracking.log_exception(ex)
       error(ex.message)
     end
 
@@ -67,7 +70,7 @@ module Commits
     end
 
     def validate_permissions!
-      allowed = ::Gitlab::UserAccess.new(current_user, project: project).can_push_to_branch?(@branch_name)
+      allowed = ::Gitlab::UserAccess.new(current_user, container: project).can_push_to_branch?(@branch_name)
 
       unless allowed
         raise_error("You are not allowed to push into this branch")

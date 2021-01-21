@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { createStore } from '~/ide/stores';
 import modal from '~/ide/components/new_dropdown/modal.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -19,7 +19,7 @@ describe('new file modal component', () => {
     ${'tree'} | ${'Create new directory'} | ${'Create directory'} | ${false}
     ${'blob'} | ${'Create new file'}      | ${'Create file'}      | ${true}
   `('$entryType', ({ entryType, modalTitle, btnTitle, showsFileTemplates }) => {
-    beforeEach(done => {
+    beforeEach((done) => {
       const store = createStore();
 
       vm = createComponentWithStore(Component, store).$mount();

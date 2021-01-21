@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton } from '@gitlab/ui';
 import { inserted } from '~/feature_highlight/feature_highlight_helper';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 
@@ -11,7 +11,7 @@ import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover
 export default {
   name: 'HelpPopover',
   components: {
-    Icon,
+    GlButton,
   },
   props: {
     options: {
@@ -43,7 +43,5 @@ export default {
 };
 </script>
 <template>
-  <button type="button" class="btn btn-blank btn-transparent btn-help" tabindex="0">
-    <icon name="question" />
-  </button>
+  <gl-button variant="link" icon="question" tabindex="0" />
 </template>

@@ -18,6 +18,8 @@ module Gitlab
       def build(object, **options)
         # Objects are sometimes wrapped in a BatchLoader instance
         case object.itself
+        when Board
+          board_url(object, **options)
         when ::Ci::Build
           instance.project_job_url(object.project, object, **options)
         when Commit
@@ -32,6 +34,8 @@ module Gitlab
           instance.milestone_url(object, **options)
         when Note
           note_url(object, **options)
+        when Release
+          instance.release_url(object, **options)
         when Project
           instance.project_url(object, **options)
         when Snippet
@@ -39,7 +43,7 @@ module Gitlab
         when User
           instance.user_url(object, **options)
         when Wiki
-          wiki_page_url(object, Wiki::HOMEPAGE, **options)
+          wiki_url(object, **options)
         when WikiPage
           wiki_page_url(object.wiki, object, **options)
         when ::DesignManagement::Design
@@ -49,6 +53,14 @@ module Gitlab
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity
+
+      def board_url(board, **options)
+        if board.project_board?
+          instance.project_board_url(board.resource_parent, board, **options)
+        else
+          instance.group_board_url(board.resource_parent, board, **options)
+        end
+      end
 
       def commit_url(commit, **options)
         return '' unless commit.project
@@ -71,19 +83,34 @@ module Gitlab
       end
 
       def snippet_url(snippet, **options)
-        if options.delete(:raw).present?
+        if options[:file].present?
+          file, ref = options.values_at(:file, :ref)
+
+          instance.gitlab_raw_snippet_blob_url(snippet, file, ref)
+        elsif options.delete(:raw).present?
           instance.gitlab_raw_snippet_url(snippet, **options)
         else
           instance.gitlab_snippet_url(snippet, **options)
         end
       end
 
-      def wiki_page_url(wiki, page, **options)
+      def wiki_url(wiki, **options)
+        return wiki_page_url(wiki, Wiki::HOMEPAGE, **options) unless options[:action]
+
         if wiki.container.is_a?(Project)
-          instance.project_wiki_url(wiki.container, page, **options)
-        else
-          raise NotImplementedError.new("No URL builder defined for #{wiki.container.inspect} wikis")
+          options[:controller] = 'projects/wikis'
+          options[:namespace_id] = wiki.container.namespace
+          options[:project_id] = wiki.container
         end
+
+        instance.url_for(**options)
+      end
+
+      def wiki_page_url(wiki, page, **options)
+        options[:action] ||= :show
+        options[:id] = page
+
+        wiki_url(wiki, **options)
       end
 
       def design_url(design, **options)

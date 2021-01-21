@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Template::Finders::GlobalTemplateFinder do
+RSpec.describe Gitlab::Template::Finders::GlobalTemplateFinder do
   let(:base_dir) { Dir.mktmpdir }
 
   def create_template!(name_with_category)
@@ -15,9 +15,19 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
     FileUtils.rm_rf(base_dir)
   end
 
-  subject(:finder) { described_class.new(base_dir, '', { 'General' => '', 'Bar' => 'Bar' }, exclusions: exclusions) }
+  subject(:finder) do
+    described_class.new(base_dir, '',
+                        { 'General' => '', 'Bar' => 'Bar' },
+                        include_categories_for_file,
+                        excluded_patterns: excluded_patterns)
+  end
 
-  let(:exclusions) { [] }
+  let(:excluded_patterns) { [] }
+  let(:include_categories_for_file) do
+    {
+      "SAST" => { "Security" => "Security" }
+    }
+  end
 
   describe '.find' do
     context 'with a non-prefixed General template' do
@@ -38,7 +48,7 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
       end
 
       context 'while listed as an exclusion' do
-        let(:exclusions) { %w[test-template] }
+        let(:excluded_patterns) { [%r{^test-template$}] }
 
         it 'does not find the template without a prefix' do
           expect(finder.find('test-template')).to be_nil
@@ -60,6 +70,7 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
     context 'with a prefixed template' do
       before do
         create_template!('Bar/test-template')
+        create_template!('Security/SAST')
       end
 
       it 'finds the template with a prefix' do
@@ -76,8 +87,18 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
         expect { finder.find('../foo') }.to raise_error(/Invalid path/)
       end
 
+      context 'with include_categories_for_file being present' do
+        it 'finds the template with a prefix' do
+          expect(finder.find('SAST')).to be_present
+        end
+
+        it 'does not find any template which is missing in include_categories_for_file' do
+          expect(finder.find('DAST')).to be_nil
+        end
+      end
+
       context 'while listed as an exclusion' do
-        let(:exclusions) { %w[Bar/test-template] }
+        let(:excluded_patterns) { [%r{^Bar/test-template$}] }
 
         it 'does not find the template with a prefix' do
           expect(finder.find('Bar/test-template')).to be_nil
@@ -94,6 +115,17 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
 
           expect(finder.find('test-template')).to be_present
           expect(finder.find('Bar/test-template')).to be_nil
+        end
+      end
+
+      context 'while listed as an exclusion' do
+        let(:excluded_patterns) { [%r{\.latest$}] }
+
+        it 'excludes the template matched the pattern' do
+          create_template!('test-template.latest')
+
+          expect(finder.find('test-template')).to be_present
+          expect(finder.find('test-template.latest')).to be_nil
         end
       end
     end

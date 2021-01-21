@@ -4,8 +4,8 @@
  * Scanning, Secret Scanning) body text
  * [severity-badge] [name] in [link]:[line]
  */
+import ModalOpenName from 'ee/reports/components/modal_open_name.vue';
 import ReportLink from '~/reports/components/report_link.vue';
-import ModalOpenName from '~/reports/components/modal_open_name.vue';
 import SeverityBadge from './severity_badge.vue';
 
 export default {
@@ -34,9 +34,13 @@ export default {
 };
 </script>
 <template>
-  <div class="report-block-list-issue-description prepend-top-5 append-bottom-5">
-    <div class="report-block-list-issue-description-text">
-      <severity-badge v-if="issue.severity" class="d-inline-block" :severity="issue.severity" />
+  <div class="report-block-list-issue-description gl-mt-2 gl-mb-2 gl-w-full">
+    <div class="report-block-list-issue-description-text gl-display-flex gl-w-full">
+      <severity-badge
+        v-if="issue.severity"
+        class="d-inline-block gl-mr-1"
+        :severity="issue.severity"
+      />
       <modal-open-name :issue="issue" :status="status" />
     </div>
     <report-link v-if="showReportLink && issue.path" :issue="issue" />

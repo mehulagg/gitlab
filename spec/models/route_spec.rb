@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Route do
+RSpec.describe Route do
   let(:group) { create(:group, path: 'git_lab', name: 'git_lab') }
   let(:route) { group.route }
 
@@ -59,6 +59,15 @@ describe Route do
 
     it 'returns correct routes' do
       expect(described_class.inside_path('git_lab')).to match_array([nested_group.route, deep_nested_group.route])
+    end
+  end
+
+  describe '.for_routable_type' do
+    let!(:nested_group) { create(:group, path: 'foo', name: 'foo', parent: group) }
+    let!(:project) { create(:project, path: 'other-project') }
+
+    it 'returns correct routes' do
+      expect(described_class.for_routable_type(Project.name)).to match_array([project.route])
     end
   end
 

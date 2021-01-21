@@ -3,6 +3,8 @@
 module Types
   # rubocop: disable Graphql/AuthorizeTypes
   class BoardListType < BaseObject
+    include Gitlab::Utils::StrongMemoize
+
     graphql_name 'BoardList'
     description 'Represents a list for an issue board'
 
@@ -17,8 +19,33 @@ module Types
     field :label, Types::LabelType, null: true,
           description: 'Label of the list'
     field :collapsed, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if list is collapsed for this user',
-          resolve: -> (list, _args, ctx) { list.collapsed?(ctx[:current_user]) }
+          description: 'Indicates if list is collapsed for this user'
+    field :issues_count, GraphQL::INT_TYPE, null: true,
+          description: 'Count of issues in the list'
+
+    field :issues, ::Types::IssueType.connection_type, null: true,
+          description: 'Board issues',
+          resolver: ::Resolvers::BoardListIssuesResolver
+
+    def issues_count
+      metadata[:size]
+    end
+
+    def collapsed
+      object.collapsed?(context[:current_user])
+    end
+
+    def metadata
+      strong_memoize(:metadata) do
+        list = self.object
+        user = context[:current_user]
+        params = (context[:issue_filters] || {}).merge(board_id: list.board_id, id: list.id)
+
+        ::Boards::Issues::ListService
+          .new(list.board.resource_parent, user, params)
+          .metadata
+      end
+    end
   end
   # rubocop: enable Graphql/AuthorizeTypes
 end

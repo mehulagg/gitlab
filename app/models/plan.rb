@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Plan < ApplicationRecord
-  DEFAULT = 'default'.freeze
+  DEFAULT = 'default'
 
   has_one :limits, class_name: 'PlanLimits'
 
@@ -27,7 +27,7 @@ class Plan < ApplicationRecord
   end
 
   def actual_limits
-    self.limits || PlanLimits.new
+    self.limits || self.build_limits
   end
 
   def default?

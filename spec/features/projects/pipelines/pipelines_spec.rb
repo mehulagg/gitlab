@@ -12,6 +12,7 @@ RSpec.describe 'Pipelines', :js do
 
     before do
       sign_in(user)
+      stub_feature_flags(graphql_pipeline_details: false)
       project.add_developer(user)
       project.update!(auto_devops_attributes: { enabled: false })
     end
@@ -65,19 +66,8 @@ RSpec.describe 'Pipelines', :js do
           expect(page.find('.js-pipelines-tab-all .badge').text).to include('1')
         end
 
-        it 'shows a tab for Pending pipelines and count' do
-          expect(page.find('.js-pipelines-tab-pending').text).to include('Pending')
-          expect(page.find('.js-pipelines-tab-pending .badge').text).to include('0')
-        end
-
-        it 'shows a tab for Running pipelines and count' do
-          expect(page.find('.js-pipelines-tab-running').text).to include('Running')
-          expect(page.find('.js-pipelines-tab-running .badge').text).to include('1')
-        end
-
         it 'shows a tab for Finished pipelines and count' do
           expect(page.find('.js-pipelines-tab-finished').text).to include('Finished')
-          expect(page.find('.js-pipelines-tab-finished .badge').text).to include('0')
         end
 
         it 'shows a tab for Branches' do
@@ -89,9 +79,9 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'updates content when tab is clicked' do
-          page.find('.js-pipelines-tab-pending').click
+          page.find('.js-pipelines-tab-finished').click
           wait_for_requests
-          expect(page).to have_content('There are currently no pending pipelines.')
+          expect(page).to have_content('There are currently no finished pipelines.')
         end
       end
 
@@ -129,7 +119,7 @@ RSpec.describe 'Pipelines', :js do
         context 'when canceling' do
           before do
             find('.js-pipelines-cancel-button').click
-            find('.js-modal-primary-action').click
+            click_button 'Stop pipeline'
             wait_for_requests
           end
 
@@ -322,7 +312,7 @@ RSpec.describe 'Pipelines', :js do
         let!(:delayed_job) do
           create(:ci_build, :scheduled,
             pipeline: pipeline,
-            name: 'delayed job',
+            name: 'delayed job 1',
             stage: 'test')
         end
 
@@ -338,7 +328,7 @@ RSpec.describe 'Pipelines', :js do
           find('.js-pipeline-dropdown-manual-actions').click
 
           time_diff = [0, delayed_job.scheduled_at - Time.now].max
-          expect(page).to have_button('delayed job')
+          expect(page).to have_button('delayed job 1')
           expect(page).to have_content(Time.at(time_diff).utc.strftime("%H:%M:%S"))
         end
 
@@ -346,7 +336,7 @@ RSpec.describe 'Pipelines', :js do
           let!(:delayed_job) do
             create(:ci_build, :expired_scheduled,
               pipeline: pipeline,
-              name: 'delayed job',
+              name: 'delayed job 1',
               stage: 'test')
           end
 
@@ -360,7 +350,7 @@ RSpec.describe 'Pipelines', :js do
         context 'when user played a delayed job immediately' do
           before do
             find('.js-pipeline-dropdown-manual-actions').click
-            page.accept_confirm { click_button('delayed job') }
+            page.accept_confirm { click_button('delayed job 1') }
             wait_for_requests
           end
 
@@ -418,7 +408,7 @@ RSpec.describe 'Pipelines', :js do
           context 'when canceling' do
             before do
               find('.js-pipelines-cancel-button').click
-              find('.js-modal-primary-action').click
+              click_button 'Stop pipeline'
             end
 
             it 'indicates that pipeline was canceled', :sidekiq_might_not_need_inline do
@@ -539,7 +529,7 @@ RSpec.describe 'Pipelines', :js do
         end
 
         it 'renders a mini pipeline graph' do
-          expect(page).to have_selector('.js-mini-pipeline-graph')
+          expect(page).to have_selector('[data-testid="widget-mini-pipeline-graph"]')
           expect(page).to have_selector('.js-builds-dropdown-button')
         end
 
@@ -663,6 +653,7 @@ RSpec.describe 'Pipelines', :js do
       let(:project) { create(:project, :repository) }
 
       before do
+        stub_feature_flags(new_pipeline_form: false)
         visit new_project_pipeline_path(project)
       end
 
@@ -729,6 +720,7 @@ RSpec.describe 'Pipelines', :js do
       let(:project) { create(:project, :repository) }
 
       before do
+        stub_feature_flags(new_pipeline_form: false)
         visit new_project_pipeline_path(project)
       end
 

@@ -1,13 +1,14 @@
 <script>
-import { GlLink, GlSprintf } from '@gitlab/ui';
+import { GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { __ } from '../../locale';
-import createFlash from '../../flash';
+import { deprecatedCreateFlash as createFlash } from '../../flash';
 import Api from '../../api';
 import state from '../state';
 import Dropdown from './dropdown.vue';
 
 export default {
   components: {
+    GlIcon,
     GlLink,
     GlSprintf,
     Dropdown,
@@ -60,7 +61,7 @@ export default {
       }
     },
     normalizeProjectData(data) {
-      return data.map(p => ({
+      return data.map((p) => ({
         id: p.id,
         name: p.name_with_namespace,
         pathWithNamespace: p.path_with_namespace,
@@ -77,7 +78,7 @@ export default {
           this.projects = this.normalizeProjectData(data);
           this.selectProject(this.projects[0]);
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash(__('Error fetching forked projects. Please try again.'));
           throw e;
         });
@@ -136,7 +137,7 @@ export default {
           target="_blank"
         >
           <span class="sr-only">{{ __('Read more') }}</span>
-          <i class="fa fa-question-circle" aria-hidden="true"></i>
+          <gl-icon name="question-o" />
         </gl-link>
       </p>
     </div>

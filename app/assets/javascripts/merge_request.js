@@ -1,12 +1,14 @@
 /* eslint-disable func-names, no-underscore-dangle, consistent-return */
 
 import $ from 'jquery';
+import axios from './lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import eventHub from '~/vue_merge_request_widget/event_hub';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import TaskList from './task_list';
 import MergeRequestTabs from './merge_request_tabs';
-import IssuablesHelper from './helpers/issuables_helper';
 import { addDelimiter } from './lib/utils/text_utility';
+import { getParameterValues, setUrlParams } from './lib/utils/url_utility';
 
 function MergeRequest(opts) {
   // Initialize MergeRequest behavior
@@ -22,7 +24,6 @@ function MergeRequest(opts) {
   this.initTabs();
   this.initMRBtnListeners();
   this.initCommitMessageListeners();
-  this.closeReopenReportToggle = IssuablesHelper.initCloseReopenReport();
 
   if ($('.description.js-task-list-container').length) {
     this.taskList = new TaskList({
@@ -30,7 +31,7 @@ function MergeRequest(opts) {
       fieldName: 'description',
       selector: '.detail-page-description',
       lockVersion: this.$el.data('lockVersion'),
-      onSuccess: result => {
+      onSuccess: (result) => {
         document.querySelector('#task_status').innerText = result.task_status;
         document.querySelector('#task_status_short').innerText = result.task_status_short;
       },
@@ -46,11 +47,11 @@ function MergeRequest(opts) {
 }
 
 // Local jQuery finder
-MergeRequest.prototype.$ = function(selector) {
+MergeRequest.prototype.$ = function (selector) {
   return this.$el.find(selector);
 };
 
-MergeRequest.prototype.initTabs = function() {
+MergeRequest.prototype.initTabs = function () {
   if (window.mrTabs) {
     window.mrTabs.unbindEvents();
   }
@@ -58,21 +59,52 @@ MergeRequest.prototype.initTabs = function() {
   window.mrTabs = new MergeRequestTabs(this.opts);
 };
 
-MergeRequest.prototype.showAllCommits = function() {
+MergeRequest.prototype.showAllCommits = function () {
   this.$('.first-commits').remove();
   return this.$('.all-commits').removeClass('hide');
 };
 
-MergeRequest.prototype.initMRBtnListeners = function() {
+MergeRequest.prototype.initMRBtnListeners = function () {
   const _this = this;
-  return $('a.btn-close, a.btn-reopen').on('click', function(e) {
+  const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
+
+  if (draftToggles.length) {
+    draftToggles.forEach((draftToggle) => {
+      draftToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        const url = draftToggle.href;
+        const wipEvent = getParameterValues('merge_request[wip_event]', url)[0];
+        const mobileDropdown = draftToggle.closest('.dropdown.show');
+
+        if (mobileDropdown) {
+          $(mobileDropdown.firstElementChild).dropdown('toggle');
+        }
+
+        draftToggle.setAttribute('disabled', 'disabled');
+
+        axios
+          .put(draftToggle.href, null, { params: { format: 'json' } })
+          .then(({ data }) => {
+            draftToggle.removeAttribute('disabled');
+            eventHub.$emit('MRWidgetUpdateRequested');
+            MergeRequest.toggleDraftStatus(data.title, wipEvent === 'unwip');
+          })
+          .catch(() => {
+            draftToggle.removeAttribute('disabled');
+            createFlash(__('Something went wrong. Please try again.'));
+          });
+      });
+    });
+  }
+
+  return $('.btn-close, .btn-reopen').on('click', function (e) {
     const $this = $(this);
     const shouldSubmit = $this.hasClass('btn-comment');
     if (shouldSubmit && $this.data('submitted')) {
       return;
     }
-
-    if (this.closeReopenReportToggle) this.closeReopenReportToggle.setDisable();
 
     if (shouldSubmit) {
       if ($this.hasClass('btn-comment-and-close') || $this.hasClass('btn-comment-and-reopen')) {
@@ -85,7 +117,7 @@ MergeRequest.prototype.initMRBtnListeners = function() {
   });
 };
 
-MergeRequest.prototype.submitNoteForm = function(form, $button) {
+MergeRequest.prototype.submitNoteForm = function (form, $button) {
   const noteText = form.find('textarea.js-note-text').val();
   if (noteText.trim().length > 0) {
     form.submit();
@@ -94,8 +126,8 @@ MergeRequest.prototype.submitNoteForm = function(form, $button) {
   }
 };
 
-MergeRequest.prototype.initCommitMessageListeners = function() {
-  $(document).on('click', 'a.js-with-description-link', e => {
+MergeRequest.prototype.initCommitMessageListeners = function () {
+  $(document).on('click', 'a.js-with-description-link', (e) => {
     const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
@@ -104,7 +136,7 @@ MergeRequest.prototype.initCommitMessageListeners = function() {
     $('.js-without-description-hint').show();
   });
 
-  $(document).on('click', 'a.js-without-description-link', e => {
+  $(document).on('click', 'a.js-without-description-link', (e) => {
     const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
@@ -114,7 +146,7 @@ MergeRequest.prototype.initCommitMessageListeners = function() {
   });
 };
 
-MergeRequest.setStatusBoxToMerged = function() {
+MergeRequest.setStatusBoxToMerged = function () {
   $('.detail-page-header .status-box')
     .removeClass('status-box-open')
     .addClass('status-box-mr-merged')
@@ -122,26 +154,43 @@ MergeRequest.setStatusBoxToMerged = function() {
     .text(__('Merged'));
 };
 
-MergeRequest.decreaseCounter = function(by = 1) {
+MergeRequest.decreaseCounter = function (by = 1) {
   const $el = $('.js-merge-counter');
   const count = Math.max(parseInt($el.text().replace(/[^\d]/, ''), 10) - by, 0);
 
   $el.text(addDelimiter(count));
 };
 
-MergeRequest.hideCloseButton = function() {
+MergeRequest.hideCloseButton = function () {
   const el = document.querySelector('.merge-request .js-issuable-actions');
-  const closeDropdownItem = el.querySelector('li.close-item');
-  if (closeDropdownItem) {
-    closeDropdownItem.classList.add('hidden');
-    // Selects the next dropdown item
-    el.querySelector('li.report-item').click();
-  } else {
-    // No dropdown just hide the Close button
-    el.querySelector('.btn-close').classList.add('hidden');
-  }
   // Dropdown for mobile screen
   el.querySelector('li.js-close-item').classList.add('hidden');
+};
+
+MergeRequest.toggleDraftStatus = function (title, isReady) {
+  if (isReady) {
+    createFlash(__('The merge request can now be merged.'), 'notice');
+  }
+  const titleEl = document.querySelector('.merge-request .detail-page-description .title');
+
+  if (titleEl) {
+    titleEl.textContent = title;
+  }
+
+  const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
+
+  if (draftToggles.length) {
+    draftToggles.forEach((el) => {
+      const draftToggle = el;
+      const url = setUrlParams(
+        { 'merge_request[wip_event]': isReady ? 'wip' : 'unwip' },
+        draftToggle.href,
+      );
+
+      draftToggle.setAttribute('href', url);
+      draftToggle.textContent = isReady ? __('Mark as draft') : __('Mark as ready');
+    });
+  }
 };
 
 export default MergeRequest;

@@ -5,6 +5,7 @@ namespace :gitlab do
     desc 'GitLab | License | Gather license related information'
     task info: :gitlab_environment do
       license = Gitlab::UsageData.license_usage_data
+      abort("No license has been applied.") unless license[:license_plan]
       puts "Today's Date: #{Date.today}"
       puts "Current User Count: #{license[:active_user_count]}"
       puts "Max Historical Count: #{license[:historical_max_users]}"

@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Editor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Migration to Versioned Snippets **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/215861) in GitLab 13.0.
@@ -8,7 +14,7 @@ and users can update it directly through Git.
 
 Nevertheless, existing GitLab Snippets have to be migrated to this new functionality.
 For each snippet, a new repository is created and the snippet content is committed
-to the repository inside a file whose name is the file name used in the snippet
+to the repository inside a file whose name is the filename used in the snippet
 as well.
 
 GitLab performs this migration through a [Background Migration](../development/background_migrations.md)
@@ -35,7 +41,7 @@ bundle exec rake gitlab:snippets:migrate SNIPPET_IDS=1,2,3,4
 ```
 
 There is a default limit (100) to the number of ids supported in the migration
-process. You can modify this limit by using the env variable `LIMIT`.
+process. You can modify this limit by using the environment variable `LIMIT`.
 
 ```shell
 sudo gitlab-rake gitlab:snippets:migrate SNIPPET_IDS=1,2,3,4 LIMIT=50
@@ -83,7 +89,7 @@ bundle exec rake gitlab:snippets:list_non_migrated RAILS_ENV=production
 
 As the number of non-migrated snippets can be large, we limit
 by default the size of the number of ids returned to 100. You can
-modify this limit by using the env variable `LIMIT`.
+modify this limit by using the environment variable `LIMIT`.
 
 ```shell
 sudo gitlab-rake gitlab:snippets:list_non_migrated LIMIT=200

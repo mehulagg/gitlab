@@ -1,6 +1,6 @@
-import createState from 'ee/security_dashboard/store/modules/project_selector/state';
-import mutations from 'ee/security_dashboard/store/modules/project_selector/mutations';
 import * as types from 'ee/security_dashboard/store/modules/project_selector/mutation_types';
+import mutations from 'ee/security_dashboard/store/modules/project_selector/mutations';
+import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 
 describe('EE projectsSelector mutations', () => {
   let state;

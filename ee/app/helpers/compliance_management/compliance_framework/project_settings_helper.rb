@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
+require_dependency 'compliance_management/compliance_framework'
+
 module ComplianceManagement
   module ComplianceFramework
     module ProjectSettingsHelper
       def compliance_framework_options
         option_values = compliance_framework_option_values
-        ProjectSettings.frameworks.map { |k, _v| [option_values.fetch(k.to_sym), k] }
+        ::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map { |framework| [option_values.fetch(framework.identifier), framework.identifier] }
+      end
+
+      def compliance_framework_checkboxes
+        ::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map do |framework|
+          [framework.id, compliance_framework_title_values.fetch(framework.identifier)]
+        end
       end
 
       def compliance_framework_description(framework)
@@ -58,7 +66,7 @@ module ComplianceManagement
 
       def compliance_framework_tooltip_values
         @compliance_framework_tooltip_values ||=
-          compliance_framework_title_values.map { |k, v| [k, get_compliance_framework_tooltip(v)] }.to_h
+          compliance_framework_title_values.transform_values { |v| get_compliance_framework_tooltip(v) }
       end
 
       def get_compliance_framework_tooltip(framework)

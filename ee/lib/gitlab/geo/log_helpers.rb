@@ -29,7 +29,7 @@ module Gitlab
         }.merge(extra_log_data).compact
       end
 
-      # Intended to be overidden elsewhere
+      # Intended to be overridden elsewhere
       def extra_log_data
         {}
       end

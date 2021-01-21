@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Push mirror a repository over HTTP' do
-      it 'configures and syncs a (push) mirrored repository' do
+      it 'configures and syncs a (push) mirrored repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/414' do
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_credentials)
 
@@ -35,8 +35,11 @@ module QA
 
         # Check that the target project has the commit from the source
         target_project.visit!
-        expect(page).to have_content('README.md')
-        expect(page).to have_content('This is a test project')
+
+        Page::Project::Show.perform do |project|
+          expect(project).to have_content('README.md')
+          expect(project).to have_content('This is a test project')
+        end
       end
     end
   end

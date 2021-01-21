@@ -12,7 +12,7 @@ RSpec.describe LicensesListSerializer do
 
     let(:project) { create(:project, :repository) }
     let!(:pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
-    let(:license_compliance) { ::SCA::LicenseCompliance.new(project) }
+    let(:license_compliance) { project.license_compliance }
     let(:user) { create(:user) }
     let(:ci_build) { create(:ee_ci_build, :success) }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees check out branch modal', :js do
+RSpec.describe 'Merge request > User sees check out branch modal', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:merge_request) { create(:merge_request, source_project: project) }
@@ -18,8 +18,8 @@ describe 'Merge request > User sees check out branch modal', :js do
     expect(page).to have_content('Check out, review, and merge locally')
   end
 
-  it 'closes the check out branch modal with escape keypress' do
-    find('#modal_merge_info').send_keys(:escape)
+  it 'closes the check out branch modal with the close action' do
+    find('.modal button[aria-label="Close"]').click
 
     expect(page).not_to have_content('Check out, review, and merge locally')
   end

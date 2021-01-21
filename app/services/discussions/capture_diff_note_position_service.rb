@@ -9,8 +9,7 @@ module Discussions
 
     def execute(discussion)
       # The service has been implemented for text only
-      # The impact of image notes on this service is being investigated in
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/213989
+      # We don't need to capture positions for images
       return unless discussion.on_text?
 
       result = tracer&.trace(discussion.position)
@@ -19,13 +18,16 @@ module Discussions
       position = result[:position]
       return unless position
 
+      line_code = position.line_code(project.repository)
+      return unless line_code
+
       # Currently position data is copied across all notes of a discussion
       # It makes sense to store a position only for the first note instead
       # Within the newly introduced table we can start doing just that
       DiffNotePosition.create_or_update_for(discussion.notes.first,
         diff_type: :head,
         position: position,
-        line_code: position.line_code(project.repository))
+        line_code: line_code)
     end
 
     private
@@ -50,9 +52,9 @@ module Discussions
       merge_ref_head = merge_request.merge_ref_head
       return unless merge_ref_head
 
-      start_sha, base_sha = merge_ref_head.parent_ids
+      start_sha, _ = merge_ref_head.parent_ids
       new_diff_refs = Gitlab::Diff::DiffRefs.new(
-        base_sha: base_sha,
+        base_sha: start_sha,
         start_sha: start_sha,
         head_sha: merge_ref_head.id)
 

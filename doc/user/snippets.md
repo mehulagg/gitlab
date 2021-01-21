@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference
+---
+
 # Snippets
 
 With GitLab Snippets you can store and share bits of code and text with other users.
@@ -45,8 +52,8 @@ part of the dropdown (**This project**).
 From there, add the **Title**, **Description**, and a **File** name with the
 appropriate extension (for example, `example.rb`, `index.html`).
 
-CAUTION: **Warning:**
-Make sure to add the file name to get code highlighting and to avoid this
+WARNING:
+Make sure to add the filename to get code highlighting and to avoid this
 [copy-pasting bug](https://gitlab.com/gitlab-org/gitlab/-/issues/22870).
 
 ## Versioned Snippets
@@ -62,10 +69,10 @@ new commit to the master branch is recorded. Commit messages are automatically
 generated. The snippet's repository has only one branch (master) by default, deleting
 it or creating other branches is not supported.
 
-Existing snippets will be automatically migrated in 13.0. Their current
-content will be saved as the initial commit to the snippets' repository.
+Existing snippets are automatically migrated in 13.0. Their current
+content is saved as the initial commit to the snippets' repository.
 
-### File names
+### Filenames
 
 Snippets support syntax highlighting based on the filename and
 extension provided for them. While it is possible to submit a snippet
@@ -79,11 +86,45 @@ number increases incrementally when more snippets without an attributed
 filename are added.
 
 When upgrading from an earlier version of GitLab to 13.0, existing snippets
-without a supported filename will be renamed to a compatible format. For
-example, if the snippet's filename is `http://a-weird-filename.me` it will
-be changed to `http-a-weird-filename-me` to be included in the snippet's
-repository. As snippets are stored by ID, changing their filenames will not break
+without a supported filename are renamed to a compatible format. For
+example, if the snippet's filename is `http://a-weird-filename.me` it is
+changed to `http-a-weird-filename-me` to be included in the snippet's
+repository. As snippets are stored by ID, changing their filenames breaks
 direct or embedded links to the snippet.
+
+### Multiple files by Snippet
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2829) in GitLab 13.5.
+
+GitLab Snippets support multiple files in one single snippet. It can be very handy
+when your code snippet is composed of multiple parts or when they relate
+to a certain context. For example:
+
+- A snippet that includes a script and its output.
+- A snippet that includes HTML, CSS, and JS code.
+- A snippet with a `docker-compose.yml` file and its associated `.env` file.
+- A `gulpfile.js` file coupled with a `package.json` file, which together can be used to bootstrap a project and manage its dependencies.
+
+Snippets support between 1 and 10 files. They can be managed via Git (because they're [versioned](#versioned-snippets)
+by a Git repository), through the [Snippets API](../api/snippets.md), or in the GitLab UI.
+
+![Multi-file Snippet](img/gitlab_snippet_v13_5.png)
+
+To add a new file to your snippet through the GitLab UI:
+
+1. Go to your snippet in the GitLab UI.
+1. Click **Edit** in the top right.
+1. Select **Add another file**.
+1. Add your content to the file in the form fields provided.
+1. Click **Save changes**.
+
+To delete a file from your snippet through the GitLab UI:
+
+1. Go to your snippet in the GitLab UI.
+1. Click **Edit** in the top right.
+1. Select **Delete file** alongside the filename of each file
+you wish to delete.
+1. Click **Save changes**.
 
 ### Cloning snippets
 
@@ -96,19 +137,27 @@ This allows you to have a local copy of the snippet's repository and make
 changes as needed. You can commit those changes and push them to the remote
 master branch.
 
+### Reduce snippets repository size
+
+Because versioned Snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
+it's recommended to keep snippets' repositories as compact as possible.
+
+For more information about tools to compact repositories,
+see the documentation on [reducing repository size](../user/project/repository/reducing_the_repo_size_using_git.md).
+
 ### Limitations
 
 - Binary files are not supported.
-- Creating or deleting branches is not supported. Only a default *master*.
-branch is used.
+- Creating or deleting branches is not supported. Only a default *master* branch is used.
 - Git tags are not supported in snippet repositories.
-- Snippets' repositories are limited to one file. Attempting to push more
-than one file will result in an error.
+- Snippets' repositories are limited to 10 files. Attempting to push more
+than 10 files results in an error.
 - Revisions are not *yet* visible to the user on the GitLab UI, but
 it's planned to be added in future iterations. See the [revisions tab issue](https://gitlab.com/gitlab-org/gitlab/-/issues/39271)
 for updates.
 - The [maximum size for a snippet](../administration/snippets/index.md#snippets-content-size-limit)
 is 50 MB, by default.
+- Git LFS is not supported.
 
 ## Discover snippets
 
@@ -116,8 +165,8 @@ There are two main ways of how you can discover snippets in GitLab.
 
 For exploring all snippets that are visible to you, you can go to the Snippets
 dashboard of your GitLab instance via the top navigation. For GitLab.com you can
-find it [here](https://gitlab.com/dashboard/snippets). This navigates you to an
-overview that shows snippets you created and allows you to explore all snippets.
+navigate to an [overview]((https://gitlab.com/dashboard/snippets)) that shows snippets
+you created and allows you to explore all snippets.
 
 If you want to discover snippets that belong to a specific project, you can navigate
 to the Snippets page via the left side navigation on the project page.
@@ -138,9 +187,9 @@ facilitating the collaboration among users.
 
 You can download the raw content of a snippet.
 
-By default snippets will be downloaded with Linux-style line endings (`LF`). If
+By default snippets are downloaded with Linux-style line endings (`LF`). If
 you want to preserve the original line endings you need to add a parameter `line_ending=raw`
-(e.g., `https://gitlab.com/snippets/SNIPPET_ID/raw?line_ending=raw`). In case a
+(For example: `https://gitlab.com/snippets/SNIPPET_ID/raw?line_ending=raw`). In case a
 snippet was created using the GitLab web interface the original line ending is Windows-like (`CRLF`).
 
 ## Embedded snippets
@@ -158,7 +207,7 @@ To embed a snippet, first make sure that:
 - In **Project > Settings > Permissions**, the snippets permissions are
   set to **Everyone with access**
 
-Once the above conditions are met, the "Embed" section will appear in your
+After the above conditions are met, the "Embed" section appears in your
 snippet where you can simply click on the "Copy" button. This copies a one-line
 script that you can add to any website or blog post.
 
@@ -172,6 +221,6 @@ Here's how an embedded snippet looks like:
 
 <script src="https://gitlab.com/gitlab-org/gitlab-foss/snippets/1717978.js"></script>
 
-Embedded snippets are displayed with a header that shows the file name if it's defined,
+Embedded snippets are displayed with a header that shows the filename if it's defined,
 the snippet size, a link to GitLab, and the actual snippet content. Actions in
 the header allow users to see the snippet in raw format and download it.

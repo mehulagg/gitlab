@@ -1,9 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
-import SeverityBadge, {
-  CLASS_NAME_MAP,
-  TOOLTIP_TITLE_MAP,
-} from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import {
+  SEVERITY_CLASS_NAME_MAP,
+  SEVERITY_TOOLTIP_TITLE_MAP,
+} from 'ee/vue_shared/security_reports/components/constants';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('Severity Badge', () => {
@@ -28,12 +29,12 @@ describe('Severity Badge', () => {
   const findIcon = () => wrapper.find(GlIcon);
   const findTooltip = () => getBinding(findIcon().element, 'tooltip').value;
 
-  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', severity => {
+  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', (severity) => {
     beforeEach(() => {
       createWrapper({ severity });
     });
 
-    const className = CLASS_NAME_MAP[severity];
+    const className = SEVERITY_CLASS_NAME_MAP[severity];
 
     it(`renders the component with ${severity} badge`, () => {
       expect(wrapper.find(`.${className}`).exists()).toBe(true);
@@ -49,17 +50,17 @@ describe('Severity Badge', () => {
     });
 
     it('renders tooltip', () => {
-      expect(findTooltip()).toBe(TOOLTIP_TITLE_MAP[severity]);
+      expect(findTooltip()).toBe(SEVERITY_TOOLTIP_TITLE_MAP[severity]);
     });
   });
 
-  describe.each(['foo', '', ' '])('given an invalid severity "%s"', invalidSeverity => {
+  describe.each(['foo', '', ' '])('given an invalid severity "%s"', (invalidSeverity) => {
     beforeEach(() => {
       createWrapper({ severity: invalidSeverity });
     });
 
     it(`renders an empty component`, () => {
-      expect(wrapper.isEmpty()).toBe(true);
+      expect(wrapper.html()).toBe('');
     });
   });
 });

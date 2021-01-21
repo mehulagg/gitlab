@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class Groups < Grape::API
+  class Groups < ::API::Base
     include PaginationParams
     include Helpers::CustomAttributes
 
     before { authenticate_non_get! }
+
+    feature_category :subgroups
 
     helpers Helpers::GroupsHelpers
 
@@ -16,7 +18,7 @@ module API
 
       params :group_list_params do
         use :statistics_params
-        optional :skip_groups, type: Array[Integer], desc: 'Array of group ids to exclude from list'
+        optional :skip_groups, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of group ids to exclude from list'
         optional :all_available, type: Boolean, desc: 'Show all group that you have access to'
         optional :search, type: String, desc: 'Search for a specific group'
         optional :owned, type: Boolean, default: false, desc: 'Limit by owned by authenticated user'
@@ -29,7 +31,12 @@ module API
 
       # rubocop: disable CodeReuse/ActiveRecord
       def find_groups(params, parent_id = nil)
-        find_params = params.slice(:all_available, :custom_attributes, :owned, :min_access_level)
+        find_params = params.slice(
+          :all_available,
+          :custom_attributes,
+          :owned, :min_access_level,
+          :include_parent_descendants
+        )
 
         find_params[:parent] = if params[:top_level_only]
                                  [nil]
@@ -41,7 +48,7 @@ module API
           find_params.fetch(:all_available, current_user&.can_read_all_resources?)
 
         groups = GroupsFinder.new(current_user, find_params).execute
-        groups = groups.search(params[:search]) if params[:search].present?
+        groups = groups.search(params[:search], include_parents: true) if params[:search].present?
         groups = groups.where.not(id: params[:skip_groups]) if params[:skip_groups].present?
         order_options = { params[:order_by] => params[:sort] }
         order_options["id"] ||= "asc"
@@ -76,10 +83,7 @@ module API
           params: project_finder_params,
           options: finder_options
         ).execute
-        projects = projects.with_issues_available_for_user(current_user) if params[:with_issues_enabled]
-        projects = projects.with_merge_requests_enabled if params[:with_merge_requests_enabled]
-        projects = projects.visible_to_user_and_access_level(current_user, params[:min_access_level]) if params[:min_access_level]
-        projects = reorder_projects(projects)
+        projects = reorder_projects_with_similarity_order_support(group, projects)
         paginate(projects)
       end
 
@@ -115,6 +119,24 @@ module API
 
         accepted!
       end
+
+      def reorder_projects_with_similarity_order_support(group, projects)
+        return handle_similarity_order(group, projects) if params[:order_by] == 'similarity'
+
+        reorder_projects(projects)
+      end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def handle_similarity_order(group, projects)
+        if params[:search].present? && Feature.enabled?(:similarity_search, group, default_enabled: true)
+          projects.sorted_by_similarity_desc(params[:search])
+        else
+          order_options = { name: :asc }
+          order_options['id'] ||= params[:sort] || 'asc'
+          projects.reorder(order_options)
+        end
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     resource :groups do
@@ -221,11 +243,11 @@ module API
         success Entities::Project
       end
       params do
-        optional :archived, type: Boolean, default: false, desc: 'Limit by archived status'
+        optional :archived, type: Boolean, desc: 'Limit by archived status'
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values,
                               desc: 'Limit by visibility'
         optional :search, type: String, desc: 'Return list of authorized projects matching the search criteria'
-        optional :order_by, type: String, values: %w[id name path created_at updated_at last_activity_at],
+        optional :order_by, type: String, values: %w[id name path created_at updated_at last_activity_at similarity],
                             default: 'created_at', desc: 'Return projects ordered by field'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
                         desc: 'Return projects sorted in ascending and descending order'
@@ -258,7 +280,7 @@ module API
         success Entities::Project
       end
       params do
-        optional :archived, type: Boolean, default: false, desc: 'Limit by archived status'
+        optional :archived, type: Boolean, desc: 'Limit by archived status'
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values,
                               desc: 'Limit by visibility'
         optional :search, type: String, desc: 'Return list of authorized projects matching the search criteria'
@@ -291,6 +313,19 @@ module API
       end
       get ":id/subgroups" do
         groups = find_groups(declared_params(include_missing: false), params[:id])
+        present_groups params, groups
+      end
+
+      desc 'Get a list of descendant groups of this group.' do
+        success Entities::Group
+      end
+      params do
+        use :group_list_params
+        use :with_custom_attributes
+      end
+      get ":id/descendant_groups" do
+        finder_params = declared_params(include_missing: false).merge(include_parent_descendants: true)
+        groups = find_groups(finder_params, params[:id])
         present_groups params, groups
       end
 

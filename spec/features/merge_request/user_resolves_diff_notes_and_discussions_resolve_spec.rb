@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User resolves diff notes and threads', :js do
+RSpec.describe 'Merge request > User resolves diff notes and threads', :js do
   let(:project)       { create(:project, :public, :repository) }
   let(:user)          { project.creator }
   let(:guest)         { create(:user) }
@@ -16,14 +16,14 @@ describe 'Merge request > User resolves diff notes and threads', :js do
   end
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
+    stub_feature_flags(remove_resolve_note: false)
   end
 
   context 'no threads' do
     before do
       project.add_maintainer(user)
       sign_in(user)
-      note.destroy
+      note.destroy!
       visit_merge_request
     end
 
@@ -111,7 +111,6 @@ describe 'Merge request > User resolves diff notes and threads', :js do
           it 'shows resolved thread when toggled' do
             find(".timeline-content .discussion[data-discussion-id='#{note.discussion_id}'] .discussion-toggle-button").click
 
-            expect(page.find(".line-holder-placeholder")).to be_visible
             expect(page.find(".timeline-content #note_#{note.id}")).to be_visible
           end
 
@@ -229,6 +228,7 @@ describe 'Merge request > User resolves diff notes and threads', :js do
           page.find('.discussion-next-btn').click
         end
 
+        expect(page).to have_button('Resolve thread', visible: true)
         expect(page.evaluate_script("window.pageYOffset")).to be > 0
       end
 

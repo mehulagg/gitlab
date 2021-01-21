@@ -45,44 +45,31 @@ RSpec.shared_examples 'group and project boards query' do
     end
 
     describe 'sorting and pagination' do
+      let(:data_path) { [board_parent_type, :boards] }
+
+      def pagination_query(params)
+        graphql_query_for(board_parent_type, { full_path: board_parent.full_path },
+          query_nodes(:boards, :id, include_pagination_info: true, args: params)
+        )
+      end
+
       context 'when using default sorting' do
         let!(:board_B) { create(:board, resource_parent: board_parent, name: 'B') }
         let!(:board_C) { create(:board, resource_parent: board_parent, name: 'C') }
         let!(:board_a) { create(:board, resource_parent: board_parent, name: 'a') }
         let!(:board_A) { create(:board, resource_parent: board_parent, name: 'A') }
-
-        before do
-          post_graphql(query, current_user: current_user)
-        end
-
-        it_behaves_like 'a working graphql query'
+        let(:boards)   { [board_a, board_A, board_B, board_C] }
 
         context 'when ascending' do
-          let(:boards) { [board_a, board_A, board_B, board_C] }
-          let(:expected_boards) do
-            if board_parent.multiple_issue_boards_available?
-              boards
-            else
-              [boards.first]
-            end
-          end
-
-          it 'sorts boards' do
-            expect(grab_names).to eq expected_boards.map(&:name)
-          end
-
-          context 'when paginating' do
-            let(:params) { 'first: 2' }
-
-            it 'sorts boards' do
-              expect(grab_names).to eq expected_boards.first(2).map(&:name)
-
-              cursored_query = query("after: \"#{end_cursor}\"")
-              post_graphql(cursored_query, current_user: current_user)
-
-              response_data = Gitlab::Json.parse(response.body)['data'][board_parent_type]['boards']['edges']
-
-              expect(grab_names(response_data)).to eq expected_boards.drop(2).first(2).map(&:name)
+          it_behaves_like 'sorted paginated query' do
+            let(:sort_param)       { }
+            let(:first_param)      { 2 }
+            let(:expected_results) do
+              if board_parent.multiple_issue_boards_available?
+                boards.map { |board| global_id_of(board) }
+              else
+                [global_id_of(boards.first)]
+              end
             end
           end
         end
@@ -97,7 +84,7 @@ RSpec.shared_examples 'group and project boards query' do
 
     it_behaves_like 'a working graphql query' do
       before do
-        post_graphql(query_single_board, current_user: current_user)
+        post_graphql(query_single_board("id: \"gid://gitlab/Board/1\""), current_user: current_user)
       end
     end
 

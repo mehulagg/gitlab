@@ -2,304 +2,239 @@
 
 require 'spec_helper'
 
-describe Gitlab::Experimentation do
+# As each associated, backwards-compatible experiment gets cleaned up and removed from the EXPERIMENTS list, its key will also get removed from this list. Once the list here is empty, we can remove the backwards compatibility code altogether.
+# Originally created as part of https://gitlab.com/gitlab-org/gitlab/-/merge_requests/45733 for https://gitlab.com/gitlab-org/gitlab/-/issues/270858.
+RSpec.describe Gitlab::Experimentation::EXPERIMENTS do
+  it 'temporarily ensures we know what experiments exist for backwards compatibility' do
+    expected_experiment_keys = [
+      :onboarding_issues,
+      :ci_notification_dot,
+      :upgrade_link_in_user_menu_a,
+      :invite_members_version_a,
+      :invite_members_version_b,
+      :invite_members_empty_group_version_a,
+      :contact_sales_btn_in_app,
+      :customize_homepage,
+      :group_only_trials,
+      :default_to_issues_board
+    ]
+
+    backwards_compatible_experiment_keys = described_class.filter { |_, v| v[:use_backwards_compatible_subject_index] }.keys
+
+    expect(backwards_compatible_experiment_keys).not_to be_empty, "Oh, hey! Let's clean up that :use_backwards_compatible_subject_index stuff now :D"
+    expect(backwards_compatible_experiment_keys).to match(expected_experiment_keys)
+  end
+end
+
+RSpec.describe Gitlab::Experimentation do
+  using RSpec::Parameterized::TableSyntax
+
   before do
     stub_const('Gitlab::Experimentation::EXPERIMENTS', {
+      backwards_compatible_test_experiment: {
+        tracking_category: 'Team',
+        use_backwards_compatible_subject_index: true
+      },
       test_experiment: {
-        environment: environment,
         tracking_category: 'Team'
+      },
+      tabular_experiment: {
+        tracking_category: 'Team',
+        rollout_strategy: rollout_strategy
       }
     })
 
+    skip_feature_flags_yaml_validation
+    skip_default_enabled_yaml_check
+    Feature.enable_percentage_of_time(:backwards_compatible_test_experiment_experiment_percentage, enabled_percentage)
     Feature.enable_percentage_of_time(:test_experiment_experiment_percentage, enabled_percentage)
+    allow(Gitlab).to receive(:com?).and_return(true)
   end
 
-  let(:environment) { Rails.env.test? }
   let(:enabled_percentage) { 10 }
+  let(:rollout_strategy) { nil }
 
-  describe Gitlab::Experimentation::ControllerConcern, type: :controller do
-    controller(ApplicationController) do
-      include Gitlab::Experimentation::ControllerConcern
+  describe '.get_experiment' do
+    subject { described_class.get_experiment(:test_experiment) }
 
-      def index
-        head :ok
-      end
+    context 'returns experiment' do
+      it { is_expected.to be_instance_of(Gitlab::Experimentation::Experiment) }
     end
 
-    describe '#set_experimentation_subject_id_cookie' do
-      let(:do_not_track) { nil }
-      let(:cookie) { cookies.permanent.signed[:experimentation_subject_id] }
+    context 'experiment is not defined' do
+      subject { described_class.get_experiment(:missing_experiment) }
 
-      before do
-        request.headers['DNT'] = do_not_track if do_not_track.present?
-
-        get :index
-      end
-
-      context 'cookie is present' do
-        before do
-          cookies[:experimentation_subject_id] = 'test'
-        end
-
-        it 'does not change the cookie' do
-          expect(cookies[:experimentation_subject_id]).to eq 'test'
-        end
-      end
-
-      context 'cookie is not present' do
-        it 'sets a permanent signed cookie' do
-          expect(cookie).to be_present
-        end
-
-        context 'DNT: 0' do
-          let(:do_not_Track) { '0' }
-
-          it 'sets a permanent signed cookie' do
-            expect(cookie).to be_present
-          end
-        end
-
-        context 'DNT: 1' do
-          let(:do_not_track) { '1' }
-
-          it 'does nothing' do
-            expect(cookie).not_to be_present
-          end
-        end
-      end
-    end
-
-    describe '#experiment_enabled?' do
-      subject { controller.experiment_enabled?(:test_experiment) }
-
-      context 'cookie is not present' do
-        it 'calls Gitlab::Experimentation.enabled_for_user? with the name of the experiment and an experimentation_subject_index of nil' do
-          expect(Gitlab::Experimentation).to receive(:enabled_for_user?).with(:test_experiment, nil)
-          controller.experiment_enabled?(:test_experiment)
-        end
-      end
-
-      context 'cookie is present' do
-        before do
-          cookies.permanent.signed[:experimentation_subject_id] = 'abcd-1234'
-          get :index
-        end
-
-        it 'calls Gitlab::Experimentation.enabled_for_user? with the name of the experiment and an experimentation_subject_index of the modulo 100 of the hex value of the uuid' do
-          # 'abcd1234'.hex % 100 = 76
-          expect(Gitlab::Experimentation).to receive(:enabled_for_user?).with(:test_experiment, 76)
-          controller.experiment_enabled?(:test_experiment)
-        end
-      end
-
-      it 'returns true when DNT: 0 is set in the request' do
-        allow(Gitlab::Experimentation).to receive(:enabled_for_user?) { true }
-        controller.request.headers['DNT'] = '0'
-
-        is_expected.to be_truthy
-      end
-
-      it 'returns false when DNT: 1 is set in the request' do
-        allow(Gitlab::Experimentation).to receive(:enabled_for_user?) { true }
-        controller.request.headers['DNT'] = '1'
-
-        is_expected.to be_falsy
-      end
-
-      describe 'URL parameter to force enable experiment' do
-        it 'returns true unconditionally' do
-          get :index, params: { force_experiment: :test_experiment }
-
-          is_expected.to be_truthy
-        end
-      end
-    end
-
-    describe '#track_experiment_event' do
-      context 'when the experiment is enabled' do
-        before do
-          stub_experiment(test_experiment: true)
-        end
-
-        context 'the user is part of the experimental group' do
-          before do
-            stub_experiment_for_user(test_experiment: true)
-          end
-
-          it 'tracks the event with the right parameters' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Team',
-              'start',
-              property: 'experimental_group',
-              value: 'team_id'
-            )
-            controller.track_experiment_event(:test_experiment, 'start', 'team_id')
-          end
-        end
-
-        context 'the user is part of the control group' do
-          before do
-            stub_experiment_for_user(test_experiment: false)
-          end
-
-          it 'tracks the event with the right parameters' do
-            expect(Gitlab::Tracking).to receive(:event).with(
-              'Team',
-              'start',
-              property: 'control_group',
-              value: 'team_id'
-            )
-            controller.track_experiment_event(:test_experiment, 'start', 'team_id')
-          end
-        end
-      end
-
-      context 'when the experiment is disabled' do
-        before do
-          stub_experiment(test_experiment: false)
-        end
-
-        it 'does not track the event' do
-          expect(Gitlab::Tracking).not_to receive(:event)
-          controller.track_experiment_event(:test_experiment, 'start')
-        end
-      end
-    end
-
-    describe '#frontend_experimentation_tracking_data' do
-      context 'when the experiment is enabled' do
-        before do
-          stub_experiment(test_experiment: true)
-        end
-
-        context 'the user is part of the experimental group' do
-          before do
-            stub_experiment_for_user(test_experiment: true)
-          end
-
-          it 'pushes the right parameters to gon' do
-            controller.frontend_experimentation_tracking_data(:test_experiment, 'start', 'team_id')
-            expect(Gon.tracking_data).to eq(
-              {
-                category: 'Team',
-                action: 'start',
-                property: 'experimental_group',
-                value: 'team_id'
-              }
-            )
-          end
-        end
-
-        context 'the user is part of the control group' do
-          before do
-            allow_next_instance_of(described_class) do |instance|
-              allow(instance).to receive(:experiment_enabled?).with(:test_experiment).and_return(false)
-            end
-          end
-
-          it 'pushes the right parameters to gon' do
-            controller.frontend_experimentation_tracking_data(:test_experiment, 'start', 'team_id')
-            expect(Gon.tracking_data).to eq(
-              {
-                category: 'Team',
-                action: 'start',
-                property: 'control_group',
-                value: 'team_id'
-              }
-            )
-          end
-
-          it 'does not send nil value to gon' do
-            controller.frontend_experimentation_tracking_data(:test_experiment, 'start')
-            expect(Gon.tracking_data).to eq(
-              {
-                category: 'Team',
-                action: 'start',
-                property: 'control_group'
-              }
-            )
-          end
-        end
-      end
-
-      context 'when the experiment is disabled' do
-        before do
-          stub_experiment(test_experiment: false)
-        end
-
-        it 'does not push data to gon' do
-          expect(Gon.method_defined?(:tracking_data)).to be_falsey
-          controller.track_experiment_event(:test_experiment, 'start')
-        end
-      end
+      it { is_expected.to be_nil }
     end
   end
 
-  describe '.enabled?' do
-    subject { described_class.enabled?(:test_experiment) }
+  describe '.active?' do
+    subject { described_class.active?(:test_experiment) }
 
-    context 'feature toggle is enabled, we are on the right environment and we are selected' do
-      it { is_expected.to be_truthy }
+    context 'feature toggle is enabled' do
+      it { is_expected.to eq(true) }
     end
 
     describe 'experiment is not defined' do
       it 'returns false' do
-        expect(described_class.enabled?(:missing_experiment)).to be_falsey
+        expect(described_class.active?(:missing_experiment)).to eq(false)
       end
     end
 
     describe 'experiment is disabled' do
       let(:enabled_percentage) { 0 }
 
-      it { is_expected.to be_falsey }
-    end
-
-    describe 'we are on the wrong environment' do
-      let(:environment) { ::Gitlab.com? }
-
-      it { is_expected.to be_falsey }
+      it { is_expected.to eq(false) }
     end
   end
 
-  describe '.enabled_for_user?' do
-    subject { described_class.enabled_for_user?(:test_experiment, experimentation_subject_index) }
+  describe '.in_experiment_group?' do
+    context 'with new index calculation' do
+      let(:enabled_percentage) { 50 }
+      let(:experiment_subject) { 'z' } # Zlib.crc32('test_experimentz') % 100 = 33
 
-    let(:experimentation_subject_index) { 9 }
+      subject { described_class.in_experiment_group?(:test_experiment, subject: experiment_subject) }
 
-    context 'experiment is disabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(false)
+      context 'when experiment is active' do
+        context 'when subject is part of the experiment' do
+          it { is_expected.to eq(true) }
+        end
+
+        context 'when subject is not part of the experiment' do
+          let(:experiment_subject) { 'a' } # Zlib.crc32('test_experimenta') % 100 = 61
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when subject has a global_id' do
+          let(:experiment_subject) { double(:subject, to_global_id: 'z') }
+
+          it { is_expected.to eq(true) }
+        end
+
+        context 'when subject is nil' do
+          let(:experiment_subject) { nil }
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when subject is an empty string' do
+          let(:experiment_subject) { '' }
+
+          it { is_expected.to eq(false) }
+        end
       end
 
-      it { is_expected.to be_falsey }
+      context 'when experiment is not active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(false)
+        end
+
+        it { is_expected.to eq(false) }
+      end
     end
 
-    context 'experiment is enabled' do
-      before do
-        allow(described_class).to receive(:enabled?).and_return(true)
+    context 'with backwards compatible index calculation' do
+      let(:experiment_subject) { 'abcd' } # Digest::SHA1.hexdigest('abcd').hex % 100 = 7
+
+      subject { described_class.in_experiment_group?(:backwards_compatible_test_experiment, subject: experiment_subject) }
+
+      context 'when experiment is active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(true)
+        end
+
+        context 'when subject is part of the experiment' do
+          it { is_expected.to eq(true) }
+        end
+
+        context 'when subject is not part of the experiment' do
+          let(:experiment_subject) { 'abc' } # Digest::SHA1.hexdigest('abc').hex % 100 = 17
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when subject has a global_id' do
+          let(:experiment_subject) { double(:subject, to_global_id: 'abcd') }
+
+          it { is_expected.to eq(true) }
+        end
+
+        context 'when subject is nil' do
+          let(:experiment_subject) { nil }
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when subject is an empty string' do
+          let(:experiment_subject) { '' }
+
+          it { is_expected.to eq(false) }
+        end
       end
 
-      it { is_expected.to be_truthy }
-
-      describe 'experimentation_subject_index' do
-        context 'experimentation_subject_index is not set' do
-          let(:experimentation_subject_index) { nil }
-
-          it { is_expected.to be_falsey }
+      context 'when experiment is not active' do
+        before do
+          allow(described_class).to receive(:active?).and_return(false)
         end
 
-        context 'experimentation_subject_index is an empty string' do
-          let(:experimentation_subject_index) { '' }
-
-          it { is_expected.to be_falsey }
-        end
-
-        context 'experimentation_subject_index outside enabled ratio' do
-          let(:experimentation_subject_index) { 11 }
-
-          it { is_expected.to be_falsey }
-        end
+        it { is_expected.to eq(false) }
       end
+    end
+  end
+
+  describe '.log_invalid_rollout' do
+    subject { described_class.log_invalid_rollout(:test_experiment, 1) }
+
+    before do
+      allow(described_class).to receive(:valid_subject_for_rollout_strategy?).and_return(valid)
+    end
+
+    context 'subject is not valid for experiment' do
+      let(:valid) { false }
+
+      it 'logs a warning message' do
+        expect_next_instance_of(Gitlab::ExperimentationLogger) do |logger|
+          expect(logger)
+            .to receive(:warn)
+                  .with(
+                    message: 'Subject must conform to the rollout strategy',
+                    experiment_key: :test_experiment,
+                    subject: 'Integer',
+                    rollout_strategy: :cookie
+                  )
+        end
+
+        subject
+      end
+    end
+
+    context 'subject is valid for experiment' do
+      let(:valid) { true }
+
+      it 'does not log a warning message' do
+        expect(Gitlab::ExperimentationLogger).not_to receive(:build)
+
+        subject
+      end
+    end
+  end
+
+  describe '.valid_subject_for_rollout_strategy?' do
+    subject { described_class.valid_subject_for_rollout_strategy?(:tabular_experiment, experiment_subject) }
+
+    where(:rollout_strategy, :experiment_subject, :result) do
+      :cookie | nil       | true
+      nil     | nil       | true
+      :cookie | 'string'  | true
+      nil     | User.new  | false
+      :user   | User.new  | true
+      :group  | User.new  | false
+      :group  | Group.new | true
+    end
+
+    with_them do
+      it { is_expected.to be(result) }
     end
   end
 end

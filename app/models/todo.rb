@@ -7,24 +7,28 @@ class Todo < ApplicationRecord
   # Time to wait for todos being removed when not visible for user anymore.
   # Prevents TODOs being removed by mistake, for example, removing access from a user
   # and giving it back again.
-  WAIT_FOR_DELETE    = 1.hour
+  WAIT_FOR_DELETE = 1.hour
 
-  ASSIGNED           = 1
-  MENTIONED          = 2
-  BUILD_FAILED       = 3
-  MARKED             = 4
-  APPROVAL_REQUIRED  = 5 # This is an EE-only feature
-  UNMERGEABLE        = 6
-  DIRECTLY_ADDRESSED = 7
+  ASSIGNED            = 1
+  MENTIONED           = 2
+  BUILD_FAILED        = 3
+  MARKED              = 4
+  APPROVAL_REQUIRED   = 5 # This is an EE-only feature
+  UNMERGEABLE         = 6
+  DIRECTLY_ADDRESSED  = 7
+  MERGE_TRAIN_REMOVED = 8 # This is an EE-only feature
+  REVIEW_REQUESTED    = 9
 
   ACTION_NAMES = {
     ASSIGNED => :assigned,
+    REVIEW_REQUESTED => :review_requested,
     MENTIONED => :mentioned,
     BUILD_FAILED => :build_failed,
     MARKED => :marked,
     APPROVAL_REQUIRED => :approval_required,
     UNMERGEABLE => :unmergeable,
-    DIRECTLY_ADDRESSED => :directly_addressed
+    DIRECTLY_ADDRESSED => :directly_addressed,
+    MERGE_TRAIN_REMOVED => :merge_train_removed
   }.freeze
 
   belongs_to :author, class_name: "User"
@@ -135,13 +139,11 @@ class Todo < ApplicationRecord
     # Todos with highest priority first then oldest todos
     # Need to order by created_at last because of differences on Mysql and Postgres when joining by type "Merge_request/Issue"
     def order_by_labels_priority
-      params = {
+      highest_priority = highest_label_priority(
         target_type_column: "todos.target_type",
         target_column: "todos.target_id",
         project_column: "todos.project_id"
-      }
-
-      highest_priority = highest_label_priority(params).to_sql
+      ).to_sql
 
       select("#{table_name}.*, (#{highest_priority}) AS highest_priority")
         .order(Gitlab::Database.nulls_last_order('highest_priority', 'ASC'))
@@ -163,6 +165,14 @@ class Todo < ApplicationRecord
 
   def assigned?
     action == ASSIGNED
+  end
+
+  def review_requested?
+    action == REVIEW_REQUESTED
+  end
+
+  def merge_train_removed?
+    action == MERGE_TRAIN_REMOVED
   end
 
   def done?
@@ -215,7 +225,7 @@ class Todo < ApplicationRecord
   end
 
   def self_assigned?
-    assigned? && self_added?
+    self_added? && (assigned? || review_requested?)
   end
 
   private

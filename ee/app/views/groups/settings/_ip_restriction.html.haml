@@ -1,9 +1,16 @@
 - return if !group.feature_available?(:group_ip_restriction) || group.parent_id.present?
-
-%h5= _('Restrict access by IP address')
+- hidden_input_id = 'group_ip_restriction_ranges'
+- label_id = "#{hidden_input_id}_label"
 
 .form-group
-  = f.text_field :ip_restriction_ranges, class: 'form-control', data: { qa_selector: 'ip_restriction_field' }, placeholder: _('Enter IP address range')
+  %label{ id: label_id }
+    = _('Allow access to the following IP addresses')
+  .js-ip-restriction{ data: { hidden_input_id: hidden_input_id, label_id: label_id } }
+  = f.hidden_field :ip_restriction_ranges, id: hidden_input_id
   .form-text.text-muted
-    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index', anchor: 'ip-access-restriction-ultimate'))
-    = _('This group, including all subgroups, projects and git repositories, will only be reachable from the specified IP address range. Multiple addresses are supported with comma delimiters.<br>Example: <code>192.168.0.0/24,192.168.1.0/24</code>. %{read_more_link}.').html_safe % { read_more_link: read_more_link }
+    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index.md', anchor: 'ip-access-restriction'))
+    = _('This group, including all subgroups, projects and git repositories, will be reachable from only the specified IP address ranges.')
+    %br
+    = _('Multiple IP address ranges are supported.')
+    %br
+    = html_escape(_('Example: %{ip_address}. %{read_more_link}.')) % { read_more_link: read_more_link, ip_address: tag.code('192.168.0.0/24') }

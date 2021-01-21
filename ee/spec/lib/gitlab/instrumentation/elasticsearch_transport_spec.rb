@@ -35,7 +35,7 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransport, :elastic, :req
 
       ::Gitlab::SafeRequestStore.clear!
 
-      create(:issue, title: "new issue")
+      create(:merge_request, title: "new MR")
       ensure_elasticsearch_index!
 
       request = ::Gitlab::Instrumentation::ElasticsearchTransport.detail_store.first
@@ -56,5 +56,31 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransportInterceptor, :el
     expect(::Gitlab::Instrumentation::ElasticsearchTransport.get_request_count).to be > 0
     expect(::Gitlab::Instrumentation::ElasticsearchTransport.query_time).to be > 0
     expect(::Gitlab::Instrumentation::ElasticsearchTransport.detail_store).not_to be_empty
+  end
+
+  it 'adds the labkit correlation id as X-Opaque-Id to all requests' do
+    allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
+
+    elasticsearch_url = Gitlab::CurrentSettings.elasticsearch_url[0]
+    stub_request(:any, elasticsearch_url)
+
+    Project.__elasticsearch__.client
+      .perform_request(:get, '/')
+
+    expect(a_request(:get, /#{elasticsearch_url}/)
+      .with(headers: { 'X-Opaque-Id' => 'new-correlation-id' })).to have_been_made
+  end
+
+  it 'does not override the X-Opaque-Id if it is already present' do
+    allow(Labkit::Correlation::CorrelationId).to receive(:current_or_new_id).and_return('new-correlation-id')
+
+    elasticsearch_url = Gitlab::CurrentSettings.elasticsearch_url[0]
+    stub_request(:any, elasticsearch_url)
+
+    Project.__elasticsearch__.client
+      .perform_request(:get, '/', {}, nil, { 'X-Opaque-Id': 'original-opaque-id' })
+
+    expect(a_request(:get, /#{elasticsearch_url}/)
+      .with(headers: { 'X-Opaque-Id' => 'original-opaque-id' })).to have_been_made
   end
 end

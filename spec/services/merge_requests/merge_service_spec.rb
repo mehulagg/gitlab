@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::MergeService do
+RSpec.describe MergeRequests::MergeService do
   let_it_be(:user) { create(:user) }
   let_it_be(:user2) { create(:user) }
   let(:merge_request) { create(:merge_request, :simple, author: user2, assignees: [user2]) }
@@ -20,12 +20,9 @@ describe MergeRequests::MergeService do
     end
 
     context 'valid params' do
-      let(:state_tracking) { true }
-
       before do
-        stub_feature_flags(track_resource_state_change_events: state_tracking)
-
         allow(service).to receive(:execute_hooks)
+        expect(merge_request).to receive(:update_and_mark_in_progress_merge_commit_sha).twice.and_call_original
 
         perform_enqueued_jobs do
           service.execute(merge_request)
@@ -40,6 +37,10 @@ describe MergeRequests::MergeService do
         expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
 
+      it 'does not update squash_commit_sha if it is not a squash' do
+        expect(merge_request.squash_commit_sha).to be_nil
+      end
+
       it 'sends email to user2 about merge of new merge_request' do
         email = ActionMailer::Base.deliveries.last
         expect(email.to.first).to eq(user2.email)
@@ -47,20 +48,9 @@ describe MergeRequests::MergeService do
       end
 
       context 'note creation' do
-        context 'when resource state event tracking is disabled' do
-          let(:state_tracking) { false }
-
-          it 'creates system note about merge_request merge' do
-            note = merge_request.notes.last
-            expect(note.note).to include 'merged'
-          end
-        end
-
-        context 'when resource state event tracking is enabled' do
-          it 'creates resource state event about merge_request merge' do
-            event = merge_request.resource_state_events.last
-            expect(event.state).to eq('merged')
-          end
+        it 'creates resource state event about merge_request merge' do
+          event = merge_request.resource_state_events.last
+          expect(event.state).to eq('merged')
         end
       end
 
@@ -89,6 +79,12 @@ describe MergeRequests::MergeService do
 
           expect(merge_commit.message).to eq('Merge commit message')
           expect(squash_commit.message).to eq("Squash commit message\n")
+        end
+
+        it 'persists squash_commit_sha' do
+          squash_commit = merge_request.merge_commit.parents.last
+
+          expect(merge_request.squash_commit_sha).to eq(squash_commit.id)
         end
       end
     end
@@ -152,6 +148,7 @@ describe MergeRequests::MergeService do
         let(:commit)       { double('commit', safe_message: "Fixes #{jira_issue.to_reference}") }
 
         before do
+          stub_jira_service_test
           project.update!(has_external_issue_tracker: true)
           jira_service_settings
           stub_jira_urls(jira_issue.id)
@@ -175,7 +172,7 @@ describe MergeRequests::MergeService do
           end
 
           it 'does not close issue' do
-            jira_tracker.update(jira_issue_transition_id: nil)
+            jira_tracker.update!(jira_issue_transition_id: nil)
 
             expect_any_instance_of(JiraService).not_to receive(:transition_issue)
 
@@ -360,6 +357,26 @@ describe MergeRequests::MergeService do
         expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
       end
 
+      context 'when squashing is required' do
+        before do
+          merge_request.update!(source_branch: 'master', target_branch: 'feature')
+          merge_request.target_project.project_setting.squash_always!
+        end
+
+        it 'raises an error if squashing is not done' do
+          error_message = 'requires squashing commits'
+
+          service.execute(merge_request)
+
+          expect(merge_request).to be_open
+
+          expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
+          expect(merge_request.merge_error).to include(error_message)
+          expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+        end
+      end
+
       context 'when squashing' do
         before do
           merge_request.update!(source_branch: 'master', target_branch: 'feature')
@@ -369,12 +386,13 @@ describe MergeRequests::MergeService do
           error_message = 'Failed to squash. Should be done manually'
 
           allow_any_instance_of(MergeRequests::SquashService).to receive(:squash!).and_return(nil)
-          merge_request.update(squash: true)
+          merge_request.update!(squash: true)
 
           service.execute(merge_request)
 
           expect(merge_request).to be_open
           expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
           expect(merge_request.merge_error).to include(error_message)
           expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
         end
@@ -383,13 +401,30 @@ describe MergeRequests::MergeService do
           error_message = 'another squash is already in progress'
 
           allow_any_instance_of(MergeRequest).to receive(:squash_in_progress?).and_return(true)
-          merge_request.update(squash: true)
+          merge_request.update!(squash: true)
 
           service.execute(merge_request)
 
           expect(merge_request).to be_open
           expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
           expect(merge_request.merge_error).to include(error_message)
+          expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+        end
+
+        it 'logs and saves error if there is an PreReceiveError exception' do
+          error_message = 'error message'
+
+          allow(service).to receive(:repository).and_raise(Gitlab::Git::PreReceiveError, "GitLab: #{error_message}")
+          allow(service).to receive(:execute_hooks)
+          merge_request.update!(squash: true)
+
+          service.execute(merge_request)
+
+          expect(merge_request).to be_open
+          expect(merge_request.merge_commit_sha).to be_nil
+          expect(merge_request.squash_commit_sha).to be_nil
+          expect(merge_request.merge_error).to include('Something went wrong during merge pre-receive hook')
           expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
         end
 
@@ -401,7 +436,7 @@ describe MergeRequests::MergeService do
           %w(semi-linear ff).each do |merge_method|
             it "logs and saves error if merge is #{merge_method} only" do
               merge_method = 'rebase_merge' if merge_method == 'semi-linear'
-              merge_request.project.update(merge_method: merge_method)
+              merge_request.project.update!(merge_method: merge_method)
               error_message = 'Only fast-forward merge is allowed for your project. Please update your source branch'
               allow(service).to receive(:execute_hooks)
 
@@ -409,8 +444,46 @@ describe MergeRequests::MergeService do
 
               expect(merge_request).to be_open
               expect(merge_request.merge_commit_sha).to be_nil
+              expect(merge_request.squash_commit_sha).to be_nil
               expect(merge_request.merge_error).to include(error_message)
               expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+            end
+          end
+        end
+      end
+
+      context 'when not mergeable' do
+        let!(:error_message) { 'Merge request is not mergeable' }
+
+        context 'with failing CI' do
+          before do
+            allow(merge_request).to receive(:mergeable_ci_state?) { false }
+          end
+
+          it 'logs and saves error' do
+            service.execute(merge_request)
+
+            expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+          end
+        end
+
+        context 'with unresolved discussions' do
+          before do
+            allow(merge_request).to receive(:mergeable_discussions_state?) { false }
+          end
+
+          it 'logs and saves error' do
+            service.execute(merge_request)
+
+            expect(Gitlab::AppLogger).to have_received(:error).with(a_string_matching(error_message))
+          end
+
+          context 'when passing `skip_discussions_check: true` as `options` parameter' do
+            it 'merges the merge request' do
+              service.execute(merge_request, skip_discussions_check: true)
+
+              expect(merge_request).to be_valid
+              expect(merge_request).to be_merged
             end
           end
         end

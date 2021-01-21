@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe MergeRequests::AfterCreateService do
+RSpec.describe MergeRequests::AfterCreateService do
+  include AfterNextHelpers
+
   let_it_be(:merge_request) { create(:merge_request) }
 
   subject(:after_create_service) do
@@ -18,32 +20,42 @@ describe MergeRequests::AfterCreateService do
       allow(after_create_service).to receive(:notification_service).and_return(notification_service)
     end
 
+    subject(:execute_service) { after_create_service.execute(merge_request) }
+
     it 'creates a merge request open event' do
       expect(event_service)
         .to receive(:open_mr).with(merge_request, merge_request.author)
 
-      after_create_service.execute(merge_request)
+      execute_service
+    end
+
+    it 'calls the merge request activity counter' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_create_mr_action)
+        .with(user: merge_request.author)
+
+      execute_service
     end
 
     it 'creates a new merge request notification' do
       expect(notification_service)
         .to receive(:new_merge_request).with(merge_request, merge_request.author)
 
-      after_create_service.execute(merge_request)
+      execute_service
     end
 
     it 'writes diffs to the cache' do
       expect(merge_request)
         .to receive_message_chain(:diffs, :write_cache)
 
-      after_create_service.execute(merge_request)
+      execute_service
     end
 
     it 'creates cross references' do
       expect(merge_request)
         .to receive(:create_cross_references!).with(merge_request.author)
 
-      after_create_service.execute(merge_request)
+      execute_service
     end
 
     it 'creates a pipeline and updates the HEAD pipeline' do
@@ -51,7 +63,18 @@ describe MergeRequests::AfterCreateService do
         .to receive(:create_pipeline_for).with(merge_request, merge_request.author)
       expect(merge_request).to receive(:update_head_pipeline)
 
-      after_create_service.execute(merge_request)
+      execute_service
+    end
+
+    it 'registers an onboarding progress action' do
+      OnboardingProgress.onboard(merge_request.target_project.namespace)
+
+      expect_next(OnboardingProgressService, merge_request.target_project.namespace)
+        .to receive(:execute).with(action: :merge_request_created).and_call_original
+
+      execute_service
+
+      expect(OnboardingProgress.completed?(merge_request.target_project.namespace, :merge_request_created)).to be(true)
     end
   end
 end

@@ -1,10 +1,9 @@
 <script>
-import { GlPopover, GlLink } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlPopover, GlLink, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlPopover,
     GlLink,
   },
@@ -22,7 +21,7 @@ export default {
   <div class="d-flex align-items-center">
     <span class="mt-n1">{{ __('Any eligible user') }}</span>
     <span id="popovercontainer" class="ml-2 align-self-end">
-      <icon
+      <gl-icon
         id="pop-approver"
         tabindex="0"
         name="question"
@@ -36,12 +35,12 @@ export default {
         placement="top"
         triggers="hover focus"
       >
-        <template #title>{{ __('Who can be an approver?') }}</template>
+        <template #title>{{ __('Who can approve?') }}</template>
         <ul class="pl-3">
           <li>
-            {{ __('Any member with Developer or higher permissions to the project.') }}
+            {{ __('Any member with at least Developer permissions on the project.') }}
           </li>
-          <li>{{ __('Code Owners to the merge request changes.') }}</li>
+          <li>{{ __('Members listed as CODEOWNERS of affected files.') }}</li>
           <li>
             {{
               __("Users or groups set as approvers in the project's or merge request's settings.")

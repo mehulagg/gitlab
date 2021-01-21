@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Projects::ClustersController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::ClustersController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:admin) { create(:admin) }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project, :repository, namespace: namespace) }
   let(:cluster) { create(:cluster, :provided_by_gcp, projects: [project]) }
+  let(:user) { project.owner }
 
   render_views
 
@@ -17,7 +17,7 @@ describe Projects::ClustersController, '(JavaScript fixtures)', type: :controlle
   end
 
   before do
-    sign_in(admin)
+    sign_in(user)
   end
 
   after do

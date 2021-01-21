@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RemoteMirror, :mailer do
+RSpec.describe RemoteMirror, :mailer do
   include GitHelpers
 
   describe 'URL validation' do
@@ -139,6 +139,20 @@ describe RemoteMirror, :mailer do
 
         expect(remote_mirror.remote_name).to be_nil
       end
+    end
+  end
+
+  describe '#bare_url' do
+    it 'returns the URL without any credentials' do
+      remote_mirror = build(:remote_mirror, url: 'http://user:pass@example.com/foo')
+
+      expect(remote_mirror.bare_url).to eq('http://example.com/foo')
+    end
+
+    it 'returns an empty string when the URL is nil' do
+      remote_mirror = build(:remote_mirror, url: nil)
+
+      expect(remote_mirror.bare_url).to eq('')
     end
   end
 
@@ -283,7 +297,7 @@ describe RemoteMirror, :mailer do
     let(:remote_mirror) { create(:project, :repository, :remote_mirror).remote_mirrors.first }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'with remote mirroring disabled' do
@@ -397,7 +411,7 @@ describe RemoteMirror, :mailer do
     let(:timestamp) { Time.current - 5.minutes }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     before do
@@ -442,16 +456,18 @@ describe RemoteMirror, :mailer do
   end
 
   describe '#disabled?' do
+    let_it_be(:project) { create(:project, :repository) }
+
     subject { remote_mirror.disabled? }
 
     context 'when disabled' do
-      let(:remote_mirror) { build(:remote_mirror, enabled: false) }
+      let(:remote_mirror) { build(:remote_mirror, project: project, enabled: false) }
 
       it { is_expected.to be_truthy }
     end
 
     context 'when enabled' do
-      let(:remote_mirror) { build(:remote_mirror, enabled: true) }
+      let(:remote_mirror) { build(:remote_mirror, project: project, enabled: true) }
 
       it { is_expected.to be_falsy }
     end

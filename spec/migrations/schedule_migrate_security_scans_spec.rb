@@ -4,7 +4,7 @@ require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200217225719_schedule_migrate_security_scans.rb')
 
 # rubocop: disable RSpec/FactoriesInMigrationSpecs
-describe ScheduleMigrateSecurityScans, :sidekiq do
+RSpec.describe ScheduleMigrateSecurityScans, :sidekiq do
   let(:migration) { described_class.new }
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
@@ -40,7 +40,7 @@ describe ScheduleMigrateSecurityScans, :sidekiq do
 
     it 'schedules migration of security scans' do
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migration.up
 
           expect(described_class::MIGRATION).to be_scheduled_delayed_migration(5.minutes, job_artifact_1.id, job_artifact_1.id)
@@ -57,7 +57,7 @@ describe ScheduleMigrateSecurityScans, :sidekiq do
 
     it 'schedules migration of security scans' do
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migration.up
 
           expect(BackgroundMigrationWorker.jobs).to be_empty

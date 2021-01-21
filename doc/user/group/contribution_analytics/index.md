@@ -1,15 +1,13 @@
 ---
 type: reference
 stage: Manage
-group: Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Optimize
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 # Contribution Analytics **(STARTER)**
 
 > - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 8.3.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3090) for subgroups in GitLab 12.2.
-
-## Overview
 
 With Contribution Analytics you can get an overview of the following activity in your
 group:

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::BuildPresenter do
+RSpec.describe Ci::BuildPresenter do
   let(:project) { create(:project) }
   let(:pipeline) { create(:ci_pipeline, project: project) }
   let(:build) { create(:ci_build, pipeline: pipeline) }
@@ -228,7 +228,7 @@ describe Ci::BuildPresenter do
         let(:build) { create(:ci_build, :scheduled) }
 
         it 'returns execution time' do
-          Timecop.freeze do
+          freeze_time do
             is_expected.to be_like_time(60.0)
           end
         end
@@ -238,7 +238,7 @@ describe Ci::BuildPresenter do
         let(:build) { create(:ci_build, :expired_scheduled) }
 
         it 'returns execution time' do
-          Timecop.freeze do
+          freeze_time do
             is_expected.to eq(0)
           end
         end
@@ -249,7 +249,7 @@ describe Ci::BuildPresenter do
       let(:build) { create(:ci_build) }
 
       it 'does not return execution time' do
-        Timecop.freeze do
+        freeze_time do
           is_expected.to be_falsy
         end
       end

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import { MAX_DISPLAYED_VULNERABILITIES_PER_DEPENDENCY } from 'ee/dependencies/components/constants';
 import DependencyVulnerabilities from 'ee/dependencies/components/dependency_vulnerabilities.vue';
 import DependencyVulnerability from 'ee/dependencies/components/dependency_vulnerability.vue';
-import { MAX_DISPLAYED_VULNERABILITIES_PER_DEPENDENCY } from 'ee/dependencies/components/constants';
 import mockDataVulnerabilities from '../../security_dashboard/store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 describe('DependencVulnerabilities component', () => {

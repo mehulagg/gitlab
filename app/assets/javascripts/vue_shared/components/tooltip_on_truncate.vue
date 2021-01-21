@@ -1,6 +1,7 @@
 <script>
 import { isFunction } from 'lodash';
 import tooltip from '../directives/tooltip';
+import { hasHorizontalOverflow } from '~/lib/utils/dom_utils';
 
 export default {
   directives: {
@@ -49,7 +50,7 @@ export default {
     },
     updateTooltip() {
       const target = this.selectTarget();
-      this.showTooltip = Boolean(target && target.scrollWidth > target.offsetWidth);
+      this.showTooltip = hasHorizontalOverflow(target);
     },
   },
 };
@@ -61,9 +62,9 @@ export default {
     v-tooltip
     :title="title"
     :data-placement="placement"
-    class="js-show-tooltip"
+    class="js-show-tooltip gl-min-w-0"
   >
     <slot></slot>
   </span>
-  <span v-else> <slot></slot> </span>
+  <span v-else class="gl-min-w-0"> <slot></slot> </span>
 </template>

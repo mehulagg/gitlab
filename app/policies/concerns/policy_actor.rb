@@ -45,6 +45,14 @@ module PolicyActor
     false
   end
 
+  def support_bot?
+    false
+  end
+
+  def security_bot?
+    false
+  end
+
   def deactivated?
     false
   end
@@ -67,6 +75,10 @@ module PolicyActor
 
   def try_obtain_ldap_lease
     nil
+  end
+
+  def can_read_all_resources?
+    false
   end
 end
 

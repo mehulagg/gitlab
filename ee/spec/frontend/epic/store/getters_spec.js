@@ -1,5 +1,5 @@
-import * as getters from 'ee/epic/store/getters';
 import { statusType } from 'ee/epic/constants';
+import * as getters from 'ee/epic/store/getters';
 
 describe('Epic Store Getters', () => {
   const dateString = '2018-01-01';

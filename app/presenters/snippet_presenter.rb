@@ -3,12 +3,8 @@
 class SnippetPresenter < Gitlab::View::Presenter::Delegated
   presents :snippet
 
-  def web_url
-    Gitlab::UrlBuilder.build(snippet)
-  end
-
   def raw_url
-    Gitlab::UrlBuilder.build(snippet, raw: true)
+    url_builder.build(snippet, raw: true)
   end
 
   def ssh_url_to_repo
@@ -36,11 +32,9 @@ class SnippetPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def blob
-    if snippet.empty_repo?
-      snippet.blob
-    else
-      snippet.blobs.first
-    end
+    return snippet.blob if snippet.empty_repo?
+
+    blobs.first
   end
 
   private

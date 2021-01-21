@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -10,18 +13,17 @@ and it may be useful for users with experience with Linux. If you are currently
 having an issue with GitLab, you may want to check your [support options](https://about.gitlab.com/support/)
 first, before attempting to use this information.
 
-CAUTION: **CAUTION:**
+WARNING:
 If you are administering GitLab you are expected to know these commands for your distribution
 of choice. If you are a GitLab Support Engineer, consider this a cross-reference to
 translate `yum` -> `apt-get` and the like.
 
-Note: **Note:**
 Most of the commands below have not been labeled as to which distribution they work
 on. Contributions are welcome to help add them.
 
 ## System Commands
 
-### Distro Information
+### Distribution Information
 
 ```shell
 # Debian/Ubuntu
@@ -179,11 +181,13 @@ strace -tt -T -f -y -yy -s 1024 -p <pid>
 ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs strace -tt -T -f -y -yy -s 1024 -o /tmp/unicorn.txt
 ```
 
-See the [strace zine](https://wizardzines.com/zines/strace/) for a quick walkthrough.
-
-Brendan Gregg has a more detailed explanation of [how to use strace](http://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html).
-
 Be aware that strace can have major impacts to system performance when it is running.
+
+#### Strace Resources
+
+- See the [strace zine](https://wizardzines.com/zines/strace/) for a quick walkthrough.
+- Brendan Gregg has a more detailed explanation of [how to use strace](http://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html).
+- We have a [series of GitLab Unfiltered videos](https://www.youtube.com/playlist?list=PL05JrBw4t0KoC7cIkoAFcRhr4gsVesekg) on using strace to understand GitLab.
 
 ### The Strace Parser tool
 
@@ -196,7 +200,7 @@ or you can build it from source if you have the Rust compiler.
 
 #### How to use the tool
 
-First run the tool with no arguments other than the strace output file name to get
+First run the tool with no arguments other than the strace output filename to get
 a summary of the top processes sorted by time spent actively performing tasks. You
 can also sort based on total time, # of syscalls made, PID #, and # of child processes
 using the `-S` or `--sort` flag. The number of results defaults to 25 processes, but
@@ -299,7 +303,7 @@ nslookup example.com 1.1.1.1
 whois <ip_address> | grep -i "orgname\|netname"
 
 # Curl headers with redirect
-curl --head --location https://example.com
+curl --head --location "https://example.com"
 ```
 
 ## Package Management

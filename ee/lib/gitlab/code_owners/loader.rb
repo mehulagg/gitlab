@@ -41,6 +41,14 @@ module Gitlab
         code_owners_file&.path
       end
 
+      def code_owners_sections
+        code_owners_file&.sections
+      end
+
+      def optional_section?(section)
+        code_owners_file&.optional_section?(section)
+      end
+
       private
 
       def load_bare_entries_for_paths
@@ -63,7 +71,7 @@ module Gitlab
 
       def load_code_owners_file
         code_owners_blob = @project.repository.code_owners_blob(ref: @ref)
-        Gitlab::CodeOwners::File.new(code_owners_blob, @project)
+        Gitlab::CodeOwners::File.new(code_owners_blob)
       end
     end
   end

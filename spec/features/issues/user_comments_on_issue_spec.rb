@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe "User comments on issue", :js do
+RSpec.describe "User comments on issue", :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
   let(:project) { create(:project_empty_repo, :public) }
@@ -10,6 +10,7 @@ describe "User comments on issue", :js do
   let(:user) { create(:user) }
 
   before do
+    stub_feature_flags(tribute_autocomplete: false)
     project.add_guest(user)
     sign_in(user)
 

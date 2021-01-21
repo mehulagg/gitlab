@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Deployments::CreateService do
+RSpec.describe Deployments::CreateService do
   let(:user) { create(:user) }
 
   describe '#execute' do
@@ -19,8 +19,9 @@ describe Deployments::CreateService do
         status: 'success'
       )
 
-      expect(Deployments::SuccessWorker).to receive(:perform_async)
-      expect(Deployments::FinishedWorker).to receive(:perform_async)
+      expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+      expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      expect(Deployments::ExecuteHooksWorker).to receive(:perform_async)
 
       expect(service.execute).to be_persisted
     end
@@ -34,10 +35,32 @@ describe Deployments::CreateService do
         tag: false
       )
 
-      expect(Deployments::SuccessWorker).not_to receive(:perform_async)
-      expect(Deployments::FinishedWorker).not_to receive(:perform_async)
+      expect(Deployments::UpdateEnvironmentWorker).not_to receive(:perform_async)
+      expect(Deployments::LinkMergeRequestWorker).not_to receive(:perform_async)
+      expect(Deployments::ExecuteHooksWorker).not_to receive(:perform_async)
 
       expect(service.execute).to be_persisted
+    end
+
+    context 'when the last deployment has the same parameters' do
+      let(:params) do
+        {
+          sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
+          ref: 'master',
+          tag: false,
+          status: 'success'
+        }
+      end
+
+      it 'does not create a new deployment' do
+        described_class.new(environment, user, params).execute
+
+        expect(Deployments::UpdateEnvironmentWorker).not_to receive(:perform_async)
+        expect(Deployments::LinkMergeRequestWorker).not_to receive(:perform_async)
+        expect(Deployments::ExecuteHooksWorker).not_to receive(:perform_async)
+
+        described_class.new(environment.reload, user, params).execute
+      end
     end
   end
 

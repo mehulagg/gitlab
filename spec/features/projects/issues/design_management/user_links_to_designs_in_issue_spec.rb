@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'viewing issues with design references' do
+RSpec.describe 'viewing issues with design references' do
   include DesignManagementTestHelpers
 
   let_it_be(:public_project) { create(:project_empty_repo, :public) }
@@ -89,35 +89,6 @@ describe 'viewing issues with design references' do
         expect(page).not_to have_link(design_ref_a)
         expect(page).not_to have_link(design_ref_b)
       end
-    end
-
-    context 'design management is enabled, but the filter is disabled globally' do
-      before do
-        enable_design_management
-        stub_feature_flags(
-          Banzai::Filter::DesignReferenceFilter::FEATURE_FLAG => false
-        )
-      end
-
-      it 'processes design tab links successfully, and design references as issue references', :aggregate_failures do
-        visit_page_with_design_references
-
-        expect(page).to have_text('The designs I mentioned')
-        expect(page).to have_link(design_tab_ref)
-        expect(page).to have_link(issue_ref)
-        expect(page).not_to have_link(design_ref_a)
-        expect(page).not_to have_link(design_ref_b)
-      end
-    end
-
-    context 'design management is enabled, and the filter is enabled for the current project' do
-      before do
-        stub_feature_flags(
-          Banzai::Filter::DesignReferenceFilter::FEATURE_FLAG => public_project
-        )
-      end
-
-      it_behaves_like 'successful use of design link references'
     end
   end
 end

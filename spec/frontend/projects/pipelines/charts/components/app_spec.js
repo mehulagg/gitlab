@@ -1,29 +1,55 @@
-import { shallowMount } from '@vue/test-utils';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { merge } from 'lodash';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+import { GlTabs, GlTab } from '@gitlab/ui';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import Component from '~/projects/pipelines/charts/components/app.vue';
-import StatisticsList from '~/projects/pipelines/charts/components/statistics_list.vue';
-import PipelinesAreaChart from '~/projects/pipelines/charts/components/pipelines_area_chart.vue';
-import {
-  counts,
-  timesChartData,
-  areaChartData as lastWeekChartData,
-  areaChartData as lastMonthChartData,
-  lastYearChartData,
-} from '../mock_data';
+import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_charts.vue';
+import getPipelineCountByStatus from '~/projects/pipelines/charts/graphql/queries/get_pipeline_count_by_status.query.graphql';
+import getProjectPipelineStatistics from '~/projects/pipelines/charts/graphql/queries/get_project_pipeline_statistics.query.graphql';
+import { mockPipelineCount, mockPipelineStatistics } from '../mock_data';
+
+const projectPath = 'gitlab-org/gitlab';
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+
+const DeploymentFrequencyChartsStub = { name: 'DeploymentFrequencyCharts', render: () => {} };
 
 describe('ProjectsPipelinesChartsApp', () => {
   let wrapper;
 
+  function createMockApolloProvider() {
+    const requestHandlers = [
+      [getPipelineCountByStatus, jest.fn().mockResolvedValue(mockPipelineCount)],
+      [getProjectPipelineStatistics, jest.fn().mockResolvedValue(mockPipelineStatistics)],
+    ];
+
+    return createMockApollo(requestHandlers);
+  }
+
+  function createComponent(mountOptions = {}) {
+    wrapper = shallowMount(
+      Component,
+      merge(
+        {},
+        {
+          provide: {
+            projectPath,
+            shouldRenderDeploymentFrequencyCharts: false,
+          },
+          localVue,
+          apolloProvider: createMockApolloProvider(),
+          stubs: {
+            DeploymentFrequencyCharts: DeploymentFrequencyChartsStub,
+          },
+        },
+        mountOptions,
+      ),
+    );
+  }
+
   beforeEach(() => {
-    wrapper = shallowMount(Component, {
-      propsData: {
-        counts,
-        timesChartData,
-        lastWeekChartData,
-        lastMonthChartData,
-        lastYearChartData,
-      },
-    });
+    createComponent();
   });
 
   afterEach(() => {
@@ -31,42 +57,74 @@ describe('ProjectsPipelinesChartsApp', () => {
     wrapper = null;
   });
 
-  describe('overall statistics', () => {
-    it('displays the statistics list', () => {
-      const list = wrapper.find(StatisticsList);
+  describe('pipelines charts', () => {
+    it('displays the pipeline charts', () => {
+      const chart = wrapper.find(PipelineCharts);
+      const analytics = mockPipelineStatistics.data.project.pipelineAnalytics;
 
-      expect(list.exists()).toBeTruthy();
-      expect(list.props('counts')).toBe(counts);
-    });
+      const {
+        totalPipelines: total,
+        successfulPipelines: success,
+        failedPipelines: failed,
+      } = mockPipelineCount.data.project;
 
-    it('displays the commit duration chart', () => {
-      const chart = wrapper.find(GlColumnChart);
-
-      expect(chart.exists()).toBeTruthy();
-      expect(chart.props('yAxisTitle')).toBe('Minutes');
-      expect(chart.props('xAxisTitle')).toBe('Commit');
-      expect(chart.props('data')).toBe(wrapper.vm.timesChartTransformedData);
-      expect(chart.props('option')).toBe(wrapper.vm.$options.timesChartOptions);
+      expect(chart.exists()).toBe(true);
+      expect(chart.props()).toMatchObject({
+        counts: {
+          failed: failed.count,
+          success: success.count,
+          total: total.count,
+          successRatio: (success.count / (success.count + failed.count)) * 100,
+        },
+        lastWeek: {
+          labels: analytics.weekPipelinesLabels,
+          totals: analytics.weekPipelinesTotals,
+          success: analytics.weekPipelinesSuccessful,
+        },
+        lastMonth: {
+          labels: analytics.monthPipelinesLabels,
+          totals: analytics.monthPipelinesTotals,
+          success: analytics.monthPipelinesSuccessful,
+        },
+        lastYear: {
+          labels: analytics.yearPipelinesLabels,
+          totals: analytics.yearPipelinesTotals,
+          success: analytics.yearPipelinesSuccessful,
+        },
+        timesChart: {
+          labels: analytics.pipelineTimesLabels,
+          values: analytics.pipelineTimesValues,
+        },
+      });
     });
   });
 
-  describe('pipelines charts', () => {
-    it('displays 3 area charts', () => {
-      expect(wrapper.findAll(PipelinesAreaChart).length).toBe(3);
+  const findDeploymentFrequencyCharts = () => wrapper.find(DeploymentFrequencyChartsStub);
+  const findGlTabs = () => wrapper.find(GlTabs);
+  const findAllGlTab = () => wrapper.findAll(GlTab);
+  const findGlTabAt = (i) => findAllGlTab().at(i);
+
+  describe('when shouldRenderDeploymentFrequencyCharts is true', () => {
+    beforeEach(() => {
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: true } });
     });
 
-    describe('displays individual correctly', () => {
-      it('renders with the correct data', () => {
-        const charts = wrapper.findAll(PipelinesAreaChart);
+    it('renders the deployment frequency charts in a tab', () => {
+      expect(findGlTabs().exists()).toBe(true);
+      expect(findGlTabAt(0).attributes('title')).toBe('Pipelines');
+      expect(findGlTabAt(1).attributes('title')).toBe('Deployments');
+      expect(findDeploymentFrequencyCharts().exists()).toBe(true);
+    });
+  });
 
-        for (let i = 0; i < charts.length; i += 1) {
-          const chart = charts.at(i);
+  describe('when shouldRenderDeploymentFrequencyCharts is false', () => {
+    beforeEach(() => {
+      createComponent({ provide: { shouldRenderDeploymentFrequencyCharts: false } });
+    });
 
-          expect(chart.exists()).toBeTruthy();
-          expect(chart.props('chartData')).toBe(wrapper.vm.areaCharts[i].data);
-          expect(chart.text()).toBe(wrapper.vm.areaCharts[i].title);
-        }
-      });
+    it('does not render the deployment frequency charts in a tab', () => {
+      expect(findGlTabs().exists()).toBe(false);
+      expect(findDeploymentFrequencyCharts().exists()).toBe(false);
     });
   });
 });

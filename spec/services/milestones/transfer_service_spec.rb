@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Milestones::TransferService do
+RSpec.describe Milestones::TransferService do
   describe '#execute' do
     subject(:service) { described_class.new(user, old_group, project) }
 
@@ -23,7 +23,7 @@ describe Milestones::TransferService do
         new_group.add_maintainer(user)
         project.add_maintainer(user)
         # simulate project transfer
-        project.update(group: new_group)
+        project.update!(group: new_group)
       end
 
       context 'without existing milestone at the new group level' do

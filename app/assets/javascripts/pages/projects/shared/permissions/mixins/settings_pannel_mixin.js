@@ -2,6 +2,7 @@ export default {
   data() {
     return {
       packagesEnabled: false,
+      requirementsEnabled: false,
     };
   },
   watch: {
@@ -13,7 +14,6 @@ export default {
 
         if (value === 0) {
           this.containerRegistryEnabled = false;
-          this.lfsEnabled = false;
         }
       } else if (oldValue === 0) {
         this.mergeRequestsAccessLevel = value;

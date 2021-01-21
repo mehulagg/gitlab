@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Issuable::BulkUpdateService do
-  let(:user)    { create(:user) }
-  let(:project) { create(:project, :repository, namespace: user.namespace) }
+RSpec.describe Issuable::BulkUpdateService do
+  let_it_be(:user)    { create(:user) }
+  let_it_be(:project) { create(:project, :repository, namespace: user.namespace) }
 
   def bulk_update(issuables, extra_params = {})
     bulk_update_params = extra_params
@@ -18,8 +18,8 @@ describe Issuable::BulkUpdateService do
     it 'succeeds' do
       result = bulk_update(issuables, milestone_id: milestone.id)
 
-      expect(result[:success]).to be_truthy
-      expect(result[:count]).to eq(issuables.count)
+      expect(result.success?).to be_truthy
+      expect(result.payload[:count]).to eq(issuables.count)
     end
 
     it 'updates the issuables milestone' do
@@ -27,6 +27,23 @@ describe Issuable::BulkUpdateService do
 
       issuables.each do |issuable|
         expect(issuable.reload.milestone).to eq(milestone)
+      end
+    end
+  end
+
+  shared_examples 'updates iterations' do
+    it 'succeeds' do
+      result = bulk_update(issuables, sprint_id: iteration.id)
+
+      expect(result.success?).to be_truthy
+      expect(result.payload[:count]).to eq(issuables.count)
+    end
+
+    it 'updates the issuables iteration' do
+      bulk_update(issuables, sprint_id: iteration.id)
+
+      issuables.each do |issuable|
+        expect(issuable.reload.iteration).to eq(iteration)
       end
     end
   end
@@ -121,8 +138,8 @@ describe Issuable::BulkUpdateService do
       it 'succeeds and returns the correct number of issues updated' do
         result = bulk_update(issues, state_event: 'close')
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(issues.count)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(issues.count)
       end
 
       it 'closes all the issues passed' do
@@ -139,8 +156,8 @@ describe Issuable::BulkUpdateService do
       it 'succeeds and returns the correct number of issues updated' do
         result = bulk_update(issues, state_event: 'reopen')
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(issues.count)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(issues.count)
       end
 
       it 'reopens all the issues passed' do
@@ -161,8 +178,8 @@ describe Issuable::BulkUpdateService do
 
           result = bulk_update(merge_request, assignee_ids: [user.id, new_assignee.id])
 
-          expect(result[:success]).to be_truthy
-          expect(result[:count]).to eq(1)
+          expect(result.success?).to be_truthy
+          expect(result.payload[:count]).to eq(1)
         end
 
         it 'updates the assignee to the user ID passed' do
@@ -199,8 +216,8 @@ describe Issuable::BulkUpdateService do
 
           result = bulk_update(issue, assignee_ids: [new_assignee.id])
 
-          expect(result[:success]).to be_truthy
-          expect(result[:count]).to eq(1)
+          expect(result.success?).to be_truthy
+          expect(result.payload[:count]).to eq(1)
         end
 
         it 'updates the assignee to the user ID passed' do
@@ -233,6 +250,21 @@ describe Issuable::BulkUpdateService do
       it_behaves_like 'updates milestones'
     end
 
+    describe 'updating iterations' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
+      let_it_be(:issuables) { [create(:issue, project: project)] }
+      let_it_be(:iteration) { create(:iteration, group: group) }
+
+      let(:parent) { project }
+
+      before do
+        group.add_reporter(user)
+      end
+
+      it_behaves_like 'updates iterations'
+    end
+
     describe 'updating labels' do
       let(:bug) { create(:label, project: project) }
       let(:regression) { create(:label, project: project) }
@@ -254,7 +286,7 @@ describe Issuable::BulkUpdateService do
     describe 'unsubscribe from issues' do
       let(:issues) do
         create_list(:closed_issue, 2, project: project) do |issue|
-          issue.subscriptions.create(user: user, project: project, subscribed: true)
+          issue.subscriptions.create!(user: user, project: project, subscribed: true)
         end
       end
 
@@ -273,8 +305,8 @@ describe Issuable::BulkUpdateService do
         issue2 = create(:issue, project: create(:project))
         result = bulk_update([issue1, issue2], assignee_ids: [user.id])
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(1)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(1)
 
         expect(issue1.reload.assignees).to eq([user])
         expect(issue2.reload.assignees).to be_empty
@@ -283,7 +315,7 @@ describe Issuable::BulkUpdateService do
   end
 
   context 'with issuables at a group level' do
-    let(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
     let(:parent) { group }
 
     before do
@@ -315,6 +347,19 @@ describe Issuable::BulkUpdateService do
       end
     end
 
+    describe 'updating iterations' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+      let_it_be(:project)   { create(:project, :repository, group: group) }
+
+      context 'when issues' do
+        let_it_be(:issue1)    { create(:issue, project: project) }
+        let_it_be(:issue2)    { create(:issue, project: project) }
+        let_it_be(:issuables) { [issue1, issue2] }
+
+        it_behaves_like 'updates iterations'
+      end
+    end
+
     describe 'updating labels' do
       let(:project)        { create(:project, :repository, group: group) }
       let(:bug)            { create(:group_label, group: group) }
@@ -332,8 +377,8 @@ describe Issuable::BulkUpdateService do
         milestone = create(:milestone, group: group)
         result = bulk_update([issue1, issue2, issue3], milestone_id: milestone.id)
 
-        expect(result[:success]).to be_truthy
-        expect(result[:count]).to eq(2)
+        expect(result.success?).to be_truthy
+        expect(result.payload[:count]).to eq(2)
 
         expect(issue1.reload.milestone).to eq(milestone)
         expect(issue2.reload.milestone).to be_nil

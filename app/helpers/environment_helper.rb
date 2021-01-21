@@ -19,7 +19,7 @@ module EnvironmentHelper
   end
 
   def deployment_path(deployment)
-    [deployment.project.namespace.becomes(Namespace), deployment.project, deployment.deployable]
+    [deployment.project, deployment.deployable]
   end
 
   def deployment_link(deployment, text: nil)
@@ -52,6 +52,8 @@ module EnvironmentHelper
         s_('Deployment|failed')
       when 'canceled'
         s_('Deployment|canceled')
+      when 'skipped'
+        s_('Deployment|skipped')
       end
 
     klass = "ci-status ci-#{status.dasherize}"

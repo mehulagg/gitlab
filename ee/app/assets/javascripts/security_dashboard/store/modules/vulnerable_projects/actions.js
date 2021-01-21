@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -15,7 +15,7 @@ export const fetchProjects = ({ dispatch }, endpoint) => {
   return axios
     .get(endpoint)
     .then(({ data }) => data.map(convertObjectPropsToCamelCase))
-    .then(data => {
+    .then((data) => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => {
@@ -38,6 +38,3 @@ export const receiveProjectsError = ({ commit }) => {
 
   commit(SET_HAS_ERROR, true);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

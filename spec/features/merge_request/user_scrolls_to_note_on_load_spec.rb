@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User scrolls to note on load', :js do
+RSpec.describe 'Merge request > User scrolls to note on load', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:merge_request) { create(:merge_request, source_project: project, author: user) }
@@ -17,15 +17,16 @@ describe 'Merge request > User scrolls to note on load', :js do
   it 'scrolls note into view' do
     visit "#{project_merge_request_path(project, merge_request)}#{fragment_id}"
 
-    wait_for_requests
+    wait_for_all_requests
 
-    page_height = page.current_window.size[1]
+    expect(page).to have_selector("#{fragment_id}")
+
     page_scroll_y = page.evaluate_script("window.scrollY")
-    fragment_position_top = page.evaluate_script("Math.round($('#{fragment_id}').offset().top)")
+    fragment_position_top = page.evaluate_script("Math.round(document.querySelector('#{fragment_id}').getBoundingClientRect().top + window.pageYOffset)")
 
     expect(find(fragment_id).visible?).to eq true
     expect(fragment_position_top).to be >= page_scroll_y
-    expect(fragment_position_top).to be < (page_scroll_y + page_height)
+    expect(page.evaluate_script("window.pageYOffset")).to be > 0
   end
 
   it 'renders un-collapsed notes with diff' do

@@ -1,25 +1,39 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
+import Vue from 'vue';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
-import { GlModal, GlTooltipDirective } from '@gitlab/ui';
-import createFlash from '~/flash';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlToast, GlModal, GlTooltipDirective, GlIcon, GlFormCheckbox } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
-import Api from '~/api';
-import eventHub from './event_hub';
+import { updateUserStatus } from '~/rest_api';
 import EmojiMenuInModal from './emoji_menu_in_modal';
+import { isUserBusy, isValidAvailibility } from './utils';
+import * as Emoji from '~/emoji';
 
 const emojiMenuClass = 'js-modal-status-emoji-menu';
+export const AVAILABILITY_STATUS = {
+  BUSY: 'busy',
+  NOT_SET: 'not_set',
+};
+
+Vue.use(GlToast);
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlModal,
+    GlFormCheckbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   props: {
+    defaultEmoji: {
+      type: String,
+      required: false,
+      default: '',
+    },
     currentEmoji: {
       type: String,
       required: true,
@@ -27,6 +41,17 @@ export default {
     currentMessage: {
       type: String,
       required: true,
+    },
+    currentAvailability: {
+      type: String,
+      required: false,
+      validator: isValidAvailibility,
+      default: '',
+    },
+    canSetUserAvailability: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -39,23 +64,24 @@ export default {
       message: this.currentMessage,
       modalId: 'set-user-status-modal',
       noEmoji: true,
+      availability: isUserBusy(this.currentAvailability),
     };
   },
   computed: {
+    isCustomEmoji() {
+      return this.emoji !== this.defaultEmoji;
+    },
     isDirty() {
-      return this.message.length || this.emoji.length;
+      return Boolean(this.message.length || this.isCustomEmoji);
     },
   },
   mounted() {
-    eventHub.$on('openModal', this.openModal);
+    this.$root.$emit('bv::show::modal', this.modalId);
   },
   beforeDestroy() {
     this.emojiMenu.destroy();
   },
   methods: {
-    openModal() {
-      this.$root.$emit('bv::show::modal', this.modalId);
-    },
     closeModal() {
       this.$root.$emit('bv::hide::modal', this.modalId);
     },
@@ -64,13 +90,13 @@ export default {
       const emojiAutocomplete = new GfmAutoComplete();
       emojiAutocomplete.setup($(this.$refs.statusMessageField), { emojis: true });
 
-      import(/* webpackChunkName: 'emoji' */ '~/emoji')
-        .then(Emoji => {
+      Emoji.initEmojiMap()
+        .then(() => {
           if (this.emoji) {
             this.emojiTag = Emoji.glEmojiTag(this.emoji);
           }
           this.noEmoji = this.emoji === '';
-          this.defaultEmojiTag = Emoji.glEmojiTag('speech_balloon');
+          this.defaultEmojiTag = Emoji.glEmojiTag(this.defaultEmoji);
 
           this.emojiMenu = new EmojiMenuInModal(
             Emoji,
@@ -79,6 +105,7 @@ export default {
             this.setEmoji,
             this.$refs.userStatusForm,
           );
+          this.setDefaultEmoji();
         })
         .catch(() => createFlash(__('Failed to load emoji list.')));
     },
@@ -97,7 +124,7 @@ export default {
     },
     setDefaultEmoji() {
       const { emojiTag } = this;
-      const hasStatusMessage = this.message;
+      const hasStatusMessage = Boolean(this.message.length);
       if (hasStatusMessage && emojiTag) {
         return;
       }
@@ -129,20 +156,23 @@ export default {
       this.hideEmojiMenu();
     },
     removeStatus() {
+      this.availability = false;
       this.clearStatusInputs();
       this.setStatus();
     },
     setStatus() {
-      const { emoji, message } = this;
+      const { emoji, message, availability } = this;
 
-      Api.postUserStatus({
+      updateUserStatus({
         emoji,
         message,
+        availability: availability ? AVAILABILITY_STATUS.BUSY : AVAILABILITY_STATUS.NOT_SET,
       })
         .then(this.onUpdateSuccess)
         .catch(this.onUpdateFail);
     },
     onUpdateSuccess() {
+      this.$toast.show(s__('SetStatusModal|Status updated'));
       this.closeModal();
       window.location.reload();
     },
@@ -178,11 +208,11 @@ export default {
         name="user[status][emoji]"
       />
       <div ref="userStatusForm" class="form-group position-relative m-0">
-        <div class="input-group">
+        <div class="input-group gl-mb-5">
           <span class="input-group-prepend">
             <button
               ref="toggleEmojiMenuButton"
-              v-gl-tooltip.bottom
+              v-gl-tooltip.bottom.hover
               :title="s__('SetStatusModal|Add status emoji')"
               :aria-label="s__('SetStatusModal|Add status emoji')"
               name="button"
@@ -195,9 +225,9 @@ export default {
                 v-show="noEmoji"
                 class="js-no-emoji-placeholder no-emoji-placeholder position-relative"
               >
-                <icon name="slight-smile" class="award-control-icon-neutral" />
-                <icon name="smiley" class="award-control-icon-positive" />
-                <icon name="smile" class="award-control-icon-super-positive" />
+                <gl-icon name="slight-smile" class="award-control-icon-neutral" />
+                <gl-icon name="smiley" class="award-control-icon-positive" />
+                <gl-icon name="smile" class="award-control-icon-super-positive" />
               </span>
             </button>
           </span>
@@ -222,9 +252,25 @@ export default {
               class="js-clear-user-status-button clear-user-status btn"
               @click="clearStatusInputs()"
             >
-              <icon name="close" />
+              <gl-icon name="close" />
             </button>
           </span>
+        </div>
+        <div v-if="canSetUserAvailability" class="form-group">
+          <div class="gl-display-flex">
+            <gl-form-checkbox
+              v-model="availability"
+              data-testid="user-availability-checkbox"
+              class="gl-mb-0"
+            >
+              <span class="gl-font-weight-bold">{{ s__('SetStatusModal|Busy') }}</span>
+            </gl-form-checkbox>
+          </div>
+          <div class="gl-display-flex">
+            <span class="gl-text-gray-600 gl-ml-5">
+              {{ s__('SetStatusModal|"Busy" will be shown next to your name') }}
+            </span>
+          </div>
         </div>
       </div>
     </div>

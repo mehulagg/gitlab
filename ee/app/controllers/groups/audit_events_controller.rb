@@ -1,24 +1,47 @@
 # frozen_string_literal: true
 
 class Groups::AuditEventsController < Groups::ApplicationController
+  include Gitlab::Utils::StrongMemoize
   include AuditEvents::EnforcesValidDateParams
   include AuditEvents::AuditLogsParams
   include AuditEvents::Sortable
+  include AuditEvents::DateRange
+  include Analytics::UniqueVisitsHelper
 
-  before_action :authorize_admin_group!
   before_action :check_audit_events_available!
 
-  layout 'group_settings'
+  track_unique_visits :index, target_id: 'g_compliance_audit_events'
+
+  feature_category :audit_events
 
   def index
-    level = Gitlab::Audit::Levels::Group.new(group: group)
+    @is_last_page = events.last_page?
+    @events = AuditEventSerializer.new.represent(events)
 
-    events = AuditLogFinder
-      .new(level: level, params: audit_logs_params)
-      .execute
-      .page(params[:page])
-      .without_count
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
+  end
 
-    @events = Gitlab::Audit::Events::Preloader.preload!(events)
+  private
+
+  def check_audit_events_available!
+    render_404 unless can?(current_user, :read_group_audit_events, group) &&
+      group.feature_available?(:audit_events)
+  end
+
+  def events
+    strong_memoize(:events) do
+      level = Gitlab::Audit::Levels::Group.new(group: group)
+      events = AuditLogFinder
+        .new(level: level, params: audit_params)
+        .execute
+        .page(params[:page])
+        .without_count
+
+      Gitlab::Audit::Events::Preloader.preload!(events)
+    end
+  end
+
+  def filter_by_author(params)
+    can?(current_user, :admin_group, group) ? params : params.merge(author_id: current_user.id)
   end
 end

@@ -6,6 +6,7 @@ module QA
       extend Forwardable
 
       attr_reader :title
+      attr_accessor :expires_at
 
       attribute :id
 
@@ -13,6 +14,7 @@ module QA
 
       def initialize
         self.title = Time.now.to_f
+        @expires_at = Date.today + 2
       end
 
       def key
@@ -53,12 +55,35 @@ module QA
       def api_post_body
         {
           title: title,
-          key: public_key
+          key: public_key,
+          expires_at: expires_at
         }
       end
 
       def api_delete_path
         "/user/keys/#{id}"
+      end
+
+      def replicated?
+        api_client = Runtime::API::Client.new(:geo_secondary)
+
+        QA::Runtime::Logger.debug('Checking for SSH key replication')
+
+        Support::Retrier.retry_until(max_duration: QA::EE::Runtime::Geo.max_db_replication_time, sleep_interval: 3) do
+          response = get Runtime::API::Request.new(api_client, api_get_path).url
+
+          response.code == QA::Support::Api::HTTP_STATUS_OK &&
+            parse_body(response)[:title].include?(title)
+        end
+      end
+
+      private
+
+      def api_get
+        with_paginated_response_body(Runtime::API::Request.new(api_client, '/user/keys', per_page: '100').url) do |page|
+          key = page.find { |key| key[:title] == title }
+          break process_api_response(key) if key
+        end
       end
     end
   end

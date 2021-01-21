@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Release' do
+  RSpec.describe 'Release' do
     describe 'Deploy key creation' do
-      it 'user adds a deploy key' do
+      it 'user adds a deploy key', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/390' do
         Flow::Login.sign_in
 
         key = Runtime::Key::RSA.new

@@ -5,13 +5,12 @@
   .dropdown.js-project-filter-dropdown-wrap{ class: ('d-flex flex-grow-1 flex-shrink-1' if feature_project_list_filter_bar) }
     %button.dropdown-menu-toggle{ href: '#', "data-toggle" => "dropdown", 'data-display' => 'static' }
       - unless has_label
-        = icon('globe', class: 'mt-1')
-        %span.light.ml-3= _("Visibility:")
+        %span= _("Visibility:")
       - if params[:visibility_level].present?
         = visibility_level_label(params[:visibility_level].to_i)
       - else
         = _('Any')
-      = icon('chevron-down')
+      = sprite_icon('chevron-down', css_class: 'dropdown-menu-toggle-icon gl-top-3')
     %ul.dropdown-menu.dropdown-menu-right
       %li
         = link_to filter_projects_path(visibility_level: nil) do

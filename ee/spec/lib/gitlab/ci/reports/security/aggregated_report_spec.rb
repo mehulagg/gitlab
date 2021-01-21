@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::AggregatedReport do
-  subject { described_class.new(reports, occurrences) }
+  subject { described_class.new(reports, findings) }
 
   let(:reports) { build_list(:ci_reports_security_report, 1) }
-  let(:occurrences) { build_list(:ci_reports_security_occurrence, 1) }
+  let(:findings) { build_list(:ci_reports_security_finding, 1) }
 
   describe '#created_at' do
     context 'no reports' do

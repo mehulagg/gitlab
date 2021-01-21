@@ -114,6 +114,8 @@ class ApprovalState
   end
 
   def can_approve?(user)
+    return merge_request.can_be_approved_by?(user) unless merge_request.approval_feature_available?
+
     return false unless user
     return false unless user.can?(:approve_merge_request, merge_request)
 
@@ -126,12 +128,6 @@ class ApprovalState
     return false if !committers_can_approve? && merge_request.committers.include?(user)
 
     true
-  end
-
-  def has_approved?(user)
-    return false unless user
-
-    approved_approvers.include?(user)
   end
 
   def authors_can_approve?
@@ -211,7 +207,7 @@ class ApprovalState
     strong_memoize(:wrapped_rules) do
       merge_request_rules = merge_request.approval_rules.applicable_to_branch(target_branch)
 
-      merge_request_rules.map do |rule|
+      merge_request_rules.map! do |rule|
         ApprovalWrappedRule.wrap(merge_request, rule)
       end
     end

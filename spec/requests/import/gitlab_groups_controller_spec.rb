@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe Import::GitlabGroupsController do
+RSpec.describe Import::GitlabGroupsController do
   include WorkhorseHelpers
 
+  let_it_be(:user) { create(:user) }
   let(:import_path) { "#{Dir.tmpdir}/gitlab_groups_controller_spec" }
   let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
   let(:workhorse_headers) do
@@ -16,6 +17,8 @@ describe Import::GitlabGroupsController do
       expect(import_export).to receive(:storage_path).and_return(import_path)
     end
 
+    allow(Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
+
     stub_uploads_object_storage(ImportExportUploader)
   end
 
@@ -25,8 +28,6 @@ describe Import::GitlabGroupsController do
 
   describe 'POST create' do
     subject(:import_request) { upload_archive(file_upload, workhorse_headers, request_params) }
-
-    let_it_be(:user) { create(:user) }
 
     let(:file) { File.join('spec', %w[fixtures group_export.tar.gz]) }
     let(:file_upload) { fixture_file_upload(file) }
@@ -192,67 +193,11 @@ describe Import::GitlabGroupsController do
   end
 
   describe 'POST authorize' do
-    let_it_be(:user) { create(:user) }
+    it_behaves_like 'handle uploads authorize request' do
+      let(:uploader_class) { ImportExportUploader }
+      let(:maximum_size) { Gitlab::CurrentSettings.max_import_size.megabytes }
 
-    before do
-      login_as(user)
-    end
-
-    context 'when using a workhorse header' do
-      subject(:authorize_request) { post authorize_import_gitlab_group_path, headers: workhorse_headers }
-
-      it 'authorizes the request' do
-        authorize_request
-
-        expect(response).to have_gitlab_http_status :ok
-        expect(response.media_type).to eq Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
-        expect(json_response['TempPath']).to eq ImportExportUploader.workhorse_local_upload_path
-      end
-    end
-
-    context 'when the request bypasses gitlab-workhorse' do
-      subject(:authorize_request) { post authorize_import_gitlab_group_path }
-
-      it 'rejects the request' do
-        expect { authorize_request }.to raise_error(JWT::DecodeError)
-      end
-    end
-
-    context 'when direct upload is enabled' do
-      subject(:authorize_request) { post authorize_import_gitlab_group_path, headers: workhorse_headers }
-
-      before do
-        stub_uploads_object_storage(ImportExportUploader, enabled: true, direct_upload: true)
-      end
-
-      it 'accepts the request and stores the files' do
-        authorize_request
-
-        expect(response).to have_gitlab_http_status :ok
-        expect(response.media_type).to eq Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
-        expect(json_response).not_to have_key 'TempPath'
-
-        expect(json_response['RemoteObject'].keys)
-          .to include('ID', 'GetURL', 'StoreURL', 'DeleteURL', 'MultipartUpload')
-      end
-    end
-
-    context 'when direct upload is disabled' do
-      subject(:authorize_request) { post authorize_import_gitlab_group_path, headers: workhorse_headers }
-
-      before do
-        stub_uploads_object_storage(ImportExportUploader, enabled: true, direct_upload: false)
-      end
-
-      it 'handles the local file' do
-        authorize_request
-
-        expect(response).to have_gitlab_http_status :ok
-        expect(response.media_type).to eq Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
-
-        expect(json_response['TempPath']).to eq ImportExportUploader.workhorse_local_upload_path
-        expect(json_response['RemoteObject']).to be_nil
-      end
+      subject { post authorize_import_gitlab_group_path, headers: workhorse_headers }
     end
   end
 end

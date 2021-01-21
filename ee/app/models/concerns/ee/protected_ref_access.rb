@@ -44,20 +44,15 @@ module EE
       end
     end
 
+    override :type
     def type
       if self.user.present?
         :user
       elsif self.group.present?
         :group
       else
-        :role
+        super
       end
-    end
-
-    # Is this a role-based access level?
-    override :role?
-    def role?
-      type == :role
     end
 
     override :humanize
@@ -70,6 +65,7 @@ module EE
 
     override :check_access
     def check_access(user)
+      return false unless user
       return true if user.admin?
       return user.id == self.user_id if self.user.present?
       return group.users.exists?(user.id) if self.group.present?

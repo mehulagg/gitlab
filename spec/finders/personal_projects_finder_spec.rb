@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PersonalProjectsFinder do
+RSpec.describe PersonalProjectsFinder do
   let(:source_user)     { create(:user) }
   let(:current_user)    { create(:user) }
   let(:finder)          { described_class.new(source_user) }
@@ -37,7 +37,7 @@ describe PersonalProjectsFinder do
 
     context 'external' do
       before do
-        current_user.update(external: true)
+        current_user.update!(external: true)
       end
 
       it { is_expected.to eq([public_project, private_project]) }

@@ -2,10 +2,15 @@
 
 require 'spec_helper'
 
-describe ProjectRepository do
+RSpec.describe ProjectRepository do
   describe 'associations' do
     it { is_expected.to belong_to(:shard) }
     it { is_expected.to belong_to(:project) }
+  end
+
+  it_behaves_like 'shardable scopes' do
+    let_it_be(:record_1) { create(:project_repository) }
+    let_it_be(:record_2, reload: true) { create(:project_repository) }
   end
 
   describe '.find_project' do

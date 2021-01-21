@@ -9,10 +9,13 @@ module EE
       def execute
         super
 
-        return unless project.use_elasticsearch?
+        # TODO: Support Elasticsearch indexing for group wikis
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/207889
+        return unless wiki.is_a?(::ProjectWiki)
+        return unless wiki.container.use_elasticsearch?
         return unless default_branch_changes.any?
 
-        project.wiki.index_wiki_blobs
+        wiki.index_wiki_blobs
       end
     end
   end

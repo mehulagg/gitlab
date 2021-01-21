@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 
 require 'rubocop'
 require 'rubocop/rspec/support'
 
 require_relative '../../../rubocop/cop/include_sidekiq_worker'
 
-describe RuboCop::Cop::IncludeSidekiqWorker do
+RSpec.describe RuboCop::Cop::IncludeSidekiqWorker do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -16,7 +16,7 @@ describe RuboCop::Cop::IncludeSidekiqWorker do
     let(:source) { 'include Sidekiq::Worker' }
     let(:correct_source) { 'include ApplicationWorker' }
 
-    it 'registers an offense ' do
+    it 'registers an offense' do
       inspect_source(source)
 
       aggregate_failures do

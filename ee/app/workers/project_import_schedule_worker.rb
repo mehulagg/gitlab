@@ -8,6 +8,7 @@ class ProjectImportScheduleWorker # rubocop:disable Scalability/IdempotentWorker
 
   feature_category :importers
   sidekiq_options retry: false
+  loggable_arguments 1 # For the job waiter key
 
   def perform(project_id)
     return if Gitlab::Database.read_only?

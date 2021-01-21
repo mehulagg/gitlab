@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 # rubocop: disable RSpec/FactoriesInMigrationSpecs
-describe Gitlab::BackgroundMigration::LegacyUploadsMigrator do
+RSpec.describe Gitlab::BackgroundMigration::LegacyUploadsMigrator do
   let(:test_dir) { FileUploader.options['storage_path'] }
 
   let!(:hashed_project) { create(:project) }
@@ -24,7 +24,7 @@ describe Gitlab::BackgroundMigration::LegacyUploadsMigrator do
 
     if with_file
       upload = create(:upload, :with_file, :attachment_upload, params)
-      model.update(attachment: upload.retrieve_uploader)
+      model.update!(attachment: upload.retrieve_uploader)
       model.attachment.upload
     else
       create(:upload, :attachment_upload, params)

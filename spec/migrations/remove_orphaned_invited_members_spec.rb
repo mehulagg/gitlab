@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'migrate', '20200424050250_remove_orphaned_invited_members.rb')
 
-describe RemoveOrphanedInvitedMembers do
+RSpec.describe RemoveOrphanedInvitedMembers do
   let(:members_table) { table(:members) }
   let(:users_table) { table(:users) }
   let(:namespaces_table) { table(:namespaces) }
@@ -22,6 +22,7 @@ describe RemoveOrphanedInvitedMembers do
                   invite_token: SecureRandom.hex, invite_accepted_at: Time.now,
                   access_level: 20)
   end
+
   let!(:invited_member2) do
     create_member(user_id: nil, source_type: 'Group', source_id: group.id,
                   invite_token: SecureRandom.hex, invite_accepted_at: Time.now,
@@ -32,6 +33,7 @@ describe RemoveOrphanedInvitedMembers do
     create_member(user_id: nil, source_type: 'Project', source_id: project.id,
                   invite_accepted_at: Time.now, access_level: 30)
   end
+
   let!(:orphaned_member2) do
     create_member(user_id: nil, source_type: 'Group', source_id: group.id,
                   invite_accepted_at: Time.now, access_level: 20)

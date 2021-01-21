@@ -20,17 +20,30 @@ module EE
         ).create!
       end
 
-      override :transfer
-      def transfer(project)
-        if project.feature_available?(:packages) && project.has_packages?(:npm) && !new_namespace_has_same_root?(project)
-          raise ::Projects::TransferService::TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
-        end
-
+      override :transfer_missing_group_resources
+      def transfer_missing_group_resources(group)
         super
+
+        ::Epics::TransferService.new(current_user, group, project).execute
       end
 
-      def new_namespace_has_same_root?(project)
-        new_namespace.root_ancestor == project.namespace.root_ancestor
+      override :post_update_hooks
+      def post_update_hooks(project)
+        super
+
+        update_elasticsearch_hooks
+      end
+
+      def update_elasticsearch_hooks
+        return unless ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?
+
+        # handle when project is moved to a new namespace with different elasticsearch settings
+        # than the old namespace
+        if old_namespace.use_elasticsearch? != new_namespace.use_elasticsearch?
+          project.invalidate_elasticsearch_indexes_cache!
+
+          ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(project) if project.maintaining_elasticsearch?
+        end
       end
     end
   end

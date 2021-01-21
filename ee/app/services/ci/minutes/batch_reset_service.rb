@@ -3,9 +3,27 @@
 module Ci
   module Minutes
     class BatchResetService
-      BatchNotResetError = Class.new(StandardError)
+      class BatchNotResetError < StandardError
+        def initialize(failed_batches)
+          @failed_batches = failed_batches
+        end
+
+        def message
+          'Some namespace shared runner minutes were not reset'
+        end
+
+        def sentry_extra_data
+          {
+            failed_batches: @failed_batches
+          }
+        end
+      end
 
       BATCH_SIZE = 1000.freeze
+
+      def initialize
+        @failed_batches = []
+      end
 
       def execute!(ids_range: nil, batch_size: BATCH_SIZE)
         relation = Namespace
@@ -13,6 +31,8 @@ module Ci
         relation.each_batch(of: batch_size) do |namespaces|
           reset_ci_minutes!(namespaces)
         end
+
+        raise BatchNotResetError.new(@failed_batches) if @failed_batches.any?
       end
 
       private
@@ -26,36 +46,64 @@ module Ci
           reset_shared_runners_seconds!(namespaces)
           reset_ci_minutes_notifications!(namespaces)
         end
-      rescue ActiveRecord::ActiveRecordError
-        # We don't need to print a thousand of namespace_ids
-        # in the message if all batches failed.
-        # A small batch would be sufficient for investigation.
-        failed_namespace_ids = namespaces.limit(10).ids # rubocop: disable CodeReuse/ActiveRecord
-
-        raise BatchNotResetError.new(
-          "#{namespaces.size} namespace shared runner minutes were not reset and the transaction was rolled back. Namespace Ids: #{failed_namespace_ids}")
+      rescue ActiveRecord::ActiveRecordError => e
+        # We cleanup the backtrace for intermediate errors so they remain compact and
+        # relevant due to the possibility of having many failed batches.
+        @failed_batches << {
+          count: namespaces.size,
+          first_namespace_id: namespaces.first.id,
+          last_namespace_id: namespaces.last.id,
+          error_message: e.message,
+          error_backtrace: ::Gitlab::BacktraceCleaner.clean_backtrace(e.backtrace)
+        }
       end
 
+      # This service is responsible for the logic that recalculates the extra shared runners
+      # minutes including how to deal with the cases where shared_runners_minutes_limit is `nil`.
+      # We prefer to keep the queries here rather than scatter them across classes.
+      # rubocop: disable CodeReuse/ActiveRecord
       def recalculate_extra_shared_runners_minutes_limits!(namespaces)
         namespaces
-          .requiring_ci_extra_minutes_recalculation
-          .update_all("extra_shared_runners_minutes_limit = #{extra_minutes_left_sql} FROM namespace_statistics")
+          .joins(:namespace_statistics)
+          .where(namespaces_arel[:extra_shared_runners_minutes_limit].gt(0))
+          .where(actual_shared_runners_minutes_limit.gt(0))
+          .where(namespaces_statistics_arel[:shared_runners_seconds].gt(actual_shared_runners_minutes_limit * 60))
+          .update_all("extra_shared_runners_minutes_limit = #{extra_minutes_left.to_sql} FROM namespace_statistics")
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def extra_minutes_left
+        shared_minutes_limit = actual_shared_runners_minutes_limit + namespaces_arel[:extra_shared_runners_minutes_limit]
+        used_minutes = arel_function("round", [namespaces_statistics_arel[:shared_runners_seconds] / Arel::Nodes::SqlLiteral.new('60.0')])
+
+        arel_function("greatest", [shared_minutes_limit - used_minutes, 0])
       end
 
-      def extra_minutes_left_sql
-        "GREATEST((namespaces.shared_runners_minutes_limit + namespaces.extra_shared_runners_minutes_limit) - ROUND(namespace_statistics.shared_runners_seconds / 60.0), 0)"
+      def actual_shared_runners_minutes_limit
+        namespaces_arel.coalesce(
+          namespaces_arel[:shared_runners_minutes_limit],
+          [::Gitlab::CurrentSettings.shared_runners_minutes.presence, 0].compact
+        )
+      end
+
+      def namespaces_arel
+        Namespace.arel_table
+      end
+
+      def namespaces_statistics_arel
+        NamespaceStatistics.arel_table
+      end
+
+      def arel_function(name, attrs)
+        Arel::Nodes::NamedFunction.new(name, attrs)
       end
 
       def reset_shared_runners_seconds!(namespaces)
-        NamespaceStatistics
-          .for_namespaces(namespaces)
-          .with_any_ci_minutes_used
-          .update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
+        namespace_relation = NamespaceStatistics.for_namespaces(namespaces)
+        namespace_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
 
-        ::ProjectStatistics
-          .for_namespaces(namespaces)
-          .with_any_ci_minutes_used
-          .update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
+        project_relation = ::ProjectStatistics.for_namespaces(namespaces)
+        project_relation.update_all(shared_runners_seconds: 0, shared_runners_seconds_last_reset: Time.current)
       end
 
       def reset_ci_minutes_notifications!(namespaces)

@@ -9,9 +9,9 @@ module Mutations
         authorize :admin_note
 
         argument :id,
-                  GraphQL::ID_TYPE,
+                  ::Types::GlobalIDType[::Note],
                   required: true,
-                  description: 'The global id of the note to update'
+                  description: 'The global ID of the note to update.'
 
         def resolve(args)
           note = authorized_find!(id: args[:id])
@@ -40,7 +40,7 @@ module Mutations
         end
 
         def note_params(_note, args)
-          { note: args[:body] }.compact
+          { note: args[:body], confidential: args[:confidential] }.compact
         end
       end
     end

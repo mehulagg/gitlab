@@ -33,6 +33,6 @@ describe('performance issue body', () => {
   });
 
   it('renders issue delta formatted', () => {
-    expect(wrapper.text()).toContain('(+0.20)');
+    expect(wrapper.text()).toContain('(+0.19)');
   });
 });

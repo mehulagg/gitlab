@@ -9,12 +9,9 @@ export const untestedProjectsCount = (state, getters) => getters.untestedProject
 export const outdatedProjects = ({ projects }) =>
   groupByDateRanges({
     ranges: UNSCANNED_PROJECTS_DATE_RANGES,
-    dateFn: x => x.securityTestsLastSuccessfulRun,
+    dateFn: (x) => x.securityTestsLastSuccessfulRun,
     projects,
   });
 
 export const outdatedProjectsCount = (state, getters) =>
   getters.outdatedProjects.reduce((count, currentGroup) => count + currentGroup.projects.length, 0);
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

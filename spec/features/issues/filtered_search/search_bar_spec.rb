@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Search bar', :js do
+RSpec.describe 'Search bar', :js do
   include FilteredSearchHelpers
 
   let!(:project) { create(:project) }
@@ -88,7 +88,7 @@ describe 'Search bar', :js do
       expect(find('#js-dropdown-hint')).to have_selector('.filter-dropdown .filter-dropdown-item', count: original_size)
     end
 
-    it 'resets the dropdown filters', :quarantine do
+    it 'resets the dropdown filters', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/9985' do
       filtered_search.click
 
       hint_offset = get_left_style(find('#js-dropdown-hint')['style'])

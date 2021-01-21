@@ -4,10 +4,20 @@ module EE
   module Issues
     module UpdateService
       extend ::Gitlab::Utils::Override
+      include ::Gitlab::Utils::StrongMemoize
+
+      override :filter_params
+      def filter_params(issue)
+        params.delete(:sprint_id) unless can_admin_issuable?(issue)
+
+        handle_epic(issue)
+        filter_iteration
+
+        super
+      end
 
       override :execute
       def execute(issue)
-        handle_epic(issue)
         handle_promotion(issue)
 
         result = super
@@ -16,7 +26,7 @@ module EE
           Epics::UpdateDatesService.new([issue.epic]).execute
         end
 
-        StatusPage.trigger_publish(project, current_user, issue) if issue.valid?
+        ::Gitlab::StatusPage.trigger_publish(project, current_user, issue) if issue.valid?
 
         result
       end
@@ -48,22 +58,6 @@ module EE
         return unless params.delete(:promote_to_epic)
 
         Epics::IssuePromoteService.new(issue.project, current_user).execute(issue)
-      end
-
-      def handle_epic(issue)
-        return unless params.key?(:epic)
-
-        epic_param = params.delete(:epic)
-
-        if epic_param
-          EpicIssues::CreateService.new(epic_param, current_user, { target_issuable: issue }).execute
-        else
-          link = EpicIssue.find_by(issue_id: issue.id) # rubocop: disable CodeReuse/ActiveRecord
-
-          return unless link
-
-          EpicIssues::DestroyService.new(link, current_user).execute
-        end
       end
     end
   end

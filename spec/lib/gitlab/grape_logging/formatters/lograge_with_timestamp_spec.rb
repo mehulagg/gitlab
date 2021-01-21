@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
+RSpec.describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
   let(:log_entry) do
     {
       status: 200,
@@ -15,7 +15,8 @@ describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
       path: '/api/v4/projects/1',
       params: {
         'description': '[FILTERED]',
-        'name': 'gitlab test'
+        'name': 'gitlab test',
+        'int': 42
       },
       host: 'localhost',
       remote_ip: '127.0.0.1',
@@ -29,6 +30,7 @@ describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
       correlation_id: 'WMefXn60429'
     }
   end
+
   let(:time) { Time.now }
   let(:result) { Gitlab::Json.parse(subject) }
 
@@ -43,7 +45,8 @@ describe Gitlab::GrapeLogging::Formatters::LogrageWithTimestamp do
 
     expect(params).to eq([
       { 'key' => 'description', 'value' => '[FILTERED]' },
-      { 'key' => 'name', 'value' => 'gitlab test' }
+      { 'key' => 'name', 'value' => 'gitlab test' },
+      { 'key' => 'int', 'value' => 42 }
     ])
   end
 end

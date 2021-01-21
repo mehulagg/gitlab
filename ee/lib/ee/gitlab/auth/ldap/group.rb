@@ -16,7 +16,7 @@ module EE
           # rubocop: enable CodeReuse/ActiveRecord
 
           def initialize(entry, adapter = nil)
-            Rails.logger.debug { "Instantiating #{self.class.name} with LDIF:\n#{entry.to_ldif}" } # rubocop:disable Gitlab/RailsLogger
+            ::Gitlab::AppLogger.debug "Instantiating #{self.class.name} with LDIF:\n#{entry.to_ldif}"
             @entry = entry
             @adapter = adapter
           end
@@ -159,14 +159,14 @@ module EE
             begin
               base = ::Gitlab::Auth::Ldap::DN.new(adapter.config.base).to_a
             rescue ::Gitlab::Auth::Ldap::DN::FormatError => e
-              Rails.logger.error "Configured LDAP `base` is invalid: '#{adapter.config.base}'. Error: \"#{e.message}\"" # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger.error "Configured LDAP `base` is invalid: '#{adapter.config.base}'. Error: \"#{e.message}\""
               return []
             end
 
             members.select do |dn|
               ::Gitlab::Auth::Ldap::DN.new(dn).to_a.last(base.length) == base
             rescue ::Gitlab::Auth::Ldap::DN::FormatError => e
-              Rails.logger.warn "Received invalid member DN from LDAP group '#{cn}': '#{dn}'. Error: \"#{e.message}\". Skipping" # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger.warn "Received invalid member DN from LDAP group '#{cn}': '#{dn}'. Error: \"#{e.message}\". Skipping"
             end
           end
 
@@ -183,7 +183,7 @@ module EE
             if dns
               normalize_dns(dns)
             else
-              Rails.logger.warn("Could not find member DNs for LDAP group #{entry.inspect}") # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger.warn("Could not find member DNs for LDAP group #{entry.inspect}")
               []
             end
           end

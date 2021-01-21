@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::PullRequestsImporter do
+RSpec.describe Gitlab::GithubImport::Importer::PullRequestsImporter do
   let(:project) { create(:project, import_source: 'foo/bar') }
   let(:client) { double(:client) }
 
@@ -29,6 +29,7 @@ describe Gitlab::GithubImport::Importer::PullRequestsImporter do
       milestone: double(:milestone, number: 4),
       user: double(:user, id: 4, login: 'alice'),
       assignee: double(:user, id: 4, login: 'alice'),
+      merged_by: double(:user, id: 4, login: 'alice'),
       created_at: 1.second.ago,
       updated_at: 1.second.ago,
       merged_at: 1.second.ago
@@ -164,7 +165,7 @@ describe Gitlab::GithubImport::Importer::PullRequestsImporter do
         .to receive(:increment)
         .and_call_original
 
-      Timecop.freeze do
+      freeze_time do
         importer.update_repository
 
         expect(project.last_repository_updated_at).to be_like_time(Time.zone.now)

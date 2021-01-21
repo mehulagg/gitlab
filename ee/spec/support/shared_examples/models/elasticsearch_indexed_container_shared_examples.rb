@@ -2,15 +2,15 @@
 
 RSpec.shared_examples 'an elasticsearch indexed container' do
   describe 'validations' do
-    subject { create container }
+    subject { create(container, container_attributes) } # rubocop:disable Rails/SaveBang
 
     it 'validates uniqueness of main attribute' do
-      is_expected.to validate_uniqueness_of(attribute)
+      is_expected.to validate_uniqueness_of(required_attribute)
     end
   end
 
   describe 'callbacks' do
-    subject { build container }
+    subject { build(container, container_attributes) }
 
     describe 'on save' do
       it 'triggers index_project' do
@@ -27,7 +27,7 @@ RSpec.shared_examples 'an elasticsearch indexed container' do
     end
 
     describe 'on destroy' do
-      subject { create container }
+      subject { create(container, container_attributes) } # rubocop:disable Rails/SaveBang
 
       it 'triggers delete_from_index' do
         is_expected.to receive(:delete_from_index)

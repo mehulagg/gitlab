@@ -1,6 +1,6 @@
 <script>
-import { __ } from '~/locale';
 import { GlSprintf, GlLink } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { BLOB_RENDER_ERRORS } from './constants';
 
 export default {
@@ -25,7 +25,7 @@ export default {
     },
     renderErrorReason() {
       const defaultReasonPath = Object.keys(BLOB_RENDER_ERRORS.REASONS).find(
-        reason => BLOB_RENDER_ERRORS.REASONS[reason].id === this.viewerError,
+        (reason) => BLOB_RENDER_ERRORS.REASONS[reason].id === this.viewerError,
       );
       const defaultReason = BLOB_RENDER_ERRORS.REASONS[defaultReasonPath].text;
       return this.notStoredExternally

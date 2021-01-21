@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_dependency 'status_page'
+require_dependency 'gitlab/status_page'
 
 # Retrieves Notes specifically for the Status Page
 # which are rendered as comments.
@@ -17,8 +17,8 @@ require_dependency 'status_page'
 #
 module StatusPage
   class IncidentCommentsFinder
-    AWARD_EMOJI = StatusPage::AWARD_EMOJI
-    MAX_LIMIT = StatusPage::Storage::MAX_COMMENTS
+    AWARD_EMOJI = Gitlab::StatusPage::AWARD_EMOJI
+    MAX_LIMIT = Gitlab::StatusPage::Storage::MAX_COMMENTS
 
     def initialize(issue:)
       @issue = issue

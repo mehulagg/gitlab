@@ -1,4 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
+import testAction from 'helpers/vuex_action_helper';
+import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import axios from '~/lib/utils/axios_utils';
 import { createStore } from '~/ide/stores';
 import {
@@ -12,7 +14,6 @@ import {
 } from '~/ide/stores/actions';
 import service from '~/ide/services';
 import api from '~/api';
-import testAction from '../../../helpers/vuex_action_helper';
 
 const TEST_PROJECT_ID = 'abc/def';
 
@@ -52,7 +53,7 @@ describe('IDE store project actions', () => {
       });
     });
 
-    it('calls the service', done => {
+    it('calls the service', (done) => {
       store
         .dispatch('refreshLastCommitData', {
           projectId: store.state.currentProjectId,
@@ -66,7 +67,7 @@ describe('IDE store project actions', () => {
         .catch(done.fail);
     });
 
-    it('commits getBranchData', done => {
+    it('commits getBranchData', (done) => {
       testAction(
         refreshLastCommitData,
         {
@@ -93,7 +94,7 @@ describe('IDE store project actions', () => {
   });
 
   describe('showBranchNotFoundError', () => {
-    it('dispatches setErrorMessage', done => {
+    it('dispatches setErrorMessage', (done) => {
       testAction(
         showBranchNotFoundError,
         'master',
@@ -116,11 +117,13 @@ describe('IDE store project actions', () => {
   });
 
   describe('createNewBranchFromDefault', () => {
+    useMockLocationHelper();
+
     beforeEach(() => {
       jest.spyOn(api, 'createBranch').mockResolvedValue();
     });
 
-    it('calls API', done => {
+    it('calls API', (done) => {
       createNewBranchFromDefault(
         {
           state: {
@@ -145,7 +148,7 @@ describe('IDE store project actions', () => {
         .catch(done.fail);
     });
 
-    it('clears error message', done => {
+    it('clears error message', (done) => {
       const dispatchSpy = jest.fn().mockName('dispatch');
 
       createNewBranchFromDefault(
@@ -169,9 +172,7 @@ describe('IDE store project actions', () => {
         .catch(done.fail);
     });
 
-    it('reloads window', done => {
-      jest.spyOn(window.location, 'reload').mockImplementation();
-
+    it('reloads window', (done) => {
       createNewBranchFromDefault(
         {
           state: {
@@ -195,7 +196,7 @@ describe('IDE store project actions', () => {
   });
 
   describe('loadEmptyBranch', () => {
-    it('creates a blank tree and sets loading state to false', done => {
+    it('creates a blank tree and sets loading state to false', (done) => {
       testAction(
         loadEmptyBranch,
         { projectId: TEST_PROJECT_ID, branchId: 'master' },
@@ -212,7 +213,7 @@ describe('IDE store project actions', () => {
       );
     });
 
-    it('does nothing, if tree already exists', done => {
+    it('does nothing, if tree already exists', (done) => {
       const trees = { [`${TEST_PROJECT_ID}/master`]: [] };
 
       testAction(
@@ -278,7 +279,7 @@ describe('IDE store project actions', () => {
     const branchId = '123-lorem';
     const ref = 'abcd2322';
 
-    it('when empty repo, loads empty branch', done => {
+    it('when empty repo, loads empty branch', (done) => {
       const mockGetters = { emptyRepo: true };
 
       testAction(
@@ -291,13 +292,13 @@ describe('IDE store project actions', () => {
       );
     });
 
-    it('when branch already exists, does nothing', done => {
+    it('when branch already exists, does nothing', (done) => {
       store.state.projects[projectId].branches[branchId] = {};
 
       testAction(loadBranch, { projectId, branchId }, store.state, [], [], done);
     });
 
-    it('fetches branch data', done => {
+    it('fetches branch data', (done) => {
       const mockGetters = { findBranch: () => ({ commit: { id: ref } }) };
       jest.spyOn(store, 'dispatch').mockResolvedValue();
 
@@ -316,7 +317,7 @@ describe('IDE store project actions', () => {
         .catch(done.fail);
     });
 
-    it('shows an error if branch can not be fetched', done => {
+    it('shows an error if branch can not be fetched', (done) => {
       jest.spyOn(store, 'dispatch').mockReturnValue(Promise.reject());
 
       loadBranch(store, { projectId, branchId })
@@ -355,7 +356,7 @@ describe('IDE store project actions', () => {
         jest.spyOn(store, 'dispatch').mockResolvedValue();
       });
 
-      it('dispatches branch actions', done => {
+      it('dispatches branch actions', (done) => {
         openBranch(store, branch)
           .then(() => {
             expect(store.dispatch.mock.calls).toEqual([
@@ -374,9 +375,9 @@ describe('IDE store project actions', () => {
         jest.spyOn(store, 'dispatch').mockReturnValue(Promise.reject());
       });
 
-      it('dispatches correct branch actions', done => {
+      it('dispatches correct branch actions', (done) => {
         openBranch(store, branch)
-          .then(val => {
+          .then((val) => {
             expect(store.dispatch.mock.calls).toEqual([
               ['setCurrentBranchId', branchId],
               ['loadBranch', { projectId, branchId }],

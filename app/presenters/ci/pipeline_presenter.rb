@@ -10,7 +10,8 @@ module Ci
     def self.failure_reasons
       { unknown_failure: 'Unknown pipeline failure!',
         config_error: 'CI/CD YAML configuration error!',
-        external_validation_failure: 'External pipeline validation failed!' }
+        external_validation_failure: 'External pipeline validation failed!',
+        deployments_limit_exceeded: 'Pipeline deployments limit exceeded!' }
     end
 
     presents :pipeline
@@ -108,6 +109,17 @@ module Ci
 
     def link_to_merge_request_target_branch
       merge_request_presenter&.target_branch_link
+    end
+
+    def downloadable_path_for_report_type(file_type)
+      if (job_artifact = batch_lookup_report_artifact_for_file_type(file_type)) &&
+          can?(current_user, :read_build, job_artifact.job)
+        download_project_job_artifacts_path(
+          job_artifact.project,
+          job_artifact.job,
+          file_type: file_type,
+          proxy: true)
+      end
     end
 
     private

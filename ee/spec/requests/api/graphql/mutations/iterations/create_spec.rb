@@ -19,10 +19,14 @@ RSpec.describe 'Creating an Iteration' do
     }
   end
 
-  let(:mutation) do
-    params = { group_path: group.full_path }.merge(attributes)
+  let(:params) do
+    {
+      group_path: group.full_path
+    }
+  end
 
-    graphql_mutation(:create_iteration, params)
+  let(:mutation) do
+    graphql_mutation(:create_iteration, params.merge(attributes))
   end
 
   def mutation_response
@@ -34,9 +38,7 @@ RSpec.describe 'Creating an Iteration' do
       stub_licensed_features(iterations: true)
     end
 
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not create iteration' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)
@@ -63,7 +65,7 @@ RSpec.describe 'Creating an Iteration' do
         stub_licensed_features(iterations: true)
       end
 
-      it 'creates the iteration' do
+      it 'creates the iteration for a group' do
         post_graphql_mutation(mutation, current_user: current_user)
 
         iteration_hash = mutation_response['iteration']
@@ -72,6 +74,31 @@ RSpec.describe 'Creating an Iteration' do
           expect(iteration_hash['description']).to eq('some description')
           expect(iteration_hash['startDate']).to eq(start_date)
           expect(iteration_hash['dueDate']).to eq(end_date)
+        end
+      end
+
+      context 'when a project_path is given' do
+        let_it_be(:project) { create(:project, namespace: group) }
+        let(:params) { { project_path: project.full_path } }
+
+        before do
+          project.add_developer(current_user)
+        end
+
+        it 'creates the iteration for a project' do
+          allow_next_instance_of(Iteration) do |iteration|
+            allow(iteration).to receive(:skip_project_validation).and_return(true)
+          end
+
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          iteration_hash = mutation_response['iteration']
+          aggregate_failures do
+            expect(iteration_hash['title']).to eq('title')
+            expect(iteration_hash['description']).to eq('some description')
+            expect(iteration_hash['startDate']).to eq(start_date)
+            expect(iteration_hash['dueDate']).to eq(end_date)
+          end
         end
       end
 
@@ -91,6 +118,28 @@ RSpec.describe 'Creating an Iteration' do
 
         it_behaves_like 'a mutation that returns top-level errors',
                         errors: ['The list of iteration attributes is empty']
+
+        it 'does not create the iteration' do
+          expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)
+        end
+      end
+
+      context 'when the params contains neither group nor project path' do
+        let(:params) { {} }
+
+        it_behaves_like 'a mutation that returns top-level errors',
+                        errors: ['Either group_path or project_path is required']
+
+        it 'does not create the iteration' do
+          expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)
+        end
+      end
+
+      context 'when the params contains both group and project path' do
+        let(:params) { { group_path: group.full_path, project_path: 'doesnotreallymatter' } }
+
+        it_behaves_like 'a mutation that returns top-level errors',
+                        errors: ['Only one of group_path or project_path can be provided']
 
         it 'does not create the iteration' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iteration, :count)

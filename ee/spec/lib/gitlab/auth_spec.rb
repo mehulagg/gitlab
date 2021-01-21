@@ -10,6 +10,7 @@ RSpec.describe Gitlab::Auth do
            password: password,
            password_confirmation: password)
   end
+
   let(:username) { 'John' } # username isn't lowercase, test this
   let(:password) { 'my-secret' }
 

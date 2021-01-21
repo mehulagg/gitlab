@@ -12,16 +12,18 @@
   }
 }
 
-.runner-status-online {
-  color: $green-600;
-}
+.runner-status {
+  &.runner-status-online {
+    background-color: $green-600;
+  }
 
-.runner-status-offline {
-  color: $gray-darkest;
-}
+  &.runner-status-offline {
+    background-color: $gray-darkest;
+  }
 
-.runner-status-paused {
-  color: $red-500;
+  &.runner-status-paused {
+    background-color: $red-500;
+  }
 }
 
 .runner {
@@ -43,11 +45,6 @@
 
   .btn-default {
     color: $gl-text-color-secondary;
-  }
-
-  .fa-pause,
-  .fa-play {
-    font-size: 11px;
   }
 }
 

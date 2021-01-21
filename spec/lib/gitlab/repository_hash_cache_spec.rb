@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::RepositoryHashCache, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::RepositoryHashCache, :clean_gitlab_redis_cache do
   let_it_be(:project) { create(:project) }
   let(:repository) { project.repository }
   let(:namespace) { "#{repository.full_path}:#{project.id}" }
@@ -47,6 +47,24 @@ describe Gitlab::RepositoryHashCache, :clean_gitlab_redis_cache do
 
     context "key doesn't exist" do
       it { is_expected.to eq(0) }
+    end
+
+    context "multiple keys" do
+      before do
+        cache.write(:test1, test_hash)
+        cache.write(:test2, test_hash)
+      end
+
+      it "deletes multiple keys" do
+        cache.delete(:test1, :test2)
+
+        expect(cache.read_members(:test1, ["test"])).to eq("test" => nil)
+        expect(cache.read_members(:test2, ["test"])).to eq("test" => nil)
+      end
+
+      it "returns deleted key count" do
+        expect(cache.delete(:test1, :test2)).to eq(2)
+      end
     end
   end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Helm::API do
+RSpec.describe Gitlab::Kubernetes::Helm::API do
   let(:client) { double('kubernetes client') }
   let(:helm) { described_class.new(client) }
   let(:gitlab_namespace) { Gitlab::Kubernetes::Helm::NAMESPACE }
@@ -13,7 +13,7 @@ describe Gitlab::Kubernetes::Helm::API do
   let(:files) { {} }
 
   let(:command) do
-    Gitlab::Kubernetes::Helm::InstallCommand.new(
+    Gitlab::Kubernetes::Helm::V2::InstallCommand.new(
       name: application_name,
       chart: 'chart-name',
       rbac: rbac,
@@ -142,7 +142,7 @@ describe Gitlab::Kubernetes::Helm::API do
     end
 
     context 'with a service account' do
-      let(:command) { Gitlab::Kubernetes::Helm::InitCommand.new(name: application_name, files: files, rbac: rbac) }
+      let(:command) { Gitlab::Kubernetes::Helm::V2::InitCommand.new(name: application_name, files: files, rbac: rbac) }
 
       context 'rbac-enabled cluster' do
         let(:rbac) { true }

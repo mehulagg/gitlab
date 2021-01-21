@@ -8,7 +8,7 @@ jest.mock('~/code_navigation/utils');
 
 describe('Code navigation actions', () => {
   describe('setInitialData', () => {
-    it('commits SET_INITIAL_DATA', done => {
+    it('commits SET_INITIAL_DATA', (done) => {
       testAction(
         actions.setInitialData,
         { projectPath: 'test' },
@@ -57,7 +57,7 @@ describe('Code navigation actions', () => {
         ]);
       });
 
-      it('commits REQUEST_DATA_SUCCESS with normalized data', done => {
+      it('commits REQUEST_DATA_SUCCESS with normalized data', (done) => {
         testAction(
           actions.fetchData,
           null,
@@ -69,7 +69,12 @@ describe('Code navigation actions', () => {
               payload: {
                 path: 'index.js',
                 normalizedData: {
-                  '0:0': { start_line: 0, start_char: 0, hover: { value: '123' } },
+                  '0:0': {
+                    definitionLineNumber: 0,
+                    start_line: 0,
+                    start_char: 0,
+                    hover: { value: '123' },
+                  },
                 },
               },
             },
@@ -79,7 +84,7 @@ describe('Code navigation actions', () => {
         );
       });
 
-      it('calls addInteractionClass with data', done => {
+      it('calls addInteractionClass with data', (done) => {
         testAction(
           actions.fetchData,
           null,
@@ -91,7 +96,12 @@ describe('Code navigation actions', () => {
               payload: {
                 path: 'index.js',
                 normalizedData: {
-                  '0:0': { start_line: 0, start_char: 0, hover: { value: '123' } },
+                  '0:0': {
+                    definitionLineNumber: 0,
+                    start_line: 0,
+                    start_char: 0,
+                    hover: { value: '123' },
+                  },
                 },
               },
             },
@@ -115,7 +125,7 @@ describe('Code navigation actions', () => {
         mock.onGet(codeNavigationPath).replyOnce(500);
       });
 
-      it('dispatches requestDataError', done => {
+      it('dispatches requestDataError', (done) => {
         testAction(
           actions.fetchData,
           null,
@@ -159,19 +169,21 @@ describe('Code navigation actions', () => {
     let target;
 
     beforeEach(() => {
-      setFixtures('<div data-path="index.js"><div class="js-test"></div></div>');
+      setFixtures(
+        '<div data-path="index.js"><div class="line"><div class="js-test"></div></div></div>',
+      );
       target = document.querySelector('.js-test');
     });
 
-    it('returns early when no data exists', done => {
+    it('returns early when no data exists', (done) => {
       testAction(actions.showDefinition, { target }, {}, [], [], done);
     });
 
-    it('commits SET_CURRENT_DEFINITION when target is not code navitation element', done => {
+    it('commits SET_CURRENT_DEFINITION when target is not code navitation element', (done) => {
       testAction(actions.showDefinition, { target }, { data: {} }, [], [], done);
     });
 
-    it('commits SET_CURRENT_DEFINITION with LSIF data', done => {
+    it('commits SET_CURRENT_DEFINITION with LSIF data', (done) => {
       target.classList.add('js-code-navigation');
       target.setAttribute('data-line-index', '0');
       target.setAttribute('data-char-index', '0');
@@ -186,7 +198,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],
@@ -210,7 +222,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],
@@ -235,7 +247,7 @@ describe('Code navigation actions', () => {
             payload: {
               blobPath: 'index.js',
               definition: { hover: 'test' },
-              position: { height: 0, x: 0, y: 0 },
+              position: { height: 0, x: 0, y: 0, lineIndex: 0 },
             },
           },
         ],

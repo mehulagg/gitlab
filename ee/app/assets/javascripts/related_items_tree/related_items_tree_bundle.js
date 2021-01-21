@@ -21,7 +21,9 @@ export default () => {
   const {
     id,
     iid,
+    numericalId,
     fullPath,
+    groupId,
     autoCompleteEpics,
     autoCompleteIssues,
     userSignedIn,
@@ -30,8 +32,8 @@ export default () => {
   } = el.dataset;
   const initialData = JSON.parse(el.dataset.initial);
 
-  Vue.component('tree-root', TreeRoot);
-  Vue.component('tree-item', TreeItem);
+  Vue.component('TreeRoot', TreeRoot);
+  Vue.component('TreeItem', TreeItem);
 
   return new Vue({
     el,
@@ -40,9 +42,12 @@ export default () => {
     created() {
       this.setInitialParentItem({
         fullPath,
+        numericalId: parseInt(numericalId, 10),
+        groupId: parseInt(groupId, 10),
         id,
-        iid: Number(iid),
+        iid: parseInt(iid, 10),
         title: initialData.initialTitleText,
+        confidential: initialData.confidential,
         reference: `${initialData.fullPath}${initialData.issuableRef}`,
         userPermissions: {
           adminEpic: initialData.canAdmin,
@@ -64,6 +69,6 @@ export default () => {
     methods: {
       ...Vuex.mapActions(['setInitialParentItem', 'setInitialConfig']),
     },
-    render: createElement => createElement('related-items-tree-app'),
+    render: (createElement) => createElement('related-items-tree-app'),
   });
 };

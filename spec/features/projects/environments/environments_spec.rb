@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Environments page', :js do
+RSpec.describe 'Environments page', :js do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:role) { :developer }
@@ -12,8 +12,20 @@ describe 'Environments page', :js do
     sign_in(user)
   end
 
+  def actions_button_selector
+    '[data-testid="environment-actions-button"]'
+  end
+
+  def action_link_selector
+    '[data-testid="manual-action-link"]'
+  end
+
   def stop_button_selector
-    %q{button[title="Stop environment"]}
+    'button[title="Stop environment"]'
+  end
+
+  def upcoming_deployment_content_selector
+    '[data-testid="upcoming-deployment-content"]'
   end
 
   describe 'page tabs' do
@@ -37,7 +49,7 @@ describe 'Environments page', :js do
 
           expect(page).to have_css('.environments-container')
           expect(page.all('.environment-name').length).to eq(1)
-          expect(page.all('.ic-stop').length).to eq(1)
+          expect(page.all('[data-testid="stop-icon"]').length).to eq(1)
         end
       end
 
@@ -106,7 +118,7 @@ describe 'Environments page', :js do
 
           expect(page).to have_css('.environments-container')
           expect(page.all('.environment-name').length).to eq(1)
-          expect(page.all('.ic-stop').length).to eq(0)
+          expect(page.all('[data-testid="stop-icon"]').length).to eq(0)
         end
       end
     end
@@ -187,18 +199,17 @@ describe 'Environments page', :js do
         end
 
         it 'shows a play button' do
-          find('.js-environment-actions-dropdown').click
-
+          find(actions_button_selector).click
           expect(page).to have_content(action.name)
         end
 
         it 'allows to play a manual action', :js do
           expect(action).to be_manual
 
-          find('.js-environment-actions-dropdown').click
+          find(actions_button_selector).click
           expect(page).to have_content(action.name)
 
-          expect { find('.js-manual-action-link').click }
+          expect { find(action_link_selector).click }
             .not_to change { Ci::Pipeline.count }
         end
 
@@ -301,11 +312,11 @@ describe 'Environments page', :js do
         end
 
         it 'has a dropdown for actionable jobs' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .ic-play')
+          expect(page).to have_selector("#{actions_button_selector} [data-testid=\"play-icon\"]")
         end
 
         it "has link to the delayed job's action" do
-          find('.js-environment-actions-dropdown').click
+          find(actions_button_selector).click
 
           expect(page).to have_button('delayed job')
           expect(page).to have_content(/\d{2}:\d{2}:\d{2}/)
@@ -320,7 +331,7 @@ describe 'Environments page', :js do
           end
 
           it "shows 00:00:00 as the remaining time" do
-            find('.js-environment-actions-dropdown').click
+            find(actions_button_selector).click
 
             expect(page).to have_content("00:00:00")
           end
@@ -328,8 +339,8 @@ describe 'Environments page', :js do
 
         context 'when user played a delayed job immediately' do
           before do
-            find('.js-environment-actions-dropdown').click
-            page.accept_confirm { click_button('delayed job') }
+            find(actions_button_selector).click
+            accept_confirm { find(action_link_selector).click }
             wait_for_requests
           end
 
@@ -355,6 +366,26 @@ describe 'Environments page', :js do
         expect(page).to have_content('No deployments yet')
       end
     end
+
+    context 'when there is an upcoming deployment' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      let!(:deployment) do
+        create(:deployment, :running,
+                            environment: environment,
+                            sha: project.commit.id)
+      end
+
+      it "renders the upcoming deployment", :aggregate_failures do
+        visit_environments(project)
+
+        within(upcoming_deployment_content_selector) do
+          expect(page).to have_content("##{deployment.iid}")
+          expect(page).to have_selector("a[href=\"#{project_job_path(project, deployment.deployable)}\"]")
+          expect(page).to have_link(href: /#{deployment.user.username}/)
+        end
+      end
+    end
   end
 
   it 'does have a new environment button' do
@@ -372,7 +403,7 @@ describe 'Environments page', :js do
       let(:role) { :developer }
 
       it 'developer creates a new environment with a valid name' do
-        within(".top-area") { click_link 'New environment' }
+        within(".environments-section") { click_link 'New environment' }
         fill_in('Name', with: 'production')
         click_on 'Save'
 
@@ -380,7 +411,7 @@ describe 'Environments page', :js do
       end
 
       it 'developer creates a new environmetn with invalid name' do
-        within(".top-area") { click_link 'New environment' }
+        within(".environments-section") { click_link 'New environment' }
         fill_in('Name', with: 'name,with,commas')
         click_on 'Save'
 
@@ -423,10 +454,10 @@ describe 'Environments page', :js do
       expect(page).to have_content 'review-1'
       expect(page).to have_content 'review-2'
       within('.ci-table') do
-        within('.gl-responsive-table-row:nth-child(3)') do
+        within('[data-qa-selector="environment_item"]', text: 'review-1') do
           expect(find('.js-auto-stop').text).not_to be_empty
         end
-        within('.gl-responsive-table-row:nth-child(4)') do
+        within('[data-qa-selector="environment_item"]', text: 'review-2') do
           expect(find('.js-auto-stop').text).not_to be_empty
         end
       end

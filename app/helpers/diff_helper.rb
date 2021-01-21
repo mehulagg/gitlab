@@ -64,13 +64,15 @@ module DiffHelper
     else
       # `sub` and substring-ing would destroy HTML-safeness of `line`
       if line.start_with?('+', '-', ' ')
-        line.dup.tap do |line|
-          line[0] = ''
-        end
+        line[1, line.length]
       else
         line
       end
     end
+  end
+
+  def diff_link_number(line_type, match, text)
+    line_type == match ? " " : text
   end
 
   def parallel_diff_discussions(left, right, diff_file)
@@ -100,18 +102,41 @@ module DiffHelper
   end
 
   def submodule_link(blob, ref, repository = @repository)
-    project_url, tree_url = submodule_links(blob, ref, repository)
-    commit_id = if tree_url.nil?
-                  Commit.truncate_sha(blob.id)
-                else
-                  link_to Commit.truncate_sha(blob.id), tree_url
-                end
+    urls = submodule_links(blob, ref, repository)
+
+    folder_name = truncate(blob.name, length: 40)
+    folder_name = link_to(folder_name, urls.web) if urls&.web
+
+    commit_id = Commit.truncate_sha(blob.id)
+    commit_id = link_to(commit_id, urls.tree) if urls&.tree
 
     [
-      content_tag(:span, link_to(truncate(blob.name, length: 40), project_url)),
+      content_tag(:span, folder_name),
       '@',
       content_tag(:span, commit_id, class: 'commit-sha')
     ].join(' ').html_safe
+  end
+
+  def submodule_diff_compare_link(diff_file)
+    compare_url = submodule_links(diff_file.blob, diff_file.content_sha, diff_file.repository, diff_file)&.compare
+
+    link = ""
+
+    if compare_url
+
+      link_text = [
+          _('Compare'),
+          ' ',
+          content_tag(:span, Commit.truncate_sha(diff_file.old_blob.id), class: 'commit-sha'),
+          '...',
+          content_tag(:span, Commit.truncate_sha(diff_file.blob.id), class: 'commit-sha')
+        ].join('').html_safe
+
+      tooltip = _('Compare submodule commit revisions')
+      link = content_tag(:span, link_to(link_text, compare_url, class: 'btn has-tooltip', title: tooltip), class: 'submodule-compare')
+    end
+
+    link
   end
 
   def diff_file_blob_raw_url(diff_file, only_path: false)
@@ -135,8 +160,7 @@ module DiffHelper
 
   def diff_file_html_data(project, diff_file_path, diff_commit_id)
     {
-      blob_diff_path: project_blob_diff_path(project,
-                                                       tree_join(diff_commit_id, diff_file_path)),
+      blob_diff_path: project_blob_diff_path(project, tree_join(diff_commit_id, diff_file_path)),
       view: diff_view
     }
   end
@@ -173,6 +197,10 @@ module DiffHelper
     diff_files.overflow?.tap do |overflown|
       Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if overflown
     end
+  end
+
+  def apply_diff_view_cookie!
+    set_secure_cookie(:diff_view, params.delete(:view), type: CookiesHelper::COOKIE_TYPE_PERMANENT) if params[:view].present?
   end
 
   private
@@ -223,5 +251,19 @@ module DiffHelper
     return path unless path.size > max && max > 3
 
     "...#{path[-(max - 3)..-1]}"
+  end
+
+  def code_navigation_path(diffs)
+    Gitlab::CodeNavigationPath.new(merge_request.project, diffs.diff_refs&.head_sha)
+  end
+
+  def conflicts
+    return unless options[:merge_ref_head_diff]
+
+    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request) # rubocop:disable CodeReuse/ServiceClass
+
+    return unless conflicts_service.can_be_resolved_in_ui?
+
+    conflicts_service.conflicts.files.index_by(&:our_path)
   end
 end

@@ -4,7 +4,7 @@ require 'spec_helper'
 require './db/post_migrate/20200128134110_migrate_commit_notes_mentions_to_db'
 require './db/post_migrate/20200211155539_migrate_merge_request_mentions_to_db'
 
-describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMention, schema: 20200211155539 do
+RSpec.describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMention, schema: 20200211155539 do
   include MigrationsHelpers
 
   context 'when migrating data' do
@@ -74,7 +74,15 @@ describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMention, s
       let(:user_mentions) { merge_request_user_mentions }
       let(:resource) { merge_request }
 
-      it_behaves_like 'resource mentions migration', MigrateMergeRequestMentionsToDb, MergeRequest
+      it_behaves_like 'resource mentions migration', MigrateMergeRequestMentionsToDb, 'MergeRequest'
+
+      context 'when FF disabled' do
+        before do
+          stub_feature_flags(migrate_user_mentions: false)
+        end
+
+        it_behaves_like 'resource migration not run', MigrateMergeRequestMentionsToDb, 'MergeRequest'
+      end
     end
 
     context 'migrate commit mentions' do
@@ -95,7 +103,15 @@ describe Gitlab::BackgroundMigration::UserMentions::CreateResourceUserMention, s
       let(:user_mentions) { commit_user_mentions }
       let(:resource) { commit }
 
-      it_behaves_like 'resource notes mentions migration', MigrateCommitNotesMentionsToDb, Commit
+      it_behaves_like 'resource notes mentions migration', MigrateCommitNotesMentionsToDb, 'Commit'
+
+      context 'when FF disabled' do
+        before do
+          stub_feature_flags(migrate_user_mentions: false)
+        end
+
+        it_behaves_like 'resource notes migration not run', MigrateCommitNotesMentionsToDb, 'Commit'
+      end
     end
   end
 

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190517153211_migrate_k8s_service_integration.rb')
 
-describe MigrateK8sServiceIntegration do
+RSpec.describe MigrateK8sServiceIntegration do
   context 'template service' do
     context 'with namespace' do
       let!(:service) do
@@ -125,6 +125,7 @@ describe MigrateK8sServiceIntegration do
           platform_type: :kubernetes
         )
       end
+
       let(:new_cluster) { MigrateK8sServiceIntegration::Cluster.instance_type.last! }
       let(:platform) { new_cluster.platform_kubernetes }
 

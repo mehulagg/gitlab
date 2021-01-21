@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::UninstallService, '#execute' do
+RSpec.describe Clusters::Applications::UninstallService, '#execute' do
   let(:application) { create(:clusters_applications_prometheus, :scheduled) }
   let(:service) { described_class.new(application) }
   let(:helm_client) { instance_double(Gitlab::Kubernetes::Helm::API) }
@@ -14,7 +14,7 @@ describe Clusters::Applications::UninstallService, '#execute' do
 
   context 'when there are no errors' do
     before do
-      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::DeleteCommand))
+      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand))
       allow(worker_class).to receive(:perform_in).and_return(nil)
     end
 
@@ -36,7 +36,7 @@ describe Clusters::Applications::UninstallService, '#execute' do
     let(:error) { Kubeclient::HttpError.new(500, 'system failure', nil) }
 
     before do
-      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::DeleteCommand)).and_raise(error)
+      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand)).and_raise(error)
     end
 
     include_examples 'logs kubernetes errors' do
@@ -58,7 +58,7 @@ describe Clusters::Applications::UninstallService, '#execute' do
     let(:error) { StandardError.new('something bad happened') }
 
     before do
-      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::DeleteCommand)).and_raise(error)
+      expect(helm_client).to receive(:uninstall).with(kind_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand)).and_raise(error)
     end
 
     include_examples 'logs kubernetes errors' do

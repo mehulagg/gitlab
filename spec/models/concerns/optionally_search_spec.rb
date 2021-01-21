@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe OptionallySearch do
+RSpec.describe OptionallySearch do
   describe '.search' do
     let(:model) do
       Class.new do
@@ -32,7 +32,7 @@ describe OptionallySearch do
       it 'delegates to the search method' do
         expect(model)
           .to receive(:search)
-          .with('foo', {})
+          .with('foo')
           .and_call_original
 
         expect(model.optionally_search('foo')).to eq(['foo', {}])

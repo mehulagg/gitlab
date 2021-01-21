@@ -19,7 +19,7 @@ RSpec.describe 'Runners' do
     it 'user can see a button to install runners on kubernetes clusters' do
       visit project_runners_path(project)
 
-      expect(page).to have_link('Install Runner on Kubernetes', href: project_clusters_path(project))
+      expect(page).to have_link('Install GitLab Runner on Kubernetes', href: project_clusters_path(project))
     end
   end
 
@@ -69,7 +69,7 @@ RSpec.describe 'Runners' do
         visit project_runners_path(project)
 
         within '.activated-specific-runners' do
-          click_on 'Remove Runner'
+          click_on 'Remove runner'
         end
 
         expect(page).not_to have_content(specific_runner.display_name)
@@ -122,6 +122,19 @@ RSpec.describe 'Runners' do
       end
     end
 
+    context 'when multiple runners are configured' do
+      let!(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
+      let!(:specific_runner_2) { create(:ci_runner, :project, projects: [project]) }
+
+      it 'adds pagination to the runner list' do
+        stub_const('Projects::Settings::CiCdController::NUMBER_OF_RUNNERS_PER_PAGE', 1)
+
+        visit project_runners_path(project)
+
+        expect(find('.pagination')).not_to be_nil
+      end
+    end
+
     context 'when a specific runner exists in another project' do
       let(:another_project) { create(:project) }
       let!(:specific_runner) { create(:ci_runner, :project, projects: [another_project]) }
@@ -166,16 +179,32 @@ RSpec.describe 'Runners' do
   context 'when a project has disabled shared_runners' do
     let(:project) { create(:project, shared_runners_enabled: false) }
 
-    before do
-      project.add_maintainer(user)
+    context 'when feature flag: vueify_shared_runners_toggle is disabled' do
+      before do
+        stub_feature_flags(vueify_shared_runners_toggle: false)
+        project.add_maintainer(user)
+      end
+
+      it 'user enables shared runners' do
+        visit project_runners_path(project)
+
+        click_on 'Enable shared runners'
+
+        expect(page.find('.shared-runners-description')).to have_content('Disable shared runners')
+        expect(page).not_to have_selector('#toggle-shared-runners-form')
+      end
     end
 
-    it 'user enables shared runners' do
-      visit project_runners_path(project)
+    context 'when feature flag: vueify_shared_runners_toggle is enabled' do
+      before do
+        project.add_maintainer(user)
+      end
 
-      click_on 'Enable shared Runners'
+      it 'user enables shared runners' do
+        visit project_runners_path(project)
 
-      expect(page.find('.shared-runners-description')).to have_content('Disable shared Runners')
+        expect(page).to have_selector('#toggle-shared-runners-form')
+      end
     end
   end
 
@@ -197,10 +226,10 @@ RSpec.describe 'Runners' do
         it 'group runners are not available' do
           visit project_runners_path(project)
 
-          expect(page).to have_content 'This group does not provide any group Runners yet'
+          expect(page).to have_content 'This group does not have any group runners yet.'
 
-          expect(page).to have_content 'Group maintainers can register group runners in the Group CI/CD settings'
-          expect(page).not_to have_content 'Ask your group maintainer to set up a group Runner'
+          expect(page).to have_content 'Group maintainers can register group runners in the group\'s CI/CD settings.'
+          expect(page).not_to have_content 'Ask your group maintainer to set up a group runner'
         end
       end
     end
@@ -212,7 +241,7 @@ RSpec.describe 'Runners' do
         it 'group runners are not available' do
           visit project_runners_path(project)
 
-          expect(page).to have_content 'This project does not belong to a group and can therefore not make use of group Runners.'
+          expect(page).to have_content 'This project does not belong to a group and cannot make use of group runners.'
         end
       end
 
@@ -223,10 +252,10 @@ RSpec.describe 'Runners' do
         it 'group runners are not available' do
           visit project_runners_path(project)
 
-          expect(page).to have_content 'This group does not provide any group Runners yet.'
+          expect(page).to have_content 'This group does not have any group runners yet.'
 
-          expect(page).not_to have_content 'Group maintainers can register group runners in the Group CI/CD settings'
-          expect(page).to have_content 'Ask your group maintainer to set up a group Runner.'
+          expect(page).not_to have_content 'Group maintainers can register group runners in the group\'s CI/CD settings.'
+          expect(page).to have_content 'Ask your group maintainer to set up a group runner.'
         end
       end
 
@@ -238,21 +267,21 @@ RSpec.describe 'Runners' do
         it 'group runners are available' do
           visit project_runners_path(project)
 
-          expect(page).to have_content 'Available group Runners: 1'
+          expect(page).to have_content 'Available group runners: 1'
           expect(page).to have_content 'group-runner'
         end
 
         it 'group runners may be disabled for a project' do
           visit project_runners_path(project)
 
-          click_on 'Disable group Runners'
+          click_on 'Disable group runners'
 
-          expect(page).to have_content 'Enable group Runners'
+          expect(page).to have_content 'Enable group runners'
           expect(project.reload.group_runners_enabled).to be false
 
-          click_on 'Enable group Runners'
+          click_on 'Enable group runners'
 
-          expect(page).to have_content 'Disable group Runners'
+          expect(page).to have_content 'Disable group runners'
           expect(project.reload.group_runners_enabled).to be true
         end
       end
@@ -270,13 +299,13 @@ RSpec.describe 'Runners' do
       it 'there are no runners displayed' do
         visit group_settings_ci_cd_path(group)
 
-        expect(page).to have_content 'This group does not provide any group Runners yet'
+        expect(page).to have_content 'No runners found'
       end
 
       it 'user can see a link to install runners on kubernetes clusters' do
         visit group_settings_ci_cd_path(group)
 
-        expect(page).to have_link('Install Runner on Kubernetes', href: group_clusters_path(group))
+        expect(page).to have_link('Install GitLab Runner on Kubernetes', href: group_clusters_path(group))
       end
     end
 
@@ -286,26 +315,26 @@ RSpec.describe 'Runners' do
       it 'the runner is visible' do
         visit group_settings_ci_cd_path(group)
 
-        expect(page).not_to have_content 'This group does not provide any group Runners yet'
-        expect(page).to have_content 'Available group Runners: 1'
+        expect(page).not_to have_content 'No runners found'
+        expect(page).to have_content 'Available runners: 1'
         expect(page).to have_content 'group-runner'
       end
 
       it 'user can pause and resume the group runner' do
         visit group_settings_ci_cd_path(group)
 
-        expect(page).to have_content('Pause')
-        expect(page).not_to have_content('Resume')
+        expect(page).to have_link href: pause_group_runner_path(group, runner)
+        expect(page).not_to have_link href: resume_group_runner_path(group, runner)
 
-        click_on 'Pause'
+        click_link href: pause_group_runner_path(group, runner)
 
-        expect(page).not_to have_content('Pause')
-        expect(page).to have_content('Resume')
+        expect(page).not_to have_link href: pause_group_runner_path(group, runner)
+        expect(page).to have_link href: resume_group_runner_path(group, runner)
 
-        click_on 'Resume'
+        click_link href: resume_group_runner_path(group, runner)
 
-        expect(page).to have_content('Pause')
-        expect(page).not_to have_content('Resume')
+        expect(page).to have_link href: pause_group_runner_path(group, runner)
+        expect(page).not_to have_link href: resume_group_runner_path(group, runner)
       end
 
       it 'user can view runner details' do
@@ -321,7 +350,7 @@ RSpec.describe 'Runners' do
       it 'user can remove a group runner' do
         visit group_settings_ci_cd_path(group)
 
-        click_on 'Remove Runner'
+        all(:link, href: group_runner_path(group, runner))[1].click
 
         expect(page).not_to have_content(runner.display_name)
       end
@@ -329,7 +358,7 @@ RSpec.describe 'Runners' do
       it 'user edits the runner to be protected' do
         visit group_settings_ci_cd_path(group)
 
-        first('.edit-runner > a').click
+        click_link href: edit_group_runner_path(group, runner)
 
         expect(page.find_field('runner[access_level]')).not_to be_checked
 
@@ -347,7 +376,7 @@ RSpec.describe 'Runners' do
         it 'user edits runner not to run untagged jobs' do
           visit group_settings_ci_cd_path(group)
 
-          first('.edit-runner > a').click
+          click_link href: edit_group_runner_path(group, runner)
 
           expect(page.find_field('runner[run_untagged]')).to be_checked
 
@@ -355,6 +384,112 @@ RSpec.describe 'Runners' do
           click_button 'Save changes'
 
           expect(page).to have_content 'Can run untagged jobs No'
+        end
+      end
+    end
+
+    context 'group with a project runner' do
+      let(:project) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project], description: 'project-runner') }
+
+      it 'the runner is visible' do
+        visit group_settings_ci_cd_path(group)
+
+        expect(page).not_to have_content 'No runners found'
+        expect(page).to have_content 'Available runners: 1'
+        expect(page).to have_content 'project-runner'
+      end
+
+      it 'user can pause and resume the project runner' do
+        visit group_settings_ci_cd_path(group)
+
+        expect(page).to have_link href: pause_group_runner_path(group, runner)
+        expect(page).not_to have_link href: resume_group_runner_path(group, runner)
+
+        click_link href: pause_group_runner_path(group, runner)
+
+        expect(page).not_to have_link href: pause_group_runner_path(group, runner)
+        expect(page).to have_link href: resume_group_runner_path(group, runner)
+
+        click_link href: resume_group_runner_path(group, runner)
+
+        expect(page).to have_link href: pause_group_runner_path(group, runner)
+        expect(page).not_to have_link href: resume_group_runner_path(group, runner)
+      end
+
+      it 'user can view runner details' do
+        visit group_settings_ci_cd_path(group)
+
+        expect(page).to have_content(runner.display_name)
+
+        click_on runner.short_sha
+
+        expect(page).to have_content(runner.platform)
+      end
+
+      it 'user can remove a project runner' do
+        visit group_settings_ci_cd_path(group)
+
+        all(:link, href: group_runner_path(group, runner))[1].click
+
+        expect(page).not_to have_content(runner.display_name)
+      end
+
+      it 'user edits the runner to be protected' do
+        visit group_settings_ci_cd_path(group)
+
+        click_link href: edit_group_runner_path(group, runner)
+
+        expect(page.find_field('runner[access_level]')).not_to be_checked
+
+        check 'runner_access_level'
+        click_button 'Save changes'
+
+        expect(page).to have_content 'Protected Yes'
+      end
+
+      context 'when a runner has a tag' do
+        before do
+          runner.update(tag_list: ['tag'])
+        end
+
+        it 'user edits runner not to run untagged jobs' do
+          visit group_settings_ci_cd_path(group)
+
+          click_link href: edit_group_runner_path(group, runner)
+
+          expect(page.find_field('runner[run_untagged]')).to be_checked
+
+          uncheck 'runner_run_untagged'
+          click_button 'Save changes'
+
+          expect(page).to have_content 'Can run untagged jobs No'
+        end
+      end
+    end
+
+    context 'group with a multi-project runner' do
+      let(:project) { create(:project, group: group) }
+      let(:project_2) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project, project_2], description: 'group-runner') }
+
+      it 'user cannot remove the project runner' do
+        visit group_settings_ci_cd_path(group)
+
+        expect(all(:link, href: group_runner_path(group, runner)).length).to eq(1)
+      end
+    end
+
+    context 'filtered search' do
+      it 'allows user to search by status and type', :js do
+        visit group_settings_ci_cd_path(group)
+
+        find('.filtered-search').click
+
+        page.within('#js-dropdown-hint') do
+          expect(page).to have_content('Status')
+          expect(page).to have_content('Type')
+          expect(page).not_to have_content('Tag')
         end
       end
     end

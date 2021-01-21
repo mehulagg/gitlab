@@ -1,9 +1,9 @@
 .block.due_date
-  .title
+  .title.gl-h-5.gl-display-flex.gl-align-items-center
     = _("Due date")
     - if can_admin_issue?
-      = icon("spinner spin", class: "block-loading")
-      = link_to _("Edit"), "#", class: "js-sidebar-dropdown-toggle edit-link float-right"
+      = loading_icon(css_class: 'gl-ml-2 block-loading')
+      = link_to _("Edit"), "#", class: "js-sidebar-dropdown-toggle edit-link gl-ml-auto"
   .value
     .value-content
       %span.no-value{ "v-if" => "!issue.dueDate" }
@@ -24,7 +24,7 @@
         %button.dropdown-menu-toggle.js-due-date-select.js-issue-boards-due-date{ type: 'button',
           data: { toggle: 'dropdown', field_name: "issue[due_date]", ability_name: "issue" } }
           %span.dropdown-toggle-text= _("Due date")
-          = icon('chevron-down')
+          = sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
         .dropdown-menu.dropdown-menu-due-date
           = dropdown_title(_('Due date'))
           = dropdown_content do

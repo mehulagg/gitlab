@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Releases::UpdateService do
+RSpec.describe Releases::UpdateService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:new_name) { 'A new name' }
@@ -30,6 +30,12 @@ describe Releases::UpdateService do
       expect(result[:status]).to eq(:success)
       expect(result[:release].name).to eq(new_name)
       expect(result[:release].description).to eq(new_description)
+    end
+
+    it 'executes hooks' do
+      expect(service.release).to receive(:execute_hooks).with('update')
+
+      service.execute
     end
 
     context 'when the tag does not exists' do

@@ -38,7 +38,7 @@ const templatedLabel = (queryLabel, metricAttributes) => {
  * @example
  * multiMetricLabel('', {__name__: "up", app: "prometheus"}) -> "__name__: up, app: prometheus"
  */
-const multiMetricLabel = metricAttributes => {
+const multiMetricLabel = (metricAttributes) => {
   return Object.entries(metricAttributes)
     .map(([templateVar, label]) => `${templateVar}: ${label}`)
     .join(', ');
@@ -49,7 +49,7 @@ const multiMetricLabel = metricAttributes => {
  * @param {Object} metricAttributes - Default metric attribute values (e.g. method, instance)
  * @returns {String} The formatted query label
  */
-const getSeriesLabel = (queryLabel, metricAttributes) => {
+export const getSeriesLabel = (queryLabel, metricAttributes) => {
   return (
     singleAttributeLabel(queryLabel, metricAttributes) ||
     templatedLabel(queryLabel, metricAttributes) ||
@@ -63,20 +63,11 @@ const getSeriesLabel = (queryLabel, metricAttributes) => {
  * @param {Object} defaultConfig - Default chart config values (e.g. lineStyle, name)
  * @returns {Array} The formatted values
  */
-// eslint-disable-next-line import/prefer-default-export
 export const makeDataSeries = (queryResults, defaultConfig) =>
-  queryResults
-    .map(result => {
-      // NaN values may disrupt avg., max. & min. calculations in the legend, filter them out
-      const data = result.values.filter(([, value]) => !Number.isNaN(value));
-      if (!data.length) {
-        return null;
-      }
-      const series = { data };
-      return {
-        ...defaultConfig,
-        ...series,
-        name: getSeriesLabel(defaultConfig.name, result.metric),
-      };
-    })
-    .filter(series => series !== null);
+  queryResults.map((result) => {
+    return {
+      ...defaultConfig,
+      data: result.values,
+      name: getSeriesLabel(defaultConfig.name, result.metric),
+    };
+  });

@@ -15,14 +15,23 @@ module EE
             iid = params.delete(:epic_iid)
 
             if iid.present?
-              epic = EpicsFinder.new(current_user, group_id: group.id, iids: [iid]).first
-              not_found!('Epic') unless epic
+              group_id = user_project&.group&.id
+
+              raise_epic_not_found! unless group_id
+
+              epic = EpicsFinder.new(current_user, group_id: group_id).find_by(iid: iid) # rubocop: disable CodeReuse/ActiveRecord
+
+              raise_epic_not_found! unless epic
 
               params[:epic_id] = epic.id
             end
           end
 
           super
+        end
+
+        def raise_epic_not_found!
+          not_found!('Epic')
         end
       end
     end

@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe Ci::DailyBuildGroupReportResultService, '#execute' do
+RSpec.describe Ci::DailyBuildGroupReportResultService, '#execute' do
   let!(:pipeline) { create(:ci_pipeline, created_at: '2020-02-06 00:01:10') }
   let!(:rspec_job) { create(:ci_build, pipeline: pipeline, name: '3/3 rspec', coverage: 80) }
   let!(:karma_job) { create(:ci_build, pipeline: pipeline, name: '2/2 karma', coverage: 90) }
   let!(:extra_job) { create(:ci_build, pipeline: pipeline, name: 'extra', coverage: nil) }
+  let(:coverages) { Ci::DailyBuildGroupReportResult.all }
 
   it 'creates daily code coverage record for each job in the pipeline that has coverage value' do
     described_class.new.execute(pipeline)
@@ -65,6 +66,7 @@ describe Ci::DailyBuildGroupReportResultService, '#execute' do
         created_at: '2020-02-06 00:02:20'
       )
     end
+
     let!(:new_rspec_job) { create(:ci_build, pipeline: new_pipeline, name: '4/4 rspec', coverage: 84) }
     let!(:new_karma_job) { create(:ci_build, pipeline: new_pipeline, name: '3/3 karma', coverage: 92) }
 
@@ -104,6 +106,7 @@ describe Ci::DailyBuildGroupReportResultService, '#execute' do
         created_at: '2020-02-06 00:02:20'
       )
     end
+
     let!(:new_rspec_job) { create(:ci_build, pipeline: new_pipeline, name: '4/4 rspec', coverage: 84) }
     let!(:new_karma_job) { create(:ci_build, pipeline: new_pipeline, name: '3/3 karma', coverage: 92) }
 
@@ -149,10 +152,37 @@ describe Ci::DailyBuildGroupReportResultService, '#execute' do
         created_at: '2020-02-06 00:02:20'
       )
     end
+
     let!(:some_job) { create(:ci_build, pipeline: new_pipeline, name: 'foo') }
 
     it 'does nothing' do
       expect { described_class.new.execute(new_pipeline) }.not_to raise_error
+    end
+  end
+
+  context 'when pipeline ref_path is the project default branch' do
+    let(:default_branch) { 'master' }
+
+    before do
+      allow(pipeline.project).to receive(:default_branch).and_return(default_branch)
+    end
+
+    it 'sets default branch to true' do
+      described_class.new.execute(pipeline)
+
+      coverages.each do |coverage|
+        expect(coverage.default_branch).to be_truthy
+      end
+    end
+  end
+
+  context 'when pipeline ref_path is not the project default branch' do
+    it 'sets default branch to false' do
+      described_class.new.execute(pipeline)
+
+      coverages.each do |coverage|
+        expect(coverage.default_branch).to be_falsey
+      end
     end
   end
 end

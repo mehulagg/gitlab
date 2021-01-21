@@ -7,6 +7,7 @@ class GroupsController < Groups::ApplicationController
   include PreviewMarkdown
   include RecordUserLastActivity
   include SendFileUpload
+  include FiltersEvents
   extend ::Gitlab::Utils::Override
 
   respond_to :html
@@ -45,6 +46,17 @@ class GroupsController < Groups::ApplicationController
 
   layout :determine_layout
 
+  feature_category :subgroups, [
+                     :index, :new, :create, :show, :edit, :update,
+                     :destroy, :details, :transfer
+                   ]
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
+  feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
+  feature_category :projects, [:projects]
+  feature_category :importers, [:export, :download_export]
+
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
   end
@@ -57,6 +69,8 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      successful_creation_hooks
+
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
                else
@@ -72,7 +86,11 @@ class GroupsController < Groups::ApplicationController
   def show
     respond_to do |format|
       format.html do
-        render_show_html
+        if @group.import_state&.in_progress?
+          redirect_to group_import_path(@group)
+        else
+          render_show_html
+        end
       end
 
       format.atom do
@@ -114,10 +132,20 @@ class GroupsController < Groups::ApplicationController
 
   def update
     if Groups::UpdateService.new(@group, current_user, group_params).execute
-      redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
+      notice = "Group '#{@group.name}' was successfully updated."
+
+      redirect_to edit_group_origin_location, notice: notice
     else
-      @group.path = @group.path_before_last_save || @group.path_was
+      @group.reset
       render action: "edit"
+    end
+  end
+
+  def edit_group_origin_location
+    if params.dig(:group, :redirect_target) == 'repository_settings'
+      group_settings_repository_path(@group, anchor: 'js-default-branch-name')
+    else
+      edit_group_path(@group, anchor: params[:update_section])
     end
   end
 
@@ -161,9 +189,19 @@ class GroupsController < Groups::ApplicationController
     end
   end
 
+  def unfoldered_environment_names
+    respond_to do |format|
+      format.json do
+        render json: EnvironmentNamesFinder.new(@group, current_user).execute
+      end
+    end
+  end
+
   protected
 
   def render_show_html
+    record_experiment_user(:invite_members_empty_group_version_a) if ::Gitlab.com?
+
     render 'groups/show', locals: { trial: params[:trial] }
   end
 
@@ -223,7 +261,9 @@ class GroupsController < Groups::ApplicationController
       :two_factor_grace_period,
       :project_creation_level,
       :subgroup_creation_level,
-      :default_branch_protection
+      :default_branch_protection,
+      :default_branch_name,
+      :allow_mfa_for_subgroups
     ]
   end
 
@@ -279,6 +319,10 @@ class GroupsController < Groups::ApplicationController
 
   private
 
+  def successful_creation_hooks
+    track_experiment_event(:onboarding_issues, 'created_namespace')
+  end
+
   def groups
     if @group.supports_events?
       @group.self_and_descendants.public_or_visible_to_user(current_user)
@@ -288,6 +332,11 @@ class GroupsController < Groups::ApplicationController
   override :markdown_service_params
   def markdown_service_params
     params.merge(group: group)
+  end
+
+  override :has_project_list?
+  def has_project_list?
+    %w(details show index).include?(action_name)
   end
 end
 

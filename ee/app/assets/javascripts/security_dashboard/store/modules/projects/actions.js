@@ -35,7 +35,7 @@ export const fetchProjects = ({ state, dispatch }) => {
   dispatch('requestProjects');
 
   getAllProjects(state.projectsEndpoint)
-    .then(projects => {
+    .then((projects) => {
       dispatch('receiveProjectsSuccess', { projects });
     })
     .catch(() => {
@@ -54,6 +54,3 @@ export const receiveProjectsSuccess = ({ commit }, { projects }) => {
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

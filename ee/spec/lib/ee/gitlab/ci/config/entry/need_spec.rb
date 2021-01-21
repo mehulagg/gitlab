@@ -36,7 +36,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
     end
   end
 
-  context 'with CrossDependency config' do
+  context 'with CrossProjectDependency config' do
     describe '#artifacts' do
       using RSpec::Parameterized::TableSyntax
 
@@ -117,7 +117,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Need do
           describe '#errors' do
             subject(:errors) { need.errors }
 
-            let(:error_message) { "cross dependency #{attribute} #{error}" }
+            let(:error_message) { "cross project dependency #{attribute} #{error}" }
 
             it { is_expected.to(be_empty)               if validity }
             it { is_expected.to(include(error_message)) unless validity }

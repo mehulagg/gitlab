@@ -4,23 +4,55 @@ require 'spec_helper'
 
 RSpec.describe Projects::BlobController do
   include ProjectForksHelper
+  include FakeBlobHelpers
 
   let(:project) { create(:project, :public, :repository) }
 
-  shared_examples "file matches a codeowners rule" do
-    let(:error_msg) { "Example error msg" }
-
-    it "renders to the edit page with an error msg" do
-      default_params[:file_path] = "CHANGELOG"
-
-      expect_next_instance_of(Gitlab::CodeOwners::Validator) do |validator|
-        expect(validator).to receive(:execute).and_return(error_msg)
-      end
+  shared_examples_for "handling the codeowners interaction" do
+    it "redirects to blob" do
+      default_params[:file_path] = "docs/EXAMPLE_FILE"
 
       subject
 
-      expect(flash[:alert]).to eq(error_msg)
-      expect(response).to render_template(expected_view)
+      expect(flash[:alert]).to eq(nil)
+      expect(response).to be_redirect
+    end
+
+    context 'when push_rules_supersede_code_owners is false' do
+      let(:error_msg) do
+        "Pushes to protected branches that contain changes to files that match " \
+          "patterns defined in `CODEOWNERS` are disabled for this project. " \
+          "Please submit these changes via a merge request.  The following " \
+          "pattern(s) from `CODEOWNERS` were matched: - docs/ "
+      end
+
+      before do
+        allow(::ProtectedBranch).to receive(:branch_requires_code_owner_approval?)
+          .and_return(true)
+
+        expect_next_instance_of(Repository) do |repo|
+          allow(repo).to receive(:code_owners_blob)
+            .with(ref: "master")
+            .and_return(
+              fake_blob(
+                path: "CODEOWNERS",
+                data: "*.rb @#{user.username}\ndocs/ @#{user.username}"
+              )
+            )
+        end
+
+        stub_licensed_features(code_owner_approval_required: true)
+        stub_feature_flags(push_rules_supersede_code_owners: false)
+      end
+
+      it "renders to the edit page with an error msg" do
+        default_params[:file_path] = "docs/EXAMPLE_FILE"
+
+        subject
+
+        expect(flash[:alert]).to eq(error_msg)
+        expect(response).to render_template(expected_view)
+      end
     end
   end
 
@@ -32,7 +64,7 @@ RSpec.describe Projects::BlobController do
         project_id: project,
         id: 'master',
         branch_name: 'master',
-        file_name: 'CHANGELOG',
+        file_name: 'docs/EXAMPLE_FILE',
         content: 'Added changes',
         commit_message: 'Create CHANGELOG'
       }
@@ -47,10 +79,10 @@ RSpec.describe Projects::BlobController do
     it 'redirects to blob' do
       post :create, params: default_params
 
-      expect(response).to be_ok
+      expect(response).to be_redirect
     end
 
-    it_behaves_like "file matches a codeowners rule" do
+    it_behaves_like "handling the codeowners interaction" do
       subject { post :create, params: default_params }
 
       let(:expected_view) { :new }
@@ -70,17 +102,13 @@ RSpec.describe Projects::BlobController do
       }
     end
 
-    def blob_after_edit_path
-      project_blob_path(project, 'master/CHANGELOG')
-    end
-
     before do
       project.add_maintainer(user)
 
       sign_in(user)
     end
 
-    it_behaves_like "file matches a codeowners rule" do
+    it_behaves_like "handling the codeowners interaction" do
       subject { put :update, params: default_params }
 
       let(:expected_view) { :edit }

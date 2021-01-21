@@ -11,10 +11,6 @@ module Gitlab
 
           delegate :dig, to: :@seed_attributes
 
-          # When the `ci_dag_limit_needs` is enabled it uses the lower limit
-          LOW_NEEDS_LIMIT = 10
-          HARD_NEEDS_LIMIT = 50
-
           def initialize(pipeline, attributes, previous_stages)
             @pipeline = pipeline
             @seed_attributes = attributes
@@ -64,6 +60,7 @@ module Gitlab
             @seed_attributes
               .deep_merge(pipeline_attributes)
               .deep_merge(rules_attributes)
+              .deep_merge(allow_failure_criteria_attributes)
               .deep_merge(cache_attributes)
           end
 
@@ -137,16 +134,12 @@ module Gitlab
                 stage.seeds_names.include?(need[:name])
               end
 
-              "#{name}: needs '#{need[:name]}'" unless result
+              "'#{name}' job needs '#{need[:name]}' job, but it was not added to the pipeline" unless result
             end.compact
           end
 
           def max_needs_allowed
-            if Feature.enabled?(:ci_dag_limit_needs, @project, default_enabled: true)
-              LOW_NEEDS_LIMIT
-            else
-              HARD_NEEDS_LIMIT
-            end
+            @pipeline.project.actual_limits.ci_needs_size_limit
           end
 
           def pipeline_attributes
@@ -162,9 +155,15 @@ module Gitlab
           end
 
           def rules_attributes
-            return {} unless @using_rules
+            strong_memoize(:rules_attributes) do
+              next {} unless @using_rules
 
-            rules_result.build_attributes
+              if ::Gitlab::Ci::Features.rules_variables_enabled?(@pipeline.project)
+                rules_result.build_attributes(@seed_attributes)
+              else
+                rules_result.build_attributes
+              end
+            end
           end
 
           def rules_result
@@ -183,6 +182,16 @@ module Gitlab
             strong_memoize(:cache_attributes) do
               @cache.build_attributes
             end
+          end
+
+          # If a job uses `allow_failure:exit_codes` and `rules:allow_failure`
+          # we need to prevent the exit codes from being persisted because they
+          # would break the behavior defined by `rules:allow_failure`.
+          def allow_failure_criteria_attributes
+            return {} if rules_attributes[:allow_failure].nil?
+            return {} unless @seed_attributes.dig(:options, :allow_failure_criteria)
+
+            { options: { allow_failure_criteria: nil } }
           end
         end
       end

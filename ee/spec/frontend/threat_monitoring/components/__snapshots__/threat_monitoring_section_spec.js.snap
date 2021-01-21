@@ -11,7 +11,7 @@ exports[`ThreatMonitoringSection component given there is a default environment 
   compact="true"
   description="Empty Text"
   primarybuttonlink="documentation_path#anchor"
-  primarybuttontext="Learn More"
+  primarybuttontext="Learn more"
   svgpath="svg_path"
   title="Empty Title"
 />

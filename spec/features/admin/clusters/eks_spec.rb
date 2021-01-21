@@ -2,18 +2,19 @@
 
 require 'spec_helper'
 
-describe 'Instance-level AWS EKS Cluster', :js do
+RSpec.describe 'Instance-level AWS EKS Cluster', :js do
   let(:user) { create(:admin) }
 
   before do
     sign_in(user)
+    gitlab_enable_admin_mode_sign_in(user)
   end
 
   context 'when user does not have a cluster and visits group clusters page' do
     before do
       visit admin_clusters_path
 
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
     end
 
     context 'when user creates a cluster on AWS EKS' do

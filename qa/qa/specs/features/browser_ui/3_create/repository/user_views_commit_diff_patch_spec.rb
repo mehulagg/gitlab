@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Commit data' do
       before(:context) do
         # Get the user's details to confirm they're included in the email patch
@@ -43,7 +43,7 @@ module QA
         find('pre').text
       end
 
-      it 'user views raw email patch' do
+      it 'user views raw email patch', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/442' do
         view_commit
 
         Page::Project::Commit::Show.perform(&:select_email_patches)
@@ -53,7 +53,7 @@ module QA
         expect(page).to have_content('diff --git a/second b/second')
       end
 
-      it 'user views raw commit diff' do
+      it 'user views raw commit diff', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/439' do
         view_commit
 
         Page::Project::Commit::Show.perform(&:select_plain_diff)

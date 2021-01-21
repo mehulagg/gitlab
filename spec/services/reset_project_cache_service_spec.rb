@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ResetProjectCacheService do
+RSpec.describe ResetProjectCacheService do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -20,7 +20,7 @@ describe ResetProjectCacheService do
 
   context 'when project cache_index is a numeric value' do
     before do
-      project.update(jobs_cache_index: 1)
+      project.update!(jobs_cache_index: 1)
     end
 
     it 'increments project cache index' do

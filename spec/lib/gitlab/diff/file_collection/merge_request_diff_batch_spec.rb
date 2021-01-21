@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
+RSpec.describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
   let(:merge_request) { create(:merge_request) }
   let(:batch_page) { 1 }
   let(:batch_size) { 10 }
@@ -17,6 +17,10 @@ describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
   end
 
   let(:diff_files) { subject.diff_files }
+
+  before do
+    stub_feature_flags(diffs_gradual_load: false)
+  end
 
   describe 'initialize' do
     it 'memoizes pagination_data' do
@@ -97,6 +101,18 @@ describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
         expect(collection.diff_files.map(&:new_path)).to eq(expected_batch_files)
       end
     end
+
+    context 'with diffs gradual load feature flag enabled' do
+      let(:batch_page) { 0 }
+
+      before do
+        stub_feature_flags(diffs_gradual_load: true)
+      end
+
+      it 'returns correct diff files' do
+        expect(subject.diffs.map(&:new_path)).to eq(diff_files_relation.page(1).per(batch_size).map(&:new_path))
+      end
+    end
   end
 
   it_behaves_like 'unfoldable diff' do
@@ -114,17 +130,32 @@ describe Gitlab::Diff::FileCollection::MergeRequestDiffBatch do
     end
 
     let(:diffable) { merge_request.merge_request_diff }
+    let(:batch_page) { 2 }
     let(:stub_path) { '.gitignore' }
 
     subject do
       described_class.new(merge_request.merge_request_diff,
                           batch_page,
                           batch_size,
-                          collection_default_args)
+                          **collection_default_args)
     end
   end
 
   it_behaves_like 'cacheable diff collection' do
     let(:cacheable_files_count) { batch_size }
+  end
+
+  it_behaves_like 'unsortable diff files' do
+    let(:diffable) { merge_request.merge_request_diff }
+    let(:collection_default_args) do
+      { diff_options: {} }
+    end
+
+    subject do
+      described_class.new(merge_request.merge_request_diff,
+                          batch_page,
+                          batch_size,
+                          **collection_default_args)
+    end
   end
 end

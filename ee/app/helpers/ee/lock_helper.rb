@@ -5,9 +5,6 @@ module EE
     def lock_file_link(project = @project, path = @path, html_options: {})
       return unless project.feature_available?(:file_locks)
       return unless current_user
-      # Always render the link if `vue_file_list` is enabled, the link will be hidden
-      # by the vue app if the path was blank
-      return if path.blank? && !vue_file_list_enabled?
 
       path_lock = project.find_path_lock(path, downstream: true)
 
@@ -56,12 +53,12 @@ module EE
     end
 
     def disabled_lock_link(label, title, html_options)
-      html_options['data-toggle'] = 'tooltip'
-      html_options[:title] = title
-      html_options[:class] = "#{html_options[:class]} disabled has-tooltip"
+      html_options[:class] = "#{html_options[:class]} disabled"
       html_options['data-qa-selector'] = 'disabled_lock_button'
 
-      content_tag :span, label, html_options
+      # Disabled buttons with tooltips should have the tooltip attached
+      # to a wrapper element https://bootstrap-vue.org/docs/components/tooltip#disabled-elements
+      content_tag(:span, content_tag(:span, label, html_options), title: title, class: 'btn-group has-tooltip')
     end
 
     def enabled_lock_link(label, title, html_options)

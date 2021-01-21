@@ -5,10 +5,11 @@ module Gitlab
     module Reports
       module DependencyList
         class Dependency
-          attr_reader :name, :packager, :package_manager, :location, :version, :licenses, :vulnerabilities
+          attr_reader :name, :iid, :packager, :package_manager, :location, :version, :licenses, :vulnerabilities
 
           def initialize(params = {})
             @name = params.fetch(:name)
+            @iid = params.fetch(:iid, nil)
             @packager = params.fetch(:packager)
             @package_manager = params.fetch(:package_manager)
             @location = params.fetch(:location)
@@ -58,7 +59,7 @@ module Gitlab
             vulnerabilities.each do |v|
               next if v.empty?
 
-              unique_vulnerabilities.add(Vulnerability.new(v))
+              unique_vulnerabilities.add(::Gitlab::Ci::Reports::DependencyList::Vulnerability.new(v))
             end
 
             unique_vulnerabilities

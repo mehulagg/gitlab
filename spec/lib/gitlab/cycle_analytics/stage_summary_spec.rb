@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CycleAnalytics::StageSummary do
+RSpec.describe Gitlab::CycleAnalytics::StageSummary do
   let(:project) { create(:project, :repository) }
   let(:options) { { from: 1.day.ago, current_user: user } }
   let(:user) { create(:user, :admin) }
@@ -11,7 +11,7 @@ describe Gitlab::CycleAnalytics::StageSummary do
     project.add_maintainer(user)
   end
 
-  let(:stage_summary) { described_class.new(project, options).data }
+  let(:stage_summary) { described_class.new(project, **options).data }
 
   describe "#new_issues" do
     subject { stage_summary.first }
@@ -121,7 +121,7 @@ describe Gitlab::CycleAnalytics::StageSummary do
       end
 
       it 'does not include commit stats' do
-        data = described_class.new(project, options).data
+        data = described_class.new(project, **options).data
         expect(includes_commits?(data)).to be_falsy
       end
 
@@ -231,7 +231,7 @@ describe Gitlab::CycleAnalytics::StageSummary do
 
       context 'when `from` and `to` are within a day' do
         it 'returns the number of deployments made on that day' do
-          Timecop.freeze(Time.now) do
+          freeze_time do
             create(:deployment, :success, project: project)
             options[:from] = options[:to] = Time.now
 

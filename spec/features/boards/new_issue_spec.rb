@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards new issue', :js do
+RSpec.describe 'Issue Boards new issue', :js do
   let(:project) { create(:project, :public) }
   let(:board)   { create(:board, project: project) }
   let!(:list)   { create(:list, board: board, position: 0) }
@@ -130,24 +130,43 @@ describe 'Issue Boards new issue', :js do
 
   context 'group boards' do
     let_it_be(:group) { create(:group, :public) }
-    let_it_be(:project) { create(:project, namespace: group) }
+    let_it_be(:project) { create(:project, :public, namespace: group) }
     let_it_be(:group_board) { create(:board, group: group) }
-    let_it_be(:list) { create(:list, board: group_board, position: 0) }
+    let_it_be(:project_label) { create(:label, project: project, name: 'label') }
+    let_it_be(:list) { create(:list, board: group_board, label: project_label, position: 0) }
 
     context 'for unauthorized users' do
-      before do
-        sign_in(user)
-        visit group_board_path(group, group_board)
-        wait_for_requests
+      context 'when backlog does not exist' do
+        before do
+          sign_in(user)
+          visit group_board_path(group, group_board)
+          wait_for_requests
+        end
+
+        it 'does not display new issue button in label list' do
+          page.within('.board.is-draggable') do
+            expect(page).not_to have_selector('.issue-count-badge-add-button')
+          end
+        end
       end
 
-      it 'displays new issue button in open list' do
-        expect(first('.board')).to have_selector('.issue-count-badge-add-button', count: 1)
-      end
+      context 'when backlog list already exists' do
+        let!(:backlog_list) { create(:backlog_list, board: group_board) }
 
-      it 'does not display new issue button in label list' do
-        page.within('.board.is-draggable') do
-          expect(page).not_to have_selector('.issue-count-badge-add-button')
+        before do
+          sign_in(user)
+          visit group_board_path(group, group_board)
+          wait_for_requests
+        end
+
+        it 'displays new issue button in open list' do
+          expect(first('.board')).to have_selector('.issue-count-badge-add-button', count: 1)
+        end
+
+        it 'does not display new issue button in label list' do
+          page.within('.board.is-draggable') do
+            expect(page).not_to have_selector('.issue-count-badge-add-button')
+          end
         end
       end
     end

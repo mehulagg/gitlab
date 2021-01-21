@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Import::StuckProjectImportJobsWorker do
+RSpec.describe Gitlab::Import::StuckProjectImportJobsWorker do
   let(:worker) { described_class.new }
 
   describe 'with scheduled import_status' do
@@ -10,7 +10,7 @@ describe Gitlab::Import::StuckProjectImportJobsWorker do
       let(:import_state) { create(:project, :import_scheduled).import_state }
 
       before do
-        import_state.update(jid: '123')
+        import_state.update!(jid: '123')
       end
     end
   end
@@ -20,7 +20,7 @@ describe Gitlab::Import::StuckProjectImportJobsWorker do
       let(:import_state) { create(:project, :import_started).import_state }
 
       before do
-        import_state.update(jid: '123')
+        import_state.update!(jid: '123')
       end
     end
   end

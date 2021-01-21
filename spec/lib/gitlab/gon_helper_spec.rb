@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GonHelper do
+RSpec.describe Gitlab::GonHelper do
   let(:helper) do
     Class.new do
       include Gitlab::GonHelper
@@ -10,6 +10,10 @@ describe Gitlab::GonHelper do
   end
 
   describe '#push_frontend_feature_flag' do
+    before do
+      skip_feature_flags_yaml_validation
+    end
+
     it 'pushes a feature flag to the frontend' do
       gon = instance_double('gon')
       thing = stub_feature_flag_gate('thing')

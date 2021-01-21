@@ -1,10 +1,14 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
-import Flash from '../../../flash';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import { __ } from '../../../locale';
 import boardsStore from '../../stores/boards_store';
 
 export default {
+  components: {
+    GlButton,
+  },
   props: {
     issue: {
       type: Object,
@@ -38,13 +42,13 @@ export default {
       axios.patch(this.updateUrl, data).catch(() => {
         Flash(__('Failed to remove issue from board, please try again.'));
 
-        lists.forEach(list => {
+        lists.forEach((list) => {
           list.addIssue(issue);
         });
       });
 
       // Remove from the frontend store
-      lists.forEach(list => {
+      lists.forEach((list) => {
         list.removeIssue(issue);
       });
 
@@ -54,9 +58,11 @@ export default {
      * Build the default patch request.
      */
     buildPatchRequest(issue, lists) {
-      const listLabelIds = lists.map(list => list.label.id);
+      const listLabelIds = lists.map((list) => list.label.id);
 
-      const labelIds = issue.labels.map(label => label.id).filter(id => !listLabelIds.includes(id));
+      const labelIds = issue.labels
+        .map((label) => label.id)
+        .filter((id) => !listLabelIds.includes(id));
 
       return {
         label_ids: labelIds,
@@ -75,8 +81,8 @@ export default {
 </script>
 <template>
   <div class="block list">
-    <button class="btn btn-default btn-block" type="button" @click="removeIssue">
+    <gl-button variant="default" category="secondary" block="block" @click="removeIssue">
       {{ __('Remove from board') }}
-    </button>
+    </gl-button>
   </div>
 </template>

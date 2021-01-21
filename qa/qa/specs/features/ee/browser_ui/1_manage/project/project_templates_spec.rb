@@ -2,8 +2,10 @@
 require 'securerandom'
 
 module QA
-  context :manage do
+  RSpec.describe 'Manage' do
     describe 'Project templates' do
+      include Support::Api
+
       before(:all) do
         @files = [
           {
@@ -42,65 +44,77 @@ module QA
           @group = Resource::Group.fabricate_via_api!
         end
 
-        it 'successfully imports the project using template' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/905' do
           built_in = 'Ruby on Rails'
 
           @group.visit!
           Page::Group::Show.perform(&:go_to_new_project)
-          Page::Project::New.perform do |new_page|
-            new_page.click_create_from_template_tab
 
+          QA::Flow::Project.go_to_create_project_from_template
+
+          Page::Project::New.perform do |new_page|
             expect(new_page).to have_text(built_in)
           end
 
           create_project_using_template(project_name: 'Project using built-in project template',
-            namespace: Runtime::Namespace.name,
+            namespace: Runtime::Namespace.name(reset_cache: false),
             template_name: built_in)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
 
-          expect(page).to have_content("Initialized from '#{built_in}' project template")
-          expect(page).to have_content(".ruby-version")
+            expect(project).to have_content("Initialized from '#{built_in}' project template")
+            expect(project).to have_file(".ruby-version")
+          end
         end
       end
 
-      context 'instance level', :requires_admin, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/13418', type: :bug } do
+      context 'instance level', :requires_admin do
         before do
           Flow::Login.sign_in_as_admin
 
-          Page::Main::Menu.perform(&:go_to_admin_area)
-          Page::Admin::Menu.perform(&:go_to_template_settings)
+          Support::Retrier.retry_until(retry_on_exception: true) do
+            Page::Main::Menu.perform(&:go_to_admin_area)
+            Page::Admin::Menu.perform(&:go_to_template_settings)
 
-          EE::Page::Admin::Settings::Templates.perform do |templates|
-            templates.choose_custom_project_template("#{@template_container_group_name}")
-          end
+            EE::Page::Admin::Settings::Templates.perform do |templates|
+              templates.choose_custom_project_template("#{@template_container_group_name}")
+            end
 
-          Page::Admin::Menu.perform(&:go_to_template_settings)
+            Page::Admin::Menu.perform(&:go_to_template_settings)
 
-          EE::Page::Admin::Settings::Templates.perform do |templates|
-            expect(templates.current_custom_project_template).to include @template_container_group_name
+            EE::Page::Admin::Settings::Templates.perform do |templates|
+              Support::Waiter.wait_until(max_duration: 10) { templates.current_custom_project_template.include? @template_container_group_name }
+            end
           end
 
           Resource::Group.fabricate_via_api!.visit!
 
           Page::Group::Show.perform(&:go_to_new_project)
 
-          Page::Project::New.perform(&:go_to_create_from_template_instance_tab)
+          QA::Flow::Project.go_to_create_project_from_template
         end
 
-        it 'successfully imports the project using template' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/914' do
           Page::Project::New.perform do |new_page|
-            expect(new_page.instance_template_tab_badge_text).to eq "1"
-            expect(new_page).to have_text(@template_project.name)
+            # TODO: Remove `reload true` once this bug is fixed: https://gitlab.com/gitlab-org/gitlab/-/issues/247874
+            new_page.retry_until(reload: true) do
+              new_page.go_to_create_from_template_instance_tab
+              expect(new_page.instance_template_tab_badge_text).to eq "1"
+              new_page.has_text?(@template_project.name)
+            end
           end
 
           create_project_using_template(project_name: 'Project using instance level project template',
             namespace: Runtime::Namespace.path,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
         end
       end
@@ -129,10 +143,12 @@ module QA
 
           Page::Group::Show.perform(&:go_to_new_project)
 
+          QA::Flow::Project.go_to_create_project_from_template
+
           Page::Project::New.perform(&:go_to_create_from_template_group_tab)
         end
 
-        it 'successfully imports the project using template' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/915' do
           Page::Project::New.perform do |new_page|
             expect(new_page.group_template_tab_badge_text).to eq "1"
             expect(new_page).to have_text(@template_container_group_name)
@@ -143,10 +159,19 @@ module QA
             namespace: Runtime::Namespace.sandbox_name,
             template_name: @template_project.name)
 
-          Page::Project::Show.perform(&:wait_for_import_success)
-          @files.each do |file|
-            expect(page).to have_content(file[:name])
+          Page::Project::Show.perform do |project|
+            project.wait_for_import_success
+            @project_id = project.project_id
+
+            @files.each do |file|
+              expect(project).to have_file(file[:name])
+            end
           end
+        end
+
+        after do
+          api_client = Runtime::API::Client.new(:gitlab)
+          delete Runtime::API::Request.new(api_client, "/projects/#{@project_id}").url
         end
       end
 

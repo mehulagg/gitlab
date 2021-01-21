@@ -2,13 +2,17 @@
 
 require 'spec_helper'
 
-describe Resolvers::ErrorTracking::SentryErrorCollectionResolver do
+RSpec.describe Resolvers::ErrorTracking::SentryErrorCollectionResolver do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
   let_it_be(:current_user) { create(:user) }
 
   let(:list_issues_service) { spy('ErrorTracking::ListIssuesService') }
+
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::ErrorTracking::SentryErrorCollectionType)
+  end
 
   before do
     project.add_developer(current_user)

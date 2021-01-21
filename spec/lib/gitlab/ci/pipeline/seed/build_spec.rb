@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Seed::Build do
-  let(:project) { create(:project, :repository) }
-  let(:head_sha) { project.repository.head_commit.id }
-  let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: head_sha) }
+RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:head_sha) { project.repository.head_commit.id }
+  let(:pipeline) { build(:ci_empty_pipeline, project: project, sha: head_sha) }
   let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage } }
   let(:previous_stages) { [] }
 
@@ -68,6 +68,33 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
         let(:attributes) { { name: 'rspec', ref: 'master', rules: [{ if: '$VAR != null' }] } }
 
         it { is_expected.to include(when: 'never') }
+      end
+    end
+
+    context 'with job:rules:[variables:]' do
+      let(:attributes) do
+        { name: 'rspec',
+          ref: 'master',
+          yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                           { key: 'VAR2', value: 'var 2', public: true }],
+          rules: [{ if: '$VAR == null', variables: { VAR1: 'new var 1', VAR3: 'var 3' } }] }
+      end
+
+      it do
+        is_expected.to include(yaml_variables: [{ key: 'VAR1', value: 'new var 1', public: true },
+                                                { key: 'VAR2', value: 'var 2', public: true },
+                                                { key: 'VAR3', value: 'var 3', public: true }])
+      end
+
+      context 'when FF ci_rules_variables is disabled' do
+        before do
+          stub_feature_flags(ci_rules_variables: false)
+        end
+
+        it do
+          is_expected.to include(yaml_variables: [{ key: 'VAR1', value: 'var 1', public: true },
+                                                  { key: 'VAR2', value: 'var 2', public: true }])
+        end
       end
     end
 
@@ -164,6 +191,45 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
       end
 
       it { is_expected.to include(options: {}) }
+    end
+
+    context 'with allow_failure' do
+      let(:options) do
+        { allow_failure_criteria: { exit_codes: [42] } }
+      end
+
+      let(:rules) do
+        [{ if: '$VAR == null', when: 'always' }]
+      end
+
+      let(:attributes) do
+        {
+          name: 'rspec',
+          ref: 'master',
+          options: options,
+          rules: rules
+        }
+      end
+
+      context 'when rules does not override allow_failure' do
+        it { is_expected.to match a_hash_including(options: options) }
+      end
+
+      context 'when rules set allow_failure to true' do
+        let(:rules) do
+          [{ if: '$VAR == null', when: 'always', allow_failure: true }]
+        end
+
+        it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
+      end
+
+      context 'when rules set allow_failure to false' do
+        let(:rules) do
+          [{ if: '$VAR == null', when: 'always', allow_failure: false }]
+        end
+
+        it { is_expected.to match a_hash_including(options: { allow_failure_criteria: nil }) }
+      end
     end
   end
 
@@ -503,7 +569,7 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
       using RSpec::Parameterized
 
       let(:pipeline) do
-        build(:ci_empty_pipeline, ref: 'deploy', tag: false, source: source)
+        build(:ci_empty_pipeline, ref: 'deploy', tag: false, source: source, project: project)
       end
 
       context 'matches' do
@@ -766,7 +832,7 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
 
       context 'with a matching changes: rule' do
         let(:pipeline) do
-          create(:ci_pipeline, project: project).tap do |pipeline|
+          build(:ci_pipeline, project: project).tap do |pipeline|
             stub_pipeline_modified_paths(pipeline, %w[app/models/ci/pipeline.rb spec/models/ci/pipeline_spec.rb .gitlab-ci.yml])
           end
         end
@@ -900,7 +966,7 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
 
       it "returns an error" do
         expect(subject.errors).to contain_exactly(
-          "rspec: needs 'build'")
+          "'rspec' job needs 'build' job, but it was not added to the pipeline")
       end
     end
 
@@ -928,29 +994,34 @@ describe Gitlab::Ci::Pipeline::Seed::Build do
       end
     end
 
-    context 'when lower limit of needs is reached' do
-      before do
-        stub_feature_flags(ci_dag_limit_needs: true)
-      end
-
-      let(:needs_count) { described_class::LOW_NEEDS_LIMIT + 1 }
+    context 'when using 101 needs' do
+      let(:needs_count) { 101 }
 
       it "returns an error" do
         expect(subject.errors).to contain_exactly(
-          "rspec: one job can only need 10 others, but you have listed 11. See needs keyword documentation for more details")
-      end
-    end
-
-    context 'when upper limit of needs is reached' do
-      before do
-        stub_feature_flags(ci_dag_limit_needs: false)
+          "rspec: one job can only need 50 others, but you have listed 101. See needs keyword documentation for more details")
       end
 
-      let(:needs_count) { described_class::HARD_NEEDS_LIMIT + 1 }
+      context 'when ci_needs_size_limit is set to 100' do
+        before do
+          project.actual_limits.update!(ci_needs_size_limit: 100)
+        end
 
-      it "returns an error" do
-        expect(subject.errors).to contain_exactly(
-          "rspec: one job can only need 50 others, but you have listed 51. See needs keyword documentation for more details")
+        it "returns an error" do
+          expect(subject.errors).to contain_exactly(
+            "rspec: one job can only need 100 others, but you have listed 101. See needs keyword documentation for more details")
+        end
+      end
+
+      context 'when ci_needs_size_limit is set to 0' do
+        before do
+          project.actual_limits.update!(ci_needs_size_limit: 0)
+        end
+
+        it "returns an error" do
+          expect(subject.errors).to contain_exactly(
+            "rspec: one job can only need 0 others, but you have listed 101. See needs keyword documentation for more details")
+        end
       end
     end
   end

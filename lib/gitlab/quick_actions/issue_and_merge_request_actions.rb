@@ -26,7 +26,7 @@ module Gitlab
         end
         types Issue, MergeRequest
         condition do
-          current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+          quick_action_target.supports_assignee? && current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
         end
         parse_params do |assignee_param|
           extract_users(assignee_param)
@@ -91,6 +91,7 @@ module Gitlab
         params '%"milestone"'
         types Issue, MergeRequest
         condition do
+          quick_action_target.supports_milestone? &&
           current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
             find_milestones(project, state: 'active').any?
         end
@@ -113,6 +114,7 @@ module Gitlab
         condition do
           quick_action_target.persisted? &&
             quick_action_target.milestone_id? &&
+            quick_action_target.supports_milestone? &&
             current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
         end
         command :remove_milestone do

@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import GeoNodeDetailItemComponent from 'ee/geo_nodes/components/geo_node_detail_item.vue';
-import GeoNodeSyncSettings from 'ee/geo_nodes/components/geo_node_sync_settings.vue';
 import GeoNodeEventStatus from 'ee/geo_nodes/components/geo_node_event_status.vue';
 import GeoNodeSyncProgress from 'ee/geo_nodes/components/geo_node_sync_progress.vue';
+import GeoNodeSyncSettings from 'ee/geo_nodes/components/geo_node_sync_settings.vue';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from 'ee/geo_nodes/constants';
 import { rawMockNodeDetails } from '../mock_data';
@@ -44,23 +44,13 @@ describe('GeoNodeDetailItemComponent', () => {
     it('renders container elements correctly', () => {
       expect(wrapper.find('.node-detail-item').exists()).toBeTruthy();
       expect(wrapper.findAll('.node-detail-title')).not.toHaveLength(0);
-      expect(
-        wrapper
-          .find('.node-detail-title')
-          .text()
-          .trim(),
-      ).toBe('GitLab version');
+      expect(wrapper.find('.node-detail-title').text().trim()).toBe('GitLab version');
     });
 
     describe('when plain text value', () => {
       it('renders plain item value', () => {
         expect(wrapper.findAll('.node-detail-value')).not.toHaveLength(0);
-        expect(
-          wrapper
-            .find('.node-detail-value')
-            .text()
-            .trim(),
-        ).toBe('10.4.0-pre');
+        expect(wrapper.find('.node-detail-value').text().trim()).toBe('10.4.0-pre');
       });
 
       it('does not render graph item', () => {
@@ -140,12 +130,9 @@ describe('GeoNodeDetailItemComponent', () => {
       });
 
       it('renders synchronization disabled text', () => {
-        expect(
-          wrapper
-            .find({ ref: 'disabledText' })
-            .text()
-            .trim(),
-        ).toBe('Synchronization disabled');
+        expect(wrapper.find({ ref: 'disabledText' }).text().trim()).toBe(
+          'Synchronization disabled',
+        );
       });
 
       it('renders GlPopover', () => {

@@ -16,11 +16,6 @@ module EE
       environments_group_cluster_path(clusterable, cluster)
     end
 
-    override :metrics_dashboard_path
-    def metrics_dashboard_path(cluster)
-      metrics_dashboard_group_cluster_path(clusterable, cluster)
-    end
-
     private
 
     def can_read_cluster_environments?

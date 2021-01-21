@@ -17,7 +17,7 @@ RSpec.describe 'Show trial banner', :js do
   before do
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free")
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free&namespace_id=#{namespace_id}")
       .to_return(status: 200, body: plans_data.to_json)
 
     group.add_owner(user)
@@ -28,24 +28,28 @@ RSpec.describe 'Show trial banner', :js do
   end
 
   context "when user's trial is active" do
+    let(:namespace_id) { user.namespace_id }
+
     it 'renders congratulations banner for user in profile billing page' do
       visit profile_billings_path + '?trial=true'
 
-      expect(page).to have_content('Congratulations, your new trial is activated')
+      expect(page).to have_content('Congratulations, your free trial is activated.')
     end
   end
 
   context "when group's trial is active" do
+    let(:namespace_id) { group.id }
+
     it 'renders congratulations banner for group in group details page' do
       visit group_path(group, trial: true)
 
-      expect(find('.user-callout').text).to have_content('Congratulations, your new trial is activated')
+      expect(find('.user-callout').text).to have_content('Congratulations, your free trial is activated.')
     end
 
     it 'does not render congratulations banner for group in group billing page' do
       visit group_billings_path(group, trial: true)
 
-      expect(page).not_to have_content('Congratulations, your new trial is activated')
+      expect(page).not_to have_content('Congratulations, your free trial is activated.')
     end
   end
 end

@@ -9,6 +9,8 @@ FactoryBot.define do
     last_wiki_successful_sync_at { nil }
     resync_repository { true }
     resync_wiki { true }
+    primary_repository_checksummed { true }
+    primary_wiki_checksummed { true }
 
     trait :dirty do
       resync_repository { true }

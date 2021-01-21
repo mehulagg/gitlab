@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuePolicy do
+RSpec.describe IssuePolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:guest) { create(:user) }
@@ -104,7 +104,7 @@ describe IssuePolicy do
       end
 
       it 'does not allow issue author to read or update confidential issue moved to an private project' do
-        confidential_issue.project = build(:project, :private)
+        confidential_issue.project = create(:project, :private)
 
         expect(permissions(author, confidential_issue)).to be_disallowed(:read_issue, :read_issue_iid, :update_issue)
       end
@@ -117,7 +117,7 @@ describe IssuePolicy do
       end
 
       it 'does not allow issue assignees to read or update confidential issue moved to an private project' do
-        confidential_issue.project = build(:project, :private)
+        confidential_issue.project = create(:project, :private)
 
         expect(permissions(assignee, confidential_issue)).to be_disallowed(:read_issue, :read_issue_iid, :update_issue)
       end
@@ -139,8 +139,13 @@ describe IssuePolicy do
       create(:project_group_link, group: group, project: project)
     end
 
+    it 'does not allow guest to create todos' do
+      expect(permissions(nil, issue)).to be_allowed(:read_issue)
+      expect(permissions(nil, issue)).to be_disallowed(:create_todo)
+    end
+
     it 'allows guests to read issues' do
-      expect(permissions(guest, issue)).to be_allowed(:read_issue, :read_issue_iid)
+      expect(permissions(guest, issue)).to be_allowed(:read_issue, :read_issue_iid, :create_todo)
       expect(permissions(guest, issue)).to be_disallowed(:update_issue, :admin_issue, :reopen_issue)
 
       expect(permissions(guest, issue_no_assignee)).to be_allowed(:read_issue, :read_issue_iid)
@@ -188,7 +193,7 @@ describe IssuePolicy do
 
     context 'when issues are private' do
       before do
-        project.project_feature.update(issues_access_level: ProjectFeature::PRIVATE)
+        project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
       end
       let(:issue) { create(:issue, project: project, author: author) }
       let(:visitor) { create(:user) }

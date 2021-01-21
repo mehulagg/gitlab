@@ -36,7 +36,7 @@ RSpec.describe 'gitlab:license namespace rake tasks' do
           let(:license_file_contents) { 'valid contents' }
 
           it 'succeeds in adding the license' do
-            expect(File).to receive(:read).with(license_path).and_return(license_file_contents)
+            expect_file_read(license_path, content: license_file_contents)
             expect(License).to receive(:create).with(data: license_file_contents).and_return(true)
 
             expect { subject }.not_to raise_error
@@ -47,7 +47,7 @@ RSpec.describe 'gitlab:license namespace rake tasks' do
           let(:license_file_contents) { 'invalid contents' }
 
           it 'fails to add the license' do
-            expect(File).to receive(:read).with(license_path).and_return(license_file_contents)
+            expect_file_read(license_path, content: license_file_contents)
             expect(License).to receive(:create).with(data: license_file_contents).and_return(false)
 
             expect { subject }.to raise_error(RuntimeError, "License Invalid")

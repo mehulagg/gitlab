@@ -1,8 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
+import { GlBadge, GlSprintf } from '@gitlab/ui';
 
 export default {
   name: 'TestIssueBody',
+  components: {
+    GlBadge,
+    GlSprintf,
+  },
   props: {
     issue: {
       type: Object,
@@ -19,20 +24,39 @@ export default {
       default: false,
     },
   },
+  computed: {
+    showRecentFailures() {
+      return this.issue.recent_failures?.count && this.issue.recent_failures?.base_branch;
+    },
+  },
   methods: {
     ...mapActions(['openModal']),
   },
 };
 </script>
 <template>
-  <div class="report-block-list-issue-description prepend-top-5 append-bottom-5">
+  <div class="report-block-list-issue-description gl-mt-2 gl-mb-2">
     <div class="report-block-list-issue-description-text" data-testid="test-issue-body-description">
       <button
         type="button"
         class="btn-link btn-blank text-left break-link vulnerability-name-button"
         @click="openModal({ issue })"
       >
-        <div v-if="isNew" class="badge badge-danger append-right-5">{{ s__('New') }}</div>
+        <gl-badge v-if="isNew" variant="danger" class="gl-mr-2">{{ s__('New') }}</gl-badge>
+        <gl-badge v-if="showRecentFailures" variant="warning" class="gl-mr-2">
+          <gl-sprintf
+            :message="
+              n__(
+                'Reports|Failed %{count} time in %{base_branch} in the last 14 days',
+                'Reports|Failed %{count} times in %{base_branch} in the last 14 days',
+                issue.recent_failures.count,
+              )
+            "
+          >
+            <template #count>{{ issue.recent_failures.count }}</template>
+            <template #base_branch>{{ issue.recent_failures.base_branch }}</template>
+          </gl-sprintf>
+        </gl-badge>
         {{ issue.name }}
       </button>
     </div>

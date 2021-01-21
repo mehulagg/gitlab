@@ -21,13 +21,17 @@ describe('Pipelines table in Commits and Merge requests', () => {
 
   preloadFixtures(jsonFixtureName);
 
+  const findRunPipelineBtn = () => vm.$el.querySelector('[data-testid="run_pipeline_button"]');
+  const findRunPipelineBtnMobile = () =>
+    vm.$el.querySelector('[data-testid="run_pipeline_button_mobile"]');
+
   beforeEach(() => {
     mock = new MockAdapter(axios);
 
     const { pipelines } = getJSONFixture(jsonFixtureName);
 
     PipelinesTable = Vue.extend(pipelinesTable);
-    pipeline = pipelines.find(p => p.user !== null && p.commit !== null);
+    pipeline = pipelines.find((p) => p.user !== null && p.commit !== null);
   });
 
   afterEach(() => {
@@ -43,7 +47,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         vm = mountComponent(PipelinesTable, props);
       });
 
-      it('should render the empty state', done => {
+      it('should render the empty state', (done) => {
         setImmediate(() => {
           expect(vm.$el.querySelector('.empty-state')).toBeDefined();
           expect(vm.$el.querySelector('.realtime-loading')).toBe(null);
@@ -59,7 +63,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
         vm = mountComponent(PipelinesTable, props);
       });
 
-      it('should render a table with the received pipelines', done => {
+      it('should render a table with the received pipelines', (done) => {
         setImmediate(() => {
           expect(vm.$el.querySelectorAll('.ci-table .commit').length).toEqual(1);
           expect(vm.$el.querySelector('.realtime-loading')).toBe(null);
@@ -70,7 +74,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       });
 
       describe('with pagination', () => {
-        it('should make an API request when using pagination', done => {
+        it('should make an API request when using pagination', (done) => {
           setImmediate(() => {
             jest.spyOn(vm, 'updateContent').mockImplementation(() => {});
 
@@ -98,11 +102,11 @@ describe('Pipelines table in Commits and Merge requests', () => {
         mock.onGet('endpoint.json').reply(200, [pipeline]);
       });
 
-      it('should receive update-pipelines-count event', done => {
+      it('should receive update-pipelines-count event', (done) => {
         const element = document.createElement('div');
         document.body.appendChild(element);
 
-        element.addEventListener('update-pipelines-count', event => {
+        element.addEventListener('update-pipelines-count', (event) => {
           expect(event.detail.pipelines).toEqual([pipeline]);
           done();
         });
@@ -121,72 +125,45 @@ describe('Pipelines table in Commits and Merge requests', () => {
       pipelineCopy = { ...pipeline };
     });
 
-    describe('when latest pipeline has detached flag and canRunPipeline is true', () => {
-      it('renders the run pipeline button', done => {
+    describe('when latest pipeline has detached flag', () => {
+      it('renders the run pipeline button', (done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = true;
         pipelineCopy.flags.merge_request_pipeline = true;
 
         mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
 
-        vm = mountComponent(PipelinesTable, { ...props, canRunPipeline: true });
+        vm = mountComponent(PipelinesTable, { ...props });
 
         setImmediate(() => {
-          expect(vm.$el.querySelector('.js-run-mr-pipeline')).not.toBeNull();
+          expect(findRunPipelineBtn()).not.toBeNull();
+          expect(findRunPipelineBtnMobile()).not.toBeNull();
           done();
         });
       });
     });
 
-    describe('when latest pipeline has detached flag and canRunPipeline is false', () => {
-      it('does not render the run pipeline button', done => {
-        pipelineCopy.flags.detached_merge_request_pipeline = true;
-        pipelineCopy.flags.merge_request_pipeline = true;
-
-        mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
-
-        vm = mountComponent(PipelinesTable, { ...props, canRunPipeline: false });
-
-        setImmediate(() => {
-          expect(vm.$el.querySelector('.js-run-mr-pipeline')).toBeNull();
-          done();
-        });
-      });
-    });
-
-    describe('when latest pipeline does not have detached flag and canRunPipeline is true', () => {
-      it('does not render the run pipeline button', done => {
+    describe('when latest pipeline does not have detached flag', () => {
+      it('does not render the run pipeline button', (done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = false;
         pipelineCopy.flags.merge_request_pipeline = false;
 
         mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
 
-        vm = mountComponent(PipelinesTable, { ...props, canRunPipeline: true });
+        vm = mountComponent(PipelinesTable, { ...props });
 
         setImmediate(() => {
-          expect(vm.$el.querySelector('.js-run-mr-pipeline')).toBeNull();
-          done();
-        });
-      });
-    });
-
-    describe('when latest pipeline does not have detached flag and merge_request_pipeline is true', () => {
-      it('does not render the run pipeline button', done => {
-        pipelineCopy.flags.detached_merge_request_pipeline = false;
-        pipelineCopy.flags.merge_request_pipeline = true;
-
-        mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
-
-        vm = mountComponent(PipelinesTable, { ...props, canRunPipeline: false });
-
-        setImmediate(() => {
-          expect(vm.$el.querySelector('.js-run-mr-pipeline')).toBeNull();
+          expect(findRunPipelineBtn()).toBeNull();
+          expect(findRunPipelineBtnMobile()).toBeNull();
           done();
         });
       });
     });
 
     describe('on click', () => {
-      beforeEach(() => {
+      const findModal = () =>
+        document.querySelector('#create-pipeline-for-fork-merge-request-modal');
+
+      beforeEach((done) => {
         pipelineCopy.flags.detached_merge_request_pipeline = true;
 
         mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
@@ -197,23 +174,91 @@ describe('Pipelines table in Commits and Merge requests', () => {
           projectId: '5',
           mergeRequestId: 3,
         });
-      });
 
-      it('updates the loading state', done => {
         jest.spyOn(Api, 'postMergeRequestPipeline').mockReturnValue(Promise.resolve());
 
         setImmediate(() => {
-          vm.$el.querySelector('.js-run-mr-pipeline').click();
+          done();
+        });
+      });
 
-          vm.$nextTick(() => {
-            expect(vm.state.isRunningMergeRequestPipeline).toBe(true);
+      it('on desktop, shows a loading button', (done) => {
+        findRunPipelineBtn().click();
 
-            setImmediate(() => {
-              expect(vm.state.isRunningMergeRequestPipeline).toBe(false);
+        vm.$nextTick(() => {
+          expect(findModal()).toBeNull();
 
-              done();
-            });
+          expect(findRunPipelineBtn().disabled).toBe(true);
+          expect(findRunPipelineBtn().querySelector('.gl-spinner')).not.toBeNull();
+
+          setImmediate(() => {
+            expect(findRunPipelineBtn().disabled).toBe(false);
+            expect(findRunPipelineBtn().querySelector('.gl-spinner')).toBeNull();
+
+            done();
           });
+        });
+      });
+
+      it('on mobile, shows a loading button', (done) => {
+        findRunPipelineBtnMobile().click();
+
+        vm.$nextTick(() => {
+          expect(findModal()).toBeNull();
+
+          expect(findModal()).toBeNull();
+          expect(findRunPipelineBtn().querySelector('.gl-spinner')).not.toBeNull();
+
+          setImmediate(() => {
+            expect(findRunPipelineBtn().disabled).toBe(false);
+            expect(findRunPipelineBtn().querySelector('.gl-spinner')).toBeNull();
+
+            done();
+          });
+        });
+      });
+    });
+
+    describe('on click for fork merge request', () => {
+      const findModal = () =>
+        document.querySelector('#create-pipeline-for-fork-merge-request-modal');
+
+      beforeEach((done) => {
+        pipelineCopy.flags.detached_merge_request_pipeline = true;
+
+        mock.onGet('endpoint.json').reply(200, [pipelineCopy]);
+
+        vm = mountComponent(PipelinesTable, {
+          ...props,
+          projectId: '5',
+          mergeRequestId: 3,
+          canCreatePipelineInTargetProject: true,
+          sourceProjectFullPath: 'test/parent-project',
+          targetProjectFullPath: 'test/fork-project',
+        });
+
+        jest.spyOn(Api, 'postMergeRequestPipeline').mockReturnValue(Promise.resolve());
+
+        setImmediate(() => {
+          done();
+        });
+      });
+
+      it('on desktop, shows a security warning modal', (done) => {
+        findRunPipelineBtn().click();
+
+        vm.$nextTick(() => {
+          expect(findModal()).not.toBeNull();
+          done();
+        });
+      });
+
+      it('on mobile, shows a security warning modal', (done) => {
+        findRunPipelineBtnMobile().click();
+
+        vm.$nextTick(() => {
+          expect(findModal()).not.toBeNull();
+          done();
         });
       });
     });
@@ -226,7 +271,7 @@ describe('Pipelines table in Commits and Merge requests', () => {
       vm = mountComponent(PipelinesTable, props);
     });
 
-    it('should render error state', done => {
+    it('should render error state', (done) => {
       setImmediate(() => {
         expect(vm.$el.querySelector('.js-pipelines-error-state')).toBeDefined();
         expect(vm.$el.querySelector('.realtime-loading')).toBe(null);

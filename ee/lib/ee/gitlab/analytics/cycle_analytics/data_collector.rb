@@ -7,7 +7,7 @@ module EE
         module DataCollector
           def duration_chart_data
             strong_memoize(:duration_chart) do
-              ::Gitlab::Analytics::CycleAnalytics::DataForDurationChart.new(stage: stage, query: query).load
+              ::Gitlab::Analytics::CycleAnalytics::DataForDurationChart.new(stage: stage, params: params, query: query).load
             end
           end
         end

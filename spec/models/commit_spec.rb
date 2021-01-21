@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Commit do
+RSpec.describe Commit do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:personal_snippet) { create(:personal_snippet, :repository) }
   let_it_be(:project_snippet) { create(:project_snippet, :repository) }
@@ -428,6 +428,19 @@ eos
       allow(commit).to receive(:safe_message).and_return(message)
       expect(commit.description).to eq(message)
     end
+
+    it 'truncates html representation if more than 1Mib' do
+      # Commit message is over 2MiB
+      huge_commit_message = ['panic', ('panic ' * 350000), 'trailing text'].join("\n")
+
+      allow(commit).to receive(:safe_message).and_return(huge_commit_message)
+
+      commit.refresh_markdown_cache
+      description_html = commit.description_html
+
+      expect(description_html.bytesize).to be < 2.megabytes
+      expect(description_html).not_to include('trailing text')
+    end
   end
 
   describe "delegation" do
@@ -675,7 +688,10 @@ eos
   end
 
   describe '#work_in_progress?' do
-    ['squash! ', 'fixup! ', 'wip: ', 'WIP: ', '[WIP] '].each do |wip_prefix|
+    [
+      'squash! ', 'fixup! ', 'wip: ', 'WIP: ', '[WIP] ',
+      'draft: ', 'Draft - ', '[Draft] ', '(draft) ', 'Draft: '
+    ].each do |wip_prefix|
       it "detects the '#{wip_prefix}' prefix" do
         commit.message = "#{wip_prefix}#{commit.message}"
 
@@ -685,6 +701,12 @@ eos
 
     it "detects WIP for a commit just saying 'wip'" do
       commit.message = "wip"
+
+      expect(commit).to be_work_in_progress
+    end
+
+    it "detects WIP for a commit just saying 'draft'" do
+      commit.message = "draft"
 
       expect(commit).to be_work_in_progress
     end

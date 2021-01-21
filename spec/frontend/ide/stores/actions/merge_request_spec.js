@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
-import store from '~/ide/stores';
-import createFlash from '~/flash';
+import { createStore } from '~/ide/stores';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getMergeRequestData,
   getMergeRequestChanges,
@@ -10,7 +10,6 @@ import {
 } from '~/ide/stores/actions/merge_request';
 import service from '~/ide/services';
 import { leftSidebarViews, PERMISSION_READ_MR } from '~/ide/constants';
-import { resetStore } from '../../helpers';
 
 const TEST_PROJECT = 'abcproject';
 const TEST_PROJECT_ID = 17;
@@ -18,9 +17,12 @@ const TEST_PROJECT_ID = 17;
 jest.mock('~/flash');
 
 describe('IDE store merge request actions', () => {
+  let store;
   let mock;
 
   beforeEach(() => {
+    store = createStore();
+
     mock = new MockAdapter(axios);
 
     store.state.projects[TEST_PROJECT] = {
@@ -34,7 +36,6 @@ describe('IDE store merge request actions', () => {
 
   afterEach(() => {
     mock.restore();
-    resetStore(store);
   });
 
   describe('getMergeRequestsForBranch', () => {
@@ -48,13 +49,14 @@ describe('IDE store merge request actions', () => {
           mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).reply(200, mockData);
         });
 
-        it('calls getProjectMergeRequests service method', done => {
+        it('calls getProjectMergeRequests service method', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
               expect(service.getProjectMergeRequests).toHaveBeenCalledWith(TEST_PROJECT, {
                 source_branch: 'bar',
                 source_project_id: TEST_PROJECT_ID,
+                state: 'opened',
                 order_by: 'created_at',
                 per_page: 1,
               });
@@ -64,19 +66,19 @@ describe('IDE store merge request actions', () => {
             .catch(done.fail);
         });
 
-        it('sets the "Merge Request" Object', done => {
+        it('sets the "Merge Request" Object', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
               expect(store.state.projects.abcproject.mergeRequests).toEqual({
-                '2': expect.objectContaining(mrData),
+                2: expect.objectContaining(mrData),
               });
               done();
             })
             .catch(done.fail);
         });
 
-        it('sets "Current Merge Request" object to the most recent MR', done => {
+        it('sets "Current Merge Request" object to the most recent MR', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
             .then(() => {
@@ -86,7 +88,7 @@ describe('IDE store merge request actions', () => {
             .catch(done.fail);
         });
 
-        it('does nothing if user cannot read MRs', done => {
+        it('does nothing if user cannot read MRs', (done) => {
           store.state.projects[TEST_PROJECT].userPermissions[PERMISSION_READ_MR] = false;
 
           store
@@ -106,7 +108,7 @@ describe('IDE store merge request actions', () => {
           mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).reply(200, []);
         });
 
-        it('does not fail if there are no merge requests for current branch', done => {
+        it('does not fail if there are no merge requests for current branch', (done) => {
           store
             .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'foo' })
             .then(() => {
@@ -124,7 +126,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests/).networkError();
       });
 
-      it('flashes message, if error', done => {
+      it('flashes message, if error', (done) => {
         store
           .dispatch('getMergeRequestsForBranch', { projectId: TEST_PROJECT, branchId: 'bar' })
           .catch(() => {
@@ -147,7 +149,7 @@ describe('IDE store merge request actions', () => {
           .reply(200, { title: 'mergerequest' });
       });
 
-      it('calls getProjectMergeRequestData service method', done => {
+      it('calls getProjectMergeRequestData service method', (done) => {
         store
           .dispatch('getMergeRequestData', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -158,7 +160,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Object', done => {
+      it('sets the Merge Request Object', (done) => {
         store
           .dispatch('getMergeRequestData', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -178,7 +180,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestData(
@@ -222,7 +224,7 @@ describe('IDE store merge request actions', () => {
           .reply(200, { title: 'mergerequest' });
       });
 
-      it('calls getProjectMergeRequestChanges service method', done => {
+      it('calls getProjectMergeRequestChanges service method', (done) => {
         store
           .dispatch('getMergeRequestChanges', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -233,7 +235,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Changes Object', done => {
+      it('sets the Merge Request Changes Object', (done) => {
         store
           .dispatch('getMergeRequestChanges', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -251,7 +253,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1\/changes/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestChanges(
@@ -294,7 +296,7 @@ describe('IDE store merge request actions', () => {
         jest.spyOn(service, 'getProjectMergeRequestVersions');
       });
 
-      it('calls getProjectMergeRequestVersions service method', done => {
+      it('calls getProjectMergeRequestVersions service method', (done) => {
         store
           .dispatch('getMergeRequestVersions', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -305,7 +307,7 @@ describe('IDE store merge request actions', () => {
           .catch(done.fail);
       });
 
-      it('sets the Merge Request Versions Object', done => {
+      it('sets the Merge Request Versions Object', (done) => {
         store
           .dispatch('getMergeRequestVersions', { projectId: TEST_PROJECT, mergeRequestId: 1 })
           .then(() => {
@@ -321,7 +323,7 @@ describe('IDE store merge request actions', () => {
         mock.onGet(/api\/(.*)\/projects\/abcproject\/merge_requests\/1\/versions/).networkError();
       });
 
-      it('dispatches error action', done => {
+      it('dispatches error action', (done) => {
         const dispatch = jest.fn();
 
         getMergeRequestVersions(
@@ -420,7 +422,7 @@ describe('IDE store merge request actions', () => {
       );
     });
 
-    it('dispatches actions for merge request data', done => {
+    it('dispatches actions for merge request data', (done) => {
       openMergeRequest({ state: store.state, dispatch: store.dispatch, getters: mockGetters }, mr)
         .then(() => {
           expect(store.dispatch.mock.calls).toEqual([
@@ -449,13 +451,11 @@ describe('IDE store merge request actions', () => {
         .catch(done.fail);
     });
 
-    it('updates activity bar view and gets file data, if changes are found', done => {
+    it('updates activity bar view and gets file data, if changes are found', (done) => {
       store.state.entries.foo = {
-        url: 'test',
         type: 'blob',
       };
       store.state.entries.bar = {
-        url: 'test',
         type: 'blob',
       };
 
@@ -490,7 +490,7 @@ describe('IDE store merge request actions', () => {
         .catch(done.fail);
     });
 
-    it('flashes message, if error', done => {
+    it('flashes message, if error', (done) => {
       store.dispatch.mockRejectedValue();
 
       openMergeRequest(store, mr)

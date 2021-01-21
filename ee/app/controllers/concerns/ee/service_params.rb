@@ -5,12 +5,15 @@ module EE
     extend ::Gitlab::Utils::Override
 
     ALLOWED_PARAMS_EE = [
+      :issues_enabled,
       :jenkins_url,
       :multiproject_enabled,
       :pass_unstable,
       :project_name,
       :repository_url,
-      :static_context
+      :static_context,
+      :vulnerabilities_enabled,
+      :vulnerabilities_issuetype
     ].freeze
 
     override :allowed_service_params

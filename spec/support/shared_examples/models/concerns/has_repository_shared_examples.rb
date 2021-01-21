@@ -6,6 +6,14 @@ RSpec.shared_examples 'model with repository' do
   let(:expected_full_path) { raise NotImplementedError }
   let(:expected_web_url_path) { expected_full_path }
   let(:expected_repo_url_path) { expected_full_path }
+  let(:expected_lfs_enabled) { false }
+
+  it 'container class includes HasRepository' do
+    # NOTE: This is not enforced at runtime, since we also need to support Geo::DeletedProject
+    expect(described_class).to include_module(HasRepository)
+    expect(container).to be_kind_of(HasRepository)
+    expect(stubbed_container).to be_kind_of(HasRepository)
+  end
 
   describe '#commits_by' do
     let(:commits) { container.repository.commits('HEAD', limit: 3).commits }
@@ -74,6 +82,10 @@ RSpec.shared_examples 'model with repository' do
     it 'returns valid repo' do
       expect(container.repository).to be_kind_of(Repository)
     end
+
+    it 'uses the same container' do
+      expect(container.repository.container).to be(container)
+    end
   end
 
   describe '#storage' do
@@ -85,6 +97,16 @@ RSpec.shared_examples 'model with repository' do
   describe '#full_path' do
     it 'returns valid full_path' do
       expect(container.full_path).to eq(expected_full_path)
+    end
+  end
+
+  describe '#lfs_enabled?' do
+    before do
+      stub_lfs_setting(enabled: true)
+    end
+
+    it 'returns the expected value' do
+      expect(container.lfs_enabled?).to eq(expected_lfs_enabled)
     end
   end
 
@@ -148,18 +170,18 @@ RSpec.shared_examples 'model with repository' do
       expect(subject).to eq('picked')
     end
 
-    it 'picks from the latest available storage', :request_store do
+    it 'picks from the available storages based on weight', :request_store do
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
       Gitlab::CurrentSettings.expire_current_application_settings
       Gitlab::CurrentSettings.current_application_settings
 
       settings = ApplicationSetting.last
-      settings.repository_storages = %w(picked)
+      settings.repository_storages_weighted = { 'picked' => 100, 'default' => 0 }
       settings.save!
 
-      expect(Gitlab::CurrentSettings.repository_storages).to eq(%w(default))
+      expect(Gitlab::CurrentSettings.repository_storages_weighted).to eq({ 'default' => 100 })
       expect(subject).to eq('picked')
-      expect(Gitlab::CurrentSettings.repository_storages).to eq(%w(picked))
+      expect(Gitlab::CurrentSettings.repository_storages_weighted).to eq({ 'default' => 0, 'picked' => 100 })
     end
   end
 end

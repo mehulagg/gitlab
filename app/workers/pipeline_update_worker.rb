@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-class PipelineUpdateWorker # rubocop:disable Scalability/IdempotentWorker
+# This worker is deprecated and will be removed in 14.0
+# See: https://gitlab.com/gitlab-org/gitlab/-/issues/232806
+class PipelineUpdateWorker
   include ApplicationWorker
   include PipelineQueue
 
   queue_namespace :pipeline_processing
   urgency :high
 
-  def perform(pipeline_id)
-    Ci::Pipeline.find_by_id(pipeline_id)&.update_legacy_status
+  idempotent!
+
+  def perform(_pipeline_id)
+    # no-op
   end
 end

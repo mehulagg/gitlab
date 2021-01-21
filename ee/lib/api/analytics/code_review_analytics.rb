@@ -2,8 +2,10 @@
 
 module API
   module Analytics
-    class CodeReviewAnalytics < Grape::API
+    class CodeReviewAnalytics < ::API::Base
       include PaginationParams
+
+      feature_category :planning_analytics
 
       helpers do
         def project
@@ -24,7 +26,7 @@ module API
         end
 
         params :negatable_params do
-          optional :label_name, type: Array, desc: 'Array of label names to filter by'
+          optional :label_name, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'Array of label names to filter by'
           optional :milestone_title, type: String, desc: 'Milestone title to filter by'
         end
       end

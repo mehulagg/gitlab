@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Monitoring AWS Resources
+# Monitoring AWS resources
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12621) in GitLab 9.4
 
@@ -33,4 +33,4 @@ A sample Cloudwatch Exporter configuration file, configured for basic AWS ELB mo
 ## Specifying the Environment label
 
 In order to isolate and only display relevant metrics for a given environment
-however, GitLab needs a method to detect which labels are associated. To do this, GitLab will [look for an `environment` label](index.md#identifying-environments).
+however, GitLab needs a method to detect which labels are associated. To do this, GitLab [looks for an `environment` label](index.md#identifying-environments).

@@ -23,7 +23,6 @@
 @import 'framework/flash';
 @import 'framework/forms';
 @import 'framework/gfm';
-@import 'framework/gitlab_theme';
 @import 'framework/header';
 @import 'framework/highlight';
 @import 'framework/issue_box';
@@ -68,6 +67,7 @@
 @import 'framework/read_more';
 @import 'framework/flex_grid';
 @import 'framework/system_messages';
-@import "framework/spinner";
+@import 'framework/spinner';
 @import 'framework/card';
 @import 'framework/editor-lite';
+@import 'framework/diffs';

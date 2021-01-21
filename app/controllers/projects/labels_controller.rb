@@ -14,6 +14,8 @@ class Projects::LabelsController < Projects::ApplicationController
 
   respond_to :js, :html
 
+  feature_category :issue_tracking
+
   def index
     @prioritized_labels = @available_labels.prioritized(@project)
     @labels = @available_labels.unprioritized(@project).page(params[:page])
@@ -161,7 +163,7 @@ class Projects::LabelsController < Projects::ApplicationController
     @available_labels ||=
       LabelsFinder.new(current_user,
                        project_id: @project.id,
-                       include_ancestor_groups: params[:include_ancestor_groups],
+                       include_ancestor_groups: true,
                        search: params[:search],
                        subscribed: params[:subscribed],
                        sort: sort).execute

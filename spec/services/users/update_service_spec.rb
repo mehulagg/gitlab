@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::UpdateService do
+RSpec.describe Users::UpdateService do
   let(:user) { create(:user) }
 
   describe '#execute' do
@@ -31,7 +31,7 @@ describe Users::UpdateService do
         result = update_user(user, { username: 'taken' })
       end.not_to change { user.reload.username }
       expect(result[:status]).to eq(:error)
-      expect(result[:message]).to eq('Username has already been taken')
+      expect(result[:message]).to eq('A user, alias, or group already exists with that username.')
     end
 
     it 'updates the status if status params were given' do

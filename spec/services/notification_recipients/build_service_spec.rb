@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NotificationRecipients::BuildService do
+RSpec.describe NotificationRecipients::BuildService do
   let(:service) { described_class }
   let(:assignee) { create(:user) }
   let(:project) { create(:project, :public) }
@@ -44,7 +44,7 @@ describe NotificationRecipients::BuildService do
     context 'when there are multiple subscribers' do
       def create_user
         subscriber = create(:user)
-        issue.subscriptions.create(user: subscriber, project: project, subscribed: true)
+        issue.subscriptions.create!(user: subscriber, project: project, subscribed: true)
       end
 
       include_examples 'no N+1 queries'
@@ -96,7 +96,7 @@ describe NotificationRecipients::BuildService do
     context 'when there are multiple subscribers' do
       def create_user
         subscriber = create(:user)
-        merge_request.subscriptions.create(user: subscriber, project: project, subscribed: true)
+        merge_request.subscriptions.create!(user: subscriber, project: project, subscribed: true)
       end
 
       include_examples 'no N+1 queries'

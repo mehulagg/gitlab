@@ -34,7 +34,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveUndefinedOccurrenceSeverityLev
   end
 
   def vuln_params(primary_identifier_id)
-    attrs = attributes_for(:vulnerabilities_occurrence)
+    attrs = attributes_for(:vulnerabilities_finding)
 
     {
       severity: 0,

@@ -6,7 +6,7 @@ require 'excon'
 
 require 'spec_helper'
 
-describe 'Unicorn' do
+RSpec.describe 'Unicorn' do
   before(:all) do
     project_root = File.expand_path('../..', __dir__)
 
@@ -68,7 +68,7 @@ describe 'Unicorn' do
   end
 
   after(:all) do
-    WebMock.disable_net_connect!(allow_localhost: true)
+    webmock_enable!
     Process.kill('TERM', @unicorn_master_pid)
   end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetPresenter do
+RSpec.describe SnippetPresenter do
   include Gitlab::Routing.url_helpers
 
   let_it_be(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe SnippetPresenter do
       let(:snippet) { personal_snippet }
 
       it 'returns snippet web url' do
-        expect(subject).to match "/snippets/#{snippet.id}"
+        expect(subject).to match "/-/snippets/#{snippet.id}"
       end
     end
 
@@ -31,7 +31,7 @@ describe SnippetPresenter do
       let(:snippet) { project_snippet }
 
       it 'returns snippet web url' do
-        expect(subject).to match "/#{project.full_path}/snippets/#{snippet.id}"
+        expect(subject).to match "/#{project.full_path}/-/snippets/#{snippet.id}"
       end
     end
   end
@@ -43,7 +43,7 @@ describe SnippetPresenter do
       let(:snippet) { personal_snippet }
 
       it 'returns snippet web url' do
-        expect(subject).to match "/snippets/#{snippet.id}/raw"
+        expect(subject).to match "/-/snippets/#{snippet.id}/raw"
       end
     end
 
@@ -51,7 +51,7 @@ describe SnippetPresenter do
       let(:snippet) { project_snippet }
 
       it 'returns snippet web url' do
-        expect(subject).to match "/#{project.full_path}/snippets/#{snippet.id}/raw"
+        expect(subject).to match "/#{project.full_path}/-/snippets/#{snippet.id}/raw"
       end
     end
   end
@@ -72,7 +72,7 @@ describe SnippetPresenter do
     context 'with ProjectSnippet' do
       let(:snippet) { project_snippet }
 
-      it 'checks read_snippet ' do
+      it 'checks read_snippet' do
         expect(presenter).to receive(:can?).with(user, :read_snippet, snippet)
 
         subject
@@ -96,7 +96,7 @@ describe SnippetPresenter do
     context 'with ProjectSnippet' do
       let(:snippet) { project_snippet }
 
-      it 'checks update_snippet ' do
+      it 'checks update_snippet' do
         expect(presenter).to receive(:can?).with(user, :update_snippet, snippet)
 
         subject
@@ -120,7 +120,7 @@ describe SnippetPresenter do
     context 'with ProjectSnippet' do
       let(:snippet) { project_snippet }
 
-      it 'checks admin_snippet ' do
+      it 'checks admin_snippet' do
         expect(presenter).to receive(:can?).with(user, :admin_snippet, snippet)
 
         subject

@@ -1,0 +1,5 @@
+---
+title: API Fuzzing Request/Responses show empty body message
+merge_request: 50731
+author:
+type: changed

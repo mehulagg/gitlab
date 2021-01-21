@@ -1,6 +1,0 @@
----
-title: Geo - Does not sync files on Object Storage when syncing object storage is
-  enabled, but the Object Storage is disabled for the data type
-merge_request: 33561
-author:
-type: fixed

@@ -3,9 +3,12 @@
 class GroupImportState < ApplicationRecord
   self.primary_key = :group_id
 
-  belongs_to :group, inverse_of: :import_state
+  MAX_ERROR_LENGTH = 255
 
-  validates :group, :status, presence: true
+  belongs_to :group, inverse_of: :import_state
+  belongs_to :user, optional: false
+
+  validates :group, :status, :user, presence: true
   validates :jid, presence: true, if: -> { started? || finished? }
 
   state_machine :status, initial: :created do
@@ -29,7 +32,11 @@ class GroupImportState < ApplicationRecord
     after_transition any => :failed do |state, transition|
       last_error = transition.args.first
 
-      state.update_column(:last_error, last_error) if last_error
+      state.update_column(:last_error, last_error.truncate(MAX_ERROR_LENGTH)) if last_error
     end
+  end
+
+  def in_progress?
+    created? || started?
   end
 end

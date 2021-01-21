@@ -74,7 +74,7 @@ module Gitlab
       end
 
       def action_cable?
-        web_server? && (!!defined?(ACTION_CABLE_SERVER) || Gitlab.config.action_cable.in_app)
+        web_server? && (!!defined?(ACTION_CABLE_SERVER) || Gitlab::ActionCable::Config.in_app?)
       end
 
       def multi_threaded?
@@ -93,7 +93,7 @@ module Gitlab
         end
 
         if action_cable?
-          threads += Gitlab.config.action_cable.worker_pool_size
+          threads += Gitlab::ActionCable::Config.worker_pool_size
         end
 
         threads

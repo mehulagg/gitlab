@@ -6,9 +6,10 @@ import createStore from './store';
 
 Vue.use(Vuex);
 
-export default el => {
+export default (el) => {
   const {
     gitlabManagedClusterHelpPath,
+    namespacePerEnvironmentHelpPath,
     kubernetesIntegrationHelpPath,
     accountAndExternalIdsHelpPath,
     createRoleArnHelpPath,
@@ -42,6 +43,7 @@ export default el => {
       return createElement('create-eks-cluster', {
         props: {
           gitlabManagedClusterHelpPath,
+          namespacePerEnvironmentHelpPath,
           kubernetesIntegrationHelpPath,
           accountAndExternalIdsHelpPath,
           createRoleArnHelpPath,

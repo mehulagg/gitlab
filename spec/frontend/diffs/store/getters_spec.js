@@ -49,17 +49,53 @@ describe('Diffs Module Getters', () => {
     });
   });
 
-  describe('hasCollapsedFile', () => {
-    it('returns true when all files are collapsed', () => {
-      localState.diffFiles = [{ viewer: { collapsed: true } }, { viewer: { collapsed: true } }];
+  describe('whichCollapsedTypes', () => {
+    const autoCollapsedFile = { viewer: { automaticallyCollapsed: true, manuallyCollapsed: null } };
+    const manuallyCollapsedFile = {
+      viewer: { automaticallyCollapsed: false, manuallyCollapsed: true },
+    };
+    const openFile = { viewer: { automaticallyCollapsed: false, manuallyCollapsed: false } };
 
-      expect(getters.hasCollapsedFile(localState)).toEqual(true);
+    it.each`
+      description                                 | value    | files
+      ${'all files are automatically collapsed'}  | ${true}  | ${[{ ...autoCollapsedFile }, { ...autoCollapsedFile }]}
+      ${'all files are manually collapsed'}       | ${true}  | ${[{ ...manuallyCollapsedFile }, { ...manuallyCollapsedFile }]}
+      ${'no files are collapsed in any way'}      | ${false} | ${[{ ...openFile }, { ...openFile }]}
+      ${'some files are collapsed in either way'} | ${true}  | ${[{ ...manuallyCollapsedFile }, { ...autoCollapsedFile }, { ...openFile }]}
+    `('`any` is $value when $description', ({ value, files }) => {
+      localState.diffFiles = files;
+
+      const getterResult = getters.whichCollapsedTypes(localState);
+
+      expect(getterResult.any).toEqual(value);
     });
 
-    it('returns true when at least one file is collapsed', () => {
-      localState.diffFiles = [{ viewer: { collapsed: false } }, { viewer: { collapsed: true } }];
+    it.each`
+      description                                 | value    | files
+      ${'all files are automatically collapsed'}  | ${true}  | ${[{ ...autoCollapsedFile }, { ...autoCollapsedFile }]}
+      ${'all files are manually collapsed'}       | ${false} | ${[{ ...manuallyCollapsedFile }, { ...manuallyCollapsedFile }]}
+      ${'no files are collapsed in any way'}      | ${false} | ${[{ ...openFile }, { ...openFile }]}
+      ${'some files are collapsed in either way'} | ${true}  | ${[{ ...manuallyCollapsedFile }, { ...autoCollapsedFile }, { ...openFile }]}
+    `('`automatic` is $value when $description', ({ value, files }) => {
+      localState.diffFiles = files;
 
-      expect(getters.hasCollapsedFile(localState)).toEqual(true);
+      const getterResult = getters.whichCollapsedTypes(localState);
+
+      expect(getterResult.automatic).toEqual(value);
+    });
+
+    it.each`
+      description                                 | value    | files
+      ${'all files are automatically collapsed'}  | ${false} | ${[{ ...autoCollapsedFile }, { ...autoCollapsedFile }]}
+      ${'all files are manually collapsed'}       | ${true}  | ${[{ ...manuallyCollapsedFile }, { ...manuallyCollapsedFile }]}
+      ${'no files are collapsed in any way'}      | ${false} | ${[{ ...openFile }, { ...openFile }]}
+      ${'some files are collapsed in either way'} | ${true}  | ${[{ ...manuallyCollapsedFile }, { ...autoCollapsedFile }, { ...openFile }]}
+    `('`manual` is $value when $description', ({ value, files }) => {
+      localState.diffFiles = files;
+
+      const getterResult = getters.whichCollapsedTypes(localState);
+
+      expect(getterResult.manual).toEqual(value);
     });
   });
 
@@ -139,50 +175,74 @@ describe('Diffs Module Getters', () => {
 
   describe('diffHasExpandedDiscussions', () => {
     it('returns true when one of the discussions is expanded', () => {
-      discussionMock1.expanded = false;
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [discussionMock, discussionMock],
+            discussionsExpanded: true,
+          },
+        ],
+      };
 
-      expect(
-        getters.diffHasExpandedDiscussions(localState, {
-          getDiffFileDiscussions: () => [discussionMock, discussionMock],
-        })(diffFileMock),
-      ).toEqual(true);
+      expect(getters.diffHasExpandedDiscussions(localState)(diffFile)).toEqual(true);
     });
 
     it('returns false when there are no discussions', () => {
-      expect(
-        getters.diffHasExpandedDiscussions(localState, { getDiffFileDiscussions: () => [] })(
-          diffFileMock,
-        ),
-      ).toEqual(false);
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [],
+            discussionsExpanded: true,
+          },
+        ],
+      };
+      expect(getters.diffHasExpandedDiscussions(localState)(diffFile)).toEqual(false);
     });
 
     it('returns false when no discussion is expanded', () => {
-      discussionMock.expanded = false;
-      discussionMock1.expanded = false;
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [discussionMock, discussionMock],
+            discussionsExpanded: false,
+          },
+        ],
+      };
 
-      expect(
-        getters.diffHasExpandedDiscussions(localState, {
-          getDiffFileDiscussions: () => [discussionMock, discussionMock1],
-        })(diffFileMock),
-      ).toEqual(false);
+      expect(getters.diffHasExpandedDiscussions(localState)(diffFile)).toEqual(false);
     });
   });
 
   describe('diffHasDiscussions', () => {
     it('returns true when getDiffFileDiscussions returns discussions', () => {
-      expect(
-        getters.diffHasDiscussions(localState, {
-          getDiffFileDiscussions: () => [discussionMock],
-        })(diffFileMock),
-      ).toEqual(true);
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [discussionMock, discussionMock],
+            discussionsExpanded: false,
+          },
+        ],
+      };
+
+      expect(getters.diffHasDiscussions(localState)(diffFile)).toEqual(true);
     });
 
     it('returns false when getDiffFileDiscussions returns no discussions', () => {
-      expect(
-        getters.diffHasDiscussions(localState, {
-          getDiffFileDiscussions: () => [],
-        })(diffFileMock),
-      ).toEqual(false);
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [],
+            discussionsExpanded: false,
+          },
+        ],
+      };
+
+      expect(getters.diffHasDiscussions(localState)(diffFile)).toEqual(false);
     });
   });
 
@@ -191,9 +251,12 @@ describe('Diffs Module Getters', () => {
       discussionMock.diff_file.file_hash = diffFileMock.file_hash;
 
       expect(
-        getters.getDiffFileDiscussions(localState, {}, {}, { discussions: [discussionMock] })(
-          diffFileMock,
-        ).length,
+        getters.getDiffFileDiscussions(
+          localState,
+          {},
+          {},
+          { discussions: [discussionMock] },
+        )(diffFileMock).length,
       ).toEqual(1);
     });
 
@@ -285,7 +348,7 @@ describe('Diffs Module Getters', () => {
 
   describe('fileLineCoverage', () => {
     beforeEach(() => {
-      Object.assign(localState.coverageFiles, { files: { 'app.js': { '1': 0, '2': 5 } } });
+      Object.assign(localState.coverageFiles, { files: { 'app.js': { 1: 0, 2: 5 } } });
     });
 
     it('returns empty object when no coverage data is available', () => {
@@ -311,5 +374,27 @@ describe('Diffs Module Getters', () => {
         class: 'coverage',
       });
     });
+  });
+
+  describe('fileReviews', () => {
+    const file1 = { id: '123', file_identifier_hash: 'abc' };
+    const file2 = { id: '098', file_identifier_hash: 'abc' };
+
+    it.each`
+      reviews                           | files             | fileReviews
+      ${{}}                             | ${[file1, file2]} | ${[false, false]}
+      ${{ abc: ['123'] }}               | ${[file1, file2]} | ${[true, false]}
+      ${{ abc: ['098'] }}               | ${[file1, file2]} | ${[false, true]}
+      ${{ def: ['123'] }}               | ${[file1, file2]} | ${[false, false]}
+      ${{ abc: ['123'], def: ['098'] }} | ${[]}             | ${[]}
+    `(
+      'returns $fileReviews based on the diff files in state and the existing reviews $reviews',
+      ({ reviews, files, fileReviews }) => {
+        localState.diffFiles = files;
+        localState.mrReviews = reviews;
+
+        expect(getters.fileReviews(localState)).toStrictEqual(fileReviews);
+      },
+    );
   });
 });

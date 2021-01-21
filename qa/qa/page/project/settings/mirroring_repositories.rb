@@ -77,7 +77,7 @@ module QA
 
             # The host key detection process is interrupted if we navigate away
             # from the page before the fingerprint appears.
-            find_element(:fingerprints_list, text: /.*/)
+            find_element(:fingerprints_list, text: /.*/, wait: 60)
           end
 
           def mirror_repository
@@ -98,7 +98,7 @@ module QA
             sleep 5
             refresh
 
-            wait_until(sleep_interval: 1) do
+            wait_until(max_duration: 180, sleep_interval: 1) do
               within_element_by_index(:mirrored_repository_row, row_index) do
                 last_update = find_element(:mirror_last_update_at_cell, wait: 0)
                 last_update.has_text?('just now') || last_update.has_text?('seconds')

@@ -39,9 +39,6 @@ RSpec.describe MergeRequests::CreateService do
     end
 
     context 'report approvers' do
-      let(:sha) { project.repository.commits(opts[:source_branch], limit: 1).first.id }
-      let(:pipeline) { instance_double(Ci::Pipeline, id: 42, project_id: project.id, merge_request?: true) }
-
       it 'refreshes report approvers for the merge request' do
         expect_next_instance_of(::MergeRequests::SyncReportApproverApprovalRules) do |service|
           expect(service).to receive(:execute)
@@ -49,28 +46,14 @@ RSpec.describe MergeRequests::CreateService do
 
         service.execute
       end
-
-      it 'enqueues approval rule report syncing when pipeline exists' do
-        expect_next_instance_of(MergeRequest) do |merge_request|
-          allow(merge_request).to receive(:find_actual_head_pipeline).and_return(pipeline)
-          allow(merge_request).to receive(:update_head_pipeline).and_return(true)
-        end
-        expect(::SyncSecurityReportsToReportApprovalRulesWorker)
-          .to receive(:perform_async)
-
-        service.execute
-      end
-
-      it 'wont enqueue approval rule report syncing without pipeline' do
-        expect(::SyncSecurityReportsToReportApprovalRulesWorker)
-          .not_to receive(:perform_async)
-
-        service.execute
-      end
     end
 
     it_behaves_like 'new issuable with scoped labels' do
       let(:parent) { project }
+    end
+
+    it_behaves_like 'service with multiple reviewers' do
+      let(:execute) { service.execute }
     end
   end
 

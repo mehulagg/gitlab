@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/gitlab/const_get_inherit_false'
 
-describe RuboCop::Cop::Gitlab::ConstGetInheritFalse do
+RSpec.describe RuboCop::Cop::Gitlab::ConstGetInheritFalse do
   include CopHelper
 
   subject(:cop) { described_class.new }

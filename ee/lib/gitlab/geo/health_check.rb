@@ -12,13 +12,6 @@ module Gitlab
         return 'Geo node has a database that is writable which is an indication it is not configured for replication with the primary node.' unless Gitlab::Database.db_read_only?
         return 'Geo node does not appear to be replicating the database from the primary node.' if replication_enabled? && !replication_working?
         return "Geo database version (#{database_version}) does not match latest migration (#{migration_version}).\nYou may have to run `gitlab-rake geo:db:migrate` as root on the secondary." unless database_migration_version_match?
-        return 'Geo database is not configured to use Foreign Data Wrapper.' unless Gitlab::Geo::Fdw.enabled?
-
-        unless Gitlab::Geo::Fdw.foreign_tables_up_to_date?
-          output = "Geo database has an outdated FDW remote schema."
-          output = "#{output} It contains #{foreign_schema_tables_count} of #{gitlab_schema_tables_count} expected tables." unless schema_tables_match?
-          return output
-        end
 
         ''
       rescue => e
@@ -55,13 +48,13 @@ module Gitlab
       def db_replication_lag_seconds_query
         <<-SQL.squish
           SELECT CASE
-            WHEN #{Gitlab::Database.pg_last_wal_receive_lsn}() = #{Gitlab::Database.pg_last_wal_replay_lsn}()
+            WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()
               THEN 0
             ELSE
-              EXTRACT (EPOCH FROM now() - #{Gitlab::Database.pg_last_xact_replay_timestamp}())::INTEGER
+              EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())::INTEGER
             END
             AS replication_lag
-          SQL
+        SQL
       end
 
       def db_migrate_path
@@ -109,25 +102,13 @@ module Gitlab
         database_version.to_i == migration_version.to_i
       end
 
-      def gitlab_schema_tables_count
-        @gitlab_schema_tables_count ||= Gitlab::Geo::Fdw.gitlab_schema_tables_count
-      end
-
-      def foreign_schema_tables_count
-        @foreign_schema_tables_count ||= Gitlab::Geo::Fdw.foreign_schema_tables_count
-      end
-
-      def schema_tables_match?
-        gitlab_schema_tables_count == foreign_schema_tables_count
-      end
-
       def archive_recovery_replication_enabled?
         !streaming_replication_enabled? && some_replication_active?
       end
 
       def streaming_replication_enabled?
         !ActiveRecord::Base.connection
-          .execute("SELECT * FROM #{Gitlab::Database.pg_last_wal_receive_lsn}() as result")
+          .execute("SELECT * FROM pg_last_wal_receive_lsn() as result")
           .first['result']
           .nil?
       end
@@ -135,7 +116,7 @@ module Gitlab
       def some_replication_active?
         # Is some sort of replication active?
         !ActiveRecord::Base.connection
-          .execute("SELECT * FROM #{Gitlab::Database.pg_last_xact_replay_timestamp}() as result")
+          .execute("SELECT * FROM pg_last_xact_replay_timestamp() as result")
           .first['result']
           .nil?
       end

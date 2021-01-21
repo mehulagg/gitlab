@@ -1,25 +1,24 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/220189', type: :investigating } do
-    describe 'Merge request creation from fork' do
-      it 'user forks a project, submits a merge request and maintainer merges it' do
-        Flow::Login.sign_in
-
-        merge_request = Resource::MergeRequestFromFork.fabricate_via_browser_ui! do |merge_request|
+  RSpec.describe 'Create' do
+    describe 'Merge request creation from fork', :smoke do
+      let!(:merge_request) do
+        Resource::MergeRequestFromFork.fabricate_via_browser_ui! do |merge_request|
           merge_request.fork_branch = 'feature-branch'
         end
+      end
 
-        merge_request.project.api_put(auto_devops_enabled: false)
+      it 'can merge feature branch fork to mainline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/928' do
+        Flow::Login.while_signed_in do
+          merge_request.visit!
 
-        Page::Main::Menu.perform(&:sign_out)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+          Page::MergeRequest::Show.perform do |merge_request|
+            merge_request.merge!
 
-        merge_request.visit!
-
-        Page::MergeRequest::Show.perform(&:merge!)
-
-        expect(page).to have_content('The changes were merged')
+            expect(merge_request).to have_content('The changes were merged')
+          end
+        end
       end
     end
   end

@@ -41,7 +41,7 @@ RSpec.describe 'Epic shortcuts', :js do
       wait_for_requests
     end
 
-    it "quotes the selected text", :quarantine do
+    it "quotes the selected text", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11057' do
       select_element('.note-text')
       find('body').native.send_key('r')
 

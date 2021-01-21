@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Suggestions::ApplyService do
+RSpec.describe Suggestions::ApplyService do
   include ProjectForksHelper
 
   def build_position(**optional_args)
@@ -20,7 +20,7 @@ describe Suggestions::ApplyService do
     position_args = args.slice(:old_path, :new_path, :old_line, :new_line)
     content_args = args.slice(:from_content, :to_content)
 
-    position = build_position(position_args)
+    position = build_position(**position_args)
 
     diff_note = create(:diff_note_on_merge_request,
                        noteable: merge_request,
@@ -609,40 +609,16 @@ describe Suggestions::ApplyService do
       end
     end
 
-    context 'suggestion is eligible to be outdated' do
+    context 'suggestion is not appliable' do
+      let(:inapplicable_reason) { "Can't apply this suggestion." }
+
       it 'returns error message' do
-        expect(suggestion).to receive(:outdated?) { true }
+        expect(suggestion).to receive(:appliable?).and_return(false)
+        expect(suggestion).to receive(:inapplicable_reason).and_return(inapplicable_reason)
 
         result = apply_service.new(user, suggestion).execute
 
-        expect(result).to eq(message: 'A suggestion is not applicable.',
-                             status: :error)
-      end
-    end
-
-    context 'note is outdated' do
-      before do
-        allow(diff_note).to receive(:active?) { false }
-      end
-
-      it 'returns error message' do
-        result = apply_service.new(user, suggestion).execute
-
-        expect(result).to eq(message: 'A suggestion is not applicable.',
-                             status: :error)
-      end
-    end
-
-    context 'suggestion was already applied' do
-      before do
-        suggestion.update!(applied: true, commit_id: 'sha')
-      end
-
-      it 'returns error message' do
-        result = apply_service.new(user, suggestion).execute
-
-        expect(result).to eq(message: 'A suggestion is not applicable.',
-                             status: :error)
+        expect(result).to eq(message: inapplicable_reason, status: :error)
       end
     end
 

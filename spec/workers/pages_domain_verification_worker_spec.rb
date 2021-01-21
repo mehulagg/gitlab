@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PagesDomainVerificationWorker do
+RSpec.describe PagesDomainVerificationWorker do
   subject(:worker) { described_class.new }
 
   let(:domain) { create(:pages_domain) }
@@ -16,7 +16,7 @@ describe PagesDomainVerificationWorker do
     end
 
     it 'does nothing for a non-existent domain' do
-      domain.destroy
+      domain.destroy!
 
       expect(VerifyPagesDomainService).not_to receive(:new)
 

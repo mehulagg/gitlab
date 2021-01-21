@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::BroadcastMessages do
+RSpec.describe API::BroadcastMessages do
   let_it_be(:user)  { create(:user) }
   let_it_be(:admin) { create(:admin) }
   let_it_be(:message) { create(:broadcast_message) }
@@ -112,7 +112,7 @@ describe API::BroadcastMessages do
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
-      it 'accepts an active dismissable value ' do
+      it 'accepts an active dismissable value' do
         attrs = { message: 'new message', dismissable: true }
 
         post api('/broadcast_messages', admin), params: attrs
@@ -197,7 +197,7 @@ describe API::BroadcastMessages do
         expect(response).to have_gitlab_http_status(:bad_request)
       end
 
-      it 'accepts a new dismissable value ' do
+      it 'accepts a new dismissable value' do
         attrs = { message: 'new message', dismissable: true }
 
         put api("/broadcast_messages/#{message.id}", admin), params: attrs

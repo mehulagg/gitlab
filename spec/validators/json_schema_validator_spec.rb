@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe JsonSchemaValidator do
+RSpec.describe JsonSchemaValidator do
   describe '#validates_each' do
     let(:build_report_result) { build(:ci_build_report_result, :with_junit_success) }
 
@@ -27,6 +27,36 @@ describe JsonSchemaValidator do
 
           expect(build_report_result.errors.size).to eq(1)
           expect(build_report_result.errors.full_messages).to eq(["Data must be a valid json schema"])
+        end
+      end
+
+      context 'when draft is > 4' do
+        let(:validator) { described_class.new(attributes: [:data], filename: "build_report_result_data", draft: 6) }
+
+        it 'uses JSONSchemer to perform validations' do
+          expect(JSONSchemer).to receive(:schema).with(Pathname.new(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s)).and_call_original
+
+          subject
+        end
+      end
+
+      context 'when draft is <= 4' do
+        let(:validator) { described_class.new(attributes: [:data], filename: "build_report_result_data", draft: 4) }
+
+        it 'uses JSON::Validator to perform validations' do
+          expect(JSON::Validator).to receive(:validate).with(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s, build_report_result.data)
+
+          subject
+        end
+      end
+
+      context 'when draft value is not provided' do
+        let(:validator) { described_class.new(attributes: [:data], filename: "build_report_result_data") }
+
+        it 'uses JSON::Validator to perform validations' do
+          expect(JSON::Validator).to receive(:validate).with(Rails.root.join('app', 'validators', 'json_schemas', 'build_report_result_data.json').to_s, build_report_result.data)
+
+          subject
         end
       end
     end

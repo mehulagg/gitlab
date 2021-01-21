@@ -93,7 +93,10 @@ module Ci
     end
 
     def refspec_for_persistent_ref
-      "+#{persistent_ref_path}:#{persistent_ref_path}"
+      # Use persistent_ref.sha because it sometimes causes 'git fetch' to do
+      # less work. See
+      # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/746.
+      "+#{pipeline.persistent_ref.sha}:#{pipeline.persistent_ref.path}"
     end
 
     def persistent_ref_exist?
@@ -107,10 +110,6 @@ module Ci
       pipeline.persistent_ref.exist?
     end
 
-    def persistent_ref_path
-      pipeline.persistent_ref.path
-    end
-
     def git_depth_variable
       strong_memoize(:git_depth_variable) do
         variables&.find { |variable| variable[:key] == 'GIT_DEPTH' }
@@ -118,3 +117,5 @@ module Ci
     end
   end
 end
+
+Ci::BuildRunnerPresenter.prepend_if_ee('EE::Ci::BuildRunnerPresenter')

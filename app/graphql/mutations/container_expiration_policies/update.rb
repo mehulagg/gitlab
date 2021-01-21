@@ -12,7 +12,7 @@ module Mutations
       argument :project_path,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'The project path where the container expiration policy is located'
+               description: 'The project path where the container expiration policy is located.'
 
       argument :enabled,
                GraphQL::BOOLEAN_TYPE,
@@ -34,10 +34,20 @@ module Mutations
                required: false,
                description: copy_field_description(Types::ContainerExpirationPolicyType, :keep_n)
 
+      argument :name_regex,
+               Types::UntrustedRegexp,
+               required: false,
+               description: copy_field_description(Types::ContainerExpirationPolicyType, :name_regex)
+
+      argument :name_regex_keep,
+               Types::UntrustedRegexp,
+               required: false,
+               description: copy_field_description(Types::ContainerExpirationPolicyType, :name_regex_keep)
+
       field :container_expiration_policy,
             Types::ContainerExpirationPolicyType,
             null: true,
-            description: 'The container expiration policy after mutation'
+            description: 'The container expiration policy after mutation.'
 
       def resolve(project_path:, **args)
         project = authorized_find!(full_path: project_path)

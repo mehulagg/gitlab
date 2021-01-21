@@ -2,12 +2,15 @@
 
 require 'spec_helper.rb'
 
-describe Issues::BuildService do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+RSpec.describe Issues::BuildService do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:guest) { create(:user) }
+  let(:user) { developer }
 
-  before do
-    project.add_developer(user)
+  before_all do
+    project.add_developer(developer)
+    project.add_guest(guest)
   end
 
   def build_issue(issue_params = {})
@@ -134,18 +137,57 @@ describe Issues::BuildService do
   end
 
   describe '#execute' do
-    it 'builds a new issues with given params' do
-      milestone = create(:milestone, project: project)
-      issue = build_issue(milestone_id: milestone.id)
+    context 'as developer' do
+      it 'builds a new issues with given params' do
+        milestone = create(:milestone, project: project)
+        issue = build_issue(milestone_id: milestone.id)
 
-      expect(issue.milestone).to eq(milestone)
+        expect(issue.milestone).to eq(milestone)
+      end
+
+      it 'sets milestone to nil if it is not available for the project' do
+        milestone = create(:milestone, project: create(:project))
+        issue = build_issue(milestone_id: milestone.id)
+
+        expect(issue.milestone).to be_nil
+      end
     end
 
-    it 'sets milestone to nil if it is not available for the project' do
-      milestone = create(:milestone, project: create(:project))
-      issue = build_issue(milestone_id: milestone.id)
+    context 'as guest' do
+      let(:user) { guest }
 
-      expect(issue.milestone).to be_nil
+      it 'cannot set milestone' do
+        milestone = create(:milestone, project: project)
+        issue = build_issue(milestone_id: milestone.id)
+
+        expect(issue.milestone).to be_nil
+      end
+
+      context 'setting issue type' do
+        it 'defaults to issue if issue_type not given' do
+          issue = build_issue
+
+          expect(issue).to be_issue
+        end
+
+        it 'sets issue' do
+          issue = build_issue(issue_type: 'issue')
+
+          expect(issue).to be_issue
+        end
+
+        it 'sets incident' do
+          issue = build_issue(issue_type: 'incident')
+
+          expect(issue).to be_incident
+        end
+
+        it 'cannot set invalid type' do
+          expect do
+            build_issue(issue_type: 'invalid type')
+          end.to raise_error(ArgumentError, "'invalid type' is not a valid issue_type")
+        end
+      end
     end
   end
 end

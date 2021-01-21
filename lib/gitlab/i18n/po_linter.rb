@@ -9,7 +9,7 @@ module Gitlab
 
       VARIABLE_REGEX = /%{\w*}|%[a-z]/.freeze
 
-      def initialize(po_path, locale = I18n.locale.to_s)
+      def initialize(po_path:, locale: I18n.locale.to_s)
         @po_path = po_path
         @locale = locale
       end
@@ -19,11 +19,13 @@ module Gitlab
       end
 
       def validate_po
-        if parse_error = parse_po
+        if (parse_error = parse_po)
           return 'PO-syntax errors' => [parse_error]
         end
 
-        validate_entries
+        Gitlab::I18n.with_locale(locale) do
+          validate_entries
+        end
       end
 
       def parse_po
@@ -38,7 +40,10 @@ module Gitlab
         end
 
         @translation_entries = entries.map do |entry_data|
-          Gitlab::I18n::TranslationEntry.new(entry_data, metadata_entry.expected_forms)
+          Gitlab::I18n::TranslationEntry.new(
+            entry_data: entry_data,
+            nplurals: metadata_entry.expected_forms
+          )
         end
 
         nil
@@ -66,6 +71,7 @@ module Gitlab
         validate_newlines(errors, entry)
         validate_number_of_plurals(errors, entry)
         validate_unescaped_chars(errors, entry)
+        validate_html(errors, entry)
         validate_translation(errors, entry)
 
         errors
@@ -82,6 +88,23 @@ module Gitlab
 
         if entry.translations_contain_unescaped_chars?
           errors << 'translation contains unescaped `%`, escape it using `%%`'
+        end
+      end
+
+      def validate_html(errors, entry)
+        common_message = 'contains < or >. Use variables to include HTML in the string, or the &lt; and &gt; codes ' \
+          'for the symbols. For more info see: https://docs.gitlab.com/ee/development/i18n/externalization.html#html'
+
+        if entry.msgid_contains_potential_html?
+          errors << common_message
+        end
+
+        if entry.plural_id_contains_potential_html?
+          errors << 'plural id ' + common_message
+        end
+
+        if entry.translations_contain_potential_html?
+          errors << 'translation ' + common_message
         end
       end
 
@@ -133,12 +156,10 @@ module Gitlab
       end
 
       def validate_translation(errors, entry)
-        Gitlab::I18n.with_locale(locale) do
-          if entry.has_plural?
-            translate_plural(entry)
-          else
-            translate_singular(entry)
-          end
+        if entry.has_plural?
+          translate_plural(entry)
+        else
+          translate_singular(entry)
         end
 
       # `sprintf` could raise an `ArgumentError` when invalid passing something
@@ -207,9 +228,7 @@ module Gitlab
         # This calls the C function that defines the pluralization rule, it can
         # return a boolean (`false` represents 0, `true` represents 1) or an integer
         # that specifies the plural form to be used for the given number
-        pluralization_result = Gitlab::I18n.with_locale(locale) do
-          FastGettext.pluralisation_rule.call(counter)
-        end
+        pluralization_result = FastGettext.pluralisation_rule.call(counter)
 
         case pluralization_result
         when false

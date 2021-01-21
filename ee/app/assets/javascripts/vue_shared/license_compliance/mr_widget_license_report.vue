@@ -1,14 +1,12 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlLink } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
+import { componentNames } from 'ee/reports/components/issue_body';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import ReportItem from '~/reports/components/report_item.vue';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
-import SetLicenseApprovalModal from 'ee/vue_shared/license_compliance/components/set_approval_status_modal.vue';
-import { componentNames } from 'ee/reports/components/issue_body';
-import Icon from '~/vue_shared/components/icon.vue';
 import ReportSection from '~/reports/components/report_section.vue';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import createStore from './store';
 
 const store = createStore();
@@ -21,9 +19,8 @@ export default {
     GlLink,
     ReportItem,
     ReportSection,
-    SetLicenseApprovalModal,
     SmartVirtualList,
-    Icon,
+    GlIcon,
   },
   mixins: [reportsMixin],
   props: {
@@ -42,6 +39,11 @@ export default {
       required: true,
     },
     licensesApiPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    approvalsApiPath: {
       type: String,
       required: false,
       default: '',
@@ -94,24 +96,29 @@ export default {
     },
   },
   mounted() {
-    const { apiUrl, canManageLicenses, licensesApiPath } = this;
+    const { apiUrl, canManageLicenses, licensesApiPath, approvalsApiPath } = this;
 
     this.setAPISettings({
       apiUrlManageLicenses: apiUrl,
       canManageLicenses,
       licensesApiPath,
+      approvalsApiPath,
     });
 
     this.fetchParsedLicenseReport();
+    this.fetchLicenseCheckApprovalRule();
   },
   methods: {
-    ...mapActions(LICENSE_MANAGEMENT, ['setAPISettings', 'fetchParsedLicenseReport']),
+    ...mapActions(LICENSE_MANAGEMENT, [
+      'setAPISettings',
+      'fetchParsedLicenseReport',
+      'fetchLicenseCheckApprovalRule',
+    ]),
   },
 };
 </script>
 <template>
   <div>
-    <set-license-approval-modal />
     <report-section
       :status="licenseReportStatus"
       :loading-text="licenseSummaryText"
@@ -165,16 +172,17 @@ export default {
             class="js-security-approval-help-link"
             target="_blank"
           >
-            <icon :size="12" name="question" />
+            <gl-icon :size="12" name="question" />
           </gl-link>
         </div>
       </template>
-      <div v-if="showActionButtons" slot="actionButtons" class="append-right-default">
+      <div v-if="showActionButtons" slot="action-buttons" class="gl-mr-3">
         <a
           v-if="licenseManagementSettingsPath"
           :class="{ 'gl-mr-3': fullReportPath }"
           :href="licenseManagementSettingsPath"
           class="btn btn-default btn-sm js-manage-licenses"
+          data-qa-selector="manage_licenses_button"
         >
           {{ s__('ciReport|Manage licenses') }}
         </a>
@@ -184,7 +192,7 @@ export default {
           target="_blank"
           class="btn btn-default btn-sm js-full-report"
         >
-          {{ s__('ciReport|View full report') }} <icon :size="16" name="external-link" />
+          {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
         </a>
       </div>
     </report-section>

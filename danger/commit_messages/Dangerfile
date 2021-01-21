@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require_relative File.expand_path('../../lib/gitlab/danger/commit_linter', __dir__)
+require_relative File.expand_path('../../tooling/danger/commit_linter', __dir__)
+require_relative File.expand_path('../../tooling/danger/merge_request_linter', __dir__)
 
 COMMIT_MESSAGE_GUIDELINES = "https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html#commit-messages-guidelines"
 MORE_INFO = "For more information, take a look at our [Commit message guidelines](#{COMMIT_MESSAGE_GUIDELINES})."
@@ -37,7 +38,8 @@ def build_message(commit, message, more_info: true)
 end
 
 def squash_mr?
-  gitlab_danger.ci? ? gitlab.mr_json['squash'] : false
+  # Locally, we assume the MR is set to be squashed so that the user only sees warnings instead of errors.
+  gitlab_danger.ci? ? gitlab.mr_json['squash'] : true
 end
 
 def wip_mr?
@@ -52,7 +54,7 @@ end
 # https://github.com/jonallured/danger-commit_lint because its output is not
 # very helpful, and it doesn't offer the means of ignoring merge commits.
 def lint_commit(commit)
-  linter = Gitlab::Danger::CommitLinter.new(commit)
+  linter = Tooling::Danger::CommitLinter.new(commit)
 
   # For now we'll ignore merge commits, as getting rid of those is a problem
   # separate from enforcing good commit messages.
@@ -91,7 +93,7 @@ end
 def lint_mr_title(mr_title)
   commit = Struct.new(:message, :sha).new(mr_title)
 
-  Gitlab::Danger::CommitLinter.new(commit).lint_subject("merge request title")
+  Tooling::Danger::MergeRequestLinter.new(commit).lint
 end
 
 def count_non_fixup_commits(commit_linters)
@@ -100,25 +102,27 @@ end
 
 def lint_commits(commits)
   commit_linters = commits.map { |commit| lint_commit(commit) }
-  failed_commit_linters = commit_linters.select { |commit_linter| commit_linter.failed? }
-  warn_or_fail_commits(failed_commit_linters, default_to_fail: !squash_mr?)
-
-  if count_non_fixup_commits(commit_linters) > MAX_COMMITS_COUNT
-    self.warn(format(MAX_COMMITS_COUNT_EXCEEDED_MESSAGE, max_commits_count: MAX_COMMITS_COUNT))
-  end
 
   if squash_mr?
     multi_line_commit_linter = commit_linters.detect { |commit_linter| !commit_linter.merge? && commit_linter.multi_line? }
 
     if multi_line_commit_linter && multi_line_commit_linter.failed?
       warn_or_fail_commits(multi_line_commit_linter)
-    else
+      commit_linters.delete(multi_line_commit_linter) # Don't show an error (here) and a warning (below)
+    elsif gitlab_danger.ci? # We don't have access to the MR title locally
       title_linter = lint_mr_title(gitlab.mr_json['title'])
       if title_linter.failed?
         warn_or_fail_commits(title_linter)
       end
     end
+  else
+    if count_non_fixup_commits(commit_linters) > MAX_COMMITS_COUNT
+      self.warn(format(MAX_COMMITS_COUNT_EXCEEDED_MESSAGE, max_commits_count: MAX_COMMITS_COUNT))
+    end
   end
+
+  failed_commit_linters = commit_linters.select { |commit_linter| commit_linter.failed? }
+  warn_or_fail_commits(failed_commit_linters, default_to_fail: !squash_mr?)
 end
 
 def warn_or_fail_commits(failed_linters, default_to_fail: true)
@@ -127,7 +131,7 @@ def warn_or_fail_commits(failed_linters, default_to_fail: true)
   Array(failed_linters).each do |linter|
     linter.problems.each do |problem_key, problem_desc|
       case problem_key
-      when :subject_above_warning
+      when :subject_too_short, :subject_above_warning
         warn_commit(linter.commit, problem_desc)
       else
         self.__send__("#{level}_commit", linter.commit, problem_desc) # rubocop:disable GitlabSecurity/PublicSend
@@ -136,4 +140,12 @@ def warn_or_fail_commits(failed_linters, default_to_fail: true)
   end
 end
 
-lint_commits(git.commits)
+# As part of https://gitlab.com/groups/gitlab-org/-/epics/4826 we are
+# vendoring workhorse commits from the stand-alone gitlab-workhorse
+# repo. There is no point in linting commits that we want to vendor as
+# is.
+def workhorse_changes?
+  git.diff.any? { |file| file.path.start_with?('workhorse/') }
+end
+
+lint_commits(git.commits) unless workhorse_changes?

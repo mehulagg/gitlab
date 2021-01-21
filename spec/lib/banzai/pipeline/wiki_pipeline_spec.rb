@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Banzai::Pipeline::WikiPipeline do
+RSpec.describe Banzai::Pipeline::WikiPipeline do
   let_it_be(:namespace) { create(:namespace, name: "wiki_link_ns") }
   let_it_be(:project)   { create(:project, :public, name: "wiki_link_project", namespace: namespace) }
-  let_it_be(:wiki)      { ProjectWiki.new(project, double(:user)) }
+  let_it_be(:wiki)      { ProjectWiki.new(project, nil) }
   let_it_be(:page)      { build(:wiki_page, wiki: wiki, title: 'nested/twice/start-page') }
 
   describe 'TableOfContents' do

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::ResetMergeStatus do
+RSpec.describe Gitlab::BackgroundMigration::ResetMergeStatus do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
-  let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
-  let(:project) { projects.create(namespace_id: namespace.id, name: 'foo') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
+  let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
   let(:merge_requests) { table(:merge_requests) }
 
   def create_merge_request(id, extra_params = {})

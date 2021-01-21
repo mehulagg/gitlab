@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Badge::Coverage::Template do
+RSpec.describe Gitlab::Badge::Coverage::Template do
   let(:badge) { double(entity: 'coverage', status: 90.00, customization: {}) }
   let(:template) { described_class.new(badge) }
 
@@ -22,7 +22,7 @@ describe Gitlab::Badge::Coverage::Template do
 
       context 'when its size is larger than the max allowed value' do
         before do
-          allow(badge).to receive(:customization).and_return({ key_text: 't' * 129 })
+          allow(badge).to receive(:customization).and_return({ key_text: 't' * 65 })
         end
 
         it 'returns default value' do
@@ -76,7 +76,7 @@ describe Gitlab::Badge::Coverage::Template do
 
       context 'when it is larger than the max allowed value' do
         before do
-          allow(badge).to receive(:customization).and_return({ key_width: 129 })
+          allow(badge).to receive(:customization).and_return({ key_width: 513 })
         end
 
         it 'returns default value' do

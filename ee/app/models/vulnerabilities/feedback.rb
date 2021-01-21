@@ -15,7 +15,8 @@ module Vulnerabilities
     attr_accessor :vulnerability_data
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3, secret_detection: 4 }
+    enum category: ::Enums::Vulnerability.report_types
+    declarative_enum DismissalReasonEnum
 
     validates :project, presence: true
     validates :author, presence: true
@@ -34,6 +35,9 @@ module Vulnerabilities
       preload(:author, :comment_author, :project, :issue, :merge_request, :pipeline)
     end
 
+    after_save :touch_pipeline, if: :for_dismissal?
+    after_destroy :touch_pipeline, if: :for_dismissal?
+
     # TODO remove once filtered data has been cleaned
     def self.only_valid_feedback
       pipeline = Ci::Pipeline.arel_table
@@ -49,8 +53,8 @@ module Vulnerabilities
       record
     end
 
-    # Rails 5.0 does not properly handle validation of enums in select queries such as find_or_initialize_by.
-    # This method, and calls to it can be removed when we are on Rails 5.2.
+    # Rails does not validate enums in select queries such as `find_or_initialize_by`,
+    # So we raise an ArgumentError early to return a human-readable error
     def self.validate_enums(feedback_params)
       unless feedback_types.include?(feedback_params[:feedback_type])
 
@@ -76,12 +80,27 @@ module Vulnerabilities
       comment.present? && comment_author.present?
     end
 
-    def occurrence_key
+    def finding_key
       {
         project_id: project_id,
         category: category,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def touch_pipeline
+      pipeline&.touch if pipeline&.needs_touch?
+    rescue ActiveRecord::StaleObjectError
+      # Often the pipeline has already been updated by creating vulnerability feedback
+      # in batches. In this case, we can ignore the exception as it's already been touched.
+    end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
     end
   end
 end

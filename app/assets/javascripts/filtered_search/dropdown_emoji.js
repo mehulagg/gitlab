@@ -1,4 +1,4 @@
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Ajax from '../droplab/plugins/ajax';
 import Filter from '../droplab/plugins/filter';
 import FilteredSearchDropdown from './filtered_search_dropdown';
@@ -10,7 +10,7 @@ export default class DropdownEmoji extends FilteredSearchDropdown {
     super(options);
     this.config = {
       Ajax: {
-        endpoint: `${gon.relative_url_root || ''}/autocomplete/award_emojis`,
+        endpoint: `${gon.relative_url_root || ''}/-/autocomplete/award_emojis`,
         method: 'setData',
         loadingTemplate: this.loadingTemplate,
         onError() {
@@ -53,7 +53,7 @@ export default class DropdownEmoji extends FilteredSearchDropdown {
   }
 
   itemClicked(e) {
-    super.itemClicked(e, selected => {
+    super.itemClicked(e, (selected) => {
       const name = selected.querySelector('.js-data-value').innerText.trim();
       return DropdownUtils.getEscapedText(name);
     });
@@ -69,7 +69,7 @@ export default class DropdownEmoji extends FilteredSearchDropdown {
 
     // Replace empty gl-emoji tag to real content
     const dropdownItems = [...this.dropdown.querySelectorAll('.filter-dropdown-item')];
-    dropdownItems.forEach(dropdownItem => {
+    dropdownItems.forEach((dropdownItem) => {
       const valueElement = dropdownItem.querySelector('.js-data-value');
       if (valueElement !== null) {
         const name = valueElement.innerText;

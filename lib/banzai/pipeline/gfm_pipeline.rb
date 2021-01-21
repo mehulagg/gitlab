@@ -12,16 +12,14 @@ module Banzai
       def self.filters
         @filters ||= FilterArray[
           Filter::PlantumlFilter,
-
           # Must always be before the SanitizationFilter to prevent XSS attacks
           Filter::SpacedLinkFilter,
-
           Filter::SanitizationFilter,
           Filter::AssetProxyFilter,
           Filter::SyntaxHighlightFilter,
-
           Filter::MathFilter,
           Filter::ColorFilter,
+          Filter::KrokiFilter,
           Filter::MermaidFilter,
           Filter::VideoLinkFilter,
           Filter::AudioLinkFilter,
@@ -34,13 +32,10 @@ module Banzai
           Filter::ExternalLinkFilter,
           Filter::SuggestionFilter,
           Filter::FootnoteFilter,
-
           *reference_filters,
-
           Filter::EmojiFilter,
           Filter::TaskListFilter,
           Filter::InlineDiffFilter,
-
           Filter::SetDirectionFilter
         ]
       end
@@ -48,7 +43,8 @@ module Banzai
       def self.metrics_filters
         [
           Filter::InlineMetricsFilter,
-          Filter::InlineGrafanaMetricsFilter
+          Filter::InlineGrafanaMetricsFilter,
+          Filter::InlineClusterMetricsFilter
         ]
       end
 
@@ -64,7 +60,8 @@ module Banzai
           Filter::CommitRangeReferenceFilter,
           Filter::CommitReferenceFilter,
           Filter::LabelReferenceFilter,
-          Filter::MilestoneReferenceFilter
+          Filter::MilestoneReferenceFilter,
+          Filter::AlertReferenceFilter
         ]
       end
 

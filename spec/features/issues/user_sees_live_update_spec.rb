@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issues > User sees live update', :js do
+RSpec.describe 'Issues > User sees live update', :js do
   let_it_be(:project) { create(:project, :public) }
   let_it_be(:user) { project.creator }
 
@@ -26,7 +26,7 @@ describe 'Issues > User sees live update', :js do
   end
 
   describe 'confidential issue#show' do
-    it 'shows confidential sibebar information as confidential and can be turned off' do
+    it 'shows confidential sibebar information as confidential and can be turned off', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/254644' do
       issue = create(:issue, :confidential, project: project)
 
       visit project_issue_path(project, issue)
@@ -39,7 +39,7 @@ describe 'Issues > User sees live update', :js do
       expect(page).to have_css('.sidebar-item-warning-message')
 
       within('.sidebar-item-warning-message') do
-        find('.btn-close').click
+        find('[data-testid="confidential-toggle"]').click
       end
 
       wait_for_requests

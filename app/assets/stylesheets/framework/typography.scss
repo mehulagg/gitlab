@@ -1,3 +1,6 @@
+// Custom Fontawesome icons
+@import 'fontawesome_custom';
+
 /**
  * Apply Markup (Markdown/AsciiDoc) typography
  *
@@ -84,15 +87,15 @@
     padding: 3px 5px;
     font-size: 11px;
     line-height: 10px;
-    color: $gl-gray-700;
+    color: $gray-700;
     vertical-align: middle;
     background-color: $gray-10;
     border-width: 1px;
     border-style: solid;
-    border-color: $gray-200 $gray-200 $gray-400;
+    border-color: $gray-100 $gray-100 $gray-200;
     border-image: none;
     border-radius: 3px;
-    box-shadow: 0 -1px 0 $gray-400 inset;
+    box-shadow: 0 -1px 0 $gray-200 inset;
   }
 
   h1 {
@@ -181,13 +184,13 @@
       background-color: $white;
 
       td {
-        border-color: $gray-200;
+        border-color: $gray-100;
       }
     }
 
     tr {
       th {
-        border-bottom: solid 2px $gray-300;
+        border-bottom: solid 2px $gray-200;
       }
     }
 
@@ -432,15 +435,11 @@
     &::before {
       margin-right: 4px;
 
-      font: normal normal normal 14px/1 FontAwesome;
+      font-style: normal;
       font-size: inherit;
       text-rendering: auto;
       -webkit-font-smoothing: antialiased;
-      content: '\f0c6';
-    }
-
-    &:hover::before {
-      text-decoration: none;
+      content: '📎';
     }
 
     &.no-attachment-icon {
@@ -457,11 +456,9 @@
   h4,
   h5,
   h6 {
-    position: relative;
-
     a.anchor {
-      left: -16px;
-      position: absolute;
+      float: left;
+      margin-left: -16px;
       text-decoration: none;
       outline: none;
 
@@ -579,10 +576,6 @@ body {
   font-size: 1.25em;
   font-weight: $gl-font-weight-bold;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
   &.with-button {
     line-height: 34px;
   }
@@ -611,7 +604,7 @@ pre {
   word-wrap: break-word;
   color: $gl-text-color;
   background-color: $gray-light;
-  border: 1px solid $gray-200;
+  border: 1px solid $gray-100;
   border-radius: $border-radius-small;
 }
 

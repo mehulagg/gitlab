@@ -1,10 +1,10 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { escape, debounce } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { GlLoadingIcon, GlFormInput, GlFormGroup } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlLoadingIcon, GlFormInput, GlFormGroup, GlButton } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import createEmptyBadge from '../empty_badge';
 import Badge from './badge.vue';
 
@@ -14,7 +14,7 @@ export default {
   name: 'BadgeForm',
   components: {
     Badge,
-    LoadingButton,
+    GlButton,
     GlLoadingIcon,
     GlFormInput,
     GlFormGroup,
@@ -48,10 +48,10 @@ export default {
     },
     helpText() {
       const placeholders = ['project_path', 'project_id', 'default_branch', 'commit_sha']
-        .map(placeholder => `<code>%{${placeholder}}</code>`)
+        .map((placeholder) => `<code>%{${placeholder}}</code>`)
         .join(', ');
       return sprintf(
-        s__('Badges|The %{docsLinkStart}variables%{docsLinkEnd} GitLab supports: %{placeholders}'),
+        s__('Badges|Supported %{docsLinkStart}variables%{docsLinkEnd}: %{placeholders}'),
         {
           docsLinkEnd: '</a>',
           docsLinkStart: `<a href="${escape(this.docsUrl)}">`,
@@ -105,13 +105,13 @@ export default {
     badgeImageUrlExample() {
       const exampleUrl =
         'https://example.gitlab.com/%{project_path}/badges/%{default_branch}/pipeline.svg';
-      return sprintf(s__('Badges|e.g. %{exampleUrl}'), {
+      return sprintf(s__('Badges|Example: %{exampleUrl}'), {
         exampleUrl,
       });
     },
     badgeLinkUrlExample() {
       const exampleUrl = 'https://example.gitlab.com/%{project_path}';
-      return sprintf(s__('Badges|e.g. %{exampleUrl}'), {
+      return sprintf(s__('Badges|Example: %{exampleUrl}'), {
         exampleUrl,
       });
     },
@@ -134,10 +134,10 @@ export default {
       if (this.isEditing) {
         return this.saveBadge()
           .then(() => {
-            createFlash(s__('Badges|The badge was saved.'), 'notice');
+            createFlash(s__('Badges|Badge saved.'), 'notice');
             this.wasValidated = false;
           })
-          .catch(error => {
+          .catch((error) => {
             createFlash(
               s__('Badges|Saving the badge failed, please check the entered URLs and try again.'),
             );
@@ -147,10 +147,10 @@ export default {
 
       return this.addBadge()
         .then(() => {
-          createFlash(s__('Badges|A new badge was added.'), 'notice');
+          createFlash(s__('Badges|New badge added.'), 'notice');
           this.wasValidated = false;
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash(
             s__('Badges|Adding the badge failed, please check the entered URLs and try again.'),
           );
@@ -164,7 +164,7 @@ export default {
 <template>
   <form
     :class="{ 'was-validated': wasValidated }"
-    class="prepend-top-default append-bottom-default needs-validation"
+    class="gl-mt-3 gl-mb-3 needs-validation"
     novalidate
     @submit.prevent.stop="onSubmit"
   >
@@ -183,8 +183,8 @@ export default {
         required
         @input="debouncedPreview"
       />
-      <div class="invalid-feedback">{{ s__('Badges|Please fill in a valid URL') }}</div>
-      <span class="form-text text-muted"> {{ badgeLinkUrlExample }} </span>
+      <div class="invalid-feedback">{{ s__('Badges|Enter a valid URL') }}</div>
+      <span class="form-text text-muted">{{ badgeLinkUrlExample }}</span>
     </div>
 
     <div class="form-group">
@@ -198,8 +198,8 @@ export default {
         required
         @input="debouncedPreview"
       />
-      <div class="invalid-feedback">{{ s__('Badges|Please fill in a valid URL') }}</div>
-      <span class="form-text text-muted"> {{ badgeImageUrlExample }} </span>
+      <div class="invalid-feedback">{{ s__('Badges|Enter a valid URL') }}</div>
+      <span class="form-text text-muted">{{ badgeImageUrlExample }}</span>
     </div>
 
     <div class="form-group">
@@ -210,28 +210,32 @@ export default {
         :image-url="renderedImageUrl"
         :link-url="renderedLinkUrl"
       />
-      <p v-show="isRendering"><gl-loading-icon :inline="true" /></p>
+      <p v-show="isRendering">
+        <gl-loading-icon :inline="true" />
+      </p>
       <p v-show="!renderedBadge && !isRendering" class="disabled-content">
         {{ s__('Badges|No image to preview') }}
       </p>
     </div>
 
     <div v-if="isEditing" class="row-content-block">
-      <loading-button
+      <gl-button class="btn-cancel gl-mr-4" data-testid="cancelEditing" @click="onCancel">
+        {{ __('Cancel') }}
+      </gl-button>
+      <gl-button
         :loading="isSaving"
-        :label="s__('Badges|Save changes')"
         type="submit"
-        container-class="btn btn-success"
-      />
-      <button class="btn btn-cancel" type="button" @click="onCancel">{{ __('Cancel') }}</button>
+        variant="success"
+        category="primary"
+        data-testid="saveEditing"
+      >
+        {{ s__('Badges|Save changes') }}
+      </gl-button>
     </div>
     <div v-else class="form-group">
-      <loading-button
-        :loading="isSaving"
-        :label="s__('Badges|Add badge')"
-        type="submit"
-        container-class="btn btn-success"
-      />
+      <gl-button :loading="isSaving" type="submit" variant="success" category="primary">
+        {{ s__('Badges|Add badge') }}
+      </gl-button>
     </div>
   </form>
 </template>

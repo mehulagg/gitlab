@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupMembersFinder, '#execute' do
+RSpec.describe GroupMembersFinder, '#execute' do
   let(:group) { create(:group) }
   let(:nested_group) { create(:group, parent: group) }
   let(:deeper_nested_group) { create(:group, parent: nested_group) }
@@ -16,6 +16,7 @@ describe GroupMembersFinder, '#execute' do
     member1 = group.add_maintainer(user1)
     member2 = group.add_maintainer(user2)
     member3 = group.add_maintainer(user3)
+    create(:group_member, :minimal_access, user: create(:user), source: group)
 
     result = described_class.new(group).execute
 
@@ -127,5 +128,49 @@ describe GroupMembersFinder, '#execute' do
 
     expect(result.to_a).not_to include(member_with_2fa)
     expect(result.to_a).to match_array([member1, member2])
+  end
+
+  it 'returns direct members with two-factor auth if requested by owner' do
+    group.add_owner(user1)
+    group.add_maintainer(user2)
+    nested_group.add_maintainer(user3)
+    member_with_2fa = nested_group.add_maintainer(user5)
+
+    result = described_class.new(nested_group, user1, params: { two_factor: 'enabled' }).execute(include_relations: [:direct])
+
+    expect(result.to_a).to match_array([member_with_2fa])
+  end
+
+  it 'returns inherited members with two-factor auth if requested by owner' do
+    group.add_owner(user1)
+    member_with_2fa = group.add_maintainer(user5)
+    nested_group.add_maintainer(user2)
+    nested_group.add_maintainer(user3)
+
+    result = described_class.new(nested_group, user1, params: { two_factor: 'enabled' }).execute(include_relations: [:inherited])
+
+    expect(result.to_a).to match_array([member_with_2fa])
+  end
+
+  it 'returns direct members without two-factor auth if requested by owner' do
+    group.add_owner(user1)
+    group.add_maintainer(user2)
+    member3 = nested_group.add_maintainer(user3)
+    nested_group.add_maintainer(user5)
+
+    result = described_class.new(nested_group, user1, params: { two_factor: 'disabled' }).execute(include_relations: [:direct])
+
+    expect(result.to_a).to match_array([member3])
+  end
+
+  it 'returns inherited members without two-factor auth if requested by owner' do
+    member1 = group.add_owner(user1)
+    group.add_maintainer(user5)
+    nested_group.add_maintainer(user2)
+    nested_group.add_maintainer(user3)
+
+    result = described_class.new(nested_group, user1, params: { two_factor: 'disabled' }).execute(include_relations: [:inherited])
+
+    expect(result.to_a).to match_array([member1])
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TemplateFinder do
+RSpec.describe TemplateFinder do
   using RSpec::Parameterized::TableSyntax
 
   describe '#build' do
@@ -12,7 +12,9 @@ describe TemplateFinder do
       :dockerfiles    | described_class
       :gitignores     | described_class
       :gitlab_ci_ymls | described_class
-      :licenses       | ::LicenseTemplateFinder
+      :licenses | ::LicenseTemplateFinder
+      :metrics_dashboard_ymls | described_class
+      :gitlab_ci_syntax_ymls  | described_class
     end
 
     with_them do
@@ -28,6 +30,8 @@ describe TemplateFinder do
       :dockerfiles    | 'Binary'
       :gitignores     | 'Actionscript'
       :gitlab_ci_ymls | 'Android'
+      :metrics_dashboard_ymls | 'Default'
+      :gitlab_ci_syntax_ymls  | 'Artifacts example'
     end
 
     with_them do

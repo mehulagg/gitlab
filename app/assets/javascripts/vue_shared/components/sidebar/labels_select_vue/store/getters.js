@@ -9,11 +9,11 @@ import { DropdownVariant } from '../constants';
  */
 export const dropdownButtonText = (state, getters) => {
   const selectedLabels = getters.isDropdownVariantSidebar
-    ? state.labels.filter(label => label.set)
+    ? state.labels.filter((label) => label.set)
     : state.selectedLabels;
 
   if (!selectedLabels.length) {
-    return __('Label');
+    return state.dropdownButtonText || __('Label');
   } else if (selectedLabels.length > 1) {
     return sprintf(s__('LabelSelect|%{firstLabelName} +%{remainingLabelCount} more'), {
       firstLabelName: selectedLabels[0].title,
@@ -28,21 +28,25 @@ export const dropdownButtonText = (state, getters) => {
  * selectedLabels array.
  * @param {object} state
  */
-export const selectedLabelsList = state => state.selectedLabels.map(label => label.id);
+export const selectedLabelsList = (state) => state.selectedLabels.map((label) => label.id);
 
 /**
  * Returns boolean representing whether dropdown variant
  * is `sidebar`
  * @param {object} state
  */
-export const isDropdownVariantSidebar = state => state.variant === DropdownVariant.Sidebar;
+export const isDropdownVariantSidebar = (state) => state.variant === DropdownVariant.Sidebar;
 
 /**
  * Returns boolean representing whether dropdown variant
  * is `standalone`
  * @param {object} state
  */
-export const isDropdownVariantStandalone = state => state.variant === DropdownVariant.Standalone;
+export const isDropdownVariantStandalone = (state) => state.variant === DropdownVariant.Standalone;
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+/**
+ * Returns boolean representing whether dropdown variant
+ * is `embedded`
+ * @param {object} state
+ */
+export const isDropdownVariantEmbedded = (state) => state.variant === DropdownVariant.Embedded;

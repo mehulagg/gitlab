@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::AlertManagement::AlertStatusCounts do
+RSpec.describe Gitlab::AlertManagement::AlertStatusCounts do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
-  let_it_be(:alert_1) { create(:alert_management_alert, :resolved, project: project) }
-  let_it_be(:alert_2) { create(:alert_management_alert, :ignored, project: project) }
-  let_it_be(:alert_3) { create(:alert_management_alert) }
+  let_it_be(:alert_resolved) { create(:alert_management_alert, :resolved, project: project) }
+  let_it_be(:alert_ignored) { create(:alert_management_alert, :ignored, project: project) }
+  let_it_be(:alert_triggered) { create(:alert_management_alert) }
   let(:params) { {} }
 
   describe '#execute' do
@@ -18,7 +18,7 @@ describe Gitlab::AlertManagement::AlertStatusCounts do
         expect(counts.open).to eq(0)
         expect(counts.all).to eq(0)
 
-        AlertManagement::Alert::STATUSES.each_key do |status|
+        ::AlertManagement::Alert.status_names.each do |status|
           expect(counts.send(status)).to eq(0)
         end
       end
@@ -39,9 +39,22 @@ describe Gitlab::AlertManagement::AlertStatusCounts do
       end
 
       context 'when filtering params are included' do
-        let(:params) { { status: AlertManagement::Alert::STATUSES[:resolved] } }
+        let(:params) { { status: :resolved } }
 
         it 'returns the correct counts for each status' do
+          expect(counts.open).to eq(0)
+          expect(counts.all).to eq(1)
+          expect(counts.resolved).to eq(1)
+          expect(counts.ignored).to eq(0)
+          expect(counts.triggered).to eq(0)
+          expect(counts.acknowledged).to eq(0)
+        end
+      end
+
+      context 'when search param is included' do
+        let(:params) { { search: alert_resolved.title } }
+
+        it 'returns the correct countss' do
           expect(counts.open).to eq(0)
           expect(counts.all).to eq(1)
           expect(counts.resolved).to eq(1)

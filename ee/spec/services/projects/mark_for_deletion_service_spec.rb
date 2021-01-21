@@ -12,7 +12,7 @@ RSpec.describe Projects::MarkForDeletionService do
       marked_for_deletion_at: marked_for_deletion_at)
   end
 
-  context 'with soft-delete feature turned on' do
+  context 'with delayed delete feature turned on' do
     before do
       stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
     end
@@ -48,7 +48,7 @@ RSpec.describe Projects::MarkForDeletionService do
     end
   end
 
-  context 'with soft-delete feature turned off' do
+  context 'with delayed delete feature turned off' do
     context 'marking project for deletion' do
       before do
         described_class.new(project, user).execute

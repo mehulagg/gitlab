@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::InlineGrafanaMetricsFilter do
+RSpec.describe Banzai::Filter::InlineGrafanaMetricsFilter do
   include FilterSpecHelper
 
   let_it_be(:project) { create(:project) }
@@ -32,7 +32,7 @@ describe Banzai::Filter::InlineGrafanaMetricsFilter do
   it_behaves_like 'a metrics embed filter'
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 17, 13, 10)) { example.run }
+    travel_to(Time.utc(2019, 3, 17, 13, 10)) { example.run }
   end
 
   context 'when grafana is not configured' do

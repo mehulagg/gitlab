@@ -1,3 +1,7 @@
+const PIPELINE_RUNNING = 'RUNNING';
+const PIPELINE_CANCELED = 'CANCELED';
+const PIPELINE_FAILED = 'FAILED';
+
 export const pipelineWithStages = {
   id: 20333396,
   user: {
@@ -320,6 +324,80 @@ export const pipelineWithStages = {
   triggered: [],
 };
 
+const threeWeeksAgo = new Date();
+threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+
+export const mockPipelineHeader = {
+  detailedStatus: {},
+  id: 123,
+  userPermissions: {
+    destroyPipeline: true,
+  },
+  createdAt: threeWeeksAgo.toISOString(),
+  user: {
+    name: 'Foo',
+    username: 'foobar',
+    email: 'foo@bar.com',
+    avatarUrl: 'link',
+  },
+};
+
+export const mockFailedPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_FAILED,
+  retryable: true,
+  cancelable: false,
+  detailedStatus: {
+    group: 'failed',
+    icon: 'status_failed',
+    label: 'failed',
+    text: 'failed',
+    detailsPath: 'path',
+  },
+};
+
+export const mockRunningPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_RUNNING,
+  retryable: false,
+  cancelable: true,
+  detailedStatus: {
+    group: 'running',
+    icon: 'status_running',
+    label: 'running',
+    text: 'running',
+    detailsPath: 'path',
+  },
+};
+
+export const mockCancelledPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_CANCELED,
+  retryable: true,
+  cancelable: false,
+  detailedStatus: {
+    group: 'cancelled',
+    icon: 'status_cancelled',
+    label: 'cancelled',
+    text: 'cancelled',
+    detailsPath: 'path',
+  },
+};
+
+export const mockSuccessfulPipelineHeader = {
+  ...mockPipelineHeader,
+  status: 'SUCCESS',
+  retryable: false,
+  cancelable: false,
+  detailedStatus: {
+    group: 'success',
+    icon: 'status_success',
+    label: 'success',
+    text: 'success',
+    detailsPath: 'path',
+  },
+};
+
 export const stageReply = {
   name: 'deploy',
   title: 'deploy: running',
@@ -560,6 +638,101 @@ export const branches = [
   },
 ];
 
+export const tags = [
+  {
+    name: 'tag-3',
+    message: '',
+    target: '66673b07efef254dab7d537f0433a40e61cf84fe',
+    commit: {
+      id: '66673b07efef254dab7d537f0433a40e61cf84fe',
+      short_id: '66673b07',
+      created_at: '2020-03-16T11:04:46.000-04:00',
+      parent_ids: ['def28bf679235071140180495f25b657e2203587'],
+      title: 'Update .gitlab-ci.yml',
+      message: 'Update .gitlab-ci.yml',
+      author_name: 'Administrator',
+      author_email: 'admin@example.com',
+      authored_date: '2020-03-16T11:04:46.000-04:00',
+      committer_name: 'Administrator',
+      committer_email: 'admin@example.com',
+      committed_date: '2020-03-16T11:04:46.000-04:00',
+      web_url:
+        'http://192.168.1.22:3000/root/dag-pipeline/-/commit/66673b07efef254dab7d537f0433a40e61cf84fe',
+    },
+    release: null,
+    protected: false,
+  },
+  {
+    name: 'tag-2',
+    message: '',
+    target: '66673b07efef254dab7d537f0433a40e61cf84fe',
+    commit: {
+      id: '66673b07efef254dab7d537f0433a40e61cf84fe',
+      short_id: '66673b07',
+      created_at: '2020-03-16T11:04:46.000-04:00',
+      parent_ids: ['def28bf679235071140180495f25b657e2203587'],
+      title: 'Update .gitlab-ci.yml',
+      message: 'Update .gitlab-ci.yml',
+      author_name: 'Administrator',
+      author_email: 'admin@example.com',
+      authored_date: '2020-03-16T11:04:46.000-04:00',
+      committer_name: 'Administrator',
+      committer_email: 'admin@example.com',
+      committed_date: '2020-03-16T11:04:46.000-04:00',
+      web_url:
+        'http://192.168.1.22:3000/root/dag-pipeline/-/commit/66673b07efef254dab7d537f0433a40e61cf84fe',
+    },
+    release: null,
+    protected: false,
+  },
+  {
+    name: 'tag-1',
+    message: '',
+    target: '66673b07efef254dab7d537f0433a40e61cf84fe',
+    commit: {
+      id: '66673b07efef254dab7d537f0433a40e61cf84fe',
+      short_id: '66673b07',
+      created_at: '2020-03-16T11:04:46.000-04:00',
+      parent_ids: ['def28bf679235071140180495f25b657e2203587'],
+      title: 'Update .gitlab-ci.yml',
+      message: 'Update .gitlab-ci.yml',
+      author_name: 'Administrator',
+      author_email: 'admin@example.com',
+      authored_date: '2020-03-16T11:04:46.000-04:00',
+      committer_name: 'Administrator',
+      committer_email: 'admin@example.com',
+      committed_date: '2020-03-16T11:04:46.000-04:00',
+      web_url:
+        'http://192.168.1.22:3000/root/dag-pipeline/-/commit/66673b07efef254dab7d537f0433a40e61cf84fe',
+    },
+    release: null,
+    protected: false,
+  },
+  {
+    name: 'master-tag',
+    message: '',
+    target: '66673b07efef254dab7d537f0433a40e61cf84fe',
+    commit: {
+      id: '66673b07efef254dab7d537f0433a40e61cf84fe',
+      short_id: '66673b07',
+      created_at: '2020-03-16T11:04:46.000-04:00',
+      parent_ids: ['def28bf679235071140180495f25b657e2203587'],
+      title: 'Update .gitlab-ci.yml',
+      message: 'Update .gitlab-ci.yml',
+      author_name: 'Administrator',
+      author_email: 'admin@example.com',
+      authored_date: '2020-03-16T11:04:46.000-04:00',
+      committer_name: 'Administrator',
+      committer_email: 'admin@example.com',
+      committed_date: '2020-03-16T11:04:46.000-04:00',
+      web_url:
+        'http://192.168.1.22:3000/root/dag-pipeline/-/commit/66673b07efef254dab7d537f0433a40e61cf84fe',
+    },
+    release: null,
+    protected: false,
+  },
+];
+
 export const mockSearch = [
   { type: 'username', value: { data: 'root', operator: '=' } },
   { type: 'ref', value: { data: 'master', operator: '=' } },
@@ -567,3 +740,5 @@ export const mockSearch = [
 ];
 
 export const mockBranchesAfterMap = ['branch-1', 'branch-10', 'branch-11'];
+
+export const mockTagsAfterMap = ['tag-3', 'tag-2', 'tag-1', 'master-tag'];

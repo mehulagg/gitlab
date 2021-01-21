@@ -38,7 +38,7 @@ describe('U2FAuthenticate', () => {
       window.u2f = oldu2f;
     });
 
-    it('falls back to normal 2fa', done => {
+    it('falls back to normal 2fa', (done) => {
       component
         .start()
         .then(() => {
@@ -50,15 +50,12 @@ describe('U2FAuthenticate', () => {
   });
 
   describe('with u2f available', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       // bypass automatic form submission within renderAuthenticated
       jest.spyOn(component, 'renderAuthenticated').mockReturnValue(true);
       u2fDevice = new MockU2FDevice();
 
-      component
-        .start()
-        .then(done)
-        .catch(done.fail);
+      component.start().then(done).catch(done.fail);
     });
 
     it('allows authenticating via a U2F device', () => {
@@ -76,7 +73,7 @@ describe('U2FAuthenticate', () => {
 
     describe('errors', () => {
       it('displays an error message', () => {
-        const setupButton = container.find('#js-login-u2f-device');
+        const setupButton = container.find('#js-login-2fa-device');
         setupButton.trigger('click');
         u2fDevice.respondToAuthenticateRequest({
           errorCode: 'error!',
@@ -87,14 +84,14 @@ describe('U2FAuthenticate', () => {
       });
 
       it('allows retrying authentication after an error', () => {
-        let setupButton = container.find('#js-login-u2f-device');
+        let setupButton = container.find('#js-login-2fa-device');
         setupButton.trigger('click');
         u2fDevice.respondToAuthenticateRequest({
           errorCode: 'error!',
         });
         const retryButton = container.find('#js-token-2fa-try-again');
         retryButton.trigger('click');
-        setupButton = container.find('#js-login-u2f-device');
+        setupButton = container.find('#js-login-2fa-device');
         setupButton.trigger('click');
         u2fDevice.respondToAuthenticateRequest({
           deviceData: 'this is data from the device',

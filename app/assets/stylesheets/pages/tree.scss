@@ -1,8 +1,11 @@
+.project-last-commit {
+  min-height: 4.75rem;
+}
+
 .tree-holder {
   .nav-block {
     margin: 16px 0;
 
-    .btn .fa,
     .btn svg {
       color: $gl-text-color-secondary;
     }
@@ -62,14 +65,14 @@
     .tree-controls {
       margin-bottom: 10px;
 
-      .btn,
+      .btn:not(.dropdown-toggle-split),
       .dropdown,
       .btn-group {
         width: 100%;
       }
 
       .btn {
-        margin: 10px 0 0;
+        margin-top: 10px;
       }
     }
   }
@@ -95,6 +98,7 @@
 
   .tree-table {
     margin-bottom: 0;
+    table-layout: fixed;
 
     tr {
       border-bottom: 1px solid $white-normal;
@@ -138,12 +142,6 @@
   }
 
   .tree-item {
-    .file-icon,
-    .folder-icon {
-      position: relative;
-      top: 2px;
-    }
-
     .link-container {
       padding: 0;
 
@@ -179,7 +177,7 @@
 
   .tree-truncated-warning {
     color: $orange-600;
-    background-color: $orange-100;
+    background-color: $orange-50;
   }
 
   .tree-time-ago {

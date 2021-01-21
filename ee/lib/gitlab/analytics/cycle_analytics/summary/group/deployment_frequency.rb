@@ -21,7 +21,7 @@ module Gitlab
 
             def value
               @value ||=
-                frequency(@deployments, options[:from], options[:to] || Time.now)
+                frequency(@deployments, options[:from], options[:to] || Time.current)
             end
 
             def unit

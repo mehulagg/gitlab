@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Public Project Pages Access" do
+RSpec.describe "Public Project Pages Access" do
   using RSpec::Parameterized::TableSyntax
   include AccessMatchers
 
@@ -72,7 +72,7 @@ describe "Public Project Pages Access" do
 
       with_them do
         before do
-          project.project_feature.update(pages_access_level: pages_access_level)
+          project.project_feature.update!(pages_access_level: pages_access_level)
         end
         it "correct return value" do
           if !with_user.nil?

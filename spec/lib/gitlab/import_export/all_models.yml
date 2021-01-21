@@ -12,8 +12,10 @@ issues:
 - resource_weight_events
 - resource_milestone_events
 - resource_state_events
+- resource_iteration_events
 - sent_notifications
 - sentry_issue
+- issuable_severity
 - label_links
 - labels
 - last_edited_by
@@ -26,11 +28,16 @@ issues:
 - events
 - merge_requests_closing_issues
 - metrics
+- metric_images
 - timelogs
+- issuable_severity
+- issuable_sla
 - issue_assignees
 - closed_by
 - epic_issue
 - epic
+- feature_flag_issues
+- feature_flags
 - designs
 - design_versions
 - description_versions
@@ -44,6 +51,9 @@ issues:
 - system_note_metadata
 - alert_management_alert
 - status_page_published_incident
+- namespace
+- note_authors
+- issue_email_participants
 events:
 - author
 - project
@@ -76,6 +86,8 @@ label:
 - issues
 - merge_requests
 - priorities
+- epic_board_labels
+- epic_lists
 milestone:
 - group
 - project
@@ -95,6 +107,8 @@ snippets:
 - user_agent_detail
 - user_mentions
 - snippet_repository
+- statistics
+- repository_storage_moves
 releases:
 - author
 - project
@@ -114,6 +128,7 @@ merge_requests:
 - award_emoji
 - author
 - assignee
+- reviewers
 - updated_by
 - milestone
 - iteration
@@ -121,6 +136,7 @@ merge_requests:
 - resource_label_events
 - resource_milestone_events
 - resource_state_events
+- resource_iteration_events
 - label_links
 - labels
 - last_edited_by
@@ -141,12 +157,15 @@ merge_requests:
 - latest_merge_request_diff
 - pipelines_for_merge_request
 - merge_request_assignees
+- merge_request_reviewers
 - suggestions
 - diff_note_positions
 - unresolved_notes
 - assignees
 - reviews
 - approval_rules
+- approval_merge_request_rule_sources
+- approval_project_rules
 - approvals
 - approvers
 - approver_users
@@ -163,19 +182,26 @@ merge_requests:
 - deployments
 - user_mentions
 - system_note_metadata
+- note_authors
+- cleanup_schedule
 external_pull_requests:
 - project
 merge_request_diff:
 - merge_request
 - merge_request_diff_commits
+- merge_request_diff_detail
 - merge_request_diff_files
 merge_request_diff_commits:
+- merge_request_diff
+merge_request_diff_detail:
 - merge_request_diff
 merge_request_diff_files:
 - merge_request_diff
 merge_request_context_commits:
 - merge_request
 - diff_files
+cleanup_schedule:
+- merge_request
 ci_pipelines:
 - project
 - user
@@ -184,6 +210,7 @@ ci_pipelines:
 - statuses
 - latest_statuses_ordered_by_stage
 - builds
+- bridges
 - processables
 - trigger_requests
 - variables
@@ -216,13 +243,18 @@ ci_pipelines:
 - parent_pipeline
 - downstream_bridges
 - job_artifacts
-- vulnerabilities_occurrence_pipelines
+- vulnerabilities_finding_pipelines
 - vulnerability_findings
 - pipeline_config
 - security_scans
+- security_findings
 - daily_build_group_report_results
 - latest_builds
 - daily_report_results
+- latest_builds_report_results
+- messages
+- pipeline_artifacts
+- latest_statuses
 ci_refs:
 - project
 - ci_pipelines
@@ -280,6 +312,8 @@ protected_branches:
 - merge_access_levels
 - push_access_levels
 - unprotect_access_levels
+- approval_project_rules
+- required_code_owners_sections
 protected_tags:
 - project
 - create_access_levels
@@ -291,6 +325,7 @@ push_access_levels:
 - protected_branch
 - user
 - group
+- deploy_key
 create_access_levels:
 - user
 - protected_tag
@@ -306,6 +341,7 @@ project:
 - chat_services
 - cluster
 - clusters
+- cluster_agents
 - cluster_project
 - creator
 - cycle_analytics_stages
@@ -316,6 +352,8 @@ project:
 - last_event
 - services
 - campfire_service
+- confluence_service
+- datadog_service
 - discord_service
 - drone_ci_service
 - emails_on_push_service
@@ -344,7 +382,7 @@ project:
 - youtrack_service
 - custom_issue_tracker_service
 - bugzilla_service
-- gitlab_issue_tracker_service
+- ewm_service
 - external_wiki_service
 - mock_ci_service
 - mock_deployment_service
@@ -386,6 +424,7 @@ project:
 - stages
 - ci_refs
 - builds
+- processables
 - runner_projects
 - runners
 - variables
@@ -397,6 +436,8 @@ project:
 - project_feature
 - auto_devops
 - pages_domains
+- pages_metadatum
+- pages_deployments
 - authorized_users
 - project_authorizations
 - remote_mirrors
@@ -424,6 +465,7 @@ project:
 - deploy_tokens
 - settings
 - ci_cd_settings
+- project_settings
 - import_export_upload
 - repository_languages
 - pool_repository
@@ -440,9 +482,10 @@ project:
 - feature_usage
 - approval_rules
 - approval_merge_request_rules
+- approval_merge_request_rule_sources
+- approval_project_rules
 - approvers
 - approver_users
-- pages_domains
 - audit_events
 - path_locks
 - approver_groups
@@ -456,6 +499,11 @@ project:
 - vulnerability_feedback
 - vulnerability_identifiers
 - vulnerability_scanners
+- dast_site_profiles
+- dast_scanner_profiles
+- dast_sites
+- dast_site_tokens
+- dast_site_validations
 - operations_feature_flags
 - operations_feature_flags_client
 - operations_feature_flags_user_lists
@@ -463,6 +511,7 @@ project:
 - prometheus_alert_events
 - self_managed_prometheus_alert_events
 - software_license_policies
+- software_licenses
 - project_registry
 - packages
 - package_files
@@ -476,8 +525,6 @@ project:
 - designs
 - project_aliases
 - external_pull_requests
-- pages_metadatum
-- alerts_service
 - grafana_integration
 - remove_source_branch_after_merge
 - deleting_user
@@ -497,12 +544,23 @@ project:
 - daily_build_group_report_results
 - jira_imports
 - compliance_framework_setting
+- compliance_management_frameworks
 - metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
 - freeze_periods
 - webex_teams_service
 - build_report_results
+- vulnerability_statistic
+- vulnerability_historical_statistics
+- vulnerability_remediations
+- product_analytics_events
+- pipeline_artifacts
+- terraform_states
+- alert_management_http_integrations
+- exported_protected_branches
+- incident_management_oncall_schedules
+- debian_distributions
 award_emoji:
 - awardable
 - user
@@ -515,8 +573,11 @@ timelogs:
 - issue
 - merge_request
 - user
+- note
 push_event_payload:
 - event
+issuable_severity:
+- issue
 issue_assignees:
 - issue
 - assignee
@@ -567,6 +628,9 @@ self_managed_prometheus_alert_events:
 epic_issues:
 - issue
 - epic
+feature_flag_issues:
+- issue
+- feature_flag
 tracing_setting:
 - project
 reviews:
@@ -584,13 +648,17 @@ boards:
 - lists
 - destroyable_lists
 - milestone
+- iteration
 - board_labels
 - board_assignee
 - assignee
 - labels
+- user_preferences
+- boards_epic_user_preferences
 lists:
 - user
 - milestone
+- iteration
 - board
 - label
 - list_user_preferences
@@ -600,6 +668,7 @@ milestone_releases:
 evidences:
 - release
 design: &design
+- authors
 - issue
 - actions
 - versions
@@ -620,6 +689,8 @@ versions: &version
 zoom_meetings:
 - issue
 sentry_issue:
+- issue
+issuable_severity:
 - issue
 design_versions: *version
 epic:
@@ -648,7 +719,11 @@ epic:
 - due_date_sourcing_epic
 - events
 - resource_label_events
+- resource_state_events
 - user_mentions
+- note_authors
+- boards_epic_user_preferences
+- epic_board_positions
 epic_issue:
 - epic
 - issue
@@ -657,3 +732,5 @@ system_note_metadata:
 - description_version
 status_page_published_incident:
 - issue
+issuable_sla:
+  - issue

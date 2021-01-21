@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # `NOT NULL` constraints
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/38358) in GitLab 13.0.
@@ -33,7 +39,7 @@ end
 
 ## Add a `NOT NULL` column to an existing table
 
-With PostgreSQL 11 being the minimum version since GitLab 13.0, adding columns with `NULL` and/or
+With PostgreSQL 11 being the minimum version in GitLab 13.0 and later, adding columns with `NULL` and/or
 default values has become much easier and the standard `add_column` helper should be used in all cases.
 
 For example, consider a migration that adds a new `NOT NULL` column `active` to table `db_guides`,
@@ -60,7 +66,7 @@ different releases:
    - Add a post-deployment migration to add the `NOT NULL` constraint with `validate: false`.
    - Add a post-deployment migration to fix the existing records.
 
-     NOTE: **Note:**
+     NOTE:
      Depending on the size of the table, a background migration for cleanup could be required in the next release.
      See the [`NOT NULL` constraints on large tables](not_null_constraints.md#not-null-constraints-on-large-tables) section for more information.
 
@@ -88,7 +94,7 @@ that all epics should have a user-generated description.
 After checking our production database, we know that there are `epics` with `NULL` descriptions,
 so we can not add and validate the constraint in one step.
 
-NOTE: **Note:**
+NOTE:
 Even if we did not have any epic with a `NULL` description, another instance of GitLab could have
 such records, so we would follow the same process either way.
 

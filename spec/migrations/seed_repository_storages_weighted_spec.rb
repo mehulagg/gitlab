@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200526000407_seed_repository_storages_weighted.rb')
 
-describe SeedRepositoryStoragesWeighted do
+RSpec.describe SeedRepositoryStoragesWeighted do
   let(:storages) { { "foo" => {}, "baz" => {} } }
   let(:application_settings) do
     table(:application_settings).tap do |klass|
@@ -17,7 +17,7 @@ describe SeedRepositoryStoragesWeighted do
     allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
   end
 
-  let(:application_setting) { application_settings.create }
+  let(:application_setting) { application_settings.create! }
   let(:repository_storages) { ["foo"] }
 
   it 'correctly schedules background migrations' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Self-Monitoring project requests' do
+RSpec.describe 'Self-Monitoring project requests' do
   let(:admin) { create(:admin) }
 
   describe 'POST #create_self_monitoring_project' do
@@ -12,7 +12,7 @@ describe 'Self-Monitoring project requests' do
 
     it_behaves_like 'not accessible to non-admin users'
 
-    context 'with admin user' do
+    context 'with admin user', :enable_admin_mode do
       before do
         login_as(admin)
       end
@@ -36,7 +36,7 @@ describe 'Self-Monitoring project requests' do
 
     it_behaves_like 'not accessible to non-admin users'
 
-    context 'with admin user' do
+    context 'with admin user', :enable_admin_mode do
       before do
         login_as(admin)
       end
@@ -116,7 +116,7 @@ describe 'Self-Monitoring project requests' do
 
     it_behaves_like 'not accessible to non-admin users'
 
-    context 'with admin user' do
+    context 'with admin user', :enable_admin_mode do
       before do
         login_as(admin)
       end
@@ -140,7 +140,7 @@ describe 'Self-Monitoring project requests' do
 
     it_behaves_like 'not accessible to non-admin users'
 
-    context 'with admin user' do
+    context 'with admin user', :enable_admin_mode do
       before do
         login_as(admin)
       end

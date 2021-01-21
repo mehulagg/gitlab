@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe MergeRequestPollWidgetEntity do
+RSpec.describe MergeRequestPollWidgetEntity do
   include ProjectForksHelper
+  using RSpec::Parameterized::TableSyntax
 
   let(:project)  { create :project, :repository }
   let(:resource) { create(:merge_request, source_project: project, target_project: project) }
@@ -35,9 +36,10 @@ describe MergeRequestPollWidgetEntity do
 
       it 'returns merge_pipeline' do
         pipeline.reload
-        pipeline_payload = PipelineDetailsEntity
-                             .represent(pipeline, request: request)
-                             .as_json
+        pipeline_payload =
+          MergeRequests::PipelineEntity
+            .represent(pipeline, request: request)
+            .as_json
 
         expect(subject[:merge_pipeline]).to eq(pipeline_payload)
       end
@@ -171,6 +173,27 @@ describe MergeRequestPollWidgetEntity do
       end
     end
 
+    describe 'squash defaults for projects' do
+      where(:squash_option, :value, :default, :readonly) do
+        'always'      | true  | true  | true
+        'never'       | false | false | true
+        'default_on'  | false | true  | false
+        'default_off' | false | false | false
+      end
+
+      with_them do
+        before do
+          project.project_setting.update!(squash_option: squash_option)
+        end
+
+        it 'the key reflects the correct value' do
+          expect(subject[:squash_on_merge]).to eq(value)
+          expect(subject[:squash_enabled_by_default]).to eq(default)
+          expect(subject[:squash_readonly]).to eq(readonly)
+        end
+      end
+    end
+
     context 'when head pipeline is finished' do
       before do
         create(:ci_pipeline, :success, project: project,
@@ -199,12 +222,21 @@ describe MergeRequestPollWidgetEntity do
       context 'when is up to date' do
         let(:req) { double('request', current_user: user, project: project) }
 
-        it 'returns pipeline' do
-          pipeline_payload = PipelineDetailsEntity
-            .represent(pipeline, request: req)
-            .as_json
+        it 'does not return pipeline' do
+          expect(subject[:pipeline]).to be_nil
+        end
 
-          expect(subject[:pipeline]).to eq(pipeline_payload)
+        context 'when merge_request_cached_pipeline_serializer is disabled' do
+          it 'returns detailed info about pipeline' do
+            stub_feature_flags(merge_request_cached_pipeline_serializer: false)
+
+            pipeline_payload =
+              MergeRequests::PipelineEntity
+                .represent(pipeline, request: req)
+                .as_json
+
+            expect(subject[:pipeline]).to eq(pipeline_payload)
+          end
         end
 
         it 'returns ci_status' do
@@ -214,7 +246,7 @@ describe MergeRequestPollWidgetEntity do
 
       context 'when is not up to date' do
         it 'returns nil' do
-          pipeline.update(sha: "not up to date")
+          pipeline.update!(sha: "not up to date")
 
           expect(subject[:pipeline]).to eq(nil)
         end
@@ -225,13 +257,25 @@ describe MergeRequestPollWidgetEntity do
       let(:result) { false }
       let(:req) { double('request', current_user: user, project: project) }
 
-      it 'does not have pipeline' do
-        expect(subject[:pipeline]).to eq(nil)
-      end
-
       it 'does not return ci_status' do
         expect(subject[:ci_status]).to eq(nil)
       end
+    end
+  end
+
+  describe '#builds_with_coverage' do
+    it 'serializes the builds with coverage' do
+      allow(resource).to receive(:head_pipeline_builds_with_coverage).and_return([
+        double(name: 'rspec', coverage: 91.5),
+        double(name: 'jest', coverage: 94.1)
+      ])
+
+      result = subject[:builds_with_coverage]
+
+      expect(result).to eq([
+        { name: 'rspec', coverage: 91.5 },
+        { name: 'jest', coverage: 94.1 }
+      ])
     end
   end
 end

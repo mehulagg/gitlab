@@ -3,14 +3,14 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200220115023_fix_projects_without_prometheus_service.rb')
 
-describe FixProjectsWithoutPrometheusService, :migration do
-  let(:namespace) { table(:namespaces).create(name: 'gitlab', path: 'gitlab-org') }
+RSpec.describe FixProjectsWithoutPrometheusService, :migration do
+  let(:namespace) { table(:namespaces).create!(name: 'gitlab', path: 'gitlab-org') }
 
   let!(:projects) do
     [
-      table(:projects).create(namespace_id: namespace.id, name: 'foo 1'),
-      table(:projects).create(namespace_id: namespace.id, name: 'foo 2'),
-      table(:projects).create(namespace_id: namespace.id, name: 'foo 3')
+      table(:projects).create!(namespace_id: namespace.id, name: 'foo 1'),
+      table(:projects).create!(namespace_id: namespace.id, name: 'foo 2'),
+      table(:projects).create!(namespace_id: namespace.id, name: 'foo 3')
     ]
   end
 
@@ -20,7 +20,7 @@ describe FixProjectsWithoutPrometheusService, :migration do
 
   around do |example|
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         example.call
       end
     end

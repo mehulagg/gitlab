@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EnvironmentStatusEntity do
+RSpec.describe EnvironmentStatusEntity do
   let(:user)    { create(:user) }
   let(:request) { double('request', project: project) }
 
@@ -17,7 +17,7 @@ describe EnvironmentStatusEntity do
   subject { entity.as_json }
 
   before do
-    deployment.update(sha: merge_request.diff_head_sha)
+    deployment.update!(sha: merge_request.diff_head_sha)
     allow(request).to receive(:current_user).and_return(user)
   end
 

@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe 'GFM autocomplete EE', :js do
-  let(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
-  let(:another_user) { create(:user, name: 'another user', username: 'another.user') }
-  let(:project) { create(:project) }
-  let(:issue) { create(:issue, project: project) }
+  let_it_be(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
+  let_it_be(:another_user) { create(:user, name: 'another user', username: 'another.user') }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:epic) { create(:epic, group: group) }
 
   before do
     project.add_maintainer(user)
@@ -15,29 +17,74 @@ RSpec.describe 'GFM autocomplete EE', :js do
   context 'assignees' do
     let(:issue_assignee) { create(:issue, project: project) }
 
-    before do
-      issue_assignee.update(assignees: [user])
+    describe 'when tribute_autocomplete feature flag is off' do
+      before do
+        stub_feature_flags(tribute_autocomplete: false)
 
-      sign_in(user)
-      visit project_issue_path(project, issue_assignee)
+        issue_assignee.update!(assignees: [user])
 
-      wait_for_requests
-    end
+        sign_in(user)
+        visit project_issue_path(project, issue_assignee)
 
-    it 'only lists users who are currently assigned to the issue when using /unassign' do
-      note = find('#note-body')
-      page.within '.timeline-content-form' do
-        note.native.send_keys('/una')
+        wait_for_requests
       end
 
-      find('.atwho-view li', text: '/unassign')
-      note.native.send_keys(:tab)
+      it 'only lists users who are currently assigned to the issue when using /unassign' do
+        note = find('#note-body')
+        page.within '.timeline-content-form' do
+          note.native.send_keys('/una')
+        end
 
-      wait_for_requests
+        find('.atwho-view li', text: '/unassign')
+        note.native.send_keys(:tab)
 
-      users = find('#at-view-users .atwho-view-ul')
-      expect(users).to have_content(user.username)
-      expect(users).not_to have_content(another_user.username)
+        wait_for_requests
+
+        users = find('#at-view-users .atwho-view-ul')
+        expect(users).to have_content(user.username)
+        expect(users).not_to have_content(another_user.username)
+      end
+    end
+
+    describe 'when tribute_autocomplete feature flag is on' do
+      before do
+        stub_licensed_features(epics: true)
+        stub_feature_flags(tribute_autocomplete: true)
+
+        issue_assignee.update!(assignees: [user])
+
+        sign_in(user)
+        visit project_issue_path(project, issue_assignee)
+
+        wait_for_requests
+      end
+
+      it 'only lists users who are currently assigned to the issue when using /unassign' do
+        note = find('#note-body')
+        page.within '.timeline-content-form' do
+          note.native.send_keys('/unassign ')
+          # The `/unassign` ajax response might replace the one by `@` below causing a failed test
+          # so we need to wait for the `/assign` ajax request to finish first
+          wait_for_requests
+          note.native.send_keys('@')
+          wait_for_requests
+        end
+
+        users = find('.tribute-container ul', visible: true)
+        expect(users).to have_content(user.username)
+        expect(users).not_to have_content(another_user.username)
+      end
+
+      it 'shows epics' do
+        note = find('#note-body')
+        page.within('.timeline-content-form') do
+          note.native.send_keys('&')
+        end
+
+        wait_for_requests
+
+        expect(find('.tribute-container ul', visible: true).text).to have_content(epic.title)
+      end
     end
   end
 end

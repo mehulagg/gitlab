@@ -19,6 +19,11 @@ module Noteable
     def resolvable_types
       %w(MergeRequest DesignManagement::Design)
     end
+
+    # `Noteable` class names that support creating/forwarding individual notes.
+    def email_creatable_types
+      %w(Issue)
+    end
   end
 
   # The timestamp of the note (e.g. the :created_at or :updated_at attribute if provided via
@@ -55,6 +60,10 @@ module Noteable
     supports_discussions? && self.class.replyable_types.include?(base_class_name)
   end
 
+  def supports_creating_notes_by_email?
+    self.class.email_creatable_types.include?(base_class_name)
+  end
+
   def supports_suggestion?
     false
   end
@@ -65,6 +74,10 @@ module Noteable
 
   def preloads_discussion_diff_highlighting?
     false
+  end
+
+  def has_any_diff_note_positions?
+    notes.any? && DiffNotePosition.where(note: notes).exists?
   end
 
   def discussion_notes
@@ -153,6 +166,18 @@ module Noteable
 
   def after_note_destroyed(_note)
     # no-op
+  end
+
+  # Email address that an authorized user can send/forward an email to be added directly
+  # to an issue or merge request.
+  # example: incoming+h5bp-html5-boilerplate-8-1234567890abcdef123456789-issue-34@localhost.com
+  def creatable_note_email_address(author)
+    return unless supports_creating_notes_by_email?
+
+    project_email = project.new_issuable_address(author, self.class.name.underscore)
+    return unless project_email
+
+    project_email.sub('@', "-#{iid}@")
   end
 end
 

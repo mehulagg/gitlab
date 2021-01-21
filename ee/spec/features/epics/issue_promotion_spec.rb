@@ -8,6 +8,8 @@ RSpec.describe 'Issue promotion', :js do
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:issue) { create(:issue, project: project) }
+  let(:parent_epic) { create(:epic, group: group) }
+  let!(:epic_issue) { create(:epic_issue, issue: issue, epic: parent_epic) }
   let(:user) { create(:user) }
 
   before do
@@ -21,7 +23,7 @@ RSpec.describe 'Issue promotion', :js do
       expect(page).not_to have_content 'Promoted issue to an epic.'
 
       expect(issue.reload).to be_open
-      expect(Epic.count).to be_zero
+      expect(Epic.count).to eq(1)
     end
   end
 
@@ -39,7 +41,7 @@ RSpec.describe 'Issue promotion', :js do
         expect(page).not_to have_content 'Promoted issue to an epic.'
 
         expect(issue.reload).to be_open
-        expect(Epic.count).to be_zero
+        expect(Epic.count).to eq(1)
       end
     end
 
@@ -70,6 +72,7 @@ RSpec.describe 'Issue promotion', :js do
         expect(epic.title).to eq(issue.title)
         expect(epic.description).to eq(issue.description)
         expect(epic.author).to eq(user)
+        expect(epic.parent).to eq(parent_epic)
       end
 
       # Spec for https://gitlab.com/gitlab-org/gitlab/-/issues/215549

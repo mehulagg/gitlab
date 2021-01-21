@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User views issue designs', :js do
+RSpec.describe 'User views issue designs', :js do
   include DesignManagementTestHelpers
 
   let_it_be(:project) { create(:project_empty_repo, :public) }
@@ -13,8 +13,6 @@ describe 'User views issue designs', :js do
     enable_design_management
 
     visit project_issue_path(project, issue)
-
-    click_link 'Designs'
   end
 
   it 'opens design detail' do

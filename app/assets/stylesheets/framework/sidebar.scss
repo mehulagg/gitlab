@@ -1,6 +1,5 @@
 .content-wrapper {
   width: 100%;
-  transition: padding $sidebar-transition-duration;
 
   .container-fluid {
     padding: 0 $gl-padding;
@@ -11,6 +10,10 @@
       border: 0;
     }
   }
+}
+
+.page-initialised  .content-wrapper {
+  transition: padding $sidebar-transition-duration;
 }
 
 .nav-header-btn {
@@ -55,11 +58,24 @@
       height: $gl-padding;
     }
   }
+
+  .copy-email-button { // TODO: replace with utility
+    @include gl-w-full;
+    @include gl-h-full;
+  }
+
+  .copy-email-address {
+    height: 60px;
+
+    &:hover {
+      background: $gray-100;
+    }
+  }
 }
 
 .right-sidebar-expanded {
   padding-right: 0;
-  z-index: 300;
+  z-index: $zindex-dropdown-menu;
 
   @include media-breakpoint-only(sm) {
     &:not(.wiki-sidebar):not(.build-sidebar):not(.issuable-bulk-update-sidebar) .content-wrapper {
@@ -142,6 +158,13 @@
   .value.dont-hide ~ .selectbox {
     padding-top: $gl-padding-8;
   }
+
+  // This is for sidebar components using gl-button for the Edit button to be consistent with the
+  // rest of the sidebar, and could be removed once the sidebar has been fully converted to use
+  // gitlab-ui components.
+  .title .gl-button {
+    color: $gl-text-color;
+  }
 }
 
 .pikaday-container {
@@ -168,7 +191,7 @@
 
     &::before {
       content: '';
-      border-left: 1px solid $gray-500;
+      border-left: 1px solid $gray-300;
       position: absolute;
       top: $gl-padding;
       bottom: $gl-padding;
@@ -214,7 +237,7 @@
 .health-status {
   .dropdown-body {
     .health-divider {
-      border-top-color: $gray-200;
+      border-top-color: $gray-100;
     }
 
     .dropdown-item:not(.health-dropdown-item) {

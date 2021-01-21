@@ -25,7 +25,7 @@ RSpec.describe Resolvers::BoardListsResolver do
     end
 
     it 'returns a list of board lists' do
-      lists = resolve_board_lists.items
+      lists = resolve_board_lists
 
       expect(lists.count).to eq 3
       expect(lists.map(&:list_type)).to eq %w(closed assignee milestone)
@@ -49,6 +49,12 @@ RSpec.describe Resolvers::BoardListsResolver do
   end
 
   def resolve_board_lists(args: {}, current_user: user)
-    resolve(described_class, obj: board, args: args, ctx: { current_user: current_user })
+    context = GraphQL::Query::Context.new(
+      query: OpenStruct.new(schema: nil),
+      values: { current_user: current_user },
+      object: nil
+    )
+
+    resolve(described_class, obj: board, args: args, ctx: context)
   end
 end

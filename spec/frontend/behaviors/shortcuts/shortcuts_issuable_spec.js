@@ -1,10 +1,8 @@
 import $ from 'jquery';
-import 'mousetrap';
+import Mousetrap from 'mousetrap';
 import initCopyAsGFM, { CopyAsGFM } from '~/behaviors/markdown/copy_as_gfm';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
-
-const FORM_SELECTOR = '.js-main-target-form .js-vue-comment-form';
 
 jest.mock('~/lib/utils/common_utils', () => ({
   ...jest.requireActual('~/lib/utils/common_utils'),
@@ -12,11 +10,12 @@ jest.mock('~/lib/utils/common_utils', () => ({
 }));
 
 describe('ShortcutsIssuable', () => {
-  const fixtureName = 'snippets/show.html';
+  const snippetShowFixtureName = 'snippets/show.html';
+  const mrShowFixtureName = 'merge_requests/merge_request_of_current_user.html';
 
-  preloadFixtures(fixtureName);
+  preloadFixtures(snippetShowFixtureName, mrShowFixtureName);
 
-  beforeAll(done => {
+  beforeAll((done) => {
     initCopyAsGFM();
 
     // Fake call to nodeToGfm so the import of lazy bundle happened
@@ -27,26 +26,28 @@ describe('ShortcutsIssuable', () => {
       .catch(done.fail);
   });
 
-  beforeEach(() => {
-    loadFixtures(fixtureName);
-    $('body').append(
-      `<div class="js-main-target-form">
-        <textarea class="js-vue-comment-form"></textarea>
-      </div>`,
-    );
-    document.querySelector('.js-new-note-form').classList.add('js-main-target-form');
-
-    window.shortcut = new ShortcutsIssuable(true);
-  });
-
-  afterEach(() => {
-    $(FORM_SELECTOR).remove();
-
-    delete window.shortcut;
-  });
-
   describe('replyWithSelectedText', () => {
-    // Stub window.gl.utils.getSelectedFragment to return a node with the provided HTML.
+    const FORM_SELECTOR = '.js-main-target-form .js-vue-comment-form';
+
+    beforeEach(() => {
+      loadFixtures(snippetShowFixtureName);
+      $('body').append(
+        `<div class="js-main-target-form">
+          <textarea class="js-vue-comment-form"></textarea>
+        </div>`,
+      );
+      document.querySelector('.js-new-note-form').classList.add('js-main-target-form');
+
+      window.shortcut = new ShortcutsIssuable(true);
+    });
+
+    afterEach(() => {
+      $(FORM_SELECTOR).remove();
+
+      delete window.shortcut;
+    });
+
+    // Stub getSelectedFragment to return a node with the provided HTML.
     const stubSelection = (html, invalidNode) => {
       getSelectedFragment.mockImplementation(() => {
         const documentFragment = document.createDocumentFragment();
@@ -80,7 +81,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<p>Selected text.</p>');
       });
 
-      it('leaves existing input intact', done => {
+      it('leaves existing input intact', (done) => {
         $(FORM_SELECTOR).val('This text was already here.');
 
         expect($(FORM_SELECTOR).val()).toBe('This text was already here.');
@@ -95,7 +96,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -109,7 +110,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -121,7 +122,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a one-line selection', () => {
-      it('quotes the selection', done => {
+      it('quotes the selection', (done) => {
         stubSelection('<p>This text has been selected.</p>');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -133,7 +134,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a multi-line selection', () => {
-      it('quotes the selected lines as a group', done => {
+      it('quotes the selected lines as a group', (done) => {
         stubSelection(
           '<p>Selected line one.</p>\n<p>Selected line two.</p>\n<p>Selected line three.</p>',
         );
@@ -153,7 +154,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<p>Selected text.</p>', true);
       });
 
-      it('does not add anything to the input', done => {
+      it('does not add anything to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -162,7 +163,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -178,7 +179,7 @@ describe('ShortcutsIssuable', () => {
         stubSelection('<div class="md">Selected text.</div><p>Invalid selected text.</p>', true);
       });
 
-      it('only adds the valid part to the input', done => {
+      it('only adds the valid part to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -187,7 +188,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -197,7 +198,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -232,7 +233,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('adds the quoted selection to the input', done => {
+      it('adds the quoted selection to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -241,7 +242,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -251,7 +252,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `input`', done => {
+      it('triggers `input`', (done) => {
         let triggered = false;
         $(FORM_SELECTOR).on('input', () => {
           triggered = true;
@@ -286,7 +287,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('does not add anything to the input', done => {
+      it('does not add anything to the input', (done) => {
         ShortcutsIssuable.replyWithSelectedText(true);
 
         setImmediate(() => {
@@ -295,7 +296,7 @@ describe('ShortcutsIssuable', () => {
         });
       });
 
-      it('triggers `focus`', done => {
+      it('triggers `focus`', (done) => {
         const spy = jest.spyOn(document.querySelector(FORM_SELECTOR), 'focus');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -307,7 +308,7 @@ describe('ShortcutsIssuable', () => {
     });
 
     describe('with a valid selection with no text content', () => {
-      it('returns the proper markdown', done => {
+      it('returns the proper markdown', (done) => {
         stubSelection('<img src="https://gitlab.com/logo.png" alt="logo" />');
         ShortcutsIssuable.replyWithSelectedText(true);
 
@@ -316,6 +317,57 @@ describe('ShortcutsIssuable', () => {
 
           done();
         });
+      });
+    });
+  });
+
+  describe('copyBranchName', () => {
+    let sidebarCollapsedBtn;
+    let sidebarExpandedBtn;
+
+    beforeEach(() => {
+      loadFixtures(mrShowFixtureName);
+
+      window.shortcut = new ShortcutsIssuable();
+
+      [sidebarCollapsedBtn, sidebarExpandedBtn] = document.querySelectorAll(
+        '.sidebar-source-branch button',
+      );
+
+      [sidebarCollapsedBtn, sidebarExpandedBtn].forEach((btn) => jest.spyOn(btn, 'click'));
+    });
+
+    afterEach(() => {
+      delete window.shortcut;
+    });
+
+    describe('when the sidebar is expanded', () => {
+      beforeEach(() => {
+        // simulate the applied CSS styles when the
+        // sidebar is expanded
+        sidebarCollapsedBtn.style.display = 'none';
+
+        Mousetrap.trigger('b');
+      });
+
+      it('clicks the "expanded" version of the copy source branch button', () => {
+        expect(sidebarExpandedBtn.click).toHaveBeenCalled();
+        expect(sidebarCollapsedBtn.click).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the sidebar is collapsed', () => {
+      beforeEach(() => {
+        // simulate the applied CSS styles when the
+        // sidebar is collapsed
+        sidebarExpandedBtn.style.display = 'none';
+
+        Mousetrap.trigger('b');
+      });
+
+      it('clicks the "collapsed" version of the copy source branch button', () => {
+        expect(sidebarCollapsedBtn.click).toHaveBeenCalled();
+        expect(sidebarExpandedBtn.click).not.toHaveBeenCalled();
       });
     });
   });

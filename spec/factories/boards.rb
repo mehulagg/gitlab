@@ -28,7 +28,11 @@ FactoryBot.define do
     end
 
     after(:create) do |board|
-      board.lists.create(list_type: :closed)
+      board.lists.create!(list_type: :closed)
     end
+  end
+
+  factory :group_board, parent: :board do
+    group
   end
 end

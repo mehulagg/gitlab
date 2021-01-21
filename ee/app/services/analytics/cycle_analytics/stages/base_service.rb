@@ -6,9 +6,12 @@ module Analytics
       class BaseService
         include Gitlab::Allowable
 
+        DEFAULT_VALUE_STREAM_NAME = 'default'
+
         def initialize(parent:, current_user:, params: {})
           @parent = parent
           @current_user = current_user
+          @params = params
         end
 
         def execute
@@ -36,7 +39,7 @@ module Analytics
         end
 
         def persist_default_stages!
-          persisted_default_stages = parent.cycle_analytics_stages.default_stages
+          persisted_default_stages = parent.cycle_analytics_stages.by_value_stream(value_stream).default_stages
 
           # make sure that we persist default stages only once
           stages_to_persist = build_default_stages.select do |new_default_stage|
@@ -47,9 +50,13 @@ module Analytics
         end
 
         def build_default_stages
-          Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |params|
-            parent.cycle_analytics_stages.build(params)
+          Gitlab::Analytics::CycleAnalytics::DefaultStages.all.map do |stage_params|
+            parent.cycle_analytics_stages.build(stage_params.merge(value_stream: value_stream))
           end
+        end
+
+        def value_stream
+          @value_stream ||= params[:value_stream] || parent.value_streams.safe_find_or_create_by!(name: DEFAULT_VALUE_STREAM_NAME)
         end
       end
     end

@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Style guides
 
 ## Editor/IDE styling standardization
@@ -8,28 +15,52 @@ settings automatically by default. If your editor/IDE does not automatically sup
 we suggest investigating to see if a plugin exists. For instance here is the
 [plugin for vim](https://github.com/editorconfig/editorconfig-vim).
 
-## Pre-commit static analysis
+## Pre-push static analysis
 
-You're strongly advised to install
-[Overcommit](https://github.com/sds/overcommit) to automatically check for
-static analysis offenses before committing locally.
+We strongly recommend installing [Lefthook](https://github.com/Arkweid/lefthook) to automatically check
+for static analysis offenses before pushing your changes.
 
-In your GitLab source directory run:
+To install `lefthook`, run the following in your GitLab source directory:
 
 ```shell
-make -C tooling/overcommit
+# 1. Make sure to uninstall Overcommit first
+overcommit --uninstall
+
+# If using rbenv, at this point you may need to do: rbenv rehash
+
+# 2. Install lefthook...
+
+## With Homebrew (macOS)
+brew install Arkweid/lefthook/lefthook
+
+## Or with Go
+go get github.com/Arkweid/lefthook
+
+## Or with Rubygems
+gem install lefthook
+
+### You may need to run the following if you're using rbenv
+rbenv rehash
+
+# 3. Install the Git hooks
+lefthook install -f
 ```
 
-Then before a commit is created, Overcommit will automatically check for
-RuboCop (and other checks) offenses on every modified file.
+Before you push your changes, Lefthook then automatically run Danger checks, and other checks
+for changed files. This saves you time as you don't have to wait for the same errors to be detected
+by CI/CD.
 
-This saves you time as you don't have to wait for the same errors to be detected
-by the CI.
+Lefthook relies on a pre-push hook to prevent commits that violate its ruleset.
+To override this behavior, pass the environment variable `LEFTHOOK=0`. That is,
+`LEFTHOOK=0 git push`.
 
-Overcommit relies on a pre-commit hook to prevent commits that violate its ruleset.
-If you wish to override this behavior, it can be done by passing the ENV variable
-`OVERCOMMIT_DISABLE`; i.e. `OVERCOMMIT_DISABLE=1 git rebase master` to rebase while
-disabling the Git hook.
+You can also:
+
+- Define [local configuration](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#local-config).
+- Skip [checks per tag on the fly](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly).
+  For example, `LEFTHOOK_EXCLUDE=frontend git push origin`.
+- Run [hooks manually](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#run-githook-group-directly).
+  For example, `lefthook run pre-push`.
 
 ## Ruby, Rails, RSpec
 
@@ -55,6 +86,42 @@ discussions/nitpicking/back-and-forth in reviews.
 Additionally, we have a dedicated
 [newlines style guide](../newlines_styleguide.md), as well as dedicated
 [test-specific style guides and best practices](../testing_guide/index.md).
+
+### Creating new RuboCop cops
+
+Typically it is better for the linting rules to be enforced programmatically as it
+reduces the aforementioned [bike-shedding](https://en.wiktionary.org/wiki/bikeshedding).
+
+To that end, we encourage creation of new RuboCop rules in the codebase.
+
+When creating a new cop that could be applied to multiple applications, we encourage you
+to add it to our [GitLab Styles](https://gitlab.com/gitlab-org/gitlab-styles) gem.
+
+### Resolving RuboCop exceptions
+
+When the number of RuboCop exceptions exceed the default [`exclude-limit` of 15](https://docs.rubocop.org/rubocop/1.2/usage/basic_usage.html#command-line-flags),
+we may want to resolve exceptions over multiple commits. To minimize confusion,
+we should track our progress through the exception list.
+
+When auto-generating the `.rubocop_todo.yml` exception list for a particular Cop,
+and more than 15 files are affected, we should add the exception list to
+a different file, `.rubocop_manual_todo.yml`.
+
+This ensures that our list isn't mistakenly removed by another auto generation of
+the `.rubocop_todo.yml`. This also allows us greater visibility into the exceptions
+which are currently being resolved.
+
+One way to generate the initial list is to run the todo auto generation,
+with `exclude limit` set to a high number.
+
+```shell
+bundle exec rubocop --auto-gen-config --auto-gen-only-exclude --exclude-limit=10000
+```
+
+You can then move the list from the freshly generated `.rubocop_todo.yml` for the Cop being actively
+resolved and place it in the `.rubocop_manual_todo.yml`. In this scenario, do not commit auto generated
+changes to the `.rubocop_todo.yml` as an `exclude limit` that is higher than 15 will make the
+`.rubocop_todo.yml` hard to parse.
 
 ## Database migrations
 
@@ -82,11 +149,11 @@ See the dedicated [Shell scripting standards and style guidelines](../shell_scri
 
 ## Markdown
 
-We're following [Ciro Santilli's Markdown Style Guide](https://cirosantilli.com/markdown-style-guide).
+We're following [Ciro Santilli's Markdown Style Guide](https://cirosantilli.com/markdown-style-guide/).
 
 ## Documentation
 
-See the dedicated [Documentation Style Guide](../documentation/styleguide.md).
+See the dedicated [Documentation Style Guide](../documentation/styleguide/index.md).
 
 ## Python
 

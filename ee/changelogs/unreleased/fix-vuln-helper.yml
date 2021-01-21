@@ -1,0 +1,5 @@
+---
+title: Fix issue with displaying solution actions
+merge_request: 50648
+author:
+type: fixed

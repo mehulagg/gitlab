@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CertManager do
+RSpec.describe Clusters::Applications::CertManager do
   let(:cert_manager) { create(:clusters_applications_cert_manager) }
 
   include_examples 'cluster application core specs', :clusters_applications_cert_manager
@@ -40,7 +40,7 @@ describe Clusters::Applications::CertManager do
 
     subject { cert_manager.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with cert_manager arguments' do
       expect(subject.name).to eq('certmanager')
@@ -90,7 +90,7 @@ describe Clusters::Applications::CertManager do
   describe '#uninstall_command' do
     subject { cert_manager.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::DeleteCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand) }
 
     it 'is initialized with cert_manager arguments' do
       expect(subject.name).to eq('certmanager')

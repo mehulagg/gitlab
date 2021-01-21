@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-
-require Rails.root.join('db', 'post_migrate', '20200506085748_update_undefined_confidence_from_occurrences.rb')
+require_migration!
 
 RSpec.describe UpdateUndefinedConfidenceFromOccurrences, :migration do
   let(:vulnerabilities) { table(:vulnerability_occurrences) }
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:scanners) { table(:vulnerability_scanners) }
   let(:projects) { table(:projects) }
-  let(:vul1) { attributes_for(:vulnerabilities_occurrence, id: 1, report_type: 2, confidence: 5) }
-  let(:vul2) { attributes_for(:vulnerabilities_occurrence, id: 2, report_type: 2, confidence: 5) }
+  let(:vul1) { attributes_for(:vulnerabilities_finding, id: 1, report_type: 2, confidence: 5) }
+  let(:vul2) { attributes_for(:vulnerabilities_finding, id: 2, report_type: 2, confidence: 5) }
 
   before do
     stub_const("#{described_class}::BATCH_SIZE", 2)

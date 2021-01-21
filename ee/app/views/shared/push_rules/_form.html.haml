@@ -66,7 +66,7 @@
   = f.label :file_name_regex, "Prohibited file names", class: "label-bold"
   = f.text_field :file_name_regex, class: "form-control", placeholder: 'Example: (jar|exe)$', data: { qa_selector: 'file_name_field' }
   .form-text.text-muted
-    All commited filenames must not match this
+    All committed filenames must not match this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
     If this field is empty it allows any filenames.
@@ -79,4 +79,4 @@
     Set to 0 to allow files of any size.
     Files tracked by Git LFS are exempted.
 
-= f.submit "Save Push Rules", class: "btn btn-success", data: { qa_selector: 'submit_settings_button' }
+= f.submit _("Save Push Rules"), class: "btn btn-success", data: { qa_selector: 'submit_settings_button' }

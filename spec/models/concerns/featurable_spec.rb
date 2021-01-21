@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Featurable do
+RSpec.describe Featurable do
   let_it_be(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:feature_class) { subject.class }
@@ -42,6 +42,7 @@ describe Featurable do
         end
       end
     end
+
     let!(:instance) { klass.new }
 
     it { expect(klass.available_features).to eq [:feature1, :feature2] }
@@ -179,6 +180,6 @@ describe Featurable do
 
   def update_all_project_features(project, features, value)
     project_feature_attributes = features.map { |f| ["#{f}_access_level", value] }.to_h
-    project.project_feature.update(project_feature_attributes)
+    project.project_feature.update!(project_feature_attributes)
   end
 end

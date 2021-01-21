@@ -8,6 +8,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
   let(:query_ctx) do
     {}
   end
+
   let(:epic_id) { 37 }
   let(:epic_iid) { 18 }
   let(:child_epic_id) { 38 }
@@ -44,6 +45,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
     let(:single_record) do
       { iid: 6, issues_count: 4, issues_weight_sum: 9, parent_id: nil, issues_state_id: OPENED_ISSUE_STATE, epic_state_id: OPENED_EPIC_STATE }
     end
+
     let(:epic_info_node) { Gitlab::Graphql::Aggregations::Epics::EpicNode.new(epic_id, [single_record] ) }
 
     subject { described_class.new(query_ctx, epic_id, COUNT) }
@@ -70,6 +72,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
       let(:fake_state) do
         { pending_ids: Set.new([epic_id, child_epic_id]), tree: {} }
       end
+
       let(:fake_data) do
         {
             epic_id => [{ epic_state_id: OPENED_EPIC_STATE, issues_count: 2, issues_weight_sum: 5, parent_id: nil, issues_state_id: OPENED_ISSUE_STATE }],

@@ -5,6 +5,7 @@ class ExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
 
   feature_category :issue_tracking
   worker_resource_boundary :cpu
+  loggable_arguments 2
 
   def perform(current_user_id, project_id, params)
     @current_user = User.find(current_user_id)
@@ -14,8 +15,6 @@ class ExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
     params[:project_id] = project_id
     params.delete(:sort)
 
-    issues = IssuesFinder.new(@current_user, params).execute
-
-    Issues::ExportCsvService.new(issues, @project).email(@current_user)
+    IssuableExportCsvWorker.perform_async(:issue, @current_user.id, @project.id, params)
   end
 end

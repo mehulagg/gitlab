@@ -6,6 +6,8 @@ class Projects::TodosController < Projects::ApplicationController
 
   before_action :authenticate_user!, only: [:create]
 
+  feature_category :issue_tracking
+
   private
 
   def issuable
@@ -15,6 +17,9 @@ class Projects::TodosController < Projects::ApplicationController
         IssuesFinder.new(current_user, project_id: @project.id).find(params[:issuable_id])
       when "merge_request"
         MergeRequestsFinder.new(current_user, project_id: @project.id).find(params[:issuable_id])
+      when "design"
+        issue = IssuesFinder.new(current_user, project_id: @project.id).find(params[:issue_id])
+        DesignManagement::DesignsFinder.new(issue, current_user).find(params[:issuable_id])
       end
     end
   end

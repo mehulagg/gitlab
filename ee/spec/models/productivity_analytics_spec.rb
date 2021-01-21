@@ -125,7 +125,7 @@ RSpec.describe ProductivityAnalytics do
     end
 
     before do
-      Timecop.freeze do
+      freeze_time do
         long_mr
         medium_mr
         short_mr

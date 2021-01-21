@@ -1,6 +1,6 @@
+import waitForPromises from 'helpers/wait_for_promises';
 import { createRouter } from '~/ide/ide_router';
 import { createStore } from '~/ide/stores';
-import waitForPromises from 'helpers/wait_for_promises';
 
 describe('IDE router', () => {
   const PROJECT_NAMESPACE = 'my-group/sub-group';
@@ -32,7 +32,7 @@ describe('IDE router', () => {
     `/project/${PROJECT_NAMESPACE}/${PROJECT_NAME}/tree/blob`,
     `/project/${PROJECT_NAMESPACE}/${PROJECT_NAME}/edit`,
     `/project/${PROJECT_NAMESPACE}/${PROJECT_NAME}`,
-  ].forEach(route => {
+  ].forEach((route) => {
     it(`finds project path when route is "${route}"`, () => {
       router.push(route);
 

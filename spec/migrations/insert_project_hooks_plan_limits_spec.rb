@@ -3,17 +3,17 @@
 require 'spec_helper'
 require Rails.root.join('db', 'migrate', '20191216183532_insert_project_hooks_plan_limits.rb')
 
-describe InsertProjectHooksPlanLimits do
+RSpec.describe InsertProjectHooksPlanLimits do
   let(:migration) { described_class.new }
   let(:plans) { table(:plans) }
   let(:plan_limits) { table(:plan_limits) }
 
   before do
-    plans.create(id: 34, name: 'free')
-    plans.create(id: 2, name: 'bronze')
-    plans.create(id: 3, name: 'silver')
-    plans.create(id: 4, name: 'gold')
-    plan_limits.create(plan_id: 34, ci_active_jobs: 5)
+    plans.create!(id: 34, name: 'free')
+    plans.create!(id: 2, name: 'bronze')
+    plans.create!(id: 3, name: 'silver')
+    plans.create!(id: 4, name: 'gold')
+    plan_limits.create!(plan_id: 34, ci_active_jobs: 5)
   end
 
   context 'when on Gitlab.com' do

@@ -1,12 +1,11 @@
+import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 
 import milestoneItemComponent from 'ee/roadmap/components/milestone_item.vue';
 
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
-
-import { mount } from '@vue/test-utils';
 import { mockTimeframeInitialDate, mockMilestone2 } from 'ee_jest/roadmap/mock_data';
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);

@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting Alert Management Alert counts by status' do
+RSpec.describe 'getting Alert Management Alert counts by status' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:alert_1) { create(:alert_management_alert, :resolved, project: project) }
-  let_it_be(:alert_2) { create(:alert_management_alert, project: project) }
+  let_it_be(:alert_resolved) { create(:alert_management_alert, :resolved, project: project) }
+  let_it_be(:alert_triggered) { create(:alert_management_alert, project: project) }
   let_it_be(:other_project_alert) { create(:alert_management_alert) }
   let(:params) { {} }
 
@@ -55,6 +55,22 @@ describe 'getting Alert Management Alert counts by status' do
           'resolved' => 1,
           'ignored' => 0
         )
+      end
+
+      context 'with search criteria' do
+        let(:params) { { search: alert_resolved.title } }
+
+        it_behaves_like 'a working graphql query'
+        it 'returns the correct counts for each status' do
+          expect(alert_counts).to eq(
+            'open' => 0,
+            'all' => 1,
+            'triggered' => 0,
+            'acknowledged' => 0,
+            'resolved' => 1,
+            'ignored' => 0
+          )
+        end
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::MarkdownFilter do
+RSpec.describe Banzai::Filter::MarkdownFilter do
   include FilterSpecHelper
 
   describe 'markdown engine from context' do
@@ -45,6 +45,12 @@ describe Banzai::Filter::MarkdownFilter do
         result = filter("```日\nsome code\n```", no_sourcepos: true)
 
         expect(result).to start_with('<pre><code lang="日">')
+      end
+
+      it 'works with additional language parameters' do
+        result = filter("```ruby:red gem\nsome code\n```", no_sourcepos: true)
+
+        expect(result).to start_with('<pre><code lang="ruby:red gem">')
       end
     end
   end

@@ -5,17 +5,6 @@ module EE
     module BaseService
       extend ::Gitlab::Utils::Override
 
-      override :execute_hooks
-      def execute_hooks(merge_request, action = 'open', old_rev: nil, old_associations: {})
-        super
-
-        return unless project.jira_subscription_exists?
-
-        if Atlassian::JiraIssueKeyExtractor.has_keys?(merge_request.title, merge_request.description)
-          JiraConnect::SyncMergeRequestWorker.perform_async(merge_request.id)
-        end
-      end
-
       private
 
       attr_accessor :blocking_merge_requests_params

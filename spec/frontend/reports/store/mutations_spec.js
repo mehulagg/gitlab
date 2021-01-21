@@ -46,6 +46,10 @@ describe('Reports Store Mutations', () => {
               name: 'StringHelper#concatenate when a is git and b is lab returns summary',
               execution_time: 0.0092435,
               system_output: "Failure/Error: is_expected.to eq('gitlab')",
+              recent_failures: {
+                count: 4,
+                base_branch: 'master',
+              },
             },
           ],
           resolved_failures: [
@@ -82,6 +86,7 @@ describe('Reports Store Mutations', () => {
       expect(stateCopy.summary.total).toEqual(mockedResponse.summary.total);
       expect(stateCopy.summary.resolved).toEqual(mockedResponse.summary.resolved);
       expect(stateCopy.summary.failed).toEqual(mockedResponse.summary.failed);
+      expect(stateCopy.summary.recentlyFailed).toEqual(1);
     });
 
     it('should set reports', () => {
@@ -121,6 +126,33 @@ describe('Reports Store Mutations', () => {
     it('should set modal data', () => {
       expect(stateCopy.modal.data.execution_time.value).toEqual(issue.execution_time);
       expect(stateCopy.modal.data.system_output.value).toEqual(issue.system_output);
+    });
+
+    it('should open modal', () => {
+      expect(stateCopy.modal.open).toEqual(true);
+    });
+  });
+
+  describe('RESET_ISSUE_MODAL_DATA', () => {
+    beforeEach(() => {
+      mutations[types.SET_ISSUE_MODAL_DATA](stateCopy, {
+        issue,
+      });
+
+      mutations[types.RESET_ISSUE_MODAL_DATA](stateCopy);
+    });
+
+    it('should reset modal title', () => {
+      expect(stateCopy.modal.title).toEqual(null);
+    });
+
+    it('should reset modal data', () => {
+      expect(stateCopy.modal.data.execution_time.value).toEqual(null);
+      expect(stateCopy.modal.data.system_output.value).toEqual(null);
+    });
+
+    it('should close modal', () => {
+      expect(stateCopy.modal.open).toEqual(false);
     });
   });
 });

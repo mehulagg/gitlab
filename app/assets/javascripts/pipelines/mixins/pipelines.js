@@ -1,11 +1,11 @@
 import Visibility from 'visibilityjs';
 import { GlLoadingIcon } from '@gitlab/ui';
-import { __ } from '../../locale';
-import createFlash from '../../flash';
-import Poll from '../../lib/utils/poll';
-import EmptyState from '../components/empty_state.vue';
-import SvgBlankState from '../components/blank_state.vue';
-import PipelinesTableComponent from '../components/pipelines_table.vue';
+import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Poll from '~/lib/utils/poll';
+import EmptyState from '../components/pipelines_list/empty_state.vue';
+import SvgBlankState from '../components/pipelines_list/blank_state.vue';
+import PipelinesTableComponent from '../components/pipelines_list/pipelines_table.vue';
 import eventHub from '../event_hub';
 import { CANCEL_REQUEST } from '../constants';
 
@@ -90,7 +90,7 @@ export default {
       // fetch new data
       return this.service
         .getPipelines(this.requestData)
-        .then(response => {
+        .then((response) => {
           this.isLoading = false;
           this.successCallback(response);
 
@@ -124,8 +124,8 @@ export default {
     getPipelines() {
       return this.service
         .getPipelines(this.requestData)
-        .then(response => this.successCallback(response))
-        .catch(error => this.errorCallback(error));
+        .then((response) => this.successCallback(response))
+        .catch((error) => this.errorCallback(error));
     },
     setCommonData(pipelines) {
       this.store.storePipelines(pipelines);

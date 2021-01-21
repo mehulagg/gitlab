@@ -1,5 +1,6 @@
 import $ from 'jquery';
-import Flash from './flash';
+import { Rails } from '~/lib/utils/rails_ujs';
+import { deprecatedCreateFlash as Flash } from './flash';
 import { __ } from '~/locale';
 
 export default function notificationsDropdown() {
@@ -11,9 +12,7 @@ export default function notificationsDropdown() {
     }
 
     const notificationLevel = $(this).data('notificationLevel');
-    const form = $(this)
-      .parents('.notification-form')
-      .first();
+    const form = $(this).parents('.notification-form').first();
 
     form.find('.js-notification-loading').toggleClass('spinner');
     if (form.hasClass('no-label')) {
@@ -21,14 +20,14 @@ export default function notificationsDropdown() {
       form.find('.js-notifications-icon').toggleClass('hidden');
     }
     form.find('#notification_setting_level').val(notificationLevel);
-    form.submit();
+    Rails.fire(form[0], 'submit');
   });
 
-  $(document).on('ajax:success', '.notification-form', (e, data) => {
+  $(document).on('ajax:success', '.notification-form', (e) => {
+    const data = e.detail[0];
+
     if (data.saved) {
-      $(e.currentTarget)
-        .closest('.js-notification-dropdown')
-        .replaceWith(data.html);
+      $(e.currentTarget).closest('.js-notification-dropdown').replaceWith(data.html);
     } else {
       Flash(__('Failed to save new settings'), 'alert');
     }

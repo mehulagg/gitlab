@@ -1,12 +1,11 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { __ } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlButton } from '@gitlab/ui';
 import DraftsCount from './drafts_count.vue';
 
 export default {
   components: {
-    LoadingButton,
+    GlButton,
     DraftsCount,
   },
   props: {
@@ -15,41 +14,38 @@ export default {
       required: false,
       default: false,
     },
-    label: {
+    category: {
       type: String,
       required: false,
-      default: __('Finish review'),
+      default: 'primary',
     },
-    shouldPublish: {
-      type: Boolean,
-      required: true,
+    variant: {
+      type: String,
+      required: false,
+      default: 'success',
     },
   },
   computed: {
     ...mapState('batchComments', ['isPublishing']),
   },
   methods: {
-    ...mapActions('batchComments', ['publishReview', 'toggleReviewDropdown']),
+    ...mapActions('batchComments', ['publishReview']),
     onClick() {
-      if (this.shouldPublish) {
-        this.publishReview();
-      } else {
-        this.toggleReviewDropdown();
-      }
+      this.publishReview();
     },
   },
 };
 </script>
 
 <template>
-  <loading-button
+  <gl-button
     :loading="isPublishing"
-    container-class="btn btn-success js-publish-draft-button qa-submit-review"
+    class="js-publish-draft-button qa-submit-review"
+    :category="category"
+    :variant="variant"
     @click="onClick"
   >
-    <span>
-      {{ label }}
-      <drafts-count v-if="showCount" />
-    </span>
-  </loading-button>
+    {{ __('Submit review') }}
+    <drafts-count v-if="showCount" />
+  </gl-button>
 </template>

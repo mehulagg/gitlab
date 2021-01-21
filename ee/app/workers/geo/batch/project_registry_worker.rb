@@ -14,6 +14,8 @@ module Geo
       BATCH_SIZE = 250
       OPERATIONS = [:resync_repositories, :reverify_repositories].freeze
 
+      loggable_arguments 0, 1
+
       def perform(operation, range)
         case operation.to_sym
         when :resync_repositories

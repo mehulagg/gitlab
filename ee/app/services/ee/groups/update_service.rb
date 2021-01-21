@@ -4,6 +4,7 @@ module EE
   module Groups
     module UpdateService
       extend ::Gitlab::Utils::Override
+      EE_SETTINGS_PARAMS = [:prevent_forking_outside_group].freeze
 
       override :execute
       def execute
@@ -11,8 +12,6 @@ module EE
           check_file_template_project_id_change!
           return false if group.errors.present?
         end
-
-        return false unless valid_path_change_with_npm_packages?
 
         handle_changes
 
@@ -92,9 +91,11 @@ module EE
         end
       end
 
+      override :handle_changes
       def handle_changes
         handle_allowed_email_domains_update
         handle_ip_restriction_update
+        super
       end
 
       def handle_ip_restriction_update
@@ -113,18 +114,9 @@ module EE
         AllowedEmailDomains::UpdateService.new(current_user, group, comma_separated_domains).execute
       end
 
-      def valid_path_change_with_npm_packages?
-        return true unless group.packages_feature_available?
-        return true if params[:path].blank?
-        return true if !group.has_parent? && group.path == params[:path]
-
-        npm_packages = Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
-        if npm_packages.exists?
-          group.errors.add(:path, s_('GroupSettings|cannot change when group contains projects with NPM packages'))
-          return
-        end
-
-        true
+      override :allowed_settings_params
+      def allowed_settings_params
+        @allowed_settings_params ||= super + EE_SETTINGS_PARAMS
       end
 
       def log_audit_event

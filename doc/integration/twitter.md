@@ -1,6 +1,12 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Twitter OAuth2 OmniAuth Provider
 
-To enable the Twitter OmniAuth provider you must register your application with Twitter. Twitter will generate a client ID and secret key for you to use.
+To enable the Twitter OmniAuth provider you must register your application with Twitter. Twitter generates a client ID and secret key for you to use.
 
 1. Sign in to [Twitter Application Management](https://developer.twitter.com/apps).
 
@@ -65,7 +71,8 @@ To enable the Twitter OmniAuth provider you must register your application with 
    For installations from source:
 
    ```yaml
-     - { name: 'twitter', app_id: 'YOUR_APP_ID',
+   - { name: 'twitter',
+       app_id: 'YOUR_APP_ID',
        app_secret: 'YOUR_APP_SECRET' }
    ```
 
@@ -78,4 +85,4 @@ To enable the Twitter OmniAuth provider you must register your application with 
 1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
-On the sign in page there should now be a Twitter icon below the regular sign in form. Click the icon to begin the authentication process. Twitter will ask the user to sign in and authorize the GitLab application. If everything goes well the user will be returned to GitLab and will be signed in.
+On the sign in page there should now be a Twitter icon below the regular sign in form. Click the icon to begin the authentication process. Twitter asks the user to sign in and authorize the GitLab application. If everything goes well the user is returned to GitLab and signed in.

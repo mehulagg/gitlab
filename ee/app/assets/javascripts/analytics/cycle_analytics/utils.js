@@ -1,22 +1,18 @@
-import { isNumber, sortBy } from 'lodash';
+import { isNumber } from 'lodash';
 import dateFormat from 'dateformat';
 import { s__, sprintf } from '~/locale';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
-import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import { hideFlash } from '~/flash';
+import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
+import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   newDate,
   dayAfter,
   secondsToDays,
   getDatesInRange,
-  getDayDifference,
-  getDateInPast,
-  getDateInFuture,
   parseSeconds,
 } from '~/lib/utils/datetime_utility';
 import { dateFormats } from '../shared/constants';
-import { STAGE_NAME, CAPITALIZED_STAGE_NAME, PATH_HOME_ICON } from './constants';
 import { toYmd } from '../shared/utils';
 
 const EVENT_TYPE_LABEL = 'label';
@@ -32,11 +28,12 @@ export const removeFlash = (type = 'alert') => {
 export const toggleSelectedLabel = ({ selectedLabelIds = [], value = null }) => {
   if (!value) return selectedLabelIds;
   return selectedLabelIds.includes(value)
-    ? selectedLabelIds.filter(v => v !== value)
+    ? selectedLabelIds.filter((v) => v !== value)
     : [...selectedLabelIds, value];
 };
 
-export const isStartEvent = ev => Boolean(ev) && Boolean(ev.canBeStartEvent) && ev.canBeStartEvent;
+export const isStartEvent = (ev) =>
+  Boolean(ev) && Boolean(ev.canBeStartEvent) && ev.canBeStartEvent;
 
 export const eventToOption = (obj = null) => {
   if (!obj || (!obj.text && !obj.identifier)) return null;
@@ -59,7 +56,7 @@ export const isLabelEvent = (labelEvents = [], ev = null) =>
   Boolean(ev) && labelEvents.length && labelEvents.includes(ev);
 
 export const getLabelEventsIdentifiers = (events = []) =>
-  events.filter(ev => ev.type && ev.type === EVENT_TYPE_LABEL).map(i => i.identifier);
+  events.filter((ev) => ev.type && ev.type === EVENT_TYPE_LABEL).map((i) => i.identifier);
 
 /**
  * Checks if the specified stage is in memory or persisted to storage based on the id
@@ -88,10 +85,8 @@ export const isPersistedStage = ({ custom, id }) => custom || isNumber(id);
  */
 const stageUrlSlug = ({ id, title, custom = false }) => {
   if (custom) return id;
-  // We still use 'production' as the id to access this stage, even though the title is 'Total'
-  return title.toLowerCase() === STAGE_NAME.TOTAL
-    ? STAGE_NAME.PRODUCTION
-    : convertToSnakeCase(title);
+
+  return convertToSnakeCase(title);
 };
 
 export const transformRawStages = (stages = []) =>
@@ -107,7 +102,7 @@ export const transformRawStages = (stages = []) =>
 
 export const transformRawTasksByTypeData = (data = []) => {
   if (!data.length) return [];
-  return data.map(d => convertObjectPropsToCamelCase(d, { deep: true }));
+  return data.map((d) => convertObjectPropsToCamelCase(d, { deep: true }));
 };
 
 /**
@@ -143,10 +138,10 @@ export const transformRawTasksByTypeData = (data = []) => {
  * @param {Array} data - The duration data for selected stages
  * @returns {Array} An array with each item being an object containing the duration_in_seconds and finished_at values for an event
  */
-export const flattenDurationChartData = data =>
+export const flattenDurationChartData = (data) =>
   data
-    .map(stage =>
-      stage.data.map(event => {
+    .map((stage) =>
+      stage.data.map((event) => {
         const date = new Date(event.finished_at);
         return {
           ...event,
@@ -191,21 +186,24 @@ export const flattenDurationChartData = data =>
  * i[2] = date, used in the tooltip
  *
  * @param {Array} data - The duration data for selected stages
- * @param {Date} startDate - The globally selected cycle analytics start date
- * @param {Date} endDate - The globally selected cycle analytics end date
+ * @param {Date} startDate - The globally selected Value Stream Analytics start date
+ * @param {Date} endDate - The globally selected Value Stream Analytics end date
  * @returns {Array} An array with each item being another arry of three items (plottable date, computed total, tooltip display date)
  */
 export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
 
+  const endOfDay = newDate(endDate);
+  endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
+
   for (
     let currentDate = newDate(startDate);
-    currentDate <= endDate;
+    currentDate <= endOfDay;
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);
-    const valuesForDay = flattenedData.filter(object => object.finished_at === currentISODate);
+    const valuesForDay = flattenedData.filter((object) => object.finished_at === currentISODate);
     const summedData = valuesForDay.reduce((total, value) => total + value.duration_in_seconds, 0);
     const summedDataInDays = secondsToDays(summedData);
 
@@ -215,43 +213,7 @@ export const getDurationChartData = (data, startDate, endDate) => {
   return eventData;
 };
 
-/**
- * Takes the offset duration data for selected stages and calls getDurationChartData to compute the totals.
- * The data is then transformed into a format expected by the scatterplot;
- *
- * [
- *   ['2019-09-02', 7],
- *   ...
- * ]
- *
- * The transformation works by calling getDateInPast on the provided startDate and endDate in order to match
- * the startDate and endDate fetched when making the API call to fetch the data.
- *
- * In order to map the offset data to plottable points within the chart's range, getDateInFuture is called
- * on the data series with the same offest used for getDateInPast. This creates plottable data that matches up
- * with the data being displayed on the chart.
- *
- * @param {Array} data - The computed, plottable duration chart data
- * @param {Date} startDate - The globally selected cycle analytics start date
- * @param {Date} endDate - The globally selected cycle analytics end date
- * @returns {Array} An array with each item being another arry of two items (date, computed total)
- */
-export const getDurationChartMedianData = (data, startDate, endDate) => {
-  const offsetValue = getDayDifference(startDate, endDate);
-  const offsetEndDate = getDateInPast(endDate, offsetValue);
-  const offsetStartDate = getDateInPast(startDate, offsetValue);
-
-  const offsetDurationData = getDurationChartData(data, offsetStartDate, offsetEndDate);
-
-  const result = offsetDurationData.map(event => [
-    dateFormat(getDateInFuture(new Date(event[0]), offsetValue), dateFormats.isoDate),
-    event[1],
-  ]);
-
-  return result;
-};
-
-export const orderByDate = (a, b, dateFmt = datetime => new Date(datetime).getTime()) =>
+export const orderByDate = (a, b, dateFmt = (datetime) => new Date(datetime).getTime()) =>
   dateFmt(a) - dateFmt(b);
 
 /**
@@ -263,7 +225,7 @@ export const orderByDate = (a, b, dateFmt = datetime => new Date(datetime).getTi
 export const flattenTaskByTypeSeries = (series = {}) =>
   Object.entries(series)
     .sort((a, b) => orderByDate(a[0], b[0]))
-    .map(dataSet => dataSet[1]);
+    .map((dataSet) => dataSet[1]);
 
 /**
  * @typedef {Object} RawTasksByTypeData
@@ -295,7 +257,6 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
     return {
       groupBy: [],
       data: [],
-      seriesNames: [],
     };
   }
 
@@ -311,14 +272,19 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
   const transformed = data.reduce(
     (acc, curr) => {
       const {
-        label: { title },
+        label: { title: name },
         series,
       } = curr;
-      acc.seriesNames = [...acc.seriesNames, title];
       acc.data = [
         ...acc.data,
-        // adds 0 values for each data point and overrides with data from the series
-        flattenTaskByTypeSeries({ ...zeroValuesForEachDataPoint, ...Object.fromEntries(series) }),
+        {
+          name,
+          // adds 0 values for each data point and overrides with data from the series
+          data: flattenTaskByTypeSeries({
+            ...zeroValuesForEachDataPoint,
+            ...Object.fromEntries(series),
+          }),
+        },
       ];
       return acc;
     },
@@ -334,11 +300,44 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
   };
 };
 
-export const handleErrorOrRethrow = ({ action, error }) => {
+const buildDataError = ({ status = httpStatus.INTERNAL_SERVER_ERROR, error }) => {
+  const err = new Error(error);
+  err.errorCode = status;
+  return err;
+};
+
+/**
+ * Flashes an error message if the status code is not 200
+ *
+ * @param {Object} error - Axios error object
+ * @param {String} errorMessage - Error message to display
+ */
+export const flashErrorIfStatusNotOk = ({ error, message }) => {
+  if (error?.errorCode !== httpStatus.OK) {
+    createFlash(message);
+  }
+};
+
+/**
+ * Data errors can occur when DB queries for analytics data time out
+ * The server will respond with a status `200` success and include the
+ * relevant error in the response body
+ *
+ * @param {Object} Response - Axios ajax response
+ * @returns {Object} Returns the axios ajax response
+ */
+export const checkForDataError = (response) => {
+  const { data, status } = response;
+  if (data?.error) {
+    throw buildDataError({ status, error: data.error });
+  }
+  return response;
+};
+
+export const throwIfUserForbidden = (error) => {
   if (error?.response?.status === httpStatus.FORBIDDEN) {
     throw error;
   }
-  action();
 };
 
 export const isStageNameExistsError = ({ status, errors }) =>
@@ -348,33 +347,60 @@ export const isStageNameExistsError = ({ status, errors }) =>
  * Takes the stages and median data, combined with the selected stage, to build an
  * array which is formatted to proivde the data required for the path navigation.
  *
- * The stage named 'Total' is renamed to 'Overview', it's configured to have
- * the 'home' icon - and is moved to the front of the array.
- *
  * @param {Array} stages - The stages available to the group / project
  * @param {Object} medians - The median values for the stages available to the group / project
  * @param {Object} selectedStage - The currently selected stage
  * @returns {Array} An array of stages formatted with data required for the path navigation
  */
 export const transformStagesForPathNavigation = ({ stages, medians, selectedStage }) => {
-  const formattedStages = stages.map(stage => {
+  const formattedStages = stages.map((stage) => {
     const { days } = parseSeconds(medians[stage.id], {
       daysPerWeek: 7,
       hoursPerDay: 24,
       limitToDays: true,
     });
-    const isTotalStage = stage.title === CAPITALIZED_STAGE_NAME.TOTAL;
 
     return {
       ...stage,
       metric: days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : null,
       selected: stage.title === selectedStage.title,
-      title: isTotalStage ? CAPITALIZED_STAGE_NAME.OVERVIEW : stage.title,
-      icon: isTotalStage ? PATH_HOME_ICON : null,
+      title: stage.title,
+      icon: null,
     };
   });
 
-  return sortBy(formattedStages, stage =>
-    stage.title === CAPITALIZED_STAGE_NAME.OVERVIEW ? 0 : 1,
-  );
+  return formattedStages;
 };
+
+/**
+ * @typedef {Object} MetricData
+ * @property {String} title - Title of the metric measured
+ * @property {String} value - String representing the decimal point value, e.g '1.5'
+ * @property {String} [unit] - String representing the decimal point value, e.g '1.5'
+ *
+ * @typedef {Object} TransformedMetricData
+ * @property {String} label - Title of the metric measured
+ * @property {String} value - String representing the decimal point value, e.g '1.5'
+ * @property {String} key - Slugified string based on the 'title'
+ * @property {String} [tooltipText] - String to display for aa tooltip
+ * @property {String} [unit] - String representing the decimal point value, e.g '1.5'
+ */
+
+/**
+ * Prepares metric data to be rendered in the metric_card component
+ *
+ * @param {MetricData[]} data - The metric data to be rendered
+ * @param {Object} [tooltipText] - Key value pair of strings to display in the tooltip
+ * @returns {TransformedMetricData[]} An array of metrics ready to render in the metric_card
+ */
+
+export const prepareTimeMetricsData = (data = [], tooltipText = {}) =>
+  data.map(({ title: label, ...rest }) => {
+    const key = slugify(label);
+    return {
+      ...rest,
+      label,
+      key,
+      tooltipText: tooltipText[key] || '',
+    };
+  });

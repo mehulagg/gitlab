@@ -2,7 +2,9 @@
 
 module Gitlab
   module SidekiqMiddleware
-    class ServerMetrics < SidekiqMiddleware::Metrics
+    class ServerMetrics
+      include ::Gitlab::SidekiqMiddleware::MetricsHelper
+
       # SIDEKIQ_LATENCY_BUCKETS are latency histogram buckets better suited to Sidekiq
       # timeframes than the DEFAULT_BUCKET definition. Defined in seconds.
       SIDEKIQ_LATENCY_BUCKETS = [0.1, 0.25, 0.5, 1, 2.5, 5, 10, 60, 300, 600].freeze
@@ -14,6 +16,10 @@ module Gitlab
       end
 
       def call(worker, job, queue)
+        # This gives all the sidekiq worker threads a name, so we can recognize them
+        # in metrics and can use them in the `ThreadsSampler` for setting a label
+        Thread.current.name ||= Gitlab::Metrics::Samplers::ThreadsSampler::SIDEKIQ_WORKER_THREAD_NAME
+
         labels = create_labels(worker.class, queue)
         queue_duration = ::Gitlab::InstrumentationHelper.queue_duration_for_job(job)
 

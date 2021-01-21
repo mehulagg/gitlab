@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AnalyticsBuildEntity do
+RSpec.describe AnalyticsBuildEntity do
   let(:entity) do
     described_class.new(build, request: double)
   end
@@ -16,7 +16,7 @@ describe AnalyticsBuildEntity do
     subject { entity.as_json }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'contains the URL' do

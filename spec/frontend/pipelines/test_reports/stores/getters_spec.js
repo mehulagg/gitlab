@@ -1,6 +1,6 @@
 import { getJSONFixture } from 'helpers/fixtures';
 import * as getters from '~/pipelines/stores/test_reports/getters';
-import { iconForTestStatus } from '~/pipelines/stores/test_reports/utils';
+import { iconForTestStatus, formattedTime } from '~/pipelines/stores/test_reports/utils';
 
 describe('Getters TestReports Store', () => {
   let state;
@@ -9,12 +9,20 @@ describe('Getters TestReports Store', () => {
 
   const defaultState = {
     testReports,
-    selectedSuite: testReports.test_suites[0],
+    selectedSuiteIndex: 0,
+    pageInfo: {
+      page: 1,
+      perPage: 2,
+    },
   };
 
   const emptyState = {
     testReports: {},
-    selectedSuite: {},
+    selectedSuite: null,
+    pageInfo: {
+      page: 1,
+      perPage: 2,
+    },
   };
 
   beforeEach(() => {
@@ -32,9 +40,9 @@ describe('Getters TestReports Store', () => {
       setupState();
 
       const suites = getters.getTestSuites(state);
-      const expected = testReports.test_suites.map(x => ({
+      const expected = testReports.test_suites.map((x) => ({
         ...x,
-        formattedTime: '00:00:00',
+        formattedTime: formattedTime(x.total_time),
       }));
 
       expect(suites).toEqual(expected);
@@ -47,16 +55,29 @@ describe('Getters TestReports Store', () => {
     });
   });
 
+  describe('getSelectedSuite', () => {
+    it('should return the selected suite', () => {
+      setupState();
+
+      const selectedSuite = getters.getSelectedSuite(state);
+      const expected = testReports.test_suites[state.selectedSuiteIndex];
+
+      expect(selectedSuite).toEqual(expected);
+    });
+  });
+
   describe('getSuiteTests', () => {
-    it('should return the test cases inside the suite', () => {
+    it('should return the current page of test cases inside the suite', () => {
       setupState();
 
       const cases = getters.getSuiteTests(state);
-      const expected = testReports.test_suites[0].test_cases.map(x => ({
-        ...x,
-        formattedTime: '00:00:00',
-        icon: iconForTestStatus(x.status),
-      }));
+      const expected = testReports.test_suites[0].test_cases
+        .map((x) => ({
+          ...x,
+          formattedTime: formattedTime(x.execution_time),
+          icon: iconForTestStatus(x.status),
+        }))
+        .slice(0, state.pageInfo.perPage);
 
       expect(cases).toEqual(expected);
     });
@@ -65,6 +86,17 @@ describe('Getters TestReports Store', () => {
       setupState(emptyState);
 
       expect(getters.getSuiteTests(state)).toEqual([]);
+    });
+  });
+
+  describe('getSuiteTestCount', () => {
+    it('should return the total number of test cases', () => {
+      setupState();
+
+      const testCount = getters.getSuiteTestCount(state);
+      const expected = testReports.test_suites[0].test_cases.length;
+
+      expect(testCount).toEqual(expected);
     });
   });
 });

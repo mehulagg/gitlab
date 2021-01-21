@@ -10,6 +10,9 @@ module Ci
       elsif job_from_token
         create_pipeline_from_job(job_from_token)
       end
+
+    rescue Ci::AuthJobFinder::AuthError => e
+      error(e.message, 401)
     end
 
     private
@@ -18,10 +21,10 @@ module Ci
       # this check is to not leak the presence of the project if user cannot read it
       return unless trigger.project == project
 
-      pipeline = Ci::CreatePipelineService.new(project, trigger.owner, ref: params[:ref])
+      pipeline = Ci::CreatePipelineService
+        .new(project, trigger.owner, ref: params[:ref], variables_attributes: variables)
         .execute(:trigger, ignore_skip_ci: true) do |pipeline|
           pipeline.trigger_requests.build(trigger: trigger)
-          pipeline.variables.build(variables)
         end
 
       if pipeline.persisted?
@@ -41,9 +44,8 @@ module Ci
       # this check is to not leak the presence of the project if user cannot read it
       return unless can?(job.user, :read_project, project)
 
-      return error("400 Job has to be running", 400) unless job.running?
-
-      pipeline = Ci::CreatePipelineService.new(project, job.user, ref: params[:ref])
+      pipeline = Ci::CreatePipelineService
+        .new(project, job.user, ref: params[:ref], variables_attributes: variables)
         .execute(:pipeline, ignore_skip_ci: true) do |pipeline|
           source = job.sourced_pipelines.build(
             source_pipeline: job.pipeline,
@@ -52,7 +54,6 @@ module Ci
             project: project)
 
           pipeline.source_pipeline = source
-          pipeline.variables.build(variables)
         end
 
       if pipeline.persisted?
@@ -64,7 +65,7 @@ module Ci
 
     def job_from_token
       strong_memoize(:job) do
-        Ci::Build.find_by_token(params[:token].to_s)
+        Ci::AuthJobFinder.new(token: params[:token].to_s).execute!
       end
     end
 

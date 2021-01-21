@@ -1,15 +1,15 @@
 <script>
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlTooltipDirective, GlLink, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
 export default {
   components: {
-    Icon,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
     ProjectAvatar,
     GlLink,
-    GlDeprecatedButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -33,9 +33,9 @@ export default {
 
 <template>
   <div
-    class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2 mb-3"
+    class="gl-display-flex gl-align-items-center page-title-holder text-secondary gl-justify-content-space-between pb-2 mb-3"
   >
-    <div class="d-flex align-items-center">
+    <div class="gl-display-flex gl-align-items-center">
       <project-avatar :project="project.namespace" :size="20" class="flex-shrink-0" />
       <gl-link class="js-namespace-link text-secondary" :href="`/${project.namespace.full_path}`">
         <span class="js-namespace gl-mr-3"> {{ project.namespace.name }} </span>
@@ -46,23 +46,23 @@ export default {
         <span class="js-name gl-mr-3"> {{ project.name }} </span>
       </gl-link>
     </div>
-    <div class="dropdown js-more-actions">
-      <button
-        v-gl-tooltip
-        class="js-more-actions-toggle d-flex align-items-center ml-2 btn btn-transparent"
-        type="button"
-        data-toggle="dropdown"
-        :title="$options.moreActionsText"
+    <div class="gl-display-flex js-more-actions">
+      <gl-dropdown
+        toggle-class="js-more-actions-toggle gl-display-flex gl-align-items-center gl-px-3! gl-bg-transparent gl-shadow-none!"
+        right
       >
-        <icon name="ellipsis_v" class="text-secondary" />
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right">
-        <li>
-          <gl-deprecated-button class="js-remove-button" @click="onRemove()">
-            <span class="text-danger"> {{ $options.removeProjectText }} </span>
-          </gl-deprecated-button>
-        </li>
-      </ul>
+        <template #button-content>
+          <gl-icon
+            v-gl-tooltip
+            :title="$options.moreActionsText"
+            name="ellipsis_v"
+            class="text-secondary"
+          />
+        </template>
+        <gl-dropdown-item class="js-remove-button" variant="link" @click="onRemove()">
+          <span class="text-danger"> {{ $options.removeProjectText }} </span>
+        </gl-dropdown-item>
+      </gl-dropdown>
     </div>
   </div>
 </template>

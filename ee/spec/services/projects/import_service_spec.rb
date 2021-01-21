@@ -23,7 +23,7 @@ RSpec.describe Projects::ImportService do
       end
 
       it 'does audit' do
-        expect { subject.execute }.to change { SecurityEvent.count }.by(1)
+        expect { subject.execute }.to change { AuditEvent.count }.by(1)
       end
     end
 
@@ -34,7 +34,7 @@ RSpec.describe Projects::ImportService do
       end
 
       it 'does not audit' do
-        expect { subject.execute }.not_to change { SecurityEvent.count }
+        expect { subject.execute }.not_to change { AuditEvent.count }
       end
     end
   end
@@ -48,7 +48,7 @@ RSpec.describe Projects::ImportService do
       end
 
       it 'does not audit' do
-        expect { subject.execute }.not_to change { SecurityEvent.count }
+        expect { subject.execute }.not_to change { AuditEvent.count }
       end
     end
 
@@ -58,7 +58,7 @@ RSpec.describe Projects::ImportService do
       end
 
       it 'does not audit' do
-        expect { subject.execute }.not_to change { SecurityEvent.count }
+        expect { subject.execute }.not_to change { AuditEvent.count }
       end
     end
   end

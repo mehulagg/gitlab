@@ -12,9 +12,15 @@ module Timebox
   include FromUnion
 
   TimeboxStruct = Struct.new(:title, :name, :id) do
+    include GlobalID::Identification
+
     # Ensure these models match the interface required for exporting
     def serializable_hash(_opts = {})
       { title: title, name: name, id: id }
+    end
+
+    def self.declarative_policy_class
+      "TimeboxPolicy"
     end
   end
 
@@ -73,10 +79,36 @@ module Timebox
       end
     end
 
+    # A timebox is within the timeframe (start_date, end_date) if it overlaps
+    # with that timeframe:
+    #
+    #        [  timeframe   ]
+    #  ----| ................     # Not overlapping
+    #   |--| ................     # Not overlapping
+    #  ------|...............     # Overlapping
+    #  -----------------------|   # Overlapping
+    #  ---------|............     # Overlapping
+    #     |-----|............     # Overlapping
+    #        |--------------|     # Overlapping
+    #     |--------------------|  # Overlapping
+    #        ...|-----|......     # Overlapping
+    #        .........|-----|     # Overlapping
+    #        .........|---------  # Overlapping
+    #      |--------------------  # Overlapping
+    #        .........|--------|  # Overlapping
+    #        ...............|--|  # Overlapping
+    #        ............... |-|  # Not Overlapping
+    #        ............... |--  # Not Overlapping
+    #
+    # where: . = in timeframe
+    #        ---| no start
+    #        |--- no end
+    #        |--| defined start and end
+    #
     scope :within_timeframe, -> (start_date, end_date) do
       where('start_date is not NULL or due_date is not NULL')
-          .where('start_date is NULL or start_date <= ?', end_date)
-          .where('due_date is NULL or due_date >= ?', start_date)
+        .where('start_date is NULL or start_date <= ?', end_date)
+        .where('due_date is NULL or due_date >= ?', start_date)
     end
 
     strip_attributes :title
@@ -193,6 +225,10 @@ module Timebox
     elsif project_timebox?
       project&.merge_requests_enabled?
     end
+  end
+
+  def weight_available?
+    resource_parent&.feature_available?(:issue_weights)
   end
 
   private

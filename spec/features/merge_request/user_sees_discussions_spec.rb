@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees threads', :js do
+RSpec.describe 'Merge request > User sees threads', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:merge_request) { create(:merge_request, source_project: project) }
@@ -13,8 +13,8 @@ describe 'Merge request > User sees threads', :js do
   end
 
   describe "Diff discussions" do
-    let!(:old_merge_request_diff) { merge_request.merge_request_diffs.create(diff_refs: outdated_diff_refs) }
-    let!(:new_merge_request_diff) { merge_request.merge_request_diffs.create }
+    let!(:old_merge_request_diff) { merge_request.merge_request_diffs.create!(diff_refs: outdated_diff_refs) }
+    let!(:new_merge_request_diff) { merge_request.merge_request_diffs.create! }
     let!(:outdated_discussion) { create(:diff_note_on_merge_request, project: project, noteable: merge_request, position: outdated_position).to_discussion }
     let!(:active_discussion) { create(:diff_note_on_merge_request, noteable: merge_request, project: project).to_discussion }
     let(:outdated_position) do
@@ -24,6 +24,7 @@ describe 'Merge request > User sees threads', :js do
         diff_refs: outdated_diff_refs
       )
     end
+
     let(:outdated_diff_refs) { project.commit("874797c3a73b60d2187ed6e2fcabd289ff75171e").diff_refs }
 
     before do

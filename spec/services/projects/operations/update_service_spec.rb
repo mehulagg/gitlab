@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::Operations::UpdateService do
+RSpec.describe Projects::Operations::UpdateService do
+  let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:project, refind: true) { create(:project) }
 
   let(:result) { subject.execute }
 
@@ -12,7 +12,7 @@ describe Projects::Operations::UpdateService do
 
   describe '#execute' do
     context 'alerting setting' do
-      before do
+      before_all do
         project.add_maintainer(user)
       end
 
@@ -126,21 +126,23 @@ describe Projects::Operations::UpdateService do
           )
           expect(project.metrics_setting.dashboard_timezone).to eq('utc')
         end
+      end
 
-        context 'with blank external_dashboard_url in params' do
-          let(:params) do
-            {
-              metrics_setting_attributes: {
-                external_dashboard_url: ''
-              }
+      context 'with blank external_dashboard_url' do
+        let(:params) do
+          {
+            metrics_setting_attributes: {
+              external_dashboard_url: '',
+              dashboard_timezone: 'utc'
             }
-          end
+          }
+        end
 
-          it 'destroys the metrics_setting entry in DB' do
-            expect(result[:status]).to eq(:success)
+        it 'updates dashboard_timezone' do
+          expect(result[:status]).to eq(:success)
 
-            expect(project.reload.metrics_setting).to be_nil
-          end
+          expect(project.reload.metrics_setting.external_dashboard_url).to be(nil)
+          expect(project.metrics_setting.dashboard_timezone).to eq('utc')
         end
       end
     end
@@ -382,6 +384,7 @@ describe Projects::Operations::UpdateService do
             manual_configuration: "0"
           })
         end
+
         let(:params) do
           {
             prometheus_integration_attributes: {
@@ -424,6 +427,94 @@ describe Projects::Operations::UpdateService do
           expect(project_update_service).to receive(:execute)
 
           subject.execute
+        end
+      end
+    end
+
+    context 'tracing setting' do
+      context 'with valid params' do
+        let(:params) do
+          {
+            tracing_setting_attributes: {
+              external_url: 'http://some-url.com'
+            }
+          }
+        end
+
+        context 'with an existing setting' do
+          before do
+            create(:project_tracing_setting, project: project)
+          end
+
+          shared_examples 'setting deletion' do
+            let!(:original_params) { params.deep_dup }
+
+            it 'deletes the setting' do
+              expect(result[:status]).to eq(:success)
+              expect(project.reload.tracing_setting).to be_nil
+            end
+
+            it 'does not modify original params' do
+              subject.execute
+
+              expect(params).to eq(original_params)
+            end
+          end
+
+          it 'updates the setting' do
+            expect(project.tracing_setting).not_to be_nil
+
+            expect(result[:status]).to eq(:success)
+            expect(project.reload.tracing_setting.external_url)
+              .to eq('http://some-url.com')
+          end
+
+          context 'with missing external_url' do
+            before do
+              params[:tracing_setting_attributes].delete(:external_url)
+            end
+
+            it_behaves_like 'setting deletion'
+          end
+
+          context 'with empty external_url' do
+            before do
+              params[:tracing_setting_attributes][:external_url] = ''
+            end
+
+            it_behaves_like 'setting deletion'
+          end
+
+          context 'with blank external_url' do
+            before do
+              params[:tracing_setting_attributes][:external_url] = ' '
+            end
+
+            it_behaves_like 'setting deletion'
+          end
+        end
+
+        context 'without an existing setting' do
+          it 'creates a setting' do
+            expect(project.tracing_setting).to be_nil
+
+            expect(result[:status]).to eq(:success)
+            expect(project.reload.tracing_setting.external_url)
+              .to eq('http://some-url.com')
+          end
+        end
+      end
+
+      context 'with empty params' do
+        let(:params) { {} }
+
+        let!(:tracing_setting) do
+          create(:project_tracing_setting, project: project)
+        end
+
+        it 'does nothing' do
+          expect(result[:status]).to eq(:success)
+          expect(project.reload.tracing_setting).to eq(tracing_setting)
         end
       end
     end

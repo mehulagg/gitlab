@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Edit Project Settings' do
+RSpec.describe 'Edit Project Settings' do
   let(:member) { create(:user) }
   let!(:project) { create(:project, :public, :repository) }
   let!(:issue) { create(:issue, project: project) }
@@ -14,7 +14,7 @@ describe 'Edit Project Settings' do
       sign_in(member)
     end
 
-    tools = { builds: "pipelines", issues: "issues", wiki: "wiki", snippets: "snippets", merge_requests: "merge_requests" }
+    tools = { builds: "pipelines", issues: "issues", wiki: "wiki", snippets: "snippets", merge_requests: "merge_requests", analytics: "analytics" }
 
     tools.each do |tool_name, shortcut_name|
       describe "feature #{tool_name}" do
@@ -94,7 +94,7 @@ describe 'Edit Project Settings' do
       {
         builds: project_job_path(project, job),
         issues: project_issues_path(project),
-        wiki: project_wiki_path(project, :home),
+        wiki: wiki_path(project.wiki),
         snippets: project_snippets_path(project),
         merge_requests: project_merge_requests_path(project)
       }
@@ -150,6 +150,7 @@ describe 'Edit Project Settings' do
       before do
         non_member.update_attribute(:admin, true)
         sign_in(non_member)
+        gitlab_enable_admin_mode_sign_in(non_member)
       end
 
       it 'renders 404 if feature is disabled' do
@@ -186,7 +187,7 @@ describe 'Edit Project Settings' do
         click_button "Save changes"
       end
 
-      expect(find(".sharing-permissions")).to have_selector(".project-feature-toggle.is-disabled", count: 3)
+      expect(find(".sharing-permissions")).to have_selector(".project-feature-toggle.is-disabled", count: 4)
     end
 
     it "shows empty features project homepage" do
@@ -201,7 +202,7 @@ describe 'Edit Project Settings' do
 
       visit project_path(project)
 
-      expect(page).to have_content "Customize your workflow!"
+      expect(page).to have_content "joined project"
     end
 
     it "hides project activity tabs" do

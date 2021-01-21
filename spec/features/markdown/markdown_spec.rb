@@ -26,7 +26,7 @@ require 'erb'
 #
 # See the MarkdownFeature class for setup details.
 
-describe 'GitLab Markdown', :aggregate_failures do
+RSpec.describe 'GitLab Markdown', :aggregate_failures do
   include Capybara::Node::Matchers
   include MarkupHelper
   include MarkdownMatchers
@@ -247,6 +247,7 @@ describe 'GitLab Markdown', :aggregate_failures do
         expect(doc).to reference_commits
         expect(doc).to reference_labels
         expect(doc).to reference_milestones
+        expect(doc).to reference_alerts
       end
 
       aggregate_failures 'TaskListFilter' do

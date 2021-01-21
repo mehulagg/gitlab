@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Lograge::CustomOptions do
+RSpec.describe Gitlab::Lograge::CustomOptions do
   describe '.call' do
     let(:params) do
       {
@@ -22,6 +22,7 @@ describe Gitlab::Lograge::CustomOptions do
         metadata: { 'meta.user' => 'jane.doe' }
       }
     end
+
     let(:event) { ActiveSupport::Notifications::Event.new('test', 1, 2, 'transaction_id', event_payload) }
 
     subject { described_class.call(event) }
@@ -41,18 +42,6 @@ describe Gitlab::Lograge::CustomOptions do
         expected_time = Time.now.utc.iso8601(3)
 
         expect(subject[:time]).to eq(expected_time)
-      end
-    end
-
-    context 'with transaction' do
-      let(:transaction) { Gitlab::Metrics::WebTransaction.new({}) }
-
-      before do
-        allow(Gitlab::Metrics::Transaction).to receive(:current).and_return(transaction)
-      end
-
-      it 'adds db counters' do
-        expect(subject).to include(:db_count, :db_write_count, :db_cached_count)
       end
     end
 
@@ -77,14 +66,14 @@ describe Gitlab::Lograge::CustomOptions do
       end
     end
 
-    context 'when correlation_id is overriden' do
+    context 'when correlation_id is overridden' do
       let(:correlation_id_key) { Labkit::Correlation::CorrelationId::LOG_KEY }
 
       before do
         event_payload[correlation_id_key] = '123456'
       end
 
-      it 'sets the overriden value' do
+      it 'sets the overridden value' do
         expect(subject[correlation_id_key]).to eq('123456')
       end
     end

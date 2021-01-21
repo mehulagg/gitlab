@@ -3,13 +3,13 @@
   .settings-header
     %h4
       = _('Amazon EKS')
-    %button.btn.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
       = _('Amazon EKS integration allows you to provision EKS clusters from GitLab.')
 
   .settings-content
-    = form_for @application_setting, url: integrations_admin_application_settings_path(anchor: 'js-eks-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-eks-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting)
 
       %fieldset
@@ -24,8 +24,13 @@
         .form-group
           = f.label :eks_access_key_id, 'Access key ID', class: 'label-bold'
           = f.text_field :eks_access_key_id, class: 'form-control'
+          .form-text.text-muted
+            = _('AWS Access Key. Only required if not using role instance credentials')
+
         .form-group
           = f.label :eks_secret_access_key, 'Secret access key', class: 'label-bold'
           = f.password_field :eks_secret_access_key, autocomplete: 'off', class: 'form-control'
+          .form-text.text-muted
+            = _('AWS Secret Access Key. Only required if not using role instance credentials')
 
-      = f.submit 'Save changes', class: "btn btn-success"
+      = f.submit 'Save changes', class: "gl-button btn btn-success"

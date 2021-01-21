@@ -9,7 +9,7 @@ export const receiveMergeRequestsError = ({ commit, dispatch }, { type, search }
     'setErrorMessage',
     {
       text: __('Error loading merge requests.'),
-      action: payload =>
+      action: (payload) =>
         dispatch('fetchMergeRequests', payload).then(() =>
           dispatch('setErrorMessage', null, { root: true }),
         ),
@@ -41,5 +41,3 @@ export const fetchMergeRequests = (
 };
 
 export const resetMergeRequests = ({ commit }) => commit(types.RESET_MERGE_REQUESTS);
-
-export default () => {};

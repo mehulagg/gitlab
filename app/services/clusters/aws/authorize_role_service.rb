@@ -9,6 +9,7 @@ module Clusters
 
       ERRORS = [
         ActiveRecord::RecordInvalid,
+        ActiveRecord::RecordNotFound,
         Clusters::Aws::FetchCredentialsService::MissingRoleError,
         ::Aws::Errors::MissingCredentialsError,
         ::Aws::STS::Errors::ServiceError
@@ -16,33 +17,57 @@ module Clusters
 
       def initialize(user, params:)
         @user = user
-        @params = params
+        @role_arn = params[:role_arn]
+        @region = params[:region]
       end
 
       def execute
-        @role = create_or_update_role!
+        ensure_role_exists!
+        update_role_arn!
 
         Response.new(:ok, credentials)
-      rescue *ERRORS
-        Response.new(:unprocessable_entity, {})
+      rescue *ERRORS => e
+        Gitlab::ErrorTracking.track_exception(e)
+
+        Response.new(:unprocessable_entity, response_details(e))
       end
 
       private
 
-      attr_reader :role, :params
+      attr_reader :role, :role_arn, :region
 
-      def create_or_update_role!
-        if role = user.aws_role
-          role.update!(params)
+      def ensure_role_exists!
+        @role = ::Aws::Role.find_by_user_id!(user.id)
+      end
 
-          role
-        else
-          user.create_aws_role!(params)
-        end
+      def update_role_arn!
+        role.update!(role_arn: role_arn, region: region)
       end
 
       def credentials
         Clusters::Aws::FetchCredentialsService.new(role).execute
+      end
+
+      def response_details(exception)
+        message =
+          case exception
+          when ::Aws::STS::Errors::AccessDenied
+            _("Access denied: %{error}") % { error: exception.message }
+          when ::Aws::STS::Errors::ServiceError
+            _("AWS service error: %{error}") % { error: exception.message }
+          when ActiveRecord::RecordNotFound
+            _("Error: Unable to find AWS role for current user")
+          when ActiveRecord::RecordInvalid
+            exception.message
+          when Clusters::Aws::FetchCredentialsService::MissingRoleError
+            _("Error: No AWS provision role found for user")
+          when ::Aws::Errors::MissingCredentialsError
+            _("Error: No AWS credentials were supplied")
+          else
+            _('An error occurred while authorizing your role')
+          end
+
+        { message: message }.compact
       end
     end
   end

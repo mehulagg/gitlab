@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::TagHooksService, :service do
+RSpec.describe Git::TagHooksService, :service do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -19,7 +19,7 @@ describe Git::TagHooksService, :service do
   end
 
   describe 'System hooks' do
-    it 'Executes system hooks' do
+    it 'executes system hooks' do
       push_data = service.send(:push_data)
       expect(project).to receive(:has_active_hooks?).and_return(true)
 

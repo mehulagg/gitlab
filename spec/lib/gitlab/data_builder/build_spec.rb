@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DataBuilder::Build do
+RSpec.describe Gitlab::DataBuilder::Build do
   let(:runner) { create(:ci_runner, :instance) }
   let(:user) { create(:user) }
   let(:build) { create(:ci_build, :running, runner: runner, user: user) }
@@ -26,6 +26,7 @@ describe Gitlab::DataBuilder::Build do
     it {
       expect(data[:user]).to eq(
         {
+            id: user.id,
             name: user.name,
             username: user.username,
             avatar_url: user.avatar_url(only_path: false),

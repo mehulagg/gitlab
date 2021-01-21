@@ -3,8 +3,9 @@
 class FetchSubscriptionPlansService
   URL = "#{EE::SUBSCRIPTIONS_URL}/gitlab_plans".freeze
 
-  def initialize(plan:)
+  def initialize(plan:, namespace_id: nil)
     @plan = plan
+    @namespace_id = namespace_id
   end
 
   def execute
@@ -14,14 +15,16 @@ class FetchSubscriptionPlansService
   private
 
   def send_request
-    response = Gitlab::HTTP.get(URL,
-                                allow_local_requests: true,
-                                query: { plan: @plan },
-                                headers: { 'Accept' => 'application/json' })
+    response = Gitlab::HTTP.get(
+      URL,
+      allow_local_requests: true,
+      query: { plan: @plan, namespace_id: @namespace_id },
+      headers: { 'Accept' => 'application/json' }
+    )
 
     Gitlab::Json.parse(response.body).map { |plan| Hashie::Mash.new(plan) }
   rescue => e
-    Rails.logger.info "Unable to connect to GitLab Customers App #{e}" # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.info "Unable to connect to GitLab Customers App #{e}"
 
     nil
   end
@@ -39,6 +42,10 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    "subscription-plans-#{@plan}"
+    if @namespace_id.present?
+      "subscription-plan-#{@plan}-#{@namespace_id}"
+    else
+      "subscription-plan-#{@plan}"
+    end
   end
 end

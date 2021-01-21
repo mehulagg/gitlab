@@ -1,6 +1,6 @@
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { GlDropdown, GlLoadingIcon } from '@gitlab/ui';
+import { GlDropdown, GlLoadingIcon, GlDropdownSectionHeader } from '@gitlab/ui';
 import { TEST_HOST } from 'spec/test_constants';
 import BoardsSelector from '~/boards/components/boards_selector.vue';
 import boardsStore from '~/boards/stores/boards_store';
@@ -26,7 +26,7 @@ describe('BoardsSelector', () => {
   const boards = boardGenerator(20);
   const recentBoards = boardGenerator(5);
 
-  const fillSearchBox = filterTerm => {
+  const fillSearchBox = (filterTerm) => {
     const searchBox = wrapper.find({ ref: 'searchBox' });
     const searchBoxInput = searchBox.find('input');
     searchBoxInput.setValue(filterTerm);
@@ -34,8 +34,9 @@ describe('BoardsSelector', () => {
   };
 
   const getDropdownItems = () => wrapper.findAll('.js-dropdown-item');
-  const getDropdownHeaders = () => wrapper.findAll('.dropdown-bold-header');
+  const getDropdownHeaders = () => wrapper.findAll(GlDropdownSectionHeader);
   const getLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findDropdown = () => wrapper.find(GlDropdown);
 
   beforeEach(() => {
     const $apollo = {
@@ -58,7 +59,7 @@ describe('BoardsSelector', () => {
       data: {
         group: {
           boards: {
-            edges: boards.map(board => ({ node: board })),
+            edges: boards.map((board) => ({ node: board })),
           },
         },
       },
@@ -81,19 +82,19 @@ describe('BoardsSelector', () => {
           assignee_id: null,
           labels: [],
         },
-        milestonePath: `${TEST_HOST}/milestone/path`,
         boardBaseUrl: `${TEST_HOST}/board/base/url`,
         hasMissingBoards: false,
         canAdminBoard: true,
         multipleIssueBoardsAvailable: true,
         labelsPath: `${TEST_HOST}/labels/path`,
+        labelsWebUrl: `${TEST_HOST}/labels`,
         projectId: 42,
         groupId: 19,
         scopedIssueBoardFeatureEnabled: true,
         weights: [],
       },
       mocks: { $apollo },
-      attachToDocument: true,
+      attachTo: document.body,
     });
 
     wrapper.vm.$apollo.addSmartQuery = jest.fn((_, options) => {
@@ -103,7 +104,7 @@ describe('BoardsSelector', () => {
     });
 
     // Emits gl-dropdown show event to simulate the dropdown is opened at initialization time
-    wrapper.find(GlDropdown).vm.$emit('show');
+    findDropdown().vm.$emit('show');
   });
 
   afterEach(() => {
@@ -125,7 +126,10 @@ describe('BoardsSelector', () => {
   });
 
   describe('loaded', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await wrapper.setData({
+        loadingBoards: false,
+      });
       return Promise.all([allBoardsResponse, recentBoardsResponse]).then(() => nextTick());
     });
 
@@ -148,7 +152,7 @@ describe('BoardsSelector', () => {
 
       it('shows only matching boards when filtering', () => {
         const filterTerm = 'board1';
-        const expectedCount = boards.filter(board => board.name.includes(filterTerm)).length;
+        const expectedCount = boards.filter((board) => board.name.includes(filterTerm)).length;
 
         fillSearchBox(filterTerm);
 

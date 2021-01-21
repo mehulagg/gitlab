@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/add_column_with_default'
 
-describe RuboCop::Cop::Migration::AddColumnWithDefault do
+RSpec.describe RuboCop::Cop::Migration::AddColumnWithDefault do
   include CopHelper
 
   let(:cop) { described_class.new }
@@ -29,7 +26,7 @@ describe RuboCop::Cop::Migration::AddColumnWithDefault do
 
     let(:offense) { '`add_column_with_default` is deprecated, use `add_column` instead' }
 
-    it 'registers an offense ' do
+    it 'registers an offense' do
       expect_offense(<<~RUBY)
         def up
           add_column_with_default(:merge_request_diff_files, :artifacts, :boolean, default: true, allow_null: false)

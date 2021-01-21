@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:admin) { create(:admin) }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project, :repository, namespace: namespace, path: 'merge-requests-project') }
+  let(:user) { project.owner }
   let(:merge_request) { create(:merge_request, :with_diffs, source_project: project, target_project: project, description: '- [ ] Task List Item') }
   let(:path) { "files/ruby/popen.rb" }
   let(:position) do
@@ -25,7 +25,7 @@ describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)', type
   end
 
   before do
-    sign_in(admin)
+    sign_in(user)
   end
 
   after do
@@ -38,18 +38,6 @@ describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)', type
     create(:user, email: project.commit.author_email, name: project.commit.author_name)
 
     render_merge_request(merge_request, commit_id: project.commit.sha)
-  end
-
-  it 'merge_request_diffs/inline_changes_tab_with_comments.json' do
-    create(:diff_note_on_merge_request, project: project, author: admin, position: position, noteable: merge_request)
-    create(:note_on_merge_request, author: admin, project: project, noteable: merge_request)
-    render_merge_request(merge_request)
-  end
-
-  it 'merge_request_diffs/parallel_changes_tab_with_comments.json' do
-    create(:diff_note_on_merge_request, project: project, author: admin, position: position, noteable: merge_request)
-    create(:note_on_merge_request, author: admin, project: project, noteable: merge_request)
-    render_merge_request(merge_request, view: 'parallel')
   end
 
   private

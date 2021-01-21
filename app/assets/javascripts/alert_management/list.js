@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import AlertManagementList from './components/alert_management_list.vue';
+import AlertManagementList from './components/alert_management_list_wrapper.vue';
 
 Vue.use(VueApollo);
 
@@ -11,18 +11,24 @@ export default () => {
   const selector = '#js-alert_management';
 
   const domEl = document.querySelector(selector);
-  const { projectPath, enableAlertManagementPath, emptyAlertSvgPath } = domEl.dataset;
-  let { alertManagementEnabled, userCanEnableAlertManagement } = domEl.dataset;
-
-  alertManagementEnabled = parseBoolean(alertManagementEnabled);
-  userCanEnableAlertManagement = parseBoolean(userCanEnableAlertManagement);
+  const {
+    projectPath,
+    enableAlertManagementPath,
+    emptyAlertSvgPath,
+    populatingAlertsHelpUrl,
+    alertsHelpUrl,
+    textQuery,
+    assigneeUsernameQuery,
+    alertManagementEnabled,
+    userCanEnableAlertManagement,
+  } = domEl.dataset;
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(
       {},
       {
         cacheConfig: {
-          dataIdFromObject: object => {
+          dataIdFromObject: (object) => {
             // eslint-disable-next-line no-underscore-dangle
             if (object.__typename === 'AlertManagementAlert') {
               return object.iid;
@@ -34,22 +40,30 @@ export default () => {
     ),
   });
 
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      alertsHelpUrl,
+    },
+  });
+
   return new Vue({
     el: selector,
-    apolloProvider,
     components: {
       AlertManagementList,
     },
+    provide: {
+      projectPath,
+      textQuery,
+      assigneeUsernameQuery,
+      enableAlertManagementPath,
+      populatingAlertsHelpUrl,
+      emptyAlertSvgPath,
+      alertManagementEnabled: parseBoolean(alertManagementEnabled),
+      userCanEnableAlertManagement: parseBoolean(userCanEnableAlertManagement),
+    },
+    apolloProvider,
     render(createElement) {
-      return createElement('alert-management-list', {
-        props: {
-          projectPath,
-          enableAlertManagementPath,
-          emptyAlertSvgPath,
-          alertManagementEnabled,
-          userCanEnableAlertManagement,
-        },
-      });
+      return createElement('alert-management-list');
     },
   });
 };

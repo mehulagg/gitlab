@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User assigns themselves' do
+RSpec.describe 'Merge request > User assigns themselves' do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:issue1) { create(:issue, project: project) }
@@ -19,6 +19,15 @@ describe 'Merge request > User assigns themselves' do
       click_link 'Assign yourself to these issues'
 
       expect(page).to have_content '2 issues have been assigned to you'
+    end
+
+    it 'updates updated_by', :js do
+      expect do
+        click_button 'assign yourself'
+
+        expect(find('.assignee')).to have_content(user.name)
+        wait_for_all_requests
+      end.to change { merge_request.reload.updated_at }
     end
 
     it 'returns user to the merge request', :js do

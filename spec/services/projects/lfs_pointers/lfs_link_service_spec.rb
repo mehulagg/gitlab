@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Projects::LfsPointers::LfsLinkService do
+RSpec.describe Projects::LfsPointers::LfsLinkService do
   let!(:project) { create(:project, lfs_enabled: true) }
   let!(:lfs_objects_project) { create_list(:lfs_objects_project, 2, project: project) }
   let(:new_oids) { { 'oid1' => 123, 'oid2' => 125 } }
@@ -24,11 +24,11 @@ describe Projects::LfsPointers::LfsLinkService do
     end
 
     it 'links existing lfs objects to the project' do
-      expect(project.all_lfs_objects.count).to eq 2
+      expect(project.lfs_objects.count).to eq 2
 
       linked = subject.execute(new_oid_list.keys)
 
-      expect(project.all_lfs_objects.count).to eq 3
+      expect(project.lfs_objects.count).to eq 3
       expect(linked.size).to eq 3
     end
 
@@ -52,7 +52,7 @@ describe Projects::LfsPointers::LfsLinkService do
       lfs_objects = create_list(:lfs_object, 7)
       linked = subject.execute(lfs_objects.pluck(:oid))
 
-      expect(project.all_lfs_objects.count).to eq 9
+      expect(project.lfs_objects.count).to eq 9
       expect(linked.size).to eq 7
     end
 

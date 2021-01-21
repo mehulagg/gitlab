@@ -1,0 +1,8 @@
+---
+name: merge_request_rebase_nowait_lock
+introduced_by_url: 
+rollout_issue_url: 
+milestone: 
+type: development
+group: 
+default_enabled: true

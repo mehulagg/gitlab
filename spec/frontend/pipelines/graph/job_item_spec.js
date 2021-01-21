@@ -1,16 +1,19 @@
 import { mount } from '@vue/test-utils';
-import { trimText } from 'helpers/text_helper';
 import JobItem from '~/pipelines/components/graph/job_item.vue';
 
 describe('pipeline graph job item', () => {
   let wrapper;
 
-  const createWrapper = propsData => {
+  const findJobWithoutLink = () => wrapper.find('[data-testid="job-without-link"]');
+  const findJobWithLink = () => wrapper.find('[data-testid="job-with-link"]');
+
+  const createWrapper = (propsData) => {
     wrapper = mount(JobItem, {
       propsData,
     });
   };
 
+  const triggerActiveClass = 'gl-shadow-x0-y0-b3-s1-blue-500';
   const delayedJobFixture = getJSONFixture('jobs/delayed.json');
   const mockJob = {
     id: 4256,
@@ -31,13 +34,25 @@ describe('pipeline graph job item', () => {
       },
     },
   };
+  const mockJobWithoutDetails = {
+    id: 4257,
+    name: 'job_without_details',
+    status: {
+      icon: 'status_success',
+      text: 'passed',
+      label: 'passed',
+      group: 'success',
+      details_path: '/root/ci-mock/builds/4257',
+      has_details: false,
+    },
+  };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('name with link', () => {
-    it('should render the job name and status with a link', done => {
+    it('should render the job name and status with a link', (done) => {
       createWrapper({ job: mockJob });
 
       wrapper.vm.$nextTick(() => {
@@ -45,11 +60,11 @@ describe('pipeline graph job item', () => {
 
         expect(link.attributes('href')).toBe(mockJob.status.details_path);
 
-        expect(link.attributes('title')).toEqual(`${mockJob.name} - ${mockJob.status.label}`);
+        expect(link.attributes('title')).toBe(`${mockJob.name} - ${mockJob.status.label}`);
 
         expect(wrapper.find('.ci-status-icon-success').exists()).toBe(true);
 
-        expect(trimText(wrapper.find('.ci-status-text').text())).toBe(mockJob.name);
+        expect(wrapper.text()).toBe(mockJob.name);
 
         done();
       });
@@ -57,26 +72,23 @@ describe('pipeline graph job item', () => {
   });
 
   describe('name without link', () => {
-    it('it should render status and name', () => {
+    beforeEach(() => {
       createWrapper({
-        job: {
-          id: 4257,
-          name: 'test',
-          status: {
-            icon: 'status_success',
-            text: 'passed',
-            label: 'passed',
-            group: 'success',
-            details_path: '/root/ci-mock/builds/4257',
-            has_details: false,
-          },
-        },
+        job: mockJobWithoutDetails,
+        cssClassJobName: 'css-class-job-name',
+        jobHovered: 'test',
       });
+    });
 
+    it('it should render status and name', () => {
       expect(wrapper.find('.ci-status-icon-success').exists()).toBe(true);
       expect(wrapper.find('a').exists()).toBe(false);
 
-      expect(trimText(wrapper.find('.ci-status-text').text())).toEqual(mockJob.name);
+      expect(wrapper.text()).toBe(mockJobWithoutDetails.name);
+    });
+
+    it('should apply hover class and provided class name', () => {
+      expect(findJobWithoutLink().classes()).toContain('css-class-job-name');
     });
   });
 
@@ -126,9 +138,7 @@ describe('pipeline graph job item', () => {
         },
       });
 
-      expect(wrapper.find('.js-job-component-tooltip').attributes('title')).toEqual(
-        'test - success',
-      );
+      expect(wrapper.find('.js-job-component-tooltip').attributes('title')).toBe('test - success');
     });
   });
 
@@ -138,9 +148,39 @@ describe('pipeline graph job item', () => {
         job: delayedJobFixture,
       });
 
-      expect(wrapper.find('.js-pipeline-graph-job-link').attributes('title')).toEqual(
+      expect(findJobWithLink().attributes('title')).toBe(
         `delayed job - delayed manual action (${wrapper.vm.remainingTime})`,
       );
     });
+  });
+
+  describe('trigger job highlighting', () => {
+    it.each`
+      job                      | jobName                       | expanded | link
+      ${mockJob}               | ${mockJob.name}               | ${true}  | ${true}
+      ${mockJobWithoutDetails} | ${mockJobWithoutDetails.name} | ${true}  | ${false}
+    `(
+      `trigger job should stay highlighted when downstream is expanded`,
+      ({ job, jobName, expanded, link }) => {
+        createWrapper({ job, pipelineExpanded: { jobName, expanded } });
+        const findJobEl = link ? findJobWithLink : findJobWithoutLink;
+
+        expect(findJobEl().classes()).toContain(triggerActiveClass);
+      },
+    );
+
+    it.each`
+      job                      | jobName                       | expanded | link
+      ${mockJob}               | ${mockJob.name}               | ${false} | ${true}
+      ${mockJobWithoutDetails} | ${mockJobWithoutDetails.name} | ${false} | ${false}
+    `(
+      `trigger job should not be highlighted when downstream is not expanded`,
+      ({ job, jobName, expanded, link }) => {
+        createWrapper({ job, pipelineExpanded: { jobName, expanded } });
+        const findJobEl = link ? findJobWithLink : findJobWithoutLink;
+
+        expect(findJobEl().classes()).not.toContain(triggerActiveClass);
+      },
+    );
   });
 });

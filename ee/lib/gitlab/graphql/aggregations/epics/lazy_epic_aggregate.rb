@@ -6,6 +6,7 @@ module Gitlab
       module Epics
         class LazyEpicAggregate
           include ::Gitlab::Graphql::Aggregations::Epics::Constants
+          include ::Gitlab::Graphql::Deferred
 
           attr_reader :facet, :epic_id, :lazy_state
 
@@ -49,6 +50,8 @@ module Gitlab
             @block ? @block.call(node, object) : object
           end
 
+          alias_method :execute, :epic_aggregate
+
           private
 
           def validate_facet(aggregate_facet)
@@ -57,7 +60,7 @@ module Gitlab
             end
 
             unless PERMITTED_FACETS.include?(aggregate_facet.to_sym)
-              return "Invalid aggregate facet #{aggregate_facet} provided."
+              "Invalid aggregate facet #{aggregate_facet} provided."
             end
           end
 

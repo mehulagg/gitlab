@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import ApproversListEmpty from 'ee/approvals/components/approvers_list_empty.vue';
 import ApproversListItem from 'ee/approvals/components/approvers_list_item.vue';
-import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import { TYPE_USER, TYPE_GROUP } from 'ee/approvals/constants';
 
 const TEST_APPROVERS = [
@@ -50,7 +50,9 @@ describe('ApproversList', () => {
     it('renders items', () => {
       factory();
 
-      const items = wrapper.findAll(ApproversListItem).wrappers.map(item => item.props('approver'));
+      const items = wrapper
+        .findAll(ApproversListItem)
+        .wrappers.map((item) => item.props('approver'));
 
       expect(items).toEqual(TEST_APPROVERS);
     });
@@ -65,7 +67,7 @@ describe('ApproversList', () => {
         return wrapper.vm.$nextTick().then(() => {
           const expected = TEST_APPROVERS.filter((x, i) => i !== idx);
 
-          expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [expected] }]);
+          expect(wrapper.emitted().input).toEqual([[expected]]);
         });
       });
     });

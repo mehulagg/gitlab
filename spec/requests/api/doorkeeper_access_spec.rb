@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'doorkeeper access' do
+RSpec.describe 'doorkeeper access' do
   let!(:user) { create(:user) }
   let!(:application) { Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user) }
   let!(:token) { Doorkeeper::AccessToken.create! application_id: application.id, resource_owner_id: user.id, scopes: "api" }
@@ -67,6 +67,14 @@ describe 'doorkeeper access' do
   context "when user is deactivated" do
     before do
       user.deactivate
+    end
+
+    it_behaves_like 'forbidden request'
+  end
+
+  context 'when user is blocked pending approval' do
+    before do
+      user.block_pending_approval
     end
 
     it_behaves_like 'forbidden request'

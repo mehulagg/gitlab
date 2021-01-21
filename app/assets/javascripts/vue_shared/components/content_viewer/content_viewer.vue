@@ -4,9 +4,14 @@ import ImageViewer from './viewers/image_viewer.vue';
 import DownloadViewer from './viewers/download_viewer.vue';
 
 export default {
+  components: {
+    MarkdownViewer,
+    ImageViewer,
+    DownloadViewer,
+  },
   props: {
     content: {
-      type: String,
+      type: [String, ArrayBuffer],
       default: '',
       required: false,
     },
@@ -45,35 +50,25 @@ export default {
       default: () => ({}),
     },
   },
-  computed: {
-    viewer() {
-      if (!this.path) return null;
-      if (!this.type) return DownloadViewer;
-
-      switch (this.type) {
-        case 'markdown':
-          return MarkdownViewer;
-        case 'image':
-          return ImageViewer;
-        default:
-          return DownloadViewer;
-      }
-    },
-  },
 };
 </script>
 
 <template>
-  <div class="preview-container">
-    <component
-      :is="viewer"
+  <div class="preview-container" data-qa-selector="preview_container">
+    <image-viewer v-if="type === 'image'" :path="path" :file-size="fileSize" />
+    <markdown-viewer
+      v-if="type === 'markdown'"
+      :content="content"
+      :commit-sha="commitSha"
+      :file-path="filePath"
+      :project-path="projectPath"
+      :images="images"
+    />
+    <download-viewer
+      v-if="!type && path"
       :path="path"
       :file-path="filePath"
       :file-size="fileSize"
-      :project-path="projectPath"
-      :content="content"
-      :images="images"
-      :commit-sha="commitSha"
     />
   </div>
 </template>

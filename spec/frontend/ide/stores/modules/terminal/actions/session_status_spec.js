@@ -5,7 +5,7 @@ import * as messages from '~/ide/stores/modules/terminal/messages';
 import * as mutationTypes from '~/ide/stores/modules/terminal/mutation_types';
 import * as actions from '~/ide/stores/modules/terminal/actions/session_status';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -98,7 +98,7 @@ describe('IDE store terminal session controls actions', () => {
       );
     });
 
-    [STOPPING, STOPPED, 'unexpected'].forEach(status => {
+    [STOPPING, STOPPED, 'unexpected'].forEach((status) => {
       it(`kills session if status is ${status}`, () => {
         return testAction(
           actions.receiveSessionStatusSuccess,

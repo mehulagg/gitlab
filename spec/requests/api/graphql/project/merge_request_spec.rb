@@ -2,19 +2,20 @@
 
 require 'spec_helper'
 
-describe 'getting merge request information nested in a project' do
+RSpec.describe 'getting merge request information nested in a project' do
   include GraphqlHelpers
 
   let(:project) { create(:project, :repository, :public) }
   let(:current_user) { create(:user) }
   let(:merge_request_graphql_data) { graphql_data['project']['mergeRequest'] }
   let!(:merge_request) { create(:merge_request, source_project: project) }
+  let(:mr_fields) { all_graphql_fields_for('MergeRequest') }
 
   let(:query) do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
-      query_graphql_field('mergeRequest', iid: merge_request.iid.to_s)
+      query_graphql_field('mergeRequest', { iid: merge_request.iid.to_s }, mr_fields)
     )
   end
 
@@ -41,6 +42,91 @@ describe 'getting merge request information nested in a project' do
     post_graphql(query, current_user: current_user)
 
     expect(merge_request_graphql_data['author']['username']).to eq(merge_request.author.username)
+  end
+
+  context 'the merge_request has reviewers' do
+    let(:mr_fields) do
+      <<~SELECT
+      reviewers { nodes { id username } }
+      participants { nodes { id username } }
+      SELECT
+    end
+
+    before do
+      merge_request.reviewers << create_list(:user, 2)
+    end
+
+    it 'includes reviewers' do
+      expected = merge_request.reviewers.map do |r|
+        a_hash_including('id' => global_id_of(r), 'username' => r.username)
+      end
+
+      post_graphql(query, current_user: current_user)
+
+      expect(graphql_data_at(:project, :merge_request, :reviewers, :nodes)).to match_array(expected)
+      expect(graphql_data_at(:project, :merge_request, :participants, :nodes)).to include(*expected)
+    end
+
+    it 'suppresses reviewers if reviewers are not allowed' do
+      stub_feature_flags(merge_request_reviewers: false)
+
+      post_graphql(query, current_user: current_user)
+
+      expect(graphql_data_at(:project, :merge_request, :reviewers)).to be_nil
+    end
+  end
+
+  it 'includes diff stats' do
+    be_natural = an_instance_of(Integer).and(be >= 0)
+
+    post_graphql(query, current_user: current_user)
+
+    sums = merge_request_graphql_data['diffStats'].reduce([0, 0, 0]) do |(a, d, c), node|
+      a_, d_ = node.values_at('additions', 'deletions')
+      [a + a_, d + d_, c + a_ + d_]
+    end
+
+    expect(merge_request_graphql_data).to include(
+      'diffStats' => all(a_hash_including('path' => String, 'additions' => be_natural, 'deletions' => be_natural)),
+      'diffStatsSummary' => a_hash_including(
+        'fileCount' => merge_request.diff_stats.count,
+        'additions' => be_natural,
+        'deletions' => be_natural,
+        'changes' => be_natural
+      )
+    )
+
+    # diff_stats is consistent with summary
+    expect(merge_request_graphql_data['diffStatsSummary']
+      .values_at('additions', 'deletions', 'changes')).to eq(sums)
+
+    # diff_stats_summary is internally consistent
+    expect(merge_request_graphql_data['diffStatsSummary']
+      .values_at('additions', 'deletions').sum)
+      .to eq(merge_request_graphql_data.dig('diffStatsSummary', 'changes'))
+      .and be_positive
+  end
+
+  context 'requesting a specific diff stat' do
+    let(:diff_stat) { merge_request.diff_stats.first }
+
+    let(:query) do
+      graphql_query_for(:project, { full_path: project.full_path },
+        query_graphql_field(:merge_request, { iid: merge_request.iid.to_s }, [
+          query_graphql_field(:diff_stats, { path: diff_stat.path }, all_graphql_fields_for('DiffStats'))
+        ])
+      )
+    end
+
+    it 'includes only the requested stats' do
+      post_graphql(query, current_user: current_user)
+
+      expect(merge_request_graphql_data).to include(
+        'diffStats' => contain_exactly(
+          a_hash_including('path' => diff_stat.path, 'additions' => diff_stat.additions, 'deletions' => diff_stat.deletions)
+        )
+      )
+    end
   end
 
   it 'includes correct mergedAt value when merged' do
@@ -71,7 +157,8 @@ describe 'getting merge request information nested in a project' do
         'removeSourceBranch' => false,
         'cherryPickOnCurrentMergeRequest' => false,
         'revertOnCurrentMergeRequest' => false,
-        'updateMergeRequest' => false
+        'updateMergeRequest' => false,
+        'canMerge' => false
       }
       post_graphql(query, current_user: current_user)
 
@@ -163,6 +250,43 @@ describe 'getting merge request information nested in a project' do
     it 'returns checking' do
       post_graphql(query, current_user: current_user)
       expect(merge_request_graphql_data['mergeStatus']).to eq('checking')
+    end
+  end
+
+  # see: https://gitlab.com/gitlab-org/gitlab/-/issues/297358
+  context 'when the notes have been preloaded (by participants)' do
+    let(:query) do
+      <<~GQL
+      query($path: ID!) {
+        project(fullPath: $path) {
+          mrs: mergeRequests(first: 1) {
+            nodes {
+              participants { nodes { id } }
+              notes(first: 1) {
+                pageInfo { endCursor hasPreviousPage hasNextPage }
+                nodes { id }
+              }
+            }
+          }
+        }
+      }
+      GQL
+    end
+
+    before do
+      create_list(:note_on_merge_request, 3, project: project, noteable: merge_request)
+    end
+
+    it 'does not error' do
+      post_graphql(query,
+                   current_user: current_user,
+                   variables: { path: project.full_path })
+
+      expect(graphql_data_at(:project, :mrs, :nodes, :notes, :pageInfo)).to contain_exactly a_hash_including(
+        'endCursor' => String,
+        'hasNextPage' => true,
+        'hasPreviousPage' => false
+      )
     end
   end
 end

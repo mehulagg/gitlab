@@ -2,12 +2,11 @@
 
 require 'spec_helper'
 
-describe 'shared/milestones/_issuables.html.haml' do
+RSpec.describe 'shared/milestones/_issuables.html.haml' do
   let(:issuables_size) { 100 }
 
   before do
-    allow(view).to receive_messages(title: nil, id: nil, show_project_name: nil,
-                                    show_full_project_name: nil, dom_class: '',
+    allow(view).to receive_messages(title: nil, id: nil, show_project_name: nil, dom_class: '',
                                     issuables: double(length: issuables_size).as_null_object)
 
     stub_template 'shared/milestones/_issuable.html.haml' => ''

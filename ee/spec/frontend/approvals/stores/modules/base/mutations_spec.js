@@ -1,6 +1,6 @@
-import createState from 'ee/approvals/stores/state';
 import * as types from 'ee/approvals/stores/modules/base/mutation_types';
 import mutations from 'ee/approvals/stores/modules/base/mutations';
+import createState from 'ee/approvals/stores/state';
 
 describe('EE approvals base module mutations', () => {
   let state;
@@ -33,6 +33,30 @@ describe('EE approvals base module mutations', () => {
       mutations[types.SET_APPROVAL_SETTINGS](state, settings);
 
       expect(state).toEqual(expect.objectContaining(settings));
+    });
+  });
+
+  describe(types.SET_RESET_TO_DEFAULT, () => {
+    it('resets rules', () => {
+      state.rules = ['test'];
+
+      mutations[types.SET_RESET_TO_DEFAULT](state, true);
+
+      expect(state.resetToDefault).toBe(true);
+      expect(state.oldRules).toEqual(['test']);
+    });
+  });
+
+  describe(types.UNDO_RULES, () => {
+    it('undos rules', () => {
+      const oldRules = ['old'];
+      state.rules = ['new'];
+      state.oldRules = oldRules;
+
+      mutations[types.UNDO_RULES](state, true);
+
+      expect(state.resetToDefault).toBe(false);
+      expect(state.rules).toEqual(oldRules);
     });
   });
 });

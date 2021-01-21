@@ -1,10 +1,14 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
 # Upgrading from Community Edition to Enterprise Edition from source
 
-NOTE: **NOTE** In the past we used separate documents for upgrading from
+NOTE:
+In the past we used separate documents for upgrading from
 Community Edition to Enterprise Edition. These documents can be found in the
 [`doc/update` directory of Enterprise Edition's source
 code](https://gitlab.com/gitlab-org/gitlab/tree/11-8-stable-ee/doc/update).
@@ -54,7 +58,7 @@ sudo -u git -H git remote add -f ee https://gitlab.com/gitlab-org/gitlab.git
 sudo -u git -H git checkout EE_BRANCH
 ```
 
-### 3. Install libs, migrations, etc
+### 3. Install libraries, migrations, etc
 
 ```shell
 cd /home/git/gitlab
@@ -124,7 +128,7 @@ sudo -u git -H bundle exec rake gitlab:backup:restore RAILS_ENV=production
 
 Certain versions of GitLab may require you to perform additional steps when
 upgrading from Community Edition to Enterprise Edition. Should such steps be
-necessary, they will listed per version below.
+necessary, they are listed per version below.
 
 <!--
 Example:

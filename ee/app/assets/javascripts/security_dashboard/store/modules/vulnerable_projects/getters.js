@@ -8,11 +8,8 @@ export const severityGroups = ({ projects }) => {
   );
 
   // return an array of severity groups, each containing an array of projects match the groups criteria
-  return SEVERITY_GROUPS.map(severityGroup => ({
+  return SEVERITY_GROUPS.map((severityGroup) => ({
     ...severityGroup,
     projects: projectsForSeverityGroup(projectsWithSeverityInformation, severityGroup),
   }));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

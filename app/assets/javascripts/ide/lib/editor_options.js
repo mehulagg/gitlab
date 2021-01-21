@@ -14,9 +14,13 @@ export const defaultDiffOptions = {
 };
 
 export const defaultDiffEditorOptions = {
+  ...defaultEditorOptions,
   quickSuggestions: false,
   occurrencesHighlight: false,
   ignoreTrimWhitespace: false,
+  readOnly: false,
+  renderLineHighlight: 'none',
+  hideCursorInOverviewRuler: true,
 };
 
 export const defaultModelOptions = {
@@ -27,7 +31,7 @@ export const defaultModelOptions = {
 
 export const editorOptions = [
   {
-    readOnly: model => Boolean(model.file.file_lock),
-    quickSuggestions: model => !(model.language === 'markdown'),
+    readOnly: (model) => Boolean(model.file.file_lock),
+    quickSuggestions: (model) => !(model.language === 'markdown'),
   },
 ];

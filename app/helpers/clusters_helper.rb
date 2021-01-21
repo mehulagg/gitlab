@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 module ClustersHelper
-  # EE overrides this
-  def has_multiple_clusters?
-    false
-  end
-
   def create_new_cluster_label(provider: nil)
     case provider
     when 'aws'
@@ -17,15 +12,46 @@ module ClustersHelper
     end
   end
 
-  def provider_icon(provider = nil)
-    case provider
-    when 'aws'
-      image_tag 'illustrations/logos/amazon_eks.svg', alt: s_('ClusterIntegration|Amazon EKS'), class: 'gl-h-full'
-    when 'gcp'
-      image_tag 'illustrations/logos/google_gke.svg', alt: s_('ClusterIntegration|Google GKE'), class: 'gl-h-full'
-    else
-      image_tag 'illustrations/logos/kubernetes.svg', alt: _('Kubernetes Cluster'), class: 'gl-h-full'
-    end
+  def display_cluster_agents?(_clusterable)
+    false
+  end
+
+  def js_cluster_agents_list_data(clusterable_project)
+    {
+      default_branch_name: clusterable_project.default_branch,
+      empty_state_image: image_path('illustrations/clusters_empty.svg'),
+      project_path: clusterable_project.full_path
+    }
+  end
+
+  def js_clusters_list_data(path = nil)
+    {
+      ancestor_help_path: help_page_path('user/group/clusters/index', anchor: 'cluster-precedence'),
+      endpoint: path,
+      img_tags: {
+        aws: { path: image_path('illustrations/logos/amazon_eks.svg'), text: s_('ClusterIntegration|Amazon EKS') },
+        default: { path: image_path('illustrations/logos/kubernetes.svg'), text: _('Kubernetes Cluster') },
+        gcp: { path: image_path('illustrations/logos/google_gke.svg'), text: s_('ClusterIntegration|Google GKE') }
+      }
+    }
+  end
+
+  def js_cluster_form_data(cluster, can_edit)
+    {
+      enabled: cluster.enabled?.to_s,
+      editable: can_edit.to_s,
+      environment_scope: cluster.environment_scope,
+      base_domain: cluster.base_domain,
+      application_ingress_external_ip: cluster.application_ingress_external_ip,
+      auto_devops_help_path: help_page_path('topics/autodevops/index'),
+      external_endpoint_help_path: help_page_path('user/clusters/applications.md', anchor: 'pointing-your-dns-at-the-external-endpoint')
+    }
+  end
+
+  def js_cluster_new
+    {
+      cluster_connect_help_path: help_page_path('user/project/clusters/add_remove_clusters', anchor: 'add-existing-cluster')
+    }
   end
 
   def render_gcp_signup_offer
@@ -87,5 +113,3 @@ module ClustersHelper
     can?(user, :admin_cluster, cluster)
   end
 end
-
-ClustersHelper.prepend_if_ee('EE::ClustersHelper')

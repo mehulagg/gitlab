@@ -1,13 +1,12 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     label: {
@@ -45,14 +44,14 @@ export default {
 
 <template>
   <button
-    v-tooltip
+    v-gl-tooltip
     :aria-label="label"
     :title="tooltipTitle"
     type="button"
     class="btn-blank"
     @click.stop.prevent="clicked"
   >
-    <icon :name="icon" :class="iconClasses" />
+    <gl-icon :name="icon" :class="iconClasses" />
     <template v-if="showLabel">
       {{ label }}
     </template>

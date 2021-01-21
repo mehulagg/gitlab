@@ -5,7 +5,7 @@ require 'gitlab_chronic_duration'
 require 'support/helpers/stub_feature_flags'
 require_dependency 'active_model'
 
-describe Gitlab::Ci::Config::Entry::Rules::Rule do
+RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
   let(:factory) do
     Gitlab::Config::Entry::Factory.new(described_class)
       .metadata(metadata)
@@ -337,6 +337,22 @@ describe Gitlab::Ci::Config::Entry::Rules::Rule do
           it 'returns an error about invalid when:' do
             expect(subject.errors).to include(/when unknown value: on_success/)
           end
+        end
+      end
+
+      context 'with an invalid variables' do
+        let(:config) do
+          { if: '$THIS == "that"', variables: 'hello' }
+        end
+
+        before do
+          subject.compose!
+        end
+
+        it { is_expected.not_to be_valid }
+
+        it 'returns an error about invalid variables:' do
+          expect(subject.errors).to include(/variables config should be a hash of key value pairs/)
         end
       end
     end

@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GitHub project integration **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3836) in GitLab Premium 10.6.
@@ -14,7 +20,7 @@ and is automatically configured on [GitHub import](../../../integration/github.m
 
 ### Complete these steps on GitHub
 
-This integration requires a [GitHub API token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)
+This integration requires a [GitHub API token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
 with `repo:status` access granted:
 
 1. Go to your "Personal access tokens" page at <https://github.com/settings/tokens>
@@ -43,8 +49,7 @@ to configure pipelines to run for open pull requests.
 
 This makes it possible to mark these status checks as _Required_ on GitHub.
 With **Static status check names** enabled on the integration page, your
-GitLab instance host name is going to be appended to a status check name,
-whereas in case of dynamic status check names, a branch name is going to be
-appended.
+GitLab instance host name is appended to a status check name,
+whereas in case of dynamic status check names, a branch name is appended.
 
 ![Configure GitHub Project Integration](img/github_configuration.png)

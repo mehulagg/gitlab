@@ -44,6 +44,7 @@ RSpec.describe Gitlab::ContributionAnalytics::DataCollector do
         [11, Issue.name, Event.actions[:closed]] => 11
       }
     end
+
     let(:data_collector) { described_class.new(group: Group.new) }
 
     before do

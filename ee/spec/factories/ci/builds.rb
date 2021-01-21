@@ -6,7 +6,7 @@ FactoryBot.define do
       failure_reason { Ci::Build.failure_reasons[:protected_environment_failure] }
     end
 
-    %i[codequality container_scanning dast dependency_scanning license_management license_scanning performance sast secret_detection].each do |report_type|
+    %i[api_fuzzing codequality container_scanning dast dependency_scanning license_management license_scanning performance browser_performance load_performance sast secret_detection coverage_fuzzing].each do |report_type|
       trait "legacy_#{report_type}".to_sym do
         success
         artifacts
@@ -114,7 +114,7 @@ FactoryBot.define do
       end
     end
 
-    %w[1 1_1 2].each do |version|
+    %w[1 1_1 2 2_1].each do |version|
       trait :"license_scan_v#{version}" do
         after :build do |build|
           build.job_artifacts << build(:ee_ci_job_artifact, :license_scan, :"v#{version}", job: build)
@@ -124,7 +124,19 @@ FactoryBot.define do
 
     trait :requirements_report do
       after(:build) do |build|
-        build.job_artifacts << create(:ee_ci_job_artifact, :requirements, job: build)
+        build.job_artifacts << create(:ee_ci_job_artifact, :all_passing_requirements, job: build)
+      end
+    end
+
+    trait :coverage_fuzzing_report do
+      after(:build) do |build|
+        build.job_artifacts << create(:ee_ci_job_artifact, :coverage_fuzzing, job: build)
+      end
+    end
+
+    trait :api_fuzzing_report do
+      after(:build) do |build|
+        build.job_artifacts << create(:ee_ci_job_artifact, :api_fuzzing, job: build)
       end
     end
   end

@@ -55,7 +55,7 @@ RSpec.describe Groups::EpicIssuesController do
 
       context 'when user does not have access to epic' do
         it 'returns 404 status' do
-          group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+          group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
           subject
 

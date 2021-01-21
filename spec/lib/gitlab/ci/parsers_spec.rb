@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Parsers do
+RSpec.describe Gitlab::Ci::Parsers do
   describe '.fabricate!' do
     subject { described_class.fabricate!(file_type) }
 
@@ -27,6 +27,14 @@ describe Gitlab::Ci::Parsers do
 
       it 'fabricates the class' do
         is_expected.to be_a(described_class::Accessibility::Pa11y)
+      end
+    end
+
+    context 'when file_type is codequality' do
+      let(:file_type) { 'codequality' }
+
+      it 'fabricates the class' do
+        is_expected.to be_a(described_class::Codequality::CodeClimate)
       end
     end
 

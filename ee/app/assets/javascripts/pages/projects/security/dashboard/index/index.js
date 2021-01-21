@@ -1,14 +1,10 @@
-import initProjectSecurityDashboard from 'ee/security_dashboard/project_init';
-import initFirstClassSecurityDashboard from 'ee/security_dashboard/first_class_init';
+import initSecurityCharts from 'ee/security_dashboard/security_charts_init';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import { waitForCSSLoaded } from '~/helpers/startup_css_helper';
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (gon.features?.firstClassVulnerabilities) {
-    initFirstClassSecurityDashboard(
-      document.getElementById('js-security-report-app'),
-      DASHBOARD_TYPES.PROJECT,
-    );
-  } else {
-    initProjectSecurityDashboard();
-  }
+waitForCSSLoaded(() => {
+  initSecurityCharts(
+    document.getElementById('js-project-security-dashboard'),
+    DASHBOARD_TYPES.PROJECT,
+  );
 });

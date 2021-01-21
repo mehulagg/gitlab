@@ -10,8 +10,8 @@ module Gitlab
       MAX_RETRIES = 8
       IGNORED_FILENAMES = %w(. ..).freeze
 
-      def self.import(*args)
-        new(*args).import
+      def self.import(*args, **kwargs)
+        new(*args, **kwargs).import
       end
 
       def initialize(importable:, archive_file:, shared:)
@@ -28,6 +28,9 @@ module Gitlab
         copy_archive
 
         wait_for_archived_file do
+          # Disable archive validation by default
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/235949
+          validate_decompressed_archive_size if Feature.enabled?(:validate_import_decompressed_archive_size)
           decompress_archive
         end
       rescue => e
@@ -81,6 +84,14 @@ module Gitlab
 
       def extracted_files
         Dir.glob("#{@shared.export_path}/**/*", File::FNM_DOTMATCH).reject { |f| IGNORED_FILENAMES.include?(File.basename(f)) }
+      end
+
+      def validate_decompressed_archive_size
+        raise ImporterError.new(size_validator.error) unless size_validator.valid?
+      end
+
+      def size_validator
+        @size_validator ||= DecompressedArchiveSizeValidator.new(archive_path: @archive_file)
       end
     end
   end

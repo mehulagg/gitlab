@@ -7,6 +7,7 @@ module Gitlab
       include Gitlab::EncodingHelper
       prepend Gitlab::Git::RuggedImpl::Commit
       extend Gitlab::Git::WrapsGitalyErrors
+      include Gitlab::Utils::StrongMemoize
 
       attr_accessor :raw_commit, :head
 
@@ -15,7 +16,7 @@ module Gitlab
       SERIALIZE_KEYS = [
         :id, :message, :parent_ids,
         :authored_date, :author_name, :author_email,
-        :committed_date, :committer_name, :committer_email
+        :committed_date, :committer_name, :committer_email, :trailers
       ].freeze
 
       attr_accessor(*SERIALIZE_KEYS)
@@ -89,14 +90,15 @@ module Gitlab
         #
         #   Commit.last_for_path(repo, 'master', 'Gemfile')
         #
-        def last_for_path(repo, ref, path = nil)
+        def last_for_path(repo, ref, path = nil, literal_pathspec: false)
           # rubocop: disable Rails/FindBy
           # This is not where..first from ActiveRecord
           where(
             repo: repo,
             ref: ref,
             path: path,
-            limit: 1
+            limit: 1,
+            literal_pathspec: literal_pathspec
           ).first
           # rubocop: enable Rails/FindBy
         end
@@ -231,6 +233,18 @@ module Gitlab
         parent_ids.first
       end
 
+      def committed_date
+        strong_memoize(:committed_date) do
+          init_date_from_gitaly(raw_commit.committer) if raw_commit
+        end
+      end
+
+      def authored_date
+        strong_memoize(:authored_date) do
+          init_date_from_gitaly(raw_commit.author) if raw_commit
+        end
+      end
+
       # Returns a diff object for the changes from this commit's first parent.
       # If there is no parent, then the diff is between this commit and an
       # empty repo. See Repository#diff for keys allowed in the +options+
@@ -247,7 +261,7 @@ module Gitlab
       end
 
       def has_zero_stats?
-        stats.total.zero?
+        stats.total == 0
       rescue
         true
       end
@@ -369,14 +383,13 @@ module Gitlab
         # subject from the message to make it clearer when there's one
         # available but not the other.
         @message = message_from_gitaly_body
-        @authored_date = init_date_from_gitaly(commit.author)
         @author_name = commit.author.name.dup
         @author_email = commit.author.email.dup
 
-        @committed_date = init_date_from_gitaly(commit.committer)
         @committer_name = commit.committer.name.dup
         @committer_email = commit.committer.email.dup
         @parent_ids = Array(commit.parent_ids)
+        @trailers = Hash[commit.trailers.map { |t| [t.key, t.value] }]
       end
 
       # Gitaly provides a UNIX timestamp in author.date.seconds, and a timezone
@@ -411,7 +424,7 @@ module Gitlab
       end
 
       def message_from_gitaly_body
-        return @raw_commit.subject.dup if @raw_commit.body_size.zero?
+        return @raw_commit.subject.dup if @raw_commit.body_size == 0
         return @raw_commit.body.dup if full_body_fetched_from_gitaly?
 
         if @raw_commit.body_size > MAX_COMMIT_MESSAGE_DISPLAY_SIZE

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::LfsObjectImporter do
+RSpec.describe Gitlab::GithubImport::Importer::LfsObjectImporter do
   let(:project) { create(:project) }
   let(:lfs_attributes) do
     {
@@ -12,7 +12,7 @@ describe Gitlab::GithubImport::Importer::LfsObjectImporter do
     }
   end
 
-  let(:lfs_download_object) { LfsDownloadObject.new(lfs_attributes) }
+  let(:lfs_download_object) { LfsDownloadObject.new(**lfs_attributes) }
   let(:github_lfs_object) { Gitlab::GithubImport::Representation::LfsObject.new(lfs_attributes) }
 
   let(:importer) { described_class.new(github_lfs_object, project, nil) }

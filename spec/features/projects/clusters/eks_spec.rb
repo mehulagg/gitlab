@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'AWS EKS Cluster', :js do
+RSpec.describe 'AWS EKS Cluster', :js do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -19,7 +19,7 @@ describe 'AWS EKS Cluster', :js do
     before do
       visit project_clusters_path(project)
 
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
     end
 
     context 'when user creates a cluster on AWS EKS' do

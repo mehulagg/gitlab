@@ -16,7 +16,6 @@ module Gitlab
       SECONDARY_JOBS = %w[
         geo_file_download_dispatch_worker
         geo_registry_sync_worker
-        geo_migrated_local_files_clean_up_worker
         geo_repository_sync_worker
         geo_container_repository_sync_worker
         geo_repository_verification_secondary_scheduler_worker

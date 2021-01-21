@@ -6,6 +6,7 @@ class LdapGroupSyncWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :authentication_and_authorization
   worker_has_external_dependencies!
   weight 2
+  loggable_arguments 0, 1
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(group_ids, provider = nil)

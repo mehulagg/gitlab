@@ -34,12 +34,8 @@ module EE
 
       def should_index_commits?
         return false unless default_branch?
-        return false unless project.use_elasticsearch?
 
-        # Check that we're not already indexing this project
-        ::Gitlab::Redis::SharedState.with do |redis|
-          !redis.sismember(:elastic_projects_indexing, project.id)
-        end
+        project.use_elasticsearch?
       end
     end
   end

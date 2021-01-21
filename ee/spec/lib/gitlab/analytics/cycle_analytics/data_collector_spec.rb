@@ -18,34 +18,35 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
   # uses two methods for the data preparaton: `create_data_for_start_event` and
   # `create_data_for_end_event`. For each stage we create 3 records with a fixed
   # durations (10, 5, 15 days) in order to easily generalize the test cases.
-  shared_examples 'custom cycle analytics stage' do
-    let(:data_collector) { described_class.new(stage: stage, params: { from: Time.new(2019), to: Time.new(2020), current_user: user }) }
+  shared_examples 'custom Value Stream Analytics Stage' do
+    let(:params) { { from: Time.new(2019), to: Time.new(2020), current_user: user } }
+    let(:data_collector) { described_class.new(stage: stage, params: params) }
 
     before do
       # takes 10 days
-      resource1 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource1 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 15)) do
+      travel_to(Time.new(2019, 3, 15)) do
         create_data_for_end_event(resource1, self)
       end
 
       # takes 5 days
-      resource2 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource2 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 10)) do
+      travel_to(Time.new(2019, 3, 10)) do
         create_data_for_end_event(resource2, self)
       end
 
       # takes 15 days
-      resource3 = Timecop.travel(Time.new(2019, 3, 5)) do
+      resource3 = travel_to(Time.new(2019, 3, 5)) do
         create_data_for_start_event(self)
       end
 
-      Timecop.travel(Time.new(2019, 3, 20)) do
+      travel_to(Time.new(2019, 3, 20)) do
         create_data_for_end_event(resource3, self)
       end
     end
@@ -84,10 +85,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           issue.metrics.update!(first_mentioned_in_commit_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue creation time and closing time' do
+      context 'between issue creation time and closing time' do
         let(:start_event_identifier) { :issue_created }
         let(:end_event_identifier) { :issue_closed }
 
@@ -99,10 +100,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.close!
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue first mentioned in commit and first associated with milestone time' do
+      context 'between issue first mentioned in commit and first associated with milestone time' do
         let(:start_event_identifier) { :issue_first_mentioned_in_commit }
         let(:end_event_identifier) { :issue_first_associated_with_milestone }
 
@@ -116,10 +117,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(first_associated_with_milestone_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue creation time and first added to board time' do
+      context 'between issue creation time and first added to board time' do
         let(:start_event_identifier) { :issue_created }
         let(:end_event_identifier) { :issue_first_added_to_board }
 
@@ -131,10 +132,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(first_added_to_board_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue creation time and last edit time' do
+      context 'between issue creation time and last edit time' do
         let(:start_event_identifier) { :issue_created }
         let(:end_event_identifier) { :issue_last_edited }
 
@@ -146,10 +147,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.update!(last_edited_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue label added time and label removed time' do
+      context 'between issue label added time and label removed time' do
         let(:start_event_identifier) { :issue_label_added }
         let(:end_event_identifier) { :issue_label_removed }
 
@@ -178,10 +179,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(resource)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between issue label added time and another issue label added time' do
+      context 'between issue label added time and another issue label added time' do
         let(:start_event_identifier) { :issue_label_added }
         let(:end_event_identifier) { :issue_label_added }
 
@@ -210,10 +211,27 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(issue)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage' do
+          context 'when filtering for two labels' do
+            let(:params) do
+              {
+                from: Time.new(2019),
+                to: Time.new(2020),
+                current_user: user,
+                label_name: [label.name, other_label.name]
+              }
+            end
+
+            subject { described_class.new(stage: stage, params: params) }
+
+            it 'does not raise query syntax error' do
+              expect { subject.records_fetcher.serialized_records }.not_to raise_error(ActiveRecord::StatementInvalid)
+            end
+          end
+        end
       end
 
-      describe 'between issue creation time and issue label added time' do
+      context 'between issue creation time and issue label added time' do
         let(:start_event_identifier) { :issue_created }
         let(:end_event_identifier) { :issue_label_added }
 
@@ -233,7 +251,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(issue)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
     end
 
@@ -250,7 +268,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(merged_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
       context 'between merge request merrged time and first deployed to production at time' do
@@ -267,7 +285,24 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(first_deployed_to_production_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
+      end
+
+      context 'between first commit at and merge request merged time' do
+        let(:start_event_identifier) { :merge_request_first_commit_at }
+        let(:end_event_identifier) { :merge_request_merged }
+
+        def create_data_for_start_event(example_class)
+          create(:merge_request, :merged, source_project: example_class.project).tap do |mr|
+            mr.metrics.update!(first_commit_at: Time.now)
+          end
+        end
+
+        def create_data_for_end_event(mr, example_class)
+          mr.metrics.update!(merged_at: Time.now)
+        end
+
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
       context 'between merge request build started time and build finished time' do
@@ -284,10 +319,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           mr.metrics.update!(latest_build_finished_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between merge request creation time and close time' do
+      context 'between merge request creation time and close time' do
         let(:start_event_identifier) { :merge_request_created }
         let(:end_event_identifier) { :merge_request_closed }
 
@@ -299,10 +334,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.metrics.update!(latest_closed_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between merge request creation time and last edit time' do
+      context 'between merge request creation time and last edit time' do
         let(:start_event_identifier) { :merge_request_created }
         let(:end_event_identifier) { :merge_request_last_edited }
 
@@ -314,10 +349,10 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           resource.update!(last_edited_at: Time.now)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
       end
 
-      describe 'between merge request label added time and label removed time' do
+      context 'between merge request label added time and label removed time' do
         let(:start_event_identifier) { :merge_request_label_added }
         let(:end_event_identifier) { :merge_request_label_removed }
 
@@ -346,7 +381,86 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(mr)
         end
 
-        it_behaves_like 'custom cycle analytics stage'
+        it_behaves_like 'custom Value Stream Analytics Stage'
+      end
+
+      context 'between code stage start time and merge request created time' do
+        let(:start_event_identifier) { :code_stage_start }
+        let(:end_event_identifier) { :merge_request_created }
+
+        context 'when issue is referenced in the commit message' do
+          def create_data_for_start_event(example_class)
+            issue = create(:issue, project: example_class.project)
+
+            mr = create(:merge_request, {
+              source_project: example_class.project,
+              target_branch: example_class.project.default_branch,
+              description: "Description\n\nclosing #{issue.to_reference}",
+              allow_broken: true
+            })
+
+            MergeRequests::UpdateService.new(
+              example_class.project,
+              user,
+              assignees: [user]
+            ).execute(mr)
+
+            mr.metrics.update!(first_commit_at: Time.zone.now)
+            mr
+          end
+
+          def create_data_for_end_event(mr, example_class)
+            mr.update!(created_at: Time.zone.now)
+          end
+
+          it_behaves_like 'custom Value Stream Analytics Stage'
+        end
+
+        context 'when `first_commit_at` is present' do
+          def create_data_for_start_event(example_class)
+            mr = create(:merge_request, { source_project: example_class.project, target_branch: example_class.project.default_branch, allow_broken: true })
+            mr.metrics.update!(first_commit_at: Time.zone.now)
+            mr
+          end
+
+          def create_data_for_end_event(mr, example_class)
+            mr.update!(created_at: Time.zone.now)
+          end
+
+          it_behaves_like 'custom Value Stream Analytics Stage'
+        end
+
+        context 'label filter' do
+          before do
+            params[:label_name] = [label.name, other_label.name]
+          end
+
+          def create_data_for_start_event(example_class)
+            issue = create(:issue, project: example_class.project)
+            issue.metrics.update!(first_mentioned_in_commit_at: Time.zone.now)
+
+            mr = create(:merge_request, {
+              source_project: example_class.project,
+              target_branch: example_class.project.default_branch,
+              description: "Description\n\nclosing #{issue.to_reference}",
+              allow_broken: true
+            })
+
+            MergeRequests::UpdateService.new(
+              example_class.project,
+              user,
+              label_ids: [label.id, other_label.id]
+            ).execute(mr)
+
+            mr
+          end
+
+          def create_data_for_end_event(mr, example_class)
+            mr.update!(created_at: Time.zone.now)
+          end
+
+          it_behaves_like 'custom Value Stream Analytics Stage'
+        end
       end
     end
   end
@@ -425,7 +539,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       before do
         group.add_user(user, GroupMember::MAINTAINER)
 
-        Timecop.travel(Time.new(2019, 6, 1)) do
+        travel_to(Time.new(2019, 6, 1)) do
           mr = create(:merge_request, source_project: project1)
           mr.metrics.update!(merged_at: 1.hour.from_now)
 
@@ -486,6 +600,39 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
           ).execute(merge_request)
 
           data_collector_params[:label_name] = [label.name]
+        end
+
+        it_behaves_like 'filter examples'
+      end
+
+      context 'when `Any` `label_name` is given' do
+        let(:label) { create(:group_label, group: group) }
+
+        before do
+          MergeRequests::UpdateService.new(
+            merge_request.project,
+            user,
+            label_ids: [label.id]
+          ).execute(merge_request)
+
+          data_collector_params[:label_name] = ['Any']
+        end
+
+        it_behaves_like 'filter examples'
+      end
+
+      context 'when two labels are given' do
+        let(:label1) { create(:group_label, group: group) }
+        let(:label2) { create(:group_label, group: group) }
+
+        before do
+          MergeRequests::UpdateService.new(
+            merge_request.project,
+            user,
+            label_ids: [label1.id, label2.id]
+          ).execute(merge_request)
+
+          data_collector_params[:label_name] = [label1.name, label2.name]
         end
 
         it_behaves_like 'filter examples'

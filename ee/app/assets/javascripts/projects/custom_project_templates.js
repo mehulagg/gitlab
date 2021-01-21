@@ -29,18 +29,13 @@ const bindEvents = () => {
 
   function hideNonRootParentPathOptions() {
     const rootParent = `/${
-      $namespaceSelect
-        .find('option:selected')
-        .data('show-path')
-        .split('/')[1]
+      $namespaceSelect.find('option:selected').data('show-path').split('/')[1]
     }`;
 
     $namespaceSelect
       .find('option')
       .filter(function doesNotMatchParent() {
-        return !$(this)
-          .data('show-path')
-          .includes(rootParent);
+        return !$(this).data('show-path').includes(rootParent);
       })
       .addClass('hidden');
   }
@@ -56,11 +51,12 @@ const bindEvents = () => {
 
   function chooseTemplate() {
     const subgroupId = $(this).data('subgroup-id');
+    const groupId = $(this).data('parent-group-id');
     const templateName = $(this).data('template-name');
 
     if (subgroupId) {
       $subgroupWithTemplatesIdInput.val(subgroupId);
-      $namespaceSelect.val(subgroupId).trigger('change');
+      $namespaceSelect.val(groupId).trigger('change');
 
       hideNonRootParentPathOptions();
 
@@ -99,10 +95,7 @@ const bindEvents = () => {
       ),
     );
 
-    $projectFieldsForm
-      .find('.js-select-namespace')
-      .first()
-      .val(subgroupId);
+    $projectFieldsForm.find('.js-select-namespace').first().val(groupId);
   }
 
   $useCustomTemplateBtn.on('change', chooseTemplate);

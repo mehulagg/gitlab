@@ -13,11 +13,11 @@ module EE
 
       render_label_text(
         label.scoped_label_key,
-        css_class: text_color_class_for_bg(label.color),
+        css_class: "gl-label-text #{text_color_class_for_bg(label.color)}",
         bg_color: label.color
       ) + render_label_text(
         label.scoped_label_value,
-        css_class: ('gl-label-text-dark' if light_color?(label.color)),
+        css_class: "gl-label-text-scoped #{('gl-label-text-dark' if light_color?(label.color))}",
         suffix: suffix
       )
     end
@@ -28,11 +28,11 @@ module EE
       wrapper_classes = %w(gl-label gl-label-scoped)
       wrapper_classes << 'gl-label-sm' if small
 
-      <<~HTML.chomp.html_safe
-        <span class="d-inline-block position-relative scoped-label-wrapper">
-          <span class="#{wrapper_classes.join(' ')}" style="color: #{label.color}">#{label_html}</span>
-        </span>
-      HTML
+      border_width = small ? '1px' : '2px'
+
+      html = %(<span class="#{wrapper_classes.join(' ')}" style="--label-inset-border: inset 0 0 0 #{border_width} #{label.color}; color: #{label.color}">#{label_html}</span>).html_safe
+
+      html
     end
 
     def label_tooltip_title(label)
@@ -56,12 +56,6 @@ module EE
         show_any: "true",
         group_id: edit_context&.try(:id)
       }.merge(scoped_labels_fields, opts)
-    end
-
-    def sidebar_label_dropdown_data(issuable_type, issuable_sidebar)
-      super.merge({
-        scoped_labels: issuable_sidebar[:scoped_labels_available].to_s
-      })
     end
 
     def issuable_types

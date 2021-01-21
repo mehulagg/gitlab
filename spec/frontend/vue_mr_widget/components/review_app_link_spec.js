@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import component from '~/vue_merge_request_widget/components/review_app_link.vue';
-import mountComponent from '../../helpers/vue_mount_component_helper';
 
 describe('review app link', () => {
   const Component = Vue.extend(component);
@@ -30,7 +30,7 @@ describe('review app link', () => {
   });
 
   it('renders provided cssClass as class attribute', () => {
-    expect(el.getAttribute('class')).toEqual(props.cssClass);
+    expect(el.getAttribute('class')).toContain(props.cssClass);
   });
 
   it('renders View app text', () => {

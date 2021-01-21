@@ -10,7 +10,7 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-export default () => {
+export default (params = {}) => {
   const boardsSwitcherElement = document.getElementById('js-multiple-boards-switcher');
   return new Vue({
     el: boardsSwitcherElement,
@@ -18,6 +18,10 @@ export default () => {
       BoardsSelector,
     },
     apolloProvider,
+    provide: {
+      fullPath: params.fullPath,
+      rootPath: params.rootPath,
+    },
     data() {
       const { dataset } = boardsSwitcherElement;
 
@@ -27,7 +31,7 @@ export default () => {
         hasMissingBoards: parseBoolean(dataset.hasMissingBoards),
         canAdminBoard: parseBoolean(dataset.canAdminBoard),
         multipleIssueBoardsAvailable: parseBoolean(dataset.multipleIssueBoardsAvailable),
-        projectId: Number(dataset.projectId),
+        projectId: dataset.projectId ? Number(dataset.projectId) : 0,
         groupId: Number(dataset.groupId),
         scopedIssueBoardFeatureEnabled: parseBoolean(dataset.scopedIssueBoardFeatureEnabled),
         weights: JSON.parse(dataset.weights),

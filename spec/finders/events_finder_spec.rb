@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe EventsFinder do
+RSpec.describe EventsFinder do
   let_it_be(:user) { create(:user) }
+  let(:private_user) { create(:user, private_profile: true) }
   let(:other_user) { create(:user) }
 
   let(:project1) { create(:project, :private, creator_id: user.id, namespace: user.namespace) }
@@ -57,31 +58,21 @@ describe EventsFinder do
 
       expect(events).to be_empty
     end
+
+    it 'returns nothing when the target profile is private' do
+      events = described_class.new(source: private_user, current_user: other_user).execute
+
+      expect(events).to be_empty
+    end
   end
 
-  describe 'wiki events feature flag' do
+  describe 'wiki events' do
     let_it_be(:events) { create_list(:wiki_page_event, 3, project: public_project) }
 
     subject(:finder) { described_class.new(source: public_project, target_type: 'wiki', current_user: user) }
 
-    context 'the wiki_events feature flag is disabled' do
-      before do
-        stub_feature_flags(wiki_events: false)
-      end
-
-      it 'omits the wiki page events' do
-        expect(finder.execute).to be_empty
-      end
-    end
-
-    context 'the wiki_events feature flag is enabled' do
-      before do
-        stub_feature_flags(wiki_events: true)
-      end
-
-      it 'can find the wiki events' do
-        expect(finder.execute).to match_array(events)
-      end
+    it 'can find the wiki events' do
+      expect(finder.execute).to match_array(events)
     end
   end
 

@@ -3,11 +3,13 @@
 class ElasticCommitIndexerWorker
   include ApplicationWorker
   prepend Elastic::IndexingControl
+  include Gitlab::ExclusiveLeaseHelpers
 
   feature_category :global_search
   sidekiq_options retry: 2
   urgency :throttled
   idempotent!
+  loggable_arguments 1, 2, 3
 
   # Performs the commits and blobs indexation
   #
@@ -23,6 +25,8 @@ class ElasticCommitIndexerWorker
     project = Project.find(project_id)
     return true unless project.use_elasticsearch?
 
-    Gitlab::Elastic::Indexer.new(project, wiki: wiki).run
+    in_lock("#{self.class.name}/#{project_id}/#{wiki}", ttl: 1.hour, retries: 0) do
+      Gitlab::Elastic::Indexer.new(project, wiki: wiki).run
+    end
   end
 end

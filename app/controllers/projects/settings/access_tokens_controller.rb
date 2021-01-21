@@ -7,6 +7,8 @@ module Projects
 
       before_action :check_feature_availability
 
+      feature_category :authentication_and_authorization
+
       def index
         @project_access_token = PersonalAccessToken.new
         set_index_vars
@@ -21,7 +23,7 @@ module Projects
 
           redirect_to namespace_project_settings_access_tokens_path, notice: _("Your new project access token has been created.")
         else
-          render :index
+          redirect_to namespace_project_settings_access_tokens_path, alert: _("Failed to create new project access token: %{token_response_message}") % { token_response_message: token_response.message }
         end
       end
 

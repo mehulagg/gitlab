@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import component from '~/pipelines/components/blank_state.vue';
-import mountComponent from '../helpers/vue_mount_component_helper';
+import mountComponent from 'helpers/vue_mount_component_helper';
+import component from '~/pipelines/components/pipelines_list/blank_state.vue';
 
 describe('Pipelines Blank State', () => {
   let vm;

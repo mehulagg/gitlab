@@ -17,6 +17,7 @@ FactoryBot.define do
     factory :note_on_project_snippet,    traits: [:on_project_snippet]
     factory :note_on_personal_snippet,   traits: [:on_personal_snippet]
     factory :note_on_design,             traits: [:on_design]
+    factory :note_on_alert,              traits: [:on_alert]
     factory :system_note,                traits: [:system]
 
     factory :discussion_note, class: 'DiscussionNote'
@@ -145,6 +146,10 @@ FactoryBot.define do
       end
     end
 
+    trait :on_alert do
+      noteable { association(:alert_management_alert, project: project) }
+    end
+
     trait :resolved do
       resolved_at { Time.now }
       resolved_by { association(:user) }
@@ -152,6 +157,11 @@ FactoryBot.define do
 
     trait :system do
       system { true }
+    end
+
+    trait :with_system_note_metadata do
+      system
+      system_note_metadata
     end
 
     trait :downvote do

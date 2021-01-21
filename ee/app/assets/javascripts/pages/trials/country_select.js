@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const selectElement = document.getElementById('country_select');
+const selectElement = document.getElementById('country_select');
+
+if (selectElement?.dataset) {
   const { countriesEndPoint, selectedOption } = selectElement.dataset;
 
   axios
@@ -18,9 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectElement.appendChild(option);
       });
-      $(selectElement)
-        .val(selectedOption)
-        .trigger('change.select2');
+      $(selectElement).val(selectedOption).trigger('change.select2');
     })
     .catch(() => new Flash(__('Error loading countries data.')));
-});
+}

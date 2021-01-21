@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: concepts, howto
 ---
 
@@ -23,11 +26,13 @@ For a commit or tag to be *verified* by GitLab:
   [Omnibus install custom public certificates](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 - The signing time has to be within the time range of the [certificate validity](https://www.rfc-editor.org/rfc/rfc5280.html#section-4.1.2.5)
   which is usually up to three years.
-- The signing time is equal or later then commit time.
+- The signing time is equal or later than commit time.
 
-NOTE: **Note:** Certificate revocation lists are checked on a daily basis via background worker.
+NOTE:
+Certificate revocation lists are checked on a daily basis via background worker.
 
-NOTE: **Note:** Self signed certificates without `authorityKeyIdentifier`,
+NOTE:
+Self signed certificates without `authorityKeyIdentifier`,
 `subjectKeyIdentifier`, and `crlDistributionPoints` are not supported. We
 recommend using certificates from a PKI that are in line with
 [RFC 5280](https://tools.ietf.org/html/rfc5280).
@@ -65,11 +70,11 @@ git config --global gpg.format x509
 
 ### Windows and MacOS
 
-Install [smimesign](https://github.com/github/smimesign) by downloading the
+Install [S/MIME Sign](https://github.com/github/smimesign) by downloading the
 installer or via `brew install smimesign` on MacOS.
 
 Get the ID of your certificate with `smimesign --list-keys` and set your
-signingkey `git config --global user.signingkey ID`, then configure X.509:
+signing key `git config --global user.signingkey ID`, then configure X.509:
 
 ```shell
 git config --global gpg.x509.program smimesign

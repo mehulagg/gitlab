@@ -34,28 +34,16 @@ RSpec.describe Import::GitlabController do
 
   describe "GET status" do
     before do
-      @repo = OpenStruct.new(path: 'vim', path_with_namespace: 'asd/vim')
+      @repo = OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim')
       assign_session_token
     end
 
-    it "assigns variables" do
-      @project = create(:project, import_type: 'gitlab', creator_id: user.id)
-      stub_client(projects: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([@repo])
-    end
-
-    it "does not show already added project" do
-      @project = create(:project, import_type: 'gitlab', creator_id: user.id, import_source: 'asd/vim')
-      stub_client(projects: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([])
+    it_behaves_like 'import controller status' do
+      let(:repo) { @repo }
+      let(:repo_id) { @repo.id }
+      let(:import_source) { @repo.path_with_namespace }
+      let(:provider_name) { 'gitlab' }
+      let(:client_repos_field) { :projects }
     end
   end
 
@@ -65,6 +53,7 @@ RSpec.describe Import::GitlabController do
     let(:gitlab_user) do
       { username: gitlab_username }.with_indifferent_access
     end
+
     let(:gitlab_repo) do
       {
         path: 'vim',

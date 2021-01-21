@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe Feature, stub_feature_flags: false do
+RSpec.describe Feature, stub_feature_flags: false do
   before do
     # reset Flipper AR-engine
     Feature.reset
+    skip_feature_flags_yaml_validation
   end
 
   describe '.get' do
@@ -21,65 +22,28 @@ describe Feature, stub_feature_flags: false do
   end
 
   describe '.persisted_names' do
-    context 'when FF_LEGACY_PERSISTED_NAMES=false' do
-      before do
-        stub_env('FF_LEGACY_PERSISTED_NAMES', 'false')
-      end
+    it 'returns the names of the persisted features' do
+      Feature.enable('foo')
 
-      it 'returns the names of the persisted features' do
-        Feature.enable('foo')
-
-        expect(described_class.persisted_names).to contain_exactly('foo')
-      end
-
-      it 'returns an empty Array when no features are presisted' do
-        expect(described_class.persisted_names).to be_empty
-      end
-
-      it 'caches the feature names when request store is active',
-       :request_store, :use_clean_rails_memory_store_caching do
-        Feature.enable('foo')
-
-        expect(Gitlab::ProcessMemoryCache.cache_backend)
-          .to receive(:fetch)
-          .once
-          .with('flipper/v1/features', expires_in: 1.minute)
-          .and_call_original
-
-        2.times do
-          expect(described_class.persisted_names).to contain_exactly('foo')
-        end
-      end
+      expect(described_class.persisted_names).to contain_exactly('foo')
     end
 
-    context 'when FF_LEGACY_PERSISTED_NAMES=true' do
-      before do
-        stub_env('FF_LEGACY_PERSISTED_NAMES', 'true')
-      end
+    it 'returns an empty Array when no features are presisted' do
+      expect(described_class.persisted_names).to be_empty
+    end
 
-      it 'returns the names of the persisted features' do
-        Feature.enable('foo')
+    it 'caches the feature names when request store is active',
+      :request_store, :use_clean_rails_memory_store_caching do
+      Feature.enable('foo')
 
+      expect(Gitlab::ProcessMemoryCache.cache_backend)
+        .to receive(:fetch)
+        .once
+        .with('flipper/v1/features', expires_in: 1.minute)
+        .and_call_original
+
+      2.times do
         expect(described_class.persisted_names).to contain_exactly('foo')
-      end
-
-      it 'returns an empty Array when no features are presisted' do
-        expect(described_class.persisted_names).to be_empty
-      end
-
-      it 'caches the feature names when request store is active',
-       :request_store, :use_clean_rails_memory_store_caching do
-        Feature.enable('foo')
-
-        expect(Gitlab::ProcessMemoryCache.cache_backend)
-          .to receive(:fetch)
-          .once
-          .with('flipper:persisted_names', expires_in: 1.minute)
-          .and_call_original
-
-        2.times do
-          expect(described_class.persisted_names).to contain_exactly('foo')
-        end
       end
     end
 
@@ -279,6 +243,98 @@ describe Feature, stub_feature_flags: false do
         end
       end
     end
+
+    context 'validates usage of feature flag with YAML definition' do
+      let(:definition) do
+        Feature::Definition.new('development/my_feature_flag.yml',
+          name: 'my_feature_flag',
+          type: 'development',
+          default_enabled: default_enabled
+        ).tap(&:validate!)
+      end
+
+      let(:default_enabled) { false }
+
+      before do
+        stub_env('LAZILY_CREATE_FEATURE_FLAG', '0')
+
+        allow(Feature::Definition).to receive(:valid_usage!).and_call_original
+        allow(Feature::Definition).to receive(:definitions) do
+          { definition.key => definition }
+        end
+      end
+
+      it 'when usage is correct' do
+        expect { described_class.enabled?(:my_feature_flag) }.not_to raise_error
+      end
+
+      it 'when invalid type is used' do
+        expect { described_class.enabled?(:my_feature_flag, type: :licensed) }
+          .to raise_error(/The `type:` of/)
+      end
+
+      it 'when invalid default_enabled is used' do
+        expect { described_class.enabled?(:my_feature_flag, default_enabled: true) }
+          .to raise_error(/The `default_enabled:` of/)
+      end
+
+      context 'when `default_enabled: :yaml` is used in code' do
+        it 'reads the default from the YAML definition' do
+          expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(false)
+        end
+
+        context 'when default_enabled is true in the YAML definition' do
+          let(:default_enabled) { true }
+
+          it 'reads the default from the YAML definition' do
+            expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(true)
+          end
+        end
+
+        context 'when YAML definition does not exist for an optional type' do
+          let(:optional_type) { described_class::Shared::TYPES.find { |name, attrs| attrs[:optional] }.first }
+
+          context 'when in dev or test environment' do
+            it 'raises an error for dev' do
+              expect { described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml) }
+                .to raise_error(
+                  Feature::InvalidFeatureFlagError,
+                  "The feature flag YAML definition for 'non_existent_flag' does not exist")
+            end
+          end
+
+          context 'when in production' do
+            before do
+              allow(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false)
+            end
+
+            context 'when database exists' do
+              before do
+                allow(Gitlab::Database).to receive(:exists?).and_return(true)
+              end
+
+              it 'checks the persisted status and returns false' do
+                expect(described_class).to receive(:get).with(:non_existent_flag).and_call_original
+
+                expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml)).to eq(false)
+              end
+            end
+
+            context 'when database does not exist' do
+              before do
+                allow(Gitlab::Database).to receive(:exists?).and_return(false)
+              end
+
+              it 'returns false without checking the status in the database' do
+                expect(described_class).not_to receive(:get)
+
+                expect(described_class.enabled?(:non_existent_flag, type: optional_type, default_enabled: :yaml)).to eq(false)
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   describe '.disable?' do
@@ -303,7 +359,119 @@ describe Feature, stub_feature_flags: false do
     end
   end
 
+  shared_examples_for 'logging' do
+    let(:expected_action) { }
+    let(:expected_extra) { }
+
+    it 'logs the event' do
+      expect(Feature.logger).to receive(:info).with(key: key, action: expected_action, **expected_extra)
+
+      subject
+    end
+  end
+
+  describe '.enable' do
+    subject { described_class.enable(key, thing) }
+
+    let(:key) { :awesome_feature }
+    let(:thing) { true }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :enable }
+      let(:expected_extra) { { "extra.thing" => "true" } }
+    end
+
+    context 'when thing is an actor' do
+      let(:thing) { create(:project) }
+
+      it_behaves_like 'logging' do
+        let(:expected_action) { :enable }
+        let(:expected_extra) { { "extra.thing" => "#{thing.flipper_id}" } }
+      end
+    end
+  end
+
+  describe '.disable' do
+    subject { described_class.disable(key, thing) }
+
+    let(:key) { :awesome_feature }
+    let(:thing) { false }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :disable }
+      let(:expected_extra) { { "extra.thing" => "false" } }
+    end
+
+    context 'when thing is an actor' do
+      let(:thing) { create(:project) }
+
+      it_behaves_like 'logging' do
+        let(:expected_action) { :disable }
+        let(:expected_extra) { { "extra.thing" => "#{thing.flipper_id}" } }
+      end
+    end
+  end
+
+  describe '.enable_percentage_of_time' do
+    subject { described_class.enable_percentage_of_time(key, percentage) }
+
+    let(:key) { :awesome_feature }
+    let(:percentage) { 50 }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :enable_percentage_of_time }
+      let(:expected_extra) { { "extra.percentage" => "#{percentage}" } }
+    end
+  end
+
+  describe '.disable_percentage_of_time' do
+    subject { described_class.disable_percentage_of_time(key) }
+
+    let(:key) { :awesome_feature }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :disable_percentage_of_time }
+      let(:expected_extra) { {} }
+    end
+  end
+
+  describe '.enable_percentage_of_actors' do
+    subject { described_class.enable_percentage_of_actors(key, percentage) }
+
+    let(:key) { :awesome_feature }
+    let(:percentage) { 50 }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :enable_percentage_of_actors }
+      let(:expected_extra) { { "extra.percentage" => "#{percentage}" } }
+    end
+  end
+
+  describe '.disable_percentage_of_actors' do
+    subject { described_class.disable_percentage_of_actors(key) }
+
+    let(:key) { :awesome_feature }
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :disable_percentage_of_actors }
+      let(:expected_extra) { {} }
+    end
+  end
+
   describe '.remove' do
+    subject { described_class.remove(key) }
+
+    let(:key) { :awesome_feature }
+
+    before do
+      described_class.enable(key)
+    end
+
+    it_behaves_like 'logging' do
+      let(:expected_action) { :remove }
+      let(:expected_extra) { {} }
+    end
+
     context 'for a non-persisted feature' do
       it 'returns nil' do
         expect(described_class.remove(:non_persisted_feature_flag)).to be_nil

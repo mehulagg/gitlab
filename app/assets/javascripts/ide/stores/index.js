@@ -12,25 +12,33 @@ import fileTemplates from './modules/file_templates';
 import paneModule from './modules/pane';
 import clientsideModule from './modules/clientside';
 import routerModule from './modules/router';
+import editorModule from './modules/editor';
+import { setupFileEditorsSync } from './modules/editor/setup';
 
 Vue.use(Vuex);
 
-export const createStore = () =>
-  new Vuex.Store({
-    state: state(),
-    actions,
-    mutations,
-    getters,
-    modules: {
-      commit: commitModule,
-      pipelines,
-      mergeRequests,
-      branches,
-      fileTemplates: fileTemplates(),
-      rightPane: paneModule(),
-      clientside: clientsideModule(),
-      router: routerModule,
-    },
-  });
+export const createStoreOptions = () => ({
+  state: state(),
+  actions,
+  mutations,
+  getters,
+  modules: {
+    commit: commitModule,
+    pipelines,
+    mergeRequests,
+    branches,
+    fileTemplates: fileTemplates(),
+    rightPane: paneModule(),
+    clientside: clientsideModule(),
+    router: routerModule,
+    editor: editorModule,
+  },
+});
 
-export default createStore();
+export const createStore = () => {
+  const store = new Vuex.Store(createStoreOptions());
+
+  setupFileEditorsSync(store);
+
+  return store;
+};

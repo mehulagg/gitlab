@@ -1,8 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Users API
 
 ## List users
-
-Active users = Total accounts - Blocked users
 
 Get a list of users.
 
@@ -49,9 +53,9 @@ For example:
 GET /users?username=jack_smith
 ```
 
-In addition, you can filter users based on states eg. `blocked`, `active`
-This works only to filter users who are `blocked` or `active`.
-It does not support `active=false` or `blocked=false`.
+In addition, you can filter users based on the states `blocked` and `active`.
+It does not support `active=false` or `blocked=false`. The list of billable users
+is the total number of users minus the blocked users.
 
 ```plaintext
 GET /users?active=true
@@ -61,7 +65,16 @@ GET /users?active=true
 GET /users?blocked=true
 ```
 
-NOTE: **Note:**
+GitLab supports bot users such as the [alert bot](../operations/incident_management/alert_integrations.md)
+or the [support bot](../user/project/service_desk.md#support-bot-user).
+To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
+([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
+
+```plaintext
+GET /users?exclude_internal=true
+```
+
+NOTE:
 Username search is case insensitive.
 
 ### For admins
@@ -76,6 +89,7 @@ GET /users
 | `sort`             | string  | no       | Return users sorted in `asc` or `desc` order. Default is `desc`                                                       |
 | `two_factor`       | string  | no       | Filter users by Two-factor authentication. Filter values are `enabled` or `disabled`. By default it returns all users |
 | `without_projects` | boolean | no       | Filter users without projects. Default is `false`                                                                     |
+| `admins`           | boolean | no       | Return only admin users. Default is `false`                                 |
 
 ```json
 [
@@ -89,7 +103,8 @@ GET /users
     "web_url": "http://localhost:3000/john_smith",
     "created_at": "2012-05-23T08:00:58Z",
     "is_admin": false,
-    "bio": null,
+    "bio": "",
+    "bio_html": "",
     "location": null,
     "skype": "",
     "linkedin": "",
@@ -128,7 +143,8 @@ GET /users
     "web_url": "http://localhost:3000/jack_smith",
     "created_at": "2012-05-23T08:01:01Z",
     "is_admin": false,
-    "bio": null,
+    "bio": "",
+    "bio_html": "",
     "location": null,
     "skype": "",
     "linkedin": "",
@@ -155,7 +171,7 @@ GET /users
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` parameters.
+Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, and `using_license_seat` parameters.
 
 ```json
 [
@@ -164,12 +180,13 @@ Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) 
     ...
     "shared_runners_minutes_limit": 133,
     "extra_shared_runners_minutes_limit": 133,
+    "using_license_seat": true
     ...
   }
 ]
 ```
 
-Users on GitLab [Silver or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Silver or higher](https://about.gitlab.com/pricing/) also see
 the `group_saml` provider option:
 
 ```json
@@ -245,7 +262,8 @@ Parameters:
   "avatar_url": "http://localhost:3000/uploads/user/avatar/1/cd8.jpeg",
   "web_url": "http://localhost:3000/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
-  "bio": null,
+  "bio": "",
+  "bio_html": "",
   "location": null,
   "public_email": "john@example.com",
   "skype": "",
@@ -280,7 +298,8 @@ Example Responses:
   "web_url": "http://localhost:3000/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
   "is_admin": false,
-  "bio": null,
+  "bio": "",
+  "bio_html": "",
   "location": null,
   "public_email": "john@example.com",
   "skype": "",
@@ -310,13 +329,15 @@ Example Responses:
   "current_sign_in_ip": "196.165.1.102",
   "last_sign_in_ip": "172.127.2.22",
   "plan": "gold",
-  "trial": true
+  "trial": true,
+  "sign_in_count": 1337
 }
 ```
 
-NOTE: **Note:** The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
+NOTE:
+The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see
 the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` parameters.
 
 ```json
@@ -329,7 +350,7 @@ the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` par
 }
 ```
 
-Users on GitLab.com [Silver, or higher](https://about.gitlab.com/pricing/) will also
+Users on GitLab.com [Silver, or higher](https://about.gitlab.com/pricing/) also
 see the `group_saml` option:
 
 ```json
@@ -365,8 +386,11 @@ Note that `force_random_password` and `reset_password` take priority
 over `password`. In addition, `reset_password` and
 `force_random_password` can be used together.
 
-NOTE: **Note:**
-From [GitLab 12.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29888/), `private_profile` will default to `false`.
+NOTE:
+From [GitLab 12.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29888/), `private_profile` defaults to `false`.
+
+NOTE:
+From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35604), `bio` defaults to `""` instead of `null`.
 
 ```plaintext
 POST /users
@@ -384,7 +408,7 @@ Parameters:
 | `email`                              | Yes      | Email                                                                                                                                                   |
 | `extern_uid`                         | No       | External UID                                                                                                                                            |
 | `external`                           | No       | Flags the user as external - true or false (default)                                                                                                    |
-| `extra_shared_runners_minutes_limit` | No       | Extra pipeline minutes quota for this user **(STARTER)**                                                                                                |
+| `extra_shared_runners_minutes_limit` | No       | Extra pipeline minutes quota for this user (purchased in addition to the minutes included in the plan) **(STARTER)**                                                                                                |
 | `force_random_password`              | No       | Set user password to a random value - true or false (default)                                                                                           |
 | `group_id_for_saml`                  | No       | ID of group where SAML has been configured                                                                                                              |
 | `linkedin`                           | No       | LinkedIn                                                                                                                                                |
@@ -393,12 +417,12 @@ Parameters:
 | `note`                               | No       | Admin notes for this user                                                                                                                               |
 | `organization`                       | No       | Organization name                                                                                                                                       |
 | `password`                           | No       | Password                                                                                                                                                |
-| `private_profile`                    | No       | User's profile is private - true, false (default), or null (will be converted to false)                                                                 |
+| `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Number of projects user can create                                                                                                                      |
 | `provider`                           | No       | External provider name                                                                                                                                  |
 | `public_email`                       | No       | The public email of the user                                                                                                                            |
 | `reset_password`                     | No       | Send user password reset link - true or false(default)                                                                                                  |
-| `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user **(STARTER)**                                                                                                      |
+| `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` **(STARTER)**                                                                                                      |
 | `skip_confirmation`                  | No       | Skip confirmation - true or false (default)                                                                                                             |
 | `skype`                              | No       | Skype ID                                                                                                                                                |
 | `theme_id`                           | No       | The GitLab theme for the user (see [the user preference docs](../user/profile/preferences.md#navigation-theme) for more information)                    |
@@ -426,7 +450,7 @@ Parameters:
 | `email`                              | No       | Email                                                                                                                                                   |
 | `extern_uid`                         | No       | External UID                                                                                                                                            |
 | `external`                           | No       | Flags the user as external - true or false (default)                                                                                                    |
-| `extra_shared_runners_minutes_limit` | No       | Extra pipeline minutes quota for this user **(STARTER)**                                                                                                |
+| `extra_shared_runners_minutes_limit` | No       | Extra pipeline minutes quota for this user (purchased in addition to the minutes included in the plan) **(STARTER)**                                                                                                |
 | `group_id_for_saml`                  | No       | ID of group where SAML has been configured                                                                                                              |
 | `id`                                 | Yes      | The ID of the user                                                                                                                                      |
 | `linkedin`                           | No       | LinkedIn                                                                                                                                                |
@@ -435,11 +459,11 @@ Parameters:
 | `note`                               | No       | Admin notes for this user                                                                                                                               |
 | `organization`                       | No       | Organization name                                                                                                                                       |
 | `password`                           | No       | Password                                                                                                                                                |
-| `private_profile`                    | No       | User's profile is private - true, false (default), or null (will be converted to false)                                                                 |
+| `private_profile`                    | No       | User's profile is private - true, false (default), or null (is converted to false)                                                                 |
 | `projects_limit`                     | No       | Limit projects each user can create                                                                                                                     |
 | `provider`                           | No       | External provider name                                                                                                                                  |
 | `public_email`                       | No       | The public email of the user                                                                                                                            |
-| `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user **(STARTER)**                                                                                                      |
+| `shared_runners_minutes_limit`       | No       | Pipeline minutes quota for this user (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` **(STARTER)**                                                                                                      |
 | `skip_reconfirmation`                | No       | Skip reconfirmation - true or false (default)                                                                                                           |
 | `skype`                              | No       | Skype ID                                                                                                                                                |
 | `theme_id`                           | No       | The GitLab theme for the user (see [the user preference docs](../user/profile/preferences.md#navigation-theme) for more information)                    |
@@ -447,7 +471,7 @@ Parameters:
 | `username`                           | No       | Username                                                                                                                                                |
 | `website_url`                        | No       | Website URL                                                                                                                                             |
 
-On password update, user will be forced to change it upon next login.
+On password update, the user is forced to change it upon next login.
 Note, at the moment this method does only return a `404` error,
 even in cases where a `409` (Conflict) would be more appropriate.
 For example, when renaming the email address to some existing one.
@@ -479,7 +503,7 @@ Parameters:
 - `id` (required) - The ID of the user
 - `hard_delete` (optional) - If true, contributions that would usually be
   [moved to the ghost user](../user/profile/account/delete_account.md#associated-records)
-  will be deleted instead, as well as groups owned solely by this user.
+  are deleted instead, as well as groups owned solely by this user.
 
 ## List current user (for normal users)
 
@@ -499,7 +523,8 @@ GET /user
   "avatar_url": "http://localhost:3000/uploads/user/avatar/1/index.jpg",
   "web_url": "http://localhost:3000/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
-  "bio": null,
+  "bio": "",
+  "bio_html": "",
   "location": null,
   "public_email": "john@example.com",
   "skype": "",
@@ -548,7 +573,8 @@ GET /user
   "web_url": "http://localhost:3000/john_smith",
   "created_at": "2012-05-23T08:00:58Z",
   "is_admin": false,
-  "bio": null,
+  "bio": "",
+  "bio_html": "",
   "location": null,
   "public_email": "john@example.com",
   "skype": "",
@@ -640,7 +666,7 @@ PUT /user/status
 | `emoji`   | string | no       | The name of the emoji to use as status. If omitted `speech_balloon` is used. Emoji name can be one of the specified names in the [Gemojione index](https://github.com/bonusly/gemojione/blob/master/config/index.json). |
 | `message` | string | no       | The message to set as a status. It can also contain emoji codes.                                                                                                                                                        |
 
-When both parameters `emoji` and `message` are empty, the status will be cleared.
+When both parameters `emoji` and `message` are empty, the status is cleared.
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "emoji=coffee" --data "message=I crave coffee" "https://gitlab.example.com/api/v4/user/status"
@@ -756,7 +782,7 @@ POST /user/keys
 
 Parameters:
 
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
@@ -768,7 +794,7 @@ Parameters:
 }
 ```
 
-Will return created key with status `201 Created` on success. If an
+Returns a created key with status `201 Created` on success. If an
 error occurs a `400 Bad Request` is returned with a message explaining the error:
 
 ```json
@@ -795,9 +821,12 @@ POST /users/:id/keys
 Parameters:
 
 - `id` (required) - ID of specified user
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
+
+NOTE:
+This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events). **(PREMIUM)**
 
 ## Delete SSH key for current user
 
@@ -929,7 +958,7 @@ Returns `204 No Content` on success, or `404 Not found` if the key cannot be fou
 
 ## List all GPG keys for given user
 
-Get a list of a specified user's GPG keys. Available only for admins.
+Get a list of a specified user's GPG keys. This endpoint can be accessed without authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys
@@ -959,7 +988,8 @@ Example response:
 
 ## Get a specific GPG key for a given user
 
-Get a specific GPG key for a given user. Available only for admins.
+Get a specific GPG key for a given user. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43693)
+in GitLab 13.5, this endpoint can be accessed without admin authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys/:key_id
@@ -1040,6 +1070,10 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Get a list of currently authenticated user's emails.
 
+NOTE:
+Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
+does not return the primary email address.
+
 ```plaintext
 GET /user/emails
 ```
@@ -1064,6 +1098,10 @@ Parameters:
 ## List emails for user
 
 Get a list of a specified user's emails. Available only for admin
+
+NOTE:
+Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
+does not return the primary email address.
 
 ```plaintext
 GET /users/:id/emails
@@ -1111,7 +1149,7 @@ Parameters:
 }
 ```
 
-Will return created email with status `201 Created` on success. If an
+Returns a created email with status `201 Created` on success. If an
 error occurs a `400 Bad Request` is returned with a message explaining the error:
 
 ```json
@@ -1180,7 +1218,9 @@ Returns:
 
 - `201 OK` on success.
 - `404 User Not Found` if user cannot be found.
-- `403 Forbidden` when trying to block an already blocked user by LDAP synchronization.
+- `403 Forbidden` when trying to block:
+  - A user that is blocked through LDAP.
+  - An internal user.
 
 ## Unblock user
 
@@ -1194,7 +1234,7 @@ Parameters:
 
 - `id` (required) - ID of specified user
 
-Will return `201 OK` on success, `404 User Not Found` is user cannot be found or
+Returns `201 OK` on success, `404 User Not Found` is user cannot be found or
 `403 Forbidden` when trying to unblock a user blocked by LDAP synchronization.
 
 ## Deactivate user
@@ -1217,7 +1257,8 @@ Returns:
 - `404 User Not Found` if user cannot be found.
 - `403 Forbidden` when trying to deactivate a user:
   - Blocked by admin or by LDAP synchronization.
-  - That has any activity in past 180 days. These users cannot be deactivated.
+  - That has any activity in past 90 days. These users cannot be deactivated.
+  - That is internal.
 
 ## Activate user
 
@@ -1236,8 +1277,8 @@ Parameters:
 Returns:
 
 - `201 OK` on success.
-- `404 User Not Found` if user cannot be found.
-- `403 Forbidden` when trying to activate a user blocked by admin or by LDAP synchronization.
+- `404 User Not Found` if the user cannot be found.
+- `403 Forbidden` if the user cannot be activated because they are blocked by an administrator or by LDAP synchronization.
 
 ### Get user contribution events
 
@@ -1271,6 +1312,7 @@ Example response:
 [
    {
       "active" : true,
+      "user_id" : 2,
       "scopes" : [
          "api"
       ],
@@ -1283,6 +1325,7 @@ Example response:
    },
    {
       "active" : false,
+      "user_id" : 2,
       "scopes" : [
          "read_user"
       ],
@@ -1294,6 +1337,44 @@ Example response:
       "expires_at" : "2017-04-14"
    }
 ]
+```
+
+## Approve user
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263107) in GitLab 13.7.
+
+Approves the specified user. Available only for administrators.
+
+```plaintext
+POST /users/:id/approve
+```
+
+Parameters:
+
+- `id` (required) - ID of specified user
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/42/approve"
+```
+
+Returns:
+
+- `201 OK` on success.
+- `404 User Not Found` if user cannot be found.
+- `403 Forbidden` if the user cannot be approved because they are blocked by an administrator or by LDAP synchronization.
+
+Example Responses:
+
+```json
+{ "message": "Success" }
+```
+
+```json
+{ "message": "404 User Not Found" }
+```
+
+```json
+{ "message": "The user you are trying to approve is not pending an approval" }
 ```
 
 ## Get an impersonation token of a user
@@ -1322,6 +1403,7 @@ Example response:
 ```json
 {
    "active" : true,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],
@@ -1337,11 +1419,11 @@ Example response:
 ## Create an impersonation token
 
 > Requires admin permissions.
-> Token values are returned once. Make sure you save it - you won't be able to access it again.
+> Token values are returned once. Make sure you save it - you can't access it again.
 
 It creates a new impersonation token. Note that only administrators can do this.
 You are only able to create impersonation tokens to impersonate the user and perform
-both API calls and Git reads and writes. The user will not see these tokens in their profile
+both API calls and Git reads and writes. The user can't see these tokens in their profile
 settings page.
 
 ```plaintext
@@ -1365,6 +1447,7 @@ Example response:
 {
    "id" : 2,
    "revoked" : false,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],
@@ -1398,9 +1481,52 @@ Parameters:
 | `user_id`                | integer | yes      | The ID of the user                |
 | `impersonation_token_id` | integer | yes      | The ID of the impersonation token |
 
-### Get user activities (admin only)
+## Create a personal access token **(CORE ONLY)**
 
-NOTE: **Note:** This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267553) in GitLab 13.8.
+
+Use this API to create a new personal access token. Token values are returned once so,
+make sure you save it as you can't access it again. This API can only be used by
+GitLab administrators.
+
+```plaintext
+POST /users/:user_id/personal_access_tokens
+```
+
+| Attribute    | Type    | Required | Description                                                                                                              |
+| ------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `user_id`    | integer | yes      | The ID of the user                                                                                                       |
+| `name`       | string  | yes      | The name of the personal access token                                                                                    |
+| `expires_at` | date    | no       | The expiration date of the personal access token in ISO format (`YYYY-MM-DD`)                                            |
+| `scopes`     | array   | yes      | The array of scopes of the personal access token (`api`, `read_user`, `read_api`, `read_repository`, `write_repository`) |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=mytoken" --data "expires_at=2017-04-04" --data "scopes[]=api" "https://gitlab.example.com/api/v4/users/42/personal_access_tokens"
+```
+
+Example response:
+
+```json
+{
+    "id": 3,
+    "name": "mytoken",
+    "revoked": false,
+    "created_at": "2020-10-14T11:58:53.526Z",
+    "scopes": [
+        "api"
+    ],
+    "user_id": 42,
+    "active": true,
+    "expires_at": "2020-12-31",
+    "token": "ggbfKkC4n-Lujy8jwCR2"
+}
+```
+
+## Get user activities (admin only)
+
+NOTE:
+This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
 
 Get the last activity date for all users, sorted from oldest to newest.
 

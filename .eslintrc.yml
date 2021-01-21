@@ -3,6 +3,7 @@ extends:
   - plugin:@gitlab/i18n
   - plugin:no-jquery/slim
   - plugin:no-jquery/deprecated-3.4
+  - ./tooling/eslint-config/conditionally_ignore_ee.js
 globals:
   __webpack_public_path__: true
   gl: false
@@ -17,6 +18,7 @@ settings:
       config: './config/webpack.config.js'
 rules:
   import/no-commonjs: error
+  import/no-default-export: off
   no-underscore-dangle:
     - error
     - allow:
@@ -24,10 +26,6 @@ rules:
         - _links
   import/no-unresolved:
     - error
-    - ignore:
-        # https://gitlab.com/gitlab-org/gitlab/issues/38226
-        - '^ee_component/'
-  import/order: off
   # Disabled for now, to make the airbnb-base 12.1.0 -> 13.1.0 update smoother
   no-else-return:
     - error
@@ -36,7 +34,7 @@ rules:
   # Disabled for now, to make the plugin-vue 4.5 -> 5.0 update smoother
   vue/no-confusing-v-for-v-if: error
   vue/no-use-v-if-with-v-for: off
-  vue/no-v-html: off
+  vue/no-v-html: error
   vue/use-v-on-exact: off
   # all offenses of no-jquery/no-animate-toggle are false positives ( $toast.show() )
   no-jquery/no-animate-toggle: off
@@ -44,6 +42,17 @@ rules:
   no-jquery/no-serialize: error
   promise/always-return: off
   promise/no-callback-in-promise: off
+  "@gitlab/no-global-event-off": error
+
+  # BEGIN eslint-plugin-vue@7 overrides
+  # TODO: Remove these rules as part of
+  # https://gitlab.com/groups/gitlab-org/-/epics/5142. These are setting
+  # various vue lint rules as they were in eslint-plugin-vue@6, or disabling
+  # new ones, to ease migration to v7, so violations of each can be fixed
+  # separately.
+  vue/no-mutating-props: off
+  vue/no-lone-template: off
+  # END eslint-plugin-vue@7 overrides
 overrides:
   - files:
       - '**/spec/**/*'

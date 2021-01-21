@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::FileImporter do
+RSpec.describe Gitlab::ImportExport::FileImporter do
   include ExportFileHelper
 
   let(:shared) { Gitlab::ImportExport::Shared.new(nil) }
@@ -95,6 +95,45 @@ describe Gitlab::ImportExport::FileImporter do
 
     it 'does not remove a valid file' do
       expect(File.exist?(valid_file)).to be true
+    end
+  end
+
+  context 'when file exceeds acceptable decompressed size' do
+    let(:project) { create(:project) }
+    let(:shared) { Gitlab::ImportExport::Shared.new(project) }
+    let(:filepath) { File.join(Dir.tmpdir, 'file_importer_spec.gz') }
+
+    subject { described_class.new(importable: project, archive_file: filepath, shared: shared) }
+
+    before do
+      Zlib::GzipWriter.open(filepath) do |gz|
+        gz.write('Hello World!')
+      end
+    end
+
+    context 'when validate_import_decompressed_archive_size feature flag is enabled' do
+      before do
+        stub_feature_flags(validate_import_decompressed_archive_size: true)
+
+        allow(Gitlab::ImportExport::DecompressedArchiveSizeValidator).to receive(:max_bytes).and_return(1)
+      end
+
+      it 'returns false' do
+        expect(subject.import).to eq(false)
+        expect(shared.errors.join).to eq('Decompressed archive size validation failed.')
+      end
+    end
+
+    context 'when validate_import_decompressed_archive_size feature flag is disabled' do
+      before do
+        stub_feature_flags(validate_import_decompressed_archive_size: false)
+      end
+
+      it 'skips validation' do
+        expect(subject).to receive(:validate_decompressed_archive_size).never
+
+        subject.import
+      end
     end
   end
 

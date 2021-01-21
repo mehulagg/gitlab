@@ -5,6 +5,12 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
+    prepended do
+      scope :with_csv_entity_associations, -> do
+        includes(:user, source: [:route, :parent])
+      end
+    end
+
     class_methods do
       extend ::Gitlab::Utils::Override
 
@@ -44,5 +50,9 @@ module EE
       user.using_license_seat?
     end
     # rubocop: enable Naming/PredicateName
+
+    def source_kind
+      source.is_a?(Group) && source.parent.present? ? 'Sub group' : source.class.to_s
+    end
   end
 end

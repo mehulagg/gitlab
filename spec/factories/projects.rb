@@ -3,8 +3,6 @@
 require_relative '../support/helpers/test_env'
 
 FactoryBot.define do
-  PAGES_ACCESS_LEVEL_SCHEMA_VERSION ||= 20180423204600
-
   # Project without repository
   #
   # Project does not have bare repository.
@@ -12,12 +10,14 @@ FactoryBot.define do
   factory :project, class: 'Project' do
     sequence(:name) { |n| "project#{n}" }
     path { name.downcase.gsub(/\s/, '_') }
-    # Behaves differently to nil due to cache_has_external_issue_tracker
+
+    # Behaves differently to nil due to cache_has_external_* methods.
     has_external_issue_tracker { false }
+    has_external_wiki { false }
 
     # Associations
     namespace
-    creator { group ? create(:user) : namespace&.owner }
+    creator { group ? association(:user) : namespace&.owner }
 
     transient do
       # Nest Project Feature attributes
@@ -31,18 +31,24 @@ FactoryBot.define do
       pages_access_level do
         visibility_level == Gitlab::VisibilityLevel::PUBLIC ? ProjectFeature::ENABLED : ProjectFeature::PRIVATE
       end
+      metrics_dashboard_access_level { ProjectFeature::PRIVATE }
+      operations_access_level { ProjectFeature::ENABLED }
 
       # we can't assign the delegated `#ci_cd_settings` attributes directly, as the
       # `#ci_cd_settings` relation needs to be created first
       group_runners_enabled { nil }
+      merge_pipelines_enabled { nil }
+      merge_trains_enabled { nil }
+      ci_keep_latest_artifact { nil }
       import_status { nil }
       import_jid { nil }
       import_correlation_id { nil }
       import_last_error { nil }
       forward_deployment_enabled { nil }
+      restrict_user_defined_variables { nil }
     end
 
-    after(:create) do |project, evaluator|
+    before(:create) do |project, evaluator|
       # Builds and MRs can't have higher visibility level than repository access level.
       builds_access_level = [evaluator.builds_access_level, evaluator.repository_access_level].min
       merge_requests_access_level = [evaluator.merge_requests_access_level, evaluator.repository_access_level].min
@@ -54,15 +60,16 @@ FactoryBot.define do
         issues_access_level: evaluator.issues_access_level,
         forking_access_level: evaluator.forking_access_level,
         merge_requests_access_level: merge_requests_access_level,
-        repository_access_level: evaluator.repository_access_level
+        repository_access_level: evaluator.repository_access_level,
+        pages_access_level: evaluator.pages_access_level,
+        metrics_dashboard_access_level: evaluator.metrics_dashboard_access_level,
+        operations_access_level: evaluator.operations_access_level
       }
 
-      if ActiveRecord::Migrator.current_version >= PAGES_ACCESS_LEVEL_SCHEMA_VERSION
-        hash.store("pages_access_level", evaluator.pages_access_level)
-      end
+      project.build_project_feature(hash)
+    end
 
-      project.project_feature.update(hash)
-
+    after(:create) do |project, evaluator|
       # Normally the class Projects::CreateService is used for creating
       # projects, and this class takes care of making sure the owner and current
       # user have access to the project. Our specs don't use said service class,
@@ -74,7 +81,11 @@ FactoryBot.define do
       project.group&.refresh_members_authorized_projects
 
       # assign the delegated `#ci_cd_settings` attributes after create
-      project.reload.group_runners_enabled = evaluator.group_runners_enabled unless evaluator.group_runners_enabled.nil?
+      project.group_runners_enabled = evaluator.group_runners_enabled unless evaluator.group_runners_enabled.nil?
+      project.merge_pipelines_enabled = evaluator.merge_pipelines_enabled unless evaluator.merge_pipelines_enabled.nil?
+      project.merge_trains_enabled = evaluator.merge_trains_enabled unless evaluator.merge_trains_enabled.nil?
+      project.ci_keep_latest_artifact = evaluator.ci_keep_latest_artifact unless evaluator.ci_keep_latest_artifact.nil?
+      project.restrict_user_defined_variables = evaluator.restrict_user_defined_variables unless evaluator.restrict_user_defined_variables.nil?
 
       if evaluator.import_status
         import_state = project.import_state || project.build_import_state
@@ -82,7 +93,7 @@ FactoryBot.define do
         import_state.jid = evaluator.import_jid
         import_state.correlation_id_value = evaluator.import_correlation_id
         import_state.last_error = evaluator.import_last_error
-        import_state.save
+        import_state.save!
       end
     end
 
@@ -112,6 +123,18 @@ FactoryBot.define do
 
     trait :import_failed do
       import_status { :failed }
+    end
+
+    trait :jira_dvcs_cloud do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_cloud, project: project)
+      end
+    end
+
+    trait :jira_dvcs_server do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_server, project: project)
+      end
     end
 
     trait :archived do
@@ -181,6 +204,7 @@ FactoryBot.define do
 
       transient do
         create_templates { nil }
+        create_branch { nil }
       end
 
       after :create do |project, evaluator|
@@ -205,6 +229,16 @@ FactoryBot.define do
             'feature_proposal',
             message: 'test 2',
             branch_name: 'master')
+        end
+
+        if evaluator.create_branch
+          project.repository.create_file(
+            project.creator,
+            'README.md',
+            "README on branch #{evaluator.create_branch}",
+            message: 'Add README.md',
+            branch_name: evaluator.create_branch)
+
         end
       end
     end
@@ -263,6 +297,12 @@ FactoryBot.define do
       end
     end
 
+    trait :with_import_url do
+      import_finished
+
+      import_url { generate(:url) }
+    end
+
     trait(:wiki_enabled)            { wiki_access_level { ProjectFeature::ENABLED } }
     trait(:wiki_disabled)           { wiki_access_level { ProjectFeature::DISABLED } }
     trait(:wiki_private)            { wiki_access_level { ProjectFeature::PRIVATE } }
@@ -289,6 +329,12 @@ FactoryBot.define do
     trait(:pages_enabled)           { pages_access_level { ProjectFeature::ENABLED } }
     trait(:pages_disabled)          { pages_access_level { ProjectFeature::DISABLED } }
     trait(:pages_private)           { pages_access_level { ProjectFeature::PRIVATE } }
+    trait(:metrics_dashboard_enabled) { metrics_dashboard_access_level { ProjectFeature::ENABLED } }
+    trait(:metrics_dashboard_disabled) { metrics_dashboard_access_level { ProjectFeature::DISABLED } }
+    trait(:metrics_dashboard_private) { metrics_dashboard_access_level { ProjectFeature::PRIVATE } }
+    trait(:operations_enabled)           { operations_access_level { ProjectFeature::ENABLED } }
+    trait(:operations_disabled)          { operations_access_level { ProjectFeature::DISABLED } }
+    trait(:operations_private)           { operations_access_level { ProjectFeature::PRIVATE } }
 
     trait :auto_devops do
       association :auto_devops, factory: :project_auto_devops
@@ -303,6 +349,14 @@ FactoryBot.define do
         project.container_expiration_policy.destroy!
       end
     end
+  end
+
+  trait :service_desk_disabled do
+    service_desk_enabled { nil }
+  end
+
+  trait(:service_desk_enabled) do
+    service_desk_enabled { true }
   end
 
   # Project with empty repository
@@ -348,10 +402,6 @@ FactoryBot.define do
     jira_service
   end
 
-  factory :mock_deployment_project, parent: :project do
-    mock_deployment_service
-  end
-
   factory :prometheus_project, parent: :project do
     after :create do |project|
       project.create_prometheus_service(
@@ -362,5 +412,22 @@ FactoryBot.define do
         }
       )
     end
+  end
+
+  factory :ewm_project, parent: :project do
+    has_external_issue_tracker { true }
+
+    ewm_service
+  end
+
+  factory :project_with_design, parent: :project do
+    after(:create) do |project|
+      issue = create(:issue, project: project)
+      create(:design, project: project, issue: issue)
+    end
+  end
+
+  trait :in_subgroup do
+    namespace factory: [:group, :nested]
   end
 end

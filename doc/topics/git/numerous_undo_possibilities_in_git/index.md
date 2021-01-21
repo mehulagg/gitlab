@@ -1,17 +1,14 @@
 ---
-author: Crt Mori
-author_gitlab: Letme
-level: intermediary
-article_type: tutorial
-date: 2017-05-15
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
-last_updated: 2019-05-31
 ---
 
 # Numerous undo possibilities in Git
 
 In this tutorial, we will show you different ways of undoing your work in Git, for which
-we will assume you have a basic working knowledge of. Check GitLab's
+we will assume you have a basic working knowledge of. Check the GitLab
 [Git documentation](../index.md) for reference.
 
 Also, we will only provide some general information of the commands, which is enough
@@ -240,7 +237,7 @@ git bisect A..E
 
 Bisect will provide us with commit ID of the middle commit to test, and then guide us
 through simple bisection process. You can read more about it [in official Git Tools](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git)
-In our example we will end up with commit `B`, that introduced bug/error. We have
+In our example we will end up with commit `B`, that introduced the bug/error. We have
 4 options on how to remove it (or part of it) from our repository.
 
 - Undo (swap additions and deletions) changes introduced by commit `B`:
@@ -406,7 +403,7 @@ the cleanup of detached commits (happens automatically).
 ### Where modifying history is generally acceptable
 
 Modified history breaks the development chain of other developers, as changed
-history does not have matching commits'ids. For that reason it should not be
+history does not have matching commit IDs. For that reason it should not be
 used on any public branch or on branch that *might* be used by other developers.
 When contributing to big open source repositories (for example, [GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/CONTRIBUTING.md#contribution-acceptance-criteria)
 itself), it is acceptable to *squash* commits into a single one, to present a
@@ -424,7 +421,7 @@ GitLab). There is a `git merge --squash` command which does exactly that
 (squashes commits on feature-branch to a single commit on target branch
 at merge).
 
-NOTE: **Note:**
+NOTE:
 Never modify the commit history of `master` or shared branch.
 
 ### How modifying history is done
@@ -460,7 +457,7 @@ pick <commit3-id> <commit3-commit-message>
 # Note that empty commits are commented out
 ```
 
-NOTE: **Note:**
+NOTE:
 It is important to notice that comment from the output clearly states that, if
 you decide to abort, then do not just close your editor (as that will in-fact
 modify history), but remove all uncommented lines and save.
@@ -495,6 +492,8 @@ tasks (which is exactly what removing sensitive information file is about).
 An alternative is the open source community-maintained tool [BFG](https://rtyley.github.io/bfg-repo-cleaner/).
 Keep in mind that these tools are faster because they do not provide the same
 feature set as `git filter-branch` does, but focus on specific use cases.
+
+Refer [Reduce repository size](../../../user/project/repository/reducing_the_repo_size_using_git.md) page to know more about purging files from repository history & GitLab storage.
 
 ## Conclusion
 

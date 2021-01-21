@@ -3,7 +3,7 @@
 require 'fast_spec_helper'
 require_dependency 're2'
 
-describe Gitlab::Ci::Pipeline::Expression::Lexeme::NotMatches do
+RSpec.describe Gitlab::Ci::Pipeline::Expression::Lexeme::NotMatches do
   let(:left) { double('left') }
   let(:right) { double('right') }
 
@@ -28,7 +28,7 @@ describe Gitlab::Ci::Pipeline::Expression::Lexeme::NotMatches do
 
   describe '.type' do
     it 'is an operator' do
-      expect(described_class.type).to eq :operator
+      expect(described_class.type).to eq :logical_operator
     end
   end
 

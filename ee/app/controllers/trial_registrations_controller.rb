@@ -7,7 +7,7 @@ class TrialRegistrationsController < RegistrationsController
 
   skip_before_action :require_no_authentication
 
-  before_action :check_if_gl_com
+  before_action :check_if_gl_com_or_dev
   before_action :set_redirect_url, only: [:new]
 
   def new

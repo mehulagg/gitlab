@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MembersHelper do
+RSpec.describe MembersHelper do
   describe '#remove_member_message' do
     let(:requester) { create(:user) }
     let(:project) { create(:project, :public) }
@@ -25,12 +25,22 @@ describe MembersHelper do
 
     context 'an accepted user invitation with no user associated' do
       before do
-        group_member_invite.update(invite_email: "#{SecureRandom.hex}@example.com", invite_token: nil, user_id: nil)
+        group_member_invite.update_columns(invite_email: "#{SecureRandom.hex}@example.com", invite_token: nil, user_id: nil)
       end
 
       it 'logs an exception and shows orphaned status' do
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(anything, hash_including(:member_id, :invite_email, :invite_accepted_at))
         expect(remove_member_message(group_member_invite)).to eq "Are you sure you want to remove this orphaned member from the #{group.name} group and any subresources?"
+      end
+    end
+
+    context 'a pending member invitation with no user associated' do
+      before do
+        project_member_invite.update_columns(invite_email: "#{SecureRandom.hex}@example.com", invite_token: 'some-token', user_id: nil)
+      end
+
+      it 'does not error when there is an invitation for the requestor' do
+        expect(remove_member_message(project_member_invite)).to eq "Are you sure you want to revoke the invitation for #{project_member_invite.invite_email} to join the #{project.full_name} project?"
       end
     end
   end

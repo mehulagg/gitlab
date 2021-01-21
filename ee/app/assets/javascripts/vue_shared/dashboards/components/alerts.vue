@@ -1,11 +1,11 @@
 <script>
 import { escape } from 'lodash';
+import { GlIcon } from '@gitlab/ui';
 import { __, n__, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     count: {
@@ -54,7 +54,7 @@ export default {
 <template>
   <div class="dashboard-card-alert row">
     <div class="col-12">
-      <icon
+      <gl-icon
         :class="alertClasses"
         class="align-text-bottom js-dashboard-alerts-icon"
         name="warning"

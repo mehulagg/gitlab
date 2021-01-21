@@ -10,8 +10,7 @@ module Banzai
       # the cost of doing a full regex match.
       def xpath_search
         "descendant-or-self::a[contains(@href,'metrics') and \
-          contains(@href,'environments') and \
-          starts-with(@href, '#{Gitlab.config.gitlab.url}')]"
+          starts-with(@href, '#{gitlab_domain}')]"
       end
 
       # Regular expression matching metrics urls
@@ -29,7 +28,7 @@ module Banzai
           params['project'],
           params['environment'],
           embedded: true,
-          **query_params(params['url'])
+          **query_params(params['url']).except(:environment)
         )
       end
     end

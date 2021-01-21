@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import InputValidator from '~/validators/input_validator';
 
 import fetchGroupPathAvailability from './fetch_group_path_availability';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
 const debounceTimeoutDuration = 1000;
@@ -12,6 +12,7 @@ const successMessageSelector = '.validation-success';
 const pendingMessageSelector = '.validation-pending';
 const unavailableMessageSelector = '.validation-error';
 const suggestionsMessageSelector = '.gl-path-suggestions';
+const inputGroupSelector = '.input-group';
 
 export default class GroupPathValidator extends InputValidator {
   constructor(opts = {}) {
@@ -20,11 +21,11 @@ export default class GroupPathValidator extends InputValidator {
     const container = opts.container || '';
     const validateElements = document.querySelectorAll(`${container} .js-validate-group-path`);
 
-    this.debounceValidateInput = debounce(inputDomElement => {
+    this.debounceValidateInput = debounce((inputDomElement) => {
       GroupPathValidator.validateGroupPathInput(inputDomElement);
     }, debounceTimeoutDuration);
 
-    validateElements.forEach(element =>
+    validateElements.forEach((element) =>
       element.addEventListener('input', this.eventHandler.bind(this)),
     );
   }
@@ -39,12 +40,12 @@ export default class GroupPathValidator extends InputValidator {
   static validateGroupPathInput(inputDomElement) {
     const groupPath = inputDomElement.value;
 
-    if (inputDomElement.checkValidity() && groupPath.length > 0) {
+    if (inputDomElement.checkValidity() && groupPath.length > 1) {
       GroupPathValidator.setMessageVisibility(inputDomElement, pendingMessageSelector);
 
       fetchGroupPathAvailability(groupPath)
         .then(({ data }) => data)
-        .then(data => {
+        .then((data) => {
           GroupPathValidator.setInputState(inputDomElement, !data.exists);
           GroupPathValidator.setMessageVisibility(inputDomElement, pendingMessageSelector, false);
           GroupPathValidator.setMessageVisibility(
@@ -69,9 +70,10 @@ export default class GroupPathValidator extends InputValidator {
   }
 
   static setMessageVisibility(inputDomElement, messageSelector, isVisible = true) {
-    const messageElement = inputDomElement.parentElement.parentElement.querySelector(
-      messageSelector,
-    );
+    const messageElement = inputDomElement
+      .closest(inputGroupSelector)
+      .parentElement.querySelector(messageSelector);
+
     messageElement.classList.toggle('hide', !isVisible);
   }
 

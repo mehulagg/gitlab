@@ -6,8 +6,8 @@ module Banzai
     #
     # Extends Banzai::Filter::BaseSanitizationFilter with specific rules.
     class AsciiDocSanitizationFilter < Banzai::Filter::BaseSanitizationFilter
-      # Section anchor link pattern
-      SECTION_LINK_REF_PATTERN = /\A#{Gitlab::Asciidoc::DEFAULT_ADOC_ATTRS['idprefix']}(:?[[:alnum:]]|-|_)+\z/.freeze
+      # Anchor link prefixed by "user-content-" pattern
+      PREFIXED_ID_PATTERN = /\A#{Gitlab::Asciidoc::DEFAULT_ADOC_ATTRS['idprefix']}(:?[[:alnum:]]|-|_)+\z/.freeze
       SECTION_HEADINGS = %w(h2 h3 h4 h5 h6).freeze
 
       # Footnote link patterns
@@ -27,7 +27,7 @@ module Banzai
       TABLE_GRID_CLASSES = %w(grid-all grid-rows grid-cols grid-none).freeze
       TABLE_STRIPES_CLASSES = %w(stripes-all stripes-odd stripes-even stripes-hover stripes-none).freeze
 
-      ELEMENT_CLASSES_WHITELIST = {
+      ELEMENT_CLASSES_ALLOWLIST = {
         span: %w(big small underline overline line-through).freeze,
         div: ALIGNMENT_BUILTINS_CLASSES + ['admonitionblock'].freeze,
         td: ['icon'].freeze,
@@ -38,59 +38,50 @@ module Banzai
         table: TABLE_FRAME_CLASSES + TABLE_GRID_CLASSES + TABLE_STRIPES_CLASSES
       }.freeze
 
-      def customize_whitelist(whitelist)
+      def customize_allowlist(allowlist)
         # Allow marks
-        whitelist[:elements].push('mark')
+        allowlist[:elements].push('mark')
 
         # Allow any classes in `span`, `i`, `div`, `td`, `ul`, `ol` and `a` elements
         # but then remove any unknown classes
-        whitelist[:attributes]['span'] = %w(class)
-        whitelist[:attributes]['div'].push('class')
-        whitelist[:attributes]['td'] = %w(class)
-        whitelist[:attributes]['i'] = %w(class)
-        whitelist[:attributes]['ul'] = %w(class)
-        whitelist[:attributes]['ol'] = %w(class)
-        whitelist[:attributes]['a'].push('class')
-        whitelist[:attributes]['table'] = %w(class)
-        whitelist[:transformers].push(self.class.remove_element_classes)
+        allowlist[:attributes]['span'] = %w(class)
+        allowlist[:attributes]['div'].push('class')
+        allowlist[:attributes]['td'] = %w(class)
+        allowlist[:attributes]['i'] = %w(class)
+        allowlist[:attributes]['ul'] = %w(class)
+        allowlist[:attributes]['ol'] = %w(class)
+        allowlist[:attributes]['a'].push('class')
+        allowlist[:attributes]['table'] = %w(class)
+        allowlist[:transformers].push(self.class.remove_element_classes)
+
+        # Allow `id` in anchor and footnote elements
+        allowlist[:attributes]['a'].push('id')
+        allowlist[:attributes]['div'].push('id')
 
         # Allow `id` in heading elements for section anchors
         SECTION_HEADINGS.each do |header|
-          whitelist[:attributes][header] = %w(id)
+          allowlist[:attributes][header] = %w(id)
         end
-        whitelist[:transformers].push(self.class.remove_non_heading_ids)
 
-        # Allow `id` in footnote elements
-        FOOTNOTE_LINK_ID_PATTERNS.keys.each do |element|
-          whitelist[:attributes][element.to_s].push('id')
-        end
-        whitelist[:transformers].push(self.class.remove_non_footnote_ids)
+        # Remove ids that are not explicitly allowed
+        allowlist[:transformers].push(self.class.remove_disallowed_ids)
 
-        whitelist
+        allowlist
       end
 
       class << self
-        def remove_non_footnote_ids
+        def remove_disallowed_ids
           lambda do |env|
             node = env[:node]
 
-            return unless (pattern = FOOTNOTE_LINK_ID_PATTERNS[node.name.to_sym])
+            return unless node.name == 'a' || node.name == 'div' || SECTION_HEADINGS.any?(node.name)
             return unless node.has_attribute?('id')
 
-            return if node['id'] =~ pattern
+            return if node['id'] =~ PREFIXED_ID_PATTERN
 
-            node.remove_attribute('id')
-          end
-        end
-
-        def remove_non_heading_ids
-          lambda do |env|
-            node = env[:node]
-
-            return unless SECTION_HEADINGS.any?(node.name)
-            return unless node.has_attribute?('id')
-
-            return if node['id'] =~ SECTION_LINK_REF_PATTERN
+            if (pattern = FOOTNOTE_LINK_ID_PATTERNS[node.name.to_sym])
+              return if node['id'] =~ pattern
+            end
 
             node.remove_attribute('id')
           end
@@ -100,11 +91,11 @@ module Banzai
           lambda do |env|
             node = env[:node]
 
-            return unless (classes_whitelist = ELEMENT_CLASSES_WHITELIST[node.name.to_sym])
+            return unless (classes_allowlist = ELEMENT_CLASSES_ALLOWLIST[node.name.to_sym])
             return unless node.has_attribute?('class')
 
             classes = node['class'].strip.split(' ')
-            allowed_classes = (classes & classes_whitelist)
+            allowed_classes = (classes & classes_allowlist)
             if allowed_classes.empty?
               node.remove_attribute('class')
             else

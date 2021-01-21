@@ -22,7 +22,7 @@ resource :profile, only: [:show, :update] do
     end
 
     resource :notifications, only: [:show, :update] do
-      resources :groups, only: :update
+      resources :groups, only: :update, constraints: { id: Gitlab::PathRegex.full_namespace_route_regex }
     end
 
     resource :password, only: [:new, :create, :edit, :update] do
@@ -63,9 +63,11 @@ resource :profile, only: [:show, :update] do
         post :create_u2f
         post :codes
         patch :skip
+        post :create_webauthn
       end
     end
 
     resources :u2f_registrations, only: [:destroy]
+    resources :webauthn_registrations, only: [:destroy]
   end
 end

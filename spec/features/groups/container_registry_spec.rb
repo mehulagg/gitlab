@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Container Registry', :js do
+RSpec.describe 'Container Registry', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, namespace: group) }
@@ -24,6 +24,13 @@ describe 'Container Registry', :js do
     expect(page).to have_title _('Container Registry')
   end
 
+  it 'sidebar menu is open' do
+    visit_container_registry
+
+    sidebar = find('.nav-sidebar')
+    expect(sidebar).to have_link _('Container Registry')
+  end
+
   context 'when there are no image repositories' do
     it 'list page has no container title' do
       visit_container_registry
@@ -42,13 +49,6 @@ describe 'Container Registry', :js do
       visit_container_registry
 
       expect(page).to have_content 'my/image'
-    end
-
-    it 'image repository delete is disabled' do
-      visit_container_registry
-
-      delete_btn = find('[title="Remove repository"]')
-      expect(delete_btn).to be_disabled
     end
 
     it 'navigates to repo details' do
@@ -75,10 +75,24 @@ describe 'Container Registry', :js do
         expect(service).to receive(:execute).with(container_repository) { { status: :success } }
         expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(container_repository.project, user, tags: ['latest']) { service }
 
-        click_on(class: 'js-delete-registry')
+        first('[data-testid="single-delete-button"]').click
         expect(find('.modal .modal-title')).to have_content _('Remove tag')
         find('.modal .modal-footer .btn-danger').click
       end
+    end
+  end
+
+  context 'when an image has the same name as the subgroup' do
+    before do
+      stub_container_registry_tags(tags: %w[latest], with_manifest: true)
+      project.container_repositories <<  create(:container_repository, name: group.name)
+      visit_container_registry
+    end
+
+    it 'details page loads properly' do
+      find('a[data-testid="details-link"]').click
+
+      expect(page).to have_content 'latest'
     end
   end
 

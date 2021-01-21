@@ -5,7 +5,7 @@ FactoryBot.define do
     cluster factory: %i(cluster provided_by_gcp)
 
     before(:create) do
-      allow(Gitlab::Kubernetes::Helm::Certificate).to receive(:generate_root)
+      allow(Gitlab::Kubernetes::Helm::V2::Certificate).to receive(:generate_root)
         .and_return(
           double(
             key_string: File.read(Rails.root.join('spec/fixtures/clusters/sample_key.key')),
@@ -15,7 +15,7 @@ FactoryBot.define do
     end
 
     after(:create) do
-      allow(Gitlab::Kubernetes::Helm::Certificate).to receive(:generate_root).and_call_original
+      allow(Gitlab::Kubernetes::Helm::V2::Certificate).to receive(:generate_root).and_call_original
     end
 
     trait :not_installable do
@@ -166,6 +166,14 @@ FactoryBot.define do
       host { 'example.com' }
       waf_log_enabled { true }
       cilium_log_enabled { true }
+      cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+    end
+
+    factory :clusters_applications_cilium, class: 'Clusters::Applications::Cilium' do
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
 
       trait :no_helm_installed do

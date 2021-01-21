@@ -12,9 +12,12 @@ module Gitlab
 
       sidekiq_options dead: false
       feature_category :importers
+      loggable_arguments 1, 2
 
       # The known importer stages and their corresponding Sidekiq workers.
       STAGES = {
+        pull_requests_merged_by: Stage::ImportPullRequestsMergedByWorker,
+        pull_request_reviews: Stage::ImportPullRequestsReviewsWorker,
         issues_and_diff_notes: Stage::ImportIssuesAndDiffNotesWorker,
         notes: Stage::ImportNotesWorker,
         lfs_objects: Stage::ImportLfsObjectsWorker,

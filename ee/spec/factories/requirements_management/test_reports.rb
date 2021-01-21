@@ -5,9 +5,6 @@ FactoryBot.define do
     author
     requirement
     build factory: :ci_build
-    after(:build) do |report|
-      report.pipeline = report.build&.pipeline
-    end
     state { :passed }
   end
 end

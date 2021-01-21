@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Style guide for writing end-to-end tests
 
 This document describes the conventions used at GitLab for writing End-to-end (E2E) tests using the GitLab QA project.
@@ -49,7 +55,7 @@ Notice that in the above example, before clicking the `:operations_environments_
 
 When adding new elements to a page, it's important that we have a uniform element naming convention.
 
-We follow a simple formula roughly based on hungarian notation.
+We follow a simple formula roughly based on Hungarian notation.
 
 *Formula*: `element :<descriptor>_<type>`
 
@@ -68,7 +74,8 @@ We follow a simple formula roughly based on hungarian notation.
   - `_tab`
   - `_menu_item`
 
-*Note: If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.*
+NOTE:
+If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.
 
 ### Examples
 
@@ -109,7 +116,7 @@ we use the name of the page object in [snake_case](https://en.wikipedia.org/wiki
 (all lowercase, with words separated by an underscore). See good and bad examples below.
 
 While we prefer to follow the standard in most cases, it is also acceptable to
-use common abbreviations (e.g., mr) or other alternatives, as long as
+use common abbreviations (e.g., `mr`) or other alternatives, as long as
 the name is not ambiguous. This can include appending `_page` if it helps to
 avoid confusion or make the code more readable. For example, if a page object is
 named `New`, it could be confusing to name the block argument `new` because that
@@ -141,7 +148,7 @@ end
 ```
 
 ```ruby
-Page::Project::New.peform do |new_page|
+Page::Project::New.perform do |new_page|
   new_page.do_something
 end
 ```
@@ -155,7 +162,7 @@ end
 ```
 
 ```ruby
-Page::Project::New.peform do |page|
+Page::Project::New.perform do |page|
   page.do_something
 end
 ```

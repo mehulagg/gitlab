@@ -4,12 +4,11 @@
 
 import { GlBreakpointInstance as breakpointInstance } from '@gitlab/ui/dist/utils';
 import $ from 'jquery';
-import axios from './axios_utils';
+import { isFunction, defer } from 'lodash';
+import Cookies from 'js-cookie';
 import { getLocationHash } from './url_utility';
 import { convertToCamelCase, convertToSnakeCase } from './text_utility';
 import { isObject } from './type_utility';
-import { isFunction } from 'lodash';
-import Cookies from 'js-cookie';
 
 export const getPagePath = (index = 0) => {
   const page = $('body').attr('data-page') || '';
@@ -44,6 +43,7 @@ export const checkPageAndAction = (page, action) => {
   return pagePath === page && actionPath === action;
 };
 
+export const isInIncidentPage = () => checkPageAndAction('incidents', 'show');
 export const isInIssuePage = () => checkPageAndAction('issues', 'show');
 export const isInMRPage = () => checkPageAndAction('merge_requests', 'show');
 export const isInEpicPage = () => checkPageAndAction('epics', 'show');
@@ -53,25 +53,12 @@ export const getCspNonceValue = () => {
   return metaTag && metaTag.content;
 };
 
-export const ajaxGet = url =>
-  axios
-    .get(url, {
-      params: { format: 'js' },
-      responseType: 'text',
-    })
-    .then(({ data }) => {
-      $.globalEval(data, { nonce: getCspNonceValue() });
-    });
-
-export const rstrip = val => {
+export const rstrip = (val) => {
   if (val) {
     return val.replace(/\s+$/, '');
   }
   return val;
 };
-
-export const updateTooltipTitle = ($tooltipEl, newTitle) =>
-  $tooltipEl.attr('title', newTitle).tooltip('_fixTitle');
 
 export const disableButtonIfEmptyField = (fieldSelector, buttonSelector, eventName = 'input') => {
   const field = $(fieldSelector);
@@ -80,7 +67,7 @@ export const disableButtonIfEmptyField = (fieldSelector, buttonSelector, eventNa
     closestSubmit.disable();
   }
   // eslint-disable-next-line func-names
-  return field.on(eventName, function() {
+  return field.on(eventName, function () {
     if (rstrip($(this).val()) === '') {
       return closestSubmit.disable();
     }
@@ -105,6 +92,7 @@ export const handleLocationHash = () => {
   const topPadding = 8;
   const diffFileHeader = document.querySelector('.js-file-title');
   const versionMenusContainer = document.querySelector('.mr-version-menus-container');
+  const fixedIssuableTitle = document.querySelector('.issue-sticky-header');
 
   let adjustment = 0;
   if (fixedNav) adjustment -= fixedNav.offsetHeight;
@@ -133,6 +121,10 @@ export const handleLocationHash = () => {
     adjustment -= versionMenusContainer.offsetHeight;
   }
 
+  if (isInIssuePage()) {
+    adjustment -= fixedIssuableTitle.offsetHeight;
+  }
+
   if (isInMRPage()) {
     adjustment -= topPadding;
   }
@@ -156,13 +148,13 @@ export const isInViewport = (el, offset = {}) => {
   );
 };
 
-export const parseUrl = url => {
+export const parseUrl = (url) => {
   const parser = document.createElement('a');
   parser.href = url;
   return parser;
 };
 
-export const parseUrlPathname = url => {
+export const parseUrlPathname = (url) => {
   const parsedUrl = parseUrl(url);
   // parsedUrl.pathname will return an absolute path for Firefox and a relative path for IE11
   // We have to make sure we always have an absolute path.
@@ -173,8 +165,8 @@ const splitPath = (path = '') => path.replace(/^\?/, '').split('&');
 
 export const urlParamsToArray = (path = '') =>
   splitPath(path)
-    .filter(param => param.length > 0)
-    .map(param => {
+    .filter((param) => param.length > 0)
+    .map((param) => {
       const split = param.split('=');
       return [decodeURI(split[0]), split[1]].join('=');
     });
@@ -216,52 +208,78 @@ export const urlParamsToObject = (path = '') =>
     return data;
   }, {});
 
-export const isMetaKey = e => e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
+export const isMetaKey = (e) => e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;
 
 // Identify following special clicks
 // 1) Cmd + Click on Mac (e.metaKey)
 // 2) Ctrl + Click on PC (e.ctrlKey)
 // 3) Middle-click or Mouse Wheel Click (e.which is 2)
-export const isMetaClick = e => e.metaKey || e.ctrlKey || e.which === 2;
+export const isMetaClick = (e) => e.metaKey || e.ctrlKey || e.which === 2;
 
 export const contentTop = () => {
-  const perfBar = $('#js-peek').outerHeight() || 0;
-  const mrTabsHeight = $('.merge-request-tabs').outerHeight() || 0;
-  const headerHeight = $('.navbar-gitlab').outerHeight() || 0;
-  const diffFilesChanged = $('.js-diff-files-changed').outerHeight() || 0;
   const isDesktop = breakpointInstance.isDesktop();
-  const diffFileTitleBar =
-    (isDesktop && $('.diff-file .file-title-flex-parent:visible').outerHeight()) || 0;
-  const compareVersionsHeaderHeight = (isDesktop && $('.mr-version-controls').outerHeight()) || 0;
+  const heightCalculators = [
+    () => $('#js-peek').outerHeight(),
+    () => $('.navbar-gitlab').outerHeight(),
+    ({ desktop }) => {
+      const container = document.querySelector('.line-resolve-all-container');
+      let size = 0;
 
-  return (
-    perfBar +
-    mrTabsHeight +
-    headerHeight +
-    diffFilesChanged +
-    diffFileTitleBar +
-    compareVersionsHeaderHeight
-  );
+      if (!desktop && container) {
+        size = container.offsetHeight;
+      }
+
+      return size;
+    },
+    () => $('.merge-request-tabs').outerHeight(),
+    () => $('.js-diff-files-changed').outerHeight(),
+    ({ desktop }) => {
+      const diffsTabIsActive = window.mrTabs?.currentAction === 'diffs';
+      let size;
+
+      if (desktop && diffsTabIsActive) {
+        size = $('.diff-file .file-title-flex-parent:visible').outerHeight();
+      }
+
+      return size;
+    },
+    ({ desktop }) => {
+      let size;
+
+      if (desktop) {
+        size = $('.mr-version-controls').outerHeight();
+      }
+
+      return size;
+    },
+  ];
+
+  return heightCalculators.reduce((totalHeight, calculator) => {
+    return totalHeight + (calculator({ desktop: isDesktop }) || 0);
+  }, 0);
 };
 
 export const scrollToElement = (element, options = {}) => {
-  let $el = element;
-  if (!(element instanceof $)) {
-    $el = $(element);
+  let el = element;
+  if (element instanceof $) {
+    // eslint-disable-next-line prefer-destructuring
+    el = element[0];
+  } else if (typeof el === 'string') {
+    el = document.querySelector(element);
   }
-  const { top } = $el.offset();
-  const { offset = 0 } = options;
 
-  // eslint-disable-next-line no-jquery/no-animate
-  return $('body, html').animate(
-    {
-      scrollTop: top - contentTop() + offset,
-    },
-    200,
-  );
+  if (el && el.getBoundingClientRect) {
+    // In the previous implementation, jQuery naturally deferred this scrolling.
+    // Unfortunately, we're quite coupled to this implementation detail now.
+    defer(() => {
+      const { duration = 200, offset = 0 } = options;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + offset - contentTop();
+      window.scrollTo({ top: y, behavior: duration ? 'smooth' : 'auto' });
+    });
+  }
 };
 
-export const scrollToElementWithContext = element => {
+export const scrollToElementWithContext = (element) => {
   const offsetMultiplier = -0.1;
   return scrollToElement(element, { offset: window.innerHeight * offsetMultiplier });
 };
@@ -271,7 +289,7 @@ export const scrollToElementWithContext = element => {
  * each browser screen repaint.
  * @param {Function} fn
  */
-export const debounceByAnimationFrame = fn => {
+export const debounceByAnimationFrame = (fn) => {
   let requestId;
 
   return function debounced(...args) {
@@ -318,7 +336,7 @@ const handleSelectedRange = (range, restrictToNode) => {
   return range.cloneContents();
 };
 
-export const getSelectedFragment = restrictToNode => {
+export const getSelectedFragment = (restrictToNode) => {
   const selection = window.getSelection();
   if (selection.rangeCount === 0) return null;
   // Most usages of the selection only want text from a part of the page (e.g. discussion)
@@ -370,64 +388,18 @@ export const insertText = (target, text) => {
   target.dispatchEvent(event);
 };
 
-export const nodeMatchesSelector = (node, selector) => {
-  const matches =
-    Element.prototype.matches ||
-    Element.prototype.matchesSelector ||
-    Element.prototype.mozMatchesSelector ||
-    Element.prototype.msMatchesSelector ||
-    Element.prototype.oMatchesSelector ||
-    Element.prototype.webkitMatchesSelector;
-
-  if (matches) {
-    return matches.call(node, selector);
-  }
-
-  // IE11 doesn't support `node.matches(selector)`
-
-  let { parentNode } = node;
-
-  if (!parentNode) {
-    parentNode = document.createElement('div');
-    // eslint-disable-next-line no-param-reassign
-    node = node.cloneNode(true);
-    parentNode.appendChild(node);
-  }
-
-  const matchingNodes = parentNode.querySelectorAll(selector);
-  return Array.prototype.indexOf.call(matchingNodes, node) !== -1;
-};
-
 /**
   this will take in the headers from an API response and normalize them
   this way we don't run into production issues when nginx gives us lowercased header keys
 */
-export const normalizeHeaders = headers => {
+export const normalizeHeaders = (headers) => {
   const upperCaseHeaders = {};
 
-  Object.keys(headers || {}).forEach(e => {
+  Object.keys(headers || {}).forEach((e) => {
     upperCaseHeaders[e.toUpperCase()] = headers[e];
   });
 
   return upperCaseHeaders;
-};
-
-/**
-  this will take in the getAllResponseHeaders result and normalize them
-  this way we don't run into production issues when nginx gives us lowercased header keys
-*/
-export const normalizeCRLFHeaders = headers => {
-  const headersObject = {};
-  const headersArray = headers.split('\n');
-
-  headersArray.forEach(header => {
-    const keyValue = header.split(': ');
-
-    // eslint-disable-next-line prefer-destructuring
-    headersObject[keyValue[0]] = keyValue[1];
-  });
-
-  return normalizeHeaders(headersObject);
 };
 
 /**
@@ -436,7 +408,7 @@ export const normalizeCRLFHeaders = headers => {
  * @param {Object} paginationInformation
  * @returns {Object}
  */
-export const parseIntPagination = paginationInformation => ({
+export const parseIntPagination = (paginationInformation) => ({
   perPage: parseInt(paginationInformation['X-PER-PAGE'], 10),
   page: parseInt(paginationInformation['X-PAGE'], 10),
   total: parseInt(paginationInformation['X-TOTAL'], 10),
@@ -475,10 +447,10 @@ export const parseQueryStringIntoObject = (query = '') => {
  */
 export const objectToQueryString = (params = {}) =>
   Object.keys(params)
-    .map(param => `${param}=${params[param]}`)
+    .map((param) => `${param}=${params[param]}`)
     .join('&');
 
-export const buildUrlWithCurrentLocation = param => {
+export const buildUrlWithCurrentLocation = (param) => {
   if (param) return `${window.location.pathname}${param}`;
 
   return window.location.pathname;
@@ -490,7 +462,7 @@ export const buildUrlWithCurrentLocation = param => {
  *
  * @param {String} param
  */
-export const historyPushState = newUrl => {
+export const historyPushState = (newUrl) => {
   window.history.pushState({}, document.title, newUrl);
 };
 
@@ -500,7 +472,7 @@ export const historyPushState = newUrl => {
  *
  * @param {String} param
  */
-export const historyReplaceState = newUrl => {
+export const historyReplaceState = (newUrl) => {
   window.history.replaceState({}, document.title, newUrl);
 };
 
@@ -512,7 +484,7 @@ export const historyReplaceState = newUrl => {
  * @param  {String} value
  * @returns {Boolean}
  */
-export const parseBoolean = value => (value && value.toString()) === 'true';
+export const parseBoolean = (value) => (value && value.toString()) === 'true';
 
 export const BACKOFF_TIMEOUT = 'BACKOFF_TIMEOUT';
 
@@ -559,7 +531,7 @@ export const backOff = (fn, timeout = 60000) => {
   let timeElapsed = 0;
 
   return new Promise((resolve, reject) => {
-    const stop = arg => (arg instanceof Error ? reject(arg) : resolve(arg));
+    const stop = (arg) => (arg instanceof Error ? reject(arg) : resolve(arg));
 
     const next = () => {
       if (timeElapsed < timeout) {
@@ -574,99 +546,6 @@ export const backOff = (fn, timeout = 60000) => {
     fn(next, stop);
   });
 };
-
-export const createOverlayIcon = (iconPath, overlayPath) => {
-  const faviconImage = document.createElement('img');
-
-  return new Promise(resolve => {
-    faviconImage.onload = () => {
-      const size = 32;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, size, size);
-      context.drawImage(
-        faviconImage,
-        0,
-        0,
-        faviconImage.width,
-        faviconImage.height,
-        0,
-        0,
-        size,
-        size,
-      );
-
-      const overlayImage = document.createElement('img');
-      overlayImage.onload = () => {
-        context.drawImage(
-          overlayImage,
-          0,
-          0,
-          overlayImage.width,
-          overlayImage.height,
-          0,
-          0,
-          size,
-          size,
-        );
-
-        const faviconWithOverlayUrl = canvas.toDataURL();
-
-        resolve(faviconWithOverlayUrl);
-      };
-      overlayImage.src = overlayPath;
-    };
-    faviconImage.src = iconPath;
-  });
-};
-
-export const setFaviconOverlay = overlayPath => {
-  const faviconEl = document.getElementById('favicon');
-
-  if (!faviconEl) {
-    return null;
-  }
-
-  const iconPath = faviconEl.getAttribute('data-original-href');
-
-  return createOverlayIcon(iconPath, overlayPath).then(faviconWithOverlayUrl =>
-    faviconEl.setAttribute('href', faviconWithOverlayUrl),
-  );
-};
-
-export const setFavicon = faviconPath => {
-  const faviconEl = document.getElementById('favicon');
-  if (faviconEl && faviconPath) {
-    faviconEl.setAttribute('href', faviconPath);
-  }
-};
-
-export const resetFavicon = () => {
-  const faviconEl = document.getElementById('favicon');
-
-  if (faviconEl) {
-    const originalFavicon = faviconEl.getAttribute('data-original-href');
-    faviconEl.setAttribute('href', originalFavicon);
-  }
-};
-
-export const setCiStatusFavicon = pageUrl =>
-  axios
-    .get(pageUrl)
-    .then(({ data }) => {
-      if (data && data.favicon) {
-        return setFaviconOverlay(data.favicon);
-      }
-      return resetFavicon();
-    })
-    .catch(error => {
-      resetFavicon();
-      throw error;
-    });
 
 export const spriteIcon = (icon, className = '') => {
   const classAttribute = className.length > 0 ? `class="${className}"` : '';
@@ -765,7 +644,7 @@ export const convertObjectPropsToCamelCase = (obj = {}, options = {}) =>
 export const convertObjectPropsToSnakeCase = (obj = {}, options = {}) =>
   convertObjectProps(convertToSnakeCase, obj, options);
 
-export const imagePath = imgUrl =>
+export const imagePath = (imgUrl) =>
   `${gon.asset_host || ''}${gon.relative_url_root || ''}/assets/${imgUrl}`;
 
 export const addSelectOnFocusBehaviour = (selector = '.js-select-on-focus') => {
@@ -774,7 +653,7 @@ export const addSelectOnFocusBehaviour = (selector = '.js-select-on-focus') => {
   $(selector).on('focusin', function selectOnFocusCallback() {
     $(this)
       .select()
-      .one('mouseup', e => {
+      .one('mouseup', (e) => {
         e.preventDefault();
       });
   });
@@ -798,6 +677,24 @@ export const roundOffFloat = (number, precision = 0) => {
   // eslint-disable-next-line no-restricted-properties
   const multiplier = Math.pow(10, precision);
   return Math.round(number * multiplier) / multiplier;
+};
+
+/**
+ * Method to round down values with decimal places
+ * with provided precision.
+ *
+ * Eg; roundDownFloat(3.141592, 3) = 3.141
+ *
+ * Refer to spec/javascripts/lib/utils/common_utils_spec.js for
+ * more supported examples.
+ *
+ * @param {Float} number
+ * @param {Number} precision
+ */
+export const roundDownFloat = (number, precision = 0) => {
+  // eslint-disable-next-line no-restricted-properties
+  const multiplier = Math.pow(10, precision);
+  return Math.floor(number * multiplier) / multiplier;
 };
 
 /**
@@ -852,7 +749,7 @@ export const searchBy = (query = '', searchSpace = {}) => {
 
   const normalizedQuery = query.toLowerCase();
   const matches = targetKeys
-    .filter(item => {
+    .filter((item) => {
       const searchItem = `${searchSpace[item]}`.toLowerCase();
 
       return (
@@ -883,41 +780,12 @@ export const searchBy = (query = '', searchSpace = {}) => {
  */
 export const isScopedLabel = ({ title = '' }) => title.indexOf('::') !== -1;
 
-window.gl = window.gl || {};
-window.gl.utils = {
-  ...(window.gl.utils || {}),
-  getPagePath,
-  isInGroupsPage,
-  isInProjectPage,
-  getProjectSlug,
-  getGroupSlug,
-  isInIssuePage,
-  ajaxGet,
-  rstrip,
-  updateTooltipTitle,
-  disableButtonIfEmptyField,
-  handleLocationHash,
-  isInViewport,
-  parseUrl,
-  parseUrlPathname,
-  getUrlParamsArray,
-  isMetaKey,
-  isMetaClick,
-  scrollToElement,
-  getParameterByName,
-  getSelectedFragment,
-  insertText,
-  nodeMatchesSelector,
-  spriteIcon,
-  imagePath,
-};
-
 // Methods to set and get Cookie
 export const setCookie = (name, value) => Cookies.set(name, value, { expires: 365 });
 
-export const getCookie = name => Cookies.get(name);
+export const getCookie = (name) => Cookies.get(name);
 
-export const removeCookie = name => Cookies.remove(name);
+export const removeCookie = (name) => Cookies.remove(name);
 
 /**
  * Returns the status of a feature flag.
@@ -932,4 +800,4 @@ export const removeCookie = name => Cookies.remove(name);
  * @param {String} flag Feature flag
  * @returns {Boolean} on/off
  */
-export const isFeatureFlagEnabled = flag => window.gon.features?.[flag];
+export const isFeatureFlagEnabled = (flag) => window.gon.features?.[flag];

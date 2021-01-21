@@ -37,6 +37,7 @@ RSpec.describe ElasticIndexBulkCronWorker do
       expect_next_instance_of(::Elastic::ProcessBookkeepingService) do |service|
         expect(service).to receive(:execute).and_return(15)
       end
+
       worker = described_class.new
 
       worker.perform

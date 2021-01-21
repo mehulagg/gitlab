@@ -6,7 +6,48 @@ RSpec.describe API::Projects do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
+  let_it_be(:another_user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
+
+  shared_examples 'inaccessable by reporter role and lower' do
+    context 'for reporter' do
+      before do
+        reporter = create(:user)
+        project.add_reporter(reporter)
+
+        get api(path, reporter)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for guest' do
+      before do
+        guest = create(:user)
+        project.add_guest(guest)
+
+        get api(path, guest)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for anonymous' do
+      before do
+        anonymous = create(:user)
+
+        get api(path, anonymous)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+  end
 
   describe 'GET /projects' do
     it 'does not break on license checks' do
@@ -142,41 +183,28 @@ RSpec.describe API::Projects do
       end
     end
 
-    describe 'packages_enabled attribute' do
-      it 'is exposed when the feature is available' do
-        stub_licensed_features(packages: true)
+    describe 'compliance_frameworks attribute' do
+      context 'when compliance_framework feature is available' do
+        context 'when project has a compliance framework' do
+          before do
+            project.update!(compliance_framework_setting: create(:compliance_framework_project_setting, :sox))
+            get api("/projects/#{project.id}", user)
+          end
 
-        get api("/projects/#{project.id}", user)
+          it 'exposes framework names as array of strings' do
+            expect(json_response['compliance_frameworks']).to contain_exactly(project.compliance_framework_setting.compliance_management_framework.name)
+          end
+        end
 
-        expect(json_response).to have_key 'packages_enabled'
-      end
+        context 'when project has no compliance framework' do
+          before do
+            get api("/projects/#{project.id}", user)
+          end
 
-      it 'is not exposed when the feature is not available' do
-        stub_licensed_features(packages: false)
-
-        get api("/projects/#{project.id}", user)
-
-        expect(json_response).not_to have_key 'packages_enabled'
-      end
-    end
-
-    describe 'service desk attributes' do
-      it 'are exposed when the feature is available' do
-        stub_licensed_features(service_desk: true)
-
-        get api("/projects/#{project.id}", user)
-
-        expect(json_response).to have_key 'service_desk_enabled'
-        expect(json_response).to have_key 'service_desk_address'
-      end
-
-      it 'are not exposed when the feature is not available' do
-        stub_licensed_features(service_desk: false)
-
-        get api("/projects/#{project.id}", user)
-
-        expect(json_response).not_to have_key 'service_desk_enabled'
-        expect(json_response).not_to have_key 'service_desk_address'
+          it 'returns an empty array' do
+            expect(json_response['compliance_frameworks']).to eq([])
+          end
+        end
       end
     end
 
@@ -528,13 +556,31 @@ RSpec.describe API::Projects do
     let_it_be(:project) { create(:project, :public, namespace: user.namespace) }
     let(:path) { "/projects/#{project.id}/audit_events" }
 
-    context 'when authenticated, as a user' do
-      it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a member' do
+      let_it_be(:developer) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_developer(developer)
+      end
+
+      it 'returns only events authored by current user' do
+        project_audit_event_1 = create(:project_audit_event, entity_id: project.id, author_id: developer.id)
+        create(:project_audit_event, entity_id: project.id, author_id: 666)
+
+        get api(path, developer)
+
+        expect_response_contain_exactly(project_audit_event_1.id)
       end
     end
 
     context 'when authenticated, as a project owner' do
+      before do
+        project.add_maintainer(user)
+      end
+
       context 'audit events feature is not available' do
         before do
           stub_licensed_features(audit_events: false)
@@ -625,9 +671,46 @@ RSpec.describe API::Projects do
 
     let_it_be(:project_audit_event) { create(:project_audit_event, created_at: Date.new(2000, 1, 10), entity_id: project.id) }
 
-    context 'when authenticated, as a user' do
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a guest' do
+      let_it_be(:guest) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_guest(guest)
+      end
+
       it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+        let(:request) { get api(path, guest) }
+      end
+    end
+
+    context 'when authenticated, as a member' do
+      let_it_be(:developer) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        project.add_developer(developer)
+      end
+
+      it 'returns 200 response' do
+        audit_event = create(:project_audit_event, entity_id: project.id, author_id: developer.id)
+        path = "/projects/#{project.id}/audit_events/#{audit_event.id}"
+
+        get api(path, developer)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'existing audit event of a different user' do
+        let_it_be(:audit_event) { create(:project_audit_event, entity_id: project.id, author_id: another_user.id) }
+
+        let(:path) { "/projects/#{project.id}/audit_events/#{audit_event.id}" }
+
+        it_behaves_like '404 response' do
+          let(:request) { get api(path, developer) }
+        end
       end
     end
 
@@ -709,27 +792,6 @@ RSpec.describe API::Projects do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload.external_authorization_classification_label).to eq('new label')
-      end
-    end
-
-    context 'when updating service desk' do
-      subject { put(api("/projects/#{project.id}", user), params: { service_desk_enabled: true }) }
-
-      before do
-        stub_licensed_features(service_desk: true)
-        project.update!(service_desk_enabled: false)
-
-        allow(::Gitlab::IncomingEmail).to receive(:enabled?).and_return(true)
-      end
-
-      it 'returns 200' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-
-      it 'enables the service_desk' do
-        expect { subject }.to change { project.reload.service_desk_enabled }.to(true)
       end
     end
 
@@ -826,40 +888,6 @@ RSpec.describe API::Projects do
       end
     end
 
-    describe 'updating packages_enabled attribute' do
-      it 'is enabled by default' do
-        expect(project.packages_enabled).to be true
-      end
-
-      context 'packages feature is allowed by license' do
-        before do
-          stub_licensed_features(packages: true)
-        end
-
-        it 'disables project packages feature' do
-          put(api("/projects/#{project.id}", user), params: { packages_enabled: false })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(project.reload.packages_enabled).to be false
-          expect(json_response['packages_enabled']).to eq(false)
-        end
-      end
-
-      context 'packages feature is not allowed by license' do
-        before do
-          stub_licensed_features(packages: false)
-        end
-
-        it 'disables project packages feature but does not return packages_enabled attribute' do
-          put(api("/projects/#{project.id}", user), params: { packages_enabled: false })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(project.reload.packages_enabled).to be false
-          expect(json_response['packages_enabled']).to be_nil
-        end
-      end
-    end
-
     describe 'updating approvals_before_merge attribute' do
       context 'when authenticated as project owner' do
         it 'updates approvals_before_merge' do
@@ -916,36 +944,70 @@ RSpec.describe API::Projects do
   end
 
   describe 'DELETE /projects/:id' do
-    context 'when feature is available' do
-      before do
-        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
-      end
+    let(:group) { create(:group) }
+    let(:project) { create(:project, group: group)}
 
-      it 'marks project for deletion' do
+    before do
+      group.add_user(user, Gitlab::Access::OWNER)
+    end
+
+    shared_examples 'deletes project immediately' do
+      it do
+        delete api("/projects/#{project.id}", user)
+
+        expect(response).to have_gitlab_http_status(:accepted)
+        expect(project.reload.pending_delete).to eq(true)
+      end
+    end
+
+    shared_examples 'marks project for deletion' do
+      it do
         delete api("/projects/#{project.id}", user)
 
         expect(response).to have_gitlab_http_status(:accepted)
         expect(project.reload.marked_for_deletion?).to be_truthy
       end
+    end
 
-      it 'returns error if project cannot be marked for deletion' do
-        message = 'Error'
-        expect(::Projects::MarkForDeletionService).to receive_message_chain(:new, :execute).and_return({ status: :error, message: message })
-
-        delete api("/projects/#{project.id}", user)
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response["message"]).to eq(message)
+    context 'when feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when instance setting is set to 0 days' do
-        it 'deletes project right away' do
-          allow(Gitlab::CurrentSettings).to receive(:deletion_adjourned_period).and_return(0)
+      context 'delayed project removal is enabled for group' do
+        let(:group) { create(:group, delayed_project_removal: true) }
+
+        it_behaves_like 'marks project for deletion'
+
+        it 'returns error if project cannot be marked for deletion' do
+          message = 'Error'
+          expect(::Projects::MarkForDeletionService).to receive_message_chain(:new, :execute).and_return({ status: :error, message: message })
+
           delete api("/projects/#{project.id}", user)
 
-          expect(response).to have_gitlab_http_status(:accepted)
-          expect(project.reload.pending_delete).to eq(true)
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response["message"]).to eq(message)
         end
+
+        context 'when instance setting is set to 0 days' do
+          it 'deletes project right away' do
+            allow(Gitlab::CurrentSettings).to receive(:deletion_adjourned_period).and_return(0)
+            delete api("/projects/#{project.id}", user)
+
+            expect(response).to have_gitlab_http_status(:accepted)
+            expect(project.reload.pending_delete).to eq(true)
+          end
+        end
+      end
+
+      context 'delayed project removal is disabled for group' do
+        it_behaves_like 'deletes project immediately'
+      end
+
+      context 'for projects in user namespace' do
+        let(:project) { create(:project, namespace: user.namespace)}
+
+        it_behaves_like 'deletes project immediately'
       end
     end
 
@@ -954,12 +1016,7 @@ RSpec.describe API::Projects do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      it 'deletes project' do
-        delete api("/projects/#{project.id}", user)
-
-        expect(response).to have_gitlab_http_status(:accepted)
-        expect(project.reload.pending_delete).to eq(true)
-      end
+      it_behaves_like 'deletes project immediately'
     end
   end
 
@@ -969,6 +1026,7 @@ RSpec.describe API::Projects do
     let!(:target_namespace) do
       create(:group).tap { |g| g.add_owner(user) }
     end
+
     let!(:group_project) { create(:project, namespace: group)}
     let(:group) { create(:group) }
 
@@ -980,6 +1038,7 @@ RSpec.describe API::Projects do
       let(:group) do
         create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true).group
       end
+
       let(:user) do
         create(:user, managing_group: group).tap do |u|
           create(:group_saml_identity, user: u, saml_provider: group.saml_provider)
@@ -987,7 +1046,7 @@ RSpec.describe API::Projects do
       end
 
       before do
-        stub_licensed_features(group_saml: true)
+        stub_licensed_features(group_saml: true, group_forking_protection: true)
       end
 
       context 'and target namespace is outer' do

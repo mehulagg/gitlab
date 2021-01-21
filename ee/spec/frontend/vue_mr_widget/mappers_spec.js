@@ -1,9 +1,9 @@
-import { mapApprovalsResponse } from 'ee/vue_merge_request_widget/mappers';
 import {
   RULE_TYPE_REGULAR,
   RULE_TYPE_CODE_OWNER,
   RULE_TYPE_REPORT_APPROVER,
 } from 'ee/approvals/constants';
+import { mapApprovalsResponse } from 'ee/vue_merge_request_widget/mappers';
 
 describe('EE MR Widget mappers', () => {
   let data;

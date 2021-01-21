@@ -14,7 +14,7 @@ module Sentry
       }.freeze
 
       def list_issues(**keyword_args)
-        response = get_issues(keyword_args)
+        response = get_issues(**keyword_args)
 
         issues = response[:issues]
         pagination = response[:pagination]
@@ -44,7 +44,7 @@ module Sentry
       def get_issues(**keyword_args)
         response = http_get(
           api_urls.issues_url,
-          query: list_issue_sentry_query(keyword_args)
+          query: list_issue_sentry_query(**keyword_args)
         )
 
         {
@@ -168,7 +168,8 @@ module Sentry
           first_release_short_version: issue.dig('firstRelease', 'shortVersion'),
           first_release_version: issue.dig('firstRelease', 'version'),
           last_release_last_commit: issue.dig('lastRelease', 'lastCommit'),
-          last_release_short_version: issue.dig('lastRelease', 'shortVersion')
+          last_release_short_version: issue.dig('lastRelease', 'shortVersion'),
+          last_release_version: issue.dig('lastRelease', 'version')
         })
       end
 

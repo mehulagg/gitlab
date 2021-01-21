@@ -1,9 +1,10 @@
 import $ from 'jquery';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import emojiRegex from 'emoji-regex';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import EmojiMenu from './emoji_menu';
 import { __ } from '~/locale';
+import * as Emoji from '~/emoji';
 
 const defaultStatusEmoji = 'speech_balloon';
 
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusEmojiField = document.getElementById('js-status-emoji-field');
   const statusMessageField = document.getElementById('js-status-message-field');
 
-  const toggleNoEmojiPlaceholder = isVisible => {
+  const toggleNoEmojiPlaceholder = (isVisible) => {
     const placeholderElement = document.getElementById('js-no-emoji-placeholder');
     placeholderElement.classList.toggle('hidden', !isVisible);
   };
@@ -55,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  import(/* webpackChunkName: 'emoji' */ '~/emoji')
-    .then(Emoji => {
+  Emoji.initEmojiMap()
+    .then(() => {
       const emojiMenu = new EmojiMenu(
         Emoji,
         toggleEmojiMenuButtonSelector,

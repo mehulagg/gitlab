@@ -1,5 +1,3 @@
-import createState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
-import * as getters from 'ee/analytics/productivity_analytics/store/modules/charts/getters';
 import {
   metricTypes,
   chartKeys,
@@ -7,6 +5,8 @@ import {
   maxColumnChartItemsPerPage,
   scatterPlotAddonQueryDays,
 } from 'ee/analytics/productivity_analytics/constants';
+import * as getters from 'ee/analytics/productivity_analytics/store/modules/charts/getters';
+import createState from 'ee/analytics/productivity_analytics/store/modules/charts/state';
 import { getScatterPlotData, getMedianLineData } from 'ee/analytics/productivity_analytics/utils';
 import { mockHistogramData } from '../../../mock_data';
 
@@ -41,8 +41,8 @@ describe('Productivity analytics chart getters', () => {
       const chartKey = chartKeys.main;
       state.charts[chartKey] = {
         data: {
-          '1': 32,
-          '5': 17,
+          1: 32,
+          5: 17,
         },
         selected: ['5'],
       };
@@ -221,7 +221,7 @@ describe('Productivity analytics chart getters', () => {
 
     describe(`does not exceed threshold of ${maxColumnChartItemsPerPage[chartKey]} items`, () => {
       it('returns an empty dataZoom property', () => {
-        state.charts[chartKey].data = { '1': 1, '2': 2, '3': 3 };
+        state.charts[chartKey].data = { 1: 1, 2: 2, 3: 3 };
 
         expect(getters.getColumnChartDatazoomOption(state)(chartKeys.main)).toEqual({});
       });
@@ -255,7 +255,7 @@ describe('Productivity analytics chart getters', () => {
       expect(getters.scatterplotYaxisLabel(null, mockGetters, mockRootState)).toBe('Days');
     });
 
-    it.each(metricsInHours)('returns "Hours" for the "%s" metric', metric => {
+    it.each(metricsInHours)('returns "Hours" for the "%s" metric', (metric) => {
       const mockGetters = {
         getSelectedMetric: () => metric,
       };

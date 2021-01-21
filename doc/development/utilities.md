@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GitLab utilities
 
 We have developed a number of utilities to help ease development:
@@ -49,7 +55,7 @@ Refer to: <https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/utils/mer
 
 ## `Override`
 
-Refer to <https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/utils/override.rb>:
+Refer to [`override.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/utils/override.rb):
 
 - This utility can help you check if one method would override
   another or not. It is the same concept as Java's `@Override` annotation
@@ -94,7 +100,7 @@ Refer to <https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/utils/over
     end
     ```
 
-    Note that the check will only happen when either:
+    Note that the check only happens when either:
 
     - The overriding method is defined in a class, or:
     - The overriding method is defined in a module, and it's prepended to
@@ -153,7 +159,7 @@ Refer to <https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/utils/stro
 
 ## `RequestCache`
 
-Refer to <https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/cache/request_cache.rb>.
+Refer to [`request_cache.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/cache/request_cache.rb).
 
 This module provides a simple way to cache values in RequestStore,
 and the cache key would be based on the class name, method name,

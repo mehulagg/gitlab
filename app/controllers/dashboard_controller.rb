@@ -2,6 +2,7 @@
 
 class DashboardController < Dashboard::ApplicationController
   include IssuableCollectionsAction
+  include FiltersEvents
 
   prepend_before_action(only: [:issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
@@ -13,6 +14,10 @@ class DashboardController < Dashboard::ApplicationController
   before_action :set_not_query_feature_flag
 
   respond_to :html
+
+  feature_category :audit_events, [:activity]
+  feature_category :issue_tracking, [:issues, :issues_calendar]
+  feature_category :code_review, [:merge_requests]
 
   def activity
     respond_to do |format|

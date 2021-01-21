@@ -2,9 +2,7 @@
 class Groups::Security::DashboardController < Groups::ApplicationController
   layout 'group'
 
-  before_action only: [:show] do
-    push_frontend_feature_flag(:first_class_vulnerabilities, group, default_enabled: true)
-  end
+  feature_category :vulnerability_management
 
   def show
     render :unavailable unless dashboard_available?
@@ -13,7 +11,6 @@ class Groups::Security::DashboardController < Groups::ApplicationController
   private
 
   def dashboard_available?
-    group.feature_available?(:security_dashboard) &&
-      can?(current_user, :read_group_security_dashboard, group)
+    can?(current_user, :read_group_security_dashboard, group)
   end
 end

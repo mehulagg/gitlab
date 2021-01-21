@@ -1,15 +1,16 @@
+import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
+
+import FilteredSearchSpecHelper from 'helpers/filtered_search_spec_helper';
 import RecentSearchesService from '~/filtered_search/services/recent_searches_service';
 import RecentSearchesServiceError from '~/filtered_search/services/recent_searches_service_error';
 import RecentSearchesRoot from '~/filtered_search/recent_searches_root';
 import IssuableFilteredSearchTokenKeys from '~/filtered_search/issuable_filtered_search_token_keys';
-import '~/lib/utils/common_utils';
 import DropdownUtils from '~/filtered_search/dropdown_utils';
 import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
 import FilteredSearchDropdownManager from '~/filtered_search/filtered_search_dropdown_manager';
-import FilteredSearchManager from '~/filtered_search/filtered_search_manager';
-import FilteredSearchSpecHelper from '../helpers/filtered_search_spec_helper';
 import { BACKSPACE_KEY_CODE, DELETE_KEY_CODE } from '~/lib/utils/keycodes';
 import { visitUrl } from '~/lib/utils/url_utility';
+import * as commonUtils from '~/lib/utils/common_utils';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   ...jest.requireActual('~/lib/utils/url_utility'),
@@ -68,7 +69,7 @@ describe('Filtered Search Manager', () => {
             ${FilteredSearchSpecHelper.createInputHTML(placeholder)}
           </ul>
           <button class="clear-search" type="button">
-            <i class="fa fa-times"></i>
+            <svg class="s16 clear-search-icon" data-testid="close-icon"><use xlink:href="icons.svg#close" /></svg>
           </button>
         </form>
       </div>
@@ -77,18 +78,18 @@ describe('Filtered Search Manager', () => {
     jest.spyOn(FilteredSearchDropdownManager.prototype, 'setDropdown').mockImplementation();
   });
 
-  const initializeManager = () => {
+  const initializeManager = ({ useDefaultState } = {}) => {
     jest.spyOn(FilteredSearchManager.prototype, 'loadSearchParamsFromURL').mockImplementation();
     jest.spyOn(FilteredSearchManager.prototype, 'tokenChange').mockImplementation();
     jest
       .spyOn(FilteredSearchDropdownManager.prototype, 'updateDropdownOffset')
       .mockImplementation();
-    jest.spyOn(gl.utils, 'getParameterByName').mockReturnValue(null);
+    jest.spyOn(commonUtils, 'getParameterByName').mockReturnValue(null);
     jest.spyOn(FilteredSearchVisualTokens, 'unselectTokens');
 
     input = document.querySelector('.filtered-search');
     tokensContainer = document.querySelector('.tokens-container');
-    manager = new FilteredSearchManager({ page });
+    manager = new FilteredSearchManager({ page, useDefaultState });
     manager.setup();
   };
 
@@ -184,16 +185,14 @@ describe('Filtered Search Manager', () => {
   });
 
   describe('search', () => {
-    const defaultParams = '?scope=all&utf8=%E2%9C%93&state=opened';
+    const defaultParams = '?scope=all&utf8=%E2%9C%93';
+    const defaultState = '&state=opened';
 
-    beforeEach(() => {
+    it('should search with a single word', (done) => {
       initializeManager();
-    });
-
-    it('should search with a single word', done => {
       input.value = 'searchTerm';
 
-      visitUrl.mockImplementation(url => {
+      visitUrl.mockImplementation((url) => {
         expect(url).toEqual(`${defaultParams}&search=searchTerm`);
         done();
       });
@@ -201,10 +200,23 @@ describe('Filtered Search Manager', () => {
       manager.search();
     });
 
-    it('should search with multiple words', done => {
+    it('sets default state', (done) => {
+      initializeManager({ useDefaultState: true });
+      input.value = 'searchTerm';
+
+      visitUrl.mockImplementation((url) => {
+        expect(url).toEqual(`${defaultParams}${defaultState}&search=searchTerm`);
+        done();
+      });
+
+      manager.search();
+    });
+
+    it('should search with multiple words', (done) => {
+      initializeManager();
       input.value = 'awesome search terms';
 
-      visitUrl.mockImplementation(url => {
+      visitUrl.mockImplementation((url) => {
         expect(url).toEqual(`${defaultParams}&search=awesome+search+terms`);
         done();
       });
@@ -212,10 +224,11 @@ describe('Filtered Search Manager', () => {
       manager.search();
     });
 
-    it('should search with special characters', done => {
+    it('should search with special characters', (done) => {
+      initializeManager();
       input.value = '~!@#$%^&*()_+{}:<>,.?/';
 
-      visitUrl.mockImplementation(url => {
+      visitUrl.mockImplementation((url) => {
         expect(url).toEqual(
           `${defaultParams}&search=~!%40%23%24%25%5E%26*()_%2B%7B%7D%3A%3C%3E%2C.%3F%2F`,
         );
@@ -225,13 +238,35 @@ describe('Filtered Search Manager', () => {
       manager.search();
     });
 
-    it('removes duplicated tokens', done => {
+    it('should use replacement URL for condition', (done) => {
+      initializeManager();
+      tokensContainer.innerHTML = FilteredSearchSpecHelper.createTokensContainerHTML(
+        FilteredSearchSpecHelper.createFilterVisualTokenHTML('milestone', '=', '13', true),
+      );
+
+      visitUrl.mockImplementation((url) => {
+        expect(url).toEqual(`${defaultParams}&milestone_title=replaced`);
+        done();
+      });
+
+      manager.filteredSearchTokenKeys.conditions.push({
+        url: 'milestone_title=13',
+        replacementUrl: 'milestone_title=replaced',
+        tokenKey: 'milestone',
+        value: '13',
+        operator: '=',
+      });
+      manager.search();
+    });
+
+    it('removes duplicated tokens', (done) => {
+      initializeManager();
       tokensContainer.innerHTML = FilteredSearchSpecHelper.createTokensContainerHTML(`
         ${FilteredSearchSpecHelper.createFilterVisualTokenHTML('label', '=', '~bug')}
         ${FilteredSearchSpecHelper.createFilterVisualTokenHTML('label', '=', '~bug')}
       `);
 
-      visitUrl.mockImplementation(url => {
+      visitUrl.mockImplementation((url) => {
         expect(url).toEqual(`${defaultParams}&label_name[]=bug`);
         done();
       });
@@ -570,7 +605,7 @@ describe('Filtered Search Manager', () => {
     it('correctly modifies params when custom modifier is passed', () => {
       const modifedParams = manager.getAllParams.call(
         {
-          modifyUrlParams: params => params.reverse(),
+          modifyUrlParams: (params) => params.reverse(),
         },
         [].concat(paramsArr),
       );

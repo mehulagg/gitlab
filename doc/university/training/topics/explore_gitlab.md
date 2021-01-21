@@ -1,12 +1,8 @@
 ---
-comments: false
+redirect_to: '../../../gitlab-basics/README.md'
 ---
 
-# Explore GitLab projects
+This document was moved to [another location](../../../gitlab-basics/README.md).
 
-- Dashboard
-- User Preferences
-- Issues
-- Milestones and Labels
-- Manage project members
-- Project settings
+<!-- This redirect file can be deleted after February 1, 2021. -->
+<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->

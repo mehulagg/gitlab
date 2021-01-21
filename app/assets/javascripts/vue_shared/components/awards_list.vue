@@ -1,7 +1,7 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { groupBy } from 'lodash';
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { glEmojiTag } from '../../emoji';
 import { __, sprintf } from '~/locale';
 
@@ -10,10 +10,11 @@ const NO_USER_ID = -1;
 
 export default {
   components: {
+    GlButton,
     GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     awards: {
@@ -47,7 +48,7 @@ export default {
     groupedAwards() {
       const { thumbsup, thumbsdown, ...rest } = {
         ...this.groupedDefaultAwards,
-        ...groupBy(this.awards, x => x.name),
+        ...groupBy(this.awards, (x) => x.name),
       };
 
       return [
@@ -63,7 +64,7 @@ export default {
   methods: {
     getAwardClassBindings(awardList) {
       return {
-        active: this.hasReactionByCurrentUser(awardList),
+        selected: this.hasReactionByCurrentUser(awardList),
         disabled: this.currentUserId === NO_USER_ID,
       };
     },
@@ -72,7 +73,7 @@ export default {
         return false;
       }
 
-      return awardList.some(award => award.user.id === this.currentUserId);
+      return awardList.some((award) => award.user.id === this.currentUserId);
     },
     createAwardList(name, list) {
       return {
@@ -94,11 +95,11 @@ export default {
 
       // Filter myself from list if I am awarded.
       if (hasReactionByCurrentUser) {
-        awardList = awardList.filter(award => award.user.id !== this.currentUserId);
+        awardList = awardList.filter((award) => award.user.id !== this.currentUserId);
       }
 
       // Get only 9-10 usernames to show in tooltip text.
-      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map(award => award.user.name);
+      const namesToShow = awardList.slice(0, TOOLTIP_NAME_COUNT).map((award) => award.user.name);
 
       // Get the remaining list to use in `and x more` text.
       const remainingAwardList = awardList.slice(TOOLTIP_NAME_COUNT, awardList.length);
@@ -149,45 +150,39 @@ export default {
 
 <template>
   <div class="awards js-awards-block">
-    <button
+    <gl-button
       v-for="awardList in groupedAwards"
       :key="awardList.name"
-      v-tooltip
+      v-gl-tooltip.viewport
+      class="gl-mr-3"
       :class="awardList.classes"
       :title="awardList.title"
-      data-boundary="viewport"
       data-testid="award-button"
-      class="btn award-control"
-      type="button"
       @click="handleAward(awardList.name)"
     >
-      <span data-testid="award-html" v-html="awardList.html"></span>
-      <span class="award-control-text js-counter">{{ awardList.list.length }}</span>
-    </button>
+      <template #emoji>
+        <span class="award-emoji-block" data-testid="award-html" v-html="awardList.html"></span>
+      </template>
+      <span class="js-counter">{{ awardList.list.length }}</span>
+    </gl-button>
     <div v-if="canAwardEmoji" class="award-menu-holder">
-      <button
-        v-tooltip
+      <gl-button
+        v-gl-tooltip.viewport
         :class="addButtonClass"
-        class="award-control btn js-add-award"
+        class="add-reaction-button js-add-award"
         title="Add reaction"
         :aria-label="__('Add reaction')"
-        data-boundary="viewport"
-        type="button"
       >
-        <span class="award-control-icon award-control-icon-neutral">
-          <gl-icon aria-hidden="true" name="slight-smile" />
+        <span class="reaction-control-icon reaction-control-icon-neutral">
+          <gl-icon name="slight-smile" />
         </span>
-        <span class="award-control-icon award-control-icon-positive">
-          <gl-icon aria-hidden="true" name="smiley" />
+        <span class="reaction-control-icon reaction-control-icon-positive">
+          <gl-icon name="smiley" />
         </span>
-        <span class="award-control-icon award-control-icon-super-positive">
-          <gl-icon aria-hidden="true" name="smiley" />
+        <span class="reaction-control-icon reaction-control-icon-super-positive">
+          <gl-icon name="smile" />
         </span>
-        <i
-          aria-hidden="true"
-          class="fa fa-spinner fa-spin award-control-icon award-control-icon-loading"
-        ></i>
-      </button>
+      </gl-button>
     </div>
   </div>
 </template>

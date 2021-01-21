@@ -165,6 +165,9 @@ production: &base
     ## Disable jQuery and CSS animations
     # disable_animations: true
 
+    ## Application settings cache expiry in seconds (default: 60)
+    # application_settings_cache_seconds: 60
+
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
   # For documentation on how to set this up, see http://doc.gitlab.com/ce/administration/reply_by_email.html
@@ -204,6 +207,36 @@ production: &base
 
     # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
     expunge_deleted: false
+
+  ## Consolidated object store config
+  ## This will only take effect if the object_store sections are not defined
+  ## within the types (e.g. artifacts, lfs, etc.).
+  # object_store:
+  #   enabled: false
+  #   proxy_download: false # Passthrough all downloads via GitLab instead of using Redirects to Object Storage
+  #   connection:
+  #     provider: AWS # Only AWS supported at the moment
+  #     aws_access_key_id: AWS_ACCESS_KEY_ID
+  #     aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+  #     region: us-east-1
+  #     aws_signature_version: 4 # For creation of signed URLs. Set to 2 if provider does not support v4.
+  #     endpoint: 'https://s3.amazonaws.com' # default: nil - Useful for S3 compliant services such as DigitalOcean Spaces
+  #   storage_options:
+  #     server_side_encryption: AES256 # AES256, aws:kms
+  #     server_side_encryption_kms_key_id: # Amazon Resource Name. See https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html
+  #   objects:
+  #     artifacts:
+  #       bucket: artifacts
+  #     external_diffs:
+  #       bucket: external-diffs
+  #     lfs:
+  #       bucket: lfs-objects
+  #     uploads:
+  #       bucket: uploads
+  #     packages:
+  #       bucket: packages
+  #     dependency_proxy:
+  #       bucket: dependency_proxy
 
   ## Build Artifacts
   artifacts:
@@ -287,6 +320,7 @@ production: &base
   ## Packages (maven repository, npm registry, etc...)
   packages:
     enabled: true
+    dpkg_deb_path: /usr/bin/dpkg-deb
     # The location where build packages are stored (default: shared/packages).
     # storage_path: shared/packages
     object_store:
@@ -333,7 +367,7 @@ production: &base
     # storage_path: shared/terraform_state
     object_store:
       enabled: false
-      remote_directory: terraform_state # The bucket name
+      remote_directory: terraform # The bucket name
       connection:
         provider: AWS
         aws_access_key_id: AWS_ACCESS_KEY_ID
@@ -364,6 +398,14 @@ production: &base
     # File that contains the shared secret key for verifying access for gitlab-pages.
     # Default is '.gitlab_pages_secret' relative to Rails.root (i.e. root of the GitLab app).
     # secret_file: /home/git/gitlab/.gitlab_pages_secret
+    object_store:
+      enabled: false
+      remote_directory: pages # The bucket name
+      connection:
+        provider: AWS
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -396,7 +438,13 @@ production: &base
       cron: "19 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
-      cron: "50 * * * *"
+      cron: "*/7 * * * *"
+    # Remove expired pipeline artifacts
+    ci_pipelines_expire_artifacts_worker:
+      cron: "*/23 * * * *"
+    # Remove files from object storage
+    ci_schedule_delete_objects_worker:
+      cron: "*/16 * * * *"
     # Stop expired environments
     environments_auto_stop_cron_worker:
       cron: "24 * * * *"
@@ -426,9 +474,17 @@ production: &base
     schedule_migrate_external_diffs_worker:
       cron: "15 * * * *"
 
+    # Update CI Platform Metrics daily
+    ci_platform_metrics_update_cron_worker:
+      cron: "47 9 * * *"
+
   # GitLab EE only jobs. These jobs are automatically enabled for an EE
   # installation, and ignored for a CE installation.
   ee_cron_jobs:
+    # Schedule snapshots for all devops adoption segments
+    analytics_devops_adoption_create_all_snapshots_worker:
+      cron: 0 4 * * *
+
     # Snapshot active users statistics
     historical_data_worker:
       cron: "0 12 * * *"
@@ -474,11 +530,6 @@ production: &base
     geo_registry_sync_worker:
       cron: "*/1 * * * *"
 
-    # GitLab Geo migrated local files clean up worker
-    # NOTE: This will only take effect if Geo is enabled (secondary nodes only)
-    geo_migrated_local_files_clean_up_worker:
-      cron: "15 */6 * * *"
-
     # Export pseudonymized data in CSV format for analysis
     pseudonymizer_worker:
       cron: "0 * * * *"
@@ -487,6 +538,16 @@ production: &base
     # NOTE: This will only take effect if elasticsearch is enabled.
     elastic_index_bulk_cron_worker:
       cron: "*/1 * * * *"
+
+    # Elasticsearch bulk updater for initial updates.
+    # NOTE: This will only take effect if elasticsearch is enabled.
+    elastic_index_initial_bulk_cron_worker:
+      cron: "*/1 * * * *"
+
+    # Elasticsearch reindexing worker
+    # NOTE: This will only take effect if elasticsearch is enabled.
+    elastic_index_initial_bulk_cron_worker:
+      cron: "*/10 * * * *"
 
   registry:
     # enabled: true
@@ -564,6 +625,9 @@ production: &base
   ldap:
     enabled: false
     prevent_ldap_sign_in: false
+
+    # File location to read encrypted secrets from
+    # secret_file: /mnt/gitlab/ldap.yaml.enc # Default: shared/encrypted_settings/ldap.yaml.enc
 
     # This setting controls the number of seconds between LDAP permission checks
     # for each user. After this time has expired for a given user, their next
@@ -807,6 +871,12 @@ production: &base
     # (default: accept any service name in keytab file)
     # service_principal_name: HTTP/gitlab.example.com@EXAMPLE.COM
 
+    # Kerberos realms/domains that are allowed to automatically link LDAP identities.
+    # By default, GitLab accepts a realm that matches the domain derived from the
+    # LDAP `base` DN. For example, `ou=users,dc=example,dc=com` would allow users
+    # with a realm matching `example.com`.
+    # simple_ldap_linking_allowed_realms: ['example.com','kerberos.example.com']
+
     # Dedicated port: Git before 2.4 does not fall back to Basic authentication if Negotiate fails.
     # To support both Basic and Negotiate methods with older versions of Git, configure
     # nginx to proxy GitLab on an extra port (e.g. 8443) and uncomment the following lines
@@ -852,6 +922,13 @@ production: &base
     # login, without having to do a manual login first and manually add SAML
     # (default: false)
     auto_link_saml_user: false
+
+    # Allow users with existing accounts to sign in and auto link their account via OmniAuth
+    # login, without having to do a manual login first and manually add OmniAuth. Links on email.
+    # Define the allowed providers using an array, e.g. ["saml", "twitter"], or as true/false to
+    # allow all providers or none.
+    # (default: false)
+    auto_link_user: ["saml", "twitter"]
 
     # Set different Omniauth providers as external so that all users creating accounts
     # via these providers will not be able to have access to internal projects. You
@@ -959,9 +1036,37 @@ production: &base
     # cas3:
     #   session_duration: 28800
 
+  # FortiAuthenticator settings
+  forti_authenticator:
+    # Allow using FortiAuthenticator as OTP provider
+    enabled: false
+
+    # Host and port of FortiAuthenticator instance
+    # host: forti_authenticator.example.com
+    # port: 443
+
+    # Username for accessing FortiAuthenticator API
+    # username: john
+
+    # Access token for FortiAuthenticator API
+    # access_token: 123s3cr3t456
+
+  # FortiToken Cloud settings
+  forti_token_cloud:
+    # Allow using FortiToken Cloud as OTP provider
+    enabled: false
+
+    # Client ID and Secret to access FortiToken Cloud API
+    # client_id: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_ID'
+    # client_secret: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_SECRET'
+
   # Shared file storage settings
   shared:
     # path: /mnt/gitlab # Default: shared
+
+  # Encrypted Settings configuration
+  encrypted_settings:
+    # path: /mnt/gitlab/encrypted_settings  # Default: shared/encrypted_settings
 
   # Gitaly settings
   gitaly:
@@ -1053,6 +1158,11 @@ production: &base
     # Default is '.gitlab_workhorse_secret' relative to Rails.root (i.e. root of the GitLab app).
     # secret_file: /home/git/gitlab/.gitlab_workhorse_secret
 
+  gitlab_kas:
+    # File that contains the secret key for verifying access for gitlab-kas.
+    # Default is '.gitlab_kas_secret' relative to Rails.root (i.e. root of the GitLab app).
+    # secret_file: /home/git/gitlab/.gitlab_kas_secret
+
   ## GitLab Elasticsearch settings
   elasticsearch:
     indexer_path: /home/git/gitlab-elasticsearch-indexer/
@@ -1073,14 +1183,6 @@ production: &base
     #   host: localhost
     #   port: 3808
 
-  ## ActionCable settings
-  action_cable:
-    # Enables handling of ActionCable requests on the Puma web workers
-    # When this is disabled, a standalone ActionCable server must be started
-    in_app: true
-    # Number of threads used to process ActionCable connection callbacks and channel actions
-    # worker_pool_size: 4
-
   ## Monitoring
   # Built in monitoring settings
   monitoring:
@@ -1093,6 +1195,7 @@ production: &base
     # Sidekiq exporter is webserver built in to Sidekiq to expose Prometheus metrics
     sidekiq_exporter:
     #  enabled: true
+    #  log_enabled: false
     #  address: localhost
     #  port: 8082
 
@@ -1110,8 +1213,12 @@ production: &base
   # yourself, and then update the values here.
   # https://docs.gitlab.com/ee/administration/monitoring/prometheus/
   prometheus:
-    # enable: true
-    # listen_address: 'localhost:9090'
+    # enabled: true
+    # server_address: 'localhost:9090'
+
+  ## Consul settings
+  consul:
+    # api_url: 'http://localhost:8500'
 
   shutdown:
     #  # blackout_seconds:
@@ -1129,9 +1236,12 @@ production: &base
     ## Google analytics. Uncomment if you want it
     # google_analytics_id: '_your_tracking_id'
 
-    ## Piwik analytics.
-    # piwik_url: '_your_piwik_url'
-    # piwik_site_id: '_your_piwik_site_id'
+    ## Google tag manager
+    # google_tag_manager_id: '_your_tracking_id'
+
+    ## Matomo analytics.
+    # matomo_url: '_your_matomo_url'
+    # matomo_site_id: '_your_matomo_site_id'
 
   rack_attack:
     git_basic_auth:
@@ -1179,7 +1289,7 @@ test:
     # has been pushed).
     # when: always
     # The location where external diffs are stored (default: shared/external-diffs).
-    # storage_path: shared/external-diffs
+    storage_path: tmp/tests/external-diffs
     object_store:
       enabled: false
       remote_directory: external-diffs # The bucket name
@@ -1229,7 +1339,7 @@ test:
     storage_path: tmp/tests/terraform_state
     object_store:
       enabled: false
-      remote_directory: terraform_state
+      remote_directory: terraform
       connection:
         provider: AWS # Only AWS supported at the moment
         aws_access_key_id: AWS_ACCESS_KEY_ID
@@ -1267,11 +1377,19 @@ test:
     # user: YOUR_USERNAME
   pages:
     path: tmp/tests/pages
+    object_store:
+      enabled: false
+      remote_directory: pages # The bucket name
+      connection:
+        provider: AWS
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
   repositories:
     storages:
       default:
         path: tmp/tests/repositories/
-        gitaly_address: unix:tmp/tests/gitaly/gitaly.socket
+        gitaly_address: unix:tmp/tests/gitaly/praefect.socket
 
   gitaly:
     client_path: tmp/tests/gitaly
@@ -1365,6 +1483,11 @@ test:
           app_id: 'YOUR_CLIENT_ID',
           app_secret: 'YOUR_CLIENT_SECRET'
         }
+      - { name: 'atlassian_oauth2',
+          app_id: 'YOUR_CLIENT_ID',
+          app_secret: 'YOUR_CLIENT_SECRET',
+          args: { scope: 'offline_access read:jira-user read:jira-work', prompt: 'consent' }
+      }
   ldap:
     enabled: false
     servers:
@@ -1379,8 +1502,8 @@ test:
         group_base: 'ou=groups,dc=example,dc=com'
         admin_group: ''
   prometheus:
-    enable: true
-    listen_address: 'localhost:9090'
+    enabled: true
+    server_address: 'localhost:9090'
 
 staging:
   <<: *base

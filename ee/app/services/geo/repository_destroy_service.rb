@@ -3,10 +3,14 @@
 module Geo
   class RepositoryDestroyService
     include ::Gitlab::Geo::LogHelpers
+    include ::Gitlab::Utils::StrongMemoize
 
     attr_reader :id, :name, :disk_path, :repository_storage
 
-    def initialize(id, name, disk_path, repository_storage)
+    # There is a possibility that the replicable's record does not exist
+    # anymore. In this case, you need to pass the optional parameters
+    # explicitly.
+    def initialize(id, name = nil, disk_path = nil, repository_storage = nil)
       @id = id
       @name = name
       @disk_path = disk_path
@@ -29,25 +33,36 @@ module Geo
     private
 
     def destroy_project
-      ::Projects::DestroyService.new(deleted_project, nil).geo_replicate
+      # We should skip if we had to rebuild the project, but we don't
+      # have the information that our service class requires.
+      return if project.is_a?(Geo::DeletedProject) && !project.valid?
+
+      ::Projects::DestroyService.new(project, nil).geo_replicate
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def destroy_registry_entries
-      ::Geo::ProjectRegistry.where(project_id: id).delete_all
-      ::Geo::DesignRegistry.where(project_id: id).delete_all
+      ::Geo::ProjectRegistry.model_id_in(id).delete_all
+      ::Geo::DesignRegistry.model_id_in(id).delete_all
 
-      log_info("Registry entries removed", project_id: id)
+      log_info('Registry entries removed', project_id: id)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
-    def deleted_project
-      # We don't have access to the original model anymore, so we are
-      # rebuilding only what our service class requires
-      ::Geo::DeletedProject.new(id: id,
-                                name: name,
-                                disk_path: disk_path,
-                                repository_storage: repository_storage)
+    def project
+      strong_memoize(:project) do
+        Project.find(id)
+      rescue ActiveRecord::RecordNotFound => e
+        # When cleaning up project/registries, there are some cases where
+        # the replicable record does not exist anymore. So, we try to
+        # rebuild it with only what our service class requires.
+        log_error('Could not find project', e.message)
+
+        ::Geo::DeletedProject.new(
+          id: id,
+          name: name,
+          disk_path: disk_path,
+          repository_storage: repository_storage
+        )
+      end
     end
   end
 end

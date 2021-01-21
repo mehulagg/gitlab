@@ -14,6 +14,8 @@ module Geo
       Sidekiq.logger.warn "Failed #{msg['class']} with #{msg['args']}: #{msg['error_message']}"
     end
 
+    loggable_arguments 1
+
     # rubocop: disable CodeReuse/ActiveRecord
     def perform(project_id, options = {})
       options.symbolize_keys!

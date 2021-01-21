@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Config::Entry::Configurable do
+RSpec.describe Gitlab::Config::Entry::Configurable do
   let(:entry) do
     Class.new(Gitlab::Config::Entry::Node) do
       include Gitlab::Config::Entry::Configurable
@@ -15,7 +15,7 @@ describe Gitlab::Config::Entry::Configurable do
 
   describe 'validations' do
     context 'when entry is a hash' do
-      let(:instance) { entry.new(key: 'value') }
+      let(:instance) { entry.new({ key: 'value' }) }
 
       it 'correctly validates an instance' do
         expect(instance).to be_valid

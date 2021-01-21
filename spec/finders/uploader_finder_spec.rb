@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UploaderFinder do
+RSpec.describe UploaderFinder do
   describe '#execute' do
     let(:project) { build(:project) }
     let(:upload) { create(:upload, :issuable_upload, :with_file) }
@@ -12,7 +12,7 @@ describe UploaderFinder do
     subject { described_class.new(project, secret, file_name).execute }
 
     before do
-      upload.save
+      upload.save!
     end
 
     context 'when successful' do
@@ -32,7 +32,7 @@ describe UploaderFinder do
     context 'when path traversal in file name' do
       before do
         upload.path = '/uploads/11111111111111111111111111111111/../../../../../../../../../../../../../../etc/passwd)'
-        upload.save
+        upload.save!
       end
 
       it 'returns nil' do

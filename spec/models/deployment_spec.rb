@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Deployment do
+RSpec.describe Deployment do
   subject { build(:deployment) }
 
   it { is_expected.to belong_to(:project).required }
@@ -44,10 +44,14 @@ describe Deployment do
 
   describe 'modules' do
     it_behaves_like 'AtomicInternalId' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:deployable) { create(:ci_build, project: project) }
+      let_it_be(:environment) { create(:environment, project: project) }
+
       let(:internal_id_attribute) { :iid }
-      let(:instance) { build(:deployment) }
+      let(:instance) { build(:deployment, deployable: deployable, environment: environment) }
       let(:scope) { :project }
-      let(:scope_attrs) { { project: instance.project } }
+      let(:scope_attrs) { { project: project } }
       let(:usage) { :deployments }
     end
   end
@@ -94,15 +98,27 @@ describe Deployment do
     context 'when deployment runs' do
       let(:deployment) { create(:deployment) }
 
-      before do
-        deployment.run!
-      end
-
       it 'starts running' do
-        Timecop.freeze do
+        freeze_time do
+          deployment.run!
+
           expect(deployment).to be_running
           expect(deployment.finished_at).to be_nil
         end
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
+
+        deployment.run!
+      end
+
+      it 'executes Deployments::DropOlderDeploymentsWorker asynchronously' do
+        expect(Deployments::DropOlderDeploymentsWorker)
+            .to receive(:perform_async).once.with(deployment.id)
+
+        deployment.run!
       end
     end
 
@@ -110,7 +126,7 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.succeed!
 
           expect(deployment).to be_success
@@ -118,15 +134,15 @@ describe Deployment do
         end
       end
 
-      it 'executes Deployments::SuccessWorker asynchronously' do
-        expect(Deployments::SuccessWorker)
+      it 'executes Deployments::UpdateEnvironmentWorker asynchronously' do
+        expect(Deployments::UpdateEnvironmentWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
@@ -137,7 +153,7 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.drop!
 
           expect(deployment).to be_failed
@@ -145,9 +161,16 @@ describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
+
+        deployment.drop!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
@@ -157,7 +180,7 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.cancel!
 
           expect(deployment).to be_canceled
@@ -165,11 +188,73 @@ describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
+
+        deployment.cancel!
+      end
+    end
+
+    context 'when deployment was skipped' do
+      let(:deployment) { create(:deployment, :running) }
+
+      it 'has correct status' do
+        deployment.skip!
+
+        expect(deployment).to be_skipped
+        expect(deployment.finished_at).to be_nil
+      end
+
+      it 'does not execute Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
+          .not_to receive(:perform_async).with(deployment.id)
+
+        deployment.skip!
+      end
+
+      it 'does not execute Deployments::ExecuteHooksWorker' do
+        expect(Deployments::ExecuteHooksWorker)
+            .not_to receive(:perform_async).with(deployment.id)
+
+        deployment.skip!
+      end
+    end
+
+    describe 'synching status to Jira' do
+      let(:deployment) { create(:deployment) }
+
+      let(:worker) { ::JiraConnect::SyncDeploymentsWorker }
+
+      it 'calls the worker on creation' do
+        expect(worker).to receive(:perform_async).with(Integer)
+
+        deployment
+      end
+
+      it 'does not call the worker for skipped deployments' do
+        expect(deployment).to be_present # warm-up, ignore the creation trigger
+
+        expect(worker).not_to receive(:perform_async)
+
+        deployment.skip!
+      end
+
+      %i[run! succeed! drop! cancel!].each do |event|
+        context "when we call pipeline.#{event}" do
+          it 'triggers a Jira synch worker' do
+            expect(worker).to receive(:perform_async).with(deployment.id)
+
+            deployment.send(event)
+          end
+        end
       end
     end
   end
@@ -290,6 +375,7 @@ describe Deployment do
         deployment2 = create(:deployment, status: :running )
         create(:deployment, status: :failed )
         create(:deployment, status: :canceled )
+        create(:deployment, status: :skipped)
 
         is_expected.to contain_exactly(deployment1, deployment2)
       end
@@ -316,8 +402,68 @@ describe Deployment do
       it 'retrieves deployments with deployable builds' do
         with_deployable = create(:deployment)
         create(:deployment, deployable: nil)
+        create(:deployment, deployable_type: 'CommitStatus', deployable_id: non_existing_record_id)
 
         is_expected.to contain_exactly(with_deployable)
+      end
+    end
+
+    describe 'finished_between' do
+      subject { described_class.finished_between(start_time, end_time) }
+
+      let_it_be(:start_time) { DateTime.new(2017) }
+      let_it_be(:end_time) { DateTime.new(2019) }
+      let_it_be(:deployment_2016) { create(:deployment, finished_at: DateTime.new(2016)) }
+      let_it_be(:deployment_2017) { create(:deployment, finished_at: DateTime.new(2017)) }
+      let_it_be(:deployment_2018) { create(:deployment, finished_at: DateTime.new(2018)) }
+      let_it_be(:deployment_2019) { create(:deployment, finished_at: DateTime.new(2019)) }
+      let_it_be(:deployment_2020) { create(:deployment, finished_at: DateTime.new(2020)) }
+
+      it 'retrieves deployments that finished between the specified times' do
+        is_expected.to contain_exactly(deployment_2017, deployment_2018)
+      end
+    end
+
+    describe 'visible' do
+      subject { described_class.visible }
+
+      it 'retrieves the visible deployments' do
+        deployment1 = create(:deployment, status: :running)
+        deployment2 = create(:deployment, status: :success)
+        deployment3 = create(:deployment, status: :failed)
+        deployment4 = create(:deployment, status: :canceled)
+        create(:deployment, status: :skipped)
+
+        is_expected.to contain_exactly(deployment1, deployment2, deployment3, deployment4)
+      end
+    end
+  end
+
+  describe 'latest_for_sha' do
+    subject { described_class.latest_for_sha(sha) }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:commits) { project.repository.commits('master', limit: 2) }
+    let_it_be(:deployments) { commits.reverse.map { |commit| create(:deployment, project: project, sha: commit.id) } }
+    let(:sha) { commits.map(&:id) }
+
+    it 'finds the latest deployment with sha' do
+      is_expected.to eq(deployments.last)
+    end
+
+    context 'when sha is old' do
+      let(:sha) { commits.last.id }
+
+      it 'finds the latest deployment with sha' do
+        is_expected.to eq(deployments.first)
+      end
+    end
+
+    context 'when sha is nil' do
+      let(:sha) { nil }
+
+      it 'returns nothing' do
+        is_expected.to be_nil
       end
     end
   end
@@ -576,15 +722,16 @@ describe Deployment do
       expect(deploy).to be_success
     end
 
-    it 'schedules SuccessWorker and FinishedWorker when finishing a deploy' do
-      expect(Deployments::SuccessWorker).to receive(:perform_async)
-      expect(Deployments::FinishedWorker).to receive(:perform_async)
+    it 'schedules workers when finishing a deploy' do
+      expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+      expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      expect(Deployments::ExecuteHooksWorker).to receive(:perform_async)
 
       deploy.update_status('success')
     end
 
     it 'updates finished_at when transitioning to a finished status' do
-      Timecop.freeze do
+      freeze_time do
         deploy.update_status('success')
 
         expect(deploy.read_attribute(:finished_at)).to eq(Time.current)

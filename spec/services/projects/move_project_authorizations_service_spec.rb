@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MoveProjectAuthorizationsService do
+RSpec.describe Projects::MoveProjectAuthorizationsService do
   let!(:user) { create(:user) }
   let(:project_with_users) { create(:project, namespace: user.namespace) }
   let(:target_project) { create(:project, namespace: user.namespace) }
@@ -49,7 +49,7 @@ describe Projects::MoveProjectAuthorizationsService do
         target_project.add_maintainer(developer_user)
         target_project.add_developer(reporter_user)
 
-        subject.execute(project_with_users, options)
+        subject.execute(project_with_users, **options)
 
         expect(project_with_users.project_authorizations.count).not_to eq 0
       end

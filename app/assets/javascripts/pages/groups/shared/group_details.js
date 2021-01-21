@@ -2,15 +2,16 @@
 
 import { getPagePath, getDashPath } from '~/lib/utils/common_utils';
 import { ACTIVE_TAB_SHARED, ACTIVE_TAB_ARCHIVED } from '~/groups/constants';
-import NewGroupChild from '~/groups/new_group_child';
 import notificationsDropdown from '~/notifications_dropdown';
 import NotificationsForm from '~/notifications_form';
 import ProjectsList from '~/projects_list';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import GroupTabs from './group_tabs';
+import initInviteMembersBanner from '~/groups/init_invite_members_banner';
+import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
 
 export default function initGroupDetails(actionName = 'show') {
-  const newGroupChildWrapper = document.querySelector('.js-new-project-subgroup');
   const loadableActions = [ACTIVE_TAB_SHARED, ACTIVE_TAB_ARCHIVED];
   const dashPath = getDashPath();
   let action = loadableActions.includes(dashPath) ? dashPath : getPagePath(1);
@@ -24,7 +25,7 @@ export default function initGroupDetails(actionName = 'show') {
   notificationsDropdown();
   new ProjectsList();
 
-  if (newGroupChildWrapper) {
-    new NewGroupChild(newGroupChildWrapper);
-  }
+  initInviteMembersBanner();
+  initInviteMembersModal();
+  initInviteMembersTrigger();
 }

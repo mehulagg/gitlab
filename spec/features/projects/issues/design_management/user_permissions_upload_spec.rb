@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User design permissions', :js do
+RSpec.describe 'User design permissions', :js do
   include DesignManagementTestHelpers
 
   let(:project) { create(:project_empty_repo, :public) }
@@ -12,10 +12,6 @@ describe 'User design permissions', :js do
     enable_design_management
 
     visit project_issue_path(project, issue)
-
-    click_link 'Designs'
-
-    wait_for_requests
   end
 
   it 'user does not have permissions to upload design' do

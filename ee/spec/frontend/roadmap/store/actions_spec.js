@@ -1,15 +1,15 @@
 import MockAdapter from 'axios-mock-adapter';
+import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
+import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
 import * as actions from 'ee/roadmap/store/actions';
 import * as types from 'ee/roadmap/store/mutation_types';
 import defaultState from 'ee/roadmap/store/state';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import * as epicUtils from 'ee/roadmap/utils/epic_utils';
 import * as roadmapItemUtils from 'ee/roadmap/utils/roadmap_item_utils';
-import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
-import groupMilestones from 'ee/roadmap/queries/groupMilestones.query.graphql';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
 import {
   mockGroupId,
   basePath,
@@ -155,7 +155,21 @@ describe('Roadmap Vuex Actions', () => {
             payload: [{ ...mockFormattedEpic, newEpic: true }],
           },
         ],
-        [],
+        [
+          {
+            type: 'initItemChildrenFlags',
+            payload: {
+              epics: [
+                {
+                  ...mockFormattedEpic,
+                  startDateOutOfRange: true,
+                  endDateOutOfRange: false,
+                  newEpic: true,
+                },
+              ],
+            },
+          },
+        ],
       );
     });
   });
@@ -318,7 +332,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('refreshEpicDates', () => {
     it('should update epics after refreshing epic dates to match with updated timeframe', () => {
-      const epics = rawEpics.map(epic =>
+      const epics = rawEpics.map((epic) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           epic,
           state.timeframeStartDate,
@@ -733,7 +747,7 @@ describe('Roadmap Vuex Actions', () => {
 
   describe('refreshMilestoneDates', () => {
     it('should update milestones after refreshing milestone dates to match with updated timeframe', () => {
-      const milestones = rawMilestones.map(milestone =>
+      const milestones = rawMilestones.map((milestone) =>
         roadmapItemUtils.formatRoadmapItemDetails(
           milestone,
           state.timeframeStartDate,

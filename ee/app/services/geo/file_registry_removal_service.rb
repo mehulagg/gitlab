@@ -26,15 +26,8 @@ module Geo
           break
         end
 
-        if file_path && File.exist?(file_path)
-          log_info('Unlinking file', file_path: file_path)
-          File.unlink(file_path)
-        else
-          log_error('Unable to unlink file because file path is unknown. A file may be orphaned', object_type: object_type, object_db_id: object_db_id)
-        end
-
-        log_info('Removing file registry', file_registry_id: file_registry.id)
-        file_registry.destroy
+        destroy_file
+        destroy_registry
 
         log_info('Local file & registry removed')
       end
@@ -52,16 +45,48 @@ module Geo
           ::Geo::JobArtifactRegistry.find_by(artifact_id: object_db_id)
         elsif lfs?
           ::Geo::LfsObjectRegistry.find_by(lfs_object_id: object_db_id)
-        else
+        elsif user_upload?
           ::Geo::UploadRegistry.find_by(file_type: object_type, file_id: object_db_id)
+        elsif replicator
+          replicator.registry
         end
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
+    def destroy_file
+      if file_path && File.exist?(file_path)
+        log_info('Unlinking file', file_path: file_path)
+        File.unlink(file_path)
+      else
+        log_error('Unable to unlink file because file path is unknown. A file may be orphaned', object_type: object_type, object_db_id: object_db_id)
+      end
+    end
+
+    def destroy_registry
+      log_info('Removing file registry', file_registry_id: file_registry.id)
+
+      file_registry.destroy
+    end
+
+    def replicator
+      strong_memoize(:replicator) do
+        Gitlab::Geo::Replicator.for_replicable_params(replicable_name: object_type.to_s, replicable_id: object_db_id)
+      rescue NotImplementedError
+        nil
+      end
+    end
+
+    def blob_path_from_replicator
+      replicator.blob_path
+    rescue ActiveRecord::RecordNotFound
+      nil
+    end
+
     def file_path
       strong_memoize(:file_path) do
         next @object_file_path if @object_file_path
+        next blob_path_from_replicator if replicator
         # When local storage is used, just rely on the existing methods
         next if file_uploader.nil?
         next file_uploader.file.path if file_uploader.object_store == ObjectStorage::Store::LOCAL

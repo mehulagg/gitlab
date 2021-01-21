@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import WorkInProgress from '~/vue_merge_request_widget/components/states/work_in_progress.vue';
 import eventHub from '~/vue_merge_request_widget/event_hub';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -47,12 +47,12 @@ describe('Wip', () => {
     };
 
     describe('handleRemoveWIP', () => {
-      it('should make a request to service and handle response', done => {
+      it('should make a request to service and handle response', (done) => {
         const vm = createComponent();
 
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
         jest.spyOn(vm.service, 'removeWIP').mockReturnValue(
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolve({
               data: mrObj,
             });
@@ -84,15 +84,15 @@ describe('Wip', () => {
 
     it('should have correct elements', () => {
       expect(el.classList.contains('mr-widget-body')).toBeTruthy();
-      expect(el.innerText).toContain('This is a Work in Progress');
+      expect(el.innerText).toContain('This merge request is still a draft.');
       expect(el.querySelector('button').getAttribute('disabled')).toBeTruthy();
       expect(el.querySelector('button').innerText).toContain('Merge');
       expect(el.querySelector('.js-remove-wip').innerText.replace(/\s\s+/g, ' ')).toContain(
-        'Resolve WIP status',
+        'Mark as ready',
       );
     });
 
-    it('should not show removeWIP button is user cannot update MR', done => {
+    it('should not show removeWIP button is user cannot update MR', (done) => {
       vm.mr.removeWIPPath = '';
 
       Vue.nextTick(() => {

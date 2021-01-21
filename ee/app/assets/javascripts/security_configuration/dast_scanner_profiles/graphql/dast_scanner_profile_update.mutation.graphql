@@ -1,0 +1,6 @@
+mutation dastScannerProfileUpdate($input: DastScannerProfileUpdateInput!) {
+  dastScannerProfileUpdate(input: $input) {
+    id
+    errors
+  }
+}

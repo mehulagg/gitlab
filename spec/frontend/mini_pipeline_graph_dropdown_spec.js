@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import MiniPipelineGraph from '~/mini_pipeline_graph_dropdown';
-import waitForPromises from './helpers/wait_for_promises';
 
 describe('Mini Pipeline Graph Dropdown', () => {
   preloadFixtures('static/mini_dropdown_graph.html');
@@ -64,12 +64,12 @@ describe('Mini Pipeline Graph Dropdown', () => {
       expect(ajaxSpy.mock.calls[0][0]).toEqual('foobar');
     });
 
-    it('should not close when user uses cmd/ctrl + click', done => {
+    it('should not close when user uses cmd/ctrl + click', (done) => {
       mock.onGet('foobar').reply(200, {
         html: `<li>
           <a class="mini-pipeline-graph-dropdown-item" href="#">
             <span class="ci-status-icon ci-status-icon-failed"></span>
-            <span class="ci-build-text">build</span>
+            <span>build</span>
           </a>
           <a class="ci-action-icon-wrapper js-ci-action-icon" href="#"></a>
         </li>`,
@@ -90,7 +90,7 @@ describe('Mini Pipeline Graph Dropdown', () => {
         .catch(done.fail);
     });
 
-    it('should close the dropdown when request returns an error', done => {
+    it('should close the dropdown when request returns an error', (done) => {
       mock.onGet('foobar').networkError();
 
       new MiniPipelineGraph({ container: '.js-builds-dropdown-tests' }).bindEvents();

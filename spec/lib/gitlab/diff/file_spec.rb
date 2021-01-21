@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::File do
+RSpec.describe Gitlab::Diff::File do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -800,6 +800,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do
@@ -842,6 +843,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do

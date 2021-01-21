@@ -2,15 +2,17 @@
 import { __ } from '~/locale';
 import ListLabel from '~/boards/models/label';
 import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
-import BoardMilestoneSelect from './milestone_select.vue';
-import BoardWeightSelect from './weight_select.vue';
 import AssigneeSelect from './assignee_select.vue';
+import BoardMilestoneSelect from './milestone_select.vue';
+import BoardScopeCurrentIteration from './board_scope_current_iteration.vue';
+import BoardWeightSelect from './weight_select.vue';
 
 export default {
   components: {
     AssigneeSelect,
     BoardLabelsSelect,
     BoardMilestoneSelect,
+    BoardScopeCurrentIteration,
     BoardWeightSelect,
   },
 
@@ -27,11 +29,11 @@ export default {
       type: Object,
       required: true,
     },
-    milestonePath: {
+    labelsPath: {
       type: String,
       required: true,
     },
-    labelsPath: {
+    labelsWebUrl: {
       type: String,
       required: true,
     },
@@ -73,7 +75,7 @@ export default {
     handleLabelClick(label) {
       if (label.isAny) {
         this.board.labels = [];
-      } else if (!this.board.labels.find(l => l.id === label.id)) {
+      } else if (!this.board.labels.find((l) => l.id === label.id)) {
         this.board.labels.push(
           new ListLabel({
             id: label.id,
@@ -84,7 +86,7 @@ export default {
         );
       } else {
         let { labels } = this.board;
-        labels = labels.filter(selected => selected.id !== label.id);
+        labels = labels.filter((selected) => selected.id !== label.id);
         this.board.labels = labels;
       }
     },
@@ -94,32 +96,41 @@ export default {
 
 <template>
   <div data-qa-selector="board_scope_modal">
-    <div v-if="canAdminBoard" class="media append-bottom-10">
-      <label class="form-section-title label-bold media-body">{{ __('Board scope') }}</label>
+    <div v-if="canAdminBoard" class="media">
+      <label class="label-bold gl-font-lg media-body">{{ __('Scope') }}</label>
       <button v-if="collapseScope" type="button" class="btn" @click="expanded = !expanded">
         {{ expandButtonText }}
       </button>
     </div>
-    <p class="text-secondary append-bottom-10">
+    <p class="text-secondary gl-mb-3">
       {{ __('Board scope affects which issues are displayed for anyone who visits this board') }}
     </p>
     <div v-if="!collapseScope || expanded">
       <board-milestone-select
         :board="board"
-        :milestone-path="milestonePath"
+        :group-id="groupId"
+        :project-id="projectId"
         :can-edit="canAdminBoard"
+      />
+
+      <board-scope-current-iteration
+        :can-admin-board="canAdminBoard"
+        :iteration-id="board.iteration_id"
+        @set-iteration="$emit('set-iteration', $event)"
       />
 
       <board-labels-select
         :context="board"
         :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
         :can-edit="canAdminBoard"
+        :show-create="canAdminBoard"
         :enable-scoped-labels="enableScopedLabels"
+        variant="standalone"
         ability-name="issue"
         @onLabelClick="handleLabelClick"
+        >{{ __('Any label') }}</board-labels-select
       >
-        {{ __('Any label') }}
-      </board-labels-select>
 
       <assignee-select
         :board="board"

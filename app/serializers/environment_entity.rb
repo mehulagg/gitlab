@@ -3,7 +3,15 @@
 class EnvironmentEntity < Grape::Entity
   include RequestAwareEntity
 
+  UNNECESSARY_ENTRIES_FOR_UPCOMING_DEPLOYMENT =
+    %i[manual_actions scheduled_actions playable_build cluster].freeze
+
   expose :id
+
+  expose :global_id do |environment|
+    environment.to_global_id.to_s
+  end
+
   expose :name
   expose :state
   expose :external_url
@@ -11,6 +19,12 @@ class EnvironmentEntity < Grape::Entity
   expose :name_without_type
   expose :last_deployment, using: DeploymentEntity
   expose :stop_action_available?, as: :has_stop_action
+  expose :rollout_status, if: -> (*) { can_read_deploy_board? }, using: RolloutStatusEntity
+
+  expose :upcoming_deployment, expose_nil: false do |environment, ops|
+    DeploymentEntity.represent(environment.upcoming_deployment,
+      ops.merge(except: UNNECESSARY_ENTRIES_FOR_UPCOMING_DEPLOYMENT))
+  end
 
   expose :metrics_path, if: -> (*) { environment.has_metrics? } do |environment|
     metrics_project_environment_path(environment.project, environment)
@@ -89,6 +103,10 @@ class EnvironmentEntity < Grape::Entity
 
   def can_read_pod_logs?
     can?(current_user, :read_pod_logs, environment.project)
+  end
+
+  def can_read_deploy_board?
+    can?(current_user, :read_deploy_board, environment.project)
   end
 
   def cluster_platform_kubernetes?

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Getting Grafana Integration' do
+RSpec.describe 'Getting Grafana Integration' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -45,7 +45,6 @@ describe 'Getting Grafana Integration' do
 
       it_behaves_like 'a working graphql query'
 
-      specify { expect(integration_data['token']).to eql grafana_integration.masked_token }
       specify { expect(integration_data['grafanaUrl']).to eql grafana_integration.grafana_url }
 
       specify do

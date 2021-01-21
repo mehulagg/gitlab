@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PipelinePolicy, :models do
+RSpec.describe Ci::PipelinePolicy, :models do
   let(:user) { create(:user) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project) }
 
@@ -45,7 +45,7 @@ describe Ci::PipelinePolicy, :models do
           create(:protected_tag, :no_one_can_create,
                  name: pipeline.ref, project: project)
 
-          pipeline.update(tag: true)
+          pipeline.update!(tag: true)
         end
 
         it 'does not include ability to update pipeline' do

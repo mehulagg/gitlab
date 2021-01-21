@@ -1,12 +1,12 @@
 <script>
-import { GlDeprecatedButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 const ANY_WEIGHT = 'Any weight';
 const NO_WEIGHT = 'None';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
   },
@@ -49,17 +49,15 @@ export default {
       this.dropdownHidden = false;
       this.$refs.dropdown.$children[0].show();
     },
-    selectWeight({ target: { value: weight } }) {
+    selectWeight(weight) {
       this.board.weight = this.weightInt(weight);
       this.dropdownHidden = true;
     },
     weightInt(weight) {
-      if (weight > 0) {
-        return parseInt(weight, 10);
+      if (weight >= 0) {
+        return weight;
       } else if (weight === NO_WEIGHT) {
         return -2;
-      } else if (weight === '0') {
-        return 0;
       }
       return -1;
     },
@@ -69,16 +67,11 @@ export default {
 
 <template>
   <div class="block weight">
-    <div class="title append-bottom-10">
+    <div class="title gl-mb-3">
       {{ __('Weight') }}
-      <gl-deprecated-button
-        v-if="canEdit"
-        variant="blank"
-        class="float-right"
-        @click="showDropdown"
-      >
+      <gl-button v-if="canEdit" variant="link" class="float-right" @click="showDropdown">
         {{ __('Edit') }}
-      </gl-deprecated-button>
+      </gl-button>
     </div>
     <div :class="valueClass" :hidden="!dropdownHidden" class="value">{{ valueText }}</div>
 
@@ -86,15 +79,17 @@ export default {
       ref="dropdown"
       :hidden="dropdownHidden"
       :text="valueText"
-      class="w-100"
-      menu-class="w-100"
+      block
       toggle-class="d-flex justify-content-between"
     >
-      <div ref="weight-select" @click="selectWeight">
-        <gl-dropdown-item v-for="weight in weights" :key="weight" :value="weight">
-          {{ weight }}
-        </gl-dropdown-item>
-      </div>
+      <gl-dropdown-item
+        v-for="weight in weights"
+        :key="weight"
+        :value="weight"
+        @click="selectWeight(weight)"
+      >
+        {{ weight }}
+      </gl-dropdown-item>
     </gl-dropdown>
   </div>
 </template>

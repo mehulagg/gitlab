@@ -195,4 +195,77 @@ RSpec.describe GlobalPolicy do
       end
     end
   end
+
+  describe 'list_removable_projects' do
+    context 'when user is an admin', :enable_admin_mode do
+      let_it_be(:current_user) { admin }
+
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
+      end
+
+      context 'when licensed feature is enabled' do
+        let(:licensed?) { true }
+
+        it { is_expected.to be_allowed(:list_removable_projects) }
+      end
+
+      context 'when licensed feature is enabled' do
+        let(:licensed?) { false }
+
+        it { is_expected.to be_disallowed(:list_removable_projects) }
+      end
+    end
+
+    context 'when user is a normal user' do
+      let_it_be(:current_user) { create(:user) }
+
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
+      end
+
+      context 'when licensed feature is enabled' do
+        let(:licensed?) { true }
+
+        it { is_expected.to be_disallowed(:list_removable_projects) }
+      end
+
+      context 'when licensed feature is enabled' do
+        let(:licensed?) { false }
+
+        it { is_expected.to be_disallowed(:list_removable_projects) }
+      end
+    end
+  end
+
+  describe ':export_user_permissions', :enable_admin_mode do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :export_user_permissions }
+
+    let_it_be(:admin) { build_stubbed(:admin) }
+    let_it_be(:guest) { build_stubbed(:user) }
+
+    where(:role, :flag_enabled, :licensed, :allowed) do
+      :admin      | true  | true  | true
+      :admin      | true  | false | false
+      :admin      | false | true  | false
+      :admin      | false | false | false
+      :guest      | true  | true  | false
+      :guest      | true  | false | false
+      :guest      | false | true  | false
+      :guest      | false | false | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        stub_licensed_features(export_user_permissions: licensed)
+        stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
 end

@@ -2,14 +2,10 @@
 
 require 'spec_helper'
 
-describe 'Copy as GFM', :js do
+RSpec.describe 'Copy as GFM', :js do
   include MarkupHelper
   include RepoHelpers
   include ActionView::Helpers::JavaScriptHelper
-
-  before do
-    sign_in(create(:admin))
-  end
 
   describe 'Copying rendered GFM' do
     before do
@@ -18,6 +14,9 @@ describe 'Copy as GFM', :js do
       # `markdown` helper expects a `@project` variable
       @project = @feat.project
 
+      user = create(:user)
+      @project.add_maintainer(user)
+      sign_in(user)
       visit project_issue_path(@project, @feat.issue)
     end
 
@@ -30,13 +29,11 @@ describe 'Copy as GFM', :js do
     it 'works', :aggregate_failures do
       verify(
         'nesting',
-
         '> 1. [x] **[$`2 + 2`$ {-=-}{+=+} 2^2 ~~:thumbsup:~~](http://google.com)**'
       )
 
       verify(
         'a real world example from the gitlab-ce README',
-
         <<~GFM
           # GitLab
 
@@ -103,19 +100,16 @@ describe 'Copy as GFM', :js do
 
       verify(
         'InlineDiffFilter',
-
         '{-Deleted text-}',
         '{+Added text+}'
       )
 
       verify(
         'TaskListFilter',
-
         <<~GFM,
           * [ ] Unchecked task
           * [x] Checked task
         GFM
-
         <<~GFM
           1. [ ] Unchecked ordered task
           1. [x] Checked ordered task
@@ -124,7 +118,6 @@ describe 'Copy as GFM', :js do
 
       verify(
         'ReferenceFilter',
-
         # issue reference
         @feat.issue.to_reference,
         # full issue reference
@@ -141,13 +134,11 @@ describe 'Copy as GFM', :js do
 
       verify(
         'AutolinkFilter',
-
         'https://example.com'
       )
 
       verify(
         'TableOfContentsFilter',
-
         <<~GFM,
           [[_TOC_]]
 
@@ -155,64 +146,53 @@ describe 'Copy as GFM', :js do
 
           ## Heading 2
         GFM
-
         pipeline: :wiki,
         wiki: @project.wiki
       )
 
       verify(
         'EmojiFilter',
-
         ':thumbsup:'
       )
 
       verify(
         'ImageLinkFilter',
-
         '![Image](https://example.com/image.png)'
       )
 
       verify_media_with_partial_path(
         '[test.txt](/uploads/a123/image.txt)',
-
         project_media_uri(@project, '/uploads/a123/image.txt')
       )
 
       verify_media_with_partial_path(
         '![Image](/uploads/a123/image.png)',
-
         project_media_uri(@project, '/uploads/a123/image.png')
       )
 
       verify(
         'VideoLinkFilter',
-
         '![Video](https://example.com/video.mp4)'
       )
 
       verify_media_with_partial_path(
         '![Video](/uploads/a123/video.mp4)',
-
         project_media_uri(@project, '/uploads/a123/video.mp4')
       )
 
       verify(
         'AudioLinkFilter',
-
         '![Audio](https://example.com/audio.wav)'
       )
 
       verify_media_with_partial_path(
         '![Audio](/uploads/a123/audio.wav)',
-
         project_media_uri(@project, '/uploads/a123/audio.wav')
       )
 
       verify(
         'MathFilter: math as converted from GFM to HTML',
-
         '$`c = \pm\sqrt{a^2 + b^2}`$',
-
         # math block
         <<~GFM
           ```math
@@ -334,7 +314,6 @@ describe 'Copy as GFM', :js do
 
       verify(
         'MermaidFilter: mermaid as converted from GFM to HTML',
-
         <<~GFM
           ```mermaid
           graph TD;
@@ -429,7 +408,6 @@ describe 'Copy as GFM', :js do
 
       verify(
         'SuggestionFilter: suggestion as converted from GFM to HTML',
-
         <<~GFM
           ```suggestion
           New
@@ -491,7 +469,6 @@ describe 'Copy as GFM', :js do
 
       verify(
         'SanitizationFilter',
-
         <<~GFM
         <sub>sub</sub>
 
@@ -527,13 +504,11 @@ describe 'Copy as GFM', :js do
 
       verify(
         'SanitizationFilter',
-
         <<~GFM,
           ```
           Plain text
           ```
         GFM
-
         <<~GFM,
           ```ruby
           def foo
@@ -541,7 +516,6 @@ describe 'Copy as GFM', :js do
           end
           ```
         GFM
-
         <<~GFM
           Foo
 
@@ -553,27 +527,19 @@ describe 'Copy as GFM', :js do
 
       verify(
         'MarkdownFilter',
-
         "Line with two spaces at the end  \nto insert a linebreak",
-
         '`code`',
         '`` code with ` ticks ``',
-
         '> Quote',
-
         # multiline quote
         <<~GFM,
           > Multiline Quote
           >
           > With multiple paragraphs
         GFM
-
         '![Image](https://example.com/image.png)',
-
         '# Heading with no anchor link',
-
         '[Link](https://example.com)',
-
         <<~GFM,
           * List item
           * List item 2
@@ -598,7 +564,6 @@ describe 'Copy as GFM', :js do
 
             > Blockquote
         GFM
-
         <<~GFM,
           1. Ordered list item
           1. Ordered list item 2
@@ -623,22 +588,16 @@ describe 'Copy as GFM', :js do
 
           ---
         GFM
-
         '# Heading',
         '## Heading',
         '### Heading',
         '#### Heading',
         '##### Heading',
         '###### Heading',
-
         '**Bold**',
-
         '*Italics*',
-
         '~~Strikethrough~~',
-
         '---',
-
         # table
         <<~GFM,
           | Centered | Right | Left |
@@ -690,15 +649,17 @@ describe 'Copy as GFM', :js do
   describe 'Copying code' do
     let(:project) { create(:project, :repository) }
 
+    before do
+      sign_in(project.owner)
+    end
+
     context 'from a diff' do
       shared_examples 'copying code from a diff' do
         context 'selecting one word of text' do
           it 'copies as inline code' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"] .line .no',
-
               '`RuntimeError`',
-
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]'
             )
           end
@@ -708,9 +669,7 @@ describe 'Copy as GFM', :js do
           it 'copies as inline code' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]',
-
               '`raise RuntimeError, "System commands must be given as an array of strings"`',
-
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]'
             )
           end
@@ -720,14 +679,12 @@ describe 'Copy as GFM', :js do
           it 'copies as a code block' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_10"]',
-
               <<~GFM,
                 ```ruby
                       raise RuntimeError, "System commands must be given as an array of strings"
                     end
                 ```
               GFM
-
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]'
             )
           end
@@ -737,6 +694,7 @@ describe 'Copy as GFM', :js do
       context 'inline diff' do
         before do
           visit project_commit_path(project, sample_commit.id, view: 'inline')
+          wait_for_requests
         end
 
         it_behaves_like 'copying code from a diff'
@@ -745,6 +703,7 @@ describe 'Copy as GFM', :js do
       context 'parallel diff' do
         before do
           visit project_commit_path(project, sample_commit.id, view: 'parallel')
+          wait_for_requests
         end
 
         it_behaves_like 'copying code from a diff'
@@ -753,7 +712,6 @@ describe 'Copy as GFM', :js do
           it 'copies as a code block' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_8_8"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_9_9"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_10"]',
-
               <<~GFM,
                 ```ruby
                     unless cmd.is_a?(Array)
@@ -761,7 +719,6 @@ describe 'Copy as GFM', :js do
                     end
                 ```
               GFM
-
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_8_8"].left-side'
             )
           end
@@ -771,7 +728,6 @@ describe 'Copy as GFM', :js do
           it 'copies as a code block' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_8_8"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_9_9"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"], [id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_10"]',
-
               <<~GFM,
                 ```ruby
                     unless cmd.is_a?(Array)
@@ -779,7 +735,6 @@ describe 'Copy as GFM', :js do
                     end
                 ```
               GFM
-
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_8_8"].right-side'
             )
           end
@@ -797,7 +752,6 @@ describe 'Copy as GFM', :js do
         it 'copies as inline code' do
           verify(
             '.line[id="LC9"] .no',
-
             '`RuntimeError`'
           )
         end
@@ -807,7 +761,6 @@ describe 'Copy as GFM', :js do
         it 'copies as inline code' do
           verify(
             '.line[id="LC9"]',
-
             '`raise RuntimeError, "System commands must be given as an array of strings"`'
           )
         end
@@ -817,7 +770,6 @@ describe 'Copy as GFM', :js do
         it 'copies as a code block' do
           verify(
             '.line[id="LC9"], .line[id="LC10"]',
-
             <<~GFM
               ```ruby
                     raise RuntimeError, "System commands must be given as an array of strings"
@@ -839,7 +791,6 @@ describe 'Copy as GFM', :js do
         it 'copies as inline code' do
           verify(
             '.line[id="LC27"] .nl',
-
             '`"bio"`'
           )
         end
@@ -849,7 +800,6 @@ describe 'Copy as GFM', :js do
         it 'copies as inline code' do
           verify(
             '.line[id="LC27"]',
-
             '`"bio": null,`'
           )
         end
@@ -859,7 +809,6 @@ describe 'Copy as GFM', :js do
         it 'copies as a code block with the correct language' do
           verify(
             '.line[id="LC27"], .line[id="LC28"]',
-
             <<~GFM
               ```json
                   "bio": null,

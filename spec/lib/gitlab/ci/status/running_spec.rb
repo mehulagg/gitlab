@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::Running do
+RSpec.describe Gitlab::Ci::Status::Running do
   subject do
     described_class.new(double('subject'), double('user'))
   end
@@ -25,5 +25,9 @@ describe Gitlab::Ci::Status::Running do
 
   describe '#group' do
     it { expect(subject.group).to eq 'running' }
+  end
+
+  describe '#details_path' do
+    it { expect(subject.details_path).to be_nil }
   end
 end

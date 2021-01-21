@@ -7,14 +7,16 @@ module Projects
       include IssuableActions
       include RendersNotes
 
-      before_action :not_found, unless: -> { project.first_class_vulnerabilities_enabled? }
-      before_action :vulnerability
+      before_action :vulnerability, except: :index
 
       alias_method :vulnerable, :project
+
+      feature_category :vulnerability_management
 
       def show
         pipeline = vulnerability.finding.pipelines.first
         @pipeline = pipeline if Ability.allowed?(current_user, :read_pipeline, pipeline)
+        @gfm_form = true
       end
 
       private
@@ -25,6 +27,10 @@ module Projects
 
       alias_method :issuable, :vulnerability
       alias_method :noteable, :vulnerability
+
+      def issue_serializer
+        IssueSerializer.new(current_user: current_user)
+      end
     end
   end
 end

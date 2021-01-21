@@ -6,17 +6,22 @@ FactoryBot.define do
     sequence(:name) { |n| "#{ApprovalRuleLike::DEFAULT_NAME}-#{n}" }
   end
 
+  factory :approval_merge_request_rule_source do
+    approval_merge_request_rule
+    approval_project_rule
+  end
+
   factory :code_owner_rule, parent: :approval_merge_request_rule do
     merge_request
     rule_type { :code_owner }
-    code_owner { true } # deprecated, replaced with `rule_type: :code_owner`
     sequence(:name) { |n| "*-#{n}.js" }
+    section { Gitlab::CodeOwners::Entry::DEFAULT_SECTION }
   end
 
   factory :report_approver_rule, parent: :approval_merge_request_rule do
     merge_request
     rule_type { :report_approver }
-    report_type { :security }
+    report_type { :vulnerability }
     sequence(:name) { |n| "*-#{n}.js" }
 
     trait :requires_approval do
@@ -43,13 +48,13 @@ FactoryBot.define do
       approvals_required { rand(1..ApprovalProjectRule::APPROVALS_REQUIRED_MAX) }
     end
 
-    trait :security_report do
+    trait :vulnerability_report do
       rule_type { :report_approver }
-      name { ApprovalRuleLike::DEFAULT_NAME_FOR_SECURITY_REPORT }
+      name { ApprovalRuleLike::DEFAULT_NAME_FOR_VULNERABILITY_REPORT }
     end
 
-    trait :security do
-      security_report
+    trait :vulnerability do
+      vulnerability_report
     end
 
     trait :license_scanning do

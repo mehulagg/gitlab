@@ -4,18 +4,24 @@ require 'spec_helper'
 
 RSpec.describe Dashboard::Projects::CreateService do
   let(:user) { create(:user) }
-  let(:service) { described_class.new(user, user.ops_dashboard_projects, feature: :operations_dashboard) }
+  let(:service) { described_class.new(user, user.ops_dashboard_projects, feature: feature, ability: ability) }
+  let(:feature) { :operations_dashboard }
+  let(:ability) { nil }
   let(:project) { create(:project) }
 
   describe '#execute' do
-    let(:projects_service) { double(Dashboard::Projects::ListService) }
+    let(:projects_finder) { double(ProjectsFinder) }
     let(:result) { service.execute(input) }
+    let(:feature_available) { true }
+    let(:permission_available) { false }
 
     before do
-      allow(Dashboard::Projects::ListService)
-        .to receive(:new).with(user, feature: :operations_dashboard).and_return(projects_service)
-      allow(projects_service)
-        .to receive(:execute).with(input).and_return(output)
+      allow(ProjectsFinder)
+        .to receive(:new).with(current_user: user, project_ids_relation: input, params: { min_access_level: ProjectMember::DEVELOPER }).and_return(projects_finder)
+      allow(projects_finder)
+        .to receive(:execute).and_return(output)
+      allow(project).to receive(:feature_available?).and_return(feature_available)
+      allow(user).to receive(:can?).and_return(permission_available)
     end
 
     context 'with projects' do
@@ -34,6 +40,60 @@ RSpec.describe Dashboard::Projects::CreateService do
 
         it 'adds a project' do
           expect(result).to eq(expected_result(added_project_ids: [project.id]))
+        end
+      end
+
+      context 'with a project that does not exist' do
+        let(:input) { [non_existing_record_id] }
+        let(:output) { [] }
+
+        it 'does not add a not found project' do
+          expect(result).to eq(expected_result(not_found_project_ids: [non_existing_record_id]))
+        end
+      end
+
+      context 'when feature name is provided' do
+        context 'with project without provided feature enabled' do
+          let(:input) { [project.id] }
+          let(:feature_available) { false }
+          let(:ability) { nil }
+
+          it 'checks if feature is available' do
+            expect(project).to receive(:feature_available?).and_return(false)
+            result
+          end
+
+          it 'does not check if user has access to the project with given ability' do
+            expect(user).not_to receive(:can?).with(ability, project)
+            result
+          end
+
+          it 'does not add a not licensed project' do
+            expect(result).to eq(expected_result(not_licensed_project_ids: [project.id]))
+          end
+        end
+      end
+
+      context 'when ability name is provided' do
+        context 'with project for which user has no permission' do
+          let(:input) { [project.id] }
+          let(:feature) { nil }
+          let(:ability) { :read_vulnerability }
+          let(:permission_available) { false }
+
+          it 'does not check if feature is available' do
+            expect(project).not_to receive(:feature_available?)
+            result
+          end
+
+          it 'checks if user has access to the project with given ability' do
+            expect(user).to receive(:can?).with(ability, project).and_return(false)
+            result
+          end
+
+          it 'does not add a not licensed project' do
+            expect(result).to eq(expected_result(not_licensed_project_ids: [project.id]))
+          end
         end
       end
 
@@ -63,11 +123,12 @@ RSpec.describe Dashboard::Projects::CreateService do
 
   def expected_result(
     added_project_ids: [],
-    invalid_project_ids: [],
+    not_found_project_ids: [],
+    not_licensed_project_ids: [],
     duplicate_project_ids: []
   )
     described_class::Result.new(
-      added_project_ids, invalid_project_ids, duplicate_project_ids
+      added_project_ids, not_found_project_ids, not_licensed_project_ids, duplicate_project_ids
     )
   end
 end

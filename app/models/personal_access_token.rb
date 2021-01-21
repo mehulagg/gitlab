@@ -9,7 +9,9 @@ class PersonalAccessToken < ApplicationRecord
   add_authentication_token_field :token, digest: true
 
   REDIS_EXPIRY_TIME = 3.minutes
-  TOKEN_LENGTH = 20
+
+  # PATs are 20 characters + optional configurable settings prefix (0..20)
+  TOKEN_LENGTH_RANGE = (20..40).freeze
 
   serialize :scopes, Array # rubocop:disable Cop/ActiveRecordSerialize
 
@@ -17,12 +19,16 @@ class PersonalAccessToken < ApplicationRecord
 
   before_save :ensure_token
 
-  scope :active, -> { where("revoked = false AND (expires_at >= NOW() OR expires_at IS NULL)") }
-  scope :expiring_and_not_notified, ->(date) { where(["revoked = false AND expire_notification_delivered = false AND expires_at >= NOW() AND expires_at <= ?", date]) }
-  scope :inactive, -> { where("revoked = true OR expires_at < NOW()") }
+  scope :active, -> { where("revoked = false AND (expires_at >= CURRENT_DATE OR expires_at IS NULL)") }
+  scope :expiring_and_not_notified, ->(date) { where(["revoked = false AND expire_notification_delivered = false AND expires_at >= CURRENT_DATE AND expires_at <= ?", date]) }
+  scope :expired_today_and_not_notified, -> { where(["revoked = false AND expires_at = CURRENT_DATE AND after_expiry_notification_delivered = false"]) }
+  scope :inactive, -> { where("revoked = true OR expires_at < CURRENT_DATE") }
   scope :with_impersonation, -> { where(impersonation: true) }
   scope :without_impersonation, -> { where(impersonation: false) }
+  scope :revoked, -> { where(revoked: true) }
+  scope :not_revoked, -> { where(revoked: [false, nil]) }
   scope :for_user, -> (user) { where(user: user) }
+  scope :for_users, -> (users) { where(user: users) }
   scope :preload_users, -> { preload(:user) }
   scope :order_expires_at_asc, -> { reorder(expires_at: :asc) }
   scope :order_expires_at_desc, -> { reorder(expires_at: :desc) }
@@ -71,6 +77,15 @@ class PersonalAccessToken < ApplicationRecord
         'expires_at_desc' => -> { order_expires_at_desc }
       }
     )
+  end
+
+  def self.token_prefix
+    Gitlab::CurrentSettings.current_application_settings.personal_access_token_prefix
+  end
+
+  override :format_token
+  def format_token(token)
+    "#{self.class.token_prefix}#{token}"
   end
 
   protected

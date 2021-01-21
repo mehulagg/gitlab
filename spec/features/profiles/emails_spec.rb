@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Profile > Emails' do
+RSpec.describe 'Profile > Emails' do
   let(:user) { create(:user) }
 
   before do
@@ -42,7 +42,7 @@ describe 'Profile > Emails' do
     end
   end
 
-  it 'User removes email' do
+  it 'user removes email' do
     user.emails.create(email: 'my@email.com')
     visit profile_emails_path
     expect(page).to have_content("my@email.com")
@@ -51,7 +51,7 @@ describe 'Profile > Emails' do
     expect(page).not_to have_content("my@email.com")
   end
 
-  it 'User confirms email' do
+  it 'user confirms email' do
     email = user.emails.create(email: 'my@email.com')
     visit profile_emails_path
     expect(page).to have_content("#{email.email} Unverified")
@@ -63,7 +63,7 @@ describe 'Profile > Emails' do
     expect(page).to have_content("#{email.email} Verified")
   end
 
-  it 'User re-sends confirmation email' do
+  it 'user re-sends confirmation email' do
     email = user.emails.create(email: 'my@email.com')
     visit profile_emails_path
 

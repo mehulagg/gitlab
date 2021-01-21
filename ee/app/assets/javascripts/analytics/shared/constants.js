@@ -1,6 +1,10 @@
+import { masks } from 'dateformat';
+
+const { isoDate, mediumDate } = masks;
+
 export const dateFormats = {
-  isoDate: 'yyyy-mm-dd',
-  defaultDate: 'mmm d, yyyy',
+  isoDate,
+  defaultDate: mediumDate,
   defaultDateTime: 'mmm d, yyyy h:MMtt',
 };
 
@@ -14,10 +18,10 @@ export const scatterChartLineProps = {
   },
 };
 
-export const LAST_ACTIVITY_AT = 'last_activity_at';
-
 export const DATE_RANGE_LIMIT = 180;
 
 export const OFFSET_DATE_BY_ONE = 1;
 
 export const NO_DRAG_CLASS = 'no-drag';
+
+export const DATA_REFETCH_DELAY = 250;

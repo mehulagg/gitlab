@@ -4,20 +4,9 @@ require 'spec_helper'
 
 RSpec.describe 'User activates Jira', :js do
   include_context 'project service activation'
+  include_context 'project service Jira context'
 
-  let(:url) { 'http://jira.example.com' }
-  let(:test_url) { 'http://jira.example.com/rest/api/2/serverInfo' }
-
-  def fill_form(disable: false)
-    click_active_toggle if disable
-
-    fill_in 'service_url', with: url
-    fill_in 'service_username', with: 'username'
-    fill_in 'service_password', with: 'password'
-    fill_in 'service_jira_issue_transition_id', with: '25'
-  end
-
-  describe 'user sets and activates Jira Service' do
+  describe 'user tests Jira Service' do
     context 'when Jira connection test succeeds' do
       before do
         server_info = { key: 'value' }.to_json
@@ -25,17 +14,22 @@ RSpec.describe 'User activates Jira', :js do
 
         visit_project_integration('Jira')
         fill_form
-        click_test_integration
+        click_test_then_save_integration(expect_test_to_fail: false)
       end
 
       it 'activates the Jira service' do
-        expect(page).to have_content('Jira activated.')
-        expect(current_path).to eq(project_settings_integrations_path(project))
+        expect(page).to have_content('Jira settings saved and active.')
+        expect(current_path).to eq(edit_project_service_path(project, :jira))
       end
 
-      it 'shows the Jira link in the menu' do
-        page.within('.nav-sidebar') do
-          expect(page).to have_link('Jira', href: url)
+      unless Gitlab.ee?
+        it 'adds Jira link to sidebar menu' do
+          page.within('.nav-sidebar') do
+            expect(page).not_to have_link('Jira Issues')
+            expect(page).not_to have_link('Issue List', visible: false)
+            expect(page).not_to have_link('Open Jira', href: url, visible: false)
+            expect(page).to have_link('Jira', href: url)
+          end
         end
       end
     end
@@ -60,22 +54,25 @@ RSpec.describe 'User activates Jira', :js do
         fill_form
         click_test_then_save_integration
 
-        expect(page).to have_content('Jira activated.')
-        expect(current_path).to eq(project_settings_integrations_path(project))
+        expect(page).to have_content('Jira settings saved and active.')
+        expect(current_path).to eq(edit_project_service_path(project, :jira))
       end
     end
   end
 
   describe 'user disables the Jira Service' do
+    include JiraServiceHelper
+
     before do
+      stub_jira_service_test
       visit_project_integration('Jira')
       fill_form(disable: true)
-      click_button('Save changes')
+      click_save_integration
     end
 
     it 'saves but does not activate the Jira service' do
-      expect(page).to have_content('Jira settings saved, but not activated.')
-      expect(current_path).to eq(project_settings_integrations_path(project))
+      expect(page).to have_content('Jira settings saved, but not active.')
+      expect(current_path).to eq(edit_project_service_path(project, :jira))
     end
 
     it 'does not show the Jira link in the menu' do

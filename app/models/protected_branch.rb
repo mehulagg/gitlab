@@ -38,15 +38,19 @@ class ProtectedBranch < ApplicationRecord
     project.protected_branches
   end
 
+  # overridden in EE
   def self.branch_requires_code_owner_approval?(project, branch_name)
-    # NOOP
-    #
+    false
   end
 
   def self.by_name(query)
     return none if query.blank?
 
     where(fuzzy_arel_match(:name, query.downcase))
+  end
+
+  def allow_multiple?(type)
+    type == :push
   end
 end
 

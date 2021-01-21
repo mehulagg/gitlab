@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::RebaseService do
+RSpec.describe MergeRequests::RebaseService do
   include ProjectForksHelper
 
   let(:user) { create(:user) }
@@ -13,6 +13,7 @@ describe MergeRequests::RebaseService do
            target_branch: 'master',
            rebase_jid: rebase_jid
   end
+
   let(:project) { merge_request.project }
   let(:repository) { project.repository.raw }
   let(:skip_ci) { false }

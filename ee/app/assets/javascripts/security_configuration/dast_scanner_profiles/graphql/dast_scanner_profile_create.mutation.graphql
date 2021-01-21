@@ -1,0 +1,5 @@
+mutation dastScannerProfileCreate($input: DastScannerProfileCreateInput!) {
+  dastScannerProfileCreate(input: $input) {
+    errors
+  }
+}

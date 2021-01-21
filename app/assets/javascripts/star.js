@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import { __, s__ } from './locale';
 import { spriteIcon } from './lib/utils/common_utils';
 import axios from './lib/utils/axios_utils';
@@ -16,10 +16,7 @@ export default class Star {
         .post($this.data('endpoint'))
         .then(({ data }) => {
           const isStarred = $starSpan.hasClass('starred');
-          $this
-            .parent()
-            .find('.count')
-            .text(data.star_count);
+          $this.parent().find('.count').text(data.star_count);
 
           if (isStarred) {
             $starSpan.removeClass('starred').text(s__('StarProject|Star'));

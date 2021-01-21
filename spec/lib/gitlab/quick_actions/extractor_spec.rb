@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::QuickActions::Extractor do
+RSpec.describe Gitlab::QuickActions::Extractor do
   let(:definitions) do
     Class.new do
       include Gitlab::QuickActions::Dsl
@@ -262,6 +262,22 @@ describe Gitlab::QuickActions::Extractor do
 
       expect(commands).to be_empty
       expect(msg).to eq 'Fixes #123'
+    end
+
+    it 'does not get confused if command comes before an inline code' do
+      msg = "/reopen\n`some inline code`\n/labels ~a\n`more inline code`"
+      msg, commands = extractor.extract_commands(msg)
+
+      expect(commands).to eq([['reopen'], ['labels', '~a']])
+      expect(msg).to eq "`some inline code`\n`more inline code`"
+    end
+
+    it 'does not get confused if command comes before a blockcode' do
+      msg = "/reopen\n```\nsome blockcode\n```\n/labels ~a\n```\nmore blockcode\n```"
+      msg, commands = extractor.extract_commands(msg)
+
+      expect(commands).to eq([['reopen'], ['labels', '~a']])
+      expect(msg).to eq "```\nsome blockcode\n```\n```\nmore blockcode\n```"
     end
 
     it 'does not extract commands inside a blockcode' do

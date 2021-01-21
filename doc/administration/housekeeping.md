@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Housekeeping
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/3041) in GitLab 8.4.
@@ -28,6 +34,26 @@ the `pushes_since_gc` value is 200 a `git gc` will be run.
   `git add`.
 - `git repack` ([man page](https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-repack.html)) re-organize existing packs into a single, more efficient pack.
 
+Housekeeping will also [remove unreferenced LFS files](../raketasks/cleanup.md#remove-unreferenced-lfs-files)
+from your project on the same schedule as the `git gc` operation, freeing up storage space for your project.
+
 You can find this option under your project's **Settings > General > Advanced**.
 
 ![Housekeeping settings](img/housekeeping_settings.png)
+
+## How housekeeping handles pool repositories
+
+Housekeeping for pool repositories is handled differently from standard repositories.
+It is ultimately performed by the Gitaly RPC `FetchIntoObjectPool`.
+
+This is the current call stack by which it is invoked:
+
+1. `Repositories::HousekeepingService#execute_gitlab_shell_gc`
+1. `GitGarbageCollectWorker#perform`
+1. `Projects::GitDeduplicationService#fetch_from_source`
+1. `ObjectPool#fetch`
+1. `ObjectPoolService#fetch`
+1. `Gitaly::FetchIntoObjectPoolRequest`
+
+To manually invoke it from a Rails console, if needed, you can call `project.pool_repository.object_pool.fetch`.
+This is a potentially long-running task, though Gitaly will timeout in about 8 hours.

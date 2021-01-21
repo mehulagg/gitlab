@@ -1,5 +1,0 @@
----
-title: Fix N+1 queries for Elastic Search merge_requests scope.
-merge_request: 30546
-author:
-type: performance

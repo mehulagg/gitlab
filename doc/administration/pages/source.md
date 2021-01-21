@@ -1,12 +1,12 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Pages administration for source installations
 
->**Note:**
+NOTE:
 Before attempting to enable GitLab Pages, first make sure you have
 [installed GitLab](../../install/installation.md) successfully.
 
@@ -17,8 +17,8 @@ You are encouraged to read the [Omnibus documentation](index.md) as it provides
 some invaluable information to the configuration of GitLab Pages. Please proceed
 to read it before going forward with this guide.
 
-We also highly recommend that you use the Omnibus GitLab packages, as we
-optimize them specifically for GitLab, and we will take care of upgrading GitLab
+We also highly recommend that you use the Omnibus GitLab packages. We
+optimize them specifically for GitLab, and we take care of upgrading GitLab
 Pages to the latest supported version.
 
 ## Overview
@@ -38,22 +38,22 @@ which you can set it up:
 1. Run the Pages daemon in the same server as GitLab, listening on a secondary IP.
 1. Run the Pages daemon in a separate server. In that case, the
    [Pages path](#change-storage-path) must also be present in the server that
-   the Pages daemon is installed, so you will have to share it via network.
+   the Pages daemon is installed, so you must share it through the network.
 1. Run the Pages daemon in the same server as GitLab, listening on the same IP
-   but on different ports. In that case, you will have to proxy the traffic with
-   a load balancer. If you choose that route note that you should use TCP load
-   balancing for HTTPS. If you use TLS-termination (HTTPS-load balancing) the
-   pages will not be able to be served with user provided certificates. For
-   HTTP it's OK to use HTTP or TCP load balancing.
+   but on different ports. In that case, you must proxy the traffic with
+   a load balancer. If you choose that route, note that you should use TCP load
+   balancing for HTTPS. If you use TLS-termination (HTTPS-load balancing), the
+   pages aren't able to be served with user-provided certificates. For
+   HTTP, it's OK to use HTTP or TCP load balancing.
 
-In this document, we will proceed assuming the first option. If you are not
-supporting custom domains a secondary IP is not needed.
+In this document, we proceed assuming the first option. If you aren't
+supporting custom domains, a secondary IP isn't needed.
 
 ## Prerequisites
 
 Before proceeding with the Pages configuration, make sure that:
 
-1. You have a separate domain under which GitLab Pages will be served. In
+1. You have a separate domain to serve GitLab Pages from. In
    this document we assume that to be `example.io`.
 1. You have configured a **wildcard DNS record** for that domain.
 1. You have installed the `zip` and `unzip` packages in the same server that
@@ -61,7 +61,7 @@ Before proceeding with the Pages configuration, make sure that:
    Pages artifacts.
 1. (Optional) You have a **wildcard certificate** for the Pages domain if you
    decide to serve Pages (`*.example.io`) under HTTPS.
-1. (Optional but recommended) You have configured and enabled the [Shared Runners](../../ci/runners/README.md)
+1. (Optional but recommended) You have configured and enabled the [shared runners](../../ci/runners/README.md)
    so that your users don't have to bring their own.
 
 ### DNS configuration
@@ -74,10 +74,10 @@ host that GitLab runs. For example, an entry would look like this:
 *.example.io. 1800 IN A 192.0.2.1
 ```
 
-where `example.io` is the domain under which GitLab Pages will be served
+Where `example.io` is the domain to serve GitLab Pages from,
 and `192.0.2.1` is the IP address of your GitLab instance.
 
-> **Note:**
+NOTE:
 You should not use the GitLab domain to serve user pages. For more information
 see the [security section](#security).
 
@@ -94,10 +94,10 @@ since that is needed in all configurations.
 
 - [Wildcard DNS setup](#dns-configuration)
 
-URL scheme: `http://page.example.io`
+URL scheme: `http://<namespace>.example.io/<project_slug>`
 
 This is the minimum setup that you can use Pages with. It is the base for all
-other setups as described below. NGINX will proxy all requests to the daemon.
+other setups as described below. NGINX proxies all requests to the daemon.
 The Pages daemon doesn't listen to the outside world.
 
 1. Install the Pages daemon:
@@ -117,7 +117,7 @@ The Pages daemon doesn't listen to the outside world.
    ```
 
 1. Edit `gitlab.yml` and under the `pages` setting, set `enabled` to `true` and
-   the `host` to the FQDN under which GitLab Pages will be served:
+   the `host` to the FQDN to serve GitLab Pages from:
 
    ```yaml
    ## GitLab Pages
@@ -157,9 +157,9 @@ The Pages daemon doesn't listen to the outside world.
 - [Wildcard DNS setup](#dns-configuration)
 - Wildcard TLS certificate
 
-URL scheme: `https://page.example.io`
+URL scheme: `https://<namespace>.example.io/<project_slug>`
 
-NGINX will proxy all requests to the daemon. Pages daemon doesn't listen to the
+NGINX proxies all requests to the daemon. Pages daemon doesn't listen to the
 outside world.
 
 1. Install the Pages daemon:
@@ -221,7 +221,7 @@ that without TLS certificates.
 - [Wildcard DNS setup](#dns-configuration)
 - Secondary IP
 
-URL scheme: `http://page.example.io` and `http://domain.com`
+URL scheme: `http://<namespace>.example.io/<project_slug>` and `http://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -238,8 +238,8 @@ world. Custom domains are supported, but no TLS.
    ```
 
 1. Edit `gitlab.yml` to look like the example below. You need to change the
-   `host` to the FQDN under which GitLab Pages will be served. Set
-   `external_http` to the secondary IP on which the pages daemon will listen
+   `host` to the FQDN to serve GitLab Pages from. Set
+   `external_http` to the secondary IP on which the pages daemon listens
    for connections:
 
    ```yaml
@@ -286,7 +286,7 @@ world. Custom domains are supported, but no TLS.
 - Wildcard TLS certificate
 - Secondary IP
 
-URL scheme: `https://page.example.io` and `https://domain.com`
+URL scheme: `https://<namespace>.example.io/<project_slug>` and `https://custom-domain.com`
 
 In that case, the pages daemon is running, NGINX still proxies requests to
 the daemon but the daemon is also able to receive requests from the outside
@@ -303,9 +303,9 @@ world. Custom domains and TLS are supported.
    ```
 
 1. Edit `gitlab.yml` to look like the example below. You need to change the
-   `host` to the FQDN under which GitLab Pages will be served. Set
+   `host` to the FQDN to serve GitLab Pages from. Set
    `external_http` and `external_https` to the secondary IP on which the pages
-   daemon will listen for connections:
+   daemon listens for connections:
 
    ```yaml
    ## GitLab Pages
@@ -349,7 +349,7 @@ world. Custom domains and TLS are supported.
 
 ## NGINX caveats
 
->**Note:**
+NOTE:
 The following information applies only for installations from source.
 
 Be extra careful when setting up the domain name in the NGINX configuration. You must
@@ -395,7 +395,7 @@ API to check that the user is authorized to read that site.
 From [GitLab 12.8](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/3689) onward,
 Access Control parameters for Pages are set in a configuration file, which
 by convention is named `gitlab-pages-config`. The configuration file is passed to
-pages using the `-config flag` or CONFIG environment variable.
+pages using the `-config flag` or `CONFIG` environment variable.
 
 Pages access control is disabled by default. To enable it:
 
@@ -421,7 +421,7 @@ Pages access control is disabled by default. To enable it:
      auth-server=<URL of the GitLab instance>
    ```
 
-1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control-core).
+1. Users can now configure it in their [projects' settings](../../user/project/pages/introduction.md#gitlab-pages-access-control).
 
 ## Change storage path
 

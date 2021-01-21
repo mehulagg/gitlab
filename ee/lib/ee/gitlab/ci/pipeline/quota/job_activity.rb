@@ -5,7 +5,7 @@ module EE
     module Ci
       module Pipeline
         module Quota
-          class JobActivity < Ci::Limit
+          class JobActivity < ::Gitlab::Ci::Limit
             include ::Gitlab::Utils::StrongMemoize
             include ActionView::Helpers::TextHelper
 
@@ -21,14 +21,15 @@ module EE
             def exceeded?
               return false unless enabled?
 
-              excessive_jobs_count > 0
+              jobs_in_alive_pipelines_count > ci_active_jobs_limit
             end
 
             def message
               return unless exceeded?
 
-              'Active jobs limit exceeded by ' \
-                "#{pluralize(excessive_jobs_count, 'job')} in the past 24 hours!"
+              'Project has too many active jobs created in the last 24 hours! ' \
+                "There are #{pluralize(jobs_in_alive_pipelines_count, 'active job')}, " \
+                "but the limit is #{ci_active_jobs_limit}."
             end
 
             private
@@ -39,7 +40,9 @@ module EE
 
             # rubocop: disable CodeReuse/ActiveRecord
             def jobs_in_alive_pipelines_count
-              @project.all_pipelines.created_after(24.hours.ago).alive.joins(:builds).count
+              strong_memoize(:jobs_in_alive_pipelines_count) do
+                @project.all_pipelines.created_after(24.hours.ago).alive.joins(:builds).count
+              end
             end
             # rubocop: enable CodeReuse/ActiveRecord
 

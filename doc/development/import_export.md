@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Import/Export development documentation
 
 Troubleshooting and general development guidelines and tips for the [Import/Export feature](../user/project/settings/import_export.md).
@@ -36,7 +42,7 @@ SIDEKIQ_MEMORY_KILLER_HARD_LIMIT_RSS = 3000000
 SIDEKIQ_MEMORY_KILLER_GRACE_TIME = 900
 ```
 
-An import status `started`, and the following Sidekiq logs will signal a memory issue:
+An import status `started`, and the following Sidekiq logs signal a memory issue:
 
 ```shell
 WARN: Work still in progress <struct with JID>
@@ -207,24 +213,12 @@ module Gitlab
 
 ## Version history
 
-The [current version history](../user/project/settings/import_export.md) also displays the equivalent GitLab version
-and it is useful for knowing which versions won't be compatible between them.
-
-| Exporting GitLab version   | Importing GitLab version   |
-| -------------------------- | -------------------------- |
-| 11.7 to current            | 11.7 to current            |
-| 11.1 to 11.6               | 11.1 to 11.6               |
-| 10.8 to 11.0               | 10.8 to 11.0               |
-| 10.4 to 10.7               | 10.4 to 10.7               |
-| ...                        | ...                        |
-| 8.10.3 to 8.11             | 8.10.3 to 8.11             |
-| 8.10.0 to 8.10.2           | 8.10.0 to 8.10.2           |
-| 8.9.5 to 8.9.11            | 8.9.5 to 8.9.11            |
-| 8.9.0 to 8.9.4             | 8.9.0 to 8.9.4             |
+Check the [version history](../user/project/settings/import_export.md#version-history)
+for compatibility when importing and exporting projects.
 
 ### When to bump the version up
 
-We will have to bump the version if we rename model/columns or perform any format
+If we rename model/columns or perform any format, we need to bump the version
 modifications in the JSON structure or the file structure of the archive file.
 
 We do not need to bump the version up in any of the following cases:
@@ -233,7 +227,7 @@ We do not need to bump the version up in any of the following cases:
 - Remove a column or model (unless there is a DB constraint)
 - Export new things (such as a new type of upload)
 
-Every time we bump the version, the integration specs will fail and can be fixed with:
+Every time we bump the version, the integration specs fail and can be fixed with:
 
 ```shell
 bundle exec rake gitlab:import_export:bump_version
@@ -256,7 +250,7 @@ project_tree:
       - :push_event_payload
   - issues:
     - events:
-    - ...
+    # ...
 ```
 
 Only include the following attributes for the models specified:
@@ -266,8 +260,7 @@ included_attributes:
   user:
     - :id
     - :email
-  ...
-
+  # ...
 ```
 
 Do not include the following attributes for the models specified:
@@ -362,33 +355,33 @@ The tools to generate the NDJSON tree from the human-readable JSON files live in
 
 **Please use `legacy-project-json-to-ndjson.sh` to generate the NDJSON tree.**
 
-The NDJSON tree will look like this:
+The NDJSON tree looks like:
 
 ```shell
 tree
 ├── project
-│   ├── auto_devops.ndjson
-│   ├── boards.ndjson
-│   ├── ci_cd_settings.ndjson
-│   ├── ci_pipelines.ndjson
-│   ├── container_expiration_policy.ndjson
-│   ├── custom_attributes.ndjson
-│   ├── error_tracking_setting.ndjson
-│   ├── external_pull_requests.ndjson
-│   ├── issues.ndjson
-│   ├── labels.ndjson
-│   ├── merge_requests.ndjson
-│   ├── milestones.ndjson
-│   ├── pipeline_schedules.ndjson
-│   ├── project_badges.ndjson
-│   ├── project_feature.ndjson
-│   ├── project_members.ndjson
-│   ├── protected_branches.ndjson
-│   ├── protected_tags.ndjson
-│   ├── releases.ndjson
-│   ├── services.ndjson
-│   ├── snippets.ndjson
-│   └── triggers.ndjson
+│   ├── auto_devops.ndjson
+│   ├── boards.ndjson
+│   ├── ci_cd_settings.ndjson
+│   ├── ci_pipelines.ndjson
+│   ├── container_expiration_policy.ndjson
+│   ├── custom_attributes.ndjson
+│   ├── error_tracking_setting.ndjson
+│   ├── external_pull_requests.ndjson
+│   ├── issues.ndjson
+│   ├── labels.ndjson
+│   ├── merge_requests.ndjson
+│   ├── milestones.ndjson
+│   ├── pipeline_schedules.ndjson
+│   ├── project_badges.ndjson
+│   ├── project_feature.ndjson
+│   ├── project_members.ndjson
+│   ├── protected_branches.ndjson
+│   ├── protected_tags.ndjson
+│   ├── releases.ndjson
+│   ├── services.ndjson
+│   ├── snippets.ndjson
+│   └── triggers.ndjson
 └── project.json
 ```
 
@@ -396,28 +389,29 @@ tree
 
 **Please use `legacy-group-json-to-ndjson.rb` to generate the NDJSON tree.**
 
-The NDJSON tree will look like this:
+The NDJSON tree looks like this:
 
 ```shell
 tree
 └── groups
     ├── 4351
-    │   ├── badges.ndjson
-    │   ├── boards.ndjson
-    │   ├── epics.ndjson
-    │   ├── labels.ndjson
-    │   ├── members.ndjson
-    │   └── milestones.ndjson
+    │   ├── badges.ndjson
+    │   ├── boards.ndjson
+    │   ├── epics.ndjson
+    │   ├── labels.ndjson
+    │   ├── members.ndjson
+    │   └── milestones.ndjson
     ├── 4352
-    │   ├── badges.ndjson
-    │   ├── boards.ndjson
-    │   ├── epics.ndjson
-    │   ├── labels.ndjson
-    │   ├── members.ndjson
-    │   └── milestones.ndjson
+    │   ├── badges.ndjson
+    │   ├── boards.ndjson
+    │   ├── epics.ndjson
+    │   ├── labels.ndjson
+    │   ├── members.ndjson
+    │   └── milestones.ndjson
     ├── _all.ndjson
     ├── 4351.json
     └── 4352.json
 ```
 
-CAUTION: **Caution:** When updating these fixtures, please ensure you update both `json` files and `tree` folder, as the tests apply to both.
+WARNING:
+When updating these fixtures, please ensure you update both `json` files and `tree` folder, as the tests apply to both.

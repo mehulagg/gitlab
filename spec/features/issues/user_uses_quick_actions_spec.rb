@@ -7,7 +7,7 @@ require 'spec_helper'
 # for example, adding quick actions when creating the issue and checking DateTime formats on UI.
 # Because this kind of spec takes more time to run there is no need to add new ones
 # for each existing quick action unless they test something not tested by existing tests.
-describe 'Issues > User uses quick actions', :js do
+RSpec.describe 'Issues > User uses quick actions', :js do
   include Spec::Support::Helpers::Features::NotesHelpers
 
   context "issuable common quick actions" do
@@ -43,5 +43,6 @@ describe 'Issues > User uses quick actions', :js do
     it_behaves_like 'create_merge_request quick action'
     it_behaves_like 'move quick action'
     it_behaves_like 'zoom quick actions'
+    it_behaves_like 'clone quick action'
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Understanding EXPLAIN plans
 
 PostgreSQL allows you to obtain query plans using the `EXPLAIN` command. This
@@ -198,8 +204,7 @@ There are quite a few different types of nodes, so we only cover some of the
 more common ones here.
 
 A full list of all the available nodes and their descriptions can be found in
-the [PostgreSQL source file
-"plannodes.h"](https://gitlab.com/postgres/postgres/blob/master/src/include/nodes/plannodes.h)
+the [PostgreSQL source file `plannodes.h`](https://gitlab.com/postgres/postgres/blob/master/src/include/nodes/plannodes.h)
 
 ### Seq Scan
 
@@ -428,6 +433,17 @@ result, first check if there are any existing indexes you may be able to reuse.
 If there aren't any, check if you can perhaps slightly change an existing one to
 fit both the existing and new queries. Only add a new index if none of the
 existing indexes can be used in any way.
+
+When comparing execution plans, don't take timing as the only important metric.
+Good timing is the main goal of any optimization, but it can be too volatile to
+be used for comparison (for example, it depends a lot on the state of cache).
+When optimizing a query, we usually need to reduce the amount of data we're
+dealing with. Indexes are the way to work with fewer pages (buffers) to get the
+result, so, during optimization, look at the number of buffers used (read and hit),
+and work on reducing these numbers. Reduced timing will be the consequence of reduced
+buffer numbers. [#database-lab](#database-lab) guarantees that the plan is structurally
+identical to production (and overall number of buffers is the same as on production),
+but difference in cache state and I/O speed may lead to different timings.
 
 ## Queries that can't be optimised
 
@@ -686,11 +702,11 @@ Planning time: 0.411 ms
 Execution time: 0.113 ms
 ```
 
-### Chatops
+### ChatOps
 
-[GitLab employees can also use our chatops solution, available in Slack using the
+[GitLab employees can also use our ChatOps solution, available in Slack using the
 `/chatops` slash command](chatops_on_gitlabcom.md).
-You can use chatops to get a query plan by running the following:
+You can use ChatOps to get a query plan by running the following:
 
 ```sql
 /chatops run explain SELECT COUNT(*) FROM projects WHERE visibility_level IN (0, 20)
@@ -719,7 +735,7 @@ with their own clone of the production database.
 Joe is available in the
 [`#database-lab`](https://gitlab.slack.com/archives/CLJMDRD8C) channel on Slack.
 
-Unlike chatops, it gives you a way to execute DDL statements (like creating indexes and tables) and get query plan not only for `SELECT` but also `UPDATE` and `DELETE`.
+Unlike ChatOps, it gives you a way to execute DDL statements (like creating indexes and tables) and get query plan not only for `SELECT` but also `UPDATE` and `DELETE`.
 
 For example, in order to test new index you can do the following:
 

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlAlert, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
 import FluentdOutputSettings from '~/clusters/components/fluentd_output_settings.vue';
 import { APPLICATION_STATUS, FLUENTD } from '~/clusters/constants';
-import { GlAlert, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
 import eventHub from '~/clusters/event_hub';
 
 const { UPDATING } = APPLICATION_STATUS;
@@ -37,11 +37,11 @@ describe('FluentdOutputSettings', () => {
   const findSaveButton = () => wrapper.find({ ref: 'saveBtn' });
   const findCancelButton = () => wrapper.find({ ref: 'cancelBtn' });
   const findProtocolDropdown = () => wrapper.find(GlDropdown);
-  const findCheckbox = name =>
-    wrapper.findAll(GlFormCheckbox).wrappers.find(x => x.text() === name);
+  const findCheckbox = (name) =>
+    wrapper.findAll(GlFormCheckbox).wrappers.find((x) => x.text() === name);
   const findHost = () => wrapper.find('#fluentd-host');
   const findPort = () => wrapper.find('#fluentd-port');
-  const changeCheckbox = checkbox => {
+  const changeCheckbox = (checkbox) => {
     const currentValue = checkbox.attributes('checked')?.toString() === 'true';
     checkbox.vm.$emit('input', !currentValue);
   };
@@ -49,9 +49,9 @@ describe('FluentdOutputSettings', () => {
     element.value = val;
     element.dispatchEvent(new Event('input'));
   };
-  const changePort = val => changeInput(findPort(), val);
-  const changeHost = val => changeInput(findHost(), val);
-  const changeProtocol = idx => findProtocolDropdown().vm.$children[idx].$emit('click');
+  const changePort = (val) => changeInput(findPort(), val);
+  const changeHost = (val) => changeInput(findHost(), val);
+  const changeProtocol = (idx) => findProtocolDropdown().vm.$children[idx].$emit('click');
   const toApplicationSettings = ({ wafLogEnabled, ciliumLogEnabled, ...settings }) => ({
     ...settings,
     waf_log_enabled: wafLogEnabled,
@@ -70,12 +70,12 @@ describe('FluentdOutputSettings', () => {
     });
 
     describe.each`
-      desc                                     | changeFn                                                       | key                   | value
-      ${'when protocol dropdown is triggered'} | ${() => changeProtocol(1)}                                     | ${'protocol'}         | ${'udp'}
-      ${'when host is changed'}                | ${() => changeHost('test-host')}                               | ${'host'}             | ${'test-host'}
-      ${'when port is changed'}                | ${() => changePort(123)}                                       | ${'port'}             | ${123}
-      ${'when wafLogEnabled changes'}          | ${() => changeCheckbox(findCheckbox('Send ModSecurity Logs'))} | ${'wafLogEnabled'}    | ${!defaultSettings.wafLogEnabled}
-      ${'when ciliumLogEnabled changes'}       | ${() => changeCheckbox(findCheckbox('Send Cilium Logs'))}      | ${'ciliumLogEnabled'} | ${!defaultSettings.ciliumLogEnabled}
+      desc                                     | changeFn                                                                      | key                   | value
+      ${'when protocol dropdown is triggered'} | ${() => changeProtocol(1)}                                                    | ${'protocol'}         | ${'udp'}
+      ${'when host is changed'}                | ${() => changeHost('test-host')}                                              | ${'host'}             | ${'test-host'}
+      ${'when port is changed'}                | ${() => changePort(123)}                                                      | ${'port'}             | ${123}
+      ${'when wafLogEnabled changes'}          | ${() => changeCheckbox(findCheckbox('Send Web Application Firewall Logs'))}   | ${'wafLogEnabled'}    | ${!defaultSettings.wafLogEnabled}
+      ${'when ciliumLogEnabled changes'}       | ${() => changeCheckbox(findCheckbox('Send Container Network Policies Logs'))} | ${'ciliumLogEnabled'} | ${!defaultSettings.ciliumLogEnabled}
     `('$desc', ({ changeFn, key, value }) => {
       beforeEach(() => {
         changeFn();
@@ -168,7 +168,7 @@ describe('FluentdOutputSettings', () => {
       });
 
       it('displays a error message', () => {
-        expect(wrapper.contains(GlAlert)).toBe(true);
+        expect(wrapper.find(GlAlert).exists()).toBe(true);
       });
     });
   });

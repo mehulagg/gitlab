@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User views an SVG design that contains XSS', :js do
+RSpec.describe 'User views an SVG design that contains XSS', :js do
   include DesignManagementTestHelpers
 
   let(:project) { create(:project_empty_repo, :public) }
@@ -29,6 +29,7 @@ describe 'User views an SVG design that contains XSS', :js do
   end
 
   it 'displays the SVG' do
+    find("[data-testid='close-design']").click
     expect(page).to have_selector("img.design-img[alt='xss.svg']", count: 1, visible: false)
   end
 

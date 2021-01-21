@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import ErrorTrackingActions from '~/error_tracking/components/error_tracking_actions.vue';
 
 describe('Error Tracking Actions', () => {
@@ -20,7 +20,7 @@ describe('Error Tracking Actions', () => {
         },
         ...props,
       },
-      stubs: { GlDeprecatedButton },
+      stubs: { GlButton },
     });
   }
 
@@ -34,23 +34,15 @@ describe('Error Tracking Actions', () => {
     }
   });
 
-  const findButtons = () => wrapper.findAll(GlDeprecatedButton);
+  const findButtons = () => wrapper.findAll(GlButton);
 
   describe('when error status is unresolved', () => {
     it('renders the correct actions buttons to allow ignore and resolve', () => {
       expect(findButtons().exists()).toBe(true);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findButtons()
-            .at(0)
-            .attributes('title'),
-        ).toBe('Ignore');
-        expect(
-          findButtons()
-            .at(1)
-            .attributes('title'),
-        ).toBe('Resolve');
+        expect(findButtons().at(0).attributes('title')).toBe('Ignore');
+        expect(findButtons().at(1).attributes('title')).toBe('Resolve');
       });
     });
   });
@@ -64,11 +56,7 @@ describe('Error Tracking Actions', () => {
       expect(findButtons().exists()).toBe(true);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findButtons()
-            .at(0)
-            .attributes('title'),
-        ).toBe('Undo Ignore');
+        expect(findButtons().at(0).attributes('title')).toBe('Undo Ignore');
       });
     });
   });
@@ -82,11 +70,7 @@ describe('Error Tracking Actions', () => {
       expect(findButtons().exists()).toBe(true);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findButtons()
-            .at(1)
-            .attributes('title'),
-        ).toBe('Unresolve');
+        expect(findButtons().at(1).attributes('title')).toBe('Unresolve');
       });
     });
   });

@@ -10,13 +10,13 @@ RSpec.describe NewEpicWorker do
       it 'does not call Services' do
         expect(NotificationService).not_to receive(:new)
 
-        worker.perform(99, create(:user).id)
+        worker.perform(non_existing_record_id, create(:user).id)
       end
 
       it 'logs an error' do
-        expect(Rails.logger).to receive(:error).with('NewEpicWorker: couldn\'t find Epic with ID=99, skipping job')
+        expect(Gitlab::AppLogger).to receive(:error).with("NewEpicWorker: couldn't find Epic with ID=#{non_existing_record_id}, skipping job")
 
-        worker.perform(99, create(:user).id)
+        worker.perform(non_existing_record_id, create(:user).id)
       end
     end
 
@@ -24,13 +24,13 @@ RSpec.describe NewEpicWorker do
       it 'does not call Services' do
         expect(NotificationService).not_to receive(:new)
 
-        worker.perform(create(:epic).id, 99)
+        worker.perform(create(:epic).id, non_existing_record_id)
       end
 
       it 'logs an error' do
-        expect(Rails.logger).to receive(:error).with('NewEpicWorker: couldn\'t find User with ID=99, skipping job')
+        expect(Gitlab::AppLogger).to receive(:error).with("NewEpicWorker: couldn't find User with ID=#{non_existing_record_id}, skipping job")
 
-        worker.perform(create(:epic).id, 99)
+        worker.perform(create(:epic).id, non_existing_record_id)
       end
     end
 

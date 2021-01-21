@@ -4,9 +4,9 @@ module Epics
   class IssuePromoteService < ::Issuable::Clone::BaseService
     PromoteError = Class.new(StandardError)
 
-    def execute(issue)
+    def execute(issue, epic_group = nil)
       @issue = issue
-      @parent_group = issue.project.group
+      @parent_group = epic_group || issue.project.group
 
       validate_promotion!
 
@@ -24,6 +24,7 @@ module Epics
       raise PromoteError, _('Cannot promote issue because it does not belong to a group.') if parent_group.nil?
       raise PromoteError, _('Cannot promote issue due to insufficient permissions.') unless can_promote?
       raise PromoteError, _('Issue already promoted to epic.') if issue.promoted?
+      raise PromoteError, _('Promotion is not supported.') unless issue.supports_epic?
     end
 
     def can_promote?
@@ -31,9 +32,8 @@ module Epics
     end
 
     def track_event
-      ::Gitlab::Tracking.event(
-        'epics', 'promote', property: 'issue_id', value: original_entity.id
-      )
+      ::Gitlab::Tracking.event('epics', 'promote', property: 'issue_id', value: original_entity.id,
+                               standard_context: ::Gitlab::Tracking::StandardContext.new(namespace: @parent_group, project: issue.project))
     end
 
     def create_new_entity
@@ -52,8 +52,13 @@ module Epics
 
     def params
       {
-        title: original_entity.title
+        title: original_entity.title,
+        parent: issue_epic
       }
+    end
+
+    def issue_epic
+      original_entity.epic_issue&.epic
     end
 
     def add_note_from

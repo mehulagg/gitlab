@@ -15,35 +15,35 @@ module Mutations
           field :annotation,
             Types::Metrics::Dashboards::AnnotationType,
             null: true,
-            description: 'The created annotation'
+            description: 'The created annotation.'
 
           argument :environment_id,
-            GraphQL::ID_TYPE,
+            ::Types::GlobalIDType[::Environment],
             required: false,
-            description: 'The global id of the environment to add an annotation to'
+            description: 'The global ID of the environment to add an annotation to.'
 
           argument :cluster_id,
-            GraphQL::ID_TYPE,
+            ::Types::GlobalIDType[::Clusters::Cluster],
             required: false,
-            description: 'The global id of the cluster to add an annotation to'
+            description: 'The global ID of the cluster to add an annotation to.'
 
           argument :starting_at, Types::TimeType,
             required: true,
-            description: 'Timestamp indicating starting moment to which the annotation relates'
+            description: 'Timestamp indicating starting moment to which the annotation relates.'
 
           argument :ending_at, Types::TimeType,
             required: false,
-            description: 'Timestamp indicating ending moment to which the annotation relates'
+            description: 'Timestamp indicating ending moment to which the annotation relates.'
 
           argument :dashboard_path,
             GraphQL::STRING_TYPE,
             required: true,
-            description: 'The path to a file defining the dashboard on which the annotation should be added'
+            description: 'The path to a file defining the dashboard on which the annotation should be added.'
 
           argument :description,
             GraphQL::STRING_TYPE,
             required: true,
-            description: 'The description of the annotation'
+            description: 'The description of the annotation.'
 
           AnnotationSource = Struct.new(:object, keyword_init: true) do
             def type_keys
@@ -80,11 +80,11 @@ module Mutations
               raise Gitlab::Graphql::Errors::ArgumentError, ANNOTATION_SOURCE_ARGUMENT_ERROR
             end
 
-            super(args)
+            super(**args)
           end
 
           def find_object(id:)
-            GitlabSchema.object_from_id(id)
+            GitlabSchema.find_by_gid(id)
           end
 
           def annotation_create_params(args)
@@ -96,7 +96,16 @@ module Mutations
           end
 
           def annotation_source(args)
-            annotation_source_id = args[:cluster_id] || args[:environment_id]
+            # TODO: remove these lines when the compatibility layer is removed
+            # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+            annotation_source_id = if args[:cluster_id]
+                                     ::Types::GlobalIDType[::Clusters::Cluster].coerce_isolated_input(args[:cluster_id])
+                                   else
+                                     ::Types::GlobalIDType[::Environment].coerce_isolated_input(args[:environment_id])
+                                   end
+
+            # TODO: uncomment following line once lines above are removed
+            # annotation_source_id = args[:cluster_id] || args[:environment_id]
             authorized_find!(id: annotation_source_id)
           end
         end

@@ -1,30 +1,45 @@
 # frozen_string_literal: true
 
 class Projects::AuditEventsController < Projects::ApplicationController
+  include Gitlab::Utils::StrongMemoize
   include LicenseHelper
   include AuditEvents::EnforcesValidDateParams
   include AuditEvents::AuditLogsParams
   include AuditEvents::Sortable
+  include AuditEvents::DateRange
 
-  before_action :authorize_admin_project!
   before_action :check_audit_events_available!
 
-  layout 'project_settings'
+  feature_category :audit_events
 
   def index
-    level = Gitlab::Audit::Levels::Project.new(project: project)
+    @is_last_page = events.last_page?
+    @events = AuditEventSerializer.new.represent(events)
 
-    events = AuditLogFinder
-      .new(level: level, params: audit_logs_params)
-      .execute
-      .page(params[:page])
-
-    @events = Gitlab::Audit::Events::Preloader.preload!(events)
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
   end
 
   private
 
   def check_audit_events_available!
-    render_404 unless @project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user)
+    render_404 unless can?(current_user, :read_project_audit_events, project) &&
+      (project.feature_available?(:audit_events) || LicenseHelper.show_promotions?(current_user))
+  end
+
+  def events
+    strong_memoize(:events) do
+      level = Gitlab::Audit::Levels::Project.new(project: project)
+      events = AuditLogFinder
+        .new(level: level, params: audit_params)
+        .execute
+        .page(params[:page])
+        .without_count
+
+      Gitlab::Audit::Events::Preloader.preload!(events)
+    end
+  end
+
+  def filter_by_author(params)
+    can?(current_user, :admin_project, project) ? params : params.merge(author_id: current_user.id)
   end
 end

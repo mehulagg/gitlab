@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ErrorTracking::ListProjectsService do
+RSpec.describe ErrorTracking::ListProjectsService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) { create(:project) }
 
@@ -121,7 +121,7 @@ describe ErrorTracking::ListProjectsService do
     end
 
     context 'error_tracking_setting is nil' do
-      let(:error_tracking_setting) { build(:project_error_tracking_setting) }
+      let(:error_tracking_setting) { build(:project_error_tracking_setting, project: project) }
       let(:new_api_url) { new_api_host + 'api/0/projects/org/proj/' }
 
       before do

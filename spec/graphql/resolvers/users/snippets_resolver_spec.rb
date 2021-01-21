@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::Users::SnippetsResolver do
+RSpec.describe Resolvers::Users::SnippetsResolver do
   include GraphqlHelpers
 
   describe '#resolve' do
@@ -51,29 +51,28 @@ describe Resolvers::Users::SnippetsResolver do
       end
 
       it 'returns the snippets by single gid' do
-        snippets = resolve_snippets(args: { ids: private_personal_snippet.to_global_id })
+        snippets = resolve_snippets(args: { ids: [global_id_of(private_personal_snippet)] })
 
         expect(snippets).to contain_exactly(private_personal_snippet)
       end
 
       it 'returns the snippets by array of gid' do
-        args = {
-          ids: [private_personal_snippet.to_global_id, public_personal_snippet.to_global_id]
-        }
+        snippets = [private_personal_snippet, public_personal_snippet]
+        args = { ids: snippets.map { |s| global_id_of(s) } }
 
-        snippets = resolve_snippets(args: args)
+        found = resolve_snippets(args: args)
 
-        expect(snippets).to contain_exactly(private_personal_snippet, public_personal_snippet)
+        expect(found).to match_array(snippets)
       end
 
       it 'returns an error if the gid is invalid' do
         args = {
-          ids: [private_personal_snippet.to_global_id, 'foo']
+          ids: [global_id_of(private_personal_snippet), 'foo']
         }
 
         expect do
           resolve_snippets(args: args)
-        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+        end.to raise_error(GraphQL::CoercionError)
       end
     end
   end

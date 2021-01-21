@@ -48,7 +48,7 @@ module Gitlab
 
       attr_reader :logger
 
-      def initialize(logger: Rails.logger) # rubocop:disable Gitlab/RailsLogger
+      def initialize(logger: Gitlab::AppLogger)
         @logger = logger
       end
 
@@ -67,7 +67,7 @@ module Gitlab
           batch_size: 1000
         }
 
-        relation.find_each(find_params) do |upload|
+        relation.find_each(**find_params) do |upload|
           clean(upload.retrieve_uploader, dry_run: dry_run)
           sleep sleep_time if sleep_time
         rescue => err

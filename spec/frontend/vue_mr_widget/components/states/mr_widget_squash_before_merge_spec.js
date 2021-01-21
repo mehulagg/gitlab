@@ -1,12 +1,14 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlFormCheckbox } from '@gitlab/ui';
 import SquashBeforeMerge from '~/vue_merge_request_widget/components/states/squash_before_merge.vue';
+import { SQUASH_BEFORE_MERGE } from '~/vue_merge_request_widget/i18n';
 
 const localVue = createLocalVue();
 
 describe('Squash before merge component', () => {
   let wrapper;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(localVue.extend(SquashBeforeMerge), {
       localVue,
       propsData: {
@@ -19,15 +21,15 @@ describe('Squash before merge component', () => {
     wrapper.destroy();
   });
 
-  describe('checkbox', () => {
-    const findCheckbox = () => wrapper.find('.js-squash-checkbox');
+  const findCheckbox = () => wrapper.find(GlFormCheckbox);
 
+  describe('checkbox', () => {
     it('is unchecked if passed value prop is false', () => {
       createComponent({
         value: false,
       });
 
-      expect(findCheckbox().element.checked).toBeFalsy();
+      expect(findCheckbox().vm.$attrs.checked).toBe(false);
     });
 
     it('is checked if passed value prop is true', () => {
@@ -35,22 +37,7 @@ describe('Squash before merge component', () => {
         value: true,
       });
 
-      expect(findCheckbox().element.checked).toBeTruthy();
-    });
-
-    it('changes value on click', done => {
-      createComponent({
-        value: false,
-      });
-
-      findCheckbox().element.checked = true;
-
-      findCheckbox().trigger('change');
-
-      wrapper.vm.$nextTick(() => {
-        expect(findCheckbox().element.checked).toBeTruthy();
-        done();
-      });
+      expect(findCheckbox().vm.$attrs.checked).toBe(true);
     });
 
     it('is disabled if isDisabled prop is true', () => {
@@ -59,7 +46,28 @@ describe('Squash before merge component', () => {
         isDisabled: true,
       });
 
-      expect(findCheckbox().attributes('disabled')).toBeTruthy();
+      expect(findCheckbox().vm.$attrs.disabled).toBe(true);
+    });
+  });
+
+  describe('tooltip', () => {
+    const tooltipTitle = () => findCheckbox().attributes('title');
+
+    it('does not render when isDisabled is false', () => {
+      createComponent({
+        value: true,
+        isDisabled: false,
+      });
+      expect(tooltipTitle()).toBeUndefined();
+    });
+
+    it('display message when when isDisabled is true', () => {
+      createComponent({
+        value: true,
+        isDisabled: true,
+      });
+
+      expect(tooltipTitle()).toBe(SQUASH_BEFORE_MERGE.tooltipTitle);
     });
   });
 
@@ -71,7 +79,7 @@ describe('Squash before merge component', () => {
 
       const aboutLink = wrapper.find('a');
 
-      expect(aboutLink.exists()).toBeFalsy();
+      expect(aboutLink.exists()).toBe(false);
     });
 
     it('is rendered if  help path is passed', () => {
@@ -82,7 +90,7 @@ describe('Squash before merge component', () => {
 
       const aboutLink = wrapper.find('a');
 
-      expect(aboutLink.exists()).toBeTruthy();
+      expect(aboutLink.exists()).toBe(true);
     });
 
     it('should have a correct help path if passed', () => {

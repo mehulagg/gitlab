@@ -1,33 +1,24 @@
+import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import {
-  GlEmptyState,
-  GlLoadingIcon,
-  GlTab,
-  GlTabs,
-  GlAlert,
-  GlDeprecatedBadge as GlBadge,
-} from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
-import setWindowLocation from 'helpers/set_window_location_helper';
-
-import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
-
+import { stubTransition } from 'helpers/stub_transition';
 import LicenseComplianceApp from 'ee/license_compliance/components/app.vue';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
 import PipelineInfo from 'ee/license_compliance/components/pipeline_info.vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
 
 import * as getters from 'ee/license_compliance/store/modules/list/getters';
 
+import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import {
   approvedLicense,
   blacklistedLicense,
 } from 'ee_jest/vue_shared/license_compliance/mock_data';
-
-import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { TEST_HOST } from 'helpers/test_constants';
 
 Vue.use(Vuex);
 
@@ -88,10 +79,11 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
+    stubs: { transition: stubTransition() },
   });
 };
 
-const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
 describe('Project Licenses', () => {
   afterEach(() => {
@@ -164,7 +156,7 @@ describe('Project Licenses', () => {
     });
   });
 
-  describe('when licensePolicyList feature flag is enabled', () => {
+  describe('when page is shown', () => {
     beforeEach(() => {
       createComponent({
         state: {
@@ -173,11 +165,6 @@ describe('Project Licenses', () => {
             jobPath: '/',
             generatedAt: '',
             status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: true },
           },
         },
       });
@@ -231,9 +218,6 @@ describe('Project Licenses', () => {
               pageInfo: 1,
             },
             options: {
-              provide: {
-                glFeatures: { licensePolicyList: true },
-              },
               mount: true,
             },
           });
@@ -274,9 +258,6 @@ describe('Project Licenses', () => {
             pageInfo,
           },
           options: {
-            provide: {
-              glFeatures: { licensePolicyList: true },
-            },
             mount: true,
           },
         });
@@ -298,21 +279,11 @@ describe('Project Licenses', () => {
       );
 
       it('it renders the correct count in "Detected in project" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(0)
-            .text(),
-        ).toBe(pageInfo.total.toString());
+        expect(wrapper.findAll(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
       });
 
       it('it renders the correct count in "Policies" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(1)
-            .text(),
-        ).toBe(managedLicenses.length.toString());
+        expect(wrapper.findAll(GlBadge).at(1).text()).toBe(managedLicenses.length.toString());
       });
     });
 
@@ -332,45 +303,6 @@ describe('Project Licenses', () => {
           "Detected licenses that are out-of-compliance with the project's assigned policies",
         );
       });
-    });
-  });
-
-  describe('when licensePolicyList feature flag is disabled', () => {
-    beforeEach(() => {
-      createComponent({
-        state: {
-          initialized: true,
-          reportInfo: {
-            jobPath: '/',
-            generatedAt: '',
-            status: REPORT_STATUS.ok,
-          },
-        },
-        options: {
-          provide: {
-            glFeatures: { licensePolicyList: false },
-          },
-        },
-      });
-    });
-
-    it('only renders the "Detected in project" table', () => {
-      expect(wrapper.find(DetectedLicensesTable).exists()).toBe(true);
-      expect(wrapper.find(LicenseManagement).exists()).toBe(false);
-    });
-
-    it('renders no "Policies" table', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
-    });
-
-    it('renders the pipeline info', () => {
-      expect(wrapper.find(PipelineInfo).exists()).toBe(true);
-    });
-
-    it('renders no tabs', () => {
-      expect(wrapper.find(GlTabs).exists()).toBe(false);
-      expect(wrapper.find(GlTab).exists()).toBe(false);
     });
   });
 });

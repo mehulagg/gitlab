@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ClusterAncestorsFinder, '#execute' do
+RSpec.describe ClusterAncestorsFinder, '#execute' do
   let(:group) { create(:group) }
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
@@ -83,8 +83,16 @@ describe ClusterAncestorsFinder, '#execute' do
     let(:clusterable) { Clusters::Instance.new }
     let(:user) { create(:admin) }
 
-    it 'returns the list of instance clusters' do
-      is_expected.to eq([instance_cluster])
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it 'returns the list of instance clusters' do
+        is_expected.to eq([instance_cluster])
+      end
+    end
+
+    context 'when admin mode is disabled' do
+      it 'returns nothing' do
+        is_expected.to be_empty
+      end
     end
   end
 end

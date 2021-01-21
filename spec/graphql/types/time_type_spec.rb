@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['Time'] do
+RSpec.describe GitlabSchema.types['Time'] do
   let(:iso) { "2018-06-04T15:23:50+02:00" }
   let(:time) { Time.parse(iso) }
 
@@ -14,5 +14,15 @@ describe GitlabSchema.types['Time'] do
 
   it 'coerces an ISO-time into Time object' do
     expect(described_class.coerce_isolated_input(iso)).to eq(time)
+  end
+
+  it 'rejects invalid input' do
+    expect { described_class.coerce_isolated_input('not valid') }
+      .to raise_error(GraphQL::CoercionError)
+  end
+
+  it 'rejects nil' do
+    expect { described_class.coerce_isolated_input(nil) }
+      .to raise_error(GraphQL::CoercionError)
   end
 end

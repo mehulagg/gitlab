@@ -6,6 +6,8 @@ module Geo
     include Gitlab::Geo::LogHelpers
     include GeoQueue
 
+    loggable_arguments 0
+
     def perform(file_path)
       remove_file!(file_path)
     end

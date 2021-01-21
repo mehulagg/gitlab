@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ImportExport::LfsRestorer do
+RSpec.describe Gitlab::ImportExport::LfsRestorer do
   include UploadHelpers
 
   let(:export_path) { "#{Dir.tmpdir}/lfs_object_restorer_spec" }
@@ -13,7 +13,7 @@ describe Gitlab::ImportExport::LfsRestorer do
   subject(:restorer) { described_class.new(project: project, shared: shared) }
 
   before do
-    allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
+    allow(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
     FileUtils.mkdir_p(shared.export_path)
   end
 

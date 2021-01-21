@@ -1,4 +1,7 @@
 ---
+stage: Manage
+group: Access
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: howto, reference
 ---
 
@@ -21,7 +24,7 @@ connections to GitLab repositories.
 ## Requirements
 
 To support SSH, GitLab requires the installation of the OpenSSH client, which
-comes pre-installed on GNU/Linux and macOS, but not on Windows.
+comes pre-installed on GNU/Linux and macOS, as well as on Windows 10.
 
 Make sure that your system includes SSH version 6.5 or newer, as that excludes
 the now insecure MD5 signature scheme. The following command returns the version of
@@ -41,7 +44,7 @@ GitLab supports the use of RSA, DSA, ECDSA, and ED25519 keys.
 - GitLab has [deprecated](https://about.gitlab.com/releases/2018/06/22/gitlab-11-0-released/#support-for-dsa-ssh-keys) DSA keys in GitLab 11.0.
 - As noted in [Practical Cryptography With Go](https://leanpub.com/gocrypto/read#leanpub-auto-ecdsa), the security issues related to DSA also apply to ECDSA.
 
-TIP: **Tip:**
+NOTE:
 Available documentation suggests that ED25519 is more secure. If you use an RSA key, the US National Institute of Science and Technology in [Publication 800-57 Part 3 (PDF)](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf) recommends a key size of at least 2048 bits.
 
 Therefore, our documentation focuses on the use of ED25519 and RSA keys.
@@ -118,7 +121,7 @@ Enter file in which to save the key (/home/user/.ssh/id_rsa):
 
 For guidance, proceed to the [common steps](#common-steps-for-generating-an-ssh-key-pair).
 
-NOTE: **Note:**
+NOTE:
 If you have OpenSSH version 7.8 or below, consider the problems associated
 with [encoding](#rsa-keys-and-openssh-from-versions-65-to-78).
 
@@ -129,18 +132,18 @@ At this point, you'll see the following message in the command line (for ED25519
 
 ```plaintext
 Generating public/private ed25519 key pair.
-Enter file in which to save the key (/home/user/.ssh/id_rsa):
+Enter file in which to save the key (/home/user/.ssh/id_ed25519):
 ```
 
 If you don't already have an SSH key pair and are not generating a [deploy key](#deploy-keys),
-accept the suggested file and directory. Your SSH client will use
+accept the suggested file and directory. Your SSH client uses
 the resulting SSH key pair with no additional configuration.
 
 Alternatively, you can save the new SSH key pair in a different location.
-You can assign the directory and file name of your choice.
+You can assign the directory and filename of your choice.
 You can also dedicate that SSH key pair to a [specific host](#working-with-non-default-ssh-key-pair-paths).
 
-After assigning a file to save your SSH key, you'll get a chance to set up
+After assigning a file to save your SSH key, you can set up
 a [passphrase](https://www.ssh.com/ssh/passphrase/) for your SSH key:
 
 ```plaintext
@@ -180,7 +183,7 @@ the following command:
 ssh-keygen -o -t rsa -b 4096 -C "email@example.com"
 ```
 
-NOTE: **Note:**
+NOTE:
 As noted in the `ssh-keygen` man page, ED25519 already encrypts keys to the more secure
 OpenSSH format.
 
@@ -212,7 +215,7 @@ Now you can copy the SSH key you created to your GitLab account. To do so, follo
 
    If you're using an RSA key, substitute accordingly.
 
-1. Navigate to `http://gitlab.com` and sign in.
+1. Navigate to `https://gitlab.com` or your local GitLab instance URL and sign in.
 1. Select your avatar in the upper right corner, and click **Settings**
 1. Click **SSH Keys**.
 1. Paste the public key that you copied into the **Key** text box.
@@ -221,24 +224,30 @@ Now you can copy the SSH key you created to your GitLab account. To do so, follo
 1. Include an (optional) expiry date for the key under "Expires at" section. (Introduced in [GitLab 12.9](https://gitlab.com/gitlab-org/gitlab/-/issues/36243).)
 1. Click the **Add key** button.
 
-SSH keys that have "expired" using this procedure will still be valid in GitLab workflows.
+SSH keys that have "expired" using this procedure are valid in GitLab workflows.
 As the GitLab-configured expiration date is not included in the SSH key itself,
 you can still export public SSH keys as needed.
 
-NOTE: **Note:**
+NOTE:
 If you manually copied your public SSH key make sure you copied the entire
 key starting with `ssh-ed25519` (or `ssh-rsa`) and ending with your email address.
 
+## Two-factor Authentication (2FA)
+
+You can set up two-factor authentication (2FA) for
+[Git over SSH](../security/two_factor_authentication.md#two-factor-authentication-2fa-for-git-over-ssh-operations).
+
 ## Testing that everything is set up correctly
 
-To test whether your SSH key was added correctly, run the following command in
-your terminal (replacing `gitlab.com` with your GitLab's instance domain):
+To test whether your SSH key was added correctly, run the following
+command in your terminal (replace `gitlab.com` with the domain of
+your GitLab instance):
 
 ```shell
 ssh -T git@gitlab.com
 ```
 
-The first time you connect to GitLab via SSH, you will be asked to verify the
+The first time you connect to GitLab via SSH, you should verify the
 authenticity of the GitLab host that you're connecting to.
 For example, when connecting to GitLab.com, answer `yes` to add GitLab.com to
 the list of trusted hosts:
@@ -250,15 +259,15 @@ Are you sure you want to continue connecting (yes/no)? yes
 Warning: Permanently added 'gitlab.com' (ECDSA) to the list of known hosts.
 ```
 
-NOTE: **Note:**
+NOTE:
 For GitLab.com, consult the
 [SSH host keys fingerprints](../user/gitlab_com/index.md#ssh-host-keys-fingerprints),
-section to make sure you're connecting to the correct server. For example, you'll see
+section to make sure you're connecting to the correct server. For example, you can see
 the ECDSA key fingerprint shown above in the linked section.
 
-Once added to the list of known hosts, you won't be asked to validate the
-authenticity of GitLab's host again. Run the above command once more, and
-you should only receive a _Welcome to GitLab, `@username`!_ message.
+Once added to the list of known hosts, you should validate the
+authenticity of the GitLab host, once again. Run the above command
+again, and you should receive a _Welcome to GitLab, `@username`!_ message.
 
 If the welcome message doesn't appear, you can troubleshoot the problem by running `ssh`
 in verbose mode with the following command:
@@ -294,8 +303,8 @@ Host gitlab.company.com
   IdentityFile ~/.ssh/example_com_rsa
 ```
 
-Public SSH keys need to be unique to GitLab, as they will bind to your account.
-Your SSH key is the only identifier you'll have when pushing code via SSH,
+Public SSH keys need to be unique to GitLab, as they bind to your account.
+Your SSH key is the only identifier you have when pushing code via SSH,
 that's why it needs to uniquely map to a single user.
 
 ## Per-repository SSH keys
@@ -307,7 +316,7 @@ on, you can issue the following command while inside your repository:
 git config core.sshCommand "ssh -o IdentitiesOnly=yes -i ~/.ssh/private-key-filename-for-this-repository -F /dev/null"
 ```
 
-This will not use the SSH Agent and requires at least Git 2.10.
+This does not use the SSH Agent and requires at least Git 2.10.
 
 ## Multiple accounts on a single GitLab instance
 
@@ -315,13 +324,13 @@ The [per-repository](#per-repository-ssh-keys) method also works for using
 multiple accounts within a single GitLab instance.
 
 Alternatively, it is possible to directly assign aliases to hosts in
-`~.ssh/config`. SSH and, by extension, Git will fail to log in if there is
+`~.ssh/config`. SSH and, by extension, Git fails to log in if there is
 an `IdentityFile` set outside of a `Host` block in `.ssh/config`. This is
 due to how SSH assembles `IdentityFile` entries and is not changed by
 setting `IdentitiesOnly` to `yes`. `IdentityFile` entries should point to
 the private key of an SSH key pair.
 
-NOTE: **Note:**
+NOTE:
 Private and public keys should be readable by the user only. Accomplish this
 on Linux and macOS by running: `chmod 0400 ~/.ssh/<example_ssh_key>` and
 `chmod 0400 ~/.ssh/<example_sh_key.pub>`.
@@ -340,11 +349,11 @@ Host <user_2.gitlab.com>
   IdentityFile ~/.ssh/<example_ssh_key2>
 ```
 
-NOTE: **Note:**
+NOTE:
 The example `Host` aliases are defined as `user_1.gitlab.com` and
 `user_2.gitlab.com` for efficiency and transparency. Advanced configurations
 are more difficult to maintain; using this type of alias makes it easier to
-understand when using other tools such as `git remote` subcommands. SSH
+understand when using other tools such as `git remote` sub-commands. SSH
 would understand any string as a `Host` alias thus `Tanuki1` and `Tanuki2`,
 despite giving very little context as to where they point, would also work.
 
@@ -385,14 +394,14 @@ GitLab integrates with the system-installed SSH daemon, designating a user
 connecting to the GitLab server over SSH are identified by their SSH key instead
 of their username.
 
-SSH *client* operations performed on the GitLab server wil be executed as this
+SSH *client* operations performed on the GitLab server are executed as this
 user. Although it is possible to modify the SSH configuration for this user to,
 e.g., provide a private SSH key to authenticate these requests by, this practice
 is **not supported** and is strongly discouraged as it presents significant
 security risks.
 
-The GitLab check process includes a check for this condition, and will direct you
-to this section if your server is configured like this, e.g.:
+The GitLab check process includes a check for this condition, and directs you
+to this section if your server is configured like this, for example:
 
 ```shell
 $ gitlab-rake gitlab:check
@@ -412,7 +421,7 @@ are *explicitly not supported* and may stop working at any time.
 
 ### Options for Microsoft Windows
 
-If you're running Windows 10, the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10), and its latest [WSL 2](https://docs.microsoft.com/en-us/install-win10) version,
+If you're running Windows 10, the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10), and its latest [WSL 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) version,
 support the installation of different Linux distributions, which include the Git and SSH clients.
 
 For current versions of Windows, you can also install the Git and SSH clients with

@@ -27,7 +27,6 @@ RSpec.describe Repository do
 
     it { is_expected.to delegate_method(:checksum).to(:raw_repository) }
     it { is_expected.to delegate_method(:find_remote_root_ref).to(:raw_repository) }
-    it { is_expected.to delegate_method(:pull_mirror_branch_prefix).to(:project) }
   end
 
   describe '#after_sync' do
@@ -219,59 +218,14 @@ RSpec.describe Repository do
     end
   end
 
-  describe '#upstream_branch_name' do
-    let(:pull_mirror_branch_prefix) { 'upstream/' }
-    let(:branch_name) { 'upstream/master' }
+  describe '#lfs_enabled?' do
+    subject { repository.lfs_enabled? }
 
-    subject { repository.upstream_branch_name(branch_name) }
+    context 'for a group wiki repository' do
+      let(:repository) { build_stubbed(:group_wiki).repository }
 
-    before do
-      project.update(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
-    end
-
-    it { is_expected.to eq('master') }
-
-    context 'when the branch is local (not mirrored)' do
-      let(:branch_name) { 'a-local-branch' }
-
-      it { is_expected.to be_nil }
-    end
-
-    context 'when pull_mirror_branch_prefix is nil' do
-      let(:pull_mirror_branch_prefix) { nil }
-
-      it { is_expected.to eq(branch_name) }
-    end
-
-    context 'when pull_mirror_branch_prefix is empty' do
-      let(:pull_mirror_branch_prefix) { '' }
-
-      it { is_expected.to eq(branch_name) }
-    end
-
-    context 'when pull_mirror_branch_prefix feature flag is disabled' do
-      before do
-        stub_feature_flags(pull_mirror_branch_prefix: false)
-      end
-
-      it { is_expected.to eq(branch_name) }
-
-      context 'when the branch is local (not mirrored)' do
-        let(:branch_name) { 'a-local-branch' }
-
-        it { is_expected.to eq(branch_name) }
-      end
-
-      context 'when pull_mirror_branch_prefix is nil' do
-        let(:pull_mirror_branch_prefix) { nil }
-
-        it { is_expected.to eq(branch_name) }
-      end
-
-      context 'when pull_mirror_branch_prefix is empty' do
-        let(:pull_mirror_branch_prefix) { '' }
-
-        it { is_expected.to eq(branch_name) }
+      it 'returns false' do
+        is_expected.to be_falsy
       end
     end
   end

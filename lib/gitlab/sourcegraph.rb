@@ -12,8 +12,9 @@ module Gitlab
         !feature.off?
       end
 
-      def feature_enabled?(thing = nil)
-        feature.enabled?(thing)
+      def feature_enabled?(actor = nil)
+        # Some CI jobs grep for Feature.enabled? in our codebase, so it is important this reference stays around.
+        Feature.enabled?(:sourcegraph, actor)
       end
 
       private

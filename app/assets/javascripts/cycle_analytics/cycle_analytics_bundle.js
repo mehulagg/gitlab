@@ -2,8 +2,7 @@ import $ from 'jquery';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
-import filterMixins from 'ee_else_ce/analytics/cycle_analytics/mixins/filter_mixins';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import { __ } from '~/locale';
 import Translate from '../vue_shared/translate';
 import banner from './components/banner.vue';
@@ -37,15 +36,8 @@ export default () => {
       'stage-review-component': stageReviewComponent,
       'stage-staging-component': stageStagingComponent,
       'stage-production-component': stageComponent,
-      GroupsDropdownFilter: () =>
-        import('ee_component/analytics/shared/components/groups_dropdown_filter.vue'),
-      ProjectsDropdownFilter: () =>
-        import('ee_component/analytics/shared/components/projects_dropdown_filter.vue'),
-      DateRangeDropdown: () =>
-        import('ee_component/analytics/shared/components/date_range_dropdown.vue'),
       'stage-nav-item': stageNavItem,
     },
-    mixins: [filterMixins],
     data() {
       return {
         store: CycleAnalyticsStore,
@@ -82,10 +74,11 @@ export default () => {
         const $dropdown = $('.js-ca-dropdown');
         const $label = $dropdown.find('.dropdown-label');
 
+        // eslint-disable-next-line @gitlab/no-global-event-off
         $dropdown
           .find('li a')
           .off('click')
-          .on('click', e => {
+          .on('click', (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
             this.startDate = $target.data('value');
@@ -101,7 +94,7 @@ export default () => {
 
         this.service
           .fetchCycleAnalyticsData(fetchOptions)
-          .then(response => {
+          .then((response) => {
             this.store.setCycleAnalyticsData(response);
             this.selectDefaultStage();
             this.initDropdown();
@@ -135,7 +128,7 @@ export default () => {
             startDate: this.startDate,
             projectIds: this.selectedProjectIds,
           })
-          .then(response => {
+          .then((response) => {
             this.isEmptyStage = !response.events.length;
             this.store.setStageEvents(response.events, stage);
             this.isLoadingStage = false;

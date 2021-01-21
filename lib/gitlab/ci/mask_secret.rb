@@ -8,7 +8,8 @@ module Gitlab
 
         # We assume 'value' must be mutable, given
         # that frozen string is enabled.
-        value.gsub!(token, 'x' * token.length)
+
+        value.gsub!(token, 'x' * token.bytesize)
         value
       end
     end

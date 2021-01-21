@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Schedulable do
+RSpec.describe Schedulable do
   shared_examples 'before_save callback' do
     it 'updates next_run_at' do
       expect { object.save! }.to change { object.next_run_at }
@@ -35,7 +35,7 @@ describe Schedulable do
   context 'for a pipeline_schedule' do
     # let! is used to reset the next_run_at value before each spec
     let(:object) do
-      Timecop.freeze(1.day.ago) do
+      travel_to(1.day.ago) do
         create(:ci_pipeline_schedule, :hourly)
       end
     end

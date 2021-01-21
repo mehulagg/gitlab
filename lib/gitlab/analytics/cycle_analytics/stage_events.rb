@@ -11,6 +11,7 @@ module Gitlab
         ENUM_MAPPING = {
           StageEvents::IssueCreated => 1,
           StageEvents::IssueFirstMentionedInCommit => 2,
+          StageEvents::IssueDeployedToProduction => 3,
           StageEvents::MergeRequestCreated => 100,
           StageEvents::MergeRequestFirstDeployedToProduction => 101,
           StageEvents::MergeRequestLastBuildFinished => 102,
@@ -18,8 +19,7 @@ module Gitlab
           StageEvents::MergeRequestMerged => 104,
           StageEvents::CodeStageStart => 1_000,
           StageEvents::IssueStageEnd => 1_001,
-          StageEvents::PlanStageStart => 1_002,
-          StageEvents::ProductionStageEnd => 1_003
+          StageEvents::PlanStageStart => 1_002
         }.freeze
 
         EVENTS = ENUM_MAPPING.keys.freeze
@@ -27,8 +27,7 @@ module Gitlab
         INTERNAL_EVENTS = [
           StageEvents::CodeStageStart,
           StageEvents::IssueStageEnd,
-          StageEvents::PlanStageStart,
-          StageEvents::ProductionStageEnd
+          StageEvents::PlanStageStart
         ].freeze
 
         # Defines which start_event and end_event pairs are allowed
@@ -41,7 +40,7 @@ module Gitlab
           ],
           StageEvents::IssueCreated => [
             StageEvents::IssueStageEnd,
-            StageEvents::ProductionStageEnd
+            StageEvents::IssueDeployedToProduction
           ],
           StageEvents::MergeRequestCreated => [
             StageEvents::MergeRequestMerged
@@ -60,7 +59,7 @@ module Gitlab
 
         # hash for defining ActiveRecord enum: identifier => number
         def self.to_enum
-          enum_mapping.each_with_object({}) { |(k, v), hash| hash[k.identifier] = v }
+          enum_mapping.transform_keys { |k| k.identifier }
         end
 
         def self.pairing_rules

@@ -17,17 +17,41 @@ RSpec.shared_context 'GroupPolicy context' do
       read_group_merge_requests
    ]
   end
+
   let(:read_group_permissions) { %i[read_label read_list read_milestone read_board] }
-  let(:reporter_permissions) { %i[admin_label read_container_image read_metrics_dashboard_annotation] }
-  let(:developer_permissions) { %i[admin_milestone create_metrics_dashboard_annotation delete_metrics_dashboard_annotation update_metrics_dashboard_annotation] }
+
+  let(:reporter_permissions) do
+    %i[
+        admin_label
+        admin_board
+        read_container_image
+        read_metrics_dashboard_annotation
+        read_prometheus
+        read_package_settings
+      ]
+  end
+
+  let(:developer_permissions) do
+    %i[
+        admin_milestone
+        create_metrics_dashboard_annotation
+        delete_metrics_dashboard_annotation
+        update_metrics_dashboard_annotation
+        create_custom_emoji
+        create_package_settings
+      ]
+  end
+
   let(:maintainer_permissions) do
     %i[
       create_projects
       read_cluster create_cluster update_cluster admin_cluster add_cluster
     ]
   end
+
   let(:owner_permissions) do
     [
+      :owner_access,
       :admin_group,
       :admin_namespace,
       :admin_group_member,
@@ -38,6 +62,8 @@ RSpec.shared_context 'GroupPolicy context' do
       :update_default_branch_protection
     ].compact
   end
+
+  let(:admin_permissions) { %i[read_confidential_issues] }
 
   before_all do
     group.add_guest(guest)

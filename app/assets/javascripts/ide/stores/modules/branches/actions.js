@@ -8,7 +8,7 @@ export const receiveBranchesError = ({ commit, dispatch }, { search }) => {
     'setErrorMessage',
     {
       text: __('Error loading branches.'),
-      action: payload =>
+      action: (payload) =>
         dispatch('fetchBranches', payload).then(() =>
           dispatch('setErrorMessage', null, { root: true }),
         ),
@@ -32,5 +32,3 @@ export const fetchBranches = ({ dispatch, rootGetters }, { search = '' }) => {
 };
 
 export const resetBranches = ({ commit }) => commit(types.RESET_BRANCHES);
-
-export default () => {};

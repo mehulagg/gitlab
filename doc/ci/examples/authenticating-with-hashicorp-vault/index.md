@@ -1,7 +1,7 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -9,17 +9,24 @@ type: tutorial
 
 This tutorial demonstrates how to authenticate, configure, and read secrets with HashiCorp's Vault from GitLab CI/CD.
 
+NOTE:
+[GitLab Premium](https://about.gitlab.com/pricing/) supports read access to a
+Hashicorp Vault, and enables you to
+[use Vault secrets in a CI job](../../secrets/index.md#use-vault-secrets-in-a-ci-job).
+To learn more, read [Using external secrets in CI](../../secrets/index.md).
+
 ## Requirements
 
 This tutorial assumes you are familiar with GitLab CI/CD and Vault.
 
-To follow along, you will need:
+To follow along, you must have:
 
 - An account on GitLab.
-- A running Vault server and the access required to configure authentication and create roles and policies.
+- A running Vault server and access to it is required to configure authentication and create roles
+  and policies. For HashiCorp Vaults, this can be the Open Source or Enterprise version.
 
-NOTE: **Note:**
-You will need to replace the `vault.example.com` URL below with the URL of your Vault server and `gitlab.example.com` with the URL of your GitLab instance.
+NOTE:
+You must replace the `vault.example.com` URL below with the URL of your Vault server, and `gitlab.example.com` with the URL of your GitLab instance.
 
 ## How it works
 
@@ -35,22 +42,22 @@ The JWT's payload looks like this:
   "nbf": 1585798372,                             # Not valid before
   "exp": 1585713886,                             # Expire at
   "sub": "job_1212",                             # Subject (job id)
-  "namespace_id": "1",
-  "namespace_path": "mygroup",
-  "project_id": "22",
-  "project_path": "mygroup/myproject",
-  "user_id": "42",
-  "user_login": "myuser",
-  "user_email": "myuser@example.com"
-  "pipeline_id": "1212",
-  "job_id": "1212",
+  "namespace_id": "1",                           # Use this to scope to group or user level namespace by id
+  "namespace_path": "mygroup",                   # Use this to scope to group or user level namespace by path
+  "project_id": "22",                            #
+  "project_path": "mygroup/myproject",           #
+  "user_id": "42",                               # Id of the user executing the job
+  "user_login": "myuser"                         # GitLab @username
+  "user_email": "myuser@example.com",            # Email of the user executing the job
+  "pipeline_id": "1212",                         #
+  "job_id": "1212",                              #
   "ref": "auto-deploy-2020-04-01",               # Git ref for this job
   "ref_type": "branch",                          # Git ref type, branch or tag
   "ref_protected": "true"                        # true if this git ref is protected, false otherwise
 }
 ```
 
-The JWT is encoded by using RS256 and signed with your GitLab instance's OpenID Connect private key. The expire time for the token will be set to job's timeout, if specifed, or 5 minutes if it is not. The key used to sign this token may change without any notice. In such case retrying the job will generate new JWT using the current signing key.
+The JWT is encoded by using RS256 and signed with a dedicated private key. The expire time for the token is set to job's timeout, if specified, or 5 minutes if it is not. The key used to sign this token may change without any notice. In such case retrying the job generates new JWT using the current signing key.
 
 You can use this JWT and your instance's JWKS endpoint (`https://gitlab.example.com/-/jwks`) to authenticate with a Vault server that is configured to allow the JWT Authentication method for authentication.
 
@@ -60,7 +67,7 @@ To communicate with Vault, you can use either its CLI client or perform API requ
 
 ## Example
 
-CAUTION: **Caution**:
+WARNING:
 JWTs are credentials, which can grant access to resources. Be careful where you paste them!
 
 Let's say you have the passwords for your staging and production databases stored in a Vault server that is running on `http://vault.example.com:8200`. Your staging password is `pa$$w0rd` and your production password is `real-pa$$w0rd`.
@@ -104,7 +111,7 @@ EOF
 Success! Uploaded policy: myproject-production
 ```
 
-You'll also need roles that will link the JWT with these policies.
+You also need roles that link the JWT with these policies.
 
 One for staging named `myproject-staging`:
 
@@ -144,19 +151,19 @@ $ vault write auth/jwt/role/myproject-production - <<EOF
 EOF
 ```
 
-This example uses [bound_claims](https://www.vaultproject.io/api/auth/jwt#bound_claims) to specify that only a JWT with matching values for the specified claims will be allowed to authenticate.
+This example uses [bound_claims](https://www.vaultproject.io/api/auth/jwt#bound_claims) to specify that only a JWT with matching values for the specified claims is allowed to authenticate.
 
-Combined with GitLab's [protected branches](../../../user/project/protected_branches.md), you can restrict who is able to authenticate and read the secrets.
+Combined with [protected branches](../../../user/project/protected_branches.md), you can restrict who is able to authenticate and read the secrets.
 
 [token_explicit_max_ttl](https://www.vaultproject.io/api/auth/jwt#token_explicit_max_ttl) specifies that the token issued by Vault, upon successful authentication, has a hard lifetime limit of 60 seconds.
 
 [user_claim](https://www.vaultproject.io/api/auth/jwt#user_claim) specifies the name for the Identity alias created by Vault upon a successful login.
 
-[bound_claims_type](https://www.vaultproject.io/api-docs/auth/jwt#bound_claims_type) configures the interpretation of the `bound_claims` values. If set to `glob`, the values will be interpreted as globs, with `*` matching any number of characters.
+[bound_claims_type](https://www.vaultproject.io/api-docs/auth/jwt#bound_claims_type) configures the interpretation of the `bound_claims` values. If set to `glob`, the values are interpreted as globs, with `*` matching any number of characters.
 
 For the full list of options, see Vault's [Create Role documentation](https://www.vaultproject.io/api/auth/jwt#create-role).
 
-CAUTION: **Caution**:
+WARNING:
 Always restrict your roles to project or namespace by using one of the provided claims (e.g. `project_id` or `namespace_id`). Otherwise any JWT generated by this instance may be allowed to authenticate using this role.
 
 Now, configure the JWT Authentication method:
@@ -171,7 +178,7 @@ $ vault write auth/jwt/config \
 
 For the full list of available configuration options, see Vault's [API documentation](https://www.vaultproject.io/api/auth/jwt#configure).
 
-The following job, when run for the `master` branch, will be able to read secrets under `secret/myproject/staging/`, but not the secrets under `secret/myproject/production/`:
+The following job, when run for the `master` branch, is able to read secrets under `secret/myproject/staging/`, but not the secrets under `secret/myproject/production/`:
 
 ```yaml
 read_secrets:
@@ -195,7 +202,7 @@ read_secrets:
 
 ![read_secrets staging](img/vault-read-secrets-staging.png)
 
-The following job will be able to authenticate using the `myproject-production` role and read secrets under `/secret/myproject/production/`:
+The following job is able to authenticate using the `myproject-production` role and read secrets under `/secret/myproject/production/`:
 
 ```yaml
 read_secrets:

@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class SubscriptionPresenter < Gitlab::View::Presenter::Delegated
+  GRACE_PERIOD_EXTENSION_DAYS = 14.days
+
   presents :subscription
 
   def block_changes?
-    expired?
+    will_block_changes? && (block_changes_at < Date.today)
   end
 
   def plan
@@ -22,15 +24,22 @@ class SubscriptionPresenter < Gitlab::View::Presenter::Delegated
   def expires_at
     end_date
   end
-  alias_method :block_changes_at, :expires_at
+
+  def block_changes_at
+    return unless end_date
+
+    end_date + GRACE_PERIOD_EXTENSION_DAYS
+  end
 
   def remaining_days
     return unless end_date
+
+    return 0 if expired?
 
     (end_date - Date.today).to_i
   end
 
   def will_block_changes?
-    true
+    end_date.present?
   end
 end

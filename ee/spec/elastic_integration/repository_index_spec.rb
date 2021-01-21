@@ -9,7 +9,6 @@ RSpec.describe 'Repository index', :elastic do
 
     before do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-      ElasticIndexerWorker.new.perform("index", "Project", project.id, project.es_id)
     end
 
     it 'indexes initial push' do

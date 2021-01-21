@@ -3,7 +3,7 @@
 module Ci
   class BuildPolicy < CommitStatusPolicy
     condition(:protected_ref) do
-      access = ::Gitlab::UserAccess.new(@user, project: @subject.project)
+      access = ::Gitlab::UserAccess.new(@user, container: @subject.project)
 
       if @subject.tag?
         !access.can_create_tag?(@subject.ref)
@@ -20,6 +20,11 @@ module Ci
       end
     end
 
+    # overridden in EE
+    condition(:protected_environment_access) do
+      false
+    end
+
     condition(:owner_of_job) do
       @subject.triggered_by?(@user)
     end
@@ -32,6 +37,10 @@ module Ci
       @subject.archived?
     end
 
+    condition(:artifacts_public, scope: :subject) do
+      @subject.artifacts_public?
+    end
+
     condition(:terminal, scope: :subject) do
       @subject.has_terminal?
     end
@@ -40,7 +49,26 @@ module Ci
       @subject.pipeline.webide?
     end
 
-    rule { protected_ref | archived }.policy do
+    condition(:debug_mode, scope: :subject, score: 32) do
+      @subject.debug_mode?
+    end
+
+    condition(:project_read_build, scope: :subject) do
+      can?(:read_build, @subject.project)
+    end
+
+    condition(:project_update_build, scope: :subject) do
+      can?(:update_build, @subject.project)
+    end
+
+    condition(:project_developer) do
+      can?(:developer_access, @subject.project)
+    end
+
+    rule { project_read_build }.enable :read_build_trace
+    rule { debug_mode & ~project_update_build }.prevent :read_build_trace
+
+    rule { ~protected_environment_access & (protected_ref | archived) }.policy do
       prevent :update_build
       prevent :update_commit_status
       prevent :erase_build
@@ -54,6 +82,8 @@ module Ci
     end
 
     rule { can?(:update_build) & terminal }.enable :create_build_terminal
+
+    rule { can?(:update_build) }.enable :play_job
 
     rule { is_web_ide_terminal & can?(:create_web_ide_terminal) & (admin | owner_of_job) }.policy do
       enable :read_web_ide_terminal
@@ -72,6 +102,9 @@ module Ci
     rule { ~can?(:build_service_proxy_enabled) }.policy do
       prevent :create_build_service_proxy
     end
+
+    rule { project_read_build }.enable :read_job_artifacts
+    rule { ~artifacts_public & ~project_developer }.prevent :read_job_artifacts
   end
 end
 

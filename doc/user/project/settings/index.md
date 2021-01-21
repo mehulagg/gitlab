@@ -1,7 +1,14 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, index, howto
+---
+
 # Project settings
 
-NOTE: **Note:**
-Only project Maintainers and Admin users have the [permissions](../../permissions.md#project-members-permissions)
+NOTE:
+Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions)
 to access a project settings.
 
 You can adjust your [project](../index.md) settings by navigating
@@ -20,15 +27,18 @@ Adjust your project's name, description, avatar, [default branch](../repository/
 
 The project description also partially supports [standard Markdown](../../markdown.md#standard-markdown-and-extensions-in-gitlab). You can use [emphasis](../../markdown.md#emphasis), [links](../../markdown.md#links), and [line-breaks](../../markdown.md#line-breaks) to add more context to the project description.
 
-#### Compliance framework **(ULTIMATE)**
+#### Compliance framework **(PREMIUM)**
 
 You can select a framework label to identify that your project has certain compliance requirements or needs additional oversight. Available labels include:
 
-- GDPR - General Data Protection Regulation
-- HIPAA - Health Insurance Portability and Accountability Act
-- PCI-DSS - Payment Card Industry-Data Security Standard
-- SOC 2 - Service Organization Control 2
-- SOX - Sarbanes-Oxley
+- GDPR (General Data Protection Regulation)
+- HIPAA (Health Insurance Portability and Accountability Act)
+- PCI-DSS (Payment Card Industry-Data Security Standard)
+- SOC 2 (Service Organization Control 2)
+- SOX (Sarbanes-Oxley)
+
+NOTE:
+Compliance framework labels do not affect your project settings.
 
 ### Sharing and permissions
 
@@ -42,10 +52,6 @@ If you set **Project Visibility** to public, you can limit access to some featur
 to **Only Project Members**. In addition, you can select the option to
 [Allow users to request access](../members/index.md#project-membership-and-requesting-access).
 
-CAUTION: **Caution:**
-If you [reduce a project's visibility level](../../../public_access/public_access.md#reducing-visibility),
-that action unlinks all forks of that project.
-
 Use the switches to enable or disable the following features:
 
 | Option                            | More access limit options | Description                                                                                                                                                                                    |
@@ -57,20 +63,23 @@ Use the switches to enable or disable the following features:
 | **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/README.md) functionality                                                                                                                                           |
 | **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
 | **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
-| **Packages**                      |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration-premium-only) functionality                                    |
+| **Packages**                      |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration) functionality                                    |
+| **Analytics**                     | ✓                         | Enables [analytics](../../analytics/)                                                                                                                                                          |
 | **Wiki**                          | ✓                         | Enables a separate system for [documentation](../wiki/)                                                                                                                                        |
 | **Snippets**                      | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                                                                          |
 | **Pages**                         | ✓                         | Allows you to [publish static websites](../pages/)                                                                                                                                             |
 | **Metrics Dashboard**             | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)
+| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md) |
+| **Operations Dashboard**          | ✓                         | Control access to [operations dashboard](../../../operations/index.md)
 
 Some features depend on others:
 
 - If you disable the **Issues** option, GitLab also removes the following
   features:
   - **Issue Boards**
-  - [**Service Desk**](#service-desk-starter) **(STARTER)**
+  - [**Service Desk**](#service-desk)
 
-  NOTE: **Note:**
+  NOTE:
   When the **Issues** option is disabled, you can still access **Milestones**
   from merge requests.
 
@@ -89,6 +98,16 @@ Some features depend on others:
 
 - Metrics dashboard access requires reading both project environments and deployments.
   Users with access to the metrics dashboard can also access environments and deployments.
+
+#### Disabling the CVE ID request button
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41203) in GitLab 13.4, only for public projects on GitLab.com.
+
+In applicable environments, a [**Create CVE ID Request** button](../../application_security/cve_id_request.md)
+is present in the issue sidebar. The button may be disabled on a per-project basis by toggling the
+setting **Enable CVE ID requests in the issue sidebar**.
+
+![CVE ID Request toggle](img/cve_id_request_toggle.png)
 
 #### Disabling email notifications
 
@@ -125,16 +144,16 @@ Here you can run housekeeping, archive, rename, transfer, [remove a fork relatio
 
 Archiving a project makes it read-only for all users and indicates that it's
 no longer actively maintained. Projects that have been archived can also be
-unarchived. Only project Owners and Admin users have the
+unarchived. Only project owners and administrators have the
 [permissions](../../permissions.md#project-members-permissions) to archive a project.
 
-When a project is archived, the repository, issues, merge requests, and all
+When a project is archived, the repository, packages, issues, merge requests, and all
 other features are read-only. Archived projects are also hidden
 in project listings.
 
 To archive a project:
 
-1. Navigate to your project's **{settings}** **Settings > General**.
+1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
 1. In the **Archive project** section, click the **Archive project** button.
 1. Confirm the action when asked to.
@@ -142,12 +161,12 @@ To archive a project:
 #### Unarchiving a project
 
 Unarchiving a project removes the read-only restriction on a project, and makes it
-available in project listings. Only project Owners and Admin users have the
+available in project listings. Only project owners and administrators have the
 [permissions](../../permissions.md#project-members-permissions) to unarchive a project.
 
 To find an archived project:
 
-1. Sign in to GitLab as a user with project Owner or Admin permissions.
+1. Sign in to GitLab as a user with project owner or administrator permissions.
 1. If you:
    - Have the project's URL, open the project's page in your browser.
    - Don't have the project's URL:
@@ -158,15 +177,15 @@ To find an archived project:
 
 Next, to unarchive the project:
 
-1. Navigate to your project's **{settings}** **Settings > General**.
+1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
 1. In the **Unarchive project** section, click the **Unarchive project** button.
 1. Confirm the action when asked to.
 
 #### Renaming a repository
 
-NOTE: **Note:**
-Only project Maintainers and Admin users have the [permissions](../../permissions.md#project-members-permissions) to rename a
+NOTE:
+Only project maintainers and administrators have the [permissions](../../permissions.md#project-members-permissions) to rename a
 repository. Not to be confused with a project's name where it can also be
 changed from the [general project settings](#general-project-settings).
 
@@ -175,10 +194,10 @@ project via a browser) and its place on the file disk where GitLab is installed.
 
 To rename a repository:
 
-1. Navigate to your project's **{settings}** **Settings > General**.
+1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
-1. Under "Rename repository", change the "Path" to your liking.
-1. Hit **Rename project**.
+1. Under **Change path**, update the repository's path.
+1. Click **Change path**.
 
 Remember that this can have unintended side effects since everyone with the
 old URL won't be able to push or pull. Read more about what happens with the
@@ -186,21 +205,19 @@ old URL won't be able to push or pull. Read more about what happens with the
 
 #### Transferring an existing project into another namespace
 
-NOTE: **Note:**
-Only project Owners and Admin users have the [permissions](../../permissions.md#project-members-permissions)
+NOTE:
+Only project owners and administrators have the [permissions](../../permissions.md#project-members-permissions)
 to transfer a project.
 
 You can transfer an existing project into a [group](../../group/index.md) if:
 
-1. You have at least **Maintainer** [permissions](../../permissions.md#project-members-permissions) to that group.
-1. The project is in a subgroup you own.
-1. You're at least a **Maintainer** of the project under your personal namespace.
-   Similarly, if you're an owner of a group, you can transfer any of its projects
-   under your own user.
+- You have at least **Maintainer** [permissions](../../permissions.md#project-members-permissions) to that group.
+- You're at least an **Owner** of the project to be transferred.
+- The group to which the project is being transferred to must allow creation of new projects.
 
 To transfer a project:
 
-1. Navigate to your project's **{settings}** **Settings > General**.
+1. Navigate to your project's **Settings > General**.
 1. Under **Advanced**, click **Expand**.
 1. Under "Transfer project", choose the namespace you want to transfer the
    project to.
@@ -210,28 +227,33 @@ Once done, you will be taken to the new project's namespace. At this point,
 read what happens with the
 [redirects from the old project to the new one](../index.md#redirects-when-changing-repository-paths).
 
-NOTE: **Note:**
-GitLab administrators can use the admin interface to move any project to any
+NOTE:
+GitLab administrators can use the administration interface to move any project to any
 namespace if needed.
 
-#### Remove a project
+#### Delete a project
 
-NOTE: **Note:**
-Only project owners and admins have [permissions](../../permissions.md#project-members-permissions) to remove a project.
+NOTE:
+Only project owners and administrators have [permissions](../../permissions.md#project-members-permissions) to delete a project.
 
-To remove a project:
+To delete a project:
 
-1. Navigate to your project, and select **{settings}** **Settings > General > Advanced**.
-1. In the Remove project section, click the **Remove project** button.
+1. Navigate to your project, and select **Settings > General > Advanced**.
+1. In the "Delete project" section, click the **Delete project** button.
 1. Confirm the action when asked to.
 
-This action either:
+This action:
 
-- Removes a project including all associated resources (issues, merge requests etc).
-- Since [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/32935), on
-  [GitLab Premium or GitLab.com Silver](https://about.gitlab.com/pricing/) or higher tiers, marks a project for
-  deletion. The deletion will happen 7 days later by default, but this can be changed in the
-  [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-adjourned-period-premium-only).
+- Deletes a project including all associated resources (issues, merge requests etc).
+- From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers,
+group administrators can [configure](../../group/index.md#enabling-delayed-project-removal) projects within a group
+to be deleted after a delayed period.
+When enabled, actual deletion happens after number of days
+specified in [instance settings](../../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+
+WARNING:
+The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
+[Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
 #### Restore a project **(PREMIUM)**
 
@@ -239,7 +261,7 @@ This action either:
 
 To restore a project marked for deletion:
 
-1. Navigate to your project, and select **{settings}** **Settings > General > Advanced**.
+1. Navigate to your project, and select **Settings > General > Advanced**.
 1. In the Restore project section, click the **Restore project** button.
 
 #### Removing a fork relationship
@@ -247,10 +269,10 @@ To restore a project marked for deletion:
 Forking is a great way to [contribute to a project](../repository/forking_workflow.md)
 of which you're not a member.
 If you want to use the fork for yourself and don't need to send
-[merge requests](../merge_requests.md) to the upstream project,
+[merge requests](../merge_requests/index.md) to the upstream project,
 you can safely remove the fork relationship.
 
-CAUTION: **Caution:**
+WARNING:
 Once removed, the fork relationship cannot be restored. You will no longer be able to send merge requests to the source, and if anyone has forked your project, their fork will also lose the relationship.
 
 To do so:
@@ -259,7 +281,7 @@ To do so:
 1. Under **Remove fork relationship**, click the likewise-labeled button.
 1. Confirm the action by typing the project's path as instructed.
 
-NOTE: **Note:**
+NOTE:
 Only project owners have the [permissions](../../permissions.md#project-members-permissions)
 to remove a fork relationship.
 
@@ -267,13 +289,13 @@ to remove a fork relationship.
 
 ### Error Tracking
 
-Configure Error Tracking to discover and view [Sentry errors within GitLab](../operations/error_tracking.md).
+Configure Error Tracking to discover and view [Sentry errors within GitLab](../../../operations/error_tracking.md).
 
 ### Jaeger tracing **(ULTIMATE)**
 
-Add the URL of a Jaeger server to allow your users to [easily access the Jaeger UI from within GitLab](../operations/tracing.md).
+Add the URL of a Jaeger server to allow your users to [easily access the Jaeger UI from within GitLab](../../../operations/tracing.md).
 
 ### Status Page
 
-[Add Storage credentials](../status_page/#syncing-incidents-to-the-status-page)
-to enable the syncing of public Issues to a [deployed status page](../status_page/#status-page-project).
+[Add Storage credentials](../../../operations/incident_management/status_page.md#sync-incidents-to-the-status-page)
+to enable the syncing of public Issues to a [deployed status page](../../../operations/incident_management/status_page.md#create-a-status-page-project).

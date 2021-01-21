@@ -21,7 +21,12 @@ RSpec.describe StatusPage::MarkForPublicationService do
     shared_examples 'does not track the incident' do
       specify { expect { subject }.not_to change { ::StatusPage::PublishedIncident.count } }
       specify { expect { subject }.not_to change { issue.notes.count } }
-      specify { expect(subject).to be_error }
+
+      it 'returns the exepected error state' do
+        expect(Gitlab::ErrorTracking).not_to receive(:track_exception)
+
+        expect(subject).to be_error
+      end
     end
 
     context 'when license is not available' do
@@ -49,6 +54,12 @@ RSpec.describe StatusPage::MarkForPublicationService do
         specify { expect { subject }.to change { ::StatusPage::PublishedIncident.count }.by(1) }
         specify { expect { subject }.to change { issue.notes.count }.by(1) }
         specify { expect(subject).to be_success }
+
+        it 'increments the publish counter' do
+          expect(Gitlab::StatusPage::UsageDataCounters::IncidentCounter).to receive(:count).with(:publishes).once
+
+          subject
+        end
       end
 
       context 'when issue is confidential' do
@@ -59,6 +70,12 @@ RSpec.describe StatusPage::MarkForPublicationService do
 
       context 'when issue is already published' do
         let_it_be(:incident) { create(:status_page_published_incident, issue: issue) }
+
+        it_behaves_like 'does not track the incident'
+      end
+
+      context 'when user is not logged in' do
+        let(:service) { described_class.new(project, nil, issue) }
 
         it_behaves_like 'does not track the incident'
       end
@@ -76,12 +93,13 @@ RSpec.describe StatusPage::MarkForPublicationService do
           allow(::SystemNoteService).to receive(:publish_issue_to_status_page).and_raise(error)
         end
 
-        it_behaves_like 'does not track the incident'
+        specify { expect { subject }.not_to change { ::StatusPage::PublishedIncident.count } }
+        specify { expect { subject }.not_to change { issue.notes.count } }
 
-        it 'reports the error to sentry' do
+        it 'returns the exepected error state and reports the error to sentry' do
           expect(Gitlab::ErrorTracking).to receive(:track_exception).with(error)
 
-          subject
+          expect(subject).to be_error
         end
       end
     end

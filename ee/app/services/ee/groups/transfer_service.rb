@@ -5,12 +5,6 @@ module EE
     module TransferService
       extend ::Gitlab::Utils::Override
 
-      def localized_ee_error_messages
-        {
-          group_contains_npm_packages: s_('TransferGroup|Group contains projects with NPM packages.')
-        }.freeze
-      end
-
       def update_group_attributes
         ::Epic.nullify_lost_group_parents(group.self_and_descendants, lost_groups)
 
@@ -19,30 +13,11 @@ module EE
 
       private
 
-      override :ensure_allowed_transfer
-      def ensure_allowed_transfer
-        super
-        return unless group.packages_feature_available?
-
-        npm_packages = Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
-        if different_root_ancestor? && npm_packages.exists?
-          raise_ee_transfer_error(:group_contains_npm_packages)
-        end
-      end
-
       override :post_update_hooks
       def post_update_hooks(updated_project_ids)
-        ::Project.id_in(updated_project_ids).find_each do |project|
-          project.maintain_elasticsearch_update if project.maintaining_elasticsearch?
-        end
-      end
+        super
 
-      def raise_ee_transfer_error(message)
-        raise ::Groups::TransferService::TransferError, localized_ee_error_messages[message]
-      end
-
-      def different_root_ancestor?
-        group.root_ancestor != new_parent_group&.root_ancestor
+        update_elasticsearch_hooks(updated_project_ids)
       end
 
       def lost_groups
@@ -52,6 +27,25 @@ module EE
           group.ancestors_upto(new_parent_group)
         else
           ancestors
+        end
+      end
+
+      def update_elasticsearch_hooks(updated_project_ids)
+        # Handle when group is moved to a new group. There is no way to know
+        # whether the group was using Elasticsearch before the transfer. If Elasticsearch limit indexing is
+        # enabled, each associated project has the ES cache is invalidated all associated data is indexed.
+        # If Elasticsearch limit indexing is disabled, all projects are indexed and only those with visibility
+        # changes have their ES cache entry invalidated.
+        if ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?
+          ::Project.id_in(group.all_projects.select(:id)).find_each do |project|
+            project.invalidate_elasticsearch_indexes_cache!
+
+            ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(project) if project.maintaining_elasticsearch?
+          end
+        else
+          ::Project.id_in(updated_project_ids).find_each do |project|
+            project.maintain_elasticsearch_update(updated_attributes: [:visibility_level]) if project.maintaining_elasticsearch?
+          end
         end
       end
     end

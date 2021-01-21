@@ -3,38 +3,52 @@
 module Resolvers
   class EpicsResolver < BaseResolver
     include TimeFrameArguments
+    include LooksAhead
 
     argument :iid, GraphQL::ID_TYPE,
              required: false,
-             description: 'IID of the epic, e.g., "1"'
+             description: 'IID of the epic, e.g., "1".'
 
     argument :iids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of IIDs of epics, e.g., [1, 2]'
+             description: 'List of IIDs of epics, e.g., [1, 2].'
 
     argument :state, Types::EpicStateEnum,
              required: false,
-             description: 'Filter epics by state'
+             description: 'Filter epics by state.'
 
     argument :search, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by title and description'
+             description: 'Search query for epic title or description.'
 
     argument :sort, Types::EpicSortEnum,
              required: false,
-             description: 'List epics by sort order'
+             description: 'List epics by sort order.'
 
     argument :author_username, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by author'
+             description: 'Filter epics by author.'
 
     argument :label_name, [GraphQL::STRING_TYPE],
              required: false,
-             description: 'Filter epics by labels'
+             description: 'Filter epics by labels.'
+
+    argument :milestone_title, GraphQL::STRING_TYPE,
+             required: false,
+             description: "Filter epics by milestone title, computed from epic's issues."
 
     argument :iid_starts_with, GraphQL::STRING_TYPE,
              required: false,
-             description: 'Filter epics by iid for autocomplete'
+             description: 'Filter epics by IID for autocomplete.'
+
+    argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from descendant groups.',
+             default_value: true
+
+    argument :confidential, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Filter epics by given confidentiality.'
 
     type Types::EpicType, null: true
 
@@ -42,10 +56,10 @@ module Resolvers
       validate_timeframe_params!(args)
       validate_starts_with_iid!(args)
 
-      super(args)
+      super(**args)
     end
 
-    def resolve(**args)
+    def resolve_with_lookahead(**args)
       @resolver_object = object.respond_to?(:sync) ? object.sync : object
 
       return [] unless resolver_object.present?
@@ -58,8 +72,18 @@ module Resolvers
 
     attr_reader :resolver_object
 
+    def unconditional_includes
+      [:group]
+    end
+
+    def preloads
+      {
+        parent: [:parent]
+      }
+    end
+
     def find_epics(args)
-      EpicsFinder.new(context[:current_user], args).execute
+      apply_lookahead(EpicsFinder.new(context[:current_user], args).execute)
     end
 
     def epic_feature_enabled?
@@ -68,7 +92,7 @@ module Resolvers
 
     def transform_args(args)
       transformed               = args.dup
-      transformed[:group_id]    = group.id
+      transformed[:group_id]    = group
       transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
 

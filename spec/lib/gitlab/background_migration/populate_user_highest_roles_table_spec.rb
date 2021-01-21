@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schema: 20200311130802 do
+RSpec.describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schema: 20200311130802 do
   let(:members) { table(:members) }
   let(:users) { table(:users) }
   let(:user_highest_roles) { table(:user_highest_roles) }
@@ -18,7 +18,7 @@ describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schema: 202
       projects_limit: 0
     }.merge(params)
 
-    users.create(user_params)
+    users.create!(user_params)
   end
 
   def create_member(id, access_level, params = {})
@@ -30,7 +30,7 @@ describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schema: 202
       notification_level: 0
     }.merge(params)
 
-    members.create(params)
+    members.create!(params)
   end
 
   before do
@@ -47,7 +47,7 @@ describe Gitlab::BackgroundMigration::PopulateUserHighestRolesTable, schema: 202
     create_member(7, 30)
     create_member(8, 20, requested_at: Time.current)
 
-    user_highest_roles.create(user_id: 1, highest_access_level: 50)
+    user_highest_roles.create!(user_id: 1, highest_access_level: 50)
   end
 
   describe '#perform' do

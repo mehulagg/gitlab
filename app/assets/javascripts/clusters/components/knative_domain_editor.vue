@@ -6,8 +6,9 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
   GlSprintf,
+  GlButton,
+  GlAlert,
 } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import ClipboardButton from '../../vue_shared/components/clipboard_button.vue';
 import { __, s__ } from '~/locale';
 
@@ -17,7 +18,7 @@ const { UPDATING, UNINSTALLING } = APPLICATION_STATUS;
 
 export default {
   components: {
-    LoadingButton,
+    GlButton,
     ClipboardButton,
     GlLoadingIcon,
     GlDropdown,
@@ -25,6 +26,7 @@ export default {
     GlDropdownItem,
     GlSearchBoxByType,
     GlSprintf,
+    GlAlert,
   },
   props: {
     knative: {
@@ -106,12 +108,13 @@ export default {
 
 <template>
   <div class="row">
-    <div
+    <gl-alert
       v-if="knative.updateFailed"
-      class="bs-callout bs-callout-danger cluster-application-banner col-12 mt-2 mb-2 js-cluster-knative-domain-name-failure-message"
+      class="gl-mb-5 col-12 js-cluster-knative-domain-name-failure-message"
+      variant="danger"
     >
       {{ s__('ClusterIntegration|Something went wrong while updating Knative domain name.') }}
-    </div>
+    </gl-alert>
 
     <div
       :class="{ 'col-md-6': knativeInstalled, 'col-12': !knativeInstalled }"
@@ -130,7 +133,6 @@ export default {
         <gl-search-box-by-type
           v-model.trim="searchQuery"
           :placeholder="s__('ClusterIntegration|Search domains')"
-          class="m-2"
         />
         <gl-dropdown-item
           v-for="domain in filteredDomains"
@@ -215,13 +217,16 @@ export default {
         }}
       </p>
 
-      <loading-button
-        class="btn-success js-knative-save-domain-button mt-3 ml-3"
+      <gl-button
+        class="js-knative-save-domain-button gl-mt-5 gl-ml-5"
+        variant="success"
+        category="primary"
         :loading="saving"
         :disabled="saveButtonDisabled"
-        :label="saveButtonLabel"
         @click="$emit('save')"
-      />
+      >
+        {{ saveButtonLabel }}
+      </gl-button>
     </template>
   </div>
 </template>

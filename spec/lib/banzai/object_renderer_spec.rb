@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::ObjectRenderer do
+RSpec.describe Banzai::ObjectRenderer do
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
   let(:renderer) do
@@ -73,6 +73,7 @@ describe Banzai::ObjectRenderer do
           end
         end
       end
+
       let(:cacheless_thing) do
         cacheless_class.new.tap do |thing|
           thing.title = "Merge branch 'branch-merged' into 'master'"

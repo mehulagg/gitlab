@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Codeowners' do
       let(:files) do
         [
@@ -35,7 +35,7 @@ module QA
         end
       end
 
-      it 'displays owners specified in CODEOWNERS file' do
+      it 'displays owners specified in CODEOWNERS file', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/519' do
         codeowners_file_content =
           <<-CONTENT
             * @#{@user2.username}

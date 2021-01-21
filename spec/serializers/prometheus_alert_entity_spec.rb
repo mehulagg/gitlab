@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PrometheusAlertEntity do
+RSpec.describe PrometheusAlertEntity do
   let(:user) { create(:user) }
   let(:prometheus_alert) { create(:prometheus_alert) }
   let(:request) { double('prometheus_alert', current_user: user) }
@@ -16,7 +16,7 @@ describe PrometheusAlertEntity do
     end
 
     it 'exposes prometheus_alert attributes' do
-      expect(subject).to include(:id, :title, :query, :operator, :threshold)
+      expect(subject).to include(:id, :title, :query, :operator, :threshold, :runbook_url)
     end
 
     it 'exposes alert_path' do

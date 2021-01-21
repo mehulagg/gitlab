@@ -6,6 +6,10 @@ module Types
       graphql_name 'AlertManagementAlert'
       description "Describes an alert from the project's Alert Management"
 
+      present_using ::AlertManagement::AlertPresenter
+
+      implements(Types::Notes::NoteableType)
+
       authorize :read_alert_management_alert
 
       field :iid,
@@ -36,7 +40,8 @@ module Types
       field :status,
             AlertManagement::StatusEnum,
             null: true,
-            description: 'Status of the alert'
+            description: 'Status of the alert',
+            method: :status_name
 
       field :service,
             GraphQL::STRING_TYPE,
@@ -63,13 +68,18 @@ module Types
             null: true,
             description: 'Timestamp the alert ended'
 
+      field :environment,
+            Types::EnvironmentType,
+            null: true,
+            description: 'Environment for the alert'
+
       field :event_count,
             GraphQL::INT_TYPE,
             null: true,
             description: 'Number of events of this alert',
             method: :events
 
-      field :details,
+      field :details, # rubocop:disable Graphql/JSONType
             GraphQL::Types::JSON,
             null: true,
             description: 'Alert details'
@@ -85,14 +95,38 @@ module Types
             description: 'Timestamp the alert was last updated'
 
       field :assignees,
-            [Types::UserType],
+            Types::UserType.connection_type,
             null: true,
             description: 'Assignees of the alert'
 
-      def assignees
-        return User.none unless Feature.enabled?(:alert_assignee, object.project)
+      field :metrics_dashboard_url,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'URL for metrics embed for the alert'
 
-        object.assignees
+      field :runbook,
+            GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Runbook for the alert as defined in alert details'
+
+      field :todos,
+            Types::TodoType.connection_type,
+            null: true,
+            description: 'Todos of the current user for the alert',
+            resolver: Resolvers::TodoResolver
+
+      field :details_url,
+            GraphQL::STRING_TYPE,
+            null: false,
+            description: 'The URL of the alert detail page'
+
+      field :prometheus_alert,
+            Types::PrometheusAlertType,
+            null: true,
+            description: 'The alert condition for Prometheus'
+
+      def notes
+        object.ordered_notes
       end
     end
   end

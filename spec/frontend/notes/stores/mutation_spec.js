@@ -357,7 +357,7 @@ describe('Notes Store mutations', () => {
 
       mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: true });
 
-      state.discussions.forEach(discussion => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(true);
       });
     });
@@ -371,9 +371,19 @@ describe('Notes Store mutations', () => {
 
       mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: false });
 
-      state.discussions.forEach(discussion => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(false);
       });
+    });
+  });
+
+  describe('SET_RESOLVING_DISCUSSION', () => {
+    it('should set resolving discussion state', () => {
+      const state = {};
+
+      mutations.SET_RESOLVING_DISCUSSION(state, true);
+
+      expect(state.isResolvingDiscussion).toEqual(true);
     });
   });
 
@@ -388,6 +398,19 @@ describe('Notes Store mutations', () => {
       mutations.UPDATE_NOTE(state, updated);
 
       expect(state.discussions[0].notes[0].note).toEqual('Foo');
+    });
+
+    it('does not update existing note if it matches', () => {
+      const state = {
+        discussions: [{ ...individualNote, individual_note: false }],
+      };
+      jest.spyOn(state.discussions[0].notes, 'splice');
+
+      const updated = individualNote.notes[0];
+
+      mutations.UPDATE_NOTE(state, updated);
+
+      expect(state.discussions[0].notes.splice).not.toHaveBeenCalled();
     });
 
     it('transforms an individual note to discussion', () => {
@@ -521,6 +544,26 @@ describe('Notes Store mutations', () => {
       discussion.expanded = true;
 
       expect(state.discussions[0].expanded).toBe(true);
+    });
+  });
+
+  describe('SET_SELECTED_COMMENT_POSITION', () => {
+    it('should set comment position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION(state, {});
+
+      expect(state.selectedCommentPosition).toEqual({});
+    });
+  });
+
+  describe('SET_SELECTED_COMMENT_POSITION_HOVER', () => {
+    it('should set comment hover position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION_HOVER(state, {});
+
+      expect(state.selectedCommentPositionHover).toEqual({});
     });
   });
 
@@ -660,50 +703,15 @@ describe('Notes Store mutations', () => {
     });
 
     it('sets sort order', () => {
-      mutations.SET_DISCUSSIONS_SORT(state, DESC);
+      mutations.SET_DISCUSSIONS_SORT(state, { direction: DESC, persist: false });
 
       expect(state.discussionSortOrder).toBe(DESC);
-    });
-  });
-
-  describe('TOGGLE_BLOCKED_ISSUE_WARNING', () => {
-    it('should set isToggleBlockedIssueWarning as true', () => {
-      const state = {
-        discussions: [],
-        targetNoteHash: null,
-        lastFetchedAt: null,
-        isToggleStateButtonLoading: false,
-        isToggleBlockedIssueWarning: false,
-        notesData: {},
-        userData: {},
-        noteableData: {},
-      };
-
-      mutations.TOGGLE_BLOCKED_ISSUE_WARNING(state, true);
-
-      expect(state.isToggleBlockedIssueWarning).toEqual(true);
-    });
-
-    it('should set isToggleBlockedIssueWarning as false', () => {
-      const state = {
-        discussions: [],
-        targetNoteHash: null,
-        lastFetchedAt: null,
-        isToggleStateButtonLoading: false,
-        isToggleBlockedIssueWarning: true,
-        notesData: {},
-        userData: {},
-        noteableData: {},
-      };
-
-      mutations.TOGGLE_BLOCKED_ISSUE_WARNING(state, false);
-
-      expect(state.isToggleBlockedIssueWarning).toEqual(false);
+      expect(state.persistSortOrder).toBe(false);
     });
   });
 
   describe('SET_APPLYING_BATCH_STATE', () => {
-    const buildDiscussions = suggestionsInfo => {
+    const buildDiscussions = (suggestionsInfo) => {
       const suggestions = suggestionsInfo.map(({ suggestionId }) => ({ id: suggestionId }));
 
       const notes = suggestionsInfo.map(({ noteId }, index) => ({
@@ -743,7 +751,7 @@ describe('Notes Store mutations', () => {
       const expectedSuggestions = [updatedSuggestion, suggestions[1]];
 
       const actualSuggestions = state.discussions
-        .map(discussion => discussion.notes.map(n => n.suggestions))
+        .map((discussion) => discussion.notes.map((n) => n.suggestions))
         .flat(2);
 
       expect(actualSuggestions).toEqual(expectedSuggestions);
@@ -803,6 +811,62 @@ describe('Notes Store mutations', () => {
       mutations.CLEAR_SUGGESTION_BATCH(state);
 
       expect(state.batchSuggestionsInfo.length).toEqual(0);
+    });
+  });
+
+  describe('SET_ISSUE_CONFIDENTIAL', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { noteableData: { confidential: false } };
+    });
+
+    it('should set issuable as confidential', () => {
+      mutations.SET_ISSUE_CONFIDENTIAL(state, true);
+
+      expect(state.noteableData.confidential).toBe(true);
+    });
+  });
+
+  describe('SET_ISSUABLE_LOCK', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { noteableData: { discussion_locked: false } };
+    });
+
+    it('should set issuable as locked', () => {
+      mutations.SET_ISSUABLE_LOCK(state, true);
+
+      expect(state.noteableData.discussion_locked).toBe(true);
+    });
+  });
+
+  describe('UPDATE_ASSIGNEES', () => {
+    it('should update assignees', () => {
+      const state = {
+        noteableData: noteableDataMock,
+      };
+
+      mutations.UPDATE_ASSIGNEES(state, [userDataMock.id]);
+
+      expect(state.noteableData.assignees).toEqual([userDataMock.id]);
+    });
+  });
+
+  describe('UPDATE_DISCUSSION_POSITION', () => {
+    it('should upate the discusion position', () => {
+      const discussion1 = { id: 1, position: { line_code: 'abc_1_1' } };
+      const discussion2 = { id: 2, position: { line_code: 'abc_2_2' } };
+      const discussion3 = { id: 3, position: { line_code: 'abc_3_3' } };
+      const state = {
+        discussions: [discussion1, discussion2, discussion3],
+      };
+      const discussion1Position = { ...discussion1.position };
+      const position = { ...discussion1Position, test: true };
+
+      mutations.UPDATE_DISCUSSION_POSITION(state, { discussionId: discussion1.id, position });
+      expect(state.discussions[0].position).toEqual(position);
     });
   });
 });

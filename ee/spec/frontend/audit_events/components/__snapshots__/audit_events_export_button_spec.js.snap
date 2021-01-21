@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuditEventsExportButton component Audit Events CSV export button matches the snapshot 1`] = `
+<gl-button-stub
+  buttontextclasses=""
+  category="primary"
+  href="http://example.com/audit_log_reports.csv?created_after=2020-12-12"
+  icon="export"
+  size="medium"
+  title="Max 100,000 events"
+  variant="default"
+>
+  
+  Export as CSV
+
+</gl-button-stub>
+`;

@@ -1,17 +1,13 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
 import CommitFilesList from './commit_sidebar/list.vue';
 import EmptyState from './commit_sidebar/empty_state.vue';
-import { leftSidebarViews, stageKeys } from '../constants';
+import { stageKeys } from '../constants';
 
 export default {
   components: {
     CommitFilesList,
     EmptyState,
-  },
-  directives: {
-    tooltip,
   },
   computed: {
     ...mapState(['changedFiles', 'stagedFiles', 'lastCommitMsg']),
@@ -25,31 +21,35 @@ export default {
       return this.activeFile ? this.activeFile.key : null;
     },
   },
-  watch: {
-    someUncommittedChanges() {
-      if (!this.someUncommittedChanges) {
-        this.updateActivityBarView(leftSidebarViews.edit.name);
-      }
-    },
-  },
   mounted() {
-    if (this.lastOpenedFile && this.lastOpenedFile.type !== 'tree') {
+    this.initialize();
+  },
+  activated() {
+    this.initialize();
+  },
+  methods: {
+    ...mapActions(['openPendingTab', 'updateViewer', 'updateActivityBarView']),
+    initialize() {
+      const file =
+        this.lastOpenedFile && this.lastOpenedFile.type !== 'tree'
+          ? this.lastOpenedFile
+          : this.activeFile;
+
+      if (!file) return;
+
       this.openPendingTab({
-        file: this.lastOpenedFile,
-        keyPrefix: this.lastOpenedFile.staged ? stageKeys.staged : stageKeys.unstaged,
+        file,
+        keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
       })
-        .then(changeViewer => {
+        .then((changeViewer) => {
           if (changeViewer) {
             this.updateViewer('diff');
           }
         })
-        .catch(e => {
+        .catch((e) => {
           throw e;
         });
-    }
-  },
-  methods: {
-    ...mapActions(['openPendingTab', 'updateViewer', 'updateActivityBarView']),
+    },
   },
   stageKeys,
 };
@@ -64,7 +64,6 @@ export default {
         :active-file-key="activeFileKey"
         :empty-state-text="__('There are no changes')"
         class="is-first"
-        icon-name="unstaged"
       />
     </template>
     <empty-state v-else />

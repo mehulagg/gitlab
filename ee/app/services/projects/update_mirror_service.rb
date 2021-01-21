@@ -2,10 +2,16 @@
 
 module Projects
   class UpdateMirrorService < BaseService
+    include Gitlab::Utils::StrongMemoize
+
     Error = Class.new(StandardError)
     UpdateError = Class.new(Error)
 
     def execute
+      if project.import_url && Gitlab::UrlBlocker.blocked_url?(normalized_url(project.import_url))
+        return error("The import URL is invalid.")
+      end
+
       unless can?(current_user, :access_git)
         return error('The mirror user is not allowed to perform any git operations.')
       end
@@ -27,7 +33,7 @@ module Projects
       checksum_before = project.repository.checksum
 
       update_tags do
-        project.fetch_mirror(forced: true)
+        project.fetch_mirror(forced: true, check_tags_changed: Feature.enabled?(:fetch_mirror_check_tags_changed, project))
       end
 
       update_branches
@@ -36,6 +42,11 @@ module Projects
       # Let's skip this if the repository hasn't changed.
       update_lfs_objects if project.repository.checksum != checksum_before
 
+      # Running git fetch in the repository creates loose objects in the same
+      # way running git push *to* the repository does, so ensure we run regular
+      # garbage collection
+      run_housekeeping
+
       success
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, UpdateError => e
       error(e.message)
@@ -43,13 +54,19 @@ module Projects
 
     private
 
+    def normalized_url(url)
+      strong_memoize(:normalized_url) do
+        CGI.unescape(Gitlab::UrlSanitizer.sanitize(url))
+      end
+    end
+
     def update_branches
       local_branches = repository.branches.each_with_object({}) { |branch, branches| branches[branch.name] = branch }
 
       errors = []
 
       repository.upstream_branches.each do |upstream_branch|
-        name = target_branch_name(upstream_branch.name)
+        name = upstream_branch.name
 
         next if skip_branch?(name)
 
@@ -82,7 +99,7 @@ module Projects
       old_tags = repository_tags_with_target.each_with_object({}) { |tag, tags| tags[tag.name] = tag }
 
       fetch_result = yield
-      return fetch_result unless fetch_result
+      return fetch_result unless fetch_result&.tags_changed
 
       repository.expire_tags_cache
 
@@ -137,6 +154,15 @@ module Projects
       end
     end
 
+    def run_housekeeping
+      service = Repositories::HousekeepingService.new(project)
+
+      service.increment!
+      service.execute if service.needed?
+    rescue Repositories::HousekeepingService::LeaseTaken
+      # best-effort
+    end
+
     # In Git is possible to tag blob objects, and those blob objects don't point to a Git commit so those tags
     # have no target.
     def repository_tags_with_target
@@ -161,12 +187,6 @@ module Projects
 
     def log_error(error_message)
       service_logger.error(base_payload.merge(error_message: error_message))
-    end
-
-    def target_branch_name(upstream_branch_name)
-      return upstream_branch_name unless Feature.enabled?(:pull_mirror_branch_prefix, project)
-
-      "#{project.pull_mirror_branch_prefix}#{upstream_branch_name}"
     end
   end
 end

@@ -6,8 +6,8 @@ RSpec.describe Projects::TransferService do
   include EE::GeoHelpers
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:group) { create(:group) }
-  let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
+  let_it_be(:group) { create(:group, :public) }
+  let(:project) { create(:project, :repository, :public, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }
 
@@ -34,6 +34,7 @@ RSpec.describe Projects::TransferService do
           expect(instance).to receive(:has_container_registry_tags?).and_return(true)
         end
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -53,33 +54,74 @@ RSpec.describe Projects::TransferService do
     end
   end
 
-  context 'with npm packages' do
-    let!(:package) { create(:npm_package, project: project) }
+  context 'missing epics applied to issues' do
+    it 'delegates transfer to Epics::TransferService' do
+      expect_next_instance_of(Epics::TransferService, user, project.group, project) do |epics_transfer_service|
+        expect(epics_transfer_service).to receive(:execute).once.and_call_original
+      end
 
+      subject.execute(group)
+    end
+  end
+
+  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
     before do
-      stub_licensed_features(packages: true)
+      stub_ee_application_setting(elasticsearch_indexing: true)
     end
 
-    context 'with a root namespace change' do
-      it 'does not allow the transfer' do
-        expect(subject.execute(group)).to be false
-        expect(project.errors[:new_namespace]).to include("Root namespace can't be updated if project has NPM packages")
+    context 'when visibility level changes' do
+      let_it_be(:group) { create(:group, :private) }
+
+      it 'reindexes the project and associated issues' do
+        expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+        expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project.id, ['issues'])
+
+        subject.execute(group)
       end
     end
 
-    context 'without a root namespace change' do
-      let(:root) { create(:group) }
-      let(:group) { create(:group, parent: root) }
-      let(:other_group) { create(:group, parent: root) }
-      let(:project) { create(:project, :repository, namespace: group) }
-
+    context 'when elasticsearch_limit_indexing is on' do
       before do
-        other_group.add_owner(user)
+        stub_ee_application_setting(elasticsearch_limit_indexing: true)
       end
 
-      it 'does allow the transfer' do
-        expect(subject.execute(other_group)).to be true
-        expect(project.errors[:new_namespace]).to be_empty
+      context 'when transferring between a non-indexed namespace and an indexed namespace' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+        end
+
+        it 'invalidates the cache and indexes the project and all associated data' do
+          expect(Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+          subject.execute(group)
+        end
+      end
+
+      context 'when both namespaces are indexed' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+          create(:elasticsearch_indexed_namespace, namespace: project.namespace)
+        end
+
+        it 'does not invalidate the cache does not index or delete anything' do
+          expect(Elastic::ProcessInitialBookkeepingService).not_to receive(:backfill_projects!).with(project)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
+
+          subject.execute(group)
+        end
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is off' do
+      it 'does not invalidate the cache and reindexes the project only' do
+        expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project)
+        expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async)
+        expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+        subject.execute(group)
       end
     end
   end

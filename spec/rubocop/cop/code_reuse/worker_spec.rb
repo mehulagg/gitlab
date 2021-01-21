@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/code_reuse/worker'
 
-describe RuboCop::Cop::CodeReuse::Worker do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::CodeReuse::Worker do
   subject(:cop) { described_class.new }
 
   it 'flags the use of a worker in a controller' do
@@ -31,7 +28,7 @@ describe RuboCop::Cop::CodeReuse::Worker do
       .and_return(true)
 
     expect_offense(<<~SOURCE)
-      class Foo < Grape::API
+      class Foo < Grape::API::Instance
         resource :projects do
           get '/' do
             FooWorker.perform_async

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Entry::Bridge do
+RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
   subject { described_class.new(config, name: :my_bridge) }
 
   it_behaves_like 'with inheritable CI config' do
@@ -225,6 +225,85 @@ describe Gitlab::Ci::Config::Entry::Bridge do
           expect(subject.errors.first)
             .to match /contains unknown keys: script/
         end
+      end
+    end
+
+    context 'when bridge config contains exit_codes' do
+      let(:config) do
+        { script: 'rspec', allow_failure: { exit_codes: [42] } }
+      end
+
+      describe '#valid?' do
+        it { is_expected.not_to be_valid }
+      end
+
+      describe '#errors' do
+        it 'returns an error message' do
+          expect(subject.errors)
+            .to include(/allow failure should be a boolean value/)
+        end
+      end
+    end
+  end
+
+  describe '#manual_action?' do
+    context 'when job is a manual action' do
+      let(:config) { { script: 'deploy', when: 'manual' } }
+
+      it { is_expected.to be_manual_action }
+    end
+
+    context 'when job is not a manual action' do
+      let(:config) { { script: 'deploy' } }
+
+      it { is_expected.not_to be_manual_action }
+    end
+  end
+
+  describe '#ignored?' do
+    context 'when job is a manual action' do
+      context 'when it is not specified if job is allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual' }
+        end
+
+        it { is_expected.to be_ignored }
+      end
+
+      context 'when job is allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: true }
+        end
+
+        it { is_expected.to be_ignored }
+      end
+
+      context 'when job is not allowed to fail' do
+        let(:config) do
+          { script: 'deploy', when: 'manual', allow_failure: false }
+        end
+
+        it { is_expected.not_to be_ignored }
+      end
+    end
+
+    context 'when job is not a manual action' do
+      context 'when it is not specified if job is allowed to fail' do
+        let(:config) { { script: 'deploy' } }
+
+        it { is_expected.not_to be_ignored }
+      end
+
+      context 'when job is allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: true } }
+
+        it { is_expected.to be_ignored }
+      end
+
+      context 'when job is not allowed to fail' do
+        let(:config) { { script: 'deploy', allow_failure: false } }
+
+        it { is_expected.not_to be_ignored }
       end
     end
   end

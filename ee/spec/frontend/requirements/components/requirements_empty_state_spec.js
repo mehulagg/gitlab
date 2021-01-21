@@ -1,6 +1,6 @@
+import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlEmptyState, GlDeprecatedButton } from '@gitlab/ui';
 import RequirementsEmptyState from 'ee/requirements/components/requirements_empty_state.vue';
 import { FilterState } from 'ee/requirements/constants';
 
@@ -97,16 +97,13 @@ describe('RequirementsEmptyState', () => {
       const emptyStateEl = wrapper.find('.empty-state .svg-content img');
 
       expect(emptyStateEl.exists()).toBe(true);
-      expect(emptyStateEl.attributes('alt')).toBe(
-        'With requirements, you can set criteria to check your products against.',
-      );
       expect(emptyStateEl.attributes('src')).toBe(
         '/assets/illustrations/empty-state/requirements.svg',
       );
     });
 
     it('renders new requirement button when project has no requirements', () => {
-      const newReqButton = wrapper.find(GlDeprecatedButton);
+      const newReqButton = wrapper.find(GlButton);
 
       expect(newReqButton.exists()).toBe(true);
       expect(newReqButton.text()).toBe('New requirement');
@@ -122,7 +119,7 @@ describe('RequirementsEmptyState', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const newReqButton = wrapper.find(GlDeprecatedButton);
+        const newReqButton = wrapper.find(GlButton);
 
         expect(newReqButton.exists()).toBe(false);
       });
@@ -134,7 +131,7 @@ describe('RequirementsEmptyState', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const newReqButton = wrapper.find(GlDeprecatedButton);
+        const newReqButton = wrapper.find(GlButton);
 
         expect(newReqButton.exists()).toBe(false);
       });

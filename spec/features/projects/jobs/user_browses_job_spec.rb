@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User browses a job', :js do
+RSpec.describe 'User browses a job', :js do
   let(:user) { create(:user) }
   let(:user_access_level) { :developer }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -26,7 +26,7 @@ describe 'User browses a job', :js do
 
     # scroll to the top of the page first
     execute_script "window.scrollTo(0,0)"
-    accept_confirm { find('.js-erase-link').click }
+    accept_confirm { find('[data-testid="job-log-erase-link"]').click }
 
     expect(page).to have_no_css('.artifacts')
     expect(build).not_to have_trace
@@ -43,7 +43,7 @@ describe 'User browses a job', :js do
       wait_for_all_requests
       within('.builds-container') do
         expect(page).to have_selector(
-          ".build-job > a[data-original-title='test - failed - (unknown failure)']")
+          ".build-job > a[title='test - failed - (unknown failure)']")
       end
     end
   end
@@ -55,7 +55,7 @@ describe 'User browses a job', :js do
       wait_for_all_requests
       within('.builds-container') do
         expect(page).to have_selector(
-          ".build-job > a[data-original-title='test - failed - (unknown failure) (retried)']")
+          ".build-job > a[title='test - failed - (unknown failure) (retried)']")
       end
     end
   end

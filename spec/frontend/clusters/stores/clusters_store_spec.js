@@ -50,6 +50,7 @@ describe('Clusters Store', () => {
 
       expect(store.state).toEqual({
         helpPath: null,
+        helmHelpPath: null,
         ingressHelpPath: null,
         environmentsHelpPath: null,
         clustersHelpPath: null,
@@ -62,10 +63,11 @@ describe('Clusters Store', () => {
         rbac: false,
         applications: {
           helm: {
-            title: 'Helm Tiller',
+            title: 'Legacy Helm Tiller server',
             status: mockResponseData.applications[0].status,
             statusReason: mockResponseData.applications[0].status_reason,
             requestReason: null,
+            installable: true,
             installed: false,
             installFailed: false,
             uninstallable: false,
@@ -80,6 +82,7 @@ describe('Clusters Store', () => {
             requestReason: null,
             externalIp: null,
             externalHostname: null,
+            installable: true,
             installed: false,
             isEditingModSecurityEnabled: false,
             isEditingModSecurityMode: false,
@@ -100,6 +103,7 @@ describe('Clusters Store', () => {
             version: mockResponseData.applications[2].version,
             updateAvailable: mockResponseData.applications[2].update_available,
             chartRepo: 'https://gitlab.com/gitlab-org/charts/gitlab-runner',
+            installable: true,
             installed: false,
             installFailed: false,
             updateFailed: false,
@@ -114,6 +118,7 @@ describe('Clusters Store', () => {
             status: APPLICATION_STATUS.INSTALLABLE,
             statusReason: mockResponseData.applications[3].status_reason,
             requestReason: null,
+            installable: true,
             installed: false,
             installFailed: true,
             uninstallable: false,
@@ -130,6 +135,7 @@ describe('Clusters Store', () => {
             ciliumLogEnabled: null,
             host: null,
             protocol: null,
+            installable: true,
             installed: false,
             isEditingSettings: false,
             installFailed: false,
@@ -145,6 +151,7 @@ describe('Clusters Store', () => {
             statusReason: mockResponseData.applications[4].status_reason,
             requestReason: null,
             hostname: '',
+            installable: true,
             installed: false,
             installFailed: false,
             uninstallable: false,
@@ -161,6 +168,7 @@ describe('Clusters Store', () => {
             isEditingDomain: false,
             externalIp: null,
             externalHostname: null,
+            installable: true,
             installed: false,
             installFailed: false,
             uninstallable: false,
@@ -177,6 +185,7 @@ describe('Clusters Store', () => {
             statusReason: mockResponseData.applications[6].status_reason,
             requestReason: null,
             email: mockResponseData.applications[6].email,
+            installable: true,
             installed: false,
             uninstallable: false,
             uninstallSuccessful: false,
@@ -189,6 +198,7 @@ describe('Clusters Store', () => {
             installFailed: true,
             statusReason: mockResponseData.applications[7].status_reason,
             requestReason: null,
+            installable: true,
             installed: false,
             uninstallable: false,
             uninstallSuccessful: false,
@@ -201,7 +211,21 @@ describe('Clusters Store', () => {
             installFailed: true,
             statusReason: mockResponseData.applications[8].status_reason,
             requestReason: null,
+            installable: true,
             installed: false,
+            uninstallable: false,
+            uninstallSuccessful: false,
+            uninstallFailed: false,
+            validationError: null,
+          },
+          cilium: {
+            title: 'GitLab Container Network Policies',
+            status: null,
+            statusReason: null,
+            requestReason: null,
+            installable: false,
+            installed: false,
+            installFailed: false,
             uninstallable: false,
             uninstallSuccessful: false,
             uninstallFailed: false,
@@ -213,19 +237,22 @@ describe('Clusters Store', () => {
       });
     });
 
-    describe.each(APPLICATION_INSTALLED_STATUSES)('given the current app status is %s', status => {
-      it('marks application as installed', () => {
-        const mockResponseData =
-          CLUSTERS_MOCK_DATA.GET['/gitlab-org/gitlab-shell/clusters/2/status.json'].data;
-        const runnerAppIndex = 2;
+    describe.each(APPLICATION_INSTALLED_STATUSES)(
+      'given the current app status is %s',
+      (status) => {
+        it('marks application as installed', () => {
+          const mockResponseData =
+            CLUSTERS_MOCK_DATA.GET['/gitlab-org/gitlab-shell/clusters/2/status.json'].data;
+          const runnerAppIndex = 2;
 
-        mockResponseData.applications[runnerAppIndex].status = status;
+          mockResponseData.applications[runnerAppIndex].status = status;
 
-        store.updateStateFromServer(mockResponseData);
+          store.updateStateFromServer(mockResponseData);
 
-        expect(store.state.applications[RUNNER].installed).toBe(true);
-      });
-    });
+          expect(store.state.applications[RUNNER].installed).toBe(true);
+        });
+      },
+    );
 
     it('sets default hostname for jupyter when ingress has a ip address', () => {
       const mockResponseData =

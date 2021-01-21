@@ -6,6 +6,10 @@ module Import
     attr_reader :params, :current_user
 
     def execute(access_params, provider)
+      if blocked_url?
+        return log_and_return_error("Invalid URL: #{url}", :bad_request)
+      end
+
       unless authorized?
         return error(_('This namespace has already been taken! Please choose another one.'), :unprocessable_entity)
       end
@@ -27,13 +31,12 @@ module Import
         project_name,
         target_namespace,
         current_user,
-        access_params,
-        type: provider
-      ).execute(extra_project_attrs)
+        type: provider,
+        **access_params).execute(extra_project_attrs)
     end
 
     def repo
-      @repo ||= client.repo(params[:repo_id].to_i)
+      @repo ||= client.repository(params[:repo_id].to_i)
     end
 
     def project_name
@@ -54,6 +57,23 @@ module Import
 
     def authorized?
       can?(current_user, :create_projects, target_namespace)
+    end
+
+    def url
+      @url ||= params[:github_hostname]
+    end
+
+    def allow_local_requests?
+      Gitlab::CurrentSettings.allow_local_requests_from_web_hooks_and_services?
+    end
+
+    def blocked_url?
+      Gitlab::UrlBlocker.blocked_url?(
+        url,
+        allow_localhost: allow_local_requests?,
+        allow_local_network: allow_local_requests?,
+        schemes: %w(http https)
+      )
     end
 
     private

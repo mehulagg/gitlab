@@ -3,9 +3,15 @@
   "required": ["id"],
   "properties": {
     "id": { "type": "integer" },
-    "merge_request": { "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/merge_request_simple.json" },
-    "user": { "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/user/basic.json" },
-    "pipeline": { "$ref": "./pipeline.json" },
+    "merge_request": {
+      "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/merge_request_simple.json"
+    },
+    "user": {
+      "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/user/basic.json"
+    },
+    "pipeline": {
+      "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/pipeline.json"
+    },
     "created_at": { "type": "date" },
     "updated_at": { "type": "date" },
     "target_branch": { "type": "string" },

@@ -12,16 +12,23 @@ module QA
           end
 
           view 'app/assets/javascripts/jobs/components/stages_dropdown.vue' do
-            element :pipeline_path
+            element :pipeline_path, required: true
           end
 
           view 'app/assets/javascripts/jobs/components/sidebar.vue' do
             element :retry_button
           end
 
+          view 'app/assets/javascripts/jobs/components/artifacts_block.vue' do
+            element :browse_artifacts_button
+          end
+
           def successful?(timeout: 60)
             raise "Timed out waiting for the build trace to load" unless loaded?
             raise "Timed out waiting for the status to be a valid completed state" unless completed?(timeout: timeout)
+
+            job_log = find_element(:job_log_content).text
+            QA::Runtime::Logger.debug(" \n\n ------- Job log: ------- \n\n #{job_log} \n -------")
 
             passed?
           end
@@ -39,8 +46,20 @@ module QA
             result
           end
 
+          def has_browse_button?
+            has_element? :browse_artifacts_button
+          end
+
+          def click_browse_button
+            click_element :browse_artifacts_button
+          end
+
           def retry!
             click_element :retry_button
+          end
+
+          def has_job_log?
+            has_element? :job_log_content
           end
 
           private
@@ -55,3 +74,5 @@ module QA
     end
   end
 end
+
+QA::Page::Project::Job::Show.prepend_if_ee('QA::EE::Page::Project::Job::Show')

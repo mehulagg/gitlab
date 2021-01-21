@@ -1,14 +1,13 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
-    icon,
+    GlIcon,
   },
   props: {
     triggeredBy: {
@@ -86,34 +85,29 @@ export default {
     }"
     class="linked-pipeline-mini-list inline-block"
   >
-    <icon v-if="isDownstream" class="arrow-icon" name="long-arrow" />
+    <gl-icon v-if="isDownstream" class="arrow-icon" name="long-arrow" />
 
     <a
       v-for="pipeline in linkedPipelinesTrimmed"
       :key="pipeline.id"
-      v-tooltip
+      v-gl-tooltip="{ title: pipelineTooltipText(pipeline) }"
       :href="pipeline.path"
-      :title="pipelineTooltipText(pipeline)"
       :class="triggerButtonClass(pipeline.details.status.group)"
       class="linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
-      <icon :name="getStatusIcon(pipeline.details.status.icon)" />
+      <gl-icon :name="getStatusIcon(pipeline.details.status.icon)" />
     </a>
 
     <a
       v-if="shouldRenderCounter"
-      v-tooltip
+      v-gl-tooltip="{ title: counterTooltipText }"
       :title="counterTooltipText"
       :href="pipelinePath"
       class="linked-pipelines-counter linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
       {{ counterLabel }}
     </a>
 
-    <icon v-if="isUpstream" class="arrow-icon" name="long-arrow" />
+    <gl-icon v-if="isUpstream" class="arrow-icon" name="long-arrow" />
   </span>
 </template>

@@ -1,13 +1,15 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Resource milestone events API
 
-Resource milestone events keep track of what happens to GitLab [issues](../user/project/issues/),
-[merge requests](../user/project/merge_requests/), and [epics](../user/group/epics/).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31720) in GitLab 13.1.
+
+Resource milestone events keep track of what happens to GitLab [issues](../user/project/issues/) and
+[merge requests](../user/project/merge_requests/).
 
 Use them to track which milestone was added or removed, who did it, and when it happened.
 

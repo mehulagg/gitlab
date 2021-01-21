@@ -3,33 +3,21 @@
 class Projects::Ci::LintsController < Projects::ApplicationController
   before_action :authorize_create_pipeline!
 
+  feature_category :pipeline_authoring
+
+  respond_to :json, only: [:create]
+
   def show
   end
 
   def create
-    @content = params[:content]
-    result   = Gitlab::Ci::YamlProcessor.new_with_validation_errors(@content, yaml_processor_options)
+    content = params[:content]
+    dry_run = params[:dry_run]
 
-    @status = result.valid?
-    @errors = result.errors
+    result = Gitlab::Ci::Lint
+      .new(project: @project, current_user: current_user)
+      .validate(content, dry_run: dry_run)
 
-    if result.valid?
-      @config_processor = result.content
-      @stages = @config_processor.stages
-      @builds = @config_processor.builds
-      @jobs = @config_processor.jobs
-    end
-
-    render :show
-  end
-
-  private
-
-  def yaml_processor_options
-    {
-      project: @project,
-      user: current_user,
-      sha: project.repository.commit.sha
-    }
+    render json: ::Ci::Lint::ResultSerializer.new.represent(result)
   end
 end

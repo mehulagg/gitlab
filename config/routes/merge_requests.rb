@@ -17,6 +17,7 @@ resources :merge_requests, concerns: :awardable, except: [:new, :create, :show],
     get :accessibility_reports
     get :coverage_reports
     get :terraform_reports
+    get :codequality_reports
 
     scope constraints: ->(req) { req.format == :json }, as: :json do
       get :commits
@@ -47,6 +48,7 @@ resources :merge_requests, concerns: :awardable, except: [:new, :create, :show],
   collection do
     get :diff_for_path
     post :bulk_update
+    post :export_csv
   end
 
   resources :discussions, only: [:show], constraints: { id: /\h{40}/ } do

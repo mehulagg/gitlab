@@ -112,4 +112,42 @@ RSpec.describe Settings do
       end
     end
   end
+
+  describe '.cron_for_usage_ping' do
+    it 'returns correct crontab for some manually calculated example' do
+      allow(Gitlab::CurrentSettings)
+        .to receive(:uuid) { 'd9e2f4e8-db1f-4e51-b03d-f427e1965c4a'}
+
+      expect(described_class.send(:cron_for_usage_ping)).to eq('21 18 * * 4')
+    end
+
+    it 'returns min, hour, day in the valid range' do
+      allow(Gitlab::CurrentSettings)
+        .to receive(:uuid) { SecureRandom.uuid }
+
+      10.times do
+        cron = described_class.send(:cron_for_usage_ping).split(/\s/)
+
+        expect(cron[0].to_i).to be_between(0, 59)
+        expect(cron[1].to_i).to be_between(0, 23)
+        expect(cron[4].to_i).to be_between(0, 6)
+      end
+    end
+  end
+
+  describe '.encrypted' do
+    before do
+      allow(Gitlab::Application.secrets).to receive(:encryped_settings_key_base).and_return(SecureRandom.hex(64))
+    end
+
+    it 'defaults to using the encrypted_settings_key_base for the key' do
+      expect(Gitlab::EncryptedConfiguration).to receive(:new).with(hash_including(base_key: Gitlab::Application.secrets.encrypted_settings_key_base))
+      Settings.encrypted('tmp/tests/test.enc')
+    end
+
+    it 'returns empty encrypted config when a key has not been set' do
+      allow(Gitlab::Application.secrets).to receive(:encrypted_settings_key_base).and_return(nil)
+      expect(Settings.encrypted('tmp/tests/test.enc').read).to be_empty
+    end
+  end
 end

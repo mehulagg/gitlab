@@ -1,0 +1,6 @@
+mutation createTestCase($createTestCaseInput: CreateTestCaseInput!) {
+  createTestCase(input: $createTestCaseInput) {
+    clientMutationId
+    errors
+  }
+}

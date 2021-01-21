@@ -6,11 +6,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    canEdit: {
-      type: Boolean,
-      default: false,
-      required: false,
-    },
   },
   data() {
     return {

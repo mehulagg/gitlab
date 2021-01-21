@@ -8,6 +8,7 @@ module EE
     # and be included in the `RegisterJobService` service
     module RegisterJobService
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       def execute(params = {})
         db_all_caught_up = ::Gitlab::Database::LoadBalancing::Sticking.all_caught_up?(:runner, runner.id)
@@ -70,6 +71,13 @@ module EE
 
       def shared_runner_build_limits_feature_enabled?
         ENV['DISABLE_SHARED_RUNNER_BUILD_MINUTES_LIMIT'].to_s != 'true'
+      end
+
+      override :pre_assign_runner_checks
+      def pre_assign_runner_checks
+        super.merge({
+          secrets_provider_not_found: -> (build, _) { build.ci_secrets_management_available? && build.secrets? && !build.secrets_provider? }
+        })
       end
     end
   end

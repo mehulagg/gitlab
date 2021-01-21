@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Cleanup::ProjectUploads do
+RSpec.describe Gitlab::Cleanup::ProjectUploads do
   subject { described_class.new(logger: logger) }
 
   let(:logger) { double(:logger) }
@@ -15,10 +15,10 @@ describe Gitlab::Cleanup::ProjectUploads do
   describe '#run!' do
     shared_examples_for 'moves the file' do
       shared_examples_for 'a real run' do
-        let(:args) { [dry_run: false] }
+        let(:args) { { dry_run: false } }
 
         it 'moves the file to its proper location' do
-          subject.run!(*args)
+          subject.run!(**args)
 
           expect(File.exist?(path)).to be_falsey
           expect(File.exist?(new_path)).to be_truthy
@@ -28,13 +28,13 @@ describe Gitlab::Cleanup::ProjectUploads do
           expect(logger).to receive(:info).with("Looking for orphaned project uploads to clean up...")
           expect(logger).to receive(:info).with("Did #{action}")
 
-          subject.run!(*args)
+          subject.run!(**args)
         end
       end
 
       shared_examples_for 'a dry run' do
         it 'does not move the file' do
-          subject.run!(*args)
+          subject.run!(**args)
 
           expect(File.exist?(path)).to be_truthy
           expect(File.exist?(new_path)).to be_falsey
@@ -44,30 +44,30 @@ describe Gitlab::Cleanup::ProjectUploads do
           expect(logger).to receive(:info).with("Looking for orphaned project uploads to clean up. Dry run...")
           expect(logger).to receive(:info).with("Can #{action}")
 
-          subject.run!(*args)
+          subject.run!(**args)
         end
       end
 
       context 'when dry_run is false' do
-        let(:args) { [dry_run: false] }
+        let(:args) { { dry_run: false } }
 
         it_behaves_like 'a real run'
       end
 
       context 'when dry_run is nil' do
-        let(:args) { [dry_run: nil] }
+        let(:args) { { dry_run: nil } }
 
         it_behaves_like 'a real run'
       end
 
       context 'when dry_run is true' do
-        let(:args) { [dry_run: true] }
+        let(:args) { { dry_run: true } }
 
         it_behaves_like 'a dry run'
       end
 
       context 'with dry_run not specified' do
-        let(:args) { [] }
+        let(:args) { {} }
 
         it_behaves_like 'a dry run'
       end

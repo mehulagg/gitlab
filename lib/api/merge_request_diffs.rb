@@ -2,10 +2,12 @@
 
 module API
   # MergeRequestDiff API
-  class MergeRequestDiffs < Grape::API
+  class MergeRequestDiffs < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :code_review
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

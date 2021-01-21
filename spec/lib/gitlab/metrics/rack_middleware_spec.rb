@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::RackMiddleware do
+RSpec.describe Gitlab::Metrics::RackMiddleware do
   let(:app) { double(:app) }
 
   let(:middleware) { described_class.new(app) }
@@ -23,14 +23,6 @@ describe Gitlab::Metrics::RackMiddleware do
         .to receive(:add_event).with(:rails_exception)
 
       expect { middleware.call(env) }.to raise_error(RuntimeError)
-    end
-  end
-
-  describe '#transaction_from_env' do
-    let(:transaction) { middleware.transaction_from_env(env) }
-
-    it 'returns a Transaction' do
-      expect(transaction).to be_an_instance_of(Gitlab::Metrics::WebTransaction)
     end
   end
 end

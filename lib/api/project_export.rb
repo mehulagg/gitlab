@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectExport < Grape::API
+  class ProjectExport < ::API::Base
     helpers Helpers::RateLimiter
+
+    feature_category :importers
 
     before do
       not_found! unless Gitlab::CurrentSettings.project_export_enabled?
@@ -47,13 +49,15 @@ module API
       post ':id/export' do
         check_rate_limit! :project_export, [current_user]
 
+        user_project.remove_exports
+
         project_export_params = declared_params(include_missing: false)
         after_export_params = project_export_params.delete(:upload) || {}
 
         export_strategy = if after_export_params[:url].present?
                             params = after_export_params.slice(:url, :http_method).symbolize_keys
 
-                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(params)
+                            Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy.new(**params)
                           end
 
         if export_strategy&.invalid?

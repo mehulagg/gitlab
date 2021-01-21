@@ -1,0 +1,18 @@
+query($fullPath: ID!, $pipelineIid: ID!) {
+  project(fullPath: $fullPath) {
+    pipeline(iid: $pipelineIid) {
+      securityReportSummary {
+        dast {
+          scannedResourcesCsvPath
+          scannedResourcesCount
+          scannedResources {
+            nodes {
+              requestMethod
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}

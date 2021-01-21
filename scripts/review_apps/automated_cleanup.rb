@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require 'gitlab'
-require_relative File.expand_path('../../lib/quality/helm3_client.rb', __dir__)
-require_relative File.expand_path('../../lib/quality/kubernetes_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/lib/tooling/helm3_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/lib/tooling/kubernetes_client.rb', __dir__)
 
 class AutomatedCleanup
   attr_reader :project_path, :gitlab_token
@@ -40,15 +40,15 @@ class AutomatedCleanup
   end
 
   def review_apps_namespace
-    self.class.ee? ? 'review-apps-ee' : 'review-apps-ce'
+    'review-apps'
   end
 
   def helm
-    @helm ||= Quality::Helm3Client.new(namespace: review_apps_namespace)
+    @helm ||= Tooling::Helm3Client.new(namespace: review_apps_namespace)
   end
 
   def kubernetes
-    @kubernetes ||= Quality::KubernetesClient.new(namespace: review_apps_namespace)
+    @kubernetes ||= Tooling::KubernetesClient.new(namespace: review_apps_namespace)
   end
 
   def perform_gitlab_environment_cleanup!(days_for_stop:, days_for_delete:)
@@ -76,7 +76,7 @@ class AutomatedCleanup
       if deployed_at < delete_threshold
         deleted_environment = delete_environment(environment, deployment)
         if deleted_environment
-          release = Quality::Helm3Client::Release.new(environment.slug, 1, deployed_at.to_s, nil, nil, review_apps_namespace)
+          release = Tooling::Helm3Client::Release.new(environment.slug, 1, deployed_at.to_s, nil, nil, review_apps_namespace)
           releases_to_delete << release
         end
       else
@@ -113,6 +113,10 @@ class AutomatedCleanup
     end
 
     delete_helm_releases(releases_to_delete)
+  end
+
+  def perform_stale_pvc_cleanup!(days:)
+    kubernetes.cleanup_by_created_at(resource_type: 'pvc', created_before: threshold_time(days: days), wait: false)
   end
 
   private
@@ -155,13 +159,13 @@ class AutomatedCleanup
 
     releases_names = releases.map(&:name)
     helm.delete(release_name: releases_names)
-    kubernetes.cleanup(release_name: releases_names, wait: false)
+    kubernetes.cleanup_by_release(release_name: releases_names, wait: false)
 
-  rescue Quality::Helm3Client::CommandFailedError => ex
+  rescue Tooling::Helm3Client::CommandFailedError => ex
     raise ex unless ignore_exception?(ex.message, IGNORED_HELM_ERRORS)
 
     puts "Ignoring the following Helm error:\n#{ex}\n"
-  rescue Quality::KubernetesClient::CommandFailedError => ex
+  rescue Tooling::KubernetesClient::CommandFailedError => ex
     raise ex unless ignore_exception?(ex.message, IGNORED_KUBERNETES_ERRORS)
 
     puts "Ignoring the following Kubernetes error:\n#{ex}\n"
@@ -196,6 +200,10 @@ puts
 
 timed('Helm releases cleanup') do
   automated_cleanup.perform_helm_releases_cleanup!(days: 7)
+end
+
+timed('Stale PVC cleanup') do
+  automated_cleanup.perform_stale_pvc_cleanup!(days: 30)
 end
 
 exit(0)

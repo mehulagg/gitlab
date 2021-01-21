@@ -6,25 +6,57 @@ module Gitlab
 
     CreationError = Class.new(StandardError)
 
+    ERROR_MESSAGES = {
+      namespace_not_found: 'The namespace you were looking for could not be found.'
+    }.freeze
+
+    override :download_ability
+    def download_ability
+      :download_code
+    end
+
+    override :push_ability
+    def push_ability
+      :push_code
+    end
+
     private
 
-    override :check_project!
-    def check_project!(cmd)
-      ensure_project_on_push!(cmd)
+    override :check_container!
+    def check_container!
+      check_namespace!
+      ensure_project_on_push!
 
       super
     end
 
-    def ensure_project_on_push!(cmd)
+    def check_namespace!
+      raise NotFoundError, ERROR_MESSAGES[:namespace_not_found] unless namespace_path.present?
+    end
+
+    def namespace
+      strong_memoize(:namespace) { Namespace.find_by_full_path(namespace_path) }
+    end
+
+    def namespace_path
+      strong_memoize(:namespace_path) { repository_path_match[:namespace_path] }
+    end
+
+    def project_path
+      strong_memoize(:project_path) { repository_path_match[:project_path] }
+    end
+
+    def repository_path_match
+      strong_memoize(:repository_path_match) { repository_path.match(Gitlab::PathRegex.full_project_git_path_regex) || {} }
+    end
+
+    def ensure_project_on_push!
       return if project || deploy_key?
-      return unless receive_pack?(cmd) && changes == ANY && authentication_abilities.include?(:push_code)
-
-      namespace = Namespace.find_by_full_path(namespace_path)
-
+      return unless receive_pack? && changes == ANY && authentication_abilities.include?(:push_code)
       return unless user&.can?(:create_projects, namespace)
 
       project_params = {
-        path: repository_path,
+        path: project_path,
         namespace_id: namespace.id,
         visibility_level: Gitlab::VisibilityLevel::PRIVATE
       }
@@ -35,8 +67,8 @@ module Gitlab
         raise CreationError, "Could not create project: #{project.errors.full_messages.join(', ')}"
       end
 
-      @project = project
-      user_access.project = @project
+      self.container = project
+      user_access.container = project
 
       Checks::ProjectCreated.new(repository, user, protocol).add_message
     end

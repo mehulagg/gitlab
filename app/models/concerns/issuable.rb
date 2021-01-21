@@ -61,11 +61,13 @@ module Issuable
       end
     end
 
+    has_many :note_authors, -> { distinct }, through: :notes, source: :author
+
     has_many :label_links, as: :target, dependent: :destroy, inverse_of: :target # rubocop:disable Cop/ActiveRecordDependent
     has_many :labels, through: :label_links
     has_many :todos, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
-    has_one :metrics
+    has_one :metrics, inverse_of: model_name.singular.to_sym, autosave: true
 
     delegate :name,
              :email,
@@ -82,7 +84,6 @@ module Issuable
     validate :description_max_length_for_new_records_is_valid, on: :update
 
     before_validation :truncate_description_on_import!
-    after_save :store_mentions!, if: :any_mentionable_attributes_changed?
 
     scope :authored, ->(user) { where(author_id: user) }
     scope :recent, -> { reorder(id: :desc) }
@@ -175,8 +176,34 @@ module Issuable
       assignees.count > 1
     end
 
-    def supports_weight?
+    def allows_reviewers?
       false
+    end
+
+    def supports_time_tracking?
+      is_a?(TimeTrackable)
+    end
+
+    def supports_severity?
+      incident?
+    end
+
+    def incident?
+      is_a?(Issue) && super
+    end
+
+    def supports_issue_type?
+      is_a?(Issue)
+    end
+
+    def supports_assignee?
+      false
+    end
+
+    def severity
+      return IssuableSeverity::DEFAULT unless supports_severity?
+
+      issuable_severity&.severity || IssuableSeverity::DEFAULT
     end
 
     private
@@ -193,9 +220,13 @@ module Issuable
   end
 
   class_methods do
+    def participant_includes
+      [:assignees, :author, { notes: [:author, :award_emoji] }]
+    end
+
     # Searches for records with a matching title.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String
     #
@@ -219,7 +250,7 @@ module Issuable
 
     # Searches for records with a matching title or description.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String
     # matched_columns - Modify the scope of the query. 'title', 'description' or joining them with a comma.
@@ -281,14 +312,12 @@ module Issuable
     end
 
     def order_labels_priority(direction = 'ASC', excluded_labels: [], extra_select_columns: [], with_cte: false)
-      params = {
+      highest_priority = highest_label_priority(
         target_type: name,
         target_column: "#{table_name}.id",
         project_column: "#{table_name}.#{project_foreign_key}",
         excluded_labels: excluded_labels
-      }
-
-      highest_priority = highest_label_priority(params).to_sql
+      ).to_sql
 
       # When using CTE make sure to select the same columns that are on the group_by clause.
       # This prevents errors when ignored columns are present in the database.
@@ -323,12 +352,15 @@ module Issuable
     #
     # Returns an array of arel columns
     def grouping_columns(sort)
+      sort = sort.to_s
       grouping_columns = [arel_table[:id]]
 
       if %w(milestone_due_desc milestone_due_asc milestone).include?(sort)
         milestone_table = Milestone.arel_table
         grouping_columns << milestone_table[:id]
         grouping_columns << milestone_table[:due_date]
+      elsif %w(merged_at_desc merged_at_asc).include?(sort)
+        grouping_columns << MergeRequest::Metrics.arel_table[:merged_at]
       end
 
       grouping_columns
@@ -375,8 +407,12 @@ module Issuable
     Date.today == created_at.to_date
   end
 
+  def created_hours_ago
+    (Time.now.utc.to_i - created_at.utc.to_i) / 3600
+  end
+
   def new?
-    today? && created_at == updated_at
+    created_hours_ago < 24
   end
 
   def open?
@@ -411,8 +447,8 @@ module Issuable
     changes = previous_changes
 
     if old_associations
-      old_labels = old_associations.fetch(:labels, [])
-      old_assignees = old_associations.fetch(:assignees, [])
+      old_labels = old_associations.fetch(:labels, labels)
+      old_assignees = old_associations.fetch(:assignees, assignees)
 
       if old_labels != labels
         changes[:labels] = [old_labels.map(&:hook_attrs), labels.map(&:hook_attrs)]
@@ -423,7 +459,7 @@ module Issuable
       end
 
       if self.respond_to?(:total_time_spent)
-        old_total_time_spent = old_associations.fetch(:total_time_spent, nil)
+        old_total_time_spent = old_associations.fetch(:total_time_spent, total_time_spent)
 
         if old_total_time_spent != total_time_spent
           changes[:total_time_spent] = [old_total_time_spent, total_time_spent]

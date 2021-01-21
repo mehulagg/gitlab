@@ -6,14 +6,14 @@ module MembersHelper
     text = 'Are you sure you want to'
 
     action =
-      if member.request?
+      if member.invite?
+        "revoke the invitation for #{member.invite_email} to join"
+      elsif member.request?
         if member.user == user
           'withdraw your access request for'
         else
           "deny #{member.user.name}'s request to join"
         end
-      elsif member.invite?
-        "revoke the invitation for #{member.invite_email} to join"
       else
         if member.user
           "remove #{member.user.name} from"
@@ -46,6 +46,14 @@ module MembersHelper
   def filter_group_project_member_path(options = {})
     options = params.slice(:search, :sort).merge(options).permit!
     "#{request.path}?#{options.to_param}"
+  end
+
+  def member_path(member)
+    if member.is_a?(GroupMember)
+      group_group_member_path(member.source, member)
+    else
+      project_project_member_path(member.source, member)
+    end
   end
 
   private

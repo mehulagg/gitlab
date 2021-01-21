@@ -4,6 +4,7 @@ import ModelManager from '~/ide/lib/common/model_manager';
 import DecorationsController from '~/ide/lib/decorations/controller';
 import DirtyDiffController, { getDiffChangeType, getDecorator } from '~/ide/lib/diff/controller';
 import { computeDiff } from '~/ide/lib/diff/diff';
+import { createStore } from '~/ide/stores';
 import { file } from '../../helpers';
 
 describe('Multi-file editor library dirty diff controller', () => {
@@ -12,9 +13,12 @@ describe('Multi-file editor library dirty diff controller', () => {
   let modelManager;
   let decorationsController;
   let model;
+  let store;
 
   beforeEach(() => {
-    editorInstance = Editor.create();
+    store = createStore();
+
+    editorInstance = Editor.create(store);
     editorInstance.createInstance(document.createElement('div'));
 
     modelManager = new ModelManager();
@@ -33,7 +37,7 @@ describe('Multi-file editor library dirty diff controller', () => {
   });
 
   describe('getDiffChangeType', () => {
-    ['added', 'removed', 'modified'].forEach(type => {
+    ['added', 'removed', 'modified'].forEach((type) => {
       it(`returns ${type}`, () => {
         const change = {
           [type]: true,
@@ -45,7 +49,7 @@ describe('Multi-file editor library dirty diff controller', () => {
   });
 
   describe('getDecorator', () => {
-    ['added', 'removed', 'modified'].forEach(type => {
+    ['added', 'removed', 'modified'].forEach((type) => {
       it(`returns with linesDecorationsClassName for ${type}`, () => {
         const change = {
           [type]: true,

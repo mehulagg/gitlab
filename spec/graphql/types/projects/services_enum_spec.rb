@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['ServiceType'] do
+RSpec.describe GitlabSchema.types['ServiceType'] do
   specify { expect(described_class.graphql_name).to eq('ServiceType') }
 
   it 'exposes all the existing project services' do
@@ -11,5 +11,5 @@ describe GitlabSchema.types['ServiceType'] do
 end
 
 def available_services_enum
-  ::Service.services_types.map(&:underscore).map(&:upcase)
+  ::Service.available_services_types(include_dev: false).map(&:underscore).map(&:upcase)
 end

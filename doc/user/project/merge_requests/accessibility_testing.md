@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Testing
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -20,7 +23,10 @@ analyzed to a file called `accessibility`.
 
 ## Accessibility Merge Request widget
 
-[Since GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/39425), in addition to the report artifact that is created, GitLab will also show the
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/39425) in GitLab 13.0 behind the disabled [feature flag](../../../administration/feature_flags.md) `:accessibility_report_view`.
+> - [Feature Flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/217372) in GitLab 13.1.
+
+In addition to the report artifact that is created, GitLab will also show the
 Accessibility Report in the merge request widget area:
 
 ![Accessibility Merge Request Widget](img/accessibility_mr_widget_v13_0.png)
@@ -49,21 +55,21 @@ include:
 ```
 
 creates an `a11y` job in your CI/CD pipeline, runs
-Pa11y against the webpages defined in `a11y_urls`, and builds an HTML report for each.
+Pa11y against the web pages defined in `a11y_urls`, and builds an HTML report for each.
 
 The report for each URL is saved as an artifact that can be [viewed directly in your browser](../../../ci/pipelines/job_artifacts.md#browsing-artifacts).
 
 A single `gl-accessibility.json` artifact is created and saved along with the individual HTML reports.
 It includes report data for all URLs scanned.
 
-NOTE: **Note:**
+NOTE:
 For GitLab 12.10 and earlier, the [artifact generated is named `accessibility.json`](https://gitlab.com/gitlab-org/ci-cd/accessibility/-/merge_requests/9).
 
-NOTE: **Note:**
+NOTE:
 For GitLab versions earlier than 12.9, you can use `include:remote` and use a
 link to the [current template in `master`](https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Verify/Accessibility.gitlab-ci.yml)
 
-NOTE: **Note:**
+NOTE:
 The job definition provided by the template does not support Kubernetes yet.
 
 It is not yet possible to pass configurations into Pa11y via CI configuration. To change anything,

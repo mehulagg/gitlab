@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'gitlab:web_hook namespace rake tasks' do
+RSpec.describe 'gitlab:web_hook namespace rake tasks' do
   let_it_be(:group, refind: true) { create(:group) }
   let_it_be(:project1, reload: true) { create(:project, namespace: group) }
   let_it_be(:project2, reload: true) { create(:project, namespace: group) }
@@ -36,7 +36,7 @@ describe 'gitlab:web_hook namespace rake tasks' do
     it 'raises an error if an unknown namespace is specified' do
       stub_env('URL' => url, 'NAMESPACE' => group.full_path)
 
-      group.destroy
+      group.destroy!
 
       expect { run_rake_task('gitlab:web_hook:add') }.to raise_error(SystemExit)
     end
@@ -69,7 +69,7 @@ describe 'gitlab:web_hook namespace rake tasks' do
     it 'raises an error if an unknown namespace is specified' do
       stub_env('URL' => url, 'NAMESPACE' => group.full_path)
 
-      group.destroy
+      group.destroy!
 
       expect { run_rake_task('gitlab:web_hook:rm') }.to raise_error(SystemExit)
     end

@@ -1,11 +1,11 @@
 - hide_extra_sort_options = local_assigns.fetch(:hide_extra_sort_options, false)
 - sorted_by = epics_sort_options_hash[@sort]
 
-.dropdown.prepend-left-10
+.dropdown.gl-ml-3
   .btn-group.d-flex.d-md-inline-flex
     %button.btn.dropdown-toggle.epics-sort-btn{ type: 'button', data: { toggle: 'dropdown' } }
       = sorted_by
-      = icon('chevron-down')
+      = sprite_icon('chevron-down', css_class: 'gl-text-gray-200')
     %ul.dropdown-menu.dropdown-menu-right.dropdown-menu-selectable.dropdown-menu-sort
       %li
         - if !hide_extra_sort_options

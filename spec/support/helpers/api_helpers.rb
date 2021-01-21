@@ -40,17 +40,6 @@ module ApiHelpers
     end
   end
 
-  def basic_auth_header(user = nil)
-    return { 'HTTP_AUTHORIZATION' => user } unless user.respond_to?(:username)
-
-    {
-      'HTTP_AUTHORIZATION' => ActionController::HttpAuthentication::Basic.encode_credentials(
-        user.username,
-        create(:personal_access_token, user: user).token
-      )
-    }
-  end
-
   def expect_empty_array_response
     expect_successful_response_with_paginated_array
     expect(json_response.length).to eq(0)
@@ -72,7 +61,6 @@ module ApiHelpers
   def expect_response_contain_exactly(*items)
     expect(response).to have_gitlab_http_status(:ok)
     expect(json_response).to be_an Array
-    expect(json_response.length).to eq(items.size)
     expect(json_response.map { |item| item['id'] }).to contain_exactly(*items)
   end
 

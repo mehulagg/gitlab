@@ -3,12 +3,10 @@
 module Mutations
   module AwardEmojis
     class Remove < Base
-      graphql_name 'RemoveAwardEmoji'
+      graphql_name 'AwardEmojiRemove'
 
       def resolve(args)
         awardable = authorized_find!(id: args[:awardable_id])
-
-        check_object_is_awardable!(awardable)
 
         service = ::AwardEmojis::DestroyService.new(awardable, args[:name], current_user).execute
 

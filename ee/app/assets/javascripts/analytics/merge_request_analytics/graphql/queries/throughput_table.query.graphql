@@ -1,0 +1,77 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query getThroughputTableData(
+  $fullPath: ID!
+  $startDate: Time!
+  $endDate: Time!
+  $labels: [String!]
+  $authorUsername: String
+  $assigneeUsername: String
+  $milestoneTitle: String
+  $sourceBranches: [String!]
+  $targetBranches: [String!]
+  $firstPageSize: Int
+  $lastPageSize: Int
+  $prevPageCursor: String = ""
+  $nextPageCursor: String = ""
+) {
+  project(fullPath: $fullPath) {
+    mergeRequests(
+      first: $firstPageSize
+      last: $lastPageSize
+      after: $nextPageCursor
+      before: $prevPageCursor
+      mergedAfter: $startDate
+      mergedBefore: $endDate
+      sort: MERGED_AT_DESC
+      labels: $labels
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      nodes {
+        iid
+        title
+        createdAt
+        mergedAt
+        webUrl
+        milestone {
+          title
+        }
+        assignees {
+          nodes {
+            avatarUrl
+            name
+            webUrl
+          }
+        }
+        diffStatsSummary {
+          additions
+          deletions
+        }
+        labels(first: 0) {
+          count
+        }
+        pipelines {
+          nodes {
+            detailedStatus {
+              icon
+            }
+          }
+        }
+        commitCount
+        userNotesCount
+        approvedBy {
+          nodes {
+            id
+          }
+        }
+      }
+    }
+  }
+}

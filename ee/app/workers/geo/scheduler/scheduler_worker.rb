@@ -30,7 +30,7 @@ module Geo
       #    remaining jobs, excluding ones in progress.
       # 5. Quit when we have scheduled all jobs or exceeded MAX_RUNTIME.
       def perform
-        @start_time = Time.now.utc
+        @start_time = Time.current.utc
         @loops = 0
 
         # Prevent multiple Sidekiq workers from attempting to schedule jobs
@@ -65,7 +65,7 @@ module Geo
             log_error(err.message)
             raise err
           ensure
-            duration = Time.now.utc - start_time
+            duration = Time.current.utc - start_time
             log_info('Finished scheduler', total_loops: loops, duration: duration, reason: reason)
           end
         end
@@ -108,7 +108,7 @@ module Geo
       end
 
       def over_time?
-        (Time.now.utc - start_time) >= run_time
+        (Time.current.utc - start_time) >= run_time
       end
 
       def should_apply_backoff?
@@ -198,7 +198,7 @@ module Geo
       def node_enabled?
         # Only check every minute to avoid polling the DB excessively
         unless @last_enabled_check.present? && @last_enabled_check > 1.minute.ago
-          @last_enabled_check = Time.now
+          @last_enabled_check = Time.current
           clear_memoization(:current_node_enabled)
         end
 

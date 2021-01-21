@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'GFM autocomplete loading', :js do
+RSpec.describe 'GFM autocomplete loading', :js do
   let(:project) { create(:project) }
 
   before do
-    sign_in(create(:admin))
+    sign_in(project.owner)
 
     visit project_path(project)
   end

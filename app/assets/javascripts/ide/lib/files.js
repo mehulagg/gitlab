@@ -1,7 +1,6 @@
-import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
 import { decorateData, sortTree } from '../stores/utils';
 
-export const splitParent = path => {
+export const splitParent = (path) => {
   const idx = path.lastIndexOf('/');
 
   return {
@@ -12,16 +11,19 @@ export const splitParent = path => {
 
 /**
  * Create file objects from a list of file paths.
+ *
+ * @param {Array} options.data Array of blob paths to parse and create a file tree from.
+ * @param {Boolean} options.tempFile Web IDE flag for whether this is a "new" file or not.
+ * @param {String} options.content Content to initialize the new blob with.
+ * @param {String} options.rawPath Raw path used for the new blob.
+ * @param {Object} options.blobData Extra values to initialize each blob with.
  */
 export const decorateFiles = ({
   data,
-  projectId,
-  branchId,
   tempFile = false,
   content = '',
-  base64 = false,
-  binary = false,
   rawPath = '',
+  blobData = {},
 }) => {
   const treeList = [];
   const entries = {};
@@ -30,7 +32,7 @@ export const decorateFiles = ({
   let file;
   let parentPath;
 
-  const insertParent = path => {
+  const insertParent = (path) => {
     if (!path) {
       return null;
     } else if (entries[path]) {
@@ -42,12 +44,9 @@ export const decorateFiles = ({
     parentPath = parentFolder && parentFolder.path;
 
     const tree = decorateData({
-      projectId,
-      branchId,
       id: path,
       name,
       path,
-      url: `/${projectId}/tree/${branchId}/-/${path}/`,
       type: 'tree',
       tempFile,
       changed: tempFile,
@@ -68,31 +67,25 @@ export const decorateFiles = ({
     return tree;
   };
 
-  data.forEach(path => {
+  data.forEach((path) => {
     const { parent, name } = splitParent(path);
 
     const fileFolder = parent && insertParent(parent);
 
     if (name) {
-      const previewMode = viewerInformationForPath(name);
       parentPath = fileFolder && fileFolder.path;
 
       file = decorateData({
-        projectId,
-        branchId,
         id: path,
         name,
         path,
-        url: `/${projectId}/blob/${branchId}/-/${path}`,
         type: 'blob',
         tempFile,
         changed: tempFile,
         content,
-        base64,
-        binary: (previewMode && previewMode.binary) || binary,
         rawPath,
-        previewMode,
         parentPath,
+        ...blobData,
       });
 
       Object.assign(entries, {

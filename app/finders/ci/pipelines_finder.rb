@@ -18,7 +18,9 @@ module Ci
         return Ci::Pipeline.none
       end
 
-      items = pipelines.no_child
+      items = pipelines
+      items = items.no_child unless params[:iids].present?
+      items = by_iids(items)
       items = by_scope(items)
       items = by_status(items)
       items = by_ref(items)
@@ -52,6 +54,14 @@ module Ci
       project.repository.tag_names
     end
 
+    def by_iids(items)
+      if params[:iids].present?
+        items.for_iid(params[:iids])
+      else
+        items
+      end
+    end
+
     def by_scope(items)
       case params[:scope]
       when 'running'
@@ -71,7 +81,7 @@ module Ci
 
     # rubocop: disable CodeReuse/ActiveRecord
     def by_status(items)
-      return items unless HasStatus::AVAILABLE_STATUSES.include?(params[:status])
+      return items unless Ci::HasStatus::AVAILABLE_STATUSES.include?(params[:status])
 
       items.where(status: params[:status])
     end

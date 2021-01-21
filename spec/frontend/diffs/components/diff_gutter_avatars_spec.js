@@ -66,9 +66,7 @@ describe('DiffGutterAvatars', () => {
     });
 
     it('should emit toggleDiscussions event on avatars click', () => {
-      findUserAvatars()
-        .at(0)
-        .trigger('click');
+      findUserAvatars().at(0).trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
@@ -110,7 +108,7 @@ describe('DiffGutterAvatars', () => {
     it('returns truncated version of comment if it is longer than max length', () => {
       const note = wrapper.vm.discussions[0].notes[1];
 
-      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is r...');
+      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is rea…');
     });
   });
 });

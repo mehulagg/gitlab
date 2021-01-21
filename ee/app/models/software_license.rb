@@ -14,6 +14,15 @@ class SoftwareLicense < ApplicationRecord
   scope :spdx, -> { where.not(spdx_identifier: nil) }
   scope :unknown, -> { where(spdx_identifier: nil) }
   scope :grouped_by_name, -> { group(:name) }
+  scope :unreachable_limit, -> { limit(500) }
+
+  def self.unclassified_licenses_for(project)
+    spdx.id_not_in(project.software_licenses).ordered.unreachable_limit
+  end
+
+  def self.pluck_names
+    pluck(:name)
+  end
 
   def self.create_policy_for!(project:, name:, classification:)
     project.software_license_policies.create!(

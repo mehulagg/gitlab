@@ -1,6 +1,6 @@
-export const showChart = state => Boolean(!state.loading && state.chartData);
+export const showChart = (state) => Boolean(!state.loading && state.chartData);
 
-export const parsedData = state => {
+export const parsedData = (state) => {
   const byAuthorEmail = {};
   const total = {};
 
@@ -28,6 +28,3 @@ export const parsedData = state => {
     byAuthorEmail,
   };
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

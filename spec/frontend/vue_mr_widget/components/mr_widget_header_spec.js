@@ -19,10 +19,14 @@ describe('MRWidgetHeader', () => {
     const downloadEmailPatchesEl = vm.$el.querySelector('.js-download-email-patches');
     const downloadPlainDiffEl = vm.$el.querySelector('.js-download-plain-diff');
 
-    expect(downloadEmailPatchesEl.textContent.trim()).toEqual('Email patches');
-    expect(downloadEmailPatchesEl.getAttribute('href')).toEqual('/mr/email-patches');
-    expect(downloadPlainDiffEl.textContent.trim()).toEqual('Plain diff');
-    expect(downloadPlainDiffEl.getAttribute('href')).toEqual('/mr/plainDiffPath');
+    expect(downloadEmailPatchesEl.innerText.trim()).toEqual('Email patches');
+    expect(downloadEmailPatchesEl.querySelector('a').getAttribute('href')).toEqual(
+      '/mr/email-patches',
+    );
+    expect(downloadPlainDiffEl.innerText.trim()).toEqual('Plain diff');
+    expect(downloadPlainDiffEl.querySelector('a').getAttribute('href')).toEqual(
+      '/mr/plainDiffPath',
+    );
   };
 
   describe('computed', () => {
@@ -120,7 +124,7 @@ describe('MRWidgetHeader', () => {
       });
 
       it('renders clipboard button', () => {
-        expect(vm.$el.querySelector('.btn-clipboard')).not.toEqual(null);
+        expect(vm.$el.querySelector('[data-testid="mr-widget-copy-clipboard"]')).not.toEqual(null);
       });
 
       it('renders target branch', () => {
@@ -160,9 +164,7 @@ describe('MRWidgetHeader', () => {
       it('renders checkout branch button with modal trigger', () => {
         const button = vm.$el.querySelector('.js-check-out-branch');
 
-        expect(button.textContent.trim()).toEqual('Check out branch');
-        expect(button.getAttribute('data-target')).toEqual('#modal_merge_info');
-        expect(button.getAttribute('data-toggle')).toEqual('modal');
+        expect(button.textContent.trim()).toBe('Check out branch');
       });
 
       it('renders web ide button', () => {
@@ -185,7 +187,7 @@ describe('MRWidgetHeader', () => {
         expect(link.getAttribute('href')).toBeNull();
       });
 
-      it('renders web ide button with blank query string if target & source project branch', done => {
+      it('renders web ide button with blank query string if target & source project branch', (done) => {
         vm.mr.targetProjectFullPath = 'root/gitlab-ce';
 
         vm.$nextTick(() => {
@@ -200,7 +202,7 @@ describe('MRWidgetHeader', () => {
         });
       });
 
-      it('renders web ide button with relative URL', done => {
+      it('renders web ide button with relative URL', (done) => {
         gon.relative_url_root = '/gitlab';
         vm.mr.iid = 2;
 

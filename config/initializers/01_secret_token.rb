@@ -1,13 +1,5 @@
-# WARNING: If you add a new secret to this file, make sure you also
-# update Omnibus GitLab or updates will fail. Omnibus is responsible for
-# writing the `secrets.yml` file.  If Omnibus doesn't know about a
-# secret, Rails will attempt to write to the file, but this will fail
-# because Rails doesn't have write access.
-#
-# As an example:
-# * https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/27581
-# * https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests/3267
-#
+# WARNING: Before you make a change to secrets.yml, read the development guide for GitLab secrets
+# doc/development/application_secrets.md.
 #
 # This file needs to be loaded BEFORE any initializers that attempt to
 # prepend modules that require access to secrets (e.g. EE's 0_as_concern.rb).
@@ -41,6 +33,9 @@ def create_tokens
     db_key_base: generate_new_secure_token,
     openid_connect_signing_key: generate_new_rsa_private_key
   }
+
+  # encrypted_settings_key_base is optional for now
+  defaults[:encrypted_settings_key_base] = generate_new_secure_token if ENV['GITLAB_GENERATE_ENCRYPTED_SETTINGS_KEY_BASE']
 
   missing_secrets = set_missing_keys(defaults)
   write_secrets_yml(missing_secrets) unless missing_secrets.empty?

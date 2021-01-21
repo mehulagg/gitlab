@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Artifacts::Metadata do
+RSpec.describe Gitlab::Ci::Build::Artifacts::Metadata do
   def metadata(path = '', **opts)
     described_class.new(metadata_file_stream, path, **opts)
   end
@@ -142,7 +142,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata do
       it 'reads expected number of entries' do
         stream = File.open(tmpfile.path)
 
-        metadata = described_class.new(stream, 'public', { recursive: true })
+        metadata = described_class.new(stream, 'public', recursive: true)
 
         expect(metadata.find_entries!.count).to eq entry_count
       end

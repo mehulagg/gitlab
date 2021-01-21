@@ -2,34 +2,13 @@
   = hidden_field_tag :group_id, params[:group_id]
 - if params[:project_id].present?
   = hidden_field_tag :project_id, params[:project_id]
-.dropdown.form-group.mb-lg-0.mx-lg-1
+- project_attributes = @project&.attributes&.slice('id', 'namespace_id', 'name')&.merge(name_with_namespace: @project&.name_with_namespace)
+
+.dropdown.form-group.mb-lg-0.mx-lg-1.gl-p-0{ data: { testid: "group-filter" } }
   %label.d-block{ for: "dashboard_search_group" }
     = _("Group")
-  %button.dropdown-menu-toggle.js-search-group-dropdown.mt-0{ type: "button", id: "dashboard_search_group", data: { toggle: "dropdown", group_id: params[:group_id] } }
-    %span.dropdown-toggle-text
-      - if @group.present?
-        = @group.name
-      - else
-        = _("Any")
-    = icon("chevron-down")
-  .dropdown-menu.dropdown-select.dropdown-menu-selectable.dropdown-menu-right
-    = dropdown_title(_("Filter results by group"))
-    = dropdown_filter(_("Search groups"))
-    = dropdown_content
-    = dropdown_loading
-
-.dropdown.project-filter.form-group.mb-lg-0.mx-lg-1
+  %input#js-search-group-dropdown.dropdown-menu-toggle{ value: "Loading...", data: { "initial-data": @group.to_json } }
+.dropdown.form-group.mb-lg-0.mx-lg-1.gl-p-0{ data: { testid: "project-filter" } }
   %label.d-block{ for: "dashboard_search_project" }
     = _("Project")
-  %button.dropdown-menu-toggle.js-search-project-dropdown.mt-0{ type: "button", id: "dashboard_search_project", data: { toggle: "dropdown"} }
-    %span.dropdown-toggle-text
-      - if @project.present?
-        = @project.full_name
-      - else
-        = _("Any")
-    = icon("chevron-down")
-  .dropdown-menu.dropdown-select.dropdown-menu-selectable.dropdown-menu-right
-    = dropdown_title(_("Filter results by project"))
-    = dropdown_filter(_("Search projects"))
-    = dropdown_content
-    = dropdown_loading
+  %input#js-search-project-dropdown.dropdown-menu-toggle{ value: "Loading...", data: { "initial-data": project_attributes.to_json } }

@@ -25,6 +25,7 @@ RSpec.describe 'group epic roadmap', :js do
   before do
     stub_licensed_features(epics: true)
     stub_feature_flags(unfiltered_epic_aggregates: false)
+    stub_feature_flags(async_filtering: false)
 
     sign_in(user)
   end
@@ -144,57 +145,48 @@ RSpec.describe 'group epic roadmap', :js do
   context 'when no epics exist for the group' do
     before do
       visit group_roadmap_path(group)
+      wait_for_requests
     end
 
     describe 'roadmap page' do
-      it 'does not render the filtered search bar' do
-        page.within('.content-wrapper .content') do
-          expect(page).not_to have_css('.epics-filters')
+      it 'shows empty state page' do
+        page.within('.empty-state') do
+          expect(page).to have_content('The roadmap shows the progress of your epics along a timeline')
         end
       end
     end
   end
 
-  context 'when over 1000 epics exist for the group' do
-    6.times do |i|
-      let!("epic_#{i}") { create(:epic, group: group, start_date: 10.days.ago, end_date: 1.day.ago) }
-    end
-
+  context 'when over 1000 epics match roadmap filters' do
     before do
-      stub_const('Groups::RoadmapController::EPICS_ROADMAP_LIMIT', 5)
+      create_list(:epic, 2, group: group, start_date: 10.days.ago, end_date: 1.day.ago)
       visit group_roadmap_path(group)
       wait_for_requests
+      execute_script("gon.roadmap_epics_limit = 1;")
     end
 
     describe 'roadmap page' do
       it 'renders warning callout banner' do
         page.within('.content-wrapper .content') do
-          expect(page).to have_selector('.js-epics-limit-callout', count: 1)
-          expect(find('.js-epics-limit-callout')).to have_content 'Some of your epics may not be visible. A roadmap is limited to the first 1,000 epics, in your selected sort order.'
+          expect(page).to have_selector('[data-testid="epics_limit_callout"]', count: 1)
+          expect(find('[data-testid="epics_limit_callout"]')).to have_content 'Some of your epics might not be visible Roadmaps can display up to 1,000 epics. These appear in your selected sort order.'
+        end
+
+        page.within('[data-testid="epics_limit_callout"]') do
+          expect(find_link('Learn more')[:href]).to eq("https://docs.gitlab.com/ee/user/group/roadmap/")
         end
       end
 
-      it 'is removed after dismissal' do
-        find('.js-epics-limit-callout .js-close-callout').click
-
-        expect(page).not_to have_selector('.js-epics-limit-callout')
-      end
-
-      it 'does not appear on page after dismissal and reload' do
-        find('.js-epics-limit-callout .js-close-callout').click
-        visit group_roadmap_path(group)
-        wait_for_requests
-
-        expect(page).not_to have_selector('.js-epics-limit-callout')
-      end
-
-      it 'links to roadmap documentation' do
-        page.within('.js-epics-limit-callout') do
-          find('#js-learn-more').click
-          wait_for_requests
-          expect(URI.parse(current_url).host).to eq("docs.gitlab.com")
-          expect(URI.parse(current_url).path).to eq("/ee/user/group/roadmap/")
+      it 'is removed after dismissal and even after reload' do
+        page.within('[data-testid="epics_limit_callout"]') do
+          find('.gl-alert-dismiss').click
         end
+
+        expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')
+
+        refresh
+
+        expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')
       end
     end
   end

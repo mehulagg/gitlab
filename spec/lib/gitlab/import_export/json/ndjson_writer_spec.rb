@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::ImportExport::JSON::NdjsonWriter do
+RSpec.describe Gitlab::ImportExport::JSON::NdjsonWriter do
   include ImportExport::CommonUtil
 
   let(:path) { "#{Dir.tmpdir}/ndjson_writer_spec/tree" }
@@ -25,7 +25,7 @@ describe Gitlab::ImportExport::JSON::NdjsonWriter do
 
   describe "#write_relation" do
     context "when single relation is serialized" do
-      it "appends json in correct file " do
+      it "appends json in correct file" do
         relation = "relation"
         value =  { "key" => "value_1", "key_1" => "value_1" }
         subject.write_relation(exportable_path, relation, value)

@@ -1,7 +1,15 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import ThreatMonitoringApp from './components/app.vue';
 import createStore from './store';
+
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   const el = document.querySelector('#js-threat-monitoring-app');
@@ -14,8 +22,10 @@ export default () => {
     emptyStateSvgPath,
     wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
+    newPolicyPath,
     documentationPath,
     defaultEnvironmentId,
+    projectPath,
     showUserCallout,
     userCalloutId,
     userCalloutsPath,
@@ -32,20 +42,25 @@ export default () => {
   });
 
   return new Vue({
+    apolloProvider,
     el,
+    provide: {
+      documentationPath,
+      emptyStateSvgPath,
+      projectPath,
+    },
     store,
     render(createElement) {
       return createElement(ThreatMonitoringApp, {
         props: {
           chartEmptyStateSvgPath,
-          emptyStateSvgPath,
           wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
-          documentationPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
           showUserCallout: parseBoolean(showUserCallout),
           userCalloutId,
           userCalloutsPath,
+          newPolicyPath,
         },
       });
     },

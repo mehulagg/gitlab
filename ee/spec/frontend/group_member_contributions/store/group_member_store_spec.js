@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
-import GroupMemberStore from 'ee/group_member_contributions/store/group_member_store';
 import defaultColumns from 'ee/group_member_contributions/constants';
+import GroupMemberStore from 'ee/group_member_contributions/store/group_member_store';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 import { rawMembers, contributionsPath } from '../mock_data';
@@ -29,7 +29,7 @@ describe('GroupMemberStore', () => {
     });
 
     it('initializes sortOrders on store state', () => {
-      Object.keys(store.state.sortOrders).forEach(column => {
+      Object.keys(store.state.sortOrders).forEach((column) => {
         expect(store.state.sortOrders[column]).toBe(1);
       });
     });
@@ -70,7 +70,7 @@ describe('GroupMemberStore', () => {
       mock.restore();
     });
 
-    it('calls service.getContributedMembers and sets response to the store on success', done => {
+    it('calls service.getContributedMembers and sets response to the store on success', (done) => {
       mock.onGet(contributionsPath).reply(200, rawMembers);
       jest.spyOn(store, 'setColumns').mockImplementation(() => {});
       jest.spyOn(store, 'setMembers').mockImplementation(() => {});
@@ -88,13 +88,13 @@ describe('GroupMemberStore', () => {
       expect(store.isLoading).toBe(true);
     });
 
-    it('calls service.getContributedMembers and sets `isLoading` to false and shows flash message if request failed', done => {
+    it('calls service.getContributedMembers and sets `isLoading` to false and shows flash message if request failed', (done) => {
       mock.onGet(contributionsPath).reply(500, {});
 
       store
         .fetchContributedMembers()
         .then(() => done.fail('Expected error to be thrown!'))
-        .catch(e => {
+        .catch((e) => {
           expect(e.message).toBe('Request failed with status code 500');
           expect(store.isLoading).toBe(false);
           expect(createFlash).toHaveBeenCalledWith(

@@ -33,8 +33,8 @@ module StubConfiguration
     allow(Gitlab.config).to receive_messages(to_settings(messages))
   end
 
-  def stub_default_url_options(host: "localhost", protocol: "http")
-    url_options = { host: host, protocol: protocol }
+  def stub_default_url_options(host: "localhost", protocol: "http", script_name: nil)
+    url_options = { host: host, protocol: protocol, script_name: script_name }
     allow(Rails.application.routes).to receive(:default_url_options).and_return(url_options)
   end
 
@@ -111,6 +111,14 @@ module StubConfiguration
   def stub_rack_attack_setting(messages)
     allow(Gitlab.config.rack_attack).to receive(:git_basic_auth).and_return(messages)
     allow(Gitlab.config.rack_attack.git_basic_auth).to receive_messages(to_settings(messages))
+  end
+
+  def stub_service_desk_email_setting(messages)
+    allow(::Gitlab.config.service_desk_email).to receive_messages(to_settings(messages))
+  end
+
+  def stub_packages_setting(messages)
+    allow(::Gitlab.config.packages).to receive_messages(to_settings(messages))
   end
 
   private

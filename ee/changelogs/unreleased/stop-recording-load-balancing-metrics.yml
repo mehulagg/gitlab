@@ -1,5 +1,0 @@
----
-title: Stop recording connection pool metrics for load balancing hosts
-merge_request: 33749
-author:
-type: removed

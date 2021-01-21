@@ -10,6 +10,7 @@ module Clusters
       def initialize(provision_role, provider: nil)
         @provision_role = provision_role
         @provider = provider
+        @region = provider&.region || provision_role&.region || Clusters::Providers::Aws::DEFAULT_REGION
       end
 
       def execute
@@ -26,13 +27,20 @@ module Clusters
 
       private
 
-      attr_reader :provider
+      attr_reader :provider, :region
 
       def client
-        ::Aws::STS::Client.new(credentials: gitlab_credentials, region: region)
+        ::Aws::STS::Client.new(**client_args)
+      end
+
+      def client_args
+        { region: region, credentials: gitlab_credentials }.compact
       end
 
       def gitlab_credentials
+        # These are not needed for IAM instance profiles
+        return unless access_key_id.present? && secret_access_key.present?
+
         ::Aws::Credentials.new(access_key_id, secret_access_key)
       end
 
@@ -42,10 +50,6 @@ module Clusters
 
       def secret_access_key
         Gitlab::CurrentSettings.eks_secret_access_key
-      end
-
-      def region
-        provider&.region || Clusters::Providers::Aws::DEFAULT_REGION
       end
 
       ##

@@ -3,14 +3,6 @@
 module Clusters
   module Concerns
     module ApplicationData
-      def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
-          name: name,
-          rbac: cluster.platform_kubernetes_rbac?,
-          files: files
-        )
-      end
-
       def repository
         nil
       end
@@ -20,22 +12,10 @@ module Clusters
       end
 
       def files
-        @files ||= begin
-          files = { 'values.yaml': values }
-
-          files.merge!(certificate_files) if use_tiller_ssl?
-
-          files
-        end
+        @files ||= { 'values.yaml': values }
       end
 
       private
-
-      def use_tiller_ssl?
-        return false if ::Gitlab::Kubernetes::Helm.local_tiller_enabled?
-
-        cluster.application_helm.has_ssl?
-      end
 
       def certificate_files
         {

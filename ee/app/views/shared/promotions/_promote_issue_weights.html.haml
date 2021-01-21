@@ -7,7 +7,7 @@
   .block.js-weight-sidebar-callout.promotion-issue-sidebar{ data: { uid: promotion_feature } }
     .sidebar-collapsed-icon{ data: { toggle: "dropdown", target: ".js-weight-sidebar-callout" } }
       %span{ data: { toggle: "tooltip", placement: "left", container: "body" }, title: _("Weight") }
-        = icon('balance-scale')
+        = sprite_icon('scale')
         %span No
     .title.hide-collapsed
       = s_('Promotions|Weight')
@@ -15,7 +15,8 @@
       = s_('Promotions|This feature is locked.')
       %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#', data: { track_event: 'click_callout' }.merge(tracking_options) }
         = s_('Promotions|Learn more')
-        = icon('chevron-down')
+        = sprite_icon('chevron-up', css_class: 'js-sidebar-collapse hidden')
+        = sprite_icon('chevron-down', css_class: 'js-sidebar-expand')
       .js-toggle-content{ style:'display: none' }
         %div
           %h4

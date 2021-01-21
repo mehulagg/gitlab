@@ -17,12 +17,13 @@ import {
 } from '../constants';
 import transitionApplicationState from '../services/application_state_machine';
 
-const isApplicationInstalled = appStatus => APPLICATION_INSTALLED_STATUSES.includes(appStatus);
+const isApplicationInstalled = (appStatus) => APPLICATION_INSTALLED_STATUSES.includes(appStatus);
 
 const applicationInitialState = {
   status: null,
   statusReason: null,
   requestReason: null,
+  installable: true,
   installed: false,
   installFailed: false,
   uninstallable: false,
@@ -35,6 +36,7 @@ export default class ClusterStore {
   constructor() {
     this.state = {
       helpPath: null,
+      helmHelpPath: null,
       ingressHelpPath: null,
       environmentsHelpPath: null,
       clustersHelpPath: null,
@@ -48,7 +50,7 @@ export default class ClusterStore {
       applications: {
         helm: {
           ...applicationInitialState,
-          title: s__('ClusterIntegration|Helm Tiller'),
+          title: s__('ClusterIntegration|Legacy Helm Tiller server'),
         },
         ingress: {
           ...applicationInitialState,
@@ -114,30 +116,21 @@ export default class ClusterStore {
           ciliumLogEnabled: null,
           isEditingSettings: false,
         },
+        cilium: {
+          ...applicationInitialState,
+          title: s__('ClusterIntegration|GitLab Container Network Policies'),
+          installable: false,
+        },
       },
       environments: [],
       fetchingEnvironments: false,
     };
   }
 
-  setHelpPaths(
-    helpPath,
-    ingressHelpPath,
-    ingressDnsHelpPath,
-    ingressModSecurityHelpPath,
-    environmentsHelpPath,
-    clustersHelpPath,
-    deployBoardsHelpPath,
-    cloudRunHelpPath,
-  ) {
-    this.state.helpPath = helpPath;
-    this.state.ingressHelpPath = ingressHelpPath;
-    this.state.ingressDnsHelpPath = ingressDnsHelpPath;
-    this.state.ingressModSecurityHelpPath = ingressModSecurityHelpPath;
-    this.state.environmentsHelpPath = environmentsHelpPath;
-    this.state.clustersHelpPath = clustersHelpPath;
-    this.state.deployBoardsHelpPath = deployBoardsHelpPath;
-    this.state.cloudRunHelpPath = cloudRunHelpPath;
+  setHelpPaths(helpPaths) {
+    Object.assign(this.state, {
+      ...helpPaths,
+    });
   }
 
   setManagePrometheusPath(managePrometheusPath) {
@@ -202,7 +195,7 @@ export default class ClusterStore {
     this.state.status = serverState.status;
     this.state.statusReason = serverState.status_reason;
 
-    serverState.applications.forEach(serverAppEntry => {
+    serverState.applications.forEach((serverAppEntry) => {
       const {
         name: appId,
         status,
@@ -291,7 +284,7 @@ export default class ClusterStore {
   }
 
   updateEnvironments(environments = []) {
-    this.state.environments = environments.map(environment => ({
+    this.state.environments = environments.map((environment) => ({
       name: environment.name,
       project: environment.project,
       environmentPath: environment.environment_path,

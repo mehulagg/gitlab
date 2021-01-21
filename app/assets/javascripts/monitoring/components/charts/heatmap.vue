@@ -36,19 +36,22 @@ export default {
       );
     },
     xAxisName() {
-      return this.graphData.x_label || '';
+      return this.graphData.xLabel || '';
     },
     yAxisName() {
       return this.graphData.y_label || '';
     },
     xAxisLabels() {
-      return this.metrics.result.map(res => Object.values(res.metric)[0]);
+      return this.metrics.result.map((res) => Object.values(res.metric)[0]);
     },
     yAxisLabels() {
-      return this.result.values.map(val => {
+      return this.result.values.map((val) => {
         const [yLabel] = val;
 
-        return formatDate(new Date(yLabel), { format: formats.shortTime, timezone: this.timezone });
+        return formatDate(new Date(yLabel), {
+          format: formats.shortTime,
+          timezone: this.timezone,
+        });
       });
     },
     result() {

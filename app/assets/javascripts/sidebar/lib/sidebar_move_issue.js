@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import '~/gl_dropdown';
 import { escape } from 'lodash';
 import { __ } from '~/locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 function isValidProjectId(id) {
   return id > 0;
@@ -27,7 +27,7 @@ class SidebarMoveIssue {
   }
 
   initDropdown() {
-    this.$dropdownToggle.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdownToggle, {
       search: {
         fields: ['name_with_namespace'],
       },
@@ -46,14 +46,14 @@ class SidebarMoveIssue {
             () => new window.Flash(__('An error occurred while fetching projects autocomplete.')),
           );
       },
-      renderRow: project => `
+      renderRow: (project) => `
         <li>
           <a href="#" class="js-move-issue-dropdown-item">
             ${escape(project.name_with_namespace)}
           </a>
         </li>
       `,
-      clicked: options => {
+      clicked: (options) => {
         const project = options.selectedObj;
         const selectedProjectId = options.isMarking ? project.id : 0;
         this.mediator.setMoveToProjectId(selectedProjectId);

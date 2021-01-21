@@ -18,6 +18,7 @@ RSpec.describe Groups::CreateService, '#execute' do
       let(:fail_condition!) do
         allow(Gitlab::VisibilityLevel).to receive(:allowed_for?).and_return(false)
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -26,7 +27,7 @@ RSpec.describe Groups::CreateService, '#execute' do
            details: {
              add: 'group',
              author_name: user.name,
-             target_id: @resource.full_path,
+             target_id: @resource.id,
              target_type: 'Group',
              target_details: @resource.full_path
            }
@@ -61,7 +62,7 @@ RSpec.describe Groups::CreateService, '#execute' do
 
   context 'updating protected params' do
     let(:attrs) do
-      group_params.merge(shared_runners_minutes_limit: 1000, extra_shared_runners_minutes_limit: 100)
+      group_params.merge(shared_runners_minutes_limit: 1000, extra_shared_runners_minutes_limit: 100, delayed_project_removal: true)
     end
 
     context 'as an admin' do
@@ -72,6 +73,7 @@ RSpec.describe Groups::CreateService, '#execute' do
 
         expect(group.shared_runners_minutes_limit).to eq(1000)
         expect(group.extra_shared_runners_minutes_limit).to eq(100)
+        expect(group.delayed_project_removal).to be true
       end
     end
 
@@ -81,6 +83,7 @@ RSpec.describe Groups::CreateService, '#execute' do
 
         expect(group.shared_runners_minutes_limit).to be_nil
         expect(group.extra_shared_runners_minutes_limit).to be_nil
+        expect(group.delayed_project_removal).to be false
       end
     end
   end
@@ -103,18 +106,6 @@ RSpec.describe Groups::CreateService, '#execute' do
             delete_branch_regex: sample.delete_branch_regex,
             commit_message_regex: sample.commit_message_regex
           )
-        end
-
-        context 'when feature flag is switched off' do
-          before do
-            stub_feature_flags(group_push_rules: false)
-          end
-
-          it 'does not create push rule' do
-            group = create_group(user, group_params)
-
-            expect(group.push_rule).to be_nil
-          end
         end
       end
 

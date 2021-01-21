@@ -2,52 +2,61 @@
 
 class Projects::PipelinesController < Projects::ApplicationController
   include ::Gitlab::Utils::StrongMemoize
+  include Analytics::UniqueVisitsHelper
 
   before_action :whitelist_query_limiting, only: [:create, :retry]
-  before_action :pipeline, except: [:index, :new, :create, :charts]
+  before_action :pipeline, except: [:index, :new, :create, :charts, :config_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
   before_action :authorize_read_build!, only: [:index]
-  before_action :authorize_create_pipeline!, only: [:new, :create]
+  before_action :authorize_create_pipeline!, only: [:new, :create, :config_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
-    push_frontend_feature_flag(:junit_pipeline_view, project)
-    push_frontend_feature_flag(:filter_pipelines_search, default_enabled: true)
-    push_frontend_feature_flag(:dag_pipeline_tab, default_enabled: true)
+    push_frontend_feature_flag(:dag_pipeline_tab, project, default_enabled: true)
     push_frontend_feature_flag(:pipelines_security_report_summary, project)
+    push_frontend_feature_flag(:new_pipeline_form, project, default_enabled: true)
+    push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
+    push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: false)
+    push_frontend_feature_flag(:new_pipeline_form_prefilled_vars, project, type: :development, default_enabled: true)
   end
   before_action :ensure_pipeline, only: [:show]
+  before_action :push_experiment_to_gon, only: :index, if: :html_request?
+
+  # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
+  before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
+
+  track_unique_visits :charts, target_id: 'p_analytics_pipelines'
 
   wrap_parameters Ci::Pipeline
 
   POLLING_INTERVAL = 10_000
+
+  feature_category :continuous_integration
 
   def index
     @pipelines = Ci::PipelinesFinder
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(30)
+      .per(20)
 
-    @running_count = limited_pipelines_count(project, 'running')
-    @pending_count = limited_pipelines_count(project, 'pending')
-    @finished_count = limited_pipelines_count(project, 'finished')
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
-      format.html
+      format.html do
+        record_empty_pipeline_experiment
+
+        render :index
+      end
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: POLLING_INTERVAL)
 
         render json: {
           pipelines: serialize_pipelines,
           count: {
-            all: @pipelines_count,
-            running: @running_count,
-            pending: @pending_count,
-            finished: @finished_count
+            all: @pipelines_count
           }
         }
       end
@@ -63,10 +72,27 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, create_params)
       .execute(:web, ignore_skip_ci: true, save_on_errors: false)
 
-    if @pipeline.created_successfully?
-      redirect_to project_pipeline_path(project, @pipeline)
-    else
-      render 'new', status: :bad_request
+    respond_to do |format|
+      format.html do
+        if @pipeline.created_successfully?
+          redirect_to project_pipeline_path(project, @pipeline)
+        else
+          render 'new', status: :bad_request
+        end
+      end
+      format.json do
+        if @pipeline.created_successfully?
+          render json: PipelineSerializer
+                         .new(project: project, current_user: current_user)
+                         .represent(@pipeline),
+                 status: :created
+        else
+          render json: { errors: @pipeline.error_messages.map(&:content),
+                         warnings: @pipeline.warning_messages(limit: ::Gitlab::Ci::Warnings::MAX_LIMIT).map(&:content),
+                         total_warnings: @pipeline.warning_messages.length },
+                 status: :bad_request
+        end
+      end
     end
   end
 
@@ -162,22 +188,7 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
-  def charts
-    @charts = {}
-    @charts[:week] = Gitlab::Ci::Charts::WeekChart.new(project)
-    @charts[:month] = Gitlab::Ci::Charts::MonthChart.new(project)
-    @charts[:year] = Gitlab::Ci::Charts::YearChart.new(project)
-    @charts[:pipeline_times] = Gitlab::Ci::Charts::PipelineTime.new(project)
-
-    @counts = {}
-    @counts[:total] = @project.all_pipelines.count(:all)
-    @counts[:success] = @project.all_pipelines.success.count(:all)
-    @counts[:failed] = @project.all_pipelines.failed.count(:all)
-  end
-
   def test_report
-    return unless Feature.enabled?(:junit_pipeline_view, project)
-
     respond_to do |format|
       format.html do
         render 'show'
@@ -186,15 +197,19 @@ class Projects::PipelinesController < Projects::ApplicationController
       format.json do
         render json: TestReportSerializer
           .new(current_user: @current_user)
-          .represent(pipeline_test_report, project: project)
+          .represent(pipeline_test_report, project: project, details: true)
       end
     end
   end
 
-  def test_reports_count
-    return unless Feature.enabled?(:junit_pipeline_view, project)
+  def config_variables
+    respond_to do |format|
+      format.json do
+        result = Ci::ListConfigVariablesService.new(@project, current_user).execute(params[:sha])
 
-    render json: { total_count: pipeline.test_reports_count }.to_json
+        result.nil? ? head(:no_content) : render(json: result)
+      end
+    end
   end
 
   private
@@ -226,6 +241,12 @@ class Projects::PipelinesController < Projects::ApplicationController
     render_404 unless pipeline
   end
 
+  def redirect_for_legacy_scope_filter
+    return unless %w[running pending].include?(params[:scope])
+
+    redirect_to url_for(safe_params.except(:scope).merge(status: safe_params[:scope])), status: :moved_permanently
+  end
+
   # rubocop: disable CodeReuse/ActiveRecord
   def pipeline
     @pipeline ||= if params[:id].blank? && params[:latest]
@@ -249,7 +270,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def latest_pipeline
-    @project.latest_pipeline_for_ref(params['ref'])
+    @project.latest_pipeline(params['ref'])
             &.present(current_user: current_user)
   end
 
@@ -278,6 +299,20 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def index_params
     params.permit(:scope, :username, :ref, :status)
+  end
+
+  def record_empty_pipeline_experiment
+    return unless @pipelines_count.to_i == 0
+    return if helpers.has_gitlab_ci?(@project)
+
+    record_experiment_user(:pipelines_empty_state)
+  end
+
+  def push_experiment_to_gon
+    return unless current_user
+
+    push_frontend_experiment(:pipelines_empty_state, subject: current_user)
+    frontend_experimentation_tracking_data(:pipelines_empty_state, 'view', project.namespace_id, subject: current_user)
   end
 end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TestHooks::ProjectService do
+RSpec.describe TestHooks::ProjectService do
   let(:current_user) { create(:user) }
 
   describe '#execute' do
@@ -181,6 +181,24 @@ describe TestHooks::ProjectService do
       it 'executes hook' do
         create(:wiki_page, wiki: project.wiki)
         allow(Gitlab::DataBuilder::WikiPage).to receive(:build).and_return(sample_data)
+
+        expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
+        expect(service.execute).to include(success_result)
+      end
+    end
+
+    context 'releases_events' do
+      let(:trigger) { 'releases_events' }
+      let(:trigger_key) { :release_hooks }
+
+      it 'returns error message if not enough data' do
+        expect(hook).not_to receive(:execute)
+        expect(service.execute).to include({ status: :error, message: 'Ensure the project has releases.' })
+      end
+
+      it 'executes hook' do
+        allow(project).to receive(:releases).and_return([Release.new])
+        allow_any_instance_of(Release).to receive(:to_hook_data).and_return(sample_data)
 
         expect(hook).to receive(:execute).with(sample_data, trigger_key).and_return(success_result)
         expect(service.execute).to include(success_result)

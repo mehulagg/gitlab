@@ -1,5 +1,5 @@
 <script>
-import { GlSprintf, GlLink, GlFormCheckbox } from '@gitlab/ui';
+import { GlIcon, GlSprintf, GlLink, GlFormCheckbox } from '@gitlab/ui';
 
 import settingsMixin from 'ee_else_ce/pages/projects/shared/permissions/mixins/settings_pannel_mixin';
 import { s__ } from '~/locale';
@@ -12,8 +12,10 @@ import {
   featureAccessLevelMembers,
   featureAccessLevelEveryone,
   featureAccessLevel,
+  featureAccessLevelNone,
 } from '../constants';
 import { toggleHiddenClassBySelector } from '../external';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const PAGE_FEATURE_ACCESS_LEVEL = s__('ProjectSettings|Everyone');
 
@@ -22,11 +24,12 @@ export default {
     projectFeatureSetting,
     projectFeatureToggle,
     projectSettingRow,
+    GlIcon,
     GlSprintf,
     GlLink,
     GlFormCheckbox,
   },
-  mixins: [settingsMixin],
+  mixins: [settingsMixin, glFeatureFlagsMixin()],
 
   props: {
     currentSettings: {
@@ -46,7 +49,11 @@ export default {
     allowedVisibilityOptions: {
       type: Array,
       required: false,
-      default: () => [0, 10, 20],
+      default: () => [
+        visibilityOptions.PRIVATE,
+        visibilityOptions.INTERNAL,
+        visibilityOptions.PUBLIC,
+      ],
     },
     lfsAvailable: {
       type: Boolean,
@@ -59,6 +66,11 @@ export default {
       default: false,
     },
     packagesAvailable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    requirementsAvailable: {
       type: Boolean,
       required: false,
       default: false,
@@ -118,17 +130,18 @@ export default {
     const defaults = {
       visibilityOptions,
       visibilityLevel: visibilityOptions.PUBLIC,
-      // TODO: Change all of these to use the visibilityOptions constants
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/214667
-      issuesAccessLevel: 20,
-      repositoryAccessLevel: 20,
-      forkingAccessLevel: 20,
-      mergeRequestsAccessLevel: 20,
-      buildsAccessLevel: 20,
-      wikiAccessLevel: 20,
-      snippetsAccessLevel: 20,
-      pagesAccessLevel: 20,
+      issuesAccessLevel: featureAccessLevel.EVERYONE,
+      repositoryAccessLevel: featureAccessLevel.EVERYONE,
+      forkingAccessLevel: featureAccessLevel.EVERYONE,
+      mergeRequestsAccessLevel: featureAccessLevel.EVERYONE,
+      buildsAccessLevel: featureAccessLevel.EVERYONE,
+      wikiAccessLevel: featureAccessLevel.EVERYONE,
+      snippetsAccessLevel: featureAccessLevel.EVERYONE,
+      pagesAccessLevel: featureAccessLevel.EVERYONE,
       metricsDashboardAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
+      analyticsAccessLevel: featureAccessLevel.EVERYONE,
+      requirementsAccessLevel: featureAccessLevel.EVERYONE,
+      operationsAccessLevel: featureAccessLevel.EVERYONE,
       containerRegistryEnabled: true,
       lfsEnabled: true,
       requestAccessEnabled: true,
@@ -156,6 +169,14 @@ export default {
       );
     },
 
+    operationsFeatureAccessLevelOptions() {
+      if (!this.operationsEnabled) return [featureAccessLevelNone];
+
+      return this.featureAccessLevelOptions.filter(
+        ([value]) => value <= this.operationsAccessLevel,
+      );
+    },
+
     pagesFeatureAccessLevelOptions() {
       const options = [featureAccessLevelMembers];
 
@@ -175,12 +196,16 @@ export default {
       return options;
     },
 
-    metricsOptionsDropdownEnabled() {
-      return this.featureAccessLevelOptions.length < 2;
+    metricsOptionsDropdownDisabled() {
+      return this.operationsFeatureAccessLevelOptions.length < 2 || !this.operationsEnabled;
+    },
+
+    operationsEnabled() {
+      return this.operationsAccessLevel > featureAccessLevel.NOT_ENABLED;
     },
 
     repositoryEnabled() {
-      return this.repositoryAccessLevel > 0;
+      return this.repositoryAccessLevel > featureAccessLevel.NOT_ENABLED;
     },
 
     visibilityLevelDescription() {
@@ -206,40 +231,89 @@ export default {
     visibilityLevel(value, oldValue) {
       if (value === visibilityOptions.PRIVATE) {
         // when private, features are restricted to "only team members"
-        this.issuesAccessLevel = Math.min(10, this.issuesAccessLevel);
-        this.repositoryAccessLevel = Math.min(10, this.repositoryAccessLevel);
-        this.mergeRequestsAccessLevel = Math.min(10, this.mergeRequestsAccessLevel);
-        this.buildsAccessLevel = Math.min(10, this.buildsAccessLevel);
-        this.wikiAccessLevel = Math.min(10, this.wikiAccessLevel);
-        this.snippetsAccessLevel = Math.min(10, this.snippetsAccessLevel);
-        this.metricsDashboardAccessLevel = Math.min(10, this.metricsDashboardAccessLevel);
-        if (this.pagesAccessLevel === 20) {
+        this.issuesAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.issuesAccessLevel,
+        );
+        this.repositoryAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.repositoryAccessLevel,
+        );
+        this.mergeRequestsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.mergeRequestsAccessLevel,
+        );
+        this.buildsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.buildsAccessLevel,
+        );
+        this.wikiAccessLevel = Math.min(featureAccessLevel.PROJECT_MEMBERS, this.wikiAccessLevel);
+        this.snippetsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.snippetsAccessLevel,
+        );
+        this.metricsDashboardAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.metricsDashboardAccessLevel,
+        );
+        this.analyticsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.analyticsAccessLevel,
+        );
+        this.requirementsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.requirementsAccessLevel,
+        );
+        this.operationsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.operationsAccessLevel,
+        );
+        if (this.pagesAccessLevel === featureAccessLevel.EVERYONE) {
           // When from Internal->Private narrow access for only members
-          this.pagesAccessLevel = 10;
+          this.pagesAccessLevel = featureAccessLevel.PROJECT_MEMBERS;
         }
         this.highlightChanges();
       } else if (oldValue === visibilityOptions.PRIVATE) {
         // if changing away from private, make enabled features more permissive
-        if (this.issuesAccessLevel > 0) this.issuesAccessLevel = 20;
-        if (this.repositoryAccessLevel > 0) this.repositoryAccessLevel = 20;
-        if (this.mergeRequestsAccessLevel > 0) this.mergeRequestsAccessLevel = 20;
-        if (this.buildsAccessLevel > 0) this.buildsAccessLevel = 20;
-        if (this.wikiAccessLevel > 0) this.wikiAccessLevel = 20;
-        if (this.snippetsAccessLevel > 0) this.snippetsAccessLevel = 20;
-        if (this.pagesAccessLevel === 10) this.pagesAccessLevel = 20;
-        if (this.metricsDashboardAccessLevel === 10) this.metricsDashboardAccessLevel = 20;
+        if (this.issuesAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.issuesAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.repositoryAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.repositoryAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.mergeRequestsAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.mergeRequestsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.buildsAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.buildsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.wikiAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.wikiAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.snippetsAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.snippetsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.pagesAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.pagesAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.analyticsAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.analyticsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.metricsDashboardAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.metricsDashboardAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.requirementsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.requirementsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.operationsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.operationsAccessLevel = featureAccessLevel.EVERYONE;
+
         this.highlightChanges();
       }
     },
 
     issuesAccessLevel(value, oldValue) {
-      if (value === 0) toggleHiddenClassBySelector('.issues-feature', true);
-      else if (oldValue === 0) toggleHiddenClassBySelector('.issues-feature', false);
+      if (value === featureAccessLevel.NOT_ENABLED)
+        toggleHiddenClassBySelector('.issues-feature', true);
+      else if (oldValue === featureAccessLevel.NOT_ENABLED)
+        toggleHiddenClassBySelector('.issues-feature', false);
     },
 
     mergeRequestsAccessLevel(value, oldValue) {
-      if (value === 0) toggleHiddenClassBySelector('.merge-requests-feature', true);
-      else if (oldValue === 0) toggleHiddenClassBySelector('.merge-requests-feature', false);
+      if (value === featureAccessLevel.NOT_ENABLED)
+        toggleHiddenClassBySelector('.merge-requests-feature', true);
+      else if (oldValue === featureAccessLevel.NOT_ENABLED)
+        toggleHiddenClassBySelector('.merge-requests-feature', false);
     },
   },
 
@@ -260,14 +334,16 @@ export default {
 
 <template>
   <div>
-    <div class="project-visibility-setting">
+    <div
+      class="project-visibility-setting gl-border-1 gl-border-solid gl-border-gray-100 gl-py-3 gl-px-7 gl-sm-pr-5 gl-sm-pl-5"
+    >
       <project-setting-row
         ref="project-visibility-settings"
         :help-path="visibilityHelpPath"
         :label="s__('ProjectSettings|Project visibility')"
       >
-        <div class="project-feature-controls">
-          <div class="select-wrapper">
+        <div class="project-feature-controls gl-display-flex gl-align-items-center gl-my-3 gl-mx-0">
+          <div class="select-wrapper gl-flex-fill-1">
             <select
               v-model="visibilityLevel"
               :disabled="!canChangeVisibilityLevel"
@@ -278,24 +354,36 @@ export default {
               <option
                 :value="visibilityOptions.PRIVATE"
                 :disabled="!visibilityAllowed(visibilityOptions.PRIVATE)"
-                >{{ s__('ProjectSettings|Private') }}</option
               >
+                {{ s__('ProjectSettings|Private') }}
+              </option>
               <option
                 :value="visibilityOptions.INTERNAL"
                 :disabled="!visibilityAllowed(visibilityOptions.INTERNAL)"
-                >{{ s__('ProjectSettings|Internal') }}</option
               >
+                {{ s__('ProjectSettings|Internal') }}
+              </option>
               <option
                 :value="visibilityOptions.PUBLIC"
                 :disabled="!visibilityAllowed(visibilityOptions.PUBLIC)"
-                >{{ s__('ProjectSettings|Public') }}</option
               >
+                {{ s__('ProjectSettings|Public') }}
+              </option>
             </select>
-            <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+            <gl-icon
+              name="chevron-down"
+              data-hidden="true"
+              class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+            />
           </div>
         </div>
+        <span v-if="!visibilityAllowed(visibilityLevel)" class="form-text text-muted">{{
+          s__(
+            'ProjectSettings|Visibility options for this fork are limited by the current visibility of the source project.',
+          )
+        }}</span>
         <span class="form-text text-muted">{{ visibilityLevelDescription }}</span>
-        <label v-if="visibilityLevel !== visibilityOptions.PRIVATE" class="request-access">
+        <label v-if="visibilityLevel !== visibilityOptions.PRIVATE" class="gl-line-height-28">
           <input
             :value="requestAccessEnabled"
             type="hidden"
@@ -306,7 +394,10 @@ export default {
         </label>
       </project-setting-row>
     </div>
-    <div :class="{ 'highlight-changes': highlightChangesClass }" class="project-feature-settings">
+    <div
+      :class="{ 'highlight-changes': highlightChangesClass }"
+      class="gl-border-1 gl-border-solid gl-border-t-none gl-border-gray-100 gl-mb-5 gl-py-3 gl-px-7 gl-sm-pr-5 gl-sm-pl-5 gl-bg-gray-10"
+    >
       <project-setting-row
         ref="issues-settings"
         :label="s__('ProjectSettings|Issues')"
@@ -329,7 +420,7 @@ export default {
           name="project[project_feature_attributes][repository_access_level]"
         />
       </project-setting-row>
-      <div class="project-feature-setting-group">
+      <div class="project-feature-setting-group gl-pl-7 gl-sm-pl-5">
         <project-setting-row
           ref="merge-request-settings"
           :label="s__('ProjectSettings|Merge requests')"
@@ -394,7 +485,7 @@ export default {
           v-if="lfsAvailable"
           ref="git-lfs-settings"
           :help-path="lfsHelpPath"
-          :label="s__('ProjectSettings|Git Large File Storage')"
+          :label="s__('ProjectSettings|Git Large File Storage (LFS)')"
           :help-text="
             s__('ProjectSettings|Manages large files such as audio, video, and graphics files')
           "
@@ -439,6 +530,29 @@ export default {
         </project-setting-row>
       </div>
       <project-setting-row
+        ref="analytics-settings"
+        :label="s__('ProjectSettings|Analytics')"
+        :help-text="s__('ProjectSettings|View project analytics')"
+      >
+        <project-feature-setting
+          v-model="analyticsAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][analytics_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
+        v-if="requirementsAvailable"
+        ref="requirements-settings"
+        :label="s__('ProjectSettings|Requirements')"
+        :help-text="s__('ProjectSettings|Requirements management system for this project')"
+      >
+        <project-feature-setting
+          v-model="requirementsAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][requirements_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
         ref="wiki-settings"
         :label="s__('ProjectSettings|Wiki')"
         :help-text="s__('ProjectSettings|Pages for project documentation')"
@@ -476,37 +590,34 @@ export default {
         />
       </project-setting-row>
       <project-setting-row
-        ref="metrics-visibility-settings"
-        :label="__('Metrics Dashboard')"
-        :help-text="
-          s__(
-            'ProjectSettings|With Metrics Dashboard you can visualize this project performance metrics',
-          )
-        "
+        ref="operations-settings"
+        :label="s__('ProjectSettings|Operations')"
+        :help-text="s__('ProjectSettings|Environments, logs, cluster management, and more')"
       >
-        <div class="project-feature-controls">
-          <div class="select-wrapper">
-            <select
-              v-model="metricsDashboardAccessLevel"
-              :disabled="metricsOptionsDropdownEnabled"
-              name="project[project_feature_attributes][metrics_dashboard_access_level]"
-              class="form-control project-repo-select select-control"
-            >
-              <option
-                :value="featureAccessLevelMembers[0]"
-                :disabled="!visibilityAllowed(visibilityOptions.INTERNAL)"
-                >{{ featureAccessLevelMembers[1] }}</option
-              >
-              <option
-                :value="featureAccessLevelEveryone[0]"
-                :disabled="!visibilityAllowed(visibilityOptions.PUBLIC)"
-                >{{ featureAccessLevelEveryone[1] }}</option
-              >
-            </select>
-            <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
-          </div>
-        </div>
+        <project-feature-setting
+          v-model="operationsAccessLevel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][operations_access_level]"
+        />
       </project-setting-row>
+      <div class="project-feature-setting-group gl-pl-7 gl-sm-pl-5">
+        <project-setting-row
+          ref="metrics-visibility-settings"
+          :label="__('Metrics Dashboard')"
+          :help-text="
+            s__(
+              'ProjectSettings|With Metrics Dashboard you can visualize this project performance metrics',
+            )
+          "
+        >
+          <project-feature-setting
+            v-model="metricsDashboardAccessLevel"
+            :show-toggle="false"
+            :options="operationsFeatureAccessLevelOptions"
+            name="project[project_feature_attributes][metrics_dashboard_access_level]"
+          />
+        </project-setting-row>
+      </div>
     </div>
     <project-setting-row v-if="canDisableEmails" ref="email-settings" class="mb-3">
       <label class="js-emails-disabled">
@@ -534,6 +645,25 @@ export default {
         <template #help>{{
           s__(
             'ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons.',
+          )
+        }}</template>
+      </gl-form-checkbox>
+    </project-setting-row>
+    <project-setting-row
+      v-if="glFeatures.allowEditingCommitMessages"
+      ref="allow-editing-commit-messages"
+      class="gl-mb-4"
+    >
+      <input
+        :value="allowEditingCommitMessages"
+        type="hidden"
+        name="project[project_setting_attributes][allow_editing_commit_messages]"
+      />
+      <gl-form-checkbox v-model="allowEditingCommitMessages">
+        {{ s__('ProjectSettings|Allow editing commit messages') }}
+        <template #help>{{
+          s__(
+            'ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches.',
           )
         }}</template>
       </gl-form-checkbox>

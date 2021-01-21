@@ -3,11 +3,11 @@
  */
 import { isEqual, isFunction, omitBy } from 'lodash';
 import Visibility from 'visibilityjs';
-import EnvironmentsStore from 'ee_else_ce/environments/stores/environments_store';
+import EnvironmentsStore from '../stores/environments_store';
 import Poll from '../../lib/utils/poll';
 import { getParameterByName } from '../../lib/utils/common_utils';
 import { s__ } from '../../locale';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import eventHub from '../event_hub';
 
 import EnvironmentsService from '../services/environments_service';
@@ -64,7 +64,7 @@ export default {
     },
 
     filterNilValues(obj) {
-      return omitBy(obj, value => value === undefined || value === null);
+      return omitBy(obj, (value) => value === undefined || value === null);
     },
 
     /**
@@ -80,7 +80,7 @@ export default {
       // fetch new data
       return this.service
         .fetchEnvironments(this.requestData)
-        .then(response => {
+        .then((response) => {
           this.successCallback(response);
           this.poll.enable({ data: this.requestData, response });
         })
@@ -107,7 +107,7 @@ export default {
         this.service
           .postAction(endpoint)
           .then(() => this.fetchEnvironments())
-          .catch(err => {
+          .catch((err) => {
             this.isLoading = false;
             Flash(isFunction(errorMessage) ? errorMessage(err.response.data) : errorMessage);
           });
@@ -145,7 +145,7 @@ export default {
 
     deleteEnvironment(environment) {
       const endpoint = environment.delete_path;
-      const mountedToShow = environment.mounted_to_show;
+      const { onSingleEnvironmentPage } = environment;
       const errorMessage = s__(
         'Environments|An error occurred while deleting the environment. Check if the environment stopped; if not, stop it and try again.',
       );
@@ -153,7 +153,7 @@ export default {
       this.service
         .deleteAction(endpoint)
         .then(() => {
-          if (!mountedToShow) {
+          if (!onSingleEnvironmentPage) {
             // Reload as a first solution to bust the ETag cache
             window.location.reload();
             return;
@@ -219,7 +219,7 @@ export default {
         data: this.requestData,
         successCallback: this.successCallback,
         errorCallback: this.errorCallback,
-        notificationCallback: isMakingRequest => {
+        notificationCallback: (isMakingRequest) => {
           this.isMakingRequest = isMakingRequest;
         },
       });

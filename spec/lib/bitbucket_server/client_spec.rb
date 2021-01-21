@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BitbucketServer::Client do
+RSpec.describe BitbucketServer::Client do
   let(:base_uri) { 'https://test:7990/stash/' }
   let(:options) { { base_uri: base_uri, user: 'bitbucket', password: 'mypassword' } }
   let(:project) { 'SOME-PROJECT' }
@@ -18,6 +18,15 @@ describe BitbucketServer::Client do
       expect(BitbucketServer::Paginator).to receive(:new).with(anything, path, :pull_request, page_offset: 0, limit: nil)
 
       subject.pull_requests(project, repo_slug)
+    end
+
+    it 'requests a collection with offset and limit' do
+      offset = 10
+      limit = 100
+
+      expect(BitbucketServer::Paginator).to receive(:new).with(anything, path, :pull_request, page_offset: offset, limit: limit)
+
+      subject.pull_requests(project, repo_slug, page_offset: offset, limit: limit)
     end
   end
 

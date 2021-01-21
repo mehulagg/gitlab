@@ -1,0 +1,3956 @@
+{
+  "scan": {
+    "end_time": "2020-10-07T23:02:19",
+    "messages": [],
+    "scanner": {
+      "id": "gitlab-api-fuzzing",
+      "name": "API Fuzzing",
+      "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+      "version": "1.6.0",
+      "vendor": {
+        "name": "GitLab"
+      }
+    },
+    "start_time": "2020-10-07T23:00:28",
+    "status": "success",
+    "type": "dast",
+    "scanned_resources": []
+  },
+  "version": "6.0.1",
+  "vulnerabilities": [
+    {
+      "id": "fd7e57d8-3126-46b5-a825-b9d2d8a6e13e",
+      "category": "API Fuzzing",
+      "name": "CORS",
+      "message": "CORS misconfiguration at 'http://127.0.0.1:7777/api/users'",
+      "description": "A misconfigured CORS implementation may be overly permissive in which domains should be trusted and at what level of trust.  This could allow an untrusted domain to forge the Origin header and launch various types of attacks such as cross-site request forgery or cross-site scripting.  An attacker could potentially steal a victim's credentials or send malicious requests on behalf of a victim.  The victim may not even be aware that an attack is being launched.\n\n\n",
+      "cve": "check:CORS",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "CORS",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:CORS"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:CORS - Bad 'Origin' value",
+          "name": "CORS - Bad 'Origin' value"
+        },
+        "summary": "The Origin header was changed to an invalid value of http://peachapisecurity.com and the response contained an Access-Control-Allow-Origin header which included this invalid Origin, indicating that the CORS configuration on the server is overly permissive.\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Origin",
+              "value": "http://peachapisecurity.com"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:53 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "92"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://peachapisecurity.com"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://peachapisecurity.com"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "92"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ],
+              "reason_phrase": "OK",
+              "status_code": 200,
+              "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "7de69959-2039-496a-a1ae-58ee5332ec2a",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via DELETE 127.0.0.1:7777/api/users",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: DELETE /api/users\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "DELETE",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:41 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "31"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "NOT FOUND",
+          "status_code": 404,
+          "body": "{\"message\":\"User not found.\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:41 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "DELETE",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "48b56ee9-f681-43e8-8328-3d67cf1dc69e",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via DELETE 127.0.0.1:7777/api/users/2",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: DELETE /api/users/2\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "DELETE",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:29 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "31"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "NOT FOUND",
+          "status_code": 404,
+          "body": "{\"message\":\"User not found.\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:29 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "DELETE",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "c880397b-66ba-465c-a09a-02aace8b92e0",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via GET 127.0.0.1:7777/api/users",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: GET /api/users\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "92"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "92"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ],
+              "reason_phrase": "OK",
+              "status_code": 200,
+              "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "1045a2f5-2d85-4b31-a9b9-50de62f408a9",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via GET 127.0.0.1:7777/api/users/2",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: GET /api/users/2\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:01:07 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "37"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "INTERNAL SERVER ERROR",
+          "status_code": 500,
+          "body": "{\"message\":\"Internal Server Error\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:01:07 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "37"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "INTERNAL SERVER ERROR",
+              "status_code": 500,
+              "body": "{\"message\":\"Internal Server Error\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "98d566d8-4331-4538-ac6e-cd59c2c15c42",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via POST 127.0.0.1:7777/api/users",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: POST /api/users\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "62"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "POST",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": "{\"user\":\"dd\",\"first\":\"mike\",\"last\":\"smith\",\"password\":\"hello\"}"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:01:25 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "15"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            }
+          ],
+          "reason_phrase": "CREATED",
+          "status_code": 201,
+          "body": "{\"user_id\":2}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "62"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "POST",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": "{\"user\":\"dd\",\"first\":\"mike\",\"last\":\"smith\",\"password\":\"hello\"}"
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "62"
+                }
+              ],
+              "method": "POST",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": "{\"user\":\"dd\",\"first\":\"mike\",\"last\":\"smith\",\"password\":\"hello\"}"
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:01:25 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "15"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Vary",
+                  "value": "Origin"
+                }
+              ],
+              "reason_phrase": "CREATED",
+              "status_code": 201,
+              "body": "{\"user_id\":2}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "POST",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "0ffab73f-f78a-419d-ac7f-6e10ea100ebf",
+      "category": "API Fuzzing",
+      "name": "Cleartext Authentication",
+      "message": "Cleartext Authentication via PUT 127.0.0.1:7777/api/users/2",
+      "description": "Authentication credentials are transported via unencrypted channel (HTTP).  This exposes the transmitted credentials to any attacker who can monitor (sniff) the network traffic during transmition.  Sensitive information such as credentials should always be transmitted via encrypted channels such as HTTPS.\n\n\n",
+      "cve": "check:Cleartext Authentication",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Cleartext Authentication",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Cleartext Authentication"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Cleartext Authentication",
+          "name": "Cleartext Authentication"
+        },
+        "summary": "An API token was sent via an unencrypted channel (HTTP).\n\nOperation: PUT /api/users/2\nAPI Token: Authorization\nAPI Token Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "62"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "PUT",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": "{\"user\":\"dd\",\"first\":\"john\",\"last\":\"smith\",\"password\":\"hello\"}"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:01:52 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "NO CONTENT",
+          "status_code": 204,
+          "body": ""
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "62"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "PUT",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": "{\"user\":\"dd\",\"first\":\"john\",\"last\":\"smith\",\"password\":\"hello\"}"
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "62"
+                }
+              ],
+              "method": "PUT",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": "{\"user\":\"dd\",\"first\":\"john\",\"last\":\"smith\",\"password\":\"hello\"}"
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:01:52 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NO CONTENT",
+              "status_code": 204,
+              "body": ""
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "PUT",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "bf057a4f-3673-4983-a0e1-2e3fa68f45d0",
+      "category": "API Fuzzing",
+      "name": "DNS Rebinding",
+      "message": "DNS Rebinding on 'http://127.0.0.1:7777/api/users/2'",
+      "description": "DNS Rebinding allows a malicious host to spoof or redirect a request to an alternate IP address, potentially allowing an attacker to bypass security authentication or authorization.  DNS resolution on its own does not properly constitute a valid authentication mechanism.  Servers should validate that the Host header of the request matches the expected hostname of the server.  In cases where the hostname is missing or does not match the expected value, the server should return a 400.  The X-Forwarded-Host header is sometimes used instead of the Host header in cases where the request is being forwarded.  In these cases, the X-Forwarded-Host header should also be validated if it is being used to determine the Host of the original request.\n\n\n",
+      "cve": "check:DNS Rebinding",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "DNS Rebinding",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:DNS Rebinding"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:DNS Rebinding",
+          "name": "DNS Rebinding"
+        },
+        "summary": "A known-good request was modified so that the Host header was removed. The response had a status code of 404 indicating that the Host header was not read or validated.\n\nOriginal Header: 127.0.0.1:7777 \nResponse Code: 404 \nAllowed Response Codes: 400\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "DELETE",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:30 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "31"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "NOT FOUND",
+          "status_code": 404,
+          "body": "{\"message\":\"User not found.\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:29 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "DELETE",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "e145c678-a490-4348-bf5b-6d5f5bc78438",
+      "category": "API Fuzzing",
+      "name": "Application Information Disclosure",
+      "message": "Error Message Exposed via 'DELETE 127.0.0.1:7777/api/users'",
+      "description": "Application Information Leakage is an application weakness where an application reveals sensitive data, such as technical details of the web application or environment. Application data may be used by an attacker to exploit the target web application, its hosting network, or its users. Therefore, leakage of sensitive data should be limited or prevented whenever possible. Information Leakage, in its most common form, is the result of one or more of the following conditions: A failure to scrub out HTML/Script comments containing sensitive information or improper application or server configurations.\n\nFailure to scrub HTML/Script comments prior to a push to the production environment can result in the leak of sensitive, contextual, information such as server directory structure, SQL query structure, and internal network information. Often a developer will leave comments within the HTML and/or script code to help facilitate the debugging or integration process during the pre-production phase. Although there is no harm in allowing developers to include inline comments within the content they develop, these comments should all be removed prior to the content's public release.\n\nSoftware version numbers and verbose error messages (such as ASP.NET version numbers) are examples of improper server configurations. This information is useful to an attacker by providing detailed insight as to the framework, languages, or pre-built functions being utilized by a web application. Most default server configurations provide software version numbers and verbose error messages for debugging and troubleshooting purposes. Configuration changes can be made to disable these features, preventing the display of this information.\n\n\n",
+      "cve": "check:Application Information Disclosure",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Application Information Disclosure",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Application Information Disclosure"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Response Body Analysis",
+          "name": "Response Body Analysis"
+        },
+        "summary": "During testing a Error Message type value was identified in the HTTP response message. The value is a Generic error message..\n\nInformation leaked:\n\nInternal Server Error\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "DELETE",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:43 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "37"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "INTERNAL SERVER ERROR",
+          "status_code": 500,
+          "body": "{\"message\":\"Internal Server Error\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:41 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "DELETE",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "d4598c60-686d-4331-8395-413a881d64e1",
+      "category": "API Fuzzing",
+      "name": "Application Information Disclosure",
+      "message": "Error Message Exposed via 'GET 127.0.0.1:7777/api/users/2'",
+      "description": "Application Information Leakage is an application weakness where an application reveals sensitive data, such as technical details of the web application or environment. Application data may be used by an attacker to exploit the target web application, its hosting network, or its users. Therefore, leakage of sensitive data should be limited or prevented whenever possible. Information Leakage, in its most common form, is the result of one or more of the following conditions: A failure to scrub out HTML/Script comments containing sensitive information or improper application or server configurations.\n\nFailure to scrub HTML/Script comments prior to a push to the production environment can result in the leak of sensitive, contextual, information such as server directory structure, SQL query structure, and internal network information. Often a developer will leave comments within the HTML and/or script code to help facilitate the debugging or integration process during the pre-production phase. Although there is no harm in allowing developers to include inline comments within the content they develop, these comments should all be removed prior to the content's public release.\n\nSoftware version numbers and verbose error messages (such as ASP.NET version numbers) are examples of improper server configurations. This information is useful to an attacker by providing detailed insight as to the framework, languages, or pre-built functions being utilized by a web application. Most default server configurations provide software version numbers and verbose error messages for debugging and troubleshooting purposes. Configuration changes can be made to disable these features, preventing the display of this information.\n\n\n",
+      "cve": "check:Application Information Disclosure",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Application Information Disclosure",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Application Information Disclosure"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Response Body Analysis",
+          "name": "Response Body Analysis"
+        },
+        "summary": "During testing a Error Message type value was identified in the HTTP response message. The value is a Generic error message..\n\nInformation leaked:\n\nInternal Server Error\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:01:07 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "37"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "INTERNAL SERVER ERROR",
+          "status_code": 500,
+          "body": "{\"message\":\"Internal Server Error\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:01:07 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "37"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "INTERNAL SERVER ERROR",
+              "status_code": 500,
+              "body": "{\"message\":\"Internal Server Error\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "d89c9c43-f725-4fcb-8a2f-da4d06b967d4",
+      "category": "API Fuzzing",
+      "name": "Authentication Token",
+      "message": "GET 127.0.0.1:7777/api/users operation does not check token Authorization",
+      "description": "Operation failed to property resistrct access using an authentication token.  This allows an attacker to bypass authentication gaining access to information or even the ability to modify data.\n\n\n",
+      "cve": "check:Authentication Token",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Authentication Token",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Authentication Token"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Authentication Token",
+          "name": "Authentication Token"
+        },
+        "summary": "The authentication token Authorization was modified to an invalid value. After modification the operation returned 200 indicating an authentication bypass.\n\nToken: Authorization\nToken Parameter: authorization\nOriginal Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\nMutated Value: peachy\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "peachy"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:58 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "92"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "peachy"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "92"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ],
+              "reason_phrase": "OK",
+              "status_code": 200,
+              "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "param": "Header: authorization",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "10109320-ca17-4b58-8c44-63cd704263fd",
+      "category": "API Fuzzing",
+      "name": "Authentication Token",
+      "message": "HEAD 127.0.0.1:7777/api/users operation does not check token Authorization",
+      "description": "Operation failed to property resistrct access using an authentication token.  This allows an attacker to bypass authentication gaining access to information or even the ability to modify data.\n\n\n",
+      "cve": "check:Authentication Token",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Authentication Token",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Authentication Token"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Authentication Token",
+          "name": "Authentication Token"
+        },
+        "summary": "The authentication token Authorization was removed from request.  Additionally the method type was changed to 'HEAD'.\nAfter modification the operation returned 200 indicating an authentication bypass.\n\nToken: Authorization\nToken Parameter: authorization\nOriginal Value: Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "close"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "HEAD",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Connection",
+              "value": "close"
+            },
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:45 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "92"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": ""
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "close"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "HEAD",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:41 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "HEAD",
+        "param": "Header: authorization",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "f570cf09-450c-4212-8433-02a07d300572",
+      "category": "API Fuzzing",
+      "name": "JSON Hijacking",
+      "message": "JSON Hijacking vulnerability detected via GET 127.0.0.1:7777/api/users",
+      "description": "JSON hijacking allows an attacker to send a GET request via a malicious web site or similar attack vector and utilize a user's stored credentials to retrieve sensitive or protected data to which that user has access.  Since a JSON array on its own is valid JavaScript, a malicious GET request to a resource that returns only a JavaScript array can allow the attacker to use a malicious script to read the data in the array from the request.  GET requests should never return a JSON array, even if the resource requires authentication to access.  Consider using POST instead of a GET for this request or wrapping the array in a JSON object.\n\n\n",
+      "cve": "check:JSON Hijacking",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "JSON Hijacking",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:JSON Hijacking"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:JSON Hijacking",
+          "name": "JSON Hijacking"
+        },
+        "summary": "A response to a GET request returned a JSON array.  This could potentially be hijacked by a malicious website resulting in the data being exposed to an attacker.\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "92"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "method": "GET",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:52 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "92"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ],
+              "reason_phrase": "OK",
+              "status_code": 200,
+              "body": "[{\"user_id\":1,\"user\":\"admin\",\"first\":\"Joe\",\"last\":\"Smith\",\"password\":\"Password!\"}]"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "GET",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "77ced7f0-d7ba-48d1-a19e-5a6d10415fc9",
+      "category": "API Fuzzing",
+      "name": "Known Vulnerabilities",
+      "message": "One or more known vulnerabilities in 'DELETE 127.0.0.1:7777/api/users/2'",
+      "description": "One or more known vulnerabilities has been identified via the operation 'DELETE 127.0.0.1:7777/api/users/2'.  Known vulnerabilities are identified via version information identified in the HTTP response.\n\nTypically version information is pulled from HTTP response headers like 'Server' and 'X-Powered-By'.  This version information is then used to identify matching CVE entries.\n\n\n",
+      "cve": "check:Known Vulnerabilities",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Known Vulnerabilities",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Known Vulnerabilities"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Known Vulnerabilities",
+          "name": "Known Vulnerabilities"
+        },
+        "summary": "",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "DELETE",
+          "url": "http://127.0.0.1:7777/api/users/2",
+          "body": ""
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:00:29 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "31"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            }
+          ],
+          "reason_phrase": "NOT FOUND",
+          "status_code": 404,
+          "body": "{\"message\":\"User not found.\"}"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "0"
+                }
+              ],
+              "method": "DELETE",
+              "url": "http://127.0.0.1:7777/api/users/2",
+              "body": ""
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:00:29 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "31"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                }
+              ],
+              "reason_phrase": "NOT FOUND",
+              "status_code": 404,
+              "body": "{\"message\":\"User not found.\"}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "DELETE",
+        "path": "/api/users/2"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    },
+    {
+      "id": "608b87ef-67bd-434b-9ac2-581221df1d2f",
+      "category": "API Fuzzing",
+      "name": "Application Information Disclosure",
+      "message": "Version Number Exposed via 'POST 127.0.0.1:7777/api/users'",
+      "description": "Application Information Leakage is an application weakness where an application reveals sensitive data, such as technical details of the web application or environment. Application data may be used by an attacker to exploit the target web application, its hosting network, or its users. Therefore, leakage of sensitive data should be limited or prevented whenever possible. Information Leakage, in its most common form, is the result of one or more of the following conditions: A failure to scrub out HTML/Script comments containing sensitive information or improper application or server configurations.\n\nFailure to scrub HTML/Script comments prior to a push to the production environment can result in the leak of sensitive, contextual, information such as server directory structure, SQL query structure, and internal network information. Often a developer will leave comments within the HTML and/or script code to help facilitate the debugging or integration process during the pre-production phase. Although there is no harm in allowing developers to include inline comments within the content they develop, these comments should all be removed prior to the content's public release.\n\nSoftware version numbers and verbose error messages (such as ASP.NET version numbers) are examples of improper server configurations. This information is useful to an attacker by providing detailed insight as to the framework, languages, or pre-built functions being utilized by a web application. Most default server configurations provide software version numbers and verbose error messages for debugging and troubleshooting purposes. Configuration changes can be made to disable these features, preventing the display of this information.\n\n\n",
+      "cve": "check:Application Information Disclosure",
+      "severity": "Unknown",
+      "confidence": "Unknown",
+      "scanner": {
+        "id": "GitLab-API-Fuzzing",
+        "name": "GitLab API Fuzzing"
+      },
+      "identifiers": [
+        {
+          "type": "ApiFuzzingCheck",
+          "name": "Application Information Disclosure",
+          "url": "https://docs.gitlab.com/ee/user/application_security/api_fuzzing/",
+          "value": "check:Application Information Disclosure"
+        }
+      ],
+      "evidence": {
+        "source": {
+          "id": "assert:Response Body Analysis",
+          "name": "Response Body Analysis"
+        },
+        "summary": "During testing a Version Number type value was identified in the HTTP response message. The value is a Generic version number message..\n\nInformation leaked:\n\nVersion: 1.1.1 Other other \\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\n\\t\\t\\t\\tother\"\n\n\n",
+        "request": {
+          "headers": [
+            {
+              "name": "Host",
+              "value": "127.0.0.1:7777"
+            },
+            {
+              "name": "Authorization",
+              "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+            },
+            {
+              "name": "Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip,deflate,zlib"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=UTF-8"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "http://127.0.0.1:7777/"
+            },
+            {
+              "name": "Cookie",
+              "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "60"
+            },
+            {
+              "name": "Via",
+              "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+            }
+          ],
+          "method": "POST",
+          "url": "http://127.0.0.1:7777/api/users",
+          "body": "{\"user\":\"dd\",\"first\":\"\\\"\",\"last\":\"smith\",\"password\":\"hello\"}"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Server",
+              "value": "TwistedWeb/20.3.0"
+            },
+            {
+              "name": "Date",
+              "value": "Wed, 07 Oct 2020 23:01:41 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Length",
+              "value": "12661"
+            },
+            {
+              "name": "X-Powered-By",
+              "value": "PHP/7.0.11"
+            },
+            {
+              "name": "Access-Control-Allow-Origin",
+              "value": "http://127.0.0.1:7777"
+            },
+            {
+              "name": "Vary",
+              "value": "Origin"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200,
+          "body": "\"Blah blah blah. Version: 1.1.1 Other other \\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjdalskdj\\naskjdlaskjdlaksjdlaksjdlaksjdlakjsdlakjsdlkjasldkjalskdjalksjda\n---- TRUNCATED(Total Length: 12660 characters) ----"
+        },
+        "supporting_messages": [
+          {
+            "name": "Origional",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "60"
+                },
+                {
+                  "name": "Via",
+                  "value": "HTTP/1.1 GitLabApiSecurity 0.0.0"
+                }
+              ],
+              "method": "POST",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": "{\"user\":\"dd\",\"first\":\"\\\"\",\"last\":\"smith\",\"password\":\"hello\"}"
+            }
+          },
+          {
+            "name": "Recorded",
+            "request": {
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "127.0.0.1:7777"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "Token b5638ae7-6e77-4585-b035-7d9de2e3f6b3"
+                },
+                {
+                  "name": "Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Accept-Encoding",
+                  "value": "gzip,deflate,zlib"
+                },
+                {
+                  "name": "Accept-Language",
+                  "value": "en-US,en;q=0.8"
+                },
+                {
+                  "name": "User-Agent",
+                  "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                },
+                {
+                  "name": "Accept",
+                  "value": "*/*"
+                },
+                {
+                  "name": "Referer",
+                  "value": "http://127.0.0.1:7777/"
+                },
+                {
+                  "name": "Cookie",
+                  "value": ".AspNetCore.Antiforgery.a6BorKCfoC4=CfDJ8DL4GupRCDNGl_0OiAd3qWP5O9gu_LiedsgcLWhaCgn88Ru8oWwXGQvL3PXNdZ0n5TjUPody5ZI01g6DQyaaphE4U6osQ8UW4ek9hlOQX0XFvIg9G3vGuvPt1XiJkxzxEtoPMlepzIig3KblZd5YsOs"
+                },
+                {
+                  "name": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "62"
+                }
+              ],
+              "method": "POST",
+              "url": "http://127.0.0.1:7777/api/users",
+              "body": "{\"user\":\"dd\",\"first\":\"mike\",\"last\":\"smith\",\"password\":\"hello\"}"
+            },
+            "response": {
+              "headers": [
+                {
+                  "name": "Server",
+                  "value": "TwistedWeb/20.3.0"
+                },
+                {
+                  "name": "Date",
+                  "value": "Wed, 07 Oct 2020 23:01:25 GMT"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Content-Length",
+                  "value": "15"
+                },
+                {
+                  "name": "X-Powered-By",
+                  "value": "PHP/7.0.11"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "http://127.0.0.1:7777"
+                },
+                {
+                  "name": "Vary",
+                  "value": "Origin"
+                }
+              ],
+              "reason_phrase": "CREATED",
+              "status_code": 201,
+              "body": "{\"user_id\":2}"
+            }
+          }
+        ]
+      },
+      "location": {
+        "hostname": "http://127.0.0.1:7777",
+        "method": "POST",
+        "path": "/api/users"
+      },
+      "assets": [
+        {
+          "type": "postman",
+          "name": "Test Postman Collection",
+          "url": "http://localhost/test.collection"
+        }
+      ]
+    }
+  ]
+}

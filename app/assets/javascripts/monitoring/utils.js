@@ -5,12 +5,63 @@ import {
   removeParams,
   updateHistory,
 } from '~/lib/utils/url_utility';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import {
   timeRangeParamNames,
   timeRangeFromParams,
   timeRangeToParams,
 } from '~/lib/utils/datetime_range';
 import { VARIABLE_PREFIX } from './constants';
+
+/**
+ * Extracts the initial state and props from HTML dataset
+ * and places them in separate objects to setup bundle.
+ * @param {*} dataset
+ */
+export const stateAndPropsFromDataset = (dataset = {}) => {
+  const {
+    currentDashboard,
+    deploymentsEndpoint,
+    dashboardEndpoint,
+    dashboardsEndpoint,
+    panelPreviewEndpoint,
+    dashboardTimezone,
+    canAccessOperationsSettings,
+    operationsSettingsPath,
+    projectPath,
+    logsPath,
+    externalDashboardUrl,
+    currentEnvironmentName,
+    customDashboardBasePath,
+    addDashboardDocumentationPath,
+    ...dataProps
+  } = dataset;
+
+  // HTML attributes are always strings, parse other types.
+  dataProps.hasMetrics = parseBoolean(dataProps.hasMetrics);
+  dataProps.customMetricsAvailable = parseBoolean(dataProps.customMetricsAvailable);
+  dataProps.prometheusAlertsAvailable = parseBoolean(dataProps.prometheusAlertsAvailable);
+
+  return {
+    initState: {
+      currentDashboard,
+      deploymentsEndpoint,
+      dashboardEndpoint,
+      dashboardsEndpoint,
+      panelPreviewEndpoint,
+      dashboardTimezone,
+      canAccessOperationsSettings,
+      operationsSettingsPath,
+      projectPath,
+      logsPath,
+      externalDashboardUrl,
+      currentEnvironmentName,
+      customDashboardBasePath,
+      addDashboardDocumentationPath,
+    },
+    dataProps,
+  };
+};
 
 /**
  * List of non time range url parameters
@@ -30,15 +81,15 @@ export const graphDataValidatorForValues = (isValues, graphData) => {
   const responseValueKeyName = isValues ? 'value' : 'values';
   return (
     Array.isArray(graphData.metrics) &&
-    graphData.metrics.filter(query => {
+    graphData.metrics.filter((query) => {
       if (Array.isArray(query.result)) {
         return (
-          query.result.filter(res => Array.isArray(res[responseValueKeyName])).length ===
+          query.result.filter((res) => Array.isArray(res[responseValueKeyName])).length ===
           query.result.length
         );
       }
       return false;
-    }).length === graphData.metrics.filter(query => query.result).length
+    }).length === graphData.metrics.filter((query) => query.result).length
   );
 };
 
@@ -55,7 +106,7 @@ const isClusterHealthBoard = () => (document.body.dataset.page || '').includes('
  * @param {String}  chart link that will be sent as a property for the event
  * @return {Object} config object for event tracking
  */
-export const generateLinkToChartOptions = chartLink => {
+export const generateLinkToChartOptions = (chartLink) => {
   const isCLusterHealthBoard = isClusterHealthBoard();
 
   const category = isCLusterHealthBoard
@@ -73,7 +124,7 @@ export const generateLinkToChartOptions = chartLink => {
  * @param {String}  chart title that will be sent as a property for the event
  * @return {Object} config object for event tracking
  */
-export const downloadCSVOptions = title => {
+export const downloadCSVOptions = (title) => {
   const isCLusterHealthBoard = isClusterHealthBoard();
 
   const category = isCLusterHealthBoard
@@ -106,7 +157,7 @@ export const getAddMetricTrackingOptions = () => ({
  * @param {Object} graphData  the graph data response from a prometheus request
  * @returns {boolean} true if the data is valid
  */
-export const graphDataValidatorForAnomalyValues = graphData => {
+export const graphDataValidatorForAnomalyValues = (graphData) => {
   const anomalySeriesCount = 3; // metric, upper, lower
   return (
     graphData.metrics &&
@@ -135,7 +186,7 @@ export const timeRangeFromUrl = (search = window.location.search) => {
  * @param {String} label label for the template variable
  * @returns {String}
  */
-export const addPrefixToLabel = label => `${VARIABLE_PREFIX}${label}`;
+export const addPrefixToLabel = (label) => `${VARIABLE_PREFIX}${label}`;
 
 /**
  * Before the templating variables are passed to the backend the
@@ -146,7 +197,7 @@ export const addPrefixToLabel = label => `${VARIABLE_PREFIX}${label}`;
  * @param {String} label label to remove prefix from
  * @returns {String}
  */
-export const removePrefixFromLabel = label =>
+export const removePrefixFromLabel = (label) =>
   (label || '').replace(new RegExp(`^${VARIABLE_PREFIX}`), '');
 
 /**
@@ -159,9 +210,11 @@ export const removePrefixFromLabel = label =>
  * @param {Object} variables
  * @returns {Object}
  */
-export const convertVariablesForURL = variables =>
-  Object.keys(variables || {}).reduce((acc, key) => {
-    acc[addPrefixToLabel(key)] = variables[key]?.value;
+export const convertVariablesForURL = (variables) =>
+  variables.reduce((acc, { name, value }) => {
+    if (value !== null) {
+      acc[addPrefixToLabel(name)] = value;
+    }
     return acc;
   }, {});
 
@@ -170,11 +223,10 @@ export const convertVariablesForURL = variables =>
  * begin with a constant prefix so that it doesn't collide with
  * other URL params.
  *
- * @param {String} New URL
+ * @param {String} search URL
  * @returns {Object} The custom variables defined by the user in the URL
  */
-
-export const getPromCustomVariablesFromUrl = (search = window.location.search) => {
+export const templatingVariablesFromUrl = (search = window.location.search) => {
   const params = queryToObject(search);
   // pick the params with variable prefix
   const paramsWithVars = pickBy(params, (val, key) => key.startsWith(VARIABLE_PREFIX));
@@ -189,7 +241,7 @@ export const getPromCustomVariablesFromUrl = (search = window.location.search) =
  *
  * @param {Object} variables user defined variables
  */
-export const setCustomVariablesFromUrl = variables => {
+export const setCustomVariablesFromUrl = (variables) => {
   // prep the variables to append to URL
   const parsedVariables = convertVariablesForURL(variables);
   // update the URL
@@ -301,7 +353,7 @@ export const panelToUrl = (
  * @param {Array} values data points
  * @returns {Number}
  */
-const metricValueMapper = values => values[0]?.[1];
+const metricValueMapper = (values) => values[0]?.[1];
 
 /**
  * Get the metric name from metric object
@@ -312,7 +364,7 @@ const metricValueMapper = values => values[0]?.[1];
  * @param {Object} metric metric object
  * @returns {String}
  */
-const metricNameMapper = metric => Object.values(metric)?.[0];
+const metricNameMapper = (metric) => Object.values(metric)?.[0];
 
 /**
  * Parse metric object to extract metric value and name in
@@ -352,40 +404,3 @@ export const barChartsDataParser = (data = []) =>
     }),
     {},
   );
-
-/**
- * Custom variables are defined in the dashboard yml file
- * and their values can be passed through the URL.
- *
- * On component load, this method merges variables data
- * from the yml file with URL data to store in the Vuex store.
- * Not all params coming from the URL need to be stored. Only
- * the ones that have a corresponding variable defined in the
- * yml file.
- *
- * This ensures that there is always a single source of truth
- * for variables
- *
- * This method can be improved further. See the below issue
- * https://gitlab.com/gitlab-org/gitlab/-/issues/217713
- *
- * @param {Object} varsFromYML template variables from yml file
- * @returns {Object}
- */
-export const mergeURLVariables = (varsFromYML = {}) => {
-  const varsFromURL = getPromCustomVariablesFromUrl();
-  const variables = {};
-  Object.keys(varsFromYML).forEach(key => {
-    if (Object.prototype.hasOwnProperty.call(varsFromURL, key)) {
-      variables[key] = {
-        ...varsFromYML[key],
-        value: varsFromURL[key],
-      };
-    } else {
-      variables[key] = varsFromYML[key];
-    }
-  });
-  return variables;
-};
-
-export default {};

@@ -56,14 +56,10 @@ describe('IDE merge requests list', () => {
 
   it('calls fetch on mounted', () => {
     createComponent();
-    expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        search: '',
-        type: '',
-      },
-      undefined,
-    );
+    expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+      search: '',
+      type: '',
+    });
   });
 
   it('renders loading icon when merge request is loading', () => {
@@ -86,23 +82,17 @@ describe('IDE merge requests list', () => {
     return wrapper.vm
       .$nextTick()
       .then(() => {
-        findSearchTypeButtons()
-          .at(0)
-          .trigger('click');
+        findSearchTypeButtons().at(0).trigger('click');
         return wrapper.vm.$nextTick();
       })
       .then(() => {
         const searchType = wrapper.vm.$options.searchTypes[0];
 
         expect(findTokenedInput().props('tokens')).toEqual([searchType]);
-        expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            type: searchType.type,
-            search: '',
-          },
-          undefined,
-        );
+        expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+          type: searchType.type,
+          search: '',
+        });
       });
   });
 
@@ -136,14 +126,10 @@ describe('IDE merge requests list', () => {
         input.vm.$emit('input', 'something');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-            expect.any(Object),
-            {
-              search: 'something',
-              type: '',
-            },
-            undefined,
-          );
+          expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+            search: 'something',
+            type: '',
+          });
         });
       });
     });
@@ -165,8 +151,8 @@ describe('IDE merge requests list', () => {
 
       it('shows search types', () => {
         const buttons = findSearchTypeButtons();
-        expect(buttons.wrappers.map(x => x.text().trim())).toEqual(
-          wrapper.vm.$options.searchTypes.map(x => x.label),
+        expect(buttons.wrappers.map((x) => x.text().trim())).toEqual(
+          wrapper.vm.$options.searchTypes.map((x) => x.label),
         );
       });
 
@@ -180,9 +166,7 @@ describe('IDE merge requests list', () => {
 
       describe('with search type', () => {
         beforeEach(() => {
-          findSearchTypeButtons()
-            .at(0)
-            .trigger('click');
+          findSearchTypeButtons().at(0).trigger('click');
 
           return wrapper.vm
             .$nextTick()

@@ -20,6 +20,11 @@ export default {
       isAdmin: data,
     });
   },
+  [types.SET_KNOWN_LICENSES](state, data) {
+    Object.assign(state, {
+      knownLicenses: data,
+    });
+  },
   [types.RECEIVE_MANAGED_LICENSES_SUCCESS](state, licenses = []) {
     const managedLicenses = licenses.map(normalizeLicense).reverse();
 
@@ -96,10 +101,26 @@ export default {
       currentLicenseInModal: null,
     });
   },
+  [types.REQUEST_LICENSE_CHECK_APPROVAL_RULE](state) {
+    Object.assign(state, {
+      isLoadingLicenseCheckApprovalRule: true,
+    });
+  },
+  [types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_SUCCESS](state, { hasLicenseCheckApprovalRule }) {
+    Object.assign(state, {
+      isLoadingLicenseCheckApprovalRule: false,
+      hasLicenseCheckApprovalRule,
+    });
+  },
+  [types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR](state) {
+    Object.assign(state, {
+      isLoadingLicenseCheckApprovalRule: false,
+    });
+  },
   [types.ADD_PENDING_LICENSE](state, id) {
     state.pendingLicenses.push(id);
   },
   [types.REMOVE_PENDING_LICENSE](state, id) {
-    state.pendingLicenses = state.pendingLicenses.filter(pendingLicense => pendingLicense !== id);
+    state.pendingLicenses = state.pendingLicenses.filter((pendingLicense) => pendingLicense !== id);
   },
 };

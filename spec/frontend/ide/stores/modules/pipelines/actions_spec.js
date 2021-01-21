@@ -1,6 +1,7 @@
 import Visibility from 'visibilityjs';
 import MockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
 import {
   requestLatestPipeline,
@@ -15,16 +16,15 @@ import {
   fetchJobs,
   toggleStageCollapsed,
   setDetailJob,
-  requestJobTrace,
-  receiveJobTraceError,
-  receiveJobTraceSuccess,
-  fetchJobTrace,
+  requestJobLogs,
+  receiveJobLogsError,
+  receiveJobLogsSuccess,
+  fetchJobLogs,
   resetLatestPipeline,
 } from '~/ide/stores/modules/pipelines/actions';
 import state from '~/ide/stores/modules/pipelines/state';
 import * as types from '~/ide/stores/modules/pipelines/mutation_types';
 import { rightSidebarViews } from '~/ide/constants';
-import testAction from '../../../../helpers/vuex_action_helper';
 import { pipelines, jobs } from '../../../mock_data';
 
 describe('IDE pipelines actions', () => {
@@ -44,7 +44,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('requestLatestPipeline', () => {
-    it('commits request', done => {
+    it('commits request', (done) => {
       testAction(
         requestLatestPipeline,
         null,
@@ -57,7 +57,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('receiveLatestPipelineError', () => {
-    it('commits error', done => {
+    it('commits error', (done) => {
       testAction(
         receiveLatestPipelineError,
         { status: 404 },
@@ -68,7 +68,7 @@ describe('IDE pipelines actions', () => {
       );
     });
 
-    it('dispatches setErrorMessage is not 404', done => {
+    it('dispatches setErrorMessage is not 404', (done) => {
       testAction(
         receiveLatestPipelineError,
         { status: 500 },
@@ -123,7 +123,7 @@ describe('IDE pipelines actions', () => {
           .reply(200, { data: { foo: 'bar' } }, { 'poll-interval': '10000' });
       });
 
-      it('dispatches request', done => {
+      it('dispatches request', (done) => {
         jest.spyOn(axios, 'get');
         jest.spyOn(Visibility, 'hidden').mockReturnValue(false);
 
@@ -139,7 +139,7 @@ describe('IDE pipelines actions', () => {
 
         jest.advanceTimersByTime(1000);
 
-        new Promise(resolve => requestAnimationFrame(resolve))
+        new Promise((resolve) => requestAnimationFrame(resolve))
           .then(() => {
             expect(axios.get).toHaveBeenCalled();
             expect(axios.get).toHaveBeenCalledTimes(1);
@@ -150,7 +150,7 @@ describe('IDE pipelines actions', () => {
 
             jest.advanceTimersByTime(10000);
           })
-          .then(() => new Promise(resolve => requestAnimationFrame(resolve)))
+          .then(() => new Promise((resolve) => requestAnimationFrame(resolve)))
           .then(() => {
             expect(axios.get).toHaveBeenCalled();
             expect(axios.get).toHaveBeenCalledTimes(2);
@@ -169,7 +169,7 @@ describe('IDE pipelines actions', () => {
         mock.onGet('/abc/def/commit/abc123def456ghi789jkl/pipelines').reply(500);
       });
 
-      it('dispatches error', done => {
+      it('dispatches error', (done) => {
         const dispatch = jest.fn().mockName('dispatch');
         const rootGetters = {
           lastCommit: { id: 'abc123def456ghi789jkl' },
@@ -180,7 +180,7 @@ describe('IDE pipelines actions', () => {
 
         jest.advanceTimersByTime(1500);
 
-        new Promise(resolve => requestAnimationFrame(resolve))
+        new Promise((resolve) => requestAnimationFrame(resolve))
           .then(() => {
             expect(dispatch).toHaveBeenCalledWith('receiveLatestPipelineError', expect.anything());
           })
@@ -191,13 +191,13 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('requestJobs', () => {
-    it('commits request', done => {
+    it('commits request', (done) => {
       testAction(requestJobs, 1, mockedState, [{ type: types.REQUEST_JOBS, payload: 1 }], [], done);
     });
   });
 
   describe('receiveJobsError', () => {
-    it('commits error', done => {
+    it('commits error', (done) => {
       testAction(
         receiveJobsError,
         { id: 1 },
@@ -220,7 +220,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('receiveJobsSuccess', () => {
-    it('commits data', done => {
+    it('commits data', (done) => {
       testAction(
         receiveJobsSuccess,
         { id: 1, data: jobs },
@@ -240,7 +240,7 @@ describe('IDE pipelines actions', () => {
         mock.onGet(stage.dropdownPath).replyOnce(200, jobs);
       });
 
-      it('dispatches request', done => {
+      it('dispatches request', (done) => {
         testAction(
           fetchJobs,
           stage,
@@ -260,7 +260,7 @@ describe('IDE pipelines actions', () => {
         mock.onGet(stage.dropdownPath).replyOnce(500);
       });
 
-      it('dispatches error', done => {
+      it('dispatches error', (done) => {
         testAction(
           fetchJobs,
           stage,
@@ -277,7 +277,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('toggleStageCollapsed', () => {
-    it('commits collapse', done => {
+    it('commits collapse', (done) => {
       testAction(
         toggleStageCollapsed,
         1,
@@ -290,7 +290,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('setDetailJob', () => {
-    it('commits job', done => {
+    it('commits job', (done) => {
       testAction(
         setDetailJob,
         'job',
@@ -301,7 +301,7 @@ describe('IDE pipelines actions', () => {
       );
     });
 
-    it('dispatches rightPane/open as pipeline when job is null', done => {
+    it('dispatches rightPane/open as pipeline when job is null', (done) => {
       testAction(
         setDetailJob,
         null,
@@ -312,7 +312,7 @@ describe('IDE pipelines actions', () => {
       );
     });
 
-    it('dispatches rightPane/open as job', done => {
+    it('dispatches rightPane/open as job', (done) => {
       testAction(
         setDetailJob,
         'job',
@@ -324,24 +324,24 @@ describe('IDE pipelines actions', () => {
     });
   });
 
-  describe('requestJobTrace', () => {
-    it('commits request', done => {
-      testAction(requestJobTrace, null, mockedState, [{ type: types.REQUEST_JOB_TRACE }], [], done);
+  describe('requestJobLogs', () => {
+    it('commits request', (done) => {
+      testAction(requestJobLogs, null, mockedState, [{ type: types.REQUEST_JOB_LOGS }], [], done);
     });
   });
 
-  describe('receiveJobTraceError', () => {
-    it('commits error', done => {
+  describe('receiveJobLogsError', () => {
+    it('commits error', (done) => {
       testAction(
-        receiveJobTraceError,
+        receiveJobLogsError,
         null,
         mockedState,
-        [{ type: types.RECEIVE_JOB_TRACE_ERROR }],
+        [{ type: types.RECEIVE_JOB_LOGS_ERROR }],
         [
           {
             type: 'setErrorMessage',
             payload: {
-              text: 'An error occurred while fetching the job trace.',
+              text: 'An error occurred while fetching the job logs.',
               action: expect.any(Function),
               actionText: 'Please try again',
               actionPayload: null,
@@ -353,20 +353,20 @@ describe('IDE pipelines actions', () => {
     });
   });
 
-  describe('receiveJobTraceSuccess', () => {
-    it('commits data', done => {
+  describe('receiveJobLogsSuccess', () => {
+    it('commits data', (done) => {
       testAction(
-        receiveJobTraceSuccess,
+        receiveJobLogsSuccess,
         'data',
         mockedState,
-        [{ type: types.RECEIVE_JOB_TRACE_SUCCESS, payload: 'data' }],
+        [{ type: types.RECEIVE_JOB_LOGS_SUCCESS, payload: 'data' }],
         [],
         done,
       );
     });
   });
 
-  describe('fetchJobTrace', () => {
+  describe('fetchJobLogs', () => {
     beforeEach(() => {
       mockedState.detailJob = { path: `${TEST_HOST}/project/builds` };
     });
@@ -377,22 +377,22 @@ describe('IDE pipelines actions', () => {
         mock.onGet(`${TEST_HOST}/project/builds/trace`).replyOnce(200, { html: 'html' });
       });
 
-      it('dispatches request', done => {
+      it('dispatches request', (done) => {
         testAction(
-          fetchJobTrace,
+          fetchJobLogs,
           null,
           mockedState,
           [],
           [
-            { type: 'requestJobTrace' },
-            { type: 'receiveJobTraceSuccess', payload: { html: 'html' } },
+            { type: 'requestJobLogs' },
+            { type: 'receiveJobLogsSuccess', payload: { html: 'html' } },
           ],
           done,
         );
       });
 
       it('sends get request to correct URL', () => {
-        fetchJobTrace({
+        fetchJobLogs({
           state: mockedState,
 
           dispatch() {},
@@ -408,13 +408,13 @@ describe('IDE pipelines actions', () => {
         mock.onGet(`${TEST_HOST}/project/builds/trace`).replyOnce(500);
       });
 
-      it('dispatches error', done => {
+      it('dispatches error', (done) => {
         testAction(
-          fetchJobTrace,
+          fetchJobLogs,
           null,
           mockedState,
           [],
-          [{ type: 'requestJobTrace' }, { type: 'receiveJobTraceError' }],
+          [{ type: 'requestJobLogs' }, { type: 'receiveJobLogsError' }],
           done,
         );
       });
@@ -422,7 +422,7 @@ describe('IDE pipelines actions', () => {
   });
 
   describe('resetLatestPipeline', () => {
-    it('commits reset mutations', done => {
+    it('commits reset mutations', (done) => {
       testAction(
         resetLatestPipeline,
         null,

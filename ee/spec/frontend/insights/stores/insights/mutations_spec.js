@@ -1,7 +1,7 @@
-import createState from 'ee/insights/stores/modules/insights/state';
-import mutations from 'ee/insights/stores/modules/insights/mutations';
-import * as types from 'ee/insights/stores/modules/insights/mutation_types';
 import { CHART_TYPES } from 'ee/insights/constants';
+import * as types from 'ee/insights/stores/modules/insights/mutation_types';
+import mutations from 'ee/insights/stores/modules/insights/mutations';
+import createState from 'ee/insights/stores/modules/insights/state';
 
 import { configData } from 'ee_jest/insights/mock_data';
 
@@ -107,12 +107,19 @@ describe('Insights mutations', () => {
     };
 
     const transformedData = {
-      datasets: [[1], [2]],
+      datasets: [
+        { name: 'Dataset 1', data: [1] },
+        { name: 'Dataset 2', data: [2] },
+      ],
       labels: ['January', 'February'],
       xAxisTitle: 'Months',
       yAxisTitle: 'Issues',
-      seriesNames: ['Dataset 1', 'Dataset 2'],
+      seriesNames: [],
     };
+
+    beforeEach(() => {
+      mutations[types.INIT_CHART_DATA](state, [chart.title]);
+    });
 
     it('sets charts loaded state to true on success', () => {
       mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
@@ -190,16 +197,6 @@ describe('Insights mutations', () => {
       mutations[types.INIT_CHART_DATA](state, keys);
 
       expect(state.chartData).toEqual({ a: {}, b: {} });
-    });
-  });
-
-  describe(types.SET_PAGE_LOADING, () => {
-    const pageLoading = true;
-
-    it('sets pageLoading state', () => {
-      mutations[types.SET_PAGE_LOADING](state, pageLoading);
-
-      expect(state.pageLoading).toBe(pageLoading);
     });
   });
 });

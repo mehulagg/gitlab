@@ -29,6 +29,10 @@ module TestEnv
     'gitattributes'                      => '5a62481',
     'expand-collapse-diffs'              => '4842455',
     'symlink-expand-diff'                => '81e6355',
+    'diff-files-symlink-to-image'        => '8cfca84',
+    'diff-files-image-to-symlink'        => '3e94fda',
+    'diff-files-symlink-to-text'         => '689815e',
+    'diff-files-text-to-symlink'         => '5e2c270',
     'expand-collapse-files'              => '025db92',
     'expand-collapse-lines'              => '238e82d',
     'pages-deploy'                       => '7897d5b',
@@ -72,7 +76,7 @@ module TestEnv
     'png-lfs'                            => 'fe42f41',
     'sha-starting-with-large-number'     => '8426165',
     'invalid-utf8-diff-paths'            => '99e4853',
-    'compare-with-merge-head-source'     => 'b5f4399',
+    'compare-with-merge-head-source'     => 'f20a03d',
     'compare-with-merge-head-target'     => '2f1e176'
   }.freeze
 
@@ -164,9 +168,15 @@ module TestEnv
       version: Gitlab::GitalyClient.expected_server_version,
       task: "gitlab:gitaly:install[#{install_gitaly_args}]") do
         Gitlab::SetupHelper::Gitaly.create_configuration(gitaly_dir, { 'default' => repos_path }, force: true)
+        Gitlab::SetupHelper::Gitaly.create_configuration(
+          gitaly_dir,
+          { 'default' => repos_path }, force: true,
+          options: { gitaly_socket: "gitaly2.socket", config_filename: "gitaly2.config.toml" }
+        )
         Gitlab::SetupHelper::Praefect.create_configuration(gitaly_dir, { 'praefect' => repos_path }, force: true)
-        start_gitaly(gitaly_dir)
       end
+
+    start_gitaly(gitaly_dir)
   end
 
   def gitaly_socket_path
@@ -193,10 +203,13 @@ module TestEnv
     end
 
     gitaly_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly.pid')))
+    gitaly2_pid = Integer(File.read(TMP_TEST_PATH.join('gitaly2.pid')))
     praefect_pid = Integer(File.read(TMP_TEST_PATH.join('praefect.pid')))
 
-    Kernel.at_exit { stop(gitaly_pid) }
-    Kernel.at_exit { stop(praefect_pid) }
+    Kernel.at_exit do
+      pids = [gitaly_pid, gitaly2_pid, praefect_pid]
+      pids.each { |pid| stop(pid) }
+    end
 
     wait('gitaly')
     wait('praefect')
@@ -236,34 +249,64 @@ module TestEnv
   end
 
   def setup_workhorse
-    install_workhorse_args = [workhorse_dir, workhorse_url].compact.join(',')
+    start = Time.now
+    return if skip_compile_workhorse?
 
-    component_timed_setup(
-      'GitLab Workhorse',
-      install_dir: workhorse_dir,
-      version: Gitlab::Workhorse.version,
-      task: "gitlab:workhorse:install[#{install_workhorse_args}]"
-    )
+    puts "\n==> Setting up GitLab Workhorse..."
+
+    FileUtils.rm_rf(workhorse_dir)
+    Gitlab::SetupHelper::Workhorse.compile_into(workhorse_dir)
+    Gitlab::SetupHelper::Workhorse.create_configuration(workhorse_dir, nil)
+
+    File.write(workhorse_tree_file, workhorse_tree) if workhorse_source_clean?
+
+    puts "    GitLab Workhorse set up in #{Time.now - start} seconds...\n"
+  end
+
+  def skip_compile_workhorse?
+    File.directory?(workhorse_dir) &&
+      workhorse_source_clean? &&
+      File.exist?(workhorse_tree_file) &&
+      workhorse_tree == File.read(workhorse_tree_file)
+  end
+
+  def workhorse_source_clean?
+    out = IO.popen(%w[git status --porcelain workhorse], &:read)
+    $?.success? && out.empty?
+  end
+
+  def workhorse_tree
+    IO.popen(%w[git rev-parse HEAD:workhorse], &:read)
+  end
+
+  def workhorse_tree_file
+    File.join(workhorse_dir, 'WORKHORSE_TREE')
   end
 
   def workhorse_dir
     @workhorse_path ||= File.join('tmp', 'tests', 'gitlab-workhorse')
   end
 
-  def with_workhorse(workhorse_dir, host, port, upstream, &blk)
+  def with_workhorse(host, port, upstream, &blk)
     host = "[#{host}]" if host.include?(':')
     listen_addr = [host, port].join(':')
 
+    config_path = Gitlab::SetupHelper::Workhorse.get_config_path(workhorse_dir, {})
+
+    # This should be set up in setup_workhorse, but since
+    # component_needs_update? only checks that versions are consistent,
+    # we need to ensure the config file exists. This line can be removed
+    # later after a new Workhorse version is updated.
+    Gitlab::SetupHelper::Workhorse.create_configuration(workhorse_dir, nil) unless File.exist?(config_path)
+
     workhorse_pid = spawn(
+      { 'PATH' => "#{ENV['PATH']}:#{workhorse_dir}" },
       File.join(workhorse_dir, 'gitlab-workhorse'),
       '-authSocket', upstream,
       '-documentRoot', Rails.root.join('public').to_s,
       '-listenAddr', listen_addr,
       '-secretPath', Gitlab::Workhorse.secret_path.to_s,
-      # TODO: Needed for workhorse + redis features.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/209245
-      #
-      # '-config', '',
+      '-config', config_path,
       '-logFile', 'log/workhorse-test.log',
       '-logFormat', 'structured',
       '-developmentMode' # to serve assets and rich error messages
@@ -459,7 +502,6 @@ module TestEnv
   end
 
   def component_timed_setup(component, install_dir:, version:, task:)
-    puts "\n==> Setting up #{component}..."
     start = Time.now
 
     ensure_component_dir_name_is_correct!(component, install_dir)
@@ -468,22 +510,22 @@ module TestEnv
     return if File.exist?(install_dir) && ci?
 
     if component_needs_update?(install_dir, version)
+      puts "\n==> Setting up #{component}..."
       # Cleanup the component entirely to ensure we start fresh
       FileUtils.rm_rf(install_dir)
 
       unless system('rake', task)
         raise ComponentFailedToInstallError
       end
+
+      yield if block_given?
+
+      puts "    #{component} set up in #{Time.now - start} seconds...\n"
     end
-
-    yield if block_given?
-
   rescue ComponentFailedToInstallError
     puts "\n#{component} failed to install, cleaning up #{install_dir}!\n"
     FileUtils.rm_rf(install_dir)
     exit 1
-  ensure
-    puts "    #{component} set up in #{Time.now - start} seconds...\n"
   end
 
   def ci?
@@ -504,6 +546,10 @@ module TestEnv
     # Allow local overrides of the component for tests during development
     return false if Rails.env.test? && File.symlink?(component_folder)
 
+    return false if component_matches_git_sha?(component_folder, expected_version)
+
+    return false if component_ahead_of_target?(component_folder, expected_version)
+
     version = File.read(File.join(component_folder, 'VERSION')).strip
 
     # Notice that this will always yield true when using branch versions
@@ -512,6 +558,30 @@ module TestEnv
     version != expected_version
   rescue Errno::ENOENT
     true
+  end
+
+  def component_ahead_of_target?(component_folder, expected_version)
+    # The HEAD of the component_folder will be used as heuristic for the version
+    # of the binaries, allowing to use Git to determine if HEAD is later than
+    # the expected version. Note: Git considers HEAD to be an anchestor of HEAD.
+    _out, exit_status = Gitlab::Popen.popen(%W[
+      #{Gitlab.config.git.bin_path}
+      -C #{component_folder}
+      merge-base --is-ancestor
+      #{expected_version} HEAD
+])
+
+    exit_status == 0
+  end
+
+  def component_matches_git_sha?(component_folder, expected_version)
+    # Not a git SHA, so return early
+    return false unless expected_version =~ ::Gitlab::Git::COMMIT_ID
+
+    sha, exit_status = Gitlab::Popen.popen(%W(#{Gitlab.config.git.bin_path} rev-parse HEAD), component_folder)
+    return false if exit_status != 0
+
+    expected_version == sha.chomp
   end
 end
 

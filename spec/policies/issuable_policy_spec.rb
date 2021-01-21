@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuablePolicy, models: true do
+RSpec.describe IssuablePolicy, models: true do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public) }
   let(:issue) { create(:issue, project: project) }
@@ -40,8 +40,8 @@ describe IssuablePolicy, models: true do
       let(:issue) { create(:issue, project: project, discussion_locked: true) }
 
       context 'when the user is not a project member' do
-        it 'can not create a note' do
-          expect(policies).to be_disallowed(:create_note)
+        it 'can not create a note nor award emojis' do
+          expect(policies).to be_disallowed(:create_note, :award_emoji)
         end
       end
 
@@ -50,8 +50,8 @@ describe IssuablePolicy, models: true do
           project.add_guest(user)
         end
 
-        it 'can create a note' do
-          expect(policies).to be_allowed(:create_note)
+        it 'can create a note and award emojis' do
+          expect(policies).to be_allowed(:create_note, :award_emoji)
         end
       end
     end

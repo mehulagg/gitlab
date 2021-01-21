@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import {
   isStartEvent,
   isLabelEvent,
@@ -9,7 +8,6 @@ import {
   getLabelEventsIdentifiers,
   flattenDurationChartData,
   getDurationChartData,
-  getDurationChartMedianData,
   transformRawStages,
   isPersistedStage,
   getTasksByTypeData,
@@ -17,18 +15,19 @@ import {
   orderByDate,
   toggleSelectedLabel,
   transformStagesForPathNavigation,
+  prepareTimeMetricsData,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
+import { getDatesInRange } from '~/lib/utils/datetime_utility';
+import { slugify } from '~/lib/utils/text_utility';
 import {
   customStageEvents as events,
   customStageLabelEvents as labelEvents,
   labelStartEvent,
   customStageStartEvents as startEvents,
   transformedDurationData,
-  transformedDurationMedianData,
   flattenedDurationData,
   durationChartPlottableData,
-  durationChartPlottableMedianData,
   startDate,
   endDate,
   issueStage,
@@ -36,14 +35,13 @@ import {
   rawTasksByTypeData,
   allowedStages,
   stageMediansWithNumericIds,
-  totalStage,
   pathNavIssueMetric,
+  timeMetricsData,
 } from './mock_data';
-import { CAPITALIZED_STAGE_NAME, PATH_HOME_ICON } from 'ee/analytics/cycle_analytics/constants';
 
-const labelEventIds = labelEvents.map(ev => ev.identifier);
+const labelEventIds = labelEvents.map((ev) => ev.identifier);
 
-describe('Cycle analytics utils', () => {
+describe('Value Stream Analytics utils', () => {
   describe('isStartEvent', () => {
     it('will return true for a valid start event', () => {
       expect(isStartEvent(startEvents[0])).toEqual(true);
@@ -51,7 +49,7 @@ describe('Cycle analytics utils', () => {
 
     it('will return false for input that is not a start event', () => {
       [{ identifier: 'fake-event', canBeStartEvent: false }, {}, [], null, undefined].forEach(
-        ev => {
+        (ev) => {
           expect(isStartEvent(ev)).toEqual(false);
         },
       );
@@ -64,7 +62,7 @@ describe('Cycle analytics utils', () => {
     });
 
     it('will return false if the given event identifier is not in the labelEvents array', () => {
-      [startEvents[1].identifier, null, undefined, ''].forEach(ev => {
+      [startEvents[1].identifier, null, undefined, ''].forEach((ev) => {
         expect(isLabelEvent(labelEventIds, ev)).toEqual(false);
       });
       expect(isLabelEvent(labelEventIds)).toEqual(false);
@@ -73,20 +71,20 @@ describe('Cycle analytics utils', () => {
 
   describe('eventToOption', () => {
     it('will return null if no valid object is passed in', () => {
-      [{}, [], null, undefined].forEach(i => {
+      [{}, [], null, undefined].forEach((i) => {
         expect(eventToOption(i)).toEqual(null);
       });
     });
 
     it('will set the "value" property to the events identifier', () => {
-      events.forEach(ev => {
+      events.forEach((ev) => {
         const res = eventToOption(ev);
         expect(res.value).toEqual(ev.identifier);
       });
     });
 
     it('will set the "text" property to the events name', () => {
-      events.forEach(ev => {
+      events.forEach((ev) => {
         const res = eventToOption(ev);
         expect(res.text).toEqual(ev.name);
       });
@@ -113,7 +111,7 @@ describe('Cycle analytics utils', () => {
     });
 
     it('will return an empty array if there are no end events available', () => {
-      ['cool_issue_label_added', [], {}, null, undefined].forEach(ev => {
+      ['cool_issue_label_added', [], {}, null, undefined].forEach((ev) => {
         expect(getAllowedEndEvents(events, ev)).toEqual([]);
       });
     });
@@ -125,7 +123,7 @@ describe('Cycle analytics utils', () => {
     });
 
     it('will return an empty array if there are no matching events', () => {
-      [['lol', 'bad'], [], {}, null, undefined].forEach(items => {
+      [['lol', 'bad'], [], {}, null, undefined].forEach((items) => {
         expect(eventsByIdentifier(events, items)).toEqual([]);
       });
       expect(eventsByIdentifier([], labelEvents)).toEqual([]);
@@ -148,18 +146,6 @@ describe('Cycle analytics utils', () => {
     });
   });
 
-  describe('getDurationChartMedianData', () => {
-    it('computes the plottable data as expected', () => {
-      const plottableData = getDurationChartMedianData(
-        transformedDurationMedianData,
-        startDate,
-        endDate,
-      );
-
-      expect(plottableData).toStrictEqual(durationChartPlottableMedianData);
-    });
-  });
-
   describe('transformRawStages', () => {
     it('retains all the stage properties', () => {
       const transformed = transformRawStages([issueStage, rawCustomStage]);
@@ -176,14 +162,14 @@ describe('Cycle analytics utils', () => {
 
     it('sets the slug to the value of the stage id', () => {
       const transformed = transformRawStages([issueStage, rawCustomStage]);
-      transformed.forEach(t => {
+      transformed.forEach((t) => {
         expect(t.slug).toEqual(t.id);
       });
     });
 
     it('sets the name to the value of the stage title if its not set', () => {
       const transformed = transformRawStages([issueStage, rawCustomStage]);
-      transformed.forEach(t => {
+      transformed.forEach((t) => {
         expect(t.name.length > 0).toBe(true);
         expect(t.name).toEqual(t.title);
       });
@@ -218,7 +204,7 @@ describe('Cycle analytics utils', () => {
 
     it('extracts the value from an array of datetime / value pairs', () => {
       expect(transformedDummySeries.every(isNumber)).toEqual(true);
-      Object.values(dummySeries).forEach(v => {
+      Object.values(dummySeries).forEach((v) => {
         expect(transformedDummySeries.includes(v)).toBeTruthy();
       });
     });
@@ -241,21 +227,26 @@ describe('Cycle analytics utils', () => {
 
   describe('getTasksByTypeData', () => {
     let transformed = {};
-
     const groupBy = getDatesInRange(startDate, endDate, toYmd);
     // only return the values, drop the date which is the first paramater
-    const extractSeriesValues = ({ series }) => series.map(kv => kv[1]);
+    const extractSeriesValues = ({ label: { title: name }, series }) => {
+      return {
+        name,
+        data: series.map((kv) => kv[1]),
+      };
+    };
+
     const data = rawTasksByTypeData.map(extractSeriesValues);
 
-    const labels = rawTasksByTypeData.map(d => {
+    const labels = rawTasksByTypeData.map((d) => {
       const { label } = d;
       return label.title;
     });
 
     it('will return blank arrays if given no data', () => {
-      [{ data: [], startDate, endDate }, [], {}].forEach(chartData => {
+      [{ data: [], startDate, endDate }, [], {}].forEach((chartData) => {
         transformed = getTasksByTypeData(chartData);
-        ['seriesNames', 'data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach((key) => {
           expect(transformed[key]).toEqual([]);
         });
       });
@@ -267,14 +258,8 @@ describe('Cycle analytics utils', () => {
       });
 
       it('will return an object with the properties needed for the chart', () => {
-        ['seriesNames', 'data', 'groupBy'].forEach(key => {
+        ['data', 'groupBy'].forEach((key) => {
           expect(transformed).toHaveProperty(key);
-        });
-      });
-
-      describe('seriesNames', () => {
-        it('returns the names of all the labels in the dataset', () => {
-          expect(transformed.seriesNames).toEqual(labels);
         });
       });
 
@@ -302,8 +287,8 @@ describe('Cycle analytics utils', () => {
         });
 
         it('contains a value for each day in the groupBy', () => {
-          transformed.data.forEach(d => {
-            expect(d).toHaveLength(transformed.groupBy.length);
+          transformed.data.forEach((d) => {
+            expect(d.data).toHaveLength(transformed.groupBy.length);
           });
         });
       });
@@ -320,13 +305,14 @@ describe('Cycle analytics utils', () => {
     it('will remove an id that exists', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 2 })).toEqual([1, 3]);
     });
+
     it('will add an id that does not exist', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 4 })).toEqual([1, 2, 3, 4]);
     });
   });
 
   describe('transformStagesForPathNavigation', () => {
-    const stages = [...allowedStages, totalStage];
+    const stages = allowedStages;
     const response = transformStagesForPathNavigation({
       stages,
       medians: stageMediansWithNumericIds,
@@ -340,32 +326,44 @@ describe('Cycle analytics utils', () => {
       });
 
       it('selects the correct stage', () => {
-        const selected = response.filter(stage => stage.selected === true)[0];
+        const selected = response.filter((stage) => stage.selected === true)[0];
 
         expect(selected.title).toEqual(issueStage.title);
       });
 
       it('includes the correct metric for the associated stage', () => {
-        const issue = response.filter(stage => stage.name === 'Issue')[0];
+        const issue = response.filter((stage) => stage.name === 'Issue')[0];
 
         expect(issue.metric).toEqual(pathNavIssueMetric);
       });
+    });
+  });
 
-      describe(`${CAPITALIZED_STAGE_NAME.OVERVIEW} stage specific changes`, () => {
-        const overview = response.filter(stage => stage.name === CAPITALIZED_STAGE_NAME.TOTAL)[0];
+  describe('prepareTimeMetricsData', () => {
+    let prepared;
+    const [{ title: firstTitle }, { title: secondTitle }] = timeMetricsData;
+    const firstKey = slugify(firstTitle);
+    const secondKey = slugify(secondTitle);
 
-        it(`renames '${CAPITALIZED_STAGE_NAME.TOTAL}' stage title to '${CAPITALIZED_STAGE_NAME.OVERVIEW}'`, () => {
-          expect(overview.title).toEqual(CAPITALIZED_STAGE_NAME.OVERVIEW);
-        });
-
-        it('includes the correct icon', () => {
-          expect(overview.icon).toEqual(PATH_HOME_ICON);
-        });
-
-        it(`moves the stage to the front`, () => {
-          expect(response[0]).toEqual(overview);
-        });
+    beforeEach(() => {
+      prepared = prepareTimeMetricsData(timeMetricsData, {
+        [firstKey]: 'Is a value that is good',
       });
+    });
+
+    it('will add a `key` based on the title', () => {
+      expect(prepared).toMatchObject([{ key: firstKey }, { key: secondKey }]);
+    });
+
+    it('will add a `label` key', () => {
+      expect(prepared).toMatchObject([{ label: 'Lead Time' }, { label: 'Cycle Time' }]);
+    });
+
+    it('will add a tooltip text using the key if it is provided', () => {
+      expect(prepared).toMatchObject([
+        { tooltipText: 'Is a value that is good' },
+        { tooltipText: '' },
+      ]);
     });
   });
 });

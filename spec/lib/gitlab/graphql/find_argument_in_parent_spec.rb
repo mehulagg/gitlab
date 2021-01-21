@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Graphql::FindArgumentInParent do
+RSpec.describe Gitlab::Graphql::FindArgumentInParent do
   describe '#find' do
     def build_node(parent = nil, args: {})
       props = { irep_node: double(arguments: args) }
@@ -21,6 +21,7 @@ describe Gitlab::Graphql::FindArgumentInParent do
         )
       )
     end
+
     let(:arg_name) { :my_arg }
 
     it 'searches parents and returns the argument' do

@@ -32,6 +32,7 @@ RSpec.describe Epics::UpdateDatesService do
           group: group
         )
       end
+
       let(:milestone2) do
         create(
           :milestone,
@@ -69,6 +70,7 @@ RSpec.describe Epics::UpdateDatesService do
               group: group
             )
           end
+
           let(:milestone2) do
             create(
               :milestone,
@@ -96,6 +98,7 @@ RSpec.describe Epics::UpdateDatesService do
               group: group
             )
           end
+
           let(:milestone2) do
             create(
               :milestone,

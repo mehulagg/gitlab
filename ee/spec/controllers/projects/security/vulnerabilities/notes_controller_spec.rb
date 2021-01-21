@@ -40,18 +40,6 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
       expect(json_response['notes']).to be_an Array
       expect(json_response['notes'].pluck('id')).to eq([note.id.to_s])
     end
-
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(first_class_vulnerabilities: false)
-      end
-
-      it 'renders the 404 page' do
-        view_all_notes
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
   end
 
   describe 'POST create' do

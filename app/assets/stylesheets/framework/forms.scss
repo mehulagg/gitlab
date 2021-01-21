@@ -4,6 +4,8 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
@@ -126,20 +128,11 @@ label {
   display: inline;
 }
 
-.wiki-content {
-  margin-top: 35px;
-}
-
 .form-control::placeholder {
   color: $gl-text-color-tertiary;
 }
 
 .input-group {
-  .select2-container {
-    display: table-cell;
-    max-width: 180px;
-  }
-
   .input-group-prepend,
   .input-group-append {
     background-color: $input-group-addon-bg;
@@ -215,21 +208,12 @@ label {
   position: relative;
 }
 
-.select-wrapper > .fa-chevron-down {
-  position: absolute;
-  font-size: 10px;
-  right: 10px;
-  top: 12px;
-  color: $gray-darkest;
-  pointer-events: none;
-}
-
 .input-icon-wrapper > .input-icon-right {
   position: absolute;
   right: 0.8em;
   top: 50%;
   transform: translateY(-50%);
-  color: $gray-600;
+  color: $gray-400;
 }
 
 .input-md {

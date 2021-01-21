@@ -3,8 +3,8 @@
  * and returns an array of the following form:
  * [{ key: "forks", label: "Forks", value: 50 }]
  */
-export const getStatistics = state => labels =>
-  Object.keys(labels).map(key => {
+export const getStatistics = (state) => (labels) =>
+  Object.keys(labels).map((key) => {
     const result = {
       key,
       label: labels[key],
@@ -12,6 +12,3 @@ export const getStatistics = state => labels =>
     };
     return result;
   });
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

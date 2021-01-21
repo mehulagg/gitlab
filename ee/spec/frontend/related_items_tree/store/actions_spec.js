@@ -1,20 +1,20 @@
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
-import createDefaultState from 'ee/related_items_tree/store/state';
+import { ChildType, ChildState } from 'ee/related_items_tree/constants';
 import * as actions from 'ee/related_items_tree/store/actions';
 import * as types from 'ee/related_items_tree/store/mutation_types';
+import createDefaultState from 'ee/related_items_tree/store/state';
 
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { ChildType, ChildState } from 'ee/related_items_tree/constants';
+
+import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'spec/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   PathIdSeparator,
-} from 'ee/related_issues/constants';
-
-import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
-import { TEST_HOST } from 'spec/test_constants';
+} from '~/related_issues/constants';
 
 import {
   mockInitialConfig,
@@ -40,7 +40,7 @@ describe('RelatedItemTree', () => {
   describe('store', () => {
     describe('actions', () => {
       let state;
-      const mockItems = mockEpics.map(item =>
+      const mockItems = mockEpics.map((item) =>
         epicUtils.formatChildItem(Object.assign(item, { type: ChildType.Epic })),
       );
 
@@ -101,9 +101,9 @@ describe('RelatedItemTree', () => {
       });
 
       describe('updateChildrenCount', () => {
-        const mockEpicsWithType = mockEpics.map(item => ({ ...item, type: ChildType.Epic }));
+        const mockEpicsWithType = mockEpics.map((item) => ({ ...item, type: ChildType.Epic }));
 
-        const mockIssuesWithType = mockIssues.map(item => ({ ...item, type: ChildType.Issue }));
+        const mockIssuesWithType = mockIssues.map((item) => ({ ...item, type: ChildType.Issue }));
 
         it('should update openedEpics, by incrementing it', () => {
           testAction(
@@ -826,7 +826,7 @@ describe('RelatedItemTree', () => {
           state.issuableType = issuableTypesMap.EPIC;
           state.isEpic = true;
 
-          const mockEpicsWithoutPerm = mockEpics.map(item => ({
+          const mockEpicsWithoutPerm = mockEpics.map((item) => ({
             ...item,
             pathIdSeparator: PathIdSeparator.Epic,
             userPermissions: { adminEpic: undefined },
@@ -1080,6 +1080,14 @@ describe('RelatedItemTree', () => {
                 type: 'receiveCreateItemSuccess',
                 payload: {
                   rawItem: { ...mockEpic1, path: '', state: ChildState.Open, created_at: '' },
+                },
+              },
+              {
+                type: 'fetchItems',
+                payload: {
+                  parentItem: {
+                    ...mockParentItem,
+                  },
                 },
               },
             ],
@@ -1503,7 +1511,7 @@ describe('RelatedItemTree', () => {
 
         beforeEach(() => {
           requestSpy = jest.fn();
-          axiosMock.onPost(issuesEndpoint).replyOnce(config => requestSpy(config));
+          axiosMock.onPost(issuesEndpoint).replyOnce((config) => requestSpy(config));
 
           context = {
             state: {
@@ -1543,7 +1551,7 @@ describe('RelatedItemTree', () => {
             requestSpy.mockReturnValue([500, '']);
           });
 
-          it('fails and shows flash message', done => {
+          it('fails and shows flash message', (done) => {
             return actions
               .createNewIssue(context, payload)
               .then(() => done.fail('expected action to throw error!'))

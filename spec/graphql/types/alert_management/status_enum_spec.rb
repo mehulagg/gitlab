@@ -2,17 +2,17 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['AlertManagementStatus'] do
+RSpec.describe GitlabSchema.types['AlertManagementStatus'] do
   specify { expect(described_class.graphql_name).to eq('AlertManagementStatus') }
 
   describe 'statuses' do
     using RSpec::Parameterized::TableSyntax
 
     where(:status_name, :status_value) do
-      'TRIGGERED'    | 0
-      'ACKNOWLEDGED' | 1
-      'RESOLVED'     | 2
-      'IGNORED'      | 3
+      'TRIGGERED'    | :triggered
+      'ACKNOWLEDGED' | :acknowledged
+      'RESOLVED'     | :resolved
+      'IGNORED'      | :ignored
     end
 
     with_them do

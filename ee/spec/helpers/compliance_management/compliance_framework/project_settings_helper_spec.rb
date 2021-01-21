@@ -6,11 +6,23 @@ RSpec.describe ComplianceManagement::ComplianceFramework::ProjectSettingsHelper 
   describe '#compliance_framework_options' do
     it 'has all the options' do
       expect(helper.compliance_framework_options).to contain_exactly(
-        ['GDPR - General Data Protection Regulation', 'gdpr'],
-        ['HIPAA - Health Insurance Portability and Accountability Act', 'hipaa'],
-        ['PCI-DSS - Payment Card Industry-Data Security Standard', 'pci_dss'],
-        ['SOC 2 - Service Organization Control 2', 'soc_2'],
-        ['SOX - Sarbanes-Oxley', 'sox']
+        ['GDPR - General Data Protection Regulation', :gdpr],
+        ['HIPAA - Health Insurance Portability and Accountability Act', :hipaa],
+        ['PCI-DSS - Payment Card Industry-Data Security Standard', :pci_dss],
+        ['SOC 2 - Service Organization Control 2', :soc_2],
+        ['SOX - Sarbanes-Oxley', :sox]
+      )
+    end
+  end
+
+  describe '#compliance_framework_checkboxes' do
+    it 'has all the checkboxes' do
+      expect(helper.compliance_framework_checkboxes).to contain_exactly(
+        [1, 'GDPR'],
+        [2, 'HIPAA'],
+        [3, 'PCI-DSS'],
+        [4, 'SOC 2'],
+        [5, 'SOX']
       )
     end
   end

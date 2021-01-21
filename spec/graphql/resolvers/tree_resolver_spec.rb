@@ -2,10 +2,14 @@
 
 require 'spec_helper'
 
-describe Resolvers::TreeResolver do
+RSpec.describe Resolvers::TreeResolver do
   include GraphqlHelpers
 
   let(:repository) { create(:project, :repository).repository }
+
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::Tree::TreeType)
+  end
 
   describe '#resolve' do
     it 'resolves to a tree' do

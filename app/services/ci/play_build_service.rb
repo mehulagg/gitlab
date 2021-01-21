@@ -3,7 +3,9 @@
 module Ci
   class PlayBuildService < ::BaseService
     def execute(build, job_variables_attributes = nil)
-      unless can?(current_user, :update_build, build)
+      raise Gitlab::Access::AccessDeniedError unless can?(current_user, :play_job, build)
+
+      if job_variables_attributes.present? && !can?(current_user, :set_pipeline_variables, project)
         raise Gitlab::Access::AccessDeniedError
       end
 

@@ -1,14 +1,14 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
 # Geo nodes Admin Area **(PREMIUM ONLY)**
 
 You can configure various settings for GitLab Geo nodes. For more information, see
-[Geo documentation](../../administration/geo/replication/index.md).
+[Geo documentation](../../administration/geo/index.md).
 
 On the primary node, go to **Admin Area > Geo**. On secondary nodes, go to **Admin Area > Geo > Nodes**.
 
@@ -64,7 +64,7 @@ which is used by users. Internal URL does not need to be a private address.
 Internal URL defaults to External URL, but you can customize it under
 **Admin Area > Geo > Nodes**.
 
-CAUTION: **Warning:**
+WARNING:
 We recommend using an HTTPS connection while configuring the Geo nodes. To avoid
 breaking communication between **primary** and **secondary** nodes when using
 HTTPS, customize your Internal URL to point to a load balancer with TLS

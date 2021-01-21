@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlDropdown,
   GlDropdownItem,
   GlFormInput,
@@ -16,7 +16,7 @@ import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownItem,
     GlFormInput,
@@ -29,11 +29,10 @@ export default {
       selectedProject: null,
       searchKey: '',
       title: '',
-      preventDropdownClose: false,
     };
   },
   computed: {
-    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects']),
+    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects', 'parentItem']),
     dropdownToggleText() {
       if (this.selectedProject) {
         return this.selectedProject.name_with_namespace;
@@ -83,32 +82,6 @@ export default {
       this.searchKey = '';
       this.fetchProjects();
     },
-    handleDropdownHide(e) {
-      // Check if dropdown closure is to be prevented.
-      if (this.preventDropdownClose) {
-        e.preventDefault();
-        this.preventDropdownClose = false;
-      }
-    },
-    /**
-     * As GlDropdown can get closed if any item within
-     * it is clicked, we have to work around that behaviour
-     * by preventing dropdown close if user has clicked
-     * clear button on search input field. This hack
-     * won't be required once we add support for
-     * `BDropdownForm` https://bootstrap-vue.js.org/docs/components/dropdown#b-dropdown-form
-     * within GitLab UI.
-     */
-    handleSearchInputContainerClick({ target }) {
-      // Check if clicked target was an icon.
-      if (
-        target?.classList.contains('gl-icon') ||
-        target?.getAttribute('href')?.includes('clear')
-      ) {
-        // Enable flag to prevent dropdown close.
-        this.preventDropdownClose = true;
-      }
-    },
   },
 };
 </script>
@@ -121,7 +94,9 @@ export default {
         <gl-form-input
           ref="titleInput"
           v-model.trim="title"
-          :placeholder="__('New issue title')"
+          :placeholder="
+            parentItem.confidential ? __('New confidential issue title') : __('New issue title')
+          "
           autofocus
         />
       </div>
@@ -130,37 +105,35 @@ export default {
         <gl-dropdown
           ref="dropdownButton"
           :text="dropdownToggleText"
-          class="w-100 projects-dropdown"
-          menu-class="w-100 overflow-hidden"
-          toggle-class="d-flex align-items-center justify-content-between text-truncate"
+          class="gl-w-full projects-dropdown"
+          menu-class="gl-w-full! gl-overflow-hidden!"
+          toggle-class="gl-display-flex gl-align-items-center gl-justify-content-between gl-text-truncate"
           @show="handleDropdownShow"
-          @hide="handleDropdownHide"
         >
-          <div class="mx-2 mb-1" @click="handleSearchInputContainerClick">
-            <gl-search-box-by-type
-              ref="searchInputField"
-              v-model="searchKey"
-              :disabled="projectsFetchInProgress"
-            />
-          </div>
+          <gl-search-box-by-type
+            ref="searchInputField"
+            v-model="searchKey"
+            class="gl-mx-3 gl-mb-2"
+            :disabled="projectsFetchInProgress"
+          />
           <gl-loading-icon
             v-show="projectsFetchInProgress"
-            class="projects-fetch-loading align-items-center p-2"
+            class="projects-fetch-loading gl-align-items-center gl-p-3"
             size="md"
           />
-          <div v-if="!projectsFetchInProgress" class="dropdown-contents overflow-auto p-1">
-            <span v-if="!projects.length" class="d-block text-center p-2">{{
+          <div v-if="!projectsFetchInProgress" class="dropdown-contents gl-overflow-auto gl-p-2">
+            <span v-if="!projects.length" class="gl-display-block text-center gl-p-3">{{
               __('No matches found')
             }}</span>
             <gl-dropdown-item
               v-for="project in projects"
               :key="project.id"
-              class="w-100"
+              class="gl-w-full"
+              :secondary-text="project.namespace.name"
               @click="selectedProject = project"
             >
               <project-avatar :project="project" :size="32" />
               {{ project.name }}
-              <div class="text-secondary">{{ project.namespace.name }}</div>
             </gl-dropdown-item>
           </div>
         </gl-dropdown>
@@ -169,19 +142,18 @@ export default {
 
     <div class="row my-1">
       <div class="col-sm flex-sm-grow-0 mb-2 mb-sm-0">
-        <gl-deprecated-button
+        <gl-button
           class="w-100"
           variant="success"
+          category="primary"
           :disabled="!selectedProject || itemCreateInProgress"
           :loading="itemCreateInProgress"
           @click="createIssue"
-          >{{ __('Create issue') }}</gl-deprecated-button
+          >{{ __('Create issue') }}</gl-button
         >
       </div>
       <div class="col-sm flex-sm-grow-0 ml-auto">
-        <gl-deprecated-button class="w-100" @click="cancel">{{
-          __('Cancel')
-        }}</gl-deprecated-button>
+        <gl-button class="w-100" @click="cancel">{{ __('Cancel') }}</gl-button>
       </div>
     </div>
   </div>

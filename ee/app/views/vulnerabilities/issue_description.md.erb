@@ -1,3 +1,7 @@
+<% if vulnerability.is_a? Vulnerability %>
+<%= _("Issue created from vulnerability %{vulnerability_link}".html_safe) % { vulnerability_link: link_to(vulnerability.id, vulnerability_url(vulnerability)) } %>
+
+<% end %>
 ### <%= _("Description") %>:
 
 <%= vulnerability.description %>
@@ -8,17 +12,17 @@
 <% if vulnerability.confidence.present? %>
 * <%= _("Confidence") %>: <%= vulnerability.confidence %>
 <% end %>
-<% if defined?(vulnerability.file) && vulnerability.file.present? %>
+<% if vulnerability.try(:file) %>
 * <%= _("Location") %>: [<%= vulnerability.location_text %>](<%= vulnerability.location_link %>)
 <% end %>
-
 <% if vulnerability.solution.present? %>
+
 ### <%= _("Solution") %>:
 
 <%= vulnerability.solution %>
 <% end %>
-
 <% if vulnerability.identifiers.present? %>
+
 ### <%= _("Identifiers") %>:
 
 <% vulnerability.identifiers.each do |identifier| %>
@@ -29,8 +33,8 @@
 <% end %>
 <% end %>
 <% end %>
-
 <% if vulnerability.links.present? %>
+
 ### <%= _("Links") %>:
 
 <% vulnerability.links.each do |link| %>
@@ -41,8 +45,8 @@
 <% end %>
 <% end %>
 <% end %>
+<% if vulnerability.remediations.present? && vulnerability.remediations.any? %>
 
-<% if vulnerability.remediations.present? %>
 ### <%= _("Remediations") %>:
 
 <% vulnerability.remediations.each do |remediation| %>
@@ -54,5 +58,27 @@
   ```
 
   </details>
+<% end %>
+<% end %>
+<% if vulnerability.scanner.present? || vulnerability.scan.present? %>
+
+### <%= _("Scanner") %>:
+
+<% if vulnerability.scanner.present? %>
+* <%= _("Name") %>: <%= vulnerability.scanner[:name] %>
+<% end %>
+<% if vulnerability.scan.present? %>
+<% if vulnerability.scan[:type].present? %>
+* <%= _("Type") %>: <%= vulnerability.scan[:type] %>
+<% end %>
+<% if vulnerability.scan[:status].present? %>
+* <%= _("Status") %>: <%= vulnerability.scan[:status] %>
+<% end %>
+<% if vulnerability.scan[:start_time].present? %>
+* <%= _("Start Time") %>: <%= vulnerability.scan[:start_time] %>
+<% end %>
+<% if vulnerability.scan[:end_time].present? %>
+* <%= _("End Time") %>: <%= vulnerability.scan[:end_time] %>
+<% end %>
 <% end %>
 <% end %>

@@ -4,27 +4,26 @@ module Gitlab
   module InstrumentationHelper
     extend self
 
-    KEYS = %i(
-      gitaly_calls
-      gitaly_duration_s
-      rugged_calls
-      rugged_duration_s
-      redis_calls
-      redis_duration_s
-      redis_read_bytes
-      redis_write_bytes
-      elasticsearch_calls
-      elasticsearch_duration_s
-    ).freeze
-
     DURATION_PRECISION = 6 # microseconds
+
+    def keys
+      @keys ||= [:gitaly_calls,
+                 :gitaly_duration_s,
+                 :rugged_calls,
+                 :rugged_duration_s,
+                 :elasticsearch_calls,
+                 :elasticsearch_duration_s,
+                 *::Gitlab::Instrumentation::Redis.known_payload_keys,
+                 *::Gitlab::Metrics::Subscribers::ActiveRecord::DB_COUNTERS]
+    end
 
     def add_instrumentation_data(payload)
       instrument_gitaly(payload)
       instrument_rugged(payload)
       instrument_redis(payload)
-      instrument_redis_bytes(payload)
       instrument_elasticsearch(payload)
+      instrument_throttle(payload)
+      instrument_active_record(payload)
     end
 
     def instrument_gitaly(payload)
@@ -46,22 +45,7 @@ module Gitlab
     end
 
     def instrument_redis(payload)
-      redis_calls = Gitlab::Instrumentation::Redis.get_request_count
-
-      return if redis_calls == 0
-
-      payload[:redis_calls] = redis_calls
-      payload[:redis_duration_s] = Gitlab::Instrumentation::Redis.query_time
-    end
-
-    def instrument_redis_bytes(payload)
-      redis_read_bytes = Gitlab::Instrumentation::Redis.read_bytes
-      redis_write_bytes = Gitlab::Instrumentation::Redis.write_bytes
-
-      return if redis_read_bytes == 0 && redis_write_bytes == 0
-
-      payload[:redis_read_bytes] = redis_read_bytes
-      payload[:redis_write_bytes] = redis_write_bytes
+      payload.merge! ::Gitlab::Instrumentation::Redis.payload
     end
 
     def instrument_elasticsearch(payload)
@@ -73,6 +57,17 @@ module Gitlab
 
       payload[:elasticsearch_calls] = elasticsearch_calls
       payload[:elasticsearch_duration_s] = Gitlab::Instrumentation::ElasticsearchTransport.query_time
+    end
+
+    def instrument_throttle(payload)
+      safelist = Gitlab::Instrumentation::Throttle.safelist
+      payload[:throttle_safelist] = safelist if safelist.present?
+    end
+
+    def instrument_active_record(payload)
+      db_counters = ::Gitlab::Metrics::Subscribers::ActiveRecord.db_counter_payload
+
+      payload.merge!(db_counters)
     end
 
     # Returns the queuing duration for a Sidekiq job in seconds, as a float, if the

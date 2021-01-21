@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import PipelinesTable from '~/pipelines/components/pipelines_table.vue';
+import PipelinesTable from '~/pipelines/components/pipelines_list/pipelines_table.vue';
 
 describe('Pipelines Table', () => {
   let pipeline;
@@ -24,7 +24,7 @@ describe('Pipelines Table', () => {
 
   beforeEach(() => {
     const { pipelines } = getJSONFixture(jsonFixtureName);
-    pipeline = pipelines.find(p => p.user !== null && p.commit !== null);
+    pipeline = pipelines.find((p) => p.user !== null && p.commit !== null);
 
     createComponent();
   });

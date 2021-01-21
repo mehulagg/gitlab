@@ -1,7 +1,7 @@
 <script>
 import { GlDropdownDivider, GlSegmentedControl, GlIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { removeFlash } from '../../utils';
 import {
   TASKS_BY_TYPE_FILTERS,
@@ -121,7 +121,7 @@ export default {
               :checked="subjectFilter"
               :options="subjectFilterOptions"
               @input="
-                value =>
+                (value) =>
                   $emit('updateFilter', { filter: $options.TASKS_BY_TYPE_FILTERS.SUBJECT, value })
               "
             />

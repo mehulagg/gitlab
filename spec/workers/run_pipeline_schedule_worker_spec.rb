@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RunPipelineScheduleWorker do
+RSpec.describe RunPipelineScheduleWorker do
   describe '#perform' do
     let_it_be(:project) { create(:project) }
     let_it_be(:user) { create(:user) }
@@ -59,7 +59,7 @@ describe RunPipelineScheduleWorker do
       end
 
       it 'logging a pipeline error' do
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:error)
           .with(a_string_matching('ActiveRecord::StatementInvalid'))
           .and_call_original

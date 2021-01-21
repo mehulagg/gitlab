@@ -1,33 +1,33 @@
 ---
-type: tutorial, concepts
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: "How to migrate an existing Git repository to Git LFS with BFG."
-last_updated: 2019-07-11
 ---
 
-# Migrate a Git repo into Git LFS with BFG
+# Migrate a Git repository into Git LFS with BFG
 
 Using Git LFS can help you to reduce the size of your Git
 repository and improve its performance.
 
-However, simply adding the
-large files that are already in your repository to Git LFS,
-will not actually reduce the size of your repository because
+However, simply adding the large files that are already in your repository to Git LFS
+doesn't actually reduce the size of your repository because
 the files are still referenced by previous commits.
 
 Through the method described on this document, first migrate
 to Git LFS with a tool such as the open source community-maintained [BFG](https://rtyley.github.io/bfg-repo-cleaner/)
-through a mirror repo, then clean up the repository's history,
+through a mirror repository, then clean up the repository's history,
 and lastly create LFS tracking rules to prevent new binary files
 from being added.
 
 This tutorial was inspired by the guide
-[Use BFG to migrate a repo to Git LFS](https://confluence.atlassian.com/bitbucket/use-bfg-to-migrate-a-repo-to-git-lfs-834233484.html).
+[Use BFG to migrate a repository to Git LFS](https://support.atlassian.com/bitbucket-cloud/docs/use-bfg-to-migrate-a-repo-to-git-lfs/).
 For more information on Git LFS, see the [references](#references)
 below.
 
-CAUTION: **Warning:**
+WARNING:
 The method described on this guide rewrites Git history. Make
-sure to back up your repo before beginning and use it at your
+sure to back up your repository before beginning and use it at your
 own risk.
 
 ## Requirements
@@ -38,9 +38,8 @@ Before beginning, make sure:
   Storage is required for the entire history of all files.
 - All the team members you share the repository with have pushed all changes.
   Branches based on the repository before applying this method cannot be merged.
-  Branches based on the repo before applying this method cannot be merged.
 
-To follow this tutorial, you'll need:
+To follow this tutorial, you need:
 
 - Maintainer permissions to the existing Git repository
   you'd like to migrate to LFS with access through the command line.
@@ -59,7 +58,7 @@ To follow this tutorial, you'll need:
    brew install git-lfs
    ```
 
-NOTE: **Note:**
+NOTE:
 This guide was tested on macOS Mojave.
 
 ## Steps
@@ -71,10 +70,10 @@ Consider an example upstream project, `git@gitlab.com:gitlab-tests/test-git-lfs-
    Create a copy of your repository so that you can
    recover it in case something goes wrong.
 
-1. Clone `--mirror` the repo:
+1. Clone `--mirror` the repository:
 
-   Cloning with the mirror flag will create a bare repository.
-   This ensures you get all the branches within the repo.
+   Cloning with the mirror flag creates a bare repository.
+   This ensures you get all the branches within the repository.
 
    It creates a directory called `<repo-name>.git`
    (in our example, `test-git-lfs-repo-migration.git`),
@@ -96,13 +95,14 @@ Consider an example upstream project, `git@gitlab.com:gitlab-tests/test-git-lfs-
 1. Clean up the repository:
 
    ```shell
-   # cd path/to/mirror/repo:
+   # Change into the mirror repo directory:
    cd test-git-lfs-repo-migration.git
-   # clean up the repo:
+
+   # Clean up the repo:
    git reflog expire --expire=now --all && git gc --prune=now --aggressive
    ```
 
-   You can also take a look on how to further [clean the repo](../../../user/project/repository/reducing_the_repo_size_using_git.md),
+   You can also take a look on how to further [clean the repository](../../../user/project/repository/reducing_the_repo_size_using_git.md),
    but it's not necessary for the purposes of this guide.
 
 1. Install Git LFS in the mirror repository:
@@ -128,16 +128,27 @@ Consider an example upstream project, `git@gitlab.com:gitlab-tests/test-git-lfs-
 1. Track the files you want with LFS:
 
    ```shell
-   # cd path/to/upstream/repo:
+   # Change into the /tmp directory
+   cd /tmp
+
+   # Clone the repo
+   git clone git@gitlab.com:gitlab-tests/test-git-lfs-repo-migration.git
+
+   # Change into the upstream repo directory:
    cd test-git-lfs-repo-migration
+
    # You may need to reset your local copy with upstream's `master` after force-pushing from the mirror:
    git reset --hard origin/master
+
    # Track the files with LFS:
    git lfs track "*.gif" "*.png" "*.jpg" "*.psd" "*.mp4" "img/"
+
+   # Push up changes to .gitattributes
+   git add .gitattributes && git commit -m 'Track .gif,.png,.jpg,.psd,.mp4 and img/' && git push
    ```
 
    Now all existing the files you converted, as well as the new
-   ones you add, will be properly tracked with LFS.
+   ones you add, are properly tracked with LFS.
 
 1. [Re-protect the default branch](../../../user/project/protected_branches.md):
 
@@ -164,9 +175,9 @@ but commented out to help encourage others to add to it in the future. -->
 
 - [Getting Started with Git LFS](https://about.gitlab.com/blog/2017/01/30/getting-started-with-git-lfs-tutorial/)
 - [Migrate from Git Annex to Git LFS](migrate_from_git_annex_to_git_lfs.md)
-- [GitLab's Git LFS user documentation](index.md)
-- [GitLab's Git LFS administrator documentation](../../../administration/lfs/index.md)
-- Alternative method to [migrate an existing repo to Git LFS](https://github.com/git-lfs/git-lfs/wiki/Tutorial#migrating-existing-repository-data-to-lfs)
+- [GitLab Git LFS user documentation](index.md)
+- [GitLab Git LFS administrator documentation](../../../administration/lfs/index.md)
+- Alternative method to [migrate an existing repository to Git LFS](https://github.com/git-lfs/git-lfs/wiki/Tutorial#migrating-existing-repository-data-to-lfs)
 
 <!--
 Test project:

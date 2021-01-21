@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::CancelUserPipelinesService do
+RSpec.describe Ci::CancelUserPipelinesService do
   describe '#execute' do
     let(:user) { create(:user) }
 
@@ -17,6 +17,18 @@ describe Ci::CancelUserPipelinesService do
 
         expect(pipeline.reload).to be_canceled
         expect(build.reload).to be_canceled
+      end
+    end
+
+    context 'when an error ocurrs' do
+      it 'raises a service level error' do
+        service = double(execute: ServiceResponse.error(message: 'Error canceling pipeline'))
+        allow(::Ci::CancelUserPipelinesService).to receive(:new).and_return(service)
+
+        result = subject
+
+        expect(result).to be_a(ServiceResponse)
+        expect(result).to be_error
       end
     end
   end

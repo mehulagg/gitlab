@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::ScheduleUpdateService do
+RSpec.describe Clusters::Applications::ScheduleUpdateService do
   describe '#execute' do
     let(:project) { create(:project) }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'when application is able to be updated' do

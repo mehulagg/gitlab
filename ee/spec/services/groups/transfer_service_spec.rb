@@ -10,91 +10,75 @@ RSpec.describe Groups::TransferService, '#execute' do
   let(:transfer_service) { described_class.new(group, user) }
 
   before do
-    stub_licensed_features(packages: true)
     group.add_owner(user)
     new_group&.add_owner(user)
   end
 
-  context 'with an npm package' do
+  describe 'elasticsearch indexing', :aggregate_failures do
     before do
-      create(:npm_package, project: project)
+      stub_ee_application_setting(elasticsearch_indexing: true)
     end
 
-    shared_examples 'transfer not allowed' do
-      it 'does not allow transfer when there is a root namespace change' do
-        transfer_service.execute(new_group)
-
-        expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
-      end
-    end
-
-    it_behaves_like 'transfer not allowed'
-
-    context 'with a project within subgroup' do
-      let(:root_group) { create(:group) }
-      let(:group) { create(:group, parent: root_group) }
-
+    context 'when elasticsearch_limit_indexing is on' do
       before do
-        root_group.add_owner(user)
+        stub_ee_application_setting(elasticsearch_limit_indexing: true)
       end
 
-      it_behaves_like 'transfer not allowed'
+      context 'when moving from a non-indexed namespace to an indexed namespace' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: new_group)
+        end
 
-      context 'without a root namespace change' do
-        let(:new_group) { create(:group, parent: root_group) }
+        it 'invalidates the cache and indexes the project and all associated data' do
+          expect(project).not_to receive(:maintain_elasticsearch_update)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
 
-        it 'allows transfer' do
+          transfer_service.execute(new_group)
+        end
+      end
+
+      context 'when both namespaces are indexed' do
+        before do
+          create(:elasticsearch_indexed_namespace, namespace: group)
+          create(:elasticsearch_indexed_namespace, namespace: new_group)
+        end
+
+        it 'invalidates the cache and indexes the project and associated issues only' do
+          expect(project).not_to receive(:maintain_elasticsearch_update)
+          expect(project).not_to receive(:maintain_elasticsearch_destroy)
+          expect(::Elastic::ProcessInitialBookkeepingService).to receive(:backfill_projects!).with(project)
+          expect(::Gitlab::CurrentSettings).to receive(:invalidate_elasticsearch_indexes_cache_for_project!).with(project.id).and_call_original
+
+          transfer_service.execute(new_group)
+        end
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is off' do
+      context 'when visibility changes' do
+        let(:new_group) { create(:group, :private) }
+
+        it 'does not invalidate the cache and reindexes projects and associated issues' do
+          project1 = create(:project, :repository, :public, namespace: group)
+          project2 = create(:project, :repository, :public, namespace: group)
+          project3 = create(:project, :repository, :private, namespace: group)
+
+          expect(::Gitlab::CurrentSettings).not_to receive(:invalidate_elasticsearch_indexes_cache_for_project!)
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project1)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project1.id, ['issues'])
+          expect(Elastic::ProcessBookkeepingService).to receive(:track!).with(project2)
+          expect(ElasticAssociationIndexerWorker).to receive(:perform_async).with('Project', project2.id, ['issues'])
+          expect(Elastic::ProcessBookkeepingService).not_to receive(:track!).with(project3)
+          expect(ElasticAssociationIndexerWorker).not_to receive(:perform_async).with('Project', project3.id, ['issues'])
+
           transfer_service.execute(new_group)
 
           expect(transfer_service.error).not_to be
           expect(group.parent).to eq(new_group)
         end
       end
-
-      context 'when transferring a group into a root group' do
-        let(:new_group) { nil }
-
-        it_behaves_like 'transfer not allowed'
-      end
-    end
-  end
-
-  context 'without an npm package' do
-    context 'when transferring a group into a root group' do
-      let(:group) { create(:group, parent: create(:group)) }
-
-      it 'allows transfer' do
-        transfer_service.execute(nil)
-
-        expect(transfer_service.error).not_to be
-        expect(group.parent).to be_nil
-      end
-    end
-  end
-
-  context 'when visibility changes' do
-    let(:new_group) { create(:group, :private) }
-
-    before do
-      stub_ee_application_setting(elasticsearch_indexing: true)
-    end
-
-    it 'reindexes projects', :elastic do
-      project1 = create(:project, :repository, :public, namespace: group)
-      project2 = create(:project, :repository, :public, namespace: group)
-      project3 = create(:project, :repository, :private, namespace: group)
-
-      expect(ElasticIndexerWorker).to receive(:perform_async)
-        .with(:update, "Project", project1.id, project1.es_id)
-      expect(ElasticIndexerWorker).to receive(:perform_async)
-        .with(:update, "Project", project2.id, project2.es_id)
-      expect(ElasticIndexerWorker).not_to receive(:perform_async)
-        .with(:update, "Project", project3.id, project3.es_id)
-
-      transfer_service.execute(new_group)
-
-      expect(transfer_service.error).not_to be
-      expect(group.parent).to eq(new_group)
     end
   end
 

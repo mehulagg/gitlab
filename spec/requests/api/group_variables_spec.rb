@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GroupVariables do
+RSpec.describe API::GroupVariables do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 
@@ -168,6 +168,14 @@ describe API::GroupVariables do
         put api("/groups/#{group.id}/variables/non_existing_variable", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      it 'responds with 400 if the update fails' do
+        put api("/groups/#{group.id}/variables/#{variable.key}", user), params: { value: 'shrt', masked: true }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(variable.reload.masked).to eq(false)
+        expect(json_response['message']).to eq('value' => ['is invalid'])
       end
     end
 

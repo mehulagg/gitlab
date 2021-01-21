@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ManifestImport::Manifest do
+RSpec.describe Gitlab::ManifestImport::Manifest do
   let(:file) { File.open(Rails.root.join('spec/fixtures/aosp_manifest.xml')) }
   let(:manifest) { described_class.new(file) }
 
@@ -12,19 +12,7 @@ describe Gitlab::ManifestImport::Manifest do
     end
 
     context 'missing or invalid attributes' do
-      let(:file) { Tempfile.new('foo') }
-
-      before do
-        content = <<~EOS
-          <manifest>
-            <remote review="invalid-url" />
-            <project name="platform/build"/>
-          </manifest>
-        EOS
-
-        file.write(content)
-        file.rewind
-      end
+      let(:file) { File.open(Rails.root.join('spec/fixtures/invalid_manifest.xml')) }
 
       it { expect(manifest.valid?).to be false }
 

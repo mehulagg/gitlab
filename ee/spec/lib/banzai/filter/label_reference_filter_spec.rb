@@ -14,16 +14,28 @@ RSpec.describe Banzai::Filter::LabelReferenceFilter do
       stub_licensed_features(scoped_labels: true)
     end
 
-    it 'renders scoped label with link to documentation' do
-      doc = reference_filter("See #{scoped_label.to_reference}")
+    context 'with a scoped label' do
+      let(:doc) { reference_filter("See #{scoped_label.to_reference}") }
 
-      expect(doc.css('.gl-label-scoped .gl-label-text').map(&:text)).to eq([scoped_label.scoped_label_key, scoped_label.scoped_label_value])
+      it 'renders scoped label' do
+        expect(doc.css('.gl-label-scoped').text).to eq(scoped_label.scoped_label_key + scoped_label.scoped_label_value)
+      end
+
+      it 'renders HTML tooltips' do
+        expect(doc.at_css('.gl-label-scoped a').attr('data-html')).to eq('true')
+      end
     end
 
-    it 'renders common label' do
-      doc = reference_filter("See #{label.to_reference}")
+    context 'with a common label' do
+      let(:doc) { reference_filter("See #{label.to_reference}") }
 
-      expect(doc.css('.gl-label .gl-label-text').map(&:text)).to eq([label.name])
+      it 'renders common label' do
+        expect(doc.css('.gl-label .gl-label-text').map(&:text)).to eq([label.name])
+      end
+
+      it 'renders non-HTML tooltips' do
+        expect(doc.at_css('.gl-label a').attr('data-html')).to be_nil
+      end
     end
   end
 

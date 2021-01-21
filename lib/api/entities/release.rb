@@ -5,9 +5,7 @@ module API
     class Release < Grape::Entity
       include ::API::Helpers::Presentable
 
-      expose :name do |release, _|
-        can_download_code? ? release.name : "Release-#{release.id}"
-      end
+      expose :name
       expose :tag, as: :tag_name, if: ->(_, _) { can_download_code? }
       expose :description
       expose :description_html do |entity|
@@ -18,15 +16,17 @@ module API
       expose :author, using: Entities::UserBasic, if: -> (release, _) { release.author.present? }
       expose :commit, using: Entities::Commit, if: ->(_, _) { can_download_code? }
       expose :upcoming_release?, as: :upcoming_release
-      expose :milestones, using: Entities::MilestoneWithStats, if: -> (release, _) { release.milestones.present? && can_read_milestone? }
+      expose :milestones,
+             using: Entities::MilestoneWithStats,
+             if: -> (release, _) { release.milestones.present? && can_read_milestone? } do |release, _|
+               release.milestones.order_by_dates_and_title
+             end
+
       expose :commit_path, expose_nil: false
       expose :tag_path, expose_nil: false
 
       expose :assets do
-        expose :assets_count, as: :count do |release, _|
-          assets_to_exclude = can_download_code? ? [] : [:sources]
-          release.assets_count(except: assets_to_exclude)
-        end
+        expose :assets_count, as: :count
         expose :sources, using: Entities::Releases::Source, if: ->(_, _) { can_download_code? }
         expose :links, using: Entities::Releases::Link do |release, options|
           release.links.sorted
@@ -35,8 +35,6 @@ module API
       expose :evidences, using: Entities::Releases::Evidence, expose_nil: false, if: ->(_, _) { can_download_code? }
       expose :_links do
         expose :self_url, as: :self, expose_nil: false
-        expose :merge_requests_url, expose_nil: false
-        expose :issues_url, expose_nil: false
         expose :edit_url, expose_nil: false
       end
 

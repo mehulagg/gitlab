@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'getting projects' do
+RSpec.describe 'getting projects' do
   include GraphqlHelpers
 
   let(:group)             { create(:group) }
@@ -77,5 +77,40 @@ describe 'getting projects' do
     let(:include_subgroups) { false }
 
     it_behaves_like 'a graphql namespace'
+  end
+
+  describe 'sorting and pagination' do
+    let_it_be(:ns) { create(:group) }
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:project_1) { create(:project, name: 'Project', path: 'project', namespace: ns) }
+    let_it_be(:project_2) { create(:project, name: 'Test Project', path: 'test-project', namespace: ns) }
+    let_it_be(:project_3) { create(:project, name: 'Test', path: 'test', namespace: ns) }
+    let_it_be(:project_4) { create(:project, name: 'Test Project Other', path: 'other-test-project', namespace: ns) }
+
+    let(:data_path) { [:namespace, :projects] }
+
+    let(:ns_args) { { full_path: ns.full_path } }
+    let(:search) { 'test' }
+
+    before do
+      ns.add_owner(current_user)
+    end
+
+    def pagination_query(params)
+      arguments = params.merge(include_subgroups: include_subgroups, search: search)
+      graphql_query_for(:namespace, ns_args, query_graphql_field(:projects, arguments, <<~GQL))
+        #{page_info}
+        nodes { name }
+      GQL
+    end
+
+    context 'when sorting by similarity' do
+      it_behaves_like 'sorted paginated query' do
+        let(:node_path)        { %w[name] }
+        let(:sort_param)       { :SIMILARITY }
+        let(:first_param)      { 2 }
+        let(:expected_results) { [project_3.name, project_2.name, project_4.name] }
+      end
+    end
   end
 end

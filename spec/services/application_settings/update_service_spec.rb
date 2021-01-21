@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettings::UpdateService do
+RSpec.describe ApplicationSettings::UpdateService do
   include ExternalAuthorizationServiceHelpers
 
   let(:application_settings) { create(:application_setting) }
@@ -49,7 +49,7 @@ describe ApplicationSettings::UpdateService do
         expect(application_settings.terms).to eq('Be nice!')
       end
 
-      it 'Only queries once when the terms are changed' do
+      it 'only queries once when the terms are changed' do
         create(:term, terms: 'Other terms')
         expect(application_settings.terms).to eq('Other terms')
 
@@ -66,7 +66,7 @@ describe ApplicationSettings::UpdateService do
     context 'when params is blank' do
       let(:params) { {} }
 
-      it 'does not add to whitelist' do
+      it 'does not add to allowlist' do
         expect { subject.execute }.not_to change {
           application_settings.outbound_local_requests_whitelist
         }
@@ -80,7 +80,7 @@ describe ApplicationSettings::UpdateService do
 
       let(:params) { { add_to_outbound_local_requests_whitelist: ['example.com', ''] } }
 
-      it 'adds to whitelist' do
+      it 'adds to allowlist' do
         expect { subject.execute }.to change {
           application_settings.outbound_local_requests_whitelist
         }
@@ -91,14 +91,14 @@ describe ApplicationSettings::UpdateService do
       end
     end
 
-    context 'when param outbound_local_requests_whitelist_raw is passed' do
+    context 'when param outbound_local_requests_allowlist_raw is passed' do
       before do
         application_settings.outbound_local_requests_whitelist = ['127.0.0.1']
       end
 
-      let(:params) { { outbound_local_requests_whitelist_raw: 'example.com;gitlab.com' } }
+      let(:params) { { outbound_local_requests_allowlist_raw: 'example.com;gitlab.com' } }
 
-      it 'overwrites the existing whitelist' do
+      it 'overwrites the existing allowlist' do
         expect { subject.execute }.to change {
           application_settings.outbound_local_requests_whitelist
         }
@@ -257,7 +257,7 @@ describe ApplicationSettings::UpdateService do
       described_class.new(application_settings, admin, { external_authorization_service_enabled: false }).execute
     end
 
-    it 'does validate labels if external authorization gets enabled ' do
+    it 'does validate labels if external authorization gets enabled' do
       expect_any_instance_of(described_class).to receive(:validate_classification_label)
 
       described_class.new(application_settings, admin, { external_authorization_service_enabled: true }).execute
@@ -348,6 +348,30 @@ describe ApplicationSettings::UpdateService do
       application_settings.reload
 
       expect(application_settings.issues_create_limit).to eq(600)
+    end
+  end
+
+  context 'when require_admin_approval_after_user_signup changes' do
+    context 'when it goes from enabled to disabled' do
+      let(:params) { { require_admin_approval_after_user_signup: false } }
+
+      it 'calls ApproveBlockedPendingApprovalUsersWorker' do
+        expect(ApproveBlockedPendingApprovalUsersWorker).to receive(:perform_async)
+
+        subject.execute
+      end
+    end
+
+    context 'when it goes from disabled to enabled' do
+      let(:params) { { require_admin_approval_after_user_signup: true } }
+
+      it 'does not call ApproveBlockedPendingApprovalUsersWorker' do
+        application_settings.update!(require_admin_approval_after_user_signup: false)
+
+        expect(ApproveBlockedPendingApprovalUsersWorker).not_to receive(:perform_async)
+
+        subject.execute
+      end
     end
   end
 end

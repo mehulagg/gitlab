@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -19,27 +19,27 @@ This is what the `.gitlab-ci.yml` file looks like for this project:
 test:
   stage: test
   script:
-  - apt-get update -qy
-  - apt-get install -y nodejs
-  - bundle install --path /cache
-  - bundle exec rake db:create RAILS_ENV=test
-  - bundle exec rake test
+    - apt-get update -qy
+    - apt-get install -y nodejs
+    - bundle install --path /cache
+    - bundle exec rake db:create RAILS_ENV=test
+    - bundle exec rake test
 
 staging:
   stage: deploy
   script:
-  - gem install dpl
-  - dpl --provider=heroku --app=gitlab-ci-ruby-test-staging --api-key=$HEROKU_STAGING_API_KEY
+    - gem install dpl --pre
+    - dpl heroku api --app=gitlab-ci-ruby-test-staging --api-key=$HEROKU_STAGING_API_KEY
   only:
-  - master
+    - master
 
 production:
   stage: deploy
   script:
-  - gem install dpl
-  - dpl --provider=heroku --app=gitlab-ci-ruby-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
+    - gem install dpl --pre
+    - dpl heroku api --app=gitlab-ci-ruby-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
   only:
-  - tags
+    - tags
 ```
 
 This project has three jobs:
@@ -50,7 +50,7 @@ This project has three jobs:
 
 ## Store API keys
 
-You'll need to create two variables in your project's **Settings > CI/CD > Environment variables**:
+You'll need to create two variables in your project's **Settings > CI/CD > Environment variables** and do not check **Protect variable** and **Mask variable**:
 
 - `HEROKU_STAGING_API_KEY` - Heroku API key used to deploy staging app.
 - `HEROKU_PRODUCTION_API_KEY` - Heroku API key used to deploy production app.
@@ -62,13 +62,13 @@ Find your Heroku API key in [Manage Account](https://dashboard.heroku.com/accoun
 For each of your environments, you'll need to create a new Heroku application.
 You can do this through the [Heroku Dashboard](https://dashboard.heroku.com/).
 
-## Create Runner
+## Create a runner
 
 First install [Docker Engine](https://docs.docker.com/installation/).
 
 To build this project you also need to have [GitLab Runner](https://docs.gitlab.com/runner/).
 You can use public runners available on `gitlab.com` or register your own. Start by
-creating a template configuration file in order to pass complex configuration:
+creating a template configuration file to pass complex configuration:
 
 ```shell
 cat > /tmp/test-config.template.toml << EOF
@@ -92,6 +92,6 @@ gitlab-runner register \
   --docker-image ruby:2.6
 ```
 
-With the command above, you create a Runner that uses the [`ruby:2.6`](https://hub.docker.com/_/ruby) image and uses a [PostgreSQL](https://hub.docker.com/_/postgres) database.
+With the command above, you create a runner that uses the [`ruby:2.6`](https://hub.docker.com/_/ruby) image and uses a [PostgreSQL](https://hub.docker.com/_/postgres) database.
 
 To access the PostgreSQL database, connect to `host: postgres` as user `postgres` with no password.

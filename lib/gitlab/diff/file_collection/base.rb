@@ -30,12 +30,16 @@ module Gitlab
           @diffs ||= diffable.raw_diffs(diff_options)
         end
 
-        def diff_files
-          raw_diff_files
+        def diff_files(sorted: false)
+          raw_diff_files(sorted: sorted)
         end
 
-        def raw_diff_files
-          @raw_diff_files ||= diffs.decorate! { |diff| decorate_diff!(diff) }
+        def raw_diff_files(sorted: false)
+          strong_memoize(:"raw_diff_files_#{sorted}") do
+            collection = diffs.decorate! { |diff| decorate_diff!(diff) }
+            collection = sort_diffs(collection) if sorted
+            collection
+          end
         end
 
         def diff_file_paths
@@ -60,12 +64,20 @@ module Gitlab
           end
         end
 
-        def diff_file_with_old_path(old_path)
-          diff_files.find { |diff_file| diff_file.old_path == old_path }
+        def diff_file_with_old_path(old_path, a_mode = nil)
+          if Feature.enabled?(:file_identifier_hash) && a_mode.present?
+            diff_files.find { |diff_file| diff_file.old_path == old_path && diff_file.a_mode == a_mode }
+          else
+            diff_files.find { |diff_file| diff_file.old_path == old_path }
+          end
         end
 
-        def diff_file_with_new_path(new_path)
-          diff_files.find { |diff_file| diff_file.new_path == new_path }
+        def diff_file_with_new_path(new_path, b_mode = nil)
+          if Feature.enabled?(:file_identifier_hash) && b_mode.present?
+            diff_files.find { |diff_file| diff_file.new_path == new_path && diff_file.b_mode == b_mode }
+          else
+            diff_files.find { |diff_file| diff_file.new_path == new_path }
+          end
         end
 
         def clear_cache
@@ -80,13 +92,16 @@ module Gitlab
 
         def diff_stats_collection
           strong_memoize(:diff_stats) do
-            # There are scenarios where we don't need to request Diff Stats,
-            # when caching for instance.
-            next unless @include_stats
-            next unless diff_refs
+            next unless fetch_diff_stats?
 
             @repository.diff_stats(diff_refs.base_sha, diff_refs.head_sha)
           end
+        end
+
+        def fetch_diff_stats?
+          # There are scenarios where we don't need to request Diff Stats,
+          # when caching for instance.
+          @include_stats && diff_refs
         end
 
         def decorate_diff!(diff)
@@ -99,6 +114,12 @@ module Gitlab
                                  diff_refs: diff_refs,
                                  fallback_diff_refs: fallback_diff_refs,
                                  stats: stats)
+        end
+
+        def sort_diffs(diffs)
+          return diffs unless Feature.enabled?(:sort_diffs, project, default_enabled: false)
+
+          Gitlab::Diff::FileCollectionSorter.new(diffs).sort
         end
       end
     end

@@ -3,11 +3,11 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190528180441_enqueue_reset_merge_status.rb')
 
-describe EnqueueResetMergeStatus do
+RSpec.describe EnqueueResetMergeStatus do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
-  let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
-  let(:project) { projects.create(namespace_id: namespace.id, name: 'foo') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
+  let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
   let(:merge_requests) { table(:merge_requests) }
 
   def create_merge_request(id, extra_params = {})
@@ -33,7 +33,7 @@ describe EnqueueResetMergeStatus do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)

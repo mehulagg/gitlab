@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Command do
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Command do
   let_it_be(:project) { create(:project, :repository) }
 
   describe '#initialize' do
@@ -268,6 +268,57 @@ describe Gitlab::Ci::Pipeline::Chain::Command do
       end
 
       it { is_expected. to eq(true) }
+    end
+  end
+
+  describe '#dangling_build?' do
+    let(:project) { create(:project, :repository) }
+    let(:command) { described_class.new(project: project, source: source) }
+
+    subject { command.dangling_build? }
+
+    context 'when source is :webide' do
+      let(:source) { :webide }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when source is :ondemand_dast_scan' do
+      let(:source) { :ondemand_dast_scan }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when source something else' do
+      let(:source) { :web }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#creates_child_pipeline?' do
+    let(:command) { described_class.new(bridge: bridge) }
+
+    subject { command.creates_child_pipeline? }
+
+    context 'when bridge is present' do
+      context 'when bridge triggers a child pipeline' do
+        let(:bridge) { double(:bridge, triggers_child_pipeline?: true) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when bridge triggers a multi-project pipeline' do
+        let(:bridge) { double(:bridge, triggers_child_pipeline?: false) }
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when bridge is not present' do
+      let(:bridge) { nil }
+
+      it { is_expected.to be_falsey }
     end
   end
 end

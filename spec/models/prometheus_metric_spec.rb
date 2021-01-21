@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PrometheusMetric do
+RSpec.describe PrometheusMetric do
   subject { build(:prometheus_metric) }
 
   it_behaves_like 'having unique enum values'
@@ -11,6 +11,7 @@ describe PrometheusMetric do
   it { is_expected.to validate_presence_of(:title) }
   it { is_expected.to validate_presence_of(:query) }
   it { is_expected.to validate_presence_of(:group) }
+  it { is_expected.to validate_uniqueness_of(:identifier).scoped_to(:project_id).allow_nil }
 
   describe 'common metrics' do
     using RSpec::Parameterized::TableSyntax
@@ -135,10 +136,6 @@ describe PrometheusMetric do
 
     it 'queryable metric has no required_metric' do
       expect(subject.to_query_metric.required_metrics).to eq([])
-    end
-
-    it 'queryable metric has weight 0' do
-      expect(subject.to_query_metric.weight).to eq(0)
     end
 
     it 'queryable metrics has query description' do

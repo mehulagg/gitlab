@@ -106,7 +106,7 @@ RSpec.describe Groups::InsightsController do
         it_behaves_like '200 status'
       end
 
-      describe 'GET #show.sjon' do
+      describe 'GET #show.json' do
         subject { get :show, params: params.merge(group_id: parent_group.to_param), format: :json }
 
         it_behaves_like '200 status'
@@ -116,6 +116,13 @@ RSpec.describe Groups::InsightsController do
         subject { post :query, params: params.merge(query_params.merge(group_id: parent_group.to_param)), format: :json }
 
         it_behaves_like '200 status'
+      end
+
+      describe 'GET #show' do
+        it_behaves_like 'tracking unique visits', :show do
+          let(:request_params) { params.merge(group_id: parent_group.to_param) }
+          let(:target_id) { 'g_analytics_insights' }
+        end
       end
     end
 

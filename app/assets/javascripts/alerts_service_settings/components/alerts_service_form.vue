@@ -1,6 +1,6 @@
 <script>
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlFormGroup,
   GlFormInput,
   GlLink,
@@ -12,7 +12,7 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import axios from '~/lib/utils/axios_utils';
 import { s__, __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   i18n: {
@@ -26,7 +26,7 @@ export default {
   COPY_TO_CLIPBOARD: __('Copy'),
   RESET_KEY: __('Reset key'),
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormGroup,
     GlFormInput,
     GlLink,
@@ -64,6 +64,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    isDisabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -86,25 +91,11 @@ export default {
       ];
     },
   },
-  watch: {
-    activated() {
-      this.updateIcon();
-    },
-  },
   methods: {
-    updateIcon() {
-      return document.querySelectorAll('.js-service-active-status').forEach(icon => {
-        if (icon.dataset.value === this.activated.toString()) {
-          icon.classList.remove('d-none');
-        } else {
-          icon.classList.add('d-none');
-        }
-      });
-    },
     resetKey() {
       return axios
         .put(this.formPath, { service: { token: '' } })
-        .then(res => {
+        .then((res) => {
           this.authorizationKey = res.data.token;
         })
         .catch(() => {
@@ -142,7 +133,7 @@ export default {
     <gl-form-group :label="__('Active')" label-for="activated" label-class="label-bold">
       <toggle-button
         id="activated"
-        :disabled-input="loadingActivated"
+        :disabled-input="loadingActivated || isDisabled"
         :is-loading="loadingActivated"
         :value="activated"
         @change="toggleActivated"
@@ -152,7 +143,11 @@ export default {
       <div class="input-group">
         <gl-form-input id="url" :readonly="true" :value="url" />
         <span class="input-group-append">
-          <clipboard-button :text="url" :title="$options.COPY_TO_CLIPBOARD" />
+          <clipboard-button
+            :text="url"
+            :title="$options.COPY_TO_CLIPBOARD"
+            :disabled="isDisabled"
+          />
         </span>
       </div>
     </gl-form-group>
@@ -164,12 +159,16 @@ export default {
       <div class="input-group">
         <gl-form-input id="authorization-key" :readonly="true" :value="authorizationKey" />
         <span class="input-group-append">
-          <clipboard-button :text="authorizationKey" :title="$options.COPY_TO_CLIPBOARD" />
+          <clipboard-button
+            :text="authorizationKey"
+            :title="$options.COPY_TO_CLIPBOARD"
+            :disabled="isDisabled"
+          />
         </span>
       </div>
-      <gl-deprecated-button v-gl-modal.authKeyModal class="mt-2">{{
+      <gl-button v-gl-modal.authKeyModal class="gl-mt-2" :disabled="isDisabled">{{
         $options.RESET_KEY
-      }}</gl-deprecated-button>
+      }}</gl-button>
       <gl-modal
         modal-id="authKeyModal"
         :title="$options.RESET_KEY"

@@ -1,6 +1,6 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__, __ } from '~/locale';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -24,7 +24,7 @@ export const setSelectedEpicIssueId = ({ commit }, selectedEpicIssueId) =>
 
 export const requestEpics = ({ commit }) => commit(types.REQUEST_EPICS);
 export const receiveEpicsSuccess = ({ commit }, data) => {
-  const epics = data.map(rawEpic =>
+  const epics = data.map((rawEpic) =>
     convertObjectPropsToCamelCase(
       { ...rawEpic, url: rawEpic.web_edit_url },
       {
@@ -58,7 +58,7 @@ export const fetchEpics = ({ state, dispatch }, search = '') => {
 
 export const requestIssueUpdate = ({ commit }) => commit(types.REQUEST_ISSUE_UPDATE);
 export const receiveIssueUpdateSuccess = ({ state, commit }, { data, epic, isRemoval = false }) => {
-  /* 
+  /*
    If EpicsSelect is loaded within Boards, -
     we need to update "boardsStore.issue.detail.epic" which has -
     a differently formatted timestamp that includes '<strong>' tag.
@@ -159,6 +159,3 @@ export const removeIssueFromEpic = ({ state, dispatch }, epic) => {
       );
     });
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -o pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 echo "=> Linting documents at path $(pwd) as $(whoami)..."
 echo
 ERRORCODE=0
@@ -14,6 +15,21 @@ then
   echo '✖ ERROR: Short options for curl should not be used in documentation!
          Use long options (e.g., --header instead of -H):' >&2
   grep --extended-regexp --recursive --color=auto 'curl (.+ )?-[^- ].*' doc/
+  ((ERRORCODE++))
+fi
+
+# Test for non-standard spaces (NBSP, NNBSP) in documentation.
+echo '=> Checking for non-standard spaces...'
+echo
+grep --extended-regexp --binary-file=without-match --recursive '[  ]' doc/ >/dev/null 2>&1
+if [ $? -eq 0 ]
+then
+  echo '✖ ERROR: Non-standard spaces (NBSP, NNBSP) should not be used in documentation.
+         https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#spaces-between-words
+         Replace with standard spaces:' >&2
+  # Find the spaces, then add color codes with sed to highlight each NBSP or NNBSP in the output.
+  grep --extended-regexp --binary-file=without-match --recursive --color=auto '[  ]' doc \
+       | sed -e ''/ /s//`printf "\033[0;101m \033[0m"`/'' -e ''/ /s//`printf "\033[0;101m \033[0m"`/''
   ((ERRORCODE++))
 fi
 
@@ -40,21 +56,42 @@ then
 fi
 
 # Do not use 'README.md', instead use 'index.md'
-# Number of 'README.md's as of 2020-05-28
-NUMBER_READMES=45
+# Number of 'README.md's as of 2020-10-13
+NUMBER_READMES=36
 FIND_READMES=$(find doc/ -name "README.md" | wc -l)
 echo '=> Checking for new README.md files...'
 echo
 if [ ${FIND_READMES} -ne $NUMBER_READMES ]
 then
   echo
-  echo '  ✖ ERROR: New README.md file(s) detected, prefer index.md over README.md.' >&2
+  echo '  ✖ ERROR: The number of README.md file(s) has changed. Use index.md instead of README.md.' >&2
+  echo '  ✖        If removing a README.md file, update NUMBER_READMES in lint-doc.sh.' >&2
   echo '  https://docs.gitlab.com/ee/development/documentation/styleguide.html#work-with-directories-and-files'
   echo
   ((ERRORCODE++))
 fi
 
-MD_DOC_PATH=${MD_DOC_PATH:-doc}
+# Run Vale and Markdownlint only on changed files. Only works on merged results
+# pipelines, so first checks if a merged results CI variable is present. If not present,
+# runs test on all files.
+if [ -z "${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}" ]
+then
+  MD_DOC_PATH=${MD_DOC_PATH:-doc}
+  echo "Merge request pipeline (detached) detected. Testing all files."
+else
+  MERGE_BASE=$(git merge-base ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA} ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA})
+  if git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" | grep -E "\.vale|\.markdownlint|lint-doc\.sh"
+  then
+    MD_DOC_PATH=${MD_DOC_PATH:-doc}
+    echo "Vale, Markdownlint, or lint-doc.sh configuration changed. Testing all files."
+  else
+    MD_DOC_PATH=$(git diff --name-only "${MERGE_BASE}..${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA}" 'doc/*.md')
+    if [ -n "${MD_DOC_PATH}" ]
+    then
+      echo -e "Merged results pipeline detected. Testing only the following files:\n${MD_DOC_PATH}"
+    fi
+  fi
+fi
 
 function run_locally_or_in_docker() {
   local cmd=$1
@@ -65,7 +102,7 @@ function run_locally_or_in_docker() {
     $cmd $args
   elif hash docker 2>/dev/null
   then
-    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs:lint ${cmd} ${args}
+    docker run -t -v ${PWD}:/gitlab -w /gitlab --rm registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.12-vale-2.6.1-markdownlint-0.24.0 ${cmd} ${args}
   else
     echo
     echo "  ✖ ERROR: '${cmd}' not found. Install '${cmd}' or Docker to proceed." >&2
@@ -84,10 +121,15 @@ function run_locally_or_in_docker() {
 
 echo '=> Linting markdown style...'
 echo
-run_locally_or_in_docker 'markdownlint' "--config .markdownlint.json ${MD_DOC_PATH}"
+if [ -z "${MD_DOC_PATH}" ]
+then
+  echo "Merged results pipeline detected, but no markdown files found. Skipping."
+else
+  run_locally_or_in_docker 'markdownlint' "--config .markdownlint.json ${MD_DOC_PATH}"
+fi
 
 echo '=> Linting prose...'
-run_locally_or_in_docker 'vale' "--minAlertLevel error ${MD_DOC_PATH}"
+run_locally_or_in_docker 'vale' "--minAlertLevel error --output=doc/.vale/vale.tmpl ${MD_DOC_PATH}"
 
 if [ $ERRORCODE -ne 0 ]
 then

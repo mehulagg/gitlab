@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Suggestions < Grape::API
+  class Suggestions < ::API::Base
     before { authenticate! }
+
+    feature_category :code_review
 
     resource :suggestions do
       desc 'Apply suggestion patch in the Merge Request it was created' do
@@ -25,7 +27,7 @@ module API
         success Entities::Suggestion
       end
       params do
-        requires :ids, type: Array[String], desc: "An array of suggestion ID's"
+        requires :ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: "An array of suggestion ID's"
       end
       put 'batch_apply' do
         ids = params[:ids]

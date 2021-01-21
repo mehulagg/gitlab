@@ -1,9 +1,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import dateFormat from 'dateformat';
-import createFlash from '~/flash';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlFormInput,
   GlLink,
   GlLoadingIcon,
@@ -13,13 +11,14 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
+  GlIcon,
 } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf, n__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import Stacktrace from './stacktrace.vue';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { severityLevel, severityLevelVariant, errorStatus } from './constants';
 import Tracking from '~/tracking';
 import {
@@ -34,12 +33,12 @@ const SENTRY_TIMEOUT = 10000;
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormInput,
     GlLink,
     GlLoadingIcon,
     TooltipOnTruncate,
-    Icon,
+    GlIcon,
     Stacktrace,
     GlBadge,
     GlAlert,
@@ -47,11 +46,11 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
+    TimeAgoTooltip,
   },
   directives: {
     TrackEvent: TrackEventDirective,
   },
-  mixins: [timeagoMixin],
   props: {
     issueUpdatePath: {
       type: String,
@@ -88,7 +87,7 @@ export default {
         };
       },
       pollInterval: 2000,
-      update: data => data.project.sentryErrors.detailedError,
+      update: (data) => data.project.sentryErrors.detailedError,
       error: () => createFlash(__('Failed to load error details from Sentry.')),
       result(res) {
         if (res.data.project?.sentryErrors?.detailedError) {
@@ -107,6 +106,7 @@ export default {
       errorPollTimeout: 0,
       issueCreationInProgress: false,
       isAlertVisible: false,
+      isStacktraceEmptyAlertVisible: true,
       closedIssueId: null,
     };
   },
@@ -120,10 +120,10 @@ export default {
     ]),
     ...mapGetters('details', ['stacktrace']),
     firstReleaseLink() {
-      return `${this.error.externalBaseUrl}/releases/${this.error.firstReleaseShortVersion}`;
+      return `${this.error.externalBaseUrl}/releases/${this.error.firstReleaseVersion}`;
     },
     lastReleaseLink() {
-      return `${this.error.externalBaseUrl}/releases/${this.error.lastReleaseShortVersion}`;
+      return `${this.error.externalBaseUrl}/releases/${this.error.lastReleaseVersion}`;
     },
     showStacktrace() {
       return Boolean(this.stacktrace?.length);
@@ -168,6 +168,9 @@ export default {
     resolveBtnLabel() {
       return this.errorStatus !== errorStatus.RESOLVED ? __('Resolve') : __('Unresolve');
     },
+    showEmptyStacktraceAlert() {
+      return !this.loadingStacktrace && !this.showStacktrace && this.isStacktraceEmptyAlertVisible;
+    },
   },
   watch: {
     error(val) {
@@ -210,7 +213,7 @@ export default {
         this.errorStatus === errorStatus.RESOLVED ? errorStatus.UNRESOLVED : errorStatus.RESOLVED;
 
       // eslint-disable-next-line promise/catch-or-return
-      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then(res => {
+      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then((res) => {
         this.closedIssueId = res.closed_issue_iid;
         if (this.closedIssueId) {
           this.isAlertVisible = true;
@@ -224,9 +227,6 @@ export default {
         this.errorLoading = false;
         createFlash(__('Could not connect to Sentry. Refresh the page to try again.'), 'warning');
       }
-    },
-    formatDate(date) {
-      return `${this.timeFormatted(date)} (${dateFormat(date, 'UTC:yyyy-mm-dd h:MM:ssTT Z')})`;
     },
     trackPageViews() {
       const { category, action } = trackErrorDetailsViewsOptions;
@@ -258,6 +258,10 @@ export default {
         </gl-sprintf>
       </gl-alert>
 
+      <gl-alert v-if="showEmptyStacktraceAlert" @dismiss="isStacktraceEmptyAlertVisible = false">
+        {{ __('No stack trace for this error') }}
+      </gl-alert>
+
       <div class="error-details-header d-flex py-2 justify-content-between">
         <div
           v-if="!loadingStacktrace && stacktrace"
@@ -269,28 +273,30 @@ export default {
               <strong class="error-details-meta-culprit">{{ error.culprit }}</strong>
             </template>
             <template #timeAgo>
-              {{ timeFormatted(stacktraceData.date_received) }}
+              <time-ago-tooltip :time="stacktraceData.date_received" />
             </template>
           </gl-sprintf>
         </div>
         <div class="error-details-actions">
           <div class="d-inline-flex bv-d-sm-down-none">
-            <gl-deprecated-button
+            <gl-button
               :loading="updatingIgnoreStatus"
               data-testid="update-ignore-status-btn"
               @click="onIgnoreStatusUpdate"
             >
               {{ ignoreBtnLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button
-              class="btn-outline-info ml-2"
+            </gl-button>
+            <gl-button
+              class="ml-2"
+              category="secondary"
+              variant="info"
               :loading="updatingResolveStatus"
               data-testid="update-resolve-status-btn"
               @click="onResolveStatusUpdate"
             >
               {{ resolveBtnLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button
+            </gl-button>
+            <gl-button
               v-if="error.gitlabIssuePath"
               class="ml-2"
               data-testid="view_issue_button"
@@ -298,7 +304,7 @@ export default {
               variant="success"
             >
               {{ __('View issue') }}
-            </gl-deprecated-button>
+            </gl-button>
             <form
               ref="sentryIssueForm"
               :action="projectIssuesPath"
@@ -313,15 +319,16 @@ export default {
                 name="issue[sentry_issue_attributes][sentry_issue_identifier]"
               />
               <gl-form-input :value="csrfToken" class="hidden" name="authenticity_token" />
-              <gl-deprecated-button
+              <gl-button
                 v-if="!error.gitlabIssuePath"
-                class="btn-success"
+                category="primary"
+                variant="success"
                 :loading="issueCreationInProgress"
                 data-qa-selector="create_issue_button"
                 @click="createIssue"
               >
                 {{ __('Create issue') }}
-              </gl-deprecated-button>
+              </gl-button>
             </form>
           </div>
           <gl-dropdown
@@ -390,21 +397,21 @@ export default {
               data-testid="external-url-link"
             >
               <span class="text-truncate">{{ error.externalUrl }}</span>
-              <icon name="external-link" class="ml-1 flex-shrink-0" />
+              <gl-icon name="external-link" class="ml-1 flex-shrink-0" />
             </gl-link>
           </li>
-          <li v-if="error.firstReleaseShortVersion">
+          <li v-if="error.firstReleaseVersion">
             <strong class="bold">{{ __('First seen') }}:</strong>
-            {{ formatDate(error.firstSeen) }}
+            <time-ago-tooltip :time="error.firstSeen" />
             <gl-link :href="firstReleaseLink" target="_blank">
-              <span>{{ __('Release') }}: {{ error.firstReleaseShortVersion.substr(0, 10) }}</span>
+              <span>{{ __('Release') }}: {{ error.firstReleaseVersion }}</span>
             </gl-link>
           </li>
-          <li v-if="error.lastReleaseShortVersion">
+          <li v-if="error.lastReleaseVersion">
             <strong class="bold">{{ __('Last seen') }}:</strong>
-            {{ formatDate(error.lastSeen) }}
+            <time-ago-tooltip :time="error.lastSeen" />
             <gl-link :href="lastReleaseLink" target="_blank">
-              <span>{{ __('Release') }}: {{ error.lastReleaseShortVersion.substr(0, 10) }}</span>
+              <span>{{ __('Release') }}: {{ error.lastReleaseVersion }}</span>
             </gl-link>
           </li>
           <li>

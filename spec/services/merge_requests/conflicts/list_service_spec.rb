@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::Conflicts::ListService do
+RSpec.describe MergeRequests::Conflicts::ListService do
   describe '#can_be_resolved_in_ui?' do
     def create_merge_request(source_branch, target_branch = 'conflict-start')
       create(:merge_request, source_branch: source_branch, target_branch: target_branch, merge_status: :unchecked) do |mr|
@@ -36,7 +36,7 @@ describe MergeRequests::Conflicts::ListService do
 
     it 'returns a falsey value when the MR does not support new diff notes' do
       merge_request = create_merge_request('conflict-resolvable')
-      merge_request.merge_request_diff.update(start_commit_sha: nil)
+      merge_request.merge_request_diff.update!(start_commit_sha: nil)
 
       expect(conflicts_service(merge_request).can_be_resolved_in_ui?).to be_falsey
     end

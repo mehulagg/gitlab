@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/_head' do
+RSpec.describe 'layouts/_head' do
   include StubConfiguration
 
   before do
@@ -59,7 +59,7 @@ describe 'layouts/_head' do
 
     render
 
-    expect(rendered).to match('<link rel="stylesheet" media="all" href="/stylesheets/highlight/themes/solarised-light.css" />')
+    expect(rendered).to match('<link rel="stylesheet" media="print" href="/stylesheets/highlight/themes/solarised-light.css" />')
   end
 
   context 'when an asset_host is set and snowplow url is set' do
@@ -86,21 +86,21 @@ describe 'layouts/_head' do
     end
   end
 
-  context 'when a Piwik config is set' do
-    let(:piwik_host) { 'piwik.example.com' }
+  context 'when a Matomo config is set' do
+    let(:matomo_host) { 'matomo.example.com' }
 
     before do
       stub_config(extra: {
-                    piwik_url: piwik_host,
-                    piwik_site_id: 12345
+                    matomo_url: matomo_host,
+                    matomo_site_id: 12345
                   })
     end
 
-    it 'add a Piwik Javascript' do
+    it 'add a Matomo Javascript' do
       render
 
-      expect(rendered).to match(/<script.*>.*var u="\/\/#{piwik_host}\/".*<\/script>/m)
-      expect(rendered).to match(%r(<noscript>.*<img src="//#{piwik_host}/piwik.php.*</noscript>))
+      expect(rendered).to match(/<script.*>.*var u="\/\/#{matomo_host}\/".*<\/script>/m)
+      expect(rendered).to match(%r(<noscript>.*<img src="//#{matomo_host}/matomo.php.*</noscript>))
     end
   end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-shared_examples 'pages settings editing' do
+RSpec.shared_examples 'pages settings editing' do
   let_it_be(:project) { create(:project, pages_https_only: false) }
   let(:user) { create(:user) }
   let(:role) { :maintainer }
@@ -336,7 +336,7 @@ shared_examples 'pages settings editing' do
 
         expect(page).not_to have_field(:project_pages_https_only)
         expect(page).not_to have_content('Force HTTPS (requires valid certificates)')
-        expect(page).not_to have_button('Save')
+        expect(page).to have_button('Save')
       end
     end
   end
@@ -365,7 +365,7 @@ shared_examples 'pages settings editing' do
       end
 
       let!(:artifact) do
-        create(:ci_job_artifact, :archive,
+        create(:ci_job_artifact, :archive, :correct_checksum,
                file: fixture_file_upload(File.join('spec/fixtures/pages.zip')), job: ci_build)
       end
 
@@ -380,21 +380,21 @@ shared_examples 'pages settings editing' do
         expect(project).to be_pages_deployed
       end
 
-      it 'removes the pages' do
+      it 'removes the pages', :sidekiq_inline do
         visit project_pages_path(project)
 
         expect(page).to have_link('Remove pages')
 
         accept_confirm { click_link 'Remove pages' }
 
-        expect(page).to have_content('Pages were removed')
+        expect(page).to have_content('Pages were scheduled for removal')
         expect(project.reload.pages_deployed?).to be_falsey
       end
     end
   end
 end
 
-describe 'Pages', :js do
+RSpec.describe 'Pages', :js do
   include LetsEncryptHelpers
 
   context 'when editing normally' do

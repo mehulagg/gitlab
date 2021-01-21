@@ -13,37 +13,15 @@ RSpec.describe Ci::Pipeline do
   end
 
   it { is_expected.to have_many(:security_scans).through(:builds).class_name('Security::Scan') }
+  it { is_expected.to have_many(:security_findings).through(:security_scans).class_name('Security::Finding').source(:findings) }
   it { is_expected.to have_many(:downstream_bridges) }
-  it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_occurrence_pipelines).class_name('Vulnerabilities::Occurrence') }
-  it { is_expected.to have_many(:vulnerabilities_occurrence_pipelines).class_name('Vulnerabilities::OccurrencePipeline') }
+  it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::Finding') }
+  it { is_expected.to have_many(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::FindingPipeline') }
 
   describe '.failure_reasons' do
     it 'contains failure reasons about exceeded limits' do
       expect(described_class.failure_reasons)
         .to include 'activity_limit_exceeded', 'size_limit_exceeded'
-    end
-  end
-
-  describe '.ci_sources' do
-    subject { described_class.ci_sources }
-
-    let(:all_config_sources) { described_class.config_sources }
-
-    before do
-      all_config_sources.each do |source, _value|
-        create(:ci_pipeline, config_source: source)
-      end
-    end
-
-    it 'contains pipelines having CI only config sources' do
-      expect(subject.map(&:config_source)).to contain_exactly(
-        'auto_devops_source',
-        'external_project_source',
-        'remote_source',
-        'repository_source',
-        'unknown_source'
-      )
-      expect(subject.size).to be < all_config_sources.size
     end
   end
 
@@ -53,8 +31,8 @@ RSpec.describe Ci::Pipeline do
     let!(:pipeline_3) { create(:ci_pipeline, project: project) }
 
     before do
-      create(:vulnerabilities_occurrence, pipelines: [pipeline_1], project: pipeline.project)
-      create(:vulnerabilities_occurrence, pipelines: [pipeline_2], project: pipeline.project)
+      create(:vulnerabilities_finding, pipelines: [pipeline_1], project: pipeline.project)
+      create(:vulnerabilities_finding, pipelines: [pipeline_2], project: pipeline.project)
     end
 
     it "returns pipeline with vulnerabilities" do
@@ -63,55 +41,50 @@ RSpec.describe Ci::Pipeline do
   end
 
   describe '#batch_lookup_report_artifact_for_file_type' do
-    subject(:artifact) { pipeline.batch_lookup_report_artifact_for_file_type(file_type) }
+    shared_examples '#batch_lookup_report_artifact_for_file_type' do |file_type, license|
+      context 'when feature is available' do
+        before do
+          stub_licensed_features("#{license}": true)
+        end
 
-    let(:build_artifact) { build.job_artifacts.sample }
-
-    context 'with security report artifact' do
-      let!(:build) { create(:ee_ci_build, :dependency_scanning, :success, pipeline: pipeline) }
-      let(:file_type) { :dependency_scanning }
-
-      before do
-        stub_licensed_features(dependency_scanning: true)
+        it "returns the #{file_type} artifact" do
+          expect(pipeline.batch_lookup_report_artifact_for_file_type(file_type)).to eq(pipeline.job_artifacts.sample)
+        end
       end
 
-      it 'returns right kind of artifacts' do
-        is_expected.to eq(build_artifact)
-      end
+      context 'when feature is not available' do
+        before do
+          stub_licensed_features("#{license}": false)
+        end
 
-      context 'when looking for other type of artifact' do
-        let(:file_type) { :codequality }
-
-        it 'returns nothing' do
-          is_expected.to be_nil
+        it "doesn't return the #{file_type} artifact" do
+          expect(pipeline.batch_lookup_report_artifact_for_file_type(file_type)).to be_nil
         end
       end
     end
 
-    context 'with license compliance artifact' do
-      before do
-        stub_licensed_features(license_scanning: true)
-      end
+    context 'with security report artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
 
-      [:license_management, :license_scanning].each do |artifact_type|
-        let!(:build) { create(:ee_ci_build, artifact_type, :success, pipeline: pipeline) }
+      include_examples '#batch_lookup_report_artifact_for_file_type', :dependency_scanning, :dependency_scanning
+    end
 
-        context 'when looking for license_scanning' do
-          let(:file_type) { :license_scanning }
+    context 'with license scanning artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
 
-          it 'returns artifact' do
-            is_expected.to eq(build_artifact)
-          end
-        end
+      include_examples '#batch_lookup_report_artifact_for_file_type', :license_scanning, :license_scanning
+    end
 
-        context 'when looking for license_management' do
-          let(:file_type) { :license_management }
+    context 'with browser performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
 
-          it 'returns artifact' do
-            is_expected.to eq(build_artifact)
-          end
-        end
-      end
+      include_examples '#batch_lookup_report_artifact_for_file_type', :browser_performance, :merge_request_performance_metrics
+    end
+
+    context 'with load performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_load_performance_report, project: project) }
+
+      include_examples '#batch_lookup_report_artifact_for_file_type', :load_performance, :merge_request_performance_metrics
     end
   end
 
@@ -151,30 +124,35 @@ RSpec.describe Ci::Pipeline do
       let!(:cs1_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_1, project: project) }
       let!(:cs2_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_2, project: project) }
 
-      before do
-      end
-
-      it 'assigns pipeline commit_sha to the reports' do
-        expect(subject.commit_sha).to eq(pipeline.sha)
-        expect(subject.reports.values.map(&:commit_sha).uniq).to contain_exactly(pipeline.sha)
+      it 'assigns pipeline to the reports' do
+        expect(subject.pipeline).to eq(pipeline)
+        expect(subject.reports.values.map(&:pipeline).uniq).to contain_exactly(pipeline)
       end
 
       it 'returns security reports with collected data grouped as expected' do
         expect(subject.reports.keys).to contain_exactly('sast', 'dependency_scanning', 'container_scanning')
 
         # for each of report categories, we have merged 2 reports with the same data (fixture)
-        expect(subject.get_report('sast', sast1_artifact).occurrences.size).to eq(33)
-        expect(subject.get_report('dependency_scanning', ds1_artifact).occurrences.size).to eq(4)
-        expect(subject.get_report('container_scanning', cs1_artifact).occurrences.size).to eq(8)
+        expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+        expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
+        expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
       end
 
       context 'when builds are retried' do
         let(:build_sast_1) { create(:ci_build, :retried, name: 'sast_1', pipeline: pipeline, project: project) }
 
         it 'does not take retried builds into account' do
-          expect(subject.get_report('sast', sast1_artifact).occurrences.size).to eq(33)
-          expect(subject.get_report('dependency_scanning', ds1_artifact).occurrences.size).to eq(4)
-          expect(subject.get_report('container_scanning', cs1_artifact).occurrences.size).to eq(8)
+          expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+          expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
+          expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
+        end
+      end
+
+      context 'when the `report_types` parameter is provided' do
+        subject(:filtered_report_types) { pipeline.security_reports(report_types: %w(sast)).reports.values.map(&:type).uniq }
+
+        it 'returns only the reports which are requested' do
+          expect(filtered_report_types).to eq(%w(sast))
         end
       end
     end
@@ -187,59 +165,76 @@ RSpec.describe Ci::Pipeline do
   end
 
   describe 'Store security reports worker' do
-    using RSpec::Parameterized::TableSyntax
+    shared_examples_for 'storing the security reports' do |transition|
+      let(:default_branch) { pipeline.ref }
 
-    where(:state, :transition) do
-      :success | :succeed
-      :failed | :drop
-      :skipped | :skip
-      :cancelled | :cancel
+      subject(:transition_pipeline) { pipeline.update!(status_event: transition) }
+
+      before do
+        allow(StoreSecurityReportsWorker).to receive(:perform_async)
+        allow(project).to receive(:default_branch).and_return(default_branch)
+        allow(pipeline).to receive(:can_store_security_reports?).and_return(can_store_security_reports)
+      end
+
+      context 'when the security reports can be stored for the pipeline' do
+        let(:can_store_security_reports) { true }
+
+        context 'when the ref is the default branch of project' do
+          it 'schedules store security report worker' do
+            transition_pipeline
+
+            expect(StoreSecurityReportsWorker).to have_received(:perform_async).with(pipeline.id)
+          end
+        end
+
+        context 'when the ref is not the default branch of project' do
+          let(:default_branch) { 'another_branch' }
+
+          it 'does not schedule store security report worker' do
+            transition_pipeline
+
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
+        end
+      end
+
+      context 'when the security reports can not be stored for the pipeline' do
+        let(:can_store_security_reports) { false }
+
+        context 'when the ref is the default branch of project' do
+          it 'does not schedule store security report worker' do
+            transition_pipeline
+
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
+        end
+
+        context 'when the ref is not the default branch of project' do
+          let(:default_branch) { 'another_branch' }
+
+          it 'does not schedule store security report worker' do
+            transition_pipeline
+
+            expect(StoreSecurityReportsWorker).not_to have_received(:perform_async)
+          end
+        end
+      end
     end
 
-    with_them do
-      context 'when pipeline has security reports and ref is the default branch of project' do
-        let(:default_branch) { pipeline.ref }
+    context 'when pipeline is succeeded' do
+      it_behaves_like 'storing the security reports', :succeed
+    end
 
-        before do
-          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
-          allow(project).to receive(:default_branch) { default_branch }
-        end
+    context 'when pipeline is dropped' do
+      it_behaves_like 'storing the security reports', :drop
+    end
 
-        context "when transitioning to #{params[:state]}" do
-          it 'schedules store security report worker' do
-            expect(StoreSecurityReportsWorker).to receive(:perform_async).with(pipeline.id)
+    context 'when pipeline is skipped' do
+      it_behaves_like 'storing the security reports', :skip
+    end
 
-            pipeline.update!(status_event: transition)
-          end
-        end
-      end
-
-      context 'when pipeline does NOT have security reports' do
-        context "when transitioning to #{params[:state]}" do
-          it 'does NOT schedule store security report worker' do
-            expect(StoreSecurityReportsWorker).not_to receive(:perform_async).with(pipeline.id)
-
-            pipeline.update!(status_event: transition)
-          end
-        end
-      end
-
-      context "when pipeline ref is not the project's default branch" do
-        let(:default_branch) { 'another_branch' }
-
-        before do
-          stub_licensed_features(sast: true)
-          allow(project).to receive(:default_branch) { default_branch }
-        end
-
-        context "when transitioning to #{params[:state]}" do
-          it 'does NOT schedule store security report worker' do
-            expect(StoreSecurityReportsWorker).not_to receive(:perform_async).with(pipeline.id)
-
-            pipeline.update!(status_event: transition)
-          end
-        end
-      end
+    context 'when pipeline is canceled' do
+      it_behaves_like 'storing the security reports', :cancel
     end
   end
 
@@ -376,7 +371,7 @@ RSpec.describe Ci::Pipeline do
 
     context 'when pipeline is web terminal triggered' do
       before do
-        pipeline.config_source = 'webide_source'
+        pipeline.source = 'webide'
       end
 
       it 'does not schedule the pipeline cache worker' do
@@ -400,7 +395,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is not available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: false)
+            stub_licensed_features(ci_project_subscriptions: false)
           end
 
           it 'does not schedule the trigger downstream subscriptions worker' do
@@ -412,7 +407,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: true)
+            stub_licensed_features(ci_project_subscriptions: true)
           end
 
           it 'schedules the trigger downstream subscriptions worker' do
@@ -516,6 +511,136 @@ RSpec.describe Ci::Pipeline do
       let(:merge_request) { create(:merge_request, :with_detached_merge_request_pipeline) }
 
       it { is_expected.to eq(:detached) }
+    end
+  end
+
+  describe '#latest_failed_security_builds' do
+    let(:sast_build) { create(:ee_ci_build, :sast, :failed, pipeline: pipeline) }
+    let(:dast_build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
+    let(:retried_sast_build) { create(:ee_ci_build, :sast, :failed, :retried, pipeline: pipeline) }
+    let(:expected_builds) { [sast_build] }
+
+    before do
+      allow_next_instance_of(::Security::SecurityJobsFinder) do |finder|
+        allow(finder).to receive(:execute).and_return([sast_build, dast_build, retried_sast_build])
+      end
+    end
+
+    subject { pipeline.latest_failed_security_builds }
+
+    it { is_expected.to match_array(expected_builds) }
+  end
+
+  describe "#license_scan_completed?" do
+    where(:pipeline_status, :build_types, :expected_status) do
+      [
+        [:blocked, [:container_scanning], false],
+        [:blocked, [:license_scan_v2_1, :container_scanning], true],
+        [:blocked, [:license_scan_v2_1], true],
+        [:blocked, [], false],
+        [:failed, [:container_scanning], false],
+        [:failed, [:license_scan_v2_1, :container_scanning], true],
+        [:failed, [:license_scan_v2_1], true],
+        [:failed, [], false],
+        [:running, [:container_scanning], false],
+        [:running, [:license_scan_v2_1, :container_scanning], true],
+        [:running, [:license_scan_v2_1], true],
+        [:running, [], false],
+        [:success, [:container_scanning], false],
+        [:success, [:license_scan_v2_1, :container_scanning], true],
+        [:success, [:license_scan_v2_1], true],
+        [:success, [], false]
+      ]
+    end
+
+    with_them do
+      subject { pipeline.license_scan_completed? }
+
+      let(:pipeline) { create(:ci_pipeline, pipeline_status, builds: builds) }
+      let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+      specify { expect(subject).to eq(expected_status) }
+    end
+  end
+
+  describe '#can_store_security_reports?' do
+    subject { pipeline.can_store_security_reports? }
+
+    before do
+      pipeline.succeed!
+    end
+
+    context 'when the security reports can not be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(false)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_falsy }
+      end
+    end
+
+    context 'when the security reports can be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(true)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
+
+  describe '#has_security_findings?' do
+    subject { pipeline.has_security_findings? }
+
+    context 'when the pipeline has security_findings' do
+      before do
+        scan = create(:security_scan, pipeline: pipeline)
+        create(:security_finding, scan: scan)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the pipeline does not have security_findings' do
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#needs_touch?' do
+    subject { pipeline.needs_touch? }
+
+    context 'when pipeline was updated less than 5 minutes ago' do
+      before do
+        pipeline.updated_at = 4.minutes.ago
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when pipeline was updated more than 5 minutes ago' do
+      before do
+        pipeline.updated_at = 6.minutes.ago
+      end
+
+      it { is_expected.to eq(true) }
     end
   end
 end

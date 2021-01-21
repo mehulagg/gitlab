@@ -41,6 +41,16 @@ module API
       end
     end
 
+    def job_token_authentication?
+      initial_current_user && @current_authenticated_job.present? # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    end
+
+    # Returns the job associated with the token provided for
+    # authentication, if any
+    def current_authenticated_job
+      @current_authenticated_job
+    end
+
     # rubocop:disable Gitlab/ModuleWithInstanceVariables
     # We can't rewrite this with StrongMemoize because `sudo!` would
     # actually write to `@current_user`, and `sudo?` would immediately
@@ -79,22 +89,15 @@ module API
       @project ||= find_project!(params[:id])
     end
 
-    def wiki_page
-      page = ProjectWiki.new(user_project, current_user).find_page(params[:slug])
-
-      page || not_found!('Wiki Page')
-    end
-
-    def available_labels_for(label_parent, include_ancestor_groups: true)
-      search_params = { include_ancestor_groups: include_ancestor_groups }
-
+    def available_labels_for(label_parent, params = { include_ancestor_groups: true, only_group_labels: true })
       if label_parent.is_a?(Project)
-        search_params[:project_id] = label_parent.id
+        params.delete(:only_group_labels)
+        params[:project_id] = label_parent.id
       else
-        search_params.merge!(group_id: label_parent.id, only_group_labels: true)
+        params[:group_id] = label_parent.id
       end
 
-      LabelsFinder.new(current_user, search_params).execute
+      LabelsFinder.new(current_user, params).execute
     end
 
     def find_user(id)
@@ -217,6 +220,10 @@ module API
       user_project.builds.find(id.to_i)
     end
 
+    def find_job!(id)
+      user_project.processables.find(id.to_i)
+    end
+
     def authenticate!
       unauthorized! unless current_user
     end
@@ -268,6 +275,14 @@ module API
       authorize! :read_build, user_project
     end
 
+    def authorize_read_build_trace!(build)
+      authorize! :read_build_trace, build
+    end
+
+    def authorize_read_job_artifacts!(build)
+      authorize! :read_job_artifacts, build
+    end
+
     def authorize_destroy_artifacts!
       authorize! :destroy_artifacts, user_project
     end
@@ -315,7 +330,7 @@ module API
     #   keys (required) - A hash consisting of keys that must be present
     def required_attributes!(keys)
       keys.each do |key|
-        bad_request!(key) unless params[key].present?
+        bad_request_missing_attribute!(key) unless params[key].present?
       end
     end
 
@@ -357,14 +372,18 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
-    def bad_request!(attribute)
-      message = ["400 (Bad request)"]
-      message << "\"" + attribute.to_s + "\" not given" if attribute
+    def bad_request!(reason = nil)
+      message = ['400 Bad request']
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 400)
+    end
+
+    def bad_request_missing_attribute!(attribute)
+      bad_request!("\"#{attribute}\" not given")
     end
 
     def not_found!(resource = nil)
@@ -374,12 +393,18 @@ module API
       render_api_error!(message.join(' '), 404)
     end
 
+    def check_sha_param!(params, merge_request)
+      if params[:sha] && merge_request.diff_head_sha != params[:sha]
+        render_api_error!("SHA does not match HEAD of source branch: #{merge_request.diff_head_sha}", 409)
+      end
+    end
+
     def unauthorized!
       render_api_error!('401 Unauthorized', 401)
     end
 
-    def not_allowed!
-      render_api_error!('405 Method Not Allowed', 405)
+    def not_allowed!(message = nil)
+      render_api_error!(message || '405 Method Not Allowed', :method_not_allowed)
     end
 
     def not_acceptable!
@@ -392,6 +417,10 @@ module API
 
     def conflict!(message = nil)
       render_api_error!(message || '409 Conflict', 409)
+    end
+
+    def unprocessable_entity!(message = nil)
+      render_api_error!(message || '422 Unprocessable Entity', :unprocessable_entity)
     end
 
     def file_too_large!
@@ -416,8 +445,12 @@ module API
 
     def render_validation_error!(model)
       if model.errors.any?
-        render_api_error!(model.errors.messages || '400 Bad Request', 400)
+        render_api_error!(model_error_messages(model) || '400 Bad Request', 400)
       end
+    end
+
+    def model_error_messages(model)
+      model.errors.messages
     end
 
     def render_spam_error!
@@ -488,9 +521,9 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
-        file path
+        sendfile path
       end
     end
 
@@ -504,7 +537,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 
@@ -514,9 +547,36 @@ module API
 
       ::Gitlab::Tracking.event(category, action.to_s, **args)
     rescue => error
-      Rails.logger.warn( # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.warn(
         "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
       )
+    end
+
+    def increment_counter(event_name)
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
+
+      Gitlab::UsageDataCounters.count(event_name)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    # @param event_name [String] the event name
+    # @param values [Array|String] the values counted
+    def increment_unique_values(event_name, values)
+      return unless values.present?
+
+      feature_flag = "usage_data_#{event_name}"
+
+      return unless Feature.enabled?(feature_flag, default_enabled: true)
+
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    def with_api_params(&block)
+      yield({ api: true, request: request })
     end
 
     protected
@@ -534,15 +594,18 @@ module API
 
     def project_finder_params_ce
       finder_params = project_finder_params_visibility_ce
+      finder_params[:with_issues_enabled] = true if params[:with_issues_enabled].present?
+      finder_params[:with_merge_requests_enabled] = true if params[:with_merge_requests_enabled].present?
       finder_params[:without_deleted] = true
       finder_params[:search] = params[:search] if params[:search]
       finder_params[:search_namespaces] = true if params[:search_namespaces].present?
       finder_params[:user] = params.delete(:user) if params[:user]
       finder_params[:custom_attributes] = params[:custom_attributes] if params[:custom_attributes]
-      finder_params[:id_after] = params[:id_after] if params[:id_after]
-      finder_params[:id_before] = params[:id_before] if params[:id_before]
+      finder_params[:id_after] = sanitize_id_param(params[:id_after]) if params[:id_after]
+      finder_params[:id_before] = sanitize_id_param(params[:id_before]) if params[:id_before]
       finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
       finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
+      finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
       finder_params
     end
 
@@ -637,6 +700,10 @@ module API
 
     def ip_address
       env["action_dispatch.remote_ip"].to_s || request.ip
+    end
+
+    def sanitize_id_param(id)
+      id.present? ? id.to_i : nil
     end
   end
 end

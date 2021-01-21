@@ -5,6 +5,7 @@ class ElasticNamespaceIndexerWorker # rubocop:disable Scalability/IdempotentWork
 
   feature_category :global_search
   sidekiq_options retry: 2
+  loggable_arguments 1
 
   def perform(namespace_id, operation)
     return true unless Gitlab::CurrentSettings.elasticsearch_indexing?
@@ -23,18 +24,15 @@ class ElasticNamespaceIndexerWorker # rubocop:disable Scalability/IdempotentWork
   private
 
   def index_projects(namespace)
-    # The default of 1000 is good for us since Sidekiq documentation doesn't recommend more than 1000 per batch call
-    # https://www.rubydoc.info/github/mperham/sidekiq/Sidekiq%2FClient:push_bulk
     namespace.all_projects.find_in_batches do |batch|
-      args = batch.map { |project| [:index, project.class.to_s, project.id, project.es_id] }
-      ElasticIndexerWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
+      ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(*batch)
     end
   end
 
   def delete_from_index(namespace)
     namespace.all_projects.find_in_batches do |batch|
-      args = batch.map { |project| [:delete, project.class.to_s, project.id, project.es_id] }
-      ElasticIndexerWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
+      args = batch.map { |project| [project.id, project.es_id] }
+      ElasticDeleteProjectWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
     end
   end
 end

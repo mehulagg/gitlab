@@ -5,7 +5,7 @@ import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import createEventHub from '~/helpers/event_hub_factory';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
 import initChangesDropdown from './init_changes_dropdown';
 import {
@@ -13,6 +13,7 @@ import {
   handleLocationHash,
   isMetaClick,
   parseBoolean,
+  scrollToElement,
 } from './lib/utils/common_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { getLocationHash } from './lib/utils/url_utility';
@@ -21,6 +22,7 @@ import { localTimeAgo } from './lib/utils/datetime_utility';
 import syntaxHighlight from './syntax_highlight';
 import Notes from './notes';
 import { polyfillSticky } from './lib/utils/sticky';
+import initAddContextCommitsTriggers from './add_context_commits_modal';
 import { __ } from './locale';
 
 // MergeRequestTabs
@@ -126,7 +128,7 @@ export default class MergeRequestTabs {
 
   bindEvents() {
     $('.merge-request-tabs a[data-toggle="tabvue"]').on('click', this.clickTab);
-    window.addEventListener('popstate', event => {
+    window.addEventListener('popstate', (event) => {
       if (event.state && event.state.action) {
         this.tabShown(event.state.action, event.target.location);
         this.currentAction = event.state.action;
@@ -166,8 +168,6 @@ export default class MergeRequestTabs {
         if (this.setUrl) {
           this.setCurrentAction(action);
         }
-
-        this.eventHub.$emit('MergeRequestTabChange', this.getCurrentAction());
       }
     }
   }
@@ -177,14 +177,14 @@ export default class MergeRequestTabs {
       this.currentTab = action;
 
       if (this.mergeRequestTabPanesAll) {
-        this.mergeRequestTabPanesAll.forEach(el => {
+        this.mergeRequestTabPanesAll.forEach((el) => {
           const tabPane = el;
           tabPane.style.display = 'none';
         });
       }
 
       if (this.mergeRequestTabsAll) {
-        this.mergeRequestTabsAll.forEach(el => {
+        this.mergeRequestTabsAll.forEach((el) => {
           el.classList.remove('active');
         });
       }
@@ -226,6 +226,8 @@ export default class MergeRequestTabs {
         this.resetViewContainer();
         this.destroyPipelinesView();
       }
+
+      $('.detail-page-description').renderGFM();
     } else if (action === this.currentAction) {
       // ContentTop is used to handle anything at the top of the page before the main content
       const mainContentContainer = document.querySelector('.content-wrapper');
@@ -249,14 +251,16 @@ export default class MergeRequestTabs {
         }
       }
     }
+
+    this.eventHub.$emit('MergeRequestTabChange', action);
   }
 
-  scrollToElement(container) {
+  scrollToContainerElement(container) {
     if (location.hash) {
-      const offset = 0 - ($('.navbar-gitlab').outerHeight() + $('.js-tabs-affix').outerHeight());
       const $el = $(`${container} ${location.hash}:not(.match)`);
+
       if ($el.length) {
-        $.scrollTo($el[0], { offset });
+        scrollToElement($el[0]);
       }
     }
   }
@@ -335,9 +339,10 @@ export default class MergeRequestTabs {
         document.querySelector('div#commits').innerHTML = data.html;
         localTimeAgo($('.js-timeago', 'div#commits'));
         this.commitsLoaded = true;
-        this.scrollToElement('#commits');
+        this.scrollToContainerElement('#commits');
 
         this.toggleLoading(false);
+        initAddContextCommitsTriggers();
       })
       .catch(() => {
         this.toggleLoading(false);
@@ -356,9 +361,16 @@ export default class MergeRequestTabs {
         emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
         errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
         autoDevopsHelpPath: pipelineTableViewEl.dataset.helpAutoDevopsPath,
-        canRunPipeline: true,
+        canCreatePipelineInTargetProject: Boolean(
+          mrWidgetData?.can_create_pipeline_in_target_project,
+        ),
+        sourceProjectFullPath: mrWidgetData?.source_project_full_path || '',
+        targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
         projectId: pipelineTableViewEl.dataset.projectId,
         mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
+      },
+      provide: {
+        targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
       },
     }).$mount();
 
@@ -387,10 +399,6 @@ export default class MergeRequestTabs {
 
         initChangesDropdown(this.stickyTop);
 
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
-
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));
 
@@ -400,7 +408,7 @@ export default class MergeRequestTabs {
         this.diffsLoaded = true;
 
         new Diff();
-        this.scrollToElement('#diffs');
+        this.scrollToContainerElement('#diffs');
 
         $('.diff-file').each((i, el) => {
           new BlobForkSuggestion({
@@ -473,13 +481,14 @@ export default class MergeRequestTabs {
   }
 
   shrinkView() {
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle:visible');
+    const $expandSvg = $gutterBtn.find('.js-sidebar-expand');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is expanded
-      if ($gutterIcon.is('.fa-angle-double-right')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($expandSvg.length && $expandSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }
@@ -489,13 +498,14 @@ export default class MergeRequestTabs {
     if (parseBoolean(Cookies.get('collapsed_gutter'))) {
       return;
     }
-    const $gutterIcon = $('.js-sidebar-toggle i:visible');
+    const $gutterBtn = $('.js-sidebar-toggle');
+    const $collapseSvg = $gutterBtn.find('.js-sidebar-collapse');
 
     // Wait until listeners are set
     setTimeout(() => {
       // Only when sidebar is collapsed
-      if ($gutterIcon.is('.fa-angle-double-left')) {
-        $gutterIcon.closest('a').trigger('click', [true]);
+      if ($collapseSvg.length && !$collapseSvg.hasClass('hidden')) {
+        $gutterBtn.trigger('click', [true]);
       }
     }, 0);
   }

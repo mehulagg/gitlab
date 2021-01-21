@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'getting a repository in a project' do
+RSpec.describe 'getting a repository in a project' do
   include GraphqlHelpers
 
   let(:project) { create(:project, :repository) }
@@ -11,6 +11,7 @@ describe 'getting a repository in a project' do
       #{all_graphql_fields_for('repository'.classify)}
     QUERY
   end
+
   let(:query) do
     graphql_query_for(
       'project',

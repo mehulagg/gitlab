@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:admin) { create(:admin, feed_token: 'feedtoken:coldfeed') }
+  let(:user) { create(:user, feed_token: 'feedtoken:coldfeed') }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project_empty_repo, namespace: namespace, path: 'issues-project') }
 
@@ -16,7 +16,8 @@ describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller 
   end
 
   before do
-    sign_in(admin)
+    project.add_maintainer(user)
+    sign_in(user)
   end
 
   after do
@@ -38,17 +39,6 @@ describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller 
 
   it 'issues/closed-issue.html' do
     render_issue(create(:closed_issue, project: project))
-  end
-
-  it 'issues/issue-with-task-list.html' do
-    issue = create(:issue, project: project, description: '- [ ] Task List Item')
-    render_issue(issue)
-  end
-
-  it 'issues/issue_with_comment.html' do
-    issue = create(:issue, project: project)
-    create(:note, project: project, noteable: issue, note: '- [ ] Task List Item').save
-    render_issue(issue)
   end
 
   it 'issues/issue_list.html' do
@@ -75,7 +65,7 @@ describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller 
   end
 end
 
-describe API::Issues, '(JavaScript fixtures)', type: :request do
+RSpec.describe API::Issues, '(JavaScript fixtures)', type: :request do
   include ApiHelpers
   include JavaScriptFixturesHelpers
 

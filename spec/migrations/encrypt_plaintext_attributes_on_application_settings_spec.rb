@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'migrate', '20191120115530_encrypt_plaintext_attributes_on_application_settings.rb')
 
-describe EncryptPlaintextAttributesOnApplicationSettings do
+RSpec.describe EncryptPlaintextAttributesOnApplicationSettings do
   let(:migration) { described_class.new }
   let(:application_settings) { table(:application_settings) }
   let(:plaintext) { 'secret-token' }
@@ -19,7 +19,7 @@ describe EncryptPlaintextAttributesOnApplicationSettings do
 
   describe '#up' do
     it 'encrypts token and saves it' do
-      application_setting = application_settings.create
+      application_setting = application_settings.create!
       application_setting.update_columns(
         plaintext_attributes.each_with_object({}) do |plaintext_attribute, attributes|
           attributes[plaintext_attribute] = plaintext
@@ -39,7 +39,7 @@ describe EncryptPlaintextAttributesOnApplicationSettings do
 
   describe '#down' do
     it 'decrypts encrypted token and saves it' do
-      application_setting = application_settings.create(
+      application_setting = application_settings.create!(
         plaintext_attributes.each_with_object({}) do |plaintext_attribute, attributes|
           attributes[plaintext_attribute] = plaintext
         end

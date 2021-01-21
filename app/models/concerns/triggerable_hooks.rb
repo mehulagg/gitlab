@@ -12,14 +12,16 @@ module TriggerableHooks
     merge_request_hooks:      :merge_requests_events,
     job_hooks:                :job_events,
     pipeline_hooks:           :pipeline_events,
-    wiki_page_hooks:          :wiki_page_events
+    wiki_page_hooks:          :wiki_page_events,
+    deployment_hooks:         :deployment_events,
+    feature_flag_hooks:       :feature_flag_events,
+    release_hooks:            :releases_events,
+    member_hooks:             :member_events
   }.freeze
 
   extend ActiveSupport::Concern
 
   class_methods do
-    attr_reader :triggerable_hooks
-
     attr_reader :triggers
 
     def hooks_for(trigger)

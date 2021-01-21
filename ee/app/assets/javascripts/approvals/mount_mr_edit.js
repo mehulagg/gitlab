@@ -12,17 +12,19 @@ export default function mountApprovalInput(el) {
     return null;
   }
 
-  const mrCreateTargetBranch = el.dataset.mrSettingsPath
-    ? null
-    : document.querySelector('#js-target-branch-title')?.textContent;
+  const targetBranch =
+    document.querySelector('#js-target-branch-title')?.textContent ||
+    document.querySelector('#merge_request_target_branch')?.value;
 
   const store = createStore(mrEditModule(), {
     ...el.dataset,
     prefix: 'mr-edit',
     canEdit: parseBoolean(el.dataset.canEdit),
     allowMultiRule: parseBoolean(el.dataset.allowMultiRule),
-    mrCreateTargetBranch,
+    canOverride: parseBoolean(el.dataset.canOverride),
   });
+
+  store.dispatch('setTargetBranch', targetBranch);
 
   return new Vue({
     el,

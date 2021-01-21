@@ -8,6 +8,12 @@ RSpec.describe Gitlab::Checks::DiffCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do
+    let(:push_allowed) { false }
+
+    before do
+      allow(user_access).to receive(:can_push_to_branch?).and_return(push_allowed)
+    end
+
     shared_examples_for "returns codeowners validation message" do
       it "returns an error message" do
         expect(validation_result).to include("Pushes to protected branches")
@@ -21,6 +27,51 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         expect(subject).not_to receive(:process_commits)
 
         subject.validate!
+      end
+    end
+
+    describe '#validate_code_owners?' do
+      let_it_be(:push_rule) { create(:push_rule, file_name_regex: 'READ*') }
+      let(:validate_code_owners) { subject.send(:validate_code_owners?) }
+      let(:protocol) { 'ssh' }
+      let(:push_allowed) { false }
+
+      context 'when push_rules_supersede_code_owners is disabled' do
+        before do
+          stub_feature_flags(push_rules_supersede_code_owners: false)
+        end
+
+        it 'returns branch_requires_code_owner_approval?' do
+          expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+          expect(validate_code_owners).to eq(true)
+        end
+      end
+
+      context 'when user can not push to the branch' do
+        context 'when not updated from web' do
+          it 'checks if the branch requires code owner approval' do
+            expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+            expect(validate_code_owners).to eq(true)
+          end
+        end
+
+        context 'when updated from the web' do
+          let(:protocol) { 'web' }
+
+          it 'returns false' do
+            expect(validate_code_owners).to eq(false)
+          end
+        end
+      end
+
+      context 'when a user can push to the branch' do
+        let(:push_allowed) { true }
+
+        it 'returns false' do
+          expect(validate_code_owners).to eq(false)
+        end
       end
     end
 
@@ -90,7 +141,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
       end
     end
 
-    describe "#path_validations" do
+    describe "#file_paths_validations" do
       include_context 'change access checks context'
 
       context "when the feature isn't enabled on the project" do
@@ -100,7 +151,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         end
 
         it "returns an empty array" do
-          expect(subject.send(:path_validations)).to eq([])
+          expect(subject.send(:file_paths_validations)).to eq([])
         end
       end
 
@@ -113,7 +164,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           end
 
           it "returns an array of Proc(s)" do
-            validations = subject.send(:path_validations)
+            validations = subject.send(:file_paths_validations)
 
             expect(validations.any?).to be_truthy
             expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
@@ -125,30 +176,8 @@ RSpec.describe Gitlab::Checks::DiffCheck do
             expect(subject).to receive(:updated_from_web?).and_return(true)
           end
 
-          context "when skip_web_ui_code_owner_validations is disabled" do
-            before do
-              stub_feature_flags(skip_web_ui_code_owner_validations: false)
-              allow(project).to receive(:branch_requires_code_owner_approval?)
-                .once.and_return(true)
-            end
-
-            it "returns an array of Proc(s)" do
-              validations = subject.send(:path_validations)
-
-              expect(validations.any?).to be_truthy
-              expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
-            end
-          end
-
-          context "when skip_web_ui_code_owner_validations is enabled" do
-            before do
-              stub_feature_flags(skip_web_ui_code_owner_validations: true)
-              expect(project).not_to receive(:branch_requires_code_owner_approval?)
-            end
-
-            it "returns an empty array" do
-              expect(subject.send(:path_validations)).to eq([])
-            end
+          it "returns an empty array" do
+            expect(subject.send(:file_paths_validations)).to eq([])
           end
         end
       end
@@ -184,7 +213,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
             [
               'readme.txt', 'any/ida_rsa.pub', 'any/id_dsa.pub', 'any_2/id_ed25519.pub',
               'random_file.pdf', 'folder/id_ecdsa.pub', 'docs/aws/credentials.md', 'ending_withhistory'
-            ]
+          ]
 
           white_listed.each do |file_path|
             old_rev = 'be93687618e4b132087f430a4d8fc3a609c9b77c'
@@ -207,7 +236,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
               'aws/credentials', '.ssh/personal_rsa', 'config/server_rsa', '.ssh/id_rsa', '.ssh/id_dsa',
               '.ssh/personal_dsa', 'config/server_ed25519', 'any/id_ed25519', '.ssh/personal_ecdsa', 'config/server_ecdsa',
               'any_place/id_ecdsa', 'some_pLace/file.key', 'other_PlAcE/other_file.pem', 'bye_bug.history', 'pg_sql_history'
-            ]
+          ]
 
           black_listed.each do |file_path|
             old_rev = 'be93687618e4b132087f430a4d8fc3a609c9b77c'

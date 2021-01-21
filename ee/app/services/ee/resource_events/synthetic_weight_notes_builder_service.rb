@@ -20,7 +20,7 @@ module EE
         return [] unless resource.respond_to?(:resource_weight_events)
 
         events = resource.resource_weight_events.includes(user: :status).order(:id) # rubocop: disable CodeReuse/ActiveRecord
-        since_fetch_at(events)
+        apply_common_filters(events)
       end
     end
   end

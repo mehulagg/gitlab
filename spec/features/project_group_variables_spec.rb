@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project group variables', :js do
+RSpec.describe 'Project group variables', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:subgroup) { create(:group, parent: group) }
@@ -24,7 +24,6 @@ describe 'Project group variables', :js do
     sign_in(user)
     project.add_maintainer(user)
     group.add_owner(user)
-    stub_feature_flags(new_variables_ui: false)
   end
 
   it 'project in group shows inherited vars from ancestor group' do
@@ -53,9 +52,13 @@ describe 'Project group variables', :js do
 
   it 'project origin keys link to ancestor groups ci_cd settings' do
     visit project_path
+
     find('.group-origin-link').click
-    page.within('.js-ci-variable-list-section .js-row:nth-child(2)') do
-      expect(find('.js-ci-variable-input-key').value).to eq(key1)
+
+    wait_for_requests
+
+    page.within('.ci-variable-table') do
+      expect(find('.js-ci-variable-row:nth-child(1) [data-label="Key"]').text).to eq(key1)
     end
   end
 end

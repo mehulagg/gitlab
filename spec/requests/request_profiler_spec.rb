@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Request Profiler' do
+RSpec.describe 'Request Profiler' do
   let(:user) { create(:user) }
 
   shared_examples 'profiling a request' do |profile_type, extension|
@@ -24,7 +24,7 @@ describe 'Request Profiler' do
       time    = Time.now
       path    = "/#{project.full_path}"
 
-      Timecop.freeze(time) do
+      travel_to(time) do
         get path, params: {}, headers: { 'X-Profile-Token' => Gitlab::RequestProfiler.profile_token, 'X-Profile-Mode' => profile_type }
       end
 

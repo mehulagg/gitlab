@@ -152,19 +152,36 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
   end
 
   context 'when comment is not present' do
-    let(:feedback) { build(:vulnerability_feedback, :dismissal) }
+    let(:feedback) { build(:vulnerability_feedback, :dismissal, project: project) }
 
     it { is_expected.not_to include(:comment_details) }
   end
 
   context 'when comment is present' do
-    let(:feedback) { build(:vulnerability_feedback, :comment) }
+    let(:feedback) { build(:vulnerability_feedback, :comment, project: project) }
 
     it 'exposes comment information' do
       expect(subject).to include(:comment_details)
       expect(subject[:comment_details]).to include(:comment)
       expect(subject[:comment_details]).to include(:comment_timestamp)
       expect(subject[:comment_details]).to include(:comment_author)
+    end
+  end
+
+  context 'when finding_uuid is not present' do
+    let(:feedback) { build(:vulnerability_feedback, :issue, project: project) }
+
+    it 'has a nil finding_uuid' do
+      expect(subject[:finding_uuid]).to be_nil
+    end
+  end
+
+  context 'when finding_uuid is present' do
+    let_it_be(:finding) { create(:vulnerabilities_finding) }
+    let(:feedback) { create(:vulnerability_feedback, finding_uuid: finding.uuid, project: project) }
+
+    it 'exposes finding_uuid' do
+      expect(subject[:finding_uuid]).to eq(finding.uuid)
     end
   end
 end

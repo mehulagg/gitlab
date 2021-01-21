@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Query.project(fullPath).issue(iid)' do
+RSpec.describe 'Query.project(fullPath).issue(iid)' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -29,8 +29,8 @@ describe 'Query.project(fullPath).issue(iid)' do
 
     let(:design_fields) do
       [
-        query_graphql_field(:filename),
-        query_graphql_field(:project, nil, query_graphql_field(:id))
+        :filename,
+        query_graphql_field(:project, :id)
       ]
     end
 
@@ -173,7 +173,7 @@ describe 'Query.project(fullPath).issue(iid)' do
 
         let(:result_fields) { { 'version' => id_hash(version) } }
         let(:object_fields) do
-          design_fields + [query_graphql_field(:version, nil, query_graphql_field(:id))]
+          design_fields + [query_graphql_field(:version, :id)]
         end
 
         let(:no_argument_error) { missing_required_argument(path, :id) }

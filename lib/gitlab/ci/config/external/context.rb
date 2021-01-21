@@ -7,14 +7,15 @@ module Gitlab
         class Context
           TimeoutError = Class.new(StandardError)
 
-          attr_reader :project, :sha, :user, :parent_pipeline
+          attr_reader :project, :sha, :user, :parent_pipeline, :variables
           attr_reader :expandset, :execution_deadline
 
-          def initialize(project: nil, sha: nil, user: nil, parent_pipeline: nil)
+          def initialize(project: nil, sha: nil, user: nil, parent_pipeline: nil, variables: [])
             @project = project
             @sha = sha
             @user = user
             @parent_pipeline = parent_pipeline
+            @variables = variables
             @expandset = Set.new
             @execution_deadline = 0
 
@@ -54,7 +55,7 @@ module Gitlab
           end
 
           def execution_expired?
-            return false if execution_deadline.zero?
+            return false if execution_deadline == 0
 
             current_monotonic_time > execution_deadline
           end

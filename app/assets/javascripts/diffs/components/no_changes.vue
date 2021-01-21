@@ -1,12 +1,11 @@
 <script>
 import { mapGetters } from 'vuex';
-import { escape } from 'lodash';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlButton, GlSprintf } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
+    GlSprintf,
   },
   props: {
     changesEmptyStateIllustration: {
@@ -15,20 +14,30 @@ export default {
     },
   },
   computed: {
+    ...mapGetters('diffs', [
+      'diffCompareDropdownTargetVersions',
+      'diffCompareDropdownSourceVersions',
+    ]),
     ...mapGetters(['getNoteableData']),
-    emptyStateText() {
-      return sprintf(
-        __(
-          'No changes between %{ref_start}%{source_branch}%{ref_end} and %{ref_start}%{target_branch}%{ref_end}',
-        ),
-        {
-          ref_start: '<span class="ref-name">',
-          ref_end: '</span>',
-          source_branch: escape(this.getNoteableData.source_branch),
-          target_branch: escape(this.getNoteableData.target_branch),
-        },
-        false,
-      );
+    selectedSourceVersion() {
+      return this.diffCompareDropdownSourceVersions.find((x) => x.selected);
+    },
+    sourceName() {
+      if (!this.selectedSourceVersion || this.selectedSourceVersion.isLatestVersion) {
+        return this.getNoteableData.source_branch;
+      }
+
+      return this.selectedSourceVersion.versionName;
+    },
+    selectedTargetVersion() {
+      return this.diffCompareDropdownTargetVersions.find((x) => x.selected);
+    },
+    targetName() {
+      if (!this.selectedTargetVersion || this.selectedTargetVersion.version_index < 0) {
+        return this.getNoteableData.target_branch;
+      }
+
+      return this.selectedTargetVersion.versionName || '';
     },
   },
 };
@@ -41,11 +50,20 @@ export default {
     </div>
     <div class="col-12">
       <div class="text-content text-center">
-        <span v-html="emptyStateText"></span>
+        <div data-testid="no-changes-message">
+          <gl-sprintf :message="__('No changes between %{source} and %{target}')">
+            <template #source>
+              <span class="ref-name">{{ sourceName }}</span>
+            </template>
+            <template #target>
+              <span class="ref-name">{{ targetName }}</span>
+            </template>
+          </gl-sprintf>
+        </div>
         <div class="text-center">
-          <gl-deprecated-button :href="getNoteableData.new_blob_path" variant="success">{{
+          <gl-button :href="getNoteableData.new_blob_path" variant="success" category="primary">{{
             __('Create commit')
-          }}</gl-deprecated-button>
+          }}</gl-button>
         </div>
       </div>
     </div>

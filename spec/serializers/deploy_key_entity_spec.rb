@@ -2,15 +2,16 @@
 
 require 'spec_helper'
 
-describe DeployKeyEntity do
+RSpec.describe DeployKeyEntity do
   include RequestAwareEntity
 
   let(:user) { create(:user) }
   let(:project) { create(:project, :internal)}
   let(:project_private) { create(:project, :private)}
   let(:deploy_key) { create(:deploy_key) }
+  let(:options) { { user: user } }
 
-  let(:entity) { described_class.new(deploy_key, user: user) }
+  let(:entity) { described_class.new(deploy_key, options) }
 
   before do
     project.deploy_keys << deploy_key
@@ -51,7 +52,13 @@ describe DeployKeyEntity do
   context 'user is an admin' do
     let(:user) { create(:user, :admin) }
 
-    it { expect(entity.as_json).to include(can_edit: true) }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it { expect(entity.as_json).to include(can_edit: true) }
+    end
+
+    context 'when admin mode is disabled' do
+      it { expect(entity.as_json).not_to include(can_edit: true) }
+    end
   end
 
   context 'user is a project maintainer' do
@@ -73,5 +80,43 @@ describe DeployKeyEntity do
 
       it { expect(entity_public.as_json).to include(can_edit: true) }
     end
+  end
+
+  describe 'with_owner option' do
+    it 'does not return an owner payload when it is set to false' do
+      options[:with_owner] = false
+
+      payload = entity.as_json
+
+      expect(payload[:owner]).not_to be_present
+    end
+
+    describe 'when with_owner is set to true' do
+      before do
+        options[:with_owner] = true
+      end
+
+      it 'returns an owner payload' do
+        payload = entity.as_json
+
+        expect(payload[:owner]).to be_present
+        expect(payload[:owner].keys).to include(:id, :name, :username, :avatar_url)
+      end
+
+      it 'does not return an owner if current_user cannot read the owner' do
+        allow(Ability).to receive(:allowed?).and_call_original
+        allow(Ability).to receive(:allowed?).with(options[:user], :read_user, deploy_key.user).and_return(false)
+
+        payload = entity.as_json
+
+        expect(payload[:owner]).to be_nil
+      end
+    end
+  end
+
+  it 'does not return an owner payload with_owner option not passed in' do
+    payload = entity.as_json
+
+    expect(payload[:owner]).not_to be_present
   end
 end

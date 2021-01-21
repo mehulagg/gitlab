@@ -2,9 +2,7 @@
 
 gitlab_danger = GitlabDanger.new(helper.gitlab_helper)
 
-SCHEMA_NOT_UPDATED_MESSAGE_SHORT = <<~MSG
-New %<migrations>s added but %<schema>s wasn't updated.
-MSG
+SCHEMA_NOT_UPDATED_MESSAGE_SHORT = "New %<migrations>s added but %<schema>s wasn't updated"
 
 SCHEMA_NOT_UPDATED_MESSAGE_FULL = <<~MSG
 **#{SCHEMA_NOT_UPDATED_MESSAGE_SHORT}**
@@ -59,11 +57,9 @@ if gitlab.mr_labels.include?('database') || db_paths_to_review.any?
   markdown(DB_MESSAGE)
   markdown(DB_FILES_MESSAGE + helper.markdown_list(db_paths_to_review)) if db_paths_to_review.any?
 
-  database_labels = helper.missing_database_labels(gitlab.mr_labels)
-
-  if database_labels.any?
+  unless helper.has_database_scoped_labels?(gitlab.mr_labels)
     gitlab.api.update_merge_request(gitlab.mr_json['project_id'],
-                                        gitlab.mr_json['iid'],
-                                        labels: (gitlab.mr_labels + database_labels).join(','))
+                                    gitlab.mr_json['iid'],
+                                    add_labels: 'database::review pending')
   end
 end

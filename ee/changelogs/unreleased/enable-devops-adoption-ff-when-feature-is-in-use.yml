@@ -1,0 +1,5 @@
+---
+title: Enable DevOps Adoption Report feature flag if any Segments already exist
+merge_request: 51602
+author:
+type: other

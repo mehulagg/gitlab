@@ -1,4 +1,5 @@
 import FileTemplateSelector from '../file_template_selector';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class BlobLicenseSelector extends FileTemplateSelector {
   constructor({ mediator }) {
@@ -14,14 +15,14 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
   }
 
   initDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.$dropdown.data('data'),
       filterable: true,
       selectable: true,
       search: {
         fields: ['name'],
       },
-      clicked: options => {
+      clicked: (options) => {
         const { e } = options;
         const el = options.$el;
         const query = options.selectedObj;
@@ -38,7 +39,7 @@ export default class BlobLicenseSelector extends FileTemplateSelector {
           data,
         });
       },
-      text: item => item.name,
+      text: (item) => item.name,
     });
   }
 }

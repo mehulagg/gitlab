@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
-import { createLocalVue, mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlButton } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import GeoReplicableFilterBar from 'ee/geo_replicable/components/geo_replicable_filter_bar.vue';
-import createStore from 'ee/geo_replicable/store';
-import { DEFAULT_SEARCH_DELAY } from 'ee/geo_replicable/store/constants';
+import { DEFAULT_SEARCH_DELAY } from 'ee/geo_replicable/constants';
+import { getStoreConfig } from 'ee/geo_replicable/store';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -20,12 +20,13 @@ describe('GeoReplicableFilterBar', () => {
   };
 
   const createComponent = () => {
-    wrapper = mount(GeoReplicableFilterBar, {
+    const fakeStore = new Vuex.Store({
+      ...getStoreConfig({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
+      actions: actionSpies,
+    });
+    wrapper = shallowMount(GeoReplicableFilterBar, {
       localVue,
-      store: createStore(MOCK_REPLICABLE_TYPE),
-      methods: {
-        ...actionSpies,
-      },
+      store: fakeStore,
     });
   };
 
@@ -36,7 +37,7 @@ describe('GeoReplicableFilterBar', () => {
   const findNavContainer = () => wrapper.find('nav');
   const findGlDropdown = () => findNavContainer().find(GlDropdown);
   const findGlDropdownItems = () => findNavContainer().findAll(GlDropdownItem);
-  const findDropdownItemsText = () => findGlDropdownItems().wrappers.map(w => w.text());
+  const findDropdownItemsText = () => findGlDropdownItems().wrappers.map((w) => w.text());
   const findGlSearchBox = () => findNavContainer().find(GlSearchBoxByType);
   const findGlButton = () => findNavContainer().find(GlButton);
 
@@ -56,7 +57,7 @@ describe('GeoReplicableFilterBar', () => {
     describe('Filter options', () => {
       it('renders a dropdown item for each filterOption', () => {
         expect(findDropdownItemsText()).toStrictEqual(
-          wrapper.vm.filterOptions.map(n => {
+          wrapper.vm.filterOptions.map((n) => {
             if (n.label === 'All') {
               return `${n.label} ${MOCK_REPLICABLE_TYPE}`;
             }
@@ -68,17 +69,33 @@ describe('GeoReplicableFilterBar', () => {
 
       it('clicking a dropdown item calls setFilter with its index', () => {
         const index = 1;
-        findGlDropdownItems()
-          .at(index)
-          .find('button')
-          .trigger('click');
+        findGlDropdownItems().at(index).vm.$emit('click');
 
-        expect(actionSpies.setFilter).toHaveBeenCalledWith(index);
+        expect(actionSpies.setFilter).toHaveBeenCalledWith(expect.any(Object), index);
       });
     });
 
-    it('renders a search box always', () => {
-      expect(findGlSearchBox().exists()).toBeTruthy();
+    describe('Search box', () => {
+      it('renders always', () => {
+        expect(findGlSearchBox().exists()).toBe(true);
+      });
+
+      it('has debounce prop', () => {
+        expect(findGlSearchBox().attributes('debounce')).toBe(DEFAULT_SEARCH_DELAY.toString());
+      });
+
+      describe('onSearch', () => {
+        const testSearch = 'test search';
+
+        beforeEach(() => {
+          findGlSearchBox().vm.$emit('input', testSearch);
+        });
+
+        it('calls fetchSyncNamespaces when input event is fired from GlSearchBoxByType', () => {
+          expect(actionSpies.setSearch).toHaveBeenCalledWith(expect.any(Object), testSearch);
+          expect(actionSpies.fetchReplicableItems).toHaveBeenCalled();
+        });
+      });
     });
 
     describe('Re-sync all button', () => {
@@ -87,34 +104,9 @@ describe('GeoReplicableFilterBar', () => {
       });
 
       it('calls initiateAllReplicableSyncs when clicked', () => {
-        findGlButton().trigger('click');
+        findGlButton().vm.$emit('click');
         expect(actionSpies.initiateAllReplicableSyncs).toHaveBeenCalled();
       });
-    });
-  });
-
-  // TODO: These specs should fixed once we have a proper mock for debounce
-  // https://gitlab.com/gitlab-org/gitlab/-/issues/213925
-  // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('when search changes', () => {
-    beforeEach(() => {
-      createComponent();
-      actionSpies.fetchReplicableItems.mockClear(); // Will get called on init
-      wrapper.vm.search = 'test search';
-    });
-
-    it(`should wait ${DEFAULT_SEARCH_DELAY}ms before calling setSearch`, () => {
-      expect(actionSpies.setSearch).not.toHaveBeenCalledWith('test search');
-
-      jest.runAllTimers(); // Debounce
-      expect(actionSpies.setSearch).toHaveBeenCalledWith('test search');
-    });
-
-    it(`should wait ${DEFAULT_SEARCH_DELAY}ms before calling fetchReplicableItems`, () => {
-      expect(actionSpies.fetchReplicableItems).not.toHaveBeenCalled();
-
-      jest.runAllTimers(); // Debounce
-      expect(actionSpies.fetchReplicableItems).toHaveBeenCalled();
     });
   });
 
@@ -127,7 +119,7 @@ describe('GeoReplicableFilterBar', () => {
     });
 
     it('should call setFilter with the filterIndex', () => {
-      expect(actionSpies.setFilter).toHaveBeenCalledWith(testValue);
+      expect(actionSpies.setFilter).toHaveBeenCalledWith(expect.any(Object), testValue);
     });
 
     it('should call fetchReplicableItems', () => {

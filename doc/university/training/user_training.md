@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 type: reference
 ---
@@ -43,7 +46,7 @@ Use the tools at your disposal when you get stuck.
 
 - Mac: Type '`git`' in the Terminal application.
 
-> If it's not installed, it will prompt you to install it.
+> If it's not installed, it prompts you to install it.
 
 - Debian: '`sudo apt-get install git-all`' or Red Hat '`sudo yum install git-all`'
 
@@ -186,7 +189,7 @@ git push origin squash_some_bugs
 - When you want feedback create a merge request.
 - Target is the ‘default’ branch (usually master).
 - Assign or mention the person you would like to review.
-- Add 'WIP' to the title if it's a work in progress.
+- Add `[Draft]` to the title if it's a work in progress.
 - When accepting, always delete the branch.
 - Anyone can comment, not just the assignee.
 - Push corrections to the same branch.
@@ -232,7 +235,7 @@ See GitLab merge requests for examples: <https://gitlab.com/gitlab-org/gitlab-fo
 
 - Useful for marking deployments and releases.
 - Annotated tags are an unchangeable part of Git history.
-- Soft/lightweight tags can be set and removed at will.
+- Soft/lightweight tags can be set and removed at any time.
 - Many projects combine an annotated release tag with a stable branch.
 - Consider setting deployment/release tags automatically.
 
@@ -314,7 +317,7 @@ Squash the commits on the same branch we used for the merge conflicts step.
 git rebase -i master
 ```
 
-In the editor, leave the first commit as 'pick' and set others to 'fixup'.
+In the editor, leave the first commit as `pick` and set others to `fixup`.
 
 ## Questions?
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NamespacelessProjectDestroyWorker do
+RSpec.describe NamespacelessProjectDestroyWorker do
   include ProjectForksHelper
 
   subject { described_class.new }
@@ -60,7 +60,7 @@ describe NamespacelessProjectDestroyWorker do
         let!(:parent_project) { create(:project) }
         let(:project) do
           namespaceless_project = fork_project(parent_project)
-          namespaceless_project.save
+          namespaceless_project.save!
           namespaceless_project
         end
 

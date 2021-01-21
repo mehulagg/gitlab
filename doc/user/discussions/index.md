@@ -1,7 +1,8 @@
 ---
-stage: Plan
-group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference, howto
 ---
 
 # Threads
@@ -30,7 +31,7 @@ You can also reply to a comment notification email to reply to the comment if
 creates another standard comment. Replying to a threaded comment creates a reply in the thread. Email replies support
 [Markdown](../markdown.md) and [quick actions](../project/quick_actions.md), just as if you replied from the web.
 
-NOTE: **Note:**
+NOTE:
 There is a limit of 5,000 comments for every object, for example: issue, epic, and merge request.
 
 ## Resolvable comments and threads
@@ -84,33 +85,17 @@ Threads created this way will only appear in the original merge request
 and not when navigating to that commit under your project's
 **Repository > Commits** page.
 
-TIP: **Tip:**
+NOTE:
 When a link of a commit reference is found in a thread inside a merge
 request, it will be automatically converted to a link in the context of the
 current merge request.
-
-### Jumping between unresolved threads
-
-When a merge request has a large number of comments it can be difficult to track
-what remains unresolved. You can jump between unresolved threads with the
-Jump button next to the Reply field on a thread.
-
-You can also jump to the next unresolved thread from the button next to the
-resolved threads tracker.
-
-You can also use keyboard shortcuts to navigate among threads:
-
-- Use <kbd>n</kbd> to jump to the next unresolved thread.
-- Use <kbd>p</kbd> to jump to the previous unresolved thread.
-
-!["8/9 threads resolved"](img/threads_resolved.png)
 
 ### Marking a comment or thread as resolved
 
 You can mark a thread as resolved by clicking the **Resolve thread**
 button at the bottom of the thread.
 
-!["Resolve thread" button](img/resolve_thread_button.png)
+!["Resolve thread" button](img/resolve_thread_button_v13_3.png)
 
 Alternatively, you can mark each comment as resolved individually.
 
@@ -200,7 +185,7 @@ top-level resolvable threads are not automatically resolved.
 You can add comments and threads to a particular commit under your
 project's **Repository > Commits**.
 
-CAUTION: **Attention:**
+WARNING:
 Threads created this way will be lost if the commit ID changes after a
 force push.
 
@@ -242,7 +227,7 @@ After you click on the image, a comment form will be displayed that would be the
 of your thread. Once you save your comment, you will see a new badge displayed on
 top of your image. This badge represents your thread.
 
->**Note:**
+NOTE:
 This thread badge is typically associated with a number that is only used as a visual
 reference for each thread. In the merge request thread tab,
 this badge will be indicated with a comment icon since each thread will render a new
@@ -296,9 +281,10 @@ edit existing comments. Non-team members are restricted from adding or editing c
 
 Additionally, locked issues and merge requests can not be reopened.
 
-## Merge Request Reviews **(PREMIUM)**
+## Merge Request Reviews
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4213) in GitLab 11.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4213) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.4.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/28154) to GitLab Core in 13.1.
 
 When looking at a Merge Request diff, you are able to start a review.
 This allows you to create comments inside a Merge Request that are **only visible to you** until published,
@@ -384,7 +370,7 @@ From a merge request's **Discussion** tab, or from an epic/issue overview, find 
 
 ![Notes filters dropdown options](img/index_notes_filters.png)
 
-Once you select one of the filters in a given issue or MR, GitLab will save
+After you select one of the filters in a given issue or MR, GitLab will save
 your preference, so that it will persist when you visit the same page again
 from any device you're logged into.
 
@@ -408,17 +394,14 @@ the merge request authored by the user that applied them.
 
    ![Add a suggestion into a code block tagged properly](img/make_suggestion_v12_7.png)
 
-1. Click **Comment**.
-
-   NOTE: **Note:**
-   If you're using GitLab Premium, GitLab.com Silver, and higher tiers, the thread will display [Review](#merge-request-reviews-premium) options. Click either **Start a review**, **Add comment now**, or **Add to review** to obtain the same result.
+1. Click either **Start a review** or **Add to review** to add your comment to a [review](#merge-request-reviews), or **Add comment now** to add the comment to the thread immediately.
 
    The Suggestion in the comment can be applied by the merge request author
    directly from the merge request:
 
    ![Apply suggestions](img/apply_suggestion_v12_7.png)
 
-Once the author applies a Suggestion, it will be marked with the **Applied** label,
+After the author applies a Suggestion, it will be marked with the **Applied** label,
 the thread will be automatically resolved, and GitLab will create a new commit
 and push the suggested change directly into the codebase in the merge request's
 branch. [Developer permission](../permissions.md) is required to do so.
@@ -440,7 +423,7 @@ to 4 lines _below_ the commented line, with the suggested change.
 
 ![Multi-line suggestion preview](img/multi-line-suggestion-preview.png)
 
-NOTE: **Note:**
+NOTE:
 Suggestions covering multiple lines are limited to 100 lines _above_ and 100
 lines _below_ the commented diff line, allowing up to 200 changed lines per
 suggestion.
@@ -487,13 +470,17 @@ For example, to customize the commit message to output
 **Addresses user_1's review**, set the custom text to
 `Addresses %{username}'s review`.
 
-NOTE: **Note:**
+NOTE:
 Custom commit messages for each applied Suggestion (and for batch Suggestions) will be
-introduced by [#25381](https://gitlab.com/gitlab-org/gitlab/issues/25381).
+introduced by [#25381](https://gitlab.com/gitlab-org/gitlab/-/issues/25381).
 
 ### Batch Suggestions
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/25486) in GitLab 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25486) in GitLab 13.1 as an [alpha feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha).
+> - It was deployed behind a feature flag, disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/227799) on GitLab 13.2.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-batch-suggestions).
 
 You can apply multiple suggestions at once to reduce the number of commits added
 to your branch to address your reviewers' requests.
@@ -514,6 +501,27 @@ to your branch to address your reviewers' requests.
 
    ![A code change suggestion displayed, with the button to apply the batch of suggestions highlighted.](img/apply_batch_of_suggestions_v13_1.jpg "Apply a batch of suggestions")
 
+#### Enable or disable Batch Suggestions **(CORE ONLY)**
+
+Batch Suggestions is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can opt to disable it for your instance.
+
+To enable it:
+
+```ruby
+# Instance-wide
+Feature.enable(:batch_suggestions)
+```
+
+To disable it:
+
+```ruby
+# Instance-wide
+Feature.disable(:batch_suggestions)
+```
+
 ## Start a thread by replying to a standard comment
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30299) in GitLab 11.9
@@ -529,8 +537,20 @@ Clicking on the **Reply to comment** button will bring the reply area into focus
 ![Reply to comment feature](img/reply_to_comment.gif)
 
 Replying to a non-thread comment will convert the non-thread comment to a
-thread once the reply is submitted. This conversion is considered an edit
+thread after the reply is submitted. This conversion is considered an edit
 to the original comment, so a note about when it was last edited will appear underneath it.
 
 This feature only exists for Issues, Merge requests, and Epics. Commits, Snippets and Merge request diff threads are
 not supported yet.
+
+## Assign an issue to the commenting user
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/191455) in GitLab 13.1.
+
+You can assign an issue to a user who made a comment.
+
+In the comment, click the **More Actions** menu and click **Assign to commenting user**.
+
+Click the button again to unassign the commenter.
+
+![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)

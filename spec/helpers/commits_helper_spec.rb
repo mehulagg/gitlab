@@ -2,7 +2,40 @@
 
 require 'spec_helper'
 
-describe CommitsHelper do
+RSpec.describe CommitsHelper do
+  describe '#revert_commit_link' do
+    context 'when current_user exists' do
+      before do
+        allow(helper).to receive(:current_user).and_return(double('User'))
+        allow(helper).to receive(:can_collaborate_with_project?).and_return(true)
+      end
+
+      it 'renders a div for Vue' do
+        result = helper.revert_commit_link('_commit_', '_path_', pajamas: true)
+
+        expect(result).to include('js-revert-commit-trigger')
+      end
+
+      it 'does not render a div for Vue' do
+        result = helper.revert_commit_link('_commit_', '_path_')
+
+        expect(result).not_to include('js-revert-commit-trigger')
+      end
+    end
+
+    context 'when current_user does not exist' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it 'does not render anything' do
+        result = helper.revert_commit_link(double('Commit'), '_path_')
+
+        expect(result).to be_nil
+      end
+    end
+  end
+
   describe 'commit_author_link' do
     it 'escapes the author email' do
       commit = double(
@@ -48,6 +81,20 @@ describe CommitsHelper do
         .to include('Foo &lt;script&gt;')
       expect(helper.commit_committer_link(commit, avatar: true))
         .to include('commit-committer-name', 'Foo &lt;script&gt;')
+    end
+  end
+
+  describe '#view_file_button' do
+    let(:project) { build(:project) }
+    let(:path) { 'path/to/file' }
+    let(:sha) { '1234567890' }
+
+    subject do
+      helper.view_file_button(sha, path, project)
+    end
+
+    it 'links to project files' do
+      expect(subject).to have_link('1234567', href: helper.project_blob_path(project, "#{sha}/#{path}"))
     end
   end
 

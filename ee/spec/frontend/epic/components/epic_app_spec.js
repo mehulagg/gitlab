@@ -1,9 +1,10 @@
-import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 
 import EpicApp from 'ee/epic/components/epic_app.vue';
 import createStore from 'ee/epic/store';
 
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { initialRequest } from 'jest/issue_show/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
@@ -11,6 +12,8 @@ import axios from '~/lib/utils/axios_utils';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 
 describe('EpicAppComponent', () => {
+  useMockIntersectionObserver();
+
   let vm;
   let mock;
 
@@ -26,6 +29,8 @@ describe('EpicAppComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {

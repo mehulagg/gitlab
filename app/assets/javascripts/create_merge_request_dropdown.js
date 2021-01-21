@@ -1,7 +1,7 @@
 /* eslint-disable no-new */
 import { debounce } from 'lodash';
 import axios from './lib/utils/axios_utils';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import DropLab from './droplab/drop_lab';
 import ISetter from './droplab/plugins/input_setter';
 import { __, sprintf } from './locale';
@@ -168,9 +168,6 @@ export default class CreateMergeRequestDropdown {
 
   disable() {
     this.disableCreateAction();
-
-    this.dropdownToggle.classList.add('disabled');
-    this.dropdownToggle.setAttribute('disabled', 'disabled');
   }
 
   disableCreateAction() {
@@ -189,15 +186,12 @@ export default class CreateMergeRequestDropdown {
 
     this.createTargetButton.classList.remove('disabled');
     this.createTargetButton.removeAttribute('disabled');
-
-    this.dropdownToggle.classList.remove('disabled');
-    this.dropdownToggle.removeAttribute('disabled');
   }
 
   static findByValue(objects, ref, returnFirstMatch = false) {
     if (!objects || !objects.length) return false;
     if (objects.indexOf(ref) > -1) return ref;
-    if (returnFirstMatch) return objects.find(item => new RegExp(`^${ref}`).test(item));
+    if (returnFirstMatch) return objects.find((item) => new RegExp(`^${ref}`).test(item));
 
     return false;
   }
@@ -362,7 +356,7 @@ export default class CreateMergeRequestDropdown {
     event.preventDefault();
 
     if (isConfidentialIssue() && !event.target.classList.contains('js-create-target')) {
-      this.droplab.hooks.forEach(hook => hook.list.toggle());
+      this.droplab.hooks.forEach((hook) => hook.list.toggle());
 
       return;
     }
@@ -410,8 +404,8 @@ export default class CreateMergeRequestDropdown {
     const inputClasses = ['gl-field-error-outline', 'gl-field-success-outline'];
     const messageClasses = ['text-muted', 'text-danger', 'text-success'];
 
-    inputClasses.forEach(cssClass => input.classList.remove(cssClass));
-    messageClasses.forEach(cssClass => message.classList.remove(cssClass));
+    inputClasses.forEach((cssClass) => input.classList.remove(cssClass));
+    messageClasses.forEach((cssClass) => message.classList.remove(cssClass));
     message.style.display = 'none';
   }
 

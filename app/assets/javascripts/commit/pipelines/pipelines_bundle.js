@@ -3,9 +3,10 @@ import commitPipelinesTable from './pipelines_table.vue';
 
 /**
  * Used in:
- *  - Commit details View > Pipelines Tab > Pipelines Table.
- *  - Merge Request details View > Pipelines Tab > Pipelines Table.
- *  - New Merge Request View > Pipelines Tab > Pipelines Table.
+ *  - Project Pipelines List (projects:pipelines:index)
+ *  - Commit details View > Pipelines Tab > Pipelines Table (projects:commit:pipelines)
+ *  - Merge Request details View > Pipelines Tab > Pipelines Table (projects:merge_requests:show)
+ *  - New Merge Request View > Pipelines Tab > Pipelines Table (projects:merge_requests:creations:new)
  */
 
 const CommitPipelinesTable = Vue.extend(commitPipelinesTable);
@@ -20,7 +21,7 @@ export default () => {
 
   if (pipelineTableViewEl) {
     // Update MR and Commits tabs
-    pipelineTableViewEl.addEventListener('update-pipelines-count', event => {
+    pipelineTableViewEl.addEventListener('update-pipelines-count', (event) => {
       if (
         event.detail.pipelines &&
         event.detail.pipelines.count &&

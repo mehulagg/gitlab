@@ -1,6 +1,6 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const EXPECTED_SIZE = 16;
 
@@ -13,7 +13,7 @@ describe('EE MRWidget approved icon', () => {
     });
   };
 
-  const findIcon = () => wrapper.find(Icon);
+  const findIcon = () => wrapper.find(GlIcon);
   const findSquare = () => wrapper.find('.square');
 
   afterEach(() => {

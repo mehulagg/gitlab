@@ -4,14 +4,14 @@ import Component from 'ee/registrations/components/progress_bar.vue';
 describe('Progress Bar', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(Component, {
       propsData,
     });
   };
 
-  const firstStep = () => wrapper.find('.bar div:nth-child(1)');
-  const secondStep = () => wrapper.find('.bar div:nth-child(2)');
+  const firstStep = () => wrapper.find('.bar li:nth-child(1)');
+  const secondStep = () => wrapper.find('.bar li:nth-child(2)');
 
   beforeEach(() => {
     createComponent({ currentStep: 'b', steps: ['a', 'b'] });

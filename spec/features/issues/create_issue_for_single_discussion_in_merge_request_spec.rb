@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Resolve an open thread in a merge request by creating an issue', :js do
+RSpec.describe 'Resolve an open thread in a merge request by creating an issue', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: true) }
   let(:merge_request) { create(:merge_request, source_project: project) }
@@ -12,6 +12,10 @@ describe 'Resolve an open thread in a merge request by creating an issue', :js d
     title = 'Resolve this thread in a new issue'
     url = new_project_issue_path(project, discussion_to_resolve: discussion.id, merge_request_to_resolve_discussions_of: merge_request.iid)
     "a[title=\"#{title}\"][href=\"#{url}\"]"
+  end
+
+  before do
+    stub_feature_flags(remove_resolve_note: false)
   end
 
   describe 'As a user with access to the project' do
@@ -27,7 +31,8 @@ describe 'Resolve an open thread in a merge request by creating an issue', :js d
         visit project_merge_request_path(project, merge_request)
       end
 
-      it 'does not show a link to create a new issue' do
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/285453
+      xit 'does not show a link to create a new issue' do
         expect(page).not_to have_css resolve_discussion_selector
       end
     end
@@ -77,7 +82,7 @@ describe 'Resolve an open thread in a merge request by creating an issue', :js d
                                             discussion_to_resolve: discussion.id)
     end
 
-    it 'Shows a notice to ask someone else to resolve the threads' do
+    it 'shows a notice to ask someone else to resolve the threads' do
       expect(page).to have_content("The thread at #{merge_request.to_reference}"\
                                    " (discussion #{discussion.first_note.id}) will stay unresolved."\
                                    " Ask someone with permission to resolve it.")

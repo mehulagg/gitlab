@@ -1,13 +1,12 @@
 <script>
-import { s__ } from '~/locale';
 import { mapActions, mapState } from 'vuex';
-import { GlIcon, GlDropdown, GlDropdownHeader, GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownSectionHeader, GlDropdownItem } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
   components: {
-    GlIcon,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
   },
   props: {
@@ -43,11 +42,11 @@ export default {
       ref="podsDropdown"
       :text="podDropdownText"
       :disabled="disabled"
-      class="mb-2 gl-h-32 pr-2 d-flex d-md-block flex-grow-0 qa-pods-dropdown"
+      class="gl-mr-3 gl-mb-3 gl-display-flex gl-display-md-block qa-pods-dropdown"
     >
-      <gl-dropdown-header class="text-center">
+      <gl-dropdown-section-header>
         {{ s__('Environments|Select pod') }}
-      </gl-dropdown-header>
+      </gl-dropdown-section-header>
 
       <gl-dropdown-item v-if="!pods.options.length" disabled>
         <span ref="noPodsMsg" class="text-muted">
@@ -57,16 +56,12 @@ export default {
       <gl-dropdown-item
         v-for="podName in pods.options"
         :key="podName"
+        :is-check-item="true"
+        :is-checked="isCurrentPod(podName)"
         class="text-nowrap"
         @click="showPodLogs(podName)"
       >
-        <div class="d-flex">
-          <gl-icon
-            :class="{ invisible: !isCurrentPod(podName) }"
-            name="status_success_borderless"
-          />
-          <div class="flex-grow-1">{{ podName }}</div>
-        </div>
+        {{ podName }}
       </gl-dropdown-item>
     </gl-dropdown>
   </div>

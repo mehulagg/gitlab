@@ -1,13 +1,14 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Frontend dependencies
 
 ## Package manager
 
-We use [Yarn](https://yarnpkg.com/) to manage frontend dependencies. There are a few exceptions:
-
-- [FontAwesome](https://fontawesome.com/), installed via the `font-awesome-rails` gem: we are working to replace it with
-  [GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs/) icons library.
-- [ACE](https://ace.c9.io/) editor, installed via the `ace-rails-ap` gem.
-- Other dependencies found under `vendor/assets/`.
+We use [Yarn](https://yarnpkg.com/) to manage frontend dependencies. There are a few exceptions, stored in `vendor/assets/`.
 
 ## Updating dependencies
 
@@ -18,15 +19,15 @@ automatically create merge requests for updating dependencies of several project
 up-to-date list of projects managed by the renovate bot in the project’s README. Some key dependencies
 updated using renovate are:
 
-- [`@gitlab/ui`](https://gitlab.com/gitlab-org/gitlab-ui/)
-- [`@gitlab/svgs`](https://gitlab.com/gitlab-org/gitlab-svgs/)
-- [`@gitlab/eslint-config`](https://gitlab.com/gitlab-org/gitlab-eslint-config)
+- [`@gitlab/ui`](https://gitlab.com/gitlab-org/gitlab-ui)
+- [`@gitlab/svgs`](https://gitlab.com/gitlab-org/gitlab-svgs)
+- [`@gitlab/eslint-plugin`](https://gitlab.com/gitlab-org/frontend/eslint-plugin)
 
 ### Blocked dependencies
 
 We discourage installing some dependencies in [GitLab repository](https://gitlab.com/gitlab-org/gitlab)
 because they can create conflicts in the dependency tree. Blocked dependencies are declared in the
-`blockDependencies` property of GitLab’s [`package.json` file](https://gitlab.com/gitlab-org/gitlab/-/blob/master/package.json).
+`blockDependencies` property of the GitLab [`package.json` file](https://gitlab.com/gitlab-org/gitlab/-/blob/master/package.json).
 
 ## Dependency notes
 

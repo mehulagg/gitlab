@@ -1,6 +1,6 @@
+import { GlDaterangePicker } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
-import { GlDaterangePicker } from '@gitlab/ui';
 
 const defaultProps = {
   startDate: new Date(2019, 8, 1),
@@ -60,12 +60,7 @@ describe('Daterange component', () => {
         input.trigger('change');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emittedByOrder()).toEqual([
-            {
-              name: 'change',
-              args: [{ startDate: minDate, endDate }],
-            },
-          ]);
+          expect(wrapper.emitted().change).toEqual([[{ startDate: minDate, endDate }]]);
         });
       });
     });
@@ -80,11 +75,7 @@ describe('Daterange component', () => {
       });
 
       it('displays the correct number of selected days in the indicator', () => {
-        expect(
-          findDateRangeIndicator()
-            .find('span')
-            .text(),
-        ).toBe('10 days');
+        expect(findDateRangeIndicator().find('span').text()).toBe('10 days');
       });
     });
   });
@@ -101,12 +92,7 @@ describe('Daterange component', () => {
           const endDate = new Date('2019-10-05');
           wrapper.vm.dateRange = { startDate, endDate };
 
-          expect(wrapper.emittedByOrder()).toEqual([
-            {
-              name: 'change',
-              args: [{ startDate, endDate }],
-            },
-          ]);
+          expect(wrapper.emitted().change).toEqual([[{ startDate, endDate }]]);
         });
       });
 

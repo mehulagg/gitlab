@@ -1,20 +1,16 @@
+import { GlButton } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import { createStoreOptions } from 'ee/approvals/stores';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import { createStoreOptions } from 'ee/approvals/stores';
+import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 const TEST_RULE = { id: 10 };
 
-const findButtonLabel = button => {
-  const icon = button.find(Icon);
-  return icon.exists() ? icon.attributes('aria-label') : button.text();
-};
+const findButtonLabel = (button) => button.attributes('aria-label') || button.text();
 const hasLabel = (button, label) => findButtonLabel(button) === label;
 
 describe('EE Approvals RuleControls', () => {
@@ -31,15 +27,18 @@ describe('EE Approvals RuleControls', () => {
       store: new Vuex.Store(store),
     });
   };
-  const findButtons = () => wrapper.findAll(GlDeprecatedButton);
-  const findButton = label => findButtons().filter(button => hasLabel(button, label)).wrappers[0];
+  const findButtons = () => wrapper.findAll(GlButton);
+  const findButton = (label) =>
+    findButtons().filter((button) => hasLabel(button, label)).wrappers[0];
   const findEditButton = () => findButton('Edit');
   const findRemoveButton = () => findButton('Remove');
 
   beforeEach(() => {
     store = createStoreOptions(MREditModule());
     ({ actions } = store.modules.approvals);
-    ['requestEditRule', 'requestDeleteRule'].forEach(actionName => jest.spyOn(actions, actionName));
+    ['requestEditRule', 'requestDeleteRule'].forEach((actionName) =>
+      jest.spyOn(actions, actionName),
+    );
   });
 
   afterEach(() => {
@@ -71,7 +70,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestEditRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });
@@ -96,7 +94,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestDeleteRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });

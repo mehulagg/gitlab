@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe VerifyPagesDomainService do
+RSpec.describe VerifyPagesDomainService do
   using RSpec::Parameterized::TableSyntax
   include EmailHelpers
 
@@ -189,7 +189,7 @@ describe VerifyPagesDomainService do
         let(:domain) { build(:pages_domain, :expired, :with_missing_chain) }
 
         before do
-          domain.save(validate: false)
+          domain.save!(validate: false)
         end
 
         it 'can be disabled' do

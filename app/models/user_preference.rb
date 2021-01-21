@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 class UserPreference < ApplicationRecord
+  include IgnorableColumns
+
   # We could use enums, but Rails 4 doesn't support multiple
   # enum options with same name for multiple fields, also it creates
   # extra methods that aren't really needed here.
   NOTES_FILTERS = { all_notes: 0, only_comments: 1, only_activity: 2 }.freeze
 
   belongs_to :user
+
+  scope :with_user, -> { joins(:user) }
+  scope :gitpod_enabled, -> { where(gitpod_enabled: true) }
 
   validates :issue_notes_filter, :merge_request_notes_filter, inclusion: { in: NOTES_FILTERS.values }, presence: true
   validates :tab_width, numericality: {

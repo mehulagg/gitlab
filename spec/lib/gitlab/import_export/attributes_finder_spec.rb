@@ -2,7 +2,7 @@
 
 require 'fast_spec_helper'
 
-describe Gitlab::ImportExport::AttributesFinder do
+RSpec.describe Gitlab::ImportExport::AttributesFinder do
   describe '#find_root' do
     subject { described_class.new(config: config).find_root(model_key) }
 
@@ -59,7 +59,7 @@ describe Gitlab::ImportExport::AttributesFinder do
     end
 
     before do
-      allow_any_instance_of(Gitlab::ImportExport).to receive(:config_file).and_return(test_config)
+      allow(Gitlab::ImportExport).to receive(:config_file).and_return(test_config)
     end
 
     it 'generates hash from project tree config' do

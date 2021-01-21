@@ -15,9 +15,14 @@ describe('Delete alert', () => {
   const findAlert = () => wrapper.find(GlAlert);
   const findLink = () => wrapper.find(GlLink);
 
-  const mountComponent = propsData => {
+  const mountComponent = (propsData) => {
     wrapper = shallowMount(component, { stubs: { GlSprintf }, propsData });
   };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
 
   describe('when deleteAlertType is null', () => {
     it('does not show the alert', () => {

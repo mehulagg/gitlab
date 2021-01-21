@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::RegistryBatcher, :geo, :use_clean_rails_memory_store_caching do
+RSpec.describe Gitlab::Geo::RegistryBatcher, :geo, :use_clean_rails_memory_store_caching do
+  include EE::GeoHelpers
+
   describe '#next_range!' do
     let(:model_class) { LfsObject }
     let(:model_foreign_key) { registry_class::MODEL_FOREIGN_KEY }
     let(:registry_class) { Geo::LfsObjectRegistry }
-    let(:registry_class_factory) { registry_class.underscore.tr('/', '_').to_sym }
+    let(:registry_class_factory) { registry_factory_name(registry_class) }
     let(:key) { 'looping_batcher_spec' }
     let(:batch_size) { 2 }
 

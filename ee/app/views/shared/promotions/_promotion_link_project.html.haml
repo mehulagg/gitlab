@@ -6,7 +6,7 @@
   - namespace = @project&.namespace || @group
   - if can?(current_user, :admin_namespace, namespace)
     - if trial_cta
-      = link_to s_('Promotions|Try it for free'), new_trial_registration_path, class: 'btn btn-primary issue-weights-trial-cta', target: target_blank ? '_blank' : '_self'
+      = link_to s_('Promotions|Try it for free'), new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'discover-issue-weights'), class: 'btn btn-primary issue-weights-trial-cta', target: target_blank ? '_blank' : '_self'
     - else
       - current_group = @project&.group || @group
       = link_to s_('Promotions|Upgrade your plan'), upgrade_plan_path(current_group), class: 'btn btn-primary issue-weights-upgrade-cta', target: target_blank ? '_blank' : '_self'
@@ -20,6 +20,6 @@
   - if License.current&.expired?
     = link_to (!short_form ? s_('Promotions|Buy GitLab Enterprise Edition') : s_('Promotions|Buy EE')), ::EE::SUBSCRIPTIONS_PLANS_URL, class: 'btn btn-primary'
   - else
-    = link_to s_('Promotions|Start GitLab Ultimate trial'), new_trial_url, class: 'btn btn-primary'
+    = link_to s_('Promotions|Start GitLab Ultimate trial'), new_trial_url, class: 'btn btn-primary btn-block'
 - else
   %p= s_('Promotions|Contact your Administrator to upgrade your license.')

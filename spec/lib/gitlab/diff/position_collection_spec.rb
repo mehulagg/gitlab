@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::PositionCollection do
+RSpec.describe Gitlab::Diff::PositionCollection do
   let(:merge_request) { build(:merge_request) }
 
   let(:text_position) do
     build(:text_diff_position, :added, diff_refs: diff_refs)
   end
+
   let(:folded_text_position) do
     build(:text_diff_position, diff_refs: diff_refs, old_line: 1, new_line: 1)
   end
+
   let(:image_position) do
     build(:image_diff_position, diff_refs: diff_refs)
   end

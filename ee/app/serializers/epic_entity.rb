@@ -19,7 +19,7 @@ class EpicEntity < IssuableEntity
   expose :due_date_fixed, :due_date_from_milestones
   expose :state
   expose :lock_version
-  expose :confidential, if: -> (epic) { Feature.enabled?(:confidential_epics, epic.group) }
+  expose :confidential
 
   expose :web_url do |epic|
     group_epic_path(epic.group, epic)
@@ -42,5 +42,9 @@ class EpicEntity < IssuableEntity
 
   expose :preview_note_path do |epic|
     preview_markdown_path(epic.group, target_type: 'Epic', target_id: epic.iid)
+  end
+
+  expose :confidential_epics_docs_path, if: -> (epic) { epic.confidential? } do |epic|
+    help_page_path('user/group/epics/manage_epics.md', anchor: 'make-an-epic-confidential')
   end
 end

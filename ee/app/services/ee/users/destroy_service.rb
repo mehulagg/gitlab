@@ -20,10 +20,14 @@ module EE
         user_mirrors = ::Project.where(mirror_user: user) # rubocop: disable CodeReuse/ActiveRecord
 
         user_mirrors.find_each do |mirror|
-          new_mirror_user = first_mirror_owner(user, mirror)
+          mirror.update(mirror: false, mirror_user: nil)
+          ::Gitlab::ErrorTracking.track_exception(
+            RuntimeError.new('Disabled mirroring'),
+            user_id: user.id,
+            project_id: mirror.id
+          )
 
-          mirror.update(mirror_user: new_mirror_user)
-          ::NotificationService.new.project_mirror_user_changed(new_mirror_user, user.name, mirror)
+          ::NotificationService.new.mirror_was_disabled(mirror, user.name)
         end
       end
 

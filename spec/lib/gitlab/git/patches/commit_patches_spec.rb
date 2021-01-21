@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::Git::Patches::CommitPatches do
+RSpec.describe Gitlab::Git::Patches::CommitPatches do
   describe '#commit' do
     let(:patches) do
       patches_folder = Rails.root.join('spec/fixtures/patchfiles')
@@ -10,6 +10,7 @@ describe Gitlab::Git::Patches::CommitPatches do
 
       Gitlab::Git::Patches::Collection.new([content_1, content_2])
     end
+
     let(:user) { build(:user) }
     let(:branch_name) { 'branch-with-patches' }
     let(:repository) { create(:project, :repository).repository }

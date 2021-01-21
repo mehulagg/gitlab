@@ -1,13 +1,17 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective, GlFormCheckbox } from '@gitlab/ui';
+import { SQUASH_BEFORE_MERGE } from '../../i18n';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
+    GlFormCheckbox,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
+  },
+  i18n: {
+    ...SQUASH_BEFORE_MERGE,
   },
   props: {
     value: {
@@ -25,33 +29,39 @@ export default {
       default: false,
     },
   },
+  computed: {
+    tooltipTitle() {
+      return this.isDisabled ? this.$options.i18n.tooltipTitle : null;
+    },
+  },
 };
 </script>
 
 <template>
-  <div class="inline">
-    <label>
-      <input
-        :checked="value"
-        :disabled="isDisabled"
-        type="checkbox"
-        name="squash"
-        class="qa-squash-checkbox js-squash-checkbox"
-        @change="$emit('input', $event.target.checked)"
-      />
-      {{ __('Squash commits') }}
-    </label>
+  <div class="gl-display-flex gl-align-items-center">
+    <gl-form-checkbox
+      v-gl-tooltip
+      :checked="value"
+      :disabled="isDisabled"
+      name="squash"
+      class="qa-squash-checkbox js-squash-checkbox gl-mb-0 gl-mr-2"
+      :title="tooltipTitle"
+      @change="(checked) => $emit('input', checked)"
+    >
+      {{ $options.i18n.checkboxLabel }}
+    </gl-form-checkbox>
     <a
       v-if="helpPath"
-      v-tooltip
+      v-gl-tooltip
       :href="helpPath"
-      data-title="About this feature"
-      data-placement="bottom"
+      :title="$options.i18n.helpLabel"
       target="_blank"
       rel="noopener noreferrer nofollow"
-      data-container="body"
     >
-      <icon name="question" />
+      <gl-icon name="question" />
+      <span class="sr-only">
+        {{ $options.i18n.helpLabel }}
+      </span>
     </a>
   </div>
 </template>

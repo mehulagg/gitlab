@@ -7,8 +7,11 @@ import noteForm from '../../notes/components/note_form.vue';
 import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
 import autosave from '../../notes/mixins/autosave';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import { DIFF_NOTE_TYPE } from '../constants';
-import { commentLineOptions } from '../../notes/components/multiline_comment_utils';
+import { DIFF_NOTE_TYPE, INLINE_DIFF_LINES_KEY, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
+import {
+  commentLineOptions,
+  formatLineRange,
+} from '../../notes/components/multiline_comment_utils';
 
 export default {
   components: {
@@ -44,18 +47,21 @@ export default {
   data() {
     return {
       commentLineStart: {
-        lineCode: this.line.line_code,
+        line_code: this.line.line_code,
         type: this.line.type,
+        old_line: this.line.old_line,
+        new_line: this.line.new_line,
       },
     };
   },
   computed: {
     ...mapState({
-      noteableData: state => state.notes.noteableData,
-      diffViewType: state => state.diffs.diffViewType,
+      diffViewType: ({ diffs }) => diffs.diffViewType,
+      showSuggestPopover: ({ diffs }) => diffs.showSuggestPopover,
+      noteableData: ({ notes }) => notes.noteableData,
+      selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition,
     }),
-    ...mapState('diffs', ['showSuggestPopover']),
-    ...mapGetters('diffs', ['getDiffFileByHash']),
+    ...mapGetters('diffs', ['getDiffFileByHash', 'diffLines']),
     ...mapGetters([
       'isLoggedIn',
       'noteableType',
@@ -74,19 +80,40 @@ export default {
         diffViewType: this.diffViewType,
         diffFile: this.diffFile,
         linePosition: this.linePosition,
-        lineRange: {
-          start_line_code: this.commentLineStart.lineCode,
-          start_line_type: this.commentLineStart.type,
-          end_line_code: this.line.line_code,
-          end_line_type: this.line.type,
-        },
+        lineRange: formatLineRange(this.commentLineStart, this.line),
       };
     },
     diffFile() {
       return this.getDiffFileByHash(this.diffFileHash);
     },
     commentLineOptions() {
-      return commentLineOptions(this.diffFile.highlighted_diff_lines, this.line.line_code);
+      const combineSides = (acc, { left, right }) => {
+        // ignore null values match lines
+        if (left) acc.push(left);
+        // if the line_codes are identically, return to avoid duplicates
+        if (
+          left?.line_code === right?.line_code ||
+          left?.type === 'old-nonewline' ||
+          right?.type === 'new-nonewline'
+        ) {
+          return acc;
+        }
+        if (right && right.type !== 'match') acc.push(right);
+        return acc;
+      };
+      const getDiffLines = () => {
+        if (this.diffViewType === PARALLEL_DIFF_VIEW_TYPE) {
+          return this.diffLines(this.diffFile, this.glFeatures.unifiedDiffComponents).reduce(
+            combineSides,
+            [],
+          );
+        }
+
+        return this.diffFile[INLINE_DIFF_LINES_KEY];
+      };
+      const side = this.line.type === 'new' ? 'right' : 'left';
+      const lines = getDiffLines();
+      return commentLineOptions(lines, this.line, this.line.line_code, side);
     },
   },
   mounted() {
@@ -99,6 +126,10 @@ export default {
       ];
 
       this.initAutoSave(this.noteableData, keys);
+    }
+
+    if (this.selectedCommentPosition) {
+      this.commentLineStart = this.selectedCommentPosition.start;
     }
   },
   methods: {
@@ -136,10 +167,7 @@ export default {
 
 <template>
   <div class="content discussion-form discussion-form-container discussion-notes">
-    <div
-      v-if="glFeatures.multilineComments"
-      class="gl-mb-3 gl-text-gray-700 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
-    >
+    <div v-if="glFeatures.multilineComments" class="gl-mb-3 gl-text-gray-500 gl-pb-3">
       <multiline-comment-form
         v-model="commentLineStart"
         :line="line"
@@ -163,7 +191,7 @@ export default {
       :diff-file="diffFile"
       :show-suggest-popover="showSuggestPopover"
       save-button-title="Comment"
-      class="diff-comment-form prepend-top-10"
+      class="diff-comment-form gl-mt-3"
       @handleFormUpdateAddToReview="addToReview"
       @cancelForm="handleCancelCommentForm"
       @handleFormUpdate="handleSaveNote"

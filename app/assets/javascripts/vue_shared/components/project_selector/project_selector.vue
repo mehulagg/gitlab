@@ -41,16 +41,21 @@ export default {
     },
     totalResults: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
   },
   data() {
     return {
       searchQuery: '',
+      hasSearched: false,
     };
   },
   computed: {
     legendText() {
+      if (!this.hasSearched) {
+        return '';
+      }
       const count = this.projectSearchResults.length;
       const total = this.totalResults;
 
@@ -74,6 +79,9 @@ export default {
       return this.selectedProjects.some(({ id }) => project.id === id);
     },
     onInput: debounce(function debouncedOnInput() {
+      if (!this.hasSearched) {
+        this.hasSearched = true;
+      }
       this.$emit('searched', this.searchQuery);
     }, SEARCH_INPUT_TIMEOUT_MS),
   },
@@ -87,6 +95,7 @@ export default {
       type="search"
       class="mb-3"
       autofocus
+      data-qa-selector="project_search_field"
       @input="onInput"
     />
     <div class="d-flex flex-column">
@@ -98,7 +107,7 @@ export default {
         @bottomReached="bottomReached"
       >
         <template v-if="!showLoadingIndicator" #items>
-          <div class="d-flex flex-column">
+          <div class="gl-display-flex gl-flex-direction-column gl-p-3">
             <project-list-item
               v-for="project in projectSearchResults"
               :key="project.id"
@@ -106,13 +115,14 @@ export default {
               :project="project"
               :matcher="searchQuery"
               class="js-project-list-item"
+              data-qa-selector="project_list_item"
               @click="projectClicked(project)"
             />
           </div>
         </template>
 
         <template #default>
-          {{ legendText }}
+          <span data-testid="legend-text">{{ legendText }}</span>
         </template>
       </gl-infinite-scroll>
       <div v-if="showNoResultsMessage" class="text-muted ml-2 js-no-results-message">

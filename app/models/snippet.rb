@@ -15,11 +15,12 @@ class Snippet < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include HasRepository
+  include CanMoveRepositoryStorage
   include AfterCommitQueue
   extend ::Gitlab::Utils::Override
 
   MAX_FILE_COUNT = 10
-  MAX_SINGLE_FILE_COUNT = 1
+  MASTER_BRANCH = 'master'
 
   cache_markdown_field :title, pipeline: :single_line
   cache_markdown_field :description
@@ -44,6 +45,10 @@ class Snippet < ApplicationRecord
   has_many :notes, as: :noteable, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :user_mentions, class_name: "SnippetUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :snippet_repository, inverse_of: :snippet
+  has_many :repository_storage_moves, class_name: 'SnippetRepositoryStorageMove', inverse_of: :container
+
+  # We need to add the `dependent` in order to call the after_destroy callback
+  has_one :statistics, class_name: 'SnippetStatistics', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   delegate :name, :email, to: :author, prefix: true, allow_nil: true
 
@@ -67,7 +72,7 @@ class Snippet < ApplicationRecord
 
   validates :visibility_level, inclusion: { in: Gitlab::VisibilityLevel.values }
 
-  after_save :store_mentions!, if: :any_mentionable_attributes_changed?
+  after_create :create_statistics
 
   # Scopes
   scope :are_internal, -> { where(visibility_level: Snippet::INTERNAL) }
@@ -77,6 +82,8 @@ class Snippet < ApplicationRecord
   scope :fresh, -> { order("created_at DESC") }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :with_statistics, -> { joins(:statistics) }
+  scope :inc_projects_namespace_route, -> { includes(project: [:route, :namespace]) }
 
   attr_mentionable :description
 
@@ -170,8 +177,8 @@ class Snippet < ApplicationRecord
     Snippet.find_by(id: id, project: project)
   end
 
-  def self.max_file_limit(user)
-    Feature.enabled?(:snippet_multiple_files, user) ? MAX_FILE_COUNT : MAX_SINGLE_FILE_COUNT
+  def self.max_file_limit
+    MAX_FILE_COUNT
   end
 
   def initialize(attributes = {})
@@ -209,7 +216,8 @@ class Snippet < ApplicationRecord
   def blobs
     return [] unless repository_exists?
 
-    repository.ls_files(repository.root_ref).map { |file| Blob.lazy(repository, repository.root_ref, file) }
+    branch = default_branch
+    list_files(branch).map { |file| Blob.lazy(repository, branch, file) }
   end
 
   def hook_attrs
@@ -270,7 +278,7 @@ class Snippet < ApplicationRecord
 
   override :repository
   def repository
-    @repository ||= Repository.new(full_path, self, shard: repository_storage, disk_path: disk_path, repo_type: Gitlab::GlRepository::SNIPPET)
+    @repository ||= Gitlab::GlRepository::SNIPPET.repository_for(self)
   end
 
   override :repository_size_checker
@@ -278,7 +286,8 @@ class Snippet < ApplicationRecord
     strong_memoize(:repository_size_checker) do
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
-        limit: Gitlab::CurrentSettings.snippet_size_limit
+        limit: Gitlab::CurrentSettings.snippet_size_limit,
+        namespace: nil
       )
     end
   end
@@ -288,9 +297,7 @@ class Snippet < ApplicationRecord
     @storage ||= Storage::Hashed.new(self, prefix: Storage::Hashed::SNIPPET_REPOSITORY_PATH_PREFIX)
   end
 
-  # This is the full_path used to identify the
-  # the snippet repository. It will be used mostly
-  # for logging purposes.
+  # This is the full_path used to identify the the snippet repository.
   override :full_path
   def full_path
     return unless persisted?
@@ -298,14 +305,33 @@ class Snippet < ApplicationRecord
     @full_path ||= begin
       components = []
       components << project.full_path if project_id?
-      components << '@snippets'
+      components << 'snippets'
       components << self.id
       components.join('/')
     end
   end
 
+  override :default_branch
+  def default_branch
+    super || MASTER_BRANCH
+  end
+
   def repository_storage
     snippet_repository&.shard_name || self.class.pick_repository_storage
+  end
+
+  # Repositories are created by default with the `master` branch.
+  # This method changes the `HEAD` file to point to the existing
+  # default branch in case it's not master.
+  def change_head_to_default_branch
+    return unless repository.exists?
+    return if default_branch == MASTER_BRANCH
+    # All snippets must have at least 1 file. Therefore, if
+    # `HEAD` is empty is because it's pointing to the wrong
+    # default branch
+    return unless repository.empty? || list_files('HEAD').empty?
+
+    repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
   end
 
   def create_repository
@@ -331,13 +357,23 @@ class Snippet < ApplicationRecord
   def file_name_on_repo
     return if repository.empty?
 
-    repository.ls_files(repository.root_ref).first
+    list_files(default_branch).first
+  end
+
+  def list_files(ref = nil)
+    return [] if repository.empty?
+
+    repository.ls_files(ref || default_branch)
+  end
+
+  def multiple_files?
+    list_files.size > 1
   end
 
   class << self
     # Searches for snippets with a matching title, description or file name.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # query - The search query as a String.
     #

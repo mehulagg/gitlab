@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Discussion, ResolvableDiscussion do
+RSpec.describe Discussion, ResolvableDiscussion do
   subject { described_class.new([first_note, second_note, third_note]) }
 
   let(:first_note) { create(:discussion_note_on_merge_request) }
@@ -553,13 +553,13 @@ describe Discussion, ResolvableDiscussion do
     let(:time) { Time.current.utc }
 
     before do
-      Timecop.freeze(time - 1.second) do
+      travel_to(time - 1.second) do
         first_note.resolve!(current_user)
       end
-      Timecop.freeze(time) do
+      travel_to(time) do
         third_note.resolve!(current_user)
       end
-      Timecop.freeze(time + 1.second) do
+      travel_to(time + 1.second) do
         second_note.resolve!(current_user)
       end
     end

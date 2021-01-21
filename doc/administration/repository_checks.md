@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
+type: reference
+---
+
 # Repository checks
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3232) in GitLab 8.7.
@@ -10,7 +17,7 @@ before the check result is visible on the project admin page. If the
 checks failed you can see their output on in the [`repocheck.log`
 file.](logs.md#repochecklog)
 
-NOTE: **Note:**
+NOTE:
 It is OFF by default because it still causes too many false alarms.
 
 ## Periodic checks

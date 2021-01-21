@@ -40,14 +40,6 @@ module Geo
       "registry_consistency:#{registry_class.name.parameterize}"
     end
 
-    def find_registry_differences(range)
-      finder.find_registry_differences(range)
-    end
-
-    def finder
-      @finder ||= registry_class.finder_class.new(current_node_id: Gitlab::Geo.current_node.id)
-    end
-
     def handle_differences_in_range(range)
       untracked, unused = find_registry_differences(range)
 
@@ -72,6 +64,10 @@ module Geo
       return [] if delete_unused_in_range.empty?
 
       registry_class.delete_for_model_ids(delete_unused_in_range)
+    end
+
+    def find_registry_differences(range)
+      registry_class.find_registry_differences(range)
     end
 
     # This hack is used to sync new files soon after they are created.

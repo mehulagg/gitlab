@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User creates image diff notes', :js do
+RSpec.describe 'Merge request > User creates image diff notes', :js do
   include NoteInteractionHelpers
 
   let(:project) { create(:project, :public, :repository) }
@@ -88,7 +88,7 @@ describe 'Merge request > User creates image diff notes', :js do
           create_image_diff_note
         end
 
-        it 'shows indicator and avatar badges, and allows collapsing/expanding the discussion notes', :quarantine do
+        it 'shows indicator and avatar badges, and allows collapsing/expanding the discussion notes', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27950' do
           indicator = find('.js-image-badge', match: :first)
           badge = find('.user-avatar-link .badge', match: :first)
 

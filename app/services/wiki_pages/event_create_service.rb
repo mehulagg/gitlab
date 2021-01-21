@@ -9,13 +9,11 @@ module WikiPages
       @author = author
     end
 
-    def execute(slug, page, action)
-      return ServiceResponse.success(message: 'No event created as `wiki_events` feature is disabled') unless ::Feature.enabled?(:wiki_events)
-
+    def execute(slug, page, action, event_fingerprint)
       event = Event.transaction do
         wiki_page_meta = WikiPage::Meta.find_or_create(slug, page)
 
-        ::EventCreateService.new.wiki_event(wiki_page_meta, author, action)
+        ::EventCreateService.new.wiki_event(wiki_page_meta, author, action, event_fingerprint)
       end
 
       ServiceResponse.success(payload: { event: event })

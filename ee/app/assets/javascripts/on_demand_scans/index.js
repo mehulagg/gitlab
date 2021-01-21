@@ -1,22 +1,43 @@
 import Vue from 'vue';
-import OnDemandScansApp from './components/on_demand_scans_app.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import apolloProvider from './graphql/provider';
+import OnDemandScansForm from './components/on_demand_scans_form.vue';
 
 export default () => {
   const el = document.querySelector('#js-on-demand-scans-app');
   if (!el) {
-    return;
+    return null;
   }
 
-  const { helpPagePath, emptyStateSvgPath } = el.dataset;
+  const {
+    dastSiteValidationDocsPath,
+    projectPath,
+    defaultBranch,
+    scannerProfilesLibraryPath,
+    siteProfilesLibraryPath,
+    newSiteProfilePath,
+    newScannerProfilePath,
+    helpPagePath,
+    dastScan,
+  } = el.dataset;
 
-  // eslint-disable-next-line no-new
-  new Vue({
+  return new Vue({
     el,
+    apolloProvider,
+    provide: {
+      scannerProfilesLibraryPath,
+      siteProfilesLibraryPath,
+      newScannerProfilePath,
+      newSiteProfilePath,
+      dastSiteValidationDocsPath,
+    },
     render(h) {
-      return h(OnDemandScansApp, {
+      return h(OnDemandScansForm, {
         props: {
           helpPagePath,
-          emptyStateSvgPath,
+          projectPath,
+          defaultBranch,
+          dastScan: dastScan ? convertObjectPropsToCamelCase(JSON.parse(dastScan)) : null,
         },
       });
     },

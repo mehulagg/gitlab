@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: "Sometimes it is necessary to store large amounts of records at once, which can be inefficient
 when iterating collections and performing individual `save`s. With the arrival of `insert_all`
 in Rails 6, which operates at the row level (that is, using `Hash`es), GitLab has added a set
@@ -98,7 +101,7 @@ performance impact this might have on your code. There is a trade-off between th
 
 ### Handling duplicate records
 
-NOTE: **Note:**
+NOTE:
 This parameter applies only to `bulk_insert!`. If you intend to update existing
 records, use `bulk_upsert!` instead.
 
@@ -121,10 +124,10 @@ These callbacks cannot be used with bulk insertions, since they are meant to be 
 every instance that is saved or created. Since these events do not fire when
 records are inserted in bulk, we currently disallow their use.
 
-The specifics around which callbacks are disallowed are defined in
+The specifics around which callbacks are explicitly allowed are defined in
 [`BulkInsertSafe`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/concerns/bulk_insert_safe.rb).
-Consult the module source code for details. If your class uses any of the blacklisted
-functionality, and you `include BulkInsertSafe`, the application will fail with an error.
+Consult the module source code for details. If your class uses callbacks that are not explicitly designated
+safe and you `include BulkInsertSafe` the application will fail with an error.
 
 ### `BulkInsertSafe` versus `InsertAll`
 

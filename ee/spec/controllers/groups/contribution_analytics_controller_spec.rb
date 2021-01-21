@@ -219,10 +219,15 @@ RSpec.describe Groups::ContributionAnalyticsController do
       end
     end
 
-    describe 'GET #index' do
+    describe 'GET #show' do
       subject { get :show, params: { group_id: group.to_param } }
 
       it_behaves_like 'disabled when using an external authorization service'
+
+      it_behaves_like 'tracking unique visits', :show do
+        let(:request_params) { { group_id: group.to_param } }
+        let(:target_id) { 'g_analytics_contribution' }
+      end
     end
   end
 end

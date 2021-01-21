@@ -1,10 +1,13 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
 # Unstage
 
-- To remove files from stage use reset HEAD where HEAD is the last commit of the current branch. This will unstage the file but maintain the modifications.
+- To remove files from stage use reset HEAD where HEAD is the last commit of the current branch. This unstages the file but maintain the modifications.
 
   ```shell
   git reset HEAD <file>
@@ -16,7 +19,7 @@ comments: false
   git checkout -- <file>
   ```
 
-- To remove a file from disk and repo use `git rm` and to remove a directory use the `-r` flag:
+- To remove a file from disk and repository, use `git rm`. To remove a directory, use the `-r` flag:
 
   ```shell
   git rm '*.txt'

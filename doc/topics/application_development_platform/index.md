@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Application Development Platform
 
 The GitLab Application Development Platform refers to the set of GitLab features used to create, configure, and manage
@@ -29,14 +35,14 @@ of newer, more efficient, more profitable, and less error-prone techniques for s
 
 Because at GitLab we are [cloud-native first](https://about.gitlab.com/handbook/product/#cloud-native-first) our
 Application Development Platform initially focuses on providing robust support for Kubernetes, with other platforms
-to follow. Teams can bring their own clusters and we will additionally make it easy to create new infrastructure
+to follow. Teams can bring their own clusters and we additionally make it easy to create new infrastructure
 with various cloud providers.
 
 ### Build, test, deploy
 
-In order to provide modern DevOps workflows, our Application Development Platform will rely on
+In order to provide modern DevOps workflows, our Application Development Platform relies on
 [Auto DevOps](../autodevops/index.md) to provide those workflows. Auto DevOps works with
-any Kubernetes cluster; you're not limited to running on GitLab's infrastructure. Additionally, Auto DevOps offers
+any Kubernetes cluster; you're not limited to running on GitLab infrastructure. Additionally, Auto DevOps offers
 an incremental consumption path. Because it is [composable](../autodevops/customize.md#using-components-of-auto-devops),
 you can use as much or as little of the default pipeline as you'd like, and deeply customize without having to integrate a completely different platform.
 
@@ -47,10 +53,10 @@ that may lead to security problems and unintended use. This can be achieved by m
 which inform security teams and developers if there is something to consider changing in their apps
 before it is too late to create a preventative fix. The following features are included:
 
-- [Auto SAST (Static Application Security Testing)](../autodevops/stages.md#auto-sast-ultimate)
-- [Auto Dependency Scanning](../autodevops/stages.md#auto-dependency-scanning-ultimate)
-- [Auto Container Scanning](../autodevops/stages.md#auto-container-scanning-ultimate)
-- [Auto DAST (Dynamic Application Security Testing)](../autodevops/stages.md#auto-dast-ultimate)
+- [Auto SAST (Static Application Security Testing)](../autodevops/stages.md#auto-sast)
+- [Auto Dependency Scanning](../autodevops/stages.md#auto-dependency-scanning)
+- [Auto Container Scanning](../autodevops/stages.md#auto-container-scanning)
+- [Auto DAST (Dynamic Application Security Testing)](../autodevops/stages.md#auto-dast)
 
 ### Observability
 

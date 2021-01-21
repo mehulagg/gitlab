@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Search group member' do
+RSpec.describe 'Search group member', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create :user }
   let(:member) { create :user }
 
@@ -19,13 +21,13 @@ describe 'Search group member' do
   end
 
   it 'renders member users' do
-    page.within '.user-search-form' do
-      fill_in 'search', with: member.name
-      find('.user-search-btn').click
+    page.within '[data-testid="members-filtered-search-bar"]' do
+      find_field('Filter members').click
+      find('input').native.send_keys(member.name)
+      click_button 'Search'
     end
 
-    group_members_list = find('[data-qa-selector="members_list"]')
-    expect(group_members_list).to have_content(member.name)
-    expect(group_members_list).not_to have_content(user.name)
+    expect(members_table).to have_content(member.name)
+    expect(members_table).not_to have_content(user.name)
   end
 end

@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import { __ } from './locale';
 import { parseBoolean } from './lib/utils/common_utils';
 
@@ -49,7 +49,7 @@ function onToggleClicked(toggle, input, clickCallback) {
 export default function setupToggleButtons(container, clickCallback = () => {}) {
   const toggles = container.querySelectorAll('.js-project-feature-toggle');
 
-  toggles.forEach(toggle => {
+  toggles.forEach((toggle) => {
     const input = toggle.querySelector('.js-project-feature-toggle-input');
     const isOn = parseBoolean(input.value);
 

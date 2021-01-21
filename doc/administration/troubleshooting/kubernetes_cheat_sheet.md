@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -8,7 +11,7 @@ This is a list of useful information regarding Kubernetes that the GitLab Suppor
 Team sometimes uses while troubleshooting. GitLab is making this public, so that anyone
 can make use of the Support team's collected knowledge
 
-CAUTION: **Caution:**
+WARNING:
 These commands **can alter or break** your Kubernetes components so use these at your own risk.
 
 If you are on a [paid tier](https://about.gitlab.com/pricing/) and are not sure how
@@ -67,8 +70,7 @@ and they will assist you with any issues you are having.
   kubectl logs <pod-name> --previous
   ```
 
-  NOTE: **Note:**
-  No logs are kept in the containers/pods themselves, everything is written to stdout.
+  No logs are kept in the containers/pods themselves. Everything is written to stdout.
   This is the principle of Kubernetes, read [Twelve-factor app](https://12factor.net/)
   for details.
 
@@ -84,8 +86,7 @@ and they will assist you with any issues you are having.
 
 ## GitLab-specific Kubernetes information
 
-- Minimal config that can be used to test a Kubernetes Helm chart can be found
-  [here](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/620).
+- Minimal configuration that can be used to [test a Kubernetes Helm chart](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/620).
 
 - Tailing logs of a separate pod. An example for a Webservice pod:
 
@@ -125,7 +126,7 @@ and they will assist you with any issues you are having.
   kubectl get pods | grep task-runner
 
   # enter it
-  kubectl exec -it <task-runner-pod-name> bash
+  kubectl exec -it <task-runner-pod-name> -- bash
 
   # open rails console
   # rails console can be also called from other GitLab pods
@@ -138,10 +139,10 @@ and they will assist you with any issues you are having.
   /usr/local/bin/gitlab-rake gitlab:check
 
   # open console without entering pod
-  kubectl exec -it <task-runner-pod-name> /srv/gitlab/bin/rails console
+  kubectl exec -it <task-runner-pod-name> -- /srv/gitlab/bin/rails console
 
   # check the status of DB migrations
-  kubectl exec -it <task-runner-pod-name> /usr/local/bin/gitlab-rake db:migrate:status
+  kubectl exec -it <task-runner-pod-name> -- /usr/local/bin/gitlab-rake db:migrate:status
   ```
 
   You can also use `gitlab-rake`, instead of `/usr/local/bin/gitlab-rake`.
@@ -190,7 +191,7 @@ and they will assist you with any issues you are having.
   be possible to use [Updating GitLab using the Helm Chart](https://docs.gitlab.com/charts/index.html#updating-gitlab-using-the-helm-chart)
   for upgrades.
 
-- How to apply changes to GitLab config:
+- How to apply changes to GitLab configuration:
 
   - Modify the `gitlab.yaml` file.
   - Run the following command to apply changes:
@@ -206,7 +207,7 @@ all Kubernetes resources and dependent charts:
   helm get manifest <release name>
   ```
 
-## Installation of minimal GitLab config via Minikube on macOS
+## Installation of minimal GitLab configuration via Minikube on macOS
 
 This section is based on [Developing for Kubernetes with Minikube](https://docs.gitlab.com/charts/development/minikube/index.html)
 and [Helm](https://docs.gitlab.com/charts/installation/tools.html#helm). Refer
@@ -255,7 +256,7 @@ to those documents for details.
   helm install gitlab -f <path-to-yaml-file> gitlab/gitlab
   ```
 
-  If you want to modify some GitLab settings, you can use the above-mentioned config
+  If you want to modify some GitLab settings, you can use the above-mentioned configuration
   as a base and create your own YAML file.
 
 - Monitor the installation progress via `helm status gitlab` and `minikube dashboard`.

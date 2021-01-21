@@ -1,16 +1,18 @@
 import { mount } from '@vue/test-utils';
 import { GlProgressBar, GlLink, GlBadge, GlButton } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
+import { getJSONFixture } from 'helpers/fixtures';
 import ReleaseBlockMilestoneInfo from '~/releases/components/release_block_milestone_info.vue';
-import { milestones as originalMilestones } from '../mock_data';
 import { MAX_MILESTONES_TO_DISPLAY } from '~/releases/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+const { milestones: originalMilestones } = getJSONFixture('api/releases/release.json');
 
 describe('Release block milestone info', () => {
   let wrapper;
   let milestones;
 
-  const factory = props => {
+  const factory = (props) => {
     wrapper = mount(ReleaseBlockMilestoneInfo, {
       propsData: props,
     });
@@ -29,13 +31,14 @@ describe('Release block milestone info', () => {
 
   const milestoneProgressBarContainer = () => wrapper.find('.js-milestone-progress-bar-container');
   const milestoneListContainer = () => wrapper.find('.js-milestone-list-container');
-  const issuesContainer = () => wrapper.find('.js-issues-container');
+  const issuesContainer = () => wrapper.find('[data-testid="issue-stats"]');
+  const mergeRequestsContainer = () => wrapper.find('[data-testid="merge-request-stats"]');
 
   describe('with default props', () => {
     beforeEach(() => factory({ milestones }));
 
     it('renders the correct percentage', () => {
-      expect(milestoneProgressBarContainer().text()).toContain('41% complete');
+      expect(milestoneProgressBarContainer().text()).toContain('44% complete');
     });
 
     it('renders a progress bar that displays the correct percentage', () => {
@@ -44,19 +47,17 @@ describe('Release block milestone info', () => {
       expect(progressBar.exists()).toBe(true);
       expect(progressBar.attributes()).toEqual(
         expect.objectContaining({
-          value: '22',
-          max: '54',
+          value: '4',
+          max: '9',
         }),
       );
     });
 
     it('renders a list of links to all associated milestones', () => {
-      expect(trimText(milestoneListContainer().text())).toContain('Milestones 13.6 • 13.5');
+      expect(milestoneListContainer().text()).toMatchInterpolatedText('Milestones 12.3 • 12.4');
 
       milestones.forEach((m, i) => {
-        const milestoneLink = milestoneListContainer()
-          .findAll(GlLink)
-          .at(i);
+        const milestoneLink = milestoneListContainer().findAll(GlLink).at(i);
 
         expect(milestoneLink.text()).toBe(m.title);
         expect(milestoneLink.attributes('href')).toBe(m.webUrl);
@@ -65,7 +66,7 @@ describe('Release block milestone info', () => {
     });
 
     it('renders the "Issues" section with a total count of issues associated to the milestone(s)', () => {
-      const totalIssueCount = 54;
+      const totalIssueCount = 9;
       const issuesContainerText = trimText(issuesContainer().text());
 
       expect(issuesContainerText).toContain(`Issues ${totalIssueCount}`);
@@ -73,7 +74,7 @@ describe('Release block milestone info', () => {
       const badge = issuesContainer().find(GlBadge);
       expect(badge.text()).toBe(totalIssueCount.toString());
 
-      expect(issuesContainerText).toContain('Open: 32 • Closed: 22');
+      expect(issuesContainerText).toContain('Open: 5 • Closed: 4');
     });
   });
 
@@ -95,19 +96,17 @@ describe('Release block milestone info', () => {
         });
       }
 
-      fullListString = lotsOfMilestones.map(m => m.title).join(' • ');
+      fullListString = lotsOfMilestones.map((m) => m.title).join(' • ');
       abbreviatedListString = lotsOfMilestones
         .slice(0, MAX_MILESTONES_TO_DISPLAY)
-        .map(m => m.title)
+        .map((m) => m.title)
         .join(' • ');
 
       return factory({ milestones: lotsOfMilestones });
     });
 
     const clickShowMoreFewerButton = () => {
-      milestoneListContainer()
-        .find(GlButton)
-        .trigger('click');
+      milestoneListContainer().find(GlButton).trigger('click');
 
       return wrapper.vm.$nextTick();
     };
@@ -148,7 +147,7 @@ describe('Release block milestone info', () => {
   /** Ensures we don't have any issues with dividing by zero when computing percentages */
   describe('when all issue counts are zero', () => {
     beforeEach(() => {
-      milestones = milestones.map(m => ({
+      milestones = milestones.map((m) => ({
         ...m,
         issueStats: {
           ...m.issueStats,
@@ -165,7 +164,7 @@ describe('Release block milestone info', () => {
 
   describe('if the API response is missing the "issue_stats" property', () => {
     beforeEach(() => {
-      milestones = milestones.map(m => ({
+      milestones = milestones.map((m) => ({
         ...m,
         issueStats: undefined,
       }));
@@ -176,66 +175,32 @@ describe('Release block milestone info', () => {
     expectAllZeros();
   });
 
-  describe('Issue links', () => {
-    const findOpenIssuesLink = () => wrapper.find({ ref: 'openIssuesLink' });
-    const findOpenIssuesText = () => wrapper.find({ ref: 'openIssuesText' });
-    const findClosedIssuesLink = () => wrapper.find({ ref: 'closedIssuesLink' });
-    const findClosedIssuesText = () => wrapper.find({ ref: 'closedIssuesText' });
+  describe('if the API response is missing the "mr_stats" property', () => {
+    beforeEach(() => factory({ milestones }));
 
-    describe('when openIssuePath is provided', () => {
-      const openIssuesPath = '/path/to/open/issues';
+    it('does not render merge request stats', () => {
+      expect(mergeRequestsContainer().exists()).toBe(false);
+    });
+  });
 
-      beforeEach(() => {
-        return factory({ milestones, openIssuesPath });
-      });
+  describe('if the API response includes the "mr_stats" property', () => {
+    beforeEach(() => {
+      milestones = milestones.map((m) => ({
+        ...m,
+        mrStats: {
+          total: 15,
+          merged: 12,
+          closed: 1,
+        },
+      }));
 
-      it('renders the open issues as a link', () => {
-        expect(findOpenIssuesLink().exists()).toBe(true);
-        expect(findOpenIssuesText().exists()).toBe(false);
-      });
-
-      it('renders the open issues link with the correct href', () => {
-        expect(findOpenIssuesLink().attributes().href).toBe(openIssuesPath);
-      });
+      return factory({ milestones });
     });
 
-    describe('when openIssuePath is not provided', () => {
-      beforeEach(() => {
-        return factory({ milestones });
-      });
-
-      it('renders the open issues as plain text', () => {
-        expect(findOpenIssuesLink().exists()).toBe(false);
-        expect(findOpenIssuesText().exists()).toBe(true);
-      });
-    });
-
-    describe('when closedIssuePath is provided', () => {
-      const closedIssuesPath = '/path/to/closed/issues';
-
-      beforeEach(() => {
-        return factory({ milestones, closedIssuesPath });
-      });
-
-      it('renders the closed issues as a link', () => {
-        expect(findClosedIssuesLink().exists()).toBe(true);
-        expect(findClosedIssuesText().exists()).toBe(false);
-      });
-
-      it('renders the closed issues link with the correct href', () => {
-        expect(findClosedIssuesLink().attributes().href).toBe(closedIssuesPath);
-      });
-    });
-
-    describe('when closedIssuePath is not provided', () => {
-      beforeEach(() => {
-        return factory({ milestones });
-      });
-
-      it('renders the closed issues as plain text', () => {
-        expect(findClosedIssuesLink().exists()).toBe(false);
-        expect(findClosedIssuesText().exists()).toBe(true);
-      });
+    it('renders merge request stats', () => {
+      expect(trimText(mergeRequestsContainer().text())).toBe(
+        'Merge Requests 30 Open: 4 • Merged: 24 • Closed: 2',
+      );
     });
   });
 });

@@ -33,6 +33,8 @@ class EventsFinder
   end
 
   def execute
+    return Event.none if cannot_access_private_profile?
+
     events = get_events
 
     events = by_current_user_access(events)
@@ -52,15 +54,8 @@ class EventsFinder
     if current_user && scope == 'all'
       EventCollection.new(current_user.authorized_projects).all_project_events
     else
-      # EventCollection is responsible for applying the feature flag
-      apply_feature_flags(source.events)
+      source.events
     end
-  end
-
-  def apply_feature_flags(events)
-    return events if ::Feature.enabled?(:wiki_events)
-
-    events.not_wiki_page
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -102,6 +97,10 @@ class EventsFinder
     events.where('events.created_at > ?', params[:after].end_of_day)
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def cannot_access_private_profile?
+    source.is_a?(User) && !Ability.allowed?(current_user, :read_user_profile, source)
+  end
 
   def sort(events)
     return events unless params[:sort]

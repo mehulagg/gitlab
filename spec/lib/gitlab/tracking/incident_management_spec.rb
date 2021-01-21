@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Tracking::IncidentManagement do
+RSpec.describe Gitlab::Tracking::IncidentManagement do
   describe '.track_from_params' do
     shared_examples 'a tracked event' do |label, value = nil|
       it 'creates the tracking event with the correct details' do
@@ -11,7 +11,7 @@ describe Gitlab::Tracking::IncidentManagement do
           .with(
             'IncidentManagement::Settings',
             label,
-            value || kind_of(Hash)
+            value || any_args
           )
       end
     end
@@ -62,7 +62,7 @@ describe Gitlab::Tracking::IncidentManagement do
       context 'param without label' do
         let(:params) { { create_issue: '1' } }
 
-        it_behaves_like 'a tracked event', "enabled_issue_auto_creation_on_alerts", {}
+        it_behaves_like 'a tracked event', "enabled_issue_auto_creation_on_alerts"
       end
     end
 

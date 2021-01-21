@@ -13,6 +13,8 @@ module QA
                 view 'ee/app/views/layouts/nav/sidebar/_project_security_link.html.haml' do
                   element :security_dashboard_link
                   element :dependency_list_link
+                  element :vulnerability_report_link
+                  element :audit_events_settings_link
                 end
               end
             end
@@ -31,11 +33,27 @@ module QA
               end
             end
 
+            def click_on_vulnerability_report
+              hover_security_compliance do
+                within_submenu do
+                  click_element(:vulnerability_report_link)
+                end
+              end
+            end
+
             def hover_security_compliance
               within_sidebar do
                 find_element(:security_dashboard_link).hover
 
                 yield
+              end
+            end
+
+            def go_to_audit_events_settings
+              hover_security_compliance do
+                within_submenu do
+                  click_element :audit_events_settings_link
+                end
               end
             end
           end

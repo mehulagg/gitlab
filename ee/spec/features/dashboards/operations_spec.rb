@@ -9,7 +9,7 @@ RSpec.describe 'Dashboard operations', :js do
     project = create(:project, :repository, name: 'Great Project')
     pipeline = create(:ci_pipeline, project: project, sha: project.commit.sha, status: :running)
     project.add_developer(user)
-    user.update(ops_dashboard_projects: [project])
+    user.update!(ops_dashboard_projects: [project])
     sign_in(user)
 
     visit operations_path
@@ -47,7 +47,7 @@ RSpec.describe 'Dashboard operations', :js do
       gold_project.add_developer(user)
       bronze_group.add_developer(user)
 
-      user.update(ops_dashboard_projects: [gold_project, bronze_project, public_project])
+      user.update!(ops_dashboard_projects: [gold_project, bronze_project, public_project])
       sign_in(user)
 
       visit operations_path

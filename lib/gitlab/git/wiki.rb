@@ -6,7 +6,6 @@ module Gitlab
       include Gitlab::Git::WrapsGitalyErrors
 
       DuplicatePageError = Class.new(StandardError)
-      OperationError = Class.new(StandardError)
 
       DEFAULT_PAGINATION = Kaminari.config.default_per_page
 
@@ -156,6 +155,8 @@ module Gitlab
         return unless wiki_page
 
         Gitlab::Git::WikiPage.new(wiki_page, version)
+      rescue GRPC::InvalidArgument
+        nil
       end
 
       def gitaly_find_file(name, version)
@@ -170,9 +171,9 @@ module Gitlab
 
         gitaly_pages =
           if load_content
-            gitaly_wiki_client.load_all_pages(params)
+            gitaly_wiki_client.load_all_pages(**params)
           else
-            gitaly_wiki_client.list_all_pages(params)
+            gitaly_wiki_client.list_all_pages(**params)
           end
 
         gitaly_pages.map do |wiki_page, version|

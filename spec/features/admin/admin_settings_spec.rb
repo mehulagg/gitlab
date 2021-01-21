@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_mock_admin_mode do
+RSpec.describe 'Admin updates settings' do
   include StubENV
   include TermsHelper
   include UsageDataHelpers
@@ -21,7 +21,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         visit general_admin_application_settings_path
       end
 
-      it 'Change visibility settings' do
+      it 'change visibility settings' do
         page.within('.as-visibility-access') do
           choose "application_setting_default_project_visibility_20"
           click_button 'Save changes'
@@ -30,7 +30,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Uncheck all restricted visibility levels' do
+      it 'uncheck all restricted visibility levels' do
         page.within('.as-visibility-access') do
           find('#application_setting_visibility_level_0').set(false)
           find('#application_setting_visibility_level_10').set(false)
@@ -44,7 +44,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(find('#application_setting_visibility_level_20')).not_to be_checked
       end
 
-      it 'Modify import sources' do
+      it 'modify import sources' do
         expect(current_settings.import_sources).not_to be_empty
 
         page.within('.as-visibility-access') do
@@ -67,7 +67,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.import_sources).to eq(['git'])
       end
 
-      it 'Change Visibility and Access Controls' do
+      it 'change Visibility and Access Controls' do
         page.within('.as-visibility-access') do
           uncheck 'Project export enabled'
           click_button 'Save changes'
@@ -77,7 +77,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change Keys settings' do
+      it 'change Keys settings' do
         page.within('.as-visibility-access') do
           select 'Are forbidden', from: 'RSA SSH keys'
           select 'Are allowed', from: 'DSA SSH keys'
@@ -95,7 +95,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(find_field('ED25519 SSH keys').value).to eq(forbidden)
       end
 
-      it 'Change Account and Limit Settings' do
+      it 'change Account and Limit Settings' do
         page.within('.as-account-limit') do
           uncheck 'Gravatar enabled'
           click_button 'Save changes'
@@ -105,7 +105,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change Maximum import size' do
+      it 'change Maximum import size' do
         page.within('.as-account-limit') do
           fill_in 'Maximum import size (MB)', with: 15
           click_button 'Save changes'
@@ -115,7 +115,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change New users set to external', :js do
+      it 'change New users set to external', :js do
         user_internal_regex = find('#application_setting_user_default_internal_regex', visible: :all)
 
         expect(user_internal_regex).to be_readonly
@@ -127,7 +127,21 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(user_internal_regex['placeholder']).to eq 'Regex pattern'
       end
 
-      it 'Change Sign-in restrictions' do
+      context 'Change Sign-up restrictions' do
+        context 'Require Admin approval for new signup setting' do
+          it 'changes the setting' do
+            page.within('.as-signup') do
+              check 'Require admin approval for new sign-ups'
+              click_button 'Save changes'
+            end
+
+            expect(current_settings.require_admin_approval_after_user_signup).to be_truthy
+            expect(page).to have_content "Application settings saved successfully"
+          end
+        end
+      end
+
+      it 'change Sign-in restrictions' do
         page.within('.as-signin') do
           fill_in 'Home page URL', with: 'https://about.gitlab.com/'
           click_button 'Save changes'
@@ -137,7 +151,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Terms of Service' do
+      it 'terms of Service' do
         # Already have the admin accept terms, so they don't need to accept in this spec.
         _existing_terms = create(:term)
         accept_terms(admin)
@@ -153,7 +167,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content 'Application settings saved successfully'
       end
 
-      it 'Modify oauth providers' do
+      it 'modify oauth providers' do
         expect(current_settings.disabled_oauth_sign_in_sources).to be_empty
 
         page.within('.as-signin') do
@@ -173,7 +187,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.disabled_oauth_sign_in_sources).not_to include('google_oauth2')
       end
 
-      it 'Oauth providers do not raise validation errors when saving unrelated changes' do
+      it 'oauth providers do not raise validation errors when saving unrelated changes' do
         expect(current_settings.disabled_oauth_sign_in_sources).to be_empty
 
         page.within('.as-signin') do
@@ -196,7 +210,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.disabled_oauth_sign_in_sources).to include('google_oauth2')
       end
 
-      it 'Configure web terminal' do
+      it 'configure web terminal' do
         page.within('.as-terminal') do
           fill_in 'Max session time', with: 15
           click_button 'Save changes'
@@ -205,15 +219,28 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
         expect(current_settings.terminal_max_session_time).to eq(15)
       end
+
+      context 'Configure Gitpod' do
+        it 'changes gitpod settings' do
+          page.within('#js-gitpod-settings') do
+            check 'Enable Gitpod integration'
+            fill_in 'Gitpod URL', with: 'https://gitpod.test/'
+            click_button 'Save changes'
+          end
+
+          expect(page).to have_content 'Application settings saved successfully'
+          expect(current_settings.gitpod_url).to eq('https://gitpod.test/')
+          expect(current_settings.gitpod_enabled).to be(true)
+        end
+      end
     end
 
     context 'Integrations page' do
       before do
-        stub_feature_flags(instance_level_integrations: false)
-        visit integrations_admin_application_settings_path
+        visit general_admin_application_settings_path
       end
 
-      it 'Enable hiding third party offers' do
+      it 'enable hiding third party offers' do
         page.within('.as-third-party-offers') do
           check 'Do not display offers from third parties within GitLab'
           click_button 'Save changes'
@@ -223,7 +250,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.hide_third_party_offers).to be true
       end
 
-      it 'Change Slack Notifications Service template settings', :js do
+      it 'change Slack Notifications Service template settings', :js do
         first(:link, 'Service Templates').click
         click_link 'Slack notifications'
         fill_in 'Webhook', with: 'http://localhost'
@@ -233,7 +260,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         page.select 'All branches', from: 'Branches to be notified'
 
         check_all_events
-        click_on 'Save'
+        click_button 'Save changes'
 
         expect(page).to have_content 'Application settings saved successfully'
 
@@ -273,7 +300,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     end
 
     context 'CI/CD page' do
-      it 'Change CI/CD settings' do
+      it 'change CI/CD settings' do
         visit ci_cd_admin_application_settings_path
 
         page.within('.as-ci-cd') do
@@ -286,10 +313,59 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.auto_devops_domain).to eq('domain.com')
         expect(page).to have_content "Application settings saved successfully"
       end
+
+      context 'Container Registry' do
+        context 'delete tags service execution timeout' do
+          let(:feature_flag_enabled) { true }
+          let(:client_support) { true }
+
+          before do
+            stub_container_registry_config(enabled: true)
+            stub_feature_flags(container_registry_expiration_policies_throttling: feature_flag_enabled)
+            allow(ContainerRegistry::Client).to receive(:supports_tag_delete?).and_return(client_support)
+          end
+
+          RSpec.shared_examples 'not having service timeout settings' do
+            it 'lacks the timeout settings' do
+              visit ci_cd_admin_application_settings_path
+
+              expect(page).not_to have_content "Container Registry delete tags service execution timeout"
+            end
+          end
+
+          context 'with feature flag enabled' do
+            context 'with client supporting tag delete' do
+              it 'changes the timeout' do
+                visit ci_cd_admin_application_settings_path
+
+                page.within('.as-registry') do
+                  fill_in 'application_setting_container_registry_delete_tags_service_timeout', with: 400
+                  click_button 'Save changes'
+                end
+
+                expect(current_settings.container_registry_delete_tags_service_timeout).to eq(400)
+                expect(page).to have_content "Application settings saved successfully"
+              end
+            end
+
+            context 'with client not supporting tag delete' do
+              let(:client_support) { false }
+
+              it_behaves_like 'not having service timeout settings'
+            end
+          end
+
+          context 'with feature flag disabled' do
+            let(:feature_flag_enabled) { false }
+
+            it_behaves_like 'not having service timeout settings'
+          end
+        end
+      end
     end
 
     context 'Repository page' do
-      it 'Change Repository storage settings' do
+      it 'change Repository storage settings' do
         visit repository_admin_application_settings_path
 
         page.within('.as-repository-storage') do
@@ -302,7 +378,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     end
 
     context 'Reporting page' do
-      it 'Change Spam settings' do
+      it 'change Spam settings' do
         visit reporting_admin_application_settings_path
 
         page.within('.as-spam') do
@@ -330,7 +406,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         visit metrics_and_profiling_admin_application_settings_path
       end
 
-      it 'Change Prometheus settings' do
+      it 'change Prometheus settings' do
         page.within('.as-prometheus') do
           check 'Enable Prometheus Metrics'
           click_button 'Save changes'
@@ -340,7 +416,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change Performance bar settings' do
+      it 'change Performance bar settings' do
         group = create(:group)
 
         page.within('.as-performance-bar') do
@@ -383,7 +459,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     end
 
     context 'Network page' do
-      it 'Changes Outbound requests settings' do
+      it 'changes Outbound requests settings' do
         visit network_admin_application_settings_path
 
         page.within('.as-outbound') do
@@ -401,11 +477,11 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.dns_rebinding_protection_enabled).to be false
       end
 
-      it 'Changes Issues rate limits settings' do
+      it 'changes Issues rate limits settings' do
         visit network_admin_application_settings_path
 
         page.within('.as-issue-limits') do
-          fill_in 'Max requests per second per user', with: 0
+          fill_in 'Max requests per minute per user', with: 0
           click_button 'Save changes'
         end
 
@@ -419,23 +495,28 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         visit preferences_admin_application_settings_path
       end
 
-      it 'Change Help page' do
+      it 'change Help page' do
+        stub_feature_flags(help_page_documentation_redirect: true)
+
         new_support_url = 'http://example.com/help'
+        new_documentation_url = 'https://docs.gitlab.com'
 
         page.within('.as-help-page') do
           fill_in 'Help page text', with: 'Example text'
           check 'Hide marketing-related entries from help'
           fill_in 'Support page URL', with: new_support_url
+          fill_in 'Documentation pages URL', with: new_documentation_url
           click_button 'Save changes'
         end
 
         expect(current_settings.help_page_text).to eq "Example text"
         expect(current_settings.help_page_hide_commercial_content).to be_truthy
         expect(current_settings.help_page_support_url).to eq new_support_url
+        expect(current_settings.help_page_documentation_base_url).to eq new_documentation_url
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change Pages settings' do
+      it 'change Pages settings' do
         page.within('.as-pages') do
           fill_in 'Maximum size of pages (MB)', with: 15
           check 'Require users to prove ownership of custom domains'
@@ -447,7 +528,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
       end
 
-      it 'Change Real-time features settings' do
+      it 'change Real-time features settings' do
         page.within('.as-realtime') do
           fill_in 'Polling interval multiplier', with: 5.0
           click_button 'Save changes'
@@ -468,7 +549,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
           .to have_content "The form contains the following error: Polling interval multiplier must be greater than or equal to 0"
       end
 
-      it "Change Pages Let's Encrypt settings" do
+      it "change Pages Let's Encrypt settings" do
         visit preferences_admin_application_settings_path
         page.within('.as-pages') do
           fill_in 'Email', with: 'my@test.example.com'
@@ -482,7 +563,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     end
 
     context 'Nav bar' do
-      it 'Shows default help links in nav' do
+      it 'shows default help links in nav' do
         default_support_url = 'https://about.gitlab.com/getting-help/'
 
         visit root_dashboard_path
@@ -495,7 +576,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         end
       end
 
-      it 'Shows custom support url in nav when set' do
+      it 'shows custom support url in nav when set' do
         new_support_url = 'http://example.com/help'
         stub_application_setting(help_page_support_url: new_support_url)
 
@@ -526,6 +607,7 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
   end
 
   def check_all_events
+    page.check('Active')
     page.check('Push')
     page.check('Issue')
     page.check('Confidential Issue')

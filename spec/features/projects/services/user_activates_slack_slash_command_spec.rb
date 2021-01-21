@@ -21,23 +21,27 @@ RSpec.describe 'Slack slash commands', :js do
 
   it 'redirects to the integrations page after saving but not activating' do
     fill_in 'Token', with: 'token'
-    click_active_toggle
+    click_active_checkbox
     click_on 'Save'
 
-    expect(current_path).to eq(project_settings_integrations_path(project))
-    expect(page).to have_content('Slack slash commands settings saved, but not activated.')
+    expect(current_path).to eq(edit_project_service_path(project, :slack_slash_commands))
+    expect(page).to have_content('Slack slash commands settings saved, but not active.')
   end
 
   it 'redirects to the integrations page after activating' do
     fill_in 'Token', with: 'token'
     click_on 'Save'
 
-    expect(current_path).to eq(project_settings_integrations_path(project))
-    expect(page).to have_content('Slack slash commands activated.')
+    expect(current_path).to eq(edit_project_service_path(project, :slack_slash_commands))
+    expect(page).to have_content('Slack slash commands settings saved and active.')
   end
 
   it 'shows the correct trigger url' do
     value = find_field('url').value
     expect(value).to match("api/v4/projects/#{project.id}/services/slack_slash_commands/trigger")
+  end
+
+  it 'shows help content' do
+    expect(page).to have_content('This service allows users to perform common operations on this project by entering slash commands in Slack.')
   end
 end

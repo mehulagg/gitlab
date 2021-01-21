@@ -71,13 +71,13 @@ const createContext = (specFiles, regex, suffix) => {
 
 if (specFilters.length) {
   // resolve filters
-  let filteredSpecFiles = specFilters.map(filter =>
+  let filteredSpecFiles = specFilters.map((filter) =>
     glob
       .sync(filter, {
         root: ROOT_PATH,
         matchBase: true,
       })
-      .filter(path => path.endsWith('spec.js')),
+      .filter((path) => path.endsWith('spec.js')),
   );
 
   // flatten
@@ -92,19 +92,19 @@ if (specFilters.length) {
     exit('Your filter did not match any test files.', isError);
   }
 
-  if (!filteredSpecFiles.every(file => SPECS_PATH.test(file))) {
+  if (!filteredSpecFiles.every((file) => SPECS_PATH.test(file))) {
     exitError('Test files must be located within /spec/javascripts.');
   }
 
-  const CE_FILES = filteredSpecFiles.filter(file => !file.startsWith('ee'));
+  const CE_FILES = filteredSpecFiles.filter((file) => !file.startsWith('ee'));
   createContext(CE_FILES, /[^e]{2}[\\\/]spec[\\\/]javascripts$/, 'spec/javascripts');
 
-  const EE_FILES = filteredSpecFiles.filter(file => file.startsWith('ee'));
+  const EE_FILES = filteredSpecFiles.filter((file) => file.startsWith('ee'));
   createContext(EE_FILES, /ee[\\\/]spec[\\\/]javascripts$/, 'ee/spec/javascripts');
 }
 
 // Karma configuration
-module.exports = function(config) {
+module.exports = function (config) {
   process.env.TZ = 'Etc/UTC';
 
   const fixturesPath = `tmp/tests/frontend/fixtures${IS_EE ? '-ee' : ''}`;
@@ -181,7 +181,7 @@ module.exports = function(config) {
   if (process.env.BABEL_ENV === 'coverage' || process.env.NODE_ENV === 'coverage') {
     karmaConfig.reporters.push('coverage-istanbul');
     karmaConfig.coverageIstanbulReporter = {
-      reports: ['html', 'text-summary'],
+      reports: ['html', 'text-summary', 'cobertura'],
       dir: 'coverage-javascript/',
       subdir: '.',
       fixWebpackSourcePaths: true,

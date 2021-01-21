@@ -1,13 +1,13 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/vue_shared/dashboards/store/actions';
 import createStore from 'ee/vue_shared/dashboards/store/index';
 import * as types from 'ee/vue_shared/dashboards/store/mutation_types';
-import * as actions from 'ee/vue_shared/dashboards/store/actions';
+import { mockHeaders, mockText, mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
 import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
 
 import clearState from '../helpers';
-import { mockHeaders, mockText, mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
 
 jest.mock('~/flash');
 
@@ -120,7 +120,7 @@ describe('actions', () => {
 
     const errorMessage =
       'This dashboard is available for public projects, and private projects in groups with a Silver plan.';
-    const selectProjects = count => {
+    const selectProjects = (count) => {
       for (let i = 0; i < count; i += 1) {
         store.dispatch('toggleSelectedProject', {
           id: i,
@@ -128,7 +128,7 @@ describe('actions', () => {
         });
       }
     };
-    const addInvalidProjects = invalid =>
+    const addInvalidProjects = (invalid) =>
       store.dispatch('receiveAddProjectsToDashboardSuccess', {
         added: [],
         invalid,
@@ -188,18 +188,36 @@ describe('actions', () => {
   });
 
   describe('fetchProjects', () => {
-    it('calls project list endpoint', () => {
+    const testListEndpoint = ({ page }) => {
       store.state.projectEndpoints.list = mockListEndpoint;
-      mockAxios.onGet(mockListEndpoint).replyOnce(200);
+      mockAxios
+        .onGet(mockListEndpoint, {
+          params: {
+            page,
+          },
+        })
+        .replyOnce(200, { projects: mockProjects }, mockHeaders);
 
       return testAction(
         actions.fetchProjects,
-        null,
+        page,
         store.state,
-        [],
-        [{ type: 'requestProjects' }, { type: 'receiveProjectsSuccess' }],
+        [
+          {
+            type: 'RECEIVE_PROJECTS_SUCCESS',
+            payload: {
+              headers: mockHeaders,
+              projects: mockProjects,
+            },
+          },
+        ],
+        [{ type: 'requestProjects' }],
       );
-    });
+    };
+
+    it('calls project list endpoint', () => testListEndpoint({ page: null }));
+
+    it('calls paginated project list endpoint', () => testListEndpoint({ page: 2 }));
 
     it('handles response errors', () => {
       store.state.projectEndpoints.list = mockListEndpoint;
@@ -222,23 +240,6 @@ describe('actions', () => {
         null,
         store.state,
         [{ type: types.REQUEST_PROJECTS }],
-        [],
-      );
-    });
-  });
-
-  describe('receiveProjectsSuccess', () => {
-    it('sets projects from data on success', () => {
-      return testAction(
-        actions.receiveProjectsSuccess,
-        { projects: mockProjects },
-        store.state,
-        [
-          {
-            type: types.RECEIVE_PROJECTS_SUCCESS,
-            payload: mockProjects,
-          },
-        ],
         [],
       );
     });
@@ -317,7 +318,7 @@ describe('actions', () => {
       const searchQueries = [null, undefined, false, NaN];
 
       return Promise.all(
-        searchQueries.map(searchQuery => {
+        searchQueries.map((searchQuery) => {
           store.state.searchQuery = searchQuery;
 
           return testAction(
@@ -512,6 +513,31 @@ describe('actions', () => {
           },
         ],
         [],
+      );
+    });
+  });
+
+  describe('paginateDashboard', () => {
+    it('fetches a new page of projects', () => {
+      const newPage = 2;
+
+      return testAction(
+        actions.paginateDashboard,
+        newPage,
+        store.state,
+        [],
+        [
+          {
+            type: 'stopProjectsPolling',
+          },
+          {
+            type: 'clearProjectsEtagPoll',
+          },
+          {
+            type: 'fetchProjects',
+            payload: newPage,
+          },
+        ],
       );
     });
   });

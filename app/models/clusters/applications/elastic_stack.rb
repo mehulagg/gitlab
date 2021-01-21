@@ -26,7 +26,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'elastic-stack',
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
@@ -39,7 +39,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: 'elastic-stack',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
@@ -51,7 +51,7 @@ module Clusters
         super.merge('wait-for-elasticsearch.sh': File.read("#{Rails.root}/vendor/elastic_stack/wait-for-elasticsearch.sh"))
       end
 
-      def elasticsearch_client
+      def elasticsearch_client(timeout: nil)
         strong_memoize(:elasticsearch_client) do
           next unless kube_client
 
@@ -63,6 +63,7 @@ module Clusters
             # ensure TLS certs are properly verified
             faraday.ssl[:verify] = kube_client.ssl_options[:verify_ssl]
             faraday.ssl[:cert_store] = kube_client.ssl_options[:cert_store]
+            faraday.options.timeout = timeout unless timeout.nil?
           end
 
         rescue Kubeclient::HttpError => error
@@ -95,7 +96,7 @@ module Clusters
 
       def post_install_script
         [
-          "timeout -t60 sh /data/helm/elastic-stack/config/wait-for-elasticsearch.sh http://elastic-stack-elasticsearch-master:9200"
+          "timeout 60 sh /data/helm/elastic-stack/config/wait-for-elasticsearch.sh http://elastic-stack-elasticsearch-master:9200"
         ]
       end
 
@@ -115,7 +116,7 @@ module Clusters
         # Chart version 3.0.0 moves to our own chart at https://gitlab.com/gitlab-org/charts/elastic-stack
         # and is not compatible with pre-existing resources. We first remove them.
         [
-          Gitlab::Kubernetes::Helm::DeleteCommand.new(
+          helm_command_module::DeleteCommand.new(
             name: 'elastic-stack',
             rbac: cluster.platform_kubernetes_rbac?,
             files: files

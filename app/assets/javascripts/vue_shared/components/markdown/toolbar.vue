@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlButton, GlLink, GlLoadingIcon, GlSprintf, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
@@ -7,6 +7,7 @@ export default {
     GlLink,
     GlLoadingIcon,
     GlSprintf,
+    GlIcon,
   },
   props: {
     markdownDocsPath: {
@@ -48,10 +49,10 @@ export default {
             )
           "
         >
-          <template #markdownDocsLink="{content}">
+          <template #markdownDocsLink="{ content }">
             <gl-link :href="markdownDocsPath" target="_blank">{{ content }}</gl-link>
           </template>
-          <template #quickActionsDocsLink="{content}">
+          <template #quickActionsDocsLink="{ content }">
             <gl-link :href="quickActionsDocsPath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
@@ -59,38 +60,60 @@ export default {
     </div>
     <span v-if="canAttachFile" class="uploading-container">
       <span class="uploading-progress-container hide">
-        <i class="fa fa-file-image-o toolbar-button-icon" aria-hidden="true"></i>
+        <template>
+          <gl-icon name="media" />
+        </template>
         <span class="attaching-file-message"></span>
         <!-- eslint-disable-next-line @gitlab/vue-require-i18n-strings -->
         <span class="uploading-progress">0%</span>
-        <gl-loading-icon inline class="align-text-bottom" />
+        <gl-loading-icon inline />
       </span>
       <span class="uploading-error-container hide">
         <span class="uploading-error-icon">
-          <i class="fa fa-file-image-o toolbar-button-icon" aria-hidden="true"></i>
+          <gl-icon name="media" />
         </span>
         <span class="uploading-error-message"></span>
 
         <gl-sprintf
           :message="
             __(
-              '%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}',
+              '%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}.',
             )
           "
         >
-          <template #retryButton="{content}">
-            <button class="retry-uploading-link" type="button">{{ content }}</button>
+          <template #retryButton="{ content }">
+            <gl-button
+              variant="link"
+              category="primary"
+              class="retry-uploading-link gl-vertical-align-baseline"
+            >
+              {{ content }}
+            </gl-button>
           </template>
-          <template #newFileButton="{content}">
-            <button class="attach-new-file markdown-selector" type="button">{{ content }}</button>
+          <template #newFileButton="{ content }">
+            <gl-button
+              variant="link"
+              category="primary"
+              class="markdown-selector attach-new-file gl-vertical-align-baseline"
+            >
+              {{ content }}
+            </gl-button>
           </template>
         </gl-sprintf>
       </span>
-      <gl-button class="markdown-selector button-attach-file" variant="link">
-        <i class="fa fa-file-image-o toolbar-button-icon" aria-hidden="true"></i
-        ><span class="text-attach-file">{{ __('Attach a file') }}</span>
+      <gl-button
+        icon="media"
+        variant="link"
+        category="primary"
+        class="markdown-selector button-attach-file gl-vertical-align-text-bottom"
+      >
+        {{ __('Attach a file') }}
       </gl-button>
-      <gl-button class="btn btn-default btn-sm hide button-cancel-uploading-files" variant="link">
+      <gl-button
+        variant="link"
+        category="primary"
+        class="button-cancel-uploading-files gl-vertical-align-baseline hide"
+      >
         {{ __('Cancel') }}
       </gl-button>
     </span>

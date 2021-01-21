@@ -1,12 +1,12 @@
 <script>
-import { escape } from 'lodash';
-import { GlLink } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
+import { GlLink, GlSprintf } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 export default {
   name: 'MergeTrainHelperText',
   components: {
     GlLink,
+    GlSprintf,
   },
   props: {
     pipelineId: {
@@ -27,42 +27,35 @@ export default {
     },
   },
   computed: {
-    message() {
-      const text =
-        this.mergeTrainLength === 0
-          ? s__(
-              'mrWidget|This merge request will start a merge train when pipeline %{linkStart}#%{pipelineId}%{linkEnd} succeeds.',
-            )
-          : s__(
-              'mrWidget|This merge request will be added to the merge train when pipeline %{linkStart}#%{pipelineId}%{linkEnd} succeeds.',
-            );
-
-      const sanitizedPipelineLink = escape(this.pipelineLink);
-
-      return sprintf(
-        text,
-        {
-          pipelineId: this.pipelineId,
-          linkStart: `<a class="js-pipeline-link" href="${sanitizedPipelineLink}">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
+    helperMessage() {
+      return this.mergeTrainLength === 0
+        ? s__(
+            'mrWidget|This action will start a merge train when pipeline %{pipelineLink} succeeds.',
+          )
+        : s__(
+            'mrWidget|This action will add the merge request to the merge train when pipeline %{pipelineLink} succeeds.',
+          );
     },
   },
 };
 </script>
 
 <template>
-  <section class="js-merge-train-helper-text mr-widget-help border-top">
-    <span v-html="message"></span>
-    <gl-link
-      :href="mergeTrainWhenPipelineSucceedsDocsPath"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="js-documentation-link"
-    >
-      {{ s__('mrWidget|More information') }}
-    </gl-link>
+  <section class="js-merge-train-helper-text gl-px-5 gl-pb-5">
+    <div class="gl-pl-7">
+      <gl-sprintf :message="helperMessage">
+        <template #pipelineLink>
+          <gl-link data-testid="pipeline-link" :href="pipelineLink">#{{ pipelineId }}</gl-link>
+        </template>
+      </gl-sprintf>
+      <gl-link
+        :href="mergeTrainWhenPipelineSucceedsDocsPath"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="documentation-link"
+      >
+        {{ s__('mrWidget|More information') }}
+      </gl-link>
+    </div>
   </section>
 </template>

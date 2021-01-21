@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::PullRequestImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::PullRequestImporter, :clean_gitlab_redis_cache do
   let(:project) { create(:project, :repository) }
   let(:client) { double(:client) }
   let(:user) { create(:user) }
@@ -43,7 +43,7 @@ describe Gitlab::GithubImport::Importer::PullRequestImporter, :clean_gitlab_redi
 
   describe '#execute' do
     it 'imports the pull request' do
-      mr = double(:merge_request, id: 10)
+      mr = double(:merge_request, id: 10, merged?: false)
 
       expect(importer)
         .to receive(:create_merge_request)

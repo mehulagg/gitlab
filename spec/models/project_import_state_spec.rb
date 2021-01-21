@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportState, type: :model do
+RSpec.describe ProjectImportState, type: :model do
   let_it_be(:correlation_id) { 'cid' }
   let_it_be(:import_state, refind: true) { create(:import_state, correlation_id_value: correlation_id) }
 
@@ -103,7 +103,7 @@ describe ProjectImportState, type: :model do
         allow(after_import_service)
           .to receive(:execute) { housekeeping_service.execute }
 
-        allow(Projects::HousekeepingService)
+        allow(Repositories::HousekeepingService)
           .to receive(:new) { housekeeping_service }
       end
 

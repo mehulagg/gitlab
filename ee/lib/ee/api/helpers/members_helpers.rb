@@ -7,6 +7,12 @@ module EE
         extend ActiveSupport::Concern
         extend ::Gitlab::Utils::Override
 
+        class << self
+          def member_sort_options
+            %w(access_level_asc access_level_desc last_joined name_asc name_desc oldest_joined oldest_sign_in recent_sign_in)
+          end
+        end
+
         prepended do
           params :optional_filter_params_ee do
             optional :with_saml_identity, type: Grape::API::Boolean, desc: "List only members with linked SAML identity"
@@ -27,6 +33,14 @@ module EE
           end
 
           members
+        end
+
+        override :source_members
+        def source_members(source)
+          return super if source.is_a?(Project)
+          return super unless source.minimal_access_role_allowed?
+
+          source.all_group_members
         end
         # rubocop: enable CodeReuse/ActiveRecord
 

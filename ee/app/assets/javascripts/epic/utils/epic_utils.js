@@ -24,7 +24,7 @@ const bindDocumentEvent = (eventName, callback) => {
   $(document).on(eventName, callback);
 };
 
-const toggleContainerClass = className => {
+const toggleContainerClass = (className) => {
   const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
   if (containerEl) {
@@ -34,7 +34,7 @@ const toggleContainerClass = className => {
 
 const getCollapsedGutter = () => parseBoolean(Cookies.get('collapsed_gutter'));
 
-const setCollapsedGutter = value => Cookies.set('collapsed_gutter', value);
+const setCollapsedGutter = (value) => Cookies.set('collapsed_gutter', value);
 
 const getDateValidity = (startDateTime, dueDateTime) => {
   // If both dates are defined
@@ -92,11 +92,6 @@ const getDateFromMilestonesTooltip = ({
   );
 };
 
-// This is for mocking methods from this
-// file within tests using `spyOnDependency`
-// which requires first param to always
-// be default export of dependency as per
-// https://gitlab.com/help/development/testing_guide/frontend_testing.md#stubbing-and-mocking
 const epicUtils = {
   gqClient,
   triggerDocumentEvent,

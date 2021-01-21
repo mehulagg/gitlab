@@ -74,10 +74,10 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     end
 
     context 'when parsing a valid v2 report' do
-      let(:v2_data) { fixture_file('security_reports/gl-license-scanning-report-v2.json', dir: 'ee') }
+      let(:v2_0_data) { fixture_file('security_reports/gl-license-scanning-report-v2.json', dir: 'ee') }
 
       before do
-        subject.parse!(v2_data, report)
+        subject.parse!(v2_0_data, report)
       end
 
       it { expect(report.version).to eql('2.0') }
@@ -103,6 +103,73 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
       it { expect(report.licenses[2].count).to be(1) }
       it { expect(report.licenses[2].dependencies.count).to be(1) }
       it { expect(report.licenses[2].dependencies.map(&:name)).to contain_exactly('d') }
+    end
+
+    context 'when parsing a valid v2.1 report' do
+      let(:v2_1_data) { fixture_file('security_reports/gl-license-scanning-report-v2.1.json', dir: 'ee') }
+
+      before do
+        subject.parse!(v2_1_data, report)
+      end
+
+      it { expect(report.version).to eql('2.1') }
+      it { expect(report.licenses.count).to eq(3) }
+
+      it 'parses the BSD license' do
+        expect(report.licenses[0].id).to eql('BSD-3-Clause')
+        expect(report.licenses[0].name).to eql('BSD 3-Clause "New" or "Revised" License')
+        expect(report.licenses[0].url).to eql('https://opensource.org/licenses/BSD-3-Clause')
+        expect(report.licenses[0].count).to be(2)
+        expect(report.licenses[0].dependencies.count).to be(2)
+        expect(report.licenses[0].dependencies.map(&:name)).to contain_exactly('b', 'c')
+
+        dependency_b = report.licenses[0].dependencies.find { |x| x.name == 'b' }
+        expect(dependency_b.name).to eql('b')
+        expect(dependency_b.version).to eql('0.1.0')
+        expect(dependency_b.path).to eql('yarn.lock')
+        expect(dependency_b.package_manager).to eql('yarn')
+
+        dependency_c = report.licenses[0].dependencies.find { |x| x.name == 'c' }
+        expect(dependency_c.name).to eql('c')
+        expect(dependency_c.version).to eql('1.1.0')
+        expect(dependency_c.path).to eql('Gemfile.lock')
+        expect(dependency_c.package_manager).to eql('bundler')
+      end
+
+      it 'parses the MIT license' do
+        expect(report.licenses[1].id).to eql('MIT')
+        expect(report.licenses[1].name).to eql('MIT License')
+        expect(report.licenses[1].url).to eql('https://opensource.org/licenses/MIT')
+        expect(report.licenses[1].count).to be(2)
+        expect(report.licenses[1].dependencies.count).to be(2)
+        expect(report.licenses[1].dependencies.map(&:name)).to contain_exactly('a', 'c')
+
+        dependency_a = report.licenses[1].dependencies.find { |x| x.name == 'a' }
+        expect(dependency_a.name).to eql('a')
+        expect(dependency_a.version).to eql('1.0.0')
+        expect(dependency_a.path).to eql('Gemfile.lock')
+        expect(dependency_a.package_manager).to eql('bundler')
+
+        dependency_c = report.licenses[1].dependencies.find { |x| x.name == 'c' }
+        expect(dependency_c.name).to eql('c')
+        expect(dependency_c.version).to eql('1.1.0')
+        expect(dependency_c.path).to eql('Gemfile.lock')
+        expect(dependency_c.package_manager).to eql('bundler')
+      end
+
+      it 'parses an unknown license' do
+        expect(report.licenses[2].id).to be_nil
+        expect(report.licenses[2].name).to eql('unknown')
+        expect(report.licenses[2].url).to eql('')
+        expect(report.licenses[2].count).to be(1)
+        expect(report.licenses[2].dependencies.count).to be(1)
+        expect(report.licenses[2].dependencies.map(&:name)).to contain_exactly('d')
+
+        expect(report.licenses[2].dependencies[0].name).to eql('d')
+        expect(report.licenses[2].dependencies[0].version).to eql('1.1.1')
+        expect(report.licenses[2].dependencies[0].package_manager).to eql('bundler')
+        expect(report.licenses[2].dependencies[0].path).to eql('Gemfile.lock')
+      end
     end
 
     context 'when parsing a v2 report with a missing license definition' do
@@ -173,11 +240,12 @@ RSpec.describe Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning do
     end
 
     context 'when the report is not a valid JSON document' do
-      it do
-        expect do
-          subject.parse!('blah', report)
-        end.to raise_error(Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning::LicenseScanningParserError)
+      before do
+        subject.parse!('invalid', report)
       end
+
+      it { expect(report.version).to eql('1.0') }
+      it { expect(report.licenses).to be_empty }
     end
   end
 end

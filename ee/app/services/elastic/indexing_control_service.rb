@@ -6,6 +6,7 @@ module Elastic
   # This class should only be used with sidekiq workers which extend Elastic::IndexingControl module
   class IndexingControlService
     LIMIT = 1000
+    PROJECT_CONTEXT_KEY = "#{Labkit::Context::LOG_KEY}.project"
 
     def initialize(klass)
       raise ArgumentError, "passed class must extend Elastic::IndexingControl" unless klass.include?(Elastic::IndexingControl)
@@ -27,6 +28,12 @@ module Elastic
 
       def resume_processing!(klass)
         new(klass).resume_processing!
+      end
+
+      def queue_size
+        Elastic::IndexingControl::WORKERS.sum do |worker_class|
+          new(worker_class).queue_size
+        end
       end
     end
 
@@ -59,7 +66,7 @@ module Elastic
           remove_jobs_from_waiting_queue(redis, jobs_with_scores)
         end
 
-        redis.del(redis_set_key, redis_score_key) if queue_size.zero?
+        redis.del(redis_set_key, redis_score_key) if queue_size == 0
       end
     end
 
@@ -68,13 +75,16 @@ module Elastic
     attr_reader :klass, :queue_name, :redis_set_key, :redis_score_key
 
     def with_redis(&blk)
-      Gitlab::Redis::SharedState.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
+      Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
+        Gitlab::Redis::SharedState.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
+      end
     end
 
     def serialize(args, context)
       {
         args: args,
-        context: context
+        # Only include part of the context that would not prevent deduplication
+        context: context.slice(PROJECT_CONTEXT_KEY)
       }.to_json
     end
 

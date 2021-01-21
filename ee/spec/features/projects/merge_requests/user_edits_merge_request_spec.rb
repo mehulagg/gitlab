@@ -18,7 +18,7 @@ RSpec.describe 'Projects > Merge Requests > User edits a merge request' do
 
     let(:project) do
       create(:project, :custom_repo,
-             files: { 'docs/CODEOWNERS' => "*.rb @ruby-owner\n*.js @js-owner" })
+             files: { 'docs/CODEOWNERS' => "[Backend]\n*.rb @ruby-owner\n*.js @js-owner" })
     end
 
     let(:merge_request) do
@@ -51,6 +51,7 @@ RSpec.describe 'Projects > Merge Requests > User edits a merge request' do
       visit(edit_project_merge_request_path(project, merge_request))
 
       expect(page).to have_content('*.rb')
+      expect(page).to have_content('Backend')
       expect(page).to have_link(href: user_path(ruby_owner))
     end
   end

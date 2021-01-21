@@ -10,23 +10,28 @@ module Mutations
       field :jira_import,
             Types::JiraImportType,
             null: true,
-            description: 'The Jira import data after mutation'
+            description: 'The Jira import data after mutation.'
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'The project to import the Jira project into'
+               description: 'The project to import the Jira project into.'
       argument :jira_project_key, GraphQL::STRING_TYPE,
                required: true,
-               description: 'Project key of the importer Jira project'
+               description: 'Project key of the importer Jira project.'
       argument :jira_project_name, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Project name of the importer Jira project'
+               description: 'Project name of the importer Jira project.'
+      argument :users_mapping,
+               [Types::JiraUsersMappingInputType],
+               required: false,
+               description: 'The mapping of Jira to GitLab users.'
 
-      def resolve(project_path:, jira_project_key:)
+      def resolve(project_path:, jira_project_key:, users_mapping:)
         project = authorized_find!(full_path: project_path)
+        mapping = users_mapping.to_ary.map { |map| map.to_hash }
 
         service_response = ::JiraImport::StartImportService
-                             .new(context[:current_user], project, jira_project_key)
+                             .new(context[:current_user], project, jira_project_key, mapping)
                              .execute
         jira_import = service_response.success? ? service_response.payload[:import_data] : nil
 

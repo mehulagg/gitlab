@@ -17,7 +17,7 @@ export default {
       type: String,
       required: false,
       default: '',
-      validator: value => value === '' || Object.values(componentNames).includes(value),
+      validator: (value) => value === '' || Object.values(componentNames).includes(value),
     },
     // failed || success
     status: {
@@ -52,7 +52,7 @@ export default {
       v-if="showReportSectionStatusIcon"
       :status="status"
       :status-icon-size="statusIconSize"
-      class="append-right-default"
+      class="gl-mr-3"
     />
 
     <component :is="component" v-if="component" :issue="issue" :status="status" :is-new="isNew" />

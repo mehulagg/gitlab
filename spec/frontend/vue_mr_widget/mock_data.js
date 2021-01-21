@@ -1,5 +1,20 @@
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
 
+export const artifacts = [
+  {
+    text: 'result.txt',
+    url: 'bar',
+    job_name: 'generate-artifact',
+    job_path: 'bar',
+  },
+  {
+    text: 'foo.txt',
+    url: 'foo',
+    job_name: 'foo-artifact',
+    job_path: 'foo',
+  },
+];
+
 export default {
   id: 132,
   iid: 22,
@@ -37,7 +52,11 @@ export default {
   target_project_id: 19,
   target_project_full_path: '/group2/project2',
   merge_request_add_ci_config_path: '/group2/project2/new/pipeline',
+  is_dismissed_suggest_pipeline: false,
+  user_callouts_path: 'some/callout/path',
+  suggest_pipeline_feature_id: 'suggest_pipeline',
   new_project_pipeline_path: '/group2/project2/pipelines/new',
+  source_project_default_url: '/gitlab-org/html5-boilerplate.git',
   metrics: {
     merged_by: {
       name: 'Administrator',
@@ -80,6 +99,7 @@ export default {
     coverage: '92.16',
     path: '/root/acets-app/pipelines/172',
     details: {
+      artifacts,
       status: {
         icon: 'status_success',
         favicon: 'favicon_status_success',
@@ -123,7 +143,6 @@ export default {
           dropdown_path: '/root/acets-app/pipelines/172/stage.json?stage=review',
         },
       ],
-      artifacts: [],
       manual_actions: [
         {
           name: 'stop_review',
@@ -190,6 +209,10 @@ export default {
     updated_at: '2017-04-07T15:28:44.800Z',
   },
   pipelineCoverageDelta: '15.25',
+  buildsWithCoverage: [
+    { name: 'karma', coverage: '40.2' },
+    { name: 'rspec', coverage: '80.4' },
+  ],
   work_in_progress: false,
   source_branch_exists: false,
   mergeable_discussions_state: true,
@@ -211,6 +234,15 @@ export default {
     can_revert_on_current_merge_request: true,
     can_cherry_pick_on_current_merge_request: true,
   },
+  codeclimate: {
+    head_path: 'head.json',
+    base_path: 'base.json',
+  },
+  blob_path: {
+    base_path: 'blob_path',
+    head_path: 'blob_path',
+  },
+  codequality_help_path: 'code_quality.html',
   target_branch_path: '/root/acets-app/branches/master',
   source_branch_path: '/root/acets-app/branches/daaaa',
   conflict_resolution_ui_path: '/root/acets-app/-/merge_requests/22/conflicts',
@@ -239,7 +271,8 @@ export default {
   commit_change_content_path: '/root/acets-app/-/merge_requests/22/commit_change_content',
   merge_commit_path:
     'http://localhost:3000/root/acets-app/commit/53027d060246c8f47e4a9310fb332aa52f221775',
-  troubleshooting_docs_path: 'help',
+  mr_troubleshooting_docs_path: 'help',
+  ci_troubleshooting_docs_path: 'help2',
   merge_request_pipelines_docs_path: '/help/ci/merge_request_pipelines/index.md',
   merge_train_when_pipeline_succeeds_docs_path:
     '/help/ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/#startadd-to-merge-train-when-pipeline-succeeds',
@@ -248,12 +281,16 @@ export default {
   merge_trains_enabled: true,
   merge_trains_count: 3,
   merge_train_index: 1,
+  security_reports_docs_path: 'security-reports-docs-path',
+  sast_comparison_path: '/sast_comparison_path',
+  secret_scanning_comparison_path: '/secret_scanning_comparison_path',
 };
 
 export const mockStore = {
   pipeline: {
     id: 0,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:
@@ -273,6 +310,7 @@ export const mockStore = {
   mergePipeline: {
     id: 1,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:
@@ -312,7 +350,8 @@ export const mockStore = {
     { id: 0, name: 'prod', status: SUCCESS },
     { id: 1, name: 'prod-docs', status: SUCCESS },
   ],
-  troubleshootingDocsPath: 'troubleshooting-docs-path',
+  mrTroubleshootingDocsPath: 'mr-troubleshooting-docs-path',
+  ciTroubleshootingDocsPath: 'ci-troubleshooting-docs-path',
   ciStatus: 'ci-status',
   hasCI: true,
   exposedArtifactsPath: 'exposed_artifacts.json',

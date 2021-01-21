@@ -1,10 +1,25 @@
 import $ from 'jquery';
-import blobBundle from '~/blob_edit/blob_bundle';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import blobBundle from '~/blob_edit/blob_bundle';
+
+import EditorLite from '~/blob_edit/edit_blob';
 
 jest.mock('~/blob_edit/edit_blob');
 
 describe('BlobBundle', () => {
+  it('does not load EditorLite by default', () => {
+    blobBundle();
+    expect(EditorLite).not.toHaveBeenCalled();
+  });
+
+  it('loads EditorLite for the edit screen', async () => {
+    setFixtures(`<div class="js-edit-blob-form"></div>`);
+    blobBundle();
+    await waitForPromises();
+    expect(EditorLite).toHaveBeenCalled();
+  });
+
   describe('No Suggest Popover', () => {
     beforeEach(() => {
       setFixtures(`
@@ -43,7 +58,8 @@ describe('BlobBundle', () => {
           data-target="#target"
           data-track-label="suggest_gitlab_ci_yml"
           data-dismiss-key="1"
-          data-human-access="owner">
+          data-human-access="owner"
+          data-merge-request-path="path/to/mr">
           <button id='commit-changes' class="js-commit-button"></button>
           <a class="btn btn-cancel" href="#"></a>
         </div>

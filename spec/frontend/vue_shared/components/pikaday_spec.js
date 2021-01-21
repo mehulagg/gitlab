@@ -1,30 +1,41 @@
-import Vue from 'vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
+import { GlDatepicker } from '@gitlab/ui';
 import datePicker from '~/vue_shared/components/pikaday.vue';
 
 describe('datePicker', () => {
-  let vm;
-  beforeEach(() => {
-    const DatePicker = Vue.extend(datePicker);
-    vm = mountComponent(DatePicker, {
-      label: 'label',
+  let wrapper;
+
+  const buildWrapper = (propsData = {}) => {
+    wrapper = shallowMount(datePicker, {
+      propsData,
     });
+  };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
   });
+  it('should emit newDateSelected when GlDatePicker emits the input event', () => {
+    const minDate = new Date();
+    const maxDate = new Date();
+    const selectedDate = new Date();
+    const theDate = selectedDate.toISOString().slice(0, 10);
 
-  it('should render label text', () => {
-    expect(vm.$el.querySelector('.dropdown-toggle-text').innerText.trim()).toEqual('label');
+    buildWrapper({ minDate, maxDate, selectedDate });
+
+    expect(wrapper.find(GlDatepicker).props()).toMatchObject({
+      minDate,
+      maxDate,
+      value: selectedDate,
+    });
+    wrapper.find(GlDatepicker).vm.$emit('input', selectedDate);
+    expect(wrapper.emitted('newDateSelected')[0][0]).toBe(theDate);
   });
+  it('should emit the hidePicker event when GlDatePicker emits the close event', () => {
+    buildWrapper();
 
-  it('should show calendar', () => {
-    expect(vm.$el.querySelector('.pika-single')).toBeDefined();
-  });
+    wrapper.find(GlDatepicker).vm.$emit('close');
 
-  it('should toggle when dropdown is clicked', () => {
-    const hidePicker = jest.fn();
-    vm.$on('hidePicker', hidePicker);
-
-    vm.$el.querySelector('.dropdown-menu-toggle').click();
-
-    expect(hidePicker).toHaveBeenCalled();
+    expect(wrapper.emitted('hidePicker')).toHaveLength(1);
   });
 });

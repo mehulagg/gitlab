@@ -5,6 +5,8 @@ import {
   fetchMetrics,
   receiveMetricsSuccess,
   receiveMetricsError,
+  stopPolling,
+  clearEtagPoll,
 } from 'ee/vue_shared/metrics_reports/store/actions';
 import * as types from 'ee/vue_shared/metrics_reports/store/mutation_types';
 import state from 'ee/vue_shared/metrics_reports/store/state';
@@ -58,17 +60,26 @@ describe('metrics reports actions', () => {
   });
 
   describe('fetchMetrics', () => {
-    it('should call metrics endpoint', () => {
-      const data = {
-        metrics: [
-          {
-            name: 'name',
-            value: 'value',
-          },
-        ],
-      };
-      const endpoint = '/mock-endpoint.json';
+    const data = {
+      metrics: [
+        {
+          name: 'name',
+          value: 'value',
+        },
+      ],
+    };
+    const endpoint = '/mock-endpoint.json';
+
+    beforeEach(() => {
       mockedState.endpoint = endpoint;
+    });
+
+    afterEach(() => {
+      stopPolling();
+      clearEtagPoll();
+    });
+
+    it('should call metrics endpoint', () => {
       mock.onGet(endpoint).replyOnce(200, data);
 
       return testAction(
@@ -81,7 +92,7 @@ describe('metrics reports actions', () => {
             type: 'requestMetrics',
           },
           {
-            payload: data,
+            payload: { status: 200, data },
             type: 'receiveMetricsSuccess',
           },
         ],
@@ -89,8 +100,6 @@ describe('metrics reports actions', () => {
     });
 
     it('handles errors', () => {
-      const endpoint = '/mock-endpoint.json';
-      mockedState.endpoint = endpoint;
       mock.onGet(endpoint).replyOnce(500);
 
       return testAction(
@@ -111,11 +120,11 @@ describe('metrics reports actions', () => {
   });
 
   describe('receiveMetricsSuccess', () => {
-    it('should commit request mutation', () => {
+    it('should commit request mutation with 200', () => {
       const response = { metrics: [] };
       return testAction(
         receiveMetricsSuccess,
-        response,
+        { status: 200, data: response },
         mockedState,
         [
           {
@@ -123,6 +132,17 @@ describe('metrics reports actions', () => {
             payload: response,
           },
         ],
+        [{ type: 'stopPolling' }],
+      );
+    });
+
+    it('should not commit request mutation with 204', () => {
+      const response = { metrics: [] };
+      return testAction(
+        receiveMetricsSuccess,
+        { status: 204, data: response },
+        mockedState,
+        [],
         [],
       );
     });
@@ -139,7 +159,7 @@ describe('metrics reports actions', () => {
             type: types.RECEIVE_METRICS_ERROR,
           },
         ],
-        [],
+        [{ type: 'stopPolling' }],
       );
     });
   });

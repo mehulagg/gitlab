@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190703185326_fix_wrong_pages_access_level.rb')
 
-describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema: 20190628185004 do
+RSpec.describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema: 20190628185004 do
   using RSpec::Parameterized::TableSyntax
 
   let(:migration_class) { described_class::MIGRATION }
@@ -17,7 +17,7 @@ describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema: 20190
   let(:features_table) { table(:project_features) }
 
   let(:subgroup) do
-    root_group = namespaces_table.create(path: "group", name: "group")
+    root_group = namespaces_table.create!(path: "group", name: "group")
     namespaces_table.create!(path: "subgroup", name: "group", parent_id: root_group.id)
   end
 
@@ -29,7 +29,7 @@ describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema: 20190
 
   it 'correctly schedules background migrations' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         first_id = create_project_feature("project1", project_class::PRIVATE, feature_class::PRIVATE).id
         last_id = create_project_feature("project2", project_class::PRIVATE, feature_class::PUBLIC).id
 

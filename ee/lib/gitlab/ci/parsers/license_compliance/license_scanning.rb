@@ -17,11 +17,17 @@ module Gitlab
 
             parser = PARSERS.fetch(report.major_version)
             parser.new(report).parse(json)
-          rescue JSON::ParserError
-            raise LicenseScanningParserError, 'JSON parsing failed'
-          rescue => e
-            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
-            raise LicenseScanningParserError, 'License scanning report parsing failed'
+          rescue JSON::ParserError => error
+            Gitlab::ErrorTracking.track_exception(error, error_details_for(json_data))
+          end
+
+          private
+
+          def error_details_for(json)
+            return { message: 'artifact is blank' } if json.blank?
+            return { message: "artifact is too big (#{json.bytesize} bytes)" } if json.bytesize > 1.megabyte
+
+            { message: 'artifact is not JSON', raw: json }
           end
         end
       end

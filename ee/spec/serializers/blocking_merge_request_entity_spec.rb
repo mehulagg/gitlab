@@ -29,6 +29,12 @@ RSpec.describe BlockingMergeRequestEntity do
     )
   end
 
+  it 'serializes a blocking MR that lacks metrics' do
+    expect(merge_request).to receive(:metrics).and_return(nil)
+
+    expect(entity.as_json).to include(id: merge_request.id, closed_at: nil)
+  end
+
   describe '#head_pipeline' do
     subject { entity.as_json[:head_pipeline] }
 

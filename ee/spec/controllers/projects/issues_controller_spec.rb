@@ -26,7 +26,7 @@ RSpec.describe Projects::IssuesController do
 
     context 'licensed' do
       before do
-        stub_licensed_features(issue_weights: true, epics: true)
+        stub_licensed_features(issue_weights: true, epics: true, security_dashboard: true)
       end
 
       describe '#index' do
@@ -60,6 +60,23 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
+      describe '#new' do
+        render_views
+
+        context 'when a vulnerability_id is provided' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+          let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+          it 'sets the vulnerability_id' do
+            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+
+            expect(response.body).to include(vulnerability_field)
+          end
+        end
+      end
+
       describe '#create' do
         it 'sets issue weight and epic' do
           perform :post, :create, issue: new_issue.attributes.merge(epic_id: epic.id)
@@ -71,12 +88,52 @@ RSpec.describe Projects::IssuesController do
           expect(issue.weight).to eq(new_issue.weight)
           expect(issue.epic).to eq(epic)
         end
+
+        context 'when created from a vulnerability' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+
+          before do
+            stub_licensed_features(security_dashboard: true)
+          end
+
+          it 'links the issue to the vulnerability' do
+            send_request
+
+            expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
+          end
+
+          context 'when vulnerability already has a linked issue' do
+            render_views
+
+            let!(:vulnerabilities_issue_link) { create(:vulnerabilities_issue_link, :created, vulnerability: vulnerability) }
+
+            it 'shows an error message' do
+              send_request
+
+              expect(flash[:alert]).to include('Unable to create link to vulnerability')
+              expect(vulnerability.issue_links.map(&:issue)).to eq([vulnerabilities_issue_link.issue])
+            end
+          end
+
+          private
+
+          def send_request
+            post :create, params: {
+              namespace_id: project.namespace.to_param,
+              project_id: project,
+              issue: { title: 'Title', description: 'Description' },
+              vulnerability_id: vulnerability.id
+            }
+          end
+        end
       end
     end
 
     context 'unlicensed' do
       before do
-        stub_licensed_features(issue_weights: false, epics: false)
+        stub_licensed_features(issue_weights: false, epics: false, security_dashboard: false)
       end
 
       describe '#index' do
@@ -100,6 +157,24 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
+      describe '#new' do
+        render_views
+
+        context 'when a vulnerability_id is provided' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+          let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+          it 'does not build issue from a vulnerability' do
+            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+
+            expect(response.body).not_to include(vulnerability_field)
+            expect(issue.description).to be_nil
+          end
+        end
+      end
+
       describe '#create' do
         it 'does not set issue weight ane epic' do
           perform :post, :create, issue: new_issue.attributes
@@ -111,60 +186,6 @@ RSpec.describe Projects::IssuesController do
           expect(issue.weight).to be_nil
           expect(issue.epic).to be_nil
         end
-      end
-    end
-  end
-
-  describe 'GET service_desk' do
-    def get_service_desk(extra_params = {})
-      get :service_desk, params: extra_params.merge(namespace_id: project.namespace, project_id: project)
-    end
-
-    context 'when Service Desk is available on the project' do
-      let(:support_bot) { User.support_bot }
-      let(:other_user) { create(:user) }
-      let!(:service_desk_issue_1) { create(:issue, project: project, author: support_bot) }
-      let!(:service_desk_issue_2) { create(:issue, project: project, author: support_bot, assignees: [other_user]) }
-      let!(:other_user_issue) { create(:issue, project: project, author: other_user) }
-
-      before do
-        stub_licensed_features(service_desk: true)
-      end
-
-      it 'adds an author filter for the support bot user' do
-        get_service_desk
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
-      end
-
-      it 'does not allow any other author to be set' do
-        get_service_desk(author_username: other_user.username)
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_1, service_desk_issue_2)
-      end
-
-      it 'supports other filters' do
-        get_service_desk(assignee_username: other_user.username)
-
-        expect(assigns(:issues)).to contain_exactly(service_desk_issue_2)
-      end
-
-      it 'allows an assignee to be specified by id' do
-        get_service_desk(assignee_id: other_user.id)
-
-        expect(assigns(:users)).to contain_exactly(other_user, support_bot)
-      end
-    end
-
-    context 'when Service Desk is not available on the project' do
-      before do
-        stub_licensed_features(service_desk: false)
-      end
-
-      it 'returns a 404' do
-        get_service_desk
-
-        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -238,7 +259,7 @@ RSpec.describe Projects::IssuesController do
       before do
         sign_in(user)
         allow(Gitlab).to receive(:com?).and_return(true)
-        discussion.update(author: user)
+        discussion.update!(author: user)
       end
 
       shared_context 'non inclusion of gitlab team member badge' do |result|

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Cleanup::AppService do
+RSpec.describe Clusters::Cleanup::AppService do
   describe '#execute' do
     let!(:cluster) { create(:cluster, :project, :cleanup_uninstalling_applications, provider_type: :gcp) }
     let(:service) { described_class.new(cluster) }
@@ -67,7 +67,8 @@ describe Clusters::Cleanup::AppService do
 
         it 'only uninstalls apps that are not dependencies for other installed apps' do
           expect(Clusters::Applications::UninstallWorker)
-            .not_to receive(:perform_async).with(helm.name, helm.id)
+            .to receive(:perform_async).with(helm.name, helm.id)
+            .and_call_original
 
           expect(Clusters::Applications::UninstallWorker)
             .not_to receive(:perform_async).with(ingress.name, ingress.id)
@@ -85,7 +86,7 @@ describe Clusters::Cleanup::AppService do
 
         it 'logs application uninstalls and next execution' do
           expect(logger).to receive(:info)
-            .with(log_meta.merge(event: :uninstalling_app, application: kind_of(String))).twice
+            .with(log_meta.merge(event: :uninstalling_app, application: kind_of(String))).exactly(3).times
           expect(logger).to receive(:info)
             .with(log_meta.merge(event: :scheduling_execution, next_execution: 1))
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User paginates issue designs', :js do
+RSpec.describe 'User paginates issue designs', :js do
   include DesignManagementTestHelpers
 
   let(:project) { create(:project_empty_repo, :public) }
@@ -10,15 +10,8 @@ describe 'User paginates issue designs', :js do
 
   before do
     enable_design_management
-
     create_list(:design, 2, :with_file, issue: issue)
-
     visit project_issue_path(project, issue)
-
-    click_link 'Designs'
-
-    wait_for_requests
-
     find('.js-design-list-item', match: :first).click
   end
 

@@ -1,6 +1,11 @@
-export default () => ({
-  endpoint: '',
+export default ({ summaryEndpoint = '', suiteEndpoint = '' }) => ({
+  summaryEndpoint,
+  suiteEndpoint,
   testReports: {},
-  selectedSuite: {},
+  selectedSuiteIndex: null,
   isLoading: false,
+  pageInfo: {
+    page: 1,
+    perPage: 20,
+  },
 });

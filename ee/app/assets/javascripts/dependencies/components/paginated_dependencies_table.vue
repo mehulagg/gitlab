@@ -14,7 +14,7 @@ export default {
     namespace: {
       type: String,
       required: true,
-      validator: value =>
+      validator: (value) =>
         Object.values(DEPENDENCY_LIST_TYPES).some(({ namespace }) => value === namespace),
     },
   },
@@ -47,7 +47,7 @@ export default {
       v-if="shouldShowPagination"
       :change="fetchPage"
       :page-info="module.pageInfo"
-      class="justify-content-center prepend-top-default"
+      class="justify-content-center gl-mt-3"
     />
   </div>
 </template>

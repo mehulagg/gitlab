@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
-import { GlPopover, GlSkeletonLoading } from '@gitlab/ui';
+import { GlPopover, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import CiIcon from '../../vue_shared/components/ci_icon.vue';
 import timeagoMixin from '../../vue_shared/mixins/timeago';
 import query from '../queries/merge_request.query.graphql';
@@ -72,7 +72,7 @@ export default {
   apollo: {
     mergeRequest: {
       query,
-      update: data => data.project.mergeRequest,
+      update: (data) => data.project.mergeRequest,
       variables() {
         const { projectPath, mergeRequestIID } = this;
 

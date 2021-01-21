@@ -41,7 +41,7 @@ module Notes
 
       @interpret_service = QuickActions::InterpretService.new(project, current_user, options)
 
-      @interpret_service.execute(note.note, note.noteable)
+      interpret_service.execute(note.note, note.noteable)
     end
 
     # Applies updates extracted to note#noteable
@@ -49,6 +49,11 @@ module Notes
     def apply_updates(update_params, note)
       return if update_params.empty?
       return unless supported?(note)
+
+      # We need the `id` after the note is persisted
+      if update_params[:spend_time]
+        update_params[:spend_time][:note_id] = note.id
+      end
 
       self.class.noteable_update_service(note).new(note.resource_parent, current_user, update_params).execute(note.noteable)
     end

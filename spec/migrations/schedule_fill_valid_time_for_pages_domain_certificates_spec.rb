@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190524073827_schedule_fill_valid_time_for_pages_domain_certificates.rb')
 
-describe ScheduleFillValidTimeForPagesDomainCertificates do
+RSpec.describe ScheduleFillValidTimeForPagesDomainCertificates do
   let(:migration_class) { described_class::MIGRATION }
   let(:migration_name)  { migration_class.to_s.demodulize }
 
@@ -22,7 +22,7 @@ describe ScheduleFillValidTimeForPagesDomainCertificates do
 
   it 'correctly schedules background migrations' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         first_id = domains_table.find_by_domain("domain3.example.com").id

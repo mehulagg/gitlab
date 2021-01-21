@@ -1,15 +1,17 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { mapState, mapActions } from 'vuex';
 import {
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlLink,
   GlLoadingIcon,
   GlPagination,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSprintf,
   GlTable,
+  GlTooltipDirective,
 } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import AncestorNotice from './ancestor_notice.vue';
+import NodeErrorHelpText from './node_error_help_text.vue';
 import { CLUSTER_TYPES, STATUSES } from '../constants';
 import { __, sprintf } from '~/locale';
 
@@ -17,18 +19,32 @@ export default {
   nodeMemoryText: __('%{totalMemory} (%{freeSpacePercentage}%{percentSymbol} free)'),
   nodeCpuText: __('%{totalCpu} (%{freeSpacePercentage}%{percentSymbol} free)'),
   components: {
+    AncestorNotice,
     GlBadge,
     GlLink,
     GlLoadingIcon,
     GlPagination,
+    GlSkeletonLoading,
     GlSprintf,
     GlTable,
+    NodeErrorHelpText,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   computed: {
-    ...mapState(['clusters', 'clustersPerPage', 'loading', 'page', 'totalCulsters']),
+    ...mapState([
+      'clusters',
+      'clustersPerPage',
+      'loadingClusters',
+      'loadingNodes',
+      'page',
+      'providers',
+      'totalCulsters',
+    ]),
+    contentAlignClasses() {
+      return 'gl-display-flex gl-align-items-center gl-justify-content-end gl-justify-content-md-start';
+    },
     currentPage: {
       get() {
         return this.page;
@@ -63,7 +79,7 @@ export default {
         {
           key: 'cluster_type',
           label: __('Cluster level'),
-          formatter: value => CLUSTER_TYPES[value],
+          formatter: (value) => CLUSTER_TYPES[value],
         },
       ];
     },
@@ -75,7 +91,7 @@ export default {
     this.fetchClusters();
   },
   methods: {
-    ...mapActions(['fetchClusters', 'setPage']),
+    ...mapActions(['fetchClusters', 'reportSentryError', 'setPage']),
     k8sQuantityToGb(quantity) {
       if (!quantity) {
         return 0;
@@ -101,6 +117,9 @@ export default {
       // We are trying to track quantity types coming from Kubernetes.
       // Sentry will notify us if we are missing types.
       throw new Error(`UnknownK8sCpuQuantity:${quantity}`);
+    },
+    selectedProvider(provider) {
+      return this.providers[provider] || this.providers.default;
     },
     statusTitle(status) {
       const iconTitle = STATUSES[status] || STATUSES.default;
@@ -134,7 +153,7 @@ export default {
           };
         }
       } catch (error) {
-        Sentry.captureException(error);
+        this.reportSentryError({ error, tag: 'totalMemoryAndUsageError' });
       }
 
       return { totalMemory: null, freeSpacePercentage: null };
@@ -167,7 +186,7 @@ export default {
           };
         }
       } catch (error) {
-        Sentry.captureException(error);
+        this.reportSentryError({ error, tag: 'totalCpuAndUsageError' });
       }
 
       return { totalCpu: null, freeSpacePercentage: null };
@@ -177,31 +196,55 @@ export default {
 </script>
 
 <template>
-  <gl-loading-icon v-if="loading" size="md" class="mt-3" />
+  <gl-loading-icon v-if="loadingClusters" size="md" class="gl-mt-3" />
 
   <section v-else>
-    <gl-table :items="clusters" :fields="fields" stacked="md" class="qa-clusters-table">
+    <ancestor-notice />
+
+    <gl-table
+      :items="clusters"
+      :fields="fields"
+      stacked="md"
+      class="qa-clusters-table"
+      data-testid="cluster_list_table"
+    >
       <template #cell(name)="{ item }">
-        <div class="d-flex flex-row-reverse flex-md-row js-status">
-          <gl-link data-qa-selector="cluster" :data-qa-cluster-name="item.name" :href="item.path">
+        <div :class="[contentAlignClasses, 'js-status']">
+          <img
+            :src="selectedProvider(item.provider_type).path"
+            :alt="selectedProvider(item.provider_type).text"
+            class="gl-w-6 gl-h-6 gl-display-flex gl-align-items-center"
+          />
+
+          <gl-link
+            data-qa-selector="cluster"
+            :data-qa-cluster-name="item.name"
+            :href="item.path"
+            class="gl-px-3"
+          >
             {{ item.name }}
           </gl-link>
 
           <gl-loading-icon
             v-if="item.status === 'deleting' || item.status === 'creating'"
-            v-tooltip
+            v-gl-tooltip
             :title="statusTitle(item.status)"
             size="sm"
-            class="mr-2 ml-md-2"
           />
         </div>
       </template>
 
       <template #cell(node_size)="{ item }">
         <span v-if="item.nodes">{{ item.nodes.length }}</span>
-        <small v-else class="gl-font-sm gl-font-style-italic gl-text-gray-400">{{
-          __('Unknown')
-        }}</small>
+
+        <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
+
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.connection_error"
+          :popover-id="`nodeSizeError${item.id}`"
+        />
       </template>
 
       <template #cell(total_cpu)="{ item }">
@@ -211,11 +254,18 @@ export default {
             <template #freeSpacePercentage>{{
               totalCpuAndUsage(item.nodes).freeSpacePercentage
             }}</template>
-            <template #percentSymbol
-              >%</template
-            >
+            <template #percentSymbol>%</template>
           </gl-sprintf>
         </span>
+
+        <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
+
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.node_connection_error"
+          :popover-id="`nodeCpuError${item.id}`"
+        />
       </template>
 
       <template #cell(total_memory)="{ item }">
@@ -225,15 +275,22 @@ export default {
             <template #freeSpacePercentage>{{
               totalMemoryAndUsage(item.nodes).freeSpacePercentage
             }}</template>
-            <template #percentSymbol
-              >%</template
-            >
+            <template #percentSymbol>%</template>
           </gl-sprintf>
         </span>
+
+        <gl-skeleton-loading v-else-if="loadingNodes" :lines="1" :class="contentAlignClasses" />
+
+        <NodeErrorHelpText
+          v-else-if="item.kubernetes_errors"
+          :class="contentAlignClasses"
+          :error-type="item.kubernetes_errors.metrics_connection_error"
+          :popover-id="`nodeMemoryError${item.id}`"
+        />
       </template>
 
-      <template #cell(cluster_type)="{value}">
-        <gl-badge variant="light">
+      <template #cell(cluster_type)="{ value }">
+        <gl-badge variant="muted">
           {{ value }}
         </gl-badge>
       </template>

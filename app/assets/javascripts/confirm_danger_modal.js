@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { Rails } from '~/lib/utils/rails_ujs';
 import { rstrip } from './lib/utils/common_utils';
 
 function openConfirmDangerModal($form, $modal, text) {
@@ -13,6 +14,7 @@ function openConfirmDangerModal($form, $modal, text) {
   $submit.disable();
   $input.focus();
 
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $input.off('input').on('input', function handleInput() {
     const confirmText = rstrip($(this).val());
     if (confirmText === confirmTextMatch) {
@@ -21,9 +23,17 @@ function openConfirmDangerModal($form, $modal, text) {
       $submit.disable();
     }
   });
+
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.js-confirm-danger-submit', $modal)
     .off('click')
-    .on('click', () => $form.submit());
+    .on('click', () => {
+      if ($form.data('remote')) {
+        Rails.fire($form[0], 'submit');
+      } else {
+        $form.submit();
+      }
+    });
 }
 
 function getModal($btn) {
@@ -37,7 +47,7 @@ function getModal($btn) {
 }
 
 export default function initConfirmDangerModal() {
-  $(document).on('click', '.js-confirm-danger', e => {
+  $(document).on('click', '.js-confirm-danger', (e) => {
     const $btn = $(e.target);
     const checkFieldName = $btn.data('checkFieldName');
     const checkFieldCompareValue = $btn.data('checkCompareValue');

@@ -1,11 +1,13 @@
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import { handleLocationHash } from '../../lib/utils/common_utils';
 import axios from '../../lib/utils/axios_utils';
+import eventHub from '../../notes/event_hub';
 import { __ } from '~/locale';
+import { fixTitle } from '~/tooltips';
 
-const loadRichBlobViewer = type => {
+const loadRichBlobViewer = (type) => {
   switch (type) {
     case 'balsamiq':
       return import(/* webpackChunkName: 'balsamiq_viewer' */ '../balsamiq_viewer');
@@ -28,8 +30,8 @@ export const handleBlobRichViewer = (viewer, type) => {
   if (!viewer || !type) return;
 
   loadRichBlobViewer(type)
-    .then(module => module?.default(viewer))
-    .catch(error => {
+    .then((module) => module?.default(viewer))
+    .catch((error) => {
       Flash(__('Error loading file viewer.'));
       throw error;
     });
@@ -82,7 +84,7 @@ export default class BlobViewer {
 
   initBindings() {
     if (this.switcherBtns.length) {
-      Array.from(this.switcherBtns).forEach(el => {
+      Array.from(this.switcherBtns).forEach((el) => {
         el.addEventListener('click', this.switchViewHandler.bind(this));
       });
     }
@@ -123,23 +125,23 @@ export default class BlobViewer {
       this.copySourceBtn.classList.add('disabled');
     }
 
-    $(this.copySourceBtn).tooltip('_fixTitle');
+    fixTitle($(this.copySourceBtn));
   }
 
   switchToViewer(name) {
     const newViewer = this.$fileHolder[0].querySelector(`.blob-viewer[data-type='${name}']`);
     if (this.activeViewer === newViewer) return;
 
-    const oldButton = document.querySelector('.js-blob-viewer-switch-btn.active');
+    const oldButton = document.querySelector('.js-blob-viewer-switch-btn.selected');
     const newButton = document.querySelector(`.js-blob-viewer-switch-btn[data-viewer='${name}']`);
     const oldViewer = this.$fileHolder[0].querySelector(`.blob-viewer:not([data-type='${name}'])`);
 
     if (oldButton) {
-      oldButton.classList.remove('active');
+      oldButton.classList.remove('selected');
     }
 
     if (newButton) {
-      newButton.classList.add('active');
+      newButton.classList.add('selected');
       newButton.blur();
     }
 
@@ -153,7 +155,7 @@ export default class BlobViewer {
 
     this.toggleCopyButtonState();
     BlobViewer.loadViewer(newViewer)
-      .then(viewer => {
+      .then((viewer) => {
         $(viewer).renderGFM();
 
         this.$fileHolder.trigger('highlight:line');
@@ -177,6 +179,8 @@ export default class BlobViewer {
     return axios.get(url).then(({ data }) => {
       viewer.innerHTML = data.html;
       viewer.setAttribute('data-loaded', 'true');
+
+      eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
 
       return viewer;
     });

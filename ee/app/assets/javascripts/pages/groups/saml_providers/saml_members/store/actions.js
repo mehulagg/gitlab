@@ -1,6 +1,6 @@
 import { __ } from '~/locale';
 import Api from '~/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
 
@@ -10,7 +10,7 @@ export function fetchPage({ commit, state }, newPage) {
     page: newPage || state.pageInfo.page,
     per_page: state.pageInfo.perPage,
   })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const pageInfo = parseIntPagination(normalizeHeaders(headers));
       commit(types.RECEIVE_SAML_MEMBERS_SUCCESS, {
@@ -25,5 +25,3 @@ export function fetchPage({ commit, state }, newPage) {
       createFlash(__('An error occurred while loading group members.'));
     });
 }
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

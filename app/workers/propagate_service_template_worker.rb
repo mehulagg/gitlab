@@ -4,7 +4,7 @@
 class PropagateServiceTemplateWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
-  feature_category :source_code_management
+  feature_category :integrations
 
   LEASE_TIMEOUT = 4.hours.to_i
 
@@ -12,7 +12,7 @@ class PropagateServiceTemplateWorker # rubocop:disable Scalability/IdempotentWor
   def perform(template_id)
     return unless try_obtain_lease_for(template_id)
 
-    Projects::PropagateServiceTemplate.propagate(Service.find_by(id: template_id))
+    Admin::PropagateServiceTemplate.propagate(Service.find_by(id: template_id))
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

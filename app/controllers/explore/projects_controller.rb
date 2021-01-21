@@ -4,18 +4,26 @@ class Explore::ProjectsController < Explore::ApplicationController
   include PageLimiter
   include ParamsBackwardCompatibility
   include RendersMemberAccess
+  include RendersProjectsList
   include SortingHelper
   include SortingPreference
+
+  MIN_SEARCH_LENGTH = 3
+  PAGE_LIMIT = 50
 
   before_action :set_non_archived_param
   before_action :set_sorting
 
-  # Limit taken from https://gitlab.com/gitlab-org/gitlab/issues/38357
+  # For background information on the limit, see:
+  #   https://gitlab.com/gitlab-org/gitlab/-/issues/38357
+  #   https://gitlab.com/gitlab-org/gitlab/-/issues/262682
   before_action only: [:index, :trending, :starred] do
-    limit_pages(200)
+    limit_pages(PAGE_LIMIT)
   end
 
   rescue_from PageOutOfBoundsError, with: :page_out_of_bounds
+
+  feature_category :projects
 
   def index
     @projects = load_projects
@@ -69,7 +77,7 @@ class Explore::ProjectsController < Explore::ApplicationController
   def load_projects
     load_project_counts
 
-    projects = ProjectsFinder.new(current_user: current_user, params: params).execute
+    projects = ProjectsFinder.new(current_user: current_user, params: params.merge(minimum_search_length: MIN_SEARCH_LENGTH)).execute
 
     projects = preload_associations(projects)
     projects = projects.page(params[:page]).without_count
@@ -79,7 +87,7 @@ class Explore::ProjectsController < Explore::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def preload_associations(projects)
-    projects.includes(:route, :creator, :group, namespace: [:route, :owner])
+    projects.includes(:route, :creator, :group, :project_feature, namespace: [:route, :owner])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -89,7 +97,7 @@ class Explore::ProjectsController < Explore::ApplicationController
   end
 
   def default_sort_order
-    sort_value_latest_activity
+    sort_value_name
   end
 
   def sorting_field

@@ -8,7 +8,9 @@ module EE
 
         override :execute
         def execute
-          super do
+          result = super
+
+          if result
             ::Geo::HashedStorageMigratedEventStore.new(
               project,
               old_storage_version: old_storage_version,
@@ -17,6 +19,8 @@ module EE
               old_design_disk_path: old_design_disk_path
             ).create!
           end
+
+          result
         end
       end
     end

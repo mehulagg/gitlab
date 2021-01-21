@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Strings and the Text data type
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30453) in GitLab 13.0.
@@ -5,13 +11,13 @@
 When adding new columns that will be used to store strings or other textual information:
 
 1. We always use the `text` data type instead of the `string` data type.
-1. `text` columns should always have a limit set by using the `add_text_limit` migration helper.
+1. `text` columns should always have a limit set, either by using the `create_table_with_constraints` helper
+when creating a table, or by using the `add_text_limit` when altering an existing table.
 
-The `text` data type can not be defined with a limit, so `add_text_limit` is enforcing that by
-adding a [check constraint](https://www.postgresql.org/docs/11/ddl-constraints.html) on the
-column and then validating it at a followup step.
+The `text` data type can not be defined with a limit, so `create_table_with_constraints` and `add_text_limit` enforce
+that by adding a [check constraint](https://www.postgresql.org/docs/11/ddl-constraints.html) on the column.
 
-## Background info
+## Background information
 
 The reason we always want to use `text` instead of `string` is that `string` columns have the
 disadvantage that if you want to update their limit, you have to run an `ALTER TABLE ...` command.
@@ -38,22 +44,19 @@ For example, consider a migration that creates a table with two text columns,
 
 ```ruby
 class CreateDbGuides < ActiveRecord::Migration[6.0]
+  include Gitlab::Database::MigrationHelpers
+
   DOWNTIME = false
 
-  disable_ddl_transaction!
-
   def up
-    unless table_exists?(:db_guides)
-      create_table :db_guides do |t|
-        t.bigint :stars, default: 0, null: false
-        t.text :title
-        t.text :notes
-      end
-    end
+    create_table_with_constraints :db_guides do |t|
+      t.bigint :stars, default: 0, null: false
+      t.text :title
+      t.text :notes
 
-    # The following add the constraints and validate them immediately (no data in the table)
-    add_text_limit :db_guides, :title, 128
-    add_text_limit :db_guides, :notes, 1024
+      t.text_limit :title, 128
+      t.text_limit :notes, 1024
+    end
   end
 
   def down
@@ -63,12 +66,8 @@ class CreateDbGuides < ActiveRecord::Migration[6.0]
 end
 ```
 
-Adding a check constraint requires an exclusive lock while the `ALTER TABLE` that adds is running.
-As we don't want the exclusive lock to be held for the duration of a transaction, `add_text_limit`
-must always run in a migration with `disable_ddl_transaction!`.
-
-Also, note that we have to add a check that the table exists so that the migration can be repeated
-in case of a failure.
+Note that the `create_table_with_constraints` helper uses the `with_lock_retries` helper
+internally, so we don't need to manually wrap the method call in the migration.
 
 ## Add a text column to an existing table
 
@@ -125,7 +124,7 @@ Adding text limits to existing database columns requires multiple steps split in
    - Add a post-deployment migration to add the limit to the text column with `validate: false`.
    - Add a post-deployment migration to fix the existing records.
 
-     NOTE: **Note:**
+     NOTE:
      Depending on the size of the table, a background migration for cleanup could be required in the next release.
      See [text limit constraints on large tables](strings_and_the_text_data_type.md#text-limit-constraints-on-large-tables) for more information.
 
@@ -146,7 +145,7 @@ other processes that try to access it while running the update.
 Also, after checking our production database, we know that there are `issues` with more characters in
 their title than the 1024 character limit, so we can not add and validate the constraint in one step.
 
-NOTE: **Note:**
+NOTE:
 Even if we did not have any record with a title larger than the provided limit, another
 instance of GitLab could have such records, so we would follow the same process either way.
 
@@ -179,6 +178,7 @@ in a post-deployment migration,
 ```ruby
 class AddTextLimitMigration < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
+
   DOWNTIME = false
 
   disable_ddl_transaction!
@@ -247,7 +247,7 @@ end
 
 To keep this guide short, we skipped the definition of the background migration and only
 provided a high level example of the post-deployment migration that is used to schedule the batches.
-You can find more info on the guide about [background migrations](../background_migrations.md)
+You can find more information on the guide about [background migrations](../background_migrations.md)
 
 #### Validate the text limit (next release)
 
@@ -276,7 +276,7 @@ end
 
 ## Text limit constraints on large tables
 
-If you have to clean up a text column for a really [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/migration_helpers.rb#L12)
+If you have to clean up a text column for a really [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3)
 (for example, the `artifacts` in `ci_builds`), your background migration will go on for a while and
 it will need an additional [background migration cleaning up](../background_migrations.md#cleaning-up)
 in the release after adding the data migration.

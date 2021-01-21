@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ability do
+RSpec.describe Ability do
   context 'using a nil subject' do
     it 'has no permissions' do
       expect(described_class.policy_for(nil, nil)).to be_banned
@@ -194,6 +194,7 @@ describe Ability do
       let(:cross_project_merge_request) do
         create(:merge_request, source_project: create(:project, :public))
       end
+
       let(:other_merge_request) { create(:merge_request) }
       let(:all_merge_requests) do
         [merge_request, cross_project_merge_request, other_merge_request]

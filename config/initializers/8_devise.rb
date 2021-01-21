@@ -41,7 +41,7 @@ Devise.setup do |config|
   # Configure which authentication keys should be case-insensitive.
   # These keys will be downcased upon creating or modifying a user and when used
   # to authenticate or find a user. Default is :email.
-  config.case_insensitive_keys = [:email, :email_confirmation]
+  config.case_insensitive_keys = [:email]
 
   # Configure which authentication keys should have whitespace stripped.
   # These keys will have whitespace before and after removed upon creating or
@@ -232,7 +232,7 @@ Devise.setup do |config|
   end
 
   if Gitlab::Auth::Ldap::Config.enabled?
-    Gitlab::Auth::Ldap::Config.providers.each do |provider|
+    Gitlab::Auth::Ldap::Config.available_providers.each do |provider|
       ldap_config = Gitlab::Auth::Ldap::Config.new(provider)
       config.omniauth(provider, ldap_config.omniauth_options)
     end

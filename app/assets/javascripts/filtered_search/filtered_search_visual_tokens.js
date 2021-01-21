@@ -1,5 +1,5 @@
 import VisualTokenValue from './visual_token_value';
-import { objectToQueryString } from '~/lib/utils/common_utils';
+import { objectToQueryString, spriteIcon } from '~/lib/utils/common_utils';
 import FilteredSearchContainer from './container';
 
 export default class FilteredSearchVisualTokens {
@@ -8,7 +8,7 @@ export default class FilteredSearchVisualTokens {
   static getOperatorToken(value) {
     let token = null;
 
-    FilteredSearchVisualTokens.permissibleOperatorValues.forEach(operatorToken => {
+    FilteredSearchVisualTokens.permissibleOperatorValues.forEach((operatorToken) => {
       if (value.startsWith(operatorToken)) {
         token = operatorToken;
       }
@@ -20,7 +20,7 @@ export default class FilteredSearchVisualTokens {
   static getValueToken(value) {
     let newValue = value;
 
-    FilteredSearchVisualTokens.permissibleOperatorValues.forEach(operatorToken => {
+    FilteredSearchVisualTokens.permissibleOperatorValues.forEach((operatorToken) => {
       if (value.startsWith(operatorToken)) {
         newValue = value.slice(operatorToken.length);
       }
@@ -48,7 +48,7 @@ export default class FilteredSearchVisualTokens {
     const otherTokens = FilteredSearchContainer.container.querySelectorAll(
       '.js-visual-token .selectable.selected',
     );
-    [].forEach.call(otherTokens, t => t.classList.remove('selected'));
+    [].forEach.call(otherTokens, (t) => t.classList.remove('selected'));
   }
 
   static selectToken(tokenButton, forceSelection = false) {
@@ -84,7 +84,7 @@ export default class FilteredSearchVisualTokens {
         <div class="value-container">
           <div class="${capitalizeTokenValue ? 'text-capitalize' : ''} value"></div>
           <div class="remove-token" role="button">
-            <i class="fa fa-close"></i>
+            ${spriteIcon('close', 's16 close-icon')}
           </div>
         </div>
       </div>
@@ -193,7 +193,8 @@ export default class FilteredSearchVisualTokens {
       });
     } else if (
       !isLastVisualTokenValid &&
-      (lastVisualToken && !lastVisualToken.querySelector('.operator'))
+      lastVisualToken &&
+      !lastVisualToken.querySelector('.operator')
     ) {
       const tokensContainer = FilteredSearchContainer.container.querySelector('.tokens-container');
       tokensContainer.removeChild(lastVisualToken);

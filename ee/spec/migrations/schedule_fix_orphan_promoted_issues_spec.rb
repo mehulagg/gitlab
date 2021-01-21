@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200207185149_schedule_fix_orphan_promoted_issues.rb')
+require_migration!
 
 RSpec.describe ScheduleFixOrphanPromotedIssues do
   let(:projects) { table(:projects) }
@@ -15,7 +15,7 @@ RSpec.describe ScheduleFixOrphanPromotedIssues do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::BACKGROUND_MIGRATION).to be_scheduled_migration(promote_orphan_1_note.id)

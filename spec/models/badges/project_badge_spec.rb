@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectBadge do
+RSpec.describe ProjectBadge do
   let(:placeholder_url) { 'http://www.example.com/%{project_path}/%{project_id}/%{default_branch}/%{commit_sha}' }
 
   describe 'associations' do
@@ -27,8 +27,8 @@ describe ProjectBadge do
   end
 
   context 'methods' do
-    let(:badge) { build(:project_badge, link_url: placeholder_url, image_url: placeholder_url) }
-    let!(:project) { badge.project }
+    let(:badge) { build_stubbed(:project_badge, link_url: placeholder_url, image_url: placeholder_url) }
+    let(:project) { badge.project }
 
     describe '#rendered_link_url' do
       let(:method) { :link_url }

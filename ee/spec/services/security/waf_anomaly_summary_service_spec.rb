@@ -149,6 +149,14 @@ RSpec.describe Security::WafAnomalySummaryService do
           expect(results.fetch(:total_traffic)).to eq 0
           expect(results.fetch(:anomalous_traffic)).to eq 0.0
         end
+
+        context 'when totals_only is set to true' do
+          it 'returns totals only', :aggregate_failures do
+            results = subject.execute(totals_only: true)
+
+            expect(results).to eq(total_traffic: 0.0, total_anomalous_traffic: 0.0)
+          end
+        end
       end
 
       context 'no violations' do
@@ -163,6 +171,14 @@ RSpec.describe Security::WafAnomalySummaryService do
           expect(results.fetch(:total_traffic)).to eq 3
           expect(results.fetch(:anomalous_traffic)).to eq 0.0
         end
+
+        context 'when totals_only is set to true' do
+          it 'returns totals only', :aggregate_failures do
+            results = subject.execute(totals_only: true)
+
+            expect(results).to eq(total_traffic: 3.0, total_anomalous_traffic: 0.0)
+          end
+        end
       end
 
       context 'with violations' do
@@ -176,6 +192,14 @@ RSpec.describe Security::WafAnomalySummaryService do
           expect(results.fetch(:interval)).to eq 'day'
           expect(results.fetch(:total_traffic)).to eq 3
           expect(results.fetch(:anomalous_traffic)).to eq 0.33
+        end
+
+        context 'when totals_only is set to true' do
+          it 'returns totals only', :aggregate_failures do
+            results = subject.execute(totals_only: true)
+
+            expect(results).to eq(total_traffic: 3.0, total_anomalous_traffic: 1.0)
+          end
         end
       end
 

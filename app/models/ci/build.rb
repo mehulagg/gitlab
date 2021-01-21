@@ -26,7 +26,9 @@ module Ci
     RUNNER_FEATURES = {
       upload_multiple_artifacts: -> (build) { build.publishes_artifacts_reports? },
       refspecs: -> (build) { build.merge_request_ref? },
-      artifacts_exclude: -> (build) { build.supports_artifacts_exclude? }
+      artifacts_exclude: -> (build) { build.supports_artifacts_exclude? },
+      multi_build_steps: -> (build) { build.multi_build_steps? },
+      return_exit_code: -> (build) { build.exit_codes_defined? }
     }.freeze
 
     DEFAULT_RETRIES = {
@@ -37,13 +39,16 @@ module Ci
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :resource, class_name: 'Ci::Resource', inverse_of: :build
+    has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
-    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id
+    has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
 
     has_many :job_artifacts, class_name: 'Ci::JobArtifact', foreign_key: :job_id, dependent: :destroy, inverse_of: :job # rubocop:disable Cop/ActiveRecordDependent
     has_many :job_variables, class_name: 'Ci::JobVariable', foreign_key: :job_id
     has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_job_id
+
+    has_many :pages_deployments, inverse_of: :ci_build
 
     Ci::JobArtifact.file_types.each do |key, value|
       has_one :"job_artifacts_#{key}", -> { where(file_type: value) }, class_name: 'Ci::JobArtifact', inverse_of: :job, foreign_key: :job_id
@@ -72,8 +77,7 @@ module Ci
       return unless has_environment?
 
       strong_memoize(:persisted_environment) do
-        deployment&.environment ||
-          Environment.find_by(name: expanded_environment_name, project: project)
+        Environment.find_by(name: expanded_environment_name, project: project)
       end
     end
 
@@ -90,9 +94,9 @@ module Ci
         Ci::BuildMetadata.scoped_build.with_interruptible.select(:id))
     end
 
-    scope :unstarted, ->() { where(runner_id: nil) }
-    scope :ignore_failures, ->() { where(allow_failure: false) }
-    scope :with_downloadable_artifacts, ->() do
+    scope :unstarted, -> { where(runner_id: nil) }
+    scope :ignore_failures, -> { where(allow_failure: false) }
+    scope :with_downloadable_artifacts, -> do
       where('EXISTS (?)',
         Ci::JobArtifact.select(1)
           .where('ci_builds.id = ci_job_artifacts.job_id')
@@ -100,15 +104,19 @@ module Ci
       )
     end
 
+    scope :in_pipelines, ->(pipelines) do
+      where(pipeline: pipelines)
+    end
+
     scope :with_existing_job_artifacts, ->(query) do
       where('EXISTS (?)', ::Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').merge(query))
     end
 
-    scope :with_archived_trace, ->() do
+    scope :with_archived_trace, -> do
       with_existing_job_artifacts(Ci::JobArtifact.trace)
     end
 
-    scope :without_archived_trace, ->() do
+    scope :without_archived_trace, -> do
       where('NOT EXISTS (?)', Ci::JobArtifact.select(1).where('ci_builds.id = ci_job_artifacts.job_id').trace)
     end
 
@@ -139,11 +147,17 @@ module Ci
         .includes(:metadata, :job_artifacts_metadata)
     end
 
-    scope :with_artifacts_not_expired, ->() { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
-    scope :with_expired_artifacts, ->() { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
-    scope :last_month, ->() { where('created_at > ?', Date.today - 1.month) }
-    scope :manual_actions, ->() { where(when: :manual, status: COMPLETED_STATUSES + %i[manual]) }
-    scope :scheduled_actions, ->() { where(when: :delayed, status: COMPLETED_STATUSES + %i[scheduled]) }
+    scope :with_project_and_metadata, -> do
+      if Feature.enabled?(:non_public_artifacts, type: :development)
+        joins(:metadata).includes(:project, :metadata)
+      end
+    end
+
+    scope :with_artifacts_not_expired, -> { with_downloadable_artifacts.where('artifacts_expire_at IS NULL OR artifacts_expire_at > ?', Time.current) }
+    scope :with_expired_artifacts, -> { with_downloadable_artifacts.where('artifacts_expire_at < ?', Time.current) }
+    scope :last_month, -> { where('created_at > ?', Date.today - 1.month) }
+    scope :manual_actions, -> { where(when: :manual, status: COMPLETED_STATUSES + %i[manual]) }
+    scope :scheduled_actions, -> { where(when: :delayed, status: COMPLETED_STATUSES + %i[scheduled]) }
     scope :ref_protected, -> { where(protected: true) }
     scope :with_live_trace, -> { where('EXISTS (?)', Ci::BuildTraceChunk.where('ci_builds.id = ci_build_trace_chunks.build_id').select(1)) }
     scope :with_stale_live_trace, -> { with_live_trace.finished_before(12.hours.ago) }
@@ -175,7 +189,6 @@ module Ci
     end
 
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
-    scope :order_id_desc, -> { order('ci_builds.id DESC') }
 
     scope :preload_project_and_pipeline_project, -> do
       preload(Ci::Pipeline::PROJECT_ROUTE_AND_NAMESPACE_ROUTE,
@@ -183,6 +196,8 @@ module Ci
     end
 
     scope :with_coverage, -> { where.not(coverage: nil) }
+
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
 
     acts_as_taggable
 
@@ -212,6 +227,10 @@ module Ci
           .new(build.project, current_user)
           .execute(build)
         # rubocop: enable CodeReuse/ServiceClass
+      end
+
+      def with_preloads
+        preload(:job_artifacts_archive, :job_artifacts, project: [:namespace])
       end
     end
 
@@ -321,6 +340,8 @@ module Ci
 
       after_transition any => [:success, :failed, :canceled] do |build|
         build.run_after_commit do
+          build.run_status_commit_hooks!
+
           BuildFinishedWorker.perform_async(id)
         end
       end
@@ -350,7 +371,7 @@ module Ci
       after_transition any => [:failed] do |build|
         next unless build.project
 
-        if build.retry_failure?
+        if build.auto_retry_allowed?
           begin
             Ci::Build.retry(build, build.user)
           rescue Gitlab::Access::AccessDeniedError => ex
@@ -367,9 +388,17 @@ module Ci
         Ci::BuildRunnerSession.where(build: build).delete_all
       end
 
-      after_transition any => [:skipped, :canceled] do |build|
-        build.deployment&.cancel
+      after_transition any => [:skipped, :canceled] do |build, transition|
+        if transition.to_name == :skipped
+          build.deployment&.skip
+        else
+          build.deployment&.cancel
+        end
       end
+    end
+
+    def auto_retry_allowed?
+      auto_retry.allowed?
     end
 
     def detailed_status(current_user)
@@ -438,27 +467,6 @@ module Ci
       pipeline.builds.retried.where(name: self.name).count
     end
 
-    def retry_failure?
-      max_allowed_retries = nil
-      max_allowed_retries ||= options_retry_max if retry_on_reason_or_always?
-      max_allowed_retries ||= DEFAULT_RETRIES.fetch(failure_reason.to_sym, 0)
-
-      max_allowed_retries > 0 && retries_count < max_allowed_retries
-    end
-
-    def options_retry_max
-      options_retry[:max]
-    end
-
-    def options_retry_when
-      options_retry.fetch(:when, ['always'])
-    end
-
-    def retry_on_reason_or_always?
-      options_retry_when.include?(failure_reason.to_s) ||
-        options_retry_when.include?('always')
-    end
-
     def any_unmet_prerequisites?
       prerequisites.present?
     end
@@ -473,8 +481,7 @@ module Ci
       strong_memoize(:expanded_environment_name) do
         # We're using a persisted expanded environment name in order to avoid
         # variable expansion per request.
-        if Feature.enabled?(:ci_persisted_expanded_environment_name, project, default_enabled: true) &&
-          metadata&.expanded_environment_name.present?
+        if metadata&.expanded_environment_name.present?
           metadata.expanded_environment_name
         else
           ExpandVariables.expand(environment, -> { simple_variables })
@@ -533,17 +540,14 @@ module Ci
       strong_memoize(:variables) do
         Gitlab::Ci::Variables::Collection.new
           .concat(persisted_variables)
+          .concat(dependency_proxy_variables)
           .concat(job_jwt_variables)
           .concat(scoped_variables)
           .concat(job_variables)
-          .concat(environment_changed_page_variables)
           .concat(persisted_environment_variables)
-          .concat(deploy_freeze_variables)
           .to_runner_variables
       end
     end
-
-    CI_REGISTRY_USER = 'gitlab-ci-token'
 
     def persisted_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
@@ -556,7 +560,7 @@ module Ci
           .append(key: 'CI_JOB_TOKEN', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_BUILD_ID', value: id.to_s)
           .append(key: 'CI_BUILD_TOKEN', value: token.to_s, public: false, masked: true)
-          .append(key: 'CI_REGISTRY_USER', value: CI_REGISTRY_USER)
+          .append(key: 'CI_REGISTRY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
           .append(key: 'CI_REGISTRY_PASSWORD', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_REPOSITORY_URL', value: repo_url.to_s, public: false)
           .concat(deploy_token_variables)
@@ -576,15 +580,6 @@ module Ci
       end
     end
 
-    def environment_changed_page_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        break variables unless environment_status && Feature.enabled?(:modifed_path_ci_variables, project)
-
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_PATHS', value: environment_status.changed_paths.join(','))
-        variables.append(key: 'CI_MERGE_REQUEST_CHANGED_PAGE_URLS', value: environment_status.changed_urls.join(','))
-      end
-    end
-
     def deploy_token_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         break variables unless gitlab_deploy_token
@@ -594,24 +589,13 @@ module Ci
       end
     end
 
-    def deploy_freeze_variables
+    def dependency_proxy_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        break variables unless freeze_period?
+        break variables unless Gitlab.config.dependency_proxy.enabled
 
-        variables.append(key: 'CI_DEPLOY_FREEZE', value: 'true')
+        variables.append(key: 'CI_DEPENDENCY_PROXY_USER', value: ::Gitlab::Auth::CI_JOB_USER)
+        variables.append(key: 'CI_DEPENDENCY_PROXY_PASSWORD', value: token.to_s, public: false, masked: true)
       end
-    end
-
-    def freeze_period?
-      Ci::FreezePeriodStatus.new(project: project).execute
-    end
-
-    def dependency_variables
-      return [] if all_dependencies.empty?
-
-      Gitlab::Ci::Variables::Collection.new.concat(
-        Ci::JobVariable.where(job: all_dependencies).dotenv_source
-      )
     end
 
     def features
@@ -627,7 +611,7 @@ module Ci
     def repo_url
       return unless token
 
-      auth = "gitlab-ci-token:#{token}@"
+      auth = "#{::Gitlab::Auth::CI_JOB_USER}:#{token}@"
       project.http_url_to_repo.sub(%r{^https?://}) do |prefix|
         prefix + auth
       end
@@ -678,6 +662,17 @@ module Ci
 
     def artifacts?
       !artifacts_expired? && artifacts_file&.exists?
+    end
+
+    def locked_artifacts?
+      pipeline.artifacts_locked? && artifacts_file&.exists?
+    end
+
+    # This method is similar to #artifacts? but it includes the artifacts
+    # locking mechanics. A new method was created to prevent breaking existing
+    # behavior and avoid introducing N+1s.
+    def available_artifacts?
+      (!artifacts_expired? || pipeline.artifacts_locked?) && job_artifacts_archive&.exists?
     end
 
     def artifacts_metadata?
@@ -749,6 +744,16 @@ module Ci
       artifacts_metadata?
     end
 
+    def artifacts_public?
+      return true unless Feature.enabled?(:non_public_artifacts, type: :development)
+
+      artifacts_public = options.dig(:artifacts, :public)
+
+      return true if artifacts_public.nil? # Default artifacts:public to true
+
+      options.dig(:artifacts, :public)
+    end
+
     def artifacts_metadata_entry(path, **options)
       artifacts_metadata.open do |metadata_stream|
         metadata = Gitlab::Ci::Build::Artifacts::Metadata.new(
@@ -796,8 +801,18 @@ module Ci
         end
     end
 
+    def has_expired_locked_archive_artifacts?
+      locked_artifacts? &&
+        artifacts_expire_at.present? && artifacts_expire_at < Time.current
+    end
+
     def has_expiring_archive_artifacts?
       has_expiring_artifacts? && job_artifacts_archive.present?
+    end
+
+    def self.keep_artifacts!
+      update_all(artifacts_expire_at: nil)
+      Ci::JobArtifact.where(job: self.select(:id)).update_all(expire_at: nil)
     end
 
     def keep_artifacts!
@@ -815,6 +830,7 @@ module Ci
 
     def steps
       [Gitlab::Ci::Build::Step.from_commands(self),
+       Gitlab::Ci::Build::Step.from_release(self),
        Gitlab::Ci::Build::Step.from_after_script(self)].compact
     end
 
@@ -839,10 +855,6 @@ module Ci
 
     def credentials
       Gitlab::Ci::Build::Credentials::Factory.new(self).create!
-    end
-
-    def all_dependencies
-      dependencies.all
     end
 
     def has_valid_build_dependencies?
@@ -878,13 +890,26 @@ module Ci
       options&.dig(:artifacts, :reports)&.any?
     end
 
-    def hide_secrets(trace)
+    def supports_artifacts_exclude?
+      options&.dig(:artifacts, :exclude)&.any? &&
+        Gitlab::Ci::Features.artifacts_exclude_enabled?
+    end
+
+    def multi_build_steps?
+      options.dig(:release)&.any?
+    end
+
+    def hide_secrets(data, metrics = ::Gitlab::Ci::Trace::Metrics.new)
       return unless trace
 
-      trace = trace.dup
-      Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
-      Gitlab::Ci::MaskSecret.mask!(trace, token) if token
-      trace
+      data.dup.tap do |trace|
+        Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
+        Gitlab::Ci::MaskSecret.mask!(trace, token) if token
+
+        if trace != data
+          metrics.increment_trace_operation(operation: :mutated)
+        end
+      end
     end
 
     def serializable_hash(options = {})
@@ -898,7 +923,11 @@ module Ci
     def collect_test_reports!(test_reports)
       test_reports.get_suite(group_name).tap do |test_suite|
         each_report(Ci::JobArtifact::TEST_REPORT_FILE_TYPES) do |file_type, blob|
-          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, test_suite, job: self)
+          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+            blob,
+            test_suite,
+            job: self
+          )
         end
       end
     end
@@ -912,11 +941,31 @@ module Ci
     end
 
     def collect_coverage_reports!(coverage_report)
+      project_path, worktree_paths = if Feature.enabled?(:smart_cobertura_parser, project)
+                                       # If the flag is disabled, we intentionally pass nil
+                                       # for both project_path and worktree_paths to fallback
+                                       # to the non-smart behavior of the parser
+                                       [project.full_path, pipeline.all_worktree_paths]
+                                     end
+
       each_report(Ci::JobArtifact::COVERAGE_REPORT_FILE_TYPES) do |file_type, blob|
-        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, coverage_report)
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+          blob,
+          coverage_report,
+          project_path: project_path,
+          worktree_paths: worktree_paths
+        )
       end
 
       coverage_report
+    end
+
+    def collect_codequality_reports!(codequality_report)
+      each_report(Ci::JobArtifact::CODEQUALITY_REPORT_FILE_TYPES) do |file_type, blob|
+        Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, codequality_report)
+      end
+
+      codequality_report
     end
 
     def collect_terraform_reports!(terraform_reports)
@@ -951,21 +1000,60 @@ module Ci
         failure_reason: :data_integrity_failure)
     end
 
-    def supports_artifacts_exclude?
-      options&.dig(:artifacts, :exclude)&.any? &&
-        Gitlab::Ci::Features.artifacts_exclude_enabled?
-    end
-
     def degradation_threshold
       var = yaml_variables.find { |v| v[:key] == DEGRADATION_THRESHOLD_VARIABLE_NAME }
       var[:value]&.to_i if var
     end
 
+    def remove_pending_state!
+      pending_state.try(:delete)
+    end
+
+    def run_on_status_commit(&block)
+      status_commit_hooks.push(block)
+    end
+
+    def max_test_cases_per_report
+      # NOTE: This is temporary and will be replaced later by a value
+      # that would come from an actual application limit.
+      ::Gitlab.com? ? 500_000 : 0
+    end
+
+    def debug_mode?
+      # TODO: Have `debug_mode?` check against data on sent back from runner
+      # to capture all the ways that variables can be set.
+      # See (https://gitlab.com/gitlab-org/gitlab/-/issues/290955)
+      variables.any? { |variable| variable[:key] == 'CI_DEBUG_TRACE' && variable[:value].casecmp('true') == 0 }
+    end
+
+    def drop_with_exit_code!(failure_reason, exit_code)
+      transaction do
+        conditionally_allow_failure!(exit_code)
+        drop!(failure_reason)
+      end
+    end
+
+    def exit_codes_defined?
+      options.dig(:allow_failure_criteria, :exit_codes).present?
+    end
+
+    protected
+
+    def run_status_commit_hooks!
+      status_commit_hooks.reverse_each do |hook|
+        instance_eval(&hook)
+      end
+    end
+
     private
 
-    def dependencies
-      strong_memoize(:dependencies) do
-        Ci::BuildDependencies.new(self)
+    def status_commit_hooks
+      @status_commit_hooks ||= []
+    end
+
+    def auto_retry
+      strong_memoize(:auto_retry) do
+        Gitlab::Ci::Build::AutoRetry.new(self)
       end
     end
 
@@ -1018,19 +1106,6 @@ module Ci
       end
     end
 
-    # The format of the retry option changed in GitLab 11.5: Before it was
-    # integer only, after it is a hash. New builds are created with the new
-    # format, but builds created before GitLab 11.5 and saved in database still
-    # have the old integer only format. This method returns the retry option
-    # normalized as a hash in 11.5+ format.
-    def options_retry
-      strong_memoize(:options_retry) do
-        value = options&.dig(:retry)
-        value = value.is_a?(Integer) ? { max: value } : value.to_h
-        value.with_indifferent_access
-      end
-    end
-
     def has_expiring_artifacts?
       artifacts_expire_at.present? && artifacts_expire_at > Time.current
     end
@@ -1041,9 +1116,24 @@ module Ci
 
         jwt = Gitlab::Ci::Jwt.for_build(self)
         variables.append(key: 'CI_JOB_JWT', value: jwt, public: false, masked: true)
-      rescue OpenSSL::PKey::RSAError => e
+      rescue OpenSSL::PKey::RSAError, Gitlab::Ci::Jwt::NoSigningKeyError => e
         Gitlab::ErrorTracking.track_exception(e)
       end
+    end
+
+    def conditionally_allow_failure!(exit_code)
+      return unless exit_code
+
+      if allowed_to_fail_with_code?(exit_code)
+        update_columns(allow_failure: true)
+      end
+    end
+
+    def allowed_to_fail_with_code?(exit_code)
+      options
+        .dig(:allow_failure_criteria, :exit_codes)
+        .to_a
+        .include?(exit_code)
     end
   end
 end

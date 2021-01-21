@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Graphql::Pagination::ExternallyPaginatedArrayConnection do
+RSpec.describe Gitlab::Graphql::Pagination::ExternallyPaginatedArrayConnection do
   let(:prev_cursor) { 1 }
   let(:next_cursor) { 6 }
   let(:values) { [2, 3, 4, 5] }
@@ -10,7 +10,13 @@ describe Gitlab::Graphql::Pagination::ExternallyPaginatedArrayConnection do
   let(:arguments) { {} }
 
   subject(:connection) do
-    described_class.new(all_nodes, { max_page_size: values.size }.merge(arguments))
+    described_class.new(all_nodes, **{ max_page_size: values.size }.merge(arguments))
+  end
+
+  it_behaves_like 'a connection with collection methods'
+
+  it_behaves_like 'a redactable connection' do
+    let(:unwanted) { 3 }
   end
 
   describe '#nodes' do

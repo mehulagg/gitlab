@@ -1,10 +1,10 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     columns: {
@@ -59,7 +59,7 @@ export default {
         class="header"
         @click="onColumnClick(column.name)"
       >
-        {{ column.text }} <icon :size="12" :name="getColumnSortIcon(column.name)" />
+        {{ column.text }} <gl-icon :size="12" :name="getColumnSortIcon(column.name)" />
       </th>
     </tr>
   </thead>

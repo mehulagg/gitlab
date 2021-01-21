@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProcessCommitWorker do
+RSpec.describe ProcessCommitWorker do
   let(:worker) { described_class.new }
   let(:user) { create(:user) }
   let(:project) { create(:project, :public, :repository) }
@@ -160,7 +160,7 @@ describe ProcessCommitWorker do
 
       context 'when issue has first_mentioned_in_commit_at earlier than given committed_date' do
         before do
-          issue.metrics.update(first_mentioned_in_commit_at: commit.committed_date - 1.day)
+          issue.metrics.update!(first_mentioned_in_commit_at: commit.committed_date - 1.day)
         end
 
         it "doesn't update issue metrics" do
@@ -170,7 +170,7 @@ describe ProcessCommitWorker do
 
       context 'when issue has first_mentioned_in_commit_at later than given committed_date' do
         before do
-          issue.metrics.update(first_mentioned_in_commit_at: commit.committed_date + 1.day)
+          issue.metrics.update!(first_mentioned_in_commit_at: commit.committed_date + 1.day)
         end
 
         it "doesn't update issue metrics" do
@@ -200,9 +200,9 @@ describe ProcessCommitWorker do
     it 'parses date strings into Time instances' do
       commit = worker.build_commit(project,
                                    id: '123',
-                                   authored_date: Time.now.to_s)
+                                   authored_date: Time.current.to_s)
 
-      expect(commit.authored_date).to be_an_instance_of(Time)
+      expect(commit.authored_date).to be_a_kind_of(Time)
     end
   end
 end

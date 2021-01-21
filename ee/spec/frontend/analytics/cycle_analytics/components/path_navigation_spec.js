@@ -1,4 +1,4 @@
-import { GlPath, GlSkeletonLoading } from '@gitlab/ui';
+import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Component from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
 import { transformedStagePathData, issueStage } from '../mock_data';
@@ -6,7 +6,7 @@ import { transformedStagePathData, issueStage } from '../mock_data';
 describe('PathNavigation', () => {
   let wrapper = null;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     return mount(Component, {
       propsData: {
         stages: transformedStagePathData,
@@ -21,10 +21,8 @@ describe('PathNavigation', () => {
     return wrapper.findAll('.gl-path-button');
   };
 
-  const clickItemAt = index => {
-    pathNavigationItems()
-      .at(index)
-      .trigger('click');
+  const clickItemAt = (index) => {
+    pathNavigationItems().at(index).trigger('click');
   };
 
   beforeEach(() => {
@@ -36,10 +34,6 @@ describe('PathNavigation', () => {
     wrapper = null;
   });
 
-  it('matches snapshot', () => {
-    expect(wrapper.element).toMatchSnapshot();
-  });
-
   describe('displays correctly', () => {
     it('has the correct props', () => {
       expect(wrapper.find(GlPath).props('items')).toMatchObject(transformedStagePathData);
@@ -48,7 +42,7 @@ describe('PathNavigation', () => {
     it('contains all the expected stages', () => {
       const html = wrapper.find(GlPath).html();
 
-      transformedStagePathData.forEach(stage => {
+      transformedStagePathData.forEach((stage) => {
         expect(html).toContain(stage.title);
       });
     });
@@ -88,10 +82,10 @@ describe('PathNavigation', () => {
       clickItemAt(1);
       clickItemAt(2);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        { name: 'selected', args: [transformedStagePathData[0]] },
-        { name: 'selected', args: [transformedStagePathData[1]] },
-        { name: 'selected', args: [transformedStagePathData[2]] },
+      expect(wrapper.emitted().selected).toEqual([
+        [transformedStagePathData[0]],
+        [transformedStagePathData[1]],
+        [transformedStagePathData[2]],
       ]);
     });
   });

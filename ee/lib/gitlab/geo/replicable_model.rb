@@ -5,16 +5,20 @@ module Gitlab
     module ReplicableModel
       extend ActiveSupport::Concern
       include Checksummable
-      include ::ShaAttribute
 
       included do
         # If this hook turns out not to apply to all Models, perhaps we should extract a `ReplicableBlobModel`
         after_create_commit -> { replicator.handle_after_create_commit if replicator.respond_to?(:handle_after_create_commit) }
+        after_destroy -> { replicator.handle_after_destroy if replicator.respond_to?(:handle_after_destroy) }
 
-        scope :checksummed, -> { where('verification_checksum IS NOT NULL') }
-        scope :checksum_failed, -> { where('verification_failure IS NOT NULL') }
-
-        sha_attribute :verification_checksum
+        # Temporarily defining `verification_succeeded` and
+        # `verification_failed` for unverified models while verification is
+        # under development to avoid breaking GeoNodeStatusCheck code.
+        # TODO: Remove these after including `Gitlab::Geo::VerificationState` on
+        # all models. https://gitlab.com/gitlab-org/gitlab/-/issues/280768
+        scope :verification_succeeded, -> { none }
+        scope :verification_failed, -> { none }
+        scope :available_replicables, -> { all }
       end
 
       class_methods do
@@ -24,24 +28,16 @@ module Gitlab
         def with_replicator(klass)
           raise ArgumentError, 'Must be a class inheriting from Gitlab::Geo::Replicator' unless klass < ::Gitlab::Geo::Replicator
 
-          Gitlab::Geo::ReplicableModel.add_replicator(klass)
-
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             define_method :replicator do
               @_replicator ||= klass.new(model_record: self)
             end
+
+            define_singleton_method :replicator_class do
+              @_replicator_class ||= klass
+            end
           RUBY
         end
-      end
-
-      def self.add_replicator(klass)
-        @_replicators ||= []
-        @_replicators << klass
-      end
-
-      def self.replicators
-        @_replicators ||= []
-        @_replicators.filter { |replicator| const_defined?(replicator.to_s) }
       end
 
       # Geo Replicator
@@ -52,13 +48,13 @@ module Gitlab
         raise NotImplementedError, 'There is no Replicator defined for this model'
       end
 
-      # Clear model verification checksum and force recalculation
-      def calculate_checksum!
-        self.verification_checksum = nil
+      # Returns a checksum of the file (assumed to be a "blob" type)
+      #
+      # @return [String] SHA256 hash of the carrierwave file
+      def calculate_checksum
+        return unless checksummable?
 
-        return unless needs_checksum?
-
-        self.verification_checksum = self.class.hexdigest(file.path)
+        self.class.hexdigest(replicator.carrierwave_uploader.path)
       end
 
       # Checks whether model needs checksum to be performed
@@ -84,10 +80,14 @@ module Gitlab
       # @return [Boolean] whether the file exists on storage
       def file_exist?
         if local?
-          File.exist?(file.path)
+          File.exist?(replicator.carrierwave_uploader.path)
         else
-          file.exists?
+          replicator.carrierwave_uploader.exists?
         end
+      end
+
+      def in_replicables_for_current_secondary?
+        self.class.replicables_for_current_secondary(self).exists?
       end
     end
   end

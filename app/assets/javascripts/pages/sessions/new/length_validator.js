@@ -9,7 +9,7 @@ export default class LengthValidator extends InputValidator {
     const container = opts.container || '';
     const validateLengthElements = document.querySelectorAll(`${container} .js-validate-length`);
 
-    validateLengthElements.forEach(element =>
+    validateLengthElements.forEach((element) =>
       element.addEventListener('input', this.eventHandler.bind(this)),
     );
   }
@@ -21,11 +21,24 @@ export default class LengthValidator extends InputValidator {
     );
 
     const { value } = this.inputDomElement;
-    const { maxLengthMessage, maxLength } = this.inputDomElement.dataset;
+    const {
+      minLength,
+      minLengthMessage,
+      maxLengthMessage,
+      maxLength,
+    } = this.inputDomElement.dataset;
 
-    this.errorMessage = maxLengthMessage;
+    this.invalidInput = false;
 
-    this.invalidInput = value.length > parseInt(maxLength, 10);
+    if (value.length > parseInt(maxLength, 10)) {
+      this.invalidInput = true;
+      this.errorMessage = maxLengthMessage;
+    }
+
+    if (value.length < parseInt(minLength, 10)) {
+      this.invalidInput = true;
+      this.errorMessage = minLengthMessage;
+    }
 
     this.setValidationStateAndMessage();
   }

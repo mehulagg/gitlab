@@ -1,11 +1,13 @@
 <script>
-import { escape } from 'lodash';
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 
 export default {
   components: {
     EventItem,
+    GlSprintf,
+    GlLink,
   },
   props: {
     feedback: {
@@ -19,23 +21,15 @@ export default {
     },
   },
   computed: {
+    hasProjectUrl() {
+      return Boolean(this.project?.value && this.project?.url);
+    },
     eventText() {
-      const { project, feedback } = this;
-      const mergeRequestLink = `<a href="${feedback.merge_request_path}">!${feedback.merge_request_iid}</a>`;
-
-      if (project && project.value && project.url) {
-        const projectLink = `<a href="${escape(project.url)}">${escape(project.value)}</a>`;
-
-        return sprintf(
-          __('Created merge request %{mergeRequestLink} at %{projectLink}'),
-          {
-            mergeRequestLink,
-            projectLink,
-          },
-          false,
-        );
+      if (this.hasProjectUrl) {
+        return __('Created merge request %{mergeRequestLink} at %{projectLink}');
       }
-      return sprintf(__('Created merge request %{mergeRequestLink}'), { mergeRequestLink }, false);
+
+      return __('Created merge request %{mergeRequestLink}');
     },
   },
 };
@@ -43,6 +37,13 @@ export default {
 
 <template>
   <event-item :author="feedback.author" :created-at="feedback.created_at" icon-name="merge-request">
-    <div v-html="eventText"></div>
+    <gl-sprintf :message="eventText">
+      <template #mergeRequestLink>
+        <gl-link :href="feedback.merge_request_path">!{{ feedback.merge_request_iid }}</gl-link>
+      </template>
+      <template v-if="hasProjectUrl" #projectLink>
+        <gl-link :href="project.url">{{ project.value }}</gl-link>
+      </template>
+    </gl-sprintf>
   </event-item>
 </template>

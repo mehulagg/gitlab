@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { keepAlive } from 'helpers/keep_alive_component_helper';
 import { createStore } from '~/ide/stores';
 import { createRouter } from '~/ide/ide_router';
 import RepoCommitSection from '~/ide/components/repo_commit_section.vue';
@@ -14,7 +15,7 @@ describe('RepoCommitSection', () => {
   let store;
 
   function createComponent() {
-    wrapper = mount(RepoCommitSection, { store });
+    wrapper = mount(keepAlive(RepoCommitSection), { store });
   }
 
   function setupDefaultState() {
@@ -31,7 +32,7 @@ describe('RepoCommitSection', () => {
       },
     };
 
-    const files = [file('file1'), file('file2')].map(f =>
+    const files = [file('file1'), file('file2')].map((f) =>
       Object.assign(f, {
         type: 'blob',
         content: 'orginal content',
@@ -41,7 +42,7 @@ describe('RepoCommitSection', () => {
     store.state.currentBranch = 'master';
     store.state.changedFiles = [];
     store.state.stagedFiles = [{ ...files[0] }, { ...files[1] }];
-    store.state.stagedFiles.forEach(f =>
+    store.state.stagedFiles.forEach((f) =>
       Object.assign(f, {
         changed: true,
         staged: true,
@@ -49,7 +50,7 @@ describe('RepoCommitSection', () => {
       }),
     );
 
-    files.forEach(f => {
+    files.forEach((f) => {
       store.state.entries[f.path] = f;
     });
   }
@@ -64,6 +65,7 @@ describe('RepoCommitSection', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('empty state', () => {
@@ -75,18 +77,8 @@ describe('RepoCommitSection', () => {
     });
 
     it('renders no changes text', () => {
-      expect(
-        wrapper
-          .find(EmptyState)
-          .text()
-          .trim(),
-      ).toContain('No changes');
-      expect(
-        wrapper
-          .find(EmptyState)
-          .find('img')
-          .attributes('src'),
-      ).toBe(TEST_NO_CHANGES_SVG);
+      expect(wrapper.find(EmptyState).text().trim()).toContain('No changes');
+      expect(wrapper.find(EmptyState).find('img').attributes('src')).toBe(TEST_NO_CHANGES_SVG);
     });
   });
 
@@ -113,9 +105,9 @@ describe('RepoCommitSection', () => {
       const allFiles = store.state.changedFiles.concat(store.state.stagedFiles);
       const changedFileNames = wrapper
         .findAll('.multi-file-commit-list > li')
-        .wrappers.map(x => x.text().trim());
+        .wrappers.map((x) => x.text().trim());
 
-      expect(changedFileNames).toEqual(allFiles.map(x => x.path));
+      expect(changedFileNames).toEqual(allFiles.map((x) => x.path));
     });
 
     it('does not show empty state', () => {
@@ -123,11 +115,33 @@ describe('RepoCommitSection', () => {
     });
   });
 
+  describe('if nothing is changed or staged', () => {
+    beforeEach(() => {
+      setupDefaultState();
+
+      store.state.openFiles = [...Object.values(store.state.entries)];
+      store.state.openFiles[0].active = true;
+      store.state.stagedFiles = [];
+
+      createComponent();
+    });
+
+    it('opens currently active file', () => {
+      expect(store.state.openFiles.length).toBe(1);
+      expect(store.state.openFiles[0].pending).toBe(true);
+
+      expect(store.dispatch).toHaveBeenCalledWith('openPendingTab', {
+        file: store.state.entries[store.getters.activeFile.path],
+        keyPrefix: stageKeys.unstaged,
+      });
+    });
+  });
+
   describe('with unstaged file', () => {
     beforeEach(() => {
       setupDefaultState();
 
-      store.state.changedFiles = store.state.stagedFiles.map(x =>
+      store.state.changedFiles = store.state.stagedFiles.map((x) =>
         Object.assign(x, { staged: false }),
       );
       store.state.stagedFiles = [];
@@ -144,6 +158,23 @@ describe('RepoCommitSection', () => {
 
     it('does not show empty state', () => {
       expect(wrapper.find(EmptyState).exists()).toBe(false);
+    });
+  });
+
+  describe('activated', () => {
+    let inititializeSpy;
+
+    beforeEach(async () => {
+      createComponent();
+
+      inititializeSpy = jest.spyOn(wrapper.find(RepoCommitSection).vm, 'initialize');
+      store.state.viewer = 'diff';
+
+      await wrapper.vm.reactivate();
+    });
+
+    it('re initializes the component', () => {
+      expect(inititializeSpy).toHaveBeenCalled();
     });
   });
 });

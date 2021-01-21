@@ -6,35 +6,44 @@ module Boards
       include Gitlab::Utils::StrongMemoize
 
       def execute(board)
-        List.transaction do
-          target = target(board)
-          position = next_position(board)
-          create_list(board, type, target, position)
-        end
+        list = case type
+               when :backlog
+                 create_backlog(board)
+               else
+                 target = target(board)
+                 position = next_position(board)
+
+                 return ServiceResponse.error(message: _('%{board_target} not found') % { board_target: type.to_s.capitalize }) if target.blank?
+
+                 create_list(board, type, target, position)
+               end
+
+        return ServiceResponse.error(message: list.errors.full_messages) unless list.persisted?
+
+        ServiceResponse.success(payload: { list: list })
       end
 
       private
 
       def type
-        :label
+        # We don't ever expect to have more than one list
+        # type param at once.
+        if params.key?('backlog')
+          :backlog
+        else
+          :label
+        end
       end
 
       def target(board)
         strong_memoize(:target) do
-          available_labels_for(board).find(params[:label_id])
+          available_labels.find_by(id: params[:label_id]) # rubocop: disable CodeReuse/ActiveRecord
         end
       end
 
-      def available_labels_for(board)
-        options = { include_ancestor_groups: true }
-
-        if board.group_board?
-          options.merge!(group_id: parent.id, only_group_labels: true)
-        else
-          options[:project_id] = parent.id
-        end
-
-        LabelsFinder.new(current_user, options).execute
+      def available_labels
+        ::Labels::AvailableLabelsService.new(current_user, parent, {})
+          .available_labels
       end
 
       def next_position(board)
@@ -48,6 +57,12 @@ module Boards
 
       def create_list_attributes(type, target, position)
         { type => target, list_type: type, position: position }
+      end
+
+      def create_backlog(board)
+        return board.lists.backlog.first if board.lists.backlog.exists?
+
+        board.lists.create(list_type: :backlog, position: nil)
       end
     end
   end

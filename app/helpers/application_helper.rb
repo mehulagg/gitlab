@@ -4,10 +4,18 @@ require 'digest/md5'
 require 'uri'
 
 module ApplicationHelper
-  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-app-views
+  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-appviews
   # rubocop: disable CodeReuse/ActiveRecord
-  def render_if_exists(partial, locals = {})
-    render(partial, locals) if partial_exists?(partial)
+  # We allow partial to be nil so that collection views can be passed in
+  # `render partial: 'some/view', collection: @some_collection`
+  def render_if_exists(partial = nil, **options)
+    return unless partial_exists?(partial || options[:partial])
+
+    if partial.nil?
+      render(**options)
+    else
+      render(partial, options)
+    end
   end
 
   def partial_exists?(partial)
@@ -36,7 +44,7 @@ module ApplicationHelper
   #   current_controller?('gitlab/application') # => false
   def current_controller?(*args)
     args.any? do |v|
-      v.to_s.downcase == controller.controller_name || v.to_s.downcase == controller.controller_path
+      Gitlab::Utils.safe_downcase!(v.to_s) == controller.controller_name || Gitlab::Utils.safe_downcase!(v.to_s) == controller.controller_path
     end
   end
 
@@ -51,7 +59,7 @@ module ApplicationHelper
   #   current_action?(:create)        # => false
   #   current_action?(:new, :create)  # => true
   def current_action?(*args)
-    args.any? { |v| v.to_s.downcase == action_name }
+    args.any? { |v| Gitlab::Utils.safe_downcase!(v.to_s) == action_name }
   end
 
   def admin_section?
@@ -194,8 +202,16 @@ module ApplicationHelper
     'https://' + promo_host
   end
 
+  def contact_sales_url
+    promo_url + '/sales'
+  end
+
   def support_url
     Gitlab::CurrentSettings.current_application_settings.help_page_support_url.presence || promo_url + '/getting-help/'
+  end
+
+  def instance_review_permitted?
+    ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
   end
 
   def static_objects_external_storage_enabled?
@@ -229,6 +245,10 @@ module ApplicationHelper
     end
 
     "#{request.path}?#{options.compact.to_param}"
+  end
+
+  def stylesheet_link_tag_defer(path)
+    stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
   end
 
   def outdated_browser?
@@ -333,6 +353,25 @@ module ApplicationHelper
       "is#{browser.id.to_s.titlecase}": true,
       "is#{browser.platform.id.to_s.titlecase}": true
     }
+  end
+
+  def add_page_specific_style(path, defer: true)
+    content_for :page_specific_styles do
+      if defer
+        stylesheet_link_tag_defer path
+      else
+        stylesheet_link_tag path
+      end
+    end
+  end
+
+  def page_startup_api_calls
+    @api_startup_calls
+  end
+
+  def add_page_startup_api_call(api_path, options: {})
+    @api_startup_calls ||= {}
+    @api_startup_calls[api_path] = options
   end
 
   def autocomplete_data_sources(object, noteable_type)

@@ -47,9 +47,9 @@ export const diffViewerErrors = Object.freeze({
 });
 
 export const leftSidebarViews = {
-  edit: { name: 'ide-tree', keepAlive: false },
-  review: { name: 'ide-review', keepAlive: false },
-  commit: { name: 'repo-commit-section', keepAlive: false },
+  edit: { name: 'ide-tree' },
+  review: { name: 'ide-review' },
+  commit: { name: 'repo-commit-section' },
 };
 
 export const rightSidebarViews = {
@@ -97,3 +97,6 @@ export const packageJsonPath = 'package.json';
 
 export const SIDE_LEFT = 'left';
 export const SIDE_RIGHT = 'right';
+
+// Live Preview feature
+export const LIVE_PREVIEW_DEBOUNCE = 2000;

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ImportExport::ProjectExportPresenter do
+RSpec.describe Projects::ImportExport::ProjectExportPresenter do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user) }
@@ -42,6 +42,14 @@ describe Projects::ImportExport::ProjectExportPresenter do
       it "overrides description" do
         expect(subject.as_json["description"]).to eq(description)
       end
+    end
+  end
+
+  describe '#protected_branches' do
+    it 'returns the project exported protected branches' do
+      expect(project).to receive(:exported_protected_branches)
+
+      subject.protected_branches
     end
   end
 

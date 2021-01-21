@@ -18,7 +18,9 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}")
+    stub_feature_flags(hide_deprecated_billing_plans: false)
+    stub_experiment_for_subject(contact_sales_btn_in_app: true)
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
       .to_return(status: 200, body: plans_data.to_json)
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?) { true }
@@ -39,6 +41,20 @@ RSpec.describe 'Billing plan pages', :feature do
     it 'displays the upgrade link' do
       page.within('.content') do
         expect(page).to have_link('Upgrade', href: external_upgrade_url(namespace, plan))
+      end
+    end
+  end
+
+  shared_examples 'can contact sales' do
+    before do
+      visit page_path
+    end
+
+    it 'displays the contact sales link' do
+      # see ApplicationHelper#contact_sales_url
+      contact_sales_url = 'https://about.gitlab.com/sales'
+      page.within('.content') do
+        expect(page).to have_link('Contact sales', href: %r{#{contact_sales_url}\?test=inappcontactsales(bronze|silver|gold)})
       end
     end
   end
@@ -92,6 +108,18 @@ RSpec.describe 'Billing plan pages', :feature do
     end
   end
 
+  shared_examples 'used seats rendering for non paid subscriptions' do
+    before do
+      visit page_path
+    end
+
+    it 'displays the number of seats', :js do
+      page.within('.js-subscription-table') do
+        expect(page).to have_selector('p.property-value.gl-mt-2.gl-mb-0.number', text: '1')
+      end
+    end
+  end
+
   context 'users profile billing page' do
     let(:page_path) { profile_billings_path }
 
@@ -99,7 +127,7 @@ RSpec.describe 'Billing plan pages', :feature do
       let(:plan) { free_plan }
 
       let!(:subscription) do
-        create(:gitlab_subscription, namespace: namespace, hosted_plan: nil, seats: 15)
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
       end
 
       before do
@@ -141,6 +169,7 @@ RSpec.describe 'Billing plan pages', :feature do
       end
 
       it_behaves_like 'plan with subscription table'
+      it_behaves_like 'can contact sales'
     end
 
     context 'on bronze plan' do
@@ -153,6 +182,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
       it_behaves_like 'plan with subscription table'
     end
 
@@ -166,6 +196,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
       it_behaves_like 'plan with subscription table'
     end
 
@@ -231,6 +262,8 @@ RSpec.describe 'Billing plan pages', :feature do
           end
         end
       end
+
+      it_behaves_like 'can contact sales'
     end
 
     context 'on bronze plan' do
@@ -243,6 +276,7 @@ RSpec.describe 'Billing plan pages', :feature do
       it_behaves_like 'plan with header'
       it_behaves_like 'downgradable plan'
       it_behaves_like 'upgradable plan'
+      it_behaves_like 'can contact sales'
     end
 
     context 'on gold plan' do
@@ -319,6 +353,15 @@ RSpec.describe 'Billing plan pages', :feature do
         it 'displays subscription table', :js do
           expect(page).to have_selector('.js-subscription-table')
         end
+
+        it_behaves_like 'can contact sales'
+      end
+
+      context 'on free' do
+        let(:plan) { free_plan }
+        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: plan) }
+
+        it_behaves_like 'used seats rendering for non paid subscriptions'
       end
     end
   end
@@ -328,7 +371,7 @@ RSpec.describe 'Billing plan pages', :feature do
     let!(:group_member) { create(:group_member, :owner, group: namespace, user: user) }
 
     before do
-      stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free")
+      stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free&namespace_id=#{namespace.id}")
         .to_return(status: 200, body: plans_data.to_json)
     end
 
@@ -363,8 +406,8 @@ RSpec.describe 'Billing plan pages', :feature do
           expect(page).to have_selector('.js-subscription-table')
         end
 
-        it_behaves_like 'downgradable plan'
         it_behaves_like 'non-upgradable plan'
+        it_behaves_like 'used seats rendering for non paid subscriptions'
       end
     end
   end
@@ -433,6 +476,48 @@ RSpec.describe 'Billing plan pages', :feature do
         expect(panels.length).to eq(plans_data.length)
         plans_data.each_with_index do |data, index|
           expect(panels[index].find('.card-header')).to have_content(data[:name])
+        end
+      end
+    end
+  end
+
+  context 'when ff purchase_deprecated_plans is enabled' do
+    before do
+      stub_feature_flags(hide_deprecated_billing_plans: true)
+    end
+
+    context 'when deprecated plan is active' do
+      let(:plan) { bronze_plan }
+      let!(:subscription) do
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
+      end
+
+      let(:expected_card_header) { "#{plans_data[1][:name]} (Legacy)" }
+
+      it 'renders the plan card marked as Legacy' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length)
+
+          panel_with_legacy_plan = panels[1] # free [0], bronze [1]
+
+          expect(panel_with_legacy_plan.find('.card-header')).to have_content(expected_card_header)
+          expect(panel_with_legacy_plan.find('.card-body')).to have_link('frequently asked questions')
+        end
+      end
+    end
+
+    context 'when deprecated plan is inactive' do
+      let(:plan) { free_plan }
+
+      it 'does not render the card for that plan' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length - 1)
         end
       end
     end

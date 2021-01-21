@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :elastic do
-    desc "GitLab | Elasticsearch | Index eveything at once"
+    desc "GitLab | Elasticsearch | Index everything at once"
     task :index do
       # UPDATE_INDEX=true can cause some projects not to be indexed properly if someone were to push a commit to the
       # project before the rake task could get to it, so we set it to `nil` here to avoid that. It doesn't make sense
@@ -9,24 +9,33 @@ namespace :gitlab do
 
       Rake::Task["gitlab:elastic:recreate_index"].invoke
       Rake::Task["gitlab:elastic:clear_index_status"].invoke
+
+      # enable `elasticsearch_indexing` if it isn't
+      unless Gitlab::CurrentSettings.elasticsearch_indexing?
+        ApplicationSettings::UpdateService.new(
+          Gitlab::CurrentSettings.current_application_settings,
+          nil,
+          { elasticsearch_indexing: true }
+        ).execute
+
+        puts "Setting `elasticsearch_indexing` has been enabled."
+      end
+
       Rake::Task["gitlab:elastic:index_projects"].invoke
       Rake::Task["gitlab:elastic:index_snippets"].invoke
     end
 
     desc "GitLab | Elasticsearch | Index projects in the background"
     task index_projects: :environment do
-      print "Enqueuing projects"
+      print "Enqueuing projects…"
 
-      project_id_batches do |ids|
-        args = ids.collect do |id|
-          [:index, 'Project', id, nil] # es_id is unused for :index
-        end
-
-        ElasticIndexerWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
+      count = project_id_batches do |ids|
+        ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(*Project.find(ids))
         print "."
       end
 
-      puts "OK"
+      marker = count > 0 ? "✔" : "∅"
+      puts " #{marker} (#{count})"
     end
 
     desc "GitLab | ElasticSearch | Check project indexing status"
@@ -36,13 +45,6 @@ namespace :gitlab do
       percent = (indexed / projects.to_f) * 100.0
 
       puts "Indexing is %.2f%% complete (%d/%d projects)" % [percent, indexed, projects]
-    end
-
-    desc 'GitLab | Elasticsearch | Unlock repositories for indexing in case something gets stuck'
-    task clear_locked_projects: :environment do
-      Gitlab::Redis::SharedState.with { |redis| redis.del(:elastic_projects_indexing) }
-
-      puts 'Cleared all locked projects. Incremental indexing should work now.'
     end
 
     desc "GitLab | Elasticsearch | Index all snippets"
@@ -55,15 +57,36 @@ namespace :gitlab do
       logger.info("Indexing snippets... " + "done".color(:green))
     end
 
-    desc "GitLab | Elasticsearch | Create empty index and assign alias"
+    desc "GitLab | Elasticsearch | Create empty indexes and assigns an alias for each"
     task :create_empty_index, [:target_name] => [:environment] do |t, args|
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
-      helper.create_empty_index
+      with_alias = ENV["SKIP_ALIAS"].nil?
+      options = {}
 
-      puts "Index and underlying alias '#{helper.target_name}' has been created.".color(:green)
+      # only create an index at the specified name
+      options[:index_name] = args[:target_name] unless with_alias
+
+      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+      index_name = helper.create_empty_index(with_alias: with_alias, options: options)
+
+      # with_alias is used to support interacting with a specific index (such as when reclaiming the production index
+      # name when the index was created prior to 13.0). If the `SKIP_ALIAS` environment variable is set,
+      # do not create standalone indexes and do not create the migrations index
+      if with_alias
+        standalone_index_names = helper.create_standalone_indices(options: options)
+        standalone_index_names.each do |index_name, alias_name|
+          puts "Index '#{index_name}' has been created.".color(:green)
+          puts "Alias '#{alias_name}' -> '#{index_name}' has been created.".color(:green)
+        end
+
+        helper.create_migrations_index unless helper.migrations_index_exists?
+        ::Elastic::DataMigrationService.mark_all_as_completed!
+      end
+
+      puts "Index '#{index_name}' has been created.".color(:green)
+      puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
 
-    desc "GitLab | Elasticsearch | Delete index"
+    desc "GitLab | Elasticsearch | Delete all indexes"
     task :delete_index, [:target_name] => [:environment] do |t, args|
       helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
 
@@ -72,12 +95,32 @@ namespace :gitlab do
       else
         puts "Index/alias '#{helper.target_name}' was not found".color(:green)
       end
+
+      results = helper.delete_standalone_indices
+      results.each do |index_name, alias_name, result|
+        if result
+          puts "Index '#{index_name}' with alias '#{alias_name}' has been deleted".color(:green)
+        else
+          puts "Index '#{index_name}' with alias '#{alias_name}' was not found".color(:green)
+        end
+      end
+
+      if helper.delete_migrations_index
+        puts "Index/alias '#{helper.migrations_index_name}' has been deleted".color(:green)
+      else
+        puts "Index/alias '#{helper.migrations_index_name}' was not found".color(:green)
+      end
     end
 
-    desc "GitLab | Elasticsearch | Recreate index"
+    desc "GitLab | Elasticsearch | Recreate indexes"
     task :recreate_index, [:target_name] => [:environment] do |t, args|
       Rake::Task["gitlab:elastic:delete_index"].invoke(*args)
       Rake::Task["gitlab:elastic:create_empty_index"].invoke(*args)
+    end
+
+    desc "GitLab | Elasticsearch | Zero-downtime cluster reindexing"
+    task reindex_cluster: :environment do
+      trigger_cluster_reindexing
     end
 
     desc "GitLab | Elasticsearch | Clear indexing status"
@@ -90,29 +133,53 @@ namespace :gitlab do
     task projects_not_indexed: :environment do
       not_indexed = Project.where.not(id: IndexStatus.select(:project_id).distinct)
 
-      if not_indexed.count.zero?
+      if not_indexed.count == 0
         puts 'All projects are currently indexed'.color(:green)
       else
         display_unindexed(not_indexed)
       end
     end
 
+    desc "GitLab | Elasticsearch | Mark last reindexing job as failed"
+    task mark_reindex_failed: :environment do
+      if Elastic::ReindexingTask.running?
+        Elastic::ReindexingTask.current.failure!
+        puts 'Marked the current reindexing job as failed.'.color(:green)
+      else
+        puts 'Did not find the current running reindexing job.'
+      end
+    end
+
     def project_id_batches(&blk)
-      relation = Project
+      relation = Project.all
 
       unless ENV['UPDATE_INDEX']
         relation = relation.includes(:index_status).where('index_statuses.id IS NULL').references(:index_statuses)
       end
 
       if ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?
-        relation = relation.where(id: ::Gitlab::CurrentSettings.elasticsearch_limited_projects.select(:id))
+        relation.merge!(::Gitlab::CurrentSettings.elasticsearch_limited_projects)
       end
 
-      relation.all.in_batches(start: ENV['ID_FROM'], finish: ENV['ID_TO']) do |relation| # rubocop: disable Cop/InBatches
+      count = 0
+      relation.in_batches(start: ENV['ID_FROM'], finish: ENV['ID_TO']) do |relation| # rubocop: disable Cop/InBatches
         ids = relation.reorder(:id).pluck(:id)
-        Gitlab::Redis::SharedState.with { |redis| redis.sadd(:elastic_projects_indexing, ids) }
         yield ids
+
+        count += ids.size
       end
+
+      count
+    end
+
+    def trigger_cluster_reindexing
+      Elastic::ReindexingTask.create!
+
+      ElasticClusterReindexingCronWorker.perform_async
+
+      puts 'Reindexing job was successfully scheduled'.color(:green)
+    rescue PG::UniqueViolation, ActiveRecord::RecordNotUnique
+      puts 'There is another task in progress. Please wait for it to finish.'.color(:red)
     end
 
     def display_unindexed(projects)

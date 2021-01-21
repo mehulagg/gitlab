@@ -4,14 +4,17 @@ require 'spec_helper'
 
 RSpec.describe 'Admin Groups' do
   include Select2Helper
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
-  let(:user) { create :user }
-  let!(:group) { create :group }
-  let!(:current_user) { create(:admin) }
+
+  let_it_be(:user) { create :user }
+  let_it_be(:group) { create :group }
+  let_it_be(:current_user) { create(:admin) }
 
   before do
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
 
@@ -24,6 +27,17 @@ RSpec.describe 'Admin Groups' do
   end
 
   describe 'create a group' do
+    describe 'with expected fields' do
+      it 'renders from as expected', :aggregate_failures do
+        visit new_admin_group_path
+
+        expect(page).to have_field('name')
+        expect(page).to have_field('group_path')
+        expect(page).to have_field('group_visibility_level_0')
+        expect(page).to have_field('description')
+      end
+    end
+
     it 'creates new group' do
       visit admin_groups_path
 
@@ -161,6 +175,7 @@ RSpec.describe 'Admin Groups' do
 
   describe 'add admin himself to a group' do
     before do
+      stub_feature_flags(invite_members_group_modal: false)
       group.add_user(:user, Gitlab::Access::OWNER)
     end
 
@@ -174,14 +189,14 @@ RSpec.describe 'Admin Groups' do
 
       click_button 'Invite'
 
-      page.within '[data-qa-selector="members_list"]' do
+      page.within members_table do
         expect(page).to have_content(current_user.name)
         expect(page).to have_content('Developer')
       end
     end
   end
 
-  describe 'admin remove himself from a group', :js do
+  describe 'admin remove themself from a group', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222342' do
     it 'removes admin from the group' do
       group.add_user(current_user, Gitlab::Access::DEVELOPER)
 
@@ -192,7 +207,7 @@ RSpec.describe 'Admin Groups' do
         expect(page).to have_content('Developer')
       end
 
-      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-remove').click }
+      accept_confirm { find(:css, 'li', text: current_user.name).find(:css, 'a.btn-danger').click }
 
       visit group_group_members_path(group)
 

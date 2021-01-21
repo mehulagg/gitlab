@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { s__ } from '~/locale';
 
 export default {
@@ -29,7 +30,7 @@ export default {
 };
 </script>
 <template>
-  <section class="mr-info-list mr-links">
+  <section class="mr-info-list gl-ml-7 gl-pb-5">
     <p v-if="relatedLinks.closing">{{ closesText }} <span v-html="relatedLinks.closing"></span></p>
     <p v-if="relatedLinks.mentioned">
       {{ s__('mrWidget|Mentions') }} <span v-html="relatedLinks.mentioned"></span>

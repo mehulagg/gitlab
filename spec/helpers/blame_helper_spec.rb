@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BlameHelper do
+RSpec.describe BlameHelper do
   describe '#get_age_map_start_date' do
     let(:dates) do
       [Time.zone.local(2014, 3, 17, 0, 0, 0),
@@ -11,6 +11,7 @@ describe BlameHelper do
        Time.zone.local(2013, 2, 24, 0, 0, 0),
        Time.zone.local(2010, 9, 22, 0, 0, 0)]
     end
+
     let(:blame_groups) do
       [
         { commit: double(committed_date: dates[0]) },
@@ -57,6 +58,7 @@ describe BlameHelper do
         project = double(created_at: now)
         helper.age_map_duration(today_blame_groups, project)
       end
+
       let(:today_blame_groups) { [{ commit: double(committed_date: now) }] }
       let(:now) { Time.zone.now }
 

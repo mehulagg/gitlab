@@ -91,16 +91,16 @@ RSpec.describe 'getting epics information' do
     field_queries = args.map { |key, value| "#{key}:\"#{value}\"" }.join(',')
 
     <<~QUERY
-        query {
-          group(fullPath:"#{group.full_path}") {
-            id,
-            epics(#{field_queries}) {
-              nodes {
-                id
-              }
+      query {
+        group(fullPath: "#{group.full_path}") {
+          id,
+          epics(#{field_queries}) {
+            nodes {
+              id
             }
           }
         }
+      }
     QUERY
   end
 

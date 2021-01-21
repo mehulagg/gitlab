@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuablesHelper do
+RSpec.describe IssuablesHelper do
   let(:label)  { build_stubbed(:label) }
   let(:label2) { build_stubbed(:label) }
 
@@ -44,20 +44,27 @@ describe IssuablesHelper do
     end
   end
 
-  describe '#issuable_labels_tooltip' do
-    let(:label_entity) { LabelEntity.represent(label).as_json }
-    let(:label2_entity) { LabelEntity.represent(label2).as_json }
+  describe '#issuable_meta' do
+    let(:user) { create(:user) }
 
-    it 'returns label text with no labels' do
-      expect(issuable_labels_tooltip([])).to eq(_('Labels'))
-    end
+    let_it_be(:project) { create(:project) }
 
-    it 'returns label text with labels within max limit' do
-      expect(issuable_labels_tooltip([label_entity])).to eq(label[:title])
-    end
+    describe 'author status' do
+      let(:issuable) { build(:merge_request, source_project: project, author: user, created_at: '2020-01-30') }
 
-    it 'returns label text with labels exceeding max limit' do
-      expect(issuable_labels_tooltip([label_entity, label2_entity], limit: 1)).to eq("#{label[:title]}, and 1 more")
+      it 'displays an emoji if the user status is set' do
+        user.status = UserStatus.new(message: 'lol')
+        content = helper.issuable_meta(issuable, project)
+        expect(content).to match('<span class="user-status-emoji has-tooltip" title="lol" data-html="true" data-placement="top">')
+        expect(content).to match('<gl-emoji title="speech balloon" data-name="speech_balloon" data-unicode-version="6.0">')
+      end
+
+      it 'does not displays an emoji if the user status is not set' do
+        user.status = UserStatus.new
+        content = helper.issuable_meta(issuable, project)
+        expect(content).not_to match('class="user-status-emoji has-tooltip"')
+        expect(content).not_to match('gl-emoji')
+      end
     end
   end
 
@@ -160,7 +167,7 @@ describe IssuablesHelper do
       end
 
       before do
-        user.destroy
+        user.destroy!
       end
 
       it 'returns "Ghost user" as edited_by' do
@@ -197,7 +204,9 @@ describe IssuablesHelper do
         initialTitleText: issue.title,
         initialDescriptionHtml: '<p dir="auto">issue text</p>',
         initialDescriptionText: 'issue text',
-        initialTaskStatus: '0 of 0 tasks completed'
+        initialTaskStatus: '0 of 0 tasks completed',
+        issueType: 'issue',
+        iid: issue.iid.to_s
       }
       expect(helper.issuable_initial_data(issue)).to match(hash_including(expected_data))
     end
@@ -209,7 +218,7 @@ describe IssuablesHelper do
         assign(:project, issue.project)
       end
 
-      it 'sets sentryIssueIdentifier to nil with no sentry issue ' do
+      it 'sets sentryIssueIdentifier to nil with no sentry issue' do
         expect(helper.issuable_initial_data(issue)[:sentryIssueIdentifier])
           .to be_nil
       end
@@ -301,6 +310,88 @@ describe IssuablesHelper do
 
         it { is_expected.to include({ can_merge: can_merge })}
       end
+    end
+  end
+
+  describe '#reviewer_sidebar_data' do
+    let(:user) { create(:user) }
+
+    subject { helper.reviewer_sidebar_data(user, merge_request: merge_request) }
+
+    context 'without merge_request' do
+      let(:merge_request) { nil }
+
+      it 'returns hash of reviewer data' do
+        is_expected.to eql({
+          avatar_url: user.avatar_url,
+          name: user.name,
+          username: user.username
+        })
+      end
+    end
+
+    context 'with merge_request' do
+      let(:merge_request) { build(:merge_request) }
+
+      where(can_merge: [true, false])
+
+      with_them do
+        before do
+          allow(merge_request).to receive(:can_be_merged_by?).and_return(can_merge)
+        end
+
+        it { is_expected.to include({ can_merge: can_merge })}
+      end
+    end
+  end
+
+  describe '#issuable_squash_option?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_persisted, :squash, :squash_enabled_by_default, :expectation) do
+      true  | true  | true  | true
+      true  | false | true  | false
+      false | false | false | false
+      false | false | true  | true
+      false | true  | false | false
+      false | true  | true  | true
+    end
+
+    with_them do
+      it 'returns the correct value' do
+        project = double(
+          squash_enabled_by_default?: squash_enabled_by_default
+        )
+        issuable = double(persisted?: issuable_persisted, squash: squash)
+
+        expect(helper.issuable_squash_option?(issuable, project)).to eq(expectation)
+      end
+    end
+  end
+
+  describe '#issuable_display_type' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :issuable_display_type) do
+      :issue         | 'issue'
+      :incident      | 'incident'
+      :merge_request | 'merge request'
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { helper.issuable_display_type(issuable) }
+
+      it { is_expected.to eq(issuable_display_type) }
+    end
+  end
+
+  describe '#sidebar_milestone_tooltip_label' do
+    it 'escapes HTML in the milestone title' do
+      milestone = build(:milestone, title: '&lt;img onerror=alert(1)&gt;')
+
+      expect(helper.sidebar_milestone_tooltip_label(milestone)).to eq('&lt;img onerror=alert(1)&gt;<br/>Milestone')
     end
   end
 end

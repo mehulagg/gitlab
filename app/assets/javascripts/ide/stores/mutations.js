@@ -7,7 +7,6 @@ import treeMutations from './mutations/tree';
 import branchMutations from './mutations/branch';
 import {
   sortTree,
-  replaceFileUrl,
   swapInParentTreeWithSorting,
   updateFileCollections,
   removeFromParentTree,
@@ -34,15 +33,6 @@ export default {
       panelResizing: resizing,
     });
   },
-  [types.SET_LAST_COMMIT_DATA](state, { entry, lastCommit }) {
-    Object.assign(entry.lastCommit, {
-      id: lastCommit.commit.id,
-      url: lastCommit.commit_path,
-      message: lastCommit.commit.message,
-      author: lastCommit.commit.author_name,
-      updatedAt: lastCommit.commit.authored_date,
-    });
-  },
   [types.SET_LAST_COMMIT_MSG](state, lastCommitMsg) {
     Object.assign(state, {
       lastCommitMsg,
@@ -58,7 +48,7 @@ export default {
       entries,
     });
   },
-  [types.CREATE_TMP_ENTRY](state, { data, projectId, branchId }) {
+  [types.CREATE_TMP_ENTRY](state, { data }) {
     Object.keys(data.entries).reduce((acc, key) => {
       const entry = data.entries[key];
       const foundEntry = state.entries[key];
@@ -71,7 +61,7 @@ export default {
         });
       } else {
         const tree = entry.tree.filter(
-          f => foundEntry.tree.find(e => e.path === f.path) === undefined,
+          (f) => foundEntry.tree.find((e) => e.path === f.path) === undefined,
         );
         Object.assign(foundEntry, {
           tree: sortTree(foundEntry.tree.concat(tree)),
@@ -81,13 +71,12 @@ export default {
       return acc.concat(key);
     }, []);
 
-    const foundEntry = state.trees[`${projectId}/${branchId}`].tree.find(
-      e => e.path === data.treeList[0].path,
-    );
+    const currentTree = state.trees[`${state.currentProjectId}/${state.currentBranchId}`];
+    const foundEntry = currentTree.tree.find((e) => e.path === data.treeList[0].path);
 
     if (!foundEntry) {
-      Object.assign(state.trees[`${projectId}/${branchId}`], {
-        tree: sortTree(state.trees[`${projectId}/${branchId}`].tree.concat(data.treeList)),
+      Object.assign(currentTree, {
+        tree: sortTree(currentTree.tree.concat(data.treeList)),
       });
     }
   },
@@ -136,7 +125,7 @@ export default {
     });
   },
   [types.UPDATE_FILE_AFTER_COMMIT](state, { file, lastCommit }) {
-    const changedFile = state.changedFiles.find(f => f.path === file.path);
+    const changedFile = state.changedFiles.find((f) => f.path === file.path);
     const { prevPath } = file;
 
     Object.assign(state.entries[file.path], {
@@ -148,7 +137,6 @@ export default {
       prevId: undefined,
       prevPath: undefined,
       prevName: undefined,
-      prevUrl: undefined,
       prevKey: undefined,
       prevParentPath: undefined,
     });
@@ -184,7 +172,7 @@ export default {
     entry.deleted = true;
 
     if (parent) {
-      parent.tree = parent.tree.filter(f => f.path !== entry.path);
+      parent.tree = parent.tree.filter((f) => f.path !== entry.path);
     }
 
     if (entry.type === 'blob') {
@@ -193,8 +181,8 @@ export default {
         // changed and staged. Otherwise, we'd need to somehow evaluate the difference between
         // changed and HEAD.
         // https://gitlab.com/gitlab-org/create-stage/-/issues/12669
-        state.changedFiles = state.changedFiles.filter(f => f.path !== path);
-        state.stagedFiles = state.stagedFiles.filter(f => f.path !== path);
+        state.changedFiles = state.changedFiles.filter((f) => f.path !== path);
+        state.stagedFiles = state.stagedFiles.filter((f) => f.path !== path);
       } else {
         state.changedFiles = state.changedFiles.concat(entry);
       }
@@ -204,9 +192,6 @@ export default {
     const oldEntry = state.entries[path];
     const newPath = parentPath ? `${parentPath}/${name}` : name;
     const isRevert = newPath === oldEntry.prevPath;
-
-    const newUrl = replaceFileUrl(oldEntry.url, oldEntry.path, newPath);
-
     const newKey = oldEntry.key.replace(new RegExp(oldEntry.path, 'g'), newPath);
 
     const baseProps = {
@@ -214,7 +199,6 @@ export default {
       name,
       id: newPath,
       path: newPath,
-      url: newUrl,
       key: newKey,
       parentPath: parentPath || '',
     };
@@ -225,7 +209,6 @@ export default {
             prevId: undefined,
             prevPath: undefined,
             prevName: undefined,
-            prevUrl: undefined,
             prevKey: undefined,
             prevParentPath: undefined,
           }
@@ -233,7 +216,6 @@ export default {
             prevId: oldEntry.prevId || oldEntry.id,
             prevPath: oldEntry.prevPath || oldEntry.path,
             prevName: oldEntry.prevName || oldEntry.name,
-            prevUrl: oldEntry.prevUrl || oldEntry.url,
             prevKey: oldEntry.prevKey || oldEntry.key,
             prevParentPath: oldEntry.prevParentPath || oldEntry.parentPath,
           };

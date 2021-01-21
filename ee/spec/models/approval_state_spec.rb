@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe ApprovalState do
   def create_rule(additional_params = {})
-    default_approver = create(:user)
     params = additional_params.reverse_merge(merge_request: merge_request, users: [default_approver])
     factory =
       case params.delete(:rule_type)
@@ -28,14 +27,22 @@ RSpec.describe ApprovalState do
     allow(subject).to receive(:approval_feature_available?).and_return(false)
   end
 
-  let(:merge_request) { create(:merge_request) }
-  let(:project) { merge_request.target_project }
-  let(:approver1) { create(:user) }
-  let(:approver2) { create(:user) }
-  let(:approver3) { create(:user) }
+  def users(amount)
+    raise ArgumentError, 'not enough users' if amount > arbitrary_users.size
 
-  let(:group_approver1) { create(:user) }
-  let(:group1) do
+    arbitrary_users.take(amount)
+  end
+
+  let_it_be_with_refind(:project) { create(:project, :repository) }
+  let_it_be_with_refind(:merge_request) { create(:merge_request, source_project: project) }
+  let_it_be(:approver1) { create(:user) }
+  let_it_be(:approver2) { create(:user) }
+  let_it_be(:approver3) { create(:user) }
+  let_it_be(:default_approver) { create(:user) }
+  let_it_be(:arbitrary_users) { create_list(:user, 2) }
+
+  let_it_be(:group_approver1) { create(:user) }
+  let_it_be(:group1) do
     group = create(:group)
     group.add_developer(group_approver1)
     group
@@ -50,132 +57,43 @@ RSpec.describe ApprovalState do
     before do
       allow(merge_request).to receive(:committers).and_return(User.where(id: committers))
 
-      project.update!(
-        merge_requests_author_approval: merge_requests_author_approval,
-        merge_requests_disable_committers_approval: merge_requests_disable_committers_approval
-      )
+      allow(merge_request.project).to receive(:merge_requests_author_approval?).and_return(merge_requests_author_approval)
+      allow(merge_request.project).to receive(:merge_requests_disable_committers_approval?).and_return(merge_requests_disable_committers_approval)
+
       create_rule(users: committers)
     end
 
-    context 'when self approval is disabled on project level' do
+    context 'when self approval is disabled on project' do
       let(:merge_requests_author_approval) { false }
 
       it 'excludes authors' do
         expect(results).not_to include(merge_request.author)
       end
-
-      context 'when self approval is enabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_author_approval: false)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'excludes author' do
-          expect(results).not_to include(merge_request.author)
-        end
-      end
-
-      context 'when self approval is disabled on instance level' do
-        before do
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-          stub_application_setting(prevent_merge_requests_author_approval: true)
-        end
-
-        it 'excludes authors' do
-          expect(results).not_to include(merge_request.author)
-        end
-      end
     end
 
-    context 'when self approval is enabled on project level' do
+    context 'when self approval is enabled on project' do
       let(:merge_requests_author_approval) { true }
 
       it 'includes author' do
         expect(results).to include(merge_request.author)
       end
-
-      context 'when self approval is enabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_author_approval: false)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'includes author' do
-          expect(results).to include(merge_request.author)
-        end
-      end
-
-      context 'when self approval is disabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_author_approval: true)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'excludes authors' do
-          expect(results).not_to include(merge_request.author)
-        end
-      end
     end
 
-    context 'when committers approval is enabled on project level' do
+    context 'when committers approval is enabled on project' do
       let(:merge_requests_author_approval) { true }
       let(:merge_requests_disable_committers_approval) { false }
 
       it 'includes committers' do
         expect(results).to include(*committers)
       end
-
-      context 'when committers approval is enabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_committers_approval: false)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'includes committers' do
-          expect(results).to include(*committers)
-        end
-      end
-
-      context 'when committers approval is disabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_committers_approval: true)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'excludes committers' do
-          expect(results).not_to include(*committers)
-        end
-      end
     end
 
-    context 'when committers approval is disabled on project level' do
+    context 'when committers approval is disabled on project' do
       let(:merge_requests_author_approval) { true }
       let(:merge_requests_disable_committers_approval) { true }
 
       it 'excludes committers' do
         expect(results).not_to include(*committers)
-      end
-
-      context 'when committers approval is enabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_committers_approval: false)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'excludes committers' do
-          expect(results).not_to include(*committers)
-        end
-      end
-
-      context 'when committers approval is disabled on instance level' do
-        before do
-          stub_application_setting(prevent_merge_requests_committers_approval: true)
-          stub_licensed_features(admin_merge_request_approvers_rules: true)
-        end
-
-        it 'excludes committers' do
-          expect(results).not_to include(*committers)
-        end
       end
     end
   end
@@ -185,6 +103,24 @@ RSpec.describe ApprovalState do
     it { expect(subject.can_approve?(reporter)).to be_falsey }
     it { expect(subject.can_approve?(stranger)).to be_falsey }
     it { expect(subject.can_approve?(nil)).to be_falsey }
+  end
+
+  shared_context 'project members' do
+    def create_project_member(role, user_attrs = {})
+      user = create(:user, user_attrs)
+      project.add_user(user, role)
+      user
+    end
+
+    let_it_be_with_refind(:project) { create(:project, :repository) }
+    let_it_be(:author) { create_project_member(:developer) }
+    let_it_be_with_refind(:merge_request) { create(:merge_request, source_project: project, author: author) }
+    let_it_be(:approver) { create_project_member(:developer) }
+    let_it_be(:approver2) { create_project_member(:developer) }
+    let_it_be(:developer) { create_project_member(:developer) }
+    let_it_be(:other_developer) { create_project_member(:developer) }
+    let_it_be(:reporter) { create_project_member(:reporter) }
+    let_it_be(:stranger) { create(:user) }
   end
 
   describe '#approval_rules_overwritten?' do
@@ -336,7 +272,7 @@ RSpec.describe ApprovalState do
 
       context 'when only code owner rules present' do
         before do
-          2.times { create_rule(users: [create(:user)], rule_type: :code_owner) }
+          users(2).each { |user| create_rule(users: [user], rule_type: :code_owner) }
         end
 
         it_behaves_like 'when rules are present'
@@ -345,7 +281,7 @@ RSpec.describe ApprovalState do
 
       context 'when only report approver rules present' do
         before do
-          2.times { create_rule(users: [create(:user)], rule_type: :report_approver) }
+          users(2).each { |user| create_rule(users: [user], rule_type: :report_approver) }
         end
 
         it_behaves_like 'when rules are present'
@@ -354,7 +290,7 @@ RSpec.describe ApprovalState do
 
       context 'when regular rules present' do
         before do
-          2.times { create_rule(users: [create(:user)]) }
+          users(2).each { |user| create_rule(users: [user]) }
         end
 
         it_behaves_like 'when rules are present'
@@ -363,7 +299,7 @@ RSpec.describe ApprovalState do
       context 'when approval feature is unavailable' do
         it 'returns true' do
           disable_feature
-          create_rule(users: [create(:user)], approvals_required: 1)
+          create_rule(users: users(1), approvals_required: 1)
 
           expect(subject.approved?).to eq(true)
         end
@@ -391,7 +327,7 @@ RSpec.describe ApprovalState do
 
     describe '#approval_rules_left' do
       def create_unapproved_rule
-        create_rule(approvals_required: 1, users: [create(:user)])
+        create_rule(approvals_required: 1, users: users(1))
       end
 
       before do
@@ -470,7 +406,7 @@ RSpec.describe ApprovalState do
         create_rule(users: [approver1, approver2])
         create_rule(users: [approver1])
 
-        merge_request.approvals.create(user: approver2)
+        merge_request.approvals.create!(user: approver2)
 
         expect(subject.unactioned_approvers).to contain_exactly(approver1)
       end
@@ -499,22 +435,9 @@ RSpec.describe ApprovalState do
         end
       end
 
-      def create_project_member(role, user_attrs = {})
-        user = create(:user, user_attrs)
-        project.add_user(user, role)
-        user
+      include_context 'project members' do
+        let_it_be(:committer) { create_project_member(:developer, email: merge_request.commits.without_merge_commits.first.committer_email) }
       end
-
-      let(:project) { create(:project, :repository) }
-      let(:merge_request) { create(:merge_request, source_project: project, author: author) }
-      let(:author) { create_project_member(:developer) }
-      let(:approver) { create_project_member(:developer) }
-      let(:approver2) { create_project_member(:developer) }
-      let(:committer) { create_project_member(:developer, email: merge_request.commits.without_merge_commits.first.committer_email) }
-      let(:developer) { create_project_member(:developer) }
-      let(:other_developer) { create_project_member(:developer) }
-      let(:reporter) { create_project_member(:reporter) }
-      let(:stranger) { create(:user) }
 
       context 'when there are no regular approval rules' do
         let!(:any_approver_rule) do
@@ -833,7 +756,7 @@ RSpec.describe ApprovalState do
           end
 
           it 'requires 1 approval' do
-            expect(subject.has_approved?(approver)).to eq(true)
+            expect(merge_request.approved_by?(approver)).to eq(true)
             expect(subject.approvals_left).to eq(1)
           end
 
@@ -843,24 +766,21 @@ RSpec.describe ApprovalState do
             end
 
             it 'becomes approved' do
-              expect(subject.has_approved?(approver1)).to eq(true)
+              expect(merge_request.approved_by?(approver1)).to eq(true)
               expect(subject.approved?).to eq(true)
             end
           end
         end
       end
-    end
 
-    describe '#has_approved?' do
-      it 'returns false if user is nil' do
-        expect(subject.has_approved?(nil)).to eq(false)
-      end
+      context 'when approval feature is disabled' do
+        it 'delegates the call to merge request' do
+          stub_licensed_features(merge_request_approvers: false)
 
-      it 'returns true if user has approved' do
-        create(:approval, merge_request: merge_request, user: approver1)
+          expect(merge_request).to receive(:can_be_approved_by?).with(approver1)
 
-        expect(subject.has_approved?(approver1)).to eq(true)
-        expect(subject.has_approved?(approver2)).to eq(false)
+          subject.can_approve?(approver1)
+        end
       end
     end
 
@@ -925,7 +845,7 @@ RSpec.describe ApprovalState do
   context 'when only a single rule is allowed' do
     def create_unapproved_rule(additional_params = {})
       create_rule(
-        additional_params.reverse_merge(approvals_required: 1, users: [create(:user)])
+        additional_params.reverse_merge(approvals_required: 1, users: users(1))
       )
     end
 
@@ -1049,7 +969,7 @@ RSpec.describe ApprovalState do
       context 'when only code owner rules present' do
         before do
           # setting approvals required to 0 since we don't want to block on them now
-          2.times { create_rule(users: [create(:user)], rule_type: :code_owner, approvals_required: 0) }
+          users(2).each { |user| create_rule(users: [user], rule_type: :code_owner, approvals_required: 0) }
         end
 
         it_behaves_like 'when rules are present'
@@ -1058,7 +978,7 @@ RSpec.describe ApprovalState do
 
       context 'when only report approver rules present' do
         before do
-          2.times { create_rule(users: [create(:user)], rule_type: :report_approver) }
+          users(2).each { |user| create_rule(users: [user], rule_type: :report_approver) }
         end
 
         it_behaves_like 'when rules are present'
@@ -1068,7 +988,7 @@ RSpec.describe ApprovalState do
       context 'when regular rules present' do
         before do
           project.update!(approvals_before_merge: 999)
-          2.times { create_rule(users: [create(:user)]) }
+          users(2).each { |user| create_rule(users: [user]) }
         end
 
         it_behaves_like 'when rules are present'
@@ -1076,7 +996,7 @@ RSpec.describe ApprovalState do
 
       context 'when a single project rule is present' do
         before do
-          create(:approval_project_rule, users: [create(:user)], project: project)
+          create(:approval_project_rule, users: users(1), project: project)
         end
 
         it_behaves_like 'when rules are present'
@@ -1084,7 +1004,7 @@ RSpec.describe ApprovalState do
         context 'when the project rule is overridden by a fallback but the project does not allow overriding' do
           before do
             merge_request.update!(approvals_before_merge: 1)
-            project.update!(disable_overriding_approvers_per_merge_request: true)
+            merge_request.project.update!(disable_overriding_approvers_per_merge_request: true)
           end
 
           it_behaves_like 'when rules are present'
@@ -1101,7 +1021,7 @@ RSpec.describe ApprovalState do
 
       context 'when a single project rule is present that is overridden in the merge request' do
         before do
-          create(:approval_project_rule, users: [create(:user)], project: project)
+          create(:approval_project_rule, users: users(1), project: project)
           merge_request.update!(approvals_before_merge: 1)
         end
 
@@ -1181,7 +1101,7 @@ RSpec.describe ApprovalState do
         create_rule(users: [approver1, approver2])
         create_rule(users: [approver1])
 
-        merge_request.approvals.create(user: approver2)
+        merge_request.approvals.create!(user: approver2)
 
         expect(subject.unactioned_approvers).to contain_exactly(approver1)
       end
@@ -1210,22 +1130,9 @@ RSpec.describe ApprovalState do
         end
       end
 
-      def create_project_member(role)
-        user = create(:user)
-        project.add_user(user, role)
-        user
+      include_context 'project members' do
+        let_it_be(:guest) { create_project_member(:guest) }
       end
-
-      let(:project) { create(:project, :repository) }
-      let(:merge_request) { create(:merge_request, source_project: project, author: author) }
-      let(:author) { create_project_member(:developer) }
-      let(:approver) { create_project_member(:developer) }
-      let(:approver2) { create_project_member(:developer) }
-      let(:developer) { create_project_member(:developer) }
-      let(:other_developer) { create_project_member(:developer) }
-      let(:reporter) { create_project_member(:reporter) }
-      let(:guest) { create_project_member(:guest) }
-      let(:stranger) { create(:user) }
 
       context 'when the user is the author' do
         context 'and author is an approver' do
@@ -1262,9 +1169,9 @@ RSpec.describe ApprovalState do
       end
 
       context 'when user is a committer' do
-        let(:user) { create(:user, email: merge_request.commits.without_merge_commits.first.committer_email) }
+        let_it_be(:user) { create(:user, email: merge_request.commits.without_merge_commits.first.committer_email) }
 
-        before do
+        before_all do
           project.add_developer(user)
         end
 
@@ -1431,7 +1338,7 @@ RSpec.describe ApprovalState do
 
           context 'when an approver does not have access to the merge request' do
             before do
-              project.members.find_by(user_id: developer.id).destroy
+              project.members.find_by(user_id: developer.id).destroy!
             end
 
             it 'the user cannot approver' do
@@ -1439,19 +1346,6 @@ RSpec.describe ApprovalState do
             end
           end
         end
-      end
-    end
-
-    describe '#has_approved?' do
-      it 'returns false if user is nil' do
-        expect(subject.has_approved?(nil)).to eq(false)
-      end
-
-      it 'returns true if user has approved' do
-        create(:approval, merge_request: merge_request, user: approver1)
-
-        expect(subject.has_approved?(approver1)).to eq(true)
-        expect(subject.has_approved?(approver2)).to eq(false)
       end
     end
 

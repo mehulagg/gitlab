@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Resolvers::CommitPipelinesResolver do
+RSpec.describe Resolvers::CommitPipelinesResolver do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -18,6 +18,7 @@ describe Resolvers::CommitPipelinesResolver do
       status: 'success'
     )
   end
+
   let!(:pipeline2) do
     create(
       :ci_pipeline,
@@ -27,6 +28,7 @@ describe Resolvers::CommitPipelinesResolver do
       status: 'failed'
     )
   end
+
   let!(:pipeline3) do
     create(
       :ci_pipeline,
@@ -48,6 +50,6 @@ describe Resolvers::CommitPipelinesResolver do
   it 'resolves pipelines for commit and ref' do
     pipelines = resolve_pipelines
 
-    expect(pipelines).to eq([pipeline2, pipeline])
+    expect(pipelines.to_a).to eq([pipeline2, pipeline])
   end
 end

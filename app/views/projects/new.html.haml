@@ -4,19 +4,18 @@
 - header_title  _("Projects"), dashboard_projects_path
 - active_tab = local_assigns.fetch(:active_tab, 'blank')
 
-.project-edit-container.prepend-top-default
+.project-edit-container.gl-mt-5
   .project-edit-errors
     = render 'projects/errors'
 
-  - if experiment_enabled?(:new_create_project_ui)
-    .js-experiment-new-project-creation{ data: { is_ci_cd_available: ci_cd_projects_available?, has_errors: @project.errors.any? } }
+  .js-experiment-new-project-creation{ data: { is_ci_cd_available: (ci_cd_projects_available? if Gitlab.ee?), has_errors: @project.errors.any?, new_project_guidelines: brand_new_project_guidelines } }
 
-  .row{ 'v-cloak': experiment_enabled?(:new_create_project_ui) }
+  .row{ 'v-cloak': true }
     .col-lg-3.profile-settings-sidebar
       %h4.gl-mt-0
         = _('New project')
       %p
-        - among_other_things_link = link_to _('among other things'), help_page_path("user/project/index.md", anchor: "projects-features"), target: '_blank'
+        - among_other_things_link = link_to _('among other things'), help_page_path("user/project/index.md", anchor: "project-features"), target: '_blank'
         = _('A project is where you house your files (repository), plan your work (issues), and publish your documentation (wiki), %{among_other_things_link}.').html_safe % { among_other_things_link: among_other_things_link }
       %p
         = _('All features are enabled for blank projects, from templates, or when importing, but you can disable them afterward in the project settings.')

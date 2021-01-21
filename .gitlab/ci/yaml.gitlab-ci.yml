@@ -1,14 +1,14 @@
-# Yamllint of *.yml for .gitlab-ci.yml.
+# Yamllint of CI-related yaml and changelogs.
 # This uses rules from project root `.yamllint`.
-lint-ci-gitlab:
+lint-yaml:
   extends:
     - .default-retry
-    - .yaml:rules
-  image: sdesbure/yamllint:latest
+    - .yaml-lint:rules
+  image: pipelinecomponents/yamllint:latest
   stage: test
   needs: []
   variables:
     LINT_PATHS: .gitlab-ci.yml .gitlab/ci lib/gitlab/ci/templates changelogs
   script:
     - '[[ ! -d "ee/" ]] || export LINT_PATHS="$LINT_PATHS ee/changelogs"'
-    - yamllint $LINT_PATHS
+    - yamllint -f colored $LINT_PATHS

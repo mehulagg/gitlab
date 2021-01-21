@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Mutations::Issues::SetDueDate do
+RSpec.describe Mutations::Issues::SetDueDate do
   let(:issue) { create(:issue) }
   let(:user) { create(:user) }
 
@@ -16,9 +16,7 @@ describe Mutations::Issues::SetDueDate do
 
     subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid, due_date: due_date) }
 
-    it 'raises an error if the resource is not accessible to the user' do
-      expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-    end
+    it_behaves_like 'permission level for issue mutation is correctly verified'
 
     context 'when the user can update the issue' do
       before do

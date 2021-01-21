@@ -25,11 +25,12 @@ module EE
 
       # Called when 'merge train' is aborted
       def abort(reason)
-        body = "removed this merge request from the merge train because #{reason}"
+        ::TodoService.new.merge_train_removed(noteable)
 
         ##
         # TODO: Abort message should be sent by the system, not a particular user.
         # See https://gitlab.com/gitlab-org/gitlab/issues/29467.
+        body = "removed this merge request from the merge train because #{reason}"
         create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
       end
 
@@ -49,11 +50,12 @@ module EE
 
       # Called when 'add to merge train when pipeline succeeds' is aborted
       def abort_add_when_pipeline_succeeds(reason)
-        body = "aborted automatic add to merge train because #{reason}"
+        ::TodoService.new.merge_train_removed(noteable)
 
         ##
         # TODO: Abort message should be sent by the system, not a particular user.
         # See https://gitlab.com/gitlab-org/gitlab/issues/29467.
+        body = "aborted automatic add to merge train because #{reason}"
         create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
       end
     end

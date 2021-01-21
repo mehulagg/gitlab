@@ -9,25 +9,35 @@ import DropdownButton from '~/vue_shared/components/sidebar/labels_select_vue/dr
 import DropdownContents from '~/vue_shared/components/sidebar/labels_select_vue/dropdown_contents.vue';
 
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
+import { isInViewport } from '~/lib/utils/common_utils';
 
 import { mockConfig } from './mock_data';
+
+jest.mock('~/lib/utils/common_utils', () => ({
+  isInViewport: jest.fn().mockReturnValue(true),
+}));
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-const createComponent = (config = mockConfig, slots = {}) =>
-  shallowMount(LabelsSelectRoot, {
-    localVue,
-    slots,
-    store: new Vuex.Store(labelsSelectModule()),
-    propsData: config,
-  });
-
 describe('LabelsSelectRoot', () => {
   let wrapper;
+  let store;
+
+  const createComponent = (config = mockConfig, slots = {}) => {
+    wrapper = shallowMount(LabelsSelectRoot, {
+      localVue,
+      slots,
+      store,
+      propsData: config,
+      stubs: {
+        'dropdown-contents': DropdownContents,
+      },
+    });
+  };
 
   beforeEach(() => {
-    wrapper = createComponent();
+    store = new Vuex.Store(labelsSelectModule());
   });
 
   afterEach(() => {
@@ -37,6 +47,7 @@ describe('LabelsSelectRoot', () => {
   describe('methods', () => {
     describe('handleVuexActionDispatch', () => {
       it('calls `handleDropdownClose` when params `action.type` is `toggleDropdownContents` and state has `showDropdownButton` & `showDropdownContents` props `false`', () => {
+        createComponent();
         jest.spyOn(wrapper.vm, 'handleDropdownClose').mockImplementation();
 
         wrapper.vm.handleVuexActionDispatch(
@@ -57,9 +68,40 @@ describe('LabelsSelectRoot', () => {
           ]),
         );
       });
+
+      it('calls `handleDropdownClose` with state.labels filterd using `set` prop when dropdown variant is `embedded`', () => {
+        createComponent({
+          ...mockConfig,
+          variant: 'embedded',
+        });
+
+        jest.spyOn(wrapper.vm, 'handleDropdownClose').mockImplementation();
+
+        wrapper.vm.handleVuexActionDispatch(
+          { type: 'toggleDropdownContents' },
+          {
+            showDropdownButton: false,
+            showDropdownContents: false,
+            labels: [{ id: 1 }, { id: 2, set: true }],
+          },
+        );
+
+        expect(wrapper.vm.handleDropdownClose).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            {
+              id: 2,
+              set: true,
+            },
+          ]),
+        );
+      });
     });
 
     describe('handleDropdownClose', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
       it('emits `updateSelectedLabels` & `onDropdownClose` events on component when provided `labels` param is not empty', () => {
         wrapper.vm.handleDropdownClose([{ id: 1 }, { id: 2 }]);
 
@@ -77,6 +119,7 @@ describe('LabelsSelectRoot', () => {
 
     describe('handleCollapsedValueClick', () => {
       it('emits `toggleCollapse` event on component', () => {
+        createComponent();
         wrapper.vm.handleCollapsedValueClick();
 
         expect(wrapper.emitted().toggleCollapse).toBeTruthy();
@@ -86,58 +129,119 @@ describe('LabelsSelectRoot', () => {
 
   describe('template', () => {
     it('renders component with classes `labels-select-wrapper position-relative`', () => {
+      createComponent();
       expect(wrapper.attributes('class')).toContain('labels-select-wrapper position-relative');
     });
 
-    it('renders component root element with CSS class `is-standalone` when `state.variant` is "standalone"', () => {
-      const wrapperStandalone = createComponent({
-        ...mockConfig,
-        variant: 'standalone',
-      });
+    it.each`
+      variant         | cssClass
+      ${'standalone'} | ${'is-standalone'}
+      ${'embedded'}   | ${'is-embedded'}
+    `(
+      'renders component root element with CSS class `$cssClass` when `state.variant` is "$variant"',
+      ({ variant, cssClass }) => {
+        createComponent({
+          ...mockConfig,
+          variant,
+        });
 
-      return wrapperStandalone.vm.$nextTick(() => {
-        expect(wrapperStandalone.classes()).toContain('is-standalone');
+        return wrapper.vm.$nextTick(() => {
+          expect(wrapper.classes()).toContain(cssClass);
+        });
+      },
+    );
 
-        wrapperStandalone.destroy();
-      });
-    });
-
-    it('renders `dropdown-value-collapsed` component when `allowLabelCreate` prop is `true`', () => {
+    it('renders `dropdown-value-collapsed` component when `allowLabelCreate` prop is `true`', async () => {
+      createComponent();
+      await wrapper.vm.$nextTick;
       expect(wrapper.find(DropdownValueCollapsed).exists()).toBe(true);
     });
 
-    it('renders `dropdown-title` component', () => {
+    it('renders `dropdown-title` component', async () => {
+      createComponent();
+      await wrapper.vm.$nextTick;
       expect(wrapper.find(DropdownTitle).exists()).toBe(true);
     });
 
-    it('renders `dropdown-value` component with slot when `showDropdownButton` prop is `false`', () => {
-      const wrapperDropdownValue = createComponent(mockConfig, {
+    it('renders `dropdown-value` component', async () => {
+      createComponent(mockConfig, {
         default: 'None',
       });
-      wrapperDropdownValue.vm.$store.state.showDropdownButton = false;
+      await wrapper.vm.$nextTick;
 
-      return wrapperDropdownValue.vm.$nextTick(() => {
-        const valueComp = wrapperDropdownValue.find(DropdownValue);
+      const valueComp = wrapper.find(DropdownValue);
 
-        expect(valueComp.exists()).toBe(true);
-        expect(valueComp.text()).toBe('None');
-
-        wrapperDropdownValue.destroy();
-      });
+      expect(valueComp.exists()).toBe(true);
+      expect(valueComp.text()).toBe('None');
     });
 
-    it('renders `dropdown-button` component when `showDropdownButton` prop is `true`', () => {
+    it('renders `dropdown-button` component when `showDropdownButton` prop is `true`', async () => {
+      createComponent();
       wrapper.vm.$store.dispatch('toggleDropdownButton');
-
+      await wrapper.vm.$nextTick;
       expect(wrapper.find(DropdownButton).exists()).toBe(true);
     });
 
-    it('renders `dropdown-contents` component when `showDropdownButton` & `showDropdownContents` prop is `true`', () => {
+    it('renders `dropdown-contents` component when `showDropdownButton` & `showDropdownContents` prop is `true`', async () => {
+      createComponent();
       wrapper.vm.$store.dispatch('toggleDropdownContents');
+      await wrapper.vm.$nextTick;
+      expect(wrapper.find(DropdownContents).exists()).toBe(true);
+    });
 
-      return wrapper.vm.$nextTick(() => {
-        expect(wrapper.find(DropdownContents).exists()).toBe(true);
+    describe('sets content direction based on viewport', () => {
+      it('does not set direction when `state.variant` is not "embedded"', async () => {
+        createComponent();
+
+        wrapper.vm.$store.dispatch('toggleDropdownContents');
+        wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+        await wrapper.vm.$nextTick;
+
+        expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(false);
+      });
+
+      describe('when `state.variant` is "embedded"', () => {
+        beforeEach(() => {
+          createComponent({ ...mockConfig, variant: 'embedded' });
+          wrapper.vm.$store.dispatch('toggleDropdownContents');
+        });
+
+        it('set direction when out of viewport', () => {
+          isInViewport.mockImplementation(() => false);
+          wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(true);
+          });
+        });
+
+        it('does not set direction when inside of viewport', () => {
+          isInViewport.mockImplementation(() => true);
+          wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(false);
+          });
+        });
       });
     });
+  });
+
+  it('calls toggleDropdownContents action when isEditing prop is changing to true', async () => {
+    createComponent();
+
+    jest.spyOn(store, 'dispatch').mockResolvedValue();
+    await wrapper.setProps({ isEditing: true });
+
+    expect(store.dispatch).toHaveBeenCalledWith('toggleDropdownContents');
+  });
+
+  it('does not call toggleDropdownContents action when isEditing prop is changing to false', async () => {
+    createComponent();
+
+    jest.spyOn(store, 'dispatch').mockResolvedValue();
+    await wrapper.setProps({ isEditing: false });
+
+    expect(store.dispatch).not.toHaveBeenCalled();
   });
 });

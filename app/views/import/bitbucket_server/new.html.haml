@@ -1,10 +1,12 @@
 - title = _('Bitbucket Server Import')
 - page_title title
 - breadcrumb_title title
-- header_title "Projects", root_path
+- header_title _("Projects"), root_path
 
-%h3.page-title
-  = icon 'bitbucket-square', text: _('Import repositories from Bitbucket Server')
+%h3.page-title.d-flex
+  .gl-display-flex.gl-align-items-center.gl-justify-content-center
+    = sprite_icon('bitbucket', css_class: 'gl-mr-2')
+  = _('Import repositories from Bitbucket Server')
 
 %p
   = _('Enter in your Bitbucket Server URL and personal access token below')
@@ -17,7 +19,7 @@
   .form-group.row
     = label_tag :bitbucket_server_url, 'Username', class: 'col-form-label col-md-2'
     .col-md-4
-      = text_field_tag :bitbucket_username, '', class: 'form-control gl-mr-3', placeholder: _('username'), size: 40
+      = text_field_tag :bitbucket_server_username, '', class: 'form-control gl-mr-3', placeholder: _('username'), size: 40
   .form-group.row
     = label_tag :personal_access_token, 'Password/Personal Access Token', class: 'col-form-label col-md-2'
     .col-md-4

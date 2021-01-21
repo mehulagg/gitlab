@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Runner do
+RSpec.describe Clusters::Applications::Runner do
   let(:ci_runner) { create(:ci_runner) }
 
   include_examples 'cluster application core specs', :clusters_applications_runner
@@ -27,7 +27,7 @@ describe Clusters::Applications::Runner do
 
     subject { gitlab_runner.install_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand) }
 
     it 'is initialized with 4 arguments' do
       expect(subject.name).to eq('runner')
@@ -69,8 +69,8 @@ describe Clusters::Applications::Runner do
       expect(values).to include('privileged: true')
       expect(values).to include('image: ubuntu:16.04')
       expect(values).to include('resources')
-      expect(values).to match(/runnerToken: '?#{Regexp.escape(ci_runner.token)}/)
-      expect(values).to match(/gitlabUrl: '?#{Regexp.escape(Gitlab::Routing.url_helpers.root_url)}/)
+      expect(values).to match(/runnerToken: ['"]?#{Regexp.escape(ci_runner.token)}/)
+      expect(values).to match(/gitlabUrl: ['"]?#{Regexp.escape(Gitlab::Routing.url_helpers.root_url)}/)
     end
 
     context 'without a runner' do

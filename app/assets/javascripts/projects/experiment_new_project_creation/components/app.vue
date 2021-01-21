@@ -1,7 +1,8 @@
 <script>
+/* eslint-disable vue/no-v-html */
+import { GlBreadcrumb, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import WelcomePage from './welcome.vue';
 import LegacyContainer from './legacy_container.vue';
-import { GlBreadcrumb, GlIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 
 import blankProjectIllustration from '../illustrations/blank-project.svg';
@@ -11,6 +12,7 @@ import ciCdProjectIllustration from '../illustrations/ci-cd-project.svg';
 
 const BLANK_PANEL = 'blank_project';
 const CI_CD_PANEL = 'cicd_for_external_repo';
+const LAST_ACTIVE_TAB_KEY = 'new_project_last_active_tab';
 const PANELS = [
   {
     name: BLANK_PANEL,
@@ -55,7 +57,9 @@ export default {
     WelcomePage,
     LegacyContainer,
   },
-
+  directives: {
+    SafeHtml,
+  },
   props: {
     hasErrors: {
       type: Boolean,
@@ -66,6 +70,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    newProjectGuidelines: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
 
@@ -81,11 +90,11 @@ export default {
         return PANELS;
       }
 
-      return PANELS.filter(p => p.name !== CI_CD_PANEL);
+      return PANELS.filter((p) => p.name !== CI_CD_PANEL);
     },
 
     activePanel() {
-      return PANELS.find(p => p.name === this.activeTab);
+      return PANELS.find((p) => p.name === this.activeTab);
     },
 
     breadcrumbs() {
@@ -104,14 +113,14 @@ export default {
     this.handleLocationHashChange();
 
     if (this.hasErrors) {
-      this.activeTab = BLANK_PANEL;
+      this.activeTab = localStorage.getItem(LAST_ACTIVE_TAB_KEY) || BLANK_PANEL;
     }
 
     window.addEventListener('hashchange', () => {
       this.handleLocationHashChange();
       this.resetProjectErrors();
     });
-    this.$root.$on('clicked::link', e => {
+    this.$root.$on('clicked::link', (e) => {
       window.location = e.target.href;
     });
   },
@@ -126,6 +135,9 @@ export default {
 
     handleLocationHashChange() {
       this.activeTab = window.location.hash.substring(1) || null;
+      if (this.activeTab) {
+        localStorage.setItem(LAST_ACTIVE_TAB_KEY, this.activeTab);
+      }
     },
   },
 
@@ -137,9 +149,14 @@ export default {
   <welcome-page v-if="activeTab === null" :panels="availablePanels" />
   <div v-else class="row">
     <div class="col-lg-3">
-      <div class="text-center" v-html="activePanel.illustration"></div>
+      <div class="gl-text-white" v-html="activePanel.illustration"></div>
       <h4>{{ activePanel.title }}</h4>
       <p>{{ activePanel.description }}</p>
+      <div
+        v-if="newProjectGuidelines"
+        id="new-project-guideline"
+        v-safe-html="newProjectGuidelines"
+      ></div>
     </div>
     <div class="col-lg-9">
       <gl-breadcrumb v-if="breadcrumbs" :items="breadcrumbs">

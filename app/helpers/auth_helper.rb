@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module AuthHelper
-  PROVIDERS_WITH_ICONS = %w(twitter github gitlab bitbucket google_oauth2 facebook azure_oauth2 authentiq salesforce).freeze
+  PROVIDERS_WITH_ICONS = %w(twitter github gitlab bitbucket google_oauth2 facebook azure_oauth2 authentiq salesforce atlassian_oauth2).freeze
   LDAP_PROVIDER = /\Aldap/.freeze
 
   def ldap_enabled?
@@ -113,6 +113,10 @@ module AuthHelper
     end
   end
 
+  def experiment_enabled_button_based_providers
+    enabled_button_based_providers & %w(google_oauth2 github).freeze
+  end
+
   def button_based_providers_enabled?
     enabled_button_based_providers.any?
   end
@@ -133,6 +137,8 @@ module AuthHelper
 
   # rubocop: disable CodeReuse/ActiveRecord
   def auth_active?(provider)
+    return current_user.atlassian_identity.present? if provider == :atlassian_oauth2
+
     current_user.identities.exists?(provider: provider.to_s)
   end
   # rubocop: enable CodeReuse/ActiveRecord
@@ -147,6 +153,13 @@ module AuthHelper
 
   def allow_admin_mode_password_authentication_for_web?
     current_user.allow_password_authentication_for_web? && !current_user.password_automatically_set?
+  end
+
+  def google_tag_manager_enabled?
+    Gitlab.com? &&
+      extra_config.has_key?('google_tag_manager_id') &&
+      extra_config.google_tag_manager_id.present? &&
+      !current_user
   end
 
   extend self

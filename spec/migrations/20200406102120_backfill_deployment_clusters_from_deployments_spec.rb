@@ -3,15 +3,15 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20200406102120_backfill_deployment_clusters_from_deployments.rb')
 
-describe BackfillDeploymentClustersFromDeployments, :migration, :sidekiq, schema: 20200227140242 do
+RSpec.describe BackfillDeploymentClustersFromDeployments, :migration, :sidekiq, schema: 20200227140242 do
   describe '#up' do
     it 'schedules BackfillDeploymentClustersFromDeployments background jobs' do
       stub_const("#{described_class}::BATCH_SIZE", 2)
 
-      namespace = table(:namespaces).create(name: 'the-namespace', path: 'the-path')
-      project = table(:projects).create(name: 'the-project', namespace_id: namespace.id)
-      environment = table(:environments).create(name: 'the-environment', project_id: project.id, slug: 'slug')
-      cluster = table(:clusters).create(name: 'the-cluster')
+      namespace = table(:namespaces).create!(name: 'the-namespace', path: 'the-path')
+      project = table(:projects).create!(name: 'the-project', namespace_id: namespace.id)
+      environment = table(:environments).create!(name: 'the-environment', project_id: project.id, slug: 'slug')
+      cluster = table(:clusters).create!(name: 'the-cluster')
 
       deployment_data = { cluster_id: cluster.id, project_id: project.id, environment_id: environment.id, ref: 'abc', tag: false, sha: 'sha', status: 1 }
 
@@ -27,7 +27,7 @@ describe BackfillDeploymentClustersFromDeployments, :migration, :sidekiq, schema
       batch_2_end = create_deployment(**deployment_data)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           # batch 1
@@ -44,7 +44,7 @@ describe BackfillDeploymentClustersFromDeployments, :migration, :sidekiq, schema
     def create_deployment(**data)
       @iid ||= 0
       @iid += 1
-      table(:deployments).create(iid: @iid, **data)
+      table(:deployments).create!(iid: @iid, **data)
     end
   end
 end

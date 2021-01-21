@@ -17,7 +17,7 @@ describe('IDE TerminalControls', () => {
   it('shows an up and down scroll button', () => {
     factory();
 
-    expect(buttons.wrappers.map(x => x.props())).toEqual([
+    expect(buttons.wrappers.map((x) => x.props())).toEqual([
       expect.objectContaining({ direction: 'up', disabled: true }),
       expect.objectContaining({ direction: 'down', disabled: true }),
     ]);
@@ -42,24 +42,24 @@ describe('IDE TerminalControls', () => {
   it('emits "scroll-up" when click up button', () => {
     factory({ propsData: { canScrollUp: true } });
 
-    expect(wrapper.emittedByOrder()).toEqual([]);
+    expect(wrapper.emitted()).toEqual({});
 
     buttons.at(0).vm.$emit('click');
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-up', args: [] }]);
+      expect(wrapper.emitted('scroll-up')).toEqual([[]]);
     });
   });
 
   it('emits "scroll-down" when click down button', () => {
     factory({ propsData: { canScrollDown: true } });
 
-    expect(wrapper.emittedByOrder()).toEqual([]);
+    expect(wrapper.emitted()).toEqual({});
 
     buttons.at(1).vm.$emit('click');
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-down', args: [] }]);
+      expect(wrapper.emitted('scroll-down')).toEqual([[]]);
     });
   });
 });

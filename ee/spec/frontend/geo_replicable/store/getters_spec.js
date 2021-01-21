@@ -1,11 +1,12 @@
 import * as getters from 'ee/geo_replicable/store/getters';
 import createState from 'ee/geo_replicable/store/state';
+import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
 describe('GeoReplicable Store Getters', () => {
   let state;
 
   beforeEach(() => {
-    state = createState();
+    state = createState({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null });
   });
 
   describe('replicableTypeName', () => {

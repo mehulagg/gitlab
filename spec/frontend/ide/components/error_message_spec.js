@@ -10,7 +10,7 @@ describe('IDE error message component', () => {
   let wrapper;
 
   const setErrorMessageMock = jest.fn();
-  const createComponent = messageProps => {
+  const createComponent = (messageProps) => {
     const fakeStore = new Vuex.Store({
       actions: { setErrorMessage: setErrorMessageMock },
     });
@@ -51,7 +51,7 @@ describe('IDE error message component', () => {
     createComponent();
     findDismissButton().trigger('click');
 
-    expect(setErrorMessageMock).toHaveBeenCalledWith(expect.any(Object), null, undefined);
+    expect(setErrorMessageMock).toHaveBeenCalledWith(expect.any(Object), null);
   });
 
   describe('with action', () => {
@@ -103,7 +103,7 @@ describe('IDE error message component', () => {
       let resolveAction;
       actionMock.mockImplementation(
         () =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolveAction = resolve;
           }),
       );

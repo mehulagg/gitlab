@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Routing
 
 The GitLab backend is written primarily with Rails so it uses [Rails
@@ -63,11 +69,19 @@ gitlab-org/gitlab/-/settings/repository
 gitlab-org/serverless/runtimes/-/settings/repository
 ```
 
-Currently, only some project routes are placed under the `/-/` scope. However,
-you can help us migrate more of them! To migrate project routes:
+## Migrating unscoped routes
+
+Currently, the majority of routes are placed under the `/-/` scope. However,
+you can help us migrate the rest of them! To migrate routes:
 
 1. Modify existing routes by adding `-` scope.
 1. Add redirects for legacy routes by using `Gitlab::Routing.redirect_legacy_paths`.
 1. Create a technical debt issue to remove deprecated routes in later releases.
 
 To get started, see an [example merge request](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/28435).
+
+## Useful links
+
+- [Routing improvements master plan](https://gitlab.com/gitlab-org/gitlab/-/issues/215362)
+- [Scoped routing explained](https://gitlab.com/gitlab-org/gitlab/-/issues/214217)
+- [Removal of deprecated routes](https://gitlab.com/gitlab-org/gitlab/-/issues/28848)

@@ -1,5 +1,5 @@
-import * as getters from 'ee/security_dashboard/store/modules/unscanned_projects/getters';
 import { UNSCANNED_PROJECTS_DATE_RANGES } from 'ee/security_dashboard/store/constants';
+import * as getters from 'ee/security_dashboard/store/modules/unscanned_projects/getters';
 import { groupByDateRanges } from 'ee/security_dashboard/store/modules/unscanned_projects/utils';
 
 describe('Unscanned projects getters', () => {
@@ -59,7 +59,7 @@ describe('Unscanned projects getters', () => {
       expect(result).toEqual(
         groupByDateRanges({
           ranges: UNSCANNED_PROJECTS_DATE_RANGES,
-          dateFn: x => x.securityTestsLastSuccessfulRun,
+          dateFn: (x) => x.securityTestsLastSuccessfulRun,
           projects,
         }),
       );

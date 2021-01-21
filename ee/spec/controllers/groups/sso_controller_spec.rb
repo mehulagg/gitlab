@@ -92,12 +92,36 @@ RSpec.describe Groups::SsoController do
     end
 
     context 'when group has moved' do
-      let(:redirect_route) { group.redirect_routes.create(path: 'old-path') }
+      let(:redirect_route) { group.redirect_routes.create!(path: 'old-path') }
 
       it 'redirects to new location' do
         get :saml, params: { group_id: redirect_route.path }
 
         expect(response).to redirect_to(sso_group_saml_providers_path(group))
+      end
+    end
+
+    context 'when current user has a SAML provider configured' do
+      let(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
+      let(:identity) { create(:group_saml_identity, saml_provider: saml_provider) }
+
+      before do
+        sign_out(user)
+        sign_in(identity.user)
+      end
+
+      it 'renders `devise_empty` template' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to render_template('devise_empty')
+      end
+    end
+
+    context 'when current user does not have a SAML provider configured' do
+      it 'renders `devise` template' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to render_template('devise')
       end
     end
   end
@@ -193,7 +217,7 @@ RSpec.describe Groups::SsoController do
 
       context 'and group managed accounts enforcing is disabled' do
         before do
-          saml_provider.update(enforced_group_managed_accounts: false)
+          saml_provider.update!(enforced_group_managed_accounts: false)
         end
 
         it 'renders 404' do

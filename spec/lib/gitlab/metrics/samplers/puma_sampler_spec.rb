@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::Samplers::PumaSampler do
+RSpec.describe Gitlab::Metrics::Samplers::PumaSampler do
   subject { described_class.new }
 
   let(:null_metric) { double('null_metric', set: nil, observe: nil) }
@@ -11,15 +11,7 @@ describe Gitlab::Metrics::Samplers::PumaSampler do
     allow(Gitlab::Metrics::NullMetric).to receive(:instance).and_return(null_metric)
   end
 
-  describe '#interval' do
-    it 'samples every five seconds by default' do
-      expect(subject.interval).to eq(5)
-    end
-
-    it 'samples at other intervals if requested' do
-      expect(described_class.new(11).interval).to eq(11)
-    end
-  end
+  it_behaves_like 'metrics sampler', 'PUMA_SAMPLER'
 
   describe '#sample' do
     before do

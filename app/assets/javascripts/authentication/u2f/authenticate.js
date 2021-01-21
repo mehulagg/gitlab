@@ -37,10 +37,9 @@ export default class U2FAuthenticate {
     // Note: The server library fixes this behaviour in (unreleased) version 1.0.0.
     // This can be removed once we upgrade.
     // https://github.com/castle/ruby-u2f/commit/103f428071a81cd3d5f80c2e77d522d5029946a4
-    this.signRequests = u2fParams.sign_requests.map(request => omit(request, 'challenge'));
+    this.signRequests = u2fParams.sign_requests.map((request) => omit(request, 'challenge'));
 
     this.templates = {
-      setup: '#js-authenticate-token-2fa-setup',
       inProgress: '#js-authenticate-token-2fa-in-progress',
       error: '#js-authenticate-token-2fa-error',
       authenticated: '#js-authenticate-token-2fa-authenticated',
@@ -49,7 +48,7 @@ export default class U2FAuthenticate {
 
   start() {
     return importU2FLibrary()
-      .then(utils => {
+      .then((utils) => {
         this.u2fUtils = utils;
         this.renderInProgress();
       })
@@ -61,7 +60,7 @@ export default class U2FAuthenticate {
       this.appId,
       this.challenge,
       this.signRequests,
-      response => {
+      (response) => {
         if (response.errorCode) {
           const error = new U2FError(response.errorCode, 'authenticate');
           return this.renderError(error);
@@ -86,7 +85,7 @@ export default class U2FAuthenticate {
   renderError(error) {
     this.renderTemplate('error', {
       error_message: error.message(),
-      error_code: error.errorCode,
+      error_name: error.errorCode,
     });
     return this.container.find('#js-token-2fa-try-again').on('click', this.renderInProgress);
   }

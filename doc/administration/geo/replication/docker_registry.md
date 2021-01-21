@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -17,8 +17,8 @@ distributed storage (`azure`, `gcs`, `s3`, `swift`, or `oss`) for your Docker
 Registry on the **primary** node, you can use the same storage for a **secondary**
 Docker Registry as well. For more information, read the
 [Load balancing considerations](https://docs.docker.com/registry/deploying/#load-balancing-considerations)
-when deploying the Registry, and how to set up the storage driver for GitLab's
-integrated [Container Registry](../../packages/container_registry.md#container-registry-storage-driver).
+when deploying the Registry, and how to set up the storage driver for the GitLab
+integrated [Container Registry](../../packages/container_registry.md#use-object-storage).
 
 ## Replicating Docker Registry
 
@@ -64,17 +64,17 @@ We need to make Docker Registry send notification events to the
    ]
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Replace `<replace_with_a_secret_token>` with a case sensitive alphanumeric string
    that starts with a letter. You can generate one with `< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c 32 | sed "s/^[0-9]*//"; echo`
 
-   NOTE: **Note:**
+   NOTE:
    If you use an external Registry (not the one integrated with GitLab), you must add
    these settings to its configuration yourself. In this case, you will also have to specify
    notification secret in `registry.notification_secret` section of
    `/etc/gitlab/gitlab.rb` file.
 
-   NOTE: **Note:**
+   NOTE:
    If you use GitLab HA, you will also have to specify
    the notification secret in `registry.notification_secret` section of
    `/etc/gitlab/gitlab.rb` file for every web node.
@@ -122,7 +122,7 @@ generate a short-lived JWT that is pull-only-capable to access the
 
 ### Verify replication
 
-To verify Container Registry replication is working, go to **{admin}** **Admin Area >** **{location-dot}** **Geo**
+To verify Container Registry replication is working, go to **Admin Area > Geo**
 (`/admin/geo/nodes`) on the **secondary** node.
 The initial replication, or "backfill", will probably still be in progress.
 You can monitor the synchronization process on each Geo node from the **primary** node's **Geo Nodes** dashboard in your browser.

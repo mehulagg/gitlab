@@ -36,7 +36,7 @@ describe('GpgBadges', () => {
     mock.restore();
   });
 
-  it('does not make a request if there is no container element', done => {
+  it('does not make a request if there is no container element', (done) => {
     setFixtures('');
     jest.spyOn(axios, 'get').mockImplementation(() => {});
 
@@ -48,13 +48,13 @@ describe('GpgBadges', () => {
       .catch(done.fail);
   });
 
-  it('throws an error if the endpoint is missing', done => {
+  it('throws an error if the endpoint is missing', (done) => {
     setFixtures('<div class="js-signature-container"></div>');
     jest.spyOn(axios, 'get').mockImplementation(() => {});
 
     GpgBadges.fetch()
       .then(() => done.fail('Expected error to be thrown'))
-      .catch(error => {
+      .catch((error) => {
         expect(error.message).toBe('Missing commit signatures endpoint!');
         expect(axios.get).not.toHaveBeenCalled();
       })
@@ -62,13 +62,13 @@ describe('GpgBadges', () => {
       .catch(done.fail);
   });
 
-  it('displays a loading spinner', done => {
+  it('displays a loading spinner', (done) => {
     mock.onGet(dummyUrl).replyOnce(200);
 
     GpgBadges.fetch()
       .then(() => {
         expect(document.querySelector('.js-loading-gpg-badge:empty')).toBe(null);
-        const spinners = document.querySelectorAll('.js-loading-gpg-badge i.fa.fa-spinner.fa-spin');
+        const spinners = document.querySelectorAll('.js-loading-gpg-badge span.gl-spinner');
 
         expect(spinners.length).toBe(1);
         done();
@@ -76,7 +76,7 @@ describe('GpgBadges', () => {
       .catch(done.fail);
   });
 
-  it('replaces the loading spinner', done => {
+  it('replaces the loading spinner', (done) => {
     mock.onGet(dummyUrl).replyOnce(200, dummyResponse);
 
     GpgBadges.fetch()

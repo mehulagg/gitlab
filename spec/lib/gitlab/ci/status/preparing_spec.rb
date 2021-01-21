@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::Preparing do
+RSpec.describe Gitlab::Ci::Status::Preparing do
   subject do
     described_class.new(double('subject'), nil)
   end
@@ -25,5 +25,9 @@ describe Gitlab::Ci::Status::Preparing do
 
   describe '#group' do
     it { expect(subject.group).to eq 'preparing' }
+  end
+
+  describe '#details_path' do
+    it { expect(subject.details_path).to be_nil }
   end
 end

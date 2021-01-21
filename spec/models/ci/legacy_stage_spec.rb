@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::LegacyStage do
+RSpec.describe Ci::LegacyStage do
   let(:stage) { build(:ci_stage) }
   let(:pipeline) { stage.pipeline }
   let(:stage_name) { stage.name }
@@ -116,7 +116,7 @@ describe Ci::LegacyStage do
         let!(:new_build) { create_job(:ci_build, status: :success) }
 
         before do
-          stage_build.update(retried: true)
+          stage_build.update!(retried: true)
         end
 
         it "returns status of latest build" do

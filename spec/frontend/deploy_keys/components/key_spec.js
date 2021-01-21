@@ -9,13 +9,9 @@ describe('Deploy keys key', () => {
 
   const data = getJSONFixture('deploy_keys/keys.json');
 
-  const findTextAndTrim = selector =>
-    wrapper
-      .find(selector)
-      .text()
-      .trim();
+  const findTextAndTrim = (selector) => wrapper.find(selector).text().trim();
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = mount(key, {
       propsData: {
         store,
@@ -55,20 +51,20 @@ describe('Deploy keys key', () => {
     it('shows pencil button for editing', () => {
       createComponent({ deployKey });
 
-      expect(wrapper.find('.btn .ic-pencil')).toExist();
+      expect(wrapper.find('.btn [data-testid="pencil-icon"]')).toExist();
     });
 
     it('shows disable button when the project is not deletable', () => {
       createComponent({ deployKey });
 
-      expect(wrapper.find('.btn .ic-cancel')).toExist();
+      expect(wrapper.find('.btn [data-testid="cancel-icon"]')).toExist();
     });
 
     it('shows remove button when the project is deletable', () => {
       createComponent({
         deployKey: { ...deployKey, destroyed_when_orphaned: true, almost_orphaned: true },
       });
-      expect(wrapper.find('.btn .ic-remove')).toExist();
+      expect(wrapper.find('.btn [data-testid="remove-icon"]')).toExist();
     });
   });
 
@@ -79,7 +75,7 @@ describe('Deploy keys key', () => {
       deployKeysProjects[0] = { ...deployKeysProjects[0], can_push: true };
       createComponent({ deployKey: { ...deployKey, deploy_keys_projects: deployKeysProjects } });
 
-      expect(wrapper.find('.deploy-project-label').attributes('data-original-title')).toBe(
+      expect(wrapper.find('.deploy-project-label').attributes('title')).toBe(
         'Write access allowed',
       );
     });
@@ -88,9 +84,7 @@ describe('Deploy keys key', () => {
       deployKeysProjects[0] = { ...deployKeysProjects[0], can_push: false };
       createComponent({ deployKey: { ...deployKey, deploy_keys_projects: deployKeysProjects } });
 
-      expect(wrapper.find('.deploy-project-label').attributes('data-original-title')).toBe(
-        'Read access only',
-      );
+      expect(wrapper.find('.deploy-project-label').attributes('title')).toBe('Read access only');
     });
 
     it('shows expandable button if more than two projects', () => {
@@ -99,23 +93,20 @@ describe('Deploy keys key', () => {
 
       expect(labels.length).toBe(2);
       expect(labels.at(1).text()).toContain('others');
-      expect(labels.at(1).attributes('data-original-title')).toContain('Expand');
+      expect(labels.at(1).attributes('title')).toContain('Expand');
     });
 
     it('expands all project labels after click', () => {
       createComponent({ deployKey });
       const { length } = deployKey.deploy_keys_projects;
-      wrapper
-        .findAll('.deploy-project-label')
-        .at(1)
-        .trigger('click');
+      wrapper.findAll('.deploy-project-label').at(1).trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         const labels = wrapper.findAll('.deploy-project-label');
 
         expect(labels.length).toBe(length);
         expect(labels.at(1).text()).not.toContain(`+${length} others`);
-        expect(labels.at(1).attributes('data-original-title')).not.toContain('Expand');
+        expect(labels.at(1).attributes('title')).not.toContain('Expand');
       });
     });
 
@@ -147,7 +138,7 @@ describe('Deploy keys key', () => {
 
     it('shows pencil button for editing', () => {
       createComponent({ deployKey });
-      expect(wrapper.find('.btn .ic-pencil')).toExist();
+      expect(wrapper.find('.btn [data-testid="pencil-icon"]')).toExist();
     });
 
     it('shows disable button when key is enabled', () => {
@@ -155,7 +146,7 @@ describe('Deploy keys key', () => {
 
       createComponent({ deployKey });
 
-      expect(wrapper.find('.btn .ic-cancel')).toExist();
+      expect(wrapper.find('.btn [data-testid="cancel-icon"]')).toExist();
     });
   });
 });

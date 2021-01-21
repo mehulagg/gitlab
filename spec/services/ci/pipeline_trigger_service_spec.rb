@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineTriggerService do
-  let(:project) { create(:project, :repository) }
+RSpec.describe Ci::PipelineTriggerService do
+  include AfterNextHelpers
+
+  let_it_be(:project) { create(:project, :repository) }
 
   before do
     stub_ci_pipeline_to_return_yaml_file
   end
 
   describe '#execute' do
-    let(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
     let(:result) { described_class.new(project, user, params).execute }
 
     before do
@@ -29,8 +31,8 @@ describe Ci::PipelineTriggerService do
         end
       end
 
-      context 'when params have an existsed trigger token' do
-        context 'when params have an existsed ref' do
+      context 'when params have an existing trigger token' do
+        context 'when params have an existing ref' do
           let(:params) { { token: trigger.token, ref: 'master', variables: nil } }
 
           it 'triggers a pipeline' do
@@ -45,9 +47,7 @@ describe Ci::PipelineTriggerService do
 
           context 'when commit message has [ci skip]' do
             before do
-              allow_next_instance_of(Ci::Pipeline) do |instance|
-                allow(instance).to receive(:git_commit_message) { '[ci skip]' }
-              end
+              allow_next(Ci::Pipeline).to receive(:git_commit_message) { '[ci skip]' }
             end
 
             it 'ignores [ci skip] and create as general' do
@@ -106,9 +106,23 @@ describe Ci::PipelineTriggerService do
         let(:params) { { token: job.token, ref: 'master', variables: nil } }
         let(:job) { create(:ci_build, :success, pipeline: pipeline, user: user) }
 
-        it 'does nothing' do
+        it 'does nothing', :aggregate_failures do
           expect { result }.not_to change { Ci::Pipeline.count }
-          expect(result[:message]).to eq('400 Job has to be running')
+          expect(result[:message]).to eq('Job is not running')
+          expect(result[:http_status]).to eq(401)
+        end
+      end
+
+      context 'when job does not have a project' do
+        let(:params) { { token: job.token, ref: 'master', variables: nil } }
+        let(:job) { create(:ci_build, status: :running, pipeline: pipeline, user: user) }
+
+        it 'does nothing', :aggregate_failures do
+          job.update!(project: nil)
+
+          expect { result }.not_to change { Ci::Pipeline.count }
+          expect(result[:message]).to eq('Project has been deleted!')
+          expect(result[:http_status]).to eq(401)
         end
       end
 

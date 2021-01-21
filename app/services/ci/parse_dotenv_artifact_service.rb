@@ -3,7 +3,7 @@
 module Ci
   class ParseDotenvArtifactService < ::BaseService
     MAX_ACCEPTABLE_DOTENV_SIZE = 5.kilobytes
-    MAX_ACCEPTABLE_VARIABLES_COUNT = 10
+    MAX_ACCEPTABLE_VARIABLES_COUNT = 20
 
     SizeLimitError = Class.new(StandardError)
     ParserError = Class.new(StandardError)
@@ -54,7 +54,7 @@ module Ci
     end
 
     def scan_line!(line)
-      result = line.scan(/^(.*)=(.*)$/).last
+      result = line.scan(/^(.*?)=(.*)$/).last
 
       raise ParserError, 'Invalid Format' if result.nil?
 

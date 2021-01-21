@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::LegacyGithubImport::MilestoneFormatter do
+RSpec.describe Gitlab::LegacyGithubImport::MilestoneFormatter do
   let(:project) { create(:project) }
   let(:created_at) { DateTime.strptime('2011-01-26T19:01:12Z') }
   let(:updated_at) { DateTime.strptime('2011-01-27T19:01:12Z') }
@@ -17,6 +17,7 @@ describe Gitlab::LegacyGithubImport::MilestoneFormatter do
       closed_at: nil
     }
   end
+
   let(:iid_attr) { :number }
 
   subject(:formatter) { described_class.new(project, raw_data) }

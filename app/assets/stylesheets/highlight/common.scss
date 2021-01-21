@@ -1,4 +1,5 @@
 @import '../framework/variables';
+@import './conflict_colors';
 
 @mixin diff-background($background, $idiff, $border) {
   background: $background;
@@ -20,6 +21,7 @@
 @mixin diff-expansion($background, $border, $link) {
   background-color: $background;
 
+  .diff-td,
   td {
     border-top: 1px solid $border;
     border-bottom: 1px solid $border;
@@ -34,10 +36,60 @@
   transition: border-left 0.1s ease-out;
 
   &.coverage {
-    border-left: 3px solid $coverage;
+    border-left: 4px solid $coverage;
   }
 
   &.no-coverage {
-    border-left: 3px solid $no-coverage;
+    border-left: 2px solid $no-coverage;
+  }
+}
+
+@mixin line-number-hover($color) {
+  background-color: $color;
+  border-color: darken($color, 5%);
+
+  a {
+    color: darken($color, 15%);
+  }
+}
+
+@mixin conflict-colors($theme) {
+  .diff-line-num {
+    &.conflict_marker_our,
+    &.conflict_our {
+      background-color: map-get($conflict-colors, #{$theme}-header-head-neutral);
+      border-color: map-get($conflict-colors, #{$theme}-header-head-neutral);
+    }
+
+    &.conflict_marker_their,
+    &.conflict_their {
+      background-color: map-get($conflict-colors, #{$theme}-header-origin-neutral);
+      border-color: map-get($conflict-colors, #{$theme}-header-origin-neutral);
+    }
+  }
+
+  .line_holder {
+    .line_content,
+    .line-coverage {
+      &.conflict_marker_our {
+        background-color: map-get($conflict-colors, #{$theme}-header-head-neutral);
+        border-color: map-get($conflict-colors, #{$theme}-header-head-neutral);
+      }
+
+      &.conflict_marker_their {
+        background-color: map-get($conflict-colors, #{$theme}-header-origin-neutral);
+        border-color: map-get($conflict-colors, #{$theme}-header-origin-neutral);
+      }
+
+      &.conflict_our {
+        background-color: map-get($conflict-colors, #{$theme}-line-head-neutral);
+        border-color: map-get($conflict-colors, #{$theme}-line-head-neutral);
+      }
+
+      &.conflict_their {
+        background-color: map-get($conflict-colors, #{$theme}-line-origin-neutral);
+        border-color: map-get($conflict-colors, #{$theme}-line-origin-neutral);
+      }
+    }
   }
 }

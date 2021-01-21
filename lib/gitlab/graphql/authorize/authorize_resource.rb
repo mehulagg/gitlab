@@ -29,9 +29,8 @@ module Gitlab
           raise NotImplementedError, "Implement #find_object in #{self.class.name}"
         end
 
-        def authorized_find!(*args)
-          object = find_object(*args)
-          object = object.sync if object.respond_to?(:sync)
+        def authorized_find!(*args, **kwargs)
+          object = Graphql::Lazy.force(find_object(*args, **kwargs))
 
           authorize!(object)
 
@@ -63,8 +62,8 @@ module Gitlab
           end
         end
 
-        def raise_resource_not_available_error!
-          raise Gitlab::Graphql::Errors::ResourceNotAvailable, RESOURCE_ACCESS_ERROR
+        def raise_resource_not_available_error!(msg = RESOURCE_ACCESS_ERROR)
+          raise Gitlab::Graphql::Errors::ResourceNotAvailable, msg
         end
       end
     end

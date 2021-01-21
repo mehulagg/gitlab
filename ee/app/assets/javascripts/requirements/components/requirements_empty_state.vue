@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState, GlDeprecatedButton } from '@gitlab/ui';
+import { GlEmptyState, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 import { FilterState, FilterStateEmptyMessage } from '../constants';
@@ -7,7 +7,7 @@ import { FilterState, FilterStateEmptyMessage } from '../constants';
 export default {
   components: {
     GlEmptyState,
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     filterBy: {
@@ -25,6 +25,11 @@ export default {
     canCreateRequirement: {
       type: Boolean,
       required: true,
+    },
+    showUploadCsv: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -53,12 +58,17 @@ export default {
       :description="emptyStateDescription"
     >
       <template v-if="emptyStateDescription && canCreateRequirement" #actions>
-        <gl-deprecated-button
-          category="primary"
-          variant="success"
-          @click="$emit('clickNewRequirement')"
-          >{{ __('New requirement') }}</gl-deprecated-button
+        <gl-button category="primary" variant="success" @click="$emit('click-new-requirement')">{{
+          __('New requirement')
+        }}</gl-button>
+        <gl-button
+          v-if="showUploadCsv"
+          category="secondary"
+          variant="default"
+          @click="$emit('click-import-requirements')"
         >
+          {{ __('Import requirements') }}
+        </gl-button>
       </template>
     </gl-empty-state>
   </div>

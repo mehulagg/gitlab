@@ -1,8 +1,16 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlDeprecatedButton, GlFormCheckbox, GlSkeletonLoading } from '@gitlab/ui';
+import {
+  GlButton,
+  GlFormCheckbox,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSprintf,
+  GlIcon,
+} from '@gitlab/ui';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
+import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
 import { DASHBOARD_TYPES } from '../store/constants';
@@ -10,10 +18,11 @@ import { DASHBOARD_TYPES } from '../store/constants';
 export default {
   name: 'SecurityDashboardTableRow',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormCheckbox,
     GlSkeletonLoading,
-    Icon,
+    GlSprintf,
+    GlIcon,
     SeverityBadge,
     VulnerabilityActionButtons,
     VulnerabilityIssueLink,
@@ -35,6 +44,9 @@ export default {
     ...mapState('vulnerabilities', ['selectedVulnerabilities']),
     severity() {
       return this.vulnerability.severity || ' ';
+    },
+    vulnerabilityIdentifier() {
+      return getPrimaryIdentifier(this.vulnerability.identifiers, 'external_type');
     },
     vulnerabilityNamespace() {
       const { project, location } = this.vulnerability;
@@ -59,17 +71,38 @@ export default {
       const path = this.vulnerability.create_vulnerability_feedback_issue_path;
       return Boolean(path) && !this.hasIssue;
     },
+    extraIdentifierCount() {
+      const { identifiers } = this.vulnerability;
+      return identifiers?.length - 1;
+    },
     isSelected() {
       return Boolean(this.selectedVulnerabilities[this.vulnerability.id]);
     },
+    shouldShowExtraIdentifierCount() {
+      return this.extraIdentifierCount > 0;
+    },
+    useConvertReportType() {
+      return convertReportType(this.vulnerability.report_type);
+    },
+    vulnerabilityVendor() {
+      return this.vulnerability.scanner?.vendor;
+    },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    ...mapActions('vulnerabilities', [
+      'setModalData',
+      'selectVulnerability',
+      'deselectVulnerability',
+    ]),
     toggleVulnerability() {
       if (this.isSelected) {
         return this.deselectVulnerability(this.vulnerability);
       }
       return this.selectVulnerability(this.vulnerability);
+    },
+    openModal(payload) {
+      this.setModalData(payload);
+      this.$root.$emit('bv::show::modal', VULNERABILITY_MODAL_ID);
     },
   },
 };
@@ -104,15 +137,16 @@ export default {
       >
         <gl-skeleton-loading v-if="isLoading" class="mt-2 js-skeleton-loader" :lines="2" />
         <template v-else>
-          <gl-deprecated-button
+          <gl-button
             ref="vulnerability-title"
-            class="d-inline gl-reset-line-height gl-reset-text-align gl-white-space-normal"
-            variant="blank"
+            class="text-body gl-display-grid"
+            button-text-classes="gl-text-left gl-white-space-normal! gl-pr-4!"
+            variant="link"
             @click="openModal({ vulnerability })"
-            >{{ vulnerability.name }}</gl-deprecated-button
+            >{{ vulnerability.name }}</gl-button
           >
           <template v-if="isDismissed">
-            <icon
+            <gl-icon
               v-show="vulnerability.dismissal_feedback.comment_details"
               name="comment"
               class="text-warning vertical-align-middle"
@@ -127,11 +161,39 @@ export default {
             :issue="vulnerability.issue_feedback"
             :project-name="vulnerability.project.name"
           />
-          <br />
-          <small v-if="vulnerabilityNamespace" class="gl-text-gray-700 gl-word-break-all">
+
+          <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
             {{ vulnerabilityNamespace }}
           </small>
         </template>
+      </div>
+    </div>
+
+    <div class="table-section gl-white-space-normal section-15">
+      <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Identifier') }}</div>
+      <div class="table-mobile-content">
+        <div class="gl-text-overflow-ellipsis gl-overflow-hidden" :title="vulnerabilityIdentifier">
+          {{ vulnerabilityIdentifier }}
+        </div>
+        <div v-if="shouldShowExtraIdentifierCount" class="gl-text-gray-300">
+          <gl-sprintf :message="__('+ %{count} more')">
+            <template #count>
+              {{ extraIdentifierCount }}
+            </template>
+          </gl-sprintf>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-section section-15">
+      <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Scanner') }}</div>
+      <div class="table-mobile-content">
+        <div class="text-capitalize">
+          {{ useConvertReportType }}
+        </div>
+        <div v-if="vulnerabilityVendor" class="gl-text-gray-300" data-testid="vulnerability-vendor">
+          {{ vulnerabilityVendor }}
+        </div>
       </div>
     </div>
 

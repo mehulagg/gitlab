@@ -6,10 +6,10 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Dependency-Scanning') }
 
   describe 'the created pipeline' do
-    let(:user) { create(:admin) }
     let(:default_branch) { 'master' }
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
+    let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
@@ -31,16 +31,6 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
 
       before do
         allow(License).to receive(:current).and_return(license)
-      end
-
-      context 'when DS_DISABLE_DIND=false' do
-        before do
-          create(:ci_variable, project: project, key: 'DS_DISABLE_DIND', value: 'false')
-        end
-
-        it 'includes orchestrator job' do
-          expect(build_names).to match_array(%w[dependency_scanning])
-        end
       end
 
       context 'when DEPENDENCY_SCANNING_DISABLED=1' do
@@ -67,6 +57,8 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
             'Javascript yarn.lock'           | { 'yarn.lock' => '' }                     | %w(gemnasium-dependency_scanning)
             'Javascript npm-shrinkwrap.json' | { 'npm-shrinkwrap.json' => '' }           | %w(gemnasium-dependency_scanning)
             'Multiple languages'             | { 'pom.xml' => '', 'package.json' => '' } | %w(gemnasium-maven-dependency_scanning retire-js-dependency_scanning)
+            'NuGet'                          | { 'packages.lock.json' => '' }            | %w(gemnasium-dependency_scanning)
+            'Conan'                          | { 'conan.lock' => '' }                    | %w(gemnasium-dependency_scanning)
             'PHP'                            | { 'composer.lock' => '' }                 | %w(gemnasium-dependency_scanning)
             'Python requirements.txt'        | { 'requirements.txt' => '' }              | %w(gemnasium-python-dependency_scanning)
             'Python requirements.pip'        | { 'requirements.pip' => '' }              | %w(gemnasium-python-dependency_scanning)
@@ -91,7 +83,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
 
             context 'with file at depth 1' do
               # prepend a directory to files (e.g. convert go.sum to foo/go.sum)
-              let(:files_at_depth_x) {  Hash[files.map { |k, v| ["foo/#{k}", v]}] }
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/#{k}"} }
 
               it 'creates a pipeline with the expected jobs' do
                 expect(build_names).to include(*include_build_names)
@@ -100,7 +92,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
 
             context 'with file at depth 2' do
               # prepend a directory to files (e.g. convert go.sum to foo/bar/go.sum)
-              let(:files_at_depth_x) {  Hash[files.map { |k, v| ["foo/bar/#{k}", v]}] }
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/bar/#{k}"} }
 
               it 'creates a pipeline with the expected jobs' do
                 expect(build_names).to include(*include_build_names)
@@ -108,7 +100,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
             end
 
             context 'with file at depth > 2' do
-              let(:files_at_depth_x) {  Hash[files.map { |k, v| ["foo/bar/baz/#{k}", v]}] }
+              let(:files_at_depth_x) { files.transform_keys { |k| "foo/bar/baz/#{k}"} }
 
               it 'includes no job' do
                 expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError)

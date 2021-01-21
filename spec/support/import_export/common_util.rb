@@ -15,11 +15,11 @@ module ImportExport
       export_path = [prefix, 'spec', 'fixtures', 'lib', 'gitlab', 'import_export', name].compact
       export_path = File.join(*export_path)
 
-      allow_any_instance_of(Gitlab::ImportExport).to receive(:export_path) { export_path }
+      allow(Gitlab::ImportExport).to receive(:export_path) { export_path }
     end
 
     def setup_reader(reader)
-      if reader == :ndjson_reader && Feature.enabled?(:project_import_ndjson)
+      if reader == :ndjson_reader && Feature.enabled?(:project_import_ndjson, default_enabled: true)
         allow_any_instance_of(Gitlab::ImportExport::JSON::LegacyReader::File).to receive(:exist?).and_return(false)
         allow_any_instance_of(Gitlab::ImportExport::JSON::NdjsonReader).to receive(:exist?).and_return(true)
       else
@@ -70,9 +70,12 @@ module ImportExport
       )
     end
 
-    def get_shared_env(path:)
+    def get_shared_env(path:, logger: nil)
+      logger ||= double(info: true, warn: true, error: true)
+
       instance_double(Gitlab::ImportExport::Shared).tap do |shared|
         allow(shared).to receive(:export_path).and_return(path)
+        allow(shared).to receive(:logger).and_return(logger)
       end
     end
 

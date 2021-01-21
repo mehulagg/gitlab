@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::UserAccessDeniedReason do
+RSpec.describe Gitlab::Auth::UserAccessDeniedReason do
   include TermsHelper
   let(:user) { build(:user) }
 
@@ -40,6 +40,22 @@ describe Gitlab::Auth::UserAccessDeniedReason do
       end
 
       it { is_expected.to eq "Your account has been deactivated by your administrator. Please log back in from a web browser to reactivate your account at #{Gitlab.config.gitlab.url}" }
+    end
+
+    context 'when the user is unconfirmed' do
+      before do
+        user.update!(confirmed_at: nil)
+      end
+
+      it { is_expected.to match /Your primary email address is not confirmed/ }
+    end
+
+    context 'when the user is blocked pending approval' do
+      before do
+        user.block_pending_approval!
+      end
+
+      it { is_expected.to eq('Your account is pending approval from your administrator and hence blocked.') }
     end
   end
 end

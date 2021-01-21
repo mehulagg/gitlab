@@ -1,5 +1,7 @@
 - namespace = local_assigns.fetch(:namespace)
+- css_class = local_assigns.fetch(:css_class)
+
 - return unless Gitlab::CurrentSettings.should_check_namespace_plan? && namespace.actual_plan&.paid?
 
-%span.plan-badge.has-tooltip{ data: { plan: namespace.actual_plan_name }, title: "#{namespace.actual_plan.title} Plan" }
+%span.plan-badge.has-tooltip{ class: css_class, data: { plan: namespace.actual_plan_name }, title: "#{namespace.actual_plan.title} Plan" }
   = custom_icon('icon_premium')

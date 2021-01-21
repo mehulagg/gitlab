@@ -1,10 +1,17 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Feature flags process
 
 ## Feature flags for user applications
 
 This document only covers feature flags used in the development of GitLab
 itself. Feature flags in deployed user applications can be found at
-[Feature Flags feature documentation](../../user/project/operations/feature_flags.md).
+[Feature Flags feature documentation](../../operations/feature_flags.md).
 
 ## Feature flags in GitLab development
 
@@ -21,6 +28,21 @@ should be leveraged:
 - Merge requests that make changes hidden behind a feature flag, or remove an
   existing feature flag because a feature is deemed stable must have the
   ~"feature flag" label assigned.
+- When development of a feature will be spread across multiple merge
+  requests, you can use the following workflow:
+
+  1. [Create a new feature flag](development.md#create-a-new-feature-flag)
+     which is **off** by default, in the first merge request which uses the flag.
+     Flags [should not be added separately](development.md#risk-of-a-broken-master-main-branch).
+  1. Submit incremental changes via one or more merge requests, ensuring that any
+     new code added can only be reached if the feature flag is **on**.
+     You can keep the feature flag enabled on your local GDK during development.
+  1. When the feature is ready to be tested, enable the feature flag for
+     a specific project and ensure that there are no issues with the implementation.
+  1. When the feature is ready to be announced, create a merge request that adds
+     documentation about the feature, including [documentation for the feature flag itself](../documentation/feature_flags.md),
+     and a changelog entry. In the same merge request either flip the feature flag to
+     be **on by default** or remove it entirely in order to enable the new behavior.
 
 One might be tempted to think that feature flags will delay the release of a
 feature by at least one month (= one release). This is not the case. A feature
@@ -29,34 +51,16 @@ flag does not have to stick around for a specific amount of time
 is deemed stable. Stable means it works on GitLab.com without causing any
 problems, such as outages.
 
-### When to use feature flags
-
-Starting with GitLab 11.4, developers are required to use feature flags for
-non-trivial changes. Such changes include:
-
-- New features (e.g. a new merge request widget, epics, etc).
-- Complex performance improvements that may require additional testing in
-  production, such as rewriting complex queries.
-- Invasive changes to the user interface, such as a new navigation bar or the
-  removal of a sidebar.
-- Adding support for importing projects from a third-party service.
-
-In all cases, those working on the changes can best decide if a feature flag is
-necessary. For example, changing the color of a button doesn't need a feature
-flag, while changing the navigation bar definitely needs one. In case you are
-uncertain if a feature flag is necessary, simply ask about this in the merge
-request, and those reviewing the changes will likely provide you with an answer.
-
-When using a feature flag for UI elements, make sure to _also_ use a feature
-flag for the underlying backend code, if there is any. This ensures there is
-absolutely no way to use the feature until it is enabled.
+Please also read the [development guide for feature flags](development.md).
 
 ### Including a feature behind feature flag in the final release
 
 In order to build a final release and present the feature for self-managed
 users, the feature flag should be at least defaulted to **on**. If the feature
 is deemed stable and there is confidence that removing the feature flag is safe,
-consider removing the feature flag altogether.
+consider removing the feature flag altogether. It's _strongly_ recommended that
+the feature flag is [enabled **globally** on **production**](controls.md#enabling-a-feature-for-gitlabcom) for **at least one day**
+before making this decision. Unexpected bugs are sometimes discovered during this period.
 
 The process for enabling features that are disabled by default can take 5-6 days
 from when the merge request is first reviewed to when the change is deployed to
@@ -66,12 +70,12 @@ account for unforeseen problems.
 Feature flags must be [documented according to their state (enabled/disabled)](../documentation/feature_flags.md),
 and when the state changes, docs **must** be updated accordingly.
 
-NOTE: **Note:**
+NOTE:
 Take into consideration that such action can make the feature available on
 GitLab.com shortly after the change to the feature flag is merged.
 
 Changing the default state or removing the feature flag has to be done before
-the 22nd of the month, _at least_ 2 working days before, in order for the change
+the 22nd of the month, _at least_ 3-4 working days before, in order for the change
 to be included in the final self-managed release.
 
 In addition to this, the feature behind feature flag should:
@@ -144,3 +148,30 @@ they speed up the process as managing incidents now becomes _much_ easier. Once
 continuous deployments are easier to perform, the time to iterate on a feature
 is reduced even further, as you no longer need to wait weeks before your changes
 are available on GitLab.com.
+
+### The benefits of feature flags
+
+It may seem like feature flags are configuration, which goes against our [convention-over-configuration](https://about.gitlab.com/handbook/product/product-principles/#convention-over-configuration)
+principle. However, configuration is by definition something that is user-manageable.
+Feature flags are not intended to be user-editable. Instead, they are intended as a tool for Engineers
+and Site Reliability Engineers to use to de-risk their changes. Feature flags are the shim that gets us
+to Continuous Delivery with our mono repo and without having to deploy the entire codebase on every change. 
+Feature flags are created to ensure that we can safely rollout our work on our terms.
+If we use Feature Flags as a configuration, we are doing it wrong and are indeed in violation of our
+principles. If something needs to be configured, we should intentionally make it configuration from the
+first moment.
+
+Some of the benefits of using development-type feature flags are:
+
+1. It enables Continuous Delivery for GitLab.com.
+1. It significantly reduces Mean-Time-To-Recovery.
+1. It helps engineers to monitor and reduce the impact of their changes gradually, at any scale,
+   allowing us to be more metrics-driven and execute good DevOps practices, [shifting some responsibility "left"](https://devops.com/why-its-time-for-site-reliability-engineering-to-shift-left/).
+1. Controlled feature rollout timing: without feature flags, we would need to wait until a specific
+   deployment was complete (which at GitLab could be at any time).
+1. Increased psychological safety: when a feature flag is used, an engineer has the confidence that if anything goes wrong they can quickly disable the code and minimize the impact of a change that might be risky.
+1. Improved throughput: when a change is less risky because a flag exists, theoretical tests about
+   scalability can potentially become unnecessary or less important. This allows an engineer to
+   potentially test a feature on a small project, monitor the impact, and proceed. The alternative might
+   be to build complex benchmarks locally, or on staging, or on another GitLab deployment, which has an
+   outsized impact on the time it can take to build and release a feature.

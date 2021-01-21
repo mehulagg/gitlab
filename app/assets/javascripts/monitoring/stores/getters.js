@@ -1,8 +1,14 @@
 import { NOT_IN_DB_PREFIX } from '../constants';
-import { addPrefixToCustomVariableParams, addDashboardMetaDataToLink } from './utils';
+import {
+  addPrefixToCustomVariableParams,
+  addDashboardMetaDataToLink,
+  normalizeCustomDashboardPath,
+} from './utils';
 
-const metricsIdsInPanel = panel =>
-  panel.metrics.filter(metric => metric.metricId && metric.result).map(metric => metric.metricId);
+const metricsIdsInPanel = (panel) =>
+  panel.metrics
+    .filter((metric) => metric.metricId && metric.result)
+    .map((metric) => metric.metricId);
 
 /**
  * Returns a reference to the currently selected dashboard
@@ -10,11 +16,11 @@ const metricsIdsInPanel = panel =>
  *
  * @param {Object} state
  */
-export const selectedDashboard = state => {
+export const selectedDashboard = (state, getters) => {
   const { allDashboards } = state;
   return (
-    allDashboards.find(d => d.path === state.currentDashboard) ||
-    allDashboards.find(d => d.default) ||
+    allDashboards.find((d) => d.path === getters.fullDashboardPath) ||
+    allDashboards.find((d) => d.default) ||
     null
   );
 };
@@ -28,15 +34,15 @@ export const selectedDashboard = state => {
  * @returns {Function} A function that returns an array of
  * states in all the metric in the dashboard or group.
  */
-export const getMetricStates = state => groupKey => {
+export const getMetricStates = (state) => (groupKey) => {
   let groups = state.dashboard.panelGroups;
   if (groupKey) {
-    groups = groups.filter(group => group.key === groupKey);
+    groups = groups.filter((group) => group.key === groupKey);
   }
 
   const metricStates = groups.reduce((acc, group) => {
-    group.panels.forEach(panel => {
-      panel.metrics.forEach(metric => {
+    group.panels.forEach((panel) => {
+      panel.metrics.forEach((metric) => {
         if (metric.state) {
           acc.push(metric.state);
         }
@@ -60,15 +66,15 @@ export const getMetricStates = state => groupKey => {
  * metrics in the dashboard that contain results, optionally
  * filtered by group key.
  */
-export const metricsWithData = state => groupKey => {
+export const metricsWithData = (state) => (groupKey) => {
   let groups = state.dashboard.panelGroups;
   if (groupKey) {
-    groups = groups.filter(group => group.key === groupKey);
+    groups = groups.filter((group) => group.key === groupKey);
   }
 
   const res = [];
-  groups.forEach(group => {
-    group.panels.forEach(panel => {
+  groups.forEach((group) => {
+    group.panels.forEach((panel) => {
       res.push(...metricsIdsInPanel(panel));
     });
   });
@@ -85,7 +91,7 @@ export const metricsWithData = state => groupKey => {
  * https://gitlab.com/gitlab-org/gitlab/-/issues/28241
  * https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27447
  */
-export const metricsSavedToDb = state => {
+export const metricsSavedToDb = (state) => {
   const metricIds = [];
   state.dashboard.panelGroups.forEach(({ panels }) => {
     panels.forEach(({ metrics }) => {
@@ -107,8 +113,8 @@ export const metricsSavedToDb = state => {
  * @param {Object} state
  * @returns {Array} List of environments
  */
-export const filteredEnvironments = state =>
-  state.environments.filter(env =>
+export const filteredEnvironments = (state) =>
+  state.environments.filter((env) =>
     env.name.toLowerCase().includes((state.environmentsSearchTerm || '').trim().toLowerCase()),
   );
 
@@ -121,7 +127,7 @@ export const filteredEnvironments = state =>
  * @param {Object} state
  * @returns {Array} modified array of links
  */
-export const linksWithMetadata = state => {
+export const linksWithMetadata = (state) => {
   const metadata = {
     timeRange: state.timeRange,
   };
@@ -129,8 +135,8 @@ export const linksWithMetadata = state => {
 };
 
 /**
- * Maps an variables object to an array along with stripping
- * the variable prefix.
+ * Maps a variables array to an object for replacement in
+ * prometheus queries.
  *
  * This method outputs an object in the below format
  *
@@ -143,16 +149,26 @@ export const linksWithMetadata = state => {
  * user-defined variables coming through the URL and differentiate
  * from other variables used for Prometheus API endpoint.
  *
- * @param {Object} variables - Custom variables provided by the user
- * @returns {Array} The custom variables array to be send to the API
+ * @param {Object} state - State containing variables provided by the user
+ * @returns {Array} The custom variables object to be send to the API
  * in the format of {variables[key1]=value1, variables[key2]=value2}
  */
 
-export const getCustomVariablesParams = state =>
-  Object.keys(state.variables).reduce((acc, variable) => {
-    acc[addPrefixToCustomVariableParams(variable)] = state.variables[variable]?.value;
+export const getCustomVariablesParams = (state) =>
+  state.variables.reduce((acc, variable) => {
+    const { name, value } = variable;
+    if (value !== null) {
+      acc[addPrefixToCustomVariableParams(name)] = value;
+    }
     return acc;
   }, {});
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+/**
+ * For a given custom dashboard file name, this method
+ * returns the full file path.
+ *
+ * @param {Object} state
+ * @returns {String} full dashboard path
+ */
+export const fullDashboardPath = (state) =>
+  normalizeCustomDashboardPath(state.currentDashboard, state.customDashboardBasePath);

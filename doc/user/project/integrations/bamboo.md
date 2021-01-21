@@ -1,8 +1,14 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Atlassian Bamboo CI Service
 
 GitLab provides integration with Atlassian Bamboo for continuous integration.
-When configured, pushes to a project will trigger a build in Bamboo automatically.
-Merge requests will also display CI status showing whether the build is pending,
+When configured, pushes to a project trigger a build in Bamboo automatically.
+Merge requests also display CI status showing whether the build is pending,
 failed, or completed successfully. It also provides a link to the Bamboo build
 page for more information.
 
@@ -22,7 +28,7 @@ need to be configured in a Bamboo build plan before GitLab can integrate.
 1. Choose 'Repository triggers the build when changes are committed'
 1. Check one or more repositories checkboxes
 1. Enter the GitLab IP address in the 'Trigger IP addresses' box. This is a
-   whitelist of IP addresses that are allowed to trigger Bamboo builds.
+   list of IP addresses that are allowed to trigger Bamboo builds.
 1. Save the trigger.
 1. In the left pane, select a build stage. If you have multiple build stages
    you want to select the last stage that contains the Git checkout task.
@@ -50,12 +56,12 @@ service in GitLab.
    access to trigger the build plan. Leave these fields blank if you do not require
    authentication.
 1. Save or optionally click 'Test Settings'. Please note that 'Test Settings'
-   will actually trigger a build in Bamboo.
+   actually triggers a build in Bamboo.
 
 ## Troubleshooting
 
 If builds are not triggered, ensure you entered the right GitLab IP address in
 Bamboo under 'Trigger IP addresses'. Also check [service hook logs](overview.md#troubleshooting-integrations) for request failures.
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 8.14.0, builds are triggered on push events.

@@ -1,20 +1,21 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VirtualList from 'vue-virtual-scroll-list';
-import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
 import EpicItem from 'ee/roadmap/components/epic_item.vue';
-import createStore from 'ee/roadmap/store';
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
+import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
 import {
   PRESET_TYPES,
   EPIC_DETAILS_CELL_WIDTH,
   TIMELINE_CELL_MIN_WIDTH,
 } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 import {
   mockFormattedChildEpic1,
   mockFormattedChildEpic2,
   mockTimeframeInitialDate,
   mockGroupId,
   rawEpics,
+  mockEpicsWithParents,
   mockSortedBy,
   basePath,
   epicsPath,
@@ -119,20 +120,25 @@ describe('EpicsListSectionComponent', () => {
       });
     });
 
+    describe('epicsWithAssociatedParents', () => {
+      it('should return epics which contain parent associations', () => {
+        wrapper.setProps({
+          epics: mockEpicsWithParents,
+        });
+
+        return wrapper.vm.$nextTick(() => {
+          expect(wrapper.vm.epicsWithAssociatedParents).toEqual(mockEpicsWithParents);
+        });
+      });
+    });
+
     describe('displayedEpics', () => {
       beforeAll(() => {
         store.state.epicIds = ['1', '2', '3'];
       });
 
-      it('returns findParentEpics method by default', () => {
-        expect(wrapper.vm.displayedEpics).toEqual(wrapper.vm.findParentEpics);
-      });
-
-      it('returns findEpicsMatchingFilter method if filtered is applied', () => {
-        wrapper.setProps({
-          hasFiltersApplied: true,
-        });
-        expect(wrapper.vm.displayedEpics).toEqual(wrapper.vm.findEpicsMatchingFilter);
+      it('returns epicsWithAssociatedParents computed prop by default', () => {
+        expect(wrapper.vm.displayedEpics).toEqual(wrapper.vm.epicsWithAssociatedParents);
       });
 
       it('returns all epics if epicIid is specified', () => {
@@ -153,10 +159,6 @@ describe('EpicsListSectionComponent', () => {
         wrapper = createComponent();
 
         jest.spyOn(wrapper.vm, 'scrollToTodayIndicator').mockImplementation(() => {});
-      });
-
-      it('sets value of `roadmapShellEl` with root component element', () => {
-        expect(wrapper.vm.roadmapShellEl instanceof HTMLElement).toBe(true);
       });
 
       it('calls action `setBufferSize` with value based on window.innerHeight and component element position', () => {
@@ -239,7 +241,7 @@ describe('EpicsListSectionComponent', () => {
       it('returns an object containing props for EpicItem component', () => {
         expect(wrapper.vm.getEpicItemProps(1)).toEqual(
           expect.objectContaining({
-            key: 1,
+            key: `epic-${wrapper.vm.epics[1].id}`,
             props: {
               epic: wrapper.vm.epics[1],
               presetType: wrapper.vm.presetType,

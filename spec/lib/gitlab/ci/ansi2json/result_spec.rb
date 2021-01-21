@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Ansi2json::Result do
+RSpec.describe Gitlab::Ci::Ansi2json::Result do
   let(:stream) { StringIO.new('hello') }
   let(:state) { Gitlab::Ci::Ansi2json::State.new(nil, stream.size) }
   let(:offset) { 0 }
@@ -10,7 +10,7 @@ describe Gitlab::Ci::Ansi2json::Result do
     { lines: [], state: state, append: false, truncated: false, offset: offset, stream: stream }
   end
 
-  subject { described_class.new(params) }
+  subject { described_class.new(**params) }
 
   describe '#size' do
     before do

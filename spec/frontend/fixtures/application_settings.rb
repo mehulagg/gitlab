@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe Admin::ApplicationSettingsController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Admin::ApplicationSettingsController, '(JavaScript fixtures)', type: :controller do
   include StubENV
   include JavaScriptFixturesHelpers
+  include AdminModeHelper
 
   let(:admin) { create(:admin) }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
@@ -13,6 +14,7 @@ describe Admin::ApplicationSettingsController, '(JavaScript fixtures)', type: :c
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     sign_in(admin)
+    enable_admin_mode!(admin)
   end
 
   render_views

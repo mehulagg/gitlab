@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MoveNotificationSettingsService do
+RSpec.describe Projects::MoveNotificationSettingsService do
   let(:user) { create(:user) }
   let(:project_with_notifications) { create(:project, namespace: user.namespace) }
   let(:target_project) { create(:project, namespace: user.namespace) }
@@ -49,7 +49,7 @@ describe Projects::MoveNotificationSettingsService do
       let(:options) { { remove_remaining_elements: false } }
 
       it 'does not remove remaining notification settings' do
-        subject.execute(project_with_notifications, options)
+        subject.execute(project_with_notifications, **options)
 
         expect(project_with_notifications.notification_settings.count).not_to eq 0
       end

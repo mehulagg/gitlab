@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TimeHelper do
+RSpec.describe TimeHelper do
   describe "#time_interval_in_words" do
     it "returns minutes and seconds" do
       intervals_in_words = {
@@ -35,6 +35,16 @@ describe TimeHelper do
 
     with_them do
       it { expect(duration_in_numbers(duration)).to eq formatted_string }
+    end
+  end
+
+  describe "#time_in_milliseconds" do
+    it "returns the time in milliseconds" do
+      freeze_time do
+        time = (Time.now.to_f * 1000).to_i
+
+        expect(time_in_milliseconds).to eq time
+      end
     end
   end
 end
