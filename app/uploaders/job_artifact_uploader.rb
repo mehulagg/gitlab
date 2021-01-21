@@ -3,12 +3,27 @@
 class JobArtifactUploader < GitlabUploader
   extend Workhorse::UploadPath
   include ObjectStorage::Concern
+  include ObjectStorage::Lockbox
 
   UnknownFileLocationError = Class.new(StandardError)
 
   storage_options Gitlab.config.artifacts
 
   alias_method :upload, :model
+
+  delegate :project_id, to: :model
+
+  def key
+    OpenSSL::HMAC.digest('SHA256', Gitlab::Application.secrets.db_key_base, project_id.to_s)
+  end
+
+  def lockbox_options
+    { key: :key }
+  end
+
+  def encrypted?
+    model.encrypted
+  end
 
   def cached_size
     return model.size if model.size.present? && !model.file_changed?

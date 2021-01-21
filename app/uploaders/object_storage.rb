@@ -493,6 +493,93 @@ module ObjectStorage
     end
   end
 
+  module Lockbox
+    extend ActiveSupport::Concern
+
+    included do
+      before :cache, :encrypt
+    end
+
+    def encrypted?
+      true
+    end
+
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    def encrypt(file)
+      return unless encrypted?
+
+      raise Lockbox::Error, 'Expected files to be equal. Please report an issue.' unless file && @file && file == @file
+
+      @file = CarrierWave::SanitizedFile.new(lockbox_notify('encrypt_file') { lockbox.encrypt_io(file) })
+    end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+    def read
+      r = super
+
+      return r unless encrypted?
+
+      lockbox_notify('decrypt_file') { lockbox.decrypt(r) } if r
+    end
+
+    def size
+      return super unless encrypted?
+
+      read.bytesize
+    end
+
+    def content_type
+      return super unless CarrierWave::VERSION.to_i >= 2
+
+      MimeMagic.by_magic(read).try(:type) || 'invalid/invalid'
+    end
+
+    def rotate_encryption!
+      io = Lockbox::IO.new(read)
+      io.original_filename = file.filename
+      previous_value = enable_processing
+      begin
+        self.enable_processing = false
+        store!(io)
+      ensure
+        self.enable_processing = previous_value
+      end
+    end
+
+    private
+
+    define_method :lockbox do
+      @lockbox ||= begin
+        table = model ? model.class.table_name : '_uploader'
+        attribute = lockbox_name
+
+        ::Lockbox::Utils.build_box(self, lockbox_options, table, attribute)
+      end
+    end
+
+    def lockbox_name
+      return mounted_as.to_s if mounted_as
+
+      uploader = self
+      uploader = uploader.parent_version while uploader.parent_version
+      uploader.class.name.delete_suffix('Uploader').underscore
+    end
+
+    def lockbox_notify(type)
+      if defined?(ActiveSupport::Notifications)
+        name = lockbox_name
+        version, _ = parent_version && parent_version.versions.find { |_, v| v == self }
+        name = "#{name} #{version} version" if version
+
+        ActiveSupport::Notifications.instrument("#{type}.lockbox", { name: name }) do
+          yield
+        end
+      else
+        yield
+      end
+    end
+  end
+
   def unsafe_use_file
     if file_storage?
       return yield path

@@ -392,6 +392,16 @@ RSpec.describe Ci::JobArtifact do
       it { is_expected.to respond_to(:cache_dir) }
       it { is_expected.to respond_to(:work_dir) }
     end
+
+    context 'when artifact is encrypted' do
+      let_it_be(:artifact) { create(:ci_job_artifact, :trace) }
+      let_it_be(:encrypted_artifact) { create(:ci_job_artifact, :trace, :encrypted) }
+
+      it 'encrypts file' do
+        expect(encrypted_artifact.file.file.read).not_to eq artifact.file.read
+        expect(encrypted_artifact.file.read).to eq artifact.file.read
+      end
+    end
   end
 
   describe 'expired?' do

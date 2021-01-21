@@ -60,6 +60,10 @@ FactoryBot.define do
       end
     end
 
+    trait :encrypted do
+      encrypted { true }
+    end
+
     trait :legacy_archive do
       archive
 
