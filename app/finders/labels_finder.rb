@@ -194,6 +194,10 @@ class LabelsFinder < UnionFinder
   end
 
   def groups_user_can_read_labels(groups)
+    # because we are sure that all groups are in the same hierarchy tree
+    # we can preset root group for all of them to optimize permission checks
+    Group.preset_root_ancestor_for(groups)
+
     DeclarativePolicy.user_scope do
       groups.select { |group| authorized_to_read_labels?(group) }
     end
