@@ -24,6 +24,9 @@ module API
         optional :token_id, type: String, desc: "The ID of the token"
       end
       resource source_type.pluralize, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+        desc 'Get list of all access tokens for the specified resource' do
+          detail 'This feature was introduced in GitLab 13.9.'
+        end
         get ":id/access_tokens" do
           resource = find_source(source_type, params[:id])
           bot_users = resource&.bots
@@ -32,6 +35,9 @@ module API
           present paginate(tokens), with: Entities::PersonalAccessToken
         end
 
+        desc 'Revokes a resource access token' do
+          detail 'This feature was introduced in GitLab 13.9.'
+        end
         delete ':id/access_tokens/:token_id' do
           resource = find_source(source_type, params[:id])
           token = find_token(params[:token_id])
@@ -43,6 +49,26 @@ module API
           ).execute
 
           service.success? ? no_content! : bad_request!(nil)
+        end
+
+        desc 'Create a resource access token' do
+          detail 'This feature was introduced in GitLab 13.9.'
+        end
+        params do
+          requires :name, type: String, desc: "Resource access token name"
+          requires :scopes, type: Array[String], desc: "The permissions of the token"
+          optional :expires_at, type: DateTime, desc: "The expiration date of the token"
+        end
+        post ':id/access_tokens' do
+          resource = find_source(source_type, params[:id])
+
+          token_response = ::ResourceAccessTokens::CreateService.new(
+            current_user,
+            resource,
+            declared_params
+          ).execute
+
+          token_response.success? ? token_response.payload[:access_token] : token_response.message
         end
       end
     end
