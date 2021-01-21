@@ -213,6 +213,8 @@ module QA
           project.name = 'push_rules'
         end
 
+        Runtime::Feature.enable(:invite_members_group_modal, project: @project)
+
         Resource::Repository::ProjectPush.fabricate! do |push|
           push.project = @project
           push.files = standard_file

@@ -12,6 +12,8 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: label_board_list.project)
+
         Flow::Login.sign_in
 
         label_board_list.project.add_member(qa_user, Resource::Members::AccessLevel::GUEST)

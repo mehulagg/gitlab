@@ -15,6 +15,8 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+        Runtime::Feature.enable(:invite_members_group_modal, group: project.group)
         project.add_member(approver1)
         project.group.add_member(approver2)
 

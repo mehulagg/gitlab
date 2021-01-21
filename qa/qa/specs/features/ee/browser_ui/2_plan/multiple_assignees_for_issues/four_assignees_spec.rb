@@ -15,6 +15,8 @@ module QA
           project.name = 'project-to-test-issue-with-multiple-assignees'
         end
 
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+
         project.add_member(user_1)
         project.add_member(user_2)
         project.add_member(user_3)

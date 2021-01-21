@@ -20,6 +20,7 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
         sign_in
       end
 

@@ -24,10 +24,6 @@ module QA
       end
     end
 
-    before do
-      Runtime::Feature.enable(:invite_members_group_modal)
-    end
-
     describe 'Group' do
       let(:group) do
         Resource::Group.fabricate_via_api! do |resource|
@@ -35,14 +31,16 @@ module QA
         end
       end
 
-      before do
-        @event_count = get_audit_event_count(group)
-      end
-
       let(:project) do
         Resource::Project.fabricate_via_api! do |resource|
           resource.name = 'project-shared-with-group'
         end
+      end
+
+      before do
+        @event_count = get_audit_event_count(group)
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+        Runtime::Feature.enable(:invite_members_group_modal, group: group)
       end
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
@@ -91,7 +89,6 @@ module QA
 
       context 'Add user, change access level, remove user', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/734' do
         before do
-          Runtime::Feature.enable(:invite_members_group_modal)
           sign_in
           group.visit!
           Page::Group::Menu.perform(&:click_group_members_item)
@@ -107,7 +104,6 @@ module QA
 
       context 'Add and remove project access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/735' do
         before do
-          Runtime::Feature.enable(:invite_members_group_modal)
           sign_in
           project.visit!
 

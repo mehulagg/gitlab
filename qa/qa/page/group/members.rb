@@ -36,11 +36,6 @@ module QA
           element :groups_list_tab
         end
 
-        view 'app/views/shared/members/_invite_group.html.haml' do
-          element :group_select_field
-          element :invite_group_button
-        end
-
         def update_access_level(username, access_level)
           within_element(:member_row, text: username) do
             click_element :access_level_dropdown

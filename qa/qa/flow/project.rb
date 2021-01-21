@@ -6,6 +6,8 @@ module QA
       module_function
 
       def add_member(project:, username:)
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+
         project.visit!
 
         Page::Project::Menu.perform(&:click_members)

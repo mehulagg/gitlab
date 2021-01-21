@@ -13,6 +13,8 @@ module QA
             sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
           end
 
+          Runtime::Feature.enable(:invite_members_group_modal, group: @group)
+
           @developer_user = Resource::User.fabricate_via_api!
 
           @group.add_member(@developer_user)

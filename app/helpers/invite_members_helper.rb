@@ -5,7 +5,6 @@ module InviteMembersHelper
 
   def can_invite_members_for_group?(group)
     Feature.enabled?(:invite_members_group_modal, group) && can?(current_user, :admin_group_member, group)
-    true
   end
 
   def can_invite_members_for_project?(project)

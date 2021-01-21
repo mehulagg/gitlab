@@ -26,6 +26,7 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |project|
           project.name = "codeowners"
         end
+        Runtime::Feature.enable(:invite_members_group_modal, project: @project)
         @project.visit!
 
         Page::Project::Menu.perform(&:click_members)
