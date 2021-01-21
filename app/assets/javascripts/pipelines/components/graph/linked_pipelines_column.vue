@@ -53,6 +53,9 @@ export default {
     isUpstream() {
       return this.type === UPSTREAM;
     },
+    rightMarginVal() {
+      return this.pipelineExpanded ? 0 : '180px';
+    },
     computedTitleClasses() {
       const positionalClasses = this.isUpstream
         ? ['gl-w-full', 'gl-text-right', 'gl-linked-pipeline-padding']
@@ -79,6 +82,7 @@ export default {
         },
         result() {
           this.loadingPipelineId = null;
+          // this.$emit('scrollContainer');
         },
         error(err, _vm, _key, type) {
           this.$emit('error', LOAD_FAILURE);
@@ -149,6 +153,7 @@ export default {
         >
           <linked-pipeline
             class="gl-display-inline-block"
+            :style="{marginRight: rightMarginVal}"
             :is-loading="isLoadingPipeline(pipeline.id)"
             :pipeline="pipeline"
             :column-title="columnTitle"

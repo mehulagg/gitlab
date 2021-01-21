@@ -101,6 +101,9 @@ export default {
     setJob(jobName) {
       this.hoveredJobName = jobName;
     },
+    slidePipelineContainer() {
+      this.$refs.mainPipelineContainer.scrollBy(178, 0);
+    },
     togglePipelineExpanded(jobName, expanded) {
       this.pipelineExpanded = {
         expanded,
@@ -116,6 +119,8 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
+      id="mainPipelineContainer"
+      ref="mainPipelineContainer"
       class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap"
       :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
@@ -165,6 +170,7 @@ export default {
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             @downstreamHovered="setJob"
             @pipelineExpandToggle="togglePipelineExpanded"
+            @scrollContainer="slidePipelineContainer"
             @error="onError"
           />
         </template>
