@@ -76,10 +76,10 @@ RSpec.describe Gitlab::Elastic::Helper do
   end
 
   describe '#create_standalone_indices' do
-    after do
-      @indices.each do |index_name, _|
-        helper.delete_index(index_name: index_name)
-      end
+    around do |example|
+      helper.delete_standalone_indices
+      example.run
+      helper.delete_standalone_indices
     end
 
     it 'creates standalone indices' do
@@ -104,8 +104,11 @@ RSpec.describe Gitlab::Elastic::Helper do
   end
 
   describe '#delete_standalone_indices' do
-    before do
+    around do |example|
+      helper.delete_standalone_indices
       helper.create_standalone_indices
+      example.run
+      helper.delete_standalone_indices
     end
 
     subject { helper.delete_standalone_indices }
