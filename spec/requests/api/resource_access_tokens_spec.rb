@@ -63,6 +63,16 @@ RSpec.describe API::ResourceAccessTokens do
           end
         end
 
+        context "when trying to get the tokens of a different project" do
+          let_it_be(:project_id) { other_project.id }
+
+          it "returns a 404" do
+            get_tokens
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+
         context "when the project does not exist" do
           let(:project_id) { '1337369' }
 
