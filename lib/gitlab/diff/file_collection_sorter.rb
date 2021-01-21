@@ -35,8 +35,10 @@ module Gitlab
         comparison = a_part <=> b_part
 
         return comparison unless comparison == 0
+        return compare_path_parts(a_parts, b_parts) if a_parts.any? && b_parts.any?
 
-        compare_path_parts(a_parts, b_parts)
+        # If A and B have the same name (e.g. symlink change), they are identical so return 0
+        0
       end
     end
   end
