@@ -9073,6 +9073,31 @@ CREATE TABLE analytics_language_trend_repository_languages (
     snapshot_date date NOT NULL
 );
 
+CREATE TABLE api_fuzzing_ci_configurations (
+    id bigint NOT NULL,
+    scan_mode integer NOT NULL,
+    target text NOT NULL,
+    api_definition text NOT NULL,
+    auth_password text,
+    auth_username text,
+    scan_profile text,
+    project_id integer NOT NULL,
+    CONSTRAINT check_0d01661009 CHECK ((char_length(scan_profile) <= 255)),
+    CONSTRAINT check_6accb6a20b CHECK ((char_length(api_definition) <= 255)),
+    CONSTRAINT check_6db764d25b CHECK ((char_length(auth_username) <= 255)),
+    CONSTRAINT check_785871829d CHECK ((char_length(target) <= 255)),
+    CONSTRAINT check_be5c11c983 CHECK ((char_length(auth_password) <= 255))
+);
+
+CREATE SEQUENCE api_fuzzing_ci_configurations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE api_fuzzing_ci_configurations_id_seq OWNED BY api_fuzzing_ci_configurations.id;
+
 CREATE TABLE appearances (
     id integer NOT NULL,
     title character varying NOT NULL,
@@ -18391,6 +18416,8 @@ ALTER TABLE ONLY analytics_devops_adoption_snapshots ALTER COLUMN id SET DEFAULT
 
 ALTER TABLE ONLY analytics_instance_statistics_measurements ALTER COLUMN id SET DEFAULT nextval('analytics_instance_statistics_measurements_id_seq'::regclass);
 
+ALTER TABLE ONLY api_fuzzing_ci_configurations ALTER COLUMN id SET DEFAULT nextval('api_fuzzing_ci_configurations_id_seq'::regclass);
+
 ALTER TABLE ONLY appearances ALTER COLUMN id SET DEFAULT nextval('appearances_id_seq'::regclass);
 
 ALTER TABLE ONLY application_setting_terms ALTER COLUMN id SET DEFAULT nextval('application_setting_terms_id_seq'::regclass);
@@ -19410,6 +19437,9 @@ ALTER TABLE ONLY analytics_instance_statistics_measurements
 
 ALTER TABLE ONLY analytics_language_trend_repository_languages
     ADD CONSTRAINT analytics_language_trend_repository_languages_pkey PRIMARY KEY (programming_language_id, project_id, snapshot_date);
+
+ALTER TABLE ONLY api_fuzzing_ci_configurations
+    ADD CONSTRAINT api_fuzzing_ci_configurations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY appearances
     ADD CONSTRAINT appearances_pkey PRIMARY KEY (id);
@@ -21073,6 +21103,8 @@ CREATE INDEX index_analytics_ca_project_stages_on_start_event_label_id ON analyt
 CREATE INDEX index_analytics_cycle_analytics_group_stages_custom_only ON analytics_cycle_analytics_group_stages USING btree (id) WHERE (custom = true);
 
 CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_name ON analytics_devops_adoption_segments USING btree (name);
+
+CREATE INDEX index_api_fuzzing_ci_configurations_on_project_id ON api_fuzzing_ci_configurations USING btree (project_id);
 
 CREATE INDEX index_application_settings_on_custom_project_templates_group_id ON application_settings USING btree (custom_project_templates_group_id);
 
@@ -24554,6 +24586,9 @@ ALTER TABLE ONLY group_wiki_repositories
 
 ALTER TABLE ONLY open_project_tracker_data
     ADD CONSTRAINT fk_rails_1987546e48 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY api_fuzzing_ci_configurations
+    ADD CONSTRAINT fk_rails_19b9d64fc6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY gpg_signatures
     ADD CONSTRAINT fk_rails_19d4f1c6f9 FOREIGN KEY (gpg_key_subkey_id) REFERENCES gpg_key_subkeys(id) ON DELETE SET NULL;
