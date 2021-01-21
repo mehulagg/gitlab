@@ -7,7 +7,7 @@ RSpec.describe GroupPolicy do
 
   let(:epic_rules) do
     %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
-       destroy_epic_link read_epic_board read_epic_list)
+       destroy_epic_link read_epic_board read_epic_list admin_epic_board)
   end
 
   context 'when epics feature is disabled' do
