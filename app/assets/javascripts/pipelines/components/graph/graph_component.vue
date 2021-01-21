@@ -102,7 +102,11 @@ export default {
       this.hoveredJobName = jobName;
     },
     slidePipelineContainer() {
-      this.$refs.mainPipelineContainer.scrollBy(178, 0);
+      this.$refs.mainPipelineContainer.scrollBy({
+        left: 178,
+        top: 0,
+        behavior: 'smooth'
+      });
     },
     togglePipelineExpanded(jobName, expanded) {
       this.pipelineExpanded = {
