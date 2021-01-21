@@ -17,7 +17,7 @@
 
   .row
     .form-group.col-md-6
-      = f.label :expires_at, _('Expires at (optional)'), class: 'label-bold'
+      = f.label :expires_at, _('Expires at'), class: 'label-bold'
       .input-icon-wrapper
 
         = render_if_exists 'personal_access_tokens/callout_max_personal_access_token_lifetime'
