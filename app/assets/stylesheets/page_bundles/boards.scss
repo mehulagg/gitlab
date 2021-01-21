@@ -138,6 +138,10 @@
   border: 1px solid var(--gray-100, $gray-100);
 }
 
+.highlighted {
+  box-shadow: 0 0 2px 4px $blue-200;
+}
+
 .board-header {
   &.has-border::before {
     border-top: 3px solid;

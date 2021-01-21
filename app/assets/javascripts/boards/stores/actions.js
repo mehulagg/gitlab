@@ -534,6 +534,14 @@ export default {
     state.addColumnFormVisible = visible;
   },
 
+  highlightList: ({ state }, listId) => {
+    state.boardLists[listId].highlight = true;
+
+    setTimeout(() => {
+      state.boardLists[listId].highlight = false;
+    }, 4000);
+  },
+
   setSelectedProject: ({ commit }, project) => {
     commit(types.SET_SELECTED_PROJECT, project);
   },

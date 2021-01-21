@@ -39,35 +39,53 @@ export default {
     this.filterLabels();
   },
   methods: {
-    ...mapActions(['createList', 'fetchLabels', 'setAddColumnFormVisibility']),
-    columnExists(label) {
+    ...mapActions(['createList', 'fetchLabels', 'highlightList', 'setAddColumnFormVisibility']),
+    getListByLabel(label) {
       if (this.shouldUseGraphQL) {
-        return Boolean(this.getListByLabelId(fullLabelId(label)));
+        return this.getListByLabelId(fullLabelId(label));
       }
-      return Boolean(boardsStore.findListByLabelId(label.id));
+      return boardsStore.findListByLabelId(label.id);
+    },
+    columnExists(label) {
+      return Boolean(this.getListByLabel(label));
+    },
+    highlight(listId) {
+      if (this.shouldUseGraphQL) {
+        // TODO: should this be position??
+        this.highlightList(listId);
+      } else {
+        const list = boardsStore.state.lists.find(({ id }) => id === listId);
+        list.highlighted = true;
+        setTimeout(() => {
+          list.highlighted = false;
+        }, 4000);
+      }
     },
     addList() {
       if (!this.selectedLabelId) {
         return;
       }
 
+      const label = this.labels.find(({ id }) => id === this.selectedLabelId);
+
       if (this.columnExists({ id: this.selectedLabelId })) {
-        // TODO: highlight and scroll to column
+        // TODO: maybe expand if collapsed?
+        const listId = this.getListByLabel(label).id;
+        this.highlight(listId);
         this.setAddColumnFormVisibility(false);
         return;
       }
 
       if (this.shouldUseGraphQL) {
         this.createList({ labelId: this.selectedLabelId })
-          .then(() => {
+          .then((list) => {
             this.setAddColumnFormVisibility(false);
+            this.highlight(list.id);
           })
           .catch((e) => {
             // create list failed, reopen form and show error
           });
       } else {
-        const label = this.labels.find(({ id }) => id === this.selectedLabelId);
-
         // if label doesn't exist
         if (!label) {
           return;
@@ -83,6 +101,8 @@ export default {
             color: label.color,
           },
         });
+
+        this.highlight(boardsStore.findListByLabelId(label.id).id);
       }
     },
 

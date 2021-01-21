@@ -53,6 +53,14 @@ export default {
       },
       deep: true,
     },
+    list: {
+      deep: true,
+      handler() {
+        if (this.list.highlighted) {
+          this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      },
+    },
   },
   mounted() {
     const instance = this;
@@ -97,6 +105,7 @@ export default {
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
+      :class="{ highlighted: list.highlighted }"
     >
       <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
       <board-list ref="board-list" :disabled="disabled" :issues="listIssues" :list="list" />
