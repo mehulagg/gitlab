@@ -82,12 +82,17 @@ module API
       params do
         optional :before, type: Time, desc: "The timestamp before which environments can be deleted. Defaults to 30 days ago.", default: -> { 30.days.ago }
         optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100
-        optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to false.", default: false
+        optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to true.", default: true
       end
       delete ":id/environments/stale" do
         authorize! :read_environment, user_project
 
-        environments = user_project.environments.stopped.in_review_folder.where("created_at < ?", params[:before]).limit(params[:limit])
+        environments = user_project.environments
+                                   .stopped
+                                   .in_review_folder
+                                   .where("created_at < ?", params[:before])
+                                   .order("created_at DESC")
+                                   .limit(params[:limit])
         destroyed_environments = []
 
         environments.find_each do |env|
