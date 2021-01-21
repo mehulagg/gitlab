@@ -66,6 +66,15 @@ module EE
       mailer.provisioned_member_access_granted_email(group_member.id).deliver_later
     end
 
+    def notify_oncall_participants_of_alert(users, alert)
+      # Should this be here? It is for the other alert email trigger, but I'm not so sure.
+      return if project.emails_disabled?
+
+      users.each do |participant|
+        mailer.prometheus_alert_fired_email(project, user, alert).deliver_later
+      end
+    end
+
     private
 
     def add_mr_approvers_email(merge_request, approvers, current_user)

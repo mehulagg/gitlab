@@ -13,8 +13,14 @@ module IncidentManagement
     validates :ends_at, presence: true
     validate :timeframes_do_not_overlap, if: :rotation
 
+    scope :for_rotation, -> (rotation) { where(rotation: rotation) }
+
     scope :for_timeframe, -> (starts_at, ends_at) do
       where("tstzrange(starts_at, ends_at, '[)') && tstzrange(?, ?, '[)')", starts_at, ends_at)
+    end
+
+    scope :for_timestamp, -> (timestamp) do
+      where('starts_at <= :timestamp AND ends_at > :timestamp', timestamp: timestamp)
     end
 
     private

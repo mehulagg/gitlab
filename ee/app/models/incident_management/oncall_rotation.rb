@@ -13,7 +13,7 @@ module IncidentManagement
     NAME_LENGTH = 200
 
     belongs_to :schedule, class_name: 'OncallSchedule', inverse_of: 'rotations', foreign_key: 'oncall_schedule_id'
-    has_many :participants, class_name: 'OncallParticipant', inverse_of: :rotation
+    has_many :participants, -> { ordered_asc }, class_name: 'OncallParticipant', inverse_of: :rotation
     has_many :users, through: :participants
     has_many :shifts, class_name: 'OncallShift', inverse_of: :rotation, foreign_key: :rotation_id
 
@@ -21,6 +21,7 @@ module IncidentManagement
     validates :starts_at, presence: true
     validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
+
 
     delegate :project, to: :schedule
 

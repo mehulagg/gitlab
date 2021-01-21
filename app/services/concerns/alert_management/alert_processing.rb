@@ -141,3 +141,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::AlertProcessing.prepend_if_ee('EE::AlertManagement::AlertProcessing')

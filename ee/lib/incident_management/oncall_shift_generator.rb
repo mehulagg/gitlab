@@ -124,7 +124,7 @@ module IncidentManagement
     end
 
     def participants
-      @participants ||= rotation.participants.ordered_asc
+      @participants ||= rotation.participants
     end
 
     def rotation_starts_at
