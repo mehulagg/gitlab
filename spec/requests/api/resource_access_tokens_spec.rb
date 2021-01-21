@@ -11,7 +11,7 @@ RSpec.describe API::ResourceAccessTokens do
     describe "GET /:id/access_tokens" do
       subject(:get_tokens) { get api("/projects/#{project_id}/access_tokens", user) }
 
-      context "when the user has valid permissions" do
+      context "when the user has maintainer permissions" do
         let_it_be(:project_bot) { create(:user, :project_bot) }
         let_it_be(:access_tokens) { create_list(:personal_access_token, 3, user: project_bot) }
         let_it_be(:project_id) { project.id }
@@ -104,7 +104,7 @@ RSpec.describe API::ResourceAccessTokens do
         project.add_maintainer(project_bot)
       end
 
-      context "when the user has valid permissions" do
+      context "when the user has maintainer permissions" do
         before do
           project.add_maintainer(user)
         end
@@ -153,7 +153,7 @@ RSpec.describe API::ResourceAccessTokens do
     describe "POST /:id/access_tokens" do
       subject(:create_token) { post api("/projects/#{project_id}/access_tokens", user), params: params }
 
-      context "when the user has valid permissions" do
+      context "when the user has maintainer permissions" do
         let_it_be(:project_id) { project.id }
 
         before do
@@ -162,26 +162,26 @@ RSpec.describe API::ResourceAccessTokens do
 
         context "with valid params" do
           context "with full params" do
-            let_it_be(:params) { { name: 'test', scopes: ["api"], expires_at: Date.today + 1.month } }
+            let_it_be(:params) { { name: "test", scopes: ["api"], expires_at: Date.today + 1.month } }
 
-            it 'creates a project access token with the params', :aggregate_failures do
+            it "creates a project access token with the params", :aggregate_failures do
               create_token
 
               expect(response).to have_gitlab_http_status(:created)
-              expect(json_response["name"]).to eq('test')
+              expect(json_response["name"]).to eq("test")
               expect(json_response["scopes"]).to eq(["api"])
               expect(json_response["expires_at"]).to eq((Date.today + 1.month).iso8601)
             end
           end
 
           context "when 'expires_at' is not set" do
-            let_it_be(:params) { { name: 'test', scopes: ["api"] } }
+            let_it_be(:params) { { name: "test", scopes: ["api"] } }
 
-            it 'creates a project access token with the params', :aggregate_failures do
+            it "creates a project access token with the params", :aggregate_failures do
               create_token
 
               expect(response).to have_gitlab_http_status(:created)
-              expect(json_response["name"]).to eq('test')
+              expect(json_response["name"]).to eq("test")
               expect(json_response["scopes"]).to eq(["api"])
               expect(json_response["expires_at"]).to eq(nil)
             end
@@ -201,7 +201,7 @@ RSpec.describe API::ResourceAccessTokens do
           end
 
           context "when missing the 'scopes' param" do
-            let_it_be(:params) { { name: 'test', expires_at: 5.days.from_now } }
+            let_it_be(:params) { { name: "test", expires_at: 5.days.from_now } }
 
             it "does not create a project access token without 'scopes'" do
               create_token
@@ -212,11 +212,11 @@ RSpec.describe API::ResourceAccessTokens do
           end
         end
 
-        context 'when trying to create a token in a different project' do
+        context "when trying to create a token in a different project" do
           let_it_be(:project_id) { other_project.id }
-          let_it_be(:params) { { name: 'test', scopes: ["api"], expires_at: Date.today + 1.month } }
+          let_it_be(:params) { { name: "test", scopes: ["api"], expires_at: Date.today + 1.month } }
 
-          it 'does not create the token, and returns the project not found error' do
+          it "does not create the token, and returns the project not found error" do
             create_token
 
             expect(response).to have_gitlab_http_status(:not_found)
@@ -226,7 +226,7 @@ RSpec.describe API::ResourceAccessTokens do
       end
 
       context "when the user does not have valid permissions" do
-        let_it_be(:params) { { name: 'test', scopes: ["api"], expires_at: Date.today + 1.month } }
+        let_it_be(:params) { { name: "test", scopes: ["api"], expires_at: Date.today + 1.month } }
         let_it_be(:project_id) { project.id }
 
         context "when the user is a developer" do
@@ -234,7 +234,7 @@ RSpec.describe API::ResourceAccessTokens do
             project.add_developer(user)
           end
 
-          it 'does not create the token, and returns the permission error' do
+          it "does not create the token, and returns the permission error" do
             create_token
 
             expect(response).to have_gitlab_http_status(:bad_request)
@@ -250,7 +250,7 @@ RSpec.describe API::ResourceAccessTokens do
             project.add_maintainer(user)
           end
 
-          it 'does not allow a project access token to create another project access token' do
+          it "does not allow a project access token to create another project access token" do
             create_token
 
             expect(response).to have_gitlab_http_status(:bad_request)
