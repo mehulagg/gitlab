@@ -190,14 +190,16 @@ RSpec.describe 'Promotions', :js do
       expect(find('.promotion-issue-weight-sidebar-message')).to have_content 'Improve issues management with Issue weight and GitLab Enterprise Edition'
     end
 
-    it 'is removed after dismissal', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222518' do
+    it 'is removed after dismissal' do
       visit project_issue_path(project, issue)
       wait_for_requests
 
+      expect(page).to have_selector('.js-weight-sidebar-callout')
       within 'div.js-weight-sidebar-callout' do
         find('.btn-link.js-toggle-button.js-weight-sidebar-callout').click
         click_link "Don't show me this again"
       end
+      wait_for_requests
 
       expect(page).not_to have_selector('.js-weight-sidebar-callout')
     end
