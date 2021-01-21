@@ -1,0 +1,26 @@
+# Shopify Theme Kit is a CLI tool for Shopify Themes: https://shopify.github.io/themekit/
+# See the full usage of this template described in: https://medium.com/@gogl.alex/how-to-deploy-shopify-themes-automatically-1ac17ee1229c
+
+image: python:2
+
+stages:
+  - staging
+  - production
+
+staging:
+  image: python:2
+  stage: staging
+  script:
+    - curl -s https://shopify.github.io/themekit/scripts/install.py | python
+    - theme deploy -e=staging
+  only:
+    - master
+
+production:
+  image: python:2
+  stage: production
+  script:
+    - curl -s https://shopify.github.io/themekit/scripts/install.py | python
+    - theme deploy -e=production
+  only:
+    - tags
