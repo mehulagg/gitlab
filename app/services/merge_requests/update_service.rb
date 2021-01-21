@@ -109,6 +109,10 @@ module MergeRequests
       create_assignee_note(merge_request, old_assignees)
       notification_service.async.reassigned_merge_request(merge_request, current_user, old_assignees)
       todo_service.reassigned_assignable(merge_request, current_user, old_assignees)
+
+      merge_request.assignees.each do |assignee|
+        merge_request_activity_counter.track_users_assigned_to_mr(user: assignee.id)
+      end
     end
 
     def handle_reviewers_change(merge_request, old_reviewers)
@@ -117,6 +121,10 @@ module MergeRequests
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
       todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
       invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
+
+      merge_request.reviewers.each do |reviewer|
+        merge_request_activity_counter.track_users_review_requested(user: reviewer.id)
+      end
     end
 
     def create_branch_change_note(issuable, branch_type, old_branch, new_branch)
