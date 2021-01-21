@@ -1,6 +1,7 @@
 <script>
 import { GlTabs, GlTab, GlBadge } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import { ALL_SCOPE_TABS } from '../constants';
 
 export default {
@@ -35,6 +36,9 @@ export default {
     ...mapState(['query']),
   },
   methods: {
+    handleTabChange(scope) {
+      visitUrl(setUrlParams({ scope, page: null, state: null, confidential: null }));
+    },
     isTabActive(tab) {
       return tab === this.query.scope;
     },
@@ -53,6 +57,7 @@ export default {
         v-for="tab in scopeTabs"
         :key="$options.ALL_SCOPE_TABS[tab].scope"
         :active="isTabActive($options.ALL_SCOPE_TABS[tab].scope)"
+        @click="handleTabChange($options.ALL_SCOPE_TABS[tab].scope)"
         >
         <template #title>
           <span> {{ $options.ALL_SCOPE_TABS[tab].title }} </span>
