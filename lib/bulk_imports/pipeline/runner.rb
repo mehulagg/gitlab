@@ -10,17 +10,17 @@ module BulkImports
       def run(context)
         raise MarkedAsFailedError if marked_as_failed?(context)
 
-        info(context, message: 'Pipeline started', pipeline_class: pipeline)
+        info(context, message: 'Pipeline started')
 
-        Array.wrap(extracted_data_from(context)).each do |entry|
+        extracted_data_from(context).each do |entry|
           transformers.each do |transformer|
-            entry = run_pipeline_step(:transformer, transformer.class.name, context) do
+            entry = run_pipeline_step(:transformer, context, transformer.class.name) do
               transformer.transform(context, entry)
             end
           end
 
-          run_pipeline_step(:loader, loader.class.name, context) do
-            loader.load(context, entry)
+          run_pipeline_step(:loader, context) do
+            load(context, entry)
           end
         end
 
@@ -31,14 +31,14 @@ module BulkImports
 
       private # rubocop:disable Lint/UselessAccessModifier
 
-      def run_pipeline_step(type, class_name, context)
+      def run_pipeline_step(type, context, class_name = nil)
         raise MarkedAsFailedError if marked_as_failed?(context)
 
-        info(context, type => class_name)
+        info(context, step: type, class_name: class_name)
 
         yield
       rescue MarkedAsFailedError
-        log_skip(context, type => class_name)
+        log_skip(context, step: type, class_name: class_name)
       rescue => e
         log_import_failure(e, context)
 
@@ -46,8 +46,8 @@ module BulkImports
       end
 
       def extracted_data_from(context)
-        run_pipeline_step(:extractor, extractor.class.name, context) do
-          extractor.extract(context)
+        run_pipeline_step(:extractor, context) do
+          Array.wrap(extract(context))
         end
       end
 
@@ -89,13 +89,18 @@ module BulkImports
       end
 
       def info(context, extra = {})
-        logger.info(log_base_params(context).merge(extra))
+        logger.info(
+          log_base_params(context)
+          .merge(extra)
+          .compact_blank!
+        )
       end
 
       def log_base_params(context)
         {
           bulk_import_entity_id: context.entity.id,
-          bulk_import_entity_type: context.entity.source_type
+          bulk_import_entity_type: context.entity.source_type,
+          pipeline_class: pipeline
         }
       end
 

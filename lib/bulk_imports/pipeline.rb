@@ -10,16 +10,10 @@ module BulkImports
 
       private
 
-      def extractor
-        @extractor ||= instantiate(self.class.get_extractor)
-      end
-
       def transformers
-        @transformers ||= self.class.transformers.map(&method(:instantiate))
-      end
-
-      def loader
-        @loaders ||= instantiate(self.class.get_loader)
+        @transformers ||= self.class.transformers.map do |config|
+          config[:klass].new(config[:options])
+        end
       end
 
       def after_run
@@ -31,7 +25,6 @@ module BulkImports
       end
 
       def instantiate(class_config)
-        class_config[:klass].new(class_config[:options])
       end
 
       def abort_on_failure?
@@ -40,32 +33,16 @@ module BulkImports
     end
 
     class_methods do
-      def extractor(klass, options = nil)
-        class_attributes[:extractor] = { klass: klass, options: options }
-      end
-
       def transformer(klass, options = nil)
         add_attribute(:transformers, klass, options)
-      end
-
-      def loader(klass, options = nil)
-        class_attributes[:loader] = { klass: klass, options: options }
       end
 
       def after_run(&block)
         class_attributes[:after_run] = block
       end
 
-      def get_extractor
-        class_attributes[:extractor]
-      end
-
       def transformers
         class_attributes[:transformers]
-      end
-
-      def get_loader
-        class_attributes[:loader]
       end
 
       def after_run_callback
