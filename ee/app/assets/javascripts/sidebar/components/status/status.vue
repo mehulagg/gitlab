@@ -64,6 +64,9 @@ export default {
     statusText() {
       return this.status ? healthStatusTextMap[this.status] : s__('Sidebar|None');
     },
+    dropdownHeaderText() {
+      return s__('Sidebar|Assign health status');
+    },
     dropdownText() {
       return this.status ? healthStatusTextMap[this.status] : s__('Select health status');
     },
@@ -173,54 +176,36 @@ export default {
 
       <div
         data-testid="dropdownWrapper"
-        class="dropdown dropdown-menu-selectable"
+        class="dropdown"
         :class="{ show: isDropdownShowing, 'gl-display-none': !isDropdownShowing }"
       >
         <gl-dropdown
           ref="dropdown"
           class="gl-w-full"
+          :header-text="dropdownHeaderText"
           :text="dropdownText"
           @keydown.esc.native="hideDropdown"
           @hide="hideDropdown"
         >
-          <div class="dropdown-title gl-display-flex">
-            <span class="health-title gl-ml-auto">{{ s__('Sidebar|Assign health status') }}</span>
-            <gl-button
-              :aria-label="__('Close')"
-              variant="link"
-              class="dropdown-title-button dropdown-menu-close gl-ml-auto gl-text-gray-200!"
-              icon="close"
-              @click="hideDropdown"
-            />
-          </div>
+          <gl-dropdown-item
+            :is-check-item="true"
+            :is-checked="isSelected(null)"
+            @click="handleDropdownClick(null)"
+          >
+            {{ s__('Sidebar|No status') }}
+          </gl-dropdown-item>
 
-          <div class="dropdown-content dropdown-body">
-            <gl-dropdown-item @click="handleDropdownClick(null)">
-              <gl-button
-                variant="link"
-                class="dropdown-item health-dropdown-item gl-px-8!"
-                :class="{ 'is-active': isSelected(null) }"
-              >
-                {{ s__('Sidebar|No status') }}
-              </gl-button>
-            </gl-dropdown-item>
+          <gl-dropdown-divider />
 
-            <gl-dropdown-divider class="divider health-divider" />
-
-            <gl-dropdown-item
-              v-for="option in statusOptions"
-              :key="option.key"
-              @click="handleDropdownClick(option.key)"
-            >
-              <gl-button
-                variant="link"
-                class="dropdown-item health-dropdown-item gl-px-8!"
-                :class="{ 'is-active': isSelected(option.key) }"
-              >
-                {{ option.value }}
-              </gl-button>
-            </gl-dropdown-item>
-          </div>
+          <gl-dropdown-item
+            v-for="option in statusOptions"
+            :key="option.key"
+            :is-check-item="true"
+            :is-checked="isSelected(option.key)"
+            @click="handleDropdownClick(option.key)"
+          >
+            {{ option.value }}
+          </gl-dropdown-item>
         </gl-dropdown>
       </div>
 
