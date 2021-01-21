@@ -37,13 +37,13 @@ export default {
       {{ errorMessage }}
     </gl-alert>
 
-    <h1>GitLab for Jira Configuration</h1>
+    <h2>{{ __('JiraService|GitLab for Jira Configuration') }}</h2>
 
     <div
       v-if="showNewUI"
       class="gl-display-flex gl-justify-content-space-between gl-my-5 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
     >
-      <h3 data-testid="new-jira-connect-ui-heading">{{ s__('Integrations|Linked namespaces') }}</h3>
+      <h5 data-testid="new-jira-connect-ui-heading">{{ s__('Integrations|Linked namespaces') }}</h5>
       <gl-button
         v-gl-modal-directive="'add-namespace-modal'"
         category="primary"

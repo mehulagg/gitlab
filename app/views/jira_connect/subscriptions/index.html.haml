@@ -3,16 +3,16 @@
 
 .jira-connect-user
   - if current_user
-    - user_link = link_to(current_user.to_reference, user_path(current_user), target: '_blank', rel: 'noopener noreferrer')
+    - user_link = link_to(current_user.to_reference, jira_connect_users_path, target: '_blank', rel: 'noopener noreferrer')
     = _('Signed in to GitLab as %{user_link}').html_safe % { user_link: user_link }
   - elsif @subscriptions.present?
     = link_to _('Sign in to GitLab'), jira_connect_users_path, target: '_blank', rel: 'noopener noreferrer', class: 'js-jira-connect-sign-in'
 
 .jira-connect-app
   - if current_user.blank? && @subscriptions.empty?
-    %h1
-      GitLab for Jira Configuration
     %h2.heading-with-border Sign in to GitLab.com to get started.
+    %h2= s_('JiraService|GitLab for Jira Configuration')
+    %p= s_('JiraService|Sign in to GitLab.com to get started.')
 
     .gl-mt-5
       = external_link _('Sign in to GitLab'), jira_connect_users_path, class: 'ak-button ak-button__appearance-primary js-jira-connect-sign-in'
