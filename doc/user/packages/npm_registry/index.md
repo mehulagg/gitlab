@@ -266,7 +266,8 @@ Prerequisites:
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
 - Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
-  It must match exactly, including the case. The NPM naming convention requires it.
+  It must match exactly, including the case. This is different than the
+  NPM naming convention, but it is required to work with the GitLab Package Registry.
 
 To work with NPM commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
