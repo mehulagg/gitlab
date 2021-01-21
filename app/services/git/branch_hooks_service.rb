@@ -77,6 +77,7 @@ module Git
       enqueue_process_commit_messages
       enqueue_jira_connect_sync_messages
       enqueue_metrics_dashboard_sync
+      enqueue_ci_config_change_event
     end
 
     def branch_remove_hooks
@@ -87,6 +88,16 @@ module Git
       return unless default_branch?
 
       ::Metrics::Dashboard::SyncDashboardsWorker.perform_async(project.id)
+    end
+
+    def enqueue_ci_config_change_event
+      return unless ::Feature.enabled?(:usage_data_unique_users_committing_ciconfigfile, default_enabled: :yaml)
+      return unless default_branch?
+      return unless changing_ci_config?
+
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(
+        'o_pipeline_authoring_unique_users_committing_ciconfigfile', values: current_user.id
+      )
     end
 
     # Schedules processing of commit messages
@@ -189,6 +200,12 @@ module Git
       end
 
       set
+    end
+
+    def changing_ci_config?
+      commits.flat_map(&:diffs).flat_map(&:diff_files).any? do |diff_file|
+        diff_file.new_path == project.ci_config_path_or_default
+      end
     end
   end
 end
