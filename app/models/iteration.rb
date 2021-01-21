@@ -105,30 +105,20 @@ class Iteration < ApplicationRecord
     start_date_changed? || due_date_changed?
   end
 
-  # ensure dates do not overlap with other Iterations in the same group/project tree
+  # ensure dates do not overlap with other Iterations in the same cadence tree
   def dates_do_not_overlap
-    iterations = if parent_group.present? && resource_parent.is_a?(Project)
-                   Iteration.where(group: parent_group.self_and_ancestors).or(project.iterations)
-                 elsif parent_group.present?
-                   Iteration.where(group: parent_group.self_and_ancestors)
-                 else
-                   project.iterations
-                 end
+    return unless iteration_cadence.iterations.where.not(id: self.id).within_timeframe(start_date, due_date).exists?
 
-    return unless iterations.where.not(id: self.id).within_timeframe(start_date, due_date).exists?
-
-    errors.add(:base, s_("Iteration|Dates cannot overlap with other existing Iterations"))
+    # for now we only have a single default cadence within a group just to wrap the iterations into a set.
+    # once we introduce multiple cadences per group we need to change this message.
+    # related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/299312
+    errors.add(:base, s_("Iteration|Dates cannot overlap with other existing Iterations within this group"))
   end
 
   # ensure dates are in the future
   def future_date
-    if start_date_changed?
-      errors.add(:start_date, s_("Iteration|cannot be in the past")) if start_date < Date.current
+    if start_or_due_dates_changed?
       errors.add(:start_date, s_("Iteration|cannot be more than 500 years in the future")) if start_date > 500.years.from_now
-    end
-
-    if due_date_changed?
-      errors.add(:due_date, s_("Iteration|cannot be in the past")) if due_date < Date.current
       errors.add(:due_date, s_("Iteration|cannot be more than 500 years in the future")) if due_date > 500.years.from_now
     end
   end
