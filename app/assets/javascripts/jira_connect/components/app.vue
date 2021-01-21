@@ -19,15 +19,15 @@ export default {
     GlModalDirective,
   },
   mixins: [glFeatureFlagsMixin()],
-  data() {
-    return {
-      location: '',
-    };
-  },
   inject: {
     usersPath: {
       default: '',
     },
+  },
+  data() {
+    return {
+      location: '',
+    };
   },
   computed: {
     ...mapState(['errorMessage']),
@@ -35,7 +35,11 @@ export default {
       return this.glFeatures.newJiraConnectUi;
     },
     usersPathWithReturnTo() {
-      return `${this.usersPath}?return_to=${this.location}`;
+      if (this.location) {
+        return `${this.usersPath}?return_to=${this.location}`;
+      }
+
+      return this.usersPath;
     },
   },
   modal: {
@@ -49,7 +53,6 @@ export default {
   methods: {
     async setLocation() {
       this.location = await getLocation();
-      console.log(this.location);
     },
   },
 };
@@ -65,7 +68,7 @@ export default {
 
     <div
       v-if="showNewUI"
-      class="gl-display-flex gl-justify-content-space-between gl-my-5 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
+      class="gl-display-flex gl-justify-content-space-between gl-my-7 gl-pb-4 gl-border-b-solid gl-border-b-1 gl-border-b-gray-200"
     >
       <h5 class="gl-align-self-center gl-mb-0" data-testid="new-jira-connect-ui-heading">
         {{ s__('Integrations|Linked namespaces') }}
