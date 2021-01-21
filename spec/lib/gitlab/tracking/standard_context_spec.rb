@@ -52,4 +52,14 @@ RSpec.describe Gitlab::Tracking::StandardContext do
       end
     end
   end
+
+  describe '#event' do
+    it 'delegates to Gitlab::Tracking.event' do
+      expect(Gitlab::Tracking).to receive(:event) # rubocop:disable Rspec/ExpectGitlabTracking
+        .with('category', 'action', label: 'label', property: 'property', value: 0, context: [],
+              standard_context: kind_of(Gitlab::Tracking::StandardContext))
+
+      subject.event('category', 'action', label: 'label', property: 'property', value: 0)
+    end
+  end
 end
