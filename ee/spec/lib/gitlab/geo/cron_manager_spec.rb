@@ -8,6 +8,7 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
   jobs = %w[
     ldap_test
     repository_check_worker
+    gitlab_usage_ping_worker
     geo_repository_verification_primary_batch_worker
     geo_repository_sync_worker
     geo_file_download_dispatch_worker

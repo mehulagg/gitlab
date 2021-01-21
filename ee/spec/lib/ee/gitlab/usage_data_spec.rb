@@ -77,6 +77,7 @@ RSpec.describe Gitlab::UsageData do
         license_id
         elasticsearch_enabled
         geo_enabled
+        geo_secondary
         license_trial_ends_on
       ))
     end
@@ -170,6 +171,7 @@ RSpec.describe Gitlab::UsageData do
     it 'gathers feature usage data of EE' do
       expect(subject[:elasticsearch_enabled]).to eq(Gitlab::CurrentSettings.elasticsearch_search?)
       expect(subject[:geo_enabled]).to eq(Gitlab::Geo.enabled?)
+      expect(subject[:geo_secondary]).to eq(Gitlab::Geo.secondary?)
       expect(subject[:license_trial_ends_on]).to eq(License.trial_ends_on)
     end
   end

@@ -6,6 +6,7 @@ module Gitlab
       COMMON_JOBS = %w[
         geo_metrics_update_worker
         repository_check_worker
+        gitlab_usage_ping_worker
       ].freeze
 
       PRIMARY_JOBS = %w[
