@@ -7,7 +7,7 @@ RSpec.describe IncidentManagement::OncallRotation do
 
   describe '.associations' do
     it { is_expected.to belong_to(:schedule) }
-    it { is_expected.to have_many(:participants) }
+    it { is_expected.to have_many(:participants).order(id: :asc) }
     it { is_expected.to have_many(:users).through(:participants) }
     it { is_expected.to have_many(:shifts) }
   end

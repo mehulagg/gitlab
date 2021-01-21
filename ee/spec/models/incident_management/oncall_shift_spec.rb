@@ -45,36 +45,36 @@ RSpec.describe IncidentManagement::OncallShift do
   end
 
   describe 'scopes' do
+    let_it_be(:monday) { Time.current.next_week(:monday) }
+    let_it_be(:tuesday) { monday + 1.day }
+    let_it_be(:wednesday) { tuesday + 1.day }
+    let_it_be(:thursday) { wednesday + 1.day }
+    let_it_be(:friday) { thursday + 1.day }
+    let_it_be(:saturday) { friday + 1.day }
+    let_it_be(:sunday) { saturday + 1.day }
+
+    # Using multiple participants in different rotations
+    # to be able to simultaneously save shifts which would
+    # conflict if they were part of the same rotation
+    let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access) }
+    let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access) }
+
+    # First rotation
+    let_it_be(:mon_to_tue) { create_shift(monday, tuesday, participant) }
+    let_it_be(:tue_to_wed) { create_shift(tuesday, wednesday, participant) }
+    let_it_be(:wed_to_thu) { create_shift(wednesday, thursday, participant) }
+    let_it_be(:thu_to_fri) { create_shift(thursday, friday, participant) }
+    let_it_be(:fri_to_sat) { create_shift(friday, saturday, participant) }
+    let_it_be(:sat_to_sun) { create_shift(saturday, sunday, participant) }
+
+    # Second rotation
+    let_it_be(:mon_to_thu) { create_shift(monday, thursday, participant2) }
+    let_it_be(:fri_to_sun) { create_shift(friday, sunday, participant2) }
+
+    # Third rotation
+    let_it_be(:tue_to_sun) { create_shift(wednesday, sunday, participant3) }
+
     describe '.for_timeframe' do
-      let_it_be(:monday) { Time.current.next_week(:monday) }
-      let_it_be(:tuesday) { monday + 1.day }
-      let_it_be(:wednesday) { tuesday + 1.day }
-      let_it_be(:thursday) { wednesday + 1.day }
-      let_it_be(:friday) { thursday + 1.day }
-      let_it_be(:saturday) { friday + 1.day }
-      let_it_be(:sunday) { saturday + 1.day }
-
-      # Using multiple participants in different rotations
-      # to be able to simultaneously save shifts which would
-      # conflict if they were part of the same rotation
-      let_it_be(:participant2) { create(:incident_management_oncall_participant, :with_developer_access) }
-      let_it_be(:participant3) { create(:incident_management_oncall_participant, :with_developer_access) }
-
-      # First rotation
-      let_it_be(:mon_to_tue) { create_shift(monday, tuesday, participant) }
-      let_it_be(:tue_to_wed) { create_shift(tuesday, wednesday, participant) }
-      let_it_be(:wed_to_thu) { create_shift(wednesday, thursday, participant) }
-      let_it_be(:thu_to_fri) { create_shift(thursday, friday, participant) }
-      let_it_be(:fri_to_sat) { create_shift(friday, saturday, participant) }
-      let_it_be(:sat_to_sun) { create_shift(saturday, sunday, participant) }
-
-      # Second rotation
-      let_it_be(:mon_to_thu) { create_shift(monday, thursday, participant2) }
-      let_it_be(:fri_to_sun) { create_shift(friday, sunday, participant2) }
-
-      # Third rotation
-      let_it_be(:tue_to_sun) { create_shift(wednesday, sunday, participant3) }
-
       subject(:shifts) { described_class.for_timeframe(wednesday, saturday) }
 
       it 'includes shifts which cover the timeframe' do
@@ -106,6 +106,25 @@ RSpec.describe IncidentManagement::OncallShift do
       let_it_be(:shift2) { create_shift(Time.current + 2.hours, Time.current + 3.hours, participant) }
 
       it { is_expected.to eq [shift2, shift1]}
+    end
+
+    describe '.for_timestamp' do
+      subject(:shifts) { described_class.for_timestamp(wednesday) }
+
+      it 'includes shifts which cover the timestamp' do
+        expect(shifts).to contain_exactly(
+          mon_to_thu, # Covers timestamp
+          wed_to_thu, # Starts at timestamp
+          tue_to_sun # Covers timestamp
+        )
+        # Notable excluded shift: tue_to_wed (Ends at timestamp)
+      end
+    end
+
+    describe '.for_rotation' do
+      subject(:shifts) { described_class.for_rotation(participant2.rotation) }
+
+      it { is_expected.to contain_exactly(mon_to_thu, fri_to_sun) }
     end
   end
 

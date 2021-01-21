@@ -6,6 +6,7 @@ RSpec.describe Projects::Alerting::NotifyService do
   let_it_be(:project, refind: true) { create(:project) }
 
   describe '#execute' do
+    let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
     let(:service) { described_class.new(project, payload) }
     let(:token) { integration.token }
     let(:payload) do
@@ -13,8 +14,6 @@ RSpec.describe Projects::Alerting::NotifyService do
         'title' => 'Test alert title'
       }
     end
-
-    let(:integration) { create(:alert_management_http_integration, project: project) }
 
     subject { service.execute(token, integration) }
 
@@ -61,6 +60,48 @@ RSpec.describe Projects::Alerting::NotifyService do
             expect { subject }.to change { existing_alert.reload.resolved? }.from(false).to(true)
             expect(existing_alert.ended_at).to eq(payload['end_time'])
           end
+        end
+      end
+    end
+
+    context 'with on-call schedules' do
+      let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+      let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+      let(:notification_service) { spy }
+
+      context 'with oncall schedules enabled' do
+        before do
+          stub_licensed_features(oncall_schedules: project)
+        end
+
+        it 'sends a notification email to all users oncall' do
+          expect(NotificationService).to receive(:new).and_return(notification_service)
+
+          expect(notification_service).to receive_message_chain(:async, :notify_oncall_users_of_alert).with(
+            [participant.user],
+            having_attributes(class: AlertManagement::Alert, title: payload['title'])
+          )
+          expect(subject).to be_success
+        end
+
+        it 'does not have an N+1 for fetching users' do
+          subject # Initial serivce request has many additional requests
+
+          query_count = ActiveRecord::QueryRecorder.new { described_class.new(project.reload, payload).execute(token, integration) }
+
+          new_rotation = create(:incident_management_oncall_rotation, schedule: schedule)
+          create(:incident_management_oncall_participant, :with_developer_access, rotation: new_rotation)
+
+          expect { described_class.new(project.reload, payload).execute(token, integration) }.not_to exceed_query_limit(query_count)
+        end
+      end
+
+      context 'with oncall schedules disabled' do
+        it 'does not notify the on-call users' do
+          expect(NotificationService).not_to receive(:new)
+
+          expect(subject).to be_success
         end
       end
     end

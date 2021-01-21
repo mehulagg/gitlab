@@ -13,7 +13,8 @@ module IncidentManagement
     NAME_LENGTH = 200
 
     belongs_to :schedule, class_name: 'OncallSchedule', inverse_of: 'rotations', foreign_key: 'oncall_schedule_id'
-    has_many :participants, class_name: 'OncallParticipant', inverse_of: :rotation
+    # Note! If changing the order of participants, also change the :with_shift_generation_associations scope.
+    has_many :participants, -> { order(id: :asc) }, class_name: 'OncallParticipant', inverse_of: :rotation
     has_many :users, through: :participants
     has_many :shifts, class_name: 'OncallShift', inverse_of: :rotation, foreign_key: :rotation_id
 
@@ -23,6 +24,13 @@ module IncidentManagement
     validates :length_unit, presence: true
 
     scope :started, -> { where('starts_at < ?', Time.current) }
+    scope :except_ids, -> (ids) { where.not(id: ids) }
+    scope :with_shift_generation_associations, -> do
+      joins(:participants)
+       .distinct
+       .includes(:participants, :schedule)
+       .order(:id, 'incident_management_oncall_participants.id ASC')
+    end
 
     delegate :project, to: :schedule
 
