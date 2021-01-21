@@ -42,10 +42,18 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    if @namespace_id.present?
-      "subscription-plan-#{@plan}-#{@namespace_id}"
+    if Feature.enabled?(:subscription_plan_cache_key)
+      if @namespace_id.present?
+        "subscription-plan-#{@plan}-#{@namespace_id}"
+      else
+        "subscription-plan-#{@plan}"
+      end
     else
-      "subscription-plan-#{@plan}"
+      if @namespace_id.present?
+        "subscription-plans-#{@plan}-#{@namespace_id}"
+      else
+        "subscription-plans-#{@plan}"
+      end
     end
   end
 end
