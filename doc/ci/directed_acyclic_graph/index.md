@@ -97,16 +97,3 @@ To see the needs visualization, click on the **Needs** tab when viewing a pipeli
 Clicking a node highlights all the job paths it depends on.
 
 ![Needs visualization with path highlight](img/dag_graph_example_clicked_v13_1.png)
-
-### Enable or disable Needs Visualization **(CORE ONLY)**
-
-The needs visualization is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it for your instance:
-
-```ruby
-# Instance-wide
-Feature.disable(:dag_pipeline_tab)
-# or by project
-Feature.disable(:dag_pipeline_tab, Project.find(<project ID>))
-```
