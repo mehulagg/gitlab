@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Iteration do
-  let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
 
   describe "#iid" do
     it "is properly scoped on project and group" do
@@ -54,11 +54,11 @@ RSpec.describe Iteration do
     context 'when iteration_cadence does not exists for the group' do
       let(:iteration) { build(:iteration, group: create(:group), iteration_cadence: set_cadence) }
 
-      it 'creates a new iteration_cadence record and sets it to the reecord' do
+      it 'creates a new iteration_cadence record and sets it to the record' do
         expect { iteration.save! }.to change { Iterations::Cadence.count }.from(1).to(2)
       end
 
-      it 'sets the newly created iteration_cadence to the reecord' do
+      it 'sets the newly created iteration_cadence to the record' do
         iteration.save!
 
         expect(iteration.iteration_cadence).to eq(Iterations::Cadence.last)
@@ -138,7 +138,7 @@ RSpec.describe Iteration do
   context 'Validations' do
     subject { build(:iteration, group: group, start_date: start_date, due_date: due_date) }
 
-    describe '#not_belonging_to_project' do
+    describe 'when iteration belongs to project' do
       subject { build(:iteration, project: project, start_date: Time.current, due_date: 1.day.from_now) }
 
       it 'is invalid' do
@@ -170,13 +170,13 @@ RSpec.describe Iteration do
         let(:due_date) { 6.days.from_now }
 
         shared_examples_for 'overlapping dates' do |skip_constraint_test: false|
-          context 'when start_date is in range' do
+          context 'when start_date overlaps' do
             let(:start_date) { 5.days.from_now }
             let(:due_date) { 3.weeks.from_now }
 
             it 'is not valid' do
               expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations')
+              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
             end
 
             unless skip_constraint_test
@@ -187,13 +187,13 @@ RSpec.describe Iteration do
             end
           end
 
-          context 'when end_date is in range' do
+          context 'when due_date overlaps' do
             let(:start_date) { Time.current }
             let(:due_date) { 6.days.from_now }
 
             it 'is not valid' do
               expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations')
+              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
             end
 
             unless skip_constraint_test
@@ -207,7 +207,7 @@ RSpec.describe Iteration do
           context 'when both overlap' do
             it 'is not valid' do
               expect(subject).not_to be_valid
-              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations')
+              expect(subject.errors[:base]).to include('Dates cannot overlap with other existing Iterations within this group')
             end
 
             unless skip_constraint_test
@@ -221,7 +221,7 @@ RSpec.describe Iteration do
 
         context 'group' do
           it_behaves_like 'overlapping dates' do
-            let(:constraint_name) { 'iteration_start_and_due_daterange_group_id_constraint' }
+            let(:constraint_name) { 'iteration_start_and_due_date_iteration_cadence_id_constraint' }
           end
 
           context 'different group' do
@@ -239,11 +239,12 @@ RSpec.describe Iteration do
 
             subject { build(:iteration, group: subgroup, start_date: start_date, due_date: due_date) }
 
-            it_behaves_like 'overlapping dates', skip_constraint_test: true
+            it { is_expected.to be_valid }
           end
         end
 
-        context 'project' do
+        # Skipped. Pending https://gitlab.com/gitlab-org/gitlab/-/issues/299864
+        xcontext 'project' do
           let_it_be(:existing_iteration) { create(:iteration, :skip_project_validation, project: project, start_date: 4.days.from_now, due_date: 1.week.from_now) }
 
           subject { build(:iteration, :skip_project_validation, project: project, start_date: start_date, due_date: due_date) }
@@ -273,16 +274,16 @@ RSpec.describe Iteration do
               expect { subject.save! }.not_to raise_exception
             end
           end
-        end
 
-        context 'project in a group' do
-          let_it_be(:project) { create(:project, group: create(:group)) }
-          let_it_be(:existing_iteration) { create(:iteration, :skip_project_validation, project: project, start_date: 4.days.from_now, due_date: 1.week.from_now) }
+          context 'project in a group' do
+            let_it_be(:project) { create(:project, group: create(:group)) }
+            let_it_be(:existing_iteration) { create(:iteration, :skip_project_validation, project: project, start_date: 4.days.from_now, due_date: 1.week.from_now) }
 
-          subject { build(:iteration, :skip_project_validation, project: project, start_date: start_date, due_date: due_date) }
+            subject { build(:iteration, :skip_project_validation, project: project, start_date: start_date, due_date: due_date) }
 
-          it_behaves_like 'overlapping dates' do
-            let(:constraint_name) { 'iteration_start_and_due_daterange_project_id_constraint' }
+            it_behaves_like 'overlapping dates' do
+              let(:constraint_name) { 'iteration_start_and_due_daterange_project_id_constraint' }
+            end
           end
         end
       end
@@ -300,19 +301,23 @@ RSpec.describe Iteration do
         let(:start_date) { 1.week.ago }
         let(:due_date) { 1.week.from_now }
 
-        it 'is not valid' do
-          expect(subject).not_to be_valid
-          expect(subject.errors[:start_date]).to include('cannot be in the past')
-        end
+        it { is_expected.to be_valid }
       end
 
       context 'when due_date is in the past' do
+        let(:start_date) { 2.weeks.ago }
+        let(:due_date) { 1.week.ago }
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'when due_date is before start date' do
         let(:start_date) { Time.current }
         let(:due_date) { 1.week.ago }
 
         it 'is not valid' do
           expect(subject).not_to be_valid
-          expect(subject.errors[:due_date]).to include('cannot be in the past')
+          expect(subject.errors[:due_date]).to include('must be greater than start date')
         end
       end
 

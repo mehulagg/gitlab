@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
+    )
   )
-)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -20111,7 +20111,7 @@ ALTER TABLE ONLY iteration_cadences
     ADD CONSTRAINT iteration_cadences_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY sprints
-    ADD CONSTRAINT iteration_start_and_due_daterange_group_id_constraint EXCLUDE USING gist (group_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((group_id IS NOT NULL));
+    ADD CONSTRAINT iteration_start_and_due_date_iteration_cadence_id_constraint EXCLUDE USING gist (iteration_cadence_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((group_id IS NOT NULL));
 
 ALTER TABLE ONLY sprints
     ADD CONSTRAINT iteration_start_and_due_daterange_project_id_constraint EXCLUDE USING gist (project_id WITH =, daterange(start_date, due_date, '[]'::text) WITH &&) WHERE ((project_id IS NOT NULL));

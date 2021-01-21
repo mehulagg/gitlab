@@ -16049,10 +16049,7 @@ msgstr ""
 msgid "Iterations"
 msgstr ""
 
-msgid "Iteration|Dates cannot overlap with other existing Iterations"
-msgstr ""
-
-msgid "Iteration|cannot be in the past"
+msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
 msgstr ""
 
 msgid "Iteration|cannot be more than 500 years in the future"
