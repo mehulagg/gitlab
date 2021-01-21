@@ -3,6 +3,8 @@ import { mapState } from 'vuex';
 import { GlAlert, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
+import { getLocation } from '~/jira_connect/api';
 import GroupsList from './groups_list.vue';
 
 export default {
@@ -17,15 +19,37 @@ export default {
     GlModalDirective,
   },
   mixins: [glFeatureFlagsMixin()],
+  data() {
+    return {
+      location: '',
+    };
+  },
+  inject: {
+    usersPath: {
+      default: '',
+    },
+  },
   computed: {
     ...mapState(['errorMessage']),
     showNewUI() {
       return this.glFeatures.newJiraConnectUi;
     },
+    usersPathWithReturnTo() {
+      return `${this.usersPath}?return_to=${this.location}`;
+    },
   },
   modal: {
     cancelProps: {
       text: __('Cancel'),
+    },
+  },
+  created() {
+    this.setLocation();
+  },
+  methods: {
+    async setLocation() {
+      this.location = await getLocation();
+      console.log(this.location);
     },
   },
 };
@@ -47,19 +71,30 @@ export default {
         {{ s__('Integrations|Linked namespaces') }}
       </h5>
       <gl-button
-        v-gl-modal-directive="'add-namespace-modal'"
+        v-if="usersPath"
         category="primary"
         variant="info"
         class="gl-align-self-center"
-        >{{ s__('Integrations|Add namespace') }}</gl-button
+        :href="usersPathWithReturnTo"
+        target="_blank"
+        >{{ s__('Integrations|Sign in to add namespaces') }}</gl-button
       >
-      <gl-modal
-        modal-id="add-namespace-modal"
-        :title="s__('Integrations|Link namespaces')"
-        :action-cancel="$options.modal.cancelProps"
-      >
-        <groups-list />
-      </gl-modal>
+      <template v-else>
+        <gl-button
+          v-gl-modal-directive="'add-namespace-modal'"
+          category="primary"
+          variant="info"
+          class="gl-align-self-center"
+          >{{ s__('Integrations|Add namespace') }}</gl-button
+        >
+        <gl-modal
+          modal-id="add-namespace-modal"
+          :title="s__('Integrations|Link namespaces')"
+          :action-cancel="$options.modal.cancelProps"
+        >
+          <groups-list />
+        </gl-modal>
+      </template>
     </div>
   </div>
 </template>
