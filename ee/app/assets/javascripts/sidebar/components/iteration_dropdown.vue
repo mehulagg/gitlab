@@ -40,7 +40,12 @@ export default {
         // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220379
         const nodes = data.group?.iterations?.nodes || [];
 
-        return iterationSelectTextMap.noIterationItem.concat(nodes);
+        return nodes;
+      },
+      result({ data }) {
+        const nodes = data.group?.iterations?.nodes || [];
+
+        this.iterations = iterationSelectTextMap.noIterationItem.concat(nodes);
       },
       skip() {
         return !this.shouldFetch;
