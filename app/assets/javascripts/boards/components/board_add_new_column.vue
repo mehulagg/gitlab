@@ -42,9 +42,9 @@ export default {
     ...mapActions(['createList', 'fetchLabels']),
     columnExists(label) {
       if (this.shouldUseGraphQL) {
-        return this.getListByLabelId(fullLabelId(label));
+        return Boolean(this.getListByLabelId(fullLabelId(label)));
       }
-      return boardsStore.findListByLabelId(label.id);
+      return Boolean(boardsStore.findListByLabelId(label.id));
     },
     addList() {
       if (!this.selectedLabelId) {
@@ -115,9 +115,11 @@ export default {
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base gl-bg-white"
     >
-      <h4 class="gl-px-3 gl-pb-3 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100">
+      <h3
+        class="gl-font-base gl-px-5 gl-py-5 gl-m-0 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+      >
         {{ __('New label list') }}
-      </h4>
+      </h3>
 
       <div class="gl-display-flex gl-flex-direction-column gl-p-4 gl-h-full gl-overflow-hidden">
         <!-- selectbox is here in EE -->
@@ -128,7 +130,7 @@ export default {
           v-model.trim="searchTerm"
           debounce="250"
           :placeholder="$options.i18n.searchPlaceholder"
-          class="gl-mb-4"
+          class="gl-mb-5"
           @input="filterLabels"
         />
 
@@ -138,17 +140,17 @@ export default {
           <rect width="430" height="20" x="10" y="85" rx="4" />
         </gl-skeleton-loader>
 
-        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-mr-n4">
+        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto">
           <label
             v-for="label in labels"
             :key="label.id"
-            :disabled="columnExists(label)"
-            class="gl-display-flex gl-flex-align-items-center gl-mb-4"
+            :class="{ 'gl-text-gray-500': columnExists(label) }"
+            class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
           >
             <gl-form-radio
               :value="label.id"
               :disabled="columnExists(label)"
-              class="gl-mb-0 gl-mr-3"
+              class="gl-mb-0 gl-mr-3 gl-outline-0"
             />
             <span
               class="dropdown-label-box gl-top-0"
@@ -162,9 +164,9 @@ export default {
       </div>
 
       <div
-        class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-50"
+        class="gl-display-flex gl-p-3 gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-bg-gray-10"
       >
-        <gl-button class="gl-ml-auto gl-mr-4">{{ __('Cancel') }}</gl-button>
+        <gl-button class="gl-ml-auto gl-mr-3">{{ __('Cancel') }}</gl-button>
         <gl-button variant="success" class="gl-mr-4" @click="addList">{{ __('Add') }}</gl-button>
       </div>
     </div>
