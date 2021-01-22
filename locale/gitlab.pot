@@ -8417,6 +8417,9 @@ msgstr ""
 msgid "Created At"
 msgstr ""
 
+msgid "Created Date"
+msgstr ""
+
 msgid "Created On"
 msgstr ""
 
@@ -18572,6 +18575,9 @@ msgid "More information."
 msgstr ""
 
 msgid "More than %{number_commits_distance} commits different with %{default_branch}"
+msgstr ""
+
+msgid "Most Relevant"
 msgstr ""
 
 msgid "Most stars"
