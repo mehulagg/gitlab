@@ -3,6 +3,7 @@ Alertmanager
 Algolia
 Alibaba
 allowlist
+allowlisted
 allowlisting
 allowlists
 anonymized
@@ -54,6 +55,7 @@ blockquoted
 blockquotes
 blockquoting
 boolean
+booleans
 Bootsnap
 browsable
 Bugzilla
@@ -131,6 +133,8 @@ Disqus
 Divio
 Dockerfile
 Dockerfiles
+Dockerize
+Dockerizing
 dogfood
 dogfooding
 dogfoods
@@ -156,6 +160,7 @@ failsafe
 Falco
 fastlane
 favicon
+favorited
 Figma
 Filebeat
 Fio
@@ -322,6 +327,8 @@ negatable
 Netlify
 Nokogiri
 npm
+nullability
+nullable
 Nurtch
 nyc
 OAuth
@@ -387,6 +394,7 @@ pseudonymizer
 Puma
 Python
 Qualys
+queryable
 Quicktime
 Rackspace
 Raspbian
@@ -551,6 +559,9 @@ Twitter
 TypeScript
 Ubuntu
 unapplied
+unapprove
+unapproved
+unapproving
 unarchive
 unarchived
 unarchives
@@ -587,6 +598,7 @@ unoptimizing
 unprioritized
 unprotect
 unprotected
+unprotecting
 unprotects
 unprovision
 unprovisioned
@@ -627,6 +639,7 @@ uploader
 uploaders
 upvoted
 upvotes
+URIs
 validator
 validators
 vendored
@@ -643,6 +656,8 @@ WebdriverIO
 Webex
 webpack
 webserver
+websocket
+websockets
 whitepaper
 whitepapers
 wireframe
