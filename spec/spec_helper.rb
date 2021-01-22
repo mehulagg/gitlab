@@ -13,6 +13,7 @@ end
 Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
 
 require './spec/deprecation_toolkit_env'
+DeprecationToolkitEnv.configure!
 
 require './spec/simplecov_env'
 SimpleCovEnv.start!
