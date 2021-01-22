@@ -8,7 +8,10 @@ module BulkImports
 
         abort_on_failure!
 
-        extractor Common::Extractors::GraphqlExtractor, query: Graphql::GetGroupQuery
+        extractor Common::Extractors::GraphqlExtractor,
+                  query: Graphql::GetGroupQuery,
+                  key_path: %w[data group]
+
 
         transformer Common::Transformers::HashKeyDigger, key_path: %w[data group]
         transformer Common::Transformers::UnderscorifyKeysTransformer

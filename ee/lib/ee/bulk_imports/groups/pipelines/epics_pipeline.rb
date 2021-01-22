@@ -8,7 +8,8 @@ module EE
           include ::BulkImports::Pipeline
 
           extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
-            query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
+                    query: EE::BulkImports::Groups::Graphql::GetEpicsQuery,
+                    key_path: %w[data group epics]
 
           transformer ::BulkImports::Common::Transformers::HashKeyDigger, key_path: %w[data group epics]
           transformer ::BulkImports::Common::Transformers::UnderscorifyKeysTransformer
