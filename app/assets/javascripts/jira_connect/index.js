@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import $ from 'jquery';
 import setConfigs from '@gitlab/ui/dist/config';
 import Translate from '~/vue_shared/translate';
 import GlFeatureFlagsPlugin from '~/vue_shared/gl_feature_flags_plugin';
@@ -14,57 +13,63 @@ Vue.use(Vuex);
 
 const store = createStore();
 
+const reqComplete = () => {
+  AP.navigator.reload();
+};
+
+const reqFailed = (res, fallbackErrorMessage) => {
+  const { error = fallbackErrorMessage } = res || {};
+
+  store.commit(SET_ERROR_MESSAGE, error);
+};
+
+const updateSignInLinks = () => {
+  if (typeof AP.getLocation === 'function') {
+    AP.getLocation((location) => {
+      Array.from(document.querySelectorAll('.js-jira-connect-sign-in')).forEach((el) => {
+        const updatedLink = `${el.getAttribute('href')}?return_to=${location}`;
+        el.setAttribute('href', updatedLink);
+      });
+    });
+  }
+};
+
 /**
  * Initialize form handlers for the Jira Connect app
  */
 const initJiraFormHandlers = () => {
-  const reqComplete = () => {
-    AP.navigator.reload();
-  };
+  document
+    .querySelector('#add-subscription-form')
+    .addEventListener('submit', function onAddSubscriptionForm(e) {
+      e.preventDefault();
 
-  const reqFailed = (res, fallbackErrorMessage) => {
-    const { error = fallbackErrorMessage } = res || {};
+      const addPath = e.target.getAttribute('action');
+      const namespace = e.target.querySelector('#namespace-input').getAttribute('value');
 
-    store.commit(SET_ERROR_MESSAGE, error);
-  };
-
-  if (typeof AP.getLocation === 'function') {
-    AP.getLocation((location) => {
-      $('.js-jira-connect-sign-in').each(function updateSignInLink() {
-        const updatedLink = `${$(this).attr('href')}?return_to=${location}`;
-        $(this).attr('href', updatedLink);
-      });
+      addSubscription(addPath, namespace)
+        .then(reqComplete)
+        .catch((err) => reqFailed(err.response.data, 'Failed to add namespace. Please try again.'));
     });
-  }
 
-  $('#add-subscription-form').on('submit', function onAddSubscriptionForm(e) {
-    const addPath = $(this).attr('action');
-    const namespace = $('#namespace-input').val();
+  document
+    .querySelector('.remove-subscription')
+    .addEventListener('click', function onRemoveSubscriptionClick(e) {
+      e.preventDefault();
 
-    e.preventDefault();
-
-    addSubscription(addPath, namespace)
-      .then(reqComplete)
-      .catch((err) => reqFailed(err.response.data, 'Failed to add namespace. Please try again.'));
-  });
-
-  $('.remove-subscription').on('click', function onRemoveSubscriptionClick(e) {
-    const removePath = $(this).attr('href');
-    e.preventDefault();
-
-    removeSubscription(removePath)
-      .then(reqComplete)
-      .catch((err) =>
-        reqFailed(err.response.data, 'Failed to remove namespace. Please try again.'),
-      );
-  });
+      const removePath = e.target.getAttribute('href');
+      removeSubscription(removePath)
+        .then(reqComplete)
+        .catch((err) =>
+          reqFailed(err.response.data, 'Failed to remove namespace. Please try again.'),
+        );
+    });
 };
 
 function initJiraConnect() {
-  const el = document.querySelector('.js-jira-connect-app');
-
   initJiraFormHandlers();
+  updateSignInLinks();
 
+  const el = document.querySelector('.js-jira-connect-app');
   if (!el) {
     return null;
   }
