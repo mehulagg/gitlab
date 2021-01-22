@@ -54,6 +54,7 @@ export default {
         .then(({ data }) => {
           if (data?.destroyContainerRepository?.errors[0]) {
             this.$emit('error', data?.destroyContainerRepository?.errors);
+            return;
           }
           this.$emit('success');
         })
