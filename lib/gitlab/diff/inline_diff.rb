@@ -31,20 +31,7 @@ module Gitlab
         # Skip inline diff if empty line was replaced with content
         return if old_line == ""
 
-        lcp = longest_common_prefix(old_line, new_line)
-        lcs = longest_common_suffix(old_line[lcp..-1], new_line[lcp..-1])
-
-        lcp += offset
-        old_length = old_line.length + offset
-        new_length = new_line.length + offset
-
-        old_diff_range = lcp..(old_length - lcs - 1)
-        new_diff_range = lcp..(new_length - lcs - 1)
-
-        old_diffs = [old_diff_range] if old_diff_range.begin <= old_diff_range.end
-        new_diffs = [new_diff_range] if new_diff_range.begin <= new_diff_range.end
-
-        [old_diffs, new_diffs]
+        Gitlab::Diff::CharDiff.new(old_line, new_line).changed_ranges(offset: offset)
       end
 
       class << self

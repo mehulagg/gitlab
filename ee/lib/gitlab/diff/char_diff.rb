@@ -18,6 +18,34 @@ module Gitlab
         @changes
       end
 
+      def changed_ranges(offset: 0)
+        old_diffs = []
+        new_diffs = []
+        new_pointer = old_pointer = offset
+
+        generate_diff.each do |diff|
+          action, content = diff
+          content_size = content.size
+
+          if action == :equal
+            new_pointer += content_size
+            old_pointer += content_size
+          end
+
+          if action == :delete
+            old_diffs << (old_pointer..(old_pointer + content_size - 1))
+            old_pointer += content.size
+          end
+
+          if action == :insert
+            new_diffs << (new_pointer..(new_pointer + content_size - 1))
+            new_pointer += content.size
+          end
+        end
+
+        [old_diffs, new_diffs]
+      end
+
       def to_html
         @changes.map do |op, text|
           %{<span class="#{html_class_names(op)}">#{ERB::Util.html_escape(text)}</span>}

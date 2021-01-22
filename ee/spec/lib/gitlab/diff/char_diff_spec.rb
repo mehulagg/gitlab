@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Diff::CharDiff do
   let(:old_string) { "Helo \n Worlld" }
   let(:new_string) { "Hello \n World" }
 
-  subject { described_class.new(old_string, new_string) }
+  subject(:diff) { described_class.new(old_string, new_string) }
 
   describe '#generate_diff' do
     context 'when old string is nil' do
@@ -36,6 +36,28 @@ RSpec.describe Gitlab::Diff::CharDiff do
         [:delete, "l"],
         [:equal, "d"]
       ])
+    end
+  end
+
+  describe '#changed_ranges' do
+    subject { diff.changed_ranges }
+
+    context 'when old string is nil' do
+      let(:old_string) { nil }
+
+      it 'returns lists of changes' do
+        old_diffs, new_diffs = subject
+
+        expect(old_diffs).to eq([])
+        expect(new_diffs).to eq([0..12])
+      end
+    end
+
+    it 'returns ranges of changes' do
+      old_diffs, new_diffs = subject
+
+      expect(old_diffs).to eq([11..11])
+      expect(new_diffs).to eq([3..3])
     end
   end
 
