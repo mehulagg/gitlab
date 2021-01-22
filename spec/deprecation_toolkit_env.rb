@@ -55,7 +55,6 @@ module DeprecationToolkitEnv
   # one by one
   def self.allowed_kwarg_warning_paths
     %w[
-      spec/support/helpers/next_instance_of.rb
       rspec-mocks-3.10.0/lib/rspec/mocks/message_expectation.rb
       activerecord-6.0.3.4/lib/active_record/migration.rb
       devise-4.7.3/lib/devise/test/controller_helpers.rb
