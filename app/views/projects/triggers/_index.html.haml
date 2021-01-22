@@ -30,23 +30,20 @@
       .card-footer
 
         %p
-          In the following examples, you can see the exact API call you need to
-          make in order to rebuild a specific
+          These examples show the API call that
+          rebuilds a branch or tag's
           %code ref
-          (branch or tag) with a trigger token.
-        %p
-          All you need to do is replace the
-          %code TOKEN
-          and
-          %code REF_NAME
-          with the trigger token and the branch or tag name respectively.
+          with a trigger token.
 
         %h5.gl-mt-3
           Use cURL
 
         %p.light
-          Copy one of the tokens above, set your branch or tag name, and that
-          reference will be rebuilt.
+          Replace
+          %code TOKEN
+          with your trigger token and
+          %code REF_NAME
+          with the branch or tag name.
 
         %pre
           :plain
@@ -58,10 +55,9 @@
           Use .gitlab-ci.yml
 
         %p.light
-          In the
+          To rebuild the project at the end of the pipeline, include this snippet in your
           %code .gitlab-ci.yml
-          of another project, include the following snippet.
-          The project will be rebuilt at the end of the pipeline.
+          file.
 
         %pre
           :plain
@@ -73,8 +69,8 @@
           Use webhook
 
         %p.light
-          Add the following webhook to another project for Push and Tag push events.
-          The project will be rebuilt at the corresponding event.
+          To rebuild the project,
+          use this webhook for Push and Tag Push events.
 
         %pre
           :plain
@@ -83,10 +79,11 @@
           Pass job variables
 
         %p.light
-          Add
+          To distinguish between triggered pipelines and other pipelines,
+          add
           %code variables[VARIABLE]=VALUE
-          to an API request. Variable values can be used to distinguish between triggered pipelines and normal pipelines.
-
+          to the API request.
+        %p.light
           With cURL:
 
         %pre
