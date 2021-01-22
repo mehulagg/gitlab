@@ -93,7 +93,7 @@ export default {
 
 <template>
   <div data-qa-selector="iteration_container">
-    <gl-dropdown :text="title" class="dropdown gl-w-full">
+    <gl-dropdown :text="title" class="gl-w-full">
       <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>

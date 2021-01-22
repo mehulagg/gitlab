@@ -85,8 +85,11 @@ describe('IterationDropdown', () => {
     });
   };
 
+  const resetQuerySpy = () => {
+    groupIterationsSpy.mockClear();
+  };
+
   afterEach(() => {
-    jest.restoreAllMocks();
     wrapper.destroy();
     wrapper = null;
   });
@@ -120,6 +123,10 @@ describe('IterationDropdown', () => {
       });
     });
 
+    afterEach(() => {
+      resetQuerySpy();
+    });
+
     it(`groupIterations query called ${called}`, () => {
       const times = called ? 1 : 0;
 
@@ -130,8 +137,15 @@ describe('IterationDropdown', () => {
   });
 
   describe('when bootstrap dropdown event is emitted', () => {
-    it('changes shouldFetch to be true', async () => {
+    beforeEach(() => {
       createQuerySpy();
+    });
+
+    afterEach(() => {
+      resetQuerySpy();
+    });
+
+    it('changes shouldFetch to be true', async () => {
       createComponentWithApollo({});
 
       wrapper.vm.$root.$emit('bv::dropdown::shown');
@@ -143,7 +157,7 @@ describe('IterationDropdown', () => {
     });
   });
 
-  describe('GlDropdownItem with the right title and id', () => {
+  describe('GlDropdownItem with the right title', () => {
     const id = 'id';
     const title = 'title';
 
@@ -154,29 +168,33 @@ describe('IterationDropdown', () => {
     });
 
     it('renders title $title', () => {
-      expect(
+      const findFirstDropdownItemByTitle = () =>
         wrapper
           .findAll(GlDropdownItem)
           .filter((w) => w.text() === title)
-          .at(0)
-          .text(),
-      ).toBe(title);
+          .at(0);
+
+      expect(findFirstDropdownItemByTitle().text()).toBe(title);
     });
 
     it('checks the correct dropdown item', () => {
-      expect(
+      const findFirstDropdownItemByChecked = () =>
         wrapper
           .findAll(GlDropdownItem)
           .filter((w) => w.props('isChecked') === true)
-          .at(0)
-          .text(),
-      ).toBe(title);
+          .at(0);
+
+      expect(findFirstDropdownItemByChecked().text()).toBe(title);
     });
   });
 
   describe('when clicking on dropdown item', () => {
     beforeEach(() => {
       createQuerySpy();
+    });
+
+    afterEach(() => {
+      resetQuerySpy();
     });
 
     describe('when currentIteration id is equal to iteration id', () => {
@@ -225,6 +243,10 @@ describe('IterationDropdown', () => {
       createQuerySpy();
 
       createComponentWithApollo({ shouldFetch: true });
+    });
+
+    afterEach(() => {
+      createQuerySpy();
     });
 
     it('sets the search term', async () => {
