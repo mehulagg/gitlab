@@ -33,7 +33,22 @@ namespace :gitlab do
   )
 
   namespace :graphql do
-    desc 'Gitlab | GraphQL | Validate queries'
+    desc 'GitLab | GraphQL | Analyze queries'
+    task analyze: [:environment, :enable_feature_flags] do |t, args|
+      queries = if args.to_a.present?
+                  args.to_a.flat_map { |path| Gitlab::Graphql::Queries.find(path) }
+                else
+                  Gitlab::Graphql::Queries.all
+                end
+
+      queries.each do |defn|
+        $stdout.puts defn.file
+        $stdout.puts " - complexity: #{defn.complexity(GitlabSchema)}"
+        $stdout.puts ""
+      end
+    end
+
+    desc 'GitLab | GraphQL | Validate queries'
     task validate: [:environment, :enable_feature_flags] do |t, args|
       queries = if args.to_a.present?
                   args.to_a.flat_map { |path| Gitlab::Graphql::Queries.find(path) }

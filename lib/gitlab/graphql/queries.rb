@@ -145,6 +145,16 @@ module Gitlab
           return redacted if printer.fields_printed > 0
         end
 
+        def complexity(schema)
+          query = GraphQL::Query.new(schema, text, variables: {})
+          # why is this necessary? I have no idea! A bug, perhaps?
+          query.define_singleton_method(:arguments_for) do |_x, _y|
+            Struct.new(:keyword_arguments).new({})
+          end
+
+          GraphQL::Analysis::AST.analyze_query(query, [GraphQL::Analysis::AST::QueryComplexity]).first
+        end
+
         def query
           return @query if defined?(@query)
 
