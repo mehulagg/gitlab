@@ -229,6 +229,39 @@ DELETE /projects/:id/environments/:environment_id
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments/1"
 ```
 
+## Delete stale review environments
+
+It returns `200` if the operation was successful and `400` in case of an error. Returns an array of deleted environments.
+
+```plaintext
+DELETE /projects/:id/environments/stale
+```
+
+| Attribute | Type    | Required | Description           |
+| --------- | ------- | -------- | --------------------- |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `dry_run` | boolean | no | Defaults to true. If true, no actual deletions will be performed. Can be used to test what will be removed. |
+| `before` | time | no | Defaults to 30 days ago. Set the timestamp from before which environments will be deleted. |
+| `limit` | integer | no | Defaults to 100. Minimum of 1, maximum of 1000. Set a limit on how many records can be deleted in a single call. |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/environments/stale"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "review/example-mr",
+    "slug": "review-example-mr",
+    "external_url": "https://review-example-mr.gitlab.example.com",
+    "state": "stopped"
+  }
+]
+```
+
 ## Stop an environment
 
 It returns `200` if the environment was successfully stopped, and `404` if the environment does not exist.
