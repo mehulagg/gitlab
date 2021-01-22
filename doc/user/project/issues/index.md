@@ -39,7 +39,7 @@ Issues have a flexible content and metadata structure. Here are some of the
 elements you can provide in an issue:
 
 - Title
-- Description and tasks<
+- Description and tasks
 - Comments and other activity
 - Author
 - Assignee(s)
