@@ -48,6 +48,15 @@ let autoEntriesCount = 0;
 let watchAutoEntries = [];
 const defaultEntries = ['./main'];
 
+//TODO: Do we want to always enable some routes...
+let renderedEntryPoints = [];
+
+try {
+  renderedEntryPoints = JSON.parse(
+    fs.readFileSync(path.join(CACHE_PATH, 'visited-routes.json'), 'utf8'),
+  );
+} catch (e) {}
+
 function generateEntries() {
   // generate automatic entry points
   const autoEntries = {};
@@ -97,7 +106,15 @@ function generateEntries() {
     jira_connect_app: './jira_connect/index.js',
   };
 
-  return Object.assign(manualEntries, autoEntries);
+  //TODO: only in dev :see_no_evil:
+  const filtered = Object.entries(autoEntries).map(([key, val]) => {
+    if (renderedEntryPoints.includes(key)) {
+      return [key, val];
+    }
+    return [key, ['./webpack_non_compiled_placeholder.js']];
+  });
+
+  return Object.assign(manualEntries, Object.fromEntries(filtered));
 }
 
 const alias = {
@@ -496,7 +513,7 @@ module.exports = {
 
           // report our auto-generated bundle count
           console.log(
-            `${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
+            `${renderedEntryPoints.length} / ${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
           );
 
           callback();
@@ -576,8 +593,38 @@ module.exports = {
     */
     new webpack.IgnorePlugin(/moment/, /pikaday/),
   ].filter(Boolean),
-
   devServer: {
+    before: function (app, server) {
+      app.use(function (req, res, next) {
+        if (req.url.includes('/pages.')) {
+          const chunk = path.basename(req.url).replace('.chunk.js', '');
+
+          if (!renderedEntryPoints.includes(chunk)) {
+            renderedEntryPoints.push(chunk);
+
+            setTimeout(() => {
+              server.middleware.invalidate(() => {
+                //TODO: Check without HMR
+                if (server.sockets) {
+                  server.sockWrite(server.sockets, 'content-changed');
+                }
+              });
+            }, 10000);
+          } else {
+            renderedEntryPoints.push(chunk);
+          }
+
+          // TODO: Make smarter and only write out last 20 routes or so.
+          fs.writeFileSync(
+            path.join(CACHE_PATH, 'visited-routes.json'),
+            JSON.stringify(renderedEntryPoints),
+            'utf8',
+          );
+        }
+
+        next();
+      });
+    },
     host: DEV_SERVER_HOST,
     port: DEV_SERVER_PORT,
     public: DEV_SERVER_PUBLIC_ADDR,
