@@ -278,7 +278,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       dast_profiles: project_security_configuration_dast_profiles_path(project),
       sast: project_security_configuration_sast_path(project),
       api_fuzzing: project_security_configuration_api_fuzzing_path(project)
-    }[type] || nil
+    }[type]
   end
 
   def scan_status(type, configured, auto_dev_ops_enabled)
