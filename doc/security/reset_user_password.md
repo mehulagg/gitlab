@@ -5,72 +5,81 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# How to reset user password
+# Reset user password
 
-To reset the password of a user, first log into your server with root privileges.
+## Rake task
 
-Start a Ruby on Rails console with this command:
+GitLab provides a Rake task to reset passwords of users using their usernames.
+Since using this Rake task requires sudo access to the node where GitLab
+application is running, this rake task by default assumes `root` as the
+username, corresponding to the default admin account in a GitLab instance.
 
-```shell
-gitlab-rails console -e production
-```
-
-Wait until the console has loaded.
-
-## Find the user
-
-There are multiple ways to find your user. You can search by email or user ID number.
+This Rake task can be invoked by the following command:
 
 ```shell
-user = User.where(id: 7).first
+gitlab-rake "gitlab:password:reset"
 ```
 
-or
+You will be asked for password and confirmation. Upon giving matching values
+for both, the password will be updated.
+
+### Resetting password of a user other than `root`
+
+The rake task accepts username of the user whose password should be changed, as
+an argument. This can be specified as shown in the example below:
 
 ```shell
-user = User.find_by(email: 'user@example.com')
+gitlab-rake "gitlab:password:reset[johndoe]"
 ```
 
-## Reset the password
+## Rails console
 
-Now you can change your password:
+The Rake task is capable of finding users via their usernames. However, if only
+user ID or email ID of the user is known, Rails console can be used to find user
+using user ID and then change password of the user manually.
 
-```shell
-user.password = 'secret_pass'
-user.password_confirmation = 'secret_pass'
-```
+1. Start a Rails console
 
-It's important that you change both password and password_confirmation to make it work.
+    ```shell
+    gitlab-rails console -e production
+    ```
 
-When using this method instead of the [Users API](../api/users.md#user-modification), GitLab sends an email to the user stating that the user changed their password.
+1. Find the user either by user ID or email ID
 
-If the password was changed by an administrator, execute the following command to notify the user by email:
+    ```ruby
+    user = User.where(id: 7).first
 
-```shell
-user.send_only_admin_changed_your_password_notification!
-```
+    #or
 
-Don't forget to save the changes.
+    user = User.find_by(email: 'user@example.com')
+    ```
 
-```shell
-user.save!
-```
+1. Reset the password
 
-Exit the console, and then try to sign in with your new password.
+    ```ruby
+    user.password = 'secret_pass'
+    user.password_confirmation = 'secret_pass'
+    ```
+
+1. When using this method instead of the [Users API](../api/users.md#user-modification),
+   GitLab sends an email to the user stating that the user changed their
+   password. If the password was changed by an administrator, execute the
+   following command to notify the user by email:
+
+    ```ruby
+    user.send_only_admin_changed_your_password_notification!
+    ```
+
+1. Save the changes
+
+    ```ruby
+    user.save!
+    ```
+
+1. Exit the console, and then try to sign in with your new password.
 
 NOTE:
 You can also reset passwords by using the [Users API](../api/users.md#user-modification).
-
-### Reset your root password
-
-The previously described steps can also be used to reset the root password. First,
-identify the root user, with an `id` of `1`. To do so, run the following command:
-
-```shell
-user = User.where(id: 1).first
-```
-
-After finding the user, follow the steps mentioned in the [Reset the password](#reset-the-password) section to reset the password of the root user.
 
 <!-- ## Troubleshooting
 
