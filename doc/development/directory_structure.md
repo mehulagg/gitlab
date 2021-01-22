@@ -34,3 +34,25 @@ module MyDomain
   end
 end
 ```
+
+### About namespace naming
+
+A good guideline for naming a namespace is to use the related feature category.
+For example, `Continuous Integration` feature category maps to `Ci::` namespace.
+
+Alternatively a new class could be added to `Projects::` or `Groups::` if it's either:
+
+- Strictly related to one of these domains. For example `Projects::Alias`.
+- A new component that does not have yet a more specific domain. In this case, when
+  a more explicit domain does emerge we would need to move the class to a more specific
+  namespace.
+
+Do not use the [stage or group name](https://about.gitlab.com/handbook/product/categories/#devops-stages)
+since a feature category could be reassigned to a different group in the future.
+
+Avoid creating too granular top-level namespaces since they would tend to be too 
+shallow and more coupled with other domains.
+
+Good namespaces should be [deep](https://medium.com/@nakabonne/depth-of-module-f62dac3c2fdb)
+so consider having nested namespaces to further break down complex parts of the domain.
+E.g. `Ci::Config::`.
