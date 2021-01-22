@@ -38,16 +38,25 @@ module Ci
 
       # mark builds that are retried
       if latest_statuses.any?
-        pipeline.latest_statuses
-          .where(name: latest_statuses.map(&:second))
-          .where.not(id: latest_statuses.map(&:first))
-          .update_all(retried: true)
+        updated_count = pipeline.latest_statuses
+                          .where(name: latest_statuses.map(&:second))
+                          .where.not(id: latest_statuses.map(&:first))
+                          .update_all(retried: true)
+
+        ci_update_retried_total_counter.increment if updated_count > 0
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
     def increment_processing_counter
       metrics.pipeline_processing_events_counter.increment
+    end
+
+    # This counter is temporary. It will be used to check whether if we still use this method or not
+    # after setting correct value of `GenericCommitStatus#retried`.
+    # More info: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/50465#note_491657115
+    def ci_update_retried_total_counter
+      Gitlab::Metrics.counter(:ci_update_retried_total, "Counter for updated CommitStatus in update_retried method")
     end
   end
 end
