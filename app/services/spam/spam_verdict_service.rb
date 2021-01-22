@@ -47,13 +47,14 @@ module Spam
         return unless result
 
         json_result = Gitlab::Json.parse(result).with_indifferent_access
+        json_result = { verdict: ALLOW } if json_result.empty? # gRPC doesn't encode default values if they're 0 (which ALLOW is)
         # @TODO metrics/logging
         # Expecting:
         # error: (string or nil)
         # verdict: (string or nil)
         # @TODO log if json_result[:error]
 
-        json_result[:verdict]
+        json_result[:verdict]&.downcase
       rescue *Gitlab::HTTP::HTTP_ERRORS => e
         # @TODO: log error via try_post https://gitlab.com/gitlab-org/gitlab/-/issues/219223
         Gitlab::ErrorTracking.log_exception(e)
@@ -70,16 +71,15 @@ module Spam
       project = target.try(:project)
 
       context.merge({
-        target: {
-          title: target.spam_title,
-          description: target.spam_description,
-          type: target.class.to_s
-        },
         user: {
           created_at: user.created_at,
           email: user.email,
-          username: user.username
+          username: user.username,
+          org: user.organization
         },
+        title: target.spam_title,
+        description: target.spam_description,
+        created_at: target.created_at,
         user_in_project: user.authorized_project?(project)
       })
     end

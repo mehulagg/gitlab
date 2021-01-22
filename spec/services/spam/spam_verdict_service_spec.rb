@@ -172,9 +172,18 @@ RSpec.describe Spam::SpamVerdictService do
         end
 
         context 'the result is a valid verdict' do
-          let(:verdict) { 'allow' }
+          let(:verdict) { 'ALLOW' }
 
           it 'returns the verdict' do
+            expect(subject).to eq ALLOW
+          end
+        end
+
+        # gRPC doesn't encode the default value of a field if it's 0, which ALLOW is
+        context 'the result is an empty hash' do
+          let(:spam_check_body) { {} }
+
+          it 'returns the ALLOW verdict' do
             expect(subject).to eq ALLOW
           end
         end
