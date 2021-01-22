@@ -65,22 +65,12 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
     subject { project.environments.stale_and_deleteable(before, limit) } # rubocop: disable RSpec/SingleLineHook
 
-    it { is_expected.to include(old_stopped_review_env) }
-    it { is_expected.not_to include(new_stopped_review_env) }
-    it { is_expected.not_to include(old_active_review_env) }
-    it { is_expected.not_to include(old_stopped_other_env) }
-    it { is_expected.not_to include(new_stopped_other_env) }
-    it { is_expected.not_to include(old_active_other_env) }
+    it { is_expected.to contain_exactly(old_stopped_review_env) }
 
     context "current timestamp" do
       let(:before) { Time.zone.now }
 
-      it { is_expected.to include(old_stopped_review_env) }
-      it { is_expected.to include(new_stopped_review_env) }
-      it { is_expected.not_to include(old_active_review_env) }
-      it { is_expected.not_to include(old_stopped_other_env) }
-      it { is_expected.not_to include(new_stopped_other_env) }
-      it { is_expected.not_to include(old_active_other_env) }
+      it { is_expected.to contain_exactly(old_stopped_review_env, new_stopped_review_env) }
     end
   end
 

@@ -88,15 +88,24 @@ module API
         authorize! :read_environment, user_project
 
         environments = user_project.environments.stale_and_deleteable(params[:before], params[:limit])
-        destroyed_environments = []
+        deleted = []
+        failed = []
 
         environments.find_each do |env|
-          authorize! :destroy_environment, env
-          destroyed_environments << env if params[:dry_run] || destroy_conditionally!(env)
+          if current_user.can?(:destroy_environment, env) && (params[:dry_run] || destroy_conditionally!(env))
+            deleted << env
+          else
+            failed << env
+          end
         end
 
+        response = {
+          deleted: Entities::Environment.represent(deleted),
+          failed: Entities::Environment.represent(failed)
+        }
+
         status 200
-        present Entities::Environment.represent(destroyed_environments), current_user: current_user
+        present response, current_user: current_user
       end
 
       desc 'Deletes an existing environment' do
