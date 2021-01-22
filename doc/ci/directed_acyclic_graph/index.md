@@ -82,11 +82,8 @@ are certain use cases that you may need to work around. For more information:
 ## Needs Visualization
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/215517) in GitLab 13.1 as a [Beta feature](https://about.gitlab.com/handbook/product/#beta).
-> - It was deployed behind a feature flag, disabled by default.
-> - It became [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36802) in 13.2.
 > - It became a [standard feature](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38517) in 13.3.
-> - It's enabled on GitLab.com.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-needs-visualization).
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52208) in GitLab 13.9.
 
 The needs visualization makes it easier to visualize the relationships between dependent jobs in a DAG. This graph displays all the jobs in a pipeline that need or are needed by other jobs. Jobs with no relationships are not displayed in this view.
 
