@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlTooltipDirective, GlBadge, GlLink } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective, GlLink } from '@gitlab/ui';
 import {
   DAST_SITE_VALIDATION_STATUS,
   DAST_SITE_VALIDATION_STATUS_PROPS,
@@ -19,7 +19,6 @@ export default {
   components: {
     GlButton,
     GlIcon,
-    GlBadge,
     GlLink,
     DastSiteValidationModal,
     ProfilesList,
@@ -139,15 +138,15 @@ export default {
     </template>
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
-        <gl-badge
+        <gl-icon
           v-gl-tooltip
-          size="sm"
-          :variant="$options.statuses[value].badgeVariant"
           :title="$options.statuses[value].tooltipText"
-        >
-          <gl-icon :size="12" class="gl-mr-2" :name="$options.statuses[value].badgeIcon" />
-          {{ $options.statuses[value].label }}</gl-badge
-        >
+          :size="12"
+          :name="$options.statuses[value].icon"
+          :class="$options.statuses[value].cssClass"
+          class="gl-mr-2"
+        />
+        <span>{{ $options.statuses[value].label }}</span>
       </template>
     </template>
 
