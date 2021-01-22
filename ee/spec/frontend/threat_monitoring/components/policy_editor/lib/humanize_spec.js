@@ -36,7 +36,7 @@ describe('humanizeNetworkPolicy', () => {
 
   it('returns policy description', () => {
     expect(humanizeNetworkPolicy(policy)).toEqual(
-      'Allow all inbound traffic to <strong>all</strong> pods ' +
+      'Deny all inbound traffic to <strong>all</strong> pods ' +
         'from <strong>all</strong> pods ' +
         'on <strong>any</strong> port',
     );
@@ -50,7 +50,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to pods <strong>[one: , two: another]</strong> ' +
+        'Deny all inbound traffic to pods <strong>[one: , two: another]</strong> ' +
           'from <strong>all</strong> pods ' +
           'on <strong>any</strong> port',
       );
@@ -66,9 +66,9 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods from <strong>all</strong> pods on <strong>any</strong> port' +
+        'Deny all inbound traffic to <strong>all</strong> pods from <strong>all</strong> pods on <strong>any</strong> port' +
           '<br><br>AND<br><br>' +
-          'Allow all outbound traffic from <strong>all</strong> pods to <strong>all</strong> pods on <strong>any</strong> port',
+          'Deny all outbound traffic from <strong>all</strong> pods to <strong>all</strong> pods on <strong>any</strong> port',
       );
     });
   });
@@ -81,7 +81,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods ' +
+        'Deny all inbound traffic to <strong>all</strong> pods ' +
           'from <strong>all</strong> pods ' +
           'on ports <strong>80/TCP, 81/UDP</strong>',
       );
@@ -95,7 +95,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods ' +
+        'Deny all inbound traffic to <strong>all</strong> pods ' +
           'from pods <strong>[one: , two: another]</strong> ' +
           'on <strong>any</strong> port',
       );
@@ -111,7 +111,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods ' +
+        'Deny all inbound traffic to <strong>all</strong> pods ' +
           'from <strong>host, world</strong> ' +
           'on <strong>any</strong> port',
       );
@@ -127,7 +127,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods ' +
+        'Deny all inbound traffic to <strong>all</strong> pods ' +
           'from <strong>0.0.0.0/32, 1.1.1.1/24</strong> ' +
           'on <strong>any</strong> port',
       );
@@ -143,7 +143,7 @@ describe('humanizeNetworkPolicy', () => {
 
     it('returns policy description', () => {
       expect(humanizeNetworkPolicy(policy)).toEqual(
-        'Allow all inbound traffic to <strong>all</strong> pods ' +
+        'Deny all inbound traffic to <strong>all</strong> pods ' +
           'from <strong>some-service.com, another-service.com</strong> ' +
           'on <strong>any</strong> port',
       );
