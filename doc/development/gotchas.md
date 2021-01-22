@@ -303,3 +303,86 @@ Use `app/assets` for storing any asset that needs to be precompiled and served t
 Use `lib/assets` for storing any asset that does not need to be served to the end user directly, but is still required to be accessed by the application code.
 
 MR for reference: [!37671](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37671)
+
+## Avoid using attr_reader to access variables in private methods
+
+In a Service or Finder, or any Ruby class for that matter, it is common to use attributes defined in the initializer throughout the 
+service, often in private methods. There are three ways this can be achieved:
+
+1. Using `attr_reader` to access the attributes:
+
+```ruby
+Class Foo
+  attr_reader :my_value
+
+  def initialize(value)
+    @my_value = value
+  end
+
+  def run
+    private_method
+  end
+
+  private
+
+  def private_method
+    my_value.do_stuff
+  end
+end
+```
+
+2. Using `attr_reader` under `private` to access the attributes:
+
+```ruby
+Class Foo
+  def initialize(value)
+    @my_value = value
+  end
+
+  def run
+    private_method
+  end
+
+  private
+
+  attr_reader :my_value
+  
+  def private_method
+    my_value.do_stuff
+  end
+end
+```
+
+3. Using the attribute, `@foo`, itself:
+
+```ruby
+Class Foo
+  def initialize(value)
+    @my_value = value
+  end
+
+  def run
+    private_method
+  end
+
+  private
+  
+  def private_method
+    @my_value.do_stuff
+  end
+end
+```
+
+Version 3 should be preferred. 
+
+Version 1 exposes `@my_value` outside of the object. We should not expose the internal
+state of an object unless it is going to be used somewhere. Although the attributes are
+read only, if you had `attr_reader :my_hash`, the hash itself could still be modified
+outside of the class: `instance.my_hash.clear`.
+
+A common argument for version 2 is by using the getter method, we can easily redefine
+the method without having to refactor the entire class. First, with modern code editors,
+this kind of refactor is negligible. Second, you are "future coding", writing code with
+the idea that this attribute may need to change in the future without necessarily
+knowing how it might be changed. This goes against the 
+[YAGNI](https://martinfowler.com/bliki/Yagni.html) principle. 
