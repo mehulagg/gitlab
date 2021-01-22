@@ -24,6 +24,8 @@ module DraftNotes
       create_note_from_draft(draft)
       draft.delete
 
+      set_reviewed
+
       MergeRequests::ResolvedDiscussionNotificationService.new(project, current_user).execute(merge_request)
     end
 
@@ -37,6 +39,8 @@ module DraftNotes
         create_note_from_draft(draft_note)
       end
       draft_notes.delete_all
+
+      set_reviewed
 
       notification_service.async.new_review(review)
       MergeRequests::ResolvedDiscussionNotificationService.new(project, current_user).execute(merge_request)
@@ -63,6 +67,10 @@ module DraftNotes
       else
         discussion.unresolve!
       end
+    end
+
+    def set_reviewed
+      ::MergeRequests::MarkReviewerReviewedService.new(project, current_user).execute(merge_request, current_user)
     end
   end
 end

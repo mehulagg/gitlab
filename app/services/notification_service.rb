@@ -265,6 +265,14 @@ class NotificationService
     end
   end
 
+  def review_requested_of_merge_request(current_user, merge_request, reviewer)
+    recipients = NotificationRecipients::BuildService.build_requested_review_recipients(current_user, merge_request, reviewer)
+
+    recipients.each do |recipient|
+      mailer.request_review_merge_request_email(recipient.user.id, merge_request.id, current_user.id).deliver_later
+    end
+  end
+
   # When we add labels to a merge request we should send an email to:
   #
   #  * watchers of the mr's labels
