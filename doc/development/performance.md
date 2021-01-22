@@ -545,15 +545,17 @@ as omitting it may lead to style check failures.
 
 ## Banzai pipelines and filters
 
-When writing or updating [Banzai filters and pipelines](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/banzai), it can be difficult to understand what the performance of the filter is, and what effect it might have on the overall pipeline performance.
+When writing or updating [Banzai filters and pipelines](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/banzai),
+it can be difficult to understand what the performance of the filter is, and what effect it might
+have on the overall pipeline performance.
 
-Benchmarks can be performed by running
+To perform benchmarks run:
 
 ```shell
 bin/rake benchmark:banzai
 ```
 
-It will generate output like this
+This command generates output like this:
 
 ```plaintext
 --> Benchmarking Full, Wiki, and Plain pipelines
@@ -617,7 +619,11 @@ Calculating -------------------------------------
 
 This can give you an idea how various filters perform, and which ones might be performing the slowest.
 
-The test data has a lot to do with how well a filter performs. If there is nothing in the test data that specifically triggers the filter, then it might look like it's running incredibly fast. Make sure that you have relevent test data for your filter in the [`spec/fixtures/markdown.md.erb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/fixtures/markdown.md.erb)
+The test data has a lot to do with how well a filter performs. If there is nothing in the test data
+that specifically triggers the filter, it might look like it's running incredibly fast.
+Make sure that you have relevant test data for your filter in the
+[`spec/fixtures/markdown.md.erb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/fixtures/markdown.md.erb)
+file.
 
 ## Reading from files and other data sources
 
