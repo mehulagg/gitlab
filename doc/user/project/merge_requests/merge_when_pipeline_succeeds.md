@@ -44,9 +44,8 @@ complete, the merge is blocked until you resolve all existing threads.
 
 You can prevent merge requests from being merged if:
 
-- The pipeline did not succeed.
-- There are threads to be resolved.
 - No pipeline ran.
+- The pipeline did not succeed.
 
 This works for both:
 
