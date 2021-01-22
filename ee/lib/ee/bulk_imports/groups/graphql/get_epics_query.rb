@@ -9,6 +9,21 @@ module EE
 
           def to_s
             <<-'GRAPHQL'
+            fragment EpicFields on Epic {
+              title
+              description
+              state
+              confidential
+              createdAt
+              closedAt
+              startDate
+              startDateFixed
+              startDateIsFixed
+              dueDateFixed
+              dueDateIsFixed
+              relativePosition
+            }
+
             query($full_path: ID!, $cursor: String) {
               group(fullPath: $full_path) {
                 epics(
@@ -21,29 +36,13 @@ module EE
                     hasNextPage
                   }
                   nodes {
-                    ...epicFields
-                    hasParent
+                    ...EpicFields
                     parent {
-                      ...epicFields
+                      ...EpicFields
                     }
                   }
                 }
               }
-            }
-
-            fragment epicFields on Epic {
-              title
-              description
-              state
-              createdAt
-              closedAt
-              startDate
-              startDateFixed
-              startDateIsFixed
-              dueDateFixed
-              dueDateIsFixed
-              relativePosition
-              confidential
             }
             GRAPHQL
           end

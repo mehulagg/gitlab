@@ -13,6 +13,7 @@ module EE
           transformer ::BulkImports::Common::Transformers::HashKeyDigger, key_path: %w[data group epics]
           transformer ::BulkImports::Common::Transformers::UnderscorifyKeysTransformer
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
+          transformer EE::BulkImports::Groups::Transformers::EpicParentTransformer
 
           loader EE::BulkImports::Groups::Loaders::EpicsLoader
 
