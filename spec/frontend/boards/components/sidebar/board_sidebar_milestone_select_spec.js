@@ -69,7 +69,7 @@ describe('~/boards/components/sidebar/board_sidebar_milestone_select.vue', () =>
   });
 
   it('shows message when error or no milestones found', async () => {
-    createWrapper({});
+    createWrapper();
 
     await wrapper.setData({ milestones: [] });
 
