@@ -18,7 +18,6 @@ import searchUsers from '~/graphql_shared/queries/users_search.query.graphql';
 
 export const assigneesWidgetState = Vue.observable({
   updateAssignees: null,
-  assignees: null,
 });
 
 export default {
@@ -84,7 +83,6 @@ export default {
       result(res) {
         const issuable = res.data.issuable || res.data.project?.issuable;
         this.selected = cloneDeep(issuable.assignees.nodes);
-        assigneesWidgetState.assignees = issuable.assignees.nodes;
       },
     },
     searchUsers: {
@@ -105,7 +103,7 @@ export default {
   },
   computed: {
     assignees() {
-      return assigneesWidgetState.assignees || this.initialAssignees;
+      return this.issuable.assignees.nodes;
     },
     participants() {
       return this.isSearchEmpty ? this.issuable?.participants?.nodes : this.searchUsers;
@@ -130,21 +128,12 @@ export default {
     currentUser() {
       return gon?.current_username;
     },
-    assigneesLoading() {
-      return this.initialAssignees.length === 0 && this.$apollo.queries.issuable.loading;
-    },
-  },
-  watch: {
-    initialAssignees() {
-      assigneesWidgetState.assignees = null;
-    },
   },
   created() {
     assigneesWidgetState.updateAssignees = this.updateAssignees;
   },
   destroyed() {
     assigneesWidgetState.updateAssignees = null;
-    assigneesWidgetState.assignees = null;
   },
   methods: {
     updateAssignees(assigneeUsernames) {
@@ -159,6 +148,7 @@ export default {
         })
         .then(({ data }) => {
           this.$emit('assigneesUpdated', data);
+          return data;
         })
         .catch(() => {
           createFlash({ message: __('An error occurred while updating assignees.') });
@@ -197,7 +187,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="assigneesLoading" class="gl-display-flex gl-align-items-center">
+  <div v-if="this.$apollo.queries.issuable.loading" class="gl-display-flex gl-align-items-center">
     {{ __('Assignee') }}
     <gl-loading-icon size="sm" class="gl-ml-2" />
   </div>
@@ -222,7 +212,7 @@ export default {
         </template>
         <template #items>
           <gl-loading-icon
-            v-if="$apollo.queries.searchUsers.loading || assigneesLoading"
+            v-if="$apollo.queries.searchUsers.loading || $apollo.queries.issuable.loading"
             size="lg"
           />
           <template v-else>

@@ -183,9 +183,6 @@ export default {
 
       return null;
     },
-    assignees() {
-      return assigneesWidgetState.assignees;
-    },
   },
   created() {
     const line = this.note.position?.line_range?.start || this.line;
@@ -446,7 +443,6 @@ export default {
         />
       </div>
       <gl-button @click="assignToRoot">Assign to root</gl-button>
-      <span v-for="assignee in assignees" :key="assignee.username">{{ assignee.username }}</span>
     </div>
   </timeline-entry-item>
 </template>
