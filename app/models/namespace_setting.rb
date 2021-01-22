@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 class NamespaceSetting < ApplicationRecord
+  include CascadingNamespaceSettingAttribute
+
   belongs_to :namespace, inverse_of: :namespace_settings
 
   validate :default_branch_name_content
   validate :allow_mfa_for_group
 
   before_validation :normalize_default_branch_name
+
+  cascading_attr_reader :prevent_forking_outside_group, :delayed_project_removal, boolean: true
 
   NAMESPACE_SETTINGS_PARAMS = [:default_branch_name].freeze
 
