@@ -42,7 +42,7 @@ elements you can provide in an issue:
 - Description and tasks
 - Comments and other activity
 - Author
-- Assignee(s)
+- Assignees
 - State (open or closed)
 - Health status (on track, needs attention, or at risk)
 - Confidentiality
