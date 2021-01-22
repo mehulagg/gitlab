@@ -15,6 +15,7 @@ Asana
 Asciidoctor
 Assembla
 Atlassian
+auditability
 Auth0
 Authentiq
 autocomplete
@@ -101,6 +102,7 @@ CSV
 Dangerfile
 datetime
 Debian
+Decompressor
 deduplicate
 deduplicated
 deduplicates
@@ -158,6 +160,7 @@ Flowdock
 Fluentd
 Forgerock
 Fugit
+fuzzer
 Gantt
 Gemnasium
 Gemojione
@@ -173,6 +176,7 @@ Gitpod
 Gitter
 globals
 Gmail
+Godep
 Gollum
 Google
 goroutine
@@ -332,6 +336,7 @@ Phabricator
 phaser
 phasers
 phpenv
+pipenv
 Pipfile
 Pipfiles
 Piwik
@@ -383,6 +388,7 @@ reauthenticate
 reauthenticated
 reauthenticates
 reauthenticating
+rebar
 rebase
 rebased
 rebases
@@ -433,6 +439,7 @@ Rubix
 Rubocop
 Rubular
 ruleset
+rulesets
 runbook
 runbooks
 runit
@@ -508,6 +515,10 @@ tanuki
 tcpdump
 Thanos
 Tiller
+timebox
+timeboxed
+timeboxes
+timeboxing
 timecop
 todos
 tokenizer
