@@ -94,6 +94,14 @@ class Environment < ApplicationRecord
   end
   scope :for_id, -> (id) { where(id: id) }
 
+  scope :stale_and_deleteable, -> (before, limit) do
+    stopped
+    .in_review_folder
+    .where("created_at < ?", before)
+    .order("created_at DESC")
+    .limit(limit)
+  end
+
   state_machine :state, initial: :available do
     event :start do
       transition stopped: :available

@@ -87,12 +87,7 @@ module API
       delete ":id/environments/stale" do
         authorize! :read_environment, user_project
 
-        environments = user_project.environments
-                                   .stopped
-                                   .in_review_folder
-                                   .where("created_at < ?", params[:before])
-                                   .order("created_at DESC")
-                                   .limit(params[:limit])
+        environments = user_project.environments.stale_and_deleteable(params[:before], params[:limit])
         destroyed_environments = []
 
         environments.find_each do |env|
