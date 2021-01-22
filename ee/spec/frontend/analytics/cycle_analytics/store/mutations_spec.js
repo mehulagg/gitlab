@@ -130,7 +130,7 @@ describe('Value Stream Analytics mutations', () => {
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach((stage) => {
           expect(state.stages).toContainEqual(stage);
         });
       });
@@ -160,8 +160,8 @@ describe('Value Stream Analytics mutations', () => {
       ]);
 
       expect(stateWithData.medians).toEqual({
-        '1': { value: 20, error: null },
-        '2': { value: 10, error: null },
+        1: { value: 20, error: null },
+        2: { value: 10, error: null },
       });
     });
   });

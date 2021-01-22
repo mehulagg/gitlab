@@ -11,7 +11,7 @@ describe('BoardSettingsListType', () => {
     },
     assignee: { webUrl: 'https://gitlab.com/root', name: 'root', username: 'root' },
   };
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(BoardSettingsListTypes, {
       propsData: { ...props, activeList },
     });

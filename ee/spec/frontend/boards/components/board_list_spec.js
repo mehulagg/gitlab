@@ -4,7 +4,7 @@ describe('BoardList Component', () => {
   let mock;
   let component;
 
-  beforeEach(done => {
+  beforeEach((done) => {
     const listIssueProps = {
       project: {
         path: '/test',

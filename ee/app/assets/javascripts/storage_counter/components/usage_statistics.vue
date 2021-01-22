@@ -121,7 +121,7 @@ export default {
       :description="purchasedUsage.description"
       css-class="gl-ml-4"
     >
-      <template #footer="{link}">
+      <template #footer="{ link }">
         <gl-button
           target="_blank"
           :href="link.url"

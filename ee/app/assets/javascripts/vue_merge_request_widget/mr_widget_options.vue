@@ -1,6 +1,7 @@
 <script>
 import { GlSafeHtmlDirective } from '@gitlab/ui';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
+import GroupedBrowserPerformanceReportsApp from 'ee/reports/browser_performance_report/grouped_browser_performance_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import { componentNames } from 'ee/reports/components/issue_body';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
@@ -20,6 +21,7 @@ export default {
     GroupedSecurityReportsApp: () =>
       import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
+    GroupedBrowserPerformanceReportsApp,
     ReportSection,
   },
   directives: {
@@ -55,7 +57,7 @@ export default {
     },
     degradedBrowserPerformanceTotalScore() {
       return this.mr?.browserPerformanceMetrics?.degraded.find(
-        metric => metric.name === __('Total Score'),
+        (metric) => metric.name === __('Total Score'),
       );
     },
     hasBrowserPerformanceDegradation() {
@@ -92,7 +94,7 @@ export default {
       return (
         this.mr.canReadVulnerabilities &&
         enabledReports &&
-        this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
+        this.$options.securityReportTypes.some((reportType) => enabledReports[reportType])
       );
     },
 
@@ -159,6 +161,7 @@ export default {
         this.loadingLoadPerformanceFailed,
       );
     },
+
     licensesApiPath() {
       return gl?.mrWidgetData?.license_scanning_comparison_path || null;
     },
@@ -191,7 +194,7 @@ export default {
       this.isLoadingBrowserPerformance = true;
 
       Promise.all([this.service.fetchReport(head_path), this.service.fetchReport(base_path)])
-        .then(values => {
+        .then((values) => {
           this.mr.compareBrowserPerformanceMetrics(values[0], values[1]);
         })
         .catch(() => {
@@ -208,7 +211,7 @@ export default {
       this.isLoadingLoadPerformance = true;
 
       Promise.all([this.service.fetchReport(head_path), this.service.fetchReport(base_path)])
-        .then(values => {
+        .then((values) => {
           this.mr.compareLoadPerformanceMetrics(values[0], values[1]);
         })
         .catch(() => {
@@ -277,7 +280,7 @@ export default {
         :base-blob-path="mr.baseBlobPath"
         :codequality-help-path="mr.codequalityHelpPath"
       />
-      <report-section
+      <grouped-browser-performance-reports-app
         v-if="shouldRenderBrowserPerformance"
         :status="browserPerformanceStatus"
         :loading-text="translateText('browser-performance').loading"
@@ -287,8 +290,6 @@ export default {
         :resolved-issues="mr.browserPerformanceMetrics.improved"
         :neutral-issues="mr.browserPerformanceMetrics.same"
         :has-issues="hasBrowserPerformanceMetrics"
-        :component="$options.componentNames.PerformanceIssueBody"
-        class="js-browser-performance-widget mr-widget-border-top mr-report"
       />
       <report-section
         v-if="hasLoadPerformancePaths"
@@ -357,6 +358,8 @@ export default {
         :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"
         :sast-comparison-path="mr.sastComparisonPath"
         :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
         class="js-security-widget"
       />
       <mr-widget-licenses
@@ -389,7 +392,7 @@ export default {
       <div class="mr-widget-section">
         <component :is="componentName" :mr="mr" :service="service" />
         <div class="mr-widget-info">
-          <section v-if="mr.allowCollaboration" class="mr-info-list mr-links">
+          <section v-if="mr.allowCollaboration" class="mr-info-list gl-ml-7">
             <p>
               {{ s__('mrWidget|Allows commits from members who can merge to the target branch') }}
             </p>

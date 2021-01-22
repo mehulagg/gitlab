@@ -1,8 +1,15 @@
 <script>
-import { GlButtonGroup, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
+import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
+import {
+  editRotationModalId,
+  deleteRotationModalId,
+  PRESET_TYPES,
+  TIMELINE_CELL_WIDTH,
+} from 'ee/oncall_schedules/constants';
 import { s__ } from '~/locale';
 import CurrentDayIndicator from './current_day_indicator.vue';
-import RotationAssignee from '../../rotations/components/rotation_assignee.vue';
 
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
@@ -11,13 +18,17 @@ export const i18n = {
 
 export default {
   i18n,
+  editRotationModalId,
+  deleteRotationModalId,
   components: {
-    GlButtonGroup,
     GlButton,
+    GlButtonGroup,
     CurrentDayIndicator,
-    RotationAssignee,
+    DeleteRotationModal,
+    ScheduleShiftWrapper,
   },
   directives: {
+    GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
   props: {
@@ -32,6 +43,38 @@ export default {
     timeframe: {
       type: Array,
       required: true,
+    },
+  },
+  data() {
+    return {
+      rotationToUpdate: {},
+    };
+  },
+  computed: {
+    presetIsDay() {
+      return this.presetType === PRESET_TYPES.DAYS;
+    },
+    timeframeToDraw() {
+      if (this.presetIsDay) {
+        return [this.timeframe[0]];
+      }
+
+      return this.timeframe;
+    },
+    timelineStyles() {
+      const length = this.presetIsDay ? 1 : 2;
+
+      return {
+        width: `calc((${100}% - ${TIMELINE_CELL_WIDTH}px) / ${length})`,
+      };
+    },
+  },
+  methods: {
+    setRotationToUpdate(rotation) {
+      this.rotationToUpdate = rotation;
+    },
+    cellShouldHideOverflow(index) {
+      return index + 1 === this.timeframe.length || this.presetIsDay;
     },
   },
 };
@@ -50,6 +93,7 @@ export default {
         <span class="gl-str-truncated">{{ rotation.name }}</span>
         <gl-button-group class="gl-px-2">
           <gl-button
+            v-gl-modal="$options.editRotationModalId"
             v-gl-tooltip
             category="tertiary"
             :title="$options.i18n.editRotationLabel"
@@ -57,28 +101,37 @@ export default {
             :aria-label="$options.i18n.editRotationLabel"
           />
           <gl-button
+            v-gl-modal="$options.deleteRotationModalId"
             v-gl-tooltip
             category="tertiary"
             :title="$options.i18n.deleteRotationLabel"
             icon="remove"
             :aria-label="$options.i18n.deleteRotationLabel"
+            @click="setRotationToUpdate(rotation)"
           />
         </gl-button-group>
       </span>
       <span
-        v-for="(timeframeItem, index) in timeframe"
+        v-for="(timeframeItem, index) in timeframeToDraw"
         :key="index"
-        class="timeline-cell"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+        :class="{ 'gl-overflow-hidden': cellShouldHideOverflow(index) }"
+        :style="timelineStyles"
         data-testid="timelineCell"
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-        <rotation-assignee
-          :assignee="rotation.participants.nodes[index]"
-          :assignee-index="index"
-          :rotation-length="rotation.length"
-          :rotation-starts-at="rotation.startsAt"
+        <schedule-shift-wrapper
+          :preset-type="presetType"
+          :timeframe-item="timeframeItem"
+          :timeframe="timeframe"
+          :rotation="rotation"
         />
       </span>
     </div>
+    <delete-rotation-modal
+      :rotation="rotationToUpdate"
+      :modal-id="$options.deleteRotationModalId"
+      @set-rotation-to-update="setRotationToUpdate"
+    />
   </div>
 </template>

@@ -261,6 +261,18 @@ class MergeRequest < ApplicationRecord
   scope :by_merge_commit_sha, -> (sha) do
     where(merge_commit_sha: sha)
   end
+  scope :by_squash_commit_sha, -> (sha) do
+    where(squash_commit_sha: sha)
+  end
+  scope :by_related_commit_sha, -> (sha) do
+    from_union(
+      [
+        by_commit_sha(sha),
+        by_squash_commit_sha(sha),
+        by_merge_commit_sha(sha)
+      ]
+    )
+  end
   scope :by_cherry_pick_sha, -> (sha) do
     joins(:notes).where(notes: { commit_id: sha })
   end
@@ -491,6 +503,10 @@ class MergeRequest < ApplicationRecord
 
   def self.wip_title(title)
     work_in_progress?(title) ? title : "Draft: #{title}"
+  end
+
+  def self.participant_includes
+    [:reviewers, :award_emoji] + super
   end
 
   def committers
@@ -1748,6 +1764,10 @@ class MergeRequest < ApplicationRecord
 
   def allows_multiple_reviewers?
     false
+  end
+
+  def supports_assignee?
+    true
   end
 
   private

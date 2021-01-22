@@ -16,7 +16,7 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Update do
     }
   end
 
-  subject { mutation.resolve(id: global_id_of(framework), **params) }
+  subject { mutation.resolve(id: global_id_of(framework), params: params) }
 
   context 'feature is enabled and licensed' do
     before do

@@ -9,7 +9,7 @@ describe('FeatureStatus component', () => {
   let wrapper;
   let feature;
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = shallowMount(FeatureStatus, options);
   };
 

@@ -464,11 +464,34 @@ RSpec.describe GroupPolicy do
 
           context 'as a group owner' do
             before do
+              create(:group_saml_identity, user: current_user, saml_provider: saml_provider)
               group.add_owner(current_user)
             end
 
-            it 'prevents access without a SAML session' do
-              is_expected.not_to allow_action(:read_group)
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+
+            it 'prevents access without a SAML session for subgroup' do
+              subgroup = create(:group, :private, parent: group)
+
+              expect(described_class.new(current_user, subgroup)).not_to allow_action(:read_group)
+            end
+          end
+
+          context 'as an admin' do
+            let(:current_user) { admin }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+          end
+
+          context 'as an auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
             end
           end
 
@@ -1340,6 +1363,37 @@ RSpec.describe GroupPolicy do
       end
 
       it_behaves_like 'read_group_release_stats permissions'
+    end
+
+    describe ':admin_merge_request_approval_settings' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:policy) { :admin_merge_request_approval_settings }
+
+      where(:role, :licensed, :allowed) do
+        :guest      | true  | false
+        :guest      | false | false
+        :reporter   | true  | false
+        :reporter   | false | false
+        :developer  | true  | false
+        :developer  | false | false
+        :maintainer | true  | false
+        :maintainer | false | false
+        :owner      | true  | true
+        :owner      | false | false
+        :admin      | true  | true
+        :admin      | false | false
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        before do
+          stub_licensed_features(group_merge_request_approval_settings: licensed)
+        end
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
     end
   end
 end

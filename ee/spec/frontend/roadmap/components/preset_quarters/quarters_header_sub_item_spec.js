@@ -59,7 +59,7 @@ describe('QuartersHeaderSubItemComponent', () => {
         vm = createComponent({});
 
         expect(Array.isArray(vm.headerSubItems)).toBe(true);
-        vm.headerSubItems.forEach(subItem => {
+        vm.headerSubItems.forEach((subItem) => {
           expect(subItem instanceof Date).toBe(true);
         });
       });

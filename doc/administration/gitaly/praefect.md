@@ -5,17 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly Cluster
+# Gitaly Cluster **(CORE ONLY)**
 
 [Gitaly](index.md), the service that provides storage for Git repositories, can
 be run in a clustered configuration to increase fault tolerance. In this
 configuration, every Git repository is stored on every Gitaly node in the
-cluster. Multiple clusters (or shards), can be configured.
+cluster. Multiple clusters (or shards) can be configured.
 
 NOTE:
-Gitaly Clusters can be created using [GitLab Core](https://about.gitlab.com/pricing/#self-managed)
-and higher tiers. However, technical support is limited to GitLab Premium and Ultimate customers
-only. Not available in GitLab.com.
+Technical support for Gitaly clusters is limited to GitLab Premium and Ultimate
+customers.
 
 Praefect is a router and transaction manager for Gitaly, and a required
 component for running a Gitaly Cluster.
@@ -984,18 +983,12 @@ cluster.
 > - Introduced in GitLab 13.1 in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) with feature flag `gitaly_distributed_reads` set to disabled.
 > - [Made generally available and enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/2951) in GitLab 13.3.
 > - [Disabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3178) in GitLab 13.5.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3334) in GitLab 13.8.
 
 Praefect supports distribution of read operations across Gitaly nodes that are
 configured for the virtual node.
 
-The feature is disabled by default. To enable distributed reads, the `gitaly_distributed_reads`
-[feature flag](../feature_flags.md) must be enabled in a Ruby console:
-
-```ruby
-Feature.enable(:gitaly_distributed_reads)
-```
-
-If enabled, all RPCs marked with `ACCESSOR` option like
+All RPCs marked with `ACCESSOR` option like
 [GetBlob](https://gitlab.com/gitlab-org/gitaly/-/blob/v12.10.6/proto/blob.proto#L16)
 are redirected to an up to date and healthy Gitaly node.
 
@@ -1364,7 +1357,7 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 If your GitLab instance already has repositories on single Gitaly nodes, these aren't migrated to
 Gitaly Cluster automatically.
 
-Repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
+Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
 
 NOTE:
 The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
@@ -1387,6 +1380,8 @@ To move repositories to Gitaly Cluster:
 1. Once the moves are complete, [query projects](../../api/projects.md#list-all-projects)
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
+
+In a similar way, you can move Snippet repositories using the [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md):
 
 ## Debugging Praefect
 

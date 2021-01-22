@@ -37,6 +37,11 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to validate_presence_of(:severity) }
     it { is_expected.to validate_presence_of(:confidence) }
 
+    it { is_expected.to validate_length_of(:description).is_at_most(15000) }
+    it { is_expected.to validate_length_of(:message).is_at_most(3000) }
+    it { is_expected.to validate_length_of(:solution).is_at_most(7000) }
+    it { is_expected.to validate_length_of(:cve).is_at_most(48400) }
+
     context 'when value for details field is valid' do
       it 'is valid' do
         finding.details = {}
@@ -453,26 +458,34 @@ RSpec.describe Vulnerabilities::Finding do
   end
 
   describe '#remediations' do
-    let(:raw_remediation) { { summary: 'foo', diff: 'bar' }.stringify_keys }
-    let(:raw_metadata) { { remediations: [raw_remediation] }.to_json }
-    let(:finding) { create(:vulnerabilities_finding, raw_metadata: raw_metadata) }
+    let_it_be(:project) { create_default(:project) }
+    let_it_be(:finding, refind: true) { create(:vulnerabilities_finding) }
 
     subject { finding.remediations }
 
     context 'when the finding has associated remediation records' do
-      let!(:persisted_remediation) { create(:vulnerabilities_remediation, findings: [finding]) }
-      let(:remediation_hash) { persisted_remediation.as_json(only: [:summary, :diff]) }
+      let_it_be(:persisted_remediation) { create(:vulnerabilities_remediation, findings: [finding]) }
+      let_it_be(:remediation_hash) { { 'summary' => persisted_remediation.summary, 'diff' => persisted_remediation.diff } }
 
       it { is_expected.to eq([remediation_hash]) }
     end
 
     context 'when the finding does not have associated remediation records' do
       context 'when the finding has remediations in `raw_metadata`' do
+        let(:raw_remediation) { { summary: 'foo', diff: 'bar' }.stringify_keys }
+
+        before do
+          raw_metadata = { remediations: [raw_remediation] }.to_json
+          finding.update!(raw_metadata: raw_metadata)
+        end
+
         it { is_expected.to eq([raw_remediation]) }
       end
 
       context 'when the finding does not have remediations in `raw_metadata`' do
-        let(:raw_metadata) { {}.to_json }
+        before do
+          finding.update!(raw_metadata: {}.to_json)
+        end
 
         it { is_expected.to be_nil }
       end
@@ -689,6 +702,23 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eq(vulnerabilities_finding.scanner.name) }
   end
 
+  describe '#description' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_description) { finding.metadata['description'] }
+
+    subject { finding.description }
+
+    context 'when description metadata key is present' do
+      it { is_expected.to eql(expected_description) }
+    end
+
+    context 'when description data is present' do
+      let(:finding) { build(:vulnerabilities_finding, description: 'Vulnerability description') }
+
+      it { is_expected.to eq('Vulnerability description') }
+    end
+  end
+
   describe '#solution' do
     subject { vulnerabilities_finding.solution }
 
@@ -698,12 +728,36 @@ RSpec.describe Vulnerabilities::Finding do
       it { is_expected.to eq(vulnerabilities_finding.metadata['solution']) }
     end
 
-    context 'when remediations key is present' do
+    context 'when remediations key is present in finding' do
       let(:vulnerabilities_finding) do
         build(:vulnerabilities_finding_with_remediation, summary: "Test remediation")
       end
 
       it { is_expected.to eq(vulnerabilities_finding.remediations.dig(0, 'summary')) }
+    end
+
+    context 'when solution data is present' do
+      let(:vulnerabilities_finding) { build(:vulnerabilities_finding, solution: 'Vulnerability solution') }
+
+      it { is_expected.to eq('Vulnerability solution') }
+    end
+  end
+
+  describe '#location' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_location) { finding.metadata['location'] }
+
+    subject { finding.location }
+
+    context 'when location metadata key is present' do
+      it { is_expected.to eql(expected_location) }
+    end
+
+    context 'when location data is present' do
+      let(:location) { { 'class' => 'class', 'end_line' => 3, 'file' => 'test_file.rb', 'start_line' => 1 } }
+      let(:finding) { build(:vulnerabilities_finding, location: location) }
+
+      it { is_expected.to eq(location) }
     end
   end
 
@@ -810,7 +864,15 @@ RSpec.describe Vulnerabilities::Finding do
 
     subject { finding.message }
 
-    it { is_expected.to eql(expected_message) }
+    context 'when message metadata key is present' do
+      it { is_expected.to eql(expected_message) }
+    end
+
+    context 'when message data is present' do
+      let(:finding) { build(:vulnerabilities_finding, message: 'Vulnerability message') }
+
+      it { is_expected.to eq('Vulnerability message') }
+    end
   end
 
   describe '#cve_value' do
@@ -823,7 +885,15 @@ RSpec.describe Vulnerabilities::Finding do
       finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', name: expected_cve)
     end
 
-    it { is_expected.to eql(expected_cve) }
+    context 'when cve metadata key is present' do
+      it { is_expected.to eql(expected_cve) }
+    end
+
+    context 'when cve data is present' do
+      let(:finding) { build(:vulnerabilities_finding, cve: 'Vulnerability cve') }
+
+      it { is_expected.to eq('Vulnerability cve') }
+    end
   end
 
   describe '#cwe_value' do
@@ -874,6 +944,47 @@ RSpec.describe Vulnerabilities::Finding do
       allow(finding).to receive(:raw_metadata) { '{ "test": true }' }
 
       expect(subject).to eq({ "test" => true })
+    end
+  end
+
+  describe '#uuid_v5' do
+    let(:project) { create(:project) }
+    let(:report_type) { :sast }
+    let(:identifier_fingerprint) { 'fooo' }
+    let(:location_fingerprint) { 'zooo' }
+    let(:identifier) { build(:vulnerabilities_identifier, fingerprint: identifier_fingerprint) }
+    let(:expected_uuid) { 'this-is-supposed-to-a-uuid' }
+    let(:finding) do
+      build(:vulnerabilities_finding, report_type,
+            uuid: uuid,
+            project: project,
+            primary_identifier: identifier,
+            location_fingerprint: location_fingerprint)
+    end
+
+    subject(:uuid_v5) { finding.uuid_v5 }
+
+    before do
+      allow(::Gitlab::UUID).to receive(:v5).and_return(expected_uuid)
+    end
+
+    context 'when the finding has a version 4 uuid' do
+      let(:uuid) { SecureRandom.uuid }
+      let(:uuid_name_value) { "#{report_type}-#{identifier_fingerprint}-#{location_fingerprint}-#{project.id}" }
+
+      it 'returns the calculated uuid for the finding' do
+        expect(uuid_v5).to eq(expected_uuid)
+        expect(::Gitlab::UUID).to have_received(:v5).with(uuid_name_value)
+      end
+    end
+
+    context 'when the finding has a version 5 uuid' do
+      let(:uuid) { '6756ebb6-8465-5c33-9af9-c5c8b117aefb' }
+
+      it 'returns the uuid of the finding' do
+        expect(uuid_v5).to eq(uuid)
+        expect(::Gitlab::UUID).not_to have_received(:v5)
+      end
     end
   end
 end

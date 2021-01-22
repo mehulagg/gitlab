@@ -62,6 +62,11 @@ module Vulnerabilities
     validates :raw_metadata, presence: true
     validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
 
+    validates :description, length: { maximum: 15000 }
+    validates :message, length: { maximum: 3000 }
+    validates :solution, length: { maximum: 7000 }
+    validates :cve, length: { maximum: 48400 }
+
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 
     scope :report_type, -> (type) { where(report_type: report_types[type]) }
@@ -217,15 +222,15 @@ module Vulnerabilities
     end
 
     def description
-      metadata.dig('description')
+      super.presence || metadata.dig('description')
     end
 
     def solution
-      metadata.dig('solution') || remediations&.first&.dig('summary')
+      super.presence || metadata.dig('solution') || remediations&.first&.dig('summary')
     end
 
     def location
-      metadata.fetch('location', {})
+      super.presence || metadata.fetch('location', {})
     end
 
     def file
@@ -241,7 +246,7 @@ module Vulnerabilities
     def remediations
       return metadata.dig('remediations') unless super.present?
 
-      super.as_json(only: [:summary, :diff])
+      super.as_json(only: [:summary], methods: [:diff])
     end
 
     def build_evidence_request(data)
@@ -309,11 +314,11 @@ module Vulnerabilities
     end
 
     def message
-      metadata.dig('message')
+      super.presence || metadata.dig('message')
     end
 
     def cve_value
-      identifiers.find(&:cve?)&.name
+      cve || identifiers.find(&:cve?)&.name
     end
 
     def cwe_value
@@ -361,6 +366,12 @@ module Vulnerabilities
       self.class.confidences[self.confidence]
     end
 
+    # We will eventually have only UUIDv5 values for the `uuid`
+    # attribute of the finding records.
+    def uuid_v5
+      Gitlab::UUID.v5?(uuid) ? uuid : Gitlab::UUID.v5(uuid_v5_name)
+    end
+
     protected
 
     def first_fingerprint
@@ -375,6 +386,15 @@ module Vulnerabilities
         category: report_type,
         project_fingerprint: project_fingerprint
       }
+    end
+
+    def uuid_v5_name
+      [
+        report_type,
+        primary_identifier.fingerprint,
+        location_fingerprint,
+        project_id
+      ].join('-')
     end
   end
 end

@@ -1,3 +1,4 @@
+import { nextTick } from 'vue';
 import { GlDrawer, GlFormCheckbox } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
@@ -95,7 +96,7 @@ describe('RequirementForm', () => {
           requirement: mockRequirementsOpen[0],
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(wrapper.vm.requirementObject).toBe(mockRequirementsOpen[0]);
       });
@@ -105,7 +106,7 @@ describe('RequirementForm', () => {
           requirement: null,
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(wrapper.vm.requirementObject).toMatchObject({
           iid: '',
@@ -131,7 +132,7 @@ describe('RequirementForm', () => {
             wrapper = createComponent();
             wrapper.setProps({ requirement, enableRequirementEdit: true });
 
-            await wrapper.vm.$nextTick();
+            await nextTick();
 
             expect(wrapper.find(GlFormCheckbox).vm.$attrs.checked).toBe(satisfied);
           },
@@ -147,7 +148,7 @@ describe('RequirementForm', () => {
         });
 
         it('does not render the satisfied checkbox', async () => {
-          await wrapper.vm.$nextTick();
+          await nextTick();
           expect(wrapper.find(GlFormCheckbox).exists()).toBe(false);
         });
       });
@@ -159,7 +160,7 @@ describe('RequirementForm', () => {
           drawerOpen: false,
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(wrapper.vm.satisfied).toBe(false);
       });
@@ -168,10 +169,17 @@ describe('RequirementForm', () => {
         jest.spyOn(document, 'addEventListener');
 
         wrapper.setProps({
+          drawerOpen: false,
+        });
+
+        await nextTick();
+        expect(document.addEventListener).not.toHaveBeenCalled();
+
+        wrapper.setProps({
           drawerOpen: true,
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
       });
@@ -323,7 +331,7 @@ describe('RequirementForm', () => {
         enableRequirementEdit: true,
       });
 
-      await wrapperWithRequirement.vm.$nextTick();
+      await nextTick();
 
       const issuableBody = wrapperWithRequirement.find(IssuableBody);
 

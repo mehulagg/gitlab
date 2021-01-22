@@ -1,5 +1,0 @@
----
-title: Automatic token revocation no longer restricted to gitlab.com
-merge_request: 50087
-author:
-type: changed

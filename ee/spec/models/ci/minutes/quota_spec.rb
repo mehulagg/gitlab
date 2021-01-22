@@ -4,14 +4,14 @@ require 'spec_helper'
 RSpec.describe Ci::Minutes::Quota do
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:namespace) do
+  let_it_be_with_reload(:namespace) do
     create(:namespace, namespace_statistics: create(:namespace_statistics))
   end
 
   let(:quota) { described_class.new(namespace) }
 
   describe '#enabled?' do
-    let_it_be(:project) { create(:project, namespace: namespace) }
+    let(:project) { create(:project, namespace: namespace) }
 
     subject { quota.enabled? }
 
@@ -64,32 +64,49 @@ RSpec.describe Ci::Minutes::Quota do
   end
 
   describe '#monthly_minutes_report' do
-    context 'when unlimited' do
+    context 'when the quota is not enabled' do
       before do
         allow(quota).to receive(:enabled?).and_return(false)
+        allow(quota).to receive(:namespace_eligible?).and_return(namespace_eligible)
       end
 
-      context 'when minutes are not used' do
-        it 'returns unlimited report with no usage' do
+      context 'when the namespace is not eligible' do
+        let(:namespace_eligible) { false }
+
+        it 'returns not supported report with no usage' do
           report = quota.monthly_minutes_report
 
-          expect(report.limit).to eq 'Unlimited'
+          expect(report.limit).to eq 'Not supported'
           expect(report.used).to eq 0
           expect(report.status).to eq :disabled
         end
       end
 
-      context 'when minutes are used' do
-        before do
-          namespace.namespace_statistics.shared_runners_seconds = 20.minutes
+      context 'when the namespace is eligible' do
+        let(:namespace_eligible) { true }
+
+        context 'when minutes are not used' do
+          it 'returns unlimited report with no usage' do
+            report = quota.monthly_minutes_report
+
+            expect(report.limit).to eq 'Unlimited'
+            expect(report.used).to eq 0
+            expect(report.status).to eq :disabled
+          end
         end
 
-        it 'returns unlimited report with usage' do
-          report = quota.monthly_minutes_report
+        context 'when minutes are used' do
+          before do
+            namespace.namespace_statistics.shared_runners_seconds = 20.minutes
+          end
 
-          expect(report.limit).to eq 'Unlimited'
-          expect(report.used).to eq 20
-          expect(report.status).to eq :disabled
+          it 'returns unlimited report with usage' do
+            report = quota.monthly_minutes_report
+
+            expect(report.limit).to eq 'Unlimited'
+            expect(report.used).to eq 20
+            expect(report.status).to eq :disabled
+          end
         end
       end
     end
@@ -371,6 +388,40 @@ RSpec.describe Ci::Minutes::Quota do
       end
 
       it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#namespace_eligible?' do
+    subject { quota.namespace_eligible? }
+
+    context 'when namespace is a subgroup' do
+      it 'is false' do
+        allow(namespace).to receive(:root?).and_return(false)
+
+        expect(subject).to be_falsey
+      end
+    end
+
+    context 'when namespace is root' do
+      before do
+        create(:project, namespace: namespace, shared_runners_enabled: shared_runners_enabled)
+      end
+
+      context 'and it has a project without any shared runner enabled' do
+        let(:shared_runners_enabled) { false }
+
+        it 'is false' do
+          expect(subject).to be_falsey
+        end
+      end
+
+      context 'and it has a project with shared runner enabled' do
+        let(:shared_runners_enabled) { true }
+
+        it 'is true' do
+          expect(subject).to be_truthy
+        end
+      end
     end
   end
 end

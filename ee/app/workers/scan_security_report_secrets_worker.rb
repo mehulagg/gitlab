@@ -15,11 +15,11 @@ class ScanSecurityReportSecretsWorker # rubocop:disable Scalability/IdempotentWo
 
   ScanSecurityReportSecretsWorkerError = Class.new(StandardError)
 
-  def perform(build_id)
-    build = Ci::Build.find_by_id(build_id)
-    return unless build
+  def perform(pipeline_id)
+    pipeline = Ci::Pipeline.find_by_id(pipeline_id)
+    return unless pipeline
 
-    keys = revocable_keys(build)
+    keys = revocable_keys(pipeline)
 
     if keys.present?
       executed_result = Security::TokenRevocationService.new(revocable_keys: keys).execute
@@ -30,8 +30,8 @@ class ScanSecurityReportSecretsWorker # rubocop:disable Scalability/IdempotentWo
 
   private
 
-  def revocable_keys(build)
-    vulnerability_findings = build.pipeline.vulnerability_findings.report_type(:secret_detection)
+  def revocable_keys(pipeline)
+    vulnerability_findings = pipeline.vulnerability_findings.report_type(:secret_detection)
 
     vulnerability_findings.map do |vulnerability_finding|
       {

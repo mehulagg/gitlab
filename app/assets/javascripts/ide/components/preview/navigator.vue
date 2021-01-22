@@ -31,7 +31,7 @@ export default {
     },
   },
   mounted() {
-    this.listener = listen(e => {
+    this.listener = listen((e) => {
       switch (e.type) {
         case 'urlchange':
           this.onUrlChange(e);
@@ -78,6 +78,7 @@ export default {
       this.visitPath(this.path);
     },
     visitPath(path) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.manager.iframe.src = `${this.manager.bundlerURL}${path}`;
     },
   },

@@ -46,7 +46,7 @@ export default {
         const nodes = data.namespace?.complianceFrameworks?.nodes;
 
         return (
-          nodes?.map(framework => ({
+          nodes?.map((framework) => ({
             ...framework,
             parsedId: getIdFromGraphQLId(framework.id),
           })) || []

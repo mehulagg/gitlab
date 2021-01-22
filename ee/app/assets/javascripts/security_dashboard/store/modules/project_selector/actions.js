@@ -37,9 +37,9 @@ export const addProjects = ({ state, dispatch }) => {
 
   return axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsError'))
     .finally(() => dispatch('clearSearchResults'));
 };
@@ -55,8 +55,8 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -154,7 +154,7 @@ export const fetchSearchResults = ({ state, dispatch, commit }) => {
   }
 
   return searchProjects(searchQuery)
-    .then(payload => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
+    .then((payload) => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

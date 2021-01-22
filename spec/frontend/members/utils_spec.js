@@ -9,9 +9,11 @@ import {
   canOverride,
   parseSortParam,
   buildSortHref,
+  parseDataAttributes,
+  groupLinkRequestFormatter,
 } from '~/members/utils';
 import { DEFAULT_SORT } from '~/members/constants';
-import { member as memberMock, group, invite } from './mock_data';
+import { member as memberMock, group, invite, membersJsonString, members } from './mock_data';
 
 const DIRECT_MEMBER_ID = 178;
 const INHERITED_MEMBER_ID = 179;
@@ -24,7 +26,7 @@ describe('Members Utils', () => {
     it('has correct properties for each badge', () => {
       const badges = generateBadges(memberMock, true);
 
-      badges.forEach(badge => {
+      badges.forEach((badge) => {
         expect(badge).toEqual(
           expect.objectContaining({
             show: expect.any(Boolean),
@@ -227,6 +229,40 @@ describe('Members Utils', () => {
           }),
         ).toBe(`${URL_HOST}?search=foobar&sort=name_asc`);
       });
+    });
+  });
+
+  describe('parseDataAttributes', () => {
+    let el;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+      el.setAttribute('data-members', membersJsonString);
+      el.setAttribute('data-source-id', '234');
+      el.setAttribute('data-can-manage-members', 'true');
+    });
+
+    afterEach(() => {
+      el = null;
+    });
+
+    it('correctly parses the data attributes', () => {
+      expect(parseDataAttributes(el)).toEqual({
+        members,
+        sourceId: 234,
+        canManageMembers: true,
+      });
+    });
+  });
+
+  describe('groupLinkRequestFormatter', () => {
+    it('returns expected format', () => {
+      expect(
+        groupLinkRequestFormatter({
+          accessLevel: 50,
+          expires_at: '2020-10-16',
+        }),
+      ).toEqual({ group_link: { group_access: 50, expires_at: '2020-10-16' } });
     });
   });
 });

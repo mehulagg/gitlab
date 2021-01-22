@@ -1,5 +1,5 @@
 export const generateFeatures = (n, overrides = {}) => {
-  return [...Array(n).keys()].map(i => ({
+  return [...Array(n).keys()].map((i) => ({
     type: `scan-type-${i}`,
     name: `name-feature-${i}`,
     description: `description-feature-${i}`,

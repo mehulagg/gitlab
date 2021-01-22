@@ -122,11 +122,7 @@ describe('GeoNodeActionsComponent', () => {
 
       describe(`when nodeRemovalAllowed is ${nodeRemovalAllowed}`, () => {
         it('has the correct button text', () => {
-          expect(
-            findRemoveButton()
-              .text()
-              .trim(),
-          ).toBe('Remove');
+          expect(findRemoveButton().text().trim()).toBe('Remove');
         });
 
         it(`the button's disabled attribute should be ${buttonDisabled}`, () => {

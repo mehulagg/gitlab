@@ -124,6 +124,11 @@ export default {
       required: false,
       default: false,
     },
+    defaultSuggestionCommitMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
     mrReviews: {
       type: Object,
       required: false,
@@ -141,19 +146,17 @@ export default {
   },
   computed: {
     ...mapState({
-      isLoading: state => state.diffs.isLoading,
-      isBatchLoading: state => state.diffs.isBatchLoading,
-      diffFiles: state => state.diffs.diffFiles,
-      diffViewType: state => state.diffs.diffViewType,
-      mergeRequestDiffs: state => state.diffs.mergeRequestDiffs,
-      mergeRequestDiff: state => state.diffs.mergeRequestDiff,
-      commit: state => state.diffs.commit,
-      renderOverflowWarning: state => state.diffs.renderOverflowWarning,
-      numTotalFiles: state => state.diffs.realSize,
-      numVisibleFiles: state => state.diffs.size,
-      plainDiffPath: state => state.diffs.plainDiffPath,
-      emailPatchPath: state => state.diffs.emailPatchPath,
-      retrievingBatches: state => state.diffs.retrievingBatches,
+      isLoading: (state) => state.diffs.isLoading,
+      isBatchLoading: (state) => state.diffs.isBatchLoading,
+      diffFiles: (state) => state.diffs.diffFiles,
+      diffViewType: (state) => state.diffs.diffViewType,
+      commit: (state) => state.diffs.commit,
+      renderOverflowWarning: (state) => state.diffs.renderOverflowWarning,
+      numTotalFiles: (state) => state.diffs.realSize,
+      numVisibleFiles: (state) => state.diffs.size,
+      plainDiffPath: (state) => state.diffs.plainDiffPath,
+      emailPatchPath: (state) => state.diffs.emailPatchPath,
+      retrievingBatches: (state) => state.diffs.retrievingBatches,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -186,17 +189,16 @@ export default {
       return this.currentUser.can_fork === true && this.currentUser.can_create_merge_request;
     },
     renderDiffFiles() {
-      return (
-        this.diffFiles.length > 0 ||
-        (this.startVersion &&
-          this.startVersion.version_index === this.mergeRequestDiff.version_index)
-      );
+      return this.diffFiles.length > 0;
+    },
+    renderFileTree() {
+      return this.renderDiffFiles && this.showTreeList;
     },
     hideFileStats() {
       return this.treeWidth <= TREE_HIDE_STATS_WIDTH;
     },
     isLimitedContainer() {
-      return !this.showTreeList && !this.isParallelView && !this.isFluidLayout;
+      return !this.renderFileTree && !this.isParallelView && !this.isFluidLayout;
     },
     isDiffHead() {
       return parseBoolean(getParameterByName('diff_head'));
@@ -259,7 +261,7 @@ export default {
       this.adjustView();
     },
     isLoading: 'adjustView',
-    showTreeList: 'adjustView',
+    renderFileTree: 'adjustView',
   },
   mounted() {
     this.setBaseConfig({
@@ -271,6 +273,7 @@ export default {
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
       viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
+      defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
       mrReviews: this.mrReviews || {},
     });
 
@@ -281,12 +284,7 @@ export default {
     const id = window?.location?.hash;
 
     if (id && id.indexOf('#note') !== 0) {
-      this.setHighlightedRow(
-        id
-          .split('diff-content')
-          .pop()
-          .slice(1),
-      );
+      this.setHighlightedRow(id.split('diff-content').pop().slice(1));
     }
   },
   beforeCreate() {
@@ -404,10 +402,7 @@ export default {
     },
     setDiscussions() {
       requestIdleCallback(
-        () =>
-          this.assignDiscussionsToDiff()
-            .then(this.$nextTick)
-            .then(this.startTaskList),
+        () => this.assignDiscussionsToDiff().then(this.$nextTick).then(this.startTaskList),
         { timeout: 1000 },
       );
     },
@@ -436,7 +431,7 @@ export default {
         }
       });
 
-      if (this.commit && this.glFeatures.mrCommitNeighborNav) {
+      if (this.commit) {
         Mousetrap.bind('c', () => this.moveToNeighboringCommit({ direction: 'next' }));
         Mousetrap.bind('x', () => this.moveToNeighboringCommit({ direction: 'previous' }));
       }
@@ -475,7 +470,6 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
       />
@@ -503,7 +497,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList"
+          v-if="renderFileTree"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >

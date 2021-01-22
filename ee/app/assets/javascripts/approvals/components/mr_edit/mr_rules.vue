@@ -21,12 +21,12 @@ export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
-      rules: state => state.approvals.rules,
-      targetBranch: state => state.approvals.targetBranch,
+      rules: (state) => state.approvals.rules,
+      targetBranch: (state) => state.approvals.targetBranch,
     }),
     hasNamedRule() {
       if (this.settings.allowMultiRule) {
-        return this.rules.some(rule => rule.ruleType !== RULE_TYPE_ANY_APPROVER);
+        return this.rules.some((rule) => rule.ruleType !== RULE_TYPE_ANY_APPROVER);
       }
 
       const [rule] = this.rules;
@@ -49,7 +49,7 @@ export default {
         }
         if (
           this.settings.allowMultiRule &&
-          !newValue.some(rule => rule.ruleType === RULE_TYPE_ANY_APPROVER)
+          !newValue.some((rule) => rule.ruleType === RULE_TYPE_ANY_APPROVER)
         ) {
           this.addEmptyRule();
         }

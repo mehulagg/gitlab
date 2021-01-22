@@ -170,7 +170,7 @@ export default {
 
       axios
         .get(this.burndownEventsPath)
-        .then(burndownResponse => {
+        .then((burndownResponse) => {
           const burndownEvents = burndownResponse.data;
           const burndownChartData = new BurndownChartData(
             burndownEvents,
@@ -178,8 +178,8 @@ export default {
             this.dueDate,
           ).generateBurndownTimeseries();
 
-          this.openIssuesCount = burndownChartData.map(d => [d[0], d[1]]);
-          this.openIssuesWeight = burndownChartData.map(d => [d[0], d[2]]);
+          this.openIssuesCount = burndownChartData.map((d) => [d[0], d[1]]);
+          this.openIssuesWeight = burndownChartData.map((d) => [d[0], d[2]]);
         })
         .catch(() => {
           this.fetchedLegacyData = false;
@@ -187,7 +187,7 @@ export default {
         });
     },
     pluckBurnupDataProperties(total, completed) {
-      return this.burnupData.map(data => {
+      return this.burnupData.map((data) => {
         return [data.date, data[total] - data[completed]];
       });
     },
@@ -203,7 +203,7 @@ export default {
     padSparseBurnupData(sparseBurnupData) {
       // if we don't have data for the startDate, we still want to draw a point at 0
       // on the chart, so add an item to the start of the array
-      const hasDataForStartDate = sparseBurnupData.find(d => d.date === this.startDate);
+      const hasDataForStartDate = sparseBurnupData.find((d) => d.date === this.startDate);
       if (!hasDataForStartDate) {
         sparseBurnupData.unshift({
           date: this.startDate,
@@ -222,7 +222,7 @@ export default {
       // similar to the startDate padding, if we don't have a value for the
       // last item in the array, we should add one. If no events occur on
       // a day then we don't get any data for that day in the response
-      const hasDataForLastDate = sparseBurnupData.find(d => d.date === lastDate);
+      const hasDataForLastDate = sparseBurnupData.find((d) => d.date === lastDate);
       if (!hasDataForLastDate) {
         const lastItem = sparseBurnupData[sparseBurnupData.length - 1];
         sparseBurnupData.push({

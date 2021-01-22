@@ -19,11 +19,13 @@ import RequirementsEmptyState from './requirements_empty_state.vue';
 import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
 import ImportRequirementsModal from './import_requirements_modal.vue';
+import ExportRequirementsModal from './export_requirements_modal.vue';
 
 import projectRequirements from '../queries/projectRequirements.query.graphql';
 import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
 import createRequirement from '../queries/createRequirement.mutation.graphql';
 import updateRequirement from '../queries/updateRequirement.mutation.graphql';
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
 
 import {
   FilterState,
@@ -45,6 +47,7 @@ export default {
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
     ImportRequirementsModal,
+    ExportRequirementsModal,
   },
   mixins: [glFeatureFlagsMixin(), Tracking.mixin()],
   props: {
@@ -74,8 +77,8 @@ export default {
     initialRequirementsCount: {
       type: Object,
       required: true,
-      validator: value =>
-        ['OPENED', 'ARCHIVED', 'ALL'].every(prop => typeof value[prop] === 'number'),
+      validator: (value) =>
+        ['OPENED', 'ARCHIVED', 'ALL'].every((prop) => typeof value[prop] === 'number'),
     },
     page: {
       type: Number,
@@ -105,6 +108,10 @@ export default {
       required: true,
     },
     importCsvPath: {
+      type: String,
+      required: true,
+    },
+    currentUserEmail: {
       type: String,
       required: true,
     },
@@ -150,7 +157,7 @@ export default {
       update(data) {
         const requirementsRoot = data.project?.requirements;
 
-        const list = requirementsRoot?.nodes.map(node => {
+        const list = requirementsRoot?.nodes.map((node) => {
           return {
             ...node,
             satisfied: node.lastTestReportState === TestReportStatus.Passed,
@@ -278,7 +285,7 @@ export default {
       ];
     },
     getFilteredSearchValue() {
-      const value = this.authorUsernames.map(author => ({
+      const value = this.authorUsernames.map((author) => ({
         type: 'author_username',
         value: { data: author },
       }));
@@ -378,7 +385,7 @@ export default {
             updateRequirementInput,
           },
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: errorFlashMessage,
             parent: flashMessageContainer,
@@ -399,9 +406,30 @@ export default {
         .then(({ data }) => {
           createFlash({ message: data?.message, type: FLASH_TYPES.NOTICE });
         })
-        .catch(err => {
+        .catch((err) => {
           const { data: { message = __('Something went wrong') } = {} } = err.response;
           createFlash({ message });
+        });
+    },
+    exportCsv() {
+      return this.$apollo
+        .mutate({
+          mutation: exportRequirement,
+          variables: {
+            projectPath: this.projectPath,
+            state: this.filterBy,
+            authorUsername: this.authorUsernames,
+            search: this.textSearch,
+            sortBy: this.sortBy,
+          },
+        })
+        .catch((e) => {
+          createFlash({
+            message: __('Something went wrong while exporting requirements'),
+            captureError: true,
+            error: e,
+          });
+          throw e;
         });
     },
     handleTabClick({ filterBy }) {
@@ -445,7 +473,7 @@ export default {
             },
           },
         })
-        .then(res => {
+        .then((res) => {
           const createReqMutation = res?.data?.createRequirement || {};
 
           if (createReqMutation.errors?.length === 0) {
@@ -461,7 +489,7 @@ export default {
             throw new Error(`Error creating a requirement ${res.message}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: __('Something went wrong while creating a requirement.'),
             parent: this.$el,
@@ -485,7 +513,7 @@ export default {
         errorFlashMessage: __('Something went wrong while updating a requirement.'),
         flashMessageContainer: this.$el,
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -512,7 +540,7 @@ export default {
             ? __('Something went wrong while reopening a requirement.')
             : __('Something went wrong while archiving a requirement.'),
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -546,7 +574,7 @@ export default {
       const authors = [];
       let textSearch = '';
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (typeof filter === 'string') {
           textSearch = filter;
         } else if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
@@ -612,6 +640,7 @@ export default {
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
       @click-import-requirements="handleImportRequirementsClick"
+      @click-export-requirements="$refs.exportModal.show()"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -688,6 +717,13 @@ export default {
       ref="modal"
       :project-path="projectPath"
       @import="importCsv"
+    />
+    <export-requirements-modal
+      v-if="glFeatures.importRequirementsCsv"
+      ref="exportModal"
+      :requirement-count="totalRequirementsForCurrentTab"
+      :email="currentUserEmail"
+      @export="exportCsv"
     />
   </div>
 </template>

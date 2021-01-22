@@ -29,6 +29,15 @@ RSpec.describe ResourceAccessTokens::CreateService do
     end
   end
 
+  shared_examples 'audit event details' do
+    it 'logs author and resource info', :aggregate_failures do
+      expect { subject }.to change { AuditEvent.count }.from(0).to(1)
+      expect(AuditEvent.last.author_id).to eq(user.id)
+      expect(AuditEvent.last.entity_id).to eq(resource.id)
+      expect(AuditEvent.last.ip_address).to eq(user.current_sign_in_ip)
+    end
+  end
+
   describe '#execute' do
     context 'with enforced group managed account enabled' do
       let(:group) { create(:group_with_managed_accounts, :private) }
@@ -53,6 +62,63 @@ RSpec.describe ResourceAccessTokens::CreateService do
       end
 
       it_behaves_like 'token creation succeeds'
+    end
+
+    context 'project access token audit events' do
+      let(:resource) { create(:project) }
+
+      context 'when project access token is successfully created' do
+        before do
+          resource.add_maintainer(user)
+        end
+
+        it_behaves_like 'audit event details'
+
+        it 'logs project access token details', :aggregate_failures do
+          response = subject
+
+          expect(AuditEvent.last.details[:custom_message]).to eq("Created project access token with id: #{response.payload[:access_token].user.id} with scopes: #{response.payload[:access_token].scopes}")
+          expect(AuditEvent.last.details[:target_details]).to match(response.payload[:access_token].user.name)
+        end
+      end
+
+      context 'when project access token is unsuccessfully created' do
+        context 'with inadequate permissions' do
+          before do
+            resource.add_developer(user)
+          end
+
+          it_behaves_like 'audit event details'
+
+          it 'logs the permission error message' do
+            subject
+
+            expect(AuditEvent.last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: User does not have permission to create project access token')
+          end
+        end
+
+        context "when access provisioning fails" do
+          let_it_be(:user) { create(:user, :project_bot) }
+          let(:unpersisted_member) { build(:project_member, source: resource, user: user) }
+
+          before do
+            allow_next_instance_of(ResourceAccessTokens::CreateService) do |service|
+              allow(service).to receive(:create_user).and_return(user)
+              allow(service).to receive(:create_membership).and_return(unpersisted_member)
+            end
+
+            resource.add_maintainer(user)
+          end
+
+          it_behaves_like 'audit event details'
+
+          it 'logs the provisioning error message' do
+            subject
+
+            expect(AuditEvent.last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: Could not provision maintainer access to project access token')
+          end
+        end
+      end
     end
   end
 end

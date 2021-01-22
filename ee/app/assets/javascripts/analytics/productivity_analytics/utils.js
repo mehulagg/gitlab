@@ -91,7 +91,7 @@ export const transformScatterData = (data, startDate, endDate) => {
   const result = initDateArray(startDate, endDate);
   const totalItems = result.length;
 
-  Object.keys(data).forEach(id => {
+  Object.keys(data).forEach((id) => {
     const mergedAtDate = new Date(data[id].merged_at);
     const dayDiff = getDayDifference(mergedAtDate, endDate);
 
@@ -134,7 +134,7 @@ export const getScatterPlotData = (data, startDate, endDate) => {
   const visibleData = data.slice(startIndex);
 
   // group by date
-  const result = flatten(visibleData).map(item => [
+  const result = flatten(visibleData).map((item) => [
     dateFormat(item.merged_at, dateFormats.isoDate),
     item.metric,
     item.merged_at,
@@ -162,7 +162,7 @@ export const getScatterPlotData = (data, startDate, endDate) => {
 export const getMedianLineData = (data, startDate, endDate, daysOffset) => {
   const result = [];
   const dayDiff = getDayDifference(startDate, endDate);
-  const transformedData = data.map(arr => arr.map(x => x.metric));
+  const transformedData = data.map((arr) => arr.map((x) => x.metric));
   const len = data.length;
 
   let i = len - dayDiff;

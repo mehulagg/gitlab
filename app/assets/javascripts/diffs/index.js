@@ -83,11 +83,12 @@ export default function initDiffsApp(store) {
         showSuggestPopover: parseBoolean(dataset.showSuggestPopover),
         showWhitespaceDefault: parseBoolean(dataset.showWhitespaceDefault),
         viewDiffsFileByFile: parseBoolean(dataset.fileByFileDefault),
+        defaultSuggestionCommitMessage: dataset.defaultSuggestionCommitMessage,
       };
     },
     computed: {
       ...mapState({
-        activeTab: state => state.page.activeTab,
+        activeTab: (state) => state.page.activeTab,
       }),
     },
     created() {
@@ -123,6 +124,7 @@ export default function initDiffsApp(store) {
           dismissEndpoint: this.dismissEndpoint,
           showSuggestPopover: this.showSuggestPopover,
           fileByFileUserPreference: this.viewDiffsFileByFile,
+          defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
           mrReviews: getReviewsForMergeRequest(mrPath),
         },
       });

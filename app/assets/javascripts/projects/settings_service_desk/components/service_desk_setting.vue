@@ -1,12 +1,9 @@
 <script>
 import { GlButton, GlFormSelect, GlToggle, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import eventHub from '../event_hub';
 
 export default {
-  name: 'ServiceDeskSetting',
   components: {
     ClipboardButton,
     GlButton,
@@ -15,7 +12,6 @@ export default {
     GlLoadingIcon,
     GlSprintf,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     isEnabled: {
       type: Boolean,
@@ -84,10 +80,10 @@ export default {
   },
   methods: {
     onCheckboxToggle(isChecked) {
-      eventHub.$emit('serviceDeskEnabledCheckboxToggled', isChecked);
+      this.$emit('toggle', isChecked);
     },
     onSaveTemplate() {
-      eventHub.$emit('serviceDeskTemplateSave', {
+      this.$emit('save', {
         selectedTemplate: this.selectedTemplate,
         outgoingName: this.outgoingName,
         projectKey: this.projectKey,
@@ -103,7 +99,6 @@ export default {
       id="service-desk-checkbox"
       :value="isEnabled"
       class="d-inline-block align-middle mr-1"
-      label="Service desk"
       label-position="left"
       @change="onCheckboxToggle"
     />
@@ -112,8 +107,12 @@ export default {
     </label>
     <div v-if="isEnabled" class="row mt-3">
       <div class="col-md-9 mb-0">
-        <strong id="incoming-email-describer" class="d-block mb-1">
-          {{ __('Forward external support email address to') }}
+        <strong
+          id="incoming-email-describer"
+          class="gl-display-block gl-mb-1"
+          data-testid="incoming-email-describer"
+        >
+          {{ __('Email address to use for Support Desk') }}
         </strong>
         <template v-if="email">
           <div class="input-group">
@@ -129,15 +128,11 @@ export default {
               disabled="true"
             />
             <div class="input-group-append">
-              <clipboard-button
-                :title="__('Copy')"
-                :text="email"
-                css-class="input-group-text qa-clipboard-button"
-              />
+              <clipboard-button :title="__('Copy')" :text="email" css-class="input-group-text" />
             </div>
           </div>
           <span v-if="hasCustomEmail" class="form-text text-muted">
-            <gl-sprintf :message="__('Emails sent to %{email} will still be supported')">
+            <gl-sprintf :message="__('Emails sent to %{email} are also supported.')">
               <template #email>
                 <code>{{ incomingEmail }}</code>
               </template>
@@ -156,9 +151,7 @@ export default {
           <input id="service-desk-project-suffix" v-model.trim="projectKey" class="form-control" />
           <span class="form-text text-muted">
             {{
-              __(
-                'Project name suffix is a user-defined string which will be appended to the project path, and will form the Service Desk email address.',
-              )
+              __('A string appended to the project path to form the Service Desk email address.')
             }}
           </span>
         </template>
@@ -176,7 +169,7 @@ export default {
         </label>
         <input id="service-desk-email-from-name" v-model.trim="outgoingName" class="form-control" />
         <span class="form-text text-muted">
-          {{ __('Emails sent from Service Desk will have this name') }}
+          {{ __('Emails sent from Service Desk have this name.') }}
         </span>
         <div class="gl-display-flex gl-justify-content-end">
           <gl-button

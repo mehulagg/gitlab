@@ -1,5 +1,0 @@
----
-title: Add `hideBacklogList` and `hideClosedList` and `iteration_id` to `createBoard` mutation input
-merge_request: 49947
-author:
-type: changed

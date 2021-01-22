@@ -20,11 +20,8 @@ These locations can be configured using the options described below.
 
 ## Using local storage
 
-NOTE:
-This is the default configuration
-
-To change the location where Terraform state files are stored locally, follow the steps
-below.
+The default configuration uses local storage. To change the location where
+Terraform state files are stored locally, follow the steps below.
 
 **In Omnibus installations:**
 
@@ -103,6 +100,11 @@ See [the available connection settings for different providers](object_storage.m
    ```
 
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+1. Migrate any existing local states to the object storage (GitLab 13.9 and later):
+
+   ```shell
+   gitlab-rake gitlab:terraform_states:migrate
+   ```
 
 **In installations from source:**
 
@@ -123,3 +125,8 @@ See [the available connection settings for different providers](object_storage.m
    ```
 
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
+1. Migrate any existing local states to the object storage (GitLab 13.9 and later):
+
+   ```shell
+   sudo -u git -H bundle exec rake gitlab:terraform_states:migrate RAILS_ENV=production
+   ```

@@ -8,7 +8,8 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
     {
       name: 'GDPR',
       description: 'The EUs data protection directive',
-      color: '#abc123'
+      color: '#abc123',
+      pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
     }
   end
 
@@ -88,6 +89,7 @@ RSpec.describe ComplianceManagement::Frameworks::CreateService do
         expect(framework.name).to eq('GDPR')
         expect(framework.description).to eq('The EUs data protection directive')
         expect(framework.color).to eq('#abc123')
+        expect(framework.pipeline_configuration_full_path).to eq('compliance/.gitlab-ci.yml')
       end
     end
   end

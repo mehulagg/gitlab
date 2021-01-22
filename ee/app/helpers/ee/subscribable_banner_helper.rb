@@ -21,7 +21,21 @@ module EE
       @display_subscription_banner = true
     end
 
+    def renew_subscription_path
+      return plan_renew_url(current_namespace) if decorated_subscription
+
+      "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+    end
+
+    def upgrade_subscription_path
+      "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
+    end
+
     private
+
+    def current_namespace
+      @project&.namespace || @group
+    end
 
     def license_message(signed_in: signed_in?, is_admin: current_user&.admin?, license: License.current)
       ::Gitlab::ExpiringSubscriptionMessage.new(
@@ -33,13 +47,12 @@ module EE
 
     def subscription_message
       entity = @project || @group
-      namespace = @project&.namespace || @group
 
       ::Gitlab::ExpiringSubscriptionMessage.new(
         subscribable: decorated_subscription,
         signed_in: signed_in?,
         is_admin: can?(current_user, :owner_access, entity),
-        namespace: namespace
+        namespace: current_namespace
       ).message
     end
 

@@ -99,7 +99,7 @@ describe('BoardsStoreEE', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPut(dummyEndpoint).replyOnce(config => requestSpy(config));
+      axiosMock.onPut(dummyEndpoint).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to update the weight', () => {

@@ -19,9 +19,7 @@ if (selectElement?.dataset) {
 
         selectElement.appendChild(option);
       });
-      $(selectElement)
-        .val(selectedOption)
-        .trigger('change.select2');
+      $(selectElement).val(selectedOption).trigger('change.select2');
     })
     .catch(() => new Flash(__('Error loading countries data.')));
 }

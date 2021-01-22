@@ -5,6 +5,8 @@ module Gitlab
     module Aggregations
       module Vulnerabilities
         class LazyUserNotesCountAggregate
+          include ::Gitlab::Graphql::Deferred
+
           attr_reader :vulnerability, :lazy_state
 
           def initialize(query_ctx, vulnerability)

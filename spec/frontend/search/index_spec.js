@@ -1,14 +1,16 @@
+import setHighlightClass from 'ee_else_ce/search/highlight_blob_search_result';
 import { initSearchApp } from '~/search';
 import createStore from '~/search/store';
 
 jest.mock('~/search/store');
 jest.mock('~/search/topbar');
 jest.mock('~/search/sidebar');
+jest.mock('ee_else_ce/search/highlight_blob_search_result');
 
 describe('initSearchApp', () => {
   let defaultLocation;
 
-  const setUrl = query => {
+  const setUrl = (query) => {
     window.location.href = `https://localhost:3000/search${query}`;
     window.location.search = query;
   };
@@ -42,6 +44,7 @@ describe('initSearchApp', () => {
 
     it(`decodes ${search} to ${decodedSearch}`, () => {
       expect(createStore).toHaveBeenCalledWith({ query: { search: decodedSearch } });
+      expect(setHighlightClass).toHaveBeenCalledWith(decodedSearch);
     });
   });
 });

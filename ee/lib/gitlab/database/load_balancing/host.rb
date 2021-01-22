@@ -7,7 +7,7 @@ module Gitlab
       class Host
         attr_reader :pool, :last_checked_at, :intervals, :load_balancer, :host, :port
 
-        delegate :connection, :release_connection, :enable_query_cache!, :disable_query_cache!, to: :pool
+        delegate :connection, :release_connection, :enable_query_cache!, :disable_query_cache!, :query_cache_enabled, to: :pool
 
         CONNECTION_ERRORS =
           if defined?(PG)

@@ -36,7 +36,7 @@ describe('LicensesTable component', () => {
     });
   });
 
-  [true, false].forEach(isLoading => {
+  [true, false].forEach((isLoading) => {
     describe(`given a list of licenses (${isLoading ? 'loading' : 'loaded'})`, () => {
       let licenses;
       beforeEach(() => {
@@ -54,8 +54,8 @@ describe('LicensesTable component', () => {
 
       it('passes the correct props to the table rows', () => {
         expect(findRows()).toHaveLength(licenses.length);
-        expect(findRows().wrappers.map(x => x.props())).toEqual(
-          licenses.map(license => ({
+        expect(findRows().wrappers.map((x) => x.props())).toEqual(
+          licenses.map((license) => ({
             license,
             isLoading,
           })),

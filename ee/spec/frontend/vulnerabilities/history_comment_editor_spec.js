@@ -5,7 +5,7 @@ import HistoryCommentEditor from 'ee/vulnerabilities/components/history_comment_
 describe('History Comment Editor', () => {
   let wrapper;
 
-  const createWrapper = props => {
+  const createWrapper = (props) => {
     wrapper = shallowMount(HistoryCommentEditor, {
       propsData: { isSaving: false, ...props },
     });

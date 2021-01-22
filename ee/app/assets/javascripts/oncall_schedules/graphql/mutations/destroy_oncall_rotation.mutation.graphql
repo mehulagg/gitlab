@@ -1,0 +1,10 @@
+#import "../fragments/oncall_schedule_rotation.fragment.graphql"
+
+mutation oncallRotationDestroy($iid: String!, $projectPath: ID!) {
+  oncallRotationDestroy(input: { iid: $iid, projectPath: $projectPath }) {
+    errors
+    oncallRotation {
+      ...OnCallRotation
+    }
+  }
+}

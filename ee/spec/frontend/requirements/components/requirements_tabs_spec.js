@@ -72,7 +72,7 @@ describe('RequirementsTabs', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const buttonEl = wrapper.findAll(GlButton).at(1);
+        const buttonEl = wrapper.findAll(GlButton).at(2);
 
         expect(buttonEl.exists()).toBe(true);
         expect(buttonEl.text()).toBe('New requirement');
@@ -81,7 +81,7 @@ describe('RequirementsTabs', () => {
 
     it('does not render "New requirement" button when current tab is not "Open" tab', () => {
       wrapper.setProps({
-        filterBy: FilterState.closed,
+        filterBy: FilterState.archived,
       });
 
       return wrapper.vm.$nextTick(() => {
@@ -114,6 +114,7 @@ describe('RequirementsTabs', () => {
 
         expect(buttonEl.at(0).props('disabled')).toBe(true);
         expect(buttonEl.at(1).props('disabled')).toBe(true);
+        expect(buttonEl.at(2).props('disabled')).toBe(true);
       });
     });
   });

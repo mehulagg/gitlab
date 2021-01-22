@@ -32,7 +32,7 @@ function toggleTrialForm(trial) {
   }
 
   form.classList.toggle('hidden', !trial);
-  fields.forEach(f => {
+  fields.forEach((f) => {
     f.disabled = !trial; // eslint-disable-line no-param-reassign
   });
 
@@ -54,7 +54,7 @@ function mountTrialToggle() {
       return createElement(RegistrationTrialToggle, {
         props: { active },
         on: {
-          changed: event => toggleTrialForm(event.trial),
+          changed: (event) => toggleTrialForm(event.trial),
         },
       });
     },

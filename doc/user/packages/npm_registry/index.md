@@ -94,7 +94,10 @@ Some features such as [publishing](#publish-an-npm-package) a package is only av
 
 ## Authenticate to the Package Registry
 
-To authenticate to the Package Registry, you must use one of the following:
+You must authenticate with the Package Registry when the project
+is private. Public projects do not require authentication.
+
+To authenticate, use one of the following:
 
 - A [personal access token](../../../user/profile/personal_access_tokens.md)
   (required for two-factor authentication (2FA)), with the scope set to `api`.
@@ -102,7 +105,7 @@ To authenticate to the Package Registry, you must use one of the following:
 - It's not recommended, but you can use [OAuth tokens](../../../api/oauth2.md#resource-owner-password-credentials-flow).
   Standard OAuth tokens cannot authenticate to the GitLab NPM Registry. You must use a personal access token with OAuth headers.
 - A [CI job token](#authenticate-with-a-ci-job-token).
-- Your NPM package name must be in the format of [@scope:package-name](#package-naming-convention). It must match exactly, including the case.
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention). It must match exactly, including the case.
 
 ### Authenticate with a personal access token or deploy token
 
@@ -201,7 +204,7 @@ Then, you can run `npm publish` either locally or by using GitLab CI/CD.
 
 ## Package naming convention
 
-Your NPM package name must be in the format of `@scope:package-name`.
+Your NPM package name must be in the format of `@scope/package-name`.
 
 - The `@scope` is the root namespace of the GitLab project. It must match exactly, including the case.
 - The `package-name` can be whatever you want.
@@ -241,7 +244,9 @@ Prerequisites:
 
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
-- Your NPM package name must be in the format of [@scope:package-name](#package-naming-convention). It must match exactly, including the case.
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
+  It must match exactly, including the case. This is different than the
+  NPM naming convention, but it is required to work with the GitLab Package Registry.
 
 To upload an NPM package to your project, run this command:
 
@@ -260,6 +265,9 @@ Prerequisites:
 
 - [Authenticate](#authenticate-to-the-package-registry) to the Package Registry.
 - Set a [project-level NPM endpoint](#use-the-gitlab-endpoint-for-npm-packages).
+- Your NPM package name must be in the format of [@scope/package-name](#package-naming-convention).
+  It must match exactly, including the case. This is different than the
+  NPM naming convention, but it is required to work with the GitLab Package Registry.
 
 To work with NPM commands within [GitLab CI/CD](../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
@@ -294,7 +302,8 @@ the same version more than once, even if it has been deleted.
 ## Install a package
 
 NPM packages are commonly-installed by using the `npm` or `yarn` commands
-in a JavaScript project.
+in a JavaScript project. You can install a package from the scope of a project, group,
+or instance.
 
 1. Set the URL for scoped packages by running:
 
@@ -306,16 +315,16 @@ in a JavaScript project.
 
 1. Ensure [authentication](#authenticate-to-the-package-registry) is configured.
 
-1. In your project, to install a package, run:
+1. To install a package in your project, run:
 
    ```shell
-   npm install @my-project-scope/my-package
+   npm install @my-scope/my-package
    ```
 
    Or if you're using Yarn:
 
    ```shell
-   yarn add @my-project-scope/my-package
+   yarn add @my-scope/my-package
    ```
 
 In [GitLab 12.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/55344),
@@ -453,7 +462,7 @@ If you get this error, ensure that:
 
 - Your token is not expired and has appropriate permissions.
 - [Your token does not begin with `-`](https://gitlab.com/gitlab-org/gitlab/-/issues/235473).
-- A package with the same name doesn't already exist within the given scope.
+- A package with the same name or version doesn't already exist within the given scope.
 - The scoped packages URL includes a trailing slash:
   - Correct: `//gitlab.example.com/api/v4/packages/npm/`
   - Incorrect: `//gitlab.example.com/api/v4/packages/npm`
@@ -461,7 +470,7 @@ If you get this error, ensure that:
 ### `npm publish` returns `npm ERR! 400 Bad Request`
 
 If you get this error, your package name may not meet the
-[@scope:package-name package naming convention](#package-naming-convention).
+[@scope/package-name package naming convention](#package-naming-convention).
 
 Ensure the name meets the convention exactly, including the case.
 Then try to publish again.

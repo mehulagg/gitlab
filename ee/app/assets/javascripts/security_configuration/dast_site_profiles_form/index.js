@@ -9,11 +9,12 @@ export default () => {
     return;
   }
 
-  const { fullPath, profilesLibraryPath } = el.dataset;
+  const { fullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
 
   const props = {
     fullPath,
     profilesLibraryPath,
+    onDemandScansPath,
   };
 
   if (el.dataset.siteProfile) {

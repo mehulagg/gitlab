@@ -1,5 +1,0 @@
----
-title: Remove show license timeout guard on ee
-merge_request: 47832
-author:
-type: performance

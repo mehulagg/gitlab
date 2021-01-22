@@ -75,7 +75,7 @@ export default {
 <template>
   <section id="status-page" class="settings no-animate js-status-page-settings">
     <div class="settings-header">
-      <h4 ref="sectionHeader" class="gl-my-3! gl-py-1">
+      <h4 ref="sectionHeader">
         {{ $options.i18n.headerText }}
       </h4>
       <gl-button ref="toggleBtn" class="js-settings-toggle">{{

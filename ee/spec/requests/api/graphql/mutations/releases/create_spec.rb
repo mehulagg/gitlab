@@ -66,11 +66,7 @@ RSpec.describe 'Creation of a new release' do
         returned_milestone_titles = mutation_response.dig(:release, :milestones, :nodes)
                                                      .map { |m| m[:title] }
 
-        # Right now the milestones are returned in a non-deterministic order.
-        # This `milestones` test should be moved up into the expect(release)
-        # above (and `.to include` updated to `.to eq`) once
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/259012 is addressed.
-        expect(returned_milestone_titles).to match_array([
+        expect(returned_milestone_titles).to eq([
           milestone_12_3.title,
           milestone_12_4.title,
           group_milestone.title
@@ -88,6 +84,8 @@ RSpec.describe 'Creation of a new release' do
 
         expect(mutation_response[:release]).to be_nil
         expect(mutation_response[:errors].count).to eq(1)
+
+        # Weird error message will be fixed in https://gitlab.com/gitlab-org/gitlab/-/issues/277397
         expect(mutation_response[:errors].first).to match('Validation failed: Milestone releases is invalid, Milestone releases None of the group milestones have the same project as the release,,')
       end
     end

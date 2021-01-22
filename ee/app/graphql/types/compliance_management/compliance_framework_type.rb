@@ -22,6 +22,10 @@ module Types
       field :color, GraphQL::STRING_TYPE,
             null: false,
             description: 'Hexadecimal representation of compliance framework\'s label color'
+
+      field :pipeline_configuration_full_path, GraphQL::STRING_TYPE,
+            null: true,
+            description: 'Full path of the compliance pipeline configuration stored in a project repository, such as `.gitlab/compliance/soc2/.gitlab-ci.yml`.'
     end
   end
 end

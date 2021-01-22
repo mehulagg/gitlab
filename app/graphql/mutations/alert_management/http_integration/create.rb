@@ -10,15 +10,15 @@ module Mutations
 
         argument :project_path, GraphQL::ID_TYPE,
                  required: true,
-                 description: 'The project to create the integration in'
+                 description: 'The project to create the integration in.'
 
         argument :name, GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'The name of the integration'
+                 description: 'The name of the integration.'
 
         argument :active, GraphQL::BOOLEAN_TYPE,
                  required: true,
-                 description: 'Whether the integration is receiving alerts'
+                 description: 'Whether the integration is receiving alerts.'
 
         def resolve(args)
           project = authorized_find!(full_path: args[:project_path])
@@ -26,7 +26,7 @@ module Mutations
           response ::AlertManagement::HttpIntegrations::CreateService.new(
             project,
             current_user,
-            args.slice(:name, :active)
+            http_integration_params(project, args)
           ).execute
         end
 
@@ -39,3 +39,5 @@ module Mutations
     end
   end
 end
+
+Mutations::AlertManagement::HttpIntegration::Create.prepend_if_ee('::EE::Mutations::AlertManagement::HttpIntegration::Create')

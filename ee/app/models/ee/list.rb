@@ -8,6 +8,10 @@ module EE
 
     LIMIT_METRIC_TYPES = %w[all_metrics issue_count issue_weights].freeze
 
+    # When adding a new licensed type, make sure to also add
+    # it on license.rb with the pattern "board_<list_type>_lists"
+    LICENSED_LIST_TYPES = %i[assignee milestone iteration].freeze
+
     # ActiveSupport::Concern does not prepend the ClassMethods,
     # so we cannot call `super` if we use it.
     def self.prepended(base)
@@ -42,7 +46,7 @@ module EE
         unless: -> { board&.resource_parent&.feature_available?(:board_milestone_lists) }
       base.validates :list_type,
         exclusion: { in: %w[iteration], message: -> (_object, _data) { _('Iteration lists not available with your current license') } },
-        unless: -> { board&.resource_parent&.feature_available?(:iterations) }
+        unless: -> { board&.resource_parent&.feature_available?(:board_iteration_lists) }
 
       base.scope :without_types, ->(list_types) { where.not(list_type: list_types) }
     end

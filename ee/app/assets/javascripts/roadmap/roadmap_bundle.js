@@ -34,15 +34,15 @@ export default () => {
   // This event handler is to be removed in 11.1 once
   // we allow user to save selected preset in db
   if (presetButtonsContainer) {
-    presetButtonsContainer.addEventListener('click', e => {
+    presetButtonsContainer.addEventListener('click', (e) => {
       const presetType = e.target.querySelector('input[name="presetType"]').value;
 
       visitUrl(mergeUrlParams({ layout: presetType }, window.location.href));
     });
   }
 
-  Vue.component('epic-item', EpicItem);
-  Vue.component('epic-item-container', EpicItemContainer);
+  Vue.component('EpicItem', EpicItem);
+  Vue.component('EpicItemContainer', EpicItemContainer);
 
   return new Vue({
     el,
@@ -57,11 +57,17 @@ export default () => {
         supportedPresetTypes.indexOf(dataset.presetType) > -1
           ? dataset.presetType
           : PRESET_TYPES.MONTHS;
-      const filterParams = Object.assign(
-        convertObjectPropsToCamelCase(urlParamsToObject(window.location.search.substring(1)), {
+      const rawFilterParams = urlParamsToObject(window.location.search.substring(1));
+      const filterParams = {
+        ...convertObjectPropsToCamelCase(rawFilterParams, {
           dropKeys: ['scope', 'utf8', 'state', 'sort', 'layout'], // These keys are unsupported/unnecessary
         }),
-      );
+        // We shall put parsed value of `confidential` only
+        // when it is defined.
+        ...(rawFilterParams.confidential && {
+          confidential: parseBoolean(rawFilterParams.confidential),
+        }),
+      };
       const timeframe = getTimeframeForPreset(
         presetType,
         window.innerWidth - el.offsetLeft - EPIC_DETAILS_CELL_WIDTH,

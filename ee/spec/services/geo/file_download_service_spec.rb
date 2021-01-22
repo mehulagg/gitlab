@@ -323,13 +323,13 @@ RSpec.describe Geo::FileDownloadService do
             end
           end
 
-          it 'sets a retry date with a maximum of about 7 days' do
-            registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
+          it 'sets a retry date with a maximum of about 4 hours' do
+            registry_entry.update!(retry_count: 100, retry_at: 1.minute.ago)
 
             freeze_time do
               execute!
 
-              expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy
+              expect(registry_entry.reload.retry_at).to be_within(3.minutes).of(4.hours.from_now)
             end
           end
         end
@@ -362,13 +362,13 @@ RSpec.describe Geo::FileDownloadService do
             end
           end
 
-          it 'sets a retry date with a maximum of about 7 days' do
-            registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
+          it 'sets a retry date with a maximum of about 1 hour' do
+            registry_entry.update!(retry_count: 100, retry_at: 1.minute.ago)
 
             freeze_time do
               execute!
 
-              expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy
+              expect(registry_entry.reload.retry_at).to be_within(3.minutes).of(1.hour.from_now)
             end
           end
         end

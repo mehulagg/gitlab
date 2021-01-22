@@ -36,8 +36,8 @@ export default {
   },
   computed: {
     ...mapState({
-      rules: state => state.approvals.rules,
-      canOverride: state => state.settings.canOverride,
+      rules: (state) => state.approvals.rules,
+      canOverride: (state) => state.settings.canOverride,
     }),
     toggleIcon() {
       return this.isCollapsed ? 'chevron-down' : 'chevron-right';
@@ -46,7 +46,7 @@ export default {
       return this.glFeatures.mergeRequestReviewers && this.glFeatures.mrCollapsedApprovalRules;
     },
     hasOptionalRules() {
-      return this.rules.every(r => r.approvalsRequired === 0);
+      return this.rules.every((r) => r.approvalsRequired === 0);
     },
     requiredRules() {
       return this.rules.reduce((acc, rule) => {

@@ -66,10 +66,12 @@ RSpec.describe Subscriptions::CreateService do
           expect(subject.execute).to eq(success: false, data: { errors: 'failed to create subscription' })
         end
 
-        it 'does not create a namespace onboarding action' do
+        it 'does not register a namespace onboarding progress action' do
+          OnboardingProgress.onboard(group)
+
           subject.execute
 
-          expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(false)
+          expect(OnboardingProgress.completed?(group, :subscription_created)).to eq(false)
         end
       end
 
@@ -102,10 +104,12 @@ RSpec.describe Subscriptions::CreateService do
         subject.execute
       end
 
-      it 'creates a namespace onboarding action' do
+      it 'registers a namespace onboarding progress action' do
+        OnboardingProgress.onboard(group)
+
         subject.execute
 
-        expect(NamespaceOnboardingAction.completed?(group, :subscription_created)).to eq(true)
+        expect(OnboardingProgress.completed?(group, :subscription_created)).to eq(true)
       end
     end
   end

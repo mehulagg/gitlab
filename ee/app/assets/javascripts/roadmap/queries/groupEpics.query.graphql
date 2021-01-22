@@ -9,6 +9,7 @@ query groupEpics(
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
+  $confidential: Boolean
   $search: String = ""
 ) {
   group(fullPath: $fullPath) {
@@ -22,6 +23,7 @@ query groupEpics(
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
+      confidential: $confidential
       search: $search
     ) {
       edges {

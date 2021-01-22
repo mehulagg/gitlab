@@ -13,9 +13,6 @@ module EE
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
       with_scope :subject
-      condition(:deploy_board_disabled) { !@subject.feature_available?(:deploy_board) }
-
-      with_scope :subject
       condition(:iterations_available) { @subject.feature_available?(:iterations) }
 
       with_scope :subject
@@ -120,6 +117,11 @@ module EE
       end
 
       with_scope :subject
+      condition(:coverage_fuzzing_enabled) do
+        @subject.feature_available?(:coverage_fuzzing)
+      end
+
+      with_scope :subject
       condition(:on_demand_scans_enabled) do
         @subject.feature_available?(:security_on_demand_scans)
       end
@@ -188,7 +190,6 @@ module EE
 
       rule { can?(:reporter_access) }.policy do
         enable :admin_board
-        enable :read_deploy_board
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
@@ -218,6 +219,10 @@ module EE
         enable :read_vulnerability_scanner
       end
 
+      rule { coverage_fuzzing_enabled & can?(:developer_access) }.policy do
+        enable :read_coverage_fuzzing
+      end
+
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
         enable :read_on_demand_scans
         enable :create_on_demand_dast_scan
@@ -238,6 +243,7 @@ module EE
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
+        enable :admin_merge_request
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do
@@ -253,8 +259,6 @@ module EE
       rule { can?(:read_licenses) }.enable :read_software_license_policy
 
       rule { repository_mirrors_enabled & ((mirror_available & can?(:admin_project)) | admin) }.enable :admin_mirror
-
-      rule { deploy_board_disabled & ~is_development }.prevent :read_deploy_board
 
       rule { can?(:maintainer_access) }.policy do
         enable :push_code_to_protected_branches
@@ -330,7 +334,7 @@ module EE
           .default_project_deletion_protection
       end
 
-      rule { needs_new_sso_session & ~admin }.policy do
+      rule { needs_new_sso_session & ~admin & ~auditor }.policy do
         prevent :guest_access
         prevent :reporter_access
         prevent :developer_access
@@ -370,6 +374,7 @@ module EE
         enable :admin_requirement
         enable :update_requirement
         enable :import_requirements
+        enable :export_requirements
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement

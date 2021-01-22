@@ -12,7 +12,7 @@ import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import { mockLists, mockIssue, mockIssue2, mockEpic, rawIssue } from '../mock_data';
 
-const expectNotImplemented = action => {
+const expectNotImplemented = (action) => {
   it('is not implemented', () => {
     expect(action).toThrow(new Error('Not implemented!'));
   });
@@ -101,7 +101,7 @@ describe('setFilters', () => {
 });
 
 describe('performSearch', () => {
-  it('should dispatch setFilters action', done => {
+  it('should dispatch setFilters action', (done) => {
     testAction(actions.performSearch, {}, {}, [], [{ type: 'setFilters', payload: {} }], done);
   });
 
@@ -137,10 +137,8 @@ describe('performSearch', () => {
 
 describe('fetchEpicsSwimlanes', () => {
   const state = {
-    endpoints: {
-      fullPath: 'gitlab-org',
-      boardId: 1,
-    },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     filterParams: {},
     boardType: 'group',
   };
@@ -158,7 +156,7 @@ describe('fetchEpicsSwimlanes', () => {
     },
   };
 
-  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', done => {
+  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -176,7 +174,7 @@ describe('fetchEpicsSwimlanes', () => {
     );
   });
 
-  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', done => {
+  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(
@@ -189,7 +187,7 @@ describe('fetchEpicsSwimlanes', () => {
     );
   });
 
-  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', done => {
+  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', (done) => {
     const queryResponseWithNextPage = {
       data: {
         group: {
@@ -230,9 +228,7 @@ describe('fetchEpicsSwimlanes', () => {
 
 describe('updateBoardEpicUserPreferences', () => {
   const state = {
-    endpoints: {
-      boardId: 1,
-    },
+    boardId: 1,
   };
 
   const queryResponse = (collapsed = false) => ({
@@ -244,7 +240,7 @@ describe('updateBoardEpicUserPreferences', () => {
     },
   });
 
-  it('should send mutation', done => {
+  it('should send mutation', (done) => {
     const collapsed = true;
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue(queryResponse(collapsed));
 
@@ -270,7 +266,7 @@ describe('updateBoardEpicUserPreferences', () => {
 });
 
 describe('setShowLabels', () => {
-  it('should commit mutation SET_SHOW_LABELS', done => {
+  it('should commit mutation SET_SHOW_LABELS', (done) => {
     const state = {
       isShowingLabels: true,
     };
@@ -316,7 +312,9 @@ describe('updateListWipLimit', () => {
       .then(() => {
         expect(axios.put).toHaveBeenCalledWith(
           `${boardsStoreEE.store.state.endpoints.listsEndpoint}/${activeId}`,
-          { list: { max_issue_count: maxIssueCount } },
+          {
+            list: { max_issue_count: maxIssueCount },
+          },
         );
       });
   });
@@ -392,10 +390,8 @@ describe('fetchIssuesForEpic', () => {
   const epicId = mockEpic.id;
 
   const state = {
-    endpoints: {
-      fullPath: 'gitlab-org',
-      boardId: 1,
-    },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     filterParams: {},
     boardType: 'group',
   };
@@ -421,7 +417,7 @@ describe('fetchIssuesForEpic', () => {
 
   const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -437,7 +433,7 @@ describe('fetchIssuesForEpic', () => {
     );
   });
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', done => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(
@@ -463,10 +459,8 @@ describe('toggleEpicSwimlanes', () => {
 
     const state = {
       isShowingEpicsSwimlanes: false,
-      endpoints: {
-        fullPath: 'gitlab-org',
-        boardId: 1,
-      },
+      fullPath: 'gitlab-org',
+      boardId: 1,
     };
 
     return testAction(
@@ -495,10 +489,8 @@ describe('toggleEpicSwimlanes', () => {
 
     const state = {
       isShowingEpicsSwimlanes: true,
-      endpoints: {
-        fullPath: 'gitlab-org',
-        boardId: 1,
-      },
+      fullPath: 'gitlab-org',
+      boardId: 1,
     };
 
     return testAction(
@@ -579,7 +571,7 @@ describe('setActiveIssueWeight', () => {
     projectPath: 'h/b',
   };
 
-  it('should commit weight after setting the issue', done => {
+  it('should commit weight after setting the issue', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueSetWeight: {
@@ -630,12 +622,13 @@ describe('moveIssue', () => {
   };
 
   const issues = {
-    '436': mockIssue,
-    '437': mockIssue2,
+    436: mockIssue,
+    437: mockIssue2,
   };
 
   const state = {
-    endpoints: { fullPath: 'gitlab-org', boardId: '1' },
+    fullPath: 'gitlab-org',
+    boardId: 1,
     boardType: 'group',
     disabled: false,
     boardLists: mockLists,
@@ -643,7 +636,7 @@ describe('moveIssue', () => {
     issues,
   };
 
-  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', done => {
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueMoveList: {
@@ -684,7 +677,7 @@ describe('moveIssue', () => {
     );
   });
 
-  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_FAILURE mutation when unsuccessful', done => {
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_FAILURE mutation when unsuccessful', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
         issueMoveList: {

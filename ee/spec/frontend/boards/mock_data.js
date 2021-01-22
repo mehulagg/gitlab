@@ -36,7 +36,7 @@ export const mockLists = [
   },
 ];
 
-export const mockListsWithModel = mockLists.map(listMock =>
+export const mockListsWithModel = mockLists.map((listMock) =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
 );
 

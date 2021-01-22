@@ -1,5 +1,8 @@
+import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
+import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import BoardSidebarEpicSelect from 'ee/boards/components/sidebar/board_sidebar_epic_select.vue';
+import { stubComponent } from 'helpers/stub_component';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import { createStore } from '~/boards/stores';
 
@@ -8,7 +11,7 @@ const TEST_EPIC_ID = 8;
 const TEST_EPIC = { id: 'gid://gitlab/Epic/1', title: 'Test epic' };
 const TEST_ISSUE = { id: 'gid://gitlab/Issue/1', iid: 9, epic: null, referencePath: 'h/b#2' };
 
-jest.mock('~/lib/utils/common_utils', () => ({ debounceByAnimationFrame: callback => callback }));
+jest.mock('~/lib/utils/common_utils', () => ({ debounceByAnimationFrame: (callback) => callback }));
 
 describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   let wrapper;
@@ -20,7 +23,10 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
     wrapper = null;
   });
 
+  let epicsSelectHandleEditClick;
+
   const createWrapper = () => {
+    epicsSelectHandleEditClick = jest.fn();
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation(() => {});
     wrapper = shallowMount(BoardSidebarEpicSelect, {
@@ -30,7 +36,12 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         canUpdate: true,
       },
       stubs: {
-        'board-editable-item': BoardEditableItem,
+        BoardEditableItem,
+        EpicsSelect: stubComponent(EpicsSelect, {
+          methods: {
+            handleEditClick: epicsSelectHandleEditClick,
+          },
+        }),
       },
     });
 
@@ -50,17 +61,16 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
   it('expands the dropdown when editing', () => {
     createWrapper();
-    wrapper.setMethods({ openEpicsDropdown: jest.fn() });
     findItemWrapper().vm.$emit('open');
-    expect(wrapper.vm.openEpicsDropdown).toHaveBeenCalled();
+    expect(epicsSelectHandleEditClick).toHaveBeenCalled();
   });
 
   describe('when epic is selected', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createWrapper();
       jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation(() => TEST_EPIC);
       findEpicSelect().vm.$emit('onEpicSelect', { ...TEST_EPIC, id: TEST_EPIC_ID });
-      await wrapper.vm.$nextTick();
+      return nextTick();
     });
 
     it('collapses sidebar and renders epic title', () => {
@@ -81,11 +91,11 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   });
 
   describe('when no epic is selected', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createWrapper();
       jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation(() => null);
       findEpicSelect().vm.$emit('onEpicSelect', null);
-      await wrapper.vm.$nextTick();
+      return nextTick();
     });
 
     it('collapses sidebar and renders "None"', () => {
@@ -101,14 +111,14 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   describe('when the mutation fails', () => {
     const issueWithEpic = { ...TEST_ISSUE, epic: TEST_EPIC };
 
-    beforeEach(async () => {
+    beforeEach(() => {
       createWrapper();
       store.state.issues = { [TEST_ISSUE.id]: { ...issueWithEpic } };
       jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation(() => {
         throw new Error(['failed mutation']);
       });
       findEpicSelect().vm.$emit('onEpicSelect', {});
-      await wrapper.vm.$nextTick();
+      return nextTick();
     });
 
     it('collapses sidebar and renders former issue epic', () => {

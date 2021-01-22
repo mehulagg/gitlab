@@ -47,6 +47,7 @@ describe('Issuable output', () => {
       provide: {
         fullPath: 'gitlab-org/incidents',
         iid: '19',
+        uploadMetricsFeatureAvailable: false,
       },
       stubs: {
         HighlightBar: true,
@@ -398,8 +399,8 @@ describe('Issuable output', () => {
 
           wrapper.vm.poll.makeRequest();
 
-          return new Promise(resolve => {
-            wrapper.vm.$watch('formState.lockedWarningVisible', value => {
+          return new Promise((resolve) => {
+            wrapper.vm.$watch('formState.lockedWarningVisible', (value) => {
               if (value) {
                 resolve();
               }

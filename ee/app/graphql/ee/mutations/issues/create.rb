@@ -11,7 +11,7 @@ module EE
 
           argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
-                   description: 'The ID of an epic to associate the issue with'
+                   description: 'The ID of an epic to associate the issue with.'
         end
 
         private

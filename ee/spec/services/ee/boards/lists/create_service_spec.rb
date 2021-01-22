@@ -62,7 +62,7 @@ RSpec.describe Boards::Lists::CreateService do
       subject(:service) { described_class.new(project, user, 'iteration_id' => iteration.id) }
 
       before do
-        stub_licensed_features(iterations: true)
+        stub_licensed_features(board_iteration_lists: true)
       end
 
       it 'creates an iteration list when param is valid' do
@@ -93,7 +93,7 @@ RSpec.describe Boards::Lists::CreateService do
       end
 
       it 'returns an error when license is unavailable' do
-        stub_licensed_features(iterations: false)
+        stub_licensed_features(board_iteration_lists: false)
 
         response = service.execute(board)
 

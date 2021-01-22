@@ -1,6 +1,9 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
+import api from '~/api';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
 import ReportItem from '~/reports/components/report_item.vue';
@@ -15,6 +18,7 @@ export default {
     ReportItem,
     SmartVirtualList,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     endpoint: {
       type: String,
@@ -59,6 +63,13 @@ export default {
     hasMetrics() {
       return this.metrics.length > 0;
     },
+    handleToggleEvent() {
+      return once(() => {
+        if (this.glFeatures.usageDataITestingMetricsReportWidgetTotal) {
+          api.trackRedisHllUserEvent(this.$options.expandEvent);
+        }
+      });
+    },
   },
   created() {
     this.setEndpoint(this.endpoint);
@@ -67,6 +78,7 @@ export default {
   methods: {
     ...mapActions(['setEndpoint', 'fetchMetrics']),
   },
+  expandEvent: 'i_testing_metrics_report_widget_total',
 };
 </script>
 <template>
@@ -76,7 +88,9 @@ export default {
     :loading-text="groupedSummaryText"
     :error-text="groupedSummaryText"
     :has-issues="hasMetrics"
+    should-emit-toggle-event
     class="mr-widget-border-top grouped-security-reports mr-report"
+    @toggleEvent="handleToggleEvent"
   >
     <div slot="body" class="mr-widget-grouped-section report-block">
       <smart-virtual-list

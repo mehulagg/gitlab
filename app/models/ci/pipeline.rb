@@ -68,8 +68,8 @@ module Ci
     has_many :variables, class_name: 'Ci::PipelineVariable'
     has_many :deployments, through: :builds
     has_many :environments, -> { distinct }, through: :deployments
-    has_many :latest_builds, -> { latest }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
-    has_many :downloadable_artifacts, -> { not_expired.downloadable }, through: :latest_builds, source: :job_artifacts
+    has_many :latest_builds, -> { latest.with_project_and_metadata }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
+    has_many :downloadable_artifacts, -> { not_expired.downloadable.with_job }, through: :latest_builds, source: :job_artifacts
 
     has_many :messages, class_name: 'Ci::PipelineMessage', inverse_of: :pipeline
 
@@ -249,7 +249,8 @@ module Ci
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
-          ::Ci::Pipelines::CreateArtifactWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CreateQualityReportWorker.perform_async(pipeline.id)
         end
       end
 
@@ -262,8 +263,6 @@ module Ci
       end
 
       after_transition any => any do |pipeline|
-        next unless Feature.enabled?(:jira_sync_builds, pipeline.project)
-
         pipeline.run_after_commit do
           # Passing the seq-id ensures this is idempotent
           seq_id = ::Atlassian::JiraConnect::Client.generate_update_sequence_id
@@ -997,11 +996,21 @@ module Ci
     end
 
     def has_coverage_reports?
-      pipeline_artifacts&.has_code_coverage?
+      pipeline_artifacts&.has_report?(:code_coverage)
     end
 
     def can_generate_coverage_reports?
       has_reports?(Ci::JobArtifact.coverage_reports)
+    end
+
+    def has_codequality_reports?
+      pipeline_artifacts&.has_report?(:code_quality)
+    end
+
+    def can_generate_codequality_reports?
+      return false unless Feature.enabled?(:codequality_mr_diff, project)
+
+      has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
     def test_report_summary

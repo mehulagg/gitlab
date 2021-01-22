@@ -4,6 +4,7 @@ module Elastic
   class DataMigrationService
     MIGRATIONS_PATH = 'ee/elastic/migrate'
     MIGRATION_REGEXP = /\A([0-9]+)_([_a-z0-9]*)\.rb\z/.freeze
+    CACHE_TIMEOUT = 30.minutes
 
     class << self
       def migration_files
@@ -20,21 +21,56 @@ module Elastic
         migrations.sort_by(&:version)
       end
 
+      def [](version)
+        migrations.find { |m| m.version == version }
+      end
+
       def drop_migration_has_finished_cache!(migration)
-        name = migration.name.underscore
-        Rails.cache.delete cache_key(:migration_has_finished, name)
+        Rails.cache.delete cache_key(:migration_has_finished, migration.name_for_key)
       end
 
       def migration_has_finished?(name)
-        Rails.cache.fetch cache_key(:migration_has_finished, name), expires_in: 30.minutes do
+        Rails.cache.fetch cache_key(:migration_has_finished, name.to_s.underscore), expires_in: CACHE_TIMEOUT do
           migration_has_finished_uncached?(name)
         end
       end
 
       def migration_has_finished_uncached?(name)
-        migration = migrations.find { |migration| migration.name == name.to_s.camelize }
+        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
 
         !!migration&.load_from_index&.dig('_source', 'completed')
+      end
+
+      def migration_halted?(migration)
+        Rails.cache.fetch cache_key(:migration_halted, migration.name_for_key), expires_in: CACHE_TIMEOUT do
+          migration_halted_uncached?(migration)
+        end
+      end
+
+      def drop_migration_halted_cache!(migration)
+        Rails.cache.delete cache_key(:migration_halted, migration.name_for_key)
+      end
+
+      def migration_halted_uncached?(migration)
+        !!migration&.load_from_index&.dig('_source', 'state', 'halted')
+      end
+
+      def pending_migrations?
+        migrations.reverse.any? do |migration|
+          !migration_has_finished?(migration.name_for_key)
+        end
+      end
+
+      def halted_migrations?
+        migrations.reverse.any? do |migration|
+          migration_halted?(migration)
+        end
+      end
+
+      def halted_migration
+        migrations.reverse.find do |migration|
+          migration_halted?(migration)
+        end
       end
 
       def mark_all_as_completed!

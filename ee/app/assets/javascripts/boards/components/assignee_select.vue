@@ -89,7 +89,9 @@ export default {
           id: undefined,
         };
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee_id = assignee.id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee = assignee;
     },
   },
@@ -117,7 +119,7 @@ export default {
       <div v-else class="text-secondary">{{ anyUserText }}</div>
     </div>
 
-    <div class="selectbox" style="display: none;">
+    <div class="selectbox" style="display: none">
       <div class="dropdown">
         <button
           ref="dropdown"

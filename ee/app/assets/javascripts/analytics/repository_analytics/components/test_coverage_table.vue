@@ -36,7 +36,7 @@ export default {
           // Remove the projects that don't have any code coverage
           ...data.projects.nodes
             .filter(({ codeCoverageSummary }) => Boolean(codeCoverageSummary))
-            .map(project => ({
+            .map((project) => ({
               ...project,
               codeCoveragePath: joinPaths(
                 gon.relative_url_root || '',
@@ -76,7 +76,7 @@ export default {
     selectedProjectIds() {
       // Get the IDs of the projects that we haven't requested yet
       return Object.keys(this.projectIds).filter(
-        id => !this.allCoverageData.some(project => project.id === id),
+        (id) => !this.allCoverageData.some((project) => project.id === id),
       );
     },
     selectedCoverageData() {

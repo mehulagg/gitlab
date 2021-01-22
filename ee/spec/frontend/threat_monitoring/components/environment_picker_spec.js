@@ -14,7 +14,7 @@ describe('EnvironmentPicker component', () => {
   let store;
   let wrapper;
 
-  const factory = state => {
+  const factory = (state) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, state);
 

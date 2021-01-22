@@ -45,8 +45,7 @@ export const gqlClient = createGqClient(
 );
 
 const fetchAndFormatListIssues = (state, extraVariables) => {
-  const { endpoints, boardType, filterParams } = state;
-  const { fullPath, boardId } = endpoints;
+  const { fullPath, boardId, boardType, filterParams } = state;
 
   const variables = {
     fullPath,
@@ -126,8 +125,7 @@ export default {
   },
 
   fetchEpicsSwimlanes({ state, commit, dispatch }, { withLists = true, endCursor = null }) {
-    const { endpoints, boardType, filterParams } = state;
-    const { fullPath, boardId } = endpoints;
+    const { fullPath, boardId, boardType, filterParams } = state;
 
     const variables = {
       fullPath,
@@ -146,7 +144,7 @@ export default {
       })
       .then(({ data }) => {
         const { epics, lists } = data[boardType]?.board;
-        const epicsFormatted = epics.edges.map(e => ({
+        const epicsFormatted = epics.edges.map((e) => ({
           ...e.node,
         }));
 
@@ -176,9 +174,7 @@ export default {
   },
 
   updateBoardEpicUserPreferences({ commit, state }, { epicId, collapsed }) {
-    const {
-      endpoints: { boardId },
-    } = state;
+    const { boardId } = state;
 
     const variables = {
       boardId: fullBoardId(boardId),
@@ -394,7 +390,7 @@ export default {
       epicId,
     });
 
-    const { boardId } = state.endpoints;
+    const { boardId } = state;
     const [fullProjectPath] = issuePath.split(/[#]/);
 
     gqlClient

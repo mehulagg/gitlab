@@ -1,5 +1,6 @@
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
+import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 
 export default {
   ...Api,
@@ -42,6 +43,11 @@ export default {
   vulnerabilityIssueLinksPath: '/api/:version/vulnerabilities/:id/issue_links',
   applicationSettingsPath: '/api/:version/application/settings',
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
+  projectDeploymentFrequencyAnalyticsPath:
+    '/api/:version/projects/:id/analytics/deployment_frequency',
+  issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
+  issueMetricSingleImagePath:
+    '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
 
   userSubscription(namespaceId) {
     const url = Api.buildUrl(this.subscriptionPath).replace(':id', encodeURIComponent(namespaceId));
@@ -303,11 +309,6 @@ export default {
     return axios.post(url, params);
   },
 
-  fetchVulnerability(id, params) {
-    const url = Api.buildUrl(this.vulnerabilityPath).replace(':id', id);
-    return axios.get(url, params);
-  },
-
   changeVulnerabilityState(id, state) {
     const url = Api.buildUrl(this.vulnerabilityActionPath)
       .replace(':id', id)
@@ -334,5 +335,47 @@ export default {
   updateApplicationSettings(data) {
     const url = Api.buildUrl(this.applicationSettingsPath);
     return axios.put(url, data);
+  },
+
+  deploymentFrequencies(projectId, params = {}) {
+    const url = Api.buildUrl(this.projectDeploymentFrequencyAnalyticsPath).replace(
+      ':id',
+      encodeURIComponent(projectId),
+    );
+
+    return axios.get(url, { params });
+  },
+
+  fetchIssueMetricImages({ issueIid, id }) {
+    const metricImagesUrl = Api.buildUrl(this.issueMetricImagesPath)
+      .replace(':id', encodeURIComponent(id))
+      .replace(':issue_iid', encodeURIComponent(issueIid));
+
+    return axios.get(metricImagesUrl);
+  },
+
+  uploadIssueMetricImage({ issueIid, id, file, url = null }) {
+    const options = { headers: { ...ContentTypeMultipartFormData } };
+    const metricImagesUrl = Api.buildUrl(this.issueMetricImagesPath)
+      .replace(':id', encodeURIComponent(id))
+      .replace(':issue_iid', encodeURIComponent(issueIid));
+
+    // Construct multipart form data
+    const formData = new FormData();
+    formData.append('file', file);
+    if (url) {
+      formData.append('url', url);
+    }
+
+    return axios.post(metricImagesUrl, formData, options);
+  },
+
+  deleteMetricImage({ issueIid, id, imageId }) {
+    const individualMetricImageUrl = Api.buildUrl(this.issueMetricSingleImagePath)
+      .replace(':id', encodeURIComponent(id))
+      .replace(':issue_iid', encodeURIComponent(issueIid))
+      .replace(':image_id', encodeURIComponent(imageId));
+
+    return axios.delete(individualMetricImageUrl);
   },
 };

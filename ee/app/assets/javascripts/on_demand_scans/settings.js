@@ -33,3 +33,6 @@ export const SITE_PROFILES_EXTENDED_QUERY = {
   ...SITE_PROFILES_QUERY,
   fetchQuery: dastSiteProfilesExtendedQuery,
 };
+
+export const TYPE_SITE_PROFILE = 'DastSiteProfile';
+export const TYPE_SCANNER_PROFILE = 'DastScannerProfile';

@@ -12,17 +12,21 @@ import pipelineJobs from './modules/pipeline_jobs/index';
 
 Vue.use(Vuex);
 
+export const getStoreConfig = (dashboardType = DASHBOARD_TYPES.PROJECT) => ({
+  state: () => ({
+    dashboardType,
+  }),
+  modules: {
+    vulnerableProjects,
+    filters,
+    vulnerabilities,
+    unscannedProjects,
+    pipelineJobs,
+  },
+});
+
 export default ({ dashboardType = DASHBOARD_TYPES.PROJECT, plugins = [] } = {}) =>
   new Vuex.Store({
-    state: () => ({
-      dashboardType,
-    }),
-    modules: {
-      vulnerableProjects,
-      filters,
-      vulnerabilities,
-      unscannedProjects,
-      pipelineJobs,
-    },
+    ...getStoreConfig(dashboardType),
     plugins: [mediator, ...plugins],
   });

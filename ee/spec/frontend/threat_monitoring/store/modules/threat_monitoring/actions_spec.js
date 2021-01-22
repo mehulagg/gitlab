@@ -140,7 +140,7 @@ describe('Threat Monitoring actions', () => {
 
     describe('given more than one page of environments', () => {
       beforeEach(() => {
-        const oneEnvironmentPerPage = ({ totalPages }) => config => {
+        const oneEnvironmentPerPage = ({ totalPages }) => (config) => {
           const { page } = config.params;
           const response = [httpStatus.OK, { environments: [{ id: page }] }];
           if (page < totalPages) {

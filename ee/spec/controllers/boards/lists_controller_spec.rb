@@ -79,7 +79,7 @@ RSpec.describe Boards::ListsController do
 
         context 'when license is available' do
           before do
-            stub_licensed_features(iterations: true)
+            stub_licensed_features(board_iteration_lists: true)
           end
 
           it 'returns a successful 200 response' do
@@ -92,7 +92,7 @@ RSpec.describe Boards::ListsController do
 
         context 'when license is unavailable' do
           before do
-            stub_licensed_features(iterations: false)
+            stub_licensed_features(board_iteration_lists: false)
           end
 
           it 'returns an error' do

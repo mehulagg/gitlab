@@ -10,7 +10,7 @@ class ListEE extends List {
   }
 
   getIssues(...args) {
-    return super.getIssues(...args).then(data => {
+    return super.getIssues(...args).then((data) => {
       this.totalWeight = data.total_weight;
     });
   }
@@ -38,7 +38,7 @@ class ListEE extends List {
   onNewIssueResponse(issue, data) {
     issue.milestone = data.milestone ? new ListMilestone(data.milestone) : data.milestone;
     issue.assignees = Array.isArray(data.assignees)
-      ? data.assignees.map(assignee => new ListAssignee(assignee))
+      ? data.assignees.map((assignee) => new ListAssignee(assignee))
       : data.assignees;
     issue.labels = data.labels;
 

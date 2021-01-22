@@ -201,14 +201,14 @@ export default {
       };
 
       this.saveNote(replyData)
-        .then(res => {
+        .then((res) => {
           if (res.hasFlash !== true) {
             this.isReplying = false;
             clearDraft(this.autosaveKey);
           }
           callback();
         })
-        .catch(err => {
+        .catch((err) => {
           this.removePlaceholderNotes();
           const msg = __(
             'Your comment could not be submitted! Please check your network connection and try again.',
@@ -265,7 +265,7 @@ export default {
                 <div
                   v-else-if="showReplies"
                   :class="{ 'is-replying': isReplying }"
-                  class="discussion-reply-holder clearfix"
+                  class="discussion-reply-holder gl-border-t-0! clearfix"
                 >
                   <user-avatar-link
                     v-if="!isReplying && userCanReply"

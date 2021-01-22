@@ -67,7 +67,7 @@ export function transformBoardConfig(boardConfig) {
   let updatedFilterPath = objectToQuery(updatedBoardConfig);
   const filterPath = updatedFilterPath ? updatedFilterPath.split('&') : [];
 
-  boardConfig.labels.forEach(label => {
+  boardConfig.labels.forEach((label) => {
     const labelTitle = encodeURIComponent(label.title);
     const param = `label_name[]=${labelTitle}`;
     const labelIndex = passedFilterParams.label_name?.indexOf(labelTitle);

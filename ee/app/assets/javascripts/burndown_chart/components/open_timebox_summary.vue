@@ -36,13 +36,13 @@ export default {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     displayValue: {
       type: String,
       required: false,
       default: Unit.count,
-      validator: val => Unit[val],
+      validator: (val) => Unit[val],
     },
   },
   data() {

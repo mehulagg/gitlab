@@ -15,7 +15,7 @@ describe('Security Charts Layout component', () => {
 
   const findSlot = () => wrapper.find(`[data-testid="security-charts-layout"]`);
 
-  const createWrapper = slots => {
+  const createWrapper = (slots) => {
     wrapper = shallowMount(SecurityChartsLayout, { slots });
   };
 

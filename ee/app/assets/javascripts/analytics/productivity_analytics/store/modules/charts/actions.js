@@ -8,7 +8,7 @@ import { transformScatterData } from '../../../utils';
  * Fetches data for all charts except for the main chart
  */
 export const fetchSecondaryChartData = ({ state, dispatch }) => {
-  Object.keys(state.charts).forEach(chartKey => {
+  Object.keys(state.charts).forEach((chartKey) => {
     if (chartKey !== chartKeys.main) {
       dispatch('fetchChartData', chartKey);
     }
@@ -27,7 +27,7 @@ export const fetchChartData = ({ dispatch, getters, state, rootState }, chartKey
 
     axios
       .get(rootState.endpoint, { params })
-      .then(response => {
+      .then((response) => {
         const { data } = response;
 
         if (chartKey === chartKeys.scatterplot) {
@@ -42,7 +42,7 @@ export const fetchChartData = ({ dispatch, getters, state, rootState }, chartKey
           dispatch('receiveChartDataSuccess', { chartKey, data });
         }
       })
-      .catch(error => dispatch('receiveChartDataError', { chartKey, error }));
+      .catch((error) => dispatch('receiveChartDataError', { chartKey, error }));
   }
 };
 

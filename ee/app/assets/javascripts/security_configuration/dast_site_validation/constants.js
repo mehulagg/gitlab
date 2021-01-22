@@ -30,7 +30,8 @@ export const DAST_SITE_VALIDATION_STATUS = {
 
 const INPROGRESS_VALIDATION_PROPS = {
   label: s__('DastSiteValidation|Validating...'),
-  cssClass: 'gl-text-blue-300',
+  badgeVariant: 'info',
+  badgeIcon: 'status-running',
   tooltipText: s__('DastSiteValidation|The validation is in progress. Please wait...'),
 };
 
@@ -39,14 +40,16 @@ export const DAST_SITE_VALIDATION_STATUS_PROPS = {
   [DAST_SITE_VALIDATION_STATUS.INPROGRESS]: INPROGRESS_VALIDATION_PROPS,
   [DAST_SITE_VALIDATION_STATUS.PASSED]: {
     label: s__('DastSiteValidation|Validated'),
-    cssClass: 'gl-text-green-500',
+    badgeVariant: 'success',
+    badgeIcon: 'status-success',
     tooltipText: s__(
       'DastSiteValidation|Validation succeeded. Both active and passive scans can be run against the target site.',
     ),
   },
   [DAST_SITE_VALIDATION_STATUS.FAILED]: {
     label: s__('DastSiteValidation|Validation failed'),
-    cssClass: 'gl-text-red-500',
+    badgeVariant: 'danger',
+    badgeIcon: 'status-failed',
     tooltipText: s__('DastSiteValidation|The validation has failed. Please try again.'),
   },
 };

@@ -3,7 +3,7 @@
 module Mutations
   module DastSiteValidations
     class Create < BaseMutation
-      include AuthorizesProject
+      include FindsProject
 
       graphql_name 'DastSiteValidationCreate'
 
@@ -34,7 +34,7 @@ module Mutations
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, dast_site_token_id:, validation_path:, strategy: :text_file)
-        project = authorized_find_project!(full_path: full_path)
+        project = authorized_find!(full_path)
         raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'Feature disabled' unless allowed?(project)
 
         dast_site_token = dast_site_token_id.find
@@ -56,7 +56,7 @@ module Mutations
       private
 
       def allowed?(project)
-        Feature.enabled?(:security_on_demand_scans_site_validation, project)
+        Feature.enabled?(:security_on_demand_scans_site_validation, project, default_enabled: :yaml)
       end
 
       def error_response(errors)

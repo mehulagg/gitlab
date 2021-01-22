@@ -15,10 +15,14 @@ module Gitlab
         }
       end
 
-      def self.fabricate!(file_type)
-        parsers.fetch(file_type.to_sym).new
+      def self.fabricate!(file_type, *args)
+        parsers.fetch(file_type.to_sym).new(*args)
       rescue KeyError
         raise ParserNotFoundError, "Cannot find any parser matching file type '#{file_type}'"
+      end
+
+      def self.instrument!
+        parsers.values.each { |parser_class| parser_class.prepend(Parsers::Instrumentation) }
       end
     end
   end

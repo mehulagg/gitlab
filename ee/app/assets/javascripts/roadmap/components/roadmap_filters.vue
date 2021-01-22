@@ -6,6 +6,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
+  GlFilteredSearchToken,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
@@ -125,17 +126,30 @@ export default {
               // b) Milestones Public API supports including child projects' milestones.
               if (search) {
                 return {
-                  data: data.filter(m => m.title.toLowerCase().includes(search.toLowerCase())),
+                  data: data.filter((m) => m.title.toLowerCase().includes(search.toLowerCase())),
                 };
               }
               return { data };
             });
           },
         },
+        {
+          type: 'confidential',
+          icon: 'eye-slash',
+          title: __('Confidential'),
+          unique: true,
+          token: GlFilteredSearchToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          options: [
+            { icon: 'eye-slash', value: true, title: __('Yes') },
+            { icon: 'eye', value: false, title: __('No') },
+          ],
+        },
       ];
     },
     getFilteredSearchValue() {
-      const { authorUsername, labelName, milestoneTitle, search } = this.filterParams || {};
+      const { authorUsername, labelName, milestoneTitle, confidential, search } =
+        this.filterParams || {};
       const filteredSearchValue = [];
 
       if (authorUsername) {
@@ -154,11 +168,18 @@ export default {
 
       if (labelName?.length) {
         filteredSearchValue.push(
-          ...labelName.map(label => ({
+          ...labelName.map((label) => ({
             type: 'label_name',
             value: { data: label },
           })),
         );
+      }
+
+      if (confidential !== undefined) {
+        filteredSearchValue.push({
+          type: 'confidential',
+          value: { data: confidential },
+        });
       }
 
       if (search) {
@@ -169,7 +190,8 @@ export default {
     },
     updateUrl() {
       const queryParams = urlParamsToObject(window.location.search);
-      const { authorUsername, labelName, milestoneTitle, search } = this.filterParams || {};
+      const { authorUsername, labelName, milestoneTitle, confidential, search } =
+        this.filterParams || {};
 
       queryParams.state = this.epicsState;
       queryParams.sort = this.sortedBy;
@@ -189,6 +211,12 @@ export default {
       delete queryParams.label_name;
       if (labelName?.length) {
         queryParams['label_name[]'] = labelName;
+      }
+
+      if (confidential !== undefined) {
+        queryParams.confidential = confidential;
+      } else {
+        delete queryParams.confidential;
       }
 
       if (search) {
@@ -217,7 +245,7 @@ export default {
       const filterParams = filters.length ? {} : null;
       const labels = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         if (typeof filter === 'object') {
           switch (filter.type) {
             case 'author_username':
@@ -228,6 +256,9 @@ export default {
               break;
             case 'label_name':
               labels.push(filter.value.data);
+              break;
+            case 'confidential':
+              filterParams.confidential = filter.value.data;
               break;
             default:
               break;

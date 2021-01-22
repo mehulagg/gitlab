@@ -481,7 +481,7 @@ RSpec.describe Namespace do
       end
 
       context 'when feature not available in the plan' do
-        let(:feature) { :deploy_board }
+        let(:feature) { :cluster_deployments }
         let(:hosted_plan) { create(:bronze_plan) }
 
         it 'returns false' do
@@ -643,26 +643,6 @@ RSpec.describe Namespace do
       end
 
       it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#root?' do
-    subject { namespace.root? }
-
-    context 'when is subgroup' do
-      before do
-        namespace.parent = build(:group)
-      end
-
-      it 'returns false' do
-        is_expected.to eq(false)
-      end
-    end
-
-    context 'when is root' do
-      it 'returns true' do
-        is_expected.to eq(true)
-      end
     end
   end
 

@@ -117,7 +117,7 @@ export default {
       'fetchProjects',
     ]),
     getRawRefs(value) {
-      return value.split(/\s+/).filter(ref => ref.trim().length > 0);
+      return value.split(/\s+/).filter((ref) => ref.trim().length > 0);
     },
     handlePendingItemRemove(index) {
       this.removePendingReference(index);

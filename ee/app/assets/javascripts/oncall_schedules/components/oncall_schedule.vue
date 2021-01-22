@@ -4,19 +4,21 @@ import {
   GlCard,
   GlButtonGroup,
   GlButton,
+  GlDropdown,
+  GlDropdownItem,
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { capitalize } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
-import AddRotationModal from './rotations/components/add_rotation_modal.vue';
-
-import { getTimeframeForWeeksView } from './schedule/utils';
-import { PRESET_TYPES } from '../constants';
+import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
+import { getTimeframeForWeeksView } from './schedule/utils';
+import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -25,33 +27,34 @@ export const i18n = {
   rotationTitle: s__('OnCallSchedules|Rotations'),
   addARotation: s__('OnCallSchedules|Add a rotation'),
 };
-
-export const addRotationModalId = 'addRotationModal';
 export const editScheduleModalId = 'editScheduleModal';
 export const deleteScheduleModalId = 'deleteScheduleModal';
 
 export default {
   i18n,
   addRotationModalId,
+  editRotationModalId,
   editScheduleModalId,
   deleteScheduleModalId,
-  presetType: PRESET_TYPES.WEEKS,
-  inject: ['timezones'],
+  PRESET_TYPES,
   components: {
-    GlSprintf,
-    GlCard,
-    ScheduleTimelineSection,
-    GlButtonGroup,
     GlButton,
+    GlButtonGroup,
+    GlCard,
+    GlDropdown,
+    GlDropdownItem,
+    GlSprintf,
+    AddEditRotationModal,
     DeleteScheduleModal,
     EditScheduleModal,
-    AddRotationModal,
     RotationsListSection,
+    ScheduleTimelineSection,
   },
   directives: {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['timezones'],
   props: {
     schedule: {
       type: Object,
@@ -63,18 +66,35 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      presetType: this.$options.PRESET_TYPES.WEEKS,
+    };
+  },
   computed: {
     offset() {
-      const selectedTz = this.timezones.find(tz => tz.identifier === this.schedule.timezone);
+      const selectedTz = this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
       return __(`(UTC ${selectedTz.formatted_offset})`);
     },
     timeframe() {
       return getTimeframeForWeeksView();
     },
     scheduleRange() {
-      const range = { start: this.timeframe[0], end: this.timeframe[this.timeframe.length - 1] };
+      const end =
+        this.presetType === this.$options.PRESET_TYPES.DAYS
+          ? this.timeframe[0]
+          : this.timeframe[this.timeframe.length - 1];
+      const range = { start: this.timeframe[0], end };
 
       return `${formatDate(range.start, 'mmmm d')} - ${formatDate(range.end, 'mmmm d, yyyy')}`;
+    },
+  },
+  methods: {
+    setPresetType(type) {
+      this.presetType = type;
+    },
+    formatPresetType(type) {
+      return capitalize(type);
     },
   },
 };
@@ -107,11 +127,24 @@ export default {
           </gl-button-group>
         </div>
       </template>
-      <p class="gl-text-gray-500 gl-mb-3" data-testid="scheduleBody">
+      <p
+        class="gl-text-gray-500 gl-mb-3 gl-display-flex gl-justify-content-space-between gl-align-items-center"
+        data-testid="scheduleBody"
+      >
         <gl-sprintf :message="$options.i18n.scheduleForTz">
           <template #timezone>{{ schedule.timezone }}</template>
         </gl-sprintf>
         | {{ offset }}
+        <gl-dropdown right :text="formatPresetType(presetType)">
+          <gl-dropdown-item
+            v-for="type in $options.PRESET_TYPES"
+            :key="type"
+            :is-check-item="true"
+            :is-checked="type === presetType"
+            @click="setPresetType(type)"
+            >{{ formatPresetType(type) }}</gl-dropdown-item
+          >
+        </gl-dropdown>
       </p>
       <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
         <gl-button-group>
@@ -135,9 +168,9 @@ export default {
         </template>
 
         <div class="schedule-shell" data-testid="rotationsBody">
-          <schedule-timeline-section :preset-type="$options.presetType" :timeframe="timeframe" />
+          <schedule-timeline-section :preset-type="presetType" :timeframe="timeframe" />
           <rotations-list-section
-            :preset-type="$options.presetType"
+            :preset-type="presetType"
             :rotations="rotations"
             :timeframe="timeframe"
           />
@@ -145,12 +178,16 @@ export default {
       </gl-card>
     </gl-card>
     <delete-schedule-modal :schedule="schedule" :modal-id="$options.deleteScheduleModalId" />
-    <edit-schedule-modal :schedule="schedule" :modal-id="$options.editScheduleModalId" />
     <edit-schedule-modal
       :schedule="schedule"
       :modal-id="$options.editScheduleModalId"
       is-edit-mode
     />
-    <add-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal :schedule="schedule" :modal-id="$options.addRotationModalId" />
+    <add-edit-rotation-modal
+      :schedule="schedule"
+      :modal-id="$options.editRotationModalId"
+      is-edit-mode
+    />
   </div>
 </template>

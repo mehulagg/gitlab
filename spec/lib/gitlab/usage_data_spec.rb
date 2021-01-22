@@ -54,6 +54,32 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect { subject }.to raise_error('Stopped calculating recorded_at')
     end
+
+    context 'when generating usage ping in critical weeks' do
+      it 'does not raise error when generated in last week of the year' do
+        travel_to(DateTime.parse('2020-12-29')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in first week of the year' do
+        travel_to(DateTime.parse('2021-01-01')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in second week of the year' do
+        travel_to(DateTime.parse('2021-01-07')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+
+      it 'does not raise error when generated in 3rd week of the year' do
+        travel_to(DateTime.parse('2021-01-14')) do
+          expect { subject }.not_to raise_error
+        end
+      end
+    end
   end
 
   describe 'usage_activity_by_stage_package' do
@@ -654,7 +680,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
     it { is_expected.to include(:kubernetes_agent_gitops_sync) }
     it { is_expected.to include(:static_site_editor_views) }
-    it { is_expected.to include(:package_guest_i_package_composer_guest_pull) }
+    it { is_expected.to include(:package_events_i_package_pull_package) }
+    it { is_expected.to include(:package_events_i_package_delete_package_by_user) }
+    it { is_expected.to include(:package_events_i_package_conan_push_package) }
   end
 
   describe '.usage_data_counters' do
@@ -1234,7 +1262,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.redis_hll_counters }
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
-    let(:ineligible_total_categories) { %w[source_code testing ci_secrets_management incident_management_alerts snippets] }
+    let(:ineligible_total_categories) { %w[source_code ci_secrets_management incident_management_alerts snippets terraform] }
 
     it 'has all known_events' do
       expect(subject).to have_key(:redis_hll_counters)

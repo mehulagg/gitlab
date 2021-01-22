@@ -24,6 +24,6 @@ export function initTestCaseCreate({ mountPointSelector }) {
     provide: {
       ...mountPointEl.dataset,
     },
-    render: createElement => createElement(TestCaseCreateApp),
+    render: (createElement) => createElement(TestCaseCreateApp),
   });
 }

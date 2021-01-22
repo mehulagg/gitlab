@@ -45,8 +45,8 @@ export default class SamlSettingsForm {
         dependsOn: 'enforced-group-managed-accounts',
       },
     ]
-      .filter(s => s.el)
-      .map(setting => ({
+      .filter((s) => s.el)
+      .map((setting) => ({
         ...setting,
         toggle: getToggle(setting.el),
         helperText: getHelperText(setting.el),
@@ -60,7 +60,7 @@ export default class SamlSettingsForm {
   }
 
   findSetting(name) {
-    return this.settings.find(s => s.name === name);
+    return this.settings.find((s) => s.name === name);
   }
 
   getValueWithDeps(name) {
@@ -92,7 +92,7 @@ export default class SamlSettingsForm {
   }
 
   updateSAMLSettings() {
-    this.settings = this.settings.map(setting => ({
+    this.settings = this.settings.map((setting) => ({
       ...setting,
       value: parseBoolean(setting.el.querySelector('input').value),
     }));
@@ -112,8 +112,8 @@ export default class SamlSettingsForm {
 
   updateToggles() {
     this.settings
-      .filter(setting => setting.dependsOn)
-      .forEach(setting => {
+      .filter((setting) => setting.dependsOn)
+      .forEach((setting) => {
         const { helperText, callout, toggle } = setting;
         const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
         if (helperText) {

@@ -39,7 +39,7 @@ export default {
         xAxis: {
           type: 'time',
           axisLabel: {
-            formatter: date => dateFormat(date, dateFormats.defaultDate),
+            formatter: (date) => dateFormat(date, dateFormats.defaultDate),
           },
         },
         dataZoom: [

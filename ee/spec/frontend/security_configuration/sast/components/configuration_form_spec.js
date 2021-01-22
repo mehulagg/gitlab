@@ -25,7 +25,7 @@ describe('ConfigurationForm component', () => {
 
   let pendingPromiseResolvers;
   const fulfillPendingPromises = () => {
-    pendingPromiseResolvers.forEach(resolve => resolve());
+    pendingPromiseResolvers.forEach((resolve) => resolve());
   };
 
   const createComponent = ({ mutationResult, ...options } = {}) => {
@@ -47,7 +47,7 @@ describe('ConfigurationForm component', () => {
             $apollo: {
               mutate: jest.fn(
                 () =>
-                  new Promise(resolve => {
+                  new Promise((resolve) => {
                     pendingPromiseResolvers.push(() =>
                       resolve({
                         data: { configureSast: mutationResult },

@@ -1,0 +1,27 @@
+mutation dastScanUpdate(
+  $id: DastScanID!
+  $fullPath: ID!
+  $name: String!
+  $description: String
+  $dastSiteProfileId: DastSiteProfileID!
+  $dastScannerProfileID: DastScannerProfileID!
+  $runAfterCreate: Boolean
+) {
+  dastScanUpdate(
+    input: {
+      id: $id
+      fullPath: $fullPath
+      name: $name
+      description: $description
+      dastSiteProfileId: $dastSiteProfileId
+      dastScannerProfileID: $dastScannerProfileID
+      runAfterCreate: $runAfterCreate
+    }
+  ) @client {
+    dastScan {
+      editPath
+    }
+    pipelineUrl
+    errors
+  }
+}

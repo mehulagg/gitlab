@@ -5,37 +5,37 @@ require 'spec_helper'
 RSpec.describe "Profile access" do
   include AccessMatchers
 
-  describe "GET /profile/keys" do
+  describe "GET /-/profile/keys" do
     subject { profile_keys_path }
 
     it { is_expected.to be_allowed_for :auditor }
   end
 
-  describe "GET /profile" do
+  describe "GET /-/profile" do
     subject { profile_path }
 
     it { is_expected.to be_allowed_for :auditor }
   end
 
-  describe "GET /profile/account" do
+  describe "GET /-/profile/account" do
     subject { profile_account_path }
 
     it { is_expected.to be_allowed_for :auditor }
   end
 
-  describe "GET /profile/preferences" do
+  describe "GET /-/profile/preferences" do
     subject { profile_preferences_path }
 
     it { is_expected.to be_allowed_for :auditor }
   end
 
-  describe "GET /profile/audit_log" do
+  describe "GET /-/profile/audit_log" do
     subject { audit_log_profile_path }
 
     it { is_expected.to be_allowed_for :auditor }
   end
 
-  describe "GET /profile/notifications" do
+  describe "GET /-/profile/notifications" do
     subject { profile_notifications_path }
 
     it { is_expected.to be_allowed_for :auditor }

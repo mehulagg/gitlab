@@ -12,8 +12,7 @@ import {
 import produce from 'immer';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-// TODO once backend is settled, update by either abstracting this out to app/assets/javascripts/graphql_shared or create new, modified query in #287757
-import getAlerts from '~/alert_management/graphql/queries/get_alerts.query.graphql';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { DEFAULT_FILTERS, FIELDS, MESSAGES, PAGE_SIZE, STATUSES } from './constants';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
@@ -43,7 +42,7 @@ export default {
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
-      query: getAlerts,
+      query: getAlertsQuery,
       variables() {
         return {
           firstPageSize: this.$options.PAGE_SIZE,
@@ -100,7 +99,7 @@ export default {
         this.$apollo.queries.alerts.fetchMore({
           variables: { nextPageCursor: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
+            const results = produce(fetchMoreResult, (draftData) => {
               // eslint-disable-next-line no-param-reassign
               draftData.project.alertManagementAlerts.nodes = [
                 ...previousResult.project.alertManagementAlerts.nodes,

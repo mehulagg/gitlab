@@ -138,7 +138,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
       let(:previous_ref) { 'refs/tmp/test' }
 
       before do
-        allow(service).to receive(:previous_ref) { previous_ref }
+        allow(merge_request.merge_train).to receive(:previous_ref) { previous_ref }
       end
 
       it_behaves_like 'drops the merge request from the merge train' do

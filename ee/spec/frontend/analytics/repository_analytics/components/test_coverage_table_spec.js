@@ -4,8 +4,8 @@ import TestCoverageTable from 'ee/analytics/repository_analytics/components/test
 import getGroupProjects from 'ee/analytics/repository_analytics/graphql/queries/get_group_projects.query.graphql';
 import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/queries/get_projects_test_coverage.query.graphql';
 import { useFakeDate } from 'helpers/fake_date';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
-import waitForPromises from 'jest/helpers/wait_for_promises';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const localVue = createLocalVue();
 
@@ -18,10 +18,10 @@ describe('Test coverage table component', () => {
   const findLoadingState = () => wrapper.find('[data-testid="test-coverage-loading-state"');
   const findTable = () => wrapper.find('[data-testid="test-coverage-data-table"');
   const findTableRows = () => findTable().findAll('tbody tr');
-  const findProjectNameById = id => wrapper.find(`[data-testid="${id}-name"`);
-  const findProjectAverageById = id => wrapper.find(`[data-testid="${id}-average"`);
-  const findProjectCountById = id => wrapper.find(`[data-testid="${id}-count"`);
-  const findProjectDateById = id => wrapper.find(`[data-testid="${id}-date"`);
+  const findProjectNameById = (id) => wrapper.find(`[data-testid="${id}-name"`);
+  const findProjectAverageById = (id) => wrapper.find(`[data-testid="${id}-average"`);
+  const findProjectCountById = (id) => wrapper.find(`[data-testid="${id}-count"`);
+  const findProjectDateById = (id) => wrapper.find(`[data-testid="${id}-date"`);
 
   const createComponent = ({ data = {}, mountFn = shallowMount } = {}) => {
     wrapper = mountFn(TestCoverageTable, {
@@ -180,16 +180,8 @@ describe('Test coverage table component', () => {
       });
 
       expect(findTable().exists()).toBe(true);
-      expect(
-        findTableRows()
-          .at(0)
-          .text(),
-      ).toContain('should be first');
-      expect(
-        findTableRows()
-          .at(1)
-          .text(),
-      ).toContain('should be last');
+      expect(findTableRows().at(0).text()).toContain('should be first');
+      expect(findTableRows().at(1).text()).toContain('should be last');
     });
 
     it('renders the correct link', async () => {

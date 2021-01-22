@@ -110,7 +110,7 @@ describe('AppComponent', () => {
     });
 
     describe('fetchGeoNodes', () => {
-      it('calls service.getGeoNodes and sets response to the store on success', done => {
+      it('calls service.getGeoNodes and sets response to the store on success', (done) => {
         jest.spyOn(vm.store, 'setNodes');
 
         vm.fetchGeoNodes()
@@ -122,7 +122,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('sets error flag and message on failure', done => {
+      it('sets error flag and message on failure', (done) => {
         response = 'Something went wrong';
         statusCode = 500;
 
@@ -139,7 +139,7 @@ describe('AppComponent', () => {
     });
 
     describe('fetchNodeDetails', () => {
-      it('calls service.getGeoNodeDetails and sets response to the store on success', done => {
+      it('calls service.getGeoNodeDetails and sets response to the store on success', (done) => {
         mock.onGet(mockNode.statusPath).reply(200, rawMockNodeDetails);
 
         vm.fetchNodeDetails(mockNode)
@@ -151,7 +151,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object on 404 failure', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object on 404 failure', (done) => {
         mock.onGet(mockNode.statusPath).reply(404, {});
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -168,7 +168,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a network error occurs', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a network error occurs', (done) => {
         mock.onGet(mockNode.statusPath).networkError();
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -185,7 +185,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a timeout occurs', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a timeout occurs', (done) => {
         mock.onGet(mockNode.statusPath).timeout();
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -204,7 +204,7 @@ describe('AppComponent', () => {
     });
 
     describe('repairNode', () => {
-      it('calls service.repairNode and shows success Toast message on request success', done => {
+      it('calls service.repairNode and shows success Toast message on request success', (done) => {
         const node = { ...mockNode };
         mock.onPost(node.repairPath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -224,7 +224,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.repairNode and shows failure Flash message on request failure', done => {
+      it('calls service.repairNode and shows failure Flash message on request failure', (done) => {
         const node = { ...mockNode };
         mock.onPost(node.repairPath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -247,7 +247,7 @@ describe('AppComponent', () => {
     });
 
     describe('toggleNode', () => {
-      it('calls service.toggleNode for enabling node and updates toggle button on request success', done => {
+      it('calls service.toggleNode for enabling node and updates toggle button on request success', (done) => {
         const node = { ...mockNode };
         mock.onPut(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -271,7 +271,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.toggleNode and shows Flash error on request failure', done => {
+      it('calls service.toggleNode and shows Flash error on request failure', (done) => {
         const node = { ...mockNode };
         mock.onPut(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -295,7 +295,7 @@ describe('AppComponent', () => {
     });
 
     describe('removeNode', () => {
-      it('calls service.removeNode for removing node and shows Toast message on request success', done => {
+      it('calls service.removeNode for removing node and shows Toast message on request success', (done) => {
         const node = { ...mockNode };
         mock.onDelete(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -315,7 +315,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.removeNode and shows Flash message on request failure', done => {
+      it('calls service.removeNode and shows Flash message on request failure', (done) => {
         const node = { ...mockNode };
         mock.onDelete(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);

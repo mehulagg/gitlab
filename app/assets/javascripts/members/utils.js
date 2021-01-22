@@ -1,7 +1,17 @@
+import { isUndefined } from 'lodash';
 import { __ } from '~/locale';
-import { getParameterByName } from '~/lib/utils/common_utils';
+import {
+  getParameterByName,
+  convertObjectPropsToCamelCase,
+  parseBoolean,
+} from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
-import { FIELDS, DEFAULT_SORT } from './constants';
+import {
+  FIELDS,
+  DEFAULT_SORT,
+  GROUP_LINK_BASE_PROPERTY_NAME,
+  GROUP_LINK_ACCESS_LEVEL_PROPERTY_NAME,
+} from './constants';
 
 export const generateBadges = (member, isCurrentUser) => [
   {
@@ -21,7 +31,7 @@ export const generateBadges = (member, isCurrentUser) => [
   },
 ];
 
-export const isGroup = member => {
+export const isGroup = (member) => {
   return Boolean(member.sharedWithGroup);
 };
 
@@ -37,7 +47,7 @@ export const canRemove = (member, sourceId) => {
   return isDirectMember(member, sourceId) && member.canRemove;
 };
 
-export const canResend = member => {
+export const canResend = (member) => {
   return Boolean(member.invite?.canResend);
 };
 
@@ -47,11 +57,11 @@ export const canUpdate = (member, currentUserId, sourceId) => {
   );
 };
 
-export const parseSortParam = sortableFields => {
+export const parseSortParam = (sortableFields) => {
   const sortParam = getParameterByName('sort');
 
-  const sortedField = FIELDS.filter(field => sortableFields.includes(field.key)).find(
-    field => field.sort?.asc === sortParam || field.sort?.desc === sortParam,
+  const sortedField = FIELDS.filter((field) => sortableFields.includes(field.key)).find(
+    (field) => field.sort?.asc === sortParam || field.sort?.desc === sortParam,
   );
 
   if (!sortedField) {
@@ -70,7 +80,7 @@ export const buildSortHref = ({
   filteredSearchBarTokens,
   filteredSearchBarSearchParam,
 }) => {
-  const sortDefinition = FIELDS.find(field => field.key === sortBy)?.sort;
+  const sortDefinition = FIELDS.find((field) => field.key === sortBy)?.sort;
 
   if (!sortDefinition) {
     return '';
@@ -95,3 +105,35 @@ export const buildSortHref = ({
 
 // Defined in `ee/app/assets/javascripts/vue_shared/components/members/utils.js`
 export const canOverride = () => false;
+
+export const parseDataAttributes = (el) => {
+  const { members, sourceId, memberPath, canManageMembers } = el.dataset;
+
+  return {
+    members: convertObjectPropsToCamelCase(JSON.parse(members), { deep: true }),
+    sourceId: parseInt(sourceId, 10),
+    memberPath,
+    canManageMembers: parseBoolean(canManageMembers),
+  };
+};
+
+export const baseRequestFormatter = (basePropertyName, accessLevelPropertyName) => ({
+  accessLevel,
+  ...otherProperties
+}) => {
+  const accessLevelProperty = !isUndefined(accessLevel)
+    ? { [accessLevelPropertyName]: accessLevel }
+    : {};
+
+  return {
+    [basePropertyName]: {
+      ...accessLevelProperty,
+      ...otherProperties,
+    },
+  };
+};
+
+export const groupLinkRequestFormatter = baseRequestFormatter(
+  GROUP_LINK_BASE_PROPERTY_NAME,
+  GROUP_LINK_ACCESS_LEVEL_PROPERTY_NAME,
+);

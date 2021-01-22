@@ -178,6 +178,8 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
       >
           
         <policy-action-picker-stub />
+         
+        <!---->
       </dim-disable-container-stub>
     </div>
      
@@ -245,6 +247,7 @@ spec:
   <gl-modal-stub
     actioncancel="[object Object]"
     actionsecondary="[object Object]"
+    dismisslabel="Close"
     modalclass=""
     modalid="delete-modal"
     size="md"

@@ -53,12 +53,7 @@ describe('EE Approvals MREditApp', () => {
     });
 
     it('renders hidden inputs', () => {
-      expect(
-        wrapper
-          .find('.js-approval-rules')
-          .find(MRRulesHiddenInputs)
-          .exists(),
-      ).toBe(true);
+      expect(wrapper.find('.js-approval-rules').find(MRRulesHiddenInputs).exists()).toBe(true);
     });
   });
 
@@ -76,12 +71,7 @@ describe('EE Approvals MREditApp', () => {
       store.modules.approvals.state.rules = [{ id: 7, approvers: [] }];
 
       factory();
-      expect(
-        wrapper
-          .find('.js-approval-rules')
-          .find(MRRulesHiddenInputs)
-          .exists(),
-      ).toBe(true);
+      expect(wrapper.find('.js-approval-rules').find(MRRulesHiddenInputs).exists()).toBe(true);
     });
 
     describe('summary text', () => {

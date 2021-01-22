@@ -287,12 +287,14 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     let(:scanner) { build(:ci_reports_security_scanner) }
     let(:identifiers) { [build(:ci_reports_security_identifier)] }
     let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:uuid) { SecureRandom.uuid }
 
     let(:finding) do
       build(:ci_reports_security_finding,
             scanner: scanner,
             identifiers: identifiers,
             location: location,
+            uuid: uuid,
             compare_key: '')
     end
 
@@ -312,6 +314,12 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
 
     context 'when the location is missing' do
       let(:location) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the uuid is missing' do
+      let(:uuid) { nil }
 
       it { is_expected.to be_falsey }
     end

@@ -43,7 +43,7 @@ module EE
       def issue_params
         super.tap do |params|
           if vulnerability_id
-            params.merge!(issue_build_parameters)
+            params.merge!(vulnerability_issue_build_parameters)
           end
         end
       end
@@ -65,15 +65,15 @@ module EE
         project.vulnerabilities.find(vulnerability_id) if vulnerability_id
       end
 
-      def issue_build_parameters
+      def vulnerability_issue_build_parameters
         {
           title: _("Investigate vulnerability: %{title}") % { title: vulnerability.title },
-          description: render_description,
+          description: render_vulnerability_description,
           confidential: true
         }
       end
 
-      def render_description
+      def render_vulnerability_description
         render_to_string(
           template: 'vulnerabilities/issue_description.md.erb',
           locals: { vulnerability: vulnerability.present }

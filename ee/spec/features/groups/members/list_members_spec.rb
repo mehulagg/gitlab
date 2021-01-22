@@ -51,6 +51,7 @@ RSpec.describe 'Groups > Members > List members' do
 
     before do
       stub_licensed_features(group_saml: true)
+      stub_feature_flags(invite_members_group_modal: false)
       allow(Gitlab::Session).to receive(:current).and_return(session)
 
       create(:identity, saml_provider: saml_provider, user: user1)

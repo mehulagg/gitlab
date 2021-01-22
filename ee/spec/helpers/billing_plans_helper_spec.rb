@@ -94,6 +94,36 @@ RSpec.describe BillingPlansHelper do
         is_expected.to be(result)
       end
     end
+
+    context 'when the group is on a plan eligible for the new purchase flow' do
+      let(:namespace) do
+        create(
+          :namespace,
+          type: Group,
+          gitlab_subscription: create(:gitlab_subscription, hosted_plan: create(:free_plan))
+        )
+      end
+
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      context 'when the user has a last name' do
+        let(:user) { build(:user, last_name: 'Lastname') }
+
+        it 'returns true' do
+          expect(helper.use_new_purchase_flow?(namespace)).to eq true
+        end
+      end
+
+      context 'when the user does not have a last name' do
+        let(:user) { build(:user, last_name: nil, name: 'Firstname') }
+
+        it 'returns false' do
+          expect(helper.use_new_purchase_flow?(namespace)).to eq false
+        end
+      end
+    end
   end
 
   describe '#show_contact_sales_button?' do
@@ -149,6 +179,18 @@ RSpec.describe BillingPlansHelper do
           }
         })
       end
+    end
+  end
+
+  describe '#plan_feature_list' do
+    let(:plan) do
+      Hashie::Mash.new(features: (1..3).map { |i| { title: "feat 0#{i}", highlight: i.even? } })
+    end
+
+    it 'returns features list sorted by highlight attribute' do
+      expect(helper.plan_feature_list(plan)).to eq([{ 'title' => 'feat 02', 'highlight' => true },
+                                                    { 'title' => 'feat 01', 'highlight' => false },
+                                                    { 'title' => 'feat 03', 'highlight' => false }])
     end
   end
 
@@ -228,14 +270,22 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
-  describe '#available_plans' do
-    let(:plan) { double('Plan', deprecated?: false, code: 'silver') }
-    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze') }
+  describe '#billing_available_plans' do
+    let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: false) }
+    let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: false) }
     let(:plans_data) { [plan, deprecated_plan] }
 
-    context 'when namespace is on an active plan' do
+    context 'when namespace is not on a plan' do
       it 'returns plans without deprecated' do
-        expect(helper.available_plans(plans_data, nil)).to eq([plan])
+        expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
+      end
+    end
+
+    context 'when namespace is on an active plan' do
+      let(:current_plan) { Hashie::Mash.new(code: 'silver') }
+
+      it 'returns plans without deprecated' do
+        expect(helper.billing_available_plans(plans_data, nil)).to eq([plan])
       end
     end
 
@@ -243,7 +293,25 @@ RSpec.describe BillingPlansHelper do
       let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
 
       it 'returns plans with a deprecated plan' do
-        expect(helper.available_plans(plans_data, current_plan)).to eq(plans_data)
+        expect(helper.billing_available_plans(plans_data, current_plan)).to eq(plans_data)
+      end
+    end
+
+    context 'when namespace is on a deprecated plan that has hide_deprecated_card set to true' do
+      let(:current_plan) { Hashie::Mash.new(code: 'bronze') }
+      let(:deprecated_plan) { double('Plan', deprecated?: true, code: 'bronze', hide_deprecated_card?: true) }
+
+      it 'returns plans without the deprecated plan' do
+        expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
+      end
+    end
+
+    context 'when namespace is on a plan that has hide_deprecated_card set to true, but deprecated? is false' do
+      let(:current_plan) { Hashie::Mash.new(code: 'silver') }
+      let(:plan) { double('Plan', deprecated?: false, code: 'silver', hide_deprecated_card?: true) }
+
+      it 'returns plans with the deprecated plan' do
+        expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
       end
     end
   end

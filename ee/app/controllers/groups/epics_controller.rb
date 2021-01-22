@@ -17,10 +17,6 @@ class Groups::EpicsController < Groups::ApplicationController
   before_action :verify_group_bulk_edit_enabled!, only: [:bulk_update]
   after_action :log_epic_show, only: :show
 
-  before_action do
-    push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
-  end
-
   feature_category :epics
 
   def new

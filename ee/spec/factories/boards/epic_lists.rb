@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :epic_list, class: 'Boards::EpicList' do
     epic_board
-    label
+    association :label, factory: :group_label
     list_type { :label }
     sequence(:position)
   end

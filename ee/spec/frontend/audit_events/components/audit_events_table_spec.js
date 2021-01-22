@@ -20,13 +20,7 @@ describe('AuditEventsTable component', () => {
   };
 
   const getCell = (trIdx, tdIdx) => {
-    return wrapper
-      .find(GlTable)
-      .find('tbody')
-      .findAll('tr')
-      .at(trIdx)
-      .findAll('td')
-      .at(tdIdx);
+    return wrapper.find(GlTable).find('tbody').findAll('tr').at(trIdx).findAll('td').at(tdIdx);
   };
 
   beforeEach(() => {

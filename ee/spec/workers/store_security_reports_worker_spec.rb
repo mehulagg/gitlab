@@ -3,6 +3,45 @@
 require 'spec_helper'
 
 RSpec.describe StoreSecurityReportsWorker do
+  let_it_be(:secret_detection_scan_1) { create(:security_scan, scan_type: :secret_detection) }
+  let_it_be(:secret_detection_scan_2) { create(:security_scan, scan_type: :secret_detection) }
+  let_it_be(:secret_detection_pipeline) { secret_detection_scan_2.pipeline }
+
+  describe '#secret_detection_vulnerability_found?' do
+    before do
+      create(:vulnerabilities_finding, :with_secret_detection, pipelines: [secret_detection_pipeline], project: secret_detection_pipeline.project)
+    end
+
+    specify { expect(described_class.new.send(:secret_detection_vulnerability_found?, secret_detection_pipeline)).to be(true) }
+  end
+
+  describe '#revoke_secret_detection_token?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:pipeline, :token_revocation_enabled, :secret_detection_vulnerability_found, :expected_result) do
+      Object.new  | true  | true  | true
+      Object.new  | true  | false | false
+      Object.new  | false | true  | false
+      Object.new  | false | false | false
+      nil         | true  | true  | false
+      nil         | true  | false | false
+      nil         | false | true  | false
+      nil         | false | false | false
+    end
+
+    with_them do
+      before do
+        stub_application_setting(secret_detection_token_revocation_enabled: token_revocation_enabled)
+
+        allow_next_instance_of(described_class) do |store_scans_worker|
+          allow(store_scans_worker).to receive(:secret_detection_vulnerability_found?) { secret_detection_vulnerability_found }
+        end
+      end
+
+      specify { expect(described_class.new.send(:revoke_secret_detection_token?, pipeline)).to eql(expected_result) }
+    end
+  end
+
   describe '#perform' do
     let(:group)   { create(:group) }
     let(:project) { create(:project, namespace: group) }
@@ -10,6 +49,11 @@ RSpec.describe StoreSecurityReportsWorker do
 
     before do
       allow(Ci::Pipeline).to receive(:find).with(pipeline.id) { pipeline }
+
+      allow(::ScanSecurityReportSecretsWorker).to receive(:perform_async).and_return(nil)
+      allow_next_instance_of(described_class) do |store_scans_worker|
+        allow(store_scans_worker).to receive(:revoke_secret_detection_token?) { true }
+      end
     end
 
     context 'when at least one security report feature is enabled' do
@@ -23,6 +67,12 @@ RSpec.describe StoreSecurityReportsWorker do
         it 'executes StoreReportsService for given pipeline' do
           expect(Security::StoreReportsService).to receive(:new)
             .with(pipeline).once.and_call_original
+
+          described_class.new.perform(pipeline.id)
+        end
+
+        it 'scans security reports for token revocation' do
+          expect(::ScanSecurityReportSecretsWorker).to receive(:perform_async)
 
           described_class.new.perform(pipeline.id)
         end

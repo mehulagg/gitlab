@@ -21,10 +21,10 @@ export default {
   },
   computed: {
     systemNote() {
-      return this.notes.find(x => x.system === true);
+      return this.notes.find((x) => x.system === true);
     },
     comments() {
-      return this.notes.filter(x => x !== this.systemNote);
+      return this.notes.filter((x) => x !== this.systemNote);
     },
   },
   watch: {

@@ -10,6 +10,7 @@ import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
 import createTestReportsStore from './stores/test_reports';
+import { reportToSentry } from './components/graph/utils';
 
 Vue.use(Translate);
 
@@ -20,7 +21,7 @@ const SELECTORS = {
   PIPELINE_TESTS: '#js-pipeline-tests-detail',
 };
 
-const createLegacyPipelinesDetailApp = mediator => {
+const createLegacyPipelinesDetailApp = (mediator) => {
   if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
     return;
   }
@@ -36,6 +37,9 @@ const createLegacyPipelinesDetailApp = mediator => {
         mediator,
       };
     },
+    errorCaptured(err, _vm, info) {
+      reportToSentry('pipeline_details_bundle_legacy_details', `error: ${err}, info: ${info}`);
+    },
     render(createElement) {
       return createElement('pipeline-graph-legacy', {
         props: {
@@ -47,15 +51,15 @@ const createLegacyPipelinesDetailApp = mediator => {
           refreshPipelineGraph: this.requestRefreshPipelineGraph,
           onResetDownstream: (parentPipeline, pipeline) =>
             this.resetDownstreamPipelines(parentPipeline, pipeline),
-          onClickUpstreamPipeline: pipeline => this.clickUpstreamPipeline(pipeline),
-          onClickDownstreamPipeline: pipeline => this.clickDownstreamPipeline(pipeline),
+          onClickUpstreamPipeline: (pipeline) => this.clickUpstreamPipeline(pipeline),
+          onClickDownstreamPipeline: (pipeline) => this.clickDownstreamPipeline(pipeline),
         },
       });
     },
   });
 };
 
-const createLegacyPipelineHeaderApp = mediator => {
+const createLegacyPipelineHeaderApp = (mediator) => {
   if (!document.querySelector(SELECTORS.PIPELINE_HEADER)) {
     return;
   }
@@ -77,6 +81,9 @@ const createLegacyPipelineHeaderApp = mediator => {
     beforeDestroy() {
       eventHub.$off('headerPostAction', this.postAction);
       eventHub.$off('headerDeleteAction', this.deleteAction);
+    },
+    errorCaptured(err, _vm, info) {
+      reportToSentry('pipeline_details_bundle_legacy', `error: ${err}, info: ${info}`);
     },
     methods: {
       postAction(path) {
@@ -125,14 +132,17 @@ const createTestDetails = () => {
   });
 };
 
-export default async function() {
+export default async function () {
   createTestDetails();
   createDagApp();
+
+  const canShowNewPipelineDetails =
+    gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
 
   const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
   let mediator;
 
-  if (!gon.features.graphqlPipelineHeader || !gon.features.graphqlPipelineDetails) {
+  if (!gon.features.graphqlPipelineHeader || !canShowNewPipelineDetails) {
     try {
       const { default: PipelinesMediator } = await import(
         /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
@@ -144,14 +154,14 @@ export default async function() {
     }
   }
 
-  if (gon.features.graphqlPipelineDetails) {
+  if (canShowNewPipelineDetails) {
     try {
       const { createPipelinesDetailApp } = await import(
         /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
       );
 
       const { pipelineProjectPath, pipelineIid } = dataset;
-      createPipelinesDetailApp(SELECTORS.PIPELINE_DETAILS, pipelineProjectPath, pipelineIid);
+      createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, pipelineProjectPath, pipelineIid);
     } catch {
       Flash(__('An error occurred while loading the pipeline.'));
     }

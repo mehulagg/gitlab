@@ -65,6 +65,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
+            resource :corpus_management, only: [:show], controller: :corpus_management
             resource :sast, only: [:show, :create], controller: :sast_configuration
             resource :dast_profiles, only: [:show] do
               resources :dast_site_profiles, only: [:new, :edit]
@@ -79,7 +80,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
-              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -105,9 +105,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
         end
 
-        scope :on_demand_scans do
-          root 'on_demand_scans#index', as: 'on_demand_scans'
-        end
+        resources :on_demand_scans, only: [:index, :new, :edit]
 
         namespace :integrations do
           namespace :jira do

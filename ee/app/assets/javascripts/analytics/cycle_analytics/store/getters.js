@@ -7,7 +7,7 @@ import { dateFormats } from '../../shared/constants';
 import { transformStagesForPathNavigation } from '../utils';
 import { DEFAULT_VALUE_STREAM_ID } from '../constants';
 
-export const hasNoAccessError = state => state.errorCode === httpStatus.FORBIDDEN;
+export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;
 
 export const currentValueStreamId = ({ selectedValueStream }) =>
   selectedValueStream?.id || DEFAULT_VALUE_STREAM_ID;
@@ -51,7 +51,7 @@ export const hiddenStages = ({ stages }) => filterStagesByHiddenStatus(stages);
 export const activeStages = ({ stages }) => filterStagesByHiddenStatus(stages, false);
 
 export const enableCustomOrdering = ({ stages, errorSavingStageOrder }) =>
-  stages.some(stage => isNumber(stage.id)) && !errorSavingStageOrder;
+  stages.some((stage) => isNumber(stage.id)) && !errorSavingStageOrder;
 
 export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomStage }) =>
   Boolean(isCreatingCustomStage || isEditingCustomStage);

@@ -180,7 +180,7 @@ For other regular expressions, here are a few guidelines:
 
 - If there's a clean non-regex solution, such as `String#start_with?`, consider using it
 - Ruby supports some advanced regex features like [atomic groups](https://www.regular-expressions.info/atomic.html)
-and [possessive quantifiers](https://www.regular-expressions.info/possessive.html) that eleminate backtracking
+and [possessive quantifiers](https://www.regular-expressions.info/possessive.html) that eliminate backtracking
 - Avoid nested quantifiers if possible (for example `(a+)+`)
 - Try to be as precise as possible in your regex and avoid the `.` if there's an alternative
   - For example, Use `_[^_]+_` instead of `_.*_` to match `_text here_`
@@ -194,7 +194,7 @@ Go's [`regexp`](https://golang.org/pkg/regexp/) package uses `re2` and isn't vul
 
 - [Rubular](https://rubular.com/) is a nice online tool to fiddle with Ruby Regexps.
 - [Runaway Regular Expressions](https://www.regular-expressions.info/catastrophic.html)
-- [The impact of regular expression denial of service (ReDoS) in practice: an empirical study at the ecosystem scale](http://people.cs.vt.edu/~davisjam/downloads/publications/DavisCoghlanServantLee-EcosystemREDOS-ESECFSE18.pdf). This research paper discusses approaches to automatically detect ReDoS vulnerabilities.
+- [The impact of regular expression denial of service (ReDoS) in practice: an empirical study at the ecosystem scale](https://people.cs.vt.edu/~davisjam/downloads/publications/DavisCoghlanServantLee-EcosystemREDOS-ESECFSE18.pdf). This research paper discusses approaches to automatically detect ReDoS vulnerabilities.
 - [Freezing the web: A study of redos vulnerabilities in JavaScript-based web servers](https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-staicu.pdf). Another research paper about detecting ReDoS vulnerabilities.
 
 ## Server Side Request Forgery (SSRF)

@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import PageInfo from '~/graphql_shared/fragments/pageInfo.fragment.graphql';
 
-export default graphQlFieldName => {
+export default (graphQlFieldName) => {
   return gql`
     query($first: Int, $last: Int, $before: String!, $after: String!) {
       geoNode {

@@ -401,36 +401,44 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'bot_log_in' do
-    let(:bot_user) { create(:user, :project_bot) }
-    let(:project) { private_project }
+  describe 'set_pipeline_variables' do
+    context 'when user is developer' do
+      let(:current_user) { developer }
 
-    context 'when bot is in project and is not blocked' do
-      before do
-        project.add_maintainer(bot_user)
+      context 'when project allows user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: false)
+        end
+
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
       end
 
-      it 'is a valid project bot' do
-        expect(bot_user.can?(:bot_log_in, project)).to be_truthy
+      context 'when project restricts use of user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: true)
+        end
+
+        it { is_expected.not_to be_allowed(:set_pipeline_variables) }
       end
     end
 
-    context 'when project bot is invalid' do
-      context 'when bot is not in project' do
-        it 'is not a valid project bot' do
-          expect(bot_user.can?(:bot_log_in, project)).to be_falsy
+    context 'when user is maintainer' do
+      let(:current_user) { maintainer }
+
+      context 'when project allows user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: false)
         end
+
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
       end
 
-      context 'when bot user is blocked' do
+      context 'when project restricts use of user defined variables' do
         before do
-          project.add_maintainer(bot_user)
-          bot_user.block!
+          project.update!(restrict_user_defined_variables: true)
         end
 
-        it 'is not a valid project bot' do
-          expect(bot_user.can?(:bot_log_in, project)).to be_falsy
-        end
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
       end
     end
   end

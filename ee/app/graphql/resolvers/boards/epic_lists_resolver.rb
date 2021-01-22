@@ -8,11 +8,9 @@ module Resolvers
 
       type Types::Boards::EpicListType.connection_type, null: true
 
-      when_single do
-        argument :id, ::Types::GlobalIDType[::Boards::EpicList],
-                 required: true,
-                 description: 'Find an epic board list by ID.'
-      end
+      argument :id, ::Types::GlobalIDType[::Boards::EpicList],
+               required: false,
+               description: 'Find an epic board list by ID.'
 
       alias_method :epic_board, :object
 

@@ -24,7 +24,7 @@ describe('burndown_chart', () => {
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
   const findWeightButton = () => wrapper.find({ ref: 'totalWeightButton' });
   const findActiveButtons = () =>
-    wrapper.findAll(GlButton).filter(button => button.attributes().category === 'primary');
+    wrapper.findAll(GlButton).filter((button) => button.attributes().category === 'primary');
   const findBurndownChart = () => wrapper.find(BurndownChart);
   const findBurnupChart = () => wrapper.find(BurnupChart);
   const findOldBurndownChartButton = () => wrapper.find({ ref: 'oldBurndown' });
@@ -80,11 +80,7 @@ describe('burndown_chart', () => {
     createComponent();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issues');
+    expect(findActiveButtons().at(0).text()).toBe('Issues');
     expect(findBurndownChart().props('issuesSelected')).toBe(true);
   });
 
@@ -96,11 +92,7 @@ describe('burndown_chart', () => {
     await wrapper.vm.$nextTick();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issue weight');
+    expect(findActiveButtons().at(0).text()).toBe('Issue weight');
     expect(findBurndownChart().props('issuesSelected')).toBe(false);
   });
 

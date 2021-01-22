@@ -1,4 +1,6 @@
 <script>
+// Work around for https://github.com/vuejs/eslint-plugin-vue/issues/1411
+/* eslint-disable vue/one-component-per-file */
 import { GlDropdown } from '@gitlab/ui';
 import Tracking from '~/tracking';
 import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
@@ -19,8 +21,8 @@ export default {
     GlDropdown,
     CodeInstruction,
   },
-  inject: ['config', 'dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand'],
   mixins: [Tracking.mixin({ label: trackingLabel })],
+  inject: ['config', 'dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand'],
   trackingLabel,
   i18n: {
     QUICK_START,

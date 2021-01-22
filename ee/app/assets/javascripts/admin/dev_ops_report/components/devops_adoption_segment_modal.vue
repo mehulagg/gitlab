@@ -1,14 +1,6 @@
 <script>
-import {
-  GlFormGroup,
-  GlFormInput,
-  GlFormCheckboxTree,
-  GlModal,
-  GlSprintf,
-  GlAlert,
-  GlIcon,
-} from '@gitlab/ui';
-import { getIdFromGraphQLId, convertToGraphQLIds, TYPE_GROUP } from '~/graphql_shared/utils';
+import { GlFormGroup, GlFormInput, GlFormRadioGroup, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
+import { getIdFromGraphQLId, convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
 import * as Sentry from '~/sentry/wrapper';
 import createDevopsAdoptionSegmentMutation from '../graphql/mutations/create_devops_adoption_segment.mutation.graphql';
 import updateDevopsAdoptionSegmentMutation from '../graphql/mutations/update_devops_adoption_segment.mutation.graphql';
@@ -21,8 +13,7 @@ export default {
     GlModal,
     GlFormGroup,
     GlFormInput,
-    GlFormCheckboxTree,
-    GlSprintf,
+    GlFormRadioGroup,
     GlAlert,
     GlIcon,
   },
@@ -41,7 +32,7 @@ export default {
   data() {
     return {
       name: this.segment?.name || '',
-      checkboxValues: this.segment ? this.checkboxValuesFromSegment() : [],
+      selectedGroupId: this.segment ? this.groupIdFromSegment() : null,
       filter: '',
       loading: false,
       errors: [],
@@ -49,12 +40,15 @@ export default {
   },
   computed: {
     checkboxOptions() {
-      return this.groups.map(({ id, full_name }) => ({ label: full_name, value: id }));
+      return this.groups.map(({ id, full_name }) => ({ text: full_name, value: id }));
     },
     cancelOptions() {
       return {
-        text: this.$options.i18n.cancel,
-        attributes: [{ disabled: this.loading }],
+        button: {
+          text: this.$options.i18n.cancel,
+          attributes: [{ disabled: this.loading }],
+        },
+        callback: this.resetForm,
       };
     },
     primaryOptions() {
@@ -73,7 +67,7 @@ export default {
       };
     },
     canSubmit() {
-      return this.name.length && this.checkboxValues.length;
+      return this.name.length && Boolean(this.selectedGroupId);
     },
     displayError() {
       return this.errors[0];
@@ -83,8 +77,8 @@ export default {
     },
     filteredOptions() {
       return this.filter
-        ? this.checkboxOptions.filter(option =>
-            option.label.toLowerCase().includes(this.filter.toLowerCase()),
+        ? this.checkboxOptions.filter((option) =>
+            option.text.toLowerCase().includes(this.filter.toLowerCase()),
           )
         : this.checkboxOptions;
     },
@@ -101,7 +95,7 @@ export default {
           mutation: createDevopsAdoptionSegmentMutation,
           variables: {
             name: this.name,
-            groupIds: convertToGraphQLIds(TYPE_GROUP, this.checkboxValues),
+            groupIds: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
           },
           update: (store, { data }) => {
             const {
@@ -115,6 +109,7 @@ export default {
         if (errors.length) {
           this.errors = errors;
         } else {
+          this.resetForm();
           this.closeModal();
         }
       } catch (error) {
@@ -136,7 +131,7 @@ export default {
           variables: {
             id: this.segment.id,
             name: this.name,
-            groupIds: convertToGraphQLIds(TYPE_GROUP, this.checkboxValues),
+            groupIds: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
           },
         });
 
@@ -158,8 +153,13 @@ export default {
     closeModal() {
       this.$refs.modal.hide();
     },
-    checkboxValuesFromSegment() {
-      return this.segment.groups.map(({ id }) => getIdFromGraphQLId(id));
+    groupIdFromSegment() {
+      return this.segment.groups.map(({ id }) => getIdFromGraphQLId(id))[0];
+    },
+    resetForm() {
+      this.name = this.segment?.name || '';
+      this.selectedGroupId = this.segment ? this.groupIdFromSegment() : null;
+      this.filter = '';
     },
   },
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
@@ -173,8 +173,10 @@ export default {
     size="sm"
     scrollable
     :action-primary="primaryOptions.button"
-    :action-cancel="cancelOptions"
+    :action-cancel="cancelOptions.button"
     @primary.prevent="primaryOptions.callback"
+    @canceled="cancelOptions.callback"
+    @hide="resetForm"
   >
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}
@@ -201,10 +203,10 @@ export default {
       />
     </gl-form-group>
     <gl-form-group class="gl-mb-0">
-      <gl-form-checkbox-tree
+      <gl-form-radio-group
         v-if="filteredOptions.length"
         :key="filteredOptions.length"
-        v-model="checkboxValues"
+        v-model="selectedGroupId"
         data-testid="groups"
         :options="filteredOptions"
         :hide-toggle-all="true"
@@ -214,21 +216,6 @@ export default {
       <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
         {{ $options.i18n.noResults }}
       </gl-alert>
-      <div class="gl-text-gray-400" data-testid="groupsHelperText">
-        <gl-sprintf
-          :message="
-            n__(
-              $options.i18n.selectedGroupsTextSingular,
-              $options.i18n.selectedGroupsTextPlural,
-              checkboxValues.length,
-            )
-          "
-        >
-          <template #selectedCount>
-            {{ checkboxValues.length }}
-          </template>
-        </gl-sprintf>
-      </div>
     </gl-form-group>
   </gl-modal>
 </template>

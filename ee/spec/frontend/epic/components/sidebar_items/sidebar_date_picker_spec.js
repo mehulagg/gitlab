@@ -20,10 +20,10 @@ describe('SidebarDatePicker', () => {
 
   let wrapper;
 
-  const findIconByName = name =>
+  const findIconByName = (name) =>
     wrapper
       .findAll(GlIcon)
-      .filter(w => w.props().name === name)
+      .filter((w) => w.props().name === name)
       .at(0);
   const findEditButton = () => wrapper.find({ ref: 'editButton' });
   const findRemoveButton = () => wrapper.find({ ref: 'removeButton' });
@@ -35,7 +35,7 @@ describe('SidebarDatePicker', () => {
     findEditButton().vm.$emit('click', e);
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SidebarDatepicker, {
       propsData: {
         ...mockDatePickerProps,

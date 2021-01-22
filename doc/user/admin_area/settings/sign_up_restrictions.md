@@ -37,6 +37,9 @@ To require administrator approval for new sign ups:
 1. Go to **Admin Area > Settings > General** and expand **Sign-up restrictions**.
 1. Select the **Require admin approval for new sign-ups** checkbox, then select **Save changes**.
 
+In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/273258), if an administrator disables this setting, the users in pending approval state are
+automatically approved in a background job.
+
 ## Require email confirmation
 
 You can send confirmation emails during sign up and require that users confirm
@@ -49,19 +52,41 @@ To enforce confirmation of the email address used for new sign ups:
 
 ## User cap **(CORE ONLY)**
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4315) in GitLab 13.6.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4315) in GitLab 13.7.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-user-cap). **(CORE ONLY)**
 
 When the number of billable users reaches the user cap, any user who is added or requests access must be
 [approved](../approving_users.md#approving-a-user) by an administrator before they can start using
 their account.
 
-If an administrator increases or removes the user cap, the users in pending approval state will be
+If an administrator increases or removes the user cap, the users in pending approval state are
 automatically approved in a background job.
+
+### Enable or disable User cap **(CORE ONLY)**
+
+User cap is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it.
+
+To disable it:
+
+```ruby
+Feature.disable(:admin_new_user_signups_cap)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:admin_new_user_signups_cap)
+```
 
 ## Soft email confirmation
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/47003) in GitLab 12.2.
-> - It's [deployed behind a feature flag](../../..//user/feature_flags.md), disabled by default.
+> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-soft-email-confirmation).

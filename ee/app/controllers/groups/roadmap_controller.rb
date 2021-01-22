@@ -19,7 +19,6 @@ module Groups
       # Used to persist the order and show the correct sorting dropdown on UI.
       @sort = set_sort_order
       @epics_state = epics_state_in_user_preference || 'all'
-      @epics_count = EpicsFinder.new(current_user, group_id: @group.id).execute.count
     end
 
     private

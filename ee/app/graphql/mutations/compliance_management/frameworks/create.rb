@@ -15,21 +15,13 @@ module Mutations
                  required: true,
                  description: 'Full path of the namespace to add the compliance framework to.'
 
-        argument :name, GraphQL::STRING_TYPE,
+        argument :params, Types::ComplianceManagement::ComplianceFrameworkInputType,
                  required: true,
-                 description: 'Name of the compliance framework.'
-
-        argument :description, GraphQL::STRING_TYPE,
-                 required: true,
-                 description: 'Description of the compliance framework.'
-
-        argument :color, GraphQL::STRING_TYPE,
-                 required: true,
-                 description: 'Color to represent the compliance framework as a hexadecimal value. e.g. #ABC123.'
+                 description: 'Parameters to update the compliance framework with.'
 
         def resolve(**args)
           service = ::ComplianceManagement::Frameworks::CreateService.new(namespace: namespace(args[:namespace_path]),
-                                                                          params: args,
+                                                                          params: args[:params].to_h,
                                                                           current_user: current_user).execute
 
           service.success? ? success(service) : error(service)
@@ -49,7 +41,7 @@ module Mutations
         end
 
         def namespace(namespace_path)
-          ::Gitlab::Graphql::Loaders::FullPathModelLoader.new(Namespace, namespace_path).find.sync
+          ::Gitlab::Graphql::Loaders::FullPathModelLoader.new(::Namespace, namespace_path).find.sync
         end
       end
     end

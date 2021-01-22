@@ -31,7 +31,7 @@ describe('EE Vulnerability Security Scanner Alert', () => {
 
   const withinWrapper = () => within(wrapper.element);
   const findAlert = () => withinWrapper().queryByRole('alert');
-  const findById = testId => withinWrapper().getByTestId(testId);
+  const findById = (testId) => withinWrapper().getByTestId(testId);
 
   describe('container', () => {
     it('renders when disabled scanners are detected', () => {

@@ -22,7 +22,7 @@ describe('On-call schedule', () => {
   const mockWeeksTimeFrame = ['31 Dec 2020', '7 Jan 2021', '14 Jan 2021'];
   const formattedTimezone = '(UTC-09:00) AKST Alaska';
 
-  function mountComponent({ schedule } = {}) {
+  function createComponent({ schedule } = {}) {
     wrapper = extendedWrapper(
       shallowMount(OnCallSchedule, {
         propsData: {
@@ -42,12 +42,11 @@ describe('On-call schedule', () => {
   beforeEach(() => {
     jest.spyOn(utils, 'getTimeframeForWeeksView').mockReturnValue(mockWeeksTimeFrame);
     jest.spyOn(commonUtils, 'getFormattedTimezone').mockReturnValue(formattedTimezone);
-    mountComponent({ schedule: mockSchedule });
+    createComponent({ schedule: mockSchedule });
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findScheduleHeader = () => wrapper.findByTestId('scheduleHeader');

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CredentialsInventoryHelper
-  VALID_FILTERS = %w(ssh_keys personal_access_tokens).freeze
+  VALID_FILTERS = %w(ssh_keys personal_access_tokens gpg_keys).freeze
 
   def show_personal_access_tokens?
     return true if params[:filter] == 'personal_access_tokens'
@@ -11,6 +11,10 @@ module CredentialsInventoryHelper
 
   def show_ssh_keys?
     params[:filter] == 'ssh_keys'
+  end
+
+  def show_gpg_keys?
+    params[:filter] == 'gpg_keys'
   end
 
   def credentials_inventory_feature_available?

@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlButton, GlModalDirective } from '@gitlab/ui';
+import { GlButton, GlModalDirective, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../event_hub';
 import { integrationLevels } from '../constants';
@@ -28,9 +28,17 @@ export default {
     GlButton,
   },
   directives: {
-    'gl-modal': GlModalDirective,
+    GlModal: GlModalDirective,
+    SafeHtml,
   },
   mixins: [glFeatureFlagsMixin()],
+  props: {
+    helpHtml: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
   computed: {
     ...mapGetters(['currentKey', 'propsSource', 'isDisabled']),
     ...mapState([
@@ -59,9 +67,6 @@ export default {
     showReset() {
       return this.isInstanceOrGroupLevel && this.propsSource.resetPath;
     },
-    saveButtonKey() {
-      return `save-button-${this.isDisabled}`;
-    },
   },
   methods: {
     ...mapActions([
@@ -83,11 +88,17 @@ export default {
       this.fetchResetIntegration();
     },
   },
+  helpHtmlConfig: {
+    ADD_TAGS: ['use'], // to support icon SVGs
+  },
 };
 </script>
 
 <template>
   <div>
+    <!-- helpHtml is trusted input -->
+    <div v-if="helpHtml" v-safe-html:[$options.helpHtmlConfig]="helpHtml"></div>
+
     <override-dropdown
       v-if="defaultState !== null"
       :inherit-from-id="defaultState.id"
@@ -95,6 +106,7 @@ export default {
       :learn-more-path="propsSource.learnMorePath"
       @change="setOverride"
     />
+
     <active-checkbox v-if="propsSource.showActive" :key="`${currentKey}-active-checkbox`" />
     <jira-trigger-fields
       v-if="isJira"
@@ -120,7 +132,6 @@ export default {
     <div v-if="isEditable" class="footer-block row-content-block">
       <template v-if="isInstanceOrGroupLevel">
         <gl-button
-          :key="saveButtonKey"
           v-gl-modal.confirmSaveIntegration
           category="primary"
           variant="success"
@@ -134,7 +145,6 @@ export default {
       </template>
       <gl-button
         v-else
-        :key="saveButtonKey"
         category="primary"
         variant="success"
         type="submit"

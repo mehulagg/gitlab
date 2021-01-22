@@ -3,6 +3,12 @@ export const generateVulnerabilities = () => [
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
     hasSolutions: true,
+    mergeRequest: {
+      webUrl: 'www.testmr.com/1',
+      state: 'status_warning',
+      securityAutoFix: true,
+      iid: 1,
+    },
     identifiers: [
       {
         externalType: 'cve',

@@ -38,6 +38,43 @@ module Gitlab
           @updates[:merge] = params[:merge_request_diff_head_sha]
         end
 
+        types MergeRequest
+        desc do
+          _('Rebase source branch')
+        end
+        explanation do
+          _('Rebase source branch on the target branch.')
+        end
+        condition do
+          merge_request = quick_action_target
+
+          next false unless merge_request.open?
+          next false unless merge_request.source_branch_exists?
+
+          access_check = ::Gitlab::UserAccess
+                           .new(current_user, container: merge_request.source_project)
+
+          access_check.can_push_to_branch?(merge_request.source_branch)
+        end
+        command :rebase do
+          if quick_action_target.cannot_be_merged?
+            @execution_message[:rebase] = _('This merge request cannot be rebased while there are conflicts.')
+            next
+          end
+
+          if quick_action_target.rebase_in_progress?
+            @execution_message[:rebase] = _('A rebase is already in progress.')
+            next
+          end
+
+          # This will be used to avoid simultaneous "/merge" and "/rebase" actions
+          @updates[:rebase] = true
+
+          branch = quick_action_target.source_branch
+
+          @execution_message[:rebase] = _('Scheduled a rebase of branch %{branch}.') % { branch: branch }
+        end
+
         desc 'Toggle the Draft status'
         explanation do
           noun = quick_action_target.to_ability_name.humanize(capitalize: false)
@@ -116,6 +153,112 @@ module Gitlab
           next unless success
 
           @execution_message[:approve] = _('Approved the current merge request.')
+        end
+
+        desc do
+          if quick_action_target.allows_multiple_reviewers?
+            _('Assign reviewer(s)')
+          else
+            _('Assign reviewer')
+          end
+        end
+        explanation do |users|
+          reviewers = reviewers_to_add(users)
+          _('Assigns %{reviewer_users_sentence} as %{reviewer_text}.') % { reviewer_users_sentence: reviewer_users_sentence(users),
+                                                                           reviewer_text: 'reviewer'.pluralize(reviewers.size) }
+        end
+        execution_message do |users = nil|
+          reviewers = reviewers_to_add(users)
+          if reviewers.blank?
+            _("Failed to assign a reviewer because no user was found.")
+          else
+            _('Assigned %{reviewer_users_sentence} as %{reviewer_text}.') % { reviewer_users_sentence: reviewer_users_sentence(users),
+                                                                              reviewer_text: 'reviewer'.pluralize(reviewers.size) }
+          end
+        end
+        params do
+          quick_action_target.allows_multiple_reviewers? ? '@user1 @user2' : '@user'
+        end
+        types MergeRequest
+        condition do
+          Feature.enabled?(:merge_request_reviewers, project, default_enabled: :yaml) &&
+            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+        end
+        parse_params do |reviewer_param|
+          extract_users(reviewer_param)
+        end
+        command :assign_reviewer, :reviewer, :request_review do |users|
+          next if users.empty?
+
+          if quick_action_target.allows_multiple_reviewers?
+            @updates[:reviewer_ids] ||= quick_action_target.reviewers.map(&:id)
+            @updates[:reviewer_ids] |= users.map(&:id)
+          else
+            @updates[:reviewer_ids] = [users.first.id]
+          end
+        end
+
+        desc do
+          if quick_action_target.allows_multiple_reviewers?
+            _('Remove all or specific reviewer(s)')
+          else
+            _('Remove reviewer')
+          end
+        end
+        explanation do |users = nil|
+          reviewers = reviewers_for_removal(users)
+          _("Removes %{reviewer_text} %{reviewer_references}.") %
+            { reviewer_text: 'reviewer'.pluralize(reviewers.size), reviewer_references: reviewers.map(&:to_reference).to_sentence }
+        end
+        execution_message do |users = nil|
+          reviewers = reviewers_for_removal(users)
+          _("Removed %{reviewer_text} %{reviewer_references}.") %
+            { reviewer_text: 'reviewer'.pluralize(reviewers.size), reviewer_references: reviewers.map(&:to_reference).to_sentence }
+        end
+        params do
+          quick_action_target.allows_multiple_reviewers? ? '@user1 @user2' : ''
+        end
+        types MergeRequest
+        condition do
+          quick_action_target.persisted? &&
+            Feature.enabled?(:merge_request_reviewers, project, default_enabled: :yaml) &&
+            quick_action_target.reviewers.any? &&
+            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+        end
+        parse_params do |unassign_reviewer_param|
+          # When multiple users are assigned, all will be unassigned if multiple reviewers are no longer allowed
+          extract_users(unassign_reviewer_param) if quick_action_target.allows_multiple_reviewers?
+        end
+        command :unassign_reviewer, :remove_reviewer do |users = nil|
+          if quick_action_target.allows_multiple_reviewers? && users&.any?
+            @updates[:reviewer_ids] ||= quick_action_target.reviewers.map(&:id)
+            @updates[:reviewer_ids] -= users.map(&:id)
+          else
+            @updates[:reviewer_ids] = []
+          end
+        end
+      end
+
+      def reviewer_users_sentence(users)
+        reviewers_to_add(users).map(&:to_reference).to_sentence
+      end
+
+      def reviewers_for_removal(users)
+        reviewers = quick_action_target.reviewers
+        if users.present? && quick_action_target.allows_multiple_reviewers?
+          users
+        else
+          reviewers
+        end
+      end
+
+      def reviewers_to_add(users)
+        return if users.blank?
+
+        if quick_action_target.allows_multiple_reviewers?
+          users
+        else
+          [users.first]
         end
       end
 

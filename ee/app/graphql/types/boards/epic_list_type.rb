@@ -23,6 +23,10 @@ module Types
 
       field :label, Types::LabelType, null: true,
             description: 'Label of the list.'
+
+      field :epics, Types::EpicType.connection_type, null: true,
+            resolver: Resolvers::Boards::BoardListEpicsResolver,
+            description: 'List epics.'
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

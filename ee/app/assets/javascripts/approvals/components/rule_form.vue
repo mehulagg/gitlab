@@ -14,7 +14,7 @@ const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
 const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
 
 function mapServerResponseToValidationErrors(messages) {
-  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map(msg => `${key} ${msg}`));
+  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map((msg) => `${key} ${msg}`));
 }
 
 export default {
@@ -71,7 +71,7 @@ export default {
       return this.defaultRuleName ? null : this.initRule;
     },
     approversByType() {
-      return groupBy(this.approvers, x => x.type);
+      return groupBy(this.approvers, (x) => x.type);
     },
     users() {
       return this.approversByType[TYPE_USER] || [];
@@ -80,10 +80,10 @@ export default {
       return this.approversByType[TYPE_GROUP] || [];
     },
     userIds() {
-      return this.users.map(x => x.id);
+      return this.users.map((x) => x.id);
     },
     groupIds() {
-      return this.groups.map(x => x.id);
+      return this.groups.map((x) => x.id);
     },
     validation() {
       if (!this.showValidation) {
@@ -140,12 +140,12 @@ export default {
     invalidBranches() {
       if (this.isMrEdit) return '';
 
-      const invalidTypes = this.branches.filter(id => typeof id !== 'number');
+      const invalidTypes = this.branches.filter((id) => typeof id !== 'number');
 
       return invalidTypes.length ? __('Please select a valid target branch') : '';
     },
     isValid() {
-      return Object.keys(this.validation).every(key => !this.validation[key]);
+      return Object.keys(this.validation).every((key) => !this.validation[key]);
     },
     isMultiSubmission() {
       return this.settings.allowMultiRule && !this.isFallbackSubmission;
@@ -229,7 +229,7 @@ export default {
         submission = this.submitRule();
       }
 
-      submission.catch(failureResponse => {
+      submission.catch((failureResponse) => {
         this.serverValidationErrors = mapServerResponseToValidationErrors(
           failureResponse?.response?.data?.message || {},
         );
@@ -293,9 +293,9 @@ export default {
 
       const { containsHiddenGroups = false, removeHiddenGroups = false } = this.initRule;
 
-      const users = this.initRule.users.map(x => ({ ...x, type: TYPE_USER }));
-      const groups = this.initRule.groups.map(x => ({ ...x, type: TYPE_GROUP }));
-      const branches = this.initRule.protectedBranches?.map(x => x.id) || [];
+      const users = this.initRule.users.map((x) => ({ ...x, type: TYPE_USER }));
+      const groups = this.initRule.groups.map((x) => ({ ...x, type: TYPE_GROUP }));
+      const branches = this.initRule.protectedBranches?.map((x) => x.id) || [];
 
       return {
         name: this.initRule.name || '',

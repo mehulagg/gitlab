@@ -110,11 +110,6 @@ export default {
       return this.referencedUsers.length >= referencedUsersThreshold;
     },
     lineContent() {
-      const [firstSuggestion] = this.suggestions;
-      if (firstSuggestion) {
-        return firstSuggestion.from_content;
-      }
-
       if (this.line) {
         const { rich_text: richText, text } = this.line;
 
@@ -158,7 +153,7 @@ export default {
       const mediaInPreview = this.$refs['markdown-preview'].querySelectorAll('video, audio');
 
       if (mediaInPreview) {
-        mediaInPreview.forEach(media => {
+        mediaInPreview.forEach((media) => {
           media.pause();
         });
       }
@@ -199,7 +194,7 @@ export default {
         this.markdownPreview = __('Loading…');
         axios
           .post(this.markdownPreviewPath, { text: this.textareaValue })
-          .then(response => this.renderMarkdown(response.data))
+          .then((response) => this.renderMarkdown(response.data))
           .catch(() => new Flash(__('Error loading markdown preview')));
       } else {
         this.renderMarkdown();

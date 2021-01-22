@@ -4,7 +4,10 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ArtifactDownload from './components/artifact_download.vue';
+import { LOADING } from '~/reports/constants';
+import { securityReportTypeEnumToReportType } from './constants';
+import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
@@ -31,6 +34,7 @@ import {
 export default {
   store: createStore(),
   components: {
+    ArtifactDownload,
     GroupedIssuesList,
     ReportSection,
     SummaryRow,
@@ -45,7 +49,7 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin, vulnerabilityModalMixin()],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -226,6 +230,14 @@ export default {
       required: false,
       default: '',
     },
+    targetProjectFullPath: {
+      type: String,
+      required: true,
+    },
+    mrIid: {
+      type: Number,
+      required: true,
+    },
   },
   componentNames,
   computed: {
@@ -282,8 +294,7 @@ export default {
       return this.enabledReports.apiFuzzing;
     },
     hasCoverageFuzzingReports() {
-      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/257839
-      return this.enabledReports.coverageFuzzing && this.glFeatures.coverageFuzzingMrWidget;
+      return this.enabledReports.coverageFuzzing;
     },
     hasSastReports() {
       return this.enabledReports.sast;
@@ -329,6 +340,9 @@ export default {
     },
     hasSecretDetectionIssues() {
       return this.hasIssuesForReportType(MODULE_SECRET_DETECTION);
+    },
+    shouldShowDownloadGuidance() {
+      return this.targetProjectFullPath && this.mrIid && this.summaryStatus !== LOADING;
     },
   },
 
@@ -396,15 +410,11 @@ export default {
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
       'setPipelineId',
-      'dismissVulnerability',
-      'revertDismissVulnerability',
       'createNewIssue',
       'createMergeRequest',
       'openDismissalCommentBox',
       'closeDismissalCommentBox',
       'downloadPatch',
-      'addDismissalComment',
-      'deleteDismissalComment',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
       'fetchContainerScanningDiff',
@@ -437,6 +447,7 @@ export default {
     },
   },
   summarySlots: ['success', 'error', 'loading'],
+  reportTypes: securityReportTypeEnumToReportType,
 };
 </script>
 <template>
@@ -654,6 +665,13 @@ export default {
             <template #summary>
               <security-summary :message="groupedApiFuzzingText" />
             </template>
+
+            <artifact-download
+              v-if="shouldShowDownloadGuidance"
+              :report-types="[$options.reportTypes.API_FUZZING]"
+              :target-project-full-path="targetProjectFullPath"
+              :mr-iid="mrIid"
+            />
           </summary-row>
 
           <grouped-issues-list
@@ -677,13 +695,13 @@ export default {
           @closeDismissalCommentBox="closeDismissalCommentBox()"
           @createMergeRequest="createMergeRequest"
           @createNewIssue="createNewIssue"
-          @dismissVulnerability="dismissVulnerability"
+          @dismissVulnerability="handleDismissVulnerability"
           @openDismissalCommentBox="openDismissalCommentBox()"
           @editVulnerabilityDismissalComment="openDismissalCommentBox()"
-          @revertDismissVulnerability="revertDismissVulnerability"
+          @revertDismissVulnerability="handleRevertDismissVulnerability"
           @downloadPatch="downloadPatch"
-          @addDismissalComment="addDismissalComment({ comment: $event })"
-          @deleteDismissalComment="deleteDismissalComment"
+          @addDismissalComment="handleAddDismissalComment({ comment: $event })"
+          @deleteDismissalComment="handleDeleteDismissalComment"
           @showDismissalDeleteButtons="showDismissalDeleteButtons"
           @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
         />

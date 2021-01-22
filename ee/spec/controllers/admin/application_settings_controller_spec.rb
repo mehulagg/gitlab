@@ -11,26 +11,6 @@ RSpec.describe Admin::ApplicationSettingsController do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
 
-  describe 'GET #general' do
-    before do
-      sign_in(admin)
-    end
-
-    context 'zero-downtime elasticsearch reindexing' do
-      render_views
-
-      let!(:task) { create(:elastic_reindexing_task) }
-
-      it 'assigns elasticsearch reindexing task' do
-        get :general
-
-        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
-        expect(response.body).to include('Reindexing status')
-        expect(response.body).to include("State: #{task.state}")
-      end
-    end
-  end
-
   describe 'PUT #update' do
     before do
       sign_in(admin)
@@ -39,13 +19,6 @@ RSpec.describe Admin::ApplicationSettingsController do
     it 'updates the EE specific application settings' do
       settings = {
           help_text: 'help_text',
-          elasticsearch_url: 'http://my-elastic.search:9200',
-          elasticsearch_indexing: false,
-          elasticsearch_aws: true,
-          elasticsearch_aws_access_key: 'elasticsearch_aws_access_key',
-          elasticsearch_aws_secret_access_key: 'elasticsearch_aws_secret_access_key',
-          elasticsearch_aws_region: 'elasticsearch_aws_region',
-          elasticsearch_search: true,
           repository_size_limit: 1024,
           shared_runners_minutes: 60,
           geo_status_timeout: 30,
@@ -63,25 +36,10 @@ RSpec.describe Admin::ApplicationSettingsController do
       put :update, params: { application_setting: settings }
 
       expect(response).to redirect_to(general_admin_application_settings_path)
-      settings.except(:elasticsearch_url, :repository_size_limit).each do |setting, value|
+      settings.except(:repository_size_limit).each do |setting, value|
         expect(ApplicationSetting.current.public_send(setting)).to eq(value)
       end
       expect(ApplicationSetting.current.repository_size_limit).to eq(settings[:repository_size_limit].megabytes)
-      expect(ApplicationSetting.current.elasticsearch_url).to contain_exactly(settings[:elasticsearch_url])
-    end
-
-    context 'elasticsearch_aws_secret_access_key setting is blank' do
-      let(:settings) do
-        {
-          elasticsearch_aws_access_key: 'elasticsearch_aws_access_key',
-          elasticsearch_aws_secret_access_key: ''
-        }
-      end
-
-      it 'does not update the elasticsearch_aws_secret_access_key setting' do
-        expect { put :update, params: { application_setting: settings } }
-          .not_to change { ApplicationSetting.current.reload.elasticsearch_aws_secret_access_key }
-      end
     end
 
     shared_examples 'settings for licensed features' do
@@ -270,6 +228,114 @@ RSpec.describe Admin::ApplicationSettingsController do
       expect(response).to redirect_to(general_admin_application_settings_path)
       expect(ApplicationSetting.current.enforce_pat_expiration).to be_falsey
     end
+
+    context 'maintenance mode settings' do
+      let(:message) { 'Maintenance mode is on.' }
+
+      before do
+        stub_licensed_features(geo: true)
+      end
+
+      it "updates maintenance_mode setting" do
+        put :update, params: { application_setting: { maintenance_mode: true } }
+
+        expect(response).to redirect_to(general_admin_application_settings_path)
+        expect(ApplicationSetting.current.maintenance_mode).to be_truthy
+      end
+
+      it "updates maintenance_mode_message setting" do
+        put :update, params: { application_setting: { maintenance_mode_message: message } }
+
+        expect(response).to redirect_to(general_admin_application_settings_path)
+        expect(ApplicationSetting.current.maintenance_mode_message).to eq(message)
+      end
+
+      context 'when update disables maintenance mode' do
+        it 'removes maintenance_mode_message setting' do
+          put :update, params: { application_setting: { maintenance_mode: false } }
+
+          expect(response).to redirect_to(general_admin_application_settings_path)
+          expect(ApplicationSetting.current.maintenance_mode).to be_falsy
+          expect(ApplicationSetting.current.maintenance_mode_message).to be_nil
+        end
+      end
+
+      context 'when update does not disable maintenance mode' do
+        it 'does not remove maintenance_mode_message' do
+          set_maintenance_mode(message)
+
+          put :update, params: { application_setting: {} }
+
+          expect(ApplicationSetting.current.maintenance_mode_message).to eq(message)
+        end
+      end
+
+      context 'when updating maintenance_mode_message with empty string' do
+        it 'removes maintenance_mode_message' do
+          set_maintenance_mode(message)
+
+          put :update, params: { application_setting: { maintenance_mode_message: '' } }
+
+          expect(ApplicationSetting.current.maintenance_mode_message).to eq(nil)
+        end
+      end
+    end
+  end
+
+  describe '#advanced_search' do
+    before do
+      sign_in(admin)
+      @request.env['HTTP_REFERER'] = advanced_search_admin_application_settings_path
+    end
+
+    context 'advanced search settings' do
+      it 'updates the advanced search settings' do
+        settings = {
+            elasticsearch_url: 'http://my-elastic.search:9200',
+            elasticsearch_indexing: false,
+            elasticsearch_aws: true,
+            elasticsearch_aws_access_key: 'elasticsearch_aws_access_key',
+            elasticsearch_aws_secret_access_key: 'elasticsearch_aws_secret_access_key',
+            elasticsearch_aws_region: 'elasticsearch_aws_region',
+            elasticsearch_search: true
+        }
+
+        patch :advanced_search, params: { application_setting: settings }
+
+        expect(response).to redirect_to(advanced_search_admin_application_settings_path)
+        settings.except(:elasticsearch_url).each do |setting, value|
+          expect(ApplicationSetting.current.public_send(setting)).to eq(value)
+        end
+        expect(ApplicationSetting.current.elasticsearch_url).to contain_exactly(settings[:elasticsearch_url])
+      end
+    end
+
+    context 'zero-downtime elasticsearch reindexing' do
+      render_views
+
+      let!(:task) { create(:elastic_reindexing_task) }
+
+      it 'assigns elasticsearch reindexing task' do
+        get :advanced_search
+
+        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(response.body).to include("Reindexing Status: #{task.state}")
+      end
+    end
+
+    context 'elasticsearch_aws_secret_access_key setting is blank' do
+      let(:settings) do
+        {
+          elasticsearch_aws_access_key: 'elasticsearch_aws_access_key',
+          elasticsearch_aws_secret_access_key: ''
+        }
+      end
+
+      it 'does not update the elasticsearch_aws_secret_access_key setting' do
+        expect { patch :advanced_search, params: { application_setting: settings } }
+          .not_to change { ApplicationSetting.current.reload.elasticsearch_aws_secret_access_key }
+      end
+    end
   end
 
   describe 'GET #seat_link_payload' do
@@ -324,5 +390,12 @@ RSpec.describe Admin::ApplicationSettingsController do
         expect(response.body).to eq(Gitlab::SeatLinkData.new.to_json)
       end
     end
+  end
+
+  def set_maintenance_mode(message)
+    ApplicationSetting.current.update!(
+      maintenance_mode: true,
+      maintenance_mode_message: message
+    )
   end
 end

@@ -14,6 +14,7 @@ import flash from '~/flash';
 import { __ } from '~/locale';
 import loadAwardsHandler from '~/awards_handler';
 import { initCommitBoxInfo } from '~/projects/commit_box/info';
+import initCommitActions from '~/projects/commit';
 
 const hasPerfBar = document.querySelector('.with-performance-bar');
 const performanceHeight = hasPerfBar ? 35 : 0;
@@ -45,3 +46,4 @@ if (filesContainer.length) {
   new Diff();
 }
 loadAwardsHandler();
+initCommitActions();

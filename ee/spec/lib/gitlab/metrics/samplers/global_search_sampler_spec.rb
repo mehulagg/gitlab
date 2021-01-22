@@ -5,15 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Metrics::Samplers::GlobalSearchSampler do
   subject { described_class.new }
 
-  describe '#interval' do
-    it 'samples every sixty seconds by default' do
-      expect(subject.interval).to eq(60)
-    end
-
-    it 'samples at other intervals if requested' do
-      expect(described_class.new(11).interval).to eq(11)
-    end
-  end
+  it_behaves_like 'metrics sampler', 'GLOBAL_SEARCH_SAMPLER'
 
   describe '#sample' do
     it 'invokes the Elastic::MetricsUpdateService' do

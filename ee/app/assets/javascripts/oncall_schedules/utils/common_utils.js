@@ -1,5 +1,4 @@
 import { sprintf, __ } from '~/locale';
-import { getDateInFuture } from '~/lib/utils/datetime_utility';
 
 /**
  * Returns formatted timezone string, e.g. (UTC-09:00) AKST Alaska
@@ -11,7 +10,7 @@ import { getDateInFuture } from '~/lib/utils/datetime_utility';
  *
  * @returns {String}
  */
-export const getFormattedTimezone = tz => {
+export const getFormattedTimezone = (tz) => {
   return sprintf(__('(UTC %{offset}) %{timezone}'), {
     offset: tz.formatted_offset,
     timezone: `${tz.abbr} ${tz.name}`,
@@ -19,14 +18,12 @@ export const getFormattedTimezone = tz => {
 };
 
 /**
- * Returns formatted date of the rotation assignee
- * based on the rotation start time and length
+ * Returns `true` for non-empty string, otherwise returns `false`
  *
- * @param {Date} startDate
- * @param {Number} daysToAdd
+ * @param {String} startDate
  *
- * @returns {Date}
+ * @returns {Boolean}
  */
-export const assigneeScheduleDateStart = (startDate, daysToAdd) => {
-  return getDateInFuture(startDate, daysToAdd);
+export const isNameFieldValid = (nameField) => {
+  return Boolean(nameField?.length);
 };

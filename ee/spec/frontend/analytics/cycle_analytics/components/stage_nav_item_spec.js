@@ -29,7 +29,7 @@ describe('StageNavItem', () => {
   const findStageTooltip = () => getBinding(findStageTitle().element, 'gl-tooltip');
   const findStageMedian = () => wrapper.find({ ref: 'median' });
   const findDropdown = () => wrapper.find({ ref: 'dropdown' });
-  const setFakeTitleWidth = value =>
+  const setFakeTitleWidth = (value) =>
     Object.defineProperty(findStageTitle().element, 'scrollWidth', {
       value,
     });

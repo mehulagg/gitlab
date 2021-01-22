@@ -5,19 +5,19 @@ export default class DirtyFormChecker {
     this.isDirty = false;
 
     this.editableInputs = Array.from(this.form.querySelectorAll('input[name]')).filter(
-      el =>
+      (el) =>
         (el.type !== 'submit' && el.type !== 'hidden') ||
         el.classList.contains('js-project-feature-toggle-input'),
     );
 
     this.startingStates = {};
-    this.editableInputs.forEach(input => {
+    this.editableInputs.forEach((input) => {
       this.startingStates[input.name] = input.value;
     });
   }
 
   init() {
-    this.form.addEventListener('input', event => {
+    this.form.addEventListener('input', (event) => {
       if (event.target.matches('input[name]')) {
         this.recalculate();
       }
@@ -26,7 +26,7 @@ export default class DirtyFormChecker {
 
   recalculate() {
     const wasDirty = this.isDirty;
-    this.isDirty = this.editableInputs.some(input => {
+    this.isDirty = this.editableInputs.some((input) => {
       const currentValue = input.value;
       const startValue = this.startingStates[input.name];
 

@@ -1,0 +1,5 @@
+mutation dastSavedScansDelete($input: DastSavedScansDeleteInput!) {
+  savedScansDelete(input: $input) @client {
+    errors
+  }
+}

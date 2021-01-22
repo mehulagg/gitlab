@@ -13,6 +13,12 @@ import { s__, __ } from '~/locale';
 // data format is defined and will be the same as mocked (maybe with some minor changes)
 // feature rollout plan - https://gitlab.com/gitlab-org/gitlab/-/issues/262707#note_442529171
 import gitlabFieldsMock from './mocks/gitlabFields.json';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import {
+  getMappingData,
+  getPayloadFields,
+  transformForSave,
+} from '../utils/mapping_transformations';
 
 export const i18n = {
   columns: {
@@ -40,13 +46,18 @@ export default {
   directives: {
     GlTooltip,
   },
+  inject: {
+    gitlabAlertFields: {
+      default: gitlabFieldsMock,
+    },
+  },
   props: {
-    payloadFields: {
+    parsedPayload: {
       type: Array,
       required: false,
       default: () => [],
     },
-    mapping: {
+    savedMapping: {
       type: Array,
       required: false,
       default: () => [],
@@ -57,62 +68,43 @@ export default {
       gitlabFields: this.gitlabAlertFields,
     };
   },
-  inject: {
-    gitlabAlertFields: {
-      default: gitlabFieldsMock,
-    },
-  },
   computed: {
+    payloadFields() {
+      return getPayloadFields(this.parsedPayload);
+    },
     mappingData() {
-      return this.gitlabFields.map(gitlabField => {
-        const mappingFields = this.payloadFields.filter(({ type }) =>
-          type.some(t => gitlabField.compatibleTypes.includes(t)),
-        );
-
-        const foundMapping = this.mapping.find(
-          ({ alertFieldName }) => alertFieldName === gitlabField.name,
-        );
-
-        const { fallbackAlertPaths, payloadAlertPaths } = foundMapping || {};
-
-        return {
-          mapping: payloadAlertPaths,
-          fallback: fallbackAlertPaths,
-          searchTerm: '',
-          fallbackSearchTerm: '',
-          mappingFields,
-          ...gitlabField,
-        };
-      });
+      return getMappingData(this.gitlabFields, this.payloadFields, this.savedMapping);
     },
   },
   methods: {
     setMapping(gitlabKey, mappingKey, valueKey) {
-      const fieldIndex = this.gitlabFields.findIndex(field => field.name === gitlabKey);
+      const fieldIndex = this.gitlabFields.findIndex((field) => field.name === gitlabKey);
       const updatedField = { ...this.gitlabFields[fieldIndex], ...{ [valueKey]: mappingKey } };
       Vue.set(this.gitlabFields, fieldIndex, updatedField);
+      this.$emit('onMappingUpdate', transformForSave(this.mappingData));
     },
     setSearchTerm(search = '', searchFieldKey, gitlabKey) {
-      const fieldIndex = this.gitlabFields.findIndex(field => field.name === gitlabKey);
+      const fieldIndex = this.gitlabFields.findIndex((field) => field.name === gitlabKey);
       const updatedField = { ...this.gitlabFields[fieldIndex], ...{ [searchFieldKey]: search } };
       Vue.set(this.gitlabFields, fieldIndex, updatedField);
     },
     filterFields(searchTerm = '', fields) {
       const search = searchTerm.toLowerCase();
-
-      return fields.filter(field => field.label.toLowerCase().includes(search));
+      return fields.filter((field) => field.label.toLowerCase().includes(search));
     },
     isSelected(fieldValue, mapping) {
       return fieldValue === mapping;
     },
     selectedValue(name) {
       return (
-        this.payloadFields.find(item => item.name === name)?.label ||
+        this.payloadFields.find((item) => item.name === name)?.label ||
         this.$options.i18n.makeSelection
       );
     },
     getFieldValue({ label, type }) {
-      return `${label} (${type.join(__(' or '))})`;
+      const types = type.map((t) => capitalizeFirstCharacter(t.toLowerCase())).join(__(' or '));
+
+      return `${label} (${types})`;
     },
     noResults(searchTerm, fields) {
       return !this.filterFields(searchTerm, fields).length;

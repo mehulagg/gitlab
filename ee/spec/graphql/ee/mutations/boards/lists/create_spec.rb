@@ -21,7 +21,7 @@ RSpec.describe Mutations::Boards::Lists::Create do
   end
 
   before do
-    stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true, iterations: true)
+    stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true, board_iteration_lists: true)
   end
 
   subject { mutation.resolve(board_id: board.to_global_id.to_s, **list_create_params) }
@@ -108,7 +108,7 @@ RSpec.describe Mutations::Boards::Lists::Create do
 
         context 'when feature unavailable' do
           it 'returns an error' do
-            stub_licensed_features(iterations: false)
+            stub_licensed_features(board_iteration_lists: false)
 
             expect(subject[:errors]).to include 'Iteration lists not available with your current license'
           end

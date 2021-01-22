@@ -76,7 +76,7 @@ describe('subscription table row', () => {
   const findContentCells = () => wrapper.findAll('[data-testid="content-cell"]');
   const findHeaderIcon = () => findHeaderCell().find(GlIcon);
 
-  const findColumnLabelAndTitle = columnWrapper => {
+  const findColumnLabelAndTitle = (columnWrapper) => {
     const label = columnWrapper.find('[data-testid="property-label"]');
     const value = columnWrapper.find('[data-testid="property-value"]');
 
@@ -86,10 +86,7 @@ describe('subscription table row', () => {
     });
   };
 
-  const findUsageButton = () =>
-    findContentCells()
-      .at(0)
-      .find('[data-testid="seats-usage-button"]');
+  const findUsageButton = () => findContentCells().at(0).find('[data-testid="seats-usage-button"]');
 
   describe('dispatched actions', () => {
     it('dispatches action when created if namespace is group', () => {
@@ -114,7 +111,7 @@ describe('subscription table row', () => {
     });
 
     it(`should not render a hidden column`, () => {
-      const hiddenColIdx = COLUMNS.find(c => !c.display);
+      const hiddenColIdx = COLUMNS.find((c) => !c.display);
       const hiddenCol = findContentCells().at(hiddenColIdx);
 
       expect(hiddenCol).toBe(undefined);

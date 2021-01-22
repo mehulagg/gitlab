@@ -7,13 +7,11 @@ RSpec.describe Analytics::CycleAnalytics::StagePresenter do
   let(:default_stage) { Analytics::CycleAnalytics::ProjectStage.new(default_stage_params) }
   let(:custom_stage) { Analytics::CycleAnalytics::ProjectStage.new(name: 'Hello') }
 
-  let(:old_issue_stage_implementation) { Gitlab::CycleAnalytics::IssueStage.new(options: {}) }
-
   describe '#title' do
     it 'returns the pre-defined title for the default stage' do
       decorator = described_class.new(default_stage)
 
-      expect(decorator.title).to eq(old_issue_stage_implementation.title)
+      expect(decorator.title).to eq(s_('CycleAnalyticsStage|Issue'))
     end
 
     it 'returns the name attribute for a custom stage' do
@@ -27,7 +25,7 @@ RSpec.describe Analytics::CycleAnalytics::StagePresenter do
     it 'returns the pre-defined description for the default stage' do
       decorator = described_class.new(default_stage)
 
-      expect(decorator.description).to eq(old_issue_stage_implementation.description)
+      expect(decorator.description).to eq(_('Time before an issue gets scheduled'))
     end
 
     it 'returns empty string when custom stage is given' do

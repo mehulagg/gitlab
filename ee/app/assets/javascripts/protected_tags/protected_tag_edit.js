@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
 import { find } from 'lodash';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
@@ -60,7 +58,7 @@ export default class ProtectedTagEdit {
       .then(({ data }) => {
         this.hasChanges = false;
 
-        Object.keys(ACCESS_LEVELS).forEach(level => {
+        Object.keys(ACCESS_LEVELS).forEach((level) => {
           const accessLevelName = ACCESS_LEVELS[level];
 
           // The data coming from server will be the new persisted *state* for each dropdown
@@ -68,13 +66,13 @@ export default class ProtectedTagEdit {
         });
       })
       .catch(() => {
-        $.scrollTo(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         createFlash(s__('ProjectSettings|Failed to update tag!'));
       });
   }
 
   setSelectedItemsToDropdown(items = [], dropdownName) {
-    const itemsToAdd = items.map(currentItem => {
+    const itemsToAdd = items.map((currentItem) => {
       if (currentItem.user_id) {
         // Do this only for users for now
         // get the current data for selected items

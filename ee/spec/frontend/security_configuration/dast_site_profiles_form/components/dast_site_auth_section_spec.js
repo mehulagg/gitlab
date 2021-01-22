@@ -24,7 +24,7 @@ describe('DastSiteAuthSection', () => {
     wrapper.destroy();
   });
 
-  const findByNameAttribute = name => wrapper.find(`[name="${name}"]`);
+  const findByNameAttribute = (name) => wrapper.find(`[name="${name}"]`);
   const findAuthForm = () => wrapper.findByTestId('auth-form');
   const findAuthCheckbox = () => wrapper.find(GlFormCheckbox);
 
@@ -41,7 +41,7 @@ describe('DastSiteAuthSection', () => {
   describe('authentication toggle', () => {
     it.each([true, false])(
       'is set correctly when the "authEnabled" field is set to "%s"',
-      authEnabled => {
+      (authEnabled) => {
         createComponent({ fields: { authEnabled } });
         expect(findAuthCheckbox().vm.$attrs.checked).toBe(authEnabled);
       },
@@ -55,7 +55,7 @@ describe('DastSiteAuthSection', () => {
 
     it.each([true, false])(
       'makes the component emit an "input" event when changed',
-      async enabled => {
+      async (enabled) => {
         await setAuthentication({ enabled });
         expect(getLatestInputEventPayload().fields.authEnabled.value).toBe(enabled);
       },
@@ -77,7 +77,7 @@ describe('DastSiteAuthSection', () => {
 
     const inputFieldNames = Object.keys(inputFieldsWithValues);
 
-    describe.each(inputFieldNames)('input field "%s"', inputFieldName => {
+    describe.each(inputFieldNames)('input field "%s"', (inputFieldName) => {
       it('is rendered', () => {
         expect(findByNameAttribute(inputFieldName).exists()).toBe(true);
       });

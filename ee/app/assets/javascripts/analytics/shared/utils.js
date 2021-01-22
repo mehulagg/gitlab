@@ -2,13 +2,13 @@ import dateFormat from 'dateformat';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { dateFormats } from './constants';
 
-export const toYmd = date => dateFormat(date, dateFormats.isoDate);
+export const toYmd = (date) => dateFormat(date, dateFormats.isoDate);
 
 export default {
   toYmd,
 };
 
-export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
+export const formattedDate = (d) => dateFormat(d, dateFormats.defaultDate);
 
 /**
  * Creates a value stream object from a dataset. Returns null if no valueStreamId is present.
@@ -16,7 +16,7 @@ export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
  * @param {Object} dataset - The raw value stream object
  * @returns {Object} - A value stream object
  */
-export const buildValueStreamFromJson = valueStream => {
+export const buildValueStreamFromJson = (valueStream) => {
   const { id, name, is_custom: isCustom } = valueStream ? JSON.parse(valueStream) : {};
   return id ? { id, name, isCustom } : null;
 };
@@ -27,7 +27,7 @@ export const buildValueStreamFromJson = valueStream => {
  * @param {Object} dataset - The container's dataset
  * @returns {Object} - A group object
  */
-export const buildGroupFromDataset = dataset => {
+export const buildGroupFromDataset = (dataset) => {
   const { groupId, groupName, groupFullPath, groupAvatarUrl, groupParentId } = dataset;
 
   if (groupId) {
@@ -49,7 +49,7 @@ export const buildGroupFromDataset = dataset => {
  * @param {Object} dataset - The container's dataset
  * @returns {Object} - A project object
  */
-export const buildProjectFromDataset = dataset => {
+export const buildProjectFromDataset = (dataset) => {
   const { projectGid, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
 
   if (projectGid) {
@@ -117,5 +117,5 @@ export const buildCycleAnalyticsInitialData = ({
 
 export const filterBySearchTerm = (data = [], searchTerm = '', filterByKey = 'name') => {
   if (!searchTerm?.length) return data;
-  return data.filter(item => item[filterByKey].toLowerCase().includes(searchTerm.toLowerCase()));
+  return data.filter((item) => item[filterByKey].toLowerCase().includes(searchTerm.toLowerCase()));
 };

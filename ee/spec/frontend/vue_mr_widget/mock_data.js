@@ -133,14 +133,3 @@ export const codequalityParsedIssues = [
 ];
 
 export { mockStore };
-
-// TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/249544
-export const pipelineJobs = [
-  {
-    artifacts: [
-      {
-        file_type: 'sast',
-      },
-    ],
-  },
-];

@@ -19,12 +19,7 @@ module Ci
 
       # Status of the monthly allowance being used.
       def monthly_minutes_report
-        if enabled?
-          status = monthly_minutes_used_up? ? :over_quota : :under_quota
-          Report.new(monthly_minutes_used, monthly_minutes, status)
-        else
-          Report.new(monthly_minutes_used, 'Unlimited', :disabled)
-        end
+        Report.new(monthly_minutes_used, minutes_limit, report_status)
       end
 
       def monthly_percent_used
@@ -65,10 +60,26 @@ module Ci
         100 * total_minutes_remaining.to_i / total_minutes
       end
 
-      private
-
       def namespace_eligible?
         namespace.root? && namespace.any_project_with_shared_runners_enabled?
+      end
+
+      private
+
+      def minutes_limit
+        return monthly_minutes if enabled?
+
+        if namespace_eligible?
+          _('Unlimited')
+        else
+          _('Not supported')
+        end
+      end
+
+      def report_status
+        return :disabled unless enabled?
+
+        monthly_minutes_used_up? ? :over_quota : :under_quota
       end
 
       def total_minutes_remaining

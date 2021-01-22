@@ -55,7 +55,7 @@ describe('EE Approvals LicenseCompliance', () => {
     wrapper = null;
   });
 
-  const findByHrefAttribute = href => wrapper.find(`[href="${href}"]`);
+  const findByHrefAttribute = (href) => wrapper.find(`[href="${href}"]`);
   const findOpenModalButton = () => wrapper.find('button');
   const findLoadingIndicator = () => wrapper.find('[aria-label="loading"]');
   const findInformationIcon = () => wrapper.find(GlIcon);

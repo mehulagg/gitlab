@@ -1,30 +1,56 @@
-import { __, s__ } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+
+export const NAME_MAX_LENGTH = 100;
 
 export const I18N = {
-  RECOVER_HIDDEN_STAGE: s__('CustomCycleAnalytics|Recover hidden stage'),
-  RECOVER_STAGE_TITLE: s__('CustomCycleAnalytics|Default stages'),
-  RECOVER_STAGES_VISIBLE: s__('CustomCycleAnalytics|All default stages are currently visible'),
-  SELECT_START_EVENT: s__('CustomCycleAnalytics|Select start event'),
-  SELECT_END_EVENT: s__('CustomCycleAnalytics|Select end event'),
-  FORM_FIELD_NAME: s__('CustomCycleAnalytics|Name'),
-  FORM_FIELD_NAME_PLACEHOLDER: s__('CustomCycleAnalytics|Enter a name for the stage'),
-  FORM_FIELD_START_EVENT: s__('CustomCycleAnalytics|Start event'),
-  FORM_FIELD_START_EVENT_LABEL: s__('CustomCycleAnalytics|Start event label'),
-  FORM_FIELD_END_EVENT: s__('CustomCycleAnalytics|End event'),
-  FORM_FIELD_END_EVENT_LABEL: s__('CustomCycleAnalytics|End event label'),
-  BTN_UPDATE_STAGE: s__('CustomCycleAnalytics|Update stage'),
-  BTN_ADD_STAGE: s__('CustomCycleAnalytics|Add stage'),
-  TITLE_EDIT_STAGE: s__('CustomCycleAnalytics|Editing stage'),
-  TITLE_ADD_STAGE: s__('CustomCycleAnalytics|New stage'),
+  FORM_TITLE: __('Create Value Stream'),
+  FORM_CREATED: s__("CreateValueStreamForm|'%{name}' Value Stream created"),
+  RECOVER_HIDDEN_STAGE: s__('CreateValueStreamForm|Recover hidden stage'),
+  RESTORE_HIDDEN_STAGE: s__('CreateValueStreamForm|Restore stage'),
+  RESTORE_STAGES: s__('CreateValueStreamForm|Restore defaults'),
+  RECOVER_STAGE_TITLE: s__('CreateValueStreamForm|Default stages'),
+  RECOVER_STAGES_VISIBLE: s__('CreateValueStreamForm|All default stages are currently visible'),
+  SELECT_START_EVENT: s__('CreateValueStreamForm|Select start event'),
+  SELECT_END_EVENT: s__('CreateValueStreamForm|Select end event'),
+  FORM_FIELD_NAME_LABEL: s__('CreateValueStreamForm|Value Stream name'),
+  FORM_FIELD_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter value stream name'),
+  FORM_FIELD_STAGE_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter stage name'),
+  FORM_FIELD_START_EVENT: s__('CreateValueStreamForm|Start event'),
+  FORM_FIELD_START_EVENT_LABEL: s__('CreateValueStreamForm|Start event label'),
+  FORM_FIELD_END_EVENT: s__('CreateValueStreamForm|End event'),
+  FORM_FIELD_END_EVENT_LABEL: s__('CreateValueStreamForm|End event label'),
+  DEFAULT_FIELD_START_EVENT_LABEL: s__('CreateValueStreamForm|Start event: '),
+  DEFAULT_FIELD_END_EVENT_LABEL: s__('CreateValueStreamForm|End event: '),
+  BTN_UPDATE_STAGE: s__('CreateValueStreamForm|Update stage'),
+  BTN_ADD_STAGE: s__('CreateValueStreamForm|Add stage'),
+  BTN_ADD_ANOTHER_STAGE: s__('CreateValueStreamForm|Add another stage'),
+  TITLE_EDIT_STAGE: s__('CreateValueStreamForm|Editing stage'),
+  TITLE_ADD_STAGE: s__('CreateValueStreamForm|New stage'),
   BTN_CANCEL: __('Cancel'),
+  STAGE_INDEX: s__('CreateValueStreamForm|Stage %{index}'),
+  HIDDEN_DEFAULT_STAGE: s__('CreateValueStreamForm|%{name} (default)'),
+  TEMPLATE_DEFAULT: s__('CreateValueStreamForm|Create from default template'),
+  TEMPLATE_BLANK: s__('CreateValueStreamForm|Create from no template'),
 };
 
 export const ERRORS = {
-  START_EVENT_REQUIRED: s__('CustomCycleAnalytics|Please select a start event first'),
-  STAGE_NAME_EXISTS: s__('CustomCycleAnalytics|Stage name already exists'),
+  VALUE_STREAM_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Name is required'),
+  STAGE_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Stage name is required'),
+  MAX_LENGTH: sprintf(s__('CreateValueStreamForm|Maximum length %{maxLength} characters'), {
+    maxLength: NAME_MAX_LENGTH,
+  }),
+  START_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select a start event first'),
+  END_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select an end event'),
+  STAGE_NAME_EXISTS: s__('CreateValueStreamForm|Stage name already exists'),
   INVALID_EVENT_PAIRS: s__(
-    'CustomCycleAnalytics|Start event changed, please select a valid end event',
+    'CreateValueStreamForm|Start event changed, please select a valid end event',
   ),
+};
+
+export const STAGE_SORT_DIRECTION = {
+  UP: 'UP',
+  DOWN: 'DOWN',
 };
 
 export const defaultErrors = {
@@ -44,3 +70,68 @@ export const defaultFields = {
   endEventIdentifier: null,
   endEventLabelId: null,
 };
+
+const defaultStageCommonFields = { custom: false, hidden: false };
+
+export const defaultCustomStageFields = {
+  ...defaultFields,
+  ...defaultStageCommonFields,
+  custom: true,
+};
+
+/**
+ * These stage configs are copied from the https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/cycle_analytics
+ * This is a stopgap solution and we should eventually provide these from an API endpoint
+ *
+ * More information: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49094#note_464116439
+ */
+const BASE_DEFAULT_STAGE_CONFIG = [
+  {
+    id: 'issue',
+    startEventIdentifier: ['issue_created'],
+    endEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
+  },
+  {
+    id: 'plan',
+    startEventIdentifier: ['issue_first_associated_with_milestone', 'issue_first_added_to_board'],
+    endEventIdentifier: ['issue_first_mentioned_in_commit'],
+  },
+  {
+    id: 'code',
+    startEventIdentifier: ['issue_first_mentioned_in_commit'],
+    endEventIdentifier: ['merge_request_created'],
+  },
+  {
+    id: 'test',
+    startEventIdentifier: ['merge_request_last_build_started'],
+    endEventIdentifier: ['merge_request_last_build_finished'],
+  },
+  {
+    id: 'review',
+    startEventIdentifier: ['merge_request_created'],
+    endEventIdentifier: ['merge_request_merged'],
+  },
+  {
+    id: 'staging',
+    startEventIdentifier: ['merge_request_merged'],
+    endEventIdentifier: ['merge_request_first_deployed_to_production'],
+  },
+];
+
+export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest }) => ({
+  ...rest,
+  ...defaultStageCommonFields,
+  name: capitalizeFirstCharacter(id),
+}));
+
+export const PRESET_OPTIONS_DEFAULT = 'default';
+export const PRESET_OPTIONS = [
+  {
+    text: I18N.TEMPLATE_DEFAULT,
+    value: PRESET_OPTIONS_DEFAULT,
+  },
+  {
+    text: I18N.TEMPLATE_BLANK,
+    value: 'blank',
+  },
+];

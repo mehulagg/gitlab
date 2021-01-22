@@ -90,7 +90,7 @@ RSpec.describe RemoveDuplicatedCsFindings, :migration do
   end
 
   def finding_params(primary_identifier_id, project_id)
-    attrs = attributes_for(:vulnerabilities_finding)
+    attrs = attributes_for(:vulnerabilities_finding) # rubocop: disable RSpec/FactoriesInMigrationSpecs
     {
       severity: 0,
       confidence: 5,

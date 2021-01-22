@@ -34,9 +34,9 @@ export default {
   computed: {
     ...mapState('mergeRequests', {
       isLoading: 'isLoading',
-      perPage: state => state.pageInfo.perPage,
-      totalItems: state => state.pageInfo.total,
-      page: state => state.pageInfo.page,
+      perPage: (state) => state.pageInfo.perPage,
+      totalItems: (state) => state.pageInfo.total,
+      page: (state) => state.pageInfo.page,
     }),
     currentPage: {
       get() {

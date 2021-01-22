@@ -363,8 +363,6 @@ use the [`extends` keyword](#extends).
 | [`remote`](#includeremote)      | Include a file from a remote URL. Must be publicly accessible.    |
 | [`template`](#includetemplate)  | Include templates that are provided by GitLab.                    |
 
-The `include` methods do not support [variable expansion](../variables/where_variables_can_be_used.md#variables-usage).
-
 `.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
 The configuration is a snapshot in time and persisted in the database. Any changes to
 referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
@@ -378,6 +376,23 @@ The files defined by `include` are:
 NOTE:
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
+
+#### Variables with `include` **(CORE ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/294294) in GitLab 13.9.
+
+You can [use some predefined variables in `include` sections](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
+in your `.gitlab-ci.yml`:
+
+```yaml
+include:
+  project: '$CI_PROJECT_PATH'
+  file: '.compliance-gitlab-ci.yml'
+```
+
+For an example of how you can include these predefined variables, and their impact on CI jobs,
+see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
 
 #### `include:local`
 
@@ -412,9 +427,10 @@ include: '.gitlab-ci-production.yml'
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53903) in GitLab 11.7.
 
-To include files from another private project under the same GitLab instance,
-use `include:file`. This file is referenced with full paths relative to the
-root directory (`/`). For example:
+To include files from another private project on the same GitLab instance,
+use `include:file`. You can use `include:file` in combination with `include:project` only.
+
+The included file is referenced with a full path, relative to the root directory (`/`). For example:
 
 ```yaml
 include:
@@ -445,10 +461,7 @@ You can use local (relative to target project), project, remote, or template inc
 ##### Multiple files from a project
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26793) in GitLab 13.6.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to disable it. **(CORE ONLY)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/271560) in GitLab 13.8.
 
 You can include multiple files from the same project:
 
@@ -459,23 +472,6 @@ include:
     file:
       - '/templates/.builds.yml'
       - '/templates/.tests.yml'
-```
-
-Including multiple files from the same project is under development but ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_include_multiple_files_from_project)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_include_multiple_files_from_project)
 ```
 
 #### `include:remote`
@@ -615,10 +611,33 @@ job:
 ```
 
 Sometimes, `script` commands must be wrapped in single or double quotes.
-For example, commands that contain a colon (`:`) must be wrapped in quotes.
+For example, commands that contain a colon (`:`) must be wrapped in single quotes (`'`).
 The YAML parser needs to interpret the text as a string rather than
-a "key: value" pair. Be careful when using special characters:
-`:`, `{`, `}`, `[`, `]`, `,`, `&`, `*`, `#`, `?`, `|`, `-`, `<`, `>`, `=`, `!`, `%`, `@`, `` ` ``.
+a "key: value" pair.
+
+For example, this script uses a colon:
+
+```yaml
+job:
+  script:
+    - curl --request POST --header 'Content-Type: application/json' "https://gitlab/api/v4/projects"
+```
+
+To be considered valid YAML, you must wrap the entire command in single quotes. If
+the command already uses single quotes, you should change them to double quotes (`"`)
+if possible:
+
+```yaml
+job:
+  script:
+    - 'curl --request POST --header "Content-Type: application/json" "https://gitlab/api/v4/projects"'
+```
+
+You can verify the syntax is valid with the [CI Lint](../lint.md) tool.
+
+Be careful when using these special characters as well:
+
+- `{`, `}`, `[`, `]`, `,`, `&`, `*`, `#`, `?`, `|`, `-`, `<`, `>`, `=`, `!`, `%`, `@`, `` ` ``.
 
 If any of the script commands return an exit code other than zero, the job
 fails and further commands are not executed. Store the exit code in a variable to
@@ -1414,10 +1433,11 @@ In this example, if the first rule matches, then the job has `when: manual` and 
 #### `rules:variables`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/209864) in GitLab 13.7.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-rulesvariables). **(CORE ONLY)**
+> - It was [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/289803) on GitLab 13.8.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-rulesvariables). **(CORE ONLY)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -1444,10 +1464,10 @@ job:
 
 ##### Enable or disable rules:variables **(CORE ONLY)**
 
-rules:variables is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+rules:variables is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -2270,6 +2290,33 @@ job3:
     - deploy_to_staging
 ```
 
+#### `allow_failure:exit_codes`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273157) in GitLab 13.8.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/292024) in GitLab 13.9.
+
+Use `allow_failure:exit_codes` to dynamically control if a job should be allowed
+to fail. You can list which exit codes are not considered failures. The job fails
+for any other exit code:
+
+```yaml
+test_job_1:
+  script:
+    - echo "Run a script that results in exit code 1. This job fails."
+    - exit 1
+  allow_failure:
+    exit_codes: 137
+
+test_job_2:
+  script:
+    - echo "Run a script that results in exit code 137. This job is allowed to fail."
+    - exit 137
+  allow_failure:
+    exit_codes:
+      - 137
+      - 255
+```
+
 ### `when`
 
 `when` is used to implement jobs that are run in case of failure or despite the
@@ -2961,8 +3008,6 @@ larger than the [maximum artifact size](../../user/gitlab_com/index.md#gitlab-ci
 Job artifacts are only collected for successful jobs by default, and
 artifacts are restored after [caches](#cache).
 
-[Not all executors can use caches](https://docs.gitlab.com/runner/executors/#compatibility-chart).
-
 [Read more about artifacts](../pipelines/job_artifacts.md).
 
 #### `artifacts:paths`
@@ -3025,6 +3070,32 @@ job:
   artifacts:
     paths:
       - path/*xyz/*
+```
+
+#### `artifacts:public`
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+
+`artifacts:public` is used to determine whether the job artifacts should be
+publicly available.
+
+The default for `artifacts:public` is `true` which means that the artifacts in
+public pipelines are available for download by anonymous and guest users:
+
+```yaml
+artifacts:
+  public: true
+```
+
+To deny read access for anonymous and guest users to artifacts in public
+pipelines, set `artifacts:public` to `false`:
+
+```yaml
+artifacts:
+  public: false
 ```
 
 #### `artifacts:exclude`
@@ -3266,7 +3337,7 @@ job:
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4.
+in GitLab 13.4. In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
 
 #### `artifacts:reports`
 
@@ -3383,8 +3454,12 @@ job1:
 
 The coverage is shown in the UI if at least one line in the job output matches the regular expression.
 If there is more than one matched line in the job output, the last line is used.
-For the matched line, the first occurence of `\d+(\.\d+)?` is the code coverage.
+For the matched line, the first occurrence of `\d+(\.\d+)?` is the code coverage.
 Leading zeros are removed.
+
+Coverage output from [child pipelines](../parent_child_pipelines.md) is not recorded
+or displayed. Check [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/280818)
+for more details.
 
 ### `retry`
 
@@ -3536,14 +3611,12 @@ job split into three separate jobs.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15356) in GitLab 13.3.
 
-Use `matrix:` to configure different variables for jobs that are running in parallel.
+Use `matrix:` to run a job multiple times in parallel in a single pipeline,
+but with different variable values for each instance of the job.
 There can be from 2 to 50 jobs.
 
 Jobs can only run in parallel if there are multiple runners, or a single runner is
 [configured to run multiple jobs concurrently](#using-your-own-runners).
-
-[In GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) and later,
-you can have one-dimensional matrices with a single job.
 
 Every job gets the same `CI_NODE_TOTAL` [environment variable](../variables/README.md#predefined-environment-variables) value, and a unique `CI_NODE_INDEX` value.
 
@@ -3582,6 +3655,22 @@ deploystacks: [vultr, processing]
 ```
 
 The job naming style was [improved in GitLab 13.4](https://gitlab.com/gitlab-org/gitlab/-/issues/230452).
+
+##### One-dimensional `matrix` jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26362) in GitLab 13.5.
+
+You can also have one-dimensional matrices with a single job:
+
+```yaml
+deploystacks:
+  stage: deploy
+  script:
+    - bin/deploy
+  parallel:
+    matrix:
+      - PROVIDER: [aws, ovh, gcp, vultr]
+```
 
 ### `trigger`
 
@@ -4362,21 +4451,30 @@ You can use [YAML anchors](#anchors) with [script](#script), [`before_script`](#
 and [`after_script`](#after_script) to use predefined commands in multiple jobs:
 
 ```yaml
-.some-script: &some-script
-  - echo "Execute this script in `before_script` sections"
-
 .some-script-before: &some-script-before
-  - echo "Execute this script in `script` sections"
+  - echo "Execute this script first"
+
+.some-script: &some-script
+  - echo "Execute this script second"
+  - echo "Execute this script too"
 
 .some-script-after: &some-script-after
-  - echo "Execute this script in `after_script` sections"
+  - echo "Execute this script last"
 
-job_name:
+job1:
   before_script:
     - *some-script-before
   script:
     - *some-script
+    - echo "Execute something, for this job only"
   after_script:
+    - *some-script-after
+
+job2:
+  script:
+    - *some-script-before
+    - *some-script
+    - echo "Execute something else, for this job only"
     - *some-script-after
 ```
 

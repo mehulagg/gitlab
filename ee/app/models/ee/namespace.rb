@@ -245,10 +245,6 @@ module EE
       @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
     end
 
-    def root?
-      !has_parent?
-    end
-
     # The same method name is used also at project and job level
     def shared_runners_minutes_limit_enabled?
       ci_minutes_quota.enabled?

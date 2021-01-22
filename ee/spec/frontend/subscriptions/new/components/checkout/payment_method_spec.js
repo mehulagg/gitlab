@@ -56,12 +56,9 @@ describe('Payment Method', () => {
 
   describe('showing the summary', () => {
     it('should show the entered credit card details', () => {
-      expect(
-        wrapper
-          .find('.js-summary-line-1')
-          .html()
-          .replace(/\s+/g, ' '),
-      ).toContain('Visa ending in <strong>4242</strong>');
+      expect(wrapper.find('.js-summary-line-1').html().replace(/\s+/g, ' ')).toContain(
+        'Visa ending in <strong>4242</strong>',
+      );
     });
 
     it('should show the entered credit card expiration date', () => {

@@ -5,7 +5,7 @@ import { mockTracking } from 'helpers/tracking_helper';
 describe('Card security discover app', () => {
   let wrapper;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(CardSecurityDiscoverApp, {
       propsData,
     });

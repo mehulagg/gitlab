@@ -238,7 +238,7 @@ In GitLab 8.17 and later, GitLab requires the use of Node to compile JavaScript
 assets, and Yarn to manage JavaScript dependencies. The current minimum
 requirements for these are:
 
-- `node` >= v10.13.0. (We recommend node 12.x as it is faster)
+- `node` >= v10.14.2. (We recommend node 14.x as it is faster)
 - `yarn` >= v1.10.0.
 
 In many distros,
@@ -246,8 +246,8 @@ the versions provided by the official package repositories are out of date, so
 we need to install through the following commands:
 
 ```shell
-# install node v12.x
-curl --location "https://deb.nodesource.com/setup_12.x" | sudo bash -
+# install node v14.x
+curl --location "https://deb.nodesource.com/setup_14.x" | sudo bash -
 sudo apt-get install -y nodejs
 
 curl --silent --show-error "https://dl.yarnpkg.com/debian/pubkey.gpg" | sudo apt-key add -
@@ -271,10 +271,22 @@ sudo adduser --disabled-login --gecos 'GitLab' git
 NOTE:
 In GitLab 12.1 and later, only PostgreSQL is supported. In GitLab 13.0 and later, we [require PostgreSQL 11+](requirements.md#postgresql-requirements).
 
-1. Install the database packages:
+1. Install the database packages.
+
+   For Ubuntu 20.04 and later:
 
    ```shell
-   sudo apt-get install -y postgresql postgresql-client libpq-dev postgresql-contrib
+   sudo apt install -y postgresql postgresql-client libpq-dev postgresql-contrib
+   ```
+
+   For Ubuntu 18.04 and earlier, the available PostgreSQL doesn't meet the minimum
+   version requirement. You need to add PostgreSQL's repository:
+
+   ```shell
+   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+   RELEASE=$(lsb_release -cs) echo "deb http://apt.postgresql.org/pub/repos/apt/ ${RELEASE}"-pgdg main | sudo tee  /etc/apt/sources.list.d/pgdg.list
+   sudo apt update
+   sudo apt -y install postgresql-11 postgresql-client-11 libpq-dev
    ```
 
 1. Verify the PostgreSQL version you have is supported by the version of GitLab you're
@@ -426,7 +438,7 @@ Clone Enterprise Edition:
 
 ```shell
 # Clone GitLab repository
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b <X-Y-stable> gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab.git -b <X-Y-stable-ee> gitlab
 ```
 
 Make sure to replace `<X-Y-stable>` with the stable branch that matches the
@@ -1041,3 +1053,34 @@ On RedHat/CentOS:
 ```shell
 sudo yum groupinstall 'Development Tools'
 ```
+
+### Error compiling GitLab assets
+
+While compiling assets, you may receive the following error message:
+
+```plaintext
+Killed
+error Command failed with exit code 137.
+```
+
+This can occur when Yarn kills a container that runs out of memory. To fix this:
+
+1. Increase your system's memory to at least 8 GB.
+
+1. Run this command to clean the assets:
+
+   ```shell
+   sudo -u git -H bundle exec rake gitlab:assets:clean RAILS_ENV=production NODE_ENV=production
+   ```
+
+1. Run the `yarn` command again to resolve any conflicts:
+
+   ```shell
+   sudo -u git -H yarn install --production --pure-lockfile
+   ```
+
+1. Recompile the assets:
+
+   ```shell
+   sudo -u git -H bundle exec rake gitlab:assets:compile RAILS_ENV=production NODE_ENV=production
+   ```

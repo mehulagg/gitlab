@@ -20,20 +20,20 @@ describe('Approval Check Popover', () => {
   describe('computed props', () => {
     const securityApprovalsHelpPagePath = `${TEST_HOST}/documentation`;
 
-    beforeEach(done => {
+    beforeEach((done) => {
       wrapper.setProps({ securityApprovalsHelpPagePath });
       Vue.nextTick(done);
     });
 
     describe('showVulnerabilityCheckPopover', () => {
-      it('return true if the rule type is "Vulnerability-Check"', done => {
+      it('return true if the rule type is "Vulnerability-Check"', (done) => {
         wrapper.setProps({ rule: { name: VULNERABILITY_CHECK_NAME } });
         Vue.nextTick(() => {
           expect(wrapper.vm.showVulnerabilityCheckPopover).toBe(true);
           done();
         });
       });
-      it('return false if the rule type is "Vulnerability-Check"', done => {
+      it('return false if the rule type is "Vulnerability-Check"', (done) => {
         wrapper.setProps({ rule: { name: 'FooRule' } });
         Vue.nextTick(() => {
           expect(wrapper.vm.showVulnerabilityCheckPopover).toBe(false);
@@ -43,14 +43,14 @@ describe('Approval Check Popover', () => {
     });
 
     describe('showLicenseCheckPopover', () => {
-      it('return true if the rule type is "License-Check"', done => {
+      it('return true if the rule type is "License-Check"', (done) => {
         wrapper.setProps({ rule: { name: LICENSE_CHECK_NAME } });
         Vue.nextTick(() => {
           expect(wrapper.vm.showLicenseCheckPopover).toBe(true);
           done();
         });
       });
-      it('return false if the rule type is "License-Check"', done => {
+      it('return false if the rule type is "License-Check"', (done) => {
         wrapper.setProps({ rule: { name: 'FooRule' } });
         Vue.nextTick(() => {
           expect(wrapper.vm.showLicenseCheckPopover).toBe(false);
@@ -60,7 +60,7 @@ describe('Approval Check Popover', () => {
     });
 
     describe('approvalConfig', () => {
-      it('returns "Vulberability-Check" config', done => {
+      it('returns "Vulberability-Check" config', (done) => {
         wrapper.setProps({ rule: { name: VULNERABILITY_CHECK_NAME } });
         Vue.nextTick(() => {
           expect(wrapper.vm.approvalRuleConfig.title).toBe(
@@ -75,7 +75,7 @@ describe('Approval Check Popover', () => {
           done();
         });
       });
-      it('returns "License-Check" config', done => {
+      it('returns "License-Check" config', (done) => {
         wrapper.setProps({ rule: { name: LICENSE_CHECK_NAME } });
         Vue.nextTick(() => {
           expect(wrapper.vm.approvalRuleConfig.title).toBe(
@@ -90,7 +90,7 @@ describe('Approval Check Popover', () => {
           done();
         });
       });
-      it('returns an undefined config', done => {
+      it('returns an undefined config', (done) => {
         wrapper.setProps({ rule: { name: 'FooRule' } });
         Vue.nextTick(() => {
           expect(wrapper.vm.approvalConfig).toBe(undefined);
@@ -100,21 +100,21 @@ describe('Approval Check Popover', () => {
     });
 
     describe('documentationLink', () => {
-      it('returns documentation link for "License-Check"', done => {
+      it('returns documentation link for "License-Check"', (done) => {
         wrapper.setProps({ rule: { name: 'License-Check' } });
         Vue.nextTick(() => {
           expect(wrapper.vm.documentationLink).toBe(securityApprovalsHelpPagePath);
           done();
         });
       });
-      it('returns documentation link for "Vulnerability-Check"', done => {
+      it('returns documentation link for "Vulnerability-Check"', (done) => {
         wrapper.setProps({ rule: { name: 'Vulnerability-Check' } });
         Vue.nextTick(() => {
           expect(wrapper.vm.documentationLink).toBe(securityApprovalsHelpPagePath);
           done();
         });
       });
-      it('returns empty text', done => {
+      it('returns empty text', (done) => {
         const text = '';
         wrapper.setProps({ rule: { name: 'FooRule' } });
         Vue.nextTick(() => {

@@ -2,7 +2,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
-import BoardListHeader from 'ee_else_ce/boards/components/board_list_header_new.vue';
+import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { DRAGGABLE_TAG } from '../constants';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { n__ } from '~/locale';
@@ -40,7 +40,7 @@ export default {
     ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
-      return listId => this.getUnassignedIssues(listId);
+      return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
       return this.lists.reduce(
@@ -70,7 +70,7 @@ export default {
     hasMoreUnassignedIssues() {
       return (
         this.unassignedIssuesCount > 0 &&
-        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage)
+        this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
   },
@@ -89,7 +89,7 @@ export default {
       });
     },
     fetchMoreUnassignedIssues() {
-      this.lists.forEach(list => {
+      this.lists.forEach((list) => {
         if (this.pageInfoByListId[list.id]?.hasNextPage) {
           this.fetchIssuesForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
         }

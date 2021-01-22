@@ -59,7 +59,7 @@ export const createPolicy = ({ state, commit }, { environmentId, policy }) => {
         FLASH_TYPES.SUCCESS,
       );
     })
-    .catch(error =>
+    .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_CREATE_POLICY_ERROR, error?.response?.data),
     );
 };
@@ -89,7 +89,7 @@ export const updatePolicy = ({ state, commit }, { environmentId, policy }) => {
         FLASH_TYPES.SUCCESS,
       );
     })
-    .catch(error =>
+    .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_UPDATE_POLICY_ERROR, error?.response?.data),
     );
 };
@@ -113,7 +113,7 @@ export const deletePolicy = ({ state, commit }, { environmentId, policy }) => {
         policy,
       });
     })
-    .catch(error =>
+    .catch((error) =>
       commitPolicyError(commit, types.RECEIVE_DELETE_POLICY_ERROR, error?.response?.data),
     );
 };

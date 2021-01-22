@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import LinkedPipelinesMiniList from 'ee/vue_shared/components/linked_pipelines_mini_list.vue';
 import mockData from 'ee_jest/vue_mr_widget/mock_data';
-import { trimText } from 'jest/helpers/text_helper';
+import { trimText } from 'helpers/text_helper';
 import pipelineComponent from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
 import mockLinkedPipelines from '../vue_shared/components/linked_pipelines_mock_data';
 

@@ -11,7 +11,7 @@ import {
 } from '@gitlab/ui';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
-import { validateFields, initializeFormData } from './create_value_stream_form/utils';
+import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
 import { STAGE_ACTIONS } from '../constants';
 import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
@@ -51,7 +51,7 @@ export default {
 
     hasErrors() {
       return (
-        this.eventMismatchError || Object.values(this.errors).some(errArray => errArray?.length)
+        this.eventMismatchError || Object.values(this.errors).some((errArray) => errArray?.length)
       );
     },
     startEventRequiresLabel() {
@@ -82,7 +82,7 @@ export default {
         requiredFields.push(endEventLabelId);
       }
       return requiredFields.every(
-        fieldValue => fieldValue && (fieldValue.length > 0 || fieldValue > 0),
+        (fieldValue) => fieldValue && (fieldValue.length > 0 || fieldValue > 0),
       );
     },
     isDirty() {
@@ -155,9 +155,10 @@ export default {
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
-    handleUpdateFields(field, value) {
+    handleUpdateFields({ field, value }) {
       this.fields = { ...this.fields, [field]: value };
-      const newErrors = validateFields(this.fields);
+
+      const newErrors = validateStage({ ...this.fields, custom: true });
       newErrors.endEventIdentifier =
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
@@ -172,7 +173,7 @@ export default {
   <div v-if="isLoading">
     <gl-loading-icon class="mt-4" size="md" />
   </div>
-  <form v-else class="custom-stage-form m-4 mt-0">
+  <form v-else class="custom-stage-form m-4 gl-mt-0">
     <div class="gl-mb-1 gl-display-flex gl-justify-content-space-between gl-align-items-center">
       <h4>{{ formTitle }}</h4>
       <gl-dropdown
@@ -191,17 +192,19 @@ export default {
             >{{ stage.title }}</gl-dropdown-item
           >
         </template>
-        <p v-else class="mx-3 my-2">{{ $options.I18N.RECOVER_STAGES_VISIBLE }}</p>
+        <p v-else class="gl-mx-5 gl-my-3">{{ $options.I18N.RECOVER_STAGES_VISIBLE }}</p>
       </gl-dropdown>
     </div>
     <custom-stage-form-fields
-      :fields="fields"
-      :label-events="labelEvents"
+      :index="0"
+      :total-stages="1"
+      :stage="fields"
       :errors="errors"
-      :events="events"
-      @update="handleUpdateFields"
+      :stage-events="events"
+      @input="handleUpdateFields"
+      @select-label="({ field, value }) => handleUpdateFields({ field, value })"
     />
-    <div class="custom-stage-form-actions">
+    <div>
       <gl-button
         :disabled="!isDirty"
         category="primary"
@@ -221,7 +224,7 @@ export default {
         {{ saveStageText }}
       </gl-button>
     </div>
-    <div class="mt-2">
+    <div class="gl-mt-3">
       <gl-sprintf
         :message="
           __(

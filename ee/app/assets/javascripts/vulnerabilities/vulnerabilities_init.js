@@ -3,7 +3,7 @@ import App from 'ee/vulnerabilities/components/vulnerability.vue';
 import apolloProvider from 'ee/security_dashboard/graphql/provider';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-export default el => {
+export default (el) => {
   if (!el) {
     return null;
   }
@@ -23,7 +23,7 @@ export default el => {
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,
     },
-    render: h =>
+    render: (h) =>
       h(App, {
         props: { vulnerability },
       }),

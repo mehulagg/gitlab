@@ -42,7 +42,7 @@ describe('History Entry', () => {
   const eventItem = () => wrapper.find(EventItem);
   const newComment = () => wrapper.find({ ref: 'newComment' });
   const existingComments = () => wrapper.findAll({ ref: 'existingComment' });
-  const commentAt = index => existingComments().at(index);
+  const commentAt = (index) => existingComments().at(index);
 
   afterEach(() => wrapper.destroy());
 

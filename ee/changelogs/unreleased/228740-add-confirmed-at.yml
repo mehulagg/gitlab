@@ -1,5 +1,0 @@
----
-title: Add confirmed_at field to vulnerability in GraphQL
-merge_request: 49376
-author:
-type: changed

@@ -7,9 +7,6 @@ module EE
 
       prepended do
         before_action :authorize_create_environment_terminal!, only: [:terminal]
-        before_action do
-          push_frontend_feature_flag(:canary_ingress_weight_control, default_enabled: true)
-        end
       end
 
       private

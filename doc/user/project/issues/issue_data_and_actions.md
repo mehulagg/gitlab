@@ -35,6 +35,7 @@ The numbers in the image correspond to the following features:
 - **12.** [Participants](#participants)
 - **13.** [Notifications](#notifications)
 - **14.** [Reference](#reference)
+- [Issue email](#email)
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
@@ -128,7 +129,7 @@ element. Due dates can be changed as many times as needed.
 ### Labels
 
 Categorize issues by giving them [labels](../labels.md). They help to organize workflows,
-and they enable you to work with the [GitLab Issue Board](index.md#issue-boards).
+and they enable you to work with the [GitLab Issue Board](../issue_board.md).
 
 Group Labels, which allow you to use the same labels for all projects in the same
 group, can also be given to issues. They work exactly the same, but are immediately
@@ -173,6 +174,13 @@ for the issue. Notifications are automatically enabled after you participate in 
 - A quick "copy" button for that issue's reference, which looks like
   `foo/bar#xxx`, where `foo` is the `username` or `groupname`, `bar` is the
   `project-name`, and `xxx` is the issue number.
+
+### Email
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18816) in GitLab 13.8.
+
+Guest users can see a button in the right sidebar to copy the email address for the issue.
+Sending an email to this address creates a comment containing the email body.
 
 ### Edit
 
@@ -283,7 +291,7 @@ supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-g
 
 After you write a comment, you can:
 
-- Click **Comment** and to publish your comment.
+- Click **Comment** to publish your comment.
 - Choose **Start thread** from the dropdown list and start a new [thread](../../discussions/index.md#threaded-discussions)
   in that issue's main thread to discuss specific points. This invites other participants
   to reply directly to your thread, keeping related comments grouped together.

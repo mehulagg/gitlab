@@ -1,5 +1,5 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { GlModal, GlAlert, GlSprintf } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -22,8 +22,6 @@ const mockHideModal = jest.fn();
 const schedule =
   getOncallSchedulesQueryResponse.data.project.incidentManagementOncallSchedules.nodes[0];
 
-localVue.use(VueApollo);
-
 describe('DeleteScheduleModal', () => {
   let wrapper;
   let fakeApollo;
@@ -40,9 +38,6 @@ describe('DeleteScheduleModal', () => {
   }
 
   async function destroySchedule(localWrapper) {
-    await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
-
     localWrapper.find(GlModal).vm.$emit('primary', { preventDefault: jest.fn() });
   }
 
@@ -111,7 +106,6 @@ describe('DeleteScheduleModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders delete schedule modal layout', () => {

@@ -24,7 +24,7 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
       pat = 'demo-pat'
       stub_path = 'stub-group'
 
-      stub_request(:get, "%{url}/api/v4/groups?page=1&per_page=30&top_level_only=true" % { url: source_url }).to_return(
+      stub_request(:get, "%{url}/api/v4/groups?page=1&per_page=30&top_level_only=true&min_access_level=40" % { url: source_url }).to_return(
         body: [{
           id: 2595438,
           web_url: 'https://gitlab.com/groups/auto-breakfast',
@@ -37,6 +37,7 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
       )
 
       expect(page).to have_content 'Import groups from another instance of GitLab'
+      expect(page).to have_content 'Not all related objects are migrated'
 
       fill_in :bulk_import_gitlab_url, with: source_url
       fill_in :bulk_import_gitlab_access_token, with: pat

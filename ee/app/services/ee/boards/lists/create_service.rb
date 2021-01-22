@@ -19,16 +19,7 @@ module EE
         private
 
         def valid_license?(parent)
-          license_name = case type
-                         when :assignee
-                           :board_assignee_lists
-                         when :milestone
-                           :board_milestone_lists
-                         when :iteration
-                           :iterations
-                         end
-
-          license_name.nil? || parent.feature_available?(license_name)
+          List::LICENSED_LIST_TYPES.exclude?(type) || parent.feature_available?(:"board_#{type}_lists")
         end
 
         def license_validation_error

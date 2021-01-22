@@ -62,6 +62,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
     mrReviews,
   } = options;
@@ -73,6 +74,7 @@ export const setBaseConfig = ({ commit }, options) => {
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
     viewDiffsFileByFile,
     mrReviews,
   });
@@ -127,7 +129,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           // We need to check that the currentDiffFileId points to a file that exists
           if (
             state.currentDiffFileId &&
-            !state.diffFiles.some(f => f.file_hash === state.currentDiffFileId) &&
+            !state.diffFiles.some((f) => f.file_hash === state.currentDiffFileId) &&
             !isNoteLink
           ) {
             commit(types.VIEW_DIFF_FILE, state.diffFiles[0].file_hash);
@@ -135,11 +137,11 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 
           if (state.diffFiles?.length) {
             // eslint-disable-next-line promise/catch-or-return,promise/no-nesting
-            import('~/code_navigation').then(m =>
+            import('~/code_navigation').then((m) =>
               m.default({
                 blobs: state.diffFiles
-                  .filter(f => f.code_navigation_path)
-                  .map(f => ({
+                  .filter((f) => f.code_navigation_path)
+                  .map((f) => ({
                     path: f.new_path,
                     codeNavigationPath: f.code_navigation_path,
                   })),
@@ -161,7 +163,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 
         return pagination.next_page;
       })
-      .then(nextPage => nextPage && getBatch(nextPage))
+      .then((nextPage) => nextPage && getBatch(nextPage))
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
 
   return getBatch()
@@ -211,7 +213,7 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
 export const fetchCoverageFiles = ({ commit, state }) => {
   const coveragePoll = new Poll({
     resource: {
-      getCoverageReports: endpoint => axios.get(endpoint),
+      getCoverageReports: (endpoint) => axios.get(endpoint),
     },
     data: state.endpointCoverage,
     method: 'getCoverageReports',
@@ -246,8 +248,8 @@ export const assignDiscussionsToDiff = (
   const hash = getLocationHash();
 
   discussions
-    .filter(discussion => discussion.diff_discussion)
-    .forEach(discussion => {
+    .filter((discussion) => discussion.diff_discussion)
+    .forEach((discussion) => {
       commit(types.SET_LINE_DISCUSSIONS_FOR_FILE, {
         discussion,
         diffPositionByLineCode,
@@ -274,10 +276,10 @@ export const toggleLineDiscussions = ({ commit }, options) => {
 };
 
 export const renderFileForDiscussionId = ({ commit, rootState, state }, discussionId) => {
-  const discussion = rootState.notes.discussions.find(d => d.id === discussionId);
+  const discussion = rootState.notes.discussions.find((d) => d.id === discussionId);
 
   if (discussion && discussion.diff_file) {
-    const file = state.diffFiles.find(f => f.file_hash === discussion.diff_file.file_hash);
+    const file = state.diffFiles.find((f) => f.file_hash === discussion.diff_file.file_hash);
 
     if (file) {
       if (!file.renderIt) {
@@ -303,11 +305,12 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
 
 export const startRenderDiffsQueue = ({ state, commit }) => {
   const checkItem = () =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       const nextFile = state.diffFiles.find(
-        file =>
+        (file) =>
           !file.renderIt &&
-          (file.viewer && (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text)),
+          file.viewer &&
+          (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
       );
 
       if (nextFile) {
@@ -361,7 +364,7 @@ export const loadMoreLines = ({ commit }, options) => {
 
   params.from_merge_request = true;
 
-  return axios.get(endpoint, { params }).then(res => {
+  return axios.get(endpoint, { params }).then((res) => {
     const contextLines = res.data || [];
 
     commit(types.ADD_CONTEXT_LINES, {
@@ -402,7 +405,7 @@ export const loadCollapsedDiff = ({ commit, getters, state }, file) =>
         w: state.showWhitespace ? '0' : '1',
       },
     })
-    .then(res => {
+    .then((res) => {
       commit(types.ADD_COLLAPSED_DIFFS, {
         file,
         data: res.data,
@@ -425,7 +428,7 @@ export const toggleFileDiscussions = ({ getters, dispatch }, diff) => {
   const shouldCloseAll = getters.diffHasAllExpandedDiscussions(diff);
   const shouldExpandAll = getters.diffHasAllCollapsedDiscussions(diff);
 
-  discussions.forEach(discussion => {
+  discussions.forEach((discussion) => {
     const data = { discussionId: discussion.id };
 
     if (shouldCloseAll) {
@@ -439,13 +442,13 @@ export const toggleFileDiscussions = ({ getters, dispatch }, diff) => {
 export const toggleFileDiscussionWrappers = ({ commit }, diff) => {
   const discussionWrappersExpanded = allDiscussionWrappersExpanded(diff);
   const lineCodesWithDiscussions = new Set();
-  const lineHasDiscussion = line => Boolean(line?.discussions.length);
-  const registerDiscussionLine = line => lineCodesWithDiscussions.add(line.line_code);
+  const lineHasDiscussion = (line) => Boolean(line?.discussions.length);
+  const registerDiscussionLine = (line) => lineCodesWithDiscussions.add(line.line_code);
 
   diff[INLINE_DIFF_LINES_KEY].filter(lineHasDiscussion).forEach(registerDiscussionLine);
 
   if (lineCodesWithDiscussions.size) {
-    Array.from(lineCodesWithDiscussions).forEach(lineCode => {
+    Array.from(lineCodesWithDiscussions).forEach((lineCode) => {
       commit(types.TOGGLE_LINE_DISCUSSIONS, {
         fileHash: diff.file_hash,
         expanded: !discussionWrappersExpanded,
@@ -463,8 +466,8 @@ export const saveDiffDiscussion = ({ state, dispatch }, { note, formData }) => {
   });
 
   return dispatch('saveNote', postData, { root: true })
-    .then(result => dispatch('updateDiscussion', result.discussion, { root: true }))
-    .then(discussion => dispatch('assignDiscussionsToDiff', [discussion]))
+    .then((result) => dispatch('updateDiscussion', result.discussion, { root: true }))
+    .then((discussion) => dispatch('assignDiscussionsToDiff', [discussion]))
     .then(() => dispatch('updateResolvableDiscussionsCounts', null, { root: true }))
     .then(() => dispatch('closeDiffFileCommentForm', formData.diffFile.file_hash))
     .catch(() => createFlash(s__('MergeRequests|Saving the comment failed')));
@@ -564,7 +567,7 @@ export const setExpandedDiffLines = ({ commit }, { file, data }) => {
     });
     commit(types.TOGGLE_DIFF_FILE_RENDERING_MORE, file.file_path);
 
-    const idleCb = t => {
+    const idleCb = (t) => {
       const startIndex = index;
 
       while (
@@ -612,7 +615,7 @@ export const fetchFullDiff = ({ commit, dispatch }, file) =>
     .catch(() => dispatch('receiveFullDiffError', file.file_path));
 
 export const toggleFullDiff = ({ dispatch, commit, getters, state }, filePath) => {
-  const file = state.diffFiles.find(f => f.file_path === filePath);
+  const file = state.diffFiles.find((f) => f.file_path === filePath);
 
   commit(types.REQUEST_FULL_DIFF, filePath);
 
@@ -723,7 +726,7 @@ export const setCurrentDiffFileIdFromNote = ({ commit, state, rootGetters }, not
 
   const fileHash = rootGetters.getDiscussion(note.discussion_id).diff_file?.file_hash;
 
-  if (fileHash && state.diffFiles.some(f => f.file_hash === fileHash)) {
+  if (fileHash && state.diffFiles.some((f) => f.file_hash === fileHash)) {
     commit(types.VIEW_DIFF_FILE, fileHash);
   }
 };

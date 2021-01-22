@@ -1,4 +1,6 @@
 <script>
+// Work around for https://github.com/vuejs/eslint-plugin-vue/issues/1411
+/* eslint-disable vue/one-component-per-file */
 import $ from 'jquery';
 import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
@@ -149,9 +151,7 @@ export default {
       <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
       <span v-else class="js-weight-collapsed-weight-label">
         {{ collapsedWeightLabel
-        }}<template v-if="weight > $options.maxDisplayWeight"
-          >&hellip;</template
-        >
+        }}<template v-if="weight > $options.maxDisplayWeight">&hellip;</template>
       </span>
     </div>
     <div class="title hide-collapsed">

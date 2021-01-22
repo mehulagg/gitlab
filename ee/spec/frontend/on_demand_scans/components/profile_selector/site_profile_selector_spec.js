@@ -9,7 +9,7 @@ const TEST_NEW_PATH = '/test/new/site/profile/path';
 const TEST_ATTRS = {
   'data-foo': 'bar',
 };
-const profiles = siteProfiles.map(x => {
+const profiles = siteProfiles.map((x) => {
   const suffix = x.validationStatus === 'PASSED_VALIDATION' ? 'Validated' : 'Not Validated';
   return {
     ...x,
@@ -115,7 +115,7 @@ describe('OnDemandScansSiteProfileSelector', () => {
         expect(sel.props()).toEqual({
           libraryPath: TEST_LIBRARY_PATH,
           newProfilePath: TEST_NEW_PATH,
-          profiles: siteProfiles.map(x => ({
+          profiles: siteProfiles.map((x) => ({
             ...x,
             dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
           })),

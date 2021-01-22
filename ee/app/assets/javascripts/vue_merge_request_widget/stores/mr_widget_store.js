@@ -112,9 +112,9 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(subject => {
+    Object.keys(headMetricsIndexed).forEach((subject) => {
       const subjectMetrics = headMetricsIndexed[subject];
-      Object.keys(subjectMetrics).forEach(metric => {
+      Object.keys(subjectMetrics).forEach((metric) => {
         const headMetricData = subjectMetrics[metric];
 
         if (baseMetricsIndexed[subject] && baseMetricsIndexed[subject][metric]) {
@@ -168,7 +168,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const degraded = [];
     const same = [];
 
-    Object.keys(headMetricsIndexed).forEach(metric => {
+    Object.keys(headMetricsIndexed).forEach((metric) => {
       const headMetricData = headMetricsIndexed[metric];
       if (metric in baseMetricsIndexed) {
         const baseMetricData = baseMetricsIndexed[metric];
@@ -204,7 +204,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     const { metrics } = loadPerformanceData;
     const indexedMetrics = {};
 
-    Object.keys(loadPerformanceData.metrics).forEach(metric => {
+    Object.keys(loadPerformanceData.metrics).forEach((metric) => {
       switch (metric) {
         case 'http_reqs':
           indexedMetrics[s__('ciReport|RPS')] = metrics.http_reqs.rate;

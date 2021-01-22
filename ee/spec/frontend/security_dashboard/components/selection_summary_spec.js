@@ -63,9 +63,7 @@ describe('Selection Summary component', () => {
         expect(wrapper.vm.dismissalReason).toBe(null);
         expect(wrapper.findAll('option')).toHaveLength(4);
 
-        const option = formSelect()
-          .findAll('option')
-          .at(1);
+        const option = formSelect().findAll('option').at(1);
         option.setSelected();
         formSelect().trigger('change');
 
@@ -90,7 +88,7 @@ describe('Selection Summary component', () => {
     let mutateMock;
 
     beforeEach(() => {
-      mutateMock = jest.fn(data =>
+      mutateMock = jest.fn((data) =>
         data.variables.id % 2 === 0 ? Promise.resolve() : Promise.reject(),
       );
 

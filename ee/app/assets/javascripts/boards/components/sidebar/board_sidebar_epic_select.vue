@@ -12,12 +12,12 @@ export default {
     BoardEditableItem,
     EpicsSelect,
   },
+  inject: ['groupId'],
   data() {
     return {
       loading: false,
     };
   },
-  inject: ['groupId'],
   computed: {
     ...mapState(['epics']),
     ...mapGetters(['activeIssue', 'getEpicById', 'projectPathForActiveIssue']),
@@ -81,18 +81,16 @@ export default {
         {{ storedEpic.title }}
       </a>
     </template>
-    <template>
-      <epics-select
-        ref="epicSelect"
-        class="gl-w-full"
-        :group-id="groupId"
-        :can-edit="true"
-        :initial-epic="storedEpic"
-        :initial-epic-loading="false"
-        variant="standalone"
-        :show-header="false"
-        @onEpicSelect="setEpic"
-      />
-    </template>
+    <epics-select
+      ref="epicSelect"
+      class="gl-w-full"
+      :group-id="groupId"
+      :can-edit="true"
+      :initial-epic="storedEpic"
+      :initial-epic-loading="false"
+      variant="standalone"
+      :show-header="false"
+      @onEpicSelect="setEpic"
+    />
   </board-editable-item>
 </template>

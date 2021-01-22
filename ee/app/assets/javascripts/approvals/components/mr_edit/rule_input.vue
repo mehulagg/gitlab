@@ -21,7 +21,7 @@ export default {
     ...mapState(['settings']),
   },
   created() {
-    this.onInputChangeDebounced = debounce(event => {
+    this.onInputChangeDebounced = debounce((event) => {
       this.onInputChange(event);
     }, 1000);
   },

@@ -2,6 +2,10 @@ import { GlTable } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 
 import AdminUsersTable from '~/admin/users/components/users_table.vue';
+import AdminUserAvatar from '~/admin/users/components/user_avatar.vue';
+import AdminUserDate from '~/admin/users/components/user_date.vue';
+import AdminUserActions from '~/admin/users/components/user_actions.vue';
+
 import { users, paths } from '../mock_data';
 
 describe('AdminUsersTable component', () => {
@@ -38,14 +42,21 @@ describe('AdminUsersTable component', () => {
       initComponent();
     });
 
+    it('renders the projects count', () => {
+      expect(getCellByLabel(0, 'Projects').text()).toContain(`${user.projectsCount}`);
+    });
+
+    it('renders the user actions', () => {
+      expect(wrapper.find(AdminUserActions).exists()).toBe(true);
+    });
+
     it.each`
-      key                 | label
-      ${'name'}           | ${'Name'}
-      ${'projectsCount'}  | ${'Projects'}
-      ${'createdAt'}      | ${'Created on'}
-      ${'lastActivityOn'} | ${'Last activity'}
-    `('renders users.$key for $label', ({ key, label }) => {
-      expect(getCellByLabel(0, label).text()).toBe(`${user[key]}`);
+      component          | label
+      ${AdminUserAvatar} | ${'Name'}
+      ${AdminUserDate}   | ${'Created on'}
+      ${AdminUserDate}   | ${'Last activity'}
+    `('renders the component for column $label', ({ component, label }) => {
+      expect(getCellByLabel(0, label).find(component).exists()).toBe(true);
     });
   });
 

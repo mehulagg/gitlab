@@ -34,7 +34,7 @@ Array [
   },
   Object {
     "email": "Private",
-    "tooltip": "An email address is only visible for users managed through Group Managed Accounts.",
+    "tooltip": "An email address is only visible for users with public emails.",
     "user": Object {
       "avatarLabeled": Object {
         "size": "32",

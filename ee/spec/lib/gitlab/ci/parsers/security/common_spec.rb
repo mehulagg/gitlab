@@ -8,13 +8,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
 
     let(:artifact) { build(:ee_ci_job_artifact, :common_security_report) }
     let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
-    let(:parser) { described_class.new }
     let(:location) { ::Gitlab::Ci::Reports::Security::Locations::DependencyScanning.new(file_path: 'yarn/yarn.lock', package_version: 'v2', package_name: 'saml2') }
 
     before do
-      allow(parser).to receive(:create_location).and_return(location)
+      allow_next_instance_of(described_class) do |parser|
+        allow(parser).to receive(:create_location).and_return(location)
+      end
 
-      artifact.each_blob { |blob| parser.parse!(blob, report) }
+      artifact.each_blob { |blob| described_class.parse!(blob, report) }
     end
 
     describe 'parsing finding.name' do
@@ -142,9 +143,8 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
 
       it 'returns nil when scan is not a hash' do
-        parser =  described_class.new
         empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
-        parser.parse!({}.to_json, empty_report)
+        described_class.parse!({}.to_json, empty_report)
 
         expect(empty_report.scan).to be(nil)
       end

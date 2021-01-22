@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/header/_new_dropdown' do
-  let(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   context 'group-specific links' do
-    let(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
 
     before do
       allow(view).to receive(:current_user).and_return(user)
@@ -17,10 +17,7 @@ RSpec.describe 'layouts/header/_new_dropdown' do
     it 'does not have "New epic" link' do
       render
 
-      expect(rendered).not_to have_link(
-        'New epic',
-        href: new_group_epic_path(group)
-      )
+      expect(rendered).not_to have_link('New epic', href: new_group_epic_path(group))
     end
 
     context 'as a Group owner' do
@@ -36,10 +33,7 @@ RSpec.describe 'layouts/header/_new_dropdown' do
         it 'has a "New epic" link' do
           render
 
-          expect(rendered).to have_link(
-            'New epic',
-            href: new_group_epic_path(group)
-          )
+          expect(rendered).to have_link('New epic', href: new_group_epic_path(group))
         end
       end
     end

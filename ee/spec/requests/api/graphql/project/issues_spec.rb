@@ -54,7 +54,7 @@ RSpec.describe 'getting an issue list for a project' do
     let_it_be(:blocking_issue2) { create(:issue, :confidential, project: project) }
     let_it_be(:blocking_issue3) { create(:issue, project: project) }
 
-    let_it_be(:issue_link1) { create(:issue_link, source: blocked_issue1, target: blocking_issue1, link_type: 'is_blocked_by') }
+    let_it_be(:issue_link1) { create(:issue_link, source: blocking_issue1, target: blocked_issue1, link_type: 'blocks') }
     let_it_be(:issue_link2) { create(:issue_link, source: blocking_issue2, target: blocked_issue2, link_type: 'blocks') }
     let_it_be(:issue_link3) { create(:issue_link, source: blocking_issue3, target: blocked_issue2, link_type: 'blocks') }
 

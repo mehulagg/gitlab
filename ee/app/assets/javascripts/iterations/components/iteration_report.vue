@@ -88,11 +88,16 @@ export default {
       required: false,
       default: false,
     },
+    labelsFetchPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     namespaceType: {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
       type: String,
@@ -226,6 +231,7 @@ export default {
       <iteration-report-tabs
         :full-path="fullPath"
         :iteration-id="iteration.id"
+        :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
       />
     </template>

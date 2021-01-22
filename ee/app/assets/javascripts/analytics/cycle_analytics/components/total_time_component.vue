@@ -48,8 +48,6 @@ export default {
     <template v-if="hasData">
       {{ calculatedTime.duration }} <span> {{ calculatedTime.units }} </span>
     </template>
-    <template v-else>
-      --
-    </template>
+    <template v-else> -- </template>
   </span>
 </template>

@@ -30,9 +30,12 @@ configuration. Automation enables consistency across your projects, seamless
 management of processes, and faster creation of new projects: push your code,
 and GitLab does the rest, improving your productivity and efficiency.
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an introduction to Auto DevOps, watch [AutoDevOps in GitLab 11.0](https://youtu.be/0Tc0YYBxqi4).
 
-For requirements, see [Requirements for Auto DevOps](requirements.md) for more information.
+For requirements, read [Requirements for Auto DevOps](requirements.md) for more information.
+
+For a developer's guide, read [Auto DevOps development guide](../../development/auto_devops.md).
 
 ## Enabled by default
 
@@ -153,16 +156,6 @@ The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of pr
 as other environment [variables](../../ci/variables/README.md#priority-of-environment-variables).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
 setting is used if set.
-
-NOTE:
-If you use the [GitLab managed app for Ingress](../../user/clusters/applications.md#ingress),
-the URL endpoint should be automatically configured for you. All you must do
-is use its value for the `KUBE_INGRESS_BASE_DOMAIN` variable.
-
-NOTE:
-`AUTO_DEVOPS_DOMAIN` was [deprecated in GitLab 11.8](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/52363)
-and replaced with `KUBE_INGRESS_BASE_DOMAIN`, and removed in
-[GitLab 12.0](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56959).
 
 Auto DevOps requires a wildcard DNS A record matching the base domain(s). For
 a base domain of `example.com`, you'd need a DNS entry like:
@@ -306,6 +299,11 @@ After completing configuration, you can test your setup by creating a merge requ
 and verifying your application is deployed as a Review App in the Kubernetes
 cluster with the `review/*` environment scope. Similarly, you can check the
 other environments.
+
+[Cluster environment scope isn't respected](https://gitlab.com/gitlab-org/gitlab/-/issues/20351)
+when checking for active Kubernetes clusters. For multi-cluster setup to work with Auto DevOps,
+create a fallback cluster with **Cluster environment scope** set to `*`. A new cluster isn't
+required. You can use any of the clusters already added.
 
 ## Limitations
 
@@ -481,7 +479,7 @@ that works for this problem. Follow these steps to use the tool in Auto DevOps:
 
 ### Error: error initializing: Looks like "https://kubernetes-charts.storage.googleapis.com" is not a valid chart repository or cannot be reached
 
-As [announced in the official CNCF blogpost](https://www.cncf.io/blog/2020/10/07/important-reminder-for-all-helm-users-stable-incubator-repos-are-deprecated-and-all-images-are-changing-location/),
+As [announced in the official CNCF blog post](https://www.cncf.io/blog/2020/10/07/important-reminder-for-all-helm-users-stable-incubator-repos-are-deprecated-and-all-images-are-changing-location/),
 the stable Helm chart repository was deprecated and removed on November 13th, 2020.
 You may encounter this error after that date.
 
@@ -526,7 +524,7 @@ To fix your custom chart:
    it's used to verify the integrity of the downloaded dependencies.
 
 You can find more information in
-[issue #263778, "Migrate PostgreSQL from stable Helm repo"](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
+[issue #263778, "Migrate PostgreSQL from stable Helm repository"](https://gitlab.com/gitlab-org/gitlab/-/issues/263778).
 
 ### Error: release .... failed: timed out waiting for the condition
 
@@ -545,7 +543,7 @@ page of the deployed application on port 5000. If your application isn't configu
 to serve anything at the root page, or is configured to run on a specific port
 *other* than 5000, this check fails.
 
-If it fails, you should see these failures within the events for the relevant
+If it fails, you should see these failures in the events for the relevant
 Kubernetes namespace. These events look like the following example:
 
 ```plaintext

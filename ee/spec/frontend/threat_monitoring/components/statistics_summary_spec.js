@@ -5,7 +5,7 @@ import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summar
 describe('StatisticsSummary component', () => {
   let wrapper;
 
-  const factory = options => {
+  const factory = (options) => {
     wrapper = shallowMount(StatisticsSummary, {
       ...options,
     });

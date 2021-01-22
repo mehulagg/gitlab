@@ -50,6 +50,8 @@
   - 1
 - - bulk_import
   - 1
+- - bulk_imports_entity
+  - 1
 - - chaos
   - 2
 - - chat_notification
@@ -200,6 +202,8 @@
   - 1
 - - namespaceless_project_destroy
   - 1
+- - namespaces_onboarding_pipeline_created
+  - 1
 - - namespaces_onboarding_user_added
   - 1
 - - new_epic
@@ -266,6 +270,8 @@
   - 1
 - - project_update_repository_storage
   - 1
+- - projects_git_garbage_collect
+  - 1
 - - prometheus_create_default_alerts
   - 1
 - - propagate_integration
@@ -319,6 +325,10 @@
 - - service_desk_email_receiver
   - 1
 - - set_user_status_based_on_user_cap_setting
+  - 1
+- - snippet_schedule_bulk_repository_shard_moves
+  - 1
+- - snippet_update_repository_storage
   - 1
 - - status_page_publish
   - 1

@@ -6,7 +6,7 @@ import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
-(global => {
+((global) => {
   global.mergeConflicts = global.mergeConflicts || {};
 
   global.mergeConflicts.diffFileEditor = Vue.extend({
@@ -60,19 +60,28 @@ import { __ } from '~/locale';
         const DataPromise = axios.get(this.file.content_path);
 
         Promise.all([EditorPromise, DataPromise])
-          .then(([{ default: EditorLite }, { data: { content, new_path: path } }]) => {
-            const contentEl = this.$el.querySelector('.editor');
+          .then(
+            ([
+              { default: EditorLite },
+              {
+                data: { content, new_path: path },
+              },
+            ]) => {
+              const contentEl = this.$el.querySelector('.editor');
 
-            this.originalContent = content;
-            this.fileLoaded = true;
+              this.originalContent = content;
+              this.fileLoaded = true;
 
-            this.editor = new EditorLite().createInstance({
-              el: contentEl,
-              blobPath: path,
-              blobContent: content,
-            });
-            this.editor.onDidChangeModelContent(debounce(this.saveDiffResolution.bind(this), 250));
-          })
+              this.editor = new EditorLite().createInstance({
+                el: contentEl,
+                blobPath: path,
+                blobContent: content,
+              });
+              this.editor.onDidChangeModelContent(
+                debounce(this.saveDiffResolution.bind(this), 250),
+              );
+            },
+          )
           .catch(() => {
             flash(__('An error occurred while loading the file'));
           });
@@ -81,9 +90,11 @@ import { __ } from '~/locale';
         this.saved = true;
 
         // This probably be better placed in the data provider
+        /* eslint-disable vue/no-mutating-props */
         this.file.content = this.editor.getValue();
         this.file.resolveEditChanged = this.file.content !== this.originalContent;
         this.file.promptDiscardConfirmation = false;
+        /* eslint-enable vue/no-mutating-props */
       },
       resetEditorContent() {
         if (this.fileLoaded) {

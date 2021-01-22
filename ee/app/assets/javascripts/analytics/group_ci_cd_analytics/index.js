@@ -8,6 +8,6 @@ export default () => {
 
   return new Vue({
     el,
-    render: createElement => createElement(CiCdAnalyticsApp),
+    render: (createElement) => createElement(CiCdAnalyticsApp),
   });
 };

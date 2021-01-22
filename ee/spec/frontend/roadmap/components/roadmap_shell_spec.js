@@ -27,7 +27,7 @@ describe('RoadmapShell', () => {
     store = createStore();
     store.dispatch('setInitialData', {
       defaultInnerHeight,
-      childrenFlags: { '1': { itemExpanded: false } },
+      childrenFlags: { 1: { itemExpanded: false } },
     });
   };
 

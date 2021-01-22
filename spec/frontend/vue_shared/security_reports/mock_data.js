@@ -322,6 +322,23 @@ export const secretScanningDiffSuccessMock = {
   head_report_created_at: '2020-01-10T10:00:00.000Z',
 };
 
+export const securityReportDownloadPathsQueryNoArtifactsResponse = {
+  project: {
+    mergeRequest: {
+      headPipeline: {
+        id: 'gid://gitlab/Ci::Pipeline/176',
+        jobs: {
+          nodes: [],
+          __typename: 'CiJobConnection',
+        },
+        __typename: 'Pipeline',
+      },
+      __typename: 'MergeRequest',
+    },
+    __typename: 'Project',
+  },
+};
+
 export const securityReportDownloadPathsQueryResponse = {
   project: {
     mergeRequest: {
@@ -392,6 +409,33 @@ export const securityReportDownloadPathsQueryResponse = {
               },
               __typename: 'CiJob',
             },
+            {
+              name: 'all_artifacts',
+              artifacts: {
+                nodes: [
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=archive',
+                    fileType: 'ARCHIVE',
+                    __typename: 'CiJobArtifact',
+                  },
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=trace',
+                    fileType: 'TRACE',
+                    __typename: 'CiJobArtifact',
+                  },
+                  {
+                    downloadPath:
+                      '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=metadata',
+                    fileType: 'METADATA',
+                    __typename: 'CiJobArtifact',
+                  },
+                ],
+                __typename: 'CiJobArtifactConnection',
+              },
+              __typename: 'CiJob',
+            },
           ],
           __typename: 'CiJobConnection',
         },
@@ -435,3 +479,51 @@ export const expectedDownloadDropdownProps = {
   loading: false,
   artifacts: [...secretDetectionArtifacts, ...sastArtifacts],
 };
+
+/**
+ * These correspond to any jobs with zip archives in the securityReportDownloadPathsQueryResponse above.
+ */
+export const archiveArtifacts = [
+  {
+    name: 'all_artifacts Archive',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=archive',
+    reportType: 'ARCHIVE',
+  },
+];
+
+/**
+ * These correspond to any jobs with trace data in the securityReportDownloadPathsQueryResponse above.
+ */
+export const traceArtifacts = [
+  {
+    name: 'secret_detection Trace',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1399/artifacts/download?file_type=trace',
+    reportType: 'TRACE',
+  },
+  {
+    name: 'bandit-sast Trace',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1400/artifacts/download?file_type=trace',
+    reportType: 'TRACE',
+  },
+  {
+    name: 'eslint-sast Trace',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1401/artifacts/download?file_type=trace',
+    reportType: 'TRACE',
+  },
+  {
+    name: 'all_artifacts Trace',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=trace',
+    reportType: 'TRACE',
+  },
+];
+
+/**
+ * These correspond to any jobs with metadata data in the securityReportDownloadPathsQueryResponse above.
+ */
+export const metadataArtifacts = [
+  {
+    name: 'all_artifacts Metadata',
+    path: '/gitlab-org/secrets-detection-test/-/jobs/1402/artifacts/download?file_type=metadata',
+    reportType: 'METADATA',
+  },
+];

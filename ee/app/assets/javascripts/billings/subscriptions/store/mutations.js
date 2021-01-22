@@ -32,8 +32,8 @@ export default {
       tableKey = TABLE_TYPE_TRIAL;
     }
 
-    state.tables[tableKey].rows.forEach(row => {
-      row.columns.forEach(col => {
+    state.tables[tableKey].rows.forEach((row) => {
+      row.columns.forEach((col) => {
         if (Object.prototype.hasOwnProperty.call(usage, col.id)) {
           Vue.set(col, 'value', usage[col.id]);
         } else if (Object.prototype.hasOwnProperty.call(billing, col.id)) {

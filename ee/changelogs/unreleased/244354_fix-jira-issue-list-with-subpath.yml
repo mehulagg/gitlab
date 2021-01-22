@@ -1,5 +1,0 @@
----
-title: Fix Jira issue list API calls when Jira server runs relative to a context path
-merge_request: 49623
-author:
-type: fixed
