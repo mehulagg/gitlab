@@ -30,4 +30,19 @@ if (complianceFrameworksList) {
       createFlash({ message: __('An error occurred while loading a section of this page.') });
     }
   })();
-}
+};
+
+const mergeRequestApprovalSetting = document.querySelector('#merge-request-approval-setting');
+
+if (mergeRequestApprovalSetting) {
+  (async () => {
+    try {
+      const { createMergeRequestApprovalSettingApp } = await import(
+        /* webpackChunkName: 'createMergeRequestApprovalSettingApp' */ 'ee/approvals/mount_merge_request_approval_settings'
+      );
+      createMergeRequestApprovalSettingApp(mergeRequestApprovalSetting);
+    } catch {
+      createFlash({ message: __('An error occurred while loading a section of this page.') });
+    }
+  })();
+};
