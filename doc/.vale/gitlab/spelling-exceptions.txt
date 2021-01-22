@@ -201,6 +201,7 @@ http
 https
 idempotence
 idmapper
+Iglu
 inclusivity
 Ingress
 initializer
@@ -369,10 +370,12 @@ pseudonymizer
 Puma
 Python
 Qualys
+Quicktime
 Rackspace
 Raspbian
 Rdoc
 reachability
+Realplayer
 rebase
 rebased
 rebases
@@ -446,6 +449,7 @@ sharding
 shfmt
 Shibboleth
 Sidekiq
+Silverlight
 Sisense
 Sitespeed
 Slack
