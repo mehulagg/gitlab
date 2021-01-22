@@ -155,7 +155,7 @@ describe('Pipeline Url Component', () => {
     expect(findForkTag().text()).toBe('fork');
   });
 
-  it('should render the train tag when the flag is provided', () => {
+  it('should render the train badge when the flag is provided', () => {
     createComponent({
       pipeline: {
         flags: {
@@ -165,5 +165,17 @@ describe('Pipeline Url Component', () => {
     });
 
     expect(findTrainTag().text()).toContain('train');
+  });
+
+  it('should not render the train badge when the flag is not provided', () => {
+    createComponent({
+      pipeline: {
+        flags: {
+          merge_train_pipeline: false,
+        },
+      },
+    });
+
+    expect(findTrainTag().exists()).toBe(false);
   });
 });
