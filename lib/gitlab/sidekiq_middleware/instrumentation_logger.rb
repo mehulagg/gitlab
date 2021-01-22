@@ -4,6 +4,8 @@ module Gitlab
   module SidekiqMiddleware
     class InstrumentationLogger
       def call(worker, job, queue)
+        ::Gitlab::InstrumentationHelper.init_instrumentation_data
+
         yield
 
         # The Sidekiq logger is called outside the middleware block, so

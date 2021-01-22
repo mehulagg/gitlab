@@ -17,6 +17,13 @@ module Gitlab
                  *::Gitlab::Metrics::Subscribers::ActiveRecord::DB_COUNTERS]
     end
 
+    def init_instrumentation_data(ip: nil)
+      Gitlab::RequestContext.instance.client_ip = ip
+      Gitlab::RequestContext.instance.start_thread_cpu_time = Gitlab::Metrics::System.thread_cpu_time
+      Gitlab::RequestContext.instance.request_start_time = Gitlab::Metrics::System.real_time
+      Gitlab::RequestContext.instance.thread_memory_allocations = Gitlab::Memory::Instrumentation.thread_memory_allocations
+    end
+
     def add_instrumentation_data(payload)
       instrument_gitaly(payload)
       instrument_rugged(payload)
@@ -24,6 +31,8 @@ module Gitlab
       instrument_elasticsearch(payload)
       instrument_throttle(payload)
       instrument_active_record(payload)
+      instrument_cpu(payload)
+      instrument_thread_memory_allocations(payload)
     end
 
     def instrument_gitaly(payload)
@@ -68,6 +77,18 @@ module Gitlab
       db_counters = ::Gitlab::Metrics::Subscribers::ActiveRecord.db_counter_payload
 
       payload.merge!(db_counters)
+    end
+
+    def instrument_cpu(payload)
+      cpu_s = Gitlab::Metrics::System.thread_cpu_duration(::Gitlab::RequestContext.instance.start_thread_cpu_time)\
+
+      payload[:cpu_s] = cpu_s.round(2) if cpu_s
+    end
+
+    def instrument_thread_memory_allocations(payload)
+      counters = Gitlab::Memory::Instrumentation.measure_thread_memory_allocations(
+        ::Gitlab::Memory::Instrumentation.thread_memory_allocations)
+      payload.merge!(counters) if counters
     end
 
     # Returns the queuing duration for a Sidekiq job in seconds, as a float, if the
