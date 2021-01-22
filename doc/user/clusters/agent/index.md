@@ -443,7 +443,7 @@ The following example projects can help you get started with the Kubernetes Agen
 ### Deploying GitLab Runner with the Agent
 
 You can use the Kubernetes Agent to
-[deploy GitLab Runner in a Kubernetes cluster](http://docs.gitlab.com/runner/install/kubernetes.html#install-gitlab-runner-with-kubernetes-agent).
+[deploy GitLab Runner in a Kubernetes cluster](http://docs.gitlab.com/runner/install/kubernetes-agent.html).
 
 ## Management interfaces
 
