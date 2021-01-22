@@ -121,13 +121,18 @@ export default class Project {
           if (shouldVisit) {
             const selectedUrl = new URL(e.target.href);
             const loc = window.location.href;
+            let targetPathStringParam = '';
 
             if (loc.includes('/-/')) {
               const refs = this.fullData.Branches.concat(this.fullData.Tags);
               const currentRef = refs.find((ref) => loc.indexOf(ref) > -1);
               if (currentRef) {
                 const targetPath = loc.split(currentRef)[1].slice(1);
-                selectedUrl.searchParams.set('path', targetPath);
+
+                // Can't use "searchParams.set()" because ie. #L1 would become %23L1
+                // So appending the targetPath as a string
+                targetPathStringParam = `&path=${targetPath}`;
+                selectedUrl.searchParams.delete('path');
               }
             }
 
@@ -135,7 +140,7 @@ export default class Project {
             if (e.metaKey) {
               window.open(selectedUrl.href, '_blank');
             } else {
-              window.location.href = selectedUrl.href;
+              window.location.href = selectedUrl.href + targetPathStringParam;
             }
           }
         },
