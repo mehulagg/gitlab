@@ -14,7 +14,7 @@ module Types
     field :vulnerability_scanners,
           ::Types::VulnerabilityScannerType.connection_type,
           null: true,
-          description: 'Vulnerability scanners reported on the vulnerabilties from projects selected in Instance Security Dashboard',
+          description: 'Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard',
           resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
     field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,

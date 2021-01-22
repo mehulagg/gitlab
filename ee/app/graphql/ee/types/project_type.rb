@@ -24,7 +24,7 @@ module EE
         field :vulnerability_scanners,
               ::Types::VulnerabilityScannerType.connection_type,
               null: true,
-              description: 'Vulnerability scanners reported on the project vulnerabilties',
+              description: 'Vulnerability scanners reported on the project vulnerabilities',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
         field :vulnerabilities_count_by_day,
