@@ -3,13 +3,13 @@
 module Geo
   class PackageFileReplicator < Gitlab::Geo::Replicator
     include ::Geo::BlobReplicatorStrategy
+    extend ::Gitlab::Utils::Override
 
     def self.model
       ::Packages::PackageFile
     end
 
-    # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46998 for
-    # reasoning about this override.
+    override :verification_feature_flag_enabled?
     def self.verification_feature_flag_enabled?
       Feature.enabled?(:geo_package_file_verification)
     end
