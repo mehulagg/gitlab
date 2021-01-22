@@ -840,10 +840,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@gitlab/at.js@1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@gitlab/at.js/-/at.js-1.5.5.tgz#5f6bfe6baaef360daa9b038fa78798d7a6a916b4"
-  integrity sha512-282Dn3SPVsUHVDhMsXgfnv+Rzog0uxecjttxGRQvxh25es1+xvkGQFsvJfkSKJ3X1kHVkSjKf+Tt5Rra+Jhp9g==
+"@gitlab/at.js@1.5.6":
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/@gitlab/at.js/-/at.js-1.5.6.tgz#bc77ac53212de84f65e2e2040f30537426234b3d"
+  integrity sha512-ZWVDLwoKgsbIXvq2TDhcRgfn3uuZPqwNBr0RN78qb4Dm8WQtHOp5UxG6/Y+a6FSPj40MfK5gloSdmrGvtQwQXQ==
 
 "@gitlab/eslint-plugin@6.0.0":
   version "6.0.0"
