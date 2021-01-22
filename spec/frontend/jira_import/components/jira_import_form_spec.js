@@ -2,6 +2,7 @@ import {
   GlAlert,
   GlButton,
   GlDropdown,
+  GlDropdownItem,
   GlFormSelect,
   GlLabel,
   GlSearchBoxByType,
@@ -97,21 +98,7 @@ describe('JiraImportForm', () => {
       },
     });
     querySpy = jest.fn().mockResolvedValue({
-      data: {
-        project: {
-          projectMembers: {
-            nodes: [
-              {
-                user: {
-                  id: 7,
-                  name: 'Frederic Chopin',
-                  username: 'fchopin',
-                },
-              },
-            ],
-          },
-        },
-      },
+      data: { project: { projectMembers: { nodes: [] } } },
     });
   });
 
@@ -266,6 +253,24 @@ describe('JiraImportForm', () => {
   describe('member search', () => {
     describe('when searching for a member', () => {
       beforeEach(() => {
+        querySpy = jest.fn().mockResolvedValue({
+          data: {
+            project: {
+              projectMembers: {
+                nodes: [
+                  {
+                    user: {
+                      id: 7,
+                      name: 'Frederic Chopin',
+                      username: 'fchopin',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
         wrapper = mountComponent({ mountFunction: mount });
 
         wrapper.find(GlSearchBoxByType).vm.$emit('input', 'fred');
@@ -281,6 +286,13 @@ describe('JiraImportForm', () => {
         };
 
         expect(querySpy).toHaveBeenCalledWith(expect.objectContaining(queryArgument));
+      });
+
+      it('updates the user list', () => {
+        expect(getUserDropdown().findAll(GlDropdownItem)).toHaveLength(1);
+        expect(getUserDropdown().find(GlDropdownItem).text()).toContain(
+          'fchopin (Frederic Chopin)',
+        );
       });
     });
   });
