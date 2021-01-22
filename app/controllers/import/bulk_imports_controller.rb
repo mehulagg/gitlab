@@ -22,6 +22,10 @@ class Import::BulkImportsController < ApplicationController
   def status
     respond_to do |format|
       format.json do
+        pagination_headers.each do |header|
+          response.set_header(header, importable_data.headers[header])
+        end
+
         render json: { importable_data: serialized_importable_data }
       end
       format.html do
@@ -44,6 +48,10 @@ class Import::BulkImportsController < ApplicationController
 
   private
 
+  def pagination_headers
+    ['x-next-page', 'x-page', 'x-per-page', 'x-prev-page', 'x-total', 'x-total-pages']
+  end
+
   def serialized_importable_data
     serializer.represent(importable_data, {}, Import::BulkImportEntity)
   end
@@ -53,7 +61,7 @@ class Import::BulkImportsController < ApplicationController
   end
 
   def importable_data
-    client.get('groups', query_params).parsed_response
+    @importable_data ||= client.get('groups', query_params)
   end
 
   # Default query string params used to fetch groups from GitLab source instance
@@ -74,7 +82,9 @@ class Import::BulkImportsController < ApplicationController
   def client
     @client ||= BulkImports::Clients::Http.new(
       uri: session[url_key],
-      token: session[access_token_key]
+      token: session[access_token_key],
+      per_page: params[:per_page],
+      page: params[:page]
     )
   end
 
