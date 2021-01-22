@@ -28,7 +28,6 @@ import {
   graphQLImageListMock,
   graphQLImageDeleteMock,
   deletedContainerRepository,
-  graphQLImageDeleteMockError,
   graphQLEmptyImageListMock,
   graphQLEmptyGroupImageListMock,
   pageInfo,
