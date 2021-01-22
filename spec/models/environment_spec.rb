@@ -51,6 +51,39 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe ".stale_and_deleteable" do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:old_stopped_review_env) { create(:environment, :with_review_app, :stopped, created_at: 31.days.ago, project: project) }
+    let_it_be(:new_stopped_review_env) { create(:environment, :with_review_app, :stopped, project: project) }
+    let_it_be(:old_active_review_env) { create(:environment, :with_review_app, :available, created_at: 31.days.ago, project: project) }
+    let_it_be(:old_stopped_other_env) { create(:environment, :stopped, created_at: 31.days.ago, project: project) }
+    let_it_be(:new_stopped_other_env) { create(:environment, :stopped, project: project) }
+    let_it_be(:old_active_other_env) { create(:environment, :available, created_at: 31.days.ago, project: project) }
+
+    let(:before) { 30.days.ago }
+    let(:limit) { 1000 }
+
+    subject { project.environments.stale_and_deleteable(before, limit) }
+
+    it { is_expected.to include(old_stopped_review_env) }
+    it { is_expected.not_to include(new_stopped_review_env) }
+    it { is_expected.not_to include(old_active_review_env) }
+    it { is_expected.not_to include(old_stopped_other_env) }
+    it { is_expected.not_to include(new_stopped_other_env) }
+    it { is_expected.not_to include(old_active_other_env) }
+
+    context "current timestamp" do
+      let(:before) { Time.now }
+
+      it { is_expected.to include(old_stopped_review_env) }
+      it { is_expected.to include(new_stopped_review_env) }
+      it { is_expected.not_to include(old_active_review_env) }
+      it { is_expected.not_to include(old_stopped_other_env) }
+      it { is_expected.not_to include(new_stopped_other_env) }
+      it { is_expected.not_to include(old_active_other_env) }
+    end
+  end
+
   describe 'state machine' do
     it 'invalidates the cache after a change' do
       expect(environment).to receive(:expire_etag_cache)
