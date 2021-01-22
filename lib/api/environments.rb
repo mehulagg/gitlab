@@ -81,7 +81,7 @@ module API
       end
       params do
         optional :before, type: Time, desc: "The timestamp before which environments can be deleted. Defaults to 30 days ago.", default: -> { 30.days.ago }
-        optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100
+        optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100, values: 1..1000
         optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to true.", default: true
       end
       delete ":id/environments/stale" do
