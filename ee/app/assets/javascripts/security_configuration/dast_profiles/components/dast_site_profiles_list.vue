@@ -138,14 +138,9 @@ export default {
     </template>
     <template #cell(validationStatus)="{ value }">
       <template v-if="shouldShowValidationStatus(value)">
-        <gl-icon
-          v-gl-tooltip
-          :title="$options.statuses[value].tooltipText"
-          :size="12"
-          :name="$options.statuses[value].icon"
-          :class="$options.statuses[value].cssClass"
-          class="gl-mr-3"
-        /><span>{{ $options.statuses[value].label }}</span>
+        <gl-icon v-gl-tooltip v-bind="$options.statuses[value]" :size="12" class="gl-mr-3" /><span
+          >{{ $options.statuses[value].labelText }}</span
+        >
       </template>
     </template>
 
