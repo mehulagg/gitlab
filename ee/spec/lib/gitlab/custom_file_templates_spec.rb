@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+
 RSpec.describe Gitlab::CustomFileTemplates do
   using RSpec::Parameterized::TableSyntax
 
@@ -179,6 +180,26 @@ RSpec.describe Gitlab::CustomFileTemplates do
 
           it 'returns nil for an unknown key' do
             expect(templates.find('unknown')).to be_nil
+          end
+        end
+
+        context 'when looking for template for a specific project' do
+          let(:target_project) { project }
+          let_it_be(:another_project) { create(:project, :custom_repo, namespace: group, files: template_files('group')) }
+
+
+          it 'finds a valid template when looking into group template project' do
+            templates_find = templates.find(group_key, group_template_project.id)
+            expect(templates_find).to be_template(group_key, "Group #{group.full_name}")
+          end
+
+          it 'finds a valid template when looking into instance template project' do
+            templates_find = templates.find(instance_key, instance_template_project.id)
+            expect(templates_find).to be_template(instance_key, "Instance")
+          end
+
+          it 'does not find a template when given project does not have the template' do
+            expect(templates.find(group_key, another_project.id)).to be_nil
           end
         end
       end

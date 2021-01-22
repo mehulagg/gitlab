@@ -30,7 +30,7 @@ RSpec.describe "Custom file template classes" do
     'LICENSE/category/baz.txt'    => 'CustomLicenseTemplate category baz'
   }
 
-  let(:project) { create(:project, :custom_repo, files: files) }
+  let_it_be(:project) { create(:project, :custom_repo, files: files) }
 
   [
     ::Gitlab::Template::CustomDockerfileTemplate,

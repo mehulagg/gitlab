@@ -8,6 +8,7 @@ module Gitlab
       def initialize(path, project = nil, category: nil)
         @path = path
         @category = category
+        @project = project
         @finder = self.class.finder(project)
       end
 
@@ -29,6 +30,22 @@ module Gitlab
 
       def description
         # override with a comment to be placed at the top of the blob.
+      end
+
+      def project_id
+        @project&.id
+      end
+
+      def project_path
+        @project&.path
+      end
+
+      def namespace_id
+        @project&.namespace&.id
+      end
+
+      def namespace_path
+        @project&.namespace&.full_path
       end
 
       # Present for compatibility with license templates, which can replace text
@@ -76,7 +93,7 @@ module Gitlab
         end
 
         # Defines which strategy will be used to get templates files
-        # RepoTemplateFinder - Finds templates on project repository, templates are filtered perproject
+        # RepoTemplateFinder - Finds templates on project repository, templates are filtered per project
         # GlobalTemplateFinder - Finds templates on gitlab installation source, templates can be used in all projects
         def finder(project = nil)
           raise NotImplementedError

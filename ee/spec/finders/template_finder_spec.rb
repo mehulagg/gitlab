@@ -33,7 +33,7 @@ RSpec.describe TemplateFinder do
 
         allow(fake_template_source)
           .to receive(:find)
-          .with(custom_template.key)
+          .with(custom_template.key, nil)
           .and_return(custom_template)
 
         allow(fake_template_source)

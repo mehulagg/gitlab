@@ -28,7 +28,7 @@ module EE
       return super if custom_templates.nil? || !custom_templates.enabled?
 
       if params[:name]
-        custom_templates.find(params[:name]) || super
+        custom_templates.find(params[:name], params[:source_template_project_id]) || super
       else
         custom_templates.all + super
       end
