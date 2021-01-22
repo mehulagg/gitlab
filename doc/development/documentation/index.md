@@ -5,6 +5,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 description: Learn how to contribute to GitLab Documentation.
 ---
 
+test!
+
 # GitLab Documentation guidelines
 
 The GitLab documentation is [intended as the single source of truth (SSOT)](https://about.gitlab.com/handbook/documentation/) for information about how to configure, use, and troubleshoot GitLab. The documentation contains use cases and usage instructions for every GitLab feature, organized by product area and subject. This includes topics and workflows that span multiple GitLab features, and the use of GitLab with other applications.
