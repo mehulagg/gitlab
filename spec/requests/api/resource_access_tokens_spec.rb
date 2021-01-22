@@ -66,7 +66,7 @@ RSpec.describe API::ResourceAccessTokens do
         context "when trying to get the tokens of a different project" do
           let_it_be(:project_id) { other_project.id }
 
-          it "returns a 404" do
+          it "returns 404" do
             get_tokens
 
             expect(response).to have_gitlab_http_status(:not_found)
@@ -94,7 +94,7 @@ RSpec.describe API::ResourceAccessTokens do
           project.add_maintainer(project_bot)
         end
 
-        it "returns 401 Unauthorized" do
+        it "returns 401" do
           get_tokens
 
           expect(response).to have_gitlab_http_status(:unauthorized)

@@ -16,6 +16,10 @@ module API
       def find_token(token_id)
         PersonalAccessToken.find(token_id) || not_found!
       end
+
+      def has_permission_to_read?(resource)
+        can?(current_user, :admin_resource_access_tokens, resource)
+      end
     end
 
     %w[group project].each do |source_type|
@@ -28,8 +32,11 @@ module API
         end
         get ":id/access_tokens" do
           resource = find_source(source_type, params[:id])
+
+          return unauthorized! unless has_permission_to_read?(resource)
+
           bot_users = resource&.bots
-          tokens = PersonalAccessTokensFinder.new({ user: bot_users, impersonation: false }.merge(state: 'active')).execute
+          tokens = PersonalAccessTokensFinder.new({ user: bot_users, impersonation: false }).execute
 
           present paginate(tokens), with: Entities::PersonalAccessToken
         end
