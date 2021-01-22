@@ -8,6 +8,7 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import CiLint from './components/lint/ci_lint.vue';
 import CommitForm from './components/commit/commit_form.vue';
+import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
 import EditorTab from './components/ui/editor_tab.vue';
 import TextEditor from './components/text_editor.vue';
 import ValidationSegment from './components/info/validation_segment.vue';
@@ -30,6 +31,7 @@ export default {
   components: {
     CiLint,
     CommitForm,
+    ConfirmUnsavedChangesDialog,
     EditorTab,
     GlAlert,
     GlLoadingIcon,
@@ -73,6 +75,7 @@ export default {
       failureType: null,
       showFailureAlert: false,
       failureReasons: [],
+      hasUnsavedChanges: false,
       successType: null,
       showSuccessAlert: false,
     };
@@ -113,6 +116,7 @@ export default {
         const { ciConfig } = data || {};
         const stageNodes = ciConfig?.stages?.nodes || [];
         const stages = unwrapStagesWithNeeds(stageNodes);
+        this.hasUnsavedChanges = this.contentModel !== this.content;
 
         return { ...ciConfig, stages };
       },
@@ -209,6 +213,7 @@ export default {
     },
     reportFailure(type, reasons = []) {
       this.showFailureAlert = true;
+      this.hasUnsavedChanges = true;
       this.failureType = type;
       this.failureReasons = reasons;
     },
@@ -217,6 +222,7 @@ export default {
     },
     reportSuccess(type) {
       this.showSuccessAlert = true;
+      this.hasUnsavedChanges = false;
       this.successType = type;
     },
 
@@ -342,5 +348,6 @@ export default {
         @submit="onCommitSubmit"
       />
     </div>
+    <confirm-unsaved-changes-dialog :hasUnsavedChanges="hasUnsavedChanges" />
   </div>
 </template>
