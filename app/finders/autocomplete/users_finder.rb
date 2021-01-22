@@ -38,7 +38,9 @@ module Autocomplete
         end
       end
 
-      items.uniq
+      items.uniq.tap do |unique_items|
+        preload_status(unique_items)
+      end
     end
 
     private
@@ -90,6 +92,10 @@ module Autocomplete
       else
         User.none
       end
+    end
+
+    def preload_status(items)
+      ActiveRecord::Associations::Preloader.new.preload(items, :status)
     end
   end
 end
