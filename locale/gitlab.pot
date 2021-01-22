@@ -4490,6 +4490,9 @@ msgstr ""
 msgid "BillingPlans|billed annually at %{price_per_year}"
 msgstr ""
 
+msgid "BillingPlans|for the remainder of your subscription"
+msgstr ""
+
 msgid "BillingPlans|frequently asked questions"
 msgstr ""
 
@@ -4503,6 +4506,9 @@ msgid "BillingPlan|Contact sales"
 msgstr ""
 
 msgid "BillingPlan|Upgrade"
+msgstr ""
+
+msgid "BillingPlan|Upgrade for free"
 msgstr ""
 
 msgid "Billing|An email address is only visible for users with public emails."
@@ -12771,6 +12777,9 @@ msgid "Free Trial"
 msgstr ""
 
 msgid "Free Trial of GitLab.com Gold"
+msgstr ""
+
+msgid "Free upgrade!"
 msgstr ""
 
 msgid "Freeze end"
@@ -30591,6 +30600,9 @@ msgid "Updates"
 msgstr ""
 
 msgid "Updating"
+msgstr ""
+
+msgid "Upgrade offers available!"
 msgstr ""
 
 msgid "Upgrade your plan"

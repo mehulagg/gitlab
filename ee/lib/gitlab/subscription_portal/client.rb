@@ -45,6 +45,25 @@ module Gitlab
           end
         end
 
+        def eligible_for_upgrade_offer(namespace_id)
+          query = <<~GQL
+            {
+              subscription(namespaceId: "#{namespace_id}") {
+                eoaStarterBronzeEligible
+              }
+            }
+          GQL
+
+          response = http_post("graphql", admin_headers, { query: query })
+
+          if response['errors'].blank?
+            response = response.dig(:data, 'data', 'subscription')
+            { success: true, eligible_for_free_upgrade: response['eoaStarterBronzeEligible'] }
+          else
+            { success: false, errors: response['errors'] }
+          end
+        end
+
         private
 
         def http_get(path, headers)

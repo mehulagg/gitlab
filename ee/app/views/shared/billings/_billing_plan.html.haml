@@ -1,21 +1,19 @@
 - purchase_link = plan.purchase_link
 - plan_name = plan.name
 - show_deprecated_plan = ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
+- has_upgrade = has_upgrade?(plan_upgrade_offer)
 - if show_deprecated_plan
   - plan_name      += ' (Legacy)'
   - faq_link_url   = 'https://about.gitlab.com/gitlab-com/#faq'
   - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
-- is_upgrade_offer_free = !plan.free && plan.upgrade_price_per_month == 0.0
-- is_upgrade_offer_special = false
-- card_has_badge = is_upgrade_offer_free || is_upgrade_offer_special
-- show_upgrade_button = !is_upgrade_offer_special && purchase_link.action == 'upgrade'
-- show_contact_sales_button = experiment_enabled?(:contact_sales_btn_in_app) && purchase_link.action == 'upgrade' && !is_upgrade_offer_free
+- card_has_badge = has_upgrade?(plan_upgrade_offer)
 
-.card-wrapper{ class: ("card-wrapper-has-badge" if card_has_badge) }
-  - if card_has_badge
+.card-wrapper{ class: ("card-wrapper-has-badge" if has_upgrade) }
+  - if has_upgrade
     .card-badge
       %span.card-badge-text
-        - if is_upgrade_offer_free
+        - case plan_upgrade_offer
+        - when :upgrade_for_free
           = _("Free upgrade!")
         - else
           = _("Upgrade offers available!")
@@ -33,12 +31,13 @@
       - else
         .price-description
           .gl-mr-2.gl-display-flex.gl-align-items-center
-            - if is_upgrade_offer_free
+            - case plan_upgrade_offer
+            - when :upgrade_for_free
               %span.gl-mr-3.price-rebate
                 = number_to_plan_currency(plan.price_per_month)
               %span
                 = number_to_plan_currency(plan.upgrade_price_per_month)
-            - elsif is_upgrade_offer_special
+            - when :upgrade_for_offer
               %span.price-cut
                 = number_to_plan_currency(plan.price_per_month)
             - else
@@ -49,7 +48,8 @@
             %li= s_("BillingPlans|per user")
             %li= s_("BillingPlans|monthly")
         .price-conclusion{ class: ("invisible" unless plan.price_per_year > 0) }
-          - if is_upgrade_offer_free
+          - case plan_upgrade_offer
+          - when :upgrade_for_free
             = s_("BillingPlans|for the remainder of your subscription")
           - else
             - price_per_year = number_to_plan_currency(plan.price_per_year)
@@ -70,7 +70,9 @@
     .card-footer
       - cta_class = '-new' if use_new_purchase_flow?(namespace)
       - upgrade_button_classes = upgrade_button_css_classes(namespace, plan, is_current)
-      - upgrade_button_text = is_upgrade_offer_free ? s_('BillingPlan|Upgrade for free') : s_('BillingPlan|Upgrade')
+      - upgrade_button_text = plan_upgrade_offer === :upgrade_for_free ? s_('BillingPlan|Upgrade for free') : s_('BillingPlan|Upgrade')
+      - show_upgrade_button = show_upgrade_button?(purchase_link.action, plan_upgrade_offer)
+      - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_upgrade_offer)
       .gl-min-h-7.gl-display-flex.gl-flex-wrap.gl-justify-content-end
         - if show_contact_sales_button
           = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: [("btn gl-button"), (show_upgrade_button ? "btn-success-secondary" : "btn-success")], data: { **experiment_tracking_data_for_button_click('contact_sales') }

@@ -9,6 +9,37 @@ module BillingPlansHelper
     number_to_currency(value, unit: '$', strip_insignificant_zeros: true, format: "%u%n")
   end
 
+  def eligible_for_free_upgrade?(namespace)
+    return false unless namespace.actual_plan_name === Plan::BRONZE
+
+    result = PlanUpgradeOfferService
+        .new(namespace_id: namespace.id)
+        .execute
+    result[:eligible_for_free_upgrade]
+  end
+
+  def plan_upgrade_offer(upgrade_offer, plan)
+    return :no_offer unless plan&.offer_from_previous_tier
+
+    upgrade_offer ? :upgrade_for_free : :upgrade_for_offer
+  end
+
+  def has_upgrade?(upgrade_offer)
+    upgrade_offer == :upgrade_for_free || upgrade_offer == :upgrade_for_offer
+  end
+
+  def show_contact_sales_button?(purchase_link_action, upgrade_offer)
+    return false unless purchase_link_action == 'upgrade'
+
+    upgrade_offer == :upgrade_for_offer ||
+      (experiment_enabled?(:contact_sales_btn_in_app) && upgrade_offer == :no_offer)
+  end
+
+  def show_upgrade_button?(purchase_link_action, upgrade_offer)
+    purchase_link_action == 'upgrade' &&
+      (upgrade_offer == :no_offer || upgrade_offer == :upgrade_for_free)
+  end
+
   def subscription_plan_data_attributes(namespace, plan)
     return {} unless namespace
 

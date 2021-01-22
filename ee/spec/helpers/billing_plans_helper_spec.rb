@@ -126,16 +126,91 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
+  describe '#eligible_for_free_upgrade' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:actual_plan_name, :eligible, :result) do
+      Plan::BRONZE | true  | true
+      Plan::BRONZE | false | false
+      Plan::SILVER | true  | false
+    end
+
+    with_them do
+      let(:namespace) { Hashie::Mash.new(actual_plan_name: actual_plan_name) }
+
+      before do
+        allow_next_instance_of(PlanUpgradeOfferService) do |instance|
+          allow(instance).to receive(:execute).and_return(Hashie::Mash.new(eligible_for_free_upgrade: eligible ))
+        end
+      end
+
+      subject { helper.eligible_for_free_upgrade?(namespace) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#plan_upgrade_offer' do
+    using RSpec::Parameterized::TableSyntax
+
+    context 'when plan has no valid property' do
+      let(:plan) do
+        Hashie::Mash.new
+      end
+
+      subject { helper.plan_upgrade_offer(true, plan) }
+
+      it { is_expected.to eq(:no_offer) }
+    end
+
+    context 'when plan has a valid property' do
+      where(:upgrade_offer, :offer_from_previous_tier, :result) do
+        true  | true  | :upgrade_for_free
+        true  | false | :no_offer
+        false | true  | :upgrade_for_offer
+        false | false | :no_offer
+      end
+
+      with_them do
+        let(:plan) do
+          Hashie::Mash.new(offer_from_previous_tier: offer_from_previous_tier)
+        end
+
+        subject { helper.plan_upgrade_offer(upgrade_offer, plan) }
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
+
+  describe '#has_upgrade?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:upgrade_offer, :result) do
+      :no_offer          | false
+      :upgrade_for_free  | true
+      :upgrade_for_offer | true
+    end
+
+    with_them do
+      subject { helper.has_upgrade?(upgrade_offer) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
   describe '#show_contact_sales_button?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:experiment_enabled, :link_action, :result) do
-      true | 'downgrade' | false
-      true | 'current' | false
-      true | 'upgrade' | true
-      false | 'downgrade' | false
-      false | 'current' | false
-      false | 'upgrade' | false
+    where(:experiment_enabled, :link_action, :upgrade_offer, :result) do
+      true  | 'upgrade'     | :no_offer           | true
+      true  | 'upgrade'     | :upgrade_for_offer  | true
+      true  | 'no_upgrade'  | :no_offer           | false
+      true  | 'no_upgrade'  | :upgrade_for_offer  | false
+      false | 'upgrade'     | :no_offer           | false
+      false | 'upgrade'     | :upgrade_for_offer  | true
+      false | 'no_upgrade'  | :no_offer           | false
+      false | 'no_upgrade'  | :upgrade_for_offer  | false
     end
 
     with_them do
@@ -143,7 +218,26 @@ RSpec.describe BillingPlansHelper do
         allow(helper).to receive(:experiment_enabled?).with(:contact_sales_btn_in_app).and_return(experiment_enabled)
       end
 
-      subject { helper.show_contact_sales_button?(link_action) }
+      subject { helper.show_contact_sales_button?(link_action, upgrade_offer) }
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#show_upgrade_button?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:link_action, :upgrade_offer, :result) do
+      'upgrade'     | :no_offer          | true
+      'upgrade'     | :upgrade_for_free  | true
+      'upgrade'     | :upgrade_for_offer | false
+      'no_upgrade'  | :no_offer          | false
+      'no_upgrade'  | :upgrade_for_free  | false
+      'no_upgrade'  | :upgrade_for_offer | false
+    end
+
+    with_them do
+      subject { helper.show_upgrade_button?(link_action, upgrade_offer) }
 
       it { is_expected.to eq(result) }
     end
