@@ -58,7 +58,7 @@ export default {
     initialAssignees: {
       type: Array,
       required: false,
-      default: () => [],
+      default: null,
     },
   },
   data() {
@@ -103,7 +103,7 @@ export default {
   },
   computed: {
     assignees() {
-      return this.issuable.assignees.nodes;
+      return this.issuable?.assignees?.nodes || this.initialAssignees || [];
     },
     participants() {
       return this.isSearchEmpty ? this.issuable?.participants?.nodes : this.searchUsers;
@@ -187,7 +187,10 @@ export default {
 </script>
 
 <template>
-  <div v-if="this.$apollo.queries.issuable.loading" class="gl-display-flex gl-align-items-center">
+  <div
+    v-if="!initialAssignees && this.$apollo.queries.issuable.loading"
+    class="gl-display-flex gl-align-items-center"
+  >
     {{ __('Assignee') }}
     <gl-loading-icon size="sm" class="gl-ml-2" />
   </div>
