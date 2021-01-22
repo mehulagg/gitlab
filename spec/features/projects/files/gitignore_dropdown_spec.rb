@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Projects > Files > User wants to add a .gitignore file', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299405' do
+RSpec.describe 'Projects > Files > User wants to add a .gitignore file', :js do
+  include Spec::Support::Helpers::Features::EditorLiteSpecHelpers
+
   before do
     project = create(:project, :repository)
     sign_in project.owner
@@ -24,7 +26,7 @@ RSpec.describe 'Projects > Files > User wants to add a .gitignore file', quarant
     wait_for_requests
 
     expect(page).to have_css('.gitignore-selector .dropdown-toggle-text', text: 'Apply a template')
-    expect(page).to have_content('/.bundle')
-    expect(page).to have_content('config/initializers/secret_token.rb')
+    expect(editor_get_value).to have_content('/.bundle')
+    expect(editor_get_value).to have_content('config/initializers/secret_token.rb')
   end
 end
