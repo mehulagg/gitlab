@@ -9,6 +9,7 @@ class DeploymentsFinder
   ALLOWED_SORT_DIRECTIONS = %w[asc desc].freeze
   DEFAULT_SORT_DIRECTION = 'asc'
 
+  # TODO: Extend this class for group-level
   def initialize(project, params = {})
     @project = project
     @params = params
@@ -17,6 +18,7 @@ class DeploymentsFinder
   def execute
     items = init_collection
     items = by_updated_at(items)
+    items = by_finished_at(items)
     items = by_environment(items)
     items = by_status(items)
     sort(items)
@@ -26,24 +28,28 @@ class DeploymentsFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def init_collection
-    project
-      .deployments
-      .includes(
-        :user,
-        environment: [],
-        deployable: {
-          job_artifacts: [],
-          pipeline: {
+    items = project.deployments
+
+    if parms[:preload] || !parms.has_key?(:preload)
+      items.includes(
+          :user,
+          environment: [],
+          deployable: {
+            job_artifacts: [],
+            pipeline: {
+              project: {
+                route: [],
+                namespace: :route
+              }
+            },
             project: {
-              route: [],
               namespace: :route
             }
-          },
-          project: {
-            namespace: :route
           }
-        }
-      )
+        )
+    else
+      items
+    end
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -56,6 +62,13 @@ class DeploymentsFinder
   def by_updated_at(items)
     items = items.updated_before(params[:updated_before]) if params[:updated_before].present?
     items = items.updated_after(params[:updated_after]) if params[:updated_after].present?
+
+    items
+  end
+
+  def by_finished_at(items)
+    items = items.finished_before(params[:finished_before]) if params[:finished_before].present?
+    items = items.finished_after(params[:finished_after]) if params[:finished_after].present?
 
     items
   end
