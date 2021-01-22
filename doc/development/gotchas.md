@@ -331,7 +331,7 @@ Class Foo
 end
 ```
 
-2. Using `attr_reader` under `private` to access the attributes:
+1. Using `attr_reader` under `private` to access the attributes:
 
 ```ruby
 Class Foo
@@ -353,7 +353,7 @@ Class Foo
 end
 ```
 
-3. Using the attribute, `@foo`, itself:
+1. Using the attribute, `@foo`, itself:
 
 ```ruby
 Class Foo
