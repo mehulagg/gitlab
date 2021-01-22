@@ -377,8 +377,8 @@ class GeoNodeStatus < ApplicationRecord
   def self.add_attr_in_percentage_for_replicable_classes
     Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
       replicable = replicator.replicable_name_plural
-      attr_in_percentage "#{replicable}_checksummed",  "#{replicable}_checksummed_count",  "#{replicable}_count"
       attr_in_percentage "#{replicable}_synced",       "#{replicable}_synced_count",       "#{replicable}_registry_count"
+      attr_in_percentage "#{replicable}_verified",     "#{replicable}_verified_count",     "#{replicable}_registry_count"
     end
   end
 
@@ -402,8 +402,8 @@ class GeoNodeStatus < ApplicationRecord
     public_send("#{replicator_class.replicable_name_plural}_synced_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
   end
 
-  def checksummed_in_percentage_for(replicator_class)
-    public_send("#{replicator_class.replicable_name_plural}_checksummed_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
+  def verified_in_percentage_for(replicator_class)
+    public_send("#{replicator_class.replicable_name_plural}_verified_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
   end
 
   def storage_shards_match?

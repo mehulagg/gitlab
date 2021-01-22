@@ -1200,86 +1200,159 @@ RSpec.describe GeoNodeStatus, :geo do
       end
 
       context 'verification' do
-        let(:checksummed_count_method) { "#{replicable_name}_checksummed_count" }
-        let(:checksum_failed_count_method) { "#{replicable_name}_checksum_failed_count" }
-        let(:checksummed_in_percentage_method) { "#{replicable_name}_checksummed_in_percentage" }
+        context 'on the primary' do
+          let(:checksummed_count_method) { "#{replicable_name}_checksummed_count" }
+          let(:checksum_failed_count_method) { "#{replicable_name}_checksum_failed_count" }
 
-        context 'when verification is enabled' do
           before do
-            skip "#{replicator.model} does not include the VerificationState concern yet" unless replicator.model.respond_to?(:verification_state)
-
             stub_current_geo_node(primary)
-            allow(replicator).to receive(:verification_enabled?).and_return(true)
           end
 
-          context 'when there are replicables' do
+          context 'when verification is enabled' do
             before do
-              create(model_factory, :verification_succeeded)
-              create(model_factory, :verification_succeeded)
-              create(model_factory, :verification_failed)
+              skip "#{replicator.model} does not include the VerificationState concern yet" unless replicator.model.respond_to?(:verification_state)
+
+              allow(replicator).to receive(:verification_enabled?).and_return(true)
             end
 
-            describe '#<replicable_name>_checksummed_count' do
-              it 'returns the right number of checksummed replicables' do
-                expect(subject.send(checksummed_count_method)).to eq(2)
+            context 'when there are replicables' do
+              before do
+                create(model_factory, :verification_succeeded)
+                create(model_factory, :verification_succeeded)
+                create(model_factory, :verification_failed)
+              end
+
+              describe '#<replicable_name>_checksummed_count' do
+                it 'returns the right number of checksummed replicables' do
+                  expect(subject.send(checksummed_count_method)).to eq(2)
+                end
+              end
+
+              describe '#<replicable_name>_checksum_failed_count' do
+                it 'returns the right number of failed replicables' do
+                  expect(subject.send(checksum_failed_count_method)).to eq(1)
+                end
               end
             end
 
-            describe '#<replicable_name>_checksum_failed_count' do
-              it 'returns the right number of failed replicables' do
-                expect(subject.send(checksum_failed_count_method)).to eq(1)
+            context 'when there are no replicables' do
+              describe '#<replicable_name>_checksummed_count' do
+                it 'returns 0' do
+                  expect(subject.send(checksummed_count_method)).to eq(0)
+                end
               end
-            end
 
-            describe '#<replicable_name>_checksummed_in_percentage' do
-              it 'returns the right percentage' do
-                expect(subject.send(checksummed_in_percentage_method)).to be_within(0.01).of(66.67)
+              describe '#<replicable_name>_checksum_failed_count' do
+                it 'returns 0' do
+                  expect(subject.send(checksum_failed_count_method)).to eq(0)
+                end
               end
             end
           end
 
-          context 'when there are no replicables' do
+          context 'when verification is disabled' do
+            before do
+              allow(replicator).to receive(:verification_enabled?).and_return(false)
+            end
+
             describe '#<replicable_name>_checksummed_count' do
-              it 'returns 0' do
-                expect(subject.send(checksummed_count_method)).to eq(0)
+              it 'returns nil' do
+                expect(subject.send(checksummed_count_method)).to be_nil
               end
             end
 
             describe '#<replicable_name>_checksum_failed_count' do
-              it 'returns 0' do
-                expect(subject.send(checksum_failed_count_method)).to eq(0)
-              end
-            end
-
-            describe '#<replicable_name>_checksummed_in_percentage' do
-              it 'returns 0' do
-                expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+              it 'returns nil' do
+                expect(subject.send(checksum_failed_count_method)).to be_nil
               end
             end
           end
         end
 
-        context 'when verification is disabled' do
+        context 'on the secondary' do
+          let(:verified_count_method) { "#{replicable_name}_verified_count" }
+          let(:verification_failed_count_method) { "#{replicable_name}_verification_failed_count" }
+          let(:verified_in_percentage_method) { "#{replicable_name}_verified_in_percentage" }
+
           before do
-            stub_current_geo_node(primary)
-            allow(replicator).to receive(:verification_enabled?).and_return(false)
+            stub_current_geo_node(secondary)
           end
 
-          describe '#<replicable_name>_checksummed_count' do
-            it 'returns nil' do
-              expect(subject.send(checksummed_count_method)).to be_nil
+          context 'when verification is enabled' do
+            before do
+              skip "#{replicator.registry_class} does not include the VerificationState concern yet" unless replicator.registry_class.respond_to?(:verification_state)
+
+              allow(replicator).to receive(:verification_enabled?).and_return(true)
+            end
+
+            context 'when there are replicables' do
+              before do
+                create(model_factory, :verification_succeeded)
+                create(model_factory, :verification_succeeded)
+                create(model_factory, :verification_failed)
+              end
+
+              describe '#<replicable_name>_verified_count' do
+                it 'returns the right number of checksummed replicables' do
+                  expect(subject.send(verified_count_method)).to eq(2)
+                end
+              end
+
+              describe '#<replicable_name>_verification_failed_count' do
+                it 'returns the right number of failed replicables' do
+                  expect(subject.send(verification_failed_count_method)).to eq(1)
+                end
+              end
+
+              describe '#<replicable_name>_verified_in_percentage' do
+                it 'returns the right percentage' do
+                  expect(subject.send(verified_in_percentage_method)).to be_within(0.01).of(66.67)
+                end
+              end
+            end
+
+            context 'when there are no replicables' do
+              describe '#<replicable_name>_verified_count' do
+                it 'returns 0' do
+                  expect(subject.send(verified_count_method)).to eq(0)
+                end
+              end
+
+              describe '#<replicable_name>_verification_failed_count' do
+                it 'returns 0' do
+                  expect(subject.send(verification_failed_count_method)).to eq(0)
+                end
+              end
+
+              describe '#<replicable_name>_verified_in_percentage' do
+                it 'returns 0' do
+                  expect(subject.send(verified_in_percentage_method)).to eq(0)
+                end
+              end
             end
           end
 
-          describe '#<replicable_name>_checksum_failed_count' do
-            it 'returns nil' do
-              expect(subject.send(checksum_failed_count_method)).to be_nil
+          context 'when verification is disabled' do
+            before do
+              allow(replicator).to receive(:verification_enabled?).and_return(false)
             end
-          end
 
-          describe '#<replicable_name>_checksummed_in_percentage' do
-            it 'returns 0' do
-              expect(subject.send(checksummed_in_percentage_method)).to eq(0)
+            describe '#<replicable_name>_verified_count' do
+              it 'returns nil' do
+                expect(subject.send(verified_count_method)).to be_nil
+              end
+            end
+
+            describe '#<replicable_name>_verification_failed_count' do
+              it 'returns nil' do
+                expect(subject.send(verification_failed_count_method)).to be_nil
+              end
+            end
+
+            describe '#<replicable_name>_verified_in_percentage' do
+              it 'returns 0' do
+                expect(subject.send(verified_in_percentage_method)).to eq(0)
+              end
             end
           end
         end
