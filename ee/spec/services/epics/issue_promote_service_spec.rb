@@ -65,7 +65,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             subject.execute(issue)
 
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  standard_context: kind_of(Gitlab::Tracking::StandardContext))
+                                  standard_context: { namespace: group, project: project })
           end
 
           it 'creates a new epic with correct attributes' do
@@ -201,7 +201,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
             expect(epic.notes.where(discussion_id: discussion.discussion_id).count).to eq(0)
             expect(issue.notes.where(discussion_id: discussion.discussion_id).count).to eq(1)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  standard_context: kind_of(Gitlab::Tracking::StandardContext))
+                                  standard_context: { namespace: group, project: project })
           end
 
           it 'copies note attachments' do
@@ -211,7 +211,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
 
             expect(epic.notes.user.first.attachment).to be_kind_of(AttachmentUploader)
             expect_snowplow_event(category: 'epics', action: 'promote', property: 'issue_id', value: issue.id,
-                                  standard_context: kind_of(Gitlab::Tracking::StandardContext))
+                                  standard_context: { namespace: group, project: project })
           end
         end
 
