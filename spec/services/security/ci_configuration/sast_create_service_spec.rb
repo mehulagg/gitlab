@@ -21,6 +21,8 @@ RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
 
         expect_no_snowplow_event
       end
+
+      it_behaves_like 'does not record an onboarding progress action'
     end
 
     context 'user belongs to project' do
@@ -36,6 +38,10 @@ RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
           action: 'create',
           label: 'false'
         )
+      end
+
+      it_behaves_like 'records an onboarding progress action', :security_scan_enabled do
+        let(:namespace) { project.namespace }
       end
 
       it 'raises exception if the user does not have permission to create a new branch' do

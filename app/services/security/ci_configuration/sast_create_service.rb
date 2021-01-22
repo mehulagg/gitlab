@@ -17,6 +17,7 @@ module Security
         if result[:status] == :success
           result[:success_path] = successful_change_path
           track_event(attributes_for_commit)
+          record_onboarding_progress
         else
           result[:errors] = result[:message]
         end
@@ -60,6 +61,10 @@ module Security
         Gitlab::Tracking.event(
           self.class.to_s, action[:action], label: action[:default_values_overwritten].to_s
         )
+      end
+
+      def record_onboarding_progress
+        OnboardingProgressService.new(@project.namespace).execute(action: :security_scan_enabled)
       end
     end
   end
