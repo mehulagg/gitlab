@@ -2,7 +2,6 @@
 import { __ } from '~/locale';
 
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
-// import IssuableEventHub from '~/issuable_show/event_hub';
 
 export default {
   name: 'JiraIssueShow',
@@ -20,6 +19,7 @@ export default {
           name: 'Tom Quirk',
         },
         createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
         state: 'opened',
       },
     };
