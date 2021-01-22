@@ -28,13 +28,35 @@ describe('Vuex members mutations', () => {
     });
 
     describe(types.RECEIVE_MEMBER_ROLE_ERROR, () => {
-      it('shows error message', () => {
-        mutations[types.RECEIVE_MEMBER_ROLE_ERROR](state);
+      describe('when error does not have a message', () => {
+        it('shows default error message', () => {
+          mutations[types.RECEIVE_MEMBER_ROLE_ERROR](state, {
+            error: new Error('Network Error'),
+          });
 
-        expect(state.showError).toBe(true);
-        expect(state.errorMessage).toBe(
-          "An error occurred while updating the member's role, please try again.",
-        );
+          expect(state.showError).toBe(true);
+          expect(state.errorMessage).toBe(
+            "An error occurred while updating the member's role, please try again.",
+          );
+        });
+      });
+
+      describe('when error has a message', () => {
+        it('shows error message', () => {
+          const error = new Error('Request failed with status code 422');
+          error.response = {
+            data: {
+              message:
+                'User email "john.smith@gmail.com" does not match the allowed domain of example.com',
+            },
+          };
+          mutations[types.RECEIVE_MEMBER_ROLE_ERROR](state, { error });
+
+          expect(state.showError).toBe(true);
+          expect(state.errorMessage).toBe(
+            'User email "john.smith@gmail.com" does not match the allowed domain of example.com',
+          );
+        });
       });
     });
 
@@ -52,13 +74,35 @@ describe('Vuex members mutations', () => {
     });
 
     describe(types.RECEIVE_MEMBER_EXPIRATION_ERROR, () => {
-      it('shows error message', () => {
-        mutations[types.RECEIVE_MEMBER_EXPIRATION_ERROR](state);
+      describe('when error does not have a message', () => {
+        it('shows default error message', () => {
+          mutations[types.RECEIVE_MEMBER_EXPIRATION_ERROR](state, {
+            error: new Error('Network Error'),
+          });
 
-        expect(state.showError).toBe(true);
-        expect(state.errorMessage).toBe(
-          "An error occurred while updating the member's expiration date, please try again.",
-        );
+          expect(state.showError).toBe(true);
+          expect(state.errorMessage).toBe(
+            "An error occurred while updating the member's expiration date, please try again.",
+          );
+        });
+      });
+
+      describe('when error has a message', () => {
+        it('shows error message', () => {
+          const error = new Error('Request failed with status code 422');
+          error.response = {
+            data: {
+              message:
+                'User email "john.smith@gmail.com" does not match the allowed domain of example.com',
+            },
+          };
+          mutations[types.RECEIVE_MEMBER_EXPIRATION_ERROR](state, { error });
+
+          expect(state.showError).toBe(true);
+          expect(state.errorMessage).toBe(
+            'User email "john.smith@gmail.com" does not match the allowed domain of example.com',
+          );
+        });
       });
     });
   });
