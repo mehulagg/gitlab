@@ -310,7 +310,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 | `label`    | String                    | nil           | As described in [Structured event taxonomy](#structured-event-taxonomy).                                                          |
 | `property` | String                    | nil           | As described in [Structured event taxonomy](#structured-event-taxonomy).                                                          |
 | `value`    | Numeric                   | nil           | As described in [Structured event taxonomy](#structured-event-taxonomy).                                                          |
-| `context`  | Array[SelfDescribingJSON] | nil           | An array of custom contexts to send with this event. Most events should not have any custom contexts.                             |
+| `context`  | `Array[SelfDescribingJSON]` | nil           | An array of custom contexts to send with this event. Most events should not have any custom contexts.                             |
 
 Tracking can be viewed as either tracking user behavior, or can be used for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
