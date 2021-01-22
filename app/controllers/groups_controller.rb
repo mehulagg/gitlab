@@ -69,8 +69,6 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
-      successful_creation_hooks
-
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
                else
@@ -318,10 +316,6 @@ class GroupsController < Groups::ApplicationController
   end
 
   private
-
-  def successful_creation_hooks
-    track_experiment_event(:onboarding_issues, 'created_namespace')
-  end
 
   def groups
     if @group.supports_events?
