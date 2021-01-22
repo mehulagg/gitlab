@@ -40,13 +40,13 @@ module ProtectedRef
     end
 
     def protected_ref_accessible_to?(ref, user, project:, action:, protected_refs: nil)
-      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).any? do |access_level|
+      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).all? do |access_level|
         access_level.check_access(user)
       end
     end
 
     def developers_can?(action, ref, protected_refs: nil)
-      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).any? do |access_level|
+      access_levels_for_ref(ref, action: action, protected_refs: protected_refs).all? do |access_level|
         access_level.access_level == Gitlab::Access::DEVELOPER
       end
     end
