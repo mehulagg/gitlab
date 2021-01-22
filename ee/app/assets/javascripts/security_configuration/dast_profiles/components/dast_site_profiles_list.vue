@@ -144,9 +144,8 @@ export default {
           :size="12"
           :name="$options.statuses[value].icon"
           :class="$options.statuses[value].cssClass"
-          class="gl-mr-2"
-        />
-        <span>{{ $options.statuses[value].label }}</span>
+          class="gl-mr-3"
+        /><span>{{ $options.statuses[value].label }}</span>
       </template>
     </template>
 
