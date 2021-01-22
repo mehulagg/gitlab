@@ -21,17 +21,8 @@
         = _('Projects that belong to a group are prefixed with the group namespace. Existing projects may be moved into a group.')
 
     .col-lg-9.js-toggle-container
-      %ul.nav.nav-tabs.nav-links.gitlab-tabs{ role: 'tablist' }
-        %li.nav-item{ role: 'presentation' }
-          %a.nav-link.active{ href: '#create-group-pane', id: 'create-group-tab', role: 'tab', data: { toggle: 'tab', track_label: 'create_group', track_event: 'click_tab', track_value: '' } }
-            %span.d-none.d-sm-block= s_('GroupsNew|Create group')
-            %span.d-block.d-sm-none= s_('GroupsNew|Create')
-        %li.nav-item{ role: 'presentation' }
-          %a.nav-link{ href: '#import-group-pane', id: 'import-group-tab', role: 'tab', data: { toggle: 'tab', track_label: 'import_group', track_event: 'click_tab', track_value: '' } }
-            %span.d-none.d-sm-block= s_('GroupsNew|Import group')
-            %span.d-block.d-sm-none= s_('GroupsNew|Import')
-
-      .tab-content.gitlab-tab-content.gl-border-none
+      .js-gl-group-tabs
+      .tab-content.gitlab-tab-content
         .tab-pane.js-toggle-container{ id: 'create-group-pane', class: active_when(active_tab == 'create'), role: 'tabpanel' }
           = form_for @group, html: { class: 'group-form gl-show-field-errors' } do |f|
             = render 'new_group_fields', f: f, group_name_id: 'create-group-name'
