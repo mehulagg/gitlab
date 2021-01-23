@@ -60,7 +60,7 @@ member of a new group named `gitlab-developers`:
 
 1. In the permissions scheme list, locate your new permissions scheme, and
    select **Permissions**. Next to **Administer Projects**, select **Edit**. In
-   the **Group** list, select **gitlab-developers**.
+   the **Group** list, select `gitlab-developers`.
 
    ![Jira group access](img/jira_group_access.png)
 
