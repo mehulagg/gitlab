@@ -13,7 +13,7 @@ The Jira user account created for the integration must have write access to
 your Jira projects.
 
 As an example, the following process creates a user named `gitlab` and that's a
-member of a new group named `gitlab-developers`.
+member of a new group named `gitlab-developers`:
 
 1. To create a new user, sign in to your Jira instance as an administrator, and
    then go to **Gear icon > User Management**.
