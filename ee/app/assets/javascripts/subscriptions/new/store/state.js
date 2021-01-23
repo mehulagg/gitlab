@@ -5,7 +5,7 @@ import { STEPS, TAX_RATE } from '../constants';
 const parsePlanData = (planData) =>
   JSON.parse(planData).map((plan) => ({
     value: plan.id,
-    text: capitalizeFirstCharacter(plan.code),
+    text: capitalizeFirstCharacter(plan.name),
     pricePerUserPerYear: plan.price_per_year,
   }));
 
