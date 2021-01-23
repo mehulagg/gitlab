@@ -10,17 +10,11 @@ module Projects
 
       def index
         respond_to do |format|
-          format.html
-          format.json do
-            @images = ContainerRepositoriesFinder.new(user: current_user, subject: project, params: params.slice(:name))
-                                                 .execute
-
+          format.html do
             track_package_event(:list_repositories, :container)
-
-            serializer = ContainerRepositoriesSerializer
-              .new(project: project, current_user: current_user)
-
-            render json: serializer.with_pagination(request, response).represent(@images)
+          end
+          format.json do
+            render_404
           end
         end
       end
