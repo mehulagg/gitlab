@@ -225,21 +225,12 @@ describe('Pipeline New Form', () => {
     });
   });
 
-  describe('when feature flag new_pipeline_form_prefilled_vars is enabled', () => {
+  describe('when testing prefilled vars', () => {
     let origGon;
 
     const mockYmlKey = 'yml_var';
     const mockYmlValue = 'yml_var_val';
     const mockYmlDesc = 'A var from yml.';
-
-    beforeAll(() => {
-      origGon = window.gon;
-      window.gon = { features: { newPipelineFormPrefilledVars: true } };
-    });
-
-    afterAll(() => {
-      window.gon = origGon;
-    });
 
     describe('loading state', () => {
       it('loading icon is shown when content is requested and hidden when received', async () => {
