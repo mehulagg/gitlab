@@ -9,12 +9,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 We need to create a user account in Jira to have access to all projects that
 need to integrate with GitLab.
 
-The Jira user account created for the integration must have 'write' access to
-your Jira projects. This is covered in the following process:
+The Jira user account created for the integration must have write access to
+your Jira projects.
 
 As an example, the following process creates a user named `gitlab` and that's a
 member of a new group named `gitlab-developers`.
-
 
 1. To create a new user, sign in to your Jira instance as an administrator, and
    then go to **Gear icon > User Management**.
