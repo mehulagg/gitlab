@@ -10,7 +10,7 @@ RSpec.describe FetchSubscriptionPlansService do
     let(:plan) { 'bronze' }
     let(:response_mock) { double(body: [{ 'foo' => 'bar' }].to_json) }
 
-    context 'when successully fetching plans data' do
+    context 'when successfully fetching plans data' do
       it 'returns parsed JSON' do
         expect(Gitlab::HTTP).to receive(:get)
           .with(

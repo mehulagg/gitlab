@@ -6,7 +6,6 @@
   - plan_name      += ' (Legacy)'
   - faq_link_url   = 'https://about.gitlab.com/gitlab-com/#faq'
   - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
-- card_has_badge = has_upgrade?(plan_upgrade_offer)
 
 .card-wrapper{ class: ("card-wrapper-has-badge" if has_upgrade) }
   - if has_upgrade

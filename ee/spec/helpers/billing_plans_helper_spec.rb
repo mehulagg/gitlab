@@ -133,14 +133,15 @@ RSpec.describe BillingPlansHelper do
       Plan::BRONZE | true  | true
       Plan::BRONZE | false | false
       Plan::SILVER | true  | false
+      Plan::SILVER | false  | false
     end
 
     with_them do
       let(:namespace) { Hashie::Mash.new(actual_plan_name: actual_plan_name) }
 
       before do
-        allow_next_instance_of(PlanUpgradeOfferService) do |instance|
-          allow(instance).to receive(:execute).and_return(Hashie::Mash.new(eligible_for_free_upgrade: eligible ))
+        allow_next_instance_of(GitlabSubscriptions::EligibleForFreeUpgradeService) do |instance|
+          allow(instance).to receive(:execute).and_return(eligible)
         end
       end
 

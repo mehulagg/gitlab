@@ -12,10 +12,9 @@ module BillingPlansHelper
   def eligible_for_free_upgrade?(namespace)
     return false unless namespace.actual_plan_name === Plan::BRONZE
 
-    result = PlanUpgradeOfferService
-        .new(namespace_id: namespace.id)
-        .execute
-    result[:eligible_for_free_upgrade]
+    GitlabSubscriptions::EligibleForFreeUpgradeService
+      .new(namespace_id: namespace.id)
+      .execute
   end
 
   def plan_upgrade_offer(upgrade_offer, plan)
