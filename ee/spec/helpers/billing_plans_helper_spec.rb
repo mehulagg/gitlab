@@ -48,7 +48,7 @@ RSpec.describe BillingPlansHelper do
         renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
 
         expect(helper.subscription_plan_data_attributes(group, plan))
-          .to eq( add_seats_href:  add_seats_href,
+          .to eq(add_seats_href:  add_seats_href,
                  billable_seats_href: billable_seats_href,
                  customer_portal_url: customer_portal_url,
                  is_group: "true",
