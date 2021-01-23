@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CopyIssuesServiceDeskReplyToToIssueEmailParticipants < ActiveRecord::Migration[6.0]
+class SchedulePopulateIssueEmailParticipants < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
   DOWNTIME = false
