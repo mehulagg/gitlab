@@ -54,13 +54,14 @@ module Gitlab
             }
           GQL
 
-          response = http_post("graphql", admin_headers, { query: query })
+          response = http_post("graphql", admin_headers, { query: query }).dig(:data)
 
           if response['errors'].blank?
-            response = response.dig(:data, 'data', 'subscription')
-            { success: true, eligible_for_free_upgrade: response['eoaStarterBronzeEligible'] }
+            result = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
+
+            { success: true, eligible_for_free_upgrade: result }
           else
-            { success: false, errors: response['errors'] }
+            { success: false }
           end
         end
 

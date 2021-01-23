@@ -137,4 +137,79 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
       expect(result).to eq({ errors: ["invalid activation code"], success: false })
     end
   end
+
+  describe 'eligible_for_upgrade_offer' do
+    let(:namespace_id) { 111 }
+    let(:headers) do
+      {
+        "Accept" => "application/json",
+        "Content-Type" => "application/json",
+        "X-Admin-Email" => "gl_com_api@gitlab.com",
+        "X-Admin-Token" => "customer_admin_token"
+      }
+    end
+
+    let(:params) do
+      { query: <<~R
+        {
+          subscription(namespaceId: "{:namespace_id=>#{namespace_id}}") {
+            eoaStarterBronzeEligible
+          }
+        }
+      R
+      }
+    end
+
+    subject(:eligible_for_upgrade_offer) { described_class.eligible_for_upgrade_offer(namespace_id: namespace_id) }
+
+    context 'the response contains errors' do
+      before do
+        expect(described_class).to receive(:http_post).with('graphql', headers, params).and_return(response)
+      end
+
+      let(:response) do
+        {
+          success: true,
+          data: {
+            "errors" => [{ "message" => "this will be ignored" }]
+        }
+}
+      end
+
+      it 'returns a failure' do
+        expect(eligible_for_upgrade_offer).to eq({ success: false })
+      end
+    end
+
+    context 'the response does not contain errors' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:eligible, :result) do
+        true  | true
+        false | false
+      end
+
+      with_them do
+        before do
+          allow(described_class).to receive(:http_post).and_return({
+              success: true,
+              data: { "data" => { "subscription" => { "eoaStarterBronzeEligible" => eligible } } }
+          })
+        end
+
+        it { expect(eligible_for_upgrade_offer).to eq({ success: true, eligible_for_free_upgrade: result }) }
+      end
+
+      context 'subscription is nil' do
+        before do
+          allow(described_class).to receive(:http_post).and_return({
+            success: true,
+            data: { "data" => { "subscription" => nil } }
+          })
+        end
+
+        it { expect(eligible_for_upgrade_offer).to eq({ success: true, eligible_for_free_upgrade: nil }) }
+      end
+    end
+  end
 end

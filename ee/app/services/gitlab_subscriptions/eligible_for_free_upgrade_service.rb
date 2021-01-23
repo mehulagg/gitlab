@@ -9,7 +9,7 @@ module GitlabSubscriptions
 
     def execute
       result = client.eligible_for_upgrade_offer(@namespace_id)
-
+      
       result[:success] ? result[:eligible_for_free_upgrade] : false
     end
 

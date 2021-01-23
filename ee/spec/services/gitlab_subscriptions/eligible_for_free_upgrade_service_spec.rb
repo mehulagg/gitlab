@@ -24,9 +24,7 @@ RSpec.describe GitlabSubscriptions::EligibleForFreeUpgradeService do
         allow(Gitlab::SubscriptionPortal::Client).to receive(:eligible_for_upgrade_offer).and_return(response)
       end
 
-      it 'returns success: true' do
-        expect(execute).to eq(result)
-      end
+      it { expect(execute).to eq(result) }
     end
   end
 end
