@@ -10,6 +10,7 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const namespaceName = 'GitLab.com';
 const customerPortalUrl = 'https://customers.gitlab.com/subscriptions';
+const planName = 'Gold';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -41,6 +42,7 @@ describe('SubscriptionTable component', () => {
         provide: {
           customerPortalUrl,
           namespaceName,
+          planName,
           ...provide,
           glFeatures: {
             defaultFlags,

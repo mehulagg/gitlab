@@ -2,7 +2,8 @@
 
 module BillingPlansHelper
   def subscription_plan_info(plans_data, current_plan_code)
-    plans_data.find { |plan| plan.code == current_plan_code }
+    current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_plan? }
+    current_plan || plans_data.find { |plan| plan.code == current_plan_code }
   end
 
   def number_to_plan_currency(value)
@@ -20,7 +21,8 @@ module BillingPlansHelper
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
-      billable_seats_href: billable_seats_href(namespace)
+      billable_seats_href: billable_seats_href(namespace),
+      plan_name: plan&.name
     }
   end
 

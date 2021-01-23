@@ -8,7 +8,7 @@ RSpec.describe BillingPlansHelper do
 
     let(:group) { build(:group) }
     let(:plan) do
-      Hashie::Mash.new(id: 'external-paid-plan-hash-code')
+      Hashie::Mash.new(id: 'external-paid-plan-hash-code', name: 'Bronze Plan')
     end
 
     context 'when group and plan with ID present' do
@@ -26,7 +26,8 @@ RSpec.describe BillingPlansHelper do
                  plan_upgrade_href: upgrade_href,
                  plan_renew_href: renew_href,
                  customer_portal_url: customer_portal_url,
-                 billable_seats_href: billable_seats_href)
+                 billable_seats_href: billable_seats_href,
+                 plan_name: plan.name)
       end
     end
 
@@ -38,8 +39,29 @@ RSpec.describe BillingPlansHelper do
       end
     end
 
+    context 'when plan not present' do
+      let(:plan) { nil }
+
+      it 'returns attributes' do
+        add_seats_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+        billable_seats_href = helper.group_seat_usage_path(group)
+        renew_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+
+        expect(helper.subscription_plan_data_attributes(group, plan))
+          .to eq( add_seats_href:  add_seats_href,
+                 billable_seats_href: billable_seats_href,
+                 customer_portal_url: customer_portal_url,
+                 is_group: "true",
+                 namespace_id: nil,
+                 namespace_name: group.name,
+                 plan_renew_href: renew_href,
+                 plan_upgrade_href: nil,
+                 plan_name: nil)
+      end
+    end
+
     context 'when plan with ID not present' do
-      let(:plan) { Hashie::Mash.new(id: nil) }
+      let(:plan) { Hashie::Mash.new(id: nil, name: 'Bronze Plan') }
 
       it 'returns data attributes without upgrade href' do
         add_seats_href = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
@@ -54,7 +76,8 @@ RSpec.describe BillingPlansHelper do
                  billable_seats_href: billable_seats_href,
                  add_seats_href: add_seats_href,
                  plan_renew_href: renew_href,
-                 plan_upgrade_href: nil)
+                 plan_upgrade_href: nil,
+                 plan_name: plan.name)
       end
     end
 
@@ -313,6 +336,36 @@ RSpec.describe BillingPlansHelper do
       it 'returns plans with the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
       end
+    end
+  end
+
+  describe '#subscription_plan_info' do
+    it 'returns the current plan' do
+      other_plan = Hashie::Mash.new(code: 'bronze')
+      current_plan = Hashie::Mash.new(code: 'gold')
+
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'gold')).to eq(current_plan)
+    end
+
+    it 'returns nil if no plan matches the code' do
+      plan_a = Hashie::Mash.new(code: 'bronze')
+      plan_b = Hashie::Mash.new(code: 'gold')
+
+      expect(helper.subscription_plan_info([plan_a, plan_b], 'default')).to be_nil
+    end
+
+    it 'breaks a tie with the current_plan attribute if multiple plans have the same code' do
+      other_plan = Hashie::Mash.new(current_plan: false, code: 'silver')
+      current_plan = Hashie::Mash.new(current_plan: true, code: 'silver')
+
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
+    end
+
+    it 'returns nil if no plan matches the code even if current_plan is true' do
+      other_plan = Hashie::Mash.new(current_plan: false, code: 'free')
+      current_plan = Hashie::Mash.new(current_plan: true, code: 'bronze')
+
+      expect(helper.subscription_plan_info([other_plan, current_plan], 'default')).to be_nil
     end
   end
 end
