@@ -2,7 +2,7 @@
 
 module BillingPlansHelper
   def subscription_plan_info(plans_data, current_plan_code)
-    current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_plan? }
+    current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_subscription_plan? }
     current_plan || plans_data.find { |plan| plan.code == current_plan_code }
   end
 

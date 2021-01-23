@@ -354,16 +354,16 @@ RSpec.describe BillingPlansHelper do
       expect(helper.subscription_plan_info([plan_a, plan_b], 'default')).to be_nil
     end
 
-    it 'breaks a tie with the current_plan attribute if multiple plans have the same code' do
-      other_plan = Hashie::Mash.new(current_plan: false, code: 'silver')
-      current_plan = Hashie::Mash.new(current_plan: true, code: 'silver')
+    it 'breaks a tie with the current_subscription_plan attribute if multiple plans have the same code' do
+      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'silver')
+      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'silver')
 
       expect(helper.subscription_plan_info([other_plan, current_plan], 'silver')).to eq(current_plan)
     end
 
-    it 'returns nil if no plan matches the code even if current_plan is true' do
-      other_plan = Hashie::Mash.new(current_plan: false, code: 'free')
-      current_plan = Hashie::Mash.new(current_plan: true, code: 'bronze')
+    it 'returns nil if no plan matches the code even if current_subscription_plan is true' do
+      other_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'free')
+      current_plan = Hashie::Mash.new(current_subscription_plan: true, code: 'bronze')
 
       expect(helper.subscription_plan_info([other_plan, current_plan], 'default')).to be_nil
     end
