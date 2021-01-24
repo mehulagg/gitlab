@@ -1,0 +1,6 @@
+---
+- name: i_package_composer_deploy_token
+  group: package
+  feature_flag: collect_package_events_redis
+- name: i_package_composer_user
+  group: package

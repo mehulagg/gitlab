@@ -1,0 +1,8 @@
+---
+name: redis_tracker
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.9'
+type: ops
+group: group::product_intelligence
+default_enabled: false
