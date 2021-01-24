@@ -150,13 +150,13 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
     end
 
     let(:params) do
-      { query: <<~R
+      { query: <<~GQL
         {
           subscription(namespaceId: "{:namespace_id=>#{namespace_id}}") {
             eoaStarterBronzeEligible
           }
         }
-      R
+      GQL
       }
     end
 
