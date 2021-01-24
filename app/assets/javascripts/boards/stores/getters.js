@@ -17,6 +17,11 @@ export default {
     return state.issues[state.activeId] || {};
   },
 
+  groupPathForActiveIssue: (_, getters) => {
+    const referencePath = getters.activeIssue.referencePath || '';
+    return referencePath.slice(0, referencePath.indexOf('/'));
+  },
+
   projectPathForActiveIssue: (_, getters) => {
     const referencePath = getters.activeIssue.referencePath || '';
     return referencePath.slice(0, referencePath.indexOf('#'));
