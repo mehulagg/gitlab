@@ -27,7 +27,7 @@ RSpec.describe FetchSubscriptionPlansService do
       it 'uses only the plan within the cache key name' do
         allow(Gitlab::HTTP).to receive(:get).and_return(response_mock)
 
-        expect(Rails.cache).to receive(:read).with("subscription-plan-#{plan}")
+        expect(Rails.cache).to receive(:read).with("pnp-subscription-plan-#{plan}")
 
         execute_service
       end
@@ -53,7 +53,7 @@ RSpec.describe FetchSubscriptionPlansService do
         it 'uses the namespace id within the cache key name' do
           allow(Gitlab::HTTP).to receive(:get).and_return(response_mock)
 
-          expect(Rails.cache).to receive(:read).with("subscription-plan-#{plan}-#{namespace_id}")
+          expect(Rails.cache).to receive(:read).with("pnp-subscription-plan-#{plan}-#{namespace_id}")
 
           execute_service
         end
