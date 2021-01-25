@@ -94,8 +94,9 @@ class Environment < ApplicationRecord
   end
   scope :for_id, -> (id) { where(id: id) }
 
-  scope :stale_and_deleteable, -> (before, limit) do
+  scope :deleteable_review_envs, -> (project, before, limit) do
     stopped
+    .for_project(project)
     .in_review_folder
     .where("created_at < ?", before)
     .order("created_at DESC")

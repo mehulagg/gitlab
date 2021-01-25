@@ -266,7 +266,7 @@ RSpec.describe API::Environments do
     end
   end
 
-  describe "DELETE /projects/:id/environments/stale" do
+  describe "DELETE /projects/:id/environments/batch_delete_review_envs" do
     shared_examples "delete stale environments" do
       it "deletes the old stopped review apps" do
         old_stopped_review_env = create(:environment, :with_review_app, :stopped, created_at: 31.days.ago, project: project)
@@ -276,13 +276,10 @@ RSpec.describe API::Environments do
         new_stopped_other_env  = create(:environment, :stopped, project: project)
         old_active_other_env   = create(:environment, :available, created_at: 31.days.ago, project: project)
 
-        delete api("/projects/#{project.id}/environments/stale", current_user), params: { dry_run: false }
+        delete api("/projects/#{project.id}/environments/batch_delete_review_envs", current_user), params: { dry_run: false }
         project.environments.reload
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response["deleted"].size).to eq(1)
-        expect(json_response["deleted"].first["id"]).to eq(old_stopped_review_env.id)
-        expect(json_response["failed"]).to be_empty
+        expect(response).to have_gitlab_http_status(:no_content)
 
         expect(project.environments).not_to include(old_stopped_review_env)
         expect(project.environments).to include(new_stopped_review_env)
@@ -315,7 +312,7 @@ RSpec.describe API::Environments do
       it "rejects the request" do
         delete api("/projects/#{project.id}/environments/stale", non_member)
 
-        expect(response).to have_gitlab_http_status(:not_found)
+        expect(response).to have_gitlab_http_status(:bad_request)
       end
     end
   end

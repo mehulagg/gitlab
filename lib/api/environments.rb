@@ -75,7 +75,7 @@ module API
         end
       end
 
-      desc "Delete stale, stopped, review environments" do
+      desc "Delete multiple stopped, review environments" do
         detail "Remove multiple stopped, but not protected, review environments older than a specific age"
         success Entities::Environment
       end
@@ -84,28 +84,18 @@ module API
         optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100, values: 1..1000
         optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to true.", default: true
       end
-      delete ":id/environments/stale" do
+      delete ":id/environments/batch_delete_review_envs" do
         authorize! :read_environment, user_project
 
-        environments = user_project.environments.stale_and_deleteable(params[:before], params[:limit])
-        deleted = []
-        failed = []
+        result = ::Environments::BatchDeleteService.new(user_project, current_user, params).execute
 
-        environments.find_each do |env|
-          if current_user.can?(:destroy_environment, env) && (params[:dry_run] || destroy_conditionally!(env))
-            deleted << env
-          else
-            failed << env
-          end
+        if result.success?
+          status 200
+        else
+          status 400
         end
 
-        response = {
-          deleted: Entities::Environment.represent(deleted),
-          failed: Entities::Environment.represent(failed)
-        }
-
-        status 200
-        present response, current_user: current_user
+        body false
       end
 
       desc 'Deletes an existing environment' do

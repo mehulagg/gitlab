@@ -34,6 +34,16 @@ module EE
           project: [:route, { namespace: :route }]
         )
       end
+
+      scope :deleteable_review_envs, -> (project, before, limit) do
+        stopped
+        .for_project(project)
+        .in_review_folder
+        .where("created_at < ?", before)
+        .where.not(name: project.protected_environments.select(:name))
+        .order("created_at DESC")
+        .limit(limit)
+      end
     end
 
     def reactive_cache_updated
