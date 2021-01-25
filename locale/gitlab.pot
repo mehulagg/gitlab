@@ -21892,7 +21892,7 @@ msgstr ""
 msgid "ProjectSettings|Allow editing commit messages"
 msgstr ""
 
-msgid "ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets"
+msgid "ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets."
 msgstr ""
 
 msgid "ProjectSettings|Analytics"
@@ -21904,7 +21904,7 @@ msgstr ""
 msgid "ProjectSettings|Badges"
 msgstr ""
 
-msgid "ProjectSettings|Build, test, and deploy your changes"
+msgid "ProjectSettings|Build, test, and deploy your changes."
 msgstr ""
 
 msgid "ProjectSettings|Checkbox is visible and selected by default."
@@ -21949,16 +21949,16 @@ msgstr ""
 msgid "ProjectSettings|Encourage"
 msgstr ""
 
-msgid "ProjectSettings|Environments, logs, cluster management, and more"
+msgid "ProjectSettings|Environments, logs, cluster management, and more."
 msgstr ""
 
 msgid "ProjectSettings|Every merge creates a merge commit"
 msgstr ""
 
-msgid "ProjectSettings|Every project can have its own space to store its Docker images"
+msgid "ProjectSettings|Every project can have its own space to store its Docker images."
 msgstr ""
 
-msgid "ProjectSettings|Every project can have its own space to store its packages"
+msgid "ProjectSettings|Every project can have its own space to store its packages."
 msgstr ""
 
 msgid "ProjectSettings|Everyone"
@@ -21988,6 +21988,9 @@ msgstr ""
 msgid "ProjectSettings|Global"
 msgstr ""
 
+msgid "ProjectSettings|Host your static websites on GitLab."
+msgstr ""
+
 msgid "ProjectSettings|If pipelines for merge requests are enabled in the CI/CD configuration file, pipelines validate the combined results of the source and target branches."
 msgstr ""
 
@@ -22000,10 +22003,10 @@ msgstr ""
 msgid "ProjectSettings|LFS objects from this repository are available to forks. %{linkStart}How do I remove them?%{linkEnd}"
 msgstr ""
 
-msgid "ProjectSettings|Lightweight issue tracking system"
+msgid "ProjectSettings|Lightweight issue tracking system."
 msgstr ""
 
-msgid "ProjectSettings|Manages large files such as audio, video, and graphics files"
+msgid "ProjectSettings|Manages large files such as audio, video, and graphics files."
 msgstr ""
 
 msgid "ProjectSettings|Merge checks"
@@ -22030,7 +22033,7 @@ msgstr ""
 msgid "ProjectSettings|No merge commits are created"
 msgstr ""
 
-msgid "ProjectSettings|Note: the container registry is always visible when a project is public"
+msgid "ProjectSettings|Note: the container registry is always visible when a project is public."
 msgstr ""
 
 msgid "ProjectSettings|Only signed commits can be pushed to this repository."
@@ -22039,7 +22042,7 @@ msgstr ""
 msgid "ProjectSettings|Operations"
 msgstr ""
 
-msgid "ProjectSettings|Override user notification preferences for all project members"
+msgid "ProjectSettings|Override user notification preferences for all project members."
 msgstr ""
 
 msgid "ProjectSettings|Packages"
@@ -22048,7 +22051,7 @@ msgstr ""
 msgid "ProjectSettings|Pages"
 msgstr ""
 
-msgid "ProjectSettings|Pages for project documentation"
+msgid "ProjectSettings|Pages for project documentation."
 msgstr ""
 
 msgid "ProjectSettings|Pipelines"
@@ -22078,13 +22081,13 @@ msgstr ""
 msgid "ProjectSettings|Requirements"
 msgstr ""
 
-msgid "ProjectSettings|Requirements management system"
+msgid "ProjectSettings|Requirements management system."
 msgstr ""
 
 msgid "ProjectSettings|Set the default behavior and availability of this option in merge requests. Changes made are also applied to existing merge requests."
 msgstr ""
 
-msgid "ProjectSettings|Share code with others outside the project"
+msgid "ProjectSettings|Share code samples with others outside the project."
 msgstr ""
 
 msgid "ProjectSettings|Show default award emojis"
@@ -22108,7 +22111,7 @@ msgstr ""
 msgid "ProjectSettings|Squashing is never performed and the checkbox is hidden."
 msgstr ""
 
-msgid "ProjectSettings|Submit changes to be merged upstream"
+msgid "ProjectSettings|Submit changes to be merged upstream."
 msgstr ""
 
 msgid "ProjectSettings|The commit message used to apply merge request suggestions"
@@ -22138,7 +22141,7 @@ msgstr ""
 msgid "ProjectSettings|Transfer project"
 msgstr ""
 
-msgid "ProjectSettings|Users can copy the repository to a new project"
+msgid "ProjectSettings|Users can copy the repository to a new project."
 msgstr ""
 
 msgid "ProjectSettings|Users can only push commits to this repository that were committed with one of their own verified emails."
@@ -22153,10 +22156,10 @@ msgstr ""
 msgid "ProjectSettings|View and edit files in this project. Non-project members will only have read access"
 msgstr ""
 
-msgid "ProjectSettings|View project analytics"
+msgid "ProjectSettings|View project analytics."
 msgstr ""
 
-msgid "ProjectSettings|Visualize the project's performance metrics"
+msgid "ProjectSettings|Visualize the project's performance metrics."
 msgstr ""
 
 msgid "ProjectSettings|What are badges?"
@@ -22169,9 +22172,6 @@ msgid "ProjectSettings|When conflicts arise the user is given the option to reba
 msgstr ""
 
 msgid "ProjectSettings|Wiki"
-msgstr ""
-
-msgid "ProjectSettings|With GitLab Pages you can host your static websites on GitLab"
 msgstr ""
 
 msgid "ProjectTemplates|.NET Core"
