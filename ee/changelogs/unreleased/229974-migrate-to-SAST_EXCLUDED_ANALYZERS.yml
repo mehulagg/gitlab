@@ -1,5 +1,0 @@
----
-title: Add support for SAST_EXCLUDED_ANALYZERS
-merge_request: 50872
-author:
-type: changed

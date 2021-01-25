@@ -1,5 +1,0 @@
----
-title: Add retry ability for halted Elasticsearch migrations
-merge_request: 51335
-author:
-type: changed

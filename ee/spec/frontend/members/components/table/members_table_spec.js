@@ -79,7 +79,7 @@ describe('MemberList', () => {
 
           expect(
             findTableCellByMemberId('Actions', memberNoPermissions.id).classes(),
-          ).toStrictEqual(['col-actions', 'gl-display-none!', 'gl-display-lg-table-cell!']);
+          ).toStrictEqual(['col-actions', 'gl-display-none!', 'gl-lg-display-table-cell!']);
           expect(findTableCellByMemberId('Actions', memberCanOverride.id).classes()).toStrictEqual([
             'col-actions',
           ]);

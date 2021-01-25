@@ -89,7 +89,7 @@ From there, when reviewing merge requests' **Changes** tab, you will see only on
 
 ![File-by-file diff navigation](img/file_by_file_v13_2.png)
 
-From [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/233898) onwards, if you want to change
+In [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/233898) and later, if you want to change
 this behavior, you can do so from your **User preferences** (as explained above) or directly in a
 merge request:
 
@@ -135,6 +135,46 @@ specific commit page.
 NOTE:
 You can append `?w=1` while on the diffs page of a merge request to ignore any
 whitespace changes.
+
+## Mark files as viewed
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51513) in GitLab 13.8.
+> - It's deployed behind a feature flag, enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-file-views). **(CORE ONLY)**
+
+When reviewing a merge request with many files multiple times, it may be useful to the reviewer
+to focus on new changes and ignore the files that they have already reviewed and don't want to 
+see anymore unless they are changed again.
+
+To mark a file as viewed:
+
+1. Go to the merge request's **Diffs** tab.
+1. On the right-top of the file, locate the **Viewed** checkbox.
+1. Check it to mark the file as viewed.
+
+Once checked, the file will remain marked for that reviewer unless there are newly introduced 
+changes to its content or the checkbox is unchecked.
+
+### Enable or disable file views **(CORE ONLY)**
+
+The file view feature is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to enable it for your instance.
+
+To enable it:
+
+```ruby
+Feature.enable(:local_file_reviews)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:local_file_reviews)
+```
 
 ## Perform inline code reviews
 

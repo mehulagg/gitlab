@@ -13,9 +13,9 @@ export const I18N = {
   RECOVER_STAGES_VISIBLE: s__('CreateValueStreamForm|All default stages are currently visible'),
   SELECT_START_EVENT: s__('CreateValueStreamForm|Select start event'),
   SELECT_END_EVENT: s__('CreateValueStreamForm|Select end event'),
-  FORM_FIELD_NAME_LABEL: s__('CreateValueStreamForm|Name'),
-  FORM_FIELD_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter a name for the stage'),
-  FIELD_STAGE_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter stage name'),
+  FORM_FIELD_NAME_LABEL: s__('CreateValueStreamForm|Value Stream name'),
+  FORM_FIELD_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter value stream name'),
+  FORM_FIELD_STAGE_NAME_PLACEHOLDER: s__('CreateValueStreamForm|Enter stage name'),
   FORM_FIELD_START_EVENT: s__('CreateValueStreamForm|Start event'),
   FORM_FIELD_START_EVENT_LABEL: s__('CreateValueStreamForm|Start event label'),
   FORM_FIELD_END_EVENT: s__('CreateValueStreamForm|End event'),
@@ -24,19 +24,24 @@ export const I18N = {
   DEFAULT_FIELD_END_EVENT_LABEL: s__('CreateValueStreamForm|End event: '),
   BTN_UPDATE_STAGE: s__('CreateValueStreamForm|Update stage'),
   BTN_ADD_STAGE: s__('CreateValueStreamForm|Add stage'),
+  BTN_ADD_ANOTHER_STAGE: s__('CreateValueStreamForm|Add another stage'),
   TITLE_EDIT_STAGE: s__('CreateValueStreamForm|Editing stage'),
   TITLE_ADD_STAGE: s__('CreateValueStreamForm|New stage'),
   BTN_CANCEL: __('Cancel'),
   STAGE_INDEX: s__('CreateValueStreamForm|Stage %{index}'),
   HIDDEN_DEFAULT_STAGE: s__('CreateValueStreamForm|%{name} (default)'),
+  TEMPLATE_DEFAULT: s__('CreateValueStreamForm|Create from default template'),
+  TEMPLATE_BLANK: s__('CreateValueStreamForm|Create from no template'),
 };
 
 export const ERRORS = {
-  MIN_LENGTH: s__('CreateValueStreamForm|Name is required'),
+  VALUE_STREAM_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Name is required'),
+  STAGE_NAME_MIN_LENGTH: s__('CreateValueStreamForm|Stage name is required'),
   MAX_LENGTH: sprintf(s__('CreateValueStreamForm|Maximum length %{maxLength} characters'), {
     maxLength: NAME_MAX_LENGTH,
   }),
   START_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select a start event first'),
+  END_EVENT_REQUIRED: s__('CreateValueStreamForm|Please select an end event'),
   STAGE_NAME_EXISTS: s__('CreateValueStreamForm|Stage name already exists'),
   INVALID_EVENT_PAIRS: s__(
     'CreateValueStreamForm|Start event changed, please select a valid end event',
@@ -67,6 +72,12 @@ export const defaultFields = {
 };
 
 const defaultStageCommonFields = { custom: false, hidden: false };
+
+export const defaultCustomStageFields = {
+  ...defaultFields,
+  ...defaultStageCommonFields,
+  custom: true,
+};
 
 /**
  * These stage configs are copied from the https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/cycle_analytics
@@ -112,3 +123,15 @@ export const DEFAULT_STAGE_CONFIG = BASE_DEFAULT_STAGE_CONFIG.map(({ id, ...rest
   ...defaultStageCommonFields,
   name: capitalizeFirstCharacter(id),
 }));
+
+export const PRESET_OPTIONS_DEFAULT = 'default';
+export const PRESET_OPTIONS = [
+  {
+    text: I18N.TEMPLATE_DEFAULT,
+    value: PRESET_OPTIONS_DEFAULT,
+  },
+  {
+    text: I18N.TEMPLATE_BLANK,
+    value: 'blank',
+  },
+];

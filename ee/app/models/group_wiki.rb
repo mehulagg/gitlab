@@ -24,7 +24,7 @@ class GroupWiki < Wiki
   override :repository_storage
   def repository_storage
     strong_memoize(:repository_storage) do
-      container.group_wiki_repository&.shard_name || self.class.pick_repository_storage
+      container.group_wiki_repository&.shard_name || Repository.pick_storage_shard
     end
   end
 
@@ -49,5 +49,10 @@ class GroupWiki < Wiki
   def after_post_receive
     # TODO: Update group wiki storage
     # https://gitlab.com/gitlab-org/gitlab/-/issues/230465
+  end
+
+  override :git_garbage_collect_worker_klass
+  def git_garbage_collect_worker_klass
+    GroupWikis::GitGarbageCollectWorker
   end
 end

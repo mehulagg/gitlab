@@ -218,6 +218,18 @@ describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
     expect(state.epics).toEqual(mockEpics);
     expect(state.canAdminEpic).toEqual(true);
   });
+
+  it('merges epics while avoiding duplicates', () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+      canAdminEpic: false,
+    };
+
+    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, mockEpics);
+
+    expect(state.epics).toEqual(mockEpics);
+  });
 });
 
 describe('RECEIVE_EPICS_SUCCESS', () => {

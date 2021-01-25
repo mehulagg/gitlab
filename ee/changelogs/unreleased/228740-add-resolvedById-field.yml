@@ -1,5 +1,0 @@
----
-title: Add resolvedBy field to vulnerability object in GraphQL
-merge_request: 50145
-author:
-type: changed

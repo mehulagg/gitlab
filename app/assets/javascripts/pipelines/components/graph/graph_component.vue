@@ -3,7 +3,7 @@ import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
-import { DOWNSTREAM, MAIN, UPSTREAM } from './constants';
+import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH } from './constants';
 import { reportToSentry } from './utils';
 
 export default {
@@ -101,6 +101,13 @@ export default {
     setJob(jobName) {
       this.hoveredJobName = jobName;
     },
+    slidePipelineContainer() {
+      this.$refs.mainPipelineContainer.scrollBy({
+        left: ONE_COL_WIDTH,
+        top: 0,
+        behavior: 'smooth',
+      });
+    },
     togglePipelineExpanded(jobName, expanded) {
       this.pipelineExpanded = {
         expanded,
@@ -116,8 +123,9 @@ export default {
 <template>
   <div class="js-pipeline-graph">
     <div
-      class="gl-display-flex gl-position-relative gl-overflow-auto gl-bg-gray-10 gl-white-space-nowrap"
-      :class="{ 'gl-pipeline-min-h gl-py-5': !isLinkedPipeline }"
+      ref="mainPipelineContainer"
+      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap"
+      :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
       <linked-graph-wrapper>
         <template #upstream>
@@ -165,6 +173,7 @@ export default {
             :type="$options.pipelineTypeConstants.DOWNSTREAM"
             @downstreamHovered="setJob"
             @pipelineExpandToggle="togglePipelineExpanded"
+            @scrollContainer="slidePipelineContainer"
             @error="onError"
           />
         </template>

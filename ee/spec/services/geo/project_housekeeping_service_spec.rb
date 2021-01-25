@@ -52,13 +52,13 @@ RSpec.describe Geo::ProjectHousekeepingService do
         stub_exclusive_lease(:the_lease_key, :the_uuid)
 
         # At fetch 200
-        expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :gc, :the_lease_key, :the_uuid)
+        expect(::Projects::GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :gc, :the_lease_key, :the_uuid)
           .once
         # At fetch 50, 100, 150
-        expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :full_repack, :the_lease_key, :the_uuid)
+        expect(::Projects::GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :full_repack, :the_lease_key, :the_uuid)
           .exactly(3).times
         # At fetch 10, 20, ... (except those above)
-        expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :incremental_repack, :the_lease_key, :the_uuid)
+        expect(::Projects::GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :incremental_repack, :the_lease_key, :the_uuid)
           .exactly(16).times
 
         201.times do
@@ -76,7 +76,7 @@ RSpec.describe Geo::ProjectHousekeepingService do
         allow(service).to receive(:lease_key).and_return(:the_lease_key)
         stub_exclusive_lease(:the_lease_key, :the_uuid)
 
-        expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :gc, :the_lease_key, :the_uuid).once
+        expect(::Projects::GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :gc, :the_lease_key, :the_uuid).once
 
         service.execute
       end
@@ -88,7 +88,7 @@ RSpec.describe Geo::ProjectHousekeepingService do
       it 'does not run gc for a non-new repository' do
         stub_exclusive_lease(:the_lease_key, :the_uuid)
 
-        expect(GitGarbageCollectWorker).not_to receive(:perform_async)
+        expect(::Projects::GitGarbageCollectWorker).not_to receive(:perform_async)
 
         service.execute
       end
@@ -102,7 +102,7 @@ RSpec.describe Geo::ProjectHousekeepingService do
       end
 
       it 'does not enqueue a job' do
-        expect(GitGarbageCollectWorker).not_to receive(:perform_async)
+        expect(::Projects::GitGarbageCollectWorker).not_to receive(:perform_async)
 
         expect(service.send(:do_housekeeping)).to be_falsey
       end
@@ -119,10 +119,10 @@ RSpec.describe Geo::ProjectHousekeepingService do
       expect(service).to receive(:try_obtain_lease).and_return(:the_uuid)
       expect(service).to receive(:lease_key).and_return(:the_lease_key)
       expect(service).to receive(:task).and_return(:incremental_repack)
-      expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :incremental_repack, :the_lease_key, :the_uuid).and_call_original
+      expect(::Projects::GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :incremental_repack, :the_lease_key, :the_uuid).and_call_original
 
       Sidekiq::Testing.fake! do
-        expect { service.send(:do_housekeeping) }.to change(GitGarbageCollectWorker.jobs, :size).by(1)
+        expect { service.send(:do_housekeeping) }.to change(::Projects::GitGarbageCollectWorker.jobs, :size).by(1)
       end
     end
 

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
+  sequence :vulnerability_finding_uuid do |n|
+    SecureRandom.uuid
+  end
+
   factory :vulnerabilities_finding_with_remediation, parent: :vulnerabilities_finding do
     transient do
       summary { nil }
@@ -43,13 +47,11 @@ FactoryBot.define do
   factory :vulnerabilities_finding, class: 'Vulnerabilities::Finding' do
     name { 'Cipher with no integrity' }
     project
+    sequence(:uuid) { generate(:vulnerability_finding_uuid) }
     project_fingerprint { generate(:project_fingerprint) }
     primary_identifier factory: :vulnerabilities_identifier
-    location_fingerprint { SecureRandom.hex(20) }
+    location_fingerprint { '4e5b6966dd100170b4b1ad599c7058cce91b57b4' }
     report_type { :sast }
-    sequence(:uuid) do
-      Gitlab::UUID.v5("#{report_type}-#{primary_identifier.fingerprint}-#{location_fingerprint}-#{project_id}")
-    end
     severity { :high }
     confidence { :medium }
     scanner factory: :vulnerabilities_scanner

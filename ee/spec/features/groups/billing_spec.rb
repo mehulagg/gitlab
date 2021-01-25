@@ -39,7 +39,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Free plan")
+      expect(page).to have_content("#{group.name} is currently using the Free Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
@@ -63,7 +63,7 @@ RSpec.describe 'Groups > Billing', :js do
 
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: upgrade_url)
@@ -100,7 +100,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).not_to have_link("Upgrade")
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")

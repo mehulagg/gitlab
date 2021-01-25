@@ -101,7 +101,7 @@ export default {
 <template>
   <section>
     <div
-      class="gl-bg-gray-10 gl-p-6 gl-display-md-flex gl-justify-content-space-between gl-align-items-center"
+      class="gl-bg-gray-10 gl-p-6 gl-md-display-flex gl-justify-content-space-between gl-align-items-center"
     >
       <div data-testid="heading-info">
         <h4

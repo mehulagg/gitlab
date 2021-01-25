@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Prometheus metrics
+# GitLab Prometheus metrics **(CORE)**
 
 To enable the GitLab Prometheus metrics:
 
@@ -71,6 +71,7 @@ The following metrics are available:
 | `gitlab_transaction_event_etag_caching_resource_changed_total` | Counter   |                    9.4 | Counter for ETag cache miss - resource changed                                                      | `endpoint`                                          |
 | `gitlab_transaction_event_fork_repository_total`               | Counter   |                    9.4 | Counter for repository forks (RepositoryForkWorker). Only incremented when source repository exists |                                                     |
 | `gitlab_transaction_event_import_repository_total`             | Counter   |                    9.4 | Counter for repository imports (RepositoryImportWorker)                                             |                                                     |
+| `gitlab_transaction_event_patch_hard_limit_bytes_hit_total`   | Counter   |                   13.9 | Counter for diff patch size limit hits                                                              |                                                     |
 | `gitlab_transaction_event_push_branch_total`                   | Counter   |                    9.4 | Counter for all branch pushes                                                                       |                                                     |
 | `gitlab_transaction_event_push_commit_total`                   | Counter   |                    9.4 | Counter for commits                                                                                 | `branch`                                            |
 | `gitlab_transaction_event_push_tag_total`                      | Counter   |                    9.4 | Counter for tag pushes                                                                              |                                                     |
@@ -114,6 +115,9 @@ The following metrics are available:
 | `action_cable_pool_tasks_total`                                | Gauge     |                   13.4 | Total number of tasks executed in ActionCable thread pool | `server_mode` |
 | `gitlab_issuable_fast_count_by_state_total`                    | Counter   |                   13.5 | Total number of row count operations on issue/merge request list pages | |
 | `gitlab_issuable_fast_count_by_state_failures_total`           | Counter   |                   13.5 | Number of soft-failed row count operations on issue/merge request list pages | |
+| `gitlab_external_http_total`                                   | Counter   |                   13.8 | Total number of HTTP calls to external systems | `controller`, `action` |
+| `gitlab_external_http_duration_seconds`                        | Counter   |                   13.8 | Duration in seconds spent on each HTTP call to external systems | |
+| `gitlab_external_http_exception_total`                         | Counter   |                   13.8 | Total number of exceptions raised when making external HTTP calls | |
 
 ## Metrics controlled by a feature flag
 

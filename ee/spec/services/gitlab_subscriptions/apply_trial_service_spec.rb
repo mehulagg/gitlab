@@ -26,13 +26,7 @@ RSpec.describe GitlabSubscriptions::ApplyTrialService do
         expect(execute).to eq({ success: true })
       end
 
-      it 'records a namespace onboarding progress action' do
-        expect_next_instance_of(OnboardingProgressService) do |service|
-          expect(service).to receive(:execute).with(action: :trial_started)
-        end
-
-        execute
-      end
+      it_behaves_like 'records an onboarding progress action', :trial_started
     end
 
     context 'error while applying the trial' do
@@ -47,11 +41,7 @@ RSpec.describe GitlabSubscriptions::ApplyTrialService do
         expect(execute).to eq(expected_response)
       end
 
-      it 'does not record a namespace onboarding progress action' do
-        expect(OnboardingProgressService).not_to receive(:new)
-
-        execute
-      end
+      it_behaves_like 'does not record an onboarding progress action'
     end
   end
 end

@@ -2023,9 +2023,6 @@ msgstr ""
 msgid "AdminSettings|Disable feed token"
 msgstr ""
 
-msgid "AdminSettings|Elasticsearch, PlantUML, Slack application, Third party offers, Snowplow, Amazon EKS have moved to Settings &gt; General."
-msgstr ""
-
 msgid "AdminSettings|Enable shared runners for new projects"
 msgstr ""
 
@@ -2045,6 +2042,9 @@ msgid "AdminSettings|Moved to integrations"
 msgstr ""
 
 msgid "AdminSettings|No required pipeline"
+msgstr ""
+
+msgid "AdminSettings|PlantUML, Slack application, Third party offers, Snowplow, Amazon EKS have moved to Settings &gt; General."
 msgstr ""
 
 msgid "AdminSettings|Required pipeline configuration"
@@ -4448,7 +4448,7 @@ msgstr ""
 msgid "Billing"
 msgstr ""
 
-msgid "BillingPlans|%{group_name} is currently using the %{plan_name} plan."
+msgid "BillingPlans|%{group_name} is currently using the %{plan_name}."
 msgstr ""
 
 msgid "BillingPlans|@%{user_name} you are currently using the %{plan_name} plan."
@@ -4595,9 +4595,6 @@ msgid "Boards|An error occurred while fetching group projects. Please try again.
 msgstr ""
 
 msgid "Boards|An error occurred while fetching issues. Please reload the page."
-msgstr ""
-
-msgid "Boards|An error occurred while fetching labels. Please reload the page."
 msgstr ""
 
 msgid "Boards|An error occurred while fetching the board issues. Please reload the page."
@@ -5270,6 +5267,9 @@ msgid "ChangeTypeAction|A new branch will be created in your fork and a new merg
 msgstr ""
 
 msgid "ChangeTypeAction|Cherry-pick"
+msgstr ""
+
+msgid "ChangeTypeAction|Pick into branch"
 msgstr ""
 
 msgid "ChangeTypeAction|Revert"
@@ -7024,7 +7024,7 @@ msgstr ""
 msgid "Code Review Analytics displays a table of open merge requests considered to be in code review. There are currently no merge requests in review for this project and/or filters."
 msgstr ""
 
-msgid "Code coverage statistics for master %{start_date} - %{end_date}"
+msgid "Code coverage statistics for %{ref} %{start_date} - %{end_date}"
 msgstr ""
 
 msgid "Code owner approval is required"
@@ -7079,6 +7079,9 @@ msgid "Collapse replies"
 msgstr ""
 
 msgid "Collapse sidebar"
+msgstr ""
+
+msgid "Collapses this file (only for you) until it’s changed again."
 msgstr ""
 
 msgid "Collector hostname"
@@ -7585,7 +7588,13 @@ msgstr ""
 msgid "ContainerRegistry|Copy push command"
 msgstr ""
 
+msgid "ContainerRegistry|Delete image repository?"
+msgstr ""
+
 msgid "ContainerRegistry|Delete selected"
+msgstr ""
+
+msgid "ContainerRegistry|Deleting the image repository will delete all images and tags inside. This action cannot be undone."
 msgstr ""
 
 msgid "ContainerRegistry|Deletion disabled due to missing or insufficient permissions."
@@ -7613,6 +7622,12 @@ msgid "ContainerRegistry|If you are not already logged in, you need to authentic
 msgstr ""
 
 msgid "ContainerRegistry|Image Repositories"
+msgstr ""
+
+msgid "ContainerRegistry|Image repository deletion failed"
+msgstr ""
+
+msgid "ContainerRegistry|Image repository will be deleted"
 msgstr ""
 
 msgid "ContainerRegistry|Image tags"
@@ -7707,6 +7722,9 @@ msgstr ""
 msgid "ContainerRegistry|Something went wrong while scheduling %{title} for deletion. Please try again."
 msgstr ""
 
+msgid "ContainerRegistry|Something went wrong while scheduling the image for deletion."
+msgstr ""
+
 msgid "ContainerRegistry|Something went wrong while updating the cleanup policy."
 msgstr ""
 
@@ -7752,7 +7770,13 @@ msgstr ""
 msgid "ContainerRegistry|This image has no active tags"
 msgstr ""
 
+msgid "ContainerRegistry|This image repository has failed to be deleted"
+msgstr ""
+
 msgid "ContainerRegistry|This image repository is scheduled for deletion"
+msgstr ""
+
+msgid "ContainerRegistry|This image repository will be deleted. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "ContainerRegistry|This project's cleanup policy for tags is not enabled."
@@ -7987,6 +8011,9 @@ msgid "Copy trigger token"
 msgstr ""
 
 msgid "Copy value"
+msgstr ""
+
+msgid "CorpusManagement|Fuzz testing corpus management"
 msgstr ""
 
 msgid "Could not add admins as members"
@@ -8291,10 +8318,19 @@ msgstr ""
 msgid "CreateValueStreamForm|'%{name}' Value Stream created"
 msgstr ""
 
+msgid "CreateValueStreamForm|Add another stage"
+msgstr ""
+
 msgid "CreateValueStreamForm|Add stage"
 msgstr ""
 
 msgid "CreateValueStreamForm|All default stages are currently visible"
+msgstr ""
+
+msgid "CreateValueStreamForm|Create from default template"
+msgstr ""
+
+msgid "CreateValueStreamForm|Create from no template"
 msgstr ""
 
 msgid "CreateValueStreamForm|Default stages"
@@ -8312,16 +8348,13 @@ msgstr ""
 msgid "CreateValueStreamForm|End event: "
 msgstr ""
 
-msgid "CreateValueStreamForm|Enter a name for the stage"
-msgstr ""
-
 msgid "CreateValueStreamForm|Enter stage name"
 msgstr ""
 
-msgid "CreateValueStreamForm|Maximum length %{maxLength} characters"
+msgid "CreateValueStreamForm|Enter value stream name"
 msgstr ""
 
-msgid "CreateValueStreamForm|Name"
+msgid "CreateValueStreamForm|Maximum length %{maxLength} characters"
 msgstr ""
 
 msgid "CreateValueStreamForm|Name is required"
@@ -8331,6 +8364,9 @@ msgid "CreateValueStreamForm|New stage"
 msgstr ""
 
 msgid "CreateValueStreamForm|Please select a start event first"
+msgstr ""
+
+msgid "CreateValueStreamForm|Please select an end event"
 msgstr ""
 
 msgid "CreateValueStreamForm|Recover hidden stage"
@@ -8354,6 +8390,9 @@ msgstr ""
 msgid "CreateValueStreamForm|Stage name already exists"
 msgstr ""
 
+msgid "CreateValueStreamForm|Stage name is required"
+msgstr ""
+
 msgid "CreateValueStreamForm|Start event"
 msgstr ""
 
@@ -8367,6 +8406,9 @@ msgid "CreateValueStreamForm|Start event: "
 msgstr ""
 
 msgid "CreateValueStreamForm|Update stage"
+msgstr ""
+
+msgid "CreateValueStreamForm|Value Stream name"
 msgstr ""
 
 msgid "Created"
@@ -15368,6 +15410,9 @@ msgstr ""
 msgid "Integrations|Enable comments"
 msgstr ""
 
+msgid "Integrations|Failed to link namespace. Please try again."
+msgstr ""
+
 msgid "Integrations|Failed to load namespaces. Please try again."
 msgstr ""
 
@@ -15854,6 +15899,12 @@ msgstr ""
 msgid "IssueAnalytics|Weight"
 msgstr ""
 
+msgid "IssueBoards|An error occurred while assigning the selected epic to the issue."
+msgstr ""
+
+msgid "IssueBoards|An error occurred while fetching the assigned epic of the selected issue."
+msgstr ""
+
 msgid "IssueBoards|An error occurred while setting notifications status. Please try again."
 msgstr ""
 
@@ -16052,13 +16103,25 @@ msgstr ""
 msgid "JiraService|%{user_link} mentioned this issue in %{entity_link} of %{project_link}%{branch}:{quote}%{entity_message}{quote}"
 msgstr ""
 
+msgid "JiraService|An error occured while fetching issue list"
+msgstr ""
+
+msgid "JiraService|Define the type of Jira issue to create from a vulnerability."
+msgstr ""
+
 msgid "JiraService|Displaying Jira issues while leaving the GitLab issue functionality enabled might be confusing. Consider %{linkStart}disabling GitLab issues%{linkEnd} if they won’t otherwise be used."
 msgstr ""
 
 msgid "JiraService|Enable Jira issues"
 msgstr ""
 
+msgid "JiraService|Enable Jira issues creation from vulnerabilities"
+msgstr ""
+
 msgid "JiraService|Events for %{noteable_model_name} are disabled."
+msgstr ""
+
+msgid "JiraService|Fetch issue types for this Jira project"
 msgstr ""
 
 msgid "JiraService|For example, 12, 24"
@@ -16068,6 +16131,9 @@ msgid "JiraService|If different from Web URL"
 msgstr ""
 
 msgid "JiraService|Issue List"
+msgstr ""
+
+msgid "JiraService|Issues created from vulnerabilities in this project will be Jira issues, even if GitLab issues are enabled."
 msgstr ""
 
 msgid "JiraService|Jira API URL"
@@ -16085,6 +16151,9 @@ msgstr ""
 msgid "JiraService|Jira issue tracker"
 msgstr ""
 
+msgid "JiraService|Jira issue type"
+msgstr ""
+
 msgid "JiraService|Jira project key"
 msgstr ""
 
@@ -16095,6 +16164,15 @@ msgid "JiraService|Open Jira"
 msgstr ""
 
 msgid "JiraService|Password or API token"
+msgstr ""
+
+msgid "JiraService|Project key changed, refresh list"
+msgstr ""
+
+msgid "JiraService|Project key is required to generate issue types"
+msgstr ""
+
+msgid "JiraService|Select issue type"
 msgstr ""
 
 msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
@@ -16909,6 +16987,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Line changes"
+msgstr ""
+
+msgid "Link"
 msgstr ""
 
 msgid "Link Prometheus monitoring to GitLab."
@@ -18770,12 +18851,6 @@ msgstr ""
 msgid "NetworkPolicies|Allow"
 msgstr ""
 
-msgid "NetworkPolicies|Allow all inbound traffic to %{selector} from %{ruleSelector} on %{ports}"
-msgstr ""
-
-msgid "NetworkPolicies|Allow all outbound traffic from %{selector} to %{ruleSelector} on %{ports}"
-msgstr ""
-
 msgid "NetworkPolicies|Are you sure you want to delete this policy? This action cannot be undone."
 msgstr ""
 
@@ -18792,6 +18867,12 @@ msgid "NetworkPolicies|Delete policy"
 msgstr ""
 
 msgid "NetworkPolicies|Delete policy: %{policy}"
+msgstr ""
+
+msgid "NetworkPolicies|Deny all inbound traffic to %{selector} from %{ruleSelector} on %{ports}"
+msgstr ""
+
+msgid "NetworkPolicies|Deny all outbound traffic from %{selector} to %{ruleSelector} on %{ports}"
 msgstr ""
 
 msgid "NetworkPolicies|Deny all traffic"
@@ -20656,6 +20737,9 @@ msgid "PerformanceBar|Download"
 msgstr ""
 
 msgid "PerformanceBar|Elasticsearch calls"
+msgstr ""
+
+msgid "PerformanceBar|External Http calls"
 msgstr ""
 
 msgid "PerformanceBar|Frontend resources"
@@ -22611,7 +22695,7 @@ msgstr ""
 msgid "Projects to index"
 msgstr ""
 
-msgid "Projects will be permanently deleted after a 7-day waiting period."
+msgid "Projects will be permanently deleted after a %{waiting_period}-day waiting period."
 msgstr ""
 
 msgid "Projects will be permanently deleted immediately."
@@ -23076,6 +23160,9 @@ msgstr ""
 msgid "ProtectedEnvironment|Environment"
 msgstr ""
 
+msgid "ProtectedEnvironment|Only specified users can execute deployments in a protected environment."
+msgstr ""
+
 msgid "ProtectedEnvironment|Protect"
 msgstr ""
 
@@ -23083,9 +23170,6 @@ msgid "ProtectedEnvironment|Protect an environment"
 msgstr ""
 
 msgid "ProtectedEnvironment|Protected Environment (%{protected_environments_count})"
-msgstr ""
-
-msgid "ProtectedEnvironment|Protecting an environment restricts the users who can execute deployments."
 msgstr ""
 
 msgid "ProtectedEnvironment|Select an environment"
@@ -23097,7 +23181,7 @@ msgstr ""
 msgid "ProtectedEnvironment|Select users to deploy and manage Feature Flag settings"
 msgstr ""
 
-msgid "ProtectedEnvironment|There are currently no protected environments, protect an environment with the form above."
+msgid "ProtectedEnvironment|There are currently no protected environments. Protect an environment with this form."
 msgstr ""
 
 msgid "ProtectedEnvironment|Unprotect"
@@ -25174,9 +25258,6 @@ msgstr ""
 msgid "SecurityReports|Fuzzing artifacts"
 msgstr ""
 
-msgid "SecurityReports|Go to the %{linkStart}pipelines tab%{linkEnd} to download the security reports"
-msgstr ""
-
 msgid "SecurityReports|Hide dismissed"
 msgstr ""
 
@@ -25238,9 +25319,6 @@ msgid "SecurityReports|Security reports help page link"
 msgstr ""
 
 msgid "SecurityReports|Security scans have run"
-msgstr ""
-
-msgid "SecurityReports|Security scans have run. Go to the %{linkStart}pipelines tab%{linkEnd} to download the security reports"
 msgstr ""
 
 msgid "SecurityReports|Select a project to add by using the project search field above."
@@ -27755,10 +27833,10 @@ msgstr[1] ""
 msgid "Terraform|%{user} updated %{timeAgo}"
 msgstr ""
 
-msgid "Terraform|A Terraform report failed to generate."
+msgid "Terraform|A report failed to generate."
 msgstr ""
 
-msgid "Terraform|A Terraform report was generated in your pipelines."
+msgid "Terraform|A report was generated in your pipelines."
 msgstr ""
 
 msgid "Terraform|Actions"
@@ -27818,10 +27896,10 @@ msgstr ""
 msgid "Terraform|States"
 msgstr ""
 
-msgid "Terraform|The Terraform report %{name} failed to generate."
+msgid "Terraform|The report %{name} failed to generate."
 msgstr ""
 
-msgid "Terraform|The Terraform report %{name} was generated in your pipelines."
+msgid "Terraform|The report %{name} was generated in your pipelines."
 msgstr ""
 
 msgid "Terraform|To remove the State file and its versions, type %{name} to confirm:"
@@ -28226,6 +28304,9 @@ msgstr ""
 msgid "The maximum file size allowed is %{size}."
 msgstr ""
 
+msgid "The maximum file size is %{size}."
+msgstr ""
+
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
 msgstr ""
 
@@ -28388,7 +28469,7 @@ msgstr ""
 msgid "The user map is a mapping of the FogBugz users that participated on your projects to the way their email address and usernames will be imported into GitLab. You can change this by populating the table below."
 msgstr ""
 
-msgid "The user you are trying to approve is not pending an approval"
+msgid "The user you are trying to approve is not pending approval"
 msgstr ""
 
 msgid "The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated"
@@ -30050,6 +30131,9 @@ msgstr ""
 msgid "Trigger"
 msgstr ""
 
+msgid "Trigger a pipeline for a branch or tag by generating a trigger token and using it with an API call. The token impersonates a user's project access and permissions."
+msgstr ""
+
 msgid "Trigger cluster reindexing"
 msgstr ""
 
@@ -30084,9 +30168,6 @@ msgid "Trigger was successfully updated."
 msgstr ""
 
 msgid "Triggerer"
-msgstr ""
-
-msgid "Triggers can force a specific branch or tag to get rebuilt with an API call. These tokens will impersonate their associated user including their access to projects and their project permissions."
 msgstr ""
 
 msgid "Troubleshoot and monitor your application with tracing"
@@ -31341,6 +31422,9 @@ msgstr ""
 msgid "View users statistics"
 msgstr ""
 
+msgid "Viewed"
+msgstr ""
+
 msgid "Viewing commit"
 msgstr ""
 
@@ -31717,6 +31801,12 @@ msgid "WebAuthn only works with HTTPS-enabled websites. Contact your administrat
 msgstr ""
 
 msgid "WebIDE|Merge request"
+msgstr ""
+
+msgid "WebIDE|You need permission to edit files directly in this project."
+msgstr ""
+
+msgid "WebIDE|You need permission to edit files directly in this project. Fork this project to make your changes and submit a merge request."
 msgstr ""
 
 msgid "Webhook"
@@ -32552,6 +32642,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an on-call schedule for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to remove an on-call rotation from this project"
+msgstr ""
+
 msgid "You have insufficient permissions to remove an on-call schedule from this project"
 msgstr ""
 
@@ -33036,6 +33129,12 @@ msgid "Zoom meeting removed"
 msgstr ""
 
 msgid "[No reason]"
+msgstr ""
+
+msgid "`end_time` should not exceed one month after `start_time`"
+msgstr ""
+
+msgid "`start_time` should precede `end_time`"
 msgstr ""
 
 msgid "a deleted user"

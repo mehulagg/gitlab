@@ -65,7 +65,9 @@ export default {
       } else if (milestone.title === NO_MILESTONE) {
         id = 0;
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone_id = id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone = {
         ...milestone,
         id,

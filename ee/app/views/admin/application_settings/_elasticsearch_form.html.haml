@@ -3,21 +3,18 @@
 - recreate_index_url = help_page_url('integration/elasticsearch.md')
 - recreate_index_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: recreate_index_url }
 - recreate_index_text = _("Changes won't take place until the index is %{link_start}recreated%{link_end}.").html_safe % { link_start: recreate_index_link_start, link_end: '</a>'.html_safe }
-- expanded = integration_expanded?('elasticsearch_')
 - elasticsearch_available = Gitlab::Elastic::Helper.default.client.ping
 
-%section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded), data: { qa_selector: 'elasticsearch_tab' } }
+%section.settings.expanded.as-elasticsearch.no-animate#js-elasticsearch-settings{ data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
       = _('Advanced Search')
-    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
-      = expanded ? 'Collapse' : 'Expand'
     %p
       = _('Advanced Search with Elasticsearch')
 
   .settings-content
-    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
-      = form_errors(@application_setting) if expanded
+    = form_for @application_setting, url: advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
+      = form_errors(@application_setting)
 
       %fieldset
         .sub-section

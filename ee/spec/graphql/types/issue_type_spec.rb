@@ -30,7 +30,7 @@ RSpec.describe GitlabSchema.types['Issue'] do
 
         blocked_issue2 = create(:issue, project: project)
         blocking_issue2 = create(:issue, project: project)
-        create :issue_link, source: blocked_issue2, target: blocking_issue2, link_type: IssueLink::TYPE_IS_BLOCKED_BY
+        create :issue_link, source: blocking_issue2, target: blocked_issue2, link_type: IssueLink::TYPE_BLOCKS
 
         project2 = create(:project, :public, group: group)
         create(:issue, project: project2)

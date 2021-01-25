@@ -75,7 +75,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#create_standalone_indices' do
+  describe '#create_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     after do
       @indices.each do |index_name, _|
         helper.delete_index(index_name: index_name)
@@ -103,7 +103,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#delete_standalone_indices' do
+  describe '#delete_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     before do
       helper.create_standalone_indices
     end

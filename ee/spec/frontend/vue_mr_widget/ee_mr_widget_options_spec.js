@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { nextTick } from 'vue';
+import Vue, { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
 import MrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
 import {
   sastDiffSuccessMock,
@@ -11,6 +12,8 @@ import {
   coverageFuzzingDiffSuccessMock,
   apiFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import { securityReportDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -18,12 +21,12 @@ import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
 import mockData, {
   baseBrowserPerformance,
   headBrowserPerformance,
   baseLoadPerformance,
   headLoadPerformance,
-  pipelineJobs,
 } from './mock_data';
 
 // Force Jest to transpile and cache
@@ -31,6 +34,8 @@ import mockData, {
 import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 // eslint-disable-next-line no-unused-vars
 import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+
+Vue.use(VueApollo);
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
@@ -999,8 +1004,6 @@ describe('ee merge request widget options', () => {
   });
 
   describe('CE security report', () => {
-    const PIPELINE_JOBS_ENDPOINT = `/api/undefined/projects/${mockData.target_project_id}/pipelines/${mockData.pipeline.id}/jobs`;
-
     describe.each`
       context                               | canReadVulnerabilities | hasPipeline | featureFlag | shouldRender
       ${'user cannot read vulnerabilities'} | ${false}               | ${true}     | ${true}     | ${true}
@@ -1017,8 +1020,15 @@ describe('ee merge request widget options', () => {
 
         gon.features = { coreSecurityMrWidget: featureFlag };
 
-        mock.onGet(PIPELINE_JOBS_ENDPOINT).replyOnce(200, pipelineJobs);
-        createComponent({ propsData: { mrData: gl.mrWidgetData } });
+        createComponent({
+          propsData: { mrData: gl.mrWidgetData },
+          apolloProvider: createMockApollo([
+            [
+              securityReportDownloadPathsQuery,
+              async () => ({ data: securityReportDownloadPathsQueryResponse }),
+            ],
+          ]),
+        });
 
         return waitForPromises();
       });

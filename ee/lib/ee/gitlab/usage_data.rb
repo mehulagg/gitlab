@@ -407,10 +407,28 @@ module EE
           # time outing batch queries, to avoid that
           # different join strategy is used for HLL counter
           if ::Feature.enabled?(:postgres_hll_batch_counting)
-            relation = ::Security::Scan.where(time_period).group(:created_at)
+            scans_table = ::Security::Scan.arel_table
+            inner_relation = ::Security::Scan.select(:id)
+                               .where(
+                                 to_date_arel_node(Arel.sql('date_range_source'))
+                                   .eq(to_date_arel_node(scans_table[time_period.keys[0]]))
+                               )
 
-            start = relation.select('MIN(id) as min_id').order('min_id ASC').first&.min_id
-            finish = relation.select('MAX(id) as max_id').order('max_id DESC').first&.max_id
+            outer_relation = ::Security::Scan
+                               .from("generate_series(
+                                '#{time_period.values[0].first.to_time.to_s(:db)}'::timestamp,
+                                '#{time_period.values[0].last.to_time.to_s(:db)}'::timestamp,
+                                '1 day'::interval) date_range_source")
+
+            start_id = outer_relation
+                         .select("(#{inner_relation.order(id: :asc).limit(1).to_sql})")
+                         .order('1 ASC NULLS LAST')
+                         .first&.id
+
+            finish_id = outer_relation
+                          .select("(#{inner_relation.order(id: :desc).limit(1).to_sql})")
+                          .order('1 DESC NULLS LAST')
+                          .first&.id
 
             ::Security::Scan.scan_types.each do |name, scan_type|
               relation = ::Security::Scan.joins(:build)
@@ -419,8 +437,8 @@ module EE
                            .where(security_scans: time_period)
 
               pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
-                if start && finish
-                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start, finish: finish)
+                if start_id && finish_id
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id)
                 else
                   0
                 end
@@ -441,6 +459,11 @@ module EE
           pipelines_with_secure_jobs
         end
         # rubocop: enable UsageData/LargeTable
+
+        def to_date_arel_node(column)
+          locked_timezone = Arel::Nodes::NamedFunction.new('TIMEZONE', [Arel.sql("'UTC'"), column])
+          Arel::Nodes::NamedFunction.new('DATE', [locked_timezone])
+        end
 
         def approval_merge_request_rule_minimum_id
           strong_memoize(:approval_merge_request_rule_minimum_id) do

@@ -5,6 +5,7 @@ module EE
     module Usage
       module MetricDefinition
         extend ActiveSupport::Concern
+
         class_methods do
           extend ::Gitlab::Utils::Override
 

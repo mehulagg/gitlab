@@ -120,7 +120,7 @@ module Geo
       # Also, if another verification job is running, this will make that job
       # set state to pending after it finishes, since the calculated checksum
       # is already invalidated.
-      model_record.verification_started!
+      verification_state_tracker.verification_started!
 
       Geo::VerificationWorker.perform_async(replicable_name, model_record.id)
     end
@@ -128,7 +128,7 @@ module Geo
     # Calculates checksum and asks the model/registry to manage verification
     # state.
     def verify
-      model_record.track_checksum_attempt! do
+      verification_state_tracker.track_checksum_attempt! do
         model_record.calculate_checksum
       end
     end
@@ -157,6 +157,10 @@ module Geo
 
     def secondary_checksum
       registry.verification_checksum
+    end
+
+    def verification_state_tracker
+      Gitlab::Geo.secondary? ? registry : model_record
     end
   end
 end

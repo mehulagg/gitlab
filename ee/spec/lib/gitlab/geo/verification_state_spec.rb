@@ -244,6 +244,7 @@ RSpec.describe Gitlab::Geo::VerificationState do
       expect(subject.reload.verification_failed?).to be_truthy
       expect(subject.reload.verification_failure).to eq 'Failure to calculate checksum: An error message'
       expect(subject.verification_retry_count).to be 1
+      expect(subject.verification_checksum).to be_nil
     end
   end
 end

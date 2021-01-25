@@ -117,6 +117,11 @@ module EE
       end
 
       with_scope :subject
+      condition(:coverage_fuzzing_enabled) do
+        @subject.feature_available?(:coverage_fuzzing)
+      end
+
+      with_scope :subject
       condition(:on_demand_scans_enabled) do
         @subject.feature_available?(:security_on_demand_scans)
       end
@@ -212,6 +217,10 @@ module EE
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
         enable :read_vulnerability
         enable :read_vulnerability_scanner
+      end
+
+      rule { coverage_fuzzing_enabled & can?(:developer_access) }.policy do
+        enable :read_coverage_fuzzing
       end
 
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do

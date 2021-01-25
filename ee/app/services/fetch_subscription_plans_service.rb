@@ -42,10 +42,24 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    if @namespace_id.present?
-      "subscription-plan-#{@plan}-#{@namespace_id}"
+    if Feature.enabled?(:pnp_subscription_plan_cache_key)
+      if @namespace_id.present?
+        "pnp-subscription-plan-#{@plan}-#{@namespace_id}"
+      else
+        "pnp-subscription-plan-#{@plan}"
+      end
+    elsif Feature.enabled?(:subscription_plan_cache_key)
+      if @namespace_id.present?
+        "subscription-plan-#{@plan}-#{@namespace_id}"
+      else
+        "subscription-plan-#{@plan}"
+      end
     else
-      "subscription-plan-#{@plan}"
+      if @namespace_id.present?
+        "subscription-plans-#{@plan}-#{@namespace_id}"
+      else
+        "subscription-plans-#{@plan}"
+      end
     end
   end
 end

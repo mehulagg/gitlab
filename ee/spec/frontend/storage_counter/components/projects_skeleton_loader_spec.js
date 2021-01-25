@@ -30,7 +30,7 @@ describe('ProjectsSkeletonLoader', () => {
     it('has the correct classes', () => {
       expect(findDesktopLoader().classes()).toEqual([
         'gl-display-none',
-        'gl-display-md-flex',
+        'gl-md-display-flex',
         'gl-flex-direction-column',
       ]);
     });
@@ -44,7 +44,7 @@ describe('ProjectsSkeletonLoader', () => {
     it('has the correct classes', () => {
       expect(findMobileLoader().classes()).toEqual([
         'gl-flex-direction-column',
-        'gl-display-md-none',
+        'gl-md-display-none',
       ]);
     });
   });

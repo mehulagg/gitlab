@@ -246,58 +246,56 @@ export default {
         />
       </div>
     </template>
-    <template>
-      <issuable-body
-        :issuable="requirementObject"
-        :enable-edit="canEditRequirement"
-        :enable-autocomplete="false"
-        :enable-autosave="false"
-        :edit-form-visible="enableRequirementEdit || isCreate"
-        :show-field-title="true"
-        :description-preview-path="descriptionPreviewPath"
-        :description-help-path="descriptionHelpPath"
-        status-badge-class="status-box-open"
-        status-icon="issue-open-m"
-        @edit-issuable="$emit($options.events.enableEdit, $event)"
-        @keydown-title.escape.exact.stop="handleFormInputKeyDown"
-        @keydown-description.escape.exact.stop="handleFormInputKeyDown"
-        @keydown-title.meta.enter="handleSave(arguments[1])"
-        @keydown-title.ctrl.enter="handleSave(arguments[1])"
-        @keydown-description.meta.enter="handleSave(arguments[1])"
-        @keydown-description.ctrl.enter="handleSave(arguments[1])"
-      >
-        <template #edit-form-actions="issuableMeta">
-          <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
-            __('Satisfied')
-          }}</gl-form-checkbox>
-          <div class="gl-display-flex requirement-form-actions gl-mt-6">
-            <gl-button
-              :disabled="
-                requirementRequestActive ||
-                issuableMeta.issuableTitle.length > $options.maxTitleLength ||
-                !issuableMeta.issuableTitle.length
-              "
-              :loading="requirementRequestActive"
-              data-testid="requirement-save"
-              variant="success"
-              category="primary"
-              class="gl-mr-auto js-requirement-save"
-              @click="handleSave(issuableMeta)"
-            >
-              {{ saveButtonLabel }}
-            </gl-button>
-            <gl-button
-              data-testid="requirement-cancel"
-              variant="default"
-              category="primary"
-              class="js-requirement-cancel"
-              @click="handleCancel"
-            >
-              {{ __('Cancel') }}
-            </gl-button>
-          </div>
-        </template>
-      </issuable-body>
-    </template>
+    <issuable-body
+      :issuable="requirementObject"
+      :enable-edit="canEditRequirement"
+      :enable-autocomplete="false"
+      :enable-autosave="false"
+      :edit-form-visible="enableRequirementEdit || isCreate"
+      :show-field-title="true"
+      :description-preview-path="descriptionPreviewPath"
+      :description-help-path="descriptionHelpPath"
+      status-badge-class="status-box-open"
+      status-icon="issue-open-m"
+      @edit-issuable="$emit($options.events.enableEdit, $event)"
+      @keydown-title.escape.exact.stop="handleFormInputKeyDown"
+      @keydown-description.escape.exact.stop="handleFormInputKeyDown"
+      @keydown-title.meta.enter="handleSave(arguments[1])"
+      @keydown-title.ctrl.enter="handleSave(arguments[1])"
+      @keydown-description.meta.enter="handleSave(arguments[1])"
+      @keydown-description.ctrl.enter="handleSave(arguments[1])"
+    >
+      <template #edit-form-actions="issuableMeta">
+        <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
+          __('Satisfied')
+        }}</gl-form-checkbox>
+        <div class="gl-display-flex requirement-form-actions gl-mt-6">
+          <gl-button
+            :disabled="
+              requirementRequestActive ||
+              issuableMeta.issuableTitle.length > $options.maxTitleLength ||
+              !issuableMeta.issuableTitle.length
+            "
+            :loading="requirementRequestActive"
+            data-testid="requirement-save"
+            variant="success"
+            category="primary"
+            class="gl-mr-auto js-requirement-save"
+            @click="handleSave(issuableMeta)"
+          >
+            {{ saveButtonLabel }}
+          </gl-button>
+          <gl-button
+            data-testid="requirement-cancel"
+            variant="default"
+            category="primary"
+            class="js-requirement-cancel"
+            @click="handleCancel"
+          >
+            {{ __('Cancel') }}
+          </gl-button>
+        </div>
+      </template>
+    </issuable-body>
   </gl-drawer>
 </template>

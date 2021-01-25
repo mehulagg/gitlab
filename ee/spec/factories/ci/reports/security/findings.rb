@@ -31,9 +31,7 @@ FactoryBot.define do
     scanner factory: :ci_reports_security_scanner
     severity { :high }
     scan factory: :ci_reports_security_scan
-    sequence(:uuid) do |n|
-      Gitlab::UUID.v5("#{report_type}-#{identifiers.first&.fingerprint}-#{location.fingerprint}-#{n}")
-    end
+    sequence(:uuid) { generate(:vulnerability_finding_uuid) }
 
     skip_create
 

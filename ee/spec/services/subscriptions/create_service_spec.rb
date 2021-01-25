@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Subscriptions::CreateService do
-  subject { described_class.new(user, group: group, customer_params: customer_params, subscription_params: subscription_params) }
+  subject(:execute) { described_class.new(user, group: group, customer_params: customer_params, subscription_params: subscription_params).execute }
 
   let_it_be(:user) { create(:user, id: 111, first_name: 'First name', last_name: 'Last name', email: 'first.last@gitlab.com') }
   let_it_be(:group) { create(:group, id: 222, name: 'Group name') }
@@ -39,7 +39,7 @@ RSpec.describe Subscriptions::CreateService do
       end
 
       it 'returns the response hash' do
-        expect(subject.execute).to eq(success: false, data: { errors: 'failed to create customer' })
+        expect(execute).to eq(success: false, data: { errors: 'failed to create customer' })
       end
     end
 
@@ -54,7 +54,7 @@ RSpec.describe Subscriptions::CreateService do
           .with(anything, customer_email, 'token')
           .and_return(success: true, data: { success: true, subscription_id: 'xxx' })
 
-        subject.execute
+        execute
       end
 
       context 'when failing to create a subscription' do
@@ -63,16 +63,10 @@ RSpec.describe Subscriptions::CreateService do
         end
 
         it 'returns the response hash' do
-          expect(subject.execute).to eq(success: false, data: { errors: 'failed to create subscription' })
+          expect(execute).to eq(success: false, data: { errors: 'failed to create subscription' })
         end
 
-        it 'does not register a namespace onboarding progress action' do
-          OnboardingProgress.onboard(group)
-
-          subject.execute
-
-          expect(OnboardingProgress.completed?(group, :subscription_created)).to eq(false)
-        end
+        it_behaves_like 'does not record an onboarding progress action'
       end
 
       context 'when successfully creating a subscription' do
@@ -81,7 +75,7 @@ RSpec.describe Subscriptions::CreateService do
         end
 
         it 'returns the response hash' do
-          expect(subject.execute).to eq(success: true, data: { success: true, subscription_id: 'xxx' })
+          expect(execute).to eq(success: true, data: { success: true, subscription_id: 'xxx' })
         end
       end
     end
@@ -95,21 +89,17 @@ RSpec.describe Subscriptions::CreateService do
       it 'passes the correct parameters for creating a customer' do
         expect(client).to receive(:create_customer).with(create_service_params[:customer])
 
-        subject.execute
+        execute
       end
 
       it 'passes the correct parameters for creating a subscription' do
         expect(client).to receive(:create_subscription).with(create_service_params[:subscription], customer_email, 'token')
 
-        subject.execute
+        execute
       end
 
-      it 'registers a namespace onboarding progress action' do
-        OnboardingProgress.onboard(group)
-
-        subject.execute
-
-        expect(OnboardingProgress.completed?(group, :subscription_created)).to eq(true)
+      it_behaves_like 'records an onboarding progress action', :subscription_created do
+        let(:namespace) { group }
       end
     end
   end

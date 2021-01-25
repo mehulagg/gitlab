@@ -23,8 +23,6 @@ module EE
     prepended do
       include EachBatch
 
-      attr_writer :root_ancestor
-
       has_one :namespace_statistics
       has_one :namespace_limit, inverse_of: :namespace
       has_one :gitlab_subscription

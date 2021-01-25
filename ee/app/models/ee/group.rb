@@ -51,6 +51,7 @@ module EE
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
 
       has_one :group_wiki_repository
+      has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -162,13 +163,6 @@ module EE
 
       def groups_user_can_read_epics(groups, user, same_root: false)
         groups_user_can(groups, user, :read_epic, same_root: same_root)
-      end
-
-      def preset_root_ancestor_for(groups)
-        return groups if groups.size < 2
-
-        root = groups.first.root_ancestor
-        groups.drop(1).each { |group| group.root_ancestor = root }
       end
     end
 

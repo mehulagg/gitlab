@@ -52,7 +52,7 @@ module Geo
     end
 
     def execute_gitlab_shell_gc(lease_uuid)
-      GitGarbageCollectWorker.perform_async(project.id, task, lease_key, lease_uuid)
+      ::Projects::GitGarbageCollectWorker.perform_async(project.id, task, lease_key, lease_uuid)
     ensure
       if should_reset?
         Gitlab::Metrics.measure(:geo_reset_syncs_since_gc) do

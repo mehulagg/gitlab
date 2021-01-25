@@ -139,7 +139,12 @@ const updateRotationFromStore = (store, query, { oncallRotationUpdate }, schedul
   });
 };
 
-const deleteRotationFromStore = (store, query, { oncallRotationDestroy }, variables) => {
+const deleteRotationFromStore = (
+  store,
+  query,
+  { oncallRotationDestroy, scheduleIid },
+  variables,
+) => {
   const rotation = oncallRotationDestroy?.oncallRotation;
   if (!rotation) {
     return;
@@ -150,12 +155,16 @@ const deleteRotationFromStore = (store, query, { oncallRotationDestroy }, variab
     variables,
   });
 
-  // TODO: This needs the rotation backend to be fully integrated to work, for the moment we will place-hold it. https://gitlab.com/gitlab-org/gitlab/-/issues/262863
   const data = produce(sourceData, (draftData) => {
-    // eslint-disable-next-line no-param-reassign
-    draftData.project.incidentManagementOncallSchedules.nodes[0].rotations = [rotation].filter(
-      ({ id }) => id !== rotation.id,
+    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
+      ({ iid }) => iid === scheduleIid,
     );
+    const updatedRotations = scheduleToUpdate.rotations?.filter(({ id }) => id !== rotation.id);
+
+    // eslint-disable-next-line no-param-reassign
+    draftData.project.incidentManagementOncallSchedules.nodes.find(
+      ({ iid }) => iid === scheduleIid,
+    ).rotations = updatedRotations;
   });
 
   store.writeQuery({

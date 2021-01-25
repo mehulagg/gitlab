@@ -1,0 +1,220 @@
+import { nextTick } from 'vue';
+import { mount, shallowMount } from '@vue/test-utils';
+import { within } from '@testing-library/dom';
+import { GlAlert, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import JiraIssueCreationVulnerabilities, {
+  i18n,
+} from 'ee/integrations/edit/components/jira_issue_creation_vulnerabilities.vue';
+import { createStore } from '~/integrations/edit/store';
+
+describe('JiraIssuesFields', () => {
+  let store;
+  let wrapper;
+
+  const defaultProps = {
+    initialIssueTypeId: '10000',
+  };
+
+  const TEST_JIRA_ISSUE_TYPES = [
+    { id: '1', name: 'issue', description: 'issue' },
+    { id: '2', name: 'bug', description: 'bug' },
+    { id: '3', name: 'epic', description: 'epic' },
+  ];
+
+  const createComponent = (mountFn) => ({ props } = {}) => {
+    return extendedWrapper(
+      mountFn(JiraIssueCreationVulnerabilities, {
+        store,
+        propsData: { ...defaultProps, ...props },
+      }),
+    );
+  };
+
+  const createShallowComponent = createComponent(shallowMount);
+  const createFullComponent = createComponent(mount);
+
+  const withinComponent = () => within(wrapper.element);
+  const findHiddenInput = (name) => wrapper.find(`input[name="service[${name}]"]`);
+  const findEnableJiraVulnerabilities = () => wrapper.findByTestId('enable-jira-vulnerabilities');
+  const findIssueTypeSection = () => wrapper.findByTestId('issue-type-section');
+  const findIssueTypeDropdown = () => wrapper.findComponent(GlDropdown);
+  const findAllIssueDropdownItems = () => findIssueTypeDropdown().findAll(GlDropdownItem);
+  const findFetchIssueTypeButton = () => wrapper.findByTestId('fetch-issue-types');
+  const findFetchErrorAlert = () => wrapper.findComponent(GlAlert);
+  const setEnableJiraVulnerabilitiesChecked = (isChecked) =>
+    findEnableJiraVulnerabilities().vm.$emit('input', isChecked);
+
+  beforeEach(() => {
+    store = createStore();
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
+  describe('content', () => {
+    beforeEach(() => {
+      wrapper = createFullComponent();
+    });
+
+    it('contains a heading', () => {
+      expect(withinComponent().getByText(i18n.checkbox.label)).not.toBe(null);
+    });
+
+    it('contains a more detailed description', () => {
+      expect(withinComponent().getByText(i18n.checkbox.description)).not.toBe(null);
+    });
+
+    describe('when Jira issue creation is enabled', () => {
+      beforeEach(async () => {
+        await findEnableJiraVulnerabilities().setChecked();
+      });
+
+      it('shows a label for the issue-type selector', () => {
+        expect(withinComponent().getByText(i18n.issueTypeSelect.label)).not.toBe(null);
+      });
+
+      it('shows a reason why the issue type is needed', () => {
+        expect(withinComponent().getByText(i18n.issueTypeSelect.description)).not.toBe(null);
+      });
+    });
+  });
+
+  describe('"Enable Jira issues creation from vulnerabilities" checkbox', () => {
+    beforeEach(() => {
+      wrapper = createShallowComponent();
+    });
+
+    it.each([true, false])(
+      'toggles the hidden "vulnerabilities_enabled" input value',
+      async (isChecked) => {
+        await setEnableJiraVulnerabilitiesChecked(isChecked);
+        expect(findHiddenInput('vulnerabilities_enabled').attributes('value')).toBe(`${isChecked}`);
+      },
+    );
+
+    it.each([true, false])('toggles the Jira issue-type selection section', async (isChecked) => {
+      await setEnableJiraVulnerabilitiesChecked(isChecked);
+      expect(findIssueTypeSection().exists()).toBe(isChecked);
+    });
+  });
+
+  describe('Jira issue type dropdown', () => {
+    describe('with no Jira issues fetched', () => {
+      beforeEach(async () => {
+        wrapper = createShallowComponent();
+        await setEnableJiraVulnerabilitiesChecked(true);
+      });
+
+      it('receives the correct props', () => {
+        expect(findIssueTypeDropdown().props()).toMatchObject({
+          disabled: true,
+          loading: false,
+          text: i18n.issueTypeSelect.defaultText,
+        });
+      });
+
+      it('does not contain any dropdown-items', () => {
+        expect(findAllIssueDropdownItems()).toHaveLength(0);
+      });
+    });
+
+    describe('with Jira issues fetching in progress', () => {
+      beforeEach(async () => {
+        store.state.isLoadingJiraIssueTypes = true;
+        wrapper = createShallowComponent();
+        await setEnableJiraVulnerabilitiesChecked(true);
+      });
+
+      it('receives the correct props', () => {
+        expect(findIssueTypeDropdown().props()).toMatchObject({
+          disabled: true,
+          loading: true,
+        });
+      });
+    });
+
+    describe('with Jira issues fetched', () => {
+      beforeEach(async () => {
+        store.state.jiraIssueTypes = TEST_JIRA_ISSUE_TYPES;
+        wrapper = createShallowComponent({ props: { projectKey: 'TES' } });
+        await setEnableJiraVulnerabilitiesChecked(true);
+      });
+
+      it('receives the correct props', () => {
+        expect(findIssueTypeDropdown().props()).toMatchObject({
+          disabled: false,
+          loading: false,
+        });
+      });
+
+      it('contains a dropdown-item for each issue type', () => {
+        expect(findAllIssueDropdownItems()).toHaveLength(TEST_JIRA_ISSUE_TYPES.length);
+      });
+
+      it.each(TEST_JIRA_ISSUE_TYPES)('shows the selected issue name', async (issue) => {
+        const issueIndex = TEST_JIRA_ISSUE_TYPES.indexOf(issue);
+        findAllIssueDropdownItems().at(issueIndex).vm.$emit('click');
+        await nextTick();
+        expect(findIssueTypeDropdown().props('text')).toBe(issue.name);
+      });
+    });
+
+    describe('with Jira issue fetch failure', () => {
+      beforeEach(async () => {
+        store.state.loadingJiraIssueTypesErrorMessage = 'something went wrong';
+        wrapper = createShallowComponent();
+        await setEnableJiraVulnerabilitiesChecked(true);
+      });
+
+      it('shows an error message', () => {
+        expect(findFetchErrorAlert().exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('fetch Jira issue types button', () => {
+    beforeEach(async () => {
+      wrapper = createShallowComponent({ props: { projectKey: null } });
+      await setEnableJiraVulnerabilitiesChecked(true);
+    });
+
+    it('has a help text', () => {
+      expect(findFetchIssueTypeButton().attributes('title')).toBe(i18n.fetchIssueTypesButtonLabel);
+    });
+
+    it('emits "fetch-issues-clicked" when clicked', async () => {
+      expect(wrapper.emitted('request-get-issue-types')).toBe(undefined);
+      await findFetchIssueTypeButton().vm.$emit('click');
+      expect(wrapper.emitted('request-get-issue-types')).toHaveLength(1);
+    });
+  });
+
+  describe('Jira project key prop', () => {
+    describe('with no Jira project key', () => {
+      beforeEach(async () => {
+        wrapper = createShallowComponent({ props: { projectKey: null } });
+        await setEnableJiraVulnerabilitiesChecked(true);
+      });
+
+      it('shows a warning message telling the user to enter a valid project key', () => {
+        expect(withinComponent().getByText(i18n.projectKeyWarnings.missing)).not.toBe(null);
+      });
+    });
+
+    describe('with fetched issue types and Jira project key changing', () => {
+      beforeEach(async () => {
+        wrapper = createShallowComponent({ props: { projectKey: 'INITIAL' } });
+        await setEnableJiraVulnerabilitiesChecked(true);
+        findFetchIssueTypeButton().vm.$emit('click');
+        wrapper.setProps({ projectKey: 'CHANGED' });
+      });
+
+      it('shows a warning message telling the user to refetch the issues list', () => {
+        expect(withinComponent().getByText(i18n.projectKeyWarnings.changed)).not.toBe(null);
+      });
+    });
+  });
+});

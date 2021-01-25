@@ -123,7 +123,7 @@ export default {
   },
 
   [mutationTypes.RECEIVE_FIRST_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
-    Vue.set(state, 'epics', epics);
+    Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
     if (canAdminEpic !== undefined) {
       state.canAdminEpic = canAdminEpic;
     }
@@ -131,6 +131,16 @@ export default {
 
   [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
     Vue.set(state, 'epics', unionBy(state.epics || [], epics, 'id'));
+  },
+
+  [mutationTypes.UPDATE_CACHED_EPICS]: (state, epics) => {
+    epics.forEach((e) => {
+      Vue.set(state.epicsCacheById, e.id, e);
+    });
+  },
+
+  [mutationTypes.SET_EPIC_FETCH_IN_PROGRESS]: (state, val) => {
+    state.epicFetchInProgress = val;
   },
 
   [mutationTypes.RESET_EPICS]: (state) => {

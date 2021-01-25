@@ -124,15 +124,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
         primary_identifier: identifier,
         scanner: scanner,
         project: project,
-        uuid: "80571acf-8660-4bc8-811a-1d8dec9ab6f4",
         location_fingerprint: 'd869ba3f0b3347eb2749135a437dc07c8ae0f420')
     end
-
-    let(:uuid_v5_components) do
-      "#{finding.report_type}-#{finding.primary_identifier.fingerprint}-#{finding.location_fingerprint}-#{finding.project_id}"
-    end
-
-    let(:desired_uuid) { Gitlab::UUID.v5(uuid_v5_components) }
 
     let!(:vulnerability) { create(:vulnerability, findings: [finding], project: project) }
 
@@ -142,12 +135,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
     end
 
     subject { described_class.new(new_pipeline, new_report).execute }
-
-    it 'updates UUIDv4 to UUIDv5' do
-      subject
-
-      expect(finding.reload.uuid).to eq(desired_uuid)
-    end
 
     it 'inserts only new scanners and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Scanner.count }.by(2)
@@ -171,13 +158,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'updates existing findings with new data' do
       subject
-
       expect(finding.reload).to have_attributes(severity: 'medium', name: 'Probable insecure usage of temp file/directory.')
     end
 
     it 'updates existing vulnerability with new data' do
       subject
-
       expect(vulnerability.reload).to have_attributes(severity: 'medium', title: 'Probable insecure usage of temp file/directory.', title_html: 'Probable insecure usage of temp file/directory.')
     end
 

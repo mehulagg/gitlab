@@ -1,5 +1,7 @@
 import mockRotations from './mock_rotation.json';
 
+export const scheduleIid = '37';
+
 export const participants = [
   {
     id: '1',
@@ -16,6 +18,7 @@ export const participants = [
     avatarUrl: '',
   },
 ];
+
 export const errorMsg = 'Something went wrong';
 
 export const getOncallSchedulesQueryResponse = {
@@ -26,11 +29,12 @@ export const getOncallSchedulesQueryResponse = {
           {
             __typename: 'IncidentManagementOncallSchedule',
             iid: '37',
-            name: 'Test schedule',
+            name: 'Test schedule from query',
             description: 'Description 1 lives here',
             timezone: {
               identifier: 'Pacific/Honolulu',
             },
+            rotations: mockRotations,
           },
         ],
       },

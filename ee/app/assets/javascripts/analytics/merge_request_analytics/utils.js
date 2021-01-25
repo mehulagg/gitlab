@@ -1,7 +1,12 @@
 import dateFormat from 'dateformat';
-import { getMonthNames, dateFromParams } from '~/lib/utils/datetime_utility';
+import {
+  getMonthNames,
+  dateFromParams,
+  getDateInPast,
+  getDayDifference,
+} from '~/lib/utils/datetime_utility';
 import { dateFormats } from '../shared/constants';
-import { THROUGHPUT_CHART_STRINGS } from './constants';
+import { THROUGHPUT_CHART_STRINGS, DEFAULT_NUMBER_OF_DAYS } from './constants';
 
 /**
  * A utility function which accepts a date range and returns
@@ -66,4 +71,26 @@ export const formatThroughputChartData = (chartData) => {
       data,
     },
   ];
+};
+
+/**
+ * A utility function which accepts start and end date params
+ * and validates that the date range does not exceed the bounds
+ *
+ * @param {Date} startDate the startDate for the data range
+ * @param {Date} endDate the endDate for the data range
+ *
+ * @return {Object} an object containing the startDate and endDate
+ */
+export const parseAndValidateDates = (startDateParam, endDateParam) => {
+  let startDate = new Date(startDateParam);
+  let endDate = new Date(endDateParam);
+  const numberOfDays = getDayDifference(startDate, endDate);
+
+  if (!startDateParam.length || numberOfDays > DEFAULT_NUMBER_OF_DAYS || endDate < startDate) {
+    startDate = getDateInPast(new Date(), DEFAULT_NUMBER_OF_DAYS);
+    endDate = new Date();
+  }
+
+  return { startDate, endDate };
 };

@@ -180,7 +180,7 @@ export default {
       } else if (this.issueId) {
         this.assignIssueToEpic(epic);
       } else {
-        this.$emit('onEpicSelect', epic);
+        this.$emit('epicSelect', epic);
       }
     },
   },

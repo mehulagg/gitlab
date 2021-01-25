@@ -90,6 +90,7 @@ describe('On-call schedule', () => {
       presetType: PRESET_TYPES.WEEKS,
       timeframe: mockWeeksTimeFrame,
       rotations: expect.any(Array),
+      scheduleIid: mockSchedule.iid,
     });
   });
 });
