@@ -14,13 +14,14 @@ module Users
   #     service = Users::RefreshAuthorizedProjectsService.new(some_user)
   #     service.execute
   class RefreshAuthorizedProjectsService
-    attr_reader :user
+    attr_reader :user, :source
 
     LEASE_TIMEOUT = 1.minute.to_i
 
     # user - The User for which to refresh the authorized projects.
-    def initialize(user, incorrect_auth_found_callback: nil, missing_auth_found_callback: nil)
+    def initialize(user, source: nil, incorrect_auth_found_callback: nil, missing_auth_found_callback: nil)
       @user = user
+      @source = source
       @incorrect_auth_found_callback = incorrect_auth_found_callback
       @missing_auth_found_callback = missing_auth_found_callback
 
@@ -91,6 +92,10 @@ module Users
     # remove - The IDs of the authorization rows to remove.
     # add - Rows to insert in the form `[user id, project id, access level]`
     def update_authorizations(remove = [], add = [])
+      Gitlab::AppJsonLogger.info(event: 'authorized_projects_refresh',
+                                 source: source,
+                                 rows_deleted: remove.length,
+                                 rows_added: add.length)
       User.transaction do
         user.remove_project_authorizations(remove) unless remove.empty?
         ProjectAuthorization.insert_authorizations(add) unless add.empty?
