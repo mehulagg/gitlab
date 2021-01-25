@@ -10,7 +10,7 @@ import PartialCleanupAlert from '~/registry/explorer/components/details_page/par
 import DetailsHeader from '~/registry/explorer/components/details_page/details_header.vue';
 import TagsLoader from '~/registry/explorer/components/details_page/tags_loader.vue';
 import TagsList from '~/registry/explorer/components/details_page/tags_list.vue';
-import EmptyTagsState from '~/registry/explorer/components/details_page/empty_tags_state.vue';
+import EmptyTagsState from '~/registry/explorer/components/details_page/empty_state.vue';
 
 import getContainerRepositoryDetailsQuery from '~/registry/explorer/graphql/queries/get_container_repository_details.query.graphql';
 import deleteContainerRepositoryTagsMutation from '~/registry/explorer/graphql/mutations/delete_container_repository_tags.mutation.graphql';
@@ -22,6 +22,7 @@ import {
   graphQLImageDetailsEmptyTagsMock,
   graphQLDeleteImageRepositoryTagsMock,
   containerRepositoryMock,
+  graphQLEmptyImageDetailsMock,
   tagsMock,
   tagsPageInfo,
 } from '../mock_data';
@@ -39,7 +40,7 @@ describe('Details Page', () => {
   const findTagsList = () => wrapper.find(TagsList);
   const findDeleteAlert = () => wrapper.find(DeleteAlert);
   const findDetailsHeader = () => wrapper.find(DetailsHeader);
-  const findEmptyTagsState = () => wrapper.find(EmptyTagsState);
+  const findEmptyState = () => wrapper.find(EmptyTagsState);
   const findPartialCleanupAlert = () => wrapper.find(PartialCleanupAlert);
 
   const routeId = 1;
@@ -133,6 +134,27 @@ describe('Details Page', () => {
     });
   });
 
+  describe('when the image does not exist', () => {
+    it('does not show the default ui', async () => {
+      mountComponent({ resolver: jest.fn().mockResolvedValue(graphQLEmptyImageDetailsMock) });
+
+      await waitForApolloRequestRender();
+
+      expect(findTagsLoader().exists()).toBe(false);
+      expect(findDetailsHeader().exists()).toBe(false);
+      expect(findTagsList().exists()).toBe(false);
+      expect(findPagination().exists()).toBe(false);
+    });
+
+    it('shows an empty state message', async () => {
+      mountComponent({ resolver: jest.fn().mockResolvedValue(graphQLEmptyImageDetailsMock) });
+
+      await waitForApolloRequestRender();
+
+      expect(findEmptyState().exists()).toBe(true);
+    });
+  });
+
   describe('when the list of tags is empty', () => {
     const resolver = jest.fn().mockResolvedValue(graphQLImageDetailsEmptyTagsMock);
 
@@ -141,7 +163,7 @@ describe('Details Page', () => {
 
       await waitForApolloRequestRender();
 
-      expect(findEmptyTagsState().exists()).toBe(true);
+      expect(findEmptyState().exists()).toBe(true);
     });
 
     it('does not show the loader', async () => {
