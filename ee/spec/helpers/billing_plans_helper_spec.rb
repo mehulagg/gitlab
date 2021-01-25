@@ -154,7 +154,7 @@ RSpec.describe BillingPlansHelper do
           allow_next_instance_of(GitlabSubscriptions::PlanUpgradeService) do |instance|
             expect(instance).to receive(:execute).once.and_return({
              upgrade_for_free: for_free,
-             plan_id: plan_id
+             upgrade_plan_id: plan_id
             })
           end
         end

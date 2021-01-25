@@ -158,7 +158,7 @@ module BillingPlansHelper
   end
 
   def offer_from_previous_tier?(namespace_id, plan_id)
-    upgrade_service(namespace_id)[:plan_id] == plan_id
+    upgrade_service(namespace_id)[:upgrade_plan_id] === plan_id
   end
 
   def upgrade_for_free?(namespace_id)
