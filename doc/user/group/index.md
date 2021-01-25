@@ -705,7 +705,6 @@ This will enable the domain-checking for all new users added to the group from t
 NOTE:
 Domain restrictions currently only apply to groups and do not prevent users from being added as members of projects owned by the restricted group.
 
-
 #### Group file templates **(PREMIUM)**
 
 Group file templates allow you to share a set of templates for common file
