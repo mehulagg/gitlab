@@ -131,10 +131,6 @@ module EE
         requirements_report
       end
 
-      def retryable?
-        !merge_train_pipeline? && super
-      end
-
       def ci_secrets_management_available?
         return false unless project
 
