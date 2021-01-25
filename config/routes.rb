@@ -55,6 +55,7 @@ Rails.application.routes.draw do
 
     Gitlab.ee do
       resources :groups, only: [:new, :create]
+      resources :group_invites, only: [:new, :create]
       resources :projects, only: [:new, :create]
     end
   end

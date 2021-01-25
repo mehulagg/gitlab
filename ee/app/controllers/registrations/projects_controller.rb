@@ -5,7 +5,10 @@ module Registrations
     layout 'checkout'
 
     before_action :check_experiment_enabled
-    before_action :find_namespace, only: :new
+    before_action only: [:new] do
+      set_namespace
+      authorize_create_project!
+    end
 
     feature_category :navigation
 
@@ -27,6 +30,10 @@ module Registrations
           }
 
           record_experiment_user(:trial_onboarding_issues, trial_onboarding_context)
+
+          experiment(:registration_group_invite, actor: @project.group)
+            .track(:signup_successful, property: @project.namespace_id)
+
           redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
         else
           redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace, trial_onboarding_flow: params[:trial_onboarding_flow])
@@ -65,10 +72,12 @@ module Registrations
       access_denied! unless experiment_enabled?(:onboarding_issues)
     end
 
-    def find_namespace
-      @namespace = Namespace.find_by_id(params[:namespace_id])
-
+    def authorize_create_project!
       access_denied! unless can?(current_user, :create_projects, @namespace)
+    end
+
+    def set_namespace
+      @namespace = Namespace.find_by_id(params[:namespace_id])
     end
 
     def project_params

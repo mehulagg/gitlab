@@ -2,6 +2,10 @@
 
 RSpec.shared_examples GroupInviteMembers do
   context 'when inviting members', :snowplow do
+    before do
+      allow(Gitlab::Tracking).to receive(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+    end
+
     context 'without valid emails in the params' do
       it 'only adds creator as member' do
         expect { subject }.to change(Member, :count).by(1)
@@ -10,7 +14,7 @@ RSpec.shared_examples GroupInviteMembers do
       it 'does not track the event' do
         subject
 
-        expect_no_snowplow_event
+        expect(Gitlab::Tracking).not_to have_received(:event).with(anything, 'invite_members', label: 'new_group_form') # rubocop:disable RSpec/ExpectGitlabTracking
       end
     end
 

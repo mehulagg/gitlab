@@ -489,6 +489,9 @@ msgstr ""
 msgid "%{edit_in_new_fork_notice} Try to upload a file again."
 msgstr ""
 
+msgid "%{emailPrefix}@company.com"
+msgstr ""
+
 msgid "%{extra} more downstream pipelines"
 msgstr ""
 
@@ -10338,6 +10341,9 @@ msgstr ""
 msgid "Don't show again"
 msgstr ""
 
+msgid "Don't worry, you can always invite teammates later"
+msgstr ""
+
 msgid "Done"
 msgstr ""
 
@@ -15641,7 +15647,16 @@ msgstr ""
 msgid "Invite team members"
 msgstr ""
 
+msgid "Invite teammates to your GitLab group"
+msgstr ""
+
+msgid "Invite users to your group %{group_name} so you can collaborate on your projects"
+msgstr ""
+
 msgid "Invite your team"
+msgstr ""
+
+msgid "Invite your teammates"
 msgstr ""
 
 msgid "InviteEmail|%{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}"
@@ -15719,6 +15734,9 @@ msgstr ""
 msgid "InviteMember|Invite another member"
 msgstr ""
 
+msgid "InviteMember|Invite another teammate"
+msgstr ""
+
 msgid "InviteMember|Invite members"
 msgstr ""
 
@@ -15732,6 +15750,9 @@ msgid "InviteMember|Oops, this feature isn't ready yet"
 msgstr ""
 
 msgid "InviteMember|See who can invite members for you"
+msgstr ""
+
+msgid "InviteMember|Send invitations"
 msgstr ""
 
 msgid "InviteMember|Until then, ask an owner to invite new project members for you"
@@ -26275,6 +26296,9 @@ msgstr ""
 msgid "Skip outdated deployment jobs"
 msgstr ""
 
+msgid "Skip this for now"
+msgstr ""
+
 msgid "Skipped"
 msgstr ""
 
@@ -33821,9 +33845,6 @@ msgid "math|The math in this entry is taking too long to render and may not be d
 msgstr ""
 
 msgid "math|There was an error rendering this math block"
-msgstr ""
-
-msgid "member%{number}@company.com"
 msgstr ""
 
 msgid "merge request"

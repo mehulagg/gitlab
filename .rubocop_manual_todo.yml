@@ -1401,6 +1401,7 @@ Gitlab/NamespacedClass:
     - 'ee/elastic/**/*.rb'
     - 'scripts/**/*'
     - 'spec/migrations/**/*.rb'
+    - 'app/experiments/**/*'
     # The list above represents the permanent exclusions for this rule
     # due to the fact these files are related to infrastructure code.
     # This list should eventually be moved to .rubocop.yml after all TODOs

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import InviteMembers from './components/invite_members.vue';
+import { s__ } from '~/locale';
 
 export default () => {
   const el = document.querySelector('.js-invite-members');
@@ -9,6 +10,7 @@ export default () => {
   }
 
   const { emails, docsPath } = el.dataset;
+  const inviteLabel = s__('InviteMember|Invite Members (optional)');
 
   return new Vue({
     el,
@@ -17,6 +19,7 @@ export default () => {
         props: {
           emails: JSON.parse(emails),
           docsPath,
+          inviteLabel,
         },
       });
     },

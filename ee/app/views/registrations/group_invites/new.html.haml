@@ -1,0 +1,14 @@
+- page_title _('Invite teammates to your GitLab group')
+
+.row.flex-grow-1
+  .d-flex.flex-column.align-items-center.w-100.p-3.gl-bg-gray-10
+    .edit-group.d-flex.flex-column.align-items-center.pt-5
+      #progress-bar
+      %h2.center= _('Invite your teammates')
+      %p= _('Invite users to your group %{group_name} so you can collaborate on your projects') % { group_name: @group.name }
+      .js-invite-group-members{ data: { emails: params.dig(:group, :emails) || [],
+         docs_path: help_page_path('user/permissions'),
+         endpoint:  users_sign_up_group_invites_path(group_id: @group)} }
+      = link_to _('Skip this for now'), new_users_sign_up_project_path,  class: "gl-mt-7"
+      %p.gl-mt-3= _("Don't worry, you can always invite teammates later")
+
