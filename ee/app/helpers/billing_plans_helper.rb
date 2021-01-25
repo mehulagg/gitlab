@@ -12,8 +12,7 @@ module BillingPlansHelper
   end
 
   def upgrade_offer_type(namespace, plan)
-    return :no_offer unless namespace.actual_plan_name === Plan::BRONZE ||
-      offer_from_previous_tier?(namespace.id, plan.id)
+    return :no_offer if namespace.actual_plan_name != Plan::BRONZE || !offer_from_previous_tier?(namespace.id, plan.id)
 
     upgrade_for_free?(namespace.id) ? :upgrade_for_free : :upgrade_for_offer
   end

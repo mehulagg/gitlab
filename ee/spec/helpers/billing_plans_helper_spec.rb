@@ -131,14 +131,6 @@ RSpec.describe BillingPlansHelper do
 
     let(:plan) { OpenStruct.new({ id: '123456789' }) }
 
-    let(:namespace) do
-      OpenStruct.new({
-       actual_plan_name: plan_name,
-       id: '000000000'
-     })
-    end
-
-    subject { helper.upgrade_offer_type(namespace, plan) }
 
     context 'when plan has a valid property' do
       where(:plan_name, :for_free, :plan_id, :result) do
@@ -152,14 +144,22 @@ RSpec.describe BillingPlansHelper do
       end
 
       with_them do
+        let(:namespace) {
+          OpenStruct.new({
+           actual_plan_name: plan_name,
+           id: '000000000'
+         }) }
+
         before do
           allow_next_instance_of(GitlabSubscriptions::PlanUpgradeService) do |instance|
-            expect(instance).to receive(:execute).and_return({
+            expect(instance).to receive(:execute).once.and_return({
              upgrade_for_free: for_free,
              plan_id: plan_id
             })
           end
         end
+
+        subject { helper.upgrade_offer_type(namespace, plan) }
 
         it { is_expected.to eq(result) }
       end
