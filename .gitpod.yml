@@ -48,6 +48,8 @@ tasks:
           make gitlab-db-migrate
         fi
         cd ../gitlab
+        # Install Lefthook
+        bundle exec lefthook install
         git checkout db/structure.sql
         cd ../gitlab-development-kit
         # Waiting for GitLab ...
