@@ -5560,7 +5560,7 @@ msgstr ""
 msgid "Choose the top-level group for your repository imports."
 msgstr ""
 
-msgid "Choose visibility level, enable/disable project features (issues, repository, wiki, snippets) and set permissions."
+msgid "Choose visibility level, enable/disable project features and their permissions, disable email notifications, and show default award emoji."
 msgstr ""
 
 msgid "Choose what content you want to see on a group’s overview page."
@@ -21892,10 +21892,7 @@ msgstr ""
 msgid "ProjectSettings|Allow editing commit messages"
 msgstr ""
 
-msgid "ProjectSettings|Allow users to make copies of your repository to a new project"
-msgstr ""
-
-msgid "ProjectSettings|Allow users to request access"
+msgid "ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets"
 msgstr ""
 
 msgid "ProjectSettings|Analytics"
@@ -21920,6 +21917,9 @@ msgid "ProjectSettings|Choose your merge method, merge options, merge checks, an
 msgstr ""
 
 msgid "ProjectSettings|Choose your merge method, merge options, merge checks, merge suggestions, and set up a default description template for merge requests."
+msgstr ""
+
+msgid "ProjectSettings|Commit authors can edit commit messages on unprotected branches."
 msgstr ""
 
 msgid "ProjectSettings|Contact an admin to change this setting."
@@ -21997,10 +21997,10 @@ msgstr ""
 msgid "ProjectSettings|Issues"
 msgstr ""
 
-msgid "ProjectSettings|LFS objects from this repository are still available to forks. %{linkStart}How do I remove them?%{linkEnd}"
+msgid "ProjectSettings|LFS objects from this repository are available to forks. %{linkStart}How do I remove them?%{linkEnd}"
 msgstr ""
 
-msgid "ProjectSettings|Lightweight issue tracking system for this project"
+msgid "ProjectSettings|Lightweight issue tracking system"
 msgstr ""
 
 msgid "ProjectSettings|Manages large files such as audio, video, and graphics files"
@@ -22039,6 +22039,9 @@ msgstr ""
 msgid "ProjectSettings|Operations"
 msgstr ""
 
+msgid "ProjectSettings|Override user notification preferences for all project members"
+msgstr ""
+
 msgid "ProjectSettings|Packages"
 msgstr ""
 
@@ -22075,13 +22078,13 @@ msgstr ""
 msgid "ProjectSettings|Requirements"
 msgstr ""
 
-msgid "ProjectSettings|Requirements management system for this project"
+msgid "ProjectSettings|Requirements management system"
 msgstr ""
 
 msgid "ProjectSettings|Set the default behavior and availability of this option in merge requests. Changes made are also applied to existing merge requests."
 msgstr ""
 
-msgid "ProjectSettings|Share code pastes with others out of Git repository"
+msgid "ProjectSettings|Share code with others outside the project"
 msgstr ""
 
 msgid "ProjectSettings|Show default award emojis"
@@ -22129,16 +22132,19 @@ msgstr ""
 msgid "ProjectSettings|This setting will be applied to all projects unless overridden by an admin."
 msgstr ""
 
-msgid "ProjectSettings|This setting will override user notification preferences for all project members."
-msgstr ""
-
 msgid "ProjectSettings|This will dictate the commit history when you merge a merge request"
 msgstr ""
 
 msgid "ProjectSettings|Transfer project"
 msgstr ""
 
+msgid "ProjectSettings|Users can copy the repository to a new project"
+msgstr ""
+
 msgid "ProjectSettings|Users can only push commits to this repository that were committed with one of their own verified emails."
+msgstr ""
+
+msgid "ProjectSettings|Users can request access"
 msgstr ""
 
 msgid "ProjectSettings|View and edit files in this project"
@@ -22150,6 +22156,9 @@ msgstr ""
 msgid "ProjectSettings|View project analytics"
 msgstr ""
 
+msgid "ProjectSettings|Visualize the project's performance metrics"
+msgstr ""
+
 msgid "ProjectSettings|What are badges?"
 msgstr ""
 
@@ -22159,19 +22168,10 @@ msgstr ""
 msgid "ProjectSettings|When conflicts arise the user is given the option to rebase"
 msgstr ""
 
-msgid "ProjectSettings|When enabled, commit authors will be able to edit commit messages on unprotected branches."
-msgstr ""
-
-msgid "ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons."
-msgstr ""
-
 msgid "ProjectSettings|Wiki"
 msgstr ""
 
 msgid "ProjectSettings|With GitLab Pages you can host your static websites on GitLab"
-msgstr ""
-
-msgid "ProjectSettings|With Metrics Dashboard you can visualize this project performance metrics"
 msgstr ""
 
 msgid "ProjectTemplates|.NET Core"
