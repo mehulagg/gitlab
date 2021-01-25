@@ -22,7 +22,7 @@ View pipeline duration history:
 
 ![Pipeline duration](img/pipelines_duration_chart.png)
 
-### DORA4 Metrics 
+## DORA4 Metrics 
 
 Customer experience is becoming a key metric. Users are looking for the ability to not just  measure platform stability and other performance KPIs post-deployment but also want to set targets for customer behavior, experience, and financial impact. Tracking and measuring this indicators after deployment solves an important pain point. In a similar fashion, creating views which are managing products not projects or repos will provide users with a more relevant set of data. Given that GitLab is a tool for the entire DevOps life-cycle, the information from different workflows is integrated and can be used to measure the success of the teams.
 
@@ -38,7 +38,7 @@ These metrics are:
 
 * Time to Restore Service - How long it takes an organization to recover from a failure in production
 
-GitLab plans to add support for all the DORA4 metrics on the project and the group level. The first metric of Deployment Frequency was added to the project level [CI/CD charts](ci_cd_analytics.html#deployment-frequency-charts) and [API]( ../api/project_analytics.md).
+GitLab plans to add support for all the DORA4 metrics on the project and the group level. The first metric of Deployment Frequency was added to the project level [CI/CD charts](ci_cd_analytics.html#deployment-frequency-charts) and [API]( ../../api/project_analytics.md).
 
 ## Deployment frequency charts **(ULTIMATE)**
 
