@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
       "description": "Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.",
       "fingerprint": "15cdb5c53afd42bc22f8ca366a08d547",
       "location": {
-        "path": "foo.rb",
+        "path": "file_a.rb",
         "lines": {
           "begin": 10,
           "end": 10
@@ -40,7 +40,7 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
       ],
       "remediation_points": 550000,
       "location": {
-        "path": "foo.rb",
+        "path": "file_a.rb",
         "positions": {
           "begin": {
             "column": 14,
@@ -57,6 +57,37 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
       },
       "engine_name": "rubocop",
       "fingerprint": "ab5f8b935886b942d621399f5a2ca16e",
+      "severity": "minor"
+    }.with_indifferent_access
+  end
+
+  let(:degradation_3) do
+    {
+      "type": "Issue",
+      "check_name": "Rubocop/Metrics/ParameterLists",
+      "description": "Avoid parameter lists longer than 5 parameters. [8/5]",
+      "categories": [
+        "Complexity"
+      ],
+      "remediation_points": 550000,
+      "location": {
+        "path": "file_b.rb",
+        "positions": {
+          "begin": {
+            "column": 14,
+            "line": 20
+          },
+          "end": {
+            "column": 39,
+            "line": 20
+          }
+        }
+      },
+      "content": {
+        "body": "This cop checks for methods with too many parameters.\nThe maximum number of parameters is configurable.\nKeyword arguments can optionally be excluded from the total count."
+      },
+      "engine_name": "rubocop",
+      "fingerprint": "e9c6020381c8ce64f21251b47d1dac67",
       "severity": "minor"
     }.with_indifferent_access
   end
@@ -130,6 +161,38 @@ RSpec.describe Gitlab::Ci::Reports::CodequalityReports do
 
       it 'returns all degradations' do
         expect(all_degradations).to contain_exactly(degradation_1, degradation_2)
+      end
+    end
+  end
+
+  describe '#present_for_mr_diff' do
+    subject(:mr_diff_report) { codequality_report.present_for_mr_diff }
+
+    context 'when code quality has no degradations' do
+      it 'returns an empty hash' do
+        expect(mr_diff_report).to eq({ files: {} })
+      end
+    end
+
+    context 'when quality has degradations' do
+      before do
+        codequality_report.add_degradation(degradation_1)
+        codequality_report.add_degradation(degradation_2)
+        codequality_report.add_degradation(degradation_3)
+      end
+
+      it 'returns quality data' do
+        expect(mr_diff_report).to match(
+          files: {
+            "file_a.rb" => [
+              { line: 10, description: "Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.", severity: "major" },
+              { line: 10, description: "Avoid parameter lists longer than 5 parameters. [12/5]", severity: "minor" }
+            ],
+            "file_b.rb" => [
+              { line: 20, description: "Avoid parameter lists longer than 5 parameters. [8/5]", severity: "minor" }
+            ]
+          }
+        )
       end
     end
   end

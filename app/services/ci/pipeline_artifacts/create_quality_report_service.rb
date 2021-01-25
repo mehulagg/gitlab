@@ -22,7 +22,7 @@ module Ci
 
       def build_carrierwave_file(pipeline)
         CarrierWaveStringFile.new_file(
-          file_content: pipeline.codequality_reports.to_json,
+          file_content: pipeline.codequality_reports.present_for_mr_diff.to_json,
           filename: Ci::PipelineArtifact::DEFAULT_FILE_NAMES.fetch(:code_quality),
           content_type: 'application/json'
         )

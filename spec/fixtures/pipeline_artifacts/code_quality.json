@@ -1,43 +1,19 @@
 {
-  "degradations":
-  {
-    "9b9389167bf5b213ad08bb923b791da0": {
-      "categories": ["Complexity"],
-      "check_name": "argument_count",
-      "content": {"body": ""},
-      "description": "Method `new_array` has 8 arguments (exceeds 4 allowed). Consider refactoring.",
-      "fingerprint": "9b9389167bf5b213ad08bb923b791da0",
-      "location": {"path": "file_a.rb", "lines": {"begin": 5, "end": 5}},
-      "other_locations": [],
-      "remediation_points": 600000,
-      "severity": "major",
-      "type": "issue",
-      "engine_name": "structure"
-    },
-    "a7d73ac337d058ad2299c21c5df0dfcc": {
-      "type": "Issue",
-      "check_name": "Rubocop/Metrics/ParameterLists",
-      "description": "Avoid parameter lists longer than 5 parameters. [8/5]",
-      "categories": ["Complexity"],
-      "remediation_points": 350000,
-      "location": {"path": "file_a.rb", "positions": {"begin": {"column": 14, "line": 5}, "end": {"column": 31, "line": 5}}},
-      "content": {"body": "This cop checks for methods with too many parameters.\nThe maximum number of parameters is configurable.\nKeyword arguments can optionally be excluded from the total count."},
-      "engine_name": "rubocop",
-      "fingerprint": "a7d73ac337d058ad2299c21c5df0dfcc",
-      "severity": "minor"
-    },
-    "e9c6020381c8ce64f21251b47d1dac67": {
-      "type": "Issue",
-      "check_name": "Rubocop/Metrics/ParameterLists",
-      "description": "Avoid parameter lists longer than 5 parameters. [8/5]",
-      "categories": ["Complexity"],
-      "remediation_points": 550000,
-      "location": {"path": "file_b.rb", "positions": {"begin": {"column": 14, "line": 20}, "end": {"column": 39, "line": 20}}},
-      "content": {"body": "This cop checks for methods with too many parameters.\nThe maximum number of parameters is configurable.\nKeyword arguments can optionally be excluded from the total count."},
-      "engine_name": "rubocop",
-      "fingerprint": "e9c6020381c8ce64f21251b47d1dac67",
-      "severity": "minor"
-    }
-  },
-  "error_message": ""
+  "files": {
+    "file_a.rb": [
+      {
+        "line": 10,
+        "description": "Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.",
+        "severity": "major"
+      },
+      {
+        "line": 10,
+        "description": "Avoid parameter lists longer than 5 parameters. [12/5]",
+        "severity": "minor"
+      }
+    ],
+    "file_b.rb": [
+      { "line": 20, "description": "Avoid parameter lists longer than 5 parameters. [8/5]", "severity": "minor" }
+    ]
+  }
 }
