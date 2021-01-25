@@ -7657,6 +7657,9 @@ msgstr ""
 msgid "ContainerRegistry|Next cleanup scheduled to run on:"
 msgstr ""
 
+msgid "ContainerRegistry|No image"
+msgstr ""
+
 msgid "ContainerRegistry|Not yet scheduled"
 msgstr ""
 
@@ -7752,6 +7755,9 @@ msgstr ""
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
 msgstr ""
 
+msgid "ContainerRegistry|The requested image does not exist or has been deleted, if you think this is an error please try to refresh the page"
+msgstr ""
+
 msgid "ContainerRegistry|The value of this input should be less than 256 characters"
 msgstr ""
 
@@ -7762,6 +7768,9 @@ msgid "ContainerRegistry|There are no container images stored for this project"
 msgstr ""
 
 msgid "ContainerRegistry|There was an error during the deletion of this image repository, please try again."
+msgstr ""
+
+msgid "ContainerRegistry|This image does not exist or has been deleted"
 msgstr ""
 
 msgid "ContainerRegistry|This image has no active tags"
