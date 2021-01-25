@@ -2,25 +2,28 @@
 import EditorLite from '~/vue_shared/components/editor_lite.vue';
 import { CiSchemaExtension } from '~/editor/extensions/editor_ci_schema_ext';
 import { EDITOR_READY_EVENT } from '~/editor/constants';
+import getCommitSha from '../graphql/queries/client/commit_sha.graphql';
 
 export default {
   components: {
     EditorLite,
   },
-  inject: ['projectPath', 'projectNamespace'],
+  inject: ['ciConfigPath', 'projectPath', 'projectNamespace'],
   inheritAttrs: false,
-  props: {
-    ciConfigPath: {
-      type: String,
-      required: true,
-    },
+  data() {
+    return {
+      commitSha: '',
+    };
+  },
+  apollo: {
     commitSha: {
-      type: String,
-      required: false,
-      default: null,
+      query: getCommitSha,
     },
   },
   methods: {
+    onCiConfigUpdate(content) {
+      this.$emit('updateCiConfig', content);
+    },
     onEditorReady() {
       const editorInstance = this.$refs.editor.getEditor();
 
@@ -42,6 +45,7 @@ export default {
       :file-name="ciConfigPath"
       v-bind="$attrs"
       @[$options.readyEvent]="onEditorReady"
+      @input="onCiConfigUpdate"
       v-on="$listeners"
     />
   </div>
