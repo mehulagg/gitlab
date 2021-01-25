@@ -37,7 +37,7 @@ const notImplemented = () => {
 export const gqlClient = createGqClient(
   {},
   {
-    // fetchPolicy: fetchPolicies.NO_CACHE,
+    fetchPolicy: fetchPolicies.NO_CACHE,
   },
 );
 
