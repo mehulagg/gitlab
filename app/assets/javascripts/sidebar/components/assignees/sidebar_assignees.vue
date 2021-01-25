@@ -97,6 +97,7 @@ export default {
       :participants-query-variables="participantsQueryVariables"
       :update-assignees-mutation="updateAssigneesMutation"
       :update-assignees-variables="updateAssigneesVariables"
+      :issuable-type="issuableType"
     />
   </div>
 </template>

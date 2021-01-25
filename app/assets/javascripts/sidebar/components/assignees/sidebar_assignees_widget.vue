@@ -60,6 +60,11 @@ export default {
       required: false,
       default: null,
     },
+    issuableType: {
+      type: String,
+      required: false,
+      default: 'issue',
+    },
   },
   data() {
     return {
@@ -201,7 +206,11 @@ export default {
     @close="saveAssignees"
   >
     <template #collapsed>
-      <issuable-assignees :users="assignees" @assign-self="assignSelf" />
+      <issuable-assignees
+        :users="assignees"
+        :issuable-type="issuableType"
+        @assign-self="assignSelf"
+      />
     </template>
 
     <template #default>

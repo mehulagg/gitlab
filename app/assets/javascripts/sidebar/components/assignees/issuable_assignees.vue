@@ -14,6 +14,11 @@ export default {
       type: Array,
       required: true,
     },
+    issuableType: {
+      type: String,
+      required: false,
+      default: 'issue',
+    },
   },
   computed: {
     assigneesText() {
@@ -39,6 +44,11 @@ export default {
         <span class="gl-text-gray-400">{{ __('assign yourself') }}</span>
       </gl-button>
     </div>
-    <uncollapsed-assignee-list v-else :users="users" :root-path="rootPath" />
+    <uncollapsed-assignee-list
+      v-else
+      :users="users"
+      :root-path="rootPath"
+      :issuable-type="issuableType"
+    />
   </div>
 </template>
