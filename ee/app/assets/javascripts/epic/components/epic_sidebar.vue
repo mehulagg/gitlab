@@ -141,6 +141,7 @@ export default {
     }"
     :data-signed-in="isUserSignedIn"
     class="right-sidebar epic-sidebar"
+    :aria-label="__('Epic')"
   >
     <div class="issuable-sidebar js-issuable-update">
       <sidebar-header :sidebar-collapsed="sidebarCollapsed" />

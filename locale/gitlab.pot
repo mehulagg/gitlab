@@ -1905,6 +1905,9 @@ msgstr ""
 msgid "Admin mode enabled"
 msgstr ""
 
+msgid "Admin navigation"
+msgstr ""
+
 msgid "Admin notes"
 msgstr ""
 
@@ -4602,6 +4605,9 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
+msgid "Board"
+msgstr ""
+
 msgid "Board scope affects which issues are displayed for anyone who visits this board"
 msgstr ""
 
@@ -4851,6 +4857,9 @@ msgstr ""
 msgid "Branches|protected"
 msgstr ""
 
+msgid "Breadcrumbs"
+msgstr ""
+
 msgid "Brief title about the change"
 msgstr ""
 
@@ -4888,6 +4897,9 @@ msgid "Built-in"
 msgstr ""
 
 msgid "Bulk request concurrency"
+msgstr ""
+
+msgid "Bulk update"
 msgstr ""
 
 msgid "BulkImport|From source group"
@@ -13867,6 +13879,9 @@ msgstr ""
 msgid "Group name (your organization)"
 msgstr ""
 
+msgid "Group navigation"
+msgstr ""
+
 msgid "Group overview"
 msgstr ""
 
@@ -22604,6 +22619,9 @@ msgstr ""
 msgid "Project name suffix"
 msgstr ""
 
+msgid "Project navigation"
+msgstr ""
+
 msgid "Project order will not be saved as local storage is not available."
 msgstr ""
 
@@ -25586,6 +25604,9 @@ msgstr ""
 msgid "Security dashboard"
 msgstr ""
 
+msgid "Security navigation"
+msgstr ""
+
 msgid "Security report is out of date. Please update your branch with the latest changes from the target branch (%{targetBranchName})"
 msgstr ""
 
@@ -27699,6 +27720,9 @@ msgid "StorageSize|Unknown"
 msgstr ""
 
 msgid "Subgroup milestone"
+msgstr ""
+
+msgid "Subgroup navigation"
 msgstr ""
 
 msgid "Subgroup overview"
