@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
-    )
   )
+)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -9408,8 +9408,8 @@ CREATE TABLE application_settings (
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -20943,7 +20943,7 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
 
-CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-22 00:00:00+00'::timestamp with time zone));
+CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-21 19:00:00-05'::timestamp with time zone));
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
