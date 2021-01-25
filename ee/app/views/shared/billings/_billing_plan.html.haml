@@ -13,7 +13,7 @@
       %span.card-badge-text
         - case plan_offer_type
         - when :upgrade_for_free
-          = _("BillingPlans|Free upgrade!")
+          = s_("BillingPlans|Free upgrade!")
         - else
           = _("Upgrade offers available!")
   .card{ class: ("card-active" if is_current || show_deprecated_plan) }
@@ -22,7 +22,7 @@
         = plan_name
       - if is_current
         .text-muted
-          = _("BillingPlans|Current Plan")
+          = s_("BillingPlans|Current Plan")
 
     .card-body
       - if show_deprecated_plan

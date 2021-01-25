@@ -141,6 +141,7 @@ RSpec.describe BillingPlansHelper do
         Plan::BRONZE | false | nil          | :no_offer
         Plan::BRONZE | nil   | nil          | :no_offer
         Plan::SILVER | nil   | nil          | :no_offer
+        nil          | true  | nil          | :no_offer
       end
 
       with_them do
