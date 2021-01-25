@@ -16,24 +16,32 @@ The following documentation enables Google Workspace as a SAML provider for GitL
 
 The following guidance is based on this Google Workspace article, on how to [Set up your own custom SAML application](https://support.google.com/a/answer/6087519?hl=en):
 
-1. On the [Google Workspace Admin Console](https://admin.google.com), go to **Apps > SAML apps**.
-1. Click on the **Add App** dropdown and select **Add custom SAML app**.
-1. On the **App details** page, enter a name for the SAML app eg. *GitLab* and click **Continue**.
-1. On the **Google Identity Provider details** page, complete the following and then click **Continue**.
-    - Make a note of the **SSO URL** as you will need this when configuring the `idp_sso_target_url` setting in GitLab.
-    - Download a copy of the **Certificate** as you will need this for the `idp_certificate_fingerprint` setting in GitLab.
-1. On the **Service provider details** page, configure the following and then click **Continue**.
-    - **ACS URL** should be `https://<GITLAB_DOMAIN>/users/auth/saml/callback`
-    - **Entity ID** must be a value unique to your SAML app - but you could use `https://<GITLAB_DOMAIN>` for example. Make a note of the **Entity ID** as you will need this for the `issuer` setting in GitLab.
-    - **Name ID format** should be *EMAIL*
-    - **Name ID** should be *Basic Information > Primary email*
-1. On the **Attributes** page, add the following mappings and then click **Finish**.
+Make sure you have access to a Google Workspace [Super Admin](https://support.google.com/a/answer/2405986#super_admin) account.
+   Follow the instructions in the linked Google Workspace article, where you'll need the following information:
 
-    | Google Directory attributes | App attributes |
-    | :-------------------------- |:---------------|
-    | First name                  | `first_name`   |
-    | Last name                   | `last_name`    |
-    | Primary email               | `email`        |
+|                  | Typical value                                    | Description                                              |
+|------------------|--------------------------------------------------|----------------------------------------------------------|
+| Name of SAML App | GitLab                                           | Other names OK.                                          |
+| ACS URL          | https://<GITLAB_DOMAIN>/users/auth/saml/callback | ACS is short for Assertion Consumer Service.             |
+| GITLAB_DOMAIN    | `gitlab.example.com`                             | Set to the domain of your GitLab instance.               |
+| Entity ID        | `https://gitlab.example.com`                     | A value unique to your SAML app, you'll set it to the `issuer` in your GitLab configuration.                         |
+| Name ID format   | EMAIL                                            | Required value. Also known as `name_identifier_format`                    |
+| Name ID          | Primary email address                            | Make sure someone receives content sent to that address                |
+| First name       | `first_name`                                     | Required value to communicate with GitLab.               |
+| Last name        | `last_name`                                      | Required value to communicate with GitLab.               |
+| Primary email    | `email`                                          | Email address that Google uses to contact the app owner. |
+
+You may also use some of this information when you [Configure GitLab](#configure-gitlab).
+
+When configuring the Google Workspace SAML app, be sure to record the following information:
+
+|             | Value        | Description                                                                       |
+|-------------|--------------|-----------------------------------------------------------------------------------|
+| SSO URL     | Depends      | Google Identity Provider details. Set to the GitLab `idp_sso_target_url` setting. |
+| Certificate | Downloadable | Used for the GitLab `idp_cert_fingerprint` setting.                        |
+
+While the Google Workspace Admin provides IDP metadata, Entity ID and SHA-256 fingerprint,
+GitLab does not need that information to connect to the Google Workspace SAML app.
 
 ---
 
