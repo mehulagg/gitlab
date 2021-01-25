@@ -8,13 +8,13 @@
   = expanded ? _('Collapse') : _('Expand')
 
 %p
-  = html_escape(_('Environment variables are applied to environments via the Runner. You can use environment variables for passwords, secret keys, etc. Make variables available to the running application by prepending the variable key with %{code_open}K8S_SECRET_%{code_close}. You can set variables to be:')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
-
+  = _('You can use variables for passwords, secret keys, and so on. Instance variables are available in all projects on the instance, and are passed to environments by the runner.')
+  = link_to _('Learn more.'), help_page_path('ci/variables/README', anchor: 'instance-level-cicd-environment-variables')
+%p
+  = _('Variables can be:')
 %ul
   %li
-    = html_escape(_('%{code_open}Protected%{code_close} variables are only exposed to protected branches or tags.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+    = html_escape(_('%{code_open}Protected:%{code_close} Only exposed to protected branches or tags.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
   %li
-    = html_escape(_('%{code_open}Masked%{code_close} variables are hidden in job logs (though they must match certain regexp requirements to do so).')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
-
-%p
-  = link_to _('More information'), help_page_path('ci/variables/README', anchor: 'instance-level-cicd-environment-variables')
+    = html_escape(_('%{code_open}Masked:%{code_close} Hidden in job logs (must match regular expression requirements).')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+    = link_to _('Learn more.'), help_page_path('ci/variables/README', anchor: 'mask-a-custom-variable')
