@@ -157,7 +157,7 @@ describe('IterationDropdown', () => {
     });
   });
 
-  describe('GlDropdownItem with the right title', () => {
+  describe('GlDropdownItem', () => {
     const id = 'id';
     const title = 'title';
 
@@ -167,7 +167,7 @@ describe('IterationDropdown', () => {
       });
     });
 
-    it('renders title $title', () => {
+    it('renders the correct title', () => {
       const findFirstDropdownItemByTitle = () =>
         wrapper
           .findAll(GlDropdownItem)
@@ -255,7 +255,11 @@ describe('IterationDropdown', () => {
       await wrapper.vm.$nextTick();
       jest.runAllTimers();
 
-      // reset spy from call on mount
+      /*
+       * groupIterationsSpy is fired once on open
+       * and once on search so we assert each one independently
+       */
+
       groupIterationsSpy.mockClear();
 
       wrapper.find(GlSearchBoxByType).vm.$emit('input', searchString);
