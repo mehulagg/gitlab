@@ -4049,6 +4049,7 @@ Represents the location of a vulnerability found by a Coverage Fuzzing scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `blobPath` | String | Blob path to the vulnerable file |
 | `endLine` | String | Number of the last relevant line in the vulnerable file |
 | `file` | String | Path to the vulnerable file |
 | `startLine` | String | Number of the first relevant line in the vulnerable file |
@@ -4072,6 +4073,7 @@ Represents the location of a vulnerability found by a dependency security scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `blobPath` | String | Blob path to the vulnerable file |
 | `dependency` | VulnerableDependency | Dependency containing the vulnerability |
 | `file` | String | Path to the vulnerable file |
 
@@ -4081,6 +4083,7 @@ Represents the location of a vulnerability found by a SAST scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `blobPath` | String | Blob path to the vulnerable file |
 | `endLine` | String | Number of the last relevant line in the vulnerable file |
 | `file` | String | Path to the vulnerable file |
 | `startLine` | String | Number of the first relevant line in the vulnerable file |
@@ -4093,6 +4096,7 @@ Represents the location of a vulnerability found by a secret detection scan.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `blobPath` | String | Blob path to the vulnerable file |
 | `endLine` | String | Number of the last relevant line in the vulnerable file |
 | `file` | String | Path to the vulnerable file |
 | `startLine` | String | Number of the first relevant line in the vulnerable file |
