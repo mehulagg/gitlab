@@ -71,7 +71,7 @@ export default {
   >
     <template #header>{{ __('Issue details') }}</template>
 
-    <template>
+    <template #default>
       <board-sidebar-issue-title />
       <sidebar-assignees-widget
         :participants-query="$options.getIssueParticipants"
