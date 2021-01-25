@@ -126,58 +126,40 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
-  describe '#eligible_for_free_upgrade' do
+  describe '#upgrade_offer_type' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:actual_plan_name, :eligible, :result) do
-      Plan::BRONZE | true  | true
-      Plan::BRONZE | false | false
-      Plan::SILVER | true  | false
-      Plan::SILVER | false  | false
+    let(:plan) { OpenStruct.new({ id: '123456789' }) }
+
+    let(:namespace) do
+      OpenStruct.new({
+       actual_plan_name: plan_name,
+       id: '000000000'
+     })
     end
 
-    with_them do
-      let(:namespace) { OpenStruct.new(actual_plan_name: actual_plan_name) }
-
-      before do
-        allow_next_instance_of(GitlabSubscriptions::EligibleForFreeUpgradeService) do |instance|
-          allow(instance).to receive(:execute).and_return(eligible)
-        end
-      end
-
-      subject { helper.eligible_for_free_upgrade?(namespace) }
-
-      it { is_expected.to eq(result) }
-    end
-  end
-
-  describe '#plan_upgrade_offer' do
-    using RSpec::Parameterized::TableSyntax
-
-    context 'when plan has no valid property' do
-      let(:plan) do
-        OpenStruct.new
-      end
-
-      subject { helper.plan_upgrade_offer(true, plan) }
-
-      it { is_expected.to eq(:no_offer) }
-    end
+    subject { helper.upgrade_offer_type(namespace, plan) }
 
     context 'when plan has a valid property' do
-      where(:upgrade_offer, :plan_offer, :result) do
-        true  | true  | :upgrade_for_free
-        true  | false | :no_offer
-        false | true  | :upgrade_for_offer
-        false | false | :no_offer
+      where(:plan_name, :for_free, :plan_id, :result) do
+        Plan::BRONZE | true  | '123456789'  | :upgrade_for_free
+        Plan::BRONZE | true  | '987654321'  | :no_offer
+        Plan::BRONZE | true  | nil          | :no_offer
+        Plan::BRONZE | false | '123456789'  | :upgrade_for_offer
+        Plan::BRONZE | false | nil          | :no_offer
+        Plan::BRONZE | nil   | nil          | :no_offer
+        Plan::SILVER | nil   | nil          | :no_offer
       end
 
       with_them do
-        let(:plan) do
-          allow(helper).to receive(:offer_from_previous_tier?).and_return(plan_offer)
+        before do
+          allow_next_instance_of(GitlabSubscriptions::PlanUpgradeService) do |instance|
+            expect(instance).to receive(:execute).and_return({
+             upgrade_for_free: for_free,
+             plan_id: plan_id
+            })
+          end
         end
-
-        subject { helper.plan_upgrade_offer(upgrade_offer, plan) }
 
         it { is_expected.to eq(result) }
       end
@@ -187,14 +169,14 @@ RSpec.describe BillingPlansHelper do
   describe '#has_upgrade?' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:upgrade_offer, :result) do
+    where(:offer_type, :result) do
       :no_offer          | false
       :upgrade_for_free  | true
       :upgrade_for_offer | true
     end
 
     with_them do
-      subject { helper.has_upgrade?(upgrade_offer) }
+      subject { helper.has_upgrade?(offer_type) }
 
       it { is_expected.to eq(result) }
     end

@@ -1,7 +1,7 @@
 - purchase_link = plan.purchase_link
 - plan_name = plan.name
 - show_deprecated_plan = ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
-- has_upgrade = has_upgrade?(plan_upgrade_offer)
+- has_upgrade = has_upgrade?(plan_offer_type)
 - if show_deprecated_plan
   - plan_name      += ' (Legacy)'
   - faq_link_url   = 'https://about.gitlab.com/gitlab-com/#faq'
@@ -11,7 +11,7 @@
   - if has_upgrade
     .card-badge
       %span.card-badge-text
-        - case plan_upgrade_offer
+        - case plan_offer_type
         - when :upgrade_for_free
           = _("BillingPlans|Free upgrade!")
         - else
@@ -30,7 +30,7 @@
       - else
         .price-description
           .gl-mr-2.gl-display-flex.gl-align-items-center
-            - case plan_upgrade_offer
+            - case plan_offer_type
             - when :upgrade_for_free
               %span.gl-mr-3.price-rebate
                 = number_to_plan_currency(plan.price_per_month)
@@ -47,7 +47,7 @@
             %li= s_("BillingPlans|per user")
             %li= s_("BillingPlans|monthly")
         .price-conclusion{ class: ("invisible" unless plan.price_per_year > 0) }
-          - case plan_upgrade_offer
+          - case plan_offer_type
           - when :upgrade_for_free
             = s_("BillingPlans|for the remainder of your subscription")
           - else
@@ -69,9 +69,9 @@
     .card-footer
       - cta_class = '-new' if use_new_purchase_flow?(namespace)
       - upgrade_button_classes = upgrade_button_css_classes(namespace, plan, is_current)
-      - upgrade_button_text = plan_upgrade_offer === :upgrade_for_free ? s_('BillingPlan|Upgrade for free') : s_('BillingPlan|Upgrade')
-      - show_upgrade_button = show_upgrade_button?(purchase_link.action, plan_upgrade_offer)
-      - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_upgrade_offer)
+      - upgrade_button_text = plan_offer_type === :upgrade_for_free ? s_('BillingPlan|Upgrade for free') : s_('BillingPlan|Upgrade')
+      - show_upgrade_button = show_upgrade_button?(purchase_link.action, plan_offer_type)
+      - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_offer_type)
       .gl-min-h-7.gl-display-flex.gl-flex-wrap.gl-justify-content-end
         - if show_contact_sales_button
           = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: [("btn gl-button"), (show_upgrade_button ? "btn-success-secondary" : "btn-success")], data: { **experiment_tracking_data_for_button_click('contact_sales') }

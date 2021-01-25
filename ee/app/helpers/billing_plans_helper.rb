@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module BillingPlansHelper
+  include Gitlab::Utils::StrongMemoize
+
   def subscription_plan_info(plans_data, current_plan_code)
     plans_data.find { |plan| plan.code == current_plan_code }
   end
@@ -9,18 +11,11 @@ module BillingPlansHelper
     number_to_currency(value, unit: '$', strip_insignificant_zeros: true, format: "%u%n")
   end
 
-  def eligible_for_free_upgrade?(namespace)
-    return false unless namespace.actual_plan_name === Plan::BRONZE
+  def upgrade_offer_type(namespace, plan)
+    return :no_offer unless namespace.actual_plan_name === Plan::BRONZE ||
+      offer_from_previous_tier?(namespace.id, plan.id)
 
-    GitlabSubscriptions::EligibleForFreeUpgradeService
-      .new(namespace_id: namespace.id)
-      .execute
-  end
-
-  def plan_upgrade_offer(upgrade_offer, plan)
-    return :no_offer unless offer_from_previous_tier?(plan)
-
-    upgrade_offer ? :upgrade_for_free : :upgrade_for_offer
+    upgrade_for_free?(namespace.id) ? :upgrade_for_free : :upgrade_for_offer
   end
 
   def has_upgrade?(upgrade_offer)
@@ -163,7 +158,19 @@ module BillingPlansHelper
     group_seat_usage_path(group)
   end
 
-  def offer_from_previous_tier?(plan)
-    plan&.offer_from_previous_tier
+  def offer_from_previous_tier?(namespace_id, plan_id)
+    upgrade_service(namespace_id)[:plan_id] == plan_id
+  end
+
+  def upgrade_for_free?(namespace_id)
+    !!upgrade_service(namespace_id)[:upgrade_for_free]
+  end
+
+  def upgrade_service(namespace_id)
+    strong_memoize(:upgrade_service) do
+      GitlabSubscriptions::PlanUpgradeService
+        .new(namespace_id: namespace_id)
+        .execute
+    end
   end
 end

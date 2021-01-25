@@ -162,7 +162,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
       }
     end
 
-    subject(:eligible_for_upgrade_offer) { described_class.eligible_for_upgrade_offer(namespace_id: namespace_id) }
+    subject(:plan_upgrade_offer) { described_class.plan_upgrade_offer(namespace_id: namespace_id) }
 
     context 'the response contains errors' do
       before do

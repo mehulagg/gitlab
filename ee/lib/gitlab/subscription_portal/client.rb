@@ -45,7 +45,7 @@ module Gitlab
           end
         end
 
-        def eligible_for_upgrade_offer(namespace_id)
+        def plan_upgrade_offer(namespace_id)
           query = <<~GQL
             {
               subscription(namespaceId: "#{namespace_id}") {
