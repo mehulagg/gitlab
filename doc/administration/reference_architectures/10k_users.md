@@ -2045,9 +2045,9 @@ memory and CPU totals should translate to most systems.
 
 Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Purpose
 -|-|-|-|-
-2 | `n1-standard-4` | 15.5 | 50  | Non-GitLab resources, including Grafana, NGINX, and Prometheus
-4 | `n1-standard-4` | 15.5 | 50  | GitLab Sidekiq pods
-4 | `n1-highcpu-32` | 128  | 128 | GitLab Webservice pods
+2 | `n1-standard-4` | 7.75  | 25  | Non-GitLab resources, including Grafana, NGINX, and Prometheus
+4 | `n1-standard-4` | 15.5  | 50  | GitLab Sidekiq pods
+4 | `n1-highcpu-32` | 127.5 | 118 | GitLab Webservice pods
 
 Note that "allocatable" in this table refers to the amount of resources available to
 be used by workloads deployed to Kubernetes after accounting for the overhead of
