@@ -17,12 +17,9 @@
         - else
           = _("Upgrade offers available!")
   .card{ class: ("card-active" if is_current || show_deprecated_plan) }
-    .card-header.gl-font-weight-bold.d-flex.flex-row.justify-content-between.flex-wrap
+    .card-header.gl-line-height-normal.gl-font-weight-bold.d-flex.flex-row.justify-content-between.flex-wrap
       %div
         = plan_name
-      - if is_current
-        .text-muted
-          = s_("BillingPlans|Current Plan")
 
     .card-body
       - if show_deprecated_plan
