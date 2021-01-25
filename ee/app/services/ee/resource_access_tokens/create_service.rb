@@ -13,7 +13,7 @@ module EE
 
       def audit_event_service(token, response)
         message = if response.success?
-                    "Created #{resource_type} access token with id: #{token.user.id} with scopes: #{token.scopes}"
+                    "Created #{resource_type} access token with token_id: #{token.id} with scopes: #{token.scopes}"
                   else
                     "Attempted to create #{resource_type} access token but failed with message: #{response.message}"
                   end
