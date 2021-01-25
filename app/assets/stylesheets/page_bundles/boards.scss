@@ -138,8 +138,9 @@
   border: 1px solid var(--gray-100, $gray-100);
 }
 
-.highlighted {
-  box-shadow: 0 0 2px 4px $blue-200;
+.board-column-highlighted {
+  box-shadow: 0 0 4px -1px $blue-400;
+  background: $blue-50;
 }
 
 .board-header {

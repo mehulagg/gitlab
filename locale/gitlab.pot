@@ -1274,6 +1274,9 @@ msgstr ""
 msgid "A job artifact is an archive of files and directories saved by a job when it finishes."
 msgstr ""
 
+msgid "A label list displays all issues with the selected label."
+msgstr ""
+
 msgid "A limit of %{ci_project_subscriptions_limit} subscriptions to or from a project applies."
 msgstr ""
 
@@ -8199,6 +8202,9 @@ msgid "Create issue"
 msgstr ""
 
 msgid "Create iteration"
+msgstr ""
+
+msgid "Create list"
 msgstr ""
 
 msgid "Create lists from labels. Issues with that label appear in that list."
@@ -19084,6 +19090,9 @@ msgstr ""
 msgid "New label"
 msgstr ""
 
+msgid "New label list"
+msgstr ""
+
 msgid "New merge request"
 msgstr ""
 
@@ -24822,6 +24831,9 @@ msgstr ""
 msgid "Search forks"
 msgstr ""
 
+msgid "Search labels"
+msgstr ""
+
 msgid "Search merge requests"
 msgstr ""
 
@@ -30255,6 +30267,9 @@ msgid "Unable to load commits. Try again later."
 msgstr ""
 
 msgid "Unable to load file contents. Try again later."
+msgstr ""
+
+msgid "Unable to load labels"
 msgstr ""
 
 msgid "Unable to load the diff"

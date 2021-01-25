@@ -40,6 +40,7 @@ RSpec.describe 'issue boards', :js do
     let(:project) { create(:project, :public, namespace: group) }
 
     before do
+      stub_feature_flags(board_new_list: false)
       project.add_maintainer(user)
       group.add_reporter(user)
       login_as(user)

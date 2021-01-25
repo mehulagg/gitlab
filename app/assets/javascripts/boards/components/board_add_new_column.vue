@@ -68,6 +68,10 @@ export default {
 
       const label = this.labels.find(({ id }) => id === this.selectedLabelId);
 
+      if (!label) {
+        return;
+      }
+
       if (this.columnExists({ id: this.selectedLabelId })) {
         // TODO: maybe expand if collapsed?
         const listId = this.getListByLabel(label).id;
@@ -83,14 +87,10 @@ export default {
             this.highlight(list.id);
           })
           .catch((e) => {
-            // create list failed, reopen form and show error
+            // todo: create list failed, reopen form and show error
+            throw e;
           });
       } else {
-        // if label doesn't exist
-        if (!label) {
-          return;
-        }
-
         boardsStore.new({
           title: label.title,
           position: boardsStore.state.lists.length - 2,
@@ -103,6 +103,7 @@ export default {
         });
 
         this.highlight(boardsStore.findListByLabelId(label.id).id);
+        this.setAddColumnFormVisibility(false);
       }
     },
 
@@ -152,6 +153,10 @@ export default {
         <!-- selectbox is here in EE -->
 
         <p>{{ $options.i18n.formDescription }}</p>
+
+        <!-- TODO: tabs to Use existing label or Create new label -->
+
+        <label>{{ __('Select label') }}</label>
 
         <gl-search-box-by-type
           v-model.trim="searchTerm"

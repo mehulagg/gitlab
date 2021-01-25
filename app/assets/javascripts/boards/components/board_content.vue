@@ -1,5 +1,4 @@
 <script>
-import Vue from 'vue';
 import Draggable from 'vuedraggable';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { sortBy } from 'lodash';

@@ -12,6 +12,7 @@ import { isListDraggable } from '~/boards/boards_util';
 
 export default {
   components: {
+    BoardAddNewColumn: () => import('~/boards/components/board_add_new_column.vue'),
     BoardListHeader,
     EpicLane,
     IssuesLaneList,
@@ -98,6 +99,9 @@ export default {
     isListDraggable(list) {
       return isListDraggable(list);
     },
+    afterFormEnters() {
+      this.$refs.columns.scrollTo({ left: this.$refs.columns.scrollWidth, behavior: 'smooth' });
+    },
   },
 };
 </script>
@@ -111,6 +115,7 @@ export default {
     <component
       :is="treeRootWrapper"
       v-bind="treeRootOptions"
+      ref="columns"
       class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-mb-5 gl-bg-white gl-top-0 gl-z-index-3"
       data-testid="board-swimlanes-headers"
       @end="handleDragOnEnd"
@@ -133,6 +138,9 @@ export default {
           :is-swimlanes-header="true"
         />
       </div>
+      <transition name="slide" @after-enter="afterFormEnters">
+        <board-add-new-column class="gl-position-fixed" />
+      </transition>
     </component>
     <div class="board-epics-swimlanes gl-display-table">
       <epic-lane

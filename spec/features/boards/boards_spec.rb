@@ -18,6 +18,8 @@ RSpec.describe 'Issue Boards', :js do
 
     set_cookie('sidebar_collapsed', 'true')
 
+    stub_feature_flags(board_new_list: false)
+
     sign_in(user)
   end
 
