@@ -14,6 +14,7 @@ module QA
                     :target_branch,
                     :target_new_branch,
                     :assignee,
+                    :assignee_id,
                     :milestone,
                     :labels,
                     :file_name,
@@ -57,6 +58,7 @@ module QA
         @description = 'This is a test merge request'
         @source_branch = "qa-test-feature-#{SecureRandom.hex(8)}"
         @assignee = nil
+        @assignee_id = nil
         @milestone = nil
         @labels = []
         @file_name = "added_file-#{SecureRandom.hex(8)}.txt"
@@ -110,6 +112,7 @@ module QA
           description: @description,
           source_branch: @source_branch,
           target_branch: @target_branch,
+          assignee_id: @assignee_id || 0,
           title: @title
         }
       end

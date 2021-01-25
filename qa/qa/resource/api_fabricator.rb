@@ -112,6 +112,9 @@ module QA
 
           process_api_response(flattened_response)
         else
+          require 'pry-byebug'
+          binding.pry
+
           response = post(
             Runtime::API::Request.new(api_client, api_post_path).url,
             api_post_body)
