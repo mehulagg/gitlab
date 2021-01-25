@@ -51,7 +51,7 @@ member of a new group named `gitlab-developers`:
    ![Jira added user to group](img/jira_added_user_to_group.png)
 
 1. To give the newly-created group 'write' access, you must create a permission
-   scheme. To do this, in the admin menu, go to **Gear icon > Issues**.
+   scheme. To do this, in the admin menu, go to the gear icon and select **Issues**.
 
 1. From the sidebar, select **Permission Schemes**.
 
