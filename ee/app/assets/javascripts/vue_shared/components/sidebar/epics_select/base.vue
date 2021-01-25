@@ -1,36 +1,31 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-
-import $ from 'jquery';
-import { GlLoadingIcon } from '@gitlab/ui';
-
+import {
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
+import { debounce } from 'lodash';
 import { noneEpic } from 'ee/vue_shared/constants';
 import { __ } from '~/locale';
-
 import createStore from './store';
-
-import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
-
-import DropdownButton from './dropdown_button.vue';
-import DropdownHeader from './dropdown_header.vue';
-import DropdownSearchInput from './dropdown_search_input.vue';
-import DropdownContents from './dropdown_contents.vue';
-
 import { DropdownVariant } from './constants';
 
 export default {
+  noneEpic,
   store: createStore(),
   components: {
     GlLoadingIcon,
-    DropdownTitle,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
+    GlSearchBoxByType,
     DropdownValue,
     DropdownValueCollapsed,
-    DropdownButton,
-    DropdownHeader,
-    DropdownSearchInput,
-    DropdownContents,
   },
   props: {
     groupId: {
@@ -77,7 +72,8 @@ export default {
   },
   data() {
     return {
-      showDropdown: this.variant === DropdownVariant.Standalone,
+      isDropdownShowing: false,
+      search: '',
     };
   },
   computed: {
@@ -94,6 +90,20 @@ export default {
     },
     dropdownButtonTextClass() {
       return { 'is-default': this.isDropdownVariantStandalone };
+    },
+    dropDownTitle() {
+      return this.selectedEpic.title ?? __('Select epic');
+    },
+    dropdownClass() {
+      return this.isDropdownShowing ? 'dropdown-menu-epics show' : 'gl-display-none';
+    },
+    epicListValid() {
+      return this.groupEpics.length > 0 && !this.epicsFetchInProgress && !this.epicSelectInProgress;
+    },
+    epicListNotValid() {
+      return (
+        this.groupEpics.length === 0 && !this.epicsFetchInProgress && !this.epicSelectInProgress
+      );
     },
   },
   watch: {
@@ -133,6 +143,9 @@ export default {
         this.fetchEpics();
       }
     },
+    search: debounce(function debouncedEpicSearch() {
+      this.setSearchQuery(this.search);
+    }, 250),
   },
   mounted() {
     this.setInitialData({
@@ -142,8 +155,6 @@ export default {
       selectedEpic: this.initialEpic,
       selectedEpicIssueId: this.epicIssueId,
     });
-    $(this.$refs.dropdown).on('shown.bs.dropdown', () => this.fetchEpics());
-    $(this.$refs.dropdown).on('hidden.bs.dropdown', this.handleDropdownHidden);
   },
   methods: {
     ...mapActions([
@@ -156,31 +167,28 @@ export default {
       'assignIssueToEpic',
       'removeIssueFromEpic',
     ]),
-    handleEditClick() {
-      this.showDropdown = true;
-
-      // Wait for component to render dropdown container
-      this.$nextTick(() => {
-        // We're not calling $.dropdown('show') to open
-        // dropdown and instead triggerring click on button
-        // so that clicking outside can make dropdown close
-        // additionally, this approach requires event trigger
-        // to be deferred so that it doesn't close
-        setTimeout(() => {
-          $(this.$refs.dropdownButton.$el).trigger('click');
-        });
-      });
-    },
-    handleDropdownHidden() {
-      this.showDropdown = this.isDropdownVariantStandalone;
-    },
     handleItemSelect(epic) {
-      if (this.selectedEpicIssueId && epic.id === noneEpic.id && epic.title === noneEpic.title) {
+      if (
+        this.selectedEpicIssueId &&
+        epic.id === this.$options.noneEpic.id &&
+        epic.title === this.$options.noneEpic.title
+      ) {
         this.removeIssueFromEpic(this.selectedEpic);
       } else if (this.issueId) {
         this.assignIssueToEpic(epic);
       } else {
         this.$emit('onEpicSelect', epic);
+      }
+    },
+    hideDropdown() {
+      this.isDropdownShowing = this.isDropdownVariantStandalone;
+    },
+    toggleFormDropdown() {
+      this.isDropdownShowing = !this.isDropdownShowing;
+      const { dropdown } = this.$refs.dropdown.$refs;
+      if (dropdown && this.isDropdownShowing) {
+        dropdown.show();
+        this.fetchEpics();
       }
     },
   },
@@ -189,44 +197,78 @@ export default {
 
 <template>
   <div class="js-epic-block" :class="{ 'block epic': isDropdownVariantSidebar }">
-    <dropdown-value-collapsed v-if="isDropdownVariantSidebar" :epic="selectedEpic" />
-    <dropdown-title
-      v-if="isDropdownVariantSidebar"
-      :can-edit="canEdit"
-      :block-title="blockTitle"
-      :is-loading="dropdownSelectInProgress"
-      @onClickEdit="handleEditClick"
-    />
-    <dropdown-value v-if="isDropdownVariantSidebar" v-show="!showDropdown" :epic="selectedEpic">
-      <slot></slot>
-    </dropdown-value>
     <div
       v-if="canEdit || isDropdownVariantStandalone"
-      v-show="showDropdown"
-      class="epic-dropdown-container"
+      class="hide-collapsed epic-dropdown-container"
     >
-      <div ref="dropdown" class="dropdown">
-        <dropdown-button
-          ref="dropdownButton"
-          :selected-epic-title="selectedEpic.title"
-          :toggle-text-class="dropdownButtonTextClass"
-        />
-        <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
-          <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
-          <dropdown-search-input @onSearchInput="setSearchQuery" />
-          <dropdown-contents
-            v-if="!epicsFetchInProgress"
-            :epics="groupEpics"
-            :selected-epic="selectedEpic"
-            @onItemSelect="handleItemSelect"
-          />
-          <gl-loading-icon
-            v-if="epicsFetchInProgress"
-            class="dropdown-contents-loading"
-            size="md"
-          />
+      <p
+        v-if="isDropdownVariantSidebar"
+        class="title gl-display-flex gl-justify-content-space-between"
+      >
+        {{ __('Epic') }}
+        <a
+          v-if="canEdit"
+          ref="editButton"
+          class="btn-link"
+          href="#"
+          @click="toggleFormDropdown"
+          @keydown.esc="hideDropdown"
+        >
+          {{ __('Edit') }}
+        </a>
+      </p>
+
+      <gl-dropdown
+        ref="dropdown"
+        :text="dropDownTitle"
+        class="gl-w-full"
+        :class="dropdownClass"
+        toggle-class="dropdown-menu-toggle"
+        @keydown.esc.native="hideDropdown"
+        @hide="hideDropdown"
+      >
+        <p
+          v-if="isDropdownVariantSidebar || showHeader"
+          class="gl-new-dropdown-header-top"
+          data-testid="epic-dropdown-header"
+        >
+          {{ __('Assign Epic') }}
+        </p>
+        <gl-search-box-by-type v-model.trim="search" :placeholder="__('Search epics')" />
+        <div class="dropdown-content dropdown-body">
+          <template v-if="epicListValid">
+            <gl-dropdown-item
+              :active="!selectedEpic"
+              active-class="is-active"
+              @click="handleItemSelect($options.noneEpic)"
+            >
+              {{ __('No Epic') }}
+            </gl-dropdown-item>
+            <gl-dropdown-divider />
+            <gl-dropdown-item
+              v-for="epic in groupEpics"
+              :key="epic.id"
+              :active="selectedEpic.id === epic.id"
+              active-class="is-active"
+              :is-check-item="true"
+              :is-checked="selectedEpic.id === epic.id"
+              @click="handleItemSelect(epic)"
+              >{{ epic.title }}</gl-dropdown-item
+            >
+          </template>
+          <p v-else-if="epicListNotValid" class="gl-mx-5 gl-my-4">
+            {{ __('No Matching Results') }}
+          </p>
+          <gl-loading-icon v-else />
         </div>
-      </div>
+      </gl-dropdown>
+    </div>
+
+    <div v-if="isDropdownVariantSidebar && !isDropdownShowing">
+      <dropdown-value-collapsed :epic="selectedEpic" />
+      <dropdown-value :epic="selectedEpic">
+        <slot></slot>
+      </dropdown-value>
     </div>
   </div>
 </template>

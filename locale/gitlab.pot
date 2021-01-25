@@ -3892,6 +3892,9 @@ msgstr ""
 msgid "Assign"
 msgstr ""
 
+msgid "Assign Epic"
+msgstr ""
+
 msgid "Assign Iteration"
 msgstr ""
 
@@ -3899,9 +3902,6 @@ msgid "Assign To"
 msgstr ""
 
 msgid "Assign custom color like #FF0000"
-msgstr ""
-
-msgid "Assign epic"
 msgstr ""
 
 msgid "Assign labels"
@@ -24814,6 +24814,9 @@ msgid "Search by message"
 msgstr ""
 
 msgid "Search by name"
+msgstr ""
+
+msgid "Search epics"
 msgstr ""
 
 msgid "Search files"
