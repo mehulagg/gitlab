@@ -22,7 +22,7 @@ describe('Form', () => {
   const findSubmitBtn = () => wrapper.find('[data-testid="submit-btn"]');
   const findCancelBtn = () => wrapper.find('[data-testid="cancel-btn"]');
 
-  function createComponent(props = {}, mountFn = mount) {
+  function createComponent(props = {}, mountFn = shallowMount) {
     return mountFn(SharedForm, {
       propsData: {
         ...defaultPropsData,
@@ -45,7 +45,9 @@ describe('Form', () => {
   });
 
   afterEach(() => {
-    wrapper.destroy();
+    if (wrapper) {
+      wrapper.destroy();
+    }
   });
 
   describe('Loading', () => {
@@ -54,7 +56,7 @@ describe('Form', () => {
       ${true}
       ${false}
     `('renders the app correctly', ({ loading }) => {
-      wrapper = createComponent({ loading }, shallowMount);
+      wrapper = createComponent({ loading });
 
       expect(findLoadingIcon().exists()).toBe(loading);
       expect(findAlert().exists()).toBe(false);
@@ -64,7 +66,7 @@ describe('Form', () => {
 
   describe('Error alert', () => {
     it('shows the alert when an error are passed in', () => {
-      wrapper = createComponent({ error: 'Bad things happened' }, shallowMount);
+      wrapper = createComponent({ error: 'Bad things happened' });
 
       expect(findAlert().text()).toBe('Bad things happened');
     });
@@ -72,7 +74,7 @@ describe('Form', () => {
 
   describe('Fields', () => {
     it('shows the correct input and button fields', () => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
 
       expect(findLoadingIcon().exists()).toBe(false);
       expect(findNameInput()).toExist();
@@ -83,20 +85,24 @@ describe('Form', () => {
     });
 
     it('shows the name input description', () => {
-      wrapper = createComponent();
+      wrapper = createComponent({}, mount);
 
       expect(findNameGroup().text()).toContain('Use :: to create a scoped set (eg. SOX::AWS)');
     });
   });
 
   describe('Validation', () => {
+    it('throws an error if the provided compliance framework is invalid', () => {
+      expect(SharedForm.props.complianceFramework.validator({ foo: 'bar' })).toBe(false);
+    });
+
     it.each`
       name        | validity
       ${null}     | ${null}
       ${''}       | ${false}
       ${'foobar'} | ${true}
     `('sends the correct state to the name input group', async ({ name, validity }) => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
 
       await findNameInput().vm.$emit('input', name);
       expect(findNameGroup().props('state')).toBe(validity);
@@ -110,7 +116,7 @@ describe('Form', () => {
     `(
       'sends the correct state to the description input group',
       async ({ description, validity }) => {
-        wrapper = createComponent({}, shallowMount);
+        wrapper = createComponent();
 
         await findDescriptionInput().vm.$emit('input', description);
         expect(findDescriptionGroup().props('state')).toBe(validity);
@@ -126,7 +132,7 @@ describe('Form', () => {
       ${'#000'}    | ${true}
       ${'#000000'} | ${true}
     `('sends the correct state to the color picker', async ({ color, validity }) => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
       const colorPicker = findColorPicker();
 
       await colorPicker.vm.$emit('input', color);
@@ -144,7 +150,7 @@ describe('Form', () => {
     `(
       'should set the submit buttons disabled attribute to $disabled',
       async ({ name, description, color, disabled }) => {
-        wrapper = createComponent({}, shallowMount);
+        wrapper = createComponent();
 
         await findNameInput().vm.$emit('input', name);
         await findDescriptionInput().vm.$emit('input', description);
@@ -157,7 +163,7 @@ describe('Form', () => {
 
   describe('Updating data', () => {
     it('updates the initial form data when the compliance framework prop is updated', async () => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
 
       expect(wrapper.vm.name).toBe(null);
       expect(wrapper.vm.description).toBe(null);
@@ -171,7 +177,7 @@ describe('Form', () => {
     });
 
     it('updates only unedited form data when the compliance framework prop is updated', async () => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
 
       expect(wrapper.vm.name).toBe(null);
       expect(wrapper.vm.description).toBe(null);
@@ -188,7 +194,7 @@ describe('Form', () => {
 
   describe('On form submission', () => {
     it('emits the entered form data', async () => {
-      wrapper = createComponent({}, shallowMount);
+      wrapper = createComponent();
 
       await findNameInput().vm.$emit('input', 'Foo');
       await findDescriptionInput().vm.$emit('input', 'Bar');
@@ -202,7 +208,7 @@ describe('Form', () => {
     });
 
     it('does not emit the initial form data if editing has taken place', async () => {
-      wrapper = createComponent({ complianceFramework: frameworkFoundResponse }, shallowMount);
+      wrapper = createComponent({ complianceFramework: frameworkFoundResponse });
 
       await findNameInput().vm.$emit('input', 'Foo');
       await findDescriptionInput().vm.$emit('input', 'Bar');

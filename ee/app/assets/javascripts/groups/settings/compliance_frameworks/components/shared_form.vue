@@ -15,6 +15,14 @@ import { validateHexColor } from '~/lib/utils/color_utils';
 import { __, s__ } from '~/locale';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
 
+const hasRequiredProperties = (value) => {
+  if (Object.keys(value).length === 0) {
+    return true;
+  }
+
+  return ['name', 'description', 'color'].every((prop) => value[prop]);
+};
+
 export default {
   components: {
     ColorPicker,
@@ -32,6 +40,7 @@ export default {
       type: Object,
       required: false,
       default: () => ({}),
+      validator: hasRequiredProperties,
     },
     error: {
       type: String,
@@ -83,15 +92,15 @@ export default {
   watch: {
     complianceFramework() {
       if (this.name === null) {
-        this.name = this.complianceFramework?.name;
+        this.name = this.complianceFramework.name;
       }
 
       if (this.description === null) {
-        this.description = this.complianceFramework?.description;
+        this.description = this.complianceFramework.description;
       }
 
       if (this.color === null) {
-        this.color = this.complianceFramework?.color;
+        this.color = this.complianceFramework.color;
       }
     },
   },
