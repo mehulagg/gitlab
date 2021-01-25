@@ -154,6 +154,8 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
         {
           subscription(namespaceId: "{:namespace_id=>#{namespace_id}}") {
             eoaStarterBronzeEligible
+            assistedUpgradePlanId
+            freeUpgradePlanId
           }
         }
       GQL
@@ -184,20 +186,32 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
     context 'the response does not contain errors' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:eligible, :result) do
-        true  | true
-        false | false
+      where(:eligible, :assisted_plan_id, :free_plan_id) do
+        true | '111111' | '111111'
+        true | '111111' | nil
+        true | nil      | '111111'
       end
 
       with_them do
         before do
           allow(described_class).to receive(:http_post).and_return({
               success: true,
-              data: { "data" => { "subscription" => { "eoaStarterBronzeEligible" => eligible } } }
+              data: { "data" => { "subscription" => {
+                "eoaStarterBronzeEligible" => eligible,
+                "assistedUpgradePlanId" => assisted_plan_id,
+                "freeUpgradePlanId" => free_plan_id
+              } } }
           })
         end
 
-        it { expect(eligible_for_upgrade_offer).to eq({ success: true, eligible_for_free_upgrade: result }) }
+        it {
+          expect(eligible_for_upgrade_offer).to eq({
+            success: true,
+            eligible_for_free_upgrade: eligible,
+            assisted_upgrade_plan_id: assisted_plan_id,
+            free_upgrade_plan_id: free_plan_id
+        })
+        }
       end
 
       context 'subscription is nil' do
@@ -208,7 +222,14 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
           })
         end
 
-        it { expect(eligible_for_upgrade_offer).to eq({ success: true, eligible_for_free_upgrade: nil }) }
+        it {
+          expect(eligible_for_upgrade_offer).to eq({
+             success: true,
+             eligible_for_free_upgrade: nil,
+             assisted_upgrade_plan_id: nil,
+             free_upgrade_plan_id: nil
+           })
+        }
       end
     end
   end

@@ -50,6 +50,8 @@ module Gitlab
             {
               subscription(namespaceId: "#{namespace_id}") {
                 eoaStarterBronzeEligible
+                assistedUpgradePlanId
+                freeUpgradePlanId
               }
             }
           GQL
@@ -57,9 +59,16 @@ module Gitlab
           response = http_post("graphql", admin_headers, { query: query }).dig(:data)
 
           if response['errors'].blank?
-            result = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
+            eligible = response.dig('data', 'subscription', 'eoaStarterBronzeEligible')
+            assisted_upgrade = response.dig('data', 'subscription', 'assistedUpgradePlanId')
+            free_upgrade = response.dig('data', 'subscription', 'freeUpgradePlanId')
 
-            { success: true, eligible_for_free_upgrade: result }
+            {
+              success: true,
+              eligible_for_free_upgrade: eligible,
+              assisted_upgrade_plan_id: assisted_upgrade,
+              free_upgrade_plan_id: free_upgrade
+            }
           else
             { success: false }
           end
