@@ -179,6 +179,18 @@ FactoryBot.define do
       end
     end
 
+    trait :with_quality_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_codequality_report_artifact,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
     trait :unique_branches do
       source_branch { generate(:branch) }
       target_branch { generate(:branch) }

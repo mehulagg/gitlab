@@ -1477,6 +1477,18 @@ class MergeRequest < ApplicationRecord
     compare_reports(Ci::GenerateCoverageReportsService)
   end
 
+  def find_quality_reports
+    unless has_quality_reports?
+      return { status: :error, status_reason: 'This merge request does not have quality reports' }
+    end
+
+    compare_reports(Ci::GenerateQualityReportsService)
+  end
+
+  def has_quality_reports?
+    actual_head_pipeline&.has_codequality_reports?
+  end
+
   def has_codequality_reports?
     return false unless Feature.enabled?(:codequality_mr_diff, project)
 
