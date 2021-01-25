@@ -10,7 +10,13 @@ module QA
       let(:file) { 'README.md' }
       let(:new_branch) { 'new_branch' }
       let(:suggestion) { 'Change to this' }
-      let(:project) { Resource::Project.fabricate_via_api! { |resource| resource.api_client = api_admin_user } }
+      let(:project) do
+        Resource::Project.fabricate_via_api! do |resource|
+          resource.api_client = api_admin_user
+          resource.initialize_with_readme = true
+        end
+      end
+
       let!(:admin_user_id) do
         admin = QA::Resource::User.new.tap do |user|
           user.username = QA::Runtime::User.admin_username
@@ -23,16 +29,16 @@ module QA
         Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = project
           mr.source_branch = new_branch
-          mr.no_preparation = true
+          # mr.no_preparation = true
           mr.api_client = api_dev_user
           mr.assignee_id = admin_user_id
         end
       end
 
       def setup_project
-        Resource::Repository::ProjectPush.fabricate! do |push|
-          push.project = project
-        end
+        # Resource::Repository::ProjectPush.fabricate! do |push|
+        #   push.project = project
+        # end
 
         project.add_member(developer_user)
 
