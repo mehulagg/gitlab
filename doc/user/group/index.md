@@ -702,6 +702,9 @@ To enable this feature:
 
 This will enable the domain-checking for all new users added to the group from this moment on.
 
+**Note:** Domain restrictions currently only apply to groups and do not prevent users from being added as members of projects owned by the restricted group.
+{: .note}
+
 #### Group file templates **(PREMIUM)**
 
 Group file templates allow you to share a set of templates for common file
