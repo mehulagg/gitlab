@@ -48,3 +48,29 @@ export const frameworkFoundResponse = {
   color: '#1aaa55',
   parsedId: 1,
 };
+
+export const validCreateResponse = {
+  data: {
+    createComplianceFramework: {
+      framework: {
+        id: 'gid://gitlab/ComplianceManagement::Framework/1',
+        name: 'GDPR',
+        description: 'General Data Protection Regulation',
+        color: '#1aaa55',
+        __typename: 'ComplianceFramework',
+      },
+      errors: [],
+      __typename: 'CreateComplianceFrameworkPayload',
+    },
+  },
+};
+
+export const errorCreateResponse = {
+  data: {
+    createComplianceFramework: {
+      framework: null,
+      errors: ['Invalid values given'],
+      __typename: 'CreateComplianceFrameworkPayload',
+    },
+  },
+};
