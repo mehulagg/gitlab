@@ -15,7 +15,7 @@ your Jira projects.
 As an example, the following process creates a user named `gitlab` and that's a
 member of a new group named `gitlab-developers`:
 
-1. To create a new user, sign in to your Jira instance as an administrator, and
+1. Sign in to your Jira instance as an administrator, and
    then go to the gear icon and select **User Management**.
 
    ![Jira user management link](img/jira_user_management_link.png)
