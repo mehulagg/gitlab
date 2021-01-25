@@ -21,6 +21,9 @@ module EE
         field :blocked_by_count, GraphQL::INT_TYPE, null: true,
               description: 'Count of issues blocking this issue.'
 
+        field :blocked_by_issues, ::Types::IssueType.connection_type, null: true,
+              description: 'Issues blocking this issue.'
+
         field :health_status, ::Types::HealthStatusEnum, null: true,
               description: 'Current health status.'
 
@@ -42,14 +45,20 @@ module EE
         end
 
         def blocked
-          ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |count|
-            (count || 0) > 0
+          ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |result|
+            (result[:count] || 0) > 0
           end
         end
 
         def blocked_by_count
-          ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |count|
-            count || 0
+          ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id) do |result|
+            result[:count] || 0
+          end
+        end
+
+        def blocked_by_issues
+          ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(context, object.id, load_issue_objects: true) do |result|
+            result[:issues]
           end
         end
 

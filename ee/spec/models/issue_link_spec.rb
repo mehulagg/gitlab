@@ -63,6 +63,19 @@ RSpec.describe IssueLink do
     end
   end
 
+  describe '.blocked_or_blocking_issues' do
+    it 'returns issues blocking given issue IDs' do
+      link1 = create(:issue_link, link_type: ::IssueLink::TYPE_BLOCKS)
+      link2 = create(:issue_link, source: link1.source, link_type: ::IssueLink::TYPE_BLOCKS)
+      link3 = create(:issue_link, link_type: ::IssueLink::TYPE_RELATES_TO)
+      link4 = create(:issue_link, source: create(:issue, :closed), link_type: ::IssueLink::TYPE_BLOCKS)
+      link5 = create(:issue_link, link_type: ::IssueLink::TYPE_BLOCKS)
+
+      expect(described_class.blocked_or_blocking_issues([link1.target_id, link2.target_id, link3.target_id, link4.target_id, link5.target_id]))
+        .to match_array([link1, link2, link5])
+    end
+  end
+
   describe '.blocking_issue_ids_for' do
     it 'returns blocking issue ids' do
       issue = create(:issue)

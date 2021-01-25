@@ -25,6 +25,10 @@ module EE
         blocked_or_blocking_issues(issue_ids).pluck(:target_id)
       end
 
+      def blocking_issue_ids(issue_ids)
+        blocked_or_blocking_issues(issue_ids).pluck(:source_id)
+      end
+
       def blocking_issue_ids_for(issue)
         blocked_or_blocking_issues(issue.id).pluck(:source_id)
       end

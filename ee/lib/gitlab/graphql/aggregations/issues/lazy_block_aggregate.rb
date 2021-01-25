@@ -9,7 +9,7 @@ module Gitlab
 
           attr_reader :issue_id, :lazy_state
 
-          def initialize(query_ctx, issue_id, &block)
+          def initialize(query_ctx, issue_id, load_issue_objects: false, &block)
             @issue_id = issue_id
             @block = block
 
@@ -19,8 +19,11 @@ module Gitlab
               pending_ids: Set.new,
               loaded_objects: {}
             }
+            @lazy_state[:user] ||= query_ctx[:current_user]
             # Register this ID to be loaded later:
             @lazy_state[:pending_ids] << issue_id
+            # just need a truthy value
+            @lazy_state[:load_issue_objects] = !!load_issue_objects
           end
 
           # Return the loaded record, hitting the database if needed
@@ -45,13 +48,33 @@ module Gitlab
             # The record hasn't been loaded yet, so
             # hit the database with all pending IDs to prevent N+1
             pending_ids = @lazy_state[:pending_ids].to_a
-            blocked_data = IssueLink.blocked_issues_for_collection(pending_ids).compact.flatten
 
-            blocked_data.each do |blocked|
-              @lazy_state[:loaded_objects][blocked.blocked_issue_id] = blocked.count
+            # if we want the blocking issues themselves (from any field), load them all at once from the DB rather than just the count. And then we can just count them to get the count.
+            if @lazy_state[:load_issue_objects]
+              blocking_issues_ids = IssueLink.blocking_issue_ids(pending_ids)
+              blocking_issues_ids.each do |issue_id|
+                # using issue finder to filter out what the user can't see
+                blocked_issue_objects = ::IssuesFinder.new(current_user).execute.where(id: issue_id)
+                @lazy_state[:loaded_objects][issue_id] ||= {}
+                @lazy_state[:loaded_objects][issue_id][:issues] = blocked_issue_objects
+                ap @lazy_state[:loaded_objects]
+              end
+            else
+              blocking_data = IssueLink.blocked_issues_for_collection(pending_ids).compact.flatten
+              blocking_data.each do |blocked|
+                blocked_issue_stat(blocked.blocked_issue_id)[:count] = blocked.count
+              end
             end
 
             @lazy_state[:pending_ids].clear
+          end
+
+          def blocked_issue_stat(issue_id)
+            @lazy_state[:loaded_objects][issue_id] ||= {}
+          end
+
+          def current_user
+            @lazy_state[:current_user]
           end
         end
       end
