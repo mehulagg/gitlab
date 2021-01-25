@@ -30,13 +30,13 @@ The DevOps Research and Assesment ([DORA](https://cloud.google.com/blog/products
 
 These metrics are:
 
-* Deployment Frequency - How often an organization successfully releases to production
+- Deployment Frequency: How often an organization successfully releases to production
 
-* Lead Time for Changes - The amount of time it takes a for code to get committed to get into production
+- Lead Time for Changes: The amount of time it takes a for code to get committed to get into production
 
-* Change Failure Rate - The percentage of deployments causing a failure in production
+- Change Failure Rate: The percentage of deployments causing a failure in production
 
-* Time to Restore Service - How long it takes an organization to recover from a failure in production
+-Time to Restore Service: How long it takes an organization to recover from a failure in production
 
 GitLab plans to add support for all the DORA4 metrics on the project and the group level. The first metric of Deployment Frequency was added to the project level [CI/CD charts](ci_cd_analytics.md#deployment-frequency-charts) and [API]( ../../api/project_analytics.md).
 
