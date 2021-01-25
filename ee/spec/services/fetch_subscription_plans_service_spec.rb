@@ -34,7 +34,7 @@ RSpec.describe FetchSubscriptionPlansService do
 
       context 'with pnp_subscription_plan_cache_key flag disabled' do
         before do
-          stub_feature_flags(pnp_subscription_plan_cache_key: false)
+          stub_feature_flags(pnp_subscription_plan_cache_key: false, subscription_plan_cache_key: true)
         end
 
         it 'returns a new cache key so the cache is busted' do
