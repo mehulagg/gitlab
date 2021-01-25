@@ -5,8 +5,9 @@ import * as Sentry from '~/sentry/wrapper';
 import AddScheduleModal from './add_edit_schedule_modal.vue';
 import OncallSchedule from './oncall_schedule.vue';
 import { s__ } from '~/locale';
-import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
+import getOncallSchedulesWithRotations from '../graphql/queries/get_oncall_schedules_with_rotations.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
+import {nWeeksAfter} from '~/lib/utils/datetime_utility';
 
 export const addScheduleModalId = 'addScheduleModal';
 
@@ -50,10 +51,15 @@ export default {
   apollo: {
     schedule: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getOncallSchedulesQuery,
+      query: getOncallSchedulesWithRotations,
       variables() {
+        const startsAt = new Date();
+        const endsAt = new Date(nWeeksAfter(startsAt, 2));
+
         return {
           projectPath: this.projectPath,
+          startsAt,
+          endsAt,
         };
       },
       update(data) {
@@ -88,7 +94,7 @@ export default {
       >
         {{ $options.i18n.successNotification.description }}
       </gl-alert>
-      <oncall-schedule :schedule="schedule" :rotations="$options.mockRotations" />
+      <oncall-schedule :schedule="schedule" />
     </template>
 
     <gl-empty-state

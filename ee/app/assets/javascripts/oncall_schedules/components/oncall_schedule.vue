@@ -60,11 +60,6 @@ export default {
       type: Object,
       required: true,
     },
-    rotations: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     return {
@@ -80,6 +75,7 @@ export default {
       return getTimeframeForWeeksView();
     },
     scheduleRange() {
+      debugger
       const end =
         this.presetType === this.$options.PRESET_TYPES.DAYS
           ? this.timeframe[0]
@@ -171,7 +167,7 @@ export default {
           <schedule-timeline-section :preset-type="presetType" :timeframe="timeframe" />
           <rotations-list-section
             :preset-type="presetType"
-            :rotations="rotations"
+            :rotations="schedule.rotations.nodes"
             :timeframe="timeframe"
           />
         </div>

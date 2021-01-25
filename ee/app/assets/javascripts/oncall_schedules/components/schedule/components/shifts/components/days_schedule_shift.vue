@@ -67,14 +67,10 @@ export default {
       return new Date(this.shift.endsAt);
     },
     shiftRangeOverlap() {
-      try {
-        return getOverlapDateInPeriods(
-          { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
-          { start: this.shiftStartsAt, end: this.shiftEndsAt },
-        );
-      } catch (error) {
-        return { hoursOverlap: 0 };
-      }
+      return getOverlapDateInPeriods(
+        {start: this.timeframeItem, end: this.currentTimeframeEndsAt},
+        {start: this.shiftStartsAt, end: this.shiftEndsAt},
+      );
     },
     shiftStartHourOutOfRange() {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();

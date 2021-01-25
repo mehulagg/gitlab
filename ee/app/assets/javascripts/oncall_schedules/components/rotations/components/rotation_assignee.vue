@@ -51,7 +51,7 @@ export default {
     :style="rotationAssigneeStyle"
   >
     <gl-token
-      :id="assignee.id"
+      :id="assignee.user.id"
       class="gl-w-full gl-h-6 gl-align-items-center"
       :class="chevronClass"
       :view-only="true"
@@ -65,7 +65,7 @@ export default {
       />
     </gl-token>
     <gl-popover
-      :target="assignee.id"
+      :target="assignee.user.id"
       :title="assignee.user.username"
       triggers="hover"
       placement="top"

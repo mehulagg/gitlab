@@ -6,6 +6,7 @@ import { languageCode, s__, __, n__ } from '../../locale';
 
 const MILLISECONDS_IN_HOUR = 60 * 60 * 1000;
 const MILLISECONDS_IN_DAY = 24 * MILLISECONDS_IN_HOUR;
+const DAYS_IN_WEEK = 7;
 
 window.timeago = timeago;
 
@@ -694,6 +695,24 @@ export const nDaysAfter = (date, numberOfDays) =>
 export const nDaysBefore = (date, numberOfDays) => nDaysAfter(date, -numberOfDays);
 
 /**
+ * Returns the date n days after the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfWeeks number of weeks after
+ * @return {Date} the date following the date provided
+ */
+export const nWeeksAfter = (date, numberOfWeeks) => new Date(newDate(date)).setDate(date.getDate() + DAYS_IN_WEEK * numberOfWeeks);
+
+/**
+ * Returns the date n days before the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfWeeks number of weeks before
+ * @return {Date} the date following the date provided
+ */
+export const nWeeksBefore = (date, numberOfWeeks) => nWeeksAfter(date, -numberOfWeeks);
+
+/**
  * Returns the date n months after the date provided
  *
  * @param {Date} date the initial date
@@ -875,10 +894,6 @@ export const getOverlapDateInPeriods = (givenPeriodLeft = {}, givenPeriodRight =
   const leftEndTime = new Date(givenPeriodLeft.end).getTime();
   const rightStartTime = new Date(givenPeriodRight.start).getTime();
   const rightEndTime = new Date(givenPeriodRight.end).getTime();
-
-  if (!(leftStartTime <= leftEndTime && rightStartTime <= rightEndTime)) {
-    throw new Error(__('Invalid period'));
-  }
 
   const isOverlapping = leftStartTime < rightEndTime && rightStartTime < leftEndTime;
 

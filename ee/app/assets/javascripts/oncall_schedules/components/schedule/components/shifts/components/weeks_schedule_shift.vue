@@ -83,14 +83,10 @@ export default {
       return Boolean(this.shiftRangeOverlap.daysOverlap);
     },
     shiftRangeOverlap() {
-      try {
-        return getOverlapDateInPeriods(
-          { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
-          { start: this.shiftStartsAt, end: this.shiftEndsAt },
-        );
-      } catch (error) {
-        return { daysOverlap: 0 };
-      }
+      return getOverlapDateInPeriods(
+        {start: this.timeframeItem, end: this.currentTimeframeEndsAt},
+        {start: this.shiftStartsAt, end: this.shiftEndsAt},
+      );
     },
     shiftWidth() {
       const offset = this.shiftStartDateOutOfRange ? 0 : 1;
