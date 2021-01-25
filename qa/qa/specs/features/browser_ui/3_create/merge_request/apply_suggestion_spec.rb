@@ -7,7 +7,7 @@ module QA
       let(:api_admin_user) { Runtime::API::Client.as_admin }
       let(:api_dev_user) { Runtime::API::Client.new(:gitlab, user: developer_user) }
       let(:developer_user) { Resource::User.fabricate_via_api! { |resource| resource.api_client = api_admin_user } }
-      let(:file) { 'README.md' }
+      let(:file) { 'test.txt' }
       let(:new_branch) { 'new_branch' }
       let(:suggestion) { 'Change to this' }
       let(:project) do
@@ -29,7 +29,7 @@ module QA
         Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = project
           mr.source_branch = new_branch
-          # mr.no_preparation = true
+          mr.no_preparation = true
           mr.api_client = api_dev_user
           mr.assignee_id = admin_user_id
         end
@@ -48,6 +48,7 @@ module QA
           push.user = developer_user
           push.branch_name = new_branch
           push.file_name = file
+          push.file_content = 'Test merge request.'
         end
       end
 
@@ -72,7 +73,6 @@ module QA
       def apply_suggestion
         Flow::Login.while_signed_in(as: developer_user) do
           merge_request.visit!
-
           Page::MergeRequest::Show.perform do |mr|
             mr.apply_suggestion
           end
