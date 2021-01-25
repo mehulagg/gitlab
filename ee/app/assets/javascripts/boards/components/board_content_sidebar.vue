@@ -1,5 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
+import SidebarAssigneesWidget from 'ee_else_ce/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import { GlDrawer } from '@gitlab/ui';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
@@ -7,7 +8,6 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/update_issue_assignees.mutation.graphql';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
-import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import BoardSidebarTimeTracker from './sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarWeightInput from './sidebar/board_sidebar_weight_input.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';

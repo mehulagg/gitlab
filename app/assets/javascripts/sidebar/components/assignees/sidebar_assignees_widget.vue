@@ -172,8 +172,11 @@ export default {
       }
 
       this.selected = [name];
+      this.saveAssignees();
+      this.$refs.toggle.collapse({ emitEvent: false });
+    },
+    saveAssignees() {
       this.updateAssignees(this.selectedUserNames);
-      this.$refs.toggle.collapse();
     },
     isChecked(id) {
       return this.selectedUserNames.includes(id);

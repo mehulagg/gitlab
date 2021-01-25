@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import { mapGetters, mapActions } from 'vuex';
 import { escape } from 'lodash';
+import { assigneesWidgetState } from 'ee_else_ce/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import { GlSprintf, GlSafeHtmlDirective as SafeHtml, GlButton } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { truncateSha } from '~/lib/utils/text_utility';
@@ -24,7 +25,6 @@ import {
   formatLineRange,
 } from './multiline_comment_utils';
 import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
-import { assigneesWidgetState } from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 
 export default {
   name: 'NoteableNote',

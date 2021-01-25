@@ -1,7 +1,7 @@
 <script>
+import SidebarAssigneesWidget from 'ee_else_ce/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import Store from '~/sidebar/stores/sidebar_store';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import getIssueParticipants from '~/vue_shared/components/sidebar/queries/get_issue_participants.query.graphql';
 import getMrParticipants from '~/vue_shared/components/sidebar/queries/get_mr_participants.query.graphql';
 import updateIssueAssigneesMutation from '~/vue_shared/components/sidebar/queries/update_issue_assignees.mutation.graphql';
