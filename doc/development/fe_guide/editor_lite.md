@@ -225,3 +225,7 @@ Just pass the array of extensions to your `use` method:
 ```javascript
 editor.use([FileTemplateExtension, MyFancyExtension]);
 ```
+
+## <a id="vue-component"></a>`<editor-lite>` Vue component
+
+TBD
