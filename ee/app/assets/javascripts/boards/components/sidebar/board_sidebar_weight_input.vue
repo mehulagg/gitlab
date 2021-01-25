@@ -87,16 +87,14 @@ export default {
         </gl-button>
       </div>
     </template>
-    <template>
-      <gl-form @submit.prevent="handleFormSubmit()">
-        <gl-form-input
-          v-model.number="weight"
-          v-autofocusonshow
-          type="number"
-          min="0"
-          :placeholder="__('Enter a number')"
-        />
-      </gl-form>
-    </template>
+    <gl-form @submit.prevent="handleFormSubmit()">
+      <gl-form-input
+        v-model.number="weight"
+        v-autofocusonshow
+        type="number"
+        min="0"
+        :placeholder="__('Enter a number')"
+      />
+    </gl-form>
   </board-editable-item>
 </template>

@@ -16,6 +16,7 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     geo_repository_verification_secondary_scheduler_worker
     geo_metrics_update_worker
     geo_prune_event_log_worker
+    geo_verification_cron_worker
   ].freeze
 
   def job(name)
@@ -28,7 +29,7 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     let_it_be(:primary) { create(:geo_node, :primary) }
     let_it_be(:secondary) { create(:geo_node) }
 
-    let(:common_jobs) { [job('geo_metrics_update_worker'), job('repository_check_worker')] }
+    let(:common_jobs) { [job('geo_metrics_update_worker'), job('repository_check_worker'), job('geo_verification_cron_worker')] }
     let(:ldap_test_job) { job('ldap_test') }
     let(:primary_jobs) { [job('geo_repository_verification_primary_batch_worker')] }
 

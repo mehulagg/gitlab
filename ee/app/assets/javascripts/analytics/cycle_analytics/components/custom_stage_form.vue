@@ -155,7 +155,7 @@ export default {
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
-    handleUpdateFields(field, value) {
+    handleUpdateFields({ field, value }) {
       this.fields = { ...this.fields, [field]: value };
 
       const newErrors = validateStage({ ...this.fields, custom: true });
@@ -196,11 +196,13 @@ export default {
       </gl-dropdown>
     </div>
     <custom-stage-form-fields
-      :fields="fields"
-      :label-events="labelEvents"
+      :index="0"
+      :total-stages="1"
+      :stage="fields"
       :errors="errors"
-      :events="events"
-      @update="handleUpdateFields"
+      :stage-events="events"
+      @input="handleUpdateFields"
+      @select-label="({ field, value }) => handleUpdateFields({ field, value })"
     />
     <div>
       <gl-button

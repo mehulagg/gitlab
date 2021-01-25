@@ -104,7 +104,11 @@ RSpec.describe Registrations::GroupsController do
       it { is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: user.groups.last.id, trial: false)) }
 
       it 'calls the record user trial_during_signup experiment' do
-        expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false)
+        group = create(:group)
+        expect_next_instance_of(Groups::CreateService) do |service|
+          expect(service).to receive(:execute).and_return(group)
+        end
+        expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false, namespace_id: group.id)
 
         subject
       end
@@ -180,7 +184,12 @@ RSpec.describe Registrations::GroupsController do
           let_it_be(:trial_form_params) { { trial: 'false' } }
 
           it 'calls the record user trial_during_signup experiment' do
-            expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false)
+            group = create(:group)
+            expect_next_instance_of(Groups::CreateService) do |service|
+              expect(service).to receive(:execute).and_return(group)
+            end
+
+            expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false, namespace_id: group.id)
 
             subject
           end
@@ -223,6 +232,10 @@ RSpec.describe Registrations::GroupsController do
           expect_next_instance_of(GitlabSubscriptions::ApplyTrialService) do |service|
             expect(service).to receive(:execute).with(apply_trial_params).and_return({ success: true })
           end
+          expect(controller).to receive(:record_experiment_user).with(:remove_known_trial_form_fields, namespace_id: group.id)
+          expect(controller).to receive(:record_experiment_user).with(:trimmed_skip_trial_copy, namespace_id: group.id)
+          expect(controller).to receive(:record_experiment_user).with(:trial_registration_with_social_signin, namespace_id: group.id)
+
           is_expected.to redirect_to(new_users_sign_up_project_path(namespace_id: group.id, trial: false, trial_onboarding_flow: true))
         end
       end

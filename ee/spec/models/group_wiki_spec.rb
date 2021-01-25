@@ -12,46 +12,55 @@ RSpec.describe GroupWiki do
     end
 
     describe '#create_wiki_repository' do
-      before do
+      it 'tracks the repository storage in the database' do
+        shard = 'foo'
         # Use a custom storage shard value, to make sure we're not falling back to the default.
-        allow(subject).to receive(:repository_storage).and_return('foo')
+        allow(subject).to receive(:repository_storage).and_return(shard)
 
         # Don't actually create the repository, because the storage shard doesn't exist.
-        allow(subject.repository).to receive(:create_if_not_exists)
+        expect(subject.repository).to receive(:create_if_not_exists)
         allow(subject).to receive(:repository_exists?).and_return(true)
+
+        expect(subject).to receive(:track_wiki_repository).with(shard)
+
+        subject.create_wiki_repository
       end
+    end
+
+    describe '#track_wiki_repository' do
+      let(:shard) { 'foo' }
 
       context 'when a tracking entry does not exist' do
         let(:wiki_container) { wiki_container_without_repo }
 
         it 'creates a new entry' do
-          expect { subject.create_wiki_repository }.to change(wiki_container, :group_wiki_repository)
+          expect { subject.track_wiki_repository(shard) }.to change(wiki_container, :group_wiki_repository)
             .from(nil).to(kind_of(GroupWikiRepository))
         end
 
         it 'tracks the storage location' do
-          subject.create_wiki_repository
+          subject.track_wiki_repository(shard)
 
           expect(wiki_container.group_wiki_repository).to have_attributes(
             disk_path: subject.storage.disk_path,
-            shard_name: 'foo'
+            shard_name: shard
           )
         end
       end
 
       context 'when a tracking entry exists' do
         it 'does not create a new entry in the database' do
-          expect { subject.create_wiki_repository }.not_to change(wiki_container, :group_wiki_repository)
+          expect { subject.track_wiki_repository(shard) }.not_to change(wiki_container, :group_wiki_repository)
         end
 
         it 'updates the storage location' do
           expect(subject.storage).to receive(:disk_path).and_return('fancy/new/path')
 
-          subject.create_wiki_repository
+          subject.track_wiki_repository(shard)
 
           expect(wiki_container.group_wiki_repository).to have_attributes(
             disk_path: 'fancy/new/path',
-            shard_name: 'foo'
+            shard_name: shard
           )
         end
       end

@@ -17,6 +17,11 @@ export default {
       type: Number,
       required: true,
     },
+    canRemove: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     lastStageIndex() {
@@ -27,6 +32,15 @@ export default {
     },
     isLastActiveStage() {
       return this.index === this.lastStageIndex;
+    },
+    hideActionEvent() {
+      return this.canRemove ? 'remove' : 'hide';
+    },
+    hideActionIcon() {
+      return this.canRemove ? 'remove' : 'archive';
+    },
+    hideActionTestId() {
+      return `stage-action-${this.canRemove ? 'remove' : 'hide'}-${this.index}`;
     },
   },
   STAGE_SORT_DIRECTION,
@@ -49,9 +63,9 @@ export default {
       />
     </gl-button-group>
     <gl-button
-      :data-testid="`stage-action-hide-${index}`"
-      icon="archive"
-      @click="$emit('hide', index)"
+      :data-testid="hideActionTestId"
+      :icon="hideActionIcon"
+      @click="$emit(hideActionEvent, index)"
     />
   </div>
 </template>

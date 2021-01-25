@@ -2,7 +2,8 @@
 
 module BillingPlansHelper
   def subscription_plan_info(plans_data, current_plan_code)
-    plans_data.find { |plan| plan.code == current_plan_code }
+    current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_subscription_plan? }
+    current_plan || plans_data.find { |plan| plan.code == current_plan_code }
   end
 
   def number_to_plan_currency(value)
@@ -20,11 +21,16 @@ module BillingPlansHelper
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
-      billable_seats_href: billable_seats_href(namespace)
+      billable_seats_href: billable_seats_href(namespace),
+      plan_name: plan&.name
     }
   end
 
   def use_new_purchase_flow?(namespace)
+    # new flow requires the user to already have a last name.
+    # This can be removed once https://gitlab.com/gitlab-org/gitlab/-/issues/298715 is complete.
+    return false unless current_user.last_name.present?
+
     namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
   end
 
@@ -93,7 +99,13 @@ module BillingPlansHelper
   def billing_available_plans(plans_data, current_plan)
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
-    plans_data.filter { |plan_data| !plan_data.deprecated? || plan_data.code == current_plan&.code }
+    plans_data.reject do |plan_data|
+      if plan_data.code == current_plan&.code
+        plan_data.deprecated? && plan_data.hide_deprecated_card?
+      else
+        plan_data.deprecated?
+      end
+    end
   end
 
   private

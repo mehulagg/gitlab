@@ -8,9 +8,8 @@ import {
   GlDropdownDivider,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import { fetchPolicies } from '~/lib/graphql';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import groupMilestones from '../../graphql/group_milestones.query.graphql';
+import projectMilestones from '../../graphql/project_milestones.query.graphql';
 import createFlash from '~/flash';
 import { __, s__ } from '~/locale';
 
@@ -34,22 +33,21 @@ export default {
   },
   apollo: {
     milestones: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: groupMilestones,
+      query: projectMilestones,
       debounce: 250,
       skip() {
         return !this.edit;
       },
       variables() {
         return {
-          fullPath: this.groupFullPath,
+          fullPath: this.projectPath,
           searchTitle: this.searchTitle,
           state: 'active',
-          includeDescendants: true,
+          includeAncestors: true,
         };
       },
       update(data) {
-        const edges = data?.group?.milestones?.edges ?? [];
+        const edges = data?.project?.milestones?.edges ?? [];
         return edges.map((item) => item.node);
       },
       error() {
@@ -122,40 +120,38 @@ export default {
     <template v-if="hasMilestone" #collapsed>
       <strong class="gl-text-gray-900">{{ activeIssue.milestone.title }}</strong>
     </template>
-    <template>
-      <gl-dropdown
-        ref="dropdown"
-        :text="dropdownText"
-        :header-text="$options.i18n.assignMilestone"
-        block
+    <gl-dropdown
+      ref="dropdown"
+      :text="dropdownText"
+      :header-text="$options.i18n.assignMilestone"
+      block
+    >
+      <gl-search-box-by-type ref="search" v-model.trim="searchTitle" class="gl-m-3" />
+      <gl-dropdown-item
+        data-testid="no-milestone-item"
+        :is-check-item="true"
+        :is-checked="!activeIssue.milestone"
+        @click="setMilestone(null)"
       >
-        <gl-search-box-by-type ref="search" v-model.trim="searchTitle" class="gl-m-3" />
+        {{ $options.i18n.noMilestone }}
+      </gl-dropdown-item>
+      <gl-dropdown-divider />
+      <gl-loading-icon v-if="$apollo.loading" class="gl-py-4" />
+      <template v-else-if="milestones.length > 0">
         <gl-dropdown-item
-          data-testid="no-milestone-item"
+          v-for="milestone in milestones"
+          :key="milestone.id"
           :is-check-item="true"
-          :is-checked="!activeIssue.milestone"
-          @click="setMilestone(null)"
+          :is-checked="activeIssue.milestone && milestone.id === activeIssue.milestone.id"
+          data-testid="milestone-item"
+          @click="setMilestone(milestone.id)"
         >
-          {{ $options.i18n.noMilestone }}
+          {{ milestone.title }}
         </gl-dropdown-item>
-        <gl-dropdown-divider />
-        <gl-loading-icon v-if="$apollo.loading" class="gl-py-4" />
-        <template v-else-if="milestones.length > 0">
-          <gl-dropdown-item
-            v-for="milestone in milestones"
-            :key="milestone.id"
-            :is-check-item="true"
-            :is-checked="activeIssue.milestone && milestone.id === activeIssue.milestone.id"
-            data-testid="milestone-item"
-            @click="setMilestone(milestone.id)"
-          >
-            {{ milestone.title }}
-          </gl-dropdown-item>
-        </template>
-        <gl-dropdown-text v-else data-testid="no-milestones-found">
-          {{ $options.i18n.noMilestonesFound }}
-        </gl-dropdown-text>
-      </gl-dropdown>
-    </template>
+      </template>
+      <gl-dropdown-text v-else data-testid="no-milestones-found">
+        {{ $options.i18n.noMilestonesFound }}
+      </gl-dropdown-text>
+    </gl-dropdown>
   </board-editable-item>
 </template>

@@ -65,6 +65,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
+            resource :corpus_management, only: [:show], controller: :corpus_management
             resource :sast, only: [:show, :create], controller: :sast_configuration
             resource :dast_profiles, only: [:show] do
               resources :dast_site_profiles, only: [:new, :edit]

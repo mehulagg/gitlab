@@ -16,6 +16,10 @@ module Types
     field :path, GraphQL::STRING_TYPE, null: false,
           description: 'Path of the project'
 
+    field :sast_ci_configuration, Types::CiConfiguration::Sast::Type, null: true,
+      calls_gitaly: true,
+      description: 'SAST CI configuration for the project'
+
     field :name_with_namespace, GraphQL::STRING_TYPE, null: false,
           description: 'Full name of the project with its namespace'
     field :name, GraphQL::STRING_TYPE, null: false,
@@ -305,10 +309,16 @@ module Types
               description: 'Title of the label'
           end
 
+    field :terraform_state,
+          Types::Terraform::StateType,
+          null: true,
+          description: 'Find a single Terraform state by name.',
+          resolver: Resolvers::Terraform::StatesResolver.single
+
     field :terraform_states,
           Types::Terraform::StateType.connection_type,
           null: true,
-          description: 'Terraform states associated with the project',
+          description: 'Terraform states associated with the project.',
           resolver: Resolvers::Terraform::StatesResolver
 
     field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
@@ -357,6 +367,12 @@ module Types
 
     def container_repositories_count
       project.container_repositories.size
+    end
+
+    def sast_ci_configuration
+      return unless Ability.allowed?(current_user, :download_code, object)
+
+      ::Security::CiConfiguration::SastParserService.new(object).configuration
     end
 
     private

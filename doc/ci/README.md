@@ -160,8 +160,6 @@ Its feature set is listed on the table below according to DevOps stages.
 Find example project code and tutorials for using GitLab CI/CD with a variety of app frameworks, languages, and platforms
 on the [CI Examples](examples/README.md) page.
 
-GitLab also provides [example projects](https://gitlab.com/gitlab-examples) pre-configured to use GitLab CI/CD.
-
 ## Administration **(CORE ONLY)**
 
 As a GitLab administrator, you can change the default behavior
@@ -206,7 +204,7 @@ been necessary. These are:
 
 #### 12.0
 
-- [Use refspec to clone/fetch Git repository](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4069).
+- [Use `refspec` to clone/fetch Git repository](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4069).
 - [Old cache configuration](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4070).
 - [Old metrics server configuration](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4072).
 - [Remove `FF_K8S_USE_ENTRYPOINT_OVER_COMMAND`](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4073).

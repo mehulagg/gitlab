@@ -21,8 +21,8 @@ many organizations .
 
 | Users        | Configuration           | GCP            | AWS             | Azure          |
 |--------------|-------------------------|----------------|-----------------|----------------|
-| Up to 500    | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | c5.xlarge       | F4s v2         |
-| Up to 1,000  | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | c5.2xlarge      | F8s v2         |
+| Up to 500    | 4 vCPU, 3.6 GB memory   | n1-highcpu-4   | `c5.xlarge`       | F4s v2         |
+| Up to 1,000  | 8 vCPU, 7.2 GB memory   | n1-highcpu-8   | `c5.2xlarge`      | F8s v2         |
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
@@ -45,7 +45,7 @@ To install GitLab for this default reference architecture, use the standard
 
 You can also optionally configure GitLab to use an [external PostgreSQL service](../postgresql/external.md)
 or an [external object storage service](../object_storage.md) for added
-performance and reliability at a reduced complexity cost.
+performance and reliability at an increased complexity cost.
 
 ## Configure Advanced Search **(STARTER ONLY)**
 

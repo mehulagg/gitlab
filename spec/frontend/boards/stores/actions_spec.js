@@ -254,6 +254,27 @@ describe('createList', () => {
   });
 });
 
+describe('fetchLabels', () => {
+  it('should commit mutation RECEIVE_LABELS_SUCCESS on success', async () => {
+    const queryResponse = {
+      data: {
+        group: {
+          labels: {
+            nodes: labels,
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    await testAction({
+      action: actions.fetchLabels,
+      state: { boardType: 'group' },
+      expectedMutations: [{ type: types.RECEIVE_LABELS_SUCCESS, payload: labels }],
+    });
+  });
+});
+
 describe('moveList', () => {
   it('should commit MOVE_LIST mutation and dispatch updateList action', (done) => {
     const initialBoardListsState = {
@@ -1197,6 +1218,40 @@ describe('setSelectedProject', () => {
       ],
       [],
       done,
+    );
+  });
+});
+
+describe('toggleBoardItemMultiSelection', () => {
+  const boardItem = mockIssue;
+
+  it('should commit mutation ADD_BOARD_ITEM_TO_SELECTION if item is not on selection state', () => {
+    testAction(
+      actions.toggleBoardItemMultiSelection,
+      boardItem,
+      { selectedBoardItems: [] },
+      [
+        {
+          type: types.ADD_BOARD_ITEM_TO_SELECTION,
+          payload: boardItem,
+        },
+      ],
+      [],
+    );
+  });
+
+  it('should commit mutation REMOVE_BOARD_ITEM_FROM_SELECTION if item is on selection state', () => {
+    testAction(
+      actions.toggleBoardItemMultiSelection,
+      boardItem,
+      { selectedBoardItems: [mockIssue] },
+      [
+        {
+          type: types.REMOVE_BOARD_ITEM_FROM_SELECTION,
+          payload: boardItem,
+        },
+      ],
+      [],
     );
   });
 });

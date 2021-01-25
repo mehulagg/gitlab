@@ -4,16 +4,13 @@ gem 'rails', '~> 6.0.3.1'
 
 gem 'bootsnap', '~> 1.4.6'
 
-# Improves copy-on-write performance for MRI
-gem 'nakayoshi_fork', '~> 0.0.4'
-
 # Responders respond_to and respond_with
 gem 'responders', '~> 3.0'
 
 gem 'sprockets', '~> 3.7.0'
 
 # Default values for AR models
-gem 'default_value_for', '~> 3.3.0'
+gem 'default_value_for', '~> 3.4.0'
 
 # Supported DBs
 gem 'pg', '~> 1.1'
@@ -28,7 +25,7 @@ gem 'marginalia', '~> 1.10.0'
 gem 'devise', '~> 4.7.2'
 # TODO: verify ARM compile issue on 3.1.13+ version (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18828)
 gem 'bcrypt', '3.1.12'
-gem 'doorkeeper', '~> 5.3.0'
+gem 'doorkeeper', '~> 5.4.0'
 gem 'doorkeeper-openid_connect', '~> 1.7.4'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
@@ -106,7 +103,7 @@ gem 'hashie-forbidden_attributes'
 gem 'kaminari', '~> 1.0'
 
 # HAML
-gem 'hamlit', '~> 2.11.0'
+gem 'hamlit', '~> 2.14.2'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'
@@ -287,6 +284,7 @@ gem 'gitlab_chronic_duration', '~> 0.10.6.2'
 gem 'rack-proxy', '~> 0.6.0'
 
 gem 'sassc-rails', '~> 2.1.0'
+gem 'autoprefixer-rails', '10.2.0.0'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
@@ -339,6 +337,7 @@ end
 group :development do
   gem 'brakeman', '~> 4.2', require: false
   gem 'danger', '~> 8.0.6', require: false
+  gem 'lefthook', '~> 0.7', require: false
 
   gem 'letter_opener_web', '~> 1.3.4'
 
@@ -375,7 +374,7 @@ group :development, :test do
 
   gem 'scss_lint', '~> 0.59.0', require: false
   gem 'haml_lint', '~> 0.36.0', require: false
-  gem 'bundler-audit', '~> 0.6.1', require: false
+  gem 'bundler-audit', '~> 0.7.0.1', require: false
 
   gem 'benchmark-ips', '~> 2.3.0', require: false
 
@@ -465,7 +464,7 @@ group :ed25519 do
 end
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.8.0.pre.rc2'
+gem 'gitaly', '~> 13.8.0.pre.rc3'
 
 gem 'grpc', '~> 1.30.2'
 

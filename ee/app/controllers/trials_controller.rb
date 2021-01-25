@@ -41,6 +41,9 @@ class TrialsController < ApplicationController
     @result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
 
     if @result&.dig(:success)
+      record_experiment_user(:remove_known_trial_form_fields, namespace_id: @namespace.id)
+      record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @namespace.id)
+      record_experiment_user(:trial_registration_with_social_signin, namespace_id: @namespace.id)
       record_experiment_conversion_event(:remove_known_trial_form_fields)
       record_experiment_conversion_event(:trimmed_skip_trial_copy)
       record_experiment_conversion_event(:trial_registration_with_social_signin)

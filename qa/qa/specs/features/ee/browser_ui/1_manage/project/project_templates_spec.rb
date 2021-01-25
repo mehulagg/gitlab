@@ -95,7 +95,7 @@ module QA
           QA::Flow::Project.go_to_create_project_from_template
         end
 
-        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/914' do
+        it 'successfully imports the project using template', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1233' do
           Page::Project::New.perform do |new_page|
             # TODO: Remove `reload true` once this bug is fixed: https://gitlab.com/gitlab-org/gitlab/-/issues/247874
             new_page.retry_until(reload: true) do

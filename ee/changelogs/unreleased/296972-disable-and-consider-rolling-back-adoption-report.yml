@@ -1,5 +1,0 @@
----
-title: Ensure that only top level groups are fetched for devops adoption
-merge_request: 51565
-author:
-type: fixed

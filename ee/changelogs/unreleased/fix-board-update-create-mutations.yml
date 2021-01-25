@@ -1,5 +1,0 @@
----
-title: Fix boards create and update mutation arguments list
-merge_request: 50266
-author:
-type: fixed

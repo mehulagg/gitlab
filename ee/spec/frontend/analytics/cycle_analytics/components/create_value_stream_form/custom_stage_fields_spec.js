@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlFormSelect, GlFormInput } from '@gitlab/ui';
+import { GlDropdown, GlFormInput } from '@gitlab/ui';
 import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
+import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
-import { getLabelEventsIdentifiers } from 'ee/analytics/cycle_analytics/utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { emptyState, emptyErrorsState, firstLabel } from './mock_data';
 import {
-  customStageEvents as events,
-  customStageLabelEvents,
+  customStageEvents as stageEvents,
   labelStartEvent,
   labelStopEvent,
   customStageStopEvents as endEvents,
@@ -26,47 +26,52 @@ const formatEndEventOpts = (_events) => [
     .map(({ name: text, identifier: value }) => ({ text, value })),
 ];
 
-const startEventOptions = formatStartEventOpts(events);
-const endEventOptions = formatEndEventOpts(events);
+const startEventOptions = formatStartEventOpts(stageEvents);
+const endEventOptions = formatEndEventOpts(stageEvents);
 
 describe('CustomStageFields', () => {
   function createComponent({
-    fields = emptyState,
+    stage = emptyState,
     errors = emptyErrorsState,
-    labelEvents = getLabelEventsIdentifiers(customStageLabelEvents),
     stubs = {},
     props = {},
   } = {}) {
-    return shallowMount(CustomStageFields, {
-      propsData: {
-        fields,
-        errors,
-        events,
-        labelEvents,
-        ...props,
-      },
-      stubs: {
-        'labels-selector': false,
-        ...stubs,
-      },
-    });
+    return extendedWrapper(
+      shallowMount(CustomStageFields, {
+        propsData: {
+          stage,
+          errors,
+          stageEvents,
+          index: 0,
+          totalStages: 3,
+          ...props,
+        },
+        stubs: {
+          'labels-selector': false,
+          ...stubs,
+        },
+      }),
+    );
   }
 
   let wrapper = null;
 
-  const getSelectField = (dropdownEl) => dropdownEl.find(GlFormSelect);
+  const getDropdown = (dropdownEl) => dropdownEl.find(GlDropdown);
   const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
 
-  const findName = () => wrapper.find('[data-testid="custom-stage-name"]');
-  const findStartEvent = () => wrapper.find('[data-testid="custom-stage-start-event"]');
-  const findEndEvent = () => wrapper.find('[data-testid="custom-stage-end-event"]');
-  const findStartEventLabel = () => wrapper.find('[data-testid="custom-stage-start-event-label"]');
-  const findEndEventLabel = () => wrapper.find('[data-testid="custom-stage-end-event-label"]');
+  const findName = (index = 0) => wrapper.findByTestId(`custom-stage-name-${index}`);
+  const findStartEvent = (index = 0) => wrapper.findByTestId(`custom-stage-start-event-${index}`);
+  const findEndEvent = (index = 0) => wrapper.findByTestId(`custom-stage-end-event-${index}`);
+  const findStartEventLabel = (index = 0) =>
+    wrapper.findByTestId(`custom-stage-start-event-label-${index}`);
+  const findEndEventLabel = (index = 0) =>
+    wrapper.findByTestId(`custom-stage-end-event-label-${index}`);
   const findNameField = () => findName().find(GlFormInput);
-  const findStartEventField = () => getSelectField(findStartEvent());
-  const findEndEventField = () => getSelectField(findEndEvent());
+  const findStartEventField = () => getDropdown(findStartEvent());
+  const findEndEventField = () => getDropdown(findEndEvent());
   const findStartEventLabelField = () => getLabelSelect(findStartEventLabel());
   const findEndEventLabelField = () => getLabelSelect(findEndEventLabel());
+  const findStageFieldActions = () => wrapper.find(StageFieldActions);
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -94,16 +99,16 @@ describe('CustomStageFields', () => {
     ['End event label', findEndEventLabel],
   ])('Default state', (field, finder) => {
     it(`field '${field}' is hidden by default`, () => {
-      expect(finder(wrapper).exists()).toBe(false);
+      expect(finder().exists()).toBe(false);
     });
   });
 
   describe('Fields', () => {
-    it('emit update event when a field is changed', () => {
-      expect(wrapper.emitted('update')).toBeUndefined();
-      findNameField(wrapper).vm.$emit('input', 'Cool new stage');
+    it('emit input event when a field is changed', () => {
+      expect(wrapper.emitted('input')).toBeUndefined();
+      findNameField().vm.$emit('input', 'Cool new stage');
 
-      expect(wrapper.emitted('update')[0]).toEqual(['name', 'Cool new stage']);
+      expect(wrapper.emitted('input')[0]).toEqual([{ field: 'name', value: 'Cool new stage' }]);
     });
   });
 
@@ -123,22 +128,24 @@ describe('CustomStageFields', () => {
     describe('start event label', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          fields: {
+          stage: {
             startEventIdentifier: labelStartEvent.identifier,
           },
         });
       });
 
       it('will display the start event label field if a label event is selected', () => {
-        expect(findStartEventLabel(wrapper).exists()).toEqual(true);
+        expect(findStartEventLabel().exists()).toEqual(true);
       });
 
-      it('will emit the `update` event when the start event label field when selected', async () => {
-        expect(wrapper.emitted().update).toBeUndefined();
+      it('will emit the `input` event when the start event label field when selected', async () => {
+        expect(wrapper.emitted('input')).toBeUndefined();
 
-        findStartEventLabelField(wrapper).vm.$emit('selectLabel', firstLabel.id);
+        findStartEventLabelField().vm.$emit('select-label', firstLabel.id);
 
-        expect(wrapper.emitted().update[0]).toEqual(['startEventLabelId', firstLabel.id]);
+        expect(wrapper.emitted('input')[0]).toEqual([
+          { field: 'startEventLabelId', value: firstLabel.id },
+        ]);
       });
     });
   });
@@ -165,7 +172,7 @@ describe('CustomStageFields', () => {
     describe('end event label', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          fields: {
+          stage: {
             startEventIdentifier: labelStartEvent.identifier,
             endEventIdentifier: labelStopEvent.identifier,
           },
@@ -173,15 +180,33 @@ describe('CustomStageFields', () => {
       });
 
       it('will display the end event label field if a label event is selected', () => {
-        expect(findEndEventLabel(wrapper).exists()).toEqual(true);
+        expect(findEndEventLabel().exists()).toEqual(true);
       });
 
-      it('will emit the `update` event when the start event label field when selected', async () => {
-        expect(wrapper.emitted().update).toBeUndefined();
+      it('will emit the `input` event when the start event label field when selected', async () => {
+        expect(wrapper.emitted('input')).toBeUndefined();
 
-        findEndEventLabelField(wrapper).vm.$emit('selectLabel', firstLabel.id);
+        findEndEventLabelField().vm.$emit('select-label', firstLabel.id);
 
-        expect(wrapper.emitted().update[0]).toEqual(['endEventLabelId', firstLabel.id]);
+        expect(wrapper.emitted('input')[0]).toEqual([
+          { field: 'endEventLabelId', value: firstLabel.id },
+        ]);
+      });
+    });
+  });
+
+  describe('Stage actions', () => {
+    it('will display the stage actions component', () => {
+      expect(findStageFieldActions().exists()).toBe(true);
+    });
+
+    describe('with only 1 stage', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ props: { totalStages: 1 } });
+      });
+
+      it('does not display the stage actions component', () => {
+        expect(findStageFieldActions().exists()).toBe(false);
       });
     });
   });

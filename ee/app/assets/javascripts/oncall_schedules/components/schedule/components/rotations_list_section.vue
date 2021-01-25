@@ -1,10 +1,15 @@
 <script>
 import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
-import { editRotationModalId, deleteRotationModalId } from 'ee/oncall_schedules/constants';
+import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
+import {
+  editRotationModalId,
+  deleteRotationModalId,
+  PRESET_TYPES,
+  TIMELINE_CELL_WIDTH,
+} from 'ee/oncall_schedules/constants';
 import { s__ } from '~/locale';
 import CurrentDayIndicator from './current_day_indicator.vue';
-import ScheduleShift from './schedule_shift.vue';
 
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
@@ -16,11 +21,11 @@ export default {
   editRotationModalId,
   deleteRotationModalId,
   components: {
-    GlButtonGroup,
     GlButton,
+    GlButtonGroup,
     CurrentDayIndicator,
     DeleteRotationModal,
-    ScheduleShift,
+    ScheduleShiftWrapper,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -43,15 +48,33 @@ export default {
   data() {
     return {
       rotationToUpdate: {},
-      shiftWidths: 0,
     };
+  },
+  computed: {
+    presetIsDay() {
+      return this.presetType === PRESET_TYPES.DAYS;
+    },
+    timeframeToDraw() {
+      if (this.presetIsDay) {
+        return [this.timeframe[0]];
+      }
+
+      return this.timeframe;
+    },
+    timelineStyles() {
+      const length = this.presetIsDay ? 1 : 2;
+
+      return {
+        width: `calc((${100}% - ${TIMELINE_CELL_WIDTH}px) / ${length})`,
+      };
+    },
   },
   methods: {
     setRotationToUpdate(rotation) {
       this.rotationToUpdate = rotation;
     },
-    isLastCell(index) {
-      return index + 1 === this.timeframe.length;
+    cellShouldHideOverflow(index) {
+      return index + 1 === this.timeframe.length || this.presetIsDay;
     },
   },
 };
@@ -89,21 +112,19 @@ export default {
         </gl-button-group>
       </span>
       <span
-        v-for="(timeframeItem, index) in timeframe"
+        v-for="(timeframeItem, index) in timeframeToDraw"
         :key="index"
         class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
-        :class="{ 'gl-overflow-hidden': isLastCell(index) }"
+        :class="{ 'gl-overflow-hidden': cellShouldHideOverflow(index) }"
+        :style="timelineStyles"
         data-testid="timelineCell"
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
-        <schedule-shift
-          v-for="(shift, shiftIndex) in rotation.shifts.nodes"
-          :key="shift.startAt"
-          :shift="shift"
-          :shift-index="shiftIndex"
+        <schedule-shift-wrapper
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
           :timeframe="timeframe"
+          :rotation="rotation"
         />
       </span>
     </div>

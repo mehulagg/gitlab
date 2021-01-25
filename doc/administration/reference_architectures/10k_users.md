@@ -35,7 +35,7 @@ full list of reference architectures, see
 | GitLab Rails                               | 3           | 32 vCPU, 28.8 GB memory | n1-highcpu-32   | c5.9xlarge  | F32s v2  |
 | Monitoring node                            | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
 | Object storage                             | n/a         | n/a                     | n/a             | n/a         | n/a      |
-| NFS server                                 | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
+| NFS server                                 | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | `c5.xlarge`   | F4s v2   |
 
 ```plantuml
 @startuml 10k
@@ -2253,7 +2253,7 @@ GitLab has been tested on a number of object storage providers:
 - [Google Cloud Storage](https://cloud.google.com/storage)
 - [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces/)
 - [Oracle Cloud Infrastructure](https://docs.cloud.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
-- [Openstack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
+- [OpenStack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
 - [Azure Blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
 - On-premises hardware and appliances from various storage vendors.
 - MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.

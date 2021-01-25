@@ -59,16 +59,6 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
           value="minutes"
         />
       </div>
-       
-      <gl-form-text-stub
-        class="gl-font-base gl-text-gray-400!"
-        tag="small"
-        textvariant="muted"
-      >
-        
-          Time limit must be a multiple of 15 minutes
-        
-      </gl-form-text-stub>
     </gl-form-group-stub>
      
     <gl-button-stub

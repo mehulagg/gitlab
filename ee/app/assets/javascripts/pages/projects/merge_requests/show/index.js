@@ -7,9 +7,7 @@ import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_iss
 import initShow from '~/pages/projects/merge_requests/init_merge_request_show';
 
 initShow();
-if (gon.features && !gon.features.vueIssuableSidebar) {
-  initSidebarBundle();
-}
+initSidebarBundle();
 initMrNotes();
 initReviewBar();
 initIssuableHeaderWarning(store);

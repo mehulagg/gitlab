@@ -1,9 +1,11 @@
 <script>
+import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { GlResizeObserverDirective } from '@gitlab/ui';
 
 export default {
+  PRESET_TYPES,
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
@@ -44,6 +46,9 @@ export default {
       }
       return '';
     },
+    getSubItemValue(subItem) {
+      return subItem.getDate();
+    },
     updateShiftStyles() {
       this.$apollo.mutate({
         mutation: updateShiftTimeUnitWidthMutation,
@@ -69,11 +74,11 @@ export default {
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
       data-testid="sublabel-value"
-      >{{ subItem.getDate() }}</span
+      >{{ getSubItemValue(subItem) }}</span
     >
     <span
       v-if="hasToday"
-      :style="getIndicatorStyles()"
+      :style="getIndicatorStyles($options.PRESET_TYPES.WEEKS)"
       class="current-day-indicator-header preset-weeks"
     ></span>
   </div>

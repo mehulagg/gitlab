@@ -106,7 +106,8 @@ RSpec.describe Mutations::ComplianceManagement::Frameworks::Create do
       params: {
         name: 'GDPR',
         description: 'Example description',
-        color: '#abc123'
+        color: '#abc123',
+        pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
       }
     }
   end

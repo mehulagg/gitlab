@@ -51,6 +51,7 @@ module EE
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
 
       has_one :group_wiki_repository
+      has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
       belongs_to :file_template_project, class_name: "Project"
 

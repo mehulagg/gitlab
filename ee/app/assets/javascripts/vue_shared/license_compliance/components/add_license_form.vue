@@ -101,7 +101,7 @@ export default {
           :aria-describedby="`js-${option.value}-license-radio`"
           :class="{ 'mb-3': isDescriptionEnabled }"
         >
-          <template>{{ option.label }}</template>
+          {{ option.label }}
           <div v-if="isDescriptionEnabled" class="text-secondary">
             {{ option.description }}
           </div>

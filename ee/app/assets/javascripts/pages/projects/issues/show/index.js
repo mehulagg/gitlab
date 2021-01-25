@@ -6,10 +6,7 @@ import initShow from '~/pages/projects/issues/show';
 import UserCallout from '~/user_callout';
 
 initShow();
-
-if (gon.features && !gon.features.vueIssuableSidebar) {
-  initSidebarBundle();
-}
+initSidebarBundle();
 initRelatedIssues();
 
 // eslint-disable-next-line no-new

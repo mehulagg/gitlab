@@ -16,9 +16,9 @@ module EE
 
           loader EE::BulkImports::Groups::Loaders::EpicsLoader
 
-          after_run do |context|
+          def after_run(context)
             if context.entity.has_next_page?(:epics)
-              self.new.run(context)
+              run(context)
             end
           end
         end

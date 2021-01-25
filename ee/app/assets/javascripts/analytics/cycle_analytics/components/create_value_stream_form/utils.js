@@ -95,17 +95,17 @@ export const validateStage = (fields) => {
           : [];
     }
   } else {
-    newErrors.name = [ERRORS.MIN_LENGTH];
+    newErrors.name = [ERRORS.STAGE_NAME_MIN_LENGTH];
   }
 
   if (fields?.startEventIdentifier) {
-    newErrors.endEventIdentifier = [];
+    if (fields?.endEventIdentifier) {
+      newErrors.endEventIdentifier = [];
+    } else {
+      newErrors.endEventIdentifier = [ERRORS.END_EVENT_REQUIRED];
+    }
   } else {
     newErrors.endEventIdentifier = [ERRORS.START_EVENT_REQUIRED];
-  }
-
-  if (fields?.startEventIdentifier && fields?.endEventIdentifier) {
-    newErrors.endEventIdentifier = [];
   }
   return newErrors;
 };
@@ -123,7 +123,7 @@ export const validateValueStreamName = ({ name = '' }) => {
     errors.name.push(ERRORS.MAX_LENGTH);
   }
   if (!name.length) {
-    errors.name.push(ERRORS.MIN_LENGTH);
+    errors.name.push(ERRORS.VALUE_STREAM_NAME_MIN_LENGTH);
   }
   return errors;
 };

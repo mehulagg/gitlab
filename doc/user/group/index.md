@@ -404,6 +404,8 @@ If an LDAP user is a group member when LDAP Synchronization is added, and they a
 
 To create group links via CN:
 
+<!-- vale gitlab.Spelling = NO -->
+
 1. Select the **LDAP Server** for the link.
 1. Select `LDAP Group cn` as the **Sync method**.
 1. In the **LDAP Group cn** text input box, begin typing the CN of the group. There will be a dropdown menu with matching CNs within the configured `group_base`. Select your CN from this list.
@@ -411,6 +413,8 @@ To create group links via CN:
 1. Click the `Add Synchronization` button to save this group link.
 
 ![Creating group links via CN](img/ldap_sync_cn_v13_1.png)
+
+<!-- vale gitlab.Spelling = YES -->
 
 ### Creating group links via filter **(PREMIUM ONLY)**
 
@@ -645,9 +649,9 @@ more information.
 
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
-underlying projects, issues, etc, by IP address. This can help ensure that
+underlying subgroups, projects, issues, and so on, by IP address. This can help ensure that
 particular content doesn't leave the premises, while not blocking off access to
-the entire instance.
+the entire instance. IP access restrictions can only be configured at the group level.
 
 Add one or more allowed IP subnets using CIDR notation to the group settings and anyone
 coming from a different IP address won't be able to access the restricted

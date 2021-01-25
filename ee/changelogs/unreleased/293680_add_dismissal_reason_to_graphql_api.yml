@@ -1,5 +1,0 @@
----
-title: Add `dismissal_reason` enum to `VulnerabilityDismiss` mutation on GraphQL API
-merge_request: 50688
-author:
-type: added

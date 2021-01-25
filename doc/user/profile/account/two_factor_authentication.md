@@ -240,7 +240,7 @@ following desktop browsers:
 
 NOTE:
 For Firefox 47-66, you can enable the FIDO U2F API in
-[about:config](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
+[`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 Search for `security.webauth.u2f` and double click on it to toggle to `true`.
 
 To set up 2FA with a U2F device:
@@ -384,7 +384,7 @@ codes. If you saved these codes, you can use one of them to sign in.
 To use a recovery code, enter your username/email and password on the GitLab
 sign-in page. When prompted for a two-factor code, enter the recovery code.
 
-Once you use a recovery code, you cannot re-use it. You can still use the other
+After you use a recovery code, you cannot re-use it. You can still use the other
 recovery codes you saved.
 
 ### Generate new recovery codes using SSH
