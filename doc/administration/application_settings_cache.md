@@ -6,8 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Changing application settings cache expiry interval **(CORE ONLY)**
 
-Application settings are cached for 60 seconds by default to reduce load on the database and Redis. While this
-value would work well for most installations, there could be cases where you would want to adjust the interval value.
+Application settings are cached for 60 seconds by default which should work for most installations.
 
 This interval value can be configured in `config/gitlab.yml`:
 
@@ -17,7 +16,8 @@ This interval value can be configured in `config/gitlab.yml`:
 
 Uncomment and customize this line if you want to change the default value of the time to expire the application settings cache.
 A higher value would mean a greater delay between changing an application setting and noticing that change come into effect.
-A lower value could result in more load on the database and Redis depending on the amount data in the `application_settings` table.
+A value of 0 would result in the `application_settings` table being loaded for every request causing extra load on Redis and/or PostgreSQL.
+It is therefore recommended to keep the value above zero.
 
 ## Changing the application settings cache expiry in Omnibus installations
 
