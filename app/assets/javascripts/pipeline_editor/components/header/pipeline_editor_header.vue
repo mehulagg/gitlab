@@ -1,0 +1,28 @@
+<script>
+import validationSegment from './validation_segment.vue';
+
+export default {
+  components: {
+    validationSegment,
+  },
+  props: {
+    ciConfigData: {
+      type: Object,
+      required: true,
+    },
+    isCiConfigDataLoading: {
+      type: Boolean,
+      required: true,
+    },
+  },
+};
+</script>
+<template>
+  <div class="gl-mb-5">
+    <validation-segment
+      class="gl-p-5 gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base"
+      :loading="isCiConfigDataLoading"
+      :ci-config="ciConfigData"
+    />
+  </div>
+</template>
