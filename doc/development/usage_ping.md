@@ -136,7 +136,7 @@ Any such changes lead to inconsistent reports from multiple GitLab instances.
 If there is a problem with an existing metric, it's best to deprecate the existing metric,
 and use it, side by side, with the desired new metric.
 
-Example: 
+Example:
 Consider following change. Before GitLab 12.6, the `example_metric` was implemented as:
 
 ```ruby
@@ -502,7 +502,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
 
 Use one of the following methods to track events:
 
-1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:, feature_default_enabled: false)`.
+1. Track event in controller using `RedisTracking` module with `track_redis_hll_event(*controller_actions, name:, feature:)`.
 
    Arguments:
 
@@ -519,7 +519,7 @@ Use one of the following methods to track events:
      include RedisTracking
 
      skip_before_action :authenticate_user!, only: :show
-     track_redis_hll_event :index, :show, name: 'g_compliance_example_feature_visitors', feature: :compliance_example_feature, feature_default_enabled: true
+     track_redis_hll_event :index, :show, name: 'g_compliance_example_feature_visitors', feature: :compliance_example_feature
 
      def index
        render html: 'index'

@@ -3,18 +3,18 @@
 require "spec_helper"
 
 RSpec.describe RedisTracking do
-  let(:feature) { 'approval_rule' }
+  let(:feature) { 'track_unique_visits' }
   let(:user) { create(:user) }
 
   before do
-    skip_feature_flags_yaml_validation
+    stub_feature_flags(feature => true)
   end
 
   controller(ApplicationController) do
     include RedisTracking
 
     skip_before_action :authenticate_user!, only: :show
-    track_redis_hll_event :index, :show, name: 'g_compliance_approval_rules', feature: :approval_rule, feature_default_enabled: true,
+    track_redis_hll_event :index, :show, name: 'g_compliance_dashboard', feature: 'track_unique_visits',
       if: [:custom_condition_one?, :custom_condition_two?]
 
     def index
@@ -42,7 +42,7 @@ RSpec.describe RedisTracking do
 
   def expect_tracking
     expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
-      .with('g_compliance_approval_rules', values: instance_of(String))
+      .with('g_compliance_dashboard', values: instance_of(String))
   end
 
   def expect_no_tracking
@@ -71,12 +71,6 @@ RSpec.describe RedisTracking do
 
       it 'tracks the event' do
         expect_tracking
-
-        get :index
-      end
-
-      it 'passes default_enabled flag' do
-        expect(controller).to receive(:metric_feature_enabled?).with(feature.to_sym, true)
 
         get :index
       end

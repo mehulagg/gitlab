@@ -568,7 +568,7 @@ module API
 
       feature_flag = "usage_data_#{event_name}"
 
-      return unless Feature.enabled?(feature_flag, default_enabled: true)
+      return unless Feature.enabled?(feature_flag, default_enabled: :yaml)
 
       Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
     rescue => error
