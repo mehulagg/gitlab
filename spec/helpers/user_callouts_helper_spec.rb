@@ -223,25 +223,23 @@ RSpec.describe UserCalloutsHelper do
     end
   end
 
-  describe '.show_unfinished_tag_cleanup_callout?' do
+ describe '.show_unfinished_tag_cleanup_callout?' do
     subject { helper.show_unfinished_tag_cleanup_callout? }
 
-    let(:user) { create(:user) }
-
     before do
-      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:user_dismissed?).with(described_class::UNFINISHED_TAG_CLEANUP_CALLOUT) { dismissed }
     end
 
-    context 'when the unfinished cleanup policy alert has not been dismissed' do
-      it { is_expected.to be_truthy }
+    context 'when user has not dismissed' do
+      let(:dismissed) { false }
+
+      it { is_expected.to be true }
     end
 
-    context 'when the unfinished cleanup policy alert has been dismissed' do
-      before do
-        create(:user_callout, user: user, feature_name: described_class::UNFINISHED_TAG_CLEANUP_CALLOUT)
-      end
+    context 'when user dismissed' do
+      let(:dismissed) { true }
 
-      it { is_expected.to be_falsy }
+      it { is_expected.to be false }
     end
   end
 end
