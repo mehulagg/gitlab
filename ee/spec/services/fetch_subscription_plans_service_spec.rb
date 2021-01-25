@@ -32,6 +32,20 @@ RSpec.describe FetchSubscriptionPlansService do
         execute_service
       end
 
+      context 'with pnp_subscription_plan_cache_key flag disabled' do
+        before do
+          stub_feature_flags(pnp_subscription_plan_cache_key: false)
+        end
+
+        it 'returns a new cache key so the cache is busted' do
+          allow(Gitlab::HTTP).to receive(:get).and_return(response_mock)
+
+          expect(Rails.cache).to receive(:read).with("subscription-plan-#{plan}")
+
+          execute_service
+        end
+      end
+
       context 'with given namespace_id' do
         subject(:execute_service) { described_class.new(plan: plan, namespace_id: namespace_id).execute }
 
