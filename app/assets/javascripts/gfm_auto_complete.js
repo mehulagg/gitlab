@@ -40,7 +40,7 @@ export function membersBeforeSave(members) {
       username: member.username,
       avatarTag: autoCompleteAvatar.length === 1 ? txtAvatar : imgAvatar,
       title: sanitize(title),
-      search: sanitize(`${member.username} ${member.name}`),
+      search: sanitize(`${member.name.replace(/ /g, '')} ${member.username}`),
       icon: avatarIcon,
       availability: member?.availability,
     };
@@ -805,9 +805,14 @@ GfmAutoComplete.Emoji = {
 // Team Members
 GfmAutoComplete.Members = {
   templateFunction({ avatarTag, username, title, icon, availabilityStatus }) {
-    return `<li>${avatarTag} ${username} <small>${escape(
-      title,
-    )}${availabilityStatus}</small> ${icon}</li>`;
+    return `<li>
+      ${avatarTag}
+      <div>
+        <div>${escape(title)}</div>
+        <div><small>${username}</small></div>
+      </div>
+      ${availabilityStatus} ${icon}
+    </li>`;
   },
 };
 GfmAutoComplete.Labels = {
