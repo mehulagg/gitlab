@@ -374,10 +374,10 @@ msgstr ""
 msgid "%{board_target} not found"
 msgstr ""
 
-msgid "%{code_open}Masked%{code_close} variables are hidden in job logs (though they must match certain regexp requirements to do so)."
+msgid "%{code_open}Masked:%{code_close} Hidden in job logs (must match regular expression requirements)."
 msgstr ""
 
-msgid "%{code_open}Protected%{code_close} variables are only exposed to protected branches or tags."
+msgid "%{code_open}Protected:%{code_close} Only exposed to protected branches or tags."
 msgstr ""
 
 msgid "%{commit_author_link} authored %{commit_timeago}"
@@ -11004,9 +11004,6 @@ msgstr ""
 msgid "Environment scope"
 msgstr ""
 
-msgid "Environment variables are applied to environments via the Runner. You can use environment variables for passwords, secret keys, etc. Make variables available to the running application by prepending the variable key with %{code_open}K8S_SECRET_%{code_close}. You can set variables to be:"
-msgstr ""
-
 msgid "Environment variables are configured by your administrator to be %{link_start}protected%{link_end} by default"
 msgstr ""
 
@@ -14542,6 +14539,9 @@ msgid "How do I configure runners?"
 msgstr ""
 
 msgid "How do I mirror repositories?"
+msgstr ""
+
+msgid "How do I use variables?"
 msgstr ""
 
 msgid "How does cleanup work?"
@@ -20170,9 +20170,6 @@ msgid "Options"
 msgstr ""
 
 msgid "Or you can choose one of the suggested colors below"
-msgstr ""
-
-msgid "Origin"
 msgstr ""
 
 msgid "Orphaned member"
@@ -28793,7 +28790,7 @@ msgstr ""
 msgid "These runners are specific to this project."
 msgstr ""
 
-msgid "These variables are configured in the parent group settings, and will be active in the current project in addition to the project variables."
+msgid "These variables are inherited from the parent group and are available in this project (in addition to the project variables)."
 msgstr ""
 
 msgid "Third Party Advisory Link"
@@ -31232,6 +31229,9 @@ msgstr ""
 msgid "Variables"
 msgstr ""
 
+msgid "Variables can be:"
+msgstr ""
+
 msgid "Various container registry settings."
 msgstr ""
 
@@ -32484,6 +32484,12 @@ msgid "You can specify notification level per group or per project."
 msgstr ""
 
 msgid "You can test your .gitlab-ci.yml in %{linkStart}CI Lint%{linkEnd}."
+msgstr ""
+
+msgid "You can use variables for passwords, secret keys, and so on. Instance variables are available in all projects on the instance, and are passed to environments by the runner."
+msgstr ""
+
+msgid "You can use variables for passwords, secret keys, and so on. Variables are passed to environments by the runner."
 msgstr ""
 
 msgid "You can view the source or %{linkStart}%{cloneIcon} clone the repository%{linkEnd}"
