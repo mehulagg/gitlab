@@ -1,0 +1,5 @@
+---
+title: Remove merge_request_reviwers feature flag
+merge_request:
+author:
+type: removed
