@@ -32,7 +32,7 @@ member of a new group named `gitlab-developers`:
 
    ![Jira create new user](img/jira_create_new_user.png)
 
-1. In sidebar, select **Groups**.
+1. From the sidebar, select **Groups**.
 
    ![Jira create new user](img/jira_create_new_group.png)
 
