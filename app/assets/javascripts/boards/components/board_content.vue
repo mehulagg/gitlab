@@ -121,13 +121,18 @@ export default {
       </transition>
     </component>
 
-    <epics-swimlanes
-      v-else
-      ref="swimlanes"
-      :lists="boardListsToUse"
-      :can-admin-list="canAdminList"
-      :disabled="disabled"
-    />
+    <div v-else class="gl-display-flex">
+      <epics-swimlanes
+        ref="swimlanes"
+        :lists="boardListsToUse"
+        :can-admin-list="canAdminList"
+        :disabled="disabled"
+      />
+
+      <transition name="slide" @after-enter="afterFormEnters">
+        <board-add-new-column class="gl-mt-5 gl-mx-3" style="min-width: 400px; max-width: 85vw" />
+      </transition>
+    </div>
 
     <board-content-sidebar v-if="isSwimlanesOn || glFeatures.graphqlBoardLists" />
   </div>
