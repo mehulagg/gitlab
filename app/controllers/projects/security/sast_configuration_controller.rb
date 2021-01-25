@@ -4,7 +4,6 @@ module Projects
   module Security
     class SastConfigurationController < Projects::ApplicationController
       include CreatesCommit
-      include SecurityDashboardsPermissions
 
       alias_method :vulnerable, :project
 

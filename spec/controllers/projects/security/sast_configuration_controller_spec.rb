@@ -18,11 +18,6 @@ RSpec.describe Projects::Security::SastConfigurationController do
 
     render_views
 
-    it_behaves_like SecurityDashboardsPermissions do
-      let(:vulnerable) { project }
-      let(:security_dashboard_action) { request }
-    end
-
     context 'with authorized user' do
       before do
         stub_licensed_features(security_dashboard: true)
