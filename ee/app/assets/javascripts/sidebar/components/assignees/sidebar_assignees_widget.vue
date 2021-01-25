@@ -171,9 +171,13 @@ export default {
         return;
       }
 
-      this.selected = [name];
+      this.selected = this.selected.concat(name);
+    },
+    unselect(name) {
+      this.selected = this.selected.filter((user) => user.username !== name);
+    },
+    saveAssignees() {
       this.updateAssignees(this.selectedUserNames);
-      this.$refs.toggle.collapse();
     },
     isChecked(id) {
       return this.selectedUserNames.includes(id);
@@ -192,7 +196,6 @@ export default {
   </div>
   <sidebar-editable-item
     v-else
-    ref="toggle"
     :loading="isSettingAssignees"
     :title="assigneeText"
     @close="saveAssignees"
@@ -228,6 +231,7 @@ export default {
               v-for="item in selected"
               :key="item.id"
               :is-checked="isChecked(item.username)"
+              @click="unselect(item.username)"
             >
               <gl-avatar-link>
                 <gl-avatar-labeled
