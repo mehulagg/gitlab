@@ -1147,6 +1147,52 @@ You can download any older version of Firefox from the releases FTP server, <htt
 1. Open up a terminal and run `/Applications/Firefox_Old.app/Contents/MacOS/firefox-bin -profilemanager` to create a new profile specific to that Firefox version.
 1. Once the profile has been created, quit the app, and run it again like normal. You now have a working older Firefox version.
 
+## Snapshots
+
+A snapshot test is a simple way to evaluate changes in a components output. Snapshot tests can be a very powerful tool but they are mean't to supplement not replace unit tests.
+
+Jest renders your component into a JSON file and takes a snapshot of the file. When you run your test, Jest compares the snapshot with the latest rendered output. If there is any difference in the two snapshots the test will alert you.
+
+Jests official documentation [https://jestjs.io/docs/en/snapshot-testing](https://jestjs.io/docs/en/snapshot-testing)
+
+### How to take a snapshot
+
+```javascript
+it('renders the component correctly', () => {
+  expect(wrapper.element).toMatchSnapshot();
+})
+```
+
+### Pros and Cons
+
+Pros
+
+- Speed up the creation of unit tests
+- Easy to keep up-to-date
+
+Cons
+
+- Tightly coupled to an components output
+- No meaningful assertions or expectations
+
+A good rule of thumb to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
+
+### When to use
+
+Use
+
+- You want to test how the component renders
+- Template heavy component
+- Not a lot of logic in the component
+- Composed of native HTML elements
+
+### When not to use
+
+Don't use
+
+- Composed of custom components
+-
+
 ---
 
 [Return to Testing documentation](index.md)
