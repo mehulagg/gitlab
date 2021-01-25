@@ -56,16 +56,42 @@ RSpec.describe MergeRequestBlock do
       expect(new_block).not_to be_valid
     end
 
-    it 'forbids blocking MR from becoming blocked' do
+    it 'allows blocking MR to become blocked' do
       new_block = build(:merge_request_block, blocked_merge_request: block.blocking_merge_request)
 
-      expect(new_block).not_to be_valid
+      expect(new_block).to be_valid
     end
 
-    it 'forbids blocked MR from becoming a blocker' do
+    it 'allows blocked MR to become a blocker' do
       new_block = build(:merge_request_block, blocking_merge_request: block.blocked_merge_request)
 
-      expect(new_block).not_to be_valid
+      expect(new_block).to be_valid
+    end
+
+    context 'circular dependencies' do
+      let(:mr_A) { create(:merge_request) }
+      let(:mr_B) { create(:merge_request) }
+      let(:mr_C) { create(:merge_request) }
+      let(:mr_D) { create(:merge_request) }
+
+      before(:each) do
+        # create a chain of MRs A->B->C->D
+        create(:merge_request_block, blocking_merge_request: mr_A, blocked_merge_request: mr_B)
+        create(:merge_request_block, blocking_merge_request: mr_B, blocked_merge_request: mr_C)
+        create(:merge_request_block, blocking_merge_request: mr_C, blocked_merge_request: mr_D)
+      end
+
+      it 'forbids circular dependencies by prepending a MR already existing in the chain' do
+        new_block = build(:merge_request_block, blocking_merge_request: mr_C, blocked_merge_request: mr_A)
+
+        expect(new_block).not_to be_valid
+      end
+
+      it 'forbids circular dependencies by appending a MR already existing in the chain' do
+        new_block = build(:merge_request_block, blocking_merge_request: mr_D, blocked_merge_request: mr_B)
+
+        expect(new_block).not_to be_valid
+      end
     end
   end
 
