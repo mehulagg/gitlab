@@ -18,7 +18,7 @@ module BillingPlansHelper
   end
 
   def plan_upgrade_offer(upgrade_offer, plan)
-    return :no_offer unless plan&.offer_from_previous_tier
+    return :no_offer unless offer_from_previous_tier?(plan)
 
     upgrade_offer ? :upgrade_for_free : :upgrade_for_offer
   end
@@ -161,5 +161,9 @@ module BillingPlansHelper
 
   def billable_seats_href(group)
     group_seat_usage_path(group)
+  end
+
+  def offer_from_previous_tier?(plan)
+    plan&.offer_from_previous_tier
   end
 end

@@ -165,7 +165,7 @@ RSpec.describe BillingPlansHelper do
     end
 
     context 'when plan has a valid property' do
-      where(:upgrade_offer, :offer_from_previous_tier, :result) do
+      where(:upgrade_offer, :plan_offer, :result) do
         true  | true  | :upgrade_for_free
         true  | false | :no_offer
         false | true  | :upgrade_for_offer
@@ -174,7 +174,7 @@ RSpec.describe BillingPlansHelper do
 
       with_them do
         let(:plan) do
-          OpenStruct.new(offer_from_previous_tier: offer_from_previous_tier)
+          allow(helper).to receive(:offer_from_previous_tier?).and_return(plan_offer)
         end
 
         subject { helper.plan_upgrade_offer(upgrade_offer, plan) }
