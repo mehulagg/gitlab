@@ -5797,6 +5797,9 @@ msgstr ""
 msgid "ClassificationLabelUnavailable|is unavailable: %{reason}"
 msgstr ""
 
+msgid "Clean up after running %{link_start}git filter-repo%{link_end} on the repository."
+msgstr ""
+
 msgid "Clean up image tags"
 msgstr ""
 
