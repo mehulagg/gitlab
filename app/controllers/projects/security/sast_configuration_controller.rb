@@ -9,6 +9,7 @@ module Projects
 
       before_action :ensure_sast_configuration_enabled!, except: [:create]
       before_action :authorize_edit_tree!, only: [:create]
+      before_action :ensure_read_security_configuration!
 
       feature_category :static_application_security_testing
 
@@ -33,6 +34,10 @@ module Projects
 
       def ensure_sast_configuration_enabled!
         not_found unless ::Feature.enabled?(:sast_configuration_ui, project, default_enabled: true)
+      end
+
+      def ensure_read_security_configuration!
+        render_403 unless can?(current_user, :read_security_configuration, project)
       end
     end
   end
