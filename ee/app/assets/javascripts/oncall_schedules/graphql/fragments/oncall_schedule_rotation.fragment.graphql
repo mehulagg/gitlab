@@ -1,3 +1,5 @@
+#import "../fragments/oncall_schedule_participant.fragment.graphql"
+
 fragment OnCallRotation on IncidentManagementOncallRotation {
   id
   name
@@ -6,12 +8,7 @@ fragment OnCallRotation on IncidentManagementOncallRotation {
   lengthUnit
   participants {
     nodes {
-      user {
-        id
-        username
-      }
-      colorWeight
-      colorPalette
+      ...OnCallParticipant
     }
   }
 }

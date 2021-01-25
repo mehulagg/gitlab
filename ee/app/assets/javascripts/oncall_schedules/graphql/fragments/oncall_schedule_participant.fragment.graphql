@@ -1,0 +1,8 @@
+fragment OnCallParticipant on OncallParticipantType {
+  user {
+    id
+    username
+  }
+  colorWeight
+  colorPalette
+}

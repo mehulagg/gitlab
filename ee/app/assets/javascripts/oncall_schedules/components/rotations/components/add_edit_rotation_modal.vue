@@ -128,9 +128,9 @@ export default {
         },
         participants: this.form.participants.map(({ username }) => ({
           username,
-          // eslint-disable-next-line @gitlab/require-i18n-strings
-          colorWeight: 'WEIGHT_500',
-          colorPalette: 'BLUE',
+            // eslint-disable-next-line @gitlab/require-i18n-strings
+            colorWeight: 'WEIGHT_500',
+            colorPalette: 'BLUE',
         })),
       };
     },

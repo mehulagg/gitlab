@@ -1,8 +1,7 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { HOURS_IN_DAY, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
-import { getOverlapDateInPeriods } from '~/lib/utils/datetime_utility';
-import { incrementDateByDays } from '../../../utils';
+import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
 
 export default {
   components: {
@@ -36,7 +35,7 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return incrementDateByDays(this.timeframeItem, 1);
+      return new Date(nDaysAfter(this.timeframeItem, 1));
     },
     hoursUntilEndOfTimeFrame() {
       return HOURS_IN_DAY - new Date(this.shiftRangeOverlap.overlapStartDate).getHours();
@@ -67,14 +66,10 @@ export default {
       return new Date(this.shift.endsAt);
     },
     shiftRangeOverlap() {
-      try {
-        return getOverlapDateInPeriods(
-          { start: this.timeframeItem, end: this.currentTimeframeEndsAt },
-          { start: this.shiftStartsAt, end: this.shiftEndsAt },
-        );
-      } catch (error) {
-        return { hoursOverlap: 0 };
-      }
+      return getOverlapDateInPeriods(
+        {start: this.timeframeItem, end: this.currentTimeframeEndsAt},
+        {start: this.shiftStartsAt, end: this.shiftEndsAt},
+      );
     },
     shiftStartHourOutOfRange() {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();

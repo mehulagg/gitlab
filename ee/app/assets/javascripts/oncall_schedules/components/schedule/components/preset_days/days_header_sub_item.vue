@@ -7,6 +7,12 @@ import { GlResizeObserverDirective } from '@gitlab/ui';
 export default {
   PRESET_TYPES,
   HOURS_IN_DAY,
+  props: {
+    timeframeItem: {
+      type: Date,
+      required: true,
+    },
+  },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
@@ -42,6 +48,7 @@ export default {
       >{{ hour }}</span
     >
     <span
+      v-if="isToday"
       :style="getIndicatorStyles($options.PRESET_TYPES.DAYS)"
       class="current-day-indicator-header preset-days"
       data-testid="day-item-sublabel-current-indicator"
