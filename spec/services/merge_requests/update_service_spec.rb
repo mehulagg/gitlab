@@ -142,29 +142,11 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       context 'with reviewers' do
         let(:opts) { { reviewer_ids: [user2.id] } }
 
-        context 'when merge_request_reviewers feature is disabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: false)
-          end
+        it 'creates system note about merge_request review request' do
+          note = find_note('requested review from')
 
-          it 'does not create a system note about merge_request review request' do
-            note = find_note('review requested from')
-
-            expect(note).to be_nil
-          end
-        end
-
-        context 'when merge_request_reviewers feature is enabled' do
-          before(:context) do
-            stub_feature_flags(merge_request_reviewers: true)
-          end
-
-          it 'creates system note about merge_request review request' do
-            note = find_note('requested review from')
-
-            expect(note).not_to be_nil
-            expect(note.note).to include "requested review from #{user2.to_reference}"
-          end
+          expect(note).not_to be_nil
+          expect(note.note).to include "requested review from #{user2.to_reference}"
         end
       end
 

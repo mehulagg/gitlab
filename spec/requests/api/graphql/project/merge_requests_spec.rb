@@ -264,18 +264,6 @@ RSpec.describe 'getting merge request listings nested in a project' do
         })
       end
 
-      context 'the feature flag is disabled' do
-        before do
-          stub_feature_flags(merge_request_reviewers: false)
-        end
-
-        it 'does not return reviewers' do
-          execute_query
-
-          expect(results).to all(match a_hash_including('reviewers' => be_nil))
-        end
-      end
-
       include_examples 'N+1 query check'
     end
   end

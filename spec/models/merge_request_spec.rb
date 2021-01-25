@@ -4487,24 +4487,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
-  describe '#allows_reviewers?' do
-    it 'returns false without merge_request_reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: false)
-
-      merge_request = build_stubbed(:merge_request)
-
-      expect(merge_request.allows_reviewers?).to be(false)
-    end
-
-    it 'returns true with merge_request_reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: true)
-
-      merge_request = build_stubbed(:merge_request)
-
-      expect(merge_request.allows_reviewers?).to be(true)
-    end
-  end
-
   describe '#update_and_mark_in_progress_merge_commit_sha' do
     let(:ref) { subject.target_project.repository.commit.id }
 
