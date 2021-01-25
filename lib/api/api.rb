@@ -68,6 +68,12 @@ module API
       set_peek_enabled_for_current_request
     end
 
+    before do
+      if request.user_agent.match?("vs-code-gitlab-workflow")
+        Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter.track_vs_code_user(user: current_user)
+      end
+    end
+
     # The locale is set to the current user's locale when `current_user` is loaded
     after { Gitlab::I18n.use_default_locale }
 
