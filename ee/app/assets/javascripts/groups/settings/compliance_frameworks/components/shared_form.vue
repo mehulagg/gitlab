@@ -132,7 +132,7 @@ export default {
     </gl-alert>
     <gl-loading-icon v-if="loading" size="lg" class="gl-mt-5" />
 
-    <gl-form v-if="!loading" @submit.prevent="onSubmit">
+    <gl-form v-if="!loading" class="js-disable-on-submit" @submit.prevent="onSubmit">
       <gl-form-group
         :label="$options.i18n.titleInputLabel"
         :invalid-feedback="$options.i18n.titleInputInvalid"
