@@ -40,3 +40,11 @@ export const emptyFetchResponse = {
     },
   },
 };
+
+export const frameworkFoundResponse = {
+  id: 'gid://gitlab/ComplianceManagement::Framework/1',
+  name: 'GDPR',
+  description: 'General Data Protection Regulation',
+  color: '#1aaa55',
+  parsedId: 1,
+};

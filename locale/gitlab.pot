@@ -1253,6 +1253,9 @@ msgstr ""
 msgid "A deleted user"
 msgstr ""
 
+msgid "A description is required"
+msgstr ""
+
 msgid "A file has been changed."
 msgstr ""
 
@@ -1347,6 +1350,9 @@ msgid "A sign-in to your account has been made from the following IP address: %{
 msgstr ""
 
 msgid "A string appended to the project path to form the Service Desk email address."
+msgstr ""
+
+msgid "A title is required"
 msgstr ""
 
 msgid "A user can only participate in a rotation once"
@@ -7303,6 +7309,9 @@ msgid "ComplianceFrameworks|Regulated"
 msgstr ""
 
 msgid "ComplianceFrameworks|There are no compliance frameworks set up yet"
+msgstr ""
+
+msgid "ComplianceFrameworks|Use %{codeStart}::%{codeEnd} to create a %{linkStart}scoped set%{linkEnd} (eg. %{codeStart}SOX::AWS%{codeEnd})"
 msgstr ""
 
 msgid "ComplianceFramework|GDPR"
