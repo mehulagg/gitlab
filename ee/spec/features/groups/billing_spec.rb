@@ -140,4 +140,21 @@ RSpec.describe 'Groups > Billing', :js do
       end
     end
   end
+
+  context 'with a sub group that is not on .com' do
+    let_it_be(:sub_group) { create(:group, parent: group) }
+
+    let(:plan) { 'default' }
+
+    before do
+      allow(Gitlab).to receive(:com?).and_return(false)
+      sub_group.add_owner(user)
+    end
+
+    it 'renders the page' do
+      visit group_billings_path(sub_group)
+
+      expect(page).to have_content("This group uses the plan associated with its parent group.")
+    end
+  end
 end
