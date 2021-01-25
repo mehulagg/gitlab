@@ -6,6 +6,7 @@ import {
   WeightFilterType,
   WeightIDs,
 } from './constants';
+import { NOT_FILTER } from '~/boards/constants';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
 
@@ -23,6 +24,19 @@ export function fullMilestoneId(milestoneId) {
 
 export function fullUserId(userId) {
   return `gid://gitlab/User/${userId}`;
+}
+
+export function transformNotFilters(filters) {
+  const notFilters = {};
+  Object.entries(filters).forEach(([key, value]) => {
+    if (key.startsWith(NOT_FILTER)) {
+      notFilters[key.substring(4, key.length - 1)] = value;
+    }
+  });
+  if (notFilters.epicId) {
+    notFilters.epicId = fullEpicId(notFilters.epicId);
+  }
+  return notFilters;
 }
 
 export function transformBoardConfig(boardConfig) {
@@ -86,5 +100,6 @@ export default {
   fullEpicId,
   fullMilestoneId,
   fullUserId,
+  transformNotFilters,
   transformBoardConfig,
 };

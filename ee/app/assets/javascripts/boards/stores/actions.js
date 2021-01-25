@@ -19,6 +19,7 @@ import {
   formatListIssues,
   formatListsPageInfo,
   fullBoardId,
+  transformNotFilters,
 } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
@@ -85,6 +86,8 @@ export default {
       'search',
       'weight',
     ]);
+
+    filterParams.not = transformNotFilters(filters);
 
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
