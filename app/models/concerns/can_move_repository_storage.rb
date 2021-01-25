@@ -30,7 +30,7 @@ module CanMoveRepositoryStorage
   def set_repository_writable!
     with_lock do
       raise ActiveRecord::RecordNotSaved, _('Database update failed') unless
-        update_column(:repository_read_only, false)
+        _update_repository_read_only_column(false)
 
       nil
     end
