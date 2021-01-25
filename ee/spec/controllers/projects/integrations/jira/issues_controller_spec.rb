@@ -11,7 +11,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
 
   before do
     stub_licensed_features(jira_issues_integration: true)
-    stub_feature_flags(jira_issue_detail_view: false)
+    stub_feature_flags(jira_issues_show_integration: false)
     sign_in(user)
   end
 
@@ -183,7 +183,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
 
     context 'when `jira_issues_integration` feature is enabled' do
       before do
-        stub_feature_flags(jira_issue_detail_view: true)
+        stub_feature_flags(jira_issues_show_integration: true)
       end
 
       it 'renders `show` template' do

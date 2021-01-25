@@ -1,6 +1,6 @@
 <script>
 export default {
-  name: 'JiraIssueShow',
+  name: 'JiraIssuesShow',
 };
 </script>
 

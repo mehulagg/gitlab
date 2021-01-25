@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-import JiraIssueApp from './components/jira_issues_show_root.vue';
+import JiraIssuesShowApp from './components/jira_issues_show_root.vue';
 
 export default function initJiraIssueShow({ mountPointSelector }) {
   const mountPointEl = document.querySelector(mountPointSelector);
@@ -11,6 +11,6 @@ export default function initJiraIssueShow({ mountPointSelector }) {
 
   return new Vue({
     el: mountPointEl,
-    render: (createElement) => createElement(JiraIssueApp),
+    render: (createElement) => createElement(JiraIssuesShowApp),
   });
 }
