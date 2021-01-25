@@ -32,8 +32,10 @@ module Epics
     end
 
     def track_event
+      context = ::Gitlab::Tracking::StandardContext.new(namespace: @parent_group, project: issue.project, user: current_user)
+
       ::Gitlab::Tracking.event('epics', 'promote', property: 'issue_id', value: original_entity.id,
-                               standard_context: ::Gitlab::Tracking::StandardContext.new(namespace: @parent_group, project: issue.project))
+                               standard_context: context)
     end
 
     def create_new_entity
