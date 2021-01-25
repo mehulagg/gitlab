@@ -4460,7 +4460,7 @@ msgstr ""
 msgid "BillingPlans|If you would like to downgrade your plan please contact %{support_link_start}Customer Support%{support_link_end}."
 msgstr ""
 
-msgid "BillingPlans|Learn more about each plan by reading our %{faq_link}, or start a free 30-day trial of GitLab.com Gold."
+msgid "BillingPlans|Learn more about each plan by reading our %{faq_link}, or start a free 30-day trial of GitLab.com %{plan_name}."
 msgstr ""
 
 msgid "BillingPlans|Learn more about each plan by visiting our %{pricing_page_link}."
@@ -26995,6 +26995,9 @@ msgstr ""
 msgid "Start thread & reopen %{noteable_name}"
 msgstr ""
 
+msgid "Start your Free %{plan_name} Trial"
+msgstr ""
+
 msgid "Start your Free Gold Trial"
 msgstr ""
 
@@ -32876,7 +32879,7 @@ msgstr ""
 msgid "Your GitLab group"
 msgstr ""
 
-msgid "Your Gitlab Gold trial will last 30 days after which point you can keep your free Gitlab account forever. We just need some additional information to activate your trial."
+msgid "Your Gitlab %{plan_name} trial will last 30 days after which point you can keep your free Gitlab account forever. We just need some additional information to activate your trial."
 msgstr ""
 
 msgid "Your Groups"
