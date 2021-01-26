@@ -30,7 +30,7 @@ RSpec.describe Users::ApproveService do
 
             expect(audit_event.ip_address).to eq(current_user.current_sign_in_ip)
             expect(audit_event.details[:target_details]).to eq(user.username)
-            expect(audit_event.details[:custom_message]).to eq('Instance request approved')
+            expect(audit_event.details[:custom_message]).to eq('Instance access request approved')
           end
         end
 
