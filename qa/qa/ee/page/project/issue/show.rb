@@ -12,7 +12,7 @@ module QA
               super
 
               base.class_eval do
-                view 'ee/app/assets/javascripts/sidebar/components/iteration_select.vue' do
+                view 'ee/app/assets/javascripts/sidebar/components/sidebar_item_iteration_select.vue' do
                   element :edit_iteration_link
                   element :iteration_container
                   element :iteration_link

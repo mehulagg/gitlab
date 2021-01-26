@@ -1,40 +1,24 @@
 <script>
-import {
-  GlButton,
-  GlLink,
-  GlDropdown,
-  GlDropdownItem,
-  GlSearchBoxByType,
-  GlDropdownSectionHeader,
-  GlIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlDropdownSectionHeader } from '@gitlab/ui';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
 import { iterationSelectTextMap, iterationDisplayState } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
 
 export default {
-  noIteration: iterationSelectTextMap.noIteration,
-  iterationText: iterationSelectTextMap.iteration,
-  directives: {
-    GlTooltip: GlTooltipDirective,
+  i18n: {
+    noIteration: iterationSelectTextMap.noIteration,
+    assignIteration: __('Assign Iteration'),
   },
   components: {
-    GlButton,
-    GlLink,
     GlDropdown,
     GlDropdownItem,
     GlSearchBoxByType,
     GlDropdownSectionHeader,
-    GlIcon,
   },
   props: {
-    canEdit: {
-      required: true,
-      type: Boolean,
-    },
     groupPath: {
       required: true,
       type: String,
@@ -47,6 +31,11 @@ export default {
       required: true,
       type: String,
     },
+    dropdownOpen: {
+      required: true,
+      type: Boolean,
+      default: false,
+    },
   },
   apollo: {
     currentIteration: {
@@ -58,7 +47,10 @@ export default {
         };
       },
       update(data) {
-        return data?.project?.issue?.iteration;
+        const currentIteration = data?.project?.issue?.iteration;
+
+        this.$emit('iterationUpdate', currentIteration);
+        return currentIteration;
       },
     },
     iterations: {
@@ -85,45 +77,29 @@ export default {
   data() {
     return {
       searchTerm: '',
-      editing: false,
       currentIteration: undefined,
       iterations: iterationSelectTextMap.noIterationItem,
     };
   },
   computed: {
-    iteration() {
-      return this.iterations.find(({ id }) => id === this.currentIteration);
-    },
-    iterationTitle() {
-      return this.currentIteration?.title;
-    },
-    iterationUrl() {
-      return this.currentIteration?.webUrl;
-    },
-    showNoIterationContent() {
-      return !this.editing && !this.currentIteration?.id;
+    dropdownText() {
+      return this.currentIteration ? __('some iteration') : this.$options.i18n.noIteration;
     },
   },
-  mounted() {
-    document.addEventListener('click', this.handleOffClick);
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleOffClick);
+  watch: {
+    dropdownOpen: {
+      handler() {
+        this.$nextTick(() => {
+          if (this.dropdownOpen) {
+            this.$refs.search.focusInput();
+          }
+        });
+      },
+    },
   },
   methods: {
-    toggleDropdown() {
-      this.editing = !this.editing;
-
-      this.$nextTick(() => {
-        if (this.editing) {
-          this.$refs.search.focusInput();
-        }
-      });
-    },
     setIteration(iterationId) {
       if (iterationId === this.currentIteration?.id) return;
-
-      this.editing = false;
 
       this.$apollo
         .mutate({
@@ -143,14 +119,10 @@ export default {
           const { iterationSelectFail } = iterationSelectTextMap;
 
           createFlash(iterationSelectFail);
+        })
+        .finally(() => {
+          this.$emit('dropdownClose');
         });
-    },
-    handleOffClick(event) {
-      if (!this.editing) return;
-
-      if (!this.$refs.newDropdown.$el.contains(event.target)) {
-        this.toggleDropdown(event);
-      }
     },
     isIterationChecked(iterationId = undefined) {
       return (
@@ -162,51 +134,24 @@ export default {
 </script>
 
 <template>
-  <div data-qa-selector="iteration_container">
-    <div v-gl-tooltip class="sidebar-collapsed-icon">
-      <gl-icon :size="16" :aria-label="$options.iterationText" name="iteration" />
-      <span class="collapse-truncated-title">{{ iterationTitle }}</span>
-    </div>
-    <div class="title hide-collapsed mt-3">
-      {{ $options.iterationText }}
-      <gl-button
-        v-if="canEdit"
-        variant="link"
-        class="js-sidebar-dropdown-toggle edit-link gl-shadow-none float-right gl-reset-color! btn-link-hover"
-        data-testid="iteration-edit-link"
-        data-track-label="right_sidebar"
-        data-track-property="iteration"
-        data-track-event="click_edit_button"
-        data-qa-selector="edit_iteration_link"
-        @click.stop="toggleDropdown"
-        >{{ __('Edit') }}</gl-button
-      >
-    </div>
-    <div data-testid="select-iteration" class="hide-collapsed">
-      <span v-if="showNoIterationContent" class="no-value">{{ $options.noIteration }}</span>
-      <gl-link v-else-if="!editing" data-qa-selector="iteration_link" :href="iterationUrl"
-        ><strong>{{ iterationTitle }}</strong></gl-link
-      >
-    </div>
-    <gl-dropdown
-      v-show="editing"
-      ref="newDropdown"
-      :text="$options.iterationText"
-      class="dropdown gl-w-full"
-      :class="{ show: editing }"
+  <gl-dropdown
+    v-if="dropdownOpen"
+    :text="dropdownText"
+    class="gl-w-full"
+    menu-class="gl-w-full!"
+    :class="{ show: dropdownOpen }"
+  >
+    <gl-dropdown-section-header class="gl-display-flex gl-justify-content-center">{{
+      $options.i18n.assignIteration
+    }}</gl-dropdown-section-header>
+    <gl-search-box-by-type ref="search" v-model="searchTerm" />
+    <gl-dropdown-item
+      v-for="iterationItem in iterations"
+      :key="iterationItem.id"
+      :is-check-item="true"
+      :is-checked="isIterationChecked(iterationItem.id)"
+      @click="setIteration(iterationItem.id)"
+      >{{ iterationItem.title }}</gl-dropdown-item
     >
-      <gl-dropdown-section-header class="d-flex justify-content-center">{{
-        __('Assign Iteration')
-      }}</gl-dropdown-section-header>
-      <gl-search-box-by-type ref="search" v-model="searchTerm" />
-      <gl-dropdown-item
-        v-for="iterationItem in iterations"
-        :key="iterationItem.id"
-        :is-check-item="true"
-        :is-checked="isIterationChecked(iterationItem.id)"
-        @click="setIteration(iterationItem.id)"
-        >{{ iterationItem.title }}</gl-dropdown-item
-      >
-    </gl-dropdown>
-  </div>
+  </gl-dropdown>
 </template>
