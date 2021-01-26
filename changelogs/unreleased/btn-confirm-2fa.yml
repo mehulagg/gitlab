@@ -1,5 +1,5 @@
 ---
 title: Apply new GitLab UI for buttons in 2fa and changed deprecated info to confirm
-merge_request:
-author:
+merge_request: 52580
+author: Yogi (@yo)
 type: other
