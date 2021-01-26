@@ -10,7 +10,7 @@ class NamespaceSetting < ApplicationRecord
 
   before_validation :normalize_default_branch_name
 
-  cascading_attr_reader :prevent_forking_outside_group, :delayed_project_removal, boolean: true
+  lockable_attr :prevent_forking_outside_group, :delayed_project_removal
 
   NAMESPACE_SETTINGS_PARAMS = [:default_branch_name].freeze
 
