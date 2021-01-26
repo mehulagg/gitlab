@@ -6,7 +6,7 @@ RSpec.describe API::RubygemPackages do
   let_it_be(:project) { create(:project) }
   let_it_be(:personal_access_token) { create(:personal_access_token) }
   let_it_be(:user) { personal_access_token.user }
-  let(:headers) { {} }
+  let_it_be(:headers) { {} }
 
   before do
     project.add_developer(user)
@@ -14,7 +14,15 @@ RSpec.describe API::RubygemPackages do
 
   shared_examples 'when feature flag is disabled' do
     before do
-      stub_feature_flags(rubygems_packages: true)
+      stub_feature_flags(rubygem_packages: false)
+    end
+
+    it_behaves_like 'returning response status', :not_found
+  end
+
+  shared_examples 'when package feature is disabled' do
+    before do
+      stub_config(packages: { enabled: false })
     end
 
     it_behaves_like 'returning response status', :not_found
@@ -32,14 +40,19 @@ RSpec.describe API::RubygemPackages do
     it_behaves_like 'returning response status', :not_found
   end
 
-  describe 'GET /api/v4/projects/:project_id/packages/rubygems/:filename' do
-    let(:url) { api("/projects/#{project.id}/packages/rubygems/specs.4.8.gz") }
-
-    subject { get(url, headers: headers) }
-
+  shared_examples 'an unimplemented route' do
     it_behaves_like 'without authentication'
     it_behaves_like 'with authentication'
     it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'when package feature is disabled'
+  end
+
+  describe 'GET /api/v4/projects/:project_id/packages/rubygems/:filename' do
+    let(:url) { "/projects/#{project.id}/packages/rubygems/specs.4.8.gz" }
+
+    subject { get api(url), headers: headers }
+
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'GET /api/v4/projects/:project_id/packages/rubygems/quick/Marshal.4.8/:file_name' do
@@ -47,9 +60,7 @@ RSpec.describe API::RubygemPackages do
 
     subject { get(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'GET /api/v4/projects/:project_id/packages/rubygems/gems/:file_name' do
@@ -57,9 +68,7 @@ RSpec.describe API::RubygemPackages do
 
     subject { get(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'GET /api/v4/projects/:project_id/packages/api/v1/api_key' do
@@ -67,9 +76,7 @@ RSpec.describe API::RubygemPackages do
 
     subject { get(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'POST /api/v4/projects/:project_id/packages/api/v1/gems/authorize' do
@@ -77,9 +84,7 @@ RSpec.describe API::RubygemPackages do
 
     subject { post(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'POST /api/v4/projects/:project_id/packages/api/v1/gems' do
@@ -87,9 +92,7 @@ RSpec.describe API::RubygemPackages do
 
     subject { post(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 
   describe 'GET /api/v4/projects/:project_id/packages/api/v1/dependencies' do
@@ -97,8 +100,6 @@ RSpec.describe API::RubygemPackages do
 
     subject { get(url, headers: headers) }
 
-    it_behaves_like 'without authentication'
-    it_behaves_like 'with authentication'
-    it_behaves_like 'when feature flag is disabled'
+    it_behaves_like 'an unimplemented route'
   end
 end
