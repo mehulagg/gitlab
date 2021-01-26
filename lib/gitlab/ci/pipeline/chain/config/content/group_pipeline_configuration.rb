@@ -12,7 +12,7 @@ module Gitlab
                   next unless pipeline_configuration_full_path
 
                   path_file, path_project = pipeline_configuration_full_path.split('@', 2)
-                  YAML.dump('include' => [{ 'project' => path_project, 'file' => path_file }])
+                  YAML.dump('include' => [{ 'project' => path_project, 'file' => path_file }, { 'local' => ci_config_path }])
                 end
               end
 
