@@ -30,8 +30,7 @@ class UserRecentEventsFinder
   def execute
     return Event.none unless can?(current_user, :read_user_profile, target_user)
 
-    recent_events(params[:offset] || 0)
-      .joins(:project)
+    target_events
       .with_associations
       .limit_recent(limit, params[:offset])
   end
