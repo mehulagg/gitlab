@@ -805,3 +805,13 @@ You can set them globally or per-job in the [`variables`](../yaml/README.md#vari
 ## System calls not available on GitLab.com shared runners
 
 GitLab.com shared runners run on CoreOS. This means that you cannot use some system calls, like `getlogin`, from the C standard library.
+
+### Artifact and cache settings
+
+> Introduced in GitLab Runner 13.9
+
+| Variable                        | Description                                            |
+|---------------------------------|--------------------------------------------------------|
+| `RUNNER_METER_FREQ`             | Displays a progress meter for artifact and cache uploads/downloads. It can be set to a duration (for example, "1s" or "1m30s"). A duration of 0 disables the meter (default). |
+| `ARTIFACT_COMPRESSION_LEVEL`    | Can be set to "fastest", "fast", "default", "slow", "slowest" to adjust compression ratio. This currently only works with the fastzip archiver, so the Runner feature flag [`FF_USE_FASTZIP`](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) must also be enabled. |
+| `CACHE_COMPRESSION_LEVEL`       | Can be set to "fastest", "fast", "default", "slow", "slowest" to adjust compression ratio. This currently only works with the fastzip archiver, so the Runner feature flag [`FF_USE_FASTZIP`](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) must also be enabled. |
