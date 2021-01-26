@@ -22,7 +22,7 @@ Make sure you have access to a Google Workspace [Super Admin](https://support.go
 |                  | Typical value                                    | Description                                              |
 |------------------|--------------------------------------------------|----------------------------------------------------------|
 | Name of SAML App | GitLab                                           | Other names OK.                                          |
-| ACS URL          | https://<GITLAB_DOMAIN>/users/auth/saml/callback | ACS is short for Assertion Consumer Service.             |
+| ACS URL          | `https://<GITLAB_DOMAIN>/users/auth/saml/callback` | ACS is short for Assertion Consumer Service.             |
 | GITLAB_DOMAIN    | `gitlab.example.com`                             | Set to the domain of your GitLab instance.               |
 | Entity ID        | `https://gitlab.example.com`                     | A value unique to your SAML app, you'll set it to the `issuer` in your GitLab configuration.                         |
 | Name ID format   | EMAIL                                            | Required value. Also known as `name_identifier_format`                    |
