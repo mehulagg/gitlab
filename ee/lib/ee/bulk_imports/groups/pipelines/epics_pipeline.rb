@@ -14,6 +14,27 @@ module EE
           transformer ::BulkImports::Common::Transformers::UnderscorifyKeysTransformer
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
 
+          class Transformer
+            def initialize(*); end
+            def transform(context, data)
+              data = data.with_indifferent_access
+
+              data[:nodes] = Array.wrap(data[:nodes]).map do |entry|
+                load_labels(context, entry)
+              end
+
+              data
+            end
+
+            def load_labels(context, entry)
+              entry[:label_ids] = entry.dig(:labels, :nodes).map do |node|
+                node[:title]
+              end
+
+              entry
+            end
+          end; transformer Transformer
+
           loader EE::BulkImports::Groups::Loaders::EpicsLoader
 
           def after_run(context)

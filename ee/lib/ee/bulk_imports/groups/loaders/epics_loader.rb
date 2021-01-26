@@ -10,11 +10,11 @@ module EE
           end
 
           def load(context, data)
-            Array.wrap(data['nodes']).each do |args|
+            Array.wrap(data['nodes']).each do |entry|
               ::Epics::CreateService.new(
                 context.entity.group,
                 context.current_user,
-                args
+                entry
               ).execute
             end
 

@@ -25,6 +25,8 @@ module BulkImports
         end
 
         after_run(context) if respond_to?(:after_run)
+
+        info(context, pipeline_class: pipeline, message: 'Finished')
       rescue MarkedAsFailedError
         log_skip(context)
       end

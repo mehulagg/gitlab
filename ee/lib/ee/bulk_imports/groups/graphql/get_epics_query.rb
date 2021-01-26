@@ -33,6 +33,11 @@ module EE
                     dueDateIsFixed
                     relativePosition
                     confidential
+                    labels {
+                      nodes {
+                        title
+                      }
+                    }
                   }
                 }
               }
