@@ -21816,7 +21816,7 @@ msgstr ""
 msgid "Profiles|Full name"
 msgstr ""
 
-msgid "Profiles|GitLab is unable to verify your identity automatically."
+msgid "Profiles|GitLab is unable to verify your identity automatically. For security purposes, you must set a password using the forgot password process to delete your account."
 msgstr ""
 
 msgid "Profiles|Give your individual key a title."
@@ -21867,7 +21867,7 @@ msgstr ""
 msgid "Profiles|Path"
 msgstr ""
 
-msgid "Profiles|Please email %{data_request} to begin the account deletion process."
+msgid "Profiles|If after setting a password, the option to delete your account is still not available, please email %{data_request} to begin the account deletion process."
 msgstr ""
 
 msgid "Profiles|Position and size your new avatar"
