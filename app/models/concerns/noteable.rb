@@ -15,7 +15,7 @@ module Noteable
       %w(Issue MergeRequest)
     end
 
-    # `Noteable` class names that support resolvable notes.
+    # `Noteable` class names that support resolvable notes.ee/app/views/admin/application_settings/_elasticsearch_form.html.haml
     def resolvable_types
       %w(MergeRequest DesignManagement::Design)
     end
