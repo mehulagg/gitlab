@@ -54,7 +54,7 @@ describe('MRWidgetFailedToMerge', () => {
 
         Vue.nextTick()
           .then(() => {
-            expect(vm.mergeError).toBe('contains line breaks');
+            expect(vm.mergeError).toBe('Unable to merge: contains line breaks.');
           })
           .then(done)
           .catch(done.fail);
@@ -120,7 +120,7 @@ describe('MRWidgetFailedToMerge', () => {
 
     it('renders given error', () => {
       expect(vm.$el.querySelector('.has-error-message').textContent.trim()).toEqual(
-        'Merge error happened',
+        'Unable to merge: Merge error happened.',
       );
     });
 
