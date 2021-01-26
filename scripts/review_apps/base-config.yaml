@@ -143,7 +143,11 @@ postgresql:
       cpu: 825m
       memory: 375M
 prometheus:
-  install: false
+  persistentVolume:
+    size: 2GiB
+  alertManager:
+    persistentVolume:
+      size: 250MiB
 redis:
   metrics:
     enabled: false
