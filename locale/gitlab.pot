@@ -7755,7 +7755,7 @@ msgstr ""
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
 msgstr ""
 
-msgid "ContainerRegistry|The requested image does not exist or has been deleted, if you think this is an error please try to refresh the page"
+msgid "ContainerRegistry|The requested image repository does not exist or has been deleted. If you think this is an error, try refreshing the page"
 msgstr ""
 
 msgid "ContainerRegistry|The value of this input should be less than 256 characters"
@@ -7770,10 +7770,10 @@ msgstr ""
 msgid "ContainerRegistry|There was an error during the deletion of this image repository, please try again."
 msgstr ""
 
-msgid "ContainerRegistry|This image does not exist or has been deleted"
+msgid "ContainerRegistry|This image has no active tags"
 msgstr ""
 
-msgid "ContainerRegistry|This image has no active tags"
+msgid "ContainerRegistry|This image repository could not be found"
 msgstr ""
 
 msgid "ContainerRegistry|This image repository has failed to be deleted"
