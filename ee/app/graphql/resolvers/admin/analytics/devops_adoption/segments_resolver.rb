@@ -13,7 +13,7 @@ module Resolvers
             authorize!
 
             if segments_feature_available?
-              ::Analytics::DevopsAdoption::Segment.with_groups.ordered_by_name
+              ::Analytics::DevopsAdoption::Segment.ordered_by_name
             else
               ::Analytics::DevopsAdoption::Segment.none
             end

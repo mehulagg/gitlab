@@ -4,8 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   let_it_be(:group1) { create(:group) }
-  let_it_be(:project2) { create(:project) }
-  let_it_be(:segment) { create(:devops_adoption_segment, groups: [group1], projects: [project2]) }
+  let_it_be(:segment) { create(:devops_adoption_segment, namespace: group1) }
   let_it_be(:subgroup) { create(:group, parent: group1) }
   let_it_be(:project) { create(:project, group: group1) }
   let_it_be(:subproject) { create(:project, group: subgroup) }
@@ -25,7 +24,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     let_it_be(:old_issue) { create(:issue, project: subproject, created_at: 1.year.ago(range_end)) }
 
     context 'with an issue opened within month' do
-      let_it_be(:fresh_issue) { create(:issue, project: project2, created_at: 3.weeks.ago(range_end)) }
+      let_it_be(:fresh_issue) { create(:issue, project: project, created_at: 3.weeks.ago(range_end)) }
 
       it { is_expected.to eq true }
     end
@@ -39,7 +38,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     let!(:old_merge_request) { create(:merge_request, source_project: subproject, created_at: 1.year.ago(range_end)) }
 
     context 'with a merge request opened within month' do
-      let!(:fresh_merge_request) { create(:merge_request, source_project: project2, created_at: 3.weeks.ago(range_end)) }
+      let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
 
       it { is_expected.to eq true }
     end
@@ -81,11 +80,11 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   describe 'pipeline_succeeded' do
     subject { data[:pipeline_succeeded] }
 
-    let!(:failed_pipeline) { create(:ci_pipeline, :failed, project: project2, updated_at: 1.day.ago(range_end)) }
-    let!(:old_pipeline) { create(:ci_pipeline, :success, project: project2, updated_at: 100.days.ago(range_end)) }
+    let!(:failed_pipeline) { create(:ci_pipeline, :failed, project: project, updated_at: 1.day.ago(range_end)) }
+    let!(:old_pipeline) { create(:ci_pipeline, :success, project: project, updated_at: 100.days.ago(range_end)) }
 
     context 'with successful pipeline within month' do
-      let!(:fresh_pipeline) { create(:ci_pipeline, :success, project: project2, updated_at: 1.week.ago(range_end)) }
+      let!(:fresh_pipeline) { create(:ci_pipeline, :success, project: project, updated_at: 1.week.ago(range_end)) }
 
       it { is_expected.to eq true }
     end
@@ -96,38 +95,32 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   describe 'deploy_succeeded' do
     subject { data[:deploy_succeeded] }
 
-    let!(:old_deployment) { create(:deployment, :success, updated_at: 100.days.ago(range_end)) }
-    let!(:old_group) do
+    let!(:deployment) { create(:deployment, :success, updated_at: deployed_at) }
+    let(:deployed_at) { 100.days.ago(range_end) }
+
+    let(:segment) { create(:devops_adoption_segment, namespace: group) }
+    let!(:group) do
       create(:group).tap do |g|
-        g.projects << old_deployment.project
+        g.projects << deployment.project
       end
-    end
-
-    let(:segment) { create(:devops_adoption_segment, groups: [old_group]) }
-
-    context 'with successful deployment within month' do
-      let!(:fresh_deployment) { create(:deployment, :success, updated_at: 1.day.ago(range_end)) }
-      let!(:fresh_group) do
-        create(:group).tap do |g|
-          g.projects << fresh_deployment.project
-        end
-      end
-
-      let(:segment) { create(:devops_adoption_segment, groups: [old_group, fresh_group]) }
-
-      it { is_expected.to eq true }
     end
 
     it { is_expected.to eq false }
+
+    context 'with successful deployment within month' do
+      let(:deployed_at) { 1.day.ago(range_end) }
+
+      it { is_expected.to eq true }
+    end
   end
 
   describe 'security_scan_succeeded' do
     subject { data[:security_scan_succeeded] }
 
-    let!(:old_security_scan) { create :security_scan, build: create(:ci_build, project: project2), created_at: 100.days.ago(range_end) }
+    let!(:old_security_scan) { create :security_scan, build: create(:ci_build, project: project), created_at: 100.days.ago(range_end) }
 
     context 'with successful security scan within month' do
-      let!(:fresh_security_scan) { create :security_scan, build: create(:ci_build, project: project2), created_at: 10.days.ago(range_end) }
+      let!(:fresh_security_scan) { create :security_scan, build: create(:ci_build, project: project), created_at: 10.days.ago(range_end) }
 
       it { is_expected.to eq true }
     end
@@ -140,7 +133,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
 
     subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
 
-    let!(:fresh_merge_request) { create(:merge_request, source_project: project2, created_at: 3.weeks.ago(range_end)) }
+    let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }
 
     it 'calculates metrics which are not true yet' do
       expect(data[:merge_request_opened]).to eq true

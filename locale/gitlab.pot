@@ -9967,18 +9967,6 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
-msgid "DevopsAdoptionSegmentSelection|The maximum number of selections has been reached"
-msgstr ""
-
-msgid "DevopsAdoptionSegmentSelection|The selection cannot be configured for a project and for a group at the same time"
-msgstr ""
-
-msgid "DevopsAdoptionSegment|The maximum number of segments has been reached"
-msgstr ""
-
-msgid "DevopsAdoptionSegment|The maximum number of selections has been reached"
-msgstr ""
-
 msgid "DevopsAdoption|%{selectedCount} group selected"
 msgstr ""
 
