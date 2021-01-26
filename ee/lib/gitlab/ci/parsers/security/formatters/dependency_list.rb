@@ -59,7 +59,6 @@ module Gitlab
                 path:      file_path
               }
 
-              return base_location if Feature.disabled?(:path_to_vulnerable_dependency, project, default_enabled: true)
               return base_location unless dependency['iid']
 
               base_location.merge({

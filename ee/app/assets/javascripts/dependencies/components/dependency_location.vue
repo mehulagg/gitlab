@@ -27,10 +27,10 @@ export default {
       return this.location.ancestors || [];
     },
     hasAncestors() {
-      return this.glFeatures.pathToVulnerableDependency && this.ancestors.length > 0;
+      return this.ancestors.length > 0;
     },
     isTopLevelDependency() {
-      return this.glFeatures.pathToVulnerableDependency && this.location.top_level;
+      return this.location.top_level;
     },
     visibleDependencies() {
       return this.ancestors.slice(0, VISIBLE_DEPENDENCY_COUNT);
@@ -39,7 +39,7 @@ export default {
       return Math.max(0, this.ancestors.length - VISIBLE_DEPENDENCY_COUNT);
     },
     showMoreLink() {
-      return this.glFeatures.pathToVulnerableDependency && this.remainingDependenciesCount > 0;
+      return this.remainingDependenciesCount > 0;
     },
     nMoreMessage() {
       return n__('Dependencies|%d more', 'Dependencies|%d more', this.remainingDependenciesCount);

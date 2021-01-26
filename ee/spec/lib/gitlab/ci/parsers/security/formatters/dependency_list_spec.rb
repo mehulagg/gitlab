@@ -67,19 +67,6 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
       end
     end
 
-    context 'when feature flag for dependency path is off' do
-      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
-      let(:location) { data[:location] }
-
-      before do
-        stub_feature_flags(path_to_vulnerable_dependency: false)
-      end
-
-      it { expect(location[:top_level]).to be_nil }
-      it { expect(location[:ancestors]).to be_nil }
-      it { expect(location[:path]).to eq('file.path') }
-    end
-
     context 'with vulnerable dependency' do
       let(:data) { formatter.format(dependency, package_manager, file_path, parsed_report['vulnerabilities'].first) }
       let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
