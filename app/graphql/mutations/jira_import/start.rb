@@ -3,7 +3,7 @@
 module Mutations
   module JiraImport
     class Start < BaseMutation
-      include ResolvesProject
+      include FindsProject
 
       graphql_name 'JiraImportStart'
 
@@ -27,7 +27,7 @@ module Mutations
                description: 'The mapping of Jira to GitLab users.'
 
       def resolve(project_path:, jira_project_key:, users_mapping:)
-        project = authorized_find!(full_path: project_path)
+        project = authorized_find!(project_path)
         mapping = users_mapping.to_ary.map { |map| map.to_hash }
 
         service_response = ::JiraImport::StartImportService
@@ -42,10 +42,6 @@ module Mutations
       end
 
       private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
-      end
 
       def authorized_resource?(project)
         Ability.allowed?(context[:current_user], :admin_project, project)
