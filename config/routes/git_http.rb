@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 scope(path: '*repository_path', format: false) do
   constraints(repository_path: Gitlab::PathRegex.repository_git_route_regex) do
     scope(module: :repositories) do
