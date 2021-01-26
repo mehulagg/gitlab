@@ -1181,7 +1181,11 @@ A good rule of thumb to follow: the more complex the component you may want to s
 
 Use
 
-- You want to test how the component renders
+- to capture a components rendered output
+- to fully or partially match templates
+- to match readable data structures
+- to verify correctly composed native HTML elements
+- as a safety net for critical structures so others don't break it by accident
 - Template heavy component
 - Not a lot of logic in the component
 - Composed of native HTML elements
