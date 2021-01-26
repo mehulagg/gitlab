@@ -421,6 +421,66 @@ for more details.
 
 Here's [an example project](https://gitlab.com/jheimbuck_gl/jh_java_example_project) that uses Code Quality with a `.codeclimate.yml` file.
 
+## Using codequality image hosted in a registry with untrusted certificates
+
+If you set the `CODE_QUALITY_IMAGE` to an image that is hosted in a
+Docker registry that uses a TLS certificate that is not trusted such as
+self signed certificates you will see errors like below:
+
+```shell
+$ docker pull --quiet "$CODE_QUALITY_IMAGE"
+Error response from daemon: Get https://gitlab.example.com/v2/: x509: certificate signed by unknown authority
+```
+
+To fix this configure the Docker daemon to [trust certificates](https://docs.docker.com/registry/insecure/#use-self-signed-certificates)
+by putting the certificate inside of the `/etc/docker/certs.d`
+directory.
+
+### Docker
+
+If you have access to the GitLab Runner configuration you add this as a
+[volume mount](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#volumes-in-the-runnersdocker-section).
+
+```toml
+[[runners]]
+  ...
+  executor = "docker"
+  [runners.docker]
+    ...
+    privileged = true
+    volumes = ["/cache", "/etc/gitlab-runner/certs/gitlab.example.com.crt:/etc/docker/certs.d/gitlab.example.com/ca.crt:ro"]
+```
+
+Replace `gitlab.example.com` with the actual domain of the registry.
+
+### Kubernetes
+
+If you have access to the GitLab Runner configuration and Kubernetes
+cluster you can [mount a ConfigMap](https://docs.gitlab.com/runner/executors/kubernetes.html#configmap-volumes).
+
+Create a ConfigMap with the certificate
+
+```shell
+kubectl create configmap registry-crt --namespace gitlab-runner --from-file /etc/gitlab-runner/certs/gitlab.example.com.crt
+```
+
+Update GitLab Runner `config.toml` to specify the ConfigMap
+
+```toml
+[[runners]]
+  ...
+  executor = "kubernetes"
+  [runners.kubernetes]
+    image = "alpine:3.12"
+    privileged = true
+    [[runners.kubernetes.volumes.config_map]]
+      name = "registry-crt"
+      mount_path = "/etc/docker/certs.d/gitlab.example.com/ca.crt"
+      sub_path = "gitlab.example.com.crt"
+```
+
+Replace `gitlab.example.com` with the actual domain of the registry.
+
 ## Troubleshooting
 
 ### Changing the default configuration has no effect
