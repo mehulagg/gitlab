@@ -106,24 +106,14 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
 
 1. Add the provider configuration.
 
-   >**Notes:**
-   >
-   >- Change the value for `assertion_consumer_service_url` to match the HTTPS endpoint
-   >  of GitLab (append `users/auth/saml/callback` to the HTTPS URL of your GitLab
-   >  installation to generate the correct value).
-   >
-   >- To get the `idp_cert_fingerprint` fingerprint, first download the
-   >  certificate from the Google Workspace app you registered and then run:
-   >  `openssl x509 -in google_workspace.cert -noout -fingerprint` to generate the SHA1 fingerprint.
-   >  Substitute `google_workspace.cert` with the location of your certificate.
-   >
-   >- Change the value of `idp_sso_target_url`, with the value of the
-   >  **SSO URL** from the step when you configured the Google Workspace SAML app.
-   >
-   >- Change the value of `issuer` to the value of the **Entity ID** from your Google Workspace SAML app configuration. This will identify GitLab
-   >  to the IdP.
-   >
-   >- Leave `name_identifier_format` as-is.
+For guidance on how to set up these values, see the [SAML General Setup steps](saml.md#general-setup).
+Pay particular attention to the values for:
+
+- `assertion_consumer_service_url`
+- `idp_cert_fingerprint`
+- `idp_sso_target_url`
+- `issuer`
+- `name_identifier_format`
 
    **For Omnibus GitLab installations**
 
