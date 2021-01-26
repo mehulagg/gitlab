@@ -142,7 +142,7 @@ The following table depicts the various user permission levels in a project.
 | Create/edit/delete metrics dashboard annotations  |         |            | ✓           | ✓        | ✓      |
 | Run CI/CD pipeline against a protected branch     |         |            | ✓ (*5*)     | ✓        | ✓      |
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
-| Request a CVE ID **(FREE ONLY)**                  |         |            |             | ✓        | ✓      |
+| Request a CVE ID **(FREE SAAS)**                  |         |            |             | ✓        | ✓      |
 | Use environment terminals                         |         |            |             | ✓        | ✓      |
 | Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)** |     |      |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
@@ -290,8 +290,8 @@ group.
 | View Issue analytics **(PREMIUM)**                     | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View Productivity analytics **(PREMIUM)**              |       | ✓        | ✓         | ✓          | ✓     |
 | View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Billing **(FREE ONLY)**                           |       |          |           |            | ✓ (4) |
-| View Usage Quotas **(FREE ONLY)**                      |       |          |           |            | ✓ (4) |
+| View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
+| View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
 | Filter members by 2FA status                           |       |          |           |            | ✓     |
 
 1. Groups can be set to [allow either Owners or Owners and
