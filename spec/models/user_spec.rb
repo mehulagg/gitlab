@@ -3098,6 +3098,35 @@ RSpec.describe User do
     end
   end
 
+  describe '#owner_of?' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    subject { user.owner_of?(group) }
+
+    context 'when the user is an owner member of the given group' do
+      let_it_be(:membership) { create(:group_member, :owner, source: group, user: user) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the user is not an owner member of the given group' do
+      let_it_be(:membership) { create(:group_member, :maintainer, source: group, user: user) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the user is not a member of the given group at all' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the given group does not exist in the database' do
+      let_it_be(:group) { 123456 }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#can_remove_self?' do
     let(:user) { create(:user) }
 

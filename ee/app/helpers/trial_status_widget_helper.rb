@@ -2,7 +2,7 @@
 
 module TrialStatusWidgetHelper
   def eligible_for_trial_status_widget_experiment?(group)
-    group.trial_active?
+    group.trial_active? && current_user.owner_of?(group)
   end
 
   def show_trial_status_widget?(group)

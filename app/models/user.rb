@@ -1263,6 +1263,10 @@ class User < ApplicationRecord
     end
   end
 
+  def owner_of?(group)
+    group_members.where(group: group).owners.any?
+  end
+
   def with_defaults
     User.defaults.each do |k, v|
       public_send("#{k}=", v) # rubocop:disable GitlabSecurity/PublicSend
