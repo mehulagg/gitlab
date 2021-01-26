@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe PipelineEntity do
+RSpec.describe Ci::PipelineEntity do
   let(:user) { build_stubbed(:user) }
   let(:pipeline) { build_stubbed(:ci_empty_pipeline) }
   let(:request) { double('request', current_user: user) }
