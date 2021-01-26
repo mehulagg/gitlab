@@ -9,6 +9,7 @@ const MonacoWebpackPlugin = require('./plugins/monaco_webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const vendorDllHash = require('./helpers/vendor_dll_hash');
+const IncrementalWebpackCompiler = require('./helpers/incremental_webpack_compiler');
 
 const ROOT_PATH = path.resolve(__dirname, '..');
 const VENDOR_DLL = process.env.WEBPACK_VENDOR_DLL && process.env.WEBPACK_VENDOR_DLL !== 'false';
@@ -23,6 +24,7 @@ const DEV_SERVER_ALLOWED_HOSTS =
   process.env.DEV_SERVER_ALLOWED_HOSTS && process.env.DEV_SERVER_ALLOWED_HOSTS.split(',');
 const DEV_SERVER_HTTPS = process.env.DEV_SERVER_HTTPS && process.env.DEV_SERVER_HTTPS !== 'false';
 const DEV_SERVER_LIVERELOAD = IS_DEV_SERVER && process.env.DEV_SERVER_LIVERELOAD !== 'false';
+const INCREMENTAL_COMPILER_ENABLED = IS_DEV_SERVER && Boolean(process.env.DEV_SERVER_INCREMENTAL);
 const WEBPACK_REPORT = process.env.WEBPACK_REPORT && process.env.WEBPACK_REPORT !== 'false';
 const WEBPACK_MEMORY_TEST =
   process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
@@ -48,14 +50,10 @@ let autoEntriesCount = 0;
 let watchAutoEntries = [];
 const defaultEntries = ['./main'];
 
-//TODO: Do we want to always enable some routes...
-let renderedEntryPoints = [];
-
-try {
-  renderedEntryPoints = JSON.parse(
-    fs.readFileSync(path.join(CACHE_PATH, 'visited-routes.json'), 'utf8'),
-  );
-} catch (e) {}
+const incrementalCompiler = new IncrementalWebpackCompiler(
+  INCREMENTAL_COMPILER_ENABLED,
+  path.join(CACHE_PATH, 'incremental-webpack-compiler-history.json'),
+);
 
 function generateEntries() {
   // generate automatic entry points
@@ -106,15 +104,7 @@ function generateEntries() {
     jira_connect_app: './jira_connect/index.js',
   };
 
-  //TODO: only in dev :see_no_evil:
-  const filtered = Object.entries(autoEntries).map(([key, val]) => {
-    if (renderedEntryPoints.includes(key)) {
-      return [key, val];
-    }
-    return [key, ['./webpack_non_compiled_placeholder.js']];
-  });
-
-  return Object.assign(manualEntries, Object.fromEntries(filtered));
+  return Object.assign(manualEntries, incrementalCompiler.filterEntryPoints(autoEntries));
 }
 
 const alias = {
@@ -513,8 +503,9 @@ module.exports = {
 
           // report our auto-generated bundle count
           console.log(
-            `${renderedEntryPoints.length} / ${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
+            `${autoEntriesCount} entries from '/pages' automatically added to webpack output.`,
           );
+          incrementalCompiler.logStatus(autoEntriesCount);
 
           callback();
         });
@@ -595,35 +586,7 @@ module.exports = {
   ].filter(Boolean),
   devServer: {
     before: function (app, server) {
-      app.use(function (req, res, next) {
-        if (req.url.includes('/pages.')) {
-          const chunk = path.basename(req.url).replace('.chunk.js', '');
-
-          if (!renderedEntryPoints.includes(chunk)) {
-            renderedEntryPoints.push(chunk);
-
-            setTimeout(() => {
-              server.middleware.invalidate(() => {
-                //TODO: Check without HMR
-                if (server.sockets) {
-                  server.sockWrite(server.sockets, 'content-changed');
-                }
-              });
-            }, 10000);
-          } else {
-            renderedEntryPoints.push(chunk);
-          }
-
-          // TODO: Make smarter and only write out last 20 routes or so.
-          fs.writeFileSync(
-            path.join(CACHE_PATH, 'visited-routes.json'),
-            JSON.stringify(renderedEntryPoints),
-            'utf8',
-          );
-        }
-
-        next();
-      });
+      incrementalCompiler.setupMiddleware(app, server);
     },
     host: DEV_SERVER_HOST,
     port: DEV_SERVER_PORT,
