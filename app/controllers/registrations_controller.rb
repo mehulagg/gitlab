@@ -31,6 +31,7 @@ class RegistrationsController < Devise::RegistrationsController
         NotificationService.new.new_instance_access_request(new_user)
       end
 
+      #logevent
       yield new_user if block_given?
     end
 
