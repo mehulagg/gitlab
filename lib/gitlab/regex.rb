@@ -61,6 +61,10 @@ module Gitlab
         maven_app_name_regex
       end
 
+      def npm_scope_regex
+        @npm_scope_regex ||= %r{\A@(#{Gitlab::Regex.group_name_regex_chars})\/.*\z}
+      end
+
       def nuget_package_name_regex
         @nuget_package_name_regex ||= %r{\A[-+\.\_a-zA-Z0-9]+\z}.freeze
       end

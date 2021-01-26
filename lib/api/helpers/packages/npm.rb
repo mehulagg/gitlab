@@ -49,12 +49,33 @@ module API
             when :project
               params[:id]
             when :instance
-              ::Packages::Package.npm
-                                .with_name(params[:package_name])
-                                .first
-                                &.project_id
+              group_name = group_name_from_package_name
+              next unless group_name
+
+              namespace = namespace_named(group_name)
+              next unless namespace
+
+              finder = ::Packages::Npm::PackageFinder.new(params[:package_name], namespace: namespace)
+
+              finder.last&.project_id
             end
           end
+        end
+
+        def group_name_from_package_name
+          package_name = params[:package_name]
+          return unless package_name.starts_with?('@')
+
+          package_name.match(Gitlab::Regex.npm_scope_regex)[1]
+        end
+
+        def namespace_named(namespace_path)
+          finder = GroupFinder.new(current_user)
+          group = finder.execute(path: namespace_path)
+
+          return group if group
+
+          Namespace.for_user.by_path(namespace_path)
         end
       end
     end
