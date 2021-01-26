@@ -28,7 +28,7 @@ require File.expand_path('../config/environment', __dir__)
 
 require 'rspec/mocks'
 require 'rspec/rails'
-require 'rspec/retry'
+# require 'rspec/retry'
 require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
@@ -171,17 +171,17 @@ RSpec.configure do |config|
 
   include StubFeatureFlags
 
-  if ENV['CI'] || ENV['RETRIES']
-    # This includes the first try, i.e. tests will be run 4 times before failing.
-    config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
-  end
+  # if ENV['CI'] || ENV['RETRIES']
+  #   # This includes the first try, i.e. tests will be run 4 times before failing.
+  #   config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
+  # end
 
-  if ENV['FLAKY_RSPEC_GENERATE_REPORT']
-    config.reporter.register_listener(
-      RspecFlaky::Listener.new,
-      :example_passed,
-      :dump_summary)
-  end
+  # if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+  #   config.reporter.register_listener(
+  #     RspecFlaky::Listener.new,
+  #     :example_passed,
+  #     :dump_summary)
+  # end
 
   config.before(:suite) do
     Timecop.safe_mode = true
