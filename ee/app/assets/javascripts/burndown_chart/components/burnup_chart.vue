@@ -114,8 +114,10 @@ export default {
     <div class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burnup chart') }}</h3>
     </div>
-    <resizable-chart-container class="js-burnup-chart">
+    <resizable-chart-container v-if="dataSeries[0].data.length > 0" class="js-burnup-chart">
       <gl-line-chart
+        slot-scope="{ width }"
+        :width="width"
         :data="dataSeries"
         :option="options"
         :format-tooltip-text="formatTooltipText"
