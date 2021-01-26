@@ -36,7 +36,7 @@ module EE
         user,
         user,
         action: :custom,
-        custom_message: 'User instance request'
+        custom_message: 'User instance access request'
       ).for_user.security_event
     end
   end

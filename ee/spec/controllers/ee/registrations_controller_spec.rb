@@ -144,7 +144,7 @@ RSpec.describe RegistrationsController do
             expect(AuditEvent.last.author_id).to eq(created_user.id)
             expect(AuditEvent.last.ip_address).to eq(created_user.current_sign_in_ip)
             expect(AuditEvent.last.details[:target_details]).to eq(created_user.username)
-            expect(AuditEvent.last.details[:custom_message]).to eq("User instance request")
+            expect(AuditEvent.last.details[:custom_message]).to eq("User instance access request")
           end
         end
       end
