@@ -5,11 +5,12 @@ module Gitlab
     class RepoSaver
       include Gitlab::ImportExport::CommandLineUtil
 
-      attr_reader :exportable, :shared
+      attr_reader :exportable, :shared, :path_to_bundle
 
-      def initialize(exportable:, shared:)
+      def initialize(exportable:, shared:, path_to_bundle: nil)
         @exportable = exportable
         @shared = shared
+        @path_to_bundle = path_to_bundle || default_bundle_full_path
       end
 
       def save
@@ -28,7 +29,7 @@ module Gitlab
         repository.exists? && !repository.empty?
       end
 
-      def bundle_full_path
+      def default_bundle_full_path
         File.join(shared.export_path, bundle_filename)
       end
 
@@ -37,8 +38,9 @@ module Gitlab
       end
 
       def bundle_to_disk
-        mkdir_p(shared.export_path)
-        repository.bundle_to_disk(bundle_full_path)
+        path = Pathname.new(path_to_bundle)
+        mkdir_p(path.dirname)
+        repository.bundle_to_disk(path.to_s)
       rescue => e
         shared.error(e)
         false

@@ -46,7 +46,10 @@ module Groups
       end
 
       def save!
-        if savers.all?(&:save)
+        # We cannot include the file_saver with the other savers because
+        # it removes the tmp dir. This means that if we want to add new savers
+        # in EE the data won't be available.
+        if savers.all?(&:save) && file_saver.save
           notify_success
         else
           notify_error!
@@ -54,7 +57,7 @@ module Groups
       end
 
       def savers
-        [version_saver, tree_exporter, file_saver]
+        [version_saver, tree_exporter]
       end
 
       def tree_exporter

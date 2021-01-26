@@ -11,7 +11,7 @@ module EE
         override :bundle_filename
         def bundle_filename
           if exportable.is_a?(Group)
-            ::Gitlab::ImportExport.group_wiki_repo_bundle_filename
+            'group.wiki.bundle' #::Gitlab::ImportExport.group_wiki_repo_bundle_filename
           else
             super
           end

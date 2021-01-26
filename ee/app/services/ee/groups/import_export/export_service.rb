@@ -8,11 +8,15 @@ module EE
 
         override :savers
         def savers
-          [wiki_repo_saver] + super
+          super << group_and_subgroup_wikis_repo_saver
         end
 
         def wiki_repo_saver
-          ::Gitlab::ImportExport::WikiRepoSaver.new(exportable: group, shared: shared)
+          ::Gitlab::ImportExport::WikiRepoSaver.new(exportable: group, shared: shared, path_to_bundle: File.join(shared.export_path, 'repositories', 'group.wiki.bundle'))
+        end
+
+        def group_and_subgroup_wikis_repo_saver
+          ::Groups::ImportExport::GroupWikisRepoSaver.new(group: group, shared: shared)
         end
       end
     end
