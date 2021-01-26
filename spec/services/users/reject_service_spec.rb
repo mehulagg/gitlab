@@ -59,7 +59,7 @@ RSpec.describe Users::RejectService do
       end
 
       it 'does not log any audit event' do
-        expect { reject_user }.not_to change(AuditEvent, :count)
+        expect { subject }.not_to change(AuditEvent, :count)
       end
     end
   end
