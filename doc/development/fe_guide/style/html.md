@@ -6,6 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # HTML style guide
 
+See also our [accessibility page](../accessibility.md).
+
 ## Buttons
 
 ### Button type
@@ -20,23 +22,13 @@ Button tags requires a `type` attribute according to the [W3C HTML specification
 <button type="button"></button>
 ```
 
-### Button role
-
-If an HTML element has an `onClick` handler but is not a button, it should have `role="button"`. This is [more accessible](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role).
-
-```html
-// bad
-<div onClick="doSomething"></div>
-
-// good
-<div role="button" onClick="doSomething"></div>
-```
-
 ## Links
 
 ### Blank target
 
 Use `rel="noopener noreferrer"` whenever your links open in a new window, i.e. `target="_blank"`. This prevents a security vulnerability [documented by JitBit](https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/).
+
+When using `gl-link`, using `target="_blank"` is sufficient as it automatically adds `rel="noopener noreferrer"` to the link.
 
 ```html
 // bad
@@ -44,6 +36,9 @@ Use `rel="noopener noreferrer"` whenever your links open in a new window, i.e. `
 
 // good
 <a href="url" target="_blank" rel="noopener noreferrer"></a>
+
+// good
+<gl-link href="url" target="_blank"></gl-link>
 ```
 
 ### Fake links
