@@ -4,7 +4,7 @@ group: Purchase
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Features available to Starter/Bronze subscribers
+# Features available to Starter and Bronze subscribers
 ​
 Although GitLab has discontinued selling the Bronze and Starter tiers, GitLab
 continues to honor the entitlements of existing Bronze and Starter tier GitLab
