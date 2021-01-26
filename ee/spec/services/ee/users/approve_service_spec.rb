@@ -23,7 +23,7 @@ RSpec.describe Users::ApproveService do
             expect { operation }.to change { AuditEvent.count }.by(1)
           end
 
-          it 'logs the audit event info' do
+          it 'logs the audit event info', :aggregate_failures do
             operation
 
             audit_event = AuditEvent.where(author_id: current_user.id).last
