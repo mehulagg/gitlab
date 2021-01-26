@@ -3752,7 +3752,7 @@ upstream_bridge:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16094) in GitLab 12.7.
 
 To create a [child pipeline](../parent_child_pipelines.md), specify the path to the
-YAML file containing the configuration of the child pipeline:
+YAML file that contains the configuration of the child pipeline:
 
 ```yaml
 trigger_job:
