@@ -41,7 +41,9 @@ performance indicators for software development teams:
 - Time to restore service: How long it takes an organization to recover from a failure in
   production.
 
-GitLab plans to add support for all the DORA4 metrics on the project and the group level. The first metric of Deployment Frequency was added to the project level [CI/CD charts](ci_cd_analytics.md#deployment-frequency-charts) and [API]( ../../api/project_analytics.md).
+GitLab plans to add support for all the DORA4 metrics at the project and group levels. GitLab added
+the first metric, deployment frequency, at the project level for [CI/CD charts](ci_cd_analytics.md#deployment-frequency-charts)
+and the [API]( ../../api/project_analytics.md).
 
 ## Deployment frequency charts **(ULTIMATE)**
 
