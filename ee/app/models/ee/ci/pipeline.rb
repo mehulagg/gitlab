@@ -158,7 +158,7 @@ module EE
         end
       end
 
-      :override merge_train_pipeline?
+      override :merge_train_pipeline?
       def merge_train_pipeline?
         merge_request_pipeline? && merge_train_ref?
       end
