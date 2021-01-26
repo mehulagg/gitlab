@@ -3,6 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
+import BoardSidebarIteration from 'ee_component/boards/components/sidebar/board_sidebar_iteration.vue';
 import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_issue_title.vue';
@@ -85,6 +86,10 @@ describe('ee/BoardContentSidebar', () => {
 
   it('renders BoardSidebarMilestoneSelect', () => {
     expect(wrapper.find(BoardSidebarMilestoneSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarIteration', () => {
+    expect(wrapper.find(BoardSidebarIteration).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

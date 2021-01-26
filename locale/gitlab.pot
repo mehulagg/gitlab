@@ -15938,6 +15938,12 @@ msgstr ""
 msgid "IssueBoards|Delete board"
 msgstr ""
 
+msgid "IssueBoards|Iteration"
+msgstr ""
+
+msgid "IssueBoards|No iteration"
+msgstr ""
+
 msgid "IssueBoards|No matching boards found"
 msgstr ""
 
@@ -34532,6 +34538,9 @@ msgid "sign in"
 msgstr ""
 
 msgid "smartcn custom analyzer"
+msgstr ""
+
+msgid "some iteration"
 msgstr ""
 
 msgid "sort:"

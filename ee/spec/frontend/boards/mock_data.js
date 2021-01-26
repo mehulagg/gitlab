@@ -93,8 +93,8 @@ export const rawIssue = {
 };
 
 export const mockIssue = {
-  id: '436',
-  iid: 27,
+  id: 436,
+  iid: '27',
   title: 'Issue 1',
   referencePath: '#27',
   dueDate: null,
@@ -111,8 +111,8 @@ export const mockIssue = {
 };
 
 export const mockIssue2 = {
-  id: '437',
-  iid: 28,
+  id: 437,
+  iid: '28',
   title: 'Issue 2',
   referencePath: '#28',
   dueDate: null,
@@ -129,8 +129,8 @@ export const mockIssue2 = {
 };
 
 export const mockIssue3 = {
-  id: 'gid://gitlab/Issue/438',
-  iid: 29,
+  id: 438,
+  iid: '29',
   title: 'Issue 3',
   referencePath: '#29',
   dueDate: null,
@@ -144,8 +144,8 @@ export const mockIssue3 = {
 };
 
 export const mockIssue4 = {
-  id: 'gid://gitlab/Issue/439',
-  iid: 30,
+  id: 439,
+  iid: '30',
   title: 'Issue 4',
   referencePath: '#30',
   dueDate: null,
@@ -262,4 +262,11 @@ export const issues = {
   [mockIssue2.id]: mockIssue2,
   [mockIssue3.id]: mockIssue3,
   [mockIssue4.id]: mockIssue4,
+};
+
+export const mockIteration = {
+  __typename: 'Iteration',
+  id: 'gid://gitlab/Iteration/1',
+  title: 'Awesome iteration',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/iterations/1',
 };

@@ -13,6 +13,7 @@ import BoardSidebarIssueTitle from '~/boards/components/sidebar/board_sidebar_is
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarSubscription from '~/boards/components/sidebar/board_sidebar_subscription.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
+import BoardSidebarIteration from './sidebar/board_sidebar_iteration.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -27,6 +28,7 @@ export default {
     BoardSidebarDueDate,
     BoardSidebarSubscription,
     BoardSidebarMilestoneSelect,
+    BoardSidebarIteration,
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
@@ -54,7 +56,10 @@ export default {
     <board-sidebar-issue-title />
     <board-assignee-dropdown />
     <board-sidebar-epic-select />
-    <board-sidebar-milestone-select />
+    <div>
+      <board-sidebar-milestone-select />
+      <board-sidebar-iteration class="gl-mt-5" />
+    </div>
     <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
     <board-sidebar-due-date />
     <board-sidebar-labels-select />
