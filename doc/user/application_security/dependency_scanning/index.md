@@ -188,7 +188,7 @@ The following variables are used for configuring specific analyzers (used for a 
 | `DS_PIP_DEPENDENCY_PATH`                | `gemnasium-python` |                              | Path to load Python pip dependencies from. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12412) in GitLab 12.2) |
 | `DS_PYTHON_VERSION`                     | `retire.js`        |                              | Version of Python. If set to 2, dependencies are installed using Python 2.7 instead of Python 3.6. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12296) in GitLab 12.1, [removed](https://www.python.org/doc/sunset-python-2/) in GitLab 13.7)|
 | `DS_JAVA_VERSION`                       | `gemnasium-maven`  | `11`                         | Version of Java. Available versions: `8`, `11`, `13`, `14`. Maven and Gradle use the Java version specified by this value. |
-| `MAVEN_CLI_OPTS`                        | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repos). |
+| `MAVEN_CLI_OPTS`                        | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repositories). |
 | `GRADLE_CLI_OPTS`                       | `gemnasium-maven`  |                              | List of command line arguments that are passed to `gradle` by the analyzer. |
 | `SBT_CLI_OPTS`                          | `gemnasium-maven`  |                              | List of command-line arguments that the analyzer passes to `sbt`. |
 | `BUNDLER_AUDIT_UPDATE_DISABLED`         | `bundler-audit`    | `"false"`                    | Disable automatic updates for the `bundler-audit` analyzer. Useful if you're running dependency scanning in an offline, air-gapped environment.|
@@ -203,7 +203,7 @@ The following variables are used for configuring specific analyzers (used for a 
 If your private Maven repository requires login credentials,
 you can use the `MAVEN_CLI_OPTS` environment variable.
 
-Read more on [how to use private Maven repositories](../index.md#using-private-maven-repos).
+Read more on [how to use private Maven repositories](../index.md#using-private-maven-repositories).
 
 ## Interacting with the vulnerabilities
 
