@@ -6,31 +6,42 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Changing application settings cache expiry interval **(CORE ONLY)**
 
-Application settings are cached for 60 seconds by default which should work for most installations.
-
-This interval value can be configured in `config/gitlab.yml`:
-
-```plaintext
-# application_settings_cache_seconds: 60
-```
-
-Uncomment and customize this line if you want to change the default value of the time to expire the application settings cache.
-A higher value would mean a greater delay between changing an application setting and noticing that change come into effect.
-A value of 0 would result in the `application_settings` table being loaded for every request causing extra load on Redis and/or PostgreSQL.
+Application settings are cached for 60 seconds by default which should work
+for most installations. A higher value would mean a greater delay between
+changing an application setting and noticing that change come into effect.
+A value of `0` would result in the `application_settings` table being
+loaded for every request causing extra load on Redis and/or PostgreSQL.
 It is therefore recommended to keep the value above zero.
 
-## Changing the application settings cache expiry in Omnibus installations
+## Change the application settings cache expiry
 
-Application settings cache expiry interval can be configured in Omnibus installations by adding
- the following linke to `/etc/gitlab/gitlab.rb`.
+To change the expiry value:
 
-```ruby
-gitlab_rails['application_settings_cache_seconds'] = 60
-```
+**For Omnibus installations**
 
-After adding the configuration parameter, reconfigure and restart your GitLab instance:
+1. Edit `/etc/gitlab/gitlab.rb`:
 
-```shell
-gitlab-ctl reconfigure
-gitlab-ctl restart
-```
+   ```ruby
+   gitlab_rails['application_settings_cache_seconds'] = 60
+   ```
+
+1. Save the file, and reconfigure and restart GitLab for the changes to take effect:
+
+   ```shell
+   gitlab-ctl reconfigure
+   gitlab-ctl restart
+   ```
+
+---
+
+**For installations from source**
+
+1. Edit `config/gitlab.yml`:
+
+   ```yaml
+   gitlab:
+     application_settings_cache_seconds: 60
+   ```
+
+1. Save the file and [restart](../restart_gitlab.md#installations-from-source)
+   GitLab for the changes to take effect.
