@@ -62,7 +62,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) will also see
 the `user_id` and `group_id` parameters:
 
 Example response:
@@ -133,7 +133,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) will also see
 the `user_id` and `group_id` parameters:
 
 Example response:
@@ -215,7 +215,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) will also see
 the `user_id` and `group_id` parameters:
 
 Example response:
