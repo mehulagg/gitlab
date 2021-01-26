@@ -11,6 +11,9 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
   let(:blocks_issue_id) { 18 }
   let(:blocking_issue_id) { 38 }
 
+  # We cannot directly stub IssueLink, otherwise we get a strange RSpec error
+  let(:issue_link_klass) { class_double('IssueLink').as_stubbed_const }
+
   describe '#initialize' do
     it 'adds the issue_id to the lazy state' do
       subject = described_class.new(query_ctx, issue_id)
@@ -24,6 +27,10 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
 
       it 'is false by default' do
         expect(subject.lazy_state[:load_issue_objects]).to eq false
+      end
+
+      specify 'a falsey value does not override a truthy value in the query state' do
+        subject { described_class.new(query_ctx.merge(load_issue_objects: true), issue_id) }
       end
 
       context 'when provided' do
@@ -59,9 +66,6 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
     let(:query_ctx) do
       { lazy_state: fake_state }
     end
-
-    # We cannot directly stub IssueLink, otherwise we get a strange RSpec error
-    let(:issue_link_klass) { class_double('IssueLink').as_stubbed_const }
     let(:fake_state) do
       { pending_ids: Set.new, loaded_objects: {issue_id: double} }
     end
@@ -101,35 +105,34 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
       let(:fake_state) do
         { pending_ids: Set.new([issue_id]), load_issue_objects: load_issue_objects, loaded_objects: {} }
       end
-      let(:fake_links) do
-        [
-            double(target_id: issue_id, source_id: 2)
-        ]
+      let(:fake_blocking_issue_ids) do
+        [ other_issue_id ]
       end
 
       shared_examples 'clears the pending IDs' do
         specify do
+          subject.block_aggregate
+
           expect(subject.lazy_state[:pending_ids]).to be_empty
         end
       end
 
       context 'when load_issue_objects has been set in the lazy state' do
         let(:load_issue_objects) { true }
-        let(:fake_blocking_issue) { build(:issue) }
-        let(:fake_data) { [fake_link] }
+        let(:fake_blocking_issue) { build(:issue, title: "blocking issue") }
 
         before do
-          expect(issue_link_klass).to receive(:blocking_issue_ids).and_return(fake_links)
+          expect(issue_link_klass).to receive(:blocking_issue_ids).and_return(fake_blocking_issue_ids)
           expect_next_instance_of(IssuesFinder) do |finder|
             expect(finder).to receive_message_chain("execute.where").and_return([fake_blocking_issue])
           end
-          subject.block_aggregate
         end
 
         it 'loads all the issue objects under :issues' do
-          ap loaded_objects
-          expect(loaded_objects[:issues]).to match [fake_blocking_issue]
-          expect(loaded_objects[:count]).to be_nil
+          subject.block_aggregate
+
+          expect(loaded_objects[issue_id][:issues]).to match [fake_blocking_issue]
+          expect(loaded_objects[issue_id][:count]).to be_nil
         end
 
         it_behaves_like 'clears the pending IDs'
@@ -147,10 +150,11 @@ RSpec.describe Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate do
 
         before do
           expect(issue_link_klass).to receive(:blocked_issues_for_collection).and_return(fake_data)
-          subject.block_aggregate
         end
 
         it 'loads only the counts under :count', :aggregate_failures do
+          subject.block_aggregate
+
           expect(loaded_objects[issue_id][:issues]).to be_nil
           expect(loaded_objects[issue_id][:count]).to eq fake_count
         end
