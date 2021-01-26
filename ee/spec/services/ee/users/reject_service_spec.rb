@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Users::RejectService do
-  let(:current_user) { create(:admin) }
+  let_it_be(:current_user) { create(:admin) }
 
   describe '#execute', :enable_admin_mode do
-    let(:user) { create(:user, :blocked_pending_approval) }
+    let_it_be_with_reload(:user) { create(:user, :blocked_pending_approval) }
 
     subject(:reject_user) { Users::RejectService.new(current_user).execute(user) }
 
@@ -27,7 +27,7 @@ RSpec.describe Users::RejectService do
             expect(AuditEvent.last.author_id).to eq(current_user.id)
             expect(AuditEvent.last.ip_address).to eq(current_user.current_sign_in_ip)
             expect(AuditEvent.last.details[:target_details]).to eq(user.username)
-            expect(AuditEvent.last.details[:custom_message]).to eq("Instance request rejected")
+            expect(AuditEvent.last.details[:custom_message]).to eq('Instance request rejected')
           end
         end
 

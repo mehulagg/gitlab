@@ -15278,7 +15278,16 @@ msgstr[1] ""
 msgid "Instance Configuration"
 msgstr ""
 
+msgid "Instance access request"
+msgstr ""
+
 msgid "Instance administrators group already exists"
+msgstr ""
+
+msgid "Instance request approved"
+msgstr ""
+
+msgid "Instance request rejected"
 msgstr ""
 
 msgid "InstanceStatistics|Could not load the issues and merge requests chart. Please refresh the page to try again."
