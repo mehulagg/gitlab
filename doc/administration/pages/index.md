@@ -935,7 +935,7 @@ Pages, you may see intermittent 502 error responses while serving Pages content.
 the following warning in the Pages logs:
 
 ```plaintext
-WARN[0010] Pages cannot communicate with an instance of the GitLab API, please sync your gitlab-secrets.json file https://gitlab.com/gitlab-org/gitlab-pages/-/issues/535#workaround  error="pages endpoint unauthorized"
+WARN[0010] Pages cannot communicate with an instance of the GitLab API. Please sync your gitlab-secrets.json file https://gitlab.com/gitlab-org/gitlab-pages/-/issues/535#workaround. error="pages endpoint unauthorized"
 ```
 
 This can happen if your `gitlab-secrets.json` file is out of date between GitLab Rails and GitLab
