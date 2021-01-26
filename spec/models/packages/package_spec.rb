@@ -15,6 +15,7 @@ RSpec.describe Packages::Package, type: :model do
     it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:rubygems_metadatum).inverse_of(:package) }
   end
 
   describe '.with_composer_target' do

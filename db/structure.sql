@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
-    )
   )
+)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -9377,8 +9377,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9405,14 +9403,16 @@ CREATE TABLE application_settings (
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -15326,7 +15326,8 @@ CREATE TABLE plan_limits (
     project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
-    pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL
+    pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
+    rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -16685,6 +16686,67 @@ CREATE SEQUENCE routes_id_seq
     CACHE 1;
 
 ALTER SEQUENCE routes_id_seq OWNED BY routes.id;
+
+CREATE TABLE rubygems_metadata (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    authors text,
+    files text,
+    summary text,
+    description text,
+    email text,
+    homepage text,
+    licenses text,
+    metadata text,
+    author text,
+    bindir text,
+    cert_chain text,
+    executables text,
+    extensions text,
+    extra_rdoc_files text,
+    platform text,
+    post_install_message text,
+    rdoc_options text,
+    require_paths text,
+    required_ruby_version text,
+    required_rubygems_version text,
+    requrements text,
+    rubygems_version text,
+    signing_key text,
+    CONSTRAINT check_1f14bc3b0b CHECK ((char_length(bindir) <= 255)),
+    CONSTRAINT check_295003205a CHECK ((char_length(rdoc_options) <= 255)),
+    CONSTRAINT check_344b027468 CHECK ((char_length(required_rubygems_version) <= 255)),
+    CONSTRAINT check_3d831d2eb8 CHECK ((char_length(require_paths) <= 255)),
+    CONSTRAINT check_4030f09f46 CHECK ((char_length(post_install_message) <= 255)),
+    CONSTRAINT check_4778f5f491 CHECK ((char_length(licenses) <= 255)),
+    CONSTRAINT check_53aab4ebd7 CHECK ((char_length(files) <= 255)),
+    CONSTRAINT check_5b60aa0860 CHECK ((char_length(author) <= 255)),
+    CONSTRAINT check_73835ad391 CHECK ((char_length(description) <= 1024)),
+    CONSTRAINT check_7c5d0b8f03 CHECK ((char_length(extensions) <= 255)),
+    CONSTRAINT check_82d620c2d3 CHECK ((char_length(requrements) <= 255)),
+    CONSTRAINT check_852eb7053b CHECK ((char_length(platform) <= 255)),
+    CONSTRAINT check_9791335e63 CHECK ((char_length(cert_chain) <= 255)),
+    CONSTRAINT check_a711e29b8e CHECK ((char_length(homepage) <= 255)),
+    CONSTRAINT check_aa0c5492a1 CHECK ((char_length(metadata) <= 255)),
+    CONSTRAINT check_ac5a3fba44 CHECK ((char_length(extra_rdoc_files) <= 255)),
+    CONSTRAINT check_baea434ae8 CHECK ((char_length(email) <= 255)),
+    CONSTRAINT check_c0e7f035f7 CHECK ((char_length(authors) <= 255)),
+    CONSTRAINT check_c53412d18d CHECK ((char_length(rubygems_version) <= 255)),
+    CONSTRAINT check_d566339c49 CHECK ((char_length(signing_key) <= 255)),
+    CONSTRAINT check_e02aa05186 CHECK ((char_length(required_ruby_version) <= 255)),
+    CONSTRAINT check_e2ede6b5bd CHECK ((char_length(summary) <= 1024)),
+    CONSTRAINT check_e30ccb1b28 CHECK ((char_length(executables) <= 255))
+);
+
+CREATE SEQUENCE rubygems_metadata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE rubygems_metadata_id_seq OWNED BY rubygems_metadata.id;
 
 CREATE TABLE saml_group_links (
     id bigint NOT NULL,
@@ -19051,6 +19113,8 @@ ALTER TABLE ONLY reviews ALTER COLUMN id SET DEFAULT nextval('reviews_id_seq'::r
 
 ALTER TABLE ONLY routes ALTER COLUMN id SET DEFAULT nextval('routes_id_seq'::regclass);
 
+ALTER TABLE ONLY rubygems_metadata ALTER COLUMN id SET DEFAULT nextval('rubygems_metadata_id_seq'::regclass);
+
 ALTER TABLE ONLY saml_group_links ALTER COLUMN id SET DEFAULT nextval('saml_group_links_id_seq'::regclass);
 
 ALTER TABLE ONLY saml_providers ALTER COLUMN id SET DEFAULT nextval('saml_providers_id_seq'::regclass);
@@ -20526,6 +20590,9 @@ ALTER TABLE ONLY reviews
 ALTER TABLE ONLY routes
     ADD CONSTRAINT routes_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY rubygems_metadata
+    ADD CONSTRAINT rubygems_metadata_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY saml_group_links
     ADD CONSTRAINT saml_group_links_pkey PRIMARY KEY (id);
 
@@ -20945,7 +21012,7 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
 
-CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-22 00:00:00+00'::timestamp with time zone));
+CREATE INDEX expired_artifacts_temp_index ON ci_job_artifacts USING btree (id, created_at) WHERE ((expire_at IS NULL) AND (created_at < '2020-06-21 18:00:00-06'::timestamp with time zone));
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
