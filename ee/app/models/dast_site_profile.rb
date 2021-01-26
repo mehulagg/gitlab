@@ -9,6 +9,7 @@ class DastSiteProfile < ApplicationRecord
   validate :dast_site_project_id_fk
 
   scope :with_dast_site_and_validation, -> { includes(dast_site: :dast_site_validation) }
+  scope :with_name, -> (name) { where(name: name) }
 
   after_destroy :cleanup_dast_site
 
