@@ -14,6 +14,6 @@ class AddUniqueIndexServicesProjectIdAndType < ActiveRecord::Migration[6.0]
   end
 
   def down
-    remove_concurrent_index :services, [:project_id, :type], name: INDEX_NAME, unique: true
+    remove_concurrent_index_by_name :services, name: INDEX_NAME
   end
 end

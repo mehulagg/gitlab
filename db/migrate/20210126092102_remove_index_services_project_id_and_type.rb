@@ -10,7 +10,7 @@ class RemoveIndexServicesProjectIdAndType < ActiveRecord::Migration[6.0]
   INDEX_NAME = 'index_services_on_project_id_and_type'
 
   def up
-    remove_concurrent_index :services, [:project_id, :type], name: INDEX_NAME
+    remove_concurrent_index_by_name :services, name: INDEX_NAME
   end
 
   def down
