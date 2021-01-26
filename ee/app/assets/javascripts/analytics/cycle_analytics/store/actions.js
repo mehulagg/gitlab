@@ -113,7 +113,7 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
     .catch((error) => dispatch('receiveStageMedianValuesError', error));
 };
 
-export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
+export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_VALUE_STREAM_DATA);
 
 export const receiveCycleAnalyticsDataSuccess = ({ commit, dispatch }) => {
   commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS);
@@ -273,10 +273,10 @@ export const removeStage = ({ dispatch, getters }, stageId) => {
 };
 
 export const initializeCycleAnalyticsSuccess = ({ commit }) =>
-  commit(types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS);
+  commit(types.INITIALIZE_VSA_SUCCESS);
 
 export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {}) => {
-  commit(types.INITIALIZE_CYCLE_ANALYTICS, initialData);
+  commit(types.INITIALIZE_VSA, initialData);
 
   const {
     featureFlags = {},
