@@ -3,9 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe API::RubygemPackages do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:project) { create(:project) }
   let_it_be(:personal_access_token) { create(:personal_access_token) }
   let_it_be(:user) { personal_access_token.user }
+  let_it_be(:job) { create(:ci_build, :running, user: user) }
+  let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
+  let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
   let_it_be(:headers) { {} }
 
   before do
@@ -38,10 +43,31 @@ RSpec.describe API::RubygemPackages do
 
   shared_examples 'with authentication' do
     let(:headers) do
-      { 'HTTP_AUTHORIZATION' => personal_access_token.token }
+      { 'HTTP_AUTHORIZATION' => token }
     end
 
-    it_behaves_like 'returning response status', :not_found
+    let(:tokens) do
+      {
+        personal_access_token: personal_access_token.token,
+        deploy_token: deploy_token.token,
+        job_token: job.token
+      }
+    end
+
+    where(:token_type, :valid_token, :status) do
+      :personal_access_token   | true  | :not_found
+      :personal_access_token   | false | :unauthorized
+      :deploy_token            | true  | :not_found
+      :deploy_token            | false | :unauthorized
+      :job_token               | true  | :not_found
+      :job_token               | false | :unauthorized
+    end
+
+    with_them do
+      let(:token) { valid_token ? tokens[token_type] : 'invalid-token123' }
+
+      it_behaves_like 'returning response status', params[:status]
+    end
   end
 
   shared_examples 'an unimplemented route' do
