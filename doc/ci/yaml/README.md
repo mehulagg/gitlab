@@ -399,9 +399,8 @@ see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
 `include:local` includes a file from the same repository as `.gitlab-ci.yml`.
 It's referenced with full paths relative to the root directory (`/`).
 
-You can only use files that are tracked by Git on the same branch
-your configuration file is on. If you `include:local`, make
-sure that both `.gitlab-ci.yml` and the local file are on the same branch.
+If you use `include:local`, make sure that both `.gitlab-ci.yml` and the local file
+are on the same branch.
 
 You can't include local files through Git submodules paths.
 
@@ -3753,7 +3752,7 @@ upstream_bridge:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16094) in GitLab 12.7.
 
 To create a [child pipeline](../parent_child_pipelines.md), specify the path to the
-YAML file containing the CI config of the child pipeline:
+YAML file containing the configuration of the child pipeline:
 
 ```yaml
 trigger_job:
@@ -4031,7 +4030,7 @@ description.
 
 You can specify a file in `$CI_PROJECT_DIR` that contains the description. The file must be relative
 to the project directory (`$CI_PROJECT_DIR`), and if the file is a symbolic link it can't reside
-outside of `$CI_PROJECT_DIR`. The `./path/to/file` and file name can't contain spaces.
+outside of `$CI_PROJECT_DIR`. The `./path/to/file` and filename can't contain spaces.
 
 ```yaml
 job:
