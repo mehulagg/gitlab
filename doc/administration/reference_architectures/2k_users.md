@@ -14,7 +14,7 @@ For a full list of reference architectures, see
 > - **Supported users (approximate):** 2,000
 > - **High Availability:** No. For a highly-available environment, you can
 >   follow the [3K reference architecture](3k_users.md).
-> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git: 4 RPS
+> - **Test requests per second (RPS) rates:** API: 40 RPS, Web: 4 RPS, Git (Pull): 4 RPS, Git (Push): 1 RPS
 
 | Service                                  | Nodes  | Configuration           | GCP            | AWS          | Azure   |
 |------------------------------------------|--------|-------------------------|----------------|--------------|---------|

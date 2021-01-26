@@ -13,7 +13,7 @@ full list of reference architectures, see
 
 > - **Supported users (approximate):** 10,000
 > - **High Availability:** Yes*
-> - **Test requests per second (RPS) rates:** API: 200 RPS, Web: 20 RPS, Git: 20 RPS
+> - **Test requests per second (RPS) rates:** API: 200 RPS, Web: 20 RPS, Git (Pull): 20 RPS, Git (Push): 4 RPS
 >
 > _\* At this time Praefect requires a third party PostgreSQL database solution to achieve full High Availability. We hope to offer a built in solution for this in the future._
 
