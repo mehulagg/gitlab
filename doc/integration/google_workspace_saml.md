@@ -59,9 +59,8 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
 1. See [Initial OmniAuth Configuration](../integration/omniauth.md#initial-omniauth-configuration)
    for initial settings.
 
-1. To allow your users to use Google Workspace to sign up without having to manually create
-   an account first, don't forget to add the following values to your
-   configuration:
+1. To allow people to register for GitLab, through their Google accounts, add the following
+   values to your configuration:
 
    **For Omnibus GitLab installations**
 
