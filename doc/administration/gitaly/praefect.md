@@ -1013,7 +1013,6 @@ They reflect configuration defined for this instance of Praefect.
 > - Introduced in GitLab 13.1 in [alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga), disabled by default.
 > - Entered [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) in GitLab 13.2, disabled by default.
 > - From GitLab 13.3, disabled unless primary-wins reference transactions strategy is disabled.
-> - From GitLab 13.4, enabled by default.
 
 Praefect guarantees eventual consistency by replicating all writes to secondary nodes
 after the write to the primary Gitaly node has happened.
