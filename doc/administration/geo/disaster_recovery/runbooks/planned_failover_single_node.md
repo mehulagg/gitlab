@@ -236,8 +236,8 @@ To promote the secondary node:
    NOTE:
    In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
    this command reports `ERROR - Replication is not up-to-date` even if
-   replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
-   later.
+   replication is actually up-to-date. This bug was [fixed in GitLab 13.8 and
+   later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
    ```shell
    gitlab-ctl promotion-preflight-checks
@@ -250,7 +250,7 @@ To promote the secondary node:
    this command reports `ERROR - Replication is not up-to-date` even if
    replication is actually up-to-date. If replication and verification output
    shows that it is complete, you can add `--skip-preflight-checks` to make the
-   command complete promotion. This bug was fixed in GitLab 13.8 and later.
+   command complete the promotion. This bug was [fixed in GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
    ```shell
    gitlab-ctl promote-to-primary-node

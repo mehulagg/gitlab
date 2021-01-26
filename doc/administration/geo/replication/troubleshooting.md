@@ -696,15 +696,16 @@ section to resolve the error. Otherwise, the secret is lost and you'll need to
 
 In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
 this command reports `ERROR - Replication is not up-to-date` even if
-replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
-later.
+replication is actually up-to-date. This bug was [fixed in GitLab 13.8 and
+later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
 ### Message: `ERROR - Replication is not up-to-date` during `gitlab-ctl promote-to-primary-node`
 
 In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
 this command reports `ERROR - Replication is not up-to-date` even if
 replication is actually up-to-date. If replication and verification output
-shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
+shows that it is complete, you can add `--skip-preflight-checks` to make the command complete the promotion. This bug was [fixed in GitLab 13.8 and
+later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
 ## Expired artifacts
 

@@ -48,8 +48,8 @@ be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
 NOTE:
 In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
 this command reports `ERROR - Replication is not up-to-date` even if
-replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
-later.
+replication is actually up-to-date. This bug was [fixed in GitLab 13.8 and
+later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
 Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process will go smoothly:
 

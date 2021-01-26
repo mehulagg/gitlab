@@ -150,7 +150,7 @@ Note the following when promoting a secondary:
    this command reports `ERROR - Replication is not up-to-date` even if
    replication is actually up-to-date. If replication and verification output
    shows that it is complete, you can add `--skip-preflight-checks` to make the
-   command complete promotion. This bug was fixed in GitLab 13.8 and later.
+   command complete the promotion. This bug was [fixed in GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52253).
 
    To promote the secondary node to primary along with preflight checks:
 
