@@ -125,6 +125,40 @@ RSpec.describe RegistrationsController do
         it_behaves_like 'blocked user by default'
       end
     end
+
+    describe 'audit events' do
+      context 'when licensed' do
+        before do
+          stub_licensed_features(admin_audit_log: true)
+        end
+
+        context 'when user registers for the instance' do
+          it 'logs an audit event' do
+            expect { subject }.to change { AuditEvent.count }.by(1)
+          end
+
+          it 'logs the audit event info', :aggregate_failures do
+            subject
+            created_user = User.find_by(email: new_user_email)
+
+            expect(AuditEvent.last.author_id).to eq(created_user.id)
+            expect(AuditEvent.last.ip_address).to eq(created_user.current_sign_in_ip)
+            expect(AuditEvent.last.details[:target_details]).to eq(created_user.username)
+            expect(AuditEvent.last.details[:custom_message]).to eq("User instance request")
+          end
+        end
+      end
+
+      context 'when not licensed' do
+        before do
+          stub_licensed_features(admin_audit_log: false)
+        end
+
+        it 'does not log any audit event' do
+          expect { subject }.not_to change(AuditEvent, :count)
+        end
+      end
+    end
   end
 
   describe '#destroy' do
