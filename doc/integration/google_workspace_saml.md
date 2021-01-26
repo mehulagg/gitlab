@@ -82,7 +82,8 @@ Now that the Google Workspace SAML app is configured, it's time to enable it in 
    block_auto_created_users: false
    ```
 
-1. You can also automatically link Google Workspace users with existing GitLab users if
+1. If an existing GitLab user has the same email address as a Google Workspace user, the registration
+   process automatically links their accounts, if you add the following setting:
    their email addresses match by adding the following setting:
 
    **For Omnibus GitLab installations**
