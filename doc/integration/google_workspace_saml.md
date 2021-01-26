@@ -29,7 +29,14 @@ Make sure you have access to a Google Workspace [Super Admin](https://support.go
 | Name ID          | Primary email address                            | Make sure someone receives content sent to that address                |
 | First name       | `first_name`                                     | Required value to communicate with GitLab.               |
 | Last name        | `last_name`                                      | Required value to communicate with GitLab.               |
-| Primary email    | `email`                                          | Email address that Google uses to contact the app owner. |
+
+You will also need to setup the following SAML attribute mappings:
+
+| Google Directory attributes       | App attributes |
+|-----------------------------------|----------------|
+| Basic information > Email         | `email`        |
+| Basic Information > First name    | `first_name`   |
+| Basic Information > Last name     | `last_name`    |
 
 You may also use some of this information when you [Configure GitLab](#configure-gitlab).
 
