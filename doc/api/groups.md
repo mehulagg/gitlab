@@ -670,7 +670,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `shared_runners_minutes_limit` and `extra_shared_runners_minutes_limit` parameters:
 
 Additional response parameters:
@@ -685,7 +685,7 @@ Additional response parameters:
 }
 ```
 
-Users on GitLab [Silver, Premium, or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `marked_for_deletion_on` attribute:
 
 ```json
@@ -1319,7 +1319,7 @@ GET /groups/:id/push_rule
 }
 ```
 
-Users on GitLab [Premium, Silver, or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `commit_committer_check` and `reject_unsigned_commits` parameters:
 
 ```json
