@@ -13,6 +13,10 @@ RSpec.describe API::RubygemPackages do
   end
 
   shared_examples 'when feature flag is disabled' do
+    let(:headers) do
+      { 'HTTP_AUTHORIZATION' => personal_access_token.token }
+    end
+
     before do
       stub_feature_flags(rubygem_packages: false)
     end
@@ -48,9 +52,9 @@ RSpec.describe API::RubygemPackages do
   end
 
   describe 'GET /api/v4/projects/:project_id/packages/rubygems/:filename' do
-    let(:url) { "/projects/#{project.id}/packages/rubygems/specs.4.8.gz" }
+    let(:url) { api("/projects/#{project.id}/packages/rubygems/specs.4.8.gz") }
 
-    subject { get api(url), headers: headers }
+    subject { get(url, headers: headers) }
 
     it_behaves_like 'an unimplemented route'
   end
@@ -71,32 +75,24 @@ RSpec.describe API::RubygemPackages do
     it_behaves_like 'an unimplemented route'
   end
 
-  describe 'GET /api/v4/projects/:project_id/packages/api/v1/api_key' do
-    let(:url) { api("/projects/#{project.id}/packages/api/v1/api_key") }
-
-    subject { get(url, headers: headers) }
-
-    it_behaves_like 'an unimplemented route'
-  end
-
-  describe 'POST /api/v4/projects/:project_id/packages/api/v1/gems/authorize' do
-    let(:url) { api("/projects/#{project.id}/packages/api/v1/gems/authorize") }
+  describe 'POST /api/v4/projects/:project_id/packages/rubygems/api/v1/gems/authorize' do
+    let(:url) { api("/projects/#{project.id}/packages/rubygems/api/v1/gems/authorize") }
 
     subject { post(url, headers: headers) }
 
     it_behaves_like 'an unimplemented route'
   end
 
-  describe 'POST /api/v4/projects/:project_id/packages/api/v1/gems' do
-    let(:url) { api("/projects/#{project.id}/packages/api/v1/gems") }
+  describe 'POST /api/v4/projects/:project_id/packages/rubygems/api/v1/gems' do
+    let(:url) { api("/projects/#{project.id}/packages/rubygems/api/v1/gems") }
 
     subject { post(url, headers: headers) }
 
     it_behaves_like 'an unimplemented route'
   end
 
-  describe 'GET /api/v4/projects/:project_id/packages/api/v1/dependencies' do
-    let(:url) { api("/projects/#{project.id}/packages/api/v1/dependencies") }
+  describe 'GET /api/v4/projects/:project_id/packages/rubygems/api/v1/dependencies' do
+    let(:url) { api("/projects/#{project.id}/packages/rubygems/api/v1/dependencies") }
 
     subject { get(url, headers: headers) }
 

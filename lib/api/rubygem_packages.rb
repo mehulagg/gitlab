@@ -10,12 +10,22 @@ module API
     # Updating the version should require a GitLab API version change.
     MARSHAL_VERSION = '4.8'
 
+    FILE_NAME_REQUIREMENTS = {
+      file_name: API::NO_SLASH_URL_PART_REGEX
+    }.freeze
+
     content_type :binary, 'application/octet-stream'
 
     before do
-      not_found! unless Feature.enabled?(:rubygem_packages, user_project)
       require_packages_enabled!
       authenticate!
+      not_found! unless Feature.enabled?(:rubygem_packages, user_project)
+    end
+
+    helpers do
+      def parsed_oauth_token
+        request.headers['Authorization']
+      end
     end
 
     params do
@@ -30,7 +40,7 @@ module API
           requires :file_name, type: String, desc: 'Spec file name'
         end
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
-        get ":file_name" do
+        get ":file_name", requirements: FILE_NAME_REQUIREMENTS do
           not_found!
         end
 
@@ -41,7 +51,7 @@ module API
           requires :file_name, type: String, desc: 'Gemspec file name'
         end
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
-        get "quick/Marshal.#{MARSHAL_VERSION}/:file_name" do
+        get "quick/Marshal.#{MARSHAL_VERSION}/:file_name", requirements: FILE_NAME_REQUIREMENTS do
           not_found!
         end
 
@@ -52,21 +62,11 @@ module API
           requires :file_name, type: String, desc: 'Package file name'
         end
         route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
-        get "gems/:file_name" do
+        get "gems/:file_name", requirements: FILE_NAME_REQUIREMENTS do
           not_found!
         end
 
         namespace 'api/v1' do
-          desc 'Authenticate with the registry' do
-            detail 'This feature was introduced in GitLab 13.9'
-          end
-          route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
-          get 'api_key' do
-            authorize_read_package!
-
-            { "rubygems_api_key": "701243f217cdf23b1370c7b66b65ca97" }
-          end
-
           desc 'Authorize a gem upload' do
             detail 'This feature was introduced in GitLab 13.9'
           end
