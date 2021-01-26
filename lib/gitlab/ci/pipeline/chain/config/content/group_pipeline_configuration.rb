@@ -11,7 +11,8 @@ module Gitlab
                 strong_memoize(:content) do
                   next unless pipeline_configuration_full_path
 
-                  YAML.dump('include' => [{ 'local' => pipeline_configuration_full_path }])
+                  path_file, path_project = pipeline_configuration_full_path.split('@', 2)
+                  YAML.dump('include' => [{ 'project' => path_project, 'file' => path_file }])
                 end
               end
 
