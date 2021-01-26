@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_12_08_031224) do
+ActiveRecord::Schema.define(version: 2021_01_25_222907) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -78,16 +78,20 @@ ActiveRecord::Schema.define(version: 2020_12_08_031224) do
   end
 
   create_table "lfs_object_registry", force: :cascade do |t|
-    t.datetime_with_timezone "created_at"
+    t.datetime_with_timezone "created_at", null: false
     t.datetime_with_timezone "retry_at"
     t.bigint "bytes"
-    t.integer "lfs_object_id"
-    t.integer "retry_count"
+    t.integer "lfs_object_id", null: false
+    t.integer "retry_count", limit: 2, default: 0
     t.boolean "missing_on_primary", default: false, null: false
     t.boolean "success", default: false, null: false
     t.binary "sha256"
+    t.integer "state", limit: 2, default: 0, null: false
+    t.datetime_with_timezone "last_synced_at"
+    t.text "last_sync_failure"
     t.index ["lfs_object_id"], name: "index_lfs_object_registry_on_lfs_object_id", unique: true
     t.index ["retry_at"], name: "index_lfs_object_registry_on_retry_at"
+    t.index ["state"], name: "index_state_in_lfs_objects"
     t.index ["success"], name: "index_lfs_object_registry_on_success"
   end
 
