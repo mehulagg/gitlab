@@ -1797,20 +1797,17 @@ _only_ is added, the corresponding GitLab.com badge isn't displayed.
 
 #### Available product tier badges
 
-| Tier in which feature is available                                     | Tier badge           |
-|:-----------------------------------------------------------------------|:----------------------|
-| GitLab Core and GitLab.com Free, and their higher tiers                | `**(CORE)**`          |
-| GitLab Starter and GitLab.com Bronze, and their higher tiers           | `**(STARTER)**`       |
-| GitLab Premium and GitLab.com Silver, and their higher tiers           | `**(PREMIUM)**`       |
-| GitLab Ultimate and GitLab.com Gold                                    | `**(ULTIMATE)**`      |
-| _Only_ GitLab Core and higher tiers (no GitLab.com-based tiers)        | `**(CORE ONLY)**`     |
-| _Only_ GitLab Starter and higher tiers (no GitLab.com-based tiers)     | `**(STARTER ONLY)**`  |
-| _Only_ GitLab Premium and higher tiers (no GitLab.com-based tiers)     | `**(PREMIUM ONLY)**`  |
-| _Only_ GitLab Ultimate (no GitLab.com-based tiers)                     | `**(ULTIMATE ONLY)**` |
-| _Only_ GitLab.com Free and higher tiers (no self-managed instances)    | `**(FREE ONLY)**`     |
-| _Only_ GitLab.com Bronze and higher tiers (no self-managed instances)  | `**(BRONZE ONLY)**`   |
-| _Only_ GitLab.com Silver and higher tiers (no self-managed instances)  | `**(SILVER ONLY)**`   |
-| _Only_ GitLab.com Gold (no self-managed instances)                     | `**(GOLD ONLY)**`     |
+| Tier in which feature is available                                        | Tier badge            |
+|:--------------------------------------------------------------------------|:----------------------|
+| GitLab Free self-managed and SaaS, and higher tiers                       | `**(FREE)**`          |
+| GitLab Premium self-managed and SaaS, and their higher tiers              | `**(PREMIUM)**`       |
+| GitLab Ultimate self-managed and SaaS                                     | `**(ULTIMATE)**`      |
+| _Only_ GitLab Free self-managed and higher tiers (no SaaS-based tiers)    | `**(FREE SELF)**`     |
+| _Only_ GitLab Premium self-managed and higher tiers (no SaaS-based tiers) | `**(PREMIUM SELF)**`  |
+| _Only_ GitLab Ultimate self-managed (no SaaS-based tiers)                 | `**(ULTIMATE SELF)**` |
+| _Only_ GitLab Free SaaS and higher tiers (no self-managed instances)      | `**(FREE SAAS)**`     |
+| _Only_ GitLab Premium SaaS and higher tiers (no self-managed instances)   | `**(PREMIUM SAAS)**`  |
+| _Only_ GitLab Ultimate SaaS (no self-managed instances)                   | `**(ULTIMATE SAAS)**` |
 
 Topics that mention the `gitlab.rb` file are referring to
 self-managed instances of GitLab. To prevent confusion, include the relevant `TIER ONLY`
