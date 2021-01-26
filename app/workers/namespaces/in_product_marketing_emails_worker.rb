@@ -12,7 +12,7 @@ module Namespaces
       return unless Gitlab::Experimentation.active?(:in_product_marketing_emails)
 
       Namespaces::InProductMarketingEmailsService::TRACKS.each_key do |track|
-        Namespaces::InProductMarketingEmailsService::INTERVALS.each do |interval|
+        Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.each do |interval|
           Namespaces::InProductMarketingEmailsService.new(track, interval).execute
         end
       end

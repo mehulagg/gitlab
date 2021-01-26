@@ -7,7 +7,7 @@ RSpec.describe Namespaces::InProductMarketingEmailsWorker, '#perform' do
 
   before do
     stub_const('Namespaces::InProductMarketingEmailsService::TRACKS', first_track: :completed_column)
-    stub_const('Namespaces::InProductMarketingEmailsService::INTERVALS', [1])
+    stub_const('Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS', [1])
   end
 
   context 'when the experiment is inactive' do
