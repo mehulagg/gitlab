@@ -27,7 +27,7 @@ RSpec.describe Users::RejectService do
             expect(AuditEvent.last.author_id).to eq(current_user.id)
             expect(AuditEvent.last.ip_address).to eq(current_user.current_sign_in_ip)
             expect(AuditEvent.last.details[:target_details]).to eq(user.username)
-            expect(AuditEvent.last.details[:custom_message]).to eq("User instance request rejected")
+            expect(AuditEvent.last.details[:custom_message]).to eq("Instance request rejected")
           end
         end
 

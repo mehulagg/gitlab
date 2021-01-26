@@ -19,7 +19,7 @@ module EE
           current_user,
           user,
           action: :custom,
-          custom_message: 'User instance request rejected'
+          custom_message: 'Instance request rejected'
         ).for_user.security_event
       end
     end

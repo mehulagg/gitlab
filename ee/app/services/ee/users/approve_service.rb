@@ -19,7 +19,7 @@ module EE
           current_user,
           user,
           action: :custom,
-          custom_message: 'Approved user'
+          custom_message: 'Instance request approved'
         ).for_user.security_event
       end
     end

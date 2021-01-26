@@ -27,7 +27,7 @@ RSpec.describe Users::ApproveService do
             operation
 
             expect(AuditEvent.last).to have_attributes(
-              details: hash_including(custom_message: 'Approved user')
+              details: hash_including(custom_message: 'Instance request approved')
             )
           end
         end
