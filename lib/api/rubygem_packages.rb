@@ -6,6 +6,8 @@ module API
   class RubygemPackages < ::API::Base
     helpers ::API::Helpers::PackagesHelpers
 
+    feature_category :package_registry
+
     # The Marshal version can be found by "#{Marshal::MAJOR_VERSION}.#{Marshal::MINOR_VERSION}"
     # Updating the version should require a GitLab API version change.
     MARSHAL_VERSION = '4.8'
