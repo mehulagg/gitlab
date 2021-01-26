@@ -992,6 +992,16 @@ pre.light-well {
       width: auto;
     }
   }
+
+  // TODO: move to gitlab/ui utilities
+  .gl-search-box-by-type-input {
+    width: 100%;
+  }
+
+  // TODO: allow this to be set in gitlab/ui
+  .gl-new-dropdown-button-text {
+    @include str-truncated;
+  }
 }
 
 .clearable-input {
