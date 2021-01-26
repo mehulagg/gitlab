@@ -69,7 +69,7 @@ module Spam
 
       project = target.try(:project)
 
-      context.merge({
+      {
         target: {
           title: target.spam_title,
           description: target.spam_description,
@@ -80,8 +80,9 @@ module Spam
           email: user.email,
           username: user.username
         },
-        user_in_project: user.authorized_project?(project)
-      })
+        user_in_project: user.authorized_project?(project),
+        action: context[:action] == 'create' ? 0 : 1
+      }
     end
 
     def endpoint_url
