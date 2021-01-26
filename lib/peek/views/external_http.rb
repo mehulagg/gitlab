@@ -30,6 +30,8 @@ module Peek
       end
 
       def format_call_details(call)
+        Rails.logger.error('FORMAT CALL DETAILS')
+        Rails.logger.error(call)
         uri = URI("")
         uri.scheme = call[:scheme]
         uri.host = call[:host]

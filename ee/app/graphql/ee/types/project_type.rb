@@ -115,6 +115,18 @@ module EE
               null: true,
               description: 'Incident Management On-call schedules of the project',
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
+
+        field :api_fuzzing_ci_configuration,
+              ::Types::CiConfiguration::ApiFuzzing::Type,
+              null: true,
+              description: 'API Fuzzing configuration for the project.'
+      end
+
+      def api_fuzzing_ci_configuration
+        {
+          scan_modes: ::Security::ApiFuzzing::CiConfiguration::SCAN_MODES,
+          scan_profiles: ::Security::ApiFuzzing::CiConfiguration.scan_profiles
+        }
       end
 
       def dast_scanner_profiles

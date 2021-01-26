@@ -41,10 +41,12 @@ module Gitlab
           options
         end
 
+      Rails.logger.error("ABOUT TO MAKE REQUEST")
       httparty_perform_request(http_method, path, options_with_timeouts, &block)
     rescue HTTParty::RedirectionTooDeep
       raise RedirectionTooDeep
     rescue *HTTP_ERRORS => e
+      Rails.logger.error("FUCKING ERROR #{e}")
       extra_info = log_info || {}
       extra_info = log_info.call(e, path, options) if log_info.respond_to?(:call)
       Gitlab::ErrorTracking.log_exception(e, extra_info)
