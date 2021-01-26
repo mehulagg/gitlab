@@ -930,15 +930,16 @@ error="failed to connect to internal Pages API: Get \"https://gitlab.example.com
 
 ### Pages cannot communicate with an instance of the GitLab API
 
-If you are using the default value for `domain_config_source=auto` and you run multiple instances of GitLab Pages,
-you may see intermittent 502 error responses while serving Pages content. You may also see the following warning in the Pages logs:
+If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
+Pages, you may see intermittent 502 error responses while serving Pages content. You may also see
+the following warning in the Pages logs:
 
 ```plaintext
 WARN[0010] Pages cannot communicate with an instance of the GitLab API, please sync your gitlab-secrets.json file https://gitlab.com/gitlab-org/gitlab-pages/-/issues/535#workaround  error="pages endpoint unauthorized"
 ```
 
-This may happen if your `gitlab-secrets.json` file is out of date between GitLab Rails and GitLab Pages.
-Please follow steps 8-10 of the [Running GitLab Pages on a separate server](#running-gitlab-pages-on-a-separate-server)
+This can happen if your `gitlab-secrets.json` file is out of date between GitLab Rails and GitLab
+Pages. Follow steps 8-10 of [Running GitLab Pages on a separate server](#running-gitlab-pages-on-a-separate-server),
 in all of your GitLab Pages instances.
 
 ### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
