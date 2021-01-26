@@ -1,26 +1,20 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlEmptyState, GlTab, GlTabs, GlLink, GlSprintf } from '@gitlab/ui';
+import { GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import createFlash from '~/flash';
 import { historyReplaceState } from '~/lib/utils/common_utils';
 import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
-import PackageFilter from './packages_filter.vue';
 import PackageList from './packages_list.vue';
-import PackageSort from './packages_sort.vue';
-import { PACKAGE_REGISTRY_TABS, DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
+import { DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
 import PackageTitle from './package_title.vue';
 
 export default {
   components: {
     GlEmptyState,
-    GlTab,
-    GlTabs,
     GlLink,
     GlSprintf,
-    PackageFilter,
     PackageList,
-    PackageSort,
     PackageTitle,
   },
   computed: {
@@ -32,9 +26,6 @@ export default {
       packageHelpUrl: (state) => state.config.packageHelpUrl,
       packagesCount: (state) => state.pagination?.total,
     }),
-    tabsToRender() {
-      return PACKAGE_REGISTRY_TABS;
-    },
   },
   mounted() {
     this.requestPackagesList();
@@ -47,14 +38,6 @@ export default {
     },
     onPackageDeleteRequest(item) {
       return this.requestDeletePackage(item);
-    },
-    tabChanged(index) {
-      const selected = PACKAGE_REGISTRY_TABS[index];
-
-      if (selected !== this.selectedType) {
-        this.setSelectedType(selected);
-        this.requestPackagesList();
-      }
     },
     emptyStateTitle({ title, type }) {
       if (this.filterQuery) {
@@ -93,32 +76,19 @@ export default {
   <div>
     <package-title :package-help-url="packageHelpUrl" :packages-count="packagesCount" />
 
-    <gl-tabs @input="tabChanged">
-      <template #tabs-end>
-        <div
-          class="gl-display-flex gl-align-self-center gl-py-2 gl-flex-grow-1 gl-justify-content-end"
-        >
-          <package-filter class="gl-mr-2" @filter="requestPackagesList" />
-          <package-sort @sort:changed="requestPackagesList" />
-        </div>
-      </template>
-
-      <gl-tab v-for="(tab, index) in tabsToRender" :key="index" :title="tab.title">
-        <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
-          <template #empty-state>
-            <gl-empty-state :title="emptyStateTitle(tab)" :svg-path="emptyListIllustration">
-              <template #description>
-                <gl-sprintf v-if="filterQuery" :message="$options.i18n.widenFilters" />
-                <gl-sprintf v-else :message="$options.i18n.noResults">
-                  <template #noPackagesLink="{ content }">
-                    <gl-link :href="emptyListHelpUrl" target="_blank">{{ content }}</gl-link>
-                  </template>
-                </gl-sprintf>
+    <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
+      <template #empty-state>
+        <gl-empty-state title="test" :svg-path="emptyListIllustration">
+          <template #description>
+            <gl-sprintf v-if="filter" :message="$options.i18n.widenFilters" />
+            <gl-sprintf v-else :message="$options.i18n.noResults">
+              <template #noPackagesLink="{ content }">
+                <gl-link :href="emptyListHelpUrl" target="_blank">{{ content }}</gl-link>
               </template>
-            </gl-empty-state>
+            </gl-sprintf>
           </template>
-        </package-list>
-      </gl-tab>
-    </gl-tabs>
+        </gl-empty-state>
+      </template>
+    </package-list>
   </div>
 </template>
