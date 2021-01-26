@@ -66,13 +66,13 @@ export default {
 <template>
   <div class="gl-display-flex">
     <span
-      class="gl-display-flex gl-align-items-center gl-justify-content-center gl-mr-3 gl-align-self-start gl-mt-1"
+      class="gl-display-flex gl-align-items-center gl-justify-content-center gl-mr-3 gl-align-self-start gl-mt-3"
     >
       <gl-icon :name="iconType" :size="18" data-testid="change-type-icon" />
     </span>
 
     <div class="gl-display-flex gl-flex-fill-1 gl-flex-direction-column flex-md-row">
-      <div class="gl-flex-fill-1 gl-display-flex gl-flex-direction-column">
+      <div class="gl-flex-fill-1 gl-display-flex gl-flex-direction-column gl-pl-4">
         <p class="gl-m-0 gl-pr-1">
           <gl-sprintf :message="reportHeaderText">
             <template #name>
