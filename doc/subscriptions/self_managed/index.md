@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# GitLab self-managed subscription **(STARTER ONLY)**
+# GitLab self-managed subscription **(PREMIUM)**
 
 You can install, administer, and maintain your own GitLab instance.
 
@@ -78,13 +78,12 @@ GitLab has several features which can help you manage the number of users:
 
 To subscribe to GitLab through a self-managed installation:
 
-1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a
-   **Starter**, **Premium**, or **Ultimate** self-managed plan.
+1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a self-managed plan.
 1. After purchase, a license file is sent to the email address associated to the Customers Portal account,
    which must be [uploaded to your GitLab instance](../../user/admin_area/license.md#uploading-your-license).
 
 NOTE:
-If you're purchasing a subscription for an existing **Core** self-managed
+If you're purchasing a subscription for an existing **Free** self-managed
 instance, ensure you're purchasing enough seats to
 [cover your users](../../user/admin_area/index.md#administering-users).
 

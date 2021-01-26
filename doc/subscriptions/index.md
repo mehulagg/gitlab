@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# GitLab subscription **(STARTER)**
+# GitLab subscription **(PREMIUM)**
 
 GitLab offers tiers of features. Your subscription determines which tier you
 have access to. Subscriptions are valid for 12 months.
