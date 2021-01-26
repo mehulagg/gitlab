@@ -48,10 +48,10 @@ If you have any questions, contact your administrator.`,
 );
 
 export const MISSING_OR_DELETED_IMAGE_TITLE = s__(
-  'ContainerRegistry|This image does not exist or has been deleted',
+  'ContainerRegistry|This image repository could not be found',
 );
 export const MISSING_OR_DELETED_IMAGE_MESSAGE = s__(
-  `ContainerRegistry|The requested image does not exist or has been deleted, if you think this is an error please try to refresh the page`,
+  `ContainerRegistry|The requested image repository does not exist or has been deleted. If you think this is an error, try refreshing the page',
 );
 export const MISSING_OR_DELETE_IMAGE_BREADCRUMB = s__('ContainerRegistry|No image');
 
