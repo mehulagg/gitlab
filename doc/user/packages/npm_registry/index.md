@@ -86,7 +86,9 @@ A `package.json` file is created.
 To use the GitLab endpoint for NPM packages, choose an option:
 
 - **Project-level**: Use when you have few NPM packages and they are not in
-  the same GitLab group.
+  the same GitLab group. The [package naming convention](#package-naming-convention) is not enforced at this level. 
+  It is recommended to use a [scope](https://docs.npmjs.com/cli/v6/using-npm/scope) for your package. 
+  With a scope, the registry url will be [updated](#authenticate-to-the-package-registry) only for that scope. 
 - **Instance-level**: Use when you have many NPM packages in different
   GitLab groups or in their own namespace. Be sure to comply with the [package naming convention](#package-naming-convention).
 
@@ -204,7 +206,7 @@ Then, you can run `npm publish` either locally or by using GitLab CI/CD.
 
 ## Package naming convention
 
-Your NPM package name must be in the format of `@scope/package-name`.
+When using the [instance-level endpoint](#use-the-gitlab-endpoint-for-npm-packages), your NPM package name must be in the format of `@scope/package-name`.
 
 - The `@scope` is the root namespace of the GitLab project. It must match exactly, including the case.
 - The `package-name` can be whatever you want.
@@ -302,8 +304,9 @@ the same version more than once, even if it has been deleted.
 ## Install a package
 
 NPM packages are commonly-installed by using the `npm` or `yarn` commands
-in a JavaScript project. You can install a package from the scope of a project, group,
-or instance.
+in a JavaScript project. You can install a package from the scope of a project or instance.
+
+If multiple packages have the same name and version, when you install a package, the most recently-published package is retrieved.
 
 1. Set the URL for scoped packages by running:
 
