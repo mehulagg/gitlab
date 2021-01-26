@@ -5,6 +5,7 @@ module StatAnchorsHelper
     {}.tap do |attrs|
       attrs[:class] = %w(nav-link gl-display-flex gl-align-items-center) << extra_classes(anchor)
       attrs[:itemprop] = anchor.itemprop if anchor.itemprop
+      attrs[:data] = anchor.data if anchor.data
     end
   end
 

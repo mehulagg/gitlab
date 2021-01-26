@@ -13,7 +13,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
 
   presents :project
 
-  AnchorData = Struct.new(:is_link, :label, :link, :class_modifier, :icon, :itemprop)
+  AnchorData = Struct.new(:is_link, :label, :link, :class_modifier, :icon, :itemprop, :data)
   MAX_TOPICS_TO_SHOW = 3
 
   def statistic_icon(icon_name = 'plus-square-o')
@@ -50,6 +50,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   def empty_repo_statistics_buttons
     [
       new_file_anchor_data,
+      upload_anchor_data,
       readme_anchor_data,
       license_anchor_data,
       changelog_anchor_data,
@@ -230,6 +231,20 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
                      strong_end: '</strong>'.html_safe
                    },
                    empty_repo? ? nil : project_tags_path(project))
+  end
+
+  def upload_anchor_data
+    anchor_data = AnchorData.new(false,
+                                 statistic_icon + _('Upload'),
+                                 '#modal-upload-blob',
+                                 'dashed',
+                                 nil,
+                                 nil,
+                                 {
+                                   'target' => '#modal-upload-blob',
+                                   'toggle' => 'modal'
+                                 }
+    )
   end
 
   def new_file_anchor_data
