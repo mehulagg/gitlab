@@ -31,17 +31,15 @@ views that manage products, not projects or repos, provides users with a more re
 Since GitLab is a tool for the entire DevOps life-cycle, information from different workflows is
 integrated and can be used to measure the success of the teams.
 
-The DevOps Research and Assesment ([DORA](https://cloud.google.com/blog/products/devops-sre/the-2019-accelerate-state-of-devops-elite-performance-productivity-and-scaling)) team have come up with four key metrics that have been widely adopted by the industry and can be used to measure and indicate the performance of spftware development teams.
+The DevOps Research and Assessment ([DORA](https://cloud.google.com/blog/products/devops-sre/the-2019-accelerate-state-of-devops-elite-performance-productivity-and-scaling))
+team developed four key metrics that the industry has widely adopted. You can use these metrics as
+performance indicators for software development teams:
 
-These metrics are:
-
-- Deployment Frequency: How often an organization successfully releases to production
-
-- Lead Time for Changes: The amount of time it takes a for code to get committed to get into production
-
-- Change Failure Rate: The percentage of deployments causing a failure in production
-
--Time to Restore Service: How long it takes an organization to recover from a failure in production
+- Deployment frequency: How often an organization successfully releases to production.
+- Lead time for changes: The amount of time it takes for code to reach production.
+- Change failure rate: The percentage of deployments that cause a failure in production.
+- Time to restore service: How long it takes an organization to recover from a failure in
+  production.
 
 GitLab plans to add support for all the DORA4 metrics on the project and the group level. The first metric of Deployment Frequency was added to the project level [CI/CD charts](ci_cd_analytics.md#deployment-frequency-charts) and [API]( ../../api/project_analytics.md).
 
