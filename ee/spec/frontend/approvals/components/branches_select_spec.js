@@ -1,18 +1,22 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
 import $ from 'jquery';
+import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
 
 const TEST_DEFAULT_BRANCH = { name: 'Any branch' };
 const TEST_PROJECT_ID = '1';
-const TEST_PROTECTED_BRANCHES = [{ id: 1, name: 'master' }, { id: 2, name: 'development' }];
+const TEST_PROTECTED_BRANCHES = [
+  { id: 1, name: 'master' },
+  { id: 2, name: 'development' },
+];
 const TEST_BRANCHES_SELECTIONS = [TEST_DEFAULT_BRANCH, ...TEST_PROTECTED_BRANCHES];
-const waitForEvent = ($input, event) => new Promise(resolve => $input.one(event, resolve));
+const waitForEvent = ($input, event) => new Promise((resolve) => $input.one(event, resolve));
 const select2Container = () => document.querySelector('.select2-container');
 const select2DropdownOptions = () => document.querySelectorAll('.result-name');
-const branchNames = () => TEST_BRANCHES_SELECTIONS.map(branch => branch.name);
-const protectedBranchNames = () => TEST_PROTECTED_BRANCHES.map(branch => branch.name);
+const branchNames = () => TEST_BRANCHES_SELECTIONS.map((branch) => branch.name);
+const protectedBranchNames = () => TEST_PROTECTED_BRANCHES.map((branch) => branch.name);
 const localVue = createLocalVue();
 
 localVue.use(Vuex);
@@ -22,7 +26,7 @@ describe('Branches Select', () => {
   let store;
   let $input;
 
-  const createComponent = (props = {}) => {
+  const createComponent = async (props = {}) => {
     wrapper = shallowMount(localVue.extend(BranchesSelect), {
       propsData: {
         projectId: '1',
@@ -30,8 +34,10 @@ describe('Branches Select', () => {
       },
       localVue,
       store: new Vuex.Store(store),
-      attachToDocument: true,
+      attachTo: document.body,
     });
+
+    await waitForPromises();
 
     $input = $(wrapper.vm.$refs.input);
   };
@@ -50,20 +56,20 @@ describe('Branches Select', () => {
     wrapper.destroy();
   });
 
-  it('renders select2 input', () => {
+  it('renders select2 input', async () => {
     expect(select2Container()).toBe(null);
 
-    createComponent();
+    await createComponent();
 
     expect(select2Container()).not.toBe(null);
   });
 
-  it('displays all the protected branches and any branch', done => {
-    createComponent();
+  it('displays all the protected branches and any branch', async (done) => {
+    await createComponent();
     waitForEvent($input, 'select2-loaded')
       .then(() => {
         const nodeList = select2DropdownOptions();
-        const names = [...nodeList].map(el => el.textContent);
+        const names = [...nodeList].map((el) => el.textContent);
 
         expect(names).toEqual(branchNames());
       })
@@ -74,10 +80,10 @@ describe('Branches Select', () => {
 
   describe('with search term', () => {
     beforeEach(() => {
-      createComponent();
+      return createComponent();
     });
 
-    it('fetches protected branches with search term', done => {
+    it('fetches protected branches with search term', (done) => {
       const term = 'lorem';
       waitForEvent($input, 'select2-loaded')
         .then(() => {})
@@ -89,11 +95,11 @@ describe('Branches Select', () => {
       expect(Api.projectProtectedBranches).toHaveBeenCalledWith(TEST_PROJECT_ID, term);
     });
 
-    it('fetches protected branches with no any branch if there is search', done => {
+    it('fetches protected branches with no any branch if there is search', (done) => {
       waitForEvent($input, 'select2-loaded')
         .then(() => {
           const nodeList = select2DropdownOptions();
-          const names = [...nodeList].map(el => el.textContent);
+          const names = [...nodeList].map((el) => el.textContent);
 
           expect(names).toEqual(protectedBranchNames());
         })
@@ -102,11 +108,11 @@ describe('Branches Select', () => {
       search('master');
     });
 
-    it('fetches protected branches with any branch if search contains term "any"', done => {
+    it('fetches protected branches with any branch if search contains term "any"', (done) => {
       waitForEvent($input, 'select2-loaded')
         .then(() => {
           const nodeList = select2DropdownOptions();
-          const names = [...nodeList].map(el => el.textContent);
+          const names = [...nodeList].map((el) => el.textContent);
 
           expect(names).toEqual(branchNames());
         })
@@ -116,17 +122,12 @@ describe('Branches Select', () => {
     });
   });
 
-  it('emits input when data changes', done => {
-    createComponent();
+  it('emits input when data changes', async (done) => {
+    await createComponent();
 
     const selectedIndex = 1;
     const selectedId = TEST_BRANCHES_SELECTIONS[selectedIndex].id;
-    const expected = [
-      {
-        name: 'input',
-        args: [selectedId],
-      },
-    ];
+    const expected = [[selectedId]];
 
     waitForEvent($input, 'select2-loaded')
       .then(() => {
@@ -138,7 +139,7 @@ describe('Branches Select', () => {
 
     waitForEvent($input, 'change')
       .then(() => {
-        expect(wrapper.emittedByOrder()).toEqual(expected);
+        expect(wrapper.emitted().input).toEqual(expected);
       })
       .then(done)
       .catch(done.fail);

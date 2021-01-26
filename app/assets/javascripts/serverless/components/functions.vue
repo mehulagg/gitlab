@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import EnvironmentRow from './environment_row.vue';
 import EmptyState from './empty_state.vue';
@@ -12,6 +12,9 @@ export default {
     EmptyState,
     GlLink,
     GlLoadingIcon,
+  },
+  directives: {
+    SafeHtml,
   },
   computed: {
     ...mapState(['installed', 'isLoading', 'hasFunctionData', 'helpPath', 'statusPath']),
@@ -66,18 +69,16 @@ export default {
 
     <div v-else-if="isInstalled">
       <div v-if="hasFunctionData">
-        <template>
-          <div class="groups-list-tree-container js-functions-wrapper">
-            <ul class="content-list group-list-tree">
-              <environment-row
-                v-for="(env, index) in getFunctions"
-                :key="index"
-                :env="env"
-                :env-name="index"
-              />
-            </ul>
-          </div>
-        </template>
+        <div class="groups-list-tree-container js-functions-wrapper">
+          <ul class="content-list group-list-tree">
+            <environment-row
+              v-for="(env, index) in getFunctions"
+              :key="index"
+              :env="env"
+              :env-name="index"
+            />
+          </ul>
+        </div>
         <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3 gl-mb-3 js-functions-loader" />
       </div>
       <div v-else class="empty-state js-empty-state">
@@ -91,9 +92,9 @@ export default {
             }}
           </p>
           <ul>
-            <li v-html="noServerlessConfigFile"></li>
-            <li v-html="noGitlabYamlConfigured"></li>
-            <li v-html="mismatchedServerlessFunctions"></li>
+            <li v-safe-html="noServerlessConfigFile"></li>
+            <li v-safe-html="noGitlabYamlConfigured"></li>
+            <li v-safe-html="mismatchedServerlessFunctions"></li>
             <li>{{ s__('Serverless|The deploy job has not finished.') }}</li>
           </ul>
 

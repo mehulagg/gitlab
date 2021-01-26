@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class API < Grape::API::Instance
+  class API < ::API::Base
     include APIGuard
 
     LOG_FILENAME = Rails.root.join("log", "api_json.log")
@@ -25,7 +25,8 @@ module API
                     Gitlab::GrapeLogging::Loggers::QueueDurationLogger.new,
                     Gitlab::GrapeLogging::Loggers::PerfLogger.new,
                     Gitlab::GrapeLogging::Loggers::CorrelationIdLogger.new,
-                    Gitlab::GrapeLogging::Loggers::ContextLogger.new
+                    Gitlab::GrapeLogging::Loggers::ContextLogger.new,
+                    Gitlab::GrapeLogging::Loggers::ContentLogger.new
                   ]
 
     allow_access_with_scope :api
@@ -48,12 +49,23 @@ module API
     before do
       coerce_nil_params_to_array!
 
+      api_endpoint = env['api.endpoint']
+      feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
+
+      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
+
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin
+        caller_id: route.origin,
+        remote_ip: request.ip,
+        feature_category: feature_category
       )
+    end
+
+    before do
+      set_peek_enabled_for_current_request
     end
 
     # The locale is set to the current user's locale when `current_user` is loaded
@@ -111,11 +123,38 @@ module API
 
     format :json
     formatter :json, Gitlab::Json::GrapeFormatter
-    content_type :txt, "text/plain"
+    content_type :json, 'application/json'
+
+    # Remove the `text/plain+deprecated` with `api_always_use_application_json` feature flag
+    # There is a small chance some users depend on the old behavior.
+    # We this change under a feature flag to see if affects GitLab.com users.
+    # The `+deprecated` is added to distinguish content type
+    # as defined by `API::API` vs ex. `API::Repositories`
+    content_type :txt, 'text/plain+deprecated'
+
+    before do
+      # the feature flag workaround is only for `.txt`
+      api_format = env[Grape::Env::API_FORMAT]
+      next unless api_format == :txt
+
+      # get all defined content-types for the endpoint
+      api_endpoint = env[Grape::Env::API_ENDPOINT]
+      content_types = api_endpoint&.namespace_stackable_with_hash(:content_types).to_h
+
+      # Only overwrite `text/plain+deprecated`
+      if content_types[api_format] == 'text/plain+deprecated'
+        if Feature.enabled?(:api_always_use_application_json)
+          content_type 'application/json'
+        else
+          content_type 'text/plain'
+        end
+      end
+    end
 
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
     helpers ::API::Helpers::CommonHelpers
+    helpers ::API::Helpers::PerformanceBarHelpers
 
     namespace do
       after do
@@ -142,12 +181,17 @@ module API
       mount ::API::Commits
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
+      mount ::API::ContainerRepositories
+      mount ::API::DependencyProxy
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
       mount ::API::Environments
       mount ::API::ErrorTracking
       mount ::API::Events
+      mount ::API::FeatureFlags
+      mount ::API::FeatureFlagScopes
+      mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
@@ -162,6 +206,8 @@ module API
       mount ::API::GroupVariables
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
+      mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -185,12 +231,18 @@ module API
       mount ::API::ProjectPackages
       mount ::API::GroupPackages
       mount ::API::PackageFiles
-      mount ::API::NugetPackages
+      mount ::API::NugetProjectPackages
+      mount ::API::NugetGroupPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
-      mount ::API::ConanPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
-      mount ::API::NpmPackages
+      mount ::API::NpmProjectPackages
+      mount ::API::NpmInstancePackages
+      mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages
       mount ::API::PagesDomains
@@ -208,6 +260,8 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
+      mount ::API::PersonalAccessTokens
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -218,6 +272,7 @@ module API
       mount ::API::Services
       mount ::API::Settings
       mount ::API::SidekiqMetrics
+      mount ::API::SnippetRepositoryStorageMoves
       mount ::API::Snippets
       mount ::API::Statistics
       mount ::API::Submodules
@@ -228,6 +283,8 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::Unleash
+      mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -236,13 +293,24 @@ module API
     end
 
     mount ::API::Internal::Base
+    mount ::API::Internal::Lfs
     mount ::API::Internal::Pages
     mount ::API::Internal::Kubernetes
 
-    route :any, '*path' do
+    version 'v3', using: :path do
+      # Although the following endpoints are kept behind V3 namespace,
+      # they're not deprecated neither should be removed when V3 get
+      # removed.  They're needed as a layer to integrate with Jira
+      # Development Panel.
+      namespace '/', requirements: ::API::V3::Github::ENDPOINT_REQUIREMENTS do
+        mount ::API::V3::Github
+      end
+    end
+
+    route :any, '*path', feature_category: :not_owned do
       error!('404 Not Found', 404)
     end
   end
 end
 
-API::API.prepend_if_ee('::EE::API::API')
+API::API.prepend_ee_mod

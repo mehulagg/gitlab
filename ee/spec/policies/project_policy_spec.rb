@@ -5,16 +5,9 @@ require 'spec_helper'
 RSpec.describe ProjectPolicy do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
+  include_context 'ProjectPolicy context'
 
-  let_it_be(:owner) { create(:user) }
-  let_it_be(:admin) { create(:admin) }
-  let_it_be(:maintainer) { create(:user) }
-  let_it_be(:developer) { create(:user) }
-  let_it_be(:reporter) { create(:user) }
-  let_it_be(:guest) { create(:user) }
-  let_it_be(:non_member) { create(:user) }
-  let_it_be(:project, refind: true) { create(:project, :public, namespace: owner.namespace) }
-  let_it_be(:private_project, refind: true) { create(:project, :private, namespace: owner.namespace) }
+  let(:project) { public_project }
 
   subject { described_class.new(current_user, project) }
 
@@ -22,39 +15,21 @@ RSpec.describe ProjectPolicy do
     stub_licensed_features(license_scanning: true)
   end
 
-  before_all do
-    project.add_maintainer(maintainer)
-    project.add_developer(developer)
-    project.add_reporter(reporter)
-    project.add_guest(guest)
-
-    private_project.add_maintainer(maintainer)
-    private_project.add_developer(developer)
-    private_project.add_reporter(reporter)
-    private_project.add_guest(guest)
-  end
-
   context 'basic permissions' do
-    include_context 'ProjectPolicy context'
-
-    let(:additional_guest_permissions) do
-      %i[read_issue_link]
-    end
-
     let(:additional_reporter_permissions) do
-      %i[read_software_license_policy admin_issue_link]
+      %i[read_software_license_policy]
     end
 
     let(:additional_developer_permissions) do
       %i[
-        admin_vulnerability_feedback read_project_security_dashboard read_feature_flag
+        admin_vulnerability_feedback read_project_audit_events read_project_security_dashboard
         read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
-        admin_vulnerability_issue_link read_merge_train
+        admin_vulnerability_issue_link admin_vulnerability_external_issue_link read_merge_train
       ]
     end
 
     let(:additional_maintainer_permissions) do
-      %i[push_code_to_protected_branches admin_feature_flags_client modify_auto_fix_setting]
+      %i[push_code_to_protected_branches modify_auto_fix_setting]
     end
 
     let(:auditor_permissions) do
@@ -69,6 +44,7 @@ RSpec.describe ProjectPolicy do
         read_project_security_dashboard read_vulnerability read_vulnerability_scanner
         read_software_license_policy
         read_threat_monitoring read_merge_train
+        read_release
       ]
     end
 
@@ -181,7 +157,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'when user is logged out' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_allowed(:read_iteration) }
         it { is_expected.to be_disallowed(:create_iteration, :admin_iteration) }
@@ -197,7 +173,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'when user is logged out' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration) }
         end
@@ -210,8 +186,7 @@ RSpec.describe ProjectPolicy do
 
     context 'when the feature is disabled' do
       before do
-        project.issues_enabled = false
-        project.save!
+        project.update!(issues_enabled: false)
       end
 
       it 'disables boards permissions' do
@@ -383,6 +358,24 @@ RSpec.describe ProjectPolicy do
           end
         end
 
+        context 'as a group maintainer' do
+          before do
+            group.add_maintainer(current_user)
+          end
+
+          it 'prevents access without a SAML session' do
+            is_expected.not_to allow_action(:read_project)
+          end
+        end
+
+        context 'as an auditor' do
+          let(:current_user) { create(:user, :auditor) }
+
+          it 'allows access without a SAML session' do
+            is_expected.to allow_action(:read_project)
+          end
+        end
+
         context 'with public access' do
           let(:group) { create(:group, :public) }
           let(:project) { create(:project, :public, group: saml_provider.group) }
@@ -515,7 +508,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'with anonymous' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_disallowed(permission) }
       end
@@ -548,6 +541,70 @@ RSpec.describe ProjectPolicy do
         it { is_expected.to be_disallowed(:create_vulnerability) }
         it { is_expected.to be_disallowed(:admin_vulnerability) }
         it { is_expected.to be_disallowed(:create_vulnerability_export) }
+      end
+    end
+  end
+
+  describe 'permissions for security bot' do
+    let_it_be(:current_user) { create(:user, :security_bot) }
+    let(:project) { private_project }
+
+    let(:permissions) do
+      %i(
+        reporter_access
+        push_code
+        create_merge_request_from
+        create_merge_request_in
+        create_vulnerability_feedback
+        read_project
+        admin_merge_request
+      )
+    end
+
+    context 'when auto_fix feature is enabled' do
+      context 'when licensed feature is enabled' do
+        before do
+          stub_licensed_features(vulnerability_auto_fix: true)
+        end
+
+        it { is_expected.to be_allowed(*permissions) }
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(security_auto_fix: false)
+          end
+
+          it { is_expected.to be_disallowed(*permissions) }
+        end
+      end
+
+      context 'when licensed feature is disabled' do
+        before do
+          stub_licensed_features(vulnerability_auto_fix: false)
+        end
+
+        it { is_expected.to be_disallowed(*permissions) }
+      end
+    end
+
+    context 'when auto_fix feature is disabled' do
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+        project.security_setting.update!(auto_fix_dependency_scanning: false, auto_fix_container_scanning: false)
+      end
+
+      it { is_expected.to be_disallowed(*permissions) }
+    end
+
+    context 'when project does not have a security_setting' do
+      before do
+        stub_licensed_features(vulnerability_auto_fix: true)
+        project.security_setting.delete
+        project.reload
+      end
+
+      it do
+        is_expected.to be_disallowed(*permissions)
       end
     end
   end
@@ -598,7 +655,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'with anonymous' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_disallowed(:read_threat_monitoring) }
       end
@@ -613,6 +670,68 @@ RSpec.describe ProjectPolicy do
       end
 
       it { is_expected.to be_disallowed(:read_threat_monitoring) }
+    end
+  end
+
+  describe 'read_corpus_management' do
+    context 'when corpus_management feature is available' do
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      context 'with developer or higher role' do
+        where(role: %w[owner maintainer developer])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:read_coverage_fuzzing) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with less than developer role' do
+        where(role: %w[reporter guest])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
+      end
+    end
+
+    context 'when coverage fuzzing feature is not available' do
+      let(:current_user) { admin }
+
+      before do
+        stub_licensed_features(coverage_fuzzing: true)
+      end
+
+      it { is_expected.to be_disallowed(:read_coverage_fuzzing) }
     end
   end
 
@@ -647,34 +766,47 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'read_feature_flag' do
-    context 'with admin' do
-      let(:current_user) { admin }
+  describe 'admin_feature_flags_issue_links' do
+    before do
+      stub_licensed_features(feature_flags_related_issues: true)
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
 
       context 'when repository is disabled' do
         before do
           project.project_feature.update!(
-            # Disable merge_requests and builds as well, since merge_requests and
-            # builds cannot have higher visibility than repository.
             merge_requests_access_level: ProjectFeature::DISABLED,
             builds_access_level: ProjectFeature::DISABLED,
-            repository_access_level: ProjectFeature::DISABLED)
+            repository_access_level: ProjectFeature::DISABLED
+          )
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
     end
 
     context 'with developer' do
       let(:current_user) { developer }
 
-      context 'when feature flags features is not available' do
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
+
+      context 'when feature is unlicensed' do
         before do
-          stub_licensed_features(feature_flags: false)
+          stub_licensed_features(feature_flags_related_issues: false)
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
     end
   end
 
@@ -738,7 +870,7 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:admin_software_license_policy) }
     end
@@ -766,7 +898,7 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { create(:user) }
 
         context 'with public access to repository' do
-          let(:project) { create(:project, :public) }
+          let(:project) { public_project }
 
           it { is_expected.to be_allowed(:read_dependencies) }
         end
@@ -830,7 +962,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_dependencies) }
         end
@@ -890,7 +1022,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_licenses) }
         end
@@ -909,7 +1041,6 @@ RSpec.describe ProjectPolicy do
   end
 
   describe 'publish_status_page' do
-    let(:anonymous) { nil }
     let(:feature) { :status_page }
     let(:policy) { :publish_status_page }
 
@@ -1155,7 +1286,7 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:read_group_timelogs) }
     end
@@ -1169,6 +1300,26 @@ RSpec.describe ProjectPolicy do
     end
 
     it { is_expected.to be_disallowed(:read_group_timelogs) }
+  end
+
+  context 'when project activity analytics is available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(project_activity_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_project_activity_analytics) }
+  end
+
+  context 'when project activity analytics is not available' do
+    let(:current_user) { developer }
+
+    before do
+      stub_licensed_features(project_activity_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_project_activity_analytics) }
   end
 
   describe ':read_code_review_analytics' do
@@ -1208,13 +1359,13 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  shared_examples 'merge request rules' do
+  shared_examples 'merge request approval settings' do
     let(:project) { private_project }
 
     using RSpec::Parameterized::TableSyntax
 
     context 'with merge request approvers rules available in license' do
-      where(:role, :regulated_setting, :admin_mode, :allowed) do
+      where(:role, :setting, :admin_mode, :allowed) do
         :guest      | true  | nil    | false
         :reporter   | true  | nil    | false
         :developer  | true  | nil    | false
@@ -1233,7 +1384,7 @@ RSpec.describe ProjectPolicy do
 
         before do
           stub_licensed_features(admin_merge_request_approvers_rules: true)
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_setting)
+          stub_application_setting(app_setting => setting)
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1241,8 +1392,8 @@ RSpec.describe ProjectPolicy do
       end
     end
 
-    context 'with merge request approvers not available in license' do
-      where(:role, :regulated_setting, :admin_mode, :allowed) do
+    context 'with merge request approvers rules not available in license' do
+      where(:role, :setting, :admin_mode, :allowed) do
         :guest      | true  | nil    | false
         :reporter   | true  | nil    | false
         :developer  | true  | nil    | false
@@ -1261,7 +1412,7 @@ RSpec.describe ProjectPolicy do
 
         before do
           stub_licensed_features(admin_merge_request_approvers_rules: false)
-          allow(project).to receive(:has_regulated_settings?).and_return(regulated_setting)
+          stub_application_setting(app_setting => setting)
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1271,30 +1422,23 @@ RSpec.describe ProjectPolicy do
   end
 
   describe ':modify_approvers_rules' do
-    it_behaves_like 'merge request rules' do
-      let(:setting_name) { :disable_overriding_approvers_per_merge_request }
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :disable_overriding_approvers_per_merge_request }
       let(:policy) { :modify_approvers_rules }
     end
   end
 
   describe ':modify_merge_request_author_setting' do
-    it_behaves_like 'merge request rules' do
-      let(:setting_name) { :prevent_merge_requests_author_approval }
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :prevent_merge_requests_author_approval }
       let(:policy) { :modify_merge_request_author_setting }
     end
   end
 
   describe ':modify_merge_request_committer_setting' do
-    it_behaves_like 'merge request rules' do
-      let(:setting_name) { :prevent_merge_requests_committers_approval }
+    it_behaves_like 'merge request approval settings' do
+      let(:app_setting) { :prevent_merge_requests_committers_approval }
       let(:policy) { :modify_merge_request_committer_setting }
-    end
-  end
-
-  describe ':modify_approvers_list' do
-    it_behaves_like 'merge request rules' do
-      let(:setting_name) { :disable_overriding_approvers_per_merge_request }
-      let(:policy) { :modify_approvers_list }
     end
   end
 
@@ -1362,6 +1506,92 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'Incident Management on-call schedules' do
+    using RSpec::Parameterized::TableSyntax
+
+    context ':read_incident_management_oncall_schedule' do
+      let(:policy) { :read_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | true
+        :developer  | nil   | true
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+
+    context ':admin_incident_management_oncall_schedule' do
+      let(:policy) { :admin_incident_management_oncall_schedule }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | false
+        :developer  | nil   | false
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        stub_licensed_features(oncall_schedules: true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with disabled feature flag' do
+          before do
+            stub_feature_flags(oncall_schedules_mvc: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+
+        context 'with unavailable license' do
+          before do
+            stub_licensed_features(oncall_schedules: false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+  end
+
   context 'when project is readonly because the storage usage limit has been exceeded on the root namespace' do
     let(:current_user) { owner }
     let(:abilities) do
@@ -1372,7 +1602,7 @@ RSpec.describe ProjectPolicy do
     before do
       allow(project.root_namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
       allow(project).to receive(:design_management_enabled?).and_return(true)
-      stub_licensed_features(security_dashboard: true, license_scanning: true, feature_flags: true)
+      stub_licensed_features(security_dashboard: true, license_scanning: true)
     end
 
     context 'when the group has exceeded its storage limit' do
@@ -1400,5 +1630,36 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  include_examples 'analytics report embedding'
+  context 'project access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with maintainer' do
+        let(:current_user) { maintainer }
+
+        before do
+          project.add_maintainer(maintainer)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          project.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

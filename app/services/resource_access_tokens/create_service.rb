@@ -10,19 +10,26 @@ module ResourceAccessTokens
     end
 
     def execute
-      return unless feature_enabled?
-      return error("User does not have permission to create #{resource_type} Access Token") unless has_permission_to_create?
+      return error("User does not have permission to create #{resource_type} access token") unless has_permission_to_create?
 
       user = create_user
 
       return error(user.errors.full_messages.to_sentence) unless user.persisted?
-      return error("Failed to provide maintainer access") unless provision_access(resource, user)
+
+      member = create_membership(resource, user)
+
+      unless member.persisted?
+        delete_failed_user(user)
+        return error("Could not provision maintainer access to project access token")
+      end
 
       token_response = create_personal_access_token(user)
 
       if token_response.success?
+        log_event(token_response.payload[:personal_access_token])
         success(token_response.payload[:personal_access_token])
       else
+        delete_failed_user(user)
         error(token_response.message)
       end
     end
@@ -31,19 +38,8 @@ module ResourceAccessTokens
 
     attr_reader :resource_type, :resource
 
-    def feature_enabled?
-      ::Feature.enabled?(:resource_access_token, resource)
-    end
-
     def has_permission_to_create?
-      case resource_type
-      when 'project'
-        can?(current_user, :admin_project, resource)
-      when 'group'
-        can?(current_user, :admin_group, resource)
-      else
-        false
-      end
+      %w(project group).include?(resource_type) && can?(current_user, :admin_resource_access_tokens, resource)
     end
 
     def create_user
@@ -53,6 +49,10 @@ module ResourceAccessTokens
       # to create a new user in the system.
 
       Users::CreateService.new(current_user, default_user_params).execute(skip_authorization: true)
+    end
+
+    def delete_failed_user(user)
+      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true)
     end
 
     def default_user_params
@@ -84,7 +84,9 @@ module ResourceAccessTokens
     end
 
     def create_personal_access_token(user)
-      PersonalAccessTokens::CreateService.new(user, personal_access_token_params).execute
+      PersonalAccessTokens::CreateService.new(
+        current_user: user, target_user: user, params: personal_access_token_params
+      ).execute
     end
 
     def personal_access_token_params
@@ -100,8 +102,12 @@ module ResourceAccessTokens
       Gitlab::Auth.resource_bot_scopes
     end
 
-    def provision_access(resource, user)
-      resource.add_maintainer(user)
+    def create_membership(resource, user)
+      resource.add_user(user, :maintainer, expires_at: params[:expires_at])
+    end
+
+    def log_event(token)
+      ::Gitlab::AppLogger.info "PROJECT ACCESS TOKEN CREATION: created_by: #{current_user.username}, project_id: #{resource.id}, token_user: #{token.user.name}, token_id: #{token.id}"
     end
 
     def error(message)
@@ -113,3 +119,5 @@ module ResourceAccessTokens
     end
   end
 end
+
+ResourceAccessTokens::CreateService.prepend_if_ee('EE::ResourceAccessTokens::CreateService')

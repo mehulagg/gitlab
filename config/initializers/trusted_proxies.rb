@@ -15,7 +15,7 @@ end
 
 gitlab_trusted_proxies = Array(Gitlab.config.gitlab.trusted_proxies).map do |proxy|
   IPAddr.new(proxy)
-rescue IPAddr::InvalidAddressError
+                         rescue IPAddr::InvalidAddressError
 end.compact
 
 Rails.application.config.action_dispatch.trusted_proxies = (
@@ -30,4 +30,4 @@ module TrustedProxyMonkeyPatch
   end
 end
 
-ActionDispatch::Request.send(:include, TrustedProxyMonkeyPatch)
+ActionDispatch::Request.include TrustedProxyMonkeyPatch

@@ -83,6 +83,7 @@ RSpec.describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_st
             y_label: 'Total Cores'
           }
         end
+
         let(:metrics_url_2) { urls.metrics_project_environment_url(project, environment, **chart_params_2) }
         let(:description) { "See [metrics dashboard](#{metrics_url}) for info. \n See [metrics dashboard](#{metrics_url_2}) for info." }
         let(:issue) { create(:issue, project: project, description: description) }
@@ -141,11 +142,11 @@ RSpec.describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_st
       {
         panel_groups: [{
           panels: [{
-            type: "line-graph",
+            type: 'area-chart',
             title: title,
-            y_label: "metric",
+            y_label: 'metric',
             metrics: [{
-              query_range: "metric * 0.5 < 1"
+              query_range: 'metric * 0.5 < 1'
             }]
           }]
         }]

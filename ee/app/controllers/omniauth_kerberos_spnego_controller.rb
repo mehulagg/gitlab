@@ -5,6 +5,8 @@ class OmniauthKerberosSpnegoController < ApplicationController
 
   skip_before_action :authenticate_user!
 
+  feature_category :authentication_and_authorization
+
   def negotiate
     if spnego_provided? && (krb_principal = spnego_credentials!(spnego_token))
       session[OmniAuth::Strategies::KerberosSpnego::SESSION_KEY] = krb_principal

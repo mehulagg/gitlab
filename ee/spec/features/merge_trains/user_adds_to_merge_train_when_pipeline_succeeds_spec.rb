@@ -18,7 +18,8 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
     project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
+
     merge_request.update_head_pipeline
 
     sign_in(user)
@@ -30,7 +31,7 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
     expect(page).to have_button('Start merge train when pipeline succeeds')
 
     within('.js-merge-train-helper-text') do
-      expect(page).to have_content("This merge request will start a merge train when pipeline ##{pipeline.id} succeeds.")
+      expect(page).to have_content("This action will start a merge train when pipeline ##{pipeline.id} succeeds.")
       expect(page).to have_link('More information',
         href: MergeRequestPresenter.new(merge_request).merge_train_when_pipeline_succeeds_docs_path)
     end

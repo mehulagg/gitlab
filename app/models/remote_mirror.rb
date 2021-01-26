@@ -210,6 +210,10 @@ class RemoteMirror < ApplicationRecord
     super(usernames_whitelist: %w[git])
   end
 
+  def bare_url
+    Gitlab::UrlSanitizer.new(read_attribute(:url)).full_url
+  end
+
   def ensure_remote!
     return unless project
     return unless remote_name && remote_url
@@ -304,7 +308,7 @@ class RemoteMirror < ApplicationRecord
   end
 
   def mirror_url_changed?
-    url_changed? || credentials_changed?
+    url_changed? || attribute_changed?(:credentials)
   end
 
   def saved_change_to_mirror_url?

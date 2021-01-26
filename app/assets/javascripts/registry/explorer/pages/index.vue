@@ -1,11 +1,5 @@
-<script>
-export default {};
-</script>
-
 <template>
   <div>
-    <transition name="slide">
-      <router-view ref="router-view" />
-    </transition>
+    <router-view ref="router-view" />
   </div>
 </template>

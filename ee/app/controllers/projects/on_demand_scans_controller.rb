@@ -3,17 +3,32 @@
 module Projects
   class OnDemandScansController < Projects::ApplicationController
     before_action do
-      authorize_read_on_demand_scans!
-      push_frontend_feature_flag(:security_on_demand_scans_site_profiles_feature_flag, project)
+      push_frontend_feature_flag(:security_on_demand_scans_site_validation, @project, default_enabled: :yaml)
+      push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)
+      push_frontend_feature_flag(:dast_saved_scans, @project, default_enabled: :yaml)
     end
+
+    before_action :authorize_read_on_demand_scans!, only: :index
+    before_action :authorize_create_on_demand_dast_scan!, only: [:new, :edit]
+
+    feature_category :dynamic_application_security_testing
 
     def index
     end
 
-    private
+    def new
+      not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
+    end
 
-    def authorize_read_on_demand_scans!
-      access_denied! unless can?(current_user, :read_on_demand_scans, project)
+    def edit
+      not_found unless Feature.enabled?(:dast_saved_scans, @project, default_enabled: :yaml)
+      @dast_scan = {
+        id: 1,
+        name: "My saved DAST scan",
+        description: "My scan's description",
+        scannerProfileId: "gid://gitlab/DastScannerProfile/5",
+        siteProfileId: "gid://gitlab/DastSiteProfile/15"
+      }
     end
   end
 end

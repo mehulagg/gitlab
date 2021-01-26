@@ -3,9 +3,18 @@ require_relative '../object_store_settings'
 require_relative '../smime_signature_settings'
 
 # Default settings
+Settings['shared'] ||= Settingslogic.new({})
+Settings.shared['path'] = Settings.absolute(Settings.shared['path'] || "shared")
+
+Settings['encrypted_settings'] ||= Settingslogic.new({})
+Settings.encrypted_settings['path'] ||= File.join(Settings.shared['path'], "encrypted_settings")
+Settings.encrypted_settings['path'] = Settings.absolute(Settings.encrypted_settings['path'])
+
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
+Settings.ldap['servers'] ||= Settingslogic.new({})
 Settings.ldap['prevent_ldap_sign_in'] = false if Settings.ldap['prevent_ldap_sign_in'].blank?
+Settings.ldap['secret_file'] = Settings.absolute(Settings.ldap['secret_file'] || File.join(Settings.encrypted_settings['path'], "ldap.yaml.enc"))
 
 Gitlab.ee do
   Settings.ldap['sync_time'] = 3600 if Settings.ldap['sync_time'].nil?
@@ -83,6 +92,7 @@ Settings.omniauth['external_providers'] = [] if Settings.omniauth['external_prov
 Settings.omniauth['block_auto_created_users'] = true if Settings.omniauth['block_auto_created_users'].nil?
 Settings.omniauth['auto_link_ldap_user'] = false if Settings.omniauth['auto_link_ldap_user'].nil?
 Settings.omniauth['auto_link_saml_user'] = false if Settings.omniauth['auto_link_saml_user'].nil?
+Settings.omniauth['auto_link_user'] = false if Settings.omniauth['auto_link_user'].nil?
 
 Settings.omniauth['sync_profile_from_provider'] = false if Settings.omniauth['sync_profile_from_provider'].nil?
 Settings.omniauth['sync_profile_attributes'] = ['email'] if Settings.omniauth['sync_profile_attributes'].nil?
@@ -139,9 +149,6 @@ if Gitlab.ee? && Rails.env.test? && !saml_provider_enabled
   Settings.omniauth.providers << Settingslogic.new({ 'name' => 'group_saml' })
 end
 
-Settings['shared'] ||= Settingslogic.new({})
-Settings.shared['path'] = Settings.absolute(Settings.shared['path'] || "shared")
-
 Settings['issues_tracker'] ||= {}
 
 #
@@ -175,8 +182,8 @@ Settings.gitlab['user'] ||= 'git'
 Settings.gitlab['ssh_user'] ||= Settings.gitlab.user
 Settings.gitlab['user_home'] ||= begin
   Etc.getpwnam(Settings.gitlab['user']).dir
-rescue ArgumentError # no user configured
-  '/home/' + Settings.gitlab['user']
+                                 rescue ArgumentError # no user configured
+                                   '/home/' + Settings.gitlab['user']
 end
 Settings.gitlab['time_zone'] ||= nil
 Settings.gitlab['signup_enabled'] ||= true if Settings.gitlab['signup_enabled'].nil?
@@ -197,7 +204,7 @@ Settings.gitlab.default_projects_features['snippets']           = true if Settin
 Settings.gitlab.default_projects_features['builds']             = true if Settings.gitlab.default_projects_features['builds'].nil?
 Settings.gitlab.default_projects_features['container_registry'] = true if Settings.gitlab.default_projects_features['container_registry'].nil?
 Settings.gitlab.default_projects_features['visibility_level']   = Settings.__send__(:verify_constant, Gitlab::VisibilityLevel, Settings.gitlab.default_projects_features['visibility_level'], Gitlab::VisibilityLevel::PRIVATE)
-Settings.gitlab['domain_whitelist'] ||= []
+Settings.gitlab['domain_allowlist'] ||= []
 Settings.gitlab['import_sources'] ||= Gitlab::ImportSources.values
 Settings.gitlab['trusted_proxies'] ||= []
 Settings.gitlab['content_security_policy'] ||= Gitlab::ContentSecurityPolicy::ConfigLoader.default_settings_hash
@@ -296,6 +303,10 @@ Settings.pages['external_http'] ||= false unless Settings.pages['external_http']
 Settings.pages['external_https'] ||= false unless Settings.pages['external_https'].present?
 Settings.pages['artifacts_server'] ||= Settings.pages['enabled'] if Settings.pages['artifacts_server'].nil?
 Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
+# We want pages zip archives to be stored on the same directory as old pages hierarchical structure
+# this will allow us to easier migrate existing instances with NFS
+Settings.pages['storage_path']      = Settings.pages['path']
+Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
 # Geo
@@ -349,25 +360,24 @@ Settings.uploads['object_store']['remote_directory'] ||= 'uploads'
 # Packages
 #
 Settings['packages'] ||= Settingslogic.new({})
-Settings.packages['enabled']      = true if Settings.packages['enabled'].nil?
-Settings.packages['storage_path'] = Settings.absolute(Settings.packages['storage_path'] || File.join(Settings.shared['path'], "packages"))
-Settings.packages['object_store'] = ObjectStoreSettings.legacy_parse(Settings.packages['object_store'])
+Settings.packages['enabled']       = true if Settings.packages['enabled'].nil?
+Settings.packages['dpkg_deb_path'] = '/usr/bin/dpkg-deb' if Settings.packages['dpkg_deb_path'].nil?
+Settings.packages['storage_path']  = Settings.absolute(Settings.packages['storage_path'] || File.join(Settings.shared['path'], "packages"))
+Settings.packages['object_store']  = ObjectStoreSettings.legacy_parse(Settings.packages['object_store'])
 
 #
 # Dependency Proxy
 #
-Gitlab.ee do
-  Settings['dependency_proxy'] ||= Settingslogic.new({})
-  Settings.dependency_proxy['enabled']      = true if Settings.dependency_proxy['enabled'].nil?
-  Settings.dependency_proxy['storage_path'] = Settings.absolute(Settings.dependency_proxy['storage_path'] || File.join(Settings.shared['path'], "dependency_proxy"))
-  Settings.dependency_proxy['object_store'] = ObjectStoreSettings.legacy_parse(Settings.dependency_proxy['object_store'])
+Settings['dependency_proxy'] ||= Settingslogic.new({})
+Settings.dependency_proxy['enabled']      = true if Settings.dependency_proxy['enabled'].nil?
+Settings.dependency_proxy['storage_path'] = Settings.absolute(Settings.dependency_proxy['storage_path'] || File.join(Settings.shared['path'], "dependency_proxy"))
+Settings.dependency_proxy['object_store'] = ObjectStoreSettings.legacy_parse(Settings.dependency_proxy['object_store'])
 
-  # For first iteration dependency proxy uses Rails server to download blobs.
-  # To ensure acceptable performance we only allow feature to be used with
-  # multithreaded web-server Puma. This will be removed once download logic is moved
-  # to GitLab workhorse
-  Settings.dependency_proxy['enabled'] = false unless Gitlab::Runtime.puma?
-end
+# For first iteration dependency proxy uses Rails server to download blobs.
+# To ensure acceptable performance we only allow feature to be used with
+# multithreaded web-server Puma. This will be removed once download logic is moved
+# to GitLab workhorse
+Settings.dependency_proxy['enabled'] = false unless Gitlab::Runtime.puma?
 
 #
 # Terraform state
@@ -409,8 +419,14 @@ Settings.cron_jobs['pipeline_schedule_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['pipeline_schedule_worker']['cron'] ||= '19 * * * *'
 Settings.cron_jobs['pipeline_schedule_worker']['job_class'] = 'PipelineScheduleWorker'
 Settings.cron_jobs['expire_build_artifacts_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['expire_build_artifacts_worker']['cron'] ||= '50 * * * *'
+Settings.cron_jobs['expire_build_artifacts_worker']['cron'] ||= '*/7 * * * *'
 Settings.cron_jobs['expire_build_artifacts_worker']['job_class'] = 'ExpireBuildArtifactsWorker'
+Settings.cron_jobs['ci_pipelines_expire_artifacts_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_pipelines_expire_artifacts_worker']['cron'] ||= '*/23 * * * *'
+Settings.cron_jobs['ci_pipelines_expire_artifacts_worker']['job_class'] = 'Ci::PipelineArtifacts::ExpireArtifactsWorker'
+Settings.cron_jobs['ci_schedule_delete_objects_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_schedule_delete_objects_worker']['cron'] ||= '*/16 * * * *'
+Settings.cron_jobs['ci_schedule_delete_objects_worker']['job_class'] = 'Ci::ScheduleDeleteObjectsCronWorker'
 Settings.cron_jobs['environments_auto_stop_cron_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['environments_auto_stop_cron_worker']['cron'] ||= '24 * * * *'
 Settings.cron_jobs['environments_auto_stop_cron_worker']['job_class'] = 'Environments::AutoStopCronWorker'
@@ -444,6 +460,9 @@ Settings.cron_jobs['remove_expired_members_worker']['job_class'] = 'RemoveExpire
 Settings.cron_jobs['remove_expired_group_links_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['remove_expired_group_links_worker']['cron'] ||= '10 0 * * *'
 Settings.cron_jobs['remove_expired_group_links_worker']['job_class'] = 'RemoveExpiredGroupLinksWorker'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['cron'] ||= '10 15 * * *'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['job_class'] = 'RemoveUnacceptedMemberInvitesWorker'
 Settings.cron_jobs['prune_old_events_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['prune_old_events_worker']['cron'] ||= '0 */6 * * *'
 Settings.cron_jobs['prune_old_events_worker']['job_class'] = 'PruneOldEventsWorker'
@@ -510,8 +529,29 @@ Settings.cron_jobs['update_container_registry_info_worker']['job_class'] = 'Upda
 Settings.cron_jobs['postgres_dynamic_partitions_creator'] ||= Settingslogic.new({})
 Settings.cron_jobs['postgres_dynamic_partitions_creator']['cron'] ||= '21 */6 * * *'
 Settings.cron_jobs['postgres_dynamic_partitions_creator']['job_class'] ||= 'PartitionCreationWorker'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['cron'] ||= '47 9 * * *'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['job_class'] = 'CiPlatformMetricsUpdateCronWorker'
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['job_class'] ||= 'Analytics::InstanceStatistics::CountJobTriggerWorker'
+Settings.cron_jobs['member_invitation_reminder_emails_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['cron'] ||= '0 0 * * *'
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'MemberInvitationReminderEmailsWorker'
+Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker']['cron'] ||= '* * * * *'
+Settings.cron_jobs['schedule_merge_request_cleanup_refs_worker']['job_class'] = 'ScheduleMergeRequestCleanupRefsWorker'
+Settings.cron_jobs['manage_evidence_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['manage_evidence_worker']['cron'] ||= '0 * * * *'
+Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvidenceWorker'
 
 Gitlab.ee do
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * *'
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['job_class'] = 'Analytics::DevopsAdoption::CreateAllSnapshotsWorker'
+  Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
+  Settings.cron_jobs['active_user_count_threshold_worker']['job_class'] = 'ActiveUserCountThresholdWorker'
   Settings.cron_jobs['adjourned_group_deletion_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['adjourned_group_deletion_worker']['cron'] ||= '0 3 * * *'
   Settings.cron_jobs['adjourned_group_deletion_worker']['job_class'] = 'AdjournedGroupDeletionWorker'
@@ -521,6 +561,9 @@ Gitlab.ee do
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['cron'] ||= '0 4 * * *'
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['job_class'] = 'AdjournedProjectsDeletionCronWorker'
+  Settings.cron_jobs['geo_verification_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['geo_verification_cron_worker']['cron'] ||= '* * * * *'
+  Settings.cron_jobs['geo_verification_cron_worker']['job_class'] ||= 'Geo::VerificationCronWorker'
   Settings.cron_jobs['geo_file_download_dispatch_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['geo_file_download_dispatch_worker']['cron'] ||= '*/1 * * * *'
   Settings.cron_jobs['geo_file_download_dispatch_worker']['job_class'] ||= 'Geo::FileDownloadDispatchWorker'
@@ -551,6 +594,9 @@ Gitlab.ee do
   Settings.cron_jobs['historical_data_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['historical_data_worker']['cron'] ||= '0 12 * * *'
   Settings.cron_jobs['historical_data_worker']['job_class'] = 'HistoricalDataWorker'
+  Settings.cron_jobs['incident_sla_exceeded_check_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['incident_sla_exceeded_check_worker']['cron'] ||= '*/2 * * * *'
+  Settings.cron_jobs['incident_sla_exceeded_check_worker']['job_class'] = 'IncidentManagement::IncidentSlaExceededCheckWorker'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'
@@ -575,6 +621,12 @@ Gitlab.ee do
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker']['cron'] ||= '*/10 * * * *'
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker']['job_class'] ||= 'ElasticClusterReindexingCronWorker'
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker']['cron'] ||= '10 3 * * *'
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker']['job_class'] ||= 'ElasticRemoveExpiredNamespaceSubscriptionsFromIndexCronWorker'
+  Settings.cron_jobs['elastic_migration_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['elastic_migration_worker']['cron'] ||= '*/30 * * * *'
+  Settings.cron_jobs['elastic_migration_worker']['job_class'] ||= 'Elastic::MigrationWorker'
   Settings.cron_jobs['sync_seat_link_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['sync_seat_link_worker']['cron'] ||= "#{rand(60)} 0 * * *"
   Settings.cron_jobs['sync_seat_link_worker']['job_class'] = 'SyncSeatLinkWorker'
@@ -629,6 +681,12 @@ ObjectStoreSettings.new(Settings).parse!
 #
 Settings['workhorse'] ||= Settingslogic.new({})
 Settings.workhorse['secret_file'] ||= Rails.root.join('.gitlab_workhorse_secret')
+
+#
+# GitLab KAS
+#
+Settings['gitlab_kas'] ||= Settingslogic.new({})
+Settings.gitlab_kas['secret_file'] ||= Rails.root.join('.gitlab_kas_secret')
 
 #
 # Repositories
@@ -708,6 +766,7 @@ Gitlab.ee do
   Settings['kerberos'] ||= Settingslogic.new({})
   Settings.kerberos['enabled'] = false if Settings.kerberos['enabled'].nil?
   Settings.kerberos['keytab'] = nil if Settings.kerberos['keytab'].blank? # nil means use default keytab
+  Settings.kerberos['simple_ldap_linking_allowed_realms'] = [] if Settings.kerberos['simple_ldap_linking_allowed_realms'].blank?
   Settings.kerberos['service_principal_name'] = nil if Settings.kerberos['service_principal_name'].blank? # nil means any SPN in keytab
   Settings.kerberos['use_dedicated_port'] = false if Settings.kerberos['use_dedicated_port'].nil?
   Settings.kerberos['https'] = Settings.gitlab.https if Settings.kerberos['https'].nil?
@@ -731,9 +790,24 @@ Gitlab.ee do
 end
 
 #
+# FortiAuthenticator
+#
+Settings['forti_authenticator'] ||= Settingslogic.new({})
+Settings.forti_authenticator['enabled'] = false if Settings.forti_authenticator['enabled'].nil?
+Settings.forti_authenticator['port'] = 443 if Settings.forti_authenticator['port'].to_i == 0
+
+#
+# FortiToken Cloud
+#
+Settings['forti_token_cloud'] ||= Settingslogic.new({})
+Settings.forti_token_cloud['enabled'] = false if Settings.forti_token_cloud['enabled'].nil?
+
+#
 # Extra customization
 #
 Settings['extra'] ||= Settingslogic.new({})
+Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
+Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
 
 #
 # Rack::Attack settings
@@ -755,10 +829,15 @@ Settings['gitaly'] ||= Settingslogic.new({})
 # Webpack settings
 #
 Settings['webpack'] ||= Settingslogic.new({})
+Settings.webpack['config_file'] ||= 'config/webpack.config.js'
+Settings.webpack['output_dir']  ||= 'public/assets/webpack'
+Settings.webpack['public_path'] ||= 'assets/webpack'
+Settings.webpack['manifest_filename'] ||= 'manifest.json'
 Settings.webpack['dev_server'] ||= Settingslogic.new({})
 Settings.webpack.dev_server['enabled'] ||= false
 Settings.webpack.dev_server['host']    ||= 'localhost'
 Settings.webpack.dev_server['port']    ||= 3808
+Settings.webpack.dev_server['https']   ||= false
 
 #
 # Monitoring settings
@@ -768,12 +847,25 @@ Settings.monitoring['ip_whitelist'] ||= ['127.0.0.1/8']
 Settings.monitoring['unicorn_sampler_interval'] ||= 10
 Settings.monitoring['sidekiq_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.sidekiq_exporter['enabled'] ||= false
+Settings.monitoring.sidekiq_exporter['log_enabled'] ||= false
 Settings.monitoring.sidekiq_exporter['address'] ||= 'localhost'
 Settings.monitoring.sidekiq_exporter['port'] ||= 8082
 Settings.monitoring['web_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.web_exporter['enabled'] ||= false
 Settings.monitoring.web_exporter['address'] ||= 'localhost'
 Settings.monitoring.web_exporter['port'] ||= 8083
+
+#
+# Prometheus settings
+#
+Settings['prometheus'] ||= Settingslogic.new({})
+# TODO: Remove listen_address and enable in GitLab 14.0 and set default value
+# of server_address to be nil and enabled to be false -
+# https://gitlab.com/gitlab-org/gitlab/-/issues/296022
+Settings.prometheus['enable'] ||= false
+Settings.prometheus['listen_address'] ||= nil
+Settings.prometheus['enabled'] = Settings.prometheus['enable'] if Settings.prometheus['enabled'].nil?
+Settings.prometheus['server_address'] ||= Settings.prometheus['listen_address']
 
 #
 # Shutdown settings

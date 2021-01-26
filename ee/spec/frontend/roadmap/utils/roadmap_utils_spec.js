@@ -1,3 +1,4 @@
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import {
   getTimeframeForQuartersView,
   extendTimeframeForQuartersView,
@@ -7,12 +8,8 @@ import {
   extendTimeframeForWeeksView,
   extendTimeframeForAvailableWidth,
   getEpicsTimeframeRange,
-  getEpicsPathForPreset,
-  assignDates,
   sortEpics,
 } from 'ee/roadmap/utils/roadmap_utils';
-
-import { PRESET_TYPES } from 'ee/roadmap/constants';
 
 import {
   mockTimeframeInitialDate,
@@ -345,79 +342,18 @@ describe('getEpicsTimeframeRange', () => {
   });
 });
 
-describe('getEpicsPathForPreset', () => {
-  const basePath = '/groups/gitlab-org/-/epics.json';
-  const filterQueryString = 'scope=all&utf8=✓&state=opened&label_name[]=Bug';
-
-  it('returns epics path string based on provided basePath and timeframe for Quarters', () => {
-    const timeframeQuarters = getTimeframeForQuartersView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeQuarters,
-      presetType: PRESET_TYPES.QUARTERS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-7-1&end_date=2019-3-31`);
-  });
-
-  it('returns epics path string based on provided basePath and timeframe for Months', () => {
-    const timeframeMonths = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeMonths,
-      presetType: PRESET_TYPES.MONTHS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-11-1&end_date=2018-6-30`);
-  });
-
-  it('returns epics path string based on provided basePath and timeframe for Weeks', () => {
-    const timeframeWeeks = getTimeframeForWeeksView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      timeframe: timeframeWeeks,
-      presetType: PRESET_TYPES.WEEKS,
-    });
-
-    expect(epicsPath).toBe(`${basePath}?state=all&start_date=2017-12-17&end_date=2018-2-3`);
-  });
-
-  it('returns epics path string while preserving filterQueryString', () => {
-    const timeframeMonths = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      basePath,
-      filterQueryString,
-      timeframe: timeframeMonths,
-      presetType: PRESET_TYPES.MONTHS,
-    });
-
-    expect(epicsPath).toBe(
-      `${basePath}?state=all&start_date=2017-11-1&end_date=2018-6-30&scope=all&utf8=✓&state=opened&label_name[]=Bug`,
-    );
-  });
-
-  it('returns epics path string containing epicsState', () => {
-    const epicsState = 'opened';
-    const timeframe = getTimeframeForMonthsView(new Date(2018, 0, 1));
-    const epicsPath = getEpicsPathForPreset({
-      presetType: PRESET_TYPES.MONTHS,
-      basePath,
-      timeframe,
-      epicsState,
-    });
-
-    expect(epicsPath).toContain(`state=${epicsState}`);
-  });
-});
-
 describe('sortEpics', () => {
   it('sorts epics list by startDate in ascending order when `sortedBy` param is `start_date_asc`', () => {
     const epics = mockUnsortedEpics.slice();
     const sortedOrder = [
-      new Date(2014, 3, 17),
-      new Date(2015, 5, 8),
-      new Date(2017, 2, 12),
-      new Date(2019, 4, 12),
+      'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
+      'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
+      'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
+      'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+      'Mar 17 2014 ~ Aug 15 2015',
+      'Jun 08 2015 ~ Apr 01 2016',
+      'Mar 12 2017 ~ Aug 20 2017',
+      'Apr 12 2019 ~ Aug 30 2019',
     ];
 
     sortEpics(epics, 'start_date_asc');
@@ -425,17 +361,21 @@ describe('sortEpics', () => {
     expect(epics).toHaveLength(mockUnsortedEpics.length);
 
     epics.forEach((epic, index) => {
-      expect(epic.startDate.getTime()).toBe(sortedOrder[index].getTime());
+      expect(epic.title).toEqual(sortedOrder[index]);
     });
   });
 
   it('sorts epics list by startDate in descending order when `sortedBy` param is `start_date_desc`', () => {
     const epics = mockUnsortedEpics.slice();
     const sortedOrder = [
-      new Date(2019, 4, 12),
-      new Date(2017, 2, 12),
-      new Date(2015, 5, 8),
-      new Date(2014, 3, 17),
+      'Apr 12 2019 ~ Aug 30 2019',
+      'Mar 12 2017 ~ Aug 20 2017',
+      'Jun 08 2015 ~ Apr 01 2016',
+      'Mar 17 2014 ~ Aug 15 2015',
+      'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+      'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
+      'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
+      'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
     ];
 
     sortEpics(epics, 'start_date_desc');
@@ -443,17 +383,21 @@ describe('sortEpics', () => {
     expect(epics).toHaveLength(mockUnsortedEpics.length);
 
     epics.forEach((epic, index) => {
-      expect(epic.startDate.getTime()).toBe(sortedOrder[index].getTime());
+      expect(epic.title).toEqual(sortedOrder[index]);
     });
   });
 
   it('sorts epics list by endDate in ascending order when `sortedBy` param is `end_date_asc`', () => {
     const epics = mockUnsortedEpics.slice();
     const sortedOrder = [
-      new Date(2015, 7, 15),
-      new Date(2016, 3, 1),
-      new Date(2017, 7, 20),
-      new Date(2019, 7, 30),
+      'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
+      'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+      'Mar 17 2014 ~ Aug 15 2015',
+      'Jun 08 2015 ~ Apr 01 2016',
+      'Mar 12 2017 ~ Aug 20 2017',
+      'Apr 12 2019 ~ Aug 30 2019',
+      'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
+      'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
     ];
 
     sortEpics(epics, 'end_date_asc');
@@ -461,17 +405,21 @@ describe('sortEpics', () => {
     expect(epics).toHaveLength(mockUnsortedEpics.length);
 
     epics.forEach((epic, index) => {
-      expect(epic.endDate.getTime()).toBe(sortedOrder[index].getTime());
+      expect(epic.title).toEqual(sortedOrder[index]);
     });
   });
 
   it('sorts epics list by endDate in descending order when `sortedBy` param is `end_date_desc`', () => {
     const epics = mockUnsortedEpics.slice();
     const sortedOrder = [
-      new Date(2019, 7, 30),
-      new Date(2017, 7, 20),
-      new Date(2016, 3, 1),
-      new Date(2015, 7, 15),
+      'Mar 01 2013 ~ Dec 01 2013; no fixed due date',
+      'Jan 01 2020 ~ Dec 01 2020; no fixed start date',
+      'Apr 12 2019 ~ Aug 30 2019',
+      'Mar 12 2017 ~ Aug 20 2017',
+      'Jun 08 2015 ~ Apr 01 2016',
+      'Mar 17 2014 ~ Aug 15 2015',
+      'Oct 01 2013 ~ Nov 01 2013; actual due date is Nov 1 2014',
+      'Nov 10 2013 ~ Jun 01 2014; actual start date is Feb 1 2013',
     ];
 
     sortEpics(epics, 'end_date_desc');
@@ -479,118 +427,7 @@ describe('sortEpics', () => {
     expect(epics).toHaveLength(mockUnsortedEpics.length);
 
     epics.forEach((epic, index) => {
-      expect(epic.endDate.getTime()).toBe(sortedOrder[index].getTime());
+      expect(epic.title).toEqual(sortedOrder[index]);
     });
-  });
-});
-
-describe('assignDates', () => {
-  const startDateProps = {
-    dateUndefined: 'startDateUndefined',
-    outOfRange: 'startDateOutOfRange',
-    originalDate: 'originalStartDate',
-    date: 'startDate',
-    proxyDate: new Date('1900'),
-  };
-  const endDateProps = {
-    dateUndefined: 'endDateUndefined',
-    outOfRange: 'endDateOutOfRange',
-    originalDate: 'originalEndDate',
-    date: 'endDate',
-    proxyDate: new Date('2200'),
-  };
-
-  it('returns proxyDate if startDate is undefined', () => {
-    const epic1 = { startDateUndefined: true };
-    const epic2 = { startDateUndefined: false };
-
-    let [aDate, bDate] = assignDates(epic1, epic2, startDateProps);
-
-    expect(aDate).toEqual(startDateProps.proxyDate);
-    expect(bDate).not.toEqual(startDateProps.proxyDate);
-
-    epic1.startDateUndefined = false;
-    epic2.startDateUndefined = true;
-    [aDate, bDate] = assignDates(epic1, epic2, startDateProps);
-
-    expect(aDate).not.toEqual(startDateProps.proxyDate);
-    expect(bDate).toEqual(startDateProps.proxyDate);
-  });
-
-  it('returns proxyDate if endDate is undefined', () => {
-    const epic1 = { endDateUndefined: true };
-    const epic2 = { endDateUndefined: false };
-
-    let [aDate, bDate] = assignDates(epic1, epic2, endDateProps);
-
-    expect(aDate).toEqual(endDateProps.proxyDate);
-    expect(bDate).not.toEqual(endDateProps.proxyDate);
-
-    epic1.endDateUndefined = false;
-    epic2.endDateUndefined = true;
-    [aDate, bDate] = assignDates(epic1, epic2, endDateProps);
-
-    expect(aDate).not.toEqual(endDateProps.proxyDate);
-    expect(bDate).toEqual(endDateProps.proxyDate);
-  });
-
-  it('assigns originalStartDate if date is out of range', () => {
-    const epic1 = {
-      startDateUndefined: false,
-      originalStartDate: new Date('2000'),
-      startDate: new Date('2010'),
-      startDateOutOfRange: true,
-    };
-    const epic2 = { ...epic1, originalStartDate: new Date('2005') };
-
-    const [aDate, bDate] = assignDates(epic1, epic2, startDateProps);
-
-    expect(aDate).toEqual(epic1.originalStartDate);
-    expect(bDate).toEqual(epic2.originalStartDate);
-  });
-
-  it('assigns originalEndDate if date is out of range', () => {
-    const epic1 = {
-      endDateUndefined: false,
-      originalEndDate: new Date('2000'),
-      endDate: new Date('2010'),
-      endDateOutOfRange: true,
-    };
-    const epic2 = { ...epic1, originalEndDate: new Date('2005') };
-
-    const [aDate, bDate] = assignDates(epic1, epic2, endDateProps);
-
-    expect(aDate).toEqual(epic1.originalEndDate);
-    expect(bDate).toEqual(epic2.originalEndDate);
-  });
-
-  it('assigns startDate if date is in the range', () => {
-    const epic1 = {
-      startDateUndefined: false,
-      originalStartDate: new Date('2000'),
-      startDate: new Date('2010'),
-      startDateOutOfRange: false,
-    };
-    const epic2 = { ...epic1, startDate: new Date('2005') };
-
-    const [aDate, bDate] = assignDates(epic1, epic2, startDateProps);
-
-    expect(aDate).toEqual(epic1.startDate);
-    expect(bDate).toEqual(epic2.startDate);
-  });
-
-  it('assigns endDate if date is in the range', () => {
-    const epic1 = {
-      endDateUndefined: false,
-      originalEndDate: new Date('2000'),
-      endDate: new Date('2010'),
-      endDateOutOfRange: false,
-    };
-    const epic2 = { ...epic1, endDate: new Date('2005') };
-
-    const [aDate, bDate] = assignDates(epic1, epic2, endDateProps);
-
-    expect(aDate).toEqual(epic1.endDate);
-    expect(bDate).toEqual(epic2.endDate);
   });
 });

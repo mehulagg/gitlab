@@ -1,5 +1,5 @@
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { FETCH_ERROR_MESSAGE } from './constants';
 import { isValidResponse } from './utils';
 import * as types from './mutation_types';
@@ -41,14 +41,14 @@ export const fetchDependencies = ({ state, dispatch }, params = {}) => {
         ...params,
       },
     })
-    .then(response => {
+    .then((response) => {
       if (isValidResponse(response)) {
         dispatch('receiveDependenciesSuccess', response);
       } else {
         throw new Error(__('Invalid server response'));
       }
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDependenciesError', error);
       createFlash(FETCH_ERROR_MESSAGE);
     });

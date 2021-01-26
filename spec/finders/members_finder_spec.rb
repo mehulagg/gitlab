@@ -45,6 +45,18 @@ RSpec.describe MembersFinder, '#execute' do
     expect(result).to contain_exactly(member1)
   end
 
+  it 'does not return members of parent group with minimal access' do
+    nested_group.request_access(user1)
+    member1 = group.add_maintainer(user2)
+    member2 = nested_group.add_maintainer(user3)
+    member3 = project.add_maintainer(user4)
+    create(:group_member, :minimal_access, user: create(:user), source: group)
+
+    result = described_class.new(project, user2).execute
+
+    expect(result).to contain_exactly(member1, member2, member3)
+  end
+
   it 'includes only non-invite members if user do not have amdin permissions on project' do
     create(:project_member, :invited, project: project, invite_email: create(:user).email)
     member1 = project.add_maintainer(user1)
@@ -148,8 +160,8 @@ RSpec.describe MembersFinder, '#execute' do
     expect(result).to eq([member3, member2, member1])
   end
 
-  context 'when include_invited_groups_members == true' do
-    subject { described_class.new(project, user2).execute(include_relations: [:inherited, :direct, :invited_groups_members]) }
+  context 'when :invited_groups is passed' do
+    subject { described_class.new(project, user2).execute(include_relations: [:inherited, :direct, :invited_groups]) }
 
     let_it_be(:linked_group) { create(:group, :public) }
     let_it_be(:nested_linked_group) { create(:group, parent: linked_group) }

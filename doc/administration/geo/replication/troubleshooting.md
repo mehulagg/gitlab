@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -14,7 +14,6 @@ Here is a list of steps you should take to attempt to fix problem:
 
 - Perform [basic troubleshooting](#basic-troubleshooting).
 - Fix any [replication errors](#fixing-replication-errors).
-- Fix any [Foreign Data Wrapper](#fixing-foreign-data-wrapper-errors) errors.
 - Fix any [common](#fixing-common-errors) errors.
 
 ## Basic troubleshooting
@@ -36,7 +35,7 @@ to help identify if something is wrong:
 - Is the node's secondary tracking database connected?
 - Is the node's secondary tracking database up-to-date?
 
-![Geo health check](img/geo_node_healthcheck.png)
+![Geo health check](img/geo_node_dashboard.png)
 
 For information on how to resolve common errors reported from the UI, see
 [Fixing Common Errors](#fixing-common-errors).
@@ -64,8 +63,6 @@ This machine's Geo node name matches a database record ... yes, found a secondar
 GitLab Geo secondary database is correctly configured ... yes
 Database replication enabled? ... yes
 Database replication working? ... yes
-GitLab Geo tracking database is configured to use Foreign Data Wrapper? ... yes
-GitLab Geo tracking database Foreign Data Wrapper schema is up-to-date? ... yes
 GitLab Geo HTTP(S) connectivity ...
 * Can connect to the primary node ... yes
 HTTP/HTTPS repository cloning is enabled ... yes
@@ -254,8 +251,7 @@ sudo gitlab-rake gitlab:geo:check
 
    When performing a PostgreSQL major version (9 > 10) update this is expected. Follow:
 
-   - [initiate-the-replication-process](database.md#step-3-initiate-the-replication-process)
-   - [Geo database has an outdated FDW remote schema](troubleshooting.md#geo-database-has-an-outdated-fdw-remote-schema-error)
+   - [initiate-the-replication-process](../setup/database.md#step-3-initiate-the-replication-process)
 
 ## Fixing replication errors
 
@@ -272,7 +268,7 @@ default to 1. You may need to increase this value if you have more
 
 Be sure to restart PostgreSQL for this to take
 effect. See the [PostgreSQL replication
-setup](database.md#postgresql-replication) guide for more details.
+setup](../setup/database.md#postgresql-replication) guide for more details.
 
 ### Message: `FATAL:  could not start WAL streaming: ERROR:  replication slot "geo_secondary_my_domain_com" does not exist`?
 
@@ -280,11 +276,11 @@ This occurs when PostgreSQL does not have a replication slot for the
 **secondary** node by that name.
 
 You may want to rerun the [replication
-process](database.md) on the **secondary** node .
+process](../setup/database.md) on the **secondary** node .
 
 ### Message: "Command exceeded allowed execution time" when setting up replication?
 
-This may happen while [initiating the replication process](database.md#step-3-initiate-the-replication-process) on the **secondary** node,
+This may happen while [initiating the replication process](../setup/database.md#step-3-initiate-the-replication-process) on the **secondary** node,
 and indicates that your initial dataset is too large to be replicated in the default timeout (30 minutes).
 
 Re-run `gitlab-ctl replicate-geo-database`, but include a larger value for
@@ -312,7 +308,8 @@ log data to build up in `pg_xlog`. Removing the unused slots can reduce the amou
    sudo gitlab-psql
    ```
 
-   Note: **Note:** Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
+   NOTE:
+   Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
 
 1. View your replication slots with:
 
@@ -390,6 +387,15 @@ This happens when you have added IP addresses without a subnet mask in `postgres
 To fix this, add the subnet mask in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
 to respect the CIDR format (i.e. `1.2.3.4/32`).
 
+### Message: `Found data in the gitlabhq_production database!` when running `gitlab-ctl replicate-geo-database`
+
+This happens if data is detected in the `projects` table. When one or more projects are detected, the operation
+is aborted to prevent accidental data loss. To bypass this message, pass the `--force` option to the command.
+
+In GitLab 13.4, a seed project is added when GitLab is first installed. This makes it necessary to pass `--force` even
+on a new Geo secondary node. There is an [issue to account for seed projects](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5618)
+when checking the database.
+
 ### Very large repositories never successfully synchronize on the **secondary** node
 
 GitLab places a timeout on all repository clones, including project imports
@@ -419,6 +425,11 @@ GitLab you are running. GitLab versions 11.11.x or 12.0.x are affected by
 [a bug that results in new LFS objects not being replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 
 To resolve the issue, upgrade to GitLab 12.1 or newer.
+
+### Failures during backfill
+
+During a [backfill](../index.md#backfill), failures are scheduled to be retried at the end
+of the backfill queue, therefore these failures only clear up **after** the backfill completes.
 
 ### Resetting Geo **secondary** node replication
 
@@ -456,13 +467,13 @@ to start again from scratch, there are a few steps that can help you:
    chown git:git /var/opt/gitlab/git-data/repositories
    ```
 
-   TIP: **Tip:**
+   NOTE:
    You may want to remove the `/var/opt/gitlab/git-data/repositories.old` in the future
    as soon as you confirmed that you don't need it anymore, to save disk space.
 
 1. _(Optional)_ Rename other data folders and create new ones
 
-   CAUTION: **Caution:**
+   WARNING:
    You may still have files on the **secondary** node that have been removed from **primary** node but
    removal have not been reflected. If you skip this step, they will never be removed
    from this Geo node.
@@ -487,8 +498,8 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl start geo-postgresql
    ```
 
-   Reconfigure in order to recreate the folders and make sure permissions and ownership
-   are correctly
+   Reconfigure to recreate the folders and make sure permissions and ownership
+   are correct:
 
    ```shell
    gitlab-ctl reconfigure
@@ -506,12 +517,6 @@ to start again from scratch, there are a few steps that can help you:
 
    ```shell
    gitlab-ctl start
-   ```
-
-1. Refresh Foreign Data Wrapper tables
-
-   ```shell
-   gitlab-rake geo:db:refresh_foreign_tables
    ```
 
 ## Fixing errors during a PostgreSQL upgrade or downgrade
@@ -572,24 +577,6 @@ Then reconfigure GitLab:
 sudo gitlab-ctl reconfigure
 ```
 
-### Message: `ActiveRecord::StatementInvalid: PG::SqlclientUnableToEstablishSqlconnection: ERROR:  could not connect to server "gitlab_secondary"`
-
-When
-[upgrading PostgreSQL on a Geo instance](https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-geo-instance), or when downgrading, you
-might encounter the following error:
-
-```plaintext
-$ sudo gitlab-rake geo:db:refresh_foreign_tables
-
-Refreshing foreign tables for FDW: gitlab_secondary ... rake aborted!
-ActiveRecord::StatementInvalid: PG::SqlclientUnableToEstablishSqlconnection: ERROR:  could not connect to server "gitlab_secondary"
-DETAIL:  SSL error: certificate verify failed
-FATAL:  no pg_hba.conf entry for host "10.138.0.59", user "gitlab", database "gitlabhq_production", SSL off
-```
-
-You may need to `gitlab-ctl restart` the read-replica DB node for its PostgreSQL
-server to recognize recent changes.
-
 ## Fixing errors during a failover or when promoting a secondary to a primary node
 
 The following are possible errors that might be encountered during failover or
@@ -630,6 +617,24 @@ or `gitlab-ctl promote-to-primary-node`, either:
   if the failover was just a test. A [caching-related
   bug](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22021) was
   fixed.
+
+### Message: ActiveRecord::RecordInvalid: Validation failed: Enabled Geo primary node cannot be disabled
+
+If you disabled a secondary node, either with the [replication pause task](../index.md#pausing-and-resuming-replication)
+(13.2) or by using the user interface (13.1 and earlier), you must first
+re-enable the node before you can continue. This is fixed in 13.4.
+
+Run the following command, replacing  `https://<secondary url>/` with the URL
+for your secondary server, using either `http` or `https`, and ensuring that you
+end the URL with a slash (`/`):
+
+```shell
+sudo gitlab-rails dbconsole
+
+UPDATE geo_nodes SET enabled = true WHERE url = 'https://<secondary url>/' AND enabled = false;"
+```
+
+This should update 1 row.
 
 ### Message: ``NoMethodError: undefined method `secondary?' for nil:NilClass``
 
@@ -673,231 +678,6 @@ sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
 
 GitLab 12.9 and later are [unaffected by this error](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5147).
 
-## Fixing Foreign Data Wrapper errors
-
-This section documents ways to fix potential Foreign Data Wrapper errors.
-
-### "Foreign Data Wrapper (FDW) is not configured" error
-
-When setting up Geo, you might see this warning in the `gitlab-rake
-gitlab:geo:check` output:
-
-```plaintext
-GitLab Geo tracking database Foreign Data Wrapper schema is up-to-date? ... foreign data wrapper is not configured
-```
-
-There are a few key points to remember:
-
-1. The FDW settings are configured on the Geo **tracking** database.
-1. The configured foreign server enables a login to the Geo
-   **secondary**, read-only database.
-
-By default, the Geo secondary and tracking database are running on the
-same host on different ports. That is, 5432 and 5431 respectively.
-
-#### Checking configuration
-
-NOTE: **Note:**
-The following steps are for Omnibus installs only. Using Geo with source-based installs was **deprecated** in GitLab 11.5.
-
-To check the configuration:
-
-1. SSH into an app node in the **secondary**:
-
-   ```shell
-   sudo -i
-   ```
-
-   Note: An app node is any machine running at least one of the following services:
-
-   - `puma`
-   - `unicorn`
-   - `sidekiq`
-   - `geo-logcursor`
-
-1. Enter the database console:
-
-   If the tracking database is running on the same node:
-
-   ```shell
-   gitlab-geo-psql
-   ```
-
-   Or, if the tracking database is running on a different node, you must specify
-   the user and host when entering the database console:
-
-   ```shell
-   gitlab-geo-psql -U gitlab_geo -h <IP of tracking database>
-   ```
-
-   You will be prompted for the password of the `gitlab_geo` user. You can find
-   it in plaintext in `/etc/gitlab/gitlab.rb` at:
-
-   ```ruby
-   geo_secondary['db_password'] = '<geo_tracking_db_password>'
-   ```
-
-   This password is normally set on the tracking database during
-   [Step 3: Configure the tracking database on the secondary node](multiple_servers.md#step-3-configure-the-tracking-database-on-the-secondary-node),
-   and it is set on the app nodes during
-   [Step 4: Configure the frontend application servers on the secondary node](multiple_servers.md#step-4-configure-the-frontend-application-servers-on-the-secondary-node).
-
-1. Check whether any tables are present with the following statement:
-
-   ```sql
-   SELECT * from information_schema.foreign_tables;
-   ```
-
-   If everything is working, you should see something like this:
-
-   ```plaintext
-   gitlabhq_geo_production=# SELECT * from information_schema.foreign_tables;
-     foreign_table_catalog  | foreign_table_schema |               foreign_table_name                | foreign_server_catalog  | foreign_server_name
-   -------------------------+----------------------+-------------------------------------------------+-------------------------+---------------------
-    gitlabhq_geo_production | gitlab_secondary     | abuse_reports                                   | gitlabhq_geo_production | gitlab_secondary
-    gitlabhq_geo_production | gitlab_secondary     | appearances                                     | gitlabhq_geo_production | gitlab_secondary
-    gitlabhq_geo_production | gitlab_secondary     | application_setting_terms                       | gitlabhq_geo_production | gitlab_secondary
-    gitlabhq_geo_production | gitlab_secondary     | application_settings                            | gitlabhq_geo_production | gitlab_secondary
-   <snip>
-   ```
-
-   However, if the query returns with `0 rows`, then continue onto the next steps.
-
-1. Check that the foreign server mapping is correct via `\des+`. The
-   results should look something like this:
-
-   ```plaintext
-   gitlabhq_geo_production=# \des+
-   List of foreign servers
-   -[ RECORD 1 ]--------+------------------------------------------------------------
-   Name                 | gitlab_secondary
-   Owner                | gitlab-psql
-   Foreign-data wrapper | postgres_fdw
-   Access privileges    | "gitlab-psql"=U/"gitlab-psql"                              +
-                        | gitlab_geo=U/"gitlab-psql"
-   Type                 |
-   Version              |
-   FDW Options          | (host '0.0.0.0', port '5432', dbname 'gitlabhq_production')
-   Description          |
-   ```
-
-   NOTE: **Note:**
-   Pay particular attention to the host and port under
-   FDW options. That configuration should point to the Geo secondary
-   database.
-
-   If you need to experiment with changing the host or password, the
-   following queries demonstrate how:
-
-   ```sql
-   ALTER SERVER gitlab_secondary OPTIONS (SET host '<my_new_host>');
-   ALTER SERVER gitlab_secondary OPTIONS (SET port 5432);
-   ```
-
-   If you change the host and/or port, you will also have to adjust the
-   following settings in `/etc/gitlab/gitlab.rb` and run `gitlab-ctl
-   reconfigure`:
-
-   - `gitlab_rails['db_host']`
-   - `gitlab_rails['db_port']`
-
-1. Check that the user mapping is configured properly via `\deu+`:
-
-   ```plaintext
-   gitlabhq_geo_production=# \deu+
-                                                List of user mappings
-         Server      | User name  |                                  FDW Options
-   ------------------+------------+--------------------------------------------------------------------------------
-    gitlab_secondary | gitlab_geo | ("user" 'gitlab', password 'YOUR-PASSWORD-HERE')
-   (1 row)
-   ```
-
-   Make sure the password is correct. You can test that logins work by running `psql`:
-
-   ```shell
-   # Connect to the tracking database as the `gitlab_geo` user
-   sudo \
-      -u git /opt/gitlab/embedded/bin/psql \
-      -h /var/opt/gitlab/geo-postgresql \
-      -p 5431 \
-      -U gitlab_geo \
-      -W \
-      -d gitlabhq_geo_production
-   ```
-
-   If you need to correct the password, the following query shows how:
-
-   ```sql
-   ALTER USER MAPPING FOR gitlab_geo SERVER gitlab_secondary OPTIONS (SET password '<my_new_password>');
-   ```
-
-   If you change the user or password, you will also have to adjust the
-   following settings in `/etc/gitlab/gitlab.rb` and run `gitlab-ctl
-   reconfigure`:
-
-   - `gitlab_rails['db_username']`
-   - `gitlab_rails['db_password']`
-
-   If you are using [PgBouncer in front of the secondary
-   database](database.md#pgbouncer-support-optional), be sure to update
-   the following settings:
-
-   - `geo_postgresql['fdw_external_user']`
-   - `geo_postgresql['fdw_external_password']`
-
-#### Manual reload of FDW schema
-
-If you're still unable to get FDW working, you may want to try a manual
-reload of the FDW schema. To manually reload the FDW schema:
-
-1. On the node running the Geo tracking database, enter the PostgreSQL console via
-   the `gitlab_geo` user:
-
-   ```shell
-   sudo \
-      -u git /opt/gitlab/embedded/bin/psql \
-      -h /var/opt/gitlab/geo-postgresql \
-      -p 5431 \
-      -U gitlab_geo \
-      -W \
-      -d gitlabhq_geo_production
-   ```
-
-   Be sure to adjust the port and hostname for your configuration. You
-   may be asked to enter a password.
-
-1. Reload the schema via:
-
-   ```sql
-   DROP SCHEMA IF EXISTS gitlab_secondary CASCADE;
-   CREATE SCHEMA gitlab_secondary;
-   GRANT USAGE ON FOREIGN SERVER gitlab_secondary TO gitlab_geo;
-   IMPORT FOREIGN SCHEMA public FROM SERVER gitlab_secondary INTO gitlab_secondary;
-   ```
-
-1. Test that queries work:
-
-   ```sql
-   SELECT * from information_schema.foreign_tables;
-   SELECT * FROM gitlab_secondary.projects limit 1;
-   ```
-
-### "Geo database has an outdated FDW remote schema" error
-
-GitLab can error with a `Geo database has an outdated FDW remote schema` message.
-
-For example:
-
-```plaintext
-Geo database has an outdated FDW remote schema. It contains 229 of 236 expected tables. Please refer to Geo Troubleshooting.
-```
-
-To resolve this, run the following command on the **secondary**:
-
-```shell
-sudo gitlab-rake geo:db:refresh_foreign_tables
-```
-
 ## Expired artifacts
 
 If you notice for some reason there are more artifacts on the Geo
@@ -932,7 +712,8 @@ GitLab cannot find or doesn't have permission to access the `database_geo.yml` c
 In an Omnibus GitLab installation, the file should be in `/var/opt/gitlab/gitlab-rails/etc`.
 If it doesn't exist or inadvertent changes have been made to it, run `sudo gitlab-ctl reconfigure` to restore it to its correct state.
 
-If this path is mounted on a remote volume, please check your volume configuration and that it has correct permissions.
+If this path is mounted on a remote volume, ensure your volume configuration
+has the correct permissions.
 
 ### An existing tracking database cannot be reused
 
@@ -947,7 +728,7 @@ This error refers to a problem with the database replica on a **secondary** node
 which Geo expects to have access to. It usually means, either:
 
 - An unsupported replication method was used (for example, logical replication).
-- The instructions to setup a [Geo database replication](database.md) were not followed correctly.
+- The instructions to setup a [Geo database replication](../setup/database.md) were not followed correctly.
 - Your database connection details are incorrect, that is you have specified the wrong
   user in your `/etc/gitlab/gitlab.rb` file.
 
@@ -967,7 +748,7 @@ The most common problems that prevent the database from replicating correctly ar
 - Database replication slot is misconfigured.
 - Database is not using a replication slot or another alternative and cannot catch-up because WAL files were purged.
 
-Make sure you follow the [Geo database replication](database.md) instructions for supported configuration.
+Make sure you follow the [Geo database replication](../setup/database.md) instructions for supported configuration.
 
 ### Geo database version (...) does not match latest migration (...)
 
@@ -975,13 +756,6 @@ If you are using Omnibus GitLab installation, something might have failed during
 
 - Run `sudo gitlab-ctl reconfigure`.
 - Manually trigger the database migration by running: `sudo gitlab-rake geo:db:migrate` as root on the **secondary** node.
-
-### Geo database is not configured to use Foreign Data Wrapper
-
-This error means the Geo Tracking Database doesn't have the FDW server and credentials
-configured.
-
-See ["Foreign Data Wrapper (FDW) is not configured" error?](#foreign-data-wrapper-fdw-is-not-configured-error).
 
 ### GitLab indicates that more than 100% of repositories were synced
 
@@ -1001,3 +775,13 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+## Fixing client errors
+
+### Authorization errors from LFS HTTP(s) client requests
+
+You may have problems if you're running a version of [Git LFS](https://git-lfs.github.com/) before 2.4.2.
+As noted in [this authentication issue](https://github.com/git-lfs/git-lfs/issues/3025),
+requests redirected from the secondary to the primary node do not properly send the
+Authorization header. This may result in either an infinite `Authorization <-> Redirect`
+loop, or Authorization errors.

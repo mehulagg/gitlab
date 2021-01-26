@@ -169,7 +169,9 @@ RSpec.describe EpicIssues::CreateService do
           end
 
           context 'when multiple valid issues are given' do
-            subject { assign_issue([issue.to_reference(full: true), issue2.to_reference(full: true)]) }
+            let(:references) { [issue, issue2].map { |i| i.to_reference(full: true) } }
+
+            subject { assign_issue(references) }
 
             let(:created_link1) { EpicIssue.find_by!(issue_id: issue.id) }
             let(:created_link2) { EpicIssue.find_by!(issue_id: issue2.id) }
@@ -181,13 +183,18 @@ RSpec.describe EpicIssues::CreateService do
               expect(created_link2).to have_attributes(epic: epic)
             end
 
+            it 'places each issue at the start' do
+              subject
+
+              expect(created_link2.relative_position).to be < created_link1.relative_position
+            end
             it 'orders the epic issues to the first place and moves the existing ones down' do
               existing_link = create(:epic_issue, epic: epic, issue: issue3)
 
               subject
 
-              expect(created_link2.relative_position).to be < created_link1.relative_position
-              expect(created_link1.relative_position).to be < existing_link.reload.relative_position
+              expect([created_link1, created_link2].map(&:relative_position))
+                .to all(be < existing_link.reset.relative_position)
             end
 
             it 'returns success status' do
@@ -220,10 +227,18 @@ RSpec.describe EpicIssues::CreateService do
             expect(subject).to eq(
               status: :error,
               http_status: 422,
-              message: "#{invalid_issue1.to_reference} cannot be added: Cannot set confidential epic for not-confidential issue. "\
-                       "#{invalid_issue2.to_reference} cannot be added: Cannot set confidential epic for not-confidential issue"
+              message: "#{invalid_issue1.to_reference} cannot be added: Cannot set confidential epic for a non-confidential issue. "\
+                       "#{invalid_issue2.to_reference} cannot be added: Cannot set confidential epic for a non-confidential issue"
             )
           end
+        end
+
+        context "when assigning issuable which don't support epics" do
+          let_it_be(:incident) { create(:incident, project: project) }
+
+          subject { assign_issue([incident.to_reference(full: true)]) }
+
+          include_examples 'returns an error'
         end
       end
 

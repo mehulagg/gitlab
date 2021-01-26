@@ -1,5 +1,0 @@
----
-title: Add Geo replication columns and tables for terraform states
-merge_request: 36594
-author:
-type: added

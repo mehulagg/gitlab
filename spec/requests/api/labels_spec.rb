@@ -178,8 +178,8 @@ RSpec.describe API::Labels do
   end
 
   describe 'GET /projects/:id/labels' do
-    let(:group) { create(:group) }
-    let!(:group_label) { create(:group_label, title: 'feature', group: group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:group_label) { create(:group_label, title: 'feature label', group: group) }
 
     before do
       project.update!(group: group)
@@ -250,49 +250,41 @@ RSpec.describe API::Labels do
       end
     end
 
-    context 'when the include_ancestor_groups parameter is not set' do
-      let(:group) { create(:group) }
-      let!(:group_label) { create(:group_label, title: 'feature', group: group) }
-      let(:subgroup) { create(:group, parent: group) }
-      let!(:subgroup_label) { create(:group_label, title: 'support', group: subgroup) }
+    context 'with subgroups' do
+      let_it_be(:subgroup) { create(:group, parent: group) }
+      let_it_be(:subgroup_label) { create(:group_label, title: 'support label', group: subgroup) }
 
       before do
         subgroup.add_owner(user)
         project.update!(group: subgroup)
       end
 
-      it 'returns all available labels for the project, parent group and ancestor groups' do
-        get api("/projects/#{project.id}/labels", user)
+      context 'when the include_ancestor_groups parameter is not set' do
+        let(:request) { get api("/projects/#{project.id}/labels", user) }
+        let(:expected_labels) { [priority_label.name, group_label.name, subgroup_label.name, label1.name] }
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(json_response).to all(match_schema('public_api/v4/labels/label'))
-        expect(json_response.size).to eq(4)
-        expect(json_response.map {|r| r['name'] }).to contain_exactly(group_label.name, subgroup_label.name, priority_label.name, label1.name)
-      end
-    end
+        it_behaves_like 'fetches labels'
 
-    context 'when the include_ancestor_groups parameter is set to false' do
-      let(:group) { create(:group) }
-      let!(:group_label) { create(:group_label, title: 'feature', group: group) }
-      let(:subgroup) { create(:group, parent: group) }
-      let!(:subgroup_label) { create(:group_label, title: 'support', group: subgroup) }
+        context 'when search param is provided' do
+          let(:request) { get api("/projects/#{project.id}/labels?search=lab", user) }
+          let(:expected_labels) { [group_label.name, subgroup_label.name, label1.name] }
 
-      before do
-        subgroup.add_owner(user)
-        project.update!(group: subgroup)
+          it_behaves_like 'fetches labels'
+        end
       end
 
-      it 'returns all available labels for the project and the parent group only' do
-        get api("/projects/#{project.id}/labels", user), params: { include_ancestor_groups: false }
+      context 'when the include_ancestor_groups parameter is set to false' do
+        let(:request) { get api("/projects/#{project.id}/labels", user), params: { include_ancestor_groups: false } }
+        let(:expected_labels) { [subgroup_label.name, priority_label.name, label1.name] }
 
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(json_response).to all(match_schema('public_api/v4/labels/label'))
-        expect(json_response.size).to eq(3)
-        expect(json_response.map {|r| r['name'] }).to contain_exactly(subgroup_label.name, priority_label.name, label1.name)
+        it_behaves_like 'fetches labels'
+
+        context 'when search param is provided' do
+          let(:request) { get api("/projects/#{project.id}/labels?search=lab", user), params: { include_ancestor_groups: false } }
+          let(:expected_labels) { [subgroup_label.name, label1.name] }
+
+          it_behaves_like 'fetches labels'
+        end
       end
     end
   end
@@ -513,7 +505,7 @@ RSpec.describe API::Labels do
   end
 
   describe 'PUT /projects/:id/labels/promote' do
-    let(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
 
     before do
       group.add_owner(user)
@@ -528,14 +520,29 @@ RSpec.describe API::Labels do
       expect(json_response['color']).to eq(label1.color)
     end
 
-    it 'returns 200 if group label already exists' do
-      create(:group_label, title: label1.name, group: group)
+    context 'if group label already exists' do
+      let!(:group_label) { create(:group_label, title: label1.name, group: group) }
 
-      expect { put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name } }
-        .to change(project.labels, :count).by(-1)
-        .and change(group.labels, :count).by(0)
+      it 'returns a status of 200' do
+        put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name }
 
-      expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'does not change the group label count' do
+        expect { put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name } }
+            .not_to change(group.labels, :count)
+      end
+
+      it 'does not change the group label max (reuses the same ID)' do
+        expect { put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name } }
+            .not_to change(group.labels, :max)
+      end
+
+      it 'changes the project label count' do
+        expect { put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name } }
+            .to change(project.labels, :count).by(-1)
+      end
     end
 
     it 'returns 403 if guest promotes label' do

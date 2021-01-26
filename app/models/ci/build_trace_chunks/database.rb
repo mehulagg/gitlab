@@ -17,6 +17,8 @@ module Ci
 
       def data(model)
         model.raw_data
+      rescue ActiveModel::MissingAttributeError
+        model.reset.raw_data
       end
 
       def set_data(model, new_data)
@@ -29,7 +31,7 @@ module Ci
           new_data = truncated_data + new_data
         end
 
-        model.raw_data = new_data
+        set_data(model, new_data)
         model.raw_data.to_s.bytesize
       end
 

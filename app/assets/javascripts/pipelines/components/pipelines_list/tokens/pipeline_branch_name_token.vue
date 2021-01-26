@@ -1,9 +1,9 @@
 <script>
 import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlLoadingIcon } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import Api from '~/api';
 import { FETCH_BRANCH_ERROR_MESSAGE, FILTER_PIPELINES_SEARCH_DELAY } from '../../../constants';
-import createFlash from '~/flash';
-import { debounce } from 'lodash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   components: {
@@ -34,10 +34,10 @@ export default {
     fetchBranches(searchterm) {
       Api.branches(this.config.projectId, searchterm)
         .then(({ data }) => {
-          this.branches = data.map(branch => branch.name);
+          this.branches = data.map((branch) => branch.name);
           this.loading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           createFlash(FETCH_BRANCH_ERROR_MESSAGE);
           this.loading = false;
           throw err;

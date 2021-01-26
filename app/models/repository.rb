@@ -24,8 +24,9 @@ class Repository
 
   attr_accessor :full_path, :shard, :disk_path, :container, :repo_type
 
-  delegate :ref_name_for_sha, to: :raw_repository
-  delegate :bundle_to_disk, to: :raw_repository
+  delegate :lfs_enabled?, to: :container
+
+  delegate_missing_to :raw_repository
 
   CreateTreeError = Class.new(StandardError)
   AmbiguousRefError = Class.new(StandardError)
@@ -150,7 +151,8 @@ class Repository
       all: !!opts[:all],
       first_parent: !!opts[:first_parent],
       order: opts[:order],
-      literal_pathspec: opts.fetch(:literal_pathspec, true)
+      literal_pathspec: opts.fetch(:literal_pathspec, true),
+      trailers: opts[:trailers]
     }
 
     commits = Gitlab::Git::Commit.where(options)
@@ -214,12 +216,13 @@ class Repository
     return false if with_slash.empty?
 
     prefixes = no_slash.map { |ref| Regexp.escape(ref) }.join('|')
-    prefix_regex = %r{^#{prefixes}/}
+    prefix_regex = %r{^(#{prefixes})/}
 
     with_slash.any? do |ref|
       prefix_regex.match?(ref)
     end
   end
+  cache_method :has_ambiguous_refs?
 
   def expand_ref(ref)
     if tag_exists?(ref)
@@ -311,14 +314,16 @@ class Repository
   end
 
   def expire_tags_cache
-    expire_method_caches(%i(tag_names tag_count))
+    expire_method_caches(%i(tag_names tag_count has_ambiguous_refs?))
     @tags = nil
+    @tag_names_include = nil
   end
 
   def expire_branches_cache
-    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content?))
+    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
     @local_branches = nil
     @branch_exists_memo = nil
+    @branch_names_include = nil
   end
 
   def expire_statistics_caches
@@ -380,10 +385,6 @@ class Repository
 
     expire_method_caches(%i(has_visible_content?))
     raw_repository.expire_has_local_branches_cache
-  end
-
-  def lookup_cache
-    @lookup_cache ||= {}
   end
 
   def expire_exists_cache
@@ -490,17 +491,10 @@ class Repository
     expire_branches_cache if expire_cache
   end
 
-  def method_missing(msg, *args, &block)
-    if msg == :lookup && !block_given?
-      lookup_cache[msg] ||= {}
-      lookup_cache[msg][args.join(":")] ||= raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
-    else
-      raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
+  def lookup(sha)
+    strong_memoize("lookup_#{sha}") do
+      raw_repository.lookup(sha)
     end
-  end
-
-  def respond_to_missing?(method, include_private = false)
-    raw_repository.respond_to?(method, include_private) || super
   end
 
   def blob_at(sha, path)
@@ -508,6 +502,9 @@ class Repository
 
     # Don't attempt to return a special result if there is no blob at all
     return unless blob
+
+    # Don't attempt to return a special result if this can't be a README
+    return blob unless Gitlab::FileDetector.type_of(blob.name) == :readme
 
     # Don't attempt to return a special result unless we're looking at HEAD
     return blob unless head_commit&.sha == sha
@@ -611,7 +608,7 @@ class Repository
   end
 
   def readme_path
-    readme&.path
+    head_tree&.readme_path
   end
   cache_method :readme_path
 
@@ -850,16 +847,16 @@ class Repository
   def merge(user, source_sha, merge_request, message)
     with_cache_hooks do
       raw_repository.merge(user, source_sha, merge_request.target_branch, message) do |commit_id|
-        merge_request.update(in_progress_merge_commit_sha: commit_id)
+        merge_request.update_and_mark_in_progress_merge_commit_sha(commit_id)
         nil # Return value does not matter.
       end
     end
   end
 
-  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref)
+  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref, allow_conflicts = false)
     branch = merge_request.target_branch
 
-    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
   end
 
   def delete_refs(*ref_names)
@@ -870,7 +867,7 @@ class Repository
     their_commit_id = commit(source)&.id
     raise 'Invalid merge source' if their_commit_id.nil?
 
-    merge_request&.update(in_progress_merge_commit_sha: their_commit_id)
+    merge_request&.update_and_mark_in_progress_merge_commit_sha(their_commit_id)
 
     with_cache_hooks { raw.ff_merge(user, their_commit_id, target_branch) }
   end
@@ -1139,22 +1136,18 @@ class Repository
   end
 
   def project
-    if repo_type.snippet?
-      container.project
-    elsif container.is_a?(Project)
+    if container.is_a?(Project)
       container
+    else
+      container.try(:project)
     end
   end
 
-  # TODO: pass this in directly to `Blob` rather than delegating it to here
-  #
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/201886
-  def lfs_enabled?
-    if container.is_a?(Project)
-      container.lfs_enabled?
-    else
-      false # LFS is not supported for snippet or group repositories
-    end
+  # Choose one of the available repository storage options based on a normalized weighted probability.
+  # We should always use the latest settings, to avoid picking a deleted shard.
+  def self.pick_storage_shard(expire: true)
+    Gitlab::CurrentSettings.expire_current_application_settings if expire
+    Gitlab::CurrentSettings.pick_repository_storage
   end
 
   private

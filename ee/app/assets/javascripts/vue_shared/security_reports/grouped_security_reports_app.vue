@@ -2,25 +2,39 @@
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
+import ArtifactDownload from './components/artifact_download.vue';
+import { LOADING } from '~/reports/constants';
+import { securityReportTypeEnumToReportType } from './constants';
+import { vulnerabilityModalMixin } from './mixins/vulnerability_modal_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import Tracking from '~/tracking';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
+import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
 import IssueModal from './components/modal.vue';
 import DastModal from './components/dast_modal.vue';
 import securityReportsMixin from './mixins/security_report_mixin';
 import createStore from './store';
-import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { mrStates } from '~/mr_popover/constants';
-import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
-import SecuritySummary from './components/security_summary.vue';
+import {
+  MODULE_CONTAINER_SCANNING,
+  MODULE_API_FUZZING,
+  MODULE_COVERAGE_FUZZING,
+  MODULE_DAST,
+  MODULE_DEPENDENCY_SCANNING,
+  MODULE_SAST,
+  MODULE_SECRET_DETECTION,
+  trackMrSecurityReportDetails,
+} from './store/constants';
 
 export default {
   store: createStore(),
   components: {
+    ArtifactDownload,
     GroupedIssuesList,
     ReportSection,
     SummaryRow,
@@ -30,11 +44,12 @@ export default {
     GlLink,
     DastModal,
     GlButton,
+    FuzzingArtifactsDownload,
   },
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [securityReportsMixin, glFeatureFlagsMixin()],
+  mixins: [securityReportsMixin, vulnerabilityModalMixin()],
   apollo: {
     dastSummary: {
       query: securityReportSummaryQuery,
@@ -91,6 +106,11 @@ export default {
       required: false,
       default: '',
     },
+    apiFuzzingHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     coverageFuzzingHelpPath: {
       type: String,
       required: false,
@@ -112,11 +132,6 @@ export default {
       default: false,
     },
     vulnerabilityFeedbackPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    vulnerabilityFeedbackHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -171,20 +186,69 @@ export default {
       required: false,
       default: '',
     },
+    projectId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     projectFullPath: {
       type: String,
+      required: true,
+    },
+    apiFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    containerScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    coverageFuzzingComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    dependencyScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    sastComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    secretScanningComparisonPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    targetProjectFullPath: {
+      type: String,
+      required: true,
+    },
+    mrIid: {
+      type: Number,
       required: true,
     },
   },
   componentNames,
   computed: {
     ...mapState([
-      'sast',
-      'containerScanning',
-      'dast',
-      'coverageFuzzing',
-      'dependencyScanning',
-      'secretScanning',
+      MODULE_SAST,
+      MODULE_CONTAINER_SCANNING,
+      MODULE_DAST,
+      MODULE_API_FUZZING,
+      MODULE_COVERAGE_FUZZING,
+      MODULE_DEPENDENCY_SCANNING,
+      MODULE_SECRET_DETECTION,
       'summaryCounts',
       'modal',
       'isCreatingIssue',
@@ -197,19 +261,23 @@ export default {
       'groupedContainerScanningText',
       'groupedDastText',
       'groupedDependencyText',
-      'groupedSecretScanningText',
       'groupedCoverageFuzzingText',
       'containerScanningStatusIcon',
       'dastStatusIcon',
       'dependencyScanningStatusIcon',
-      'secretScanningStatusIcon',
       'coverageFuzzingStatusIcon',
       'isBaseSecurityReportOutOfDate',
       'canCreateIssue',
       'canCreateMergeRequest',
       'canDismissVulnerability',
     ]),
-    ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters(MODULE_SAST, ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters(MODULE_SECRET_DETECTION, [
+      'groupedSecretDetectionText',
+      'secretDetectionStatusIcon',
+    ]),
+    ...mapGetters(MODULE_API_FUZZING, ['groupedApiFuzzingText', 'apiFuzzingStatusIcon']),
+    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
     },
@@ -222,14 +290,17 @@ export default {
     hasDastReports() {
       return this.enabledReports.dast;
     },
+    hasApiFuzzingReports() {
+      return this.enabledReports.apiFuzzing;
+    },
     hasCoverageFuzzingReports() {
       return this.enabledReports.coverageFuzzing;
     },
     hasSastReports() {
       return this.enabledReports.sast;
     },
-    hasSecretScanningReports() {
-      return this.enabledReports.secretScanning;
+    hasSecretDetectionReports() {
+      return this.enabledReports.secretDetection;
     },
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
@@ -249,8 +320,29 @@ export default {
     dastDownloadLink() {
       return this.dastSummary?.scannedResourcesCsvPath || '';
     },
-    coverageFuzzingShowIssues() {
-      return this.coverageFuzzing.newIssues || this.coverageFuzzing.resolvedIssues;
+    hasApiFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_API_FUZZING);
+    },
+    hasCoverageFuzzingIssues() {
+      return this.hasIssuesForReportType(MODULE_COVERAGE_FUZZING);
+    },
+    hasSastIssues() {
+      return this.hasIssuesForReportType(MODULE_SAST);
+    },
+    hasDependencyScanningIssues() {
+      return this.hasIssuesForReportType(MODULE_DEPENDENCY_SCANNING);
+    },
+    hasContainerScanningIssues() {
+      return this.hasIssuesForReportType(MODULE_CONTAINER_SCANNING);
+    },
+    hasDastIssues() {
+      return this.hasIssuesForReportType(MODULE_DAST);
+    },
+    hasSecretDetectionIssues() {
+      return this.hasIssuesForReportType(MODULE_SECRET_DETECTION);
+    },
+    shouldShowDownloadGuidance() {
+      return this.targetProjectFullPath && this.mrIid && this.summaryStatus !== LOADING;
     },
   },
 
@@ -261,53 +353,49 @@ export default {
 
     this.setCanReadVulnerabilityFeedback(this.canReadVulnerabilityFeedback);
     this.setVulnerabilityFeedbackPath(this.vulnerabilityFeedbackPath);
-    this.setVulnerabilityFeedbackHelpPath(this.vulnerabilityFeedbackHelpPath);
     this.setCreateVulnerabilityFeedbackIssuePath(this.createVulnerabilityFeedbackIssuePath);
     this.setCreateVulnerabilityFeedbackMergeRequestPath(
       this.createVulnerabilityFeedbackMergeRequestPath,
     );
     this.setCreateVulnerabilityFeedbackDismissalPath(this.createVulnerabilityFeedbackDismissalPath);
+    this.setProjectId(this.projectId);
     this.setPipelineId(this.pipelineId);
+    this.setPipelineJobsId(this.pipelineId);
 
-    const sastDiffEndpoint = gl?.mrWidgetData?.sast_comparison_path;
-
-    if (sastDiffEndpoint && this.hasSastReports) {
-      this.setSastDiffEndpoint(sastDiffEndpoint);
+    if (this.sastComparisonPath && this.hasSastReports) {
+      this.setSastDiffEndpoint(this.sastComparisonPath);
       this.fetchSastDiff();
     }
 
-    const containerScanningDiffEndpoint = gl?.mrWidgetData?.container_scanning_comparison_path;
-
-    if (containerScanningDiffEndpoint && this.hasContainerScanningReports) {
-      this.setContainerScanningDiffEndpoint(containerScanningDiffEndpoint);
+    if (this.containerScanningComparisonPath && this.hasContainerScanningReports) {
+      this.setContainerScanningDiffEndpoint(this.containerScanningComparisonPath);
       this.fetchContainerScanningDiff();
     }
 
-    const dastDiffEndpoint = gl?.mrWidgetData?.dast_comparison_path;
-
-    if (dastDiffEndpoint && this.hasDastReports) {
-      this.setDastDiffEndpoint(dastDiffEndpoint);
+    if (this.dastComparisonPath && this.hasDastReports) {
+      this.setDastDiffEndpoint(this.dastComparisonPath);
       this.fetchDastDiff();
     }
 
-    const dependencyScanningDiffEndpoint = gl?.mrWidgetData?.dependency_scanning_comparison_path;
-
-    if (dependencyScanningDiffEndpoint && this.hasDependencyScanningReports) {
-      this.setDependencyScanningDiffEndpoint(dependencyScanningDiffEndpoint);
+    if (this.dependencyScanningComparisonPath && this.hasDependencyScanningReports) {
+      this.setDependencyScanningDiffEndpoint(this.dependencyScanningComparisonPath);
       this.fetchDependencyScanningDiff();
     }
 
-    const secretScanningDiffEndpoint = gl?.mrWidgetData?.secret_scanning_comparison_path;
-    if (secretScanningDiffEndpoint && this.hasSecretScanningReports) {
-      this.setSecretScanningDiffEndpoint(secretScanningDiffEndpoint);
-      this.fetchSecretScanningDiff();
+    if (this.secretScanningComparisonPath && this.hasSecretDetectionReports) {
+      this.setSecretDetectionDiffEndpoint(this.secretScanningComparisonPath);
+      this.fetchSecretDetectionDiff();
     }
 
-    const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
-
-    if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
-      this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
+    if (this.coverageFuzzingComparisonPath && this.hasCoverageFuzzingReports) {
+      this.setCoverageFuzzingDiffEndpoint(this.coverageFuzzingComparisonPath);
       this.fetchCoverageFuzzingDiff();
+      this.fetchPipelineJobs();
+    }
+
+    if (this.apiFuzzingComparisonPath && this.hasApiFuzzingReports) {
+      this.setApiFuzzingDiffEndpoint(this.apiFuzzingComparisonPath);
+      this.fetchApiFuzzingDiff();
     }
   },
   methods: {
@@ -318,20 +406,15 @@ export default {
       'setSourceBranch',
       'setCanReadVulnerabilityFeedback',
       'setVulnerabilityFeedbackPath',
-      'setVulnerabilityFeedbackHelpPath',
       'setCreateVulnerabilityFeedbackIssuePath',
       'setCreateVulnerabilityFeedbackMergeRequestPath',
       'setCreateVulnerabilityFeedbackDismissalPath',
       'setPipelineId',
-      'dismissVulnerability',
-      'revertDismissVulnerability',
       'createNewIssue',
       'createMergeRequest',
       'openDismissalCommentBox',
       'closeDismissalCommentBox',
       'downloadPatch',
-      'addDismissalComment',
-      'deleteDismissalComment',
       'showDismissalDeleteButtons',
       'hideDismissalDeleteButtons',
       'fetchContainerScanningDiff',
@@ -340,17 +423,31 @@ export default {
       'setDependencyScanningDiffEndpoint',
       'fetchDastDiff',
       'setDastDiffEndpoint',
-      'fetchSecretScanningDiff',
-      'setSecretScanningDiffEndpoint',
       'fetchCoverageFuzzingDiff',
       'setCoverageFuzzingDiffEndpoint',
     ]),
-    ...mapActions('sast', {
+    ...mapActions(MODULE_SAST, {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
+    ...mapActions(MODULE_SECRET_DETECTION, {
+      setSecretDetectionDiffEndpoint: 'setDiffEndpoint',
+      fetchSecretDetectionDiff: 'fetchDiff',
+    }),
+    ...mapActions(MODULE_API_FUZZING, {
+      setApiFuzzingDiffEndpoint: 'setDiffEndpoint',
+      fetchApiFuzzingDiff: 'fetchDiff',
+    }),
+    ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
+    ...mapActions('pipelineJobs', {
+      setPipelineJobsId: 'setPipelineId',
+    }),
+    hasIssuesForReportType(reportType) {
+      return Boolean(this[reportType]?.newIssues.length || this[reportType]?.resolvedIssues.length);
+    },
   },
   summarySlots: ['success', 'error', 'loading'],
+  reportTypes: securityReportTypeEnumToReportType,
 };
 </script>
 <template>
@@ -366,7 +463,7 @@ export default {
       <security-summary :key="slot" :message="groupedSummaryText" />
     </template>
 
-    <template v-if="pipelinePath" #actionButtons>
+    <template v-if="pipelinePath" #action-buttons>
       <gl-button
         :href="securityTab"
         target="_blank"
@@ -377,7 +474,7 @@ export default {
       </gl-button>
     </template>
 
-    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #subHeading>
+    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #sub-heading>
       <div class="text-secondary-700 text-1">
         <gl-sprintf
           v-if="isMRBranchOutdated"
@@ -427,11 +524,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="sast.newIssues.length || sast.resolvedIssues.length"
+            v-if="hasSastIssues"
             :unresolved-issues="sast.newIssues"
             :resolved-issues="sast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="sast-issues-list"
           />
         </template>
@@ -449,11 +545,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="dependencyScanning.newIssues.length || dependencyScanning.resolvedIssues.length"
+            v-if="hasDependencyScanningIssues"
             :unresolved-issues="dependencyScanning.newIssues"
             :resolved-issues="dependencyScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dependency-scanning-issues-list"
           />
         </template>
@@ -471,11 +566,10 @@ export default {
           </summary-row>
 
           <grouped-issues-list
-            v-if="containerScanning.newIssues.length || containerScanning.resolvedIssues.length"
+            v-if="hasContainerScanningIssues"
             :unresolved-issues="containerScanning.newIssues"
             :resolved-issues="containerScanning.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="container-scanning-issues-list"
           />
         </template>
@@ -506,40 +600,37 @@ export default {
             </template>
           </summary-row>
           <grouped-issues-list
-            v-if="dast.newIssues.length || dast.resolvedIssues.length"
+            v-if="hasDastIssues"
             :unresolved-issues="dast.newIssues"
             :resolved-issues="dast.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="dast-issues-list"
           />
         </template>
 
-        <template v-if="hasSecretScanningReports">
+        <template v-if="hasSecretDetectionReports">
           <summary-row
-            :status-icon="secretScanningStatusIcon"
+            :status-icon="secretDetectionStatusIcon"
             :popover-options="secretScanningPopover"
             class="js-secret-scanning"
             data-qa-selector="secret_scan_report"
           >
             <template #summary>
-              <security-summary :message="groupedSecretScanningText" />
+              <security-summary :message="groupedSecretDetectionText" />
             </template>
           </summary-row>
 
           <grouped-issues-list
-            v-if="secretScanning.newIssues.length || secretScanning.resolvedIssues.length"
-            :unresolved-issues="secretScanning.newIssues"
-            :resolved-issues="secretScanning.resolvedIssues"
+            v-if="hasSecretDetectionIssues"
+            :unresolved-issues="secretDetection.newIssues"
+            :resolved-issues="secretDetection.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="secret-scanning-issues-list"
           />
         </template>
 
         <template v-if="hasCoverageFuzzingReports">
           <summary-row
-            :summary="groupedCoverageFuzzingText"
             :status-icon="coverageFuzzingStatusIcon"
             :popover-options="coverageFuzzingPopover"
             class="js-coverage-fuzzing-widget"
@@ -548,21 +639,53 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
+            <fuzzing-artifacts-download
+              v-if="hasFuzzingArtifacts"
+              :jobs="fuzzingJobsWithArtifact"
+              :project-id="projectId"
+            />
           </summary-row>
 
           <grouped-issues-list
-            v-if="coverageFuzzingShowIssues"
+            v-if="hasCoverageFuzzingIssues"
             :unresolved-issues="coverageFuzzing.newIssues"
             :resolved-issues="coverageFuzzing.resolvedIssues"
             :component="$options.componentNames.SecurityIssueBody"
-            class="report-block-group-list"
             data-testid="coverage-fuzzing-issues-list"
+          />
+        </template>
+
+        <template v-if="hasApiFuzzingReports">
+          <summary-row
+            :status-icon="apiFuzzingStatusIcon"
+            :popover-options="apiFuzzingPopover"
+            class="js-api-fuzzing-widget"
+            data-qa-selector="api_fuzzing_report"
+          >
+            <template #summary>
+              <security-summary :message="groupedApiFuzzingText" />
+            </template>
+
+            <artifact-download
+              v-if="shouldShowDownloadGuidance"
+              :report-types="[$options.reportTypes.API_FUZZING]"
+              :target-project-full-path="targetProjectFullPath"
+              :mr-iid="mrIid"
+            />
+          </summary-row>
+
+          <grouped-issues-list
+            v-if="hasApiFuzzingIssues"
+            :unresolved-issues="apiFuzzing.newIssues"
+            :resolved-issues="apiFuzzing.resolvedIssues"
+            :component="$options.componentNames.SecurityIssueBody"
+            class="report-block-group-list"
+            data-testid="api-fuzzing-issues-list"
           />
         </template>
 
         <issue-modal
           :modal="modal"
-          :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
           :can-create-issue="canCreateIssue"
           :can-create-merge-request="canCreateMergeRequest"
           :can-dismiss-vulnerability="canDismissVulnerability"
@@ -572,13 +695,13 @@ export default {
           @closeDismissalCommentBox="closeDismissalCommentBox()"
           @createMergeRequest="createMergeRequest"
           @createNewIssue="createNewIssue"
-          @dismissVulnerability="dismissVulnerability"
+          @dismissVulnerability="handleDismissVulnerability"
           @openDismissalCommentBox="openDismissalCommentBox()"
           @editVulnerabilityDismissalComment="openDismissalCommentBox()"
-          @revertDismissVulnerability="revertDismissVulnerability"
+          @revertDismissVulnerability="handleRevertDismissVulnerability"
           @downloadPatch="downloadPatch"
-          @addDismissalComment="addDismissalComment({ comment: $event })"
-          @deleteDismissalComment="deleteDismissalComment"
+          @addDismissalComment="handleAddDismissalComment({ comment: $event })"
+          @deleteDismissalComment="handleDeleteDismissalComment"
           @showDismissalDeleteButtons="showDismissalDeleteButtons"
           @hideDismissalDeleteButtons="hideDismissalDeleteButtons"
         />

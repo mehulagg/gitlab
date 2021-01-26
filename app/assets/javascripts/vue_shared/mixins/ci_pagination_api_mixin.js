@@ -10,6 +10,10 @@ import { validateParams } from '~/pipelines/utils';
 export default {
   methods: {
     onChangeTab(scope) {
+      if (this.scope === scope) {
+        return;
+      }
+
       let params = {
         scope,
         page: '1',
@@ -44,7 +48,7 @@ export default {
       this.poll.stop();
 
       const queryString = Object.keys(parameters)
-        .map(parameter => {
+        .map((parameter) => {
           const value = parameters[parameter];
           // update internal state for UI
           this[parameter] = value;

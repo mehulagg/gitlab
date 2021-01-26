@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlEmptyState } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import FiltersProducedNoResults from 'ee/security_dashboard/components/empty_states/filters_produced_no_results.vue';
 
 describe('filters produced no results empty state', () => {

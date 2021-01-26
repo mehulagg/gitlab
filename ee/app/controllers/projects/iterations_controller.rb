@@ -4,9 +4,9 @@ class Projects::IterationsController < Projects::ApplicationController
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!
 
-  def index; end
+  feature_category :issue_tracking
 
-  def show; end
+  def index; end
 
   private
 

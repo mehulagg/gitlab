@@ -7,12 +7,12 @@ module ComplianceManagement
     module ProjectSettingsHelper
       def compliance_framework_options
         option_values = compliance_framework_option_values
-        ::ComplianceManagement::ComplianceFramework::FRAMEWORKS.map { |k, _v| [option_values.fetch(k), k] }
+        ::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map { |framework| [option_values.fetch(framework.identifier), framework.identifier] }
       end
 
       def compliance_framework_checkboxes
-        ::ComplianceManagement::ComplianceFramework::FRAMEWORKS.map do |k, v|
-          [v, compliance_framework_title_values.fetch(k)]
+        ::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map do |framework|
+          [framework.id, compliance_framework_title_values.fetch(framework.identifier)]
         end
       end
 

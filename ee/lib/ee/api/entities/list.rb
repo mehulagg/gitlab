@@ -8,6 +8,7 @@ module EE
 
         prepended do
           expose :milestone, using: ::API::Entities::Milestone, if: -> (entity, _) { entity.milestone? }
+          expose :iteration, using: ::API::Entities::Iteration, if: -> (entity, _) { entity.iteration? }
           expose :user, as: :assignee, using: ::API::Entities::UserSafe, if: -> (entity, _) { entity.assignee? }
           expose :max_issue_count, if: -> (list, _) { list.wip_limits_available? }
           expose :max_issue_weight, if: -> (list, _) { list.wip_limits_available? }

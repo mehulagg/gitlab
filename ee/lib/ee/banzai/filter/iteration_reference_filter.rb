@@ -10,7 +10,7 @@ module EE
         def find_object(parent, id)
           return unless valid_context?(parent)
 
-          find_iteration_with_finder(parent, id: id)
+          find_iteration(parent, id: id)
         end
 
         def valid_context?(parent)
@@ -37,7 +37,7 @@ module EE
 
           iterations = {}
           unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
-            iteration = find_iteration($~[:project], $~[:namespace], $~[:iteration_id], $~[:iteration_name])
+            iteration = parse_and_find_iteration($~[:project], $~[:namespace], $~[:iteration_id], $~[:iteration_name])
 
             if iteration
               iterations[iteration.id] = yield match, iteration.id, $~[:project], $~[:namespace], $~
@@ -52,7 +52,7 @@ module EE
           escape_with_placeholders(unescaped_html, iterations)
         end
 
-        def find_iteration(project_ref, namespace_ref, iteration_id, iteration_name)
+        def parse_and_find_iteration(project_ref, namespace_ref, iteration_id, iteration_name)
           project_path = full_project_path(namespace_ref, project_ref)
 
           # Returns group if project is not found by path
@@ -62,7 +62,7 @@ module EE
 
           iteration_params = iteration_params(iteration_id, iteration_name)
 
-          find_iteration_with_finder(parent, iteration_params)
+          find_iteration(parent, iteration_params)
         end
 
         def iteration_params(id, name)
@@ -73,23 +73,17 @@ module EE
           end
         end
 
-        # rubocop:disable CodeReuse/ActiveRecord
-        def find_iteration_with_finder(parent, params)
-          finder_params = iteration_finder_params(parent)
-
-          ::IterationsFinder.new(context[:current_user], finder_params).find_by(params)
+        # rubocop: disable CodeReuse/ActiveRecord
+        def find_iteration(parent, params)
+          ::Iteration.for_projects_and_groups(project_ids(parent), group_and_ancestors_ids(parent)).find_by(**params)
         end
-        # rubocop:enable CodeReuse/ActiveRecord
+        # rubocop: enable CodeReuse/ActiveRecord
 
-        def iteration_finder_params(parent)
-          { order: nil, state: 'all' }.tap do |params|
-            params[:project_ids] = parent.id if project_context?(parent)
-
-            params[:group_ids] = self_and_ancestors_ids(parent)
-          end
+        def project_ids(parent)
+          parent.id if project_context?(parent)
         end
 
-        def self_and_ancestors_ids(parent)
+        def group_and_ancestors_ids(parent)
           if group_context?(parent)
             parent.self_and_ancestors.select(:id)
           elsif project_context?(parent)

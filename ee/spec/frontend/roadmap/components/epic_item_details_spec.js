@@ -1,8 +1,8 @@
 import { GlButton, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/roadmap/store';
 import EpicItemDetails from 'ee/roadmap/components/epic_item_details.vue';
 import eventHub from 'ee/roadmap/event_hub';
+import createStore from 'ee/roadmap/store';
 import {
   mockGroupId,
   mockFormattedEpic,
@@ -31,7 +31,7 @@ describe('EpicItemDetails', () => {
         currentGroupId: mockGroupId,
         timeframeString: 'Jul 10, 2017 – Jun 2, 2018',
         childLevel: 0,
-        childrenFlags: { '41': { itemExpanded: false } },
+        childrenFlags: { 41: { itemExpanded: false } },
         hasFiltersApplied: false,
         isChildrenEmpty: false,
         ...props,
@@ -69,7 +69,7 @@ describe('EpicItemDetails', () => {
     title: getGroupName().attributes('title'),
   });
 
-  const createMockEpic = epic => ({
+  const createMockEpic = (epic) => ({
     ...mockFormattedEpic,
     ...epic,
   });
@@ -203,7 +203,7 @@ describe('EpicItemDetails', () => {
 
         describe('when child epics are expanded', () => {
           const childrenFlags = {
-            '41': { itemExpanded: true },
+            41: { itemExpanded: true },
           };
 
           beforeEach(() => {
@@ -241,7 +241,7 @@ describe('EpicItemDetails', () => {
         describe('when child epics are not expanded', () => {
           beforeEach(() => {
             const childrenFlags = {
-              '41': { itemExpanded: false },
+              41: { itemExpanded: false },
             };
             createWrapper({
               epic,

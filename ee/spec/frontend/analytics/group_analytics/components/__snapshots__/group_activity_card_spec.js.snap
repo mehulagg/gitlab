@@ -2,22 +2,19 @@
 
 exports[`GroupActivity component matches the snapshot 1`] = `
 <div
-  class="card"
+  class="gl-card gl-mb-5"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <strong>
       Recent activity (last 90 days)
     </strong>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-     
     <div
       class="gl-display-flex"
     >
@@ -76,9 +73,8 @@ exports[`GroupActivity component matches the snapshot 1`] = `
         </p>
       </div>
     </div>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;

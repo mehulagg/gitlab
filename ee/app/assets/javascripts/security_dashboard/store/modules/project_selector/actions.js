@@ -1,6 +1,6 @@
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 import addPageInfo from './utils/add_page_info';
 import * as types from './mutation_types';
@@ -37,9 +37,9 @@ export const addProjects = ({ state, dispatch }) => {
 
   return axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsError'))
     .finally(() => dispatch('clearSearchResults'));
 };
@@ -55,8 +55,8 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -142,7 +142,7 @@ export const receiveRemoveProjectSuccess = ({ commit, dispatch }) => {
 export const receiveRemoveProjectError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_PROJECT_ERROR);
 
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
 export const fetchSearchResults = ({ state, dispatch, commit }) => {
@@ -154,7 +154,7 @@ export const fetchSearchResults = ({ state, dispatch, commit }) => {
   }
 
   return searchProjects(searchQuery)
-    .then(payload => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
+    .then((payload) => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

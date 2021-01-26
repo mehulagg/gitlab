@@ -29,24 +29,8 @@ RSpec.describe Ci::Group do
       [create(:ci_build, :failed)]
     end
 
-    context 'when ci_composite_status is enabled' do
-      before do
-        stub_feature_flags(ci_composite_status: true)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
-    end
-
-    context 'when ci_composite_status is disabled' do
-      before do
-        stub_feature_flags(ci_composite_status: false)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
+    it 'returns a failed status' do
+      expect(subject.status).to eq('failed')
     end
   end
 
@@ -68,6 +52,18 @@ RSpec.describe Ci::Group do
       it 'fabricates a new detailed status object' do
         expect(subject.detailed_status(double(:user)))
           .to be_a(Gitlab::Ci::Status::Failed)
+      end
+    end
+
+    context 'when one of the commit statuses in the group is allowed to fail' do
+      let(:jobs) do
+        [create(:ci_build, :failed, :allowed_to_fail),
+         create(:ci_build, :success)]
+      end
+
+      it 'fabricates a new detailed status object' do
+        expect(subject.detailed_status(double(:user)))
+          .to be_a(Gitlab::Ci::Status::SuccessWarning)
       end
     end
   end

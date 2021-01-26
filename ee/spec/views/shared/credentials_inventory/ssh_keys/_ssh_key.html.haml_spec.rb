@@ -6,8 +6,10 @@ RSpec.describe('shared/credentials_inventory/ssh_keys/_ssh_key.html.haml') do
   let_it_be(:user) { create(:user) }
   let_it_be(:expiry_date) { 20.days.since }
   let_it_be(:ssh_key) { create(:personal_key, user: user, expires_at: expiry_date)}
+  let_it_be(:ssh_key_delete_path) { |key| 'ssh_key_delete_path' }
 
   before do
+    allow(view).to receive(:ssh_key_delete_path).and_return('key_path')
     allow(view).to receive(:user_detail_path).and_return('abcd')
     render 'shared/credentials_inventory/ssh_keys/ssh_key', ssh_key: ssh_key
   end
@@ -22,6 +24,10 @@ RSpec.describe('shared/credentials_inventory/ssh_keys/_ssh_key.html.haml') do
 
   it 'shows the expiry date' do
     expect(rendered).to have_text(ssh_key.expires_at.to_date.to_s)
+  end
+
+  it 'shows the delete button' do
+    expect(rendered).to have_css('.js-confirm-modal-button[value="Delete"]')
   end
 
   context 'last accessed date' do

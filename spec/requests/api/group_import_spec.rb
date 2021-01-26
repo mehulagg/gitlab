@@ -217,12 +217,14 @@ RSpec.describe API::GroupImport do
         let!(:fog_connection) do
           stub_uploads_object_storage(ImportExportUploader, direct_upload: true)
         end
+
         let(:tmp_object) do
           fog_connection.directories.new(key: 'uploads').files.create(
             key: "tmp/uploads/#{file_name}",
             body: file_upload
           )
         end
+
         let(:fog_file) { fog_to_uploaded_file(tmp_object) }
         let(:params) do
           {
@@ -262,7 +264,7 @@ RSpec.describe API::GroupImport do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+      expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
     end
 
     it 'rejects requests that bypassed gitlab-workhorse' do
@@ -283,7 +285,7 @@ RSpec.describe API::GroupImport do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
           expect(json_response).not_to have_key('TempPath')
           expect(json_response['RemoteObject']).to have_key('ID')
           expect(json_response['RemoteObject']).to have_key('GetURL')
@@ -302,7 +304,7 @@ RSpec.describe API::GroupImport do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+          expect(response.media_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
           expect(json_response['TempPath']).to eq(ImportExportUploader.workhorse_local_upload_path)
           expect(json_response['RemoteObject']).to be_nil
         end

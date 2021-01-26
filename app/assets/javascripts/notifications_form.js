@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 
 export default class NotificationsForm {
   constructor() {
@@ -22,12 +22,8 @@ export default class NotificationsForm {
 
   // eslint-disable-next-line class-methods-use-this
   showCheckboxLoadingSpinner($parent) {
-    $parent
-      .addClass('is-loading')
-      .find('.custom-notification-event-loading')
-      .removeClass('fa-check')
-      .addClass('spinner align-middle')
-      .removeClass('is-done');
+    $parent.find('.is-loading').removeClass('gl-display-none');
+    $parent.find('.is-done').addClass('gl-display-none');
   }
 
   saveEvent($checkbox, $parent) {
@@ -39,14 +35,11 @@ export default class NotificationsForm {
       .then(({ data }) => {
         $checkbox.enable();
         if (data.saved) {
-          $parent
-            .find('.custom-notification-event-loading')
-            .toggleClass('spinner fa-check is-done align-middle');
+          $parent.find('.is-loading').addClass('gl-display-none');
+          $parent.find('.is-done').removeClass('gl-display-none');
+
           setTimeout(() => {
-            $parent
-              .removeClass('is-loading')
-              .find('.custom-notification-event-loading')
-              .toggleClass('spinner fa-check is-done align-middle');
+            $parent.find('.is-done').addClass('gl-display-none');
           }, 2000);
         }
       })

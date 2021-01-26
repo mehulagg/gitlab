@@ -1,6 +1,7 @@
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
+import showToast from '~/vue_shared/plugins/global_toast';
 
 const MARKDOWN_LINK_TEXT = {
   markdown: '[Link Title](page-slug)',
@@ -10,7 +11,7 @@ const MARKDOWN_LINK_TEXT = {
 };
 
 const TRACKING_EVENT_NAME = 'view_wiki_page';
-const TRACKING_CONTEXT_SCHEMA = 'iglu:com.gitlab/wiki_page_context/jsonschema/1-0-0';
+const TRACKING_CONTEXT_SCHEMA = 'iglu:com.gitlab/wiki_page_context/jsonschema/1-0-1';
 
 export default class Wikis {
   constructor() {
@@ -19,12 +20,13 @@ export default class Wikis {
 
     const sidebarToggles = document.querySelectorAll('.js-sidebar-wiki-toggle');
     for (let i = 0; i < sidebarToggles.length; i += 1) {
-      sidebarToggles[i].addEventListener('click', e => this.handleToggleSidebar(e));
+      sidebarToggles[i].addEventListener('click', (e) => this.handleToggleSidebar(e));
     }
 
     this.isNewWikiPage = Boolean(document.querySelector('.js-new-wiki-page'));
     this.editTitleInput = document.querySelector('form.wiki-form #wiki_title');
     this.commitMessageInput = document.querySelector('form.wiki-form #wiki_message');
+    this.submitButton = document.querySelector('.js-wiki-btn-submit');
     this.commitMessageI18n = this.isNewWikiPage
       ? s__('WikiPageCreate|Create %{pageTitle}')
       : s__('WikiPageEdit|Update %{pageTitle}');
@@ -34,7 +36,7 @@ export default class Wikis {
       if (this.editTitleInput.value) this.setWikiCommitMessage(this.editTitleInput.value);
 
       // Set the commit message as the page title is changed
-      this.editTitleInput.addEventListener('keyup', e => this.handleWikiTitleChange(e));
+      this.editTitleInput.addEventListener('keyup', (e) => this.handleWikiTitleChange(e));
     }
 
     window.addEventListener('resize', () => this.renderSidebar());
@@ -44,18 +46,16 @@ export default class Wikis {
     const linkExample = document.querySelector('.js-markup-link-example');
 
     if (changeFormatSelect) {
-      changeFormatSelect.addEventListener('change', e => {
+      changeFormatSelect.addEventListener('change', (e) => {
         linkExample.innerHTML = MARKDOWN_LINK_TEXT[e.target.value];
       });
     }
 
-    const wikiTextarea = document.querySelector('form.wiki-form #wiki_content');
+    this.wikiTextarea = document.querySelector('form.wiki-form #wiki_content');
     const wikiForm = document.querySelector('form.wiki-form');
 
-    if (wikiTextarea) {
-      wikiTextarea.addEventListener('input', () => {
-        window.onbeforeunload = () => '';
-      });
+    if (this.wikiTextarea) {
+      this.wikiTextarea.addEventListener('input', () => this.handleWikiContentChange());
 
       wikiForm.addEventListener('submit', () => {
         window.onbeforeunload = null;
@@ -63,10 +63,28 @@ export default class Wikis {
     }
 
     Wikis.trackPageView();
+    Wikis.showToasts();
+
+    this.updateSubmitButton();
+  }
+
+  handleWikiContentChange() {
+    this.updateSubmitButton();
+
+    window.onbeforeunload = () => '';
   }
 
   handleWikiTitleChange(e) {
+    this.updateSubmitButton();
     this.setWikiCommitMessage(e.target.value);
+  }
+
+  updateSubmitButton() {
+    if (!this.wikiTextarea) return;
+
+    const isEnabled = Boolean(this.wikiTextarea.value.trim() && this.editTitleInput.value.trim());
+    if (isEnabled) this.submitButton.removeAttribute('disabled');
+    else this.submitButton.setAttribute('disabled', 'true');
   }
 
   setWikiCommitMessage(rawTitle) {
@@ -115,5 +133,10 @@ export default class Wikis {
         data: JSON.parse(wikiPageContent.dataset.trackingContext),
       },
     });
+  }
+
+  static showToasts() {
+    const toasts = document.querySelectorAll('.js-toast-message');
+    toasts.forEach((toast) => showToast(toast.dataset.message));
   }
 }

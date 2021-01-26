@@ -9,10 +9,6 @@ RSpec.describe 'Merge request > User sees diff', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project) }
 
-  before do
-    stub_feature_flags(diffs_batch_load: false)
-  end
-
   context 'when linking to note' do
     describe 'with unresolved note' do
       let(:note) { create :diff_note_on_merge_request, project: project, noteable: merge_request }
@@ -67,16 +63,17 @@ RSpec.describe 'Merge request > User sees diff', :js do
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
-        expect(page).to have_selector("[id=\"#{changelog_id}\"] a.js-edit-blob")
+        expect(page).to have_selector("[id=\"#{changelog_id}\"] .js-edit-blob", visible: false)
       end
     end
 
     context 'as user who needs to fork' do
-      it 'shows fork/cancel confirmation', :sidekiq_might_not_need_inline, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196749' do
+      it 'shows fork/cancel confirmation', :sidekiq_might_not_need_inline do
         sign_in(user)
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
+        find("[id=\"#{changelog_id}\"] .js-diff-more-actions").click
         find("[id=\"#{changelog_id}\"] .js-edit-blob").click
 
         expect(page).to have_selector('.js-fork-suggestion-button', count: 1)
@@ -97,7 +94,7 @@ RSpec.describe 'Merge request > User sees diff', :js do
             let c = 3;
             let d = 3;
           }
-        CONTENT
+          CONTENT
 
         new_file_content =
           <<~CONTENT
@@ -107,7 +104,7 @@ RSpec.describe 'Merge request > User sees diff', :js do
             let c = 3;
             let x = 3;
           }
-        CONTENT
+          CONTENT
 
         file_name = 'xss_file.rs'
 

@@ -1,8 +1,8 @@
 <script>
 import { GlSorting, GlSortingItem } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { ASCENDING_ODER, DESCENDING_ORDER } from '../constants';
 import getTableHeaders from '../utils';
-import { mapState, mapActions } from 'vuex';
 
 export default {
   name: 'PackageSort',
@@ -12,12 +12,12 @@ export default {
   },
   computed: {
     ...mapState({
-      isGroupPage: state => state.config.isGroupPage,
-      orderBy: state => state.sorting.orderBy,
-      sort: state => state.sorting.sort,
+      isGroupPage: (state) => state.config.isGroupPage,
+      orderBy: (state) => state.sorting.orderBy,
+      sort: (state) => state.sorting.sort,
     }),
     sortText() {
-      const field = this.sortableFields.find(s => s.orderBy === this.orderBy);
+      const field = this.sortableFields.find((s) => s.orderBy === this.orderBy);
       return field ? field.label : '';
     },
     sortableFields() {
@@ -51,7 +51,7 @@ export default {
     <gl-sorting-item
       v-for="item in sortableFields"
       ref="packageListSortItem"
-      :key="item.key"
+      :key="item.orderBy"
       @click="onSortItemClick(item.orderBy)"
     >
       {{ item.label }}

@@ -16,6 +16,8 @@ describe('Pipeline Url Component', () => {
   const findAutoDevopsTag = () => wrapper.find('[data-testid="pipeline-url-autodevops"]');
   const findStuckTag = () => wrapper.find('[data-testid="pipeline-url-stuck"]');
   const findDetachedTag = () => wrapper.find('[data-testid="pipeline-url-detached"]');
+  const findForkTag = () => wrapper.find('[data-testid="pipeline-url-fork"]');
+  const findTrainTag = () => wrapper.find('[data-testid="pipeline-url-train"]');
 
   const defaultProps = {
     pipeline: {
@@ -27,9 +29,12 @@ describe('Pipeline Url Component', () => {
     pipelineScheduleUrl: 'foo',
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(PipelineUrlComponent, {
       propsData: { ...defaultProps, ...props },
+      provide: {
+        targetProjectFullPath: 'test/test',
+      },
     });
   };
 
@@ -136,5 +141,41 @@ describe('Pipeline Url Component', () => {
 
     expect(findScheduledTag().exists()).toBe(true);
     expect(findScheduledTag().text()).toContain('Scheduled');
+  });
+
+  it('should render the fork badge when the pipeline was run in a fork', () => {
+    createComponent({
+      pipeline: {
+        flags: {},
+        project: { fullPath: 'test/forked' },
+      },
+    });
+
+    expect(findForkTag().exists()).toBe(true);
+    expect(findForkTag().text()).toBe('fork');
+  });
+
+  it('should render the train badge when the pipeline is a merge train pipeline', () => {
+    createComponent({
+      pipeline: {
+        flags: {
+          merge_train_pipeline: true,
+        },
+      },
+    });
+
+    expect(findTrainTag().text()).toContain('train');
+  });
+
+  it('should not render the train badge when the pipeline is not a merge train pipeline', () => {
+    createComponent({
+      pipeline: {
+        flags: {
+          merge_train_pipeline: false,
+        },
+      },
+    });
+
+    expect(findTrainTag().exists()).toBe(false);
   });
 });

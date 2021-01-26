@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe Resolvers::TodoResolver do
   include GraphqlHelpers
 
+  specify do
+    expect(described_class).to have_nullable_graphql_type(Types::TodoType.connection_type)
+  end
+
   describe '#resolve' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:author1) { create(:user) }
@@ -16,7 +20,7 @@ RSpec.describe Resolvers::TodoResolver do
 
     it 'calls TodosFinder' do
       expect_next_instance_of(TodosFinder) do |finder|
-        expect(finder).to receive(:execute)
+        expect(finder).to receive(:execute).and_call_original
       end
 
       resolve_todos
@@ -44,7 +48,7 @@ RSpec.describe Resolvers::TodoResolver do
       end
 
       it 'returns the todos for single filter' do
-        todos = resolve_todos(type: 'MergeRequest')
+        todos = resolve_todos(type: ['MergeRequest'])
 
         expect(todos).to contain_exactly(merge_request_todo_pending)
       end

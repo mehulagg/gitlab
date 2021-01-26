@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Milestones' do
       include Support::Dates
 
@@ -17,6 +17,7 @@ module QA
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-to-test-milestones'
+          project.group = group
         end
       end
 

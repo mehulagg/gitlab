@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import SmartInterval from '~/smart_interval';
 
 import eventHub from '../event_hub';
@@ -89,8 +89,8 @@ export default {
     fetchGeoNodes() {
       return this.service
         .getGeoNodes()
-        .then(res => res.data)
-        .then(nodes => {
+        .then((res) => res.data)
+        .then((nodes) => {
           this.store.setNodes(nodes);
           this.isLoading = false;
         })
@@ -103,8 +103,8 @@ export default {
       const nodeId = node.id;
       return this.service
         .getGeoNodeDetails(node)
-        .then(res => res.data)
-        .then(nodeDetails => {
+        .then((res) => res.data)
+        .then((nodeDetails) => {
           const primaryNodeVersion = this.store.getPrimaryNodeVersion();
           const updatedNodeDetails = Object.assign(nodeDetails, {
             primaryVersion: primaryNodeVersion.version,
@@ -113,7 +113,7 @@ export default {
           this.store.setNodeDetails(nodeId, updatedNodeDetails);
           eventHub.$emit('nodeDetailsLoaded', this.store.getNodeDetails(nodeId));
         })
-        .catch(err => {
+        .catch((err) => {
           this.store.setNodeDetails(nodeId, {
             geo_node_id: nodeId,
             health: err.message,
@@ -142,8 +142,8 @@ export default {
       this.setNodeActionStatus(targetNode, true);
       return this.service
         .toggleNode(targetNode)
-        .then(res => res.data)
-        .then(node => {
+        .then((res) => res.data)
+        .then((node) => {
           Object.assign(targetNode, {
             enabled: node.enabled,
             nodeActionActive: false,
@@ -233,9 +233,7 @@ export default {
       @cancel="hideNodeActionModal"
       @ok="handleNodeAction"
     >
-      <template>
-        {{ modalMessage }}
-      </template>
+      {{ modalMessage }}
     </gl-modal>
   </div>
 </template>

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Popover from './components/popover.vue';
 
-export default el =>
+export default (el) =>
   new Vue({
     el,
     render(createElement) {
@@ -10,6 +10,7 @@ export default el =>
           target: el.dataset.target,
           trackLabel: el.dataset.trackLabel,
           dismissKey: el.dataset.dismissKey,
+          mergeRequestPath: el.dataset.mergeRequestPath,
           humanAccess: el.dataset.humanAccess,
         },
       });

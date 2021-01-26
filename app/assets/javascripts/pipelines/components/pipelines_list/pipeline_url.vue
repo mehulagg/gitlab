@@ -1,27 +1,21 @@
 <script>
-import { GlLink, GlTooltipDirective } from '@gitlab/ui';
-import { escape } from 'lodash';
+import { GlLink, GlPopover, GlSprintf, GlTooltipDirective, GlBadge } from '@gitlab/ui';
 import { SCHEDULE_ORIGIN } from '../../constants';
-import { __, sprintf } from '~/locale';
-import popover from '~/vue_shared/directives/popover';
-
-const popoverTitle = sprintf(
-  escape(
-    __(
-      `This pipeline makes use of a predefined CI/CD configuration enabled by %{strongStart}Auto DevOps.%{strongEnd}`,
-    ),
-  ),
-  { strongStart: '<b>', strongEnd: '</b>' },
-  false,
-);
 
 export default {
   components: {
     GlLink,
+    GlPopover,
+    GlSprintf,
+    GlBadge,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
-    popover,
+  },
+  inject: {
+    targetProjectFullPath: {
+      default: '',
+    },
   },
   props: {
     pipeline: {
@@ -44,31 +38,19 @@ export default {
     isScheduled() {
       return this.pipeline.source === SCHEDULE_ORIGIN;
     },
-    popoverOptions() {
-      return {
-        html: true,
-        trigger: 'focus',
-        placement: 'top',
-        title: `<div class="autodevops-title">
-            ${popoverTitle}
-          </div>`,
-        content: `<a
-            class="autodevops-link"
-            href="${this.autoDevopsHelpPath}"
-            target="_blank"
-            rel="noopener noreferrer nofollow">
-            ${escape(__('Learn more about Auto DevOps'))}
-          </a>`,
-      };
+    isInFork() {
+      return Boolean(
+        this.targetProjectFullPath &&
+          this.pipeline?.project?.full_path !== `/${this.targetProjectFullPath}`,
+      );
     },
   },
 };
 </script>
 <template>
-  <div class="table-section section-10 d-none d-sm-none d-md-block pipeline-tags">
+  <div class="table-section section-10 d-none d-md-block pipeline-tags">
     <gl-link
       :href="pipeline.path"
-      class="js-pipeline-url-link js-onboarding-pipeline-item"
       data-testid="pipeline-url-link"
       data-qa-selector="pipeline_url_link"
     >
@@ -76,59 +58,91 @@ export default {
     </gl-link>
     <div class="label-container">
       <gl-link v-if="isScheduled" :href="pipelineScheduleUrl" target="__blank">
-        <span
+        <gl-badge
           v-gl-tooltip
           :title="__('This pipeline was triggered by a schedule.')"
-          class="badge badge-info"
+          variant="info"
+          size="sm"
           data-testid="pipeline-url-scheduled"
+          >{{ __('Scheduled') }}</gl-badge
         >
-          {{ __('Scheduled') }}
-        </span>
       </gl-link>
-      <span
+      <gl-badge
         v-if="pipeline.flags.latest"
         v-gl-tooltip
         :title="__('Latest pipeline for the most recent commit on this branch')"
-        class="js-pipeline-url-latest badge badge-success"
+        variant="success"
+        size="sm"
         data-testid="pipeline-url-latest"
+        >{{ __('latest') }}</gl-badge
       >
-        {{ __('latest') }}
-      </span>
-      <span
+      <gl-badge
+        v-if="pipeline.flags.merge_train_pipeline"
+        v-gl-tooltip
+        :title="__('This is a merge train pipeline')"
+        variant="info"
+        size="sm"
+        data-testid="pipeline-url-train"
+        >{{ __('train') }}</gl-badge
+      >
+      <gl-badge
         v-if="pipeline.flags.yaml_errors"
         v-gl-tooltip
         :title="pipeline.yaml_errors"
-        class="js-pipeline-url-yaml badge badge-danger"
+        variant="danger"
+        size="sm"
         data-testid="pipeline-url-yaml"
+        >{{ __('yaml invalid') }}</gl-badge
       >
-        {{ __('yaml invalid') }}
-      </span>
-      <span
+      <gl-badge
         v-if="pipeline.flags.failure_reason"
         v-gl-tooltip
         :title="pipeline.failure_reason"
-        class="js-pipeline-url-failure badge badge-danger"
+        variant="danger"
+        size="sm"
         data-testid="pipeline-url-failure"
+        >{{ __('error') }}</gl-badge
       >
-        {{ __('error') }}
-      </span>
       <gl-link
         v-if="pipeline.flags.auto_devops"
-        v-popover="popoverOptions"
+        :id="`pipeline-url-autodevops-${pipeline.id}`"
         tabindex="0"
-        class="js-pipeline-url-autodevops badge badge-info autodevops-badge"
         data-testid="pipeline-url-autodevops"
         role="button"
-        >{{ __('Auto DevOps') }}</gl-link
+        ><gl-badge variant="info" size="sm">{{ __('Auto DevOps') }}</gl-badge></gl-link
       >
-      <span
+      <gl-popover
+        :target="`pipeline-url-autodevops-${pipeline.id}`"
+        triggers="focus"
+        placement="top"
+      >
+        <template #title>
+          <div class="gl-font-weight-normal gl-line-height-normal">
+            <gl-sprintf
+              :message="
+                __(
+                  'This pipeline makes use of a predefined CI/CD configuration enabled by %{strongStart}Auto DevOps.%{strongEnd}',
+                )
+              "
+            >
+              <template #strong="{ content }">
+                <b>{{ content }}</b>
+              </template>
+            </gl-sprintf>
+          </div>
+        </template>
+        <gl-link :href="autoDevopsHelpPath" target="_blank" rel="noopener noreferrer nofollow">{{
+          __('Learn more about Auto DevOps')
+        }}</gl-link>
+      </gl-popover>
+      <gl-badge
         v-if="pipeline.flags.stuck"
-        class="js-pipeline-url-stuck badge badge-warning"
+        variant="warning"
+        size="sm"
         data-testid="pipeline-url-stuck"
+        >{{ __('stuck') }}</gl-badge
       >
-        {{ __('stuck') }}
-      </span>
-      <span
+      <gl-badge
         v-if="pipeline.flags.detached_merge_request_pipeline"
         v-gl-tooltip
         :title="
@@ -136,11 +150,20 @@ export default {
             'Pipelines for merge requests are configured. A detached pipeline runs in the context of the merge request, and not against the merged result. Learn more in the documentation for Pipelines for Merged Results.',
           )
         "
-        class="js-pipeline-url-detached badge badge-info"
+        variant="info"
+        size="sm"
         data-testid="pipeline-url-detached"
+        >{{ __('detached') }}</gl-badge
       >
-        {{ __('detached') }}
-      </span>
+      <gl-badge
+        v-if="isInFork"
+        v-gl-tooltip
+        :title="__('Pipeline ran in fork of project')"
+        variant="info"
+        size="sm"
+        data-testid="pipeline-url-fork"
+        >{{ __('fork') }}</gl-badge
+      >
     </div>
   </div>
 </template>

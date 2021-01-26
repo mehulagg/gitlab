@@ -64,6 +64,18 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
         expect(build('spinach 1')).to be_created
         expect(pipeline.reload).to be_running
       end
+
+      it 'changes ownership of subsequent builds' do
+        expect(build('rspec 2').user).not_to eq(user)
+        expect(build('rspec 3').user).not_to eq(user)
+        expect(build('spinach 1').user).not_to eq(user)
+
+        service.execute(pipeline)
+
+        expect(build('rspec 2').user).to eq(user)
+        expect(build('rspec 3').user).to eq(user)
+        expect(build('spinach 1').user).to eq(user)
+      end
     end
 
     context 'when there is failed build present which was run on failure' do
@@ -160,6 +172,16 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
             expect(build('staging')).to be_manual
             expect(build('rspec 2')).to be_created
             expect(pipeline.reload).to be_running
+          end
+
+          it 'changes ownership of subsequent builds' do
+            expect(build('staging').user).not_to eq(user)
+            expect(build('rspec 2').user).not_to eq(user)
+
+            service.execute(pipeline)
+
+            expect(build('staging').user).to eq(user)
+            expect(build('rspec 2').user).to eq(user)
           end
         end
       end
@@ -280,6 +302,20 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
         expect(build3.reload.scheduling_type).to eq('dag')
       end
     end
+
+    context 'when the pipeline is a downstream pipeline and the bridge is depended' do
+      let!(:bridge) { create(:ci_bridge, :strategy_depend, status: 'success') }
+
+      before do
+        create(:ci_sources_pipeline, pipeline: pipeline, source_job: bridge)
+      end
+
+      it 'marks source bridge as pending' do
+        service.execute(pipeline)
+
+        expect(bridge.reload).to be_pending
+      end
+    end
   end
 
   context 'when user is not allowed to retry pipeline' do
@@ -364,7 +400,7 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
                       stage: "stage_#{stage_num}",
                       stage_idx: stage_num,
                       pipeline: pipeline, **opts) do |build|
-      pipeline.update_legacy_status
+      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 end

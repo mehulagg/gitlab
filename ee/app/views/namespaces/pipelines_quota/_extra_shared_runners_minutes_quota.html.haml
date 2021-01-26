@@ -1,5 +1,7 @@
-- return unless Gitlab.com? && namespace.shared_runners_minutes_limit_enabled?
+- return unless Gitlab.com?
+
 - minutes_quota = namespace.ci_minutes_quota
+- return unless minutes_quota.enabled?
 
 .row
   .col-sm-6
@@ -8,7 +10,7 @@
     %div
       = ci_minutes_report(minutes_quota.purchased_minutes_report)
       minutes
-      = link_to icon('question-circle'), help_page_path('subscriptions/index', anchor: 'purchasing-additional-ci-minutes'), target: '_blank', rel: 'noopener noreferrer'
+      = link_to sprite_icon('question-o'), help_page_path('subscriptions/gitlab_com/index', anchor: 'purchase-additional-ci-minutes'), target: '_blank', rel: 'noopener noreferrer'
   .col-sm-6.right
     #{minutes_quota.purchased_percent_used}% used
     = ci_minutes_progress_bar(minutes_quota.purchased_percent_used)

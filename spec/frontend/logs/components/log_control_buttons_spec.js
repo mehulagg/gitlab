@@ -9,7 +9,7 @@ describe('LogControlButtons', () => {
   const findScrollToBottom = () => wrapper.find('.js-scroll-to-bottom');
   const findRefreshBtn = () => wrapper.find('.js-refresh-log');
 
-  const initWrapper = opts => {
+  const initWrapper = (opts) => {
     wrapper = shallowMount(LogControlButtons, {
       listeners: {
         scrollUp: () => {},
@@ -27,9 +27,6 @@ describe('LogControlButtons', () => {
 
   it('displays UI elements', () => {
     initWrapper();
-
-    expect(wrapper.isVueInstance()).toBe(true);
-    expect(wrapper.isEmpty()).toBe(false);
 
     expect(findScrollToTop().is(GlButton)).toBe(true);
     expect(findScrollToBottom().is(GlButton)).toBe(true);
@@ -57,7 +54,7 @@ describe('LogControlButtons', () => {
     });
 
     it('click on "scroll to top" scrolls up', () => {
-      expect(findScrollToTop().is('[disabled]')).toBe(false);
+      expect(findScrollToTop().attributes('disabled')).toBeUndefined();
 
       findScrollToTop().vm.$emit('click');
 
@@ -65,7 +62,7 @@ describe('LogControlButtons', () => {
     });
 
     it('click on "scroll to bottom" scrolls down', () => {
-      expect(findScrollToBottom().is('[disabled]')).toBe(false);
+      expect(findScrollToBottom().attributes('disabled')).toBeUndefined();
 
       findScrollToBottom().vm.$emit('click');
 

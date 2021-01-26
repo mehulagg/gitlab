@@ -1,6 +1,6 @@
+import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 import createStore from 'ee/vue_shared/license_compliance/store';
 import * as types from 'ee/vue_shared/license_compliance/store/mutation_types';
-import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 
 import { TEST_HOST } from 'spec/test_constants';
 import { approvedLicense } from '../mock_data';
@@ -17,6 +17,15 @@ describe('License store mutations', () => {
       store.commit(`licenseManagement/${types.SET_LICENSE_IN_MODAL}`, approvedLicense);
 
       expect(store.state.licenseManagement.currentLicenseInModal).toBe(approvedLicense);
+    });
+  });
+
+  describe('SET_KNOWN_LICENSES', () => {
+    it('assigns knownLicenses to the store', () => {
+      const licenses = [{ name: 'BSD' }, { name: 'Apache' }];
+      store.commit(`licenseManagement/${types.SET_KNOWN_LICENSES}`, licenses);
+
+      expect(store.state.licenseManagement.knownLicenses).toBe(licenses);
     });
   });
 

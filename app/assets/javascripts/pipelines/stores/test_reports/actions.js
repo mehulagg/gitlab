@@ -1,6 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 
 export const fetchSummary = ({ state, commit, dispatch }) => {
@@ -28,16 +28,12 @@ export const fetchTestSuite = ({ state, commit, dispatch }, index) => {
 
   dispatch('toggleLoading');
 
-  const { name = '', build_ids = [] } = state.testReports?.test_suites?.[index] || {};
+  const { build_ids = [] } = state.testReports?.test_suites?.[index] || {};
   // Replacing `/:suite_name.json` with the name of the suite. Including the extra characters
   // to ensure that we replace exactly the template part of the URL string
-  const endpoint = state.suiteEndpoint?.replace(
-    '/:suite_name.json',
-    `/${encodeURIComponent(name)}.json`,
-  );
 
   return axios
-    .get(endpoint, { params: { build_ids } })
+    .get(state.suiteEndpoint, { params: { build_ids } })
     .then(({ data }) => commit(types.SET_SUITE, { suite: data, index }))
     .catch(() => {
       createFlash(s__('TestReports|There was an error fetching the test suite.'));
@@ -47,6 +43,7 @@ export const fetchTestSuite = ({ state, commit, dispatch }, index) => {
     });
 };
 
+export const setPage = ({ commit }, page) => commit(types.SET_PAGE, page);
 export const setSelectedSuiteIndex = ({ commit }, data) =>
   commit(types.SET_SELECTED_SUITE_INDEX, data);
 export const removeSelectedSuiteIndex = ({ commit }) =>

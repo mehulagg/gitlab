@@ -3,27 +3,6 @@
 module InsightsActions
   extend ActiveSupport::Concern
 
-  module Embeddable
-    extend ActiveSupport::Concern
-
-    included do
-      before_action do
-        push_frontend_feature_flag(:embed_analytics_report, insights_entity)
-      end
-    end
-
-    def embedded
-      response.set_header('X-Frame-Options', 'SAMEORIGIN')
-
-      return render_404 unless Feature.enabled?(:embed_analytics_report, insights_entity)
-      return render_404 unless can?(current_user, :view_embedded_analytics_report, insights_entity)
-
-      render :embedded, layout: false
-    end
-  end
-
-  include Embeddable
-
   included do
     before_action :check_insights_available!
     before_action :validate_params, only: [:query]

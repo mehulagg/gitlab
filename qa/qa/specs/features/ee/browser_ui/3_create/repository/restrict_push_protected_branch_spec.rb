@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Restricted protected branch push and merge' do
       let(:user_developer) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
       let(:user_maintainer) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2) }
@@ -11,7 +11,7 @@ module QA
       shared_examples 'only user with access pushes and merges' do
         it 'unselected maintainer user fails to push' do
           expect { push_new_file(branch_name, as_user: user_maintainer) }.to raise_error(
-            QA::Git::Repository::RepositoryCommandError,
+            QA::Support::Run::CommandError,
             /remote: GitLab: You are not allowed to push code to protected branches on this project\.([\s\S]+)\[remote rejected\] #{branch_name} -> #{branch_name} \(pre-receive hook declined\)/)
         end
 
@@ -47,7 +47,7 @@ module QA
 
           login
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {
@@ -84,7 +84,7 @@ module QA
 
           project.add_member(user_maintainer, Resource::Members::AccessLevel::MAINTAINER)
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {

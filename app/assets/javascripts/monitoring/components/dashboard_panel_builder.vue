@@ -8,7 +8,10 @@ import {
   GlButton,
   GlSprintf,
   GlAlert,
+  GlTooltipDirective,
 } from '@gitlab/ui';
+import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
+import { timeRanges } from '~/vue_shared/constants';
 import DashboardPanel from './dashboard_panel.vue';
 
 const initialYml = `title: Go heap size
@@ -30,6 +33,10 @@ export default {
     GlSprintf,
     GlAlert,
     DashboardPanel,
+    DateTimePicker,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   data() {
     return {
@@ -41,22 +48,44 @@ export default {
       'panelPreviewIsLoading',
       'panelPreviewError',
       'panelPreviewGraphData',
+      'panelPreviewTimeRange',
+      'panelPreviewIsShown',
       'projectPath',
       'addDashboardDocumentationPath',
     ]),
   },
   methods: {
-    ...mapActions('monitoringDashboard', ['fetchPanelPreview']),
+    ...mapActions('monitoringDashboard', [
+      'fetchPanelPreview',
+      'fetchPanelPreviewMetrics',
+      'setPanelPreviewTimeRange',
+    ]),
     onSubmit() {
       this.fetchPanelPreview(this.yml);
     },
+    onDateTimePickerInput(timeRange) {
+      this.setPanelPreviewTimeRange(timeRange);
+      // refetch data only if preview has been clicked
+      // and there are no errors
+      if (this.panelPreviewIsShown && !this.panelPreviewError) {
+        this.fetchPanelPreviewMetrics();
+      }
+    },
+    onRefresh() {
+      // refetch data only if preview has been clicked
+      // and there are no errors
+      if (this.panelPreviewIsShown && !this.panelPreviewError) {
+        this.fetchPanelPreviewMetrics();
+      }
+    },
   },
+  timeRanges,
 };
 </script>
 <template>
-  <div>
+  <div class="prometheus-panel-builder">
     <div class="gl-xs-flex-direction-column gl-display-flex gl-mx-n3">
-      <gl-card class="gl-flex-grow-1 gl-flex-basis-0 gl-mx-3">
+      <gl-card class="gl-flex-grow-1 gl-flex-basis-0 gl-mx-3 gl-mb-5">
         <template #header>
           <h2 class="gl-font-size-h2 gl-my-3">{{ s__('Metrics|1. Define and preview panel') }}</h2>
         </template>
@@ -95,7 +124,7 @@ export default {
       </gl-card>
 
       <gl-card
-        class="gl-flex-grow-1 gl-flex-basis-0 gl-mx-3"
+        class="gl-flex-grow-1 gl-flex-basis-0 gl-mx-3 gl-mb-5"
         body-class="gl-display-flex gl-flex-direction-column"
       >
         <template #header>
@@ -117,7 +146,7 @@ export default {
                   )
                 "
               >
-                <template #code="{content}">
+                <template #code="{ content }">
                   <code>{{ content }}</code>
                 </template>
               </gl-sprintf>
@@ -151,7 +180,20 @@ export default {
     <gl-alert v-if="panelPreviewError" variant="warning" :dismissible="false">
       {{ panelPreviewError }}
     </gl-alert>
-
+    <date-time-picker
+      ref="dateTimePicker"
+      class="gl-flex-grow-1 preview-date-time-picker gl-xs-mb-3"
+      :value="panelPreviewTimeRange"
+      :options="$options.timeRanges"
+      @input="onDateTimePickerInput"
+    />
+    <gl-button
+      v-gl-tooltip
+      data-testid="previewRefreshButton"
+      icon="retry"
+      :title="s__('Metrics|Refresh Prometheus data')"
+      @click="onRefresh"
+    />
     <dashboard-panel :graph-data="panelPreviewGraphData" />
   </div>
 </template>

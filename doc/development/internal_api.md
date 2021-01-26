@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -25,9 +25,9 @@ To authenticate using that token, clients read the contents of that
 file, and include the token Base64 encoded in a `secret_token` parameter
 or in the `Gitlab-Shared-Secret` header.
 
-NOTE: **Note:**
-The internal API used by GitLab Pages uses a different kind of
-authentication.
+NOTE:
+The internal API used by GitLab Pages, and GitLab Kubernetes Agent Server (`kas`) uses JSON Web Token (JWT)
+authentication, which is different from GitLab Shell.
 
 ## Git Authentication
 
@@ -52,7 +52,7 @@ POST /internal/allowed
 | `username` | string | no      | Username from the certificate used to connect to GitLab Shell |
 | `project`  | string | no (if `gl_repository` is passed) | Path to the project |
 | `gl_repository`  | string | no (if `project` is passed) | Repository identifier (e.g. `project-7`) |
-| `protocol` | string | yes     | SSH when called from GitLab-shell, HTTP or SSH when called from Gitaly |
+| `protocol` | string | yes     | SSH when called from GitLab Shell, HTTP or SSH when called from Gitaly |
 | `action`   | string | yes     | Git command being run (`git-upload-pack`, `git-receive-pack`, `git-upload-archive`) |
 | `changes`  | string | yes     | `<oldrev> <newrev> <refname>` when called from Gitaly, the magic string `_any` when called from GitLab Shell |
 | `check_ip` | string | no     | IP address from which call to GitLab Shell was made |
@@ -60,7 +60,7 @@ POST /internal/allowed
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2&action=git-upload-pack&protocol=ssh" http://localhost:3001/api/v4/internal/allowed
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2&action=git-upload-pack&protocol=ssh" "http://localhost:3001/api/v4/internal/allowed"
 ```
 
 Example response:
@@ -108,7 +108,7 @@ information for LFS clients when the repository is accessed over SSH.
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2" http://localhost:3001/api/v4/internal/lfs_authenticate
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded token>" --data "key_id=11&project=gnuwget/wget2" "http://localhost:3001/api/v4/internal/lfs_authenticate"
 ```
 
 ```json
@@ -141,7 +141,7 @@ GET /internal/authorized_keys
 Example request:
 
 ```shell
-curl --request GET --header "Gitlab-Shared-Secret: <Base64 encoded secret>""http://localhost:3001/api/v4/internal/authorized_keys?key=<key as passed by OpenSSH>"
+curl --request GET --header "Gitlab-Shared-Secret: <Base64 encoded secret>" "http://localhost:3001/api/v4/internal/authorized_keys?key=<key as passed by OpenSSH>"
 ```
 
 Example response:
@@ -223,6 +223,7 @@ Example response:
 
 - GitLab Geo
 - GitLab Shell's `bin/check`
+- Gitaly
 
 ## Get new 2FA recovery codes using an SSH key
 
@@ -241,7 +242,7 @@ GET /internal/two_factor_recovery_codes
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "key_id=7" http://localhost:3001/api/v4/internal/two_factor_recovery_codes
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "key_id=7" "http://localhost:3001/api/v4/internal/two_factor_recovery_codes"
 ```
 
 Example response:
@@ -288,7 +289,7 @@ POST /internal/personal_access_token
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "user_id=29&name=mytokenname&scopes[]=read_user&scopes[]=read_repository&expires_at=2020-07-24" http://localhost:3001/api/v4/internal/personal_access_token
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "user_id=29&name=mytokenname&scopes[]=read_user&scopes[]=read_repository&expires_at=2020-07-24" "http://localhost:3001/api/v4/internal/personal_access_token"
 ```
 
 Example response:
@@ -322,7 +323,7 @@ POST /internal/pre_receive
 Example request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" http://localhost:3001/api/v4/internal/pre_receive
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" "http://localhost:3001/api/v4/internal/pre_receive"
 ```
 
 Example response:
@@ -354,7 +355,7 @@ POST /internal/post_receive
 Example Request:
 
 ```shell
-curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" --data "identifier=user-1" --data "changes=0000000000000000000000000000000000000000 fd9e76b9136bdd9fe217061b497745792fe5a5ee gh-pages\n"  http://localhost:3001/api/v4/internal/post_receive
+curl --request POST --header "Gitlab-Shared-Secret: <Base64 encoded secret>" --data "gl_repository=project-7" --data "identifier=user-1" --data "changes=0000000000000000000000000000000000000000 fd9e76b9136bdd9fe217061b497745792fe5a5ee gh-pages\n" "http://localhost:3001/api/v4/internal/post_receive"
 ```
 
 Example response:
@@ -369,4 +370,100 @@ Example response:
   ],
   "reference_counter_decreased": true
 }
+```
+
+## Kubernetes agent endpoints
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41045) in GitLab 13.4.
+> - This feature is not deployed on GitLab.com
+> - It's not recommended for production use.
+
+The following endpoints are used by the GitLab Kubernetes Agent Server (`kas`)
+for various purposes.
+
+These endpoints are all authenticated using JWT. The JWT secret is stored in a file
+specified in `config/gitlab.yml`. By default, the location is in the root of the
+GitLab Rails app in a file called `.gitlab_kas_secret`.
+
+WARNING:
+The Kubernetes agent is under development and is not recommended for production use.
+
+### Kubernetes agent information
+
+Called from GitLab Kubernetes Agent Server (`kas`) to retrieve agent
+information for the given agent token. This returns the Gitaly connection
+information for the agent's project in order for `kas` to fetch and update
+the agent's configuration.
+
+```plaintext
+GET /internal/kubernetes/agent_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/agent_info"
+```
+
+### Kubernetes agent project information
+
+Called from GitLab Kubernetes Agent Server (`kas`) to retrieve project
+information for the given agent token. This returns the Gitaly
+connection for the requested project. GitLab `kas` uses this to configure
+the agent to fetch Kubernetes resources from the project repository to
+sync.
+
+Only public projects are currently supported. For private projects, the ability for the
+agent to be authorized is [not yet implemented](https://gitlab.com/gitlab-org/gitlab/-/issues/220912).
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `id` | integer/string | yes | The ID or [URL-encoded path of the project](../api/README.md#namespaced-path-encoding) |
+
+```plaintext
+GET /internal/kubernetes/project_info
+```
+
+Example Request:
+
+```shell
+curl --request GET --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" "http://localhost:3000/api/v4/internal/kubernetes/project_info?id=7"
+```
+
+### Kubernetes agent usage metrics
+
+Called from GitLab Kubernetes Agent Server (`kas`) to increase the usage
+metric counters.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `gitops_sync_count` | integer| yes | The number to increase the `gitops_sync_count` counter by |
+
+```plaintext
+POST /internal/kubernetes/usage_metrics
+```
+
+Example Request:
+
+```shell
+curl --request POST --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Content-Type: application/json" --data '{"gitops_sync_count":1}' "http://localhost:3000/api/v4/internal/kubernetes/usage_metrics"
+```
+
+### Kubernetes agent alert metrics
+
+Called from GitLab Kubernetes Agent Server (KAS) to save alerts derived from Cilium on Kubernetes
+Cluster.
+
+| Attribute | Type   | Required | Description |
+|:----------|:-------|:---------|:------------|
+| `alert` | Hash | yes | Alerts detail. Currently same format as [3rd party alert](../operations/incident_management/alert_integrations.md#customize-the-alert-payload-outside-of-gitlab). |
+
+```plaintext
+POST internal/kubernetes/modules/cilium_alert
+```
+
+Example Request:
+
+```shell
+curl --request POST   --header "Gitlab-Kas-Api-Request: <JWT token>" --header "Authorization: Bearer <agent token>" --header "Content-Type: application/json" --data '"{\"alert\":{\"title\":\"minimal\",\"message\":\"network problem\",\"evalMatches\":[{\"value\":1,\"metric\":\"Count\",\"tags\":{}}]}}"' "http://localhost:3000/api/v4/internal/kubernetes/modules/cilium_alert"
 ```

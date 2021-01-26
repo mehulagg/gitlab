@@ -2,9 +2,10 @@
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import { sprintf, s__, __ } from './locale';
+import { fixTitle, hide } from '~/tooltips';
 
 function Sidebar() {
   this.toggleTodo = this.toggleTodo.bind(this);
@@ -14,21 +15,24 @@ function Sidebar() {
   this.addEventListeners();
 }
 
-Sidebar.initialize = function() {
+Sidebar.initialize = function () {
   if (!this.instance) {
     this.instance = new Sidebar();
   }
 };
 
-Sidebar.prototype.removeListeners = function() {
+Sidebar.prototype.removeListeners = function () {
   this.sidebar.off('click', '.sidebar-collapsed-icon');
+  // eslint-disable-next-line @gitlab/no-global-event-off
   this.sidebar.off('hidden.gl.dropdown');
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loading.gl.dropdown');
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.dropdown').off('loaded.gl.dropdown');
   $(document).off('click', '.js-sidebar-toggle');
 };
 
-Sidebar.prototype.addEventListeners = function() {
+Sidebar.prototype.addEventListeners = function () {
   const $document = $(document);
 
   this.sidebar.on('click', '.sidebar-collapsed-icon', this, this.sidebarCollapseClicked);
@@ -40,29 +44,31 @@ Sidebar.prototype.addEventListeners = function() {
     .on('click', '.js-issuable-todo', this.toggleTodo);
 };
 
-Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
+Sidebar.prototype.sidebarToggleClicked = function (e, triggered) {
   const $this = $(this);
-  const isExpanded = $this.find('i').hasClass('fa-angle-double-right');
+  const $collapseIcon = $('.js-sidebar-collapse');
+  const $expandIcon = $('.js-sidebar-expand');
+  const $toggleContainer = $('.js-sidebar-toggle-container');
+  const isExpanded = $toggleContainer.data('is-expanded');
   const tooltipLabel = isExpanded ? __('Expand sidebar') : __('Collapse sidebar');
-  const $allGutterToggleIcons = $('.js-sidebar-toggle i');
   e.preventDefault();
 
   if (isExpanded) {
-    $allGutterToggleIcons.removeClass('fa-angle-double-right').addClass('fa-angle-double-left');
+    $toggleContainer.data('is-expanded', false);
+    $collapseIcon.addClass('hidden');
+    $expandIcon.removeClass('hidden');
     $('aside.right-sidebar')
       .removeClass('right-sidebar-expanded')
       .addClass('right-sidebar-collapsed');
-    $('.layout-page')
-      .removeClass('right-sidebar-expanded')
-      .addClass('right-sidebar-collapsed');
+    $('.layout-page').removeClass('right-sidebar-expanded').addClass('right-sidebar-collapsed');
   } else {
-    $allGutterToggleIcons.removeClass('fa-angle-double-left').addClass('fa-angle-double-right');
+    $toggleContainer.data('is-expanded', true);
+    $expandIcon.addClass('hidden');
+    $collapseIcon.removeClass('hidden');
     $('aside.right-sidebar')
       .removeClass('right-sidebar-collapsed')
       .addClass('right-sidebar-expanded');
-    $('.layout-page')
-      .removeClass('right-sidebar-collapsed')
-      .addClass('right-sidebar-expanded');
+    $('.layout-page').removeClass('right-sidebar-collapsed').addClass('right-sidebar-expanded');
   }
 
   $this.attr('data-original-title', tooltipLabel);
@@ -72,16 +78,14 @@ Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
   }
 };
 
-Sidebar.prototype.toggleTodo = function(e) {
+Sidebar.prototype.toggleTodo = function (e) {
   const $this = $(e.currentTarget);
   const ajaxType = $this.data('deletePath') ? 'delete' : 'post';
   const url = String($this.data('deletePath') || $this.data('createPath'));
 
-  $this.tooltip('hide');
+  hide($this);
 
-  $('.js-issuable-todo')
-    .disable()
-    .addClass('is-loading');
+  $('.js-issuable-todo').disable().addClass('is-loading');
 
   axios[ajaxType](url, {
     issuable_id: $this.data('issuableId'),
@@ -100,7 +104,7 @@ Sidebar.prototype.toggleTodo = function(e) {
     );
 };
 
-Sidebar.prototype.todoUpdateDone = function(data) {
+Sidebar.prototype.todoUpdateDone = function (data) {
   const deletePath = data.delete_path ? data.delete_path : null;
   const attrPrefix = deletePath ? 'mark' : 'todo';
   const $todoBtns = $('.js-issuable-todo');
@@ -119,7 +123,7 @@ Sidebar.prototype.todoUpdateDone = function(data) {
       .data('deletePath', deletePath);
 
     if ($el.hasClass('has-tooltip')) {
-      $el.tooltip('_fixTitle');
+      fixTitle($el);
     }
 
     if (typeof $el.data('isCollapsed') !== 'undefined') {
@@ -130,7 +134,7 @@ Sidebar.prototype.todoUpdateDone = function(data) {
   });
 };
 
-Sidebar.prototype.sidebarCollapseClicked = function(e) {
+Sidebar.prototype.sidebarCollapseClicked = function (e) {
   if ($(e.currentTarget).hasClass('dont-change-state')) {
     return;
   }
@@ -140,7 +144,7 @@ Sidebar.prototype.sidebarCollapseClicked = function(e) {
   return sidebar.openDropdown($block);
 };
 
-Sidebar.prototype.openDropdown = function(blockOrName) {
+Sidebar.prototype.openDropdown = function (blockOrName) {
   const $block = typeof blockOrName === 'string' ? this.getBlock(blockOrName) : blockOrName;
   if (!this.isOpen()) {
     this.setCollapseAfterUpdate($block);
@@ -154,19 +158,19 @@ Sidebar.prototype.openDropdown = function(blockOrName) {
   });
 };
 
-Sidebar.prototype.setCollapseAfterUpdate = function($block) {
+Sidebar.prototype.setCollapseAfterUpdate = function ($block) {
   $block.addClass('collapse-after-update');
   return $('.layout-page').addClass('with-overlay');
 };
 
-Sidebar.prototype.onSidebarDropdownHidden = function(e) {
+Sidebar.prototype.onSidebarDropdownHidden = function (e) {
   const sidebar = e.data;
   e.preventDefault();
   const $block = $(e.target).closest('.block');
   return sidebar.sidebarDropdownHidden($block);
 };
 
-Sidebar.prototype.sidebarDropdownHidden = function($block) {
+Sidebar.prototype.sidebarDropdownHidden = function ($block) {
   if ($block.hasClass('collapse-after-update')) {
     $block.removeClass('collapse-after-update');
     $('.layout-page').removeClass('with-overlay');
@@ -174,11 +178,11 @@ Sidebar.prototype.sidebarDropdownHidden = function($block) {
   }
 };
 
-Sidebar.prototype.triggerOpenSidebar = function() {
+Sidebar.prototype.triggerOpenSidebar = function () {
   return this.sidebar.find('.js-sidebar-toggle').trigger('click');
 };
 
-Sidebar.prototype.toggleSidebar = function(action) {
+Sidebar.prototype.toggleSidebar = function (action) {
   if (action == null) {
     action = 'toggle';
   }
@@ -197,11 +201,11 @@ Sidebar.prototype.toggleSidebar = function(action) {
   }
 };
 
-Sidebar.prototype.isOpen = function() {
+Sidebar.prototype.isOpen = function () {
   return this.sidebar.is('.right-sidebar-expanded');
 };
 
-Sidebar.prototype.getBlock = function(name) {
+Sidebar.prototype.getBlock = function (name) {
   return this.sidebar.find(`.block.${name}`);
 };
 

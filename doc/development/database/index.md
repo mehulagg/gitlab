@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Database guides
 
 ## Database Reviews
@@ -24,6 +30,7 @@
 - [Background migrations](../background_migrations.md)
 - [Swapping tables](../swapping_tables.md)
 - [Deleting migrations](../deleting_migrations.md)
+- [Partitioning tables](table_partitioning.md)
 
 ## Debugging
 
@@ -49,8 +56,16 @@
 - [Database Debugging and Troubleshooting](../database_debugging.md)
 - [Query Count Limits](../query_count_limits.md)
 - [Creating enums](../creating_enums.md)
+- [Client-side connection-pool](client_side_connection_pool.md)
+- [Updating multiple values](setting_multiple_values.md)
+- [Constraints naming conventions](constraint_naming_convention.md)
+- [Query performance guidelines](../query_performance.md)
 
 ## Case studies
 
 - [Database case study: Filtering by label](../filtering_by_label.md)
 - [Database case study: Namespaces storage statistics](../namespaces_storage_statistics.md)
+
+## Miscellaneous
+
+- [Maintenance operations](maintenance_operations.md)

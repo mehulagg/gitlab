@@ -5,7 +5,10 @@ module WikiActions
   include PreviewMarkdown
   include SendsBlob
   include Gitlab::Utils::StrongMemoize
+  include RedisTracking
   extend ActiveSupport::Concern
+
+  RESCUE_GIT_TIMEOUTS_IN = %w[show edit history diff pages].freeze
 
   included do
     before_action { respond_to :html }
@@ -31,7 +34,18 @@ module WikiActions
       end
     end
 
+    # NOTE: We want to include wiki page views in the same counter as the other
+    # Event-based wiki actions tracked through TrackUniqueEvents, so we use the same event name.
+    track_redis_hll_event :show, name: Gitlab::UsageDataCounters::TrackUniqueEvents::WIKI_ACTION.to_s,
+      feature: :track_unique_wiki_page_views, feature_default_enabled: true
+
     helper_method :view_file_button, :diff_file_html_data
+
+    rescue_from ::Gitlab::Git::CommandTimedOut do |exc|
+      raise exc unless RESCUE_GIT_TIMEOUTS_IN.include?(action_name)
+
+      render 'shared/wikis/git_error'
+    end
   end
 
   def new
@@ -40,11 +54,7 @@ module WikiActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def pages
-    @wiki_pages = Kaminari.paginate_array(
-      wiki.list_pages(sort: params[:sort], direction: params[:direction])
-    ).page(params[:page])
-
-    @wiki_entries = WikiPage.group_by_directory(@wiki_pages)
+    @wiki_entries = WikiDirectory.group_pages(wiki_pages)
 
     render 'shared/wikis/pages'
   end
@@ -93,17 +103,19 @@ module WikiActions
   def update
     return render('shared/wikis/empty') unless can?(current_user, :create_wiki, container)
 
-    @page = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    response = WikiPages::UpdateService.new(container: container, current_user: current_user, params: wiki_params).execute(page)
+    @page = response.payload[:page]
 
-    if page.valid?
+    if response.success?
+      flash[:toast] = _('Wiki page was successfully updated.')
+
       redirect_to(
-        wiki_page_path(wiki, page),
-        notice: _('Wiki was successfully updated.')
+        wiki_page_path(wiki, page)
       )
     else
       render 'shared/wikis/edit'
     end
-  rescue WikiPage::PageChangedError, WikiPage::PageRenameError, Gitlab::Git::Wiki::OperationError => e
+  rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
     @error = e
     render 'shared/wikis/edit'
   end
@@ -111,20 +123,18 @@ module WikiActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def create
-    @page = WikiPages::CreateService.new(container: container, current_user: current_user, params: wiki_params).execute
+    response = WikiPages::CreateService.new(container: container, current_user: current_user, params: wiki_params).execute
+    @page = response.payload[:page]
 
-    if page.persisted?
+    if response.success?
+      flash[:toast] = _('Wiki page was successfully created.')
+
       redirect_to(
-        wiki_page_path(wiki, page),
-        notice: _('Wiki was successfully updated.')
+        wiki_page_path(wiki, page)
       )
     else
       render 'shared/wikis/edit'
     end
-  rescue Gitlab::Git::Wiki::OperationError => e
-    @page = build_page(wiki_params)
-    @error = e
-    render 'shared/wikis/edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -160,16 +170,25 @@ module WikiActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def destroy
-    WikiPages::DestroyService.new(container: container, current_user: current_user).execute(page)
+    return render_404 unless page
 
-    redirect_to wiki_path(wiki),
-                status: :found,
-                notice: _("Page was successfully deleted")
-  rescue Gitlab::Git::Wiki::OperationError => e
-    @error = e
-    render 'shared/wikis/edit'
+    response = WikiPages::DestroyService.new(container: container, current_user: current_user).execute(page)
+
+    if response.success?
+      flash[:toast] = _("Wiki page was successfully deleted.")
+
+      redirect_to wiki_path(wiki),
+      status: :found
+    else
+      @error = response
+      render 'shared/wikis/edit'
+    end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+  def git_access
+    render 'shared/wikis/git_access'
+  end
 
   private
 
@@ -214,8 +233,18 @@ module WikiActions
     unless @sidebar_page # Fallback to default sidebar
       @sidebar_wiki_entries, @sidebar_limited = wiki.sidebar_entries
     end
+  rescue ::Gitlab::Git::CommandTimedOut => e
+    @sidebar_error = e
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
+  def wiki_pages
+    strong_memoize(:wiki_pages) do
+      Kaminari.paginate_array(
+        wiki.list_pages(sort: params[:sort], direction: params[:direction])
+      ).page(params[:page])
+    end
+  end
 
   def wiki_params
     params.require(:wiki).permit(:title, :content, :format, :message, :last_commit_sha)

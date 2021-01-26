@@ -32,30 +32,6 @@ RSpec.describe DesignManagement::MoveDesignsService do
   describe '#execute' do
     subject { service.execute }
 
-    context 'the feature is unavailable' do
-      let(:current_design) { designs.first }
-      let(:previous_design) { designs.second }
-      let(:next_design) { designs.third }
-
-      before do
-        stub_feature_flags(reorder_designs: false)
-      end
-
-      it 'raises cannot_move' do
-        expect(subject).to be_error.and(have_attributes(message: :cannot_move))
-      end
-
-      context 'but it is available on the current project' do
-        before do
-          stub_feature_flags(reorder_designs: issue.project)
-        end
-
-        it 'is successful' do
-          expect(subject).to be_success
-        end
-      end
-    end
-
     context 'the user cannot move designs' do
       let(:current_design) { designs.first }
       let(:current_user) { build_stubbed(:user) }
@@ -117,9 +93,30 @@ RSpec.describe DesignManagement::MoveDesignsService do
       let(:previous_design) { designs.second }
       let(:next_design) { designs.third }
 
-      it 'calls move_between and is successful' do
-        expect(current_design).to receive(:move_between).with(previous_design, next_design)
+      it 'repositions existing designs and correctly places the given design' do
+        other_design1 = create(:design, issue: issue, relative_position: 10)
+        other_design2 = create(:design, issue: issue, relative_position: 20)
+        other_design3, other_design4 = create_list(:design, 2, issue: issue)
+
         expect(subject).to be_success
+
+        expect(issue.designs.ordered).to eq([
+          # Existing designs which already had a relative_position set.
+          # These should stay at the beginning, in the same order.
+          other_design1,
+          other_design2,
+
+          # The designs we're passing into the service.
+          # These should be placed between the existing designs, in the correct order.
+          previous_design,
+          current_design,
+          next_design,
+
+          # Existing designs which didn't have a relative_position set.
+          # These should be placed at the end, in the order of their IDs.
+          other_design3,
+          other_design4
+        ])
       end
     end
   end

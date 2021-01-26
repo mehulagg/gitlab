@@ -10,8 +10,14 @@ class Import::GithubController < Import::BaseController
   before_action :provider_auth, only: [:status, :realtime_changes, :create]
   before_action :expire_etag_cache, only: [:status, :create]
 
+  OAuthConfigMissingError = Class.new(StandardError)
+
+  rescue_from OAuthConfigMissingError, with: :missing_oauth_config
   rescue_from Octokit::Unauthorized, with: :provider_unauthorized
   rescue_from Octokit::TooManyRequests, with: :provider_rate_limit
+  rescue_from Gitlab::GithubImport::RateLimitError, with: :rate_limit_threshold_exceeded
+
+  PAGE_LENGTH = 25
 
   def new
     if !ci_cd_only? && github_import_configured? && logged_in_with_provider?
@@ -22,7 +28,7 @@ class Import::GithubController < Import::BaseController
   end
 
   def callback
-    session[access_token_key] = client.get_token(params[:code])
+    session[access_token_key] = get_token(params[:code])
     redirect_to status_import_url
   end
 
@@ -77,9 +83,7 @@ class Import::GithubController < Import::BaseController
   override :provider_url
   def provider_url
     strong_memoize(:provider_url) do
-      provider = Gitlab::Auth::OAuth::Provider.config_for('github')
-
-      provider&.dig('url').presence || 'https://github.com'
+      oauth_config&.dig('url').presence || 'https://github.com'
     end
   end
 
@@ -104,11 +108,70 @@ class Import::GithubController < Import::BaseController
   end
 
   def client
-    @client ||= Gitlab::LegacyGithubImport::Client.new(session[access_token_key], client_options)
+    @client ||= if Feature.enabled?(:remove_legacy_github_client)
+                  Gitlab::GithubImport::Client.new(session[access_token_key])
+                else
+                  Gitlab::LegacyGithubImport::Client.new(session[access_token_key], **client_options)
+                end
   end
 
   def client_repos
-    @client_repos ||= filtered(client.repos)
+    @client_repos ||= if Feature.enabled?(:remove_legacy_github_client)
+                        if sanitized_filter_param
+                          client.search_repos_by_name(sanitized_filter_param, pagination_options)[:items]
+                        else
+                          client.octokit.repos(nil, pagination_options)
+                        end
+                      else
+                        filtered(client.repos)
+                      end
+  end
+
+  def sanitized_filter_param
+    super
+
+    @filter = @filter&.tr(' ', '')&.tr(':', '')
+  end
+
+  def oauth_client
+    raise OAuthConfigMissingError unless oauth_config
+
+    @oauth_client ||= ::OAuth2::Client.new(
+      oauth_config.app_id,
+      oauth_config.app_secret,
+      oauth_options.merge(ssl: { verify: oauth_config['verify_ssl'] })
+    )
+  end
+
+  def oauth_config
+    @oauth_config ||= Gitlab::Auth::OAuth::Provider.config_for('github')
+  end
+
+  def oauth_options
+    if oauth_config
+      oauth_config.dig('args', 'client_options').deep_symbolize_keys
+    else
+      OmniAuth::Strategies::GitHub.default_options[:client_options].symbolize_keys
+    end
+  end
+
+  def authorize_url
+    if Feature.enabled?(:remove_legacy_github_client)
+      oauth_client.auth_code.authorize_url(
+        redirect_uri: callback_import_url,
+        scope: 'repo, user, user:email'
+      )
+    else
+      client.authorize_url(callback_import_url)
+    end
+  end
+
+  def get_token(code)
+    if Feature.enabled?(:remove_legacy_github_client)
+      oauth_client.auth_code.get_token(code).token
+    else
+      client.get_token(code)
+    end
   end
 
   def verify_import_enabled
@@ -116,7 +179,7 @@ class Import::GithubController < Import::BaseController
   end
 
   def go_to_provider_for_permissions
-    redirect_to client.authorize_url(callback_import_url)
+    redirect_to authorize_url
   end
 
   def import_enabled?
@@ -152,6 +215,12 @@ class Import::GithubController < Import::BaseController
       alert: _("GitHub API rate limit exceeded. Try again after %{reset_time}") % { reset_time: reset_time }
   end
 
+  def missing_oauth_config
+    session[access_token_key] = nil
+    redirect_to new_import_url,
+      alert: _('Missing OAuth configuration for GitHub.')
+  end
+
   def access_token_key
     :"#{provider_name}_access_token"
   end
@@ -184,12 +253,15 @@ class Import::GithubController < Import::BaseController
     {}
   end
 
-  def sanitized_filter_param
-    @filter ||= sanitize(params[:filter])
+  def rate_limit_threshold_exceeded
+    head :too_many_requests
   end
 
-  def filter_attribute
-    :name
+  def pagination_options
+    {
+      page: [1, params[:page].to_i].max,
+      per_page: PAGE_LENGTH
+    }
   end
 end
 

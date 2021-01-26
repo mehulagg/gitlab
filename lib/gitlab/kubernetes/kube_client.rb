@@ -61,18 +61,11 @@ module Gitlab
       # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
       # group client
       delegate :update_cluster_role_binding,
-        to: :rbac_client
-
-      # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
-      # group client
-      delegate :create_role,
-      :get_role,
-      :update_role,
-      to: :rbac_client
-
-      # RBAC methods delegates to the apis/rbac.authorization.k8s.io api
-      # group client
-      delegate :update_role_binding,
+        :create_role,
+        :get_role,
+        :update_role,
+        :delete_role_binding,
+        :update_role_binding,
         to: :rbac_client
 
       # non-entity methods that can only work with the core client
@@ -92,6 +85,7 @@ module Gitlab
       # group client
       delegate :create_network_policy,
         :get_network_policies,
+        :get_network_policy,
         :update_network_policy,
         :delete_network_policy,
         to: :networking_client
@@ -100,6 +94,7 @@ module Gitlab
       # group client
       delegate :create_cilium_network_policy,
         :get_cilium_network_policies,
+        :get_cilium_network_policy,
         :update_cilium_network_policy,
         :delete_cilium_network_policy,
         to: :cilium_networking_client
@@ -165,10 +160,36 @@ module Gitlab
         end
       end
 
+      # Ingresses resource is currently on the apis/extensions api group
+      # until Kubernetes 1.21. Kubernetest 1.22+ has ingresses resources in
+      # the networking.k8s.io/v1 api group.
+      #
+      # As we still support Kubernetes 1.12+, we will need to support both.
+      def get_ingresses(**args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:get_ingresses)
+          extensions_client.get_ingresses(**args)
+        else
+          networking_client.get_ingresses(**args)
+        end
+      end
+
+      def patch_ingress(*args)
+        extensions_client.discover unless extensions_client.discovered
+
+        if extensions_client.respond_to?(:patch_ingress)
+          extensions_client.patch_ingress(*args)
+        else
+          networking_client.patch_ingress(*args)
+        end
+      end
+
       def create_or_update_cluster_role_binding(resource)
         update_cluster_role_binding(resource)
       end
 
+      # Note that we cannot update roleRef as that is immutable
       def create_or_update_role_binding(resource)
         update_role_binding(resource)
       end

@@ -1,12 +1,6 @@
 import Vue from 'vue';
-import Mousetrap from 'mousetrap';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import headerComponent from '~/vue_merge_request_widget/components/mr_widget_header.vue';
-
-jest.mock('mousetrap', () => ({
-  bind: jest.fn(),
-  unbind: jest.fn(),
-}));
 
 describe('MRWidgetHeader', () => {
   let vm;
@@ -25,10 +19,14 @@ describe('MRWidgetHeader', () => {
     const downloadEmailPatchesEl = vm.$el.querySelector('.js-download-email-patches');
     const downloadPlainDiffEl = vm.$el.querySelector('.js-download-plain-diff');
 
-    expect(downloadEmailPatchesEl.textContent.trim()).toEqual('Email patches');
-    expect(downloadEmailPatchesEl.getAttribute('href')).toEqual('/mr/email-patches');
-    expect(downloadPlainDiffEl.textContent.trim()).toEqual('Plain diff');
-    expect(downloadPlainDiffEl.getAttribute('href')).toEqual('/mr/plainDiffPath');
+    expect(downloadEmailPatchesEl.innerText.trim()).toEqual('Email patches');
+    expect(downloadEmailPatchesEl.querySelector('a').getAttribute('href')).toEqual(
+      '/mr/email-patches',
+    );
+    expect(downloadPlainDiffEl.innerText.trim()).toEqual('Plain diff');
+    expect(downloadPlainDiffEl.querySelector('a').getAttribute('href')).toEqual(
+      '/mr/plainDiffPath',
+    );
   };
 
   describe('computed', () => {
@@ -126,40 +124,11 @@ describe('MRWidgetHeader', () => {
       });
 
       it('renders clipboard button', () => {
-        expect(vm.$el.querySelector('.btn-clipboard')).not.toEqual(null);
+        expect(vm.$el.querySelector('[data-testid="mr-widget-copy-clipboard"]')).not.toEqual(null);
       });
 
       it('renders target branch', () => {
         expect(vm.$el.querySelector('.js-target-branch').textContent.trim()).toEqual('master');
-      });
-
-      describe('keyboard shortcuts', () => {
-        it('binds a keyboard shortcut handler to the "b" key', () => {
-          expect(Mousetrap.bind).toHaveBeenCalledWith('b', expect.any(Function));
-        });
-
-        it('triggers a click on the "copy to clipboard" button when the handler is executed', () => {
-          const testClickHandler = jest.fn();
-          vm.$refs.copyBranchNameButton.$el.addEventListener('click', testClickHandler);
-
-          // Get a reference to the function that was assigned to the "b" shortcut key.
-          const shortcutHandler = Mousetrap.bind.mock.calls[0][1];
-
-          expect(testClickHandler).not.toHaveBeenCalled();
-
-          // Simulate Mousetrap calling the function.
-          shortcutHandler();
-
-          expect(testClickHandler).toHaveBeenCalledTimes(1);
-        });
-
-        it('unbinds the keyboard shortcut when the component is destroyed', () => {
-          expect(Mousetrap.unbind).not.toHaveBeenCalled();
-
-          vm.$destroy();
-
-          expect(Mousetrap.unbind).toHaveBeenCalledWith('b');
-        });
       });
     });
 
@@ -195,9 +164,7 @@ describe('MRWidgetHeader', () => {
       it('renders checkout branch button with modal trigger', () => {
         const button = vm.$el.querySelector('.js-check-out-branch');
 
-        expect(button.textContent.trim()).toEqual('Check out branch');
-        expect(button.getAttribute('data-target')).toEqual('#modal_merge_info');
-        expect(button.getAttribute('data-toggle')).toEqual('modal');
+        expect(button.textContent.trim()).toBe('Check out branch');
       });
 
       it('renders web ide button', () => {
@@ -220,7 +187,7 @@ describe('MRWidgetHeader', () => {
         expect(link.getAttribute('href')).toBeNull();
       });
 
-      it('renders web ide button with blank query string if target & source project branch', done => {
+      it('renders web ide button with blank query string if target & source project branch', (done) => {
         vm.mr.targetProjectFullPath = 'root/gitlab-ce';
 
         vm.$nextTick(() => {
@@ -235,7 +202,7 @@ describe('MRWidgetHeader', () => {
         });
       });
 
-      it('renders web ide button with relative URL', done => {
+      it('renders web ide button with relative URL', (done) => {
         gon.relative_url_root = '/gitlab';
         vm.mr.iid = 2;
 

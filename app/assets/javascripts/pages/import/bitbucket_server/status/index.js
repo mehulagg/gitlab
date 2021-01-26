@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { initStoreFromElement, initPropsFromElement } from '~/import_projects';
+import { initStoreFromElement, initPropsFromElement } from '~/import_entities/import_projects';
 import BitbucketServerStatusTable from './components/bitbucket_server_status_table.vue';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,14 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!mountElement) return undefined;
 
   const store = initStoreFromElement(mountElement);
-  const props = initPropsFromElement(mountElement);
+  const attrs = initPropsFromElement(mountElement);
   const { reconfigurePath } = mountElement.dataset;
 
   return new Vue({
     el: mountElement,
     store,
     render(createElement) {
-      return createElement(BitbucketServerStatusTable, { props: { ...props, reconfigurePath } });
+      return createElement(BitbucketServerStatusTable, {
+        attrs: { ...attrs, reconfigurePath },
+      });
     },
   });
 });

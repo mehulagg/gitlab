@@ -16,6 +16,10 @@ module Types
     field :path, GraphQL::STRING_TYPE, null: false,
           description: 'Path of the project'
 
+    field :sast_ci_configuration, Types::CiConfiguration::Sast::Type, null: true,
+      calls_gitaly: true,
+      description: 'SAST CI configuration for the project'
+
     field :name_with_namespace, GraphQL::STRING_TYPE, null: false,
           description: 'Full name of the project with its namespace'
     field :name, GraphQL::STRING_TYPE, null: false,
@@ -54,7 +58,7 @@ module Types
     field :container_registry_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project stores Docker container images in a container registry'
     field :shared_runners_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if Shared Runners are enabled for the project'
+          description: 'Indicates if shared runners are enabled for the project'
     field :lfs_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project has Large File Storage (LFS) enabled'
     field :merge_requests_ff_only_enabled, GraphQL::BOOLEAN_TYPE, null: true,
@@ -67,33 +71,25 @@ module Types
           description: 'E-mail address of the service desk.'
 
     field :avatar_url, GraphQL::STRING_TYPE, null: true, calls_gitaly: true,
-          description: 'URL to avatar image file of the project',
-          resolve: -> (project, args, ctx) do
-            project.avatar_url(only_path: false)
-          end
+          description: 'URL to avatar image file of the project'
 
     %i[issues merge_requests wiki snippets].each do |feature|
       field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true,
-            description: "Indicates if #{feature.to_s.titleize.pluralize} are enabled for the current user",
-            resolve: -> (project, args, ctx) do
-              project.feature_available?(feature, ctx[:current_user])
-            end
+            description: "Indicates if #{feature.to_s.titleize.pluralize} are enabled for the current user"
+
+      define_method "#{feature}_enabled" do
+        object.feature_available?(feature, context[:current_user])
+      end
     end
 
     field :jobs_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if CI/CD pipeline jobs are enabled for the current user',
-          resolve: -> (project, args, ctx) do
-            project.feature_available?(:builds, ctx[:current_user])
-          end
+          description: 'Indicates if CI/CD pipeline jobs are enabled for the current user'
 
     field :public_jobs, GraphQL::BOOLEAN_TYPE, method: :public_builds, null: true,
           description: 'Indicates if there is public access to pipelines and job details of the project, including output logs and artifacts'
 
     field :open_issues_count, GraphQL::INT_TYPE, null: true,
-          description: 'Number of open issues for the project',
-          resolve: -> (project, args, ctx) do
-            project.open_issues_count if project.feature_available?(:issues, ctx[:current_user])
-          end
+          description: 'Number of open issues for the project'
 
     field :import_status, GraphQL::STRING_TYPE, null: true,
           description: 'Status of import background job of the project'
@@ -115,6 +111,8 @@ module Types
           description: 'Indicates if issues referenced by merge requests and commits within the default branch are closed automatically'
     field :suggestion_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'The commit message used to apply merge request suggestions'
+    field :squash_read_only, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_readonly?,
+          description: 'Indicates if squash readonly is enabled'
 
     field :namespace, Types::NamespaceType, null: true,
           description: 'Namespace of the project'
@@ -123,8 +121,7 @@ module Types
 
     field :statistics, Types::ProjectStatisticsType,
           null: true,
-          description: 'Statistics of the project',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchProjectStatisticsLoader.new(obj.id).find }
+          description: 'Statistics of the project'
 
     field :repository, Types::RepositoryType, null: true,
           description: 'Git repository of the project'
@@ -134,7 +131,7 @@ module Types
           null: true,
           description: 'Merge requests of the project',
           extras: [:lookahead],
-          resolver: Resolvers::MergeRequestsResolver
+          resolver: Resolvers::ProjectMergeRequestsResolver
 
     field :merge_request,
           Types::MergeRequestType,
@@ -146,14 +143,21 @@ module Types
           Types::IssueType.connection_type,
           null: true,
           description: 'Issues of the project',
+          extras: [:lookahead],
           resolver: Resolvers::IssuesResolver
+
+    field :issue_status_counts,
+          Types::IssueStatusCountsType,
+          null: true,
+          description: 'Counts of issues by status for the project',
+          extras: [:lookahead],
+          resolver: Resolvers::IssueStatusCountsResolver
 
     field :milestones, Types::MilestoneType.connection_type, null: true,
           description: 'Milestones of the project',
-          resolver: Resolvers::ProjectMilestoneResolver
+          resolver: Resolvers::ProjectMilestonesResolver
 
     field :project_members,
-          Types::ProjectMemberType.connection_type,
           description: 'Members of the project',
           resolver: Resolvers::ProjectMembersResolver
 
@@ -163,9 +167,11 @@ module Types
           description: 'Environments of the project',
           resolver: Resolvers::EnvironmentsResolver
 
-    field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
-      description: 'SAST CI configuration for the project',
-      resolver: ::Resolvers::CiConfiguration::SastResolver
+    field :environment,
+          Types::EnvironmentType,
+          null: true,
+          description: 'A single environment of the project',
+          resolver: Resolvers::EnvironmentsResolver.single
 
     field :issue,
           Types::IssueType,
@@ -173,14 +179,14 @@ module Types
           description: 'A single issue of the project',
           resolver: Resolvers::IssuesResolver.single
 
-    field :packages, Types::PackageType.connection_type, null: true,
+    field :packages, Types::Packages::PackageType.connection_type, null: true,
          description: 'Packages of the project',
          resolver: Resolvers::PackagesResolver
 
     field :pipelines,
-          Types::Ci::PipelineType.connection_type,
           null: true,
           description: 'Build pipelines of the project',
+          extras: [:lookahead],
           resolver: Resolvers::ProjectPipelinesResolver
 
     field :pipeline,
@@ -188,6 +194,11 @@ module Types
           null: true,
           description: 'Build pipeline of the project',
           resolver: Resolvers::ProjectPipelineResolver
+
+    field :ci_cd_settings,
+          Types::Ci::CiCdSettingType,
+          null: true,
+          description: 'CI/CD settings for the project'
 
     field :sentry_detailed_error,
           Types::ErrorTracking::SentryDetailedErrorType,
@@ -224,13 +235,12 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the project',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :jira_imports,
           Types::JiraImportType.connection_type,
           null: true,
-          description: 'Jira imports into the project',
-          resolver: Resolvers::Projects::JiraImportsResolver
+          description: 'Jira imports into the project'
 
     field :services,
           Types::Projects::ServiceType.connection_type,
@@ -257,6 +267,12 @@ module Types
           description: 'Counts of alerts by status for the project',
           resolver: Resolvers::AlertManagement::AlertStatusCountsResolver
 
+    field :alert_management_integrations,
+          Types::AlertManagement::IntegrationType.connection_type,
+          null: true,
+          description: 'Integrations which can receive alerts for the project',
+          resolver: Resolvers::AlertManagement::IntegrationsResolver
+
     field :releases,
           Types::ReleaseType.connection_type,
           null: true,
@@ -275,6 +291,15 @@ module Types
           null: true,
           description: 'The container expiration policy of the project'
 
+    field :container_repositories,
+          Types::ContainerRepositoryType.connection_type,
+          null: true,
+          description: 'Container repositories of the project',
+          resolver: Resolvers::ContainerRepositoriesResolver
+
+    field :container_repositories_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of container repositories in the project'
+
     field :label,
           Types::LabelType,
           null: true,
@@ -283,6 +308,22 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :terraform_state,
+          Types::Terraform::StateType,
+          null: true,
+          description: 'Find a single Terraform state by name.',
+          resolver: Resolvers::Terraform::StatesResolver.single
+
+    field :terraform_states,
+          Types::Terraform::StateType.connection_type,
+          null: true,
+          description: 'Terraform states associated with the project.',
+          resolver: Resolvers::Terraform::StatesResolver
+
+    field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
+          description: 'Pipeline analytics',
+          resolver: Resolvers::ProjectPipelineStatisticsResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
@@ -306,6 +347,32 @@ module Types
       LabelsFinder
         .new(current_user, project: project, search: search_term)
         .execute
+    end
+
+    def avatar_url
+      object.avatar_url(only_path: false)
+    end
+
+    def jobs_enabled
+      object.feature_available?(:builds, context[:current_user])
+    end
+
+    def open_issues_count
+      object.open_issues_count if object.feature_available?(:issues, context[:current_user])
+    end
+
+    def statistics
+      Gitlab::Graphql::Loaders::BatchProjectStatisticsLoader.new(object.id).find
+    end
+
+    def container_repositories_count
+      project.container_repositories.size
+    end
+
+    def sast_ci_configuration
+      return unless Ability.allowed?(current_user, :download_code, object)
+
+      ::Security::CiConfiguration::SastParserService.new(object).configuration
     end
 
     private

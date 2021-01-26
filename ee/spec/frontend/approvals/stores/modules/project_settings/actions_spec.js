@@ -1,9 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
-import createFlash from '~/flash';
-import testAction from 'helpers/vuex_action_helper';
+import { mapApprovalRuleRequest, mapApprovalSettingsResponse } from 'ee/approvals/mappers';
 import * as types from 'ee/approvals/stores/modules/base/mutation_types';
 import * as actions from 'ee/approvals/stores/modules/project_settings/actions';
-import { mapApprovalRuleRequest, mapApprovalSettingsResponse } from 'ee/approvals/mappers';
+import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
@@ -101,7 +101,7 @@ describe('EE approvals project settings module actions', () => {
           { type: 'receiveRulesSuccess', payload: mapApprovalSettingsResponse(data) },
         ],
         () => {
-          expect(mock.history.get.map(x => x.url)).toEqual([TEST_SETTINGS_PATH]);
+          expect(mock.history.get.map((x) => x.url)).toEqual([TEST_SETTINGS_PATH]);
         },
       );
     });
@@ -131,16 +131,6 @@ describe('EE approvals project settings module actions', () => {
     });
   });
 
-  describe('postRuleError', () => {
-    it('creates a flash', () => {
-      expect(createFlash).not.toHaveBeenCalled();
-
-      actions.postRuleError();
-
-      expect(createFlash.mock.calls[0]).toEqual([expect.stringMatching('error occurred')]);
-    });
-  });
-
   describe('postRule', () => {
     it('dispatches success on success', () => {
       mock.onPost(TEST_RULES_PATH).replyOnce(200);
@@ -159,18 +149,6 @@ describe('EE approvals project settings module actions', () => {
             }),
           ]);
         },
-      );
-    });
-
-    it('dispatches error on error', () => {
-      mock.onPost(TEST_RULES_PATH).replyOnce(500);
-
-      return testAction(
-        actions.postRule,
-        TEST_RULE_REQUEST,
-        state,
-        [],
-        [{ type: 'postRuleError' }],
       );
     });
   });
@@ -193,18 +171,6 @@ describe('EE approvals project settings module actions', () => {
             }),
           ]);
         },
-      );
-    });
-
-    it('dispatches error on error', () => {
-      mock.onPut(`${TEST_RULES_PATH}/${TEST_RULE_ID}`).replyOnce(500);
-
-      return testAction(
-        actions.putRule,
-        { id: TEST_RULE_ID, ...TEST_RULE_REQUEST },
-        state,
-        [],
-        [{ type: 'postRuleError' }],
       );
     });
   });

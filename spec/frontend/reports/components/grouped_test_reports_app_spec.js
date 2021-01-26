@@ -1,11 +1,13 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { mockTracking } from 'helpers/tracking_helper';
 import GroupedTestReportsApp from '~/reports/components/grouped_test_reports_app.vue';
-import store from '~/reports/store';
+import { getStoreConfig } from '~/reports/store';
 
 import { failedReport } from '../mock_data/mock_data';
 import successTestReports from '../mock_data/no_failures_report.json';
 import newFailedTestReports from '../mock_data/new_failures_report.json';
+import recentFailuresTestReports from '../mock_data/recent_failures_report.json';
 import newErrorsTestReports from '../mock_data/new_errors_report.json';
 import mixedResultsTestReports from '../mock_data/new_and_fixed_failures_report.json';
 import resolvedFailures from '../mock_data/resolved_failures.json';
@@ -20,10 +22,7 @@ describe('Grouped test reports app', () => {
   let wrapper;
   let mockStore;
 
-  const mountComponent = ({
-    glFeatures = { junitPipelineView: false },
-    props = { pipelinePath },
-  } = {}) => {
+  const mountComponent = ({ props = { pipelinePath } } = {}) => {
     wrapper = mount(Component, {
       store: mockStore,
       localVue,
@@ -32,22 +31,17 @@ describe('Grouped test reports app', () => {
         pipelinePath,
         ...props,
       },
-      methods: {
-        fetchReports: () => {},
-      },
-      provide: {
-        glFeatures,
-      },
     });
   };
 
-  const setReports = reports => {
+  const setReports = (reports) => {
     mockStore.state.status = reports.status;
     mockStore.state.summary = reports.summary;
     mockStore.state.reports = reports.suites;
   };
 
   const findHeader = () => wrapper.find('[data-testid="report-section-code-text"]');
+  const findExpandButton = () => wrapper.find('[data-testid="report-section-expand-button"]');
   const findFullTestReportLink = () => wrapper.find('[data-testid="group-test-reports-full-link"]');
   const findSummaryDescription = () => wrapper.find('[data-testid="test-summary-row-description"]');
   const findIssueDescription = () => wrapper.find('[data-testid="test-issue-body-description"]');
@@ -55,7 +49,13 @@ describe('Grouped test reports app', () => {
     wrapper.findAll('[data-testid="test-issue-body-description"]');
 
   beforeEach(() => {
-    mockStore = store();
+    mockStore = new Vuex.Store({
+      ...getStoreConfig(),
+      actions: {
+        fetchReports: () => {},
+        setEndpoint: () => {},
+      },
+    });
     mountComponent();
   });
 
@@ -78,28 +78,17 @@ describe('Grouped test reports app', () => {
   });
 
   describe('`View full report` button', () => {
-    it('should not render the full test report link', () => {
-      expect(findFullTestReportLink().exists()).toBe(false);
-    });
+    it('should render the full test report link', () => {
+      const fullTestReportLink = findFullTestReportLink();
 
-    describe('With junitPipelineView feature flag enabled', () => {
-      beforeEach(() => {
-        mountComponent({ glFeatures: { junitPipelineView: true } });
-      });
-
-      it('should render the full test report link', () => {
-        const fullTestReportLink = findFullTestReportLink();
-
-        expect(fullTestReportLink.exists()).toBe(true);
-        expect(pipelinePath).not.toBe('');
-        expect(fullTestReportLink.attributes('href')).toBe(`${pipelinePath}/test_report`);
-      });
+      expect(fullTestReportLink.exists()).toBe(true);
+      expect(pipelinePath).not.toBe('');
+      expect(fullTestReportLink.attributes('href')).toBe(`${pipelinePath}/test_report`);
     });
 
     describe('Without a pipelinePath', () => {
       beforeEach(() => {
         mountComponent({
-          glFeatures: { junitPipelineView: true },
           props: { pipelinePath: '' },
         });
       });
@@ -107,6 +96,35 @@ describe('Grouped test reports app', () => {
       it('should not render the full test report link', () => {
         expect(findFullTestReportLink().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('`Expand` button', () => {
+    let trackingSpy;
+
+    beforeEach(() => {
+      setReports(newFailedTestReports);
+      mountComponent();
+      document.body.dataset.page = 'projects:merge_requests:show';
+      trackingSpy = mockTracking('_category_', wrapper.element, jest.spyOn);
+    });
+
+    it('tracks an event on click', () => {
+      findExpandButton().trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'expand_test_report_widget', {});
+    });
+
+    it('only tracks the first expansion', () => {
+      expect(trackingSpy).not.toHaveBeenCalled();
+
+      const button = findExpandButton();
+
+      button.trigger('click');
+      button.trigger('click');
+      button.trigger('click');
+
+      expect(trackingSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -209,11 +227,57 @@ describe('Grouped test reports app', () => {
     });
 
     it('renders resolved errors', () => {
-      expect(
-        findAllIssueDescriptions()
-          .at(2)
-          .text(),
-      ).toContain(resolvedFailures.suites[0].resolved_errors[0].name);
+      expect(findAllIssueDescriptions().at(2).text()).toContain(
+        resolvedFailures.suites[0].resolved_errors[0].name,
+      );
+    });
+  });
+
+  describe('recent failures counts', () => {
+    describe('with recent failures counts', () => {
+      beforeEach(() => {
+        setReports(recentFailuresTestReports);
+        mountComponent();
+      });
+
+      it('renders the recently failed tests summary', () => {
+        expect(findHeader().text()).toContain(
+          '2 out of 3 failed tests have failed more than once in the last 14 days',
+        );
+      });
+
+      it('renders the recently failed count on the test suite', () => {
+        expect(findSummaryDescription().text()).toContain(
+          '1 out of 2 failed tests has failed more than once in the last 14 days',
+        );
+      });
+
+      it('renders the recent failures count on the test case', () => {
+        expect(findIssueDescription().text()).toContain(
+          'Failed 8 times in master in the last 14 days',
+        );
+      });
+    });
+
+    describe('without recent failures counts', () => {
+      beforeEach(() => {
+        setReports(mixedResultsTestReports);
+        mountComponent();
+      });
+
+      it('does not render the recently failed tests summary', () => {
+        expect(findHeader().text()).not.toContain('failed more than once in the last 14 days');
+      });
+
+      it('does not render the recently failed count on the test suite', () => {
+        expect(findSummaryDescription().text()).not.toContain(
+          'failed more than once in the last 14 days',
+        );
+      });
+
+      it('does not render the recent failures count on the test case', () => {
+        expect(findIssueDescription().text()).not.toContain('in the last 14 days');
+      });
     });
   });
 

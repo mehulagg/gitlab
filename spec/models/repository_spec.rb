@@ -123,7 +123,7 @@ RSpec.describe Repository do
           options = { message: 'test tag message\n',
                       tagger: { name: 'John Smith', email: 'john@gmail.com' } }
 
-          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', options)
+          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', **options)
 
           double_first = double(committed_date: Time.current - 1.second)
           double_last = double(committed_date: Time.current)
@@ -587,15 +587,19 @@ RSpec.describe Repository do
       end
 
       it "is expired when the branches caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_branches_cache)
+        repository.expire_branches_cache
       end
 
       it "is expired when the repository caches are expired" do
-        expect(cache).to receive(:delete).with(:merged_branch_names).at_least(:once)
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
 
-        repository.send(:expire_all_method_caches)
+        repository.expire_all_method_caches
       end
     end
 
@@ -1259,6 +1263,7 @@ RSpec.describe Repository do
       %w(a b c/z) | %w(c d) | true
       %w(a/b/z) | %w(a/b) | false # we only consider refs ambiguous before the first slash
       %w(a/b/z) | %w(a/b a) | true
+      %w(ab) | %w(abc/d a b) | false
     end
 
     with_them do
@@ -2023,6 +2028,22 @@ RSpec.describe Repository do
     end
   end
 
+  describe '#lookup' do
+    before do
+      allow(repository.raw_repository).to receive(:lookup).and_return('interesting_blob')
+    end
+
+    it 'uses the lookup cache' do
+      2.times.each { repository.lookup('sha1') }
+
+      expect(repository.raw_repository).to have_received(:lookup).once
+    end
+
+    it 'returns the correct value' do
+      expect(repository.lookup('sha1')).to eq('interesting_blob')
+    end
+  end
+
   describe '#after_create' do
     it 'calls expire_status_cache' do
       expect(repository).to receive(:expire_status_cache)
@@ -2099,7 +2120,7 @@ RSpec.describe Repository do
   describe '#expire_branches_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(branch_names merged_branch_names branch_count has_visible_content?))
+        .with(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_branches_cache
@@ -2109,7 +2130,7 @@ RSpec.describe Repository do
   describe '#expire_tags_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(tag_names tag_count))
+        .with(%i(tag_names tag_count has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_tags_cache
@@ -2330,7 +2351,7 @@ RSpec.describe Repository do
         end
 
         it 'caches the response' do
-          expect(repository).to receive(:readme).and_call_original.once
+          expect(repository.head_tree).to receive(:readme_path).and_call_original.once
 
           2.times do
             expect(repository.readme_path).to eq("README.md")
@@ -2683,7 +2704,7 @@ RSpec.describe Repository do
         expect(subject).to be_a(Gitlab::Git::Repository)
         expect(subject.relative_path).to eq(project.disk_path + '.wiki.git')
         expect(subject.gl_repository).to eq("wiki-#{project.id}")
-        expect(subject.gl_project_path).to eq(project.full_path)
+        expect(subject.gl_project_path).to eq(project.wiki.full_path)
       end
     end
   end
@@ -2700,6 +2721,7 @@ RSpec.describe Repository do
        build(:commit, author: author_c),
        build(:commit, author: author_c)]
     end
+
     let(:order_by) { nil }
     let(:sort) { nil }
 
@@ -2935,12 +2957,19 @@ RSpec.describe Repository do
       expect(snippet.repository.project).to be_nil
     end
 
+    it 'returns the project for a project wiki' do
+      wiki = create(:project_wiki)
+
+      expect(wiki.project).to be(wiki.repository.project)
+    end
+
     it 'returns the container if it is a project' do
       expect(repository.project).to be(project)
     end
 
     it 'returns nil if the container is not a project' do
-      expect(repository).to receive(:container).and_return(Group.new)
+      repository.container = Group.new
+
       expect(repository.project).to be_nil
     end
   end
@@ -2975,16 +3004,10 @@ RSpec.describe Repository do
     context 'for a project wiki repository' do
       let(:repository) { project.wiki.repository }
 
-      it 'returns true when LFS is enabled' do
-        stub_lfs_setting(enabled: true)
+      it 'delegates to the project' do
+        expect(project).to receive(:lfs_enabled?).and_return(true)
 
         is_expected.to be_truthy
-      end
-
-      it 'returns false when LFS is disabled' do
-        stub_lfs_setting(enabled: false)
-
-        is_expected.to be_falsy
       end
     end
 
@@ -3024,6 +3047,53 @@ RSpec.describe Repository do
 
         is_expected.to be_falsy
       end
+    end
+  end
+
+  describe '.pick_storage_shard', :request_store do
+    before do
+      storages = {
+        'default' => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories'),
+        'picked'  => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories')
+      }
+
+      allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
+      stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
+      Gitlab::CurrentSettings.current_application_settings
+
+      update_storages({ 'picked' => 0, 'default' => 100 })
+    end
+
+    context 'when expire is false' do
+      it 'does not expire existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).not_to receive(:expire_current_application_settings)
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: false)
+        expect(new_storage).to eq(previous_storage)
+      end
+    end
+
+    context 'when expire is true' do
+      it 'expires existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).to receive(:expire_current_application_settings).and_call_original
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: true)
+        expect(new_storage).to eq('picked')
+      end
+    end
+
+    def update_storages(storage_hash)
+      settings = ApplicationSetting.last
+      settings.repository_storages_weighted = storage_hash
+      settings.save!
     end
   end
 end

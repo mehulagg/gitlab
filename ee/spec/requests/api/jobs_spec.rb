@@ -26,7 +26,7 @@ RSpec.describe API::Jobs do
   end
 
   describe 'GET /projects/:id/jobs/:job_id/artifacts' do
-    let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user) }
+    let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
 
     context 'when using job_token to authenticate' do
       subject do
@@ -71,15 +71,30 @@ RSpec.describe API::Jobs do
           expect(response).to have_gitlab_http_status(:not_found)
         end
       end
+
+      context 'when the job is not running' do
+        let(:api_user) { developer }
+
+        before do
+          job.success!
+        end
+
+        it 'disallows access to the artifacts' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
     end
   end
 
   describe 'GET /projects/:id/artifacts/:ref_name/download?job=name' do
+    let(:running_job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
     let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user) }
 
     context 'when using job_token to authenticate' do
       subject do
-        get api("/projects/#{project.id}/jobs/artifacts/#{pipeline.ref}/download"), params: { job: job.name, job_token: job.token }
+        get api("/projects/#{project.id}/jobs/artifacts/#{pipeline.ref}/download"), params: { job: job.name, job_token: running_job.token }
       end
 
       context 'when cross-project pipelines are enabled' do

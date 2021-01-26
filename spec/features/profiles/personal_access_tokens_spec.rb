@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Profile > Personal Access Tokens', :js do
   let(:user) { create(:user) }
+  let(:pat_create_service) { double('PersonalAccessTokens::CreateService', execute: ServiceResponse.error(message: 'error', payload: { personal_access_token: PersonalAccessToken.new })) }
 
   def active_personal_access_tokens
     find(".table.active-tokens")
@@ -17,8 +18,12 @@ RSpec.describe 'Profile > Personal Access Tokens', :js do
     find("#created-personal-access-token").value
   end
 
+  def feed_token
+    find("#feed_token").value
+  end
+
   def disallow_personal_access_token_saves!
-    allow_any_instance_of(PersonalAccessToken).to receive(:save).and_return(false)
+    allow(PersonalAccessTokens::CreateService).to receive(:new).and_return(pat_create_service)
 
     errors = ActiveModel::Errors.new(PersonalAccessToken.new).tap { |e| e.add(:name, "cannot be nil") }
     allow_any_instance_of(PersonalAccessToken).to receive(:errors).and_return(errors)
@@ -100,11 +105,36 @@ RSpec.describe 'Profile > Personal Access Tokens', :js do
     context "when revocation fails" do
       it "displays an error message" do
         visit profile_personal_access_tokens_path
-        allow_any_instance_of(PersonalAccessTokens::RevokeService).to receive(:revocation_permitted?).and_return(false)
+
+        allow_next_instance_of(PersonalAccessTokens::RevokeService) do |instance|
+          allow(instance).to receive(:revocation_permitted?).and_return(false)
+        end
 
         accept_confirm { click_on "Revoke" }
         expect(active_personal_access_tokens).to have_text(personal_access_token.name)
         expect(page).to have_content("Not permitted to revoke")
+      end
+    end
+  end
+
+  describe "feed token" do
+    context "when enabled" do
+      it "displays feed token" do
+        allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(false)
+        visit profile_personal_access_tokens_path
+
+        expect(page).to have_content("Your feed token is used to authenticate you when your RSS reader loads a personalized RSS feed or when your calendar application loads a personalized calendar, and is included in those feed URLs.")
+        expect(feed_token).to eq(user.feed_token)
+      end
+    end
+
+    context "when disabled" do
+      it "does not display feed token" do
+        allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
+        visit profile_personal_access_tokens_path
+
+        expect(page).not_to have_content("Your feed token is used to authenticate you when your RSS reader loads a personalized RSS feed or when your calendar application loads a personalized calendar, and is included in those feed URLs.")
+        expect(page).not_to have_css("#feed_token")
       end
     end
   end

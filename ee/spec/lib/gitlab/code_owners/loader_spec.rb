@@ -39,10 +39,6 @@ RSpec.describe Gitlab::CodeOwners::Loader do
     let(:expected_entry) { Gitlab::CodeOwners::Entry.new('docs/CODEOWNERS', '@owner-1 owner2@gitlab.org @owner-3 @documentation-owner') }
     let(:first_entry) { loader.entries.first }
 
-    before do
-      stub_feature_flags(sectional_codeowners: false)
-    end
-
     it 'returns entries for the matched line' do
       expect(loader.entries).to contain_exactly(expected_entry)
     end
@@ -134,15 +130,11 @@ RSpec.describe Gitlab::CodeOwners::Loader do
       end
     end
 
-    context "when sectional_codeowners is disabled" do
-      before do
-        stub_feature_flags(sectional_codeowners: false)
-      end
-
+    context "non-sectional codeowners_content" do
       it_behaves_like "returns users for passed path"
     end
 
-    context "when sectional_codeowners is enabled" do
+    context "when codeowners_content contains sections" do
       let(:codeowner_content) do
         <<~CODEOWNERS
         [Documentation]
@@ -151,10 +143,6 @@ RSpec.describe Gitlab::CodeOwners::Loader do
         [Testing]
         spec/* @test-owner @test-group @test-group/nested-group
         CODEOWNERS
-      end
-
-      before do
-        stub_feature_flags(sectional_codeowners: true)
       end
 
       it_behaves_like "returns users for passed path"
@@ -177,11 +165,29 @@ RSpec.describe Gitlab::CodeOwners::Loader do
     end
   end
 
-  describe '#empty_code_owners?' do
-    before do
-      stub_feature_flags(sectional_codeowners: false)
+  describe '#code_owners_sections' do
+    subject { loader.code_owners_sections }
+
+    context 'when CODEOWNERS does not have sections' do
+      it { is_expected.to match_array(['codeowners']) }
     end
 
+    context 'when CODEOWNERS contains sections' do
+      let(:codeowner_content) do
+        <<~CODEOWNERS
+        [Documentation]
+        docs/* @documentation-owner
+        docs/CODEOWNERS @owner-1 owner2@gitlab.org @owner-3 @documentation-owner
+        [Testing]
+        spec/* @test-owner @test-group @test-group/nested-group
+        CODEOWNERS
+      end
+
+      it { is_expected.to match_array(%w[codeowners Documentation Testing]) }
+    end
+  end
+
+  describe '#empty_code_owners?' do
     context 'when file does not exist' do
       let(:codeowner_blob) { nil }
 

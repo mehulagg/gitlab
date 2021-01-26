@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Monitoring NGINX
+# Monitoring NGINX **(CORE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12621) in GitLab 9.4
 
@@ -18,6 +18,8 @@ The [Prometheus service](../prometheus.md) must be enabled.
 
 NGINX server metrics are detected, which tracks the pages and content directly served by NGINX.
 
+[`environment_filter`](../../../../operations/metrics/dashboards/variables.md#environment_filter) is one of the predefined variables that metrics dashboards support.
+
 | Name | Query |
 | ---- | ----- |
 | Throughput (req/sec) | `sum(rate(nginx_server_requests{server_zone!="*", server_zone!="_", %{environment_filter}}[2m])) by (code)` |
@@ -27,11 +29,11 @@ NGINX server metrics are detected, which tracks the pages and content directly s
 
 ## Configuring Prometheus to monitor for NGINX metrics
 
-To get started with NGINX monitoring, you should first enable the [VTS statistics](https://github.com/vozlt/nginx-module-vts) module for your NGINX server. This will capture and display statistics in an HTML readable form. Next, you should install and configure the [NGINX VTS exporter](https://github.com/hnlq715/nginx-vts-exporter) which parses these statistics and translates them into a Prometheus monitoring endpoint.
+To get started with NGINX monitoring, you should first enable the [VTS statistics](https://github.com/vozlt/nginx-module-vts) module for your NGINX server. This captures and displays statistics in an HTML readable form. Next, you should install and configure the [NGINX VTS exporter](https://github.com/hnlq715/nginx-vts-exporter) which parses these statistics and translates them into a Prometheus monitoring endpoint.
 
-If you are using NGINX as your Kubernetes Ingress, GitLab will [automatically detect](nginx_ingress.md) the metrics once enabled in 0.9.0 and later releases.
+If you are using NGINX as your Kubernetes Ingress, GitLab [automatically detects](nginx_ingress.md) the metrics once enabled in 0.9.0 and later releases.
 
 ## Specifying the Environment label
 
 In order to isolate and only display relevant metrics for a given environment
-however, GitLab needs a method to detect which labels are associated. To do this, GitLab will [look for an `environment` label](index.md#identifying-environments).
+however, GitLab needs a method to detect which labels are associated. To do this, GitLab [looks for an `environment` label](index.md#identifying-environments).

@@ -2,12 +2,21 @@
 
 class AuditEvent < ApplicationRecord
   include CreatedAtFilterable
-  include IgnorableColumns
   include BulkInsertSafe
+  include EachBatch
+  include PartitionedTable
 
-  PARALLEL_PERSISTENCE_COLUMNS = [:author_name, :entity_path, :target_details].freeze
+  PARALLEL_PERSISTENCE_COLUMNS = [
+    :author_name,
+    :entity_path,
+    :target_details,
+    :target_type,
+    :target_id
+  ].freeze
 
-  ignore_column :updated_at, remove_with: '13.4', remove_after: '2020-09-22'
+  self.primary_key = :id
+
+  partitioned_by :created_at, strategy: :monthly
 
   serialize :details, Hash # rubocop:disable Cop/ActiveRecordSerialize
 
@@ -16,6 +25,7 @@ class AuditEvent < ApplicationRecord
   validates :author_id, presence: true
   validates :entity_id, presence: true
   validates :entity_type, presence: true
+  validates :ip_address, ip_address: true
 
   scope :by_entity_type, -> (entity_type) { where(entity_type: entity_type) }
   scope :by_entity_id, -> (entity_id) { where(entity_id: entity_id) }
@@ -39,20 +49,27 @@ class AuditEvent < ApplicationRecord
   end
 
   def initialize_details
-    self.details = {} if details.nil?
+    return unless self.has_attribute?(:details)
+
+    self.details = {} if details&.nil?
   end
 
   def author_name
-    lazy_author.name
+    author&.name
   end
 
   def formatted_details
     details.merge(details.slice(:from, :to).transform_values(&:to_s))
   end
 
+  def author
+    lazy_author&.itself.presence ||
+      ::Gitlab::Audit::NullAuthor.for(author_id, (self[:author_name] || details[:author_name]))
+  end
+
   def lazy_author
-    BatchLoader.for(author_id).batch(default_value: default_author_value) do |author_ids, loader|
-      User.where(id: author_ids).find_each do |user|
+    BatchLoader.for(author_id).batch(replace_methods: false) do |author_ids, loader|
+      User.select(:id, :name, :username).where(id: author_ids).find_each do |user|
         loader.call(user.id, user)
       end
     end

@@ -13,6 +13,7 @@ RSpec.describe Packages::Npm::CreatePackageService do
         .gsub('1.0.1', version)).with_indifferent_access
       .merge!(override)
   end
+
   let(:override) { {} }
   let(:package_name) { "@#{namespace.path}/my-app".freeze }
 
@@ -24,6 +25,10 @@ RSpec.describe Packages::Npm::CreatePackageService do
         .to change { Packages::Package.count }.by(1)
         .and change { Packages::Package.npm.count }.by(1)
         .and change { Packages::Tag.count }.by(1)
+    end
+
+    it_behaves_like 'assigns the package creator' do
+      let(:package) { subject }
     end
 
     it { is_expected.to be_valid }
@@ -43,7 +48,16 @@ RSpec.describe Packages::Npm::CreatePackageService do
     context 'scoped package' do
       it_behaves_like 'valid package'
 
-      it_behaves_like 'assigns build to package'
+      context 'with build info' do
+        let(:job) { create(:ci_build, user: user) }
+        let(:params) { super().merge(build: job) }
+
+        it_behaves_like 'assigns build to package'
+
+        it 'creates a package file build info' do
+          expect { subject }.to change { Packages::PackageFileBuildInfo.count }.by(1)
+        end
+      end
     end
 
     context 'invalid package name' do
@@ -58,6 +72,15 @@ RSpec.describe Packages::Npm::CreatePackageService do
 
       it { expect(subject[:http_status]).to eq 403 }
       it { expect(subject[:message]).to be 'Package already exists.' }
+    end
+
+    context 'file size above maximum limit' do
+      before do
+        params['_attachments']["#{package_name}-#{version}.tgz"]['length'] = project.actual_limits.npm_max_file_size + 1
+      end
+
+      it { expect(subject[:http_status]).to eq 400 }
+      it { expect(subject[:message]).to be 'File is too large.' }
     end
 
     context 'with incorrect namespace' do

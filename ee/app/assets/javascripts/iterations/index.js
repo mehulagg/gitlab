@@ -9,10 +9,15 @@ import IterationReport from './components/iteration_report.vue';
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      batchMax: 1,
+    },
+  ),
 });
 
-export function initIterationsList() {
+export function initIterationsList(namespaceType) {
   const el = document.querySelector('.js-iterations-list');
 
   return new Vue({
@@ -23,6 +28,7 @@ export function initIterationsList() {
         props: {
           fullPath: el.dataset.fullPath,
           canAdmin: parseBoolean(el.dataset.canAdmin),
+          namespaceType,
           newIterationPath: el.dataset.newIterationPath,
         },
       });
@@ -48,10 +54,17 @@ export function initIterationForm() {
   });
 }
 
-export function initIterationReport() {
+export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   const el = document.querySelector('.js-iteration');
 
-  const { fullPath, iterationIid, editIterationPath } = el.dataset;
+  const {
+    fullPath,
+    iterationId,
+    iterationIid,
+    labelsFetchPath,
+    editIterationPath,
+    previewMarkdownPath,
+  } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
   return new Vue({
@@ -61,13 +74,16 @@ export function initIterationReport() {
       return createElement(IterationReport, {
         props: {
           fullPath,
+          iterationId,
           iterationIid,
+          labelsFetchPath,
           canEdit,
           editIterationPath,
+          namespaceType,
+          previewMarkdownPath,
+          initiallyEditing,
         },
       });
     },
   });
 }
-
-export default {};

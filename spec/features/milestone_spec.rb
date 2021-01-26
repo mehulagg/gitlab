@@ -25,7 +25,7 @@ RSpec.describe 'Milestone' do
 
       find('input[name="commit"]').click
 
-      expect(find('.alert-success')).to have_content('Assign some issues to this milestone.')
+      expect(find('[data-testid="no-issues-alert"]')).to have_content('Assign some issues to this milestone.')
       expect(page).to have_content('Nov 16, 2016–Dec 16, 2016')
     end
   end
@@ -37,7 +37,7 @@ RSpec.describe 'Milestone' do
       create(:issue, title: "Bugfix1", project: project, milestone: milestone, state: "closed")
       visit project_milestone_path(project, milestone)
 
-      expect(find('.alert-success')).to have_content('All issues for this milestone are closed. You may close this milestone now.')
+      expect(find('[data-testid="all-issues-closed-alert"]')).to have_content('All issues for this milestone are closed. You may close this milestone now.')
     end
   end
 
@@ -76,7 +76,7 @@ RSpec.describe 'Milestone' do
 
       wait_for_requests
 
-      page.within('.time-tracking-no-tracking-pane') do
+      page.within('[data-testid="noTrackingPane"]') do
         expect(page).to have_content 'No estimate or time spent'
       end
     end
@@ -94,14 +94,14 @@ RSpec.describe 'Milestone' do
 
       wait_for_requests
 
-      page.within('.time-tracking-spend-only-pane') do
+      page.within('[data-testid="spentOnlyPane"]') do
         expect(page).to have_content 'Spent: 3h'
       end
     end
   end
 
   describe 'Deleting a milestone' do
-    it "The delete milestone button does not show for unauthorized users" do
+    it "the delete milestone button does not show for unauthorized users" do
       create(:milestone, project: project, title: 8.7)
       sign_out(user)
 

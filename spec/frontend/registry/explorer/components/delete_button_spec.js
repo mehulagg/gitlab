@@ -13,7 +13,7 @@ describe('delete_button', () => {
 
   const findButton = () => wrapper.find(GlButton);
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = shallowMount(component, {
       propsData: {
         ...defaultProps,
@@ -54,7 +54,6 @@ describe('delete_button', () => {
         mountComponent({ disabled: true });
         expect(findButton().attributes()).toMatchObject({
           'aria-label': 'Foo title',
-          category: 'secondary',
           icon: 'remove',
           title: 'Foo title',
           variant: 'danger',

@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Slash Commands
 
 > The `run` command was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4466) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.6. [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24780) to [GitLab Core](https://about.gitlab.com/pricing/) in 11.9.
@@ -31,11 +37,11 @@ It is possible to create new issue, display issue details and search up to 5 iss
 
 ## Deploy command
 
-In order to deploy to an environment, GitLab will try to find a deployment
+In order to deploy to an environment, GitLab tries to find a deployment
 manual action in the pipeline.
 
-If there is only one action for a given environment, it is going to be triggered.
-If there is more than one action defined, GitLab will try to find an action
+If there is only one action for a given environment, it is triggered.
+If there is more than one action defined, GitLab tries to find an action
 which name equals the environment name we want to deploy to.
 
-Command will return an error when no matching action has been found.
+The command returns an error when no matching action has been found.

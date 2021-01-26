@@ -18,13 +18,20 @@ module Gitlab
             params_for_code_stage,
             params_for_test_stage,
             params_for_review_stage,
-            params_for_staging_stage,
-            params_for_production_stage
+            params_for_staging_stage
           ]
+        end
+
+        def self.find_by_name!(name)
+          all.find { |raw_stage| raw_stage[:name].to_s.eql?(name.to_s) } || raise("Default stage '#{name}' not found")
         end
 
         def self.names
           all.map { |stage| stage[:name] }
+        end
+
+        def self.symbolized_stage_names
+          names.map(&:to_sym)
         end
 
         def self.params_for_issue_stage
@@ -84,16 +91,6 @@ module Gitlab
             relative_position: 6,
             start_event_identifier: :merge_request_merged,
             end_event_identifier: :merge_request_first_deployed_to_production
-          }
-        end
-
-        def self.params_for_production_stage
-          {
-            name: 'production',
-            custom: false,
-            relative_position: 7,
-            start_event_identifier: :issue_created,
-            end_event_identifier: :production_stage_end
           }
         end
       end

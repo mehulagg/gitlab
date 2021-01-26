@@ -1,8 +1,8 @@
 <script>
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { truncateWidth } from '~/lib/utils/text_utility';
-import { GlResizeObserverDirective } from '@gitlab/ui';
 
 import {
   CHART_HEIGHT,
@@ -65,18 +65,18 @@ export default {
       };
     },
     seriesData() {
-      return { full: this.chartData };
+      return [{ name: 'full', data: this.chartData }];
     },
   },
   methods: {
     setSvg(name) {
       return getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });
@@ -102,7 +102,7 @@ export default {
       v-bind="$attrs"
       :width="width"
       :height="height"
-      :data="seriesData"
+      :bars="seriesData"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
       x-axis-type="category"

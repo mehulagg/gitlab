@@ -31,6 +31,8 @@ module Gitlab
       module Keyset
         class Connection < GraphQL::Pagination::ActiveRecordRelationConnection
           include Gitlab::Utils::StrongMemoize
+          include ::Gitlab::Graphql::ConnectionCollectionMethods
+          prepend ::Gitlab::Graphql::ConnectionRedaction
 
           # rubocop: disable Naming/PredicateName
           # https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo.Fields
@@ -65,9 +67,14 @@ module Gitlab
                 # next page
                 true
               elsif first
-                # If we count the number of requested items plus one (`limit_value + 1`),
-                # then if we get `limit_value + 1` then we know there is a next page
-                relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                case sliced_nodes
+                when Array
+                  sliced_nodes.size > limit_value
+                else
+                  # If we count the number of requested items plus one (`limit_value + 1`),
+                  # then if we get `limit_value + 1` then we know there is a next page
+                  relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                end
               else
                 false
               end
@@ -110,8 +117,7 @@ module Gitlab
               end
 
               if last
-                # grab one more than we need
-                paginated_nodes = sliced_nodes.last(limit_value + 1)
+                paginated_nodes = LastItems.take_items(sliced_nodes, limit_value + 1)
 
                 # there is an extra node, so there is a previous page
                 @has_previous_page = paginated_nodes.count > limit_value
@@ -156,8 +162,8 @@ module Gitlab
 
               list = OrderInfo.build_order_list(items)
 
-              if loaded?(items)
-                @order_list = list.presence || [items.primary_key]
+              if loaded?(items) && !before.present? && !after.present?
+                @order_list = list.presence || [OrderInfo.new(items.primary_key)]
 
                 # already sorted, or trivially sorted
                 next items if list.present? || items.size <= 1
@@ -193,7 +199,7 @@ module Gitlab
             ordering = { 'id' => node[:id].to_s }
 
             order_list.each do |field|
-              field_name = field.attribute_name
+              field_name = field.try(:attribute_name) || field
               field_value = node[field_name]
               ordering[field_name] = if field_value.is_a?(Time)
                                        field_value.strftime('%Y-%m-%d %H:%M:%S.%N %Z')

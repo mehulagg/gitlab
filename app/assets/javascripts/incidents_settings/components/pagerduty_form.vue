@@ -11,9 +11,9 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
+import { isEqual } from 'lodash';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { I18N_PAGERDUTY_SETTINGS_FORM, CONFIGURE_PAGERDUTY_WEBHOOK_DOCS_LINK } from '../constants';
-import { isEqual } from 'lodash';
 
 export default {
   components: {
@@ -109,7 +109,20 @@ export default {
       {{ webhookUpdateAlertMsg }}
     </gl-alert>
 
-    <p>{{ $options.i18n.introText }}</p>
+    <p>
+      <gl-sprintf :message="$options.i18n.introText">
+        <template #link="{ content }">
+          <gl-link
+            :href="$options.CONFIGURE_PAGERDUTY_WEBHOOK_DOCS_LINK"
+            target="_blank"
+            class="gl-display-inline-flex"
+          >
+            <span>{{ content }}</span>
+            <gl-icon name="external-link" />
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
     <form ref="settingsForm" @submit.prevent="updatePagerDutyIntegrationSettings">
       <gl-form-group class="col-8 col-md-9 gl-p-0">
         <gl-toggle
@@ -124,7 +137,6 @@ export default {
         class="col-8 col-md-9 gl-p-0"
         :label="$options.i18n.webhookUrl.label"
         label-for="url"
-        label-class="label-bold"
       >
         <gl-form-input-group id="url" data-testid="webhook-url" readonly :value="webhookUrl">
           <template #append>
@@ -135,31 +147,15 @@ export default {
           </template>
         </gl-form-input-group>
 
-        <div class="gl-text-gray-200 gl-pt-2">
-          <gl-sprintf :message="$options.i18n.webhookUrl.helpText">
-            <template #docsLink>
-              <gl-link
-                :href="$options.CONFIGURE_PAGERDUTY_WEBHOOK_DOCS_LINK"
-                target="_blank"
-                class="gl-display-inline-flex"
-              >
-                <span>{{ $options.i18n.webhookUrl.helpDocsLink }}</span>
-                <gl-icon name="external-link" />
-              </gl-link>
-            </template>
-          </gl-sprintf>
-        </div>
-        <div class="gl-display-flex gl-justify-content-end">
-          <gl-button
-            v-gl-modal.resetWebhookModal
-            class="gl-mt-3"
-            :disabled="loading"
-            :loading="resettingWebhook"
-            data-testid="webhook-reset-btn"
-          >
-            {{ $options.i18n.webhookUrl.resetWebhookUrl }}
-          </gl-button>
-        </div>
+        <gl-button
+          v-gl-modal.resetWebhookModal
+          class="gl-mt-5"
+          :disabled="loading"
+          :loading="resettingWebhook"
+          data-testid="webhook-reset-btn"
+        >
+          {{ $options.i18n.webhookUrl.resetWebhookUrl }}
+        </gl-button>
         <gl-modal
           modal-id="resetWebhookModal"
           :title="$options.i18n.webhookUrl.resetWebhookUrl"
@@ -170,17 +166,15 @@ export default {
           {{ $options.i18n.webhookUrl.restKeyInfo }}
         </gl-modal>
       </gl-form-group>
-      <div class="gl-display-flex gl-justify-content-end">
-        <gl-button
-          ref="submitBtn"
-          :disabled="isSaveDisabled"
-          variant="success"
-          type="submit"
-          class="js-no-auto-disable"
-        >
-          {{ $options.i18n.saveBtnLabel }}
-        </gl-button>
-      </div>
+      <gl-button
+        ref="submitBtn"
+        :disabled="isSaveDisabled"
+        variant="success"
+        type="submit"
+        class="js-no-auto-disable"
+      >
+        {{ $options.i18n.saveBtnLabel }}
+      </gl-button>
     </form>
   </div>
 </template>

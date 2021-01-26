@@ -11,12 +11,12 @@ module Gitlab
 
           super(merge_request_diff,
             project: merge_request_diff.project,
-            diff_options: diff_options,
+            diff_options: merged_diff_options(diff_options),
             diff_refs: merge_request_diff.diff_refs,
             fallback_diff_refs: merge_request_diff.fallback_diff_refs)
         end
 
-        def diff_files
+        def diff_files(sorted: false)
           strong_memoize(:diff_files) do
             diff_files = super
 
@@ -24,6 +24,12 @@ module Gitlab
 
             diff_files
           end
+        end
+
+        def raw_diff_files(sorted: false)
+          # We force `sorted` to `false` as we don't need to sort the diffs when
+          # dealing with `MergeRequestDiff` since we sort its files on create.
+          super(sorted: false)
         end
 
         override :write_cache
@@ -63,6 +69,13 @@ module Gitlab
 
             diff_stats_cache.read || super
           end
+        end
+
+        def merged_diff_options(diff_options)
+          project = @merge_request_diff.project
+          max_diff_options = ::Commit.max_diff_options(project: project).merge(project: project)
+
+          diff_options.present? ? diff_options.merge(max_diff_options) : max_diff_options
         end
       end
     end

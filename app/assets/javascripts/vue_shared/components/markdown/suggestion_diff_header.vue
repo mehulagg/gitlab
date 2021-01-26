@@ -1,11 +1,11 @@
 <script>
-import { GlDeprecatedButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ApplySuggestion from './apply_suggestion.vue';
 
 export default {
-  components: { Icon, GlDeprecatedButton, GlLoadingIcon },
+  components: { GlIcon, GlButton, GlLoadingIcon, ApplySuggestion },
   directives: { 'gl-tooltip': GlTooltipDirective },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -38,10 +38,19 @@ export default {
       type: String,
       required: true,
     },
+    defaultCommitMessage: {
+      type: String,
+      required: true,
+    },
     inapplicableReason: {
       type: String,
       required: false,
       default: null,
+    },
+    suggestionsCount: {
+      type: Number,
+      required: false,
+      default: 0,
     },
   },
   data() {
@@ -52,6 +61,9 @@ export default {
   computed: {
     canBeBatched() {
       return Boolean(this.glFeatures.batchSuggestions);
+    },
+    canAddCustomCommitMessage() {
+      return this.glFeatures.suggestionsCustomCommit;
     },
     isApplying() {
       return this.isApplyingSingle || this.isApplyingBatch;
@@ -68,12 +80,15 @@ export default {
       }
       return __('Applying suggestions...');
     },
+    isLoggedIn() {
+      return Boolean(gon.current_user_id);
+    },
   },
   methods: {
-    applySuggestion() {
+    applySuggestion(message) {
       if (!this.canApply) return;
       this.isApplyingSingle = true;
-      this.$emit('apply', this.applySuggestionCallback);
+      this.$emit('apply', this.applySuggestionCallback, message);
     },
     applySuggestionCallback() {
       this.isApplyingSingle = false;
@@ -97,7 +112,7 @@ export default {
     <div class="qa-suggestion-diff-header js-suggestion-diff-header font-weight-bold">
       {{ __('Suggested change') }}
       <a v-if="helpPagePath" :href="helpPagePath" :aria-label="__('Help')" class="js-help-btn">
-        <icon name="question-o" css-classes="link-highlight" />
+        <gl-icon name="question-o" css-classes="link-highlight" />
       </a>
     </div>
     <div v-if="isApplied" class="badge badge-success">{{ __('Applied') }}</div>
@@ -106,14 +121,14 @@ export default {
       <span>{{ applyingSuggestionsMessage }}</span>
     </div>
     <div v-else-if="canApply && canBeBatched && isBatched" class="d-flex align-items-center">
-      <gl-deprecated-button
+      <gl-button
         class="btn-inverted js-remove-from-batch-btn btn-grouped"
         :disabled="isApplying"
         @click="removeSuggestionFromBatch"
       >
         {{ __('Remove from batch') }}
-      </gl-deprecated-button>
-      <gl-deprecated-button
+      </gl-button>
+      <gl-button
         v-gl-tooltip.viewport="__('This also resolves all related threads')"
         class="btn-inverted js-apply-batch-btn btn-grouped"
         :disabled="isApplying"
@@ -124,26 +139,34 @@ export default {
         <span class="badge badge-pill badge-pill-success">
           {{ batchSuggestionsCount }}
         </span>
-      </gl-deprecated-button>
+      </gl-button>
     </div>
     <div v-else class="d-flex align-items-center">
-      <gl-deprecated-button
-        v-if="canBeBatched && !isDisableButton"
+      <gl-button
+        v-if="suggestionsCount > 1 && canBeBatched && !isDisableButton"
         class="btn-inverted js-add-to-batch-btn btn-grouped"
         :disabled="isDisableButton"
         @click="addSuggestionToBatch"
       >
         {{ __('Add suggestion to batch') }}
-      </gl-deprecated-button>
-      <span v-gl-tooltip.viewport="tooltipMessage" tabindex="0">
-        <gl-deprecated-button
+      </gl-button>
+      <apply-suggestion
+        v-if="canAddCustomCommitMessage"
+        :disabled="isDisableButton"
+        :default-commit-message="defaultCommitMessage"
+        class="gl-ml-3"
+        @apply="applySuggestion"
+      />
+      <span v-else v-gl-tooltip.viewport="tooltipMessage" tabindex="0">
+        <gl-button
+          v-if="isLoggedIn"
           class="btn-inverted js-apply-btn btn-grouped"
           :disabled="isDisableButton"
           variant="success"
           @click="applySuggestion"
         >
           {{ __('Apply suggestion') }}
-        </gl-deprecated-button>
+        </gl-button>
       </span>
     </div>
   </div>

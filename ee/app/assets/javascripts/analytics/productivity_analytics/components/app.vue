@@ -3,15 +3,16 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlEmptyState,
   GlLoadingIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedButton,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
   GlTooltipDirective,
+  GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import Icon from '~/vue_shared/components/icon.vue';
 import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
 import MetricChart from './metric_chart.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
@@ -24,11 +25,12 @@ export default {
   components: {
     GlEmptyState,
     GlLoadingIcon,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlColumnChart,
-    GlDeprecatedButton,
-    Icon,
+    GlButton,
+    GlIcon,
+    GlAlert,
     MetricChart,
     Scatterplot,
     MergeRequestTable,
@@ -71,6 +73,7 @@ export default {
     ...mapGetters(['getMetricTypes']),
     ...mapGetters('charts', [
       'chartLoading',
+      'chartErrorCode',
       'chartHasData',
       'getColumnChartData',
       'getColumnChartDatazoomOption',
@@ -138,7 +141,7 @@ export default {
       return {
         yAxis: {
           axisLabel: {
-            formatter: value => value,
+            formatter: (value) => value,
           },
           minInterval: 1,
         },
@@ -181,14 +184,14 @@ export default {
     <template v-if="showAppContent">
       <div class="d-flex justify-content-between">
         <h4>{{ s__('ProductivityAnalytics|Merge Requests') }}</h4>
-        <gl-deprecated-button
+        <gl-button
           v-if="isFilteringByDaysToMerge"
           ref="clearChartFiltersBtn"
           class="btn-link float-right"
           type="button"
           variant="default"
           @click="resetMainChartSelection()"
-          >{{ __('Clear chart filters') }}</gl-deprecated-button
+          >{{ __('Clear chart filters') }}</gl-button
         >
       </div>
       <metric-chart
@@ -199,10 +202,11 @@ export default {
           __('You can filter by \'days to merge\' by clicking on the columns in the chart.')
         "
         :is-loading="chartLoading(chartKeys.main)"
+        :error-code="chartErrorCode(chartKeys.main)"
         :chart-data="getColumnChartData(chartKeys.main)"
       >
         <gl-column-chart
-          :data="{ full: getColumnChartData(chartKeys.main) }"
+          :bars="[{ name: 'full', data: getColumnChartData(chartKeys.main) }]"
           :option="getColumnChartOption(chartKeys.main)"
           :y-axis-title="__('Merge requests')"
           :x-axis-title="__('Days')"
@@ -223,7 +227,7 @@ export default {
             :chart-data="getScatterPlotMainData"
             :selected-metric="getSelectedMetric(chartKeys.scatterplot)"
             @metricTypeChange="
-              metric => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
+              (metric) => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
             "
           >
             <scatterplot
@@ -248,12 +252,12 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.timeBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.timeBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.timeBasedHistogram })
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.timeBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.timeBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.timeBasedHistogram)"
                 :y-axis-title="s__('ProductivityAnalytics|Merge requests')"
                 :x-axis-title="s__('ProductivityAnalytics|Hours')"
@@ -274,12 +278,12 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.commitBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.commitBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.commitBasedHistogram })
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.commitBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.commitBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.commitBasedHistogram)"
                 :y-axis-title="s__('ProductivityAanalytics|Merge requests')"
                 :x-axis-title="getMetricLabel(chartKeys.commitBasedHistogram)"
@@ -298,12 +302,12 @@ export default {
             >
               <strong class="mr-2">{{ __('Sort by') }}</strong>
               <div class="d-flex">
-                <gl-deprecated-dropdown
+                <gl-dropdown
                   class="mr-2 flex-grow"
                   toggle-class="dropdown-menu-toggle"
                   :text="sortFieldDropdownLabel"
                 >
-                  <gl-deprecated-dropdown-item
+                  <gl-dropdown-item
                     v-for="metric in tableSortOptions"
                     :key="metric.key"
                     active-class="is-active"
@@ -311,7 +315,7 @@ export default {
                     @click="setSortField(metric.key)"
                   >
                     <span class="d-flex">
-                      <icon
+                      <gl-icon
                         class="flex-shrink-0 gl-mr-2"
                         :class="{
                           invisible: !isSelectedSortField(metric.key),
@@ -320,15 +324,11 @@ export default {
                       />
                       {{ metric.label }}
                     </span>
-                  </gl-deprecated-dropdown-item>
-                </gl-deprecated-dropdown>
-                <gl-deprecated-button
-                  v-gl-tooltip.hover
-                  :title="sortTooltipTitle"
-                  @click="toggleSortOrder"
-                >
-                  <icon :name="sortIcon" />
-                </gl-deprecated-button>
+                  </gl-dropdown-item>
+                </gl-dropdown>
+                <gl-button v-gl-tooltip.hover :title="sortTooltipTitle" @click="toggleSortOrder">
+                  <gl-icon :name="sortIcon" />
+                </gl-button>
               </div>
             </div>
           </div>
@@ -346,9 +346,9 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <div v-if="showMergeRequestTableNoData" class="js-no-data bs-callout bs-callout-info">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
             {{ __('There is no data available. Please change your selection.') }}
-          </div>
+          </gl-alert>
         </div>
       </template>
     </template>

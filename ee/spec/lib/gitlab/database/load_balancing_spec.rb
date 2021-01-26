@@ -199,6 +199,49 @@ RSpec.describe Gitlab::Database::LoadBalancing do
     end
   end
 
+  describe '.configured?' do
+    let!(:license) { create(:license, plan: ::License::PREMIUM_PLAN) }
+
+    it 'returns true when Sidekiq is being used' do
+      allow(described_class).to receive(:hosts).and_return(%w(foo))
+      allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
+      expect(described_class).not_to receive(:program_name)
+
+      expect(described_class.configured?).to eq(true)
+    end
+
+    it 'returns true when service discovery is enabled in Sidekiq' do
+      allow(described_class).to receive(:hosts).and_return([])
+      allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
+
+      allow(described_class)
+        .to receive(:service_discovery_enabled?)
+        .and_return(true)
+
+      expect(described_class.configured?).to eq(true)
+    end
+
+    it 'returns false when neither service discovery nor hosts are configured' do
+      allow(described_class).to receive(:hosts).and_return([])
+
+      allow(described_class)
+        .to receive(:service_discovery_enabled?)
+        .and_return(false)
+
+      expect(described_class.configured?).to eq(false)
+    end
+
+    context 'without a license' do
+      before do
+        License.destroy_all # rubocop: disable Cop/DestroyAll
+      end
+
+      it 'is not configured' do
+        expect(described_class.configured?).to eq(false)
+      end
+    end
+  end
+
   describe '.program_name' do
     it 'returns a String' do
       expect(described_class.program_name).to be_an_instance_of(String)

@@ -1,7 +1,7 @@
-import { serializeForm } from '~/lib/utils/forms';
+import { serializeForm, serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 
 describe('lib/utils/forms', () => {
-  const createDummyForm = inputs => {
+  const createDummyForm = (inputs) => {
     const form = document.createElement('form');
 
     form.innerHTML = inputs
@@ -9,7 +9,7 @@ describe('lib/utils/forms', () => {
         let str = ``;
         if (type === 'select') {
           str = `<select name="${name}">`;
-          value.forEach(v => {
+          value.forEach((v) => {
             if (v.length > 0) {
               str += `<option value="${v}"></option> `;
             }
@@ -81,8 +81,8 @@ describe('lib/utils/forms', () => {
 
       jest
         .spyOn(FormData.prototype, 'getAll')
-        .mockImplementation(name =>
-          formData.map(elem => (elem.name === name ? elem.value : undefined)),
+        .mockImplementation((name) =>
+          formData.map((elem) => (elem.name === name ? elem.value : undefined)),
         );
 
       const data = serializeForm(form);
@@ -90,6 +90,48 @@ describe('lib/utils/forms', () => {
       expect(data).toEqual({
         foo: 'foo-value1',
         bar: 'bar-value2',
+      });
+    });
+  });
+
+  describe('isEmptyValue', () => {
+    it.each`
+      input        | returnValue
+      ${''}        | ${true}
+      ${[]}        | ${true}
+      ${null}      | ${true}
+      ${undefined} | ${true}
+      ${'hello'}   | ${false}
+      ${' '}       | ${false}
+      ${0}         | ${false}
+    `('returns $returnValue for value $input', ({ input, returnValue }) => {
+      expect(isEmptyValue(input)).toBe(returnValue);
+    });
+  });
+
+  describe('serializeFormObject', () => {
+    it('returns an serialized object', () => {
+      const form = {
+        profileName: { value: 'hello', state: null, feedback: null },
+        spiderTimeout: { value: 2, state: true, feedback: null },
+        targetTimeout: { value: 12, state: true, feedback: null },
+      };
+      expect(serializeFormObject(form)).toEqual({
+        profileName: 'hello',
+        spiderTimeout: 2,
+        targetTimeout: 12,
+      });
+    });
+
+    it('returns only the entries with value', () => {
+      const form = {
+        profileName: { value: '', state: null, feedback: null },
+        spiderTimeout: { value: 0, state: null, feedback: null },
+        targetTimeout: { value: null, state: null, feedback: null },
+        name: { value: undefined, state: null, feedback: null },
+      };
+      expect(serializeFormObject(form)).toEqual({
+        spiderTimeout: 0,
       });
     });
   });

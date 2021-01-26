@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Global Search
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Troubleshooting Elasticsearch
 
 To install and configure Elasticsearch, and for common and known issues,
@@ -30,6 +36,7 @@ The type of problem will determine what steps to take. The possible troubleshoot
 - Indexing.
 - Integration.
 - Performance.
+- Background Migrations.
 
 ### Search Results workflow
 
@@ -141,6 +148,30 @@ graph TD;
   F7(Escalate to<br>GitLab support.)
 ```
 
+### Background Migrations workflow
+
+```mermaid
+graph TD;
+  D --> |No| D1
+  D --> |Yes| D2
+  D2 --> |No| D3
+  D2 --> |Yes| D4
+  D4 --> |No| D5
+  D4 --> |Yes| D6
+  D6 --> |No| D8
+  D6 --> |Yes| D7
+
+  D{Is there a halted migration?}
+  D1[Migrations run in the<br>background and will<br>stop when completed.]
+  D2{Does the elasticsearch.log<br>file contain errors?}
+  D3[This is likely a bug/issue<br>in GitLab and will require<br>deeper investigation. Escalate<br>to GitLab support.]
+  D4{Have the errors<br>been addressed?}
+  D5[Have an Elasticsearch admin<br>review and address<br>the errors.]
+  D6{Has the migration<br>been retried?}
+  D7[This is likely a bug/issue<br>in GitLab and will require<br>deeper investigation. Escalate<br>to GitLab support.]
+  D8[Retry the migration from<br>the Admin > Settings ><br>Advanced Search UI.]
+```
+
 ## Troubleshooting walkthrough
 
 Most Elasticsearch troubleshooting can be broken down into 4 categories:
@@ -149,6 +180,7 @@ Most Elasticsearch troubleshooting can be broken down into 4 categories:
 - [Troubleshooting indexing](#troubleshooting-indexing)
 - [Troubleshooting integration](#troubleshooting-integration)
 - [Troubleshooting performance](#troubleshooting-performance)
+- [Troubleshooting background migrations](#troubleshooting-background-migrations)
 
 Generally speaking, if it does not fall into those four categories, it is either:
 
@@ -164,8 +196,8 @@ Troubleshooting search result issues is rather straight forward on Elasticsearch
 The first step is to confirm GitLab is using Elasticsearch for the search function.
 To do this:
 
-1. Confirm the integration is enabled in **Admin Area > Settings > Integrations**.
-1. Confirm searches utilize Elasticsearch by accessing the rails console
+1. Confirm the integration is enabled in **Admin Area > Settings > General**.
+1. Confirm searches use Elasticsearch by accessing the rails console
    (`sudo gitlab-rails console`) and running the following commands:
 
    ```rails
@@ -206,7 +238,7 @@ The best place to start is to determine if the issue is with creating an empty i
 If it is, check on the Elasticsearch side to determine if the `gitlab-production` (the
 name for the GitLab index) exists. If it exists, manually delete it on the Elasticsearch
 side and attempt to recreate it from the
-[`recreate_index`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks)
+[`recreate_index`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks)
 Rake task.
 
 If you still encounter issues, try creating an index manually on the Elasticsearch
@@ -225,8 +257,8 @@ during the indexing of projects. If errors do occur, they will either stem from 
 
 If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
 
-- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows the overall status)
-- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows specific projects that are not indexed)
+- [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows the overall status)
+- [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-advanced-search-rake-tasks) (shows specific projects that are not indexed)
 
 If:
 
@@ -323,6 +355,18 @@ dig further into these.
 
 Feel free to reach out to GitLab support, but this is likely to be something a skilled
 Elasticsearch admin has more experience with.
+
+### Troubleshooting background migrations
+
+Troubleshooting background migration failures can be difficult and may require contacting 
+an Elasticsearch admin or GitLab Support.
+
+The best place to start while debugging issues with a background migration is the 
+[`elasticsearch.log` file](../logs.md#elasticsearchlog). Migrations will
+print information while a migration is in progress and any errors encountered.
+Apply fixes for any errors found in the log and retry the migration.
+
+If you still encounter issues after retrying the migration, reach out to GitLab support.
 
 ## Common issues
 

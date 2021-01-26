@@ -2,7 +2,7 @@
 import { GlTabs, GlTab, GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import ForkGroupsListItem from './fork_groups_list_item.vue';
 
 export default {
@@ -31,7 +31,9 @@ export default {
   },
   computed: {
     filteredNamespaces() {
-      return this.namespaces.filter(n => n.name.toLowerCase().includes(this.filter.toLowerCase()));
+      return this.namespaces.filter((n) =>
+        n.name.toLowerCase().includes(this.filter.toLowerCase()),
+      );
     },
   },
 
@@ -43,7 +45,7 @@ export default {
     loadGroups() {
       axios
         .get(this.endpoint)
-        .then(response => {
+        .then((response) => {
           this.namespaces = response.data.namespaces;
         })
         .catch(() => createFlash(__('There was a problem fetching groups.')));
@@ -85,6 +87,7 @@ export default {
         v-model="filter"
         :placeholder="$options.i18n.searchPlaceholder"
         class="gl-align-self-center gl-ml-auto fork-filtered-search"
+        data-qa-selector="fork_groups_list_search_field"
       />
     </template>
   </gl-tabs>

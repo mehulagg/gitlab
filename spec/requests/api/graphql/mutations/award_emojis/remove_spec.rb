@@ -33,9 +33,7 @@ RSpec.describe 'Removing an AwardEmoji' do
 
   shared_examples 'a mutation that does not authorize the user' do
     it_behaves_like 'a mutation that does not destroy an AwardEmoji'
-
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not exist or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
   end
 
   context 'when the current_user does not own the award emoji' do
@@ -52,8 +50,9 @@ RSpec.describe 'Removing an AwardEmoji' do
 
       it_behaves_like 'a mutation that does not destroy an AwardEmoji'
 
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['Cannot award emoji to this resource']
+      it_behaves_like 'a mutation that returns top-level errors' do
+        let(:match_errors) { include(/was provided invalid value for awardableId/) }
+      end
     end
 
     context 'when the given awardable is an Awardable' do

@@ -126,15 +126,21 @@ module Geo
         repository_state_table["last_#{type}_verification_ran_at"].eq(nil).or(
           repository_state_table["last_#{type}_verification_ran_at"].lteq(interval))
 
+      query =
+        projects_table
+          .join(repository_state_table).on(project_id_matcher)
+          .project(projects_table[:id], projects_table[:last_repository_updated_at])
+          .where(verification_succeded.and(verified_before_interval))
+          .take(batch_size)
+
+      query = apply_shard_restriction(query)
+      cte = Gitlab::SQL::CTE.new(:reverifiable_projects, query)
+
       # We should prioritize less active projects first because high active
       # projects have their repositories verified more frequently.
-      query =
-        Project.joins(:repository_state)
-          .where(verification_succeded.and(verified_before_interval))
-          .order(last_repository_updated_at_asc)
-          .limit(batch_size)
-
-      apply_shard_restriction(query)
+      Project.with(cte.to_arel)
+             .from(cte.alias_to(projects_table))
+             .order(last_repository_updated_at_asc)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 

@@ -1,7 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { __ } from '~/locale';
-import createFlash from '~/flash';
 import {
   GlButton,
   GlLoadingIcon,
@@ -11,6 +9,8 @@ import {
   GlAlert,
   GlSprintf,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Stacktrace from '~/error_tracking/components/stacktrace.vue';
 import ErrorDetails from '~/error_tracking/components/error_details.vue';
 import {
@@ -38,8 +38,8 @@ describe('ErrorDetails', () => {
   let mocks;
   const externalUrl = 'https://sentry.io/organizations/test-sentry-nk/issues/1/?project=1';
 
-  const findInput = name => {
-    const inputs = wrapper.findAll(GlFormInput).filter(c => c.attributes('name') === name);
+  const findInput = (name) => {
+    const inputs = wrapper.findAll(GlFormInput).filter((c) => c.attributes('name') === name);
     return inputs.length ? inputs.at(0) : inputs;
   };
 
@@ -245,7 +245,7 @@ describe('ErrorDetails', () => {
 
       it.each(Object.keys(severityLevel))(
         'should set correct severity level variant for %s badge',
-        level => {
+        (level) => {
           wrapper.setData({
             error: {
               tags: { level: severityLevel[level] },

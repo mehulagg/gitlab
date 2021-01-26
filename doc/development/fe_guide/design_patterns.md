@@ -1,10 +1,16 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Design Patterns
 
 ## Singletons
 
 When exactly one object is needed for a given task, prefer to define it as a
 `class` rather than as an object literal. Prefer also to explicitly restrict
-instantiation, unless flexibility is important (e.g. for testing).
+instantiation, unless flexibility is important (such as for testing).
 
 ```javascript
 // bad
@@ -50,7 +56,7 @@ export default class MyThing {
 ## Manipulating the DOM in a JS Class
 
 When writing a class that needs to manipulate the DOM guarantee a container option is provided.
-This is useful when we need that class to be instantiated more than once in the same page.
+This can be used when we need that class to be instantiated more than once in the same page.
 
 Bad:
 

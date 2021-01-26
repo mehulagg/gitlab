@@ -2,18 +2,21 @@
 type: reference
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # GitLab Quick Actions
 
 > - Introduced in [GitLab 12.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/26672):
 >   once an action is executed, an alert appears when a quick action is successfully applied.
-> - In [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/16877) and later, you can use
+> - Introduced in [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/16877): you can use
 >   quick actions when updating the description of issues, epics, and merge requests.
+> - Introduced in [GitLab 13.8](https://gitlab.com/gitlab-org/gitlab/-/issues/292393): when you enter
+>   `/` into a description or comment field, all available quick actions are displayed in a scrollable list.
+> - The rebase quick action was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49800) in GitLab 13.8.
 
 Quick actions are textual shortcuts for common actions on issues, epics, merge requests,
-and commits that are usually done by clicking buttons or dropdowns in GitLab's UI.
+and commits that are usually done by clicking buttons or dropdowns in the GitLab UI.
 You can enter these commands in the description or in comments of issues, epics, merge requests, and commits.
 Each command should be on a separate line in order to be properly detected and executed.
 
@@ -31,30 +34,37 @@ The following quick actions are applicable to descriptions, discussions and thre
 | `/assign @user`                       | ✓     | ✓             |      | Assign one user.                                                                                                                 |
 | `/assign @user1 @user2`               | ✓     | ✓             |      | Assign multiple users. **(STARTER)**                                                                                             |
 | `/assign me`                          | ✓     | ✓             |      | Assign yourself.                                                                                                                 |
+| `/assign_reviewer @user`              |       | ✓             |      | Assign one user as a reviewer.                                                                                                                 |
+| `/assign_reviewer @user1 @user2`      |       | ✓             |      | Assign multiple users as reviewers. **(STARTER)**                                                                                             |
+| `/assign_reviewer me`                 |       | ✓             |      | Assign yourself as a reviewer.                                                                                                                 |
 | `/award :emoji:`                      | ✓     | ✓             | ✓    | Toggle emoji award.                                                                                                              |
 | `/child_epic <epic>`                  |       |               | ✓    | Add child epic to `<epic>`. The `<epic>` value should be in the format of `&epic`, `group&epic`, or a URL to an epic ([introduced in GitLab 12.0](https://gitlab.com/gitlab-org/gitlab/-/issues/7330)). **(ULTIMATE)** |
 | `/clear_weight`                       | ✓     |               |      | Clear weight. **(STARTER)**                                                                                                      |
+| `/clone <path/to/project> [--with_notes]`| ✓     |               |      | Clone the issue to given project, or the current one if no arguments are given ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9421) in GitLab 13.7). Copies as much data as possible as long as the target project contains equivalent labels, milestones, and so on. Does not copy comments or system notes unless `--with_notes` is provided as an argument. |
 | `/close`                              | ✓     | ✓             | ✓    | Close.                                                                                                                           |
 | `/confidential`                       | ✓     |               |      | Make confidential.                                                                                                               |
 | `/copy_metadata <!merge_request>`     | ✓     | ✓             |      | Copy labels and milestone from another merge request in the project.                                                             |
 | `/copy_metadata <#issue>`             | ✓     | ✓             |      | Copy labels and milestone from another issue in the project.                                                                     |
 | `/create_merge_request <branch name>` | ✓     |               |      | Create a new merge request starting from the current issue.                                                                      |
-| `/done`                               | ✓     | ✓             | ✓    | Mark To-Do as done.                                                                                                              |
+| `/done`                               | ✓     | ✓             | ✓    | Mark to do as done.                                                                                                              |
+| `/draft`                              |       | ✓             |      | Toggle the draft status.                                                                                              |
 | `/due <date>`                         | ✓     |               |      | Set due date. Examples of valid `<date>` include `in 2 days`, `this Friday` and `December 31st`.                                 |
 | `/duplicate <#issue>`                 | ✓     |               |      | Close this issue and mark as a duplicate of another issue. **(CORE)** Also, mark both as related. **(STARTER)**                                          |
 | `/epic <epic>`                        | ✓     |               |      | Add to epic `<epic>`. The `<epic>` value should be in the format of `&epic`, `group&epic`, or a URL to an epic. **(PREMIUM)**  |
 | `/estimate <<W>w <DD>d <hh>h <mm>m>`  | ✓     | ✓             |      | Set time estimate. For example, `/estimate 1w 3d 2h 14m`.                                                                        |
 | `/iteration *iteration:"iteration name"`     | ✓     |               |      | Set iteration. For example, to set the `Late in July` iteration: `/iteration *iteration:"Late in July"` ([introduced in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/issues/196795)). **(STARTER)** |
 | `/label ~label1 ~label2`              | ✓     | ✓             | ✓    | Add one or more labels. Label names can also start without a tilde (`~`), but mixed syntax is not supported.                      |
-| `/lock`                               | ✓     | ✓             |      | Lock the thread.                                                                                                                 |
+| `/lock`                               | ✓     | ✓             |      | Lock the discussions.                                                                                                                 |
 | `/merge`                              |       | ✓             |      | Merge changes. Depending on the project setting, this may be [when the pipeline succeeds](merge_requests/merge_when_pipeline_succeeds.md), adding to a [Merge Train](../../ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md), etc.  |
 | `/milestone %milestone`               | ✓     | ✓             |      | Set milestone.                                                                                                                   |
 | `/move <path/to/project>`             | ✓     |               |      | Move this issue to another project.                                                                                              |
 | `/parent_epic <epic>`                 |       |               | ✓    | Set parent epic to `<epic>`. The `<epic>` value should be in the format of `&epic`, `group&epic`, or a URL to an epic ([introduced in GitLab 12.1](https://gitlab.com/gitlab-org/gitlab/-/issues/10556)). **(ULTIMATE)** |
 | `/promote`                            | ✓     |               |      | Promote issue to epic. **(PREMIUM)**                                                                                            |
 | `/publish`                            | ✓     |               |      | Publish issue to an associated [Status Page](../../operations/incident_management/status_page.md) ([Introduced in GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30906)) **(ULTIMATE)** |
-| `/reassign @user1 @user2`             | ✓     | ✓             |      | Change assignee. **(STARTER)**                                                                                                   |
-| `/relabel ~label1 ~label2`            | ✓     | ✓             | ✓    | Replace existing labels with those specified.                                                                                  |
+| `/reassign @user1 @user2`             | ✓     | ✓             |      | Replace current assignees with those specified. **(STARTER)**                                                                                         |
+| `/rebase`                             |       | ✓             |      | Rebase source branch. This schedules a background task that attempts to rebase the changes in the source branch on the latest commit of the target branch. If `/rebase` is used, `/merge` is ignored to avoid a race condition where the source branch is merged or deleted before it is rebased. If there are merge conflicts, GitLab displays a message that a rebase cannot be scheduled. Rebase failures are displayed with the merge request status. |
+| `/reassign_reviewer @user1 @user2`    |       | ✓             |      | Replace current reviewers with those specified. **(STARTER)**                                                                                         |
+| `/relabel ~label1 ~label2`            | ✓     | ✓             | ✓    | Replace current labels with those specified.                                                                        |
 | `/relate #issue1 #issue2`             | ✓     |               |      | Mark issues as related. **(STARTER)**                                                                                            |
 | `/remove_child_epic <epic>`           |       |               | ✓    | Remove child epic from `<epic>`. The `<epic>` value should be in the format of `&epic`, `group&epic`, or a URL to an epic ([introduced in GitLab 12.0](https://gitlab.com/gitlab-org/gitlab/-/issues/7330)). **(ULTIMATE)** |
 | `/remove_due_date`                    | ✓     |               |      | Remove due date.                                                                                                                 |
@@ -74,14 +84,17 @@ The following quick actions are applicable to descriptions, discussions and thre
 | `/tableflip <comment>`                | ✓     | ✓             | ✓    | Append the comment with `(╯°□°)╯︵ ┻━┻`.                                                                                        |
 | `/target_branch <local branch name>`  |       | ✓             |      | Set target branch.                                                                                                              |
 | `/title <new title>`                  | ✓     | ✓             | ✓    | Change title.                                                                                                                  |
-| `/todo`                               | ✓     | ✓             | ✓    | Add a To-Do.                                                                                                                   |
+| `/todo`                               | ✓     | ✓             | ✓    | Add a to-do item.                                                                                                                   |
 | `/unassign @user1 @user2`             | ✓     | ✓             |      | Remove specific assignees. **(STARTER)**                                                                                       |
-| `/unassign`                           | ✓     | ✓             |      | Remove all assignees.                                                                                                          |
-| `/unlabel ~label1 ~label2` or `/remove_label ~label1 ~label2` | ✓     | ✓             | ✓    | Remove all or specific labels.                                                                          |
-| `/unlock`                             | ✓     | ✓             |      | Unlock the thread.                                                                                                              |
+| `/unassign`                           |       | ✓             |      | Remove all assignees.                                                                                                          |
+| `/unassign_reviewer @user1 @user2`    |       | ✓             |      | Remove specific reviewers. **(STARTER)**                                                                                       |
+| `/unassign_reviewer`                  |       | ✓             |      | Remove all reviewers.                                                                                                          |
+| `/unlabel ~label1 ~label2` or `/remove_label ~label1 ~label2` | ✓     | ✓             | ✓    | Remove specified labels.                                                                         |
+| `/unlabel` or `/remove_label` | ✓     | ✓             | ✓    | Remove all labels.                                                                          |
+| `/unlock`                             | ✓     | ✓             |      | Unlock the discussions.                                                                                                              |
 | `/unsubscribe`                        | ✓     | ✓             | ✓    | Unsubscribe from notifications.                                                                                                |
 | `/weight <value>`                     | ✓     |               |      | Set weight. Valid options for `<value>` include `0`, `1`, `2`, and so on. **(STARTER)**                                         |
-| `/wip`                                |       | ✓             |      | Toggle the Work In Progress status.                                                                                              |
+| `/wip`                                |       | ✓             |      | Toggle the draft status.                                                                                              |
 | `/zoom <Zoom URL>`                    | ✓     |               |      | Add Zoom meeting to this issue ([introduced in GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16609)).      |
 
 ## Autocomplete characters

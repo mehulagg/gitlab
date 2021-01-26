@@ -4,6 +4,7 @@ import { GlTabs, GlTab } from '@gitlab/ui';
 import { __ } from '~/locale';
 import MergeRequestsGrid from './merge_requests/grid.vue';
 import EmptyState from './empty_state.vue';
+import MergeCommitsExportButton from './merge_requests/merge_commits_export_button.vue';
 import { COMPLIANCE_TAB_COOKIE_KEY } from '../constants';
 
 export default {
@@ -13,6 +14,7 @@ export default {
     EmptyState,
     GlTab,
     GlTabs,
+    MergeCommitsExportButton,
   },
   props: {
     emptyStateSvgPath: {
@@ -28,10 +30,18 @@ export default {
       required: false,
       default: false,
     },
+    mergeCommitsCsvExportPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     hasMergeRequests() {
       return this.mergeRequests.length > 0;
+    },
+    hasMergeCommitsCsvExportPath() {
+      return this.mergeCommitsCsvExportPath !== '';
     },
   },
   methods: {
@@ -49,8 +59,14 @@ export default {
 
 <template>
   <div v-if="hasMergeRequests" class="compliance-dashboard">
-    <header class="gl-my-5">
-      <h4>{{ $options.strings.heading }}</h4>
+    <header>
+      <div class="gl-mt-5 d-flex">
+        <h4 class="gl-flex-grow-1 gl-my-0">{{ $options.strings.heading }}</h4>
+        <merge-commits-export-button
+          v-if="hasMergeCommitsCsvExportPath"
+          :merge-commits-csv-export-path="mergeCommitsCsvExportPath"
+        />
+      </div>
       <p>{{ $options.strings.subheading }}</p>
     </header>
 

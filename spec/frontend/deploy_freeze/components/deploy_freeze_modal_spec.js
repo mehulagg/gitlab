@@ -4,6 +4,7 @@ import { GlButton, GlModal } from '@gitlab/ui';
 import DeployFreezeModal from '~/deploy_freeze/components/deploy_freeze_modal.vue';
 import TimezoneDropdown from '~/vue_shared/components/timezone_dropdown.vue';
 import createStore from '~/deploy_freeze/store';
+import { freezePeriodsFixture, timezoneDataFixture } from '../helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,8 +12,6 @@ localVue.use(Vuex);
 describe('Deploy freeze modal', () => {
   let wrapper;
   let store;
-  const freezePeriodsFixture = getJSONFixture('/api/freeze-periods/freeze_periods.json');
-  const timezoneDataFixture = getJSONFixture('/api/freeze-periods/timezone_data.json');
 
   beforeEach(() => {
     store = createStore({
@@ -20,7 +19,7 @@ describe('Deploy freeze modal', () => {
       timezoneData: timezoneDataFixture,
     });
     wrapper = shallowMount(DeployFreezeModal, {
-      attachToDocument: true,
+      attachTo: document.body,
       stubs: {
         GlModal,
       },
@@ -30,10 +29,7 @@ describe('Deploy freeze modal', () => {
   });
 
   const findModal = () => wrapper.find(GlModal);
-  const addDeployFreezeButton = () =>
-    findModal()
-      .findAll(GlButton)
-      .at(1);
+  const addDeployFreezeButton = () => findModal().findAll(GlButton).at(1);
 
   const setInput = (freezeStartCron, freezeEndCron, selectedTimezone) => {
     store.state.freezeStartCron = freezeStartCron;

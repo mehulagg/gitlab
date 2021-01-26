@@ -8,10 +8,13 @@ module Types
     implements MemberInterface
 
     graphql_name 'GroupMember'
-    description 'Represents a Group Member'
+    description 'Represents a Group Membership'
 
     field :group, Types::GroupType, null: true,
-          description: 'Group that a User is a member of',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, obj.source_id).find }
+          description: 'Group that a User is a member of.'
+
+    def group
+      Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, object.source_id).find
+    end
   end
 end

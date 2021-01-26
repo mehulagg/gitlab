@@ -14,7 +14,7 @@ module StatusPage
 
     def process(issue)
       PublishedIncident.untrack(issue)
-      ::StatusPage::UsageDataCounters::IncidentCounter.count(:unpublishes)
+      ::Gitlab::StatusPage::UsageDataCounters::IncidentCounter.count(:unpublishes)
 
       # Delete the incident prior to deleting images to avoid broken links
       json_key = json_object_key(issue)
@@ -27,11 +27,11 @@ module StatusPage
     end
 
     def uploads_path(issue)
-      StatusPage::Storage.uploads_path(issue.iid)
+      Gitlab::StatusPage::Storage.uploads_path(issue.iid)
     end
 
     def json_object_key(issue)
-      StatusPage::Storage.details_path(issue.iid)
+      Gitlab::StatusPage::Storage.details_path(issue.iid)
     end
   end
 end

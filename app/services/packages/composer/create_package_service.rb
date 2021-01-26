@@ -2,7 +2,7 @@
 
 module Packages
   module Composer
-    class CreatePackageService < BaseService
+    class CreatePackageService < ::Packages::CreatePackageService
       include ::Gitlab::Utils::StrongMemoize
 
       def execute
@@ -10,21 +10,20 @@ module Packages
         composer_json
 
         ::Packages::Package.transaction do
-          ::Packages::Composer::Metadatum.upsert(
+          ::Packages::Composer::Metadatum.upsert({
             package_id: created_package.id,
             target_sha: target,
             composer_json: composer_json
-          )
+          })
         end
+
+        created_package
       end
 
       private
 
       def created_package
-        project
-          .packages
-          .composer
-          .safe_find_or_create_by!(name: package_name, version: package_version)
+        find_or_create_package!(:composer, name: package_name, version: package_version)
       end
 
       def composer_json

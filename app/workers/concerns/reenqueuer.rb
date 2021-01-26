@@ -13,7 +13,7 @@
 #   - `#lease_timeout`
 #
 # The worker spec should include `it_behaves_like 'reenqueuer'` and
-# `it_behaves_like 'it is rate limited to 1 call per'`.
+# `it_behaves_like '#perform is rate limited to 1 call per'`.
 #
 # Optionally override `#minimum_duration` to adjust the rate limit.
 #
@@ -37,6 +37,7 @@ module Reenqueuer
     include ReenqueuerSleeper
 
     sidekiq_options retry: false
+    deduplicate :none
   end
 
   def perform(*args)
@@ -52,7 +53,11 @@ module Reenqueuer
   private
 
   def reenqueue(*args)
-    self.class.perform_async(*args) if yield
+    result = yield
+
+    self.class.perform_async(*args) if result
+
+    result
   end
 
   # Override as needed

@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { isEmpty } from 'lodash';
 import { mapActions } from 'vuex';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';

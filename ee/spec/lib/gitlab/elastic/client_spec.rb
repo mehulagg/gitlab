@@ -16,6 +16,18 @@ RSpec.describe Gitlab::Elastic::Client do
 
         expect(client.get(index: 'foo', id: 1)).to eq([:fake_response])
       end
+
+      it 'does not set request timeout in transport' do
+        expect(client.transport.options).not_to include(:request_timeout)
+      end
+
+      context 'with client_request_timeout in config' do
+        let(:params) { { url: 'http://dummy-elastic:9200', client_request_timeout: 30 } }
+
+        it 'does not set request timeout in transport' do
+          expect(client.transport.options).to include(request_timeout: 30)
+        end
+      end
     end
 
     context 'with AWS IAM static credentials' do
@@ -37,8 +49,10 @@ RSpec.describe Gitlab::Elastic::Client do
           stub_request(:get, 'http://example-elastic:9200/foo/_all/1')
             .with(
               headers: {
-                'Authorization'        => 'AWS4-HMAC-SHA256 Credential=0/20170303/us-east-1/es/aws4_request, SignedHeaders=content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-opaque-id, Signature=746fa5a8a7f3859697d46a754550b1eb357413c481c91d22f17b8a0129c0121e',
+                'Authorization'        => 'AWS4-HMAC-SHA256 Credential=0/20170303/us-east-1/es/aws4_request, SignedHeaders=content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-opaque-id, Signature=61a04383d24ca21f7ec80cd56c252bc3ecd3a306dbe6681e615416b4b9ec5ecb',
                 'Content-Type'         => 'application/json',
+                # User-Agent is a part of SignedHeaders; if this changes, the signature will change
+                'User-Agent'           => 'Faraday v1.0.1',
                 'X-Amz-Content-Sha256' => 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                 'X-Amz-Date'           => '20170303T133952Z'
               })

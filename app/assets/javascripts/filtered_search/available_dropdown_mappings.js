@@ -15,6 +15,7 @@ export default class AvailableDropdownMappings {
     labelsEndpoint,
     milestonesEndpoint,
     releasesEndpoint,
+    environmentsEndpoint,
     groupsOnly,
     includeAncestorGroups,
     includeDescendantGroups,
@@ -24,6 +25,7 @@ export default class AvailableDropdownMappings {
     this.labelsEndpoint = labelsEndpoint;
     this.milestonesEndpoint = milestonesEndpoint;
     this.releasesEndpoint = releasesEndpoint;
+    this.environmentsEndpoint = environmentsEndpoint;
     this.groupsOnly = groupsOnly;
     this.includeAncestorGroups = includeAncestorGroups;
     this.includeDescendantGroups = includeDescendantGroups;
@@ -48,7 +50,7 @@ export default class AvailableDropdownMappings {
       },
     };
 
-    supportedTokens.forEach(type => {
+    supportedTokens.forEach((type) => {
       if (availableMappings[type]) {
         allowedMappings[type] = availableMappings[type];
       }
@@ -69,6 +71,16 @@ export default class AvailableDropdownMappings {
         gl: DropdownUser,
         element: this.container.querySelector('#js-dropdown-assignee'),
       },
+      reviewer: {
+        reference: null,
+        gl: DropdownUser,
+        element: this.container.querySelector('#js-dropdown-reviewer'),
+      },
+      'approved-by': {
+        reference: null,
+        gl: DropdownUser,
+        element: this.container.querySelector('#js-dropdown-approved-by'),
+      },
       milestone: {
         reference: null,
         gl: DropdownNonUser,
@@ -87,7 +99,7 @@ export default class AvailableDropdownMappings {
 
           // The DropdownNonUser class is hardcoded to look for and display a
           // "title" property, so we need to add this property to each release object
-          preprocessing: releases => releases.map(r => ({ ...r, title: r.tag })),
+          preprocessing: (releases) => releases.map((r) => ({ ...r, title: r.tag })),
         },
         element: this.container.querySelector('#js-dropdown-release'),
       },
@@ -144,6 +156,16 @@ export default class AvailableDropdownMappings {
         },
         element: this.container.querySelector('#js-dropdown-target-branch'),
       },
+      environment: {
+        reference: null,
+        gl: DropdownNonUser,
+        extraArguments: {
+          endpoint: this.getEnvironmentsEndpoint(),
+          symbol: '',
+          preprocessing: (data) => data.map((env) => ({ title: env })),
+        },
+        element: this.container.querySelector('#js-dropdown-environment'),
+      },
     };
   }
 
@@ -178,8 +200,9 @@ export default class AvailableDropdownMappings {
   }
 
   getMergeRequestTargetBranchesEndpoint() {
-    const endpoint = `${gon.relative_url_root ||
-      ''}/autocomplete/merge_request_target_branches.json`;
+    const endpoint = `${
+      gon.relative_url_root || ''
+    }/autocomplete/merge_request_target_branches.json`;
 
     const params = {
       group_id: this.getGroupId(),
@@ -187,6 +210,10 @@ export default class AvailableDropdownMappings {
     };
 
     return mergeUrlParams(params, endpoint);
+  }
+
+  getEnvironmentsEndpoint() {
+    return `${this.environmentsEndpoint}.json`;
   }
 
   getGroupId() {

@@ -43,11 +43,11 @@ RSpec.describe Gitlab::Geo::ReplicableModel do
     end
   end
 
-  describe '#in_replicables_for_geo_node?' do
-    it 'reuses replicables_for_geo_node' do
-      expect(DummyModel).to receive(:replicables_for_geo_node).once.and_return(DummyModel.all)
+  describe '#in_replicables_for_current_secondary?' do
+    it 'reuses replicables_for_current_secondary' do
+      expect(DummyModel).to receive(:replicables_for_current_secondary).once.with(subject).and_call_original
 
-      subject.in_replicables_for_geo_node?
+      subject.in_replicables_for_current_secondary?
     end
   end
 end

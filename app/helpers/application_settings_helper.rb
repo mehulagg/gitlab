@@ -49,12 +49,12 @@ module ApplicationSettingsHelper
     all_protocols_enabled? || Gitlab::CurrentSettings.enabled_git_access_protocol == 'http'
   end
 
-  def enabled_project_button(project, protocol)
+  def enabled_protocol_button(container, protocol)
     case protocol
     when 'ssh'
-      ssh_clone_button(project, append_link: false)
+      ssh_clone_button(container, append_link: false)
     else
-      http_clone_button(project, append_link: false)
+      http_clone_button(container, append_link: false)
     end
   end
 
@@ -168,7 +168,7 @@ module ApplicationSettingsHelper
 
   def visible_attributes
     [
-      :admin_notification_email,
+      :abuse_notification_email,
       :after_sign_out_path,
       :after_sign_up_text,
       :akismet_api_key,
@@ -198,15 +198,16 @@ module ApplicationSettingsHelper
       :default_project_visibility,
       :default_projects_limit,
       :default_snippet_visibility,
+      :disable_feed_token,
       :disabled_oauth_sign_in_sources,
-      :domain_blacklist,
-      :domain_blacklist_enabled,
-      # TODO Remove domain_blacklist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
-      :domain_blacklist_raw,
-      :domain_whitelist,
-      # TODO Remove domain_whitelist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
-      :domain_whitelist_raw,
-      :outbound_local_requests_whitelist_raw,
+      :domain_denylist,
+      :domain_denylist_enabled,
+      # TODO Remove domain_denylist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
+      :domain_denylist_raw,
+      :domain_allowlist,
+      # TODO Remove domain_allowlist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
+      :domain_allowlist_raw,
+      :outbound_local_requests_allowlist_raw,
       :dsa_key_restriction,
       :ecdsa_key_restriction,
       :ed25519_key_restriction,
@@ -222,12 +223,15 @@ module ApplicationSettingsHelper
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
       :gitaly_timeout_fast,
+      :gitpod_enabled,
+      :gitpod_url,
       :grafana_enabled,
       :grafana_url,
       :gravatar_enabled,
       :hashed_storage_enabled,
       :help_page_hide_commercial_content,
       :help_page_support_url,
+      :help_page_documentation_base_url,
       :help_page_text,
       :hide_third_party_offers,
       :home_page_url,
@@ -238,6 +242,7 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
       :max_import_size,
@@ -251,6 +256,9 @@ module ApplicationSettingsHelper
       :password_authentication_enabled_for_git,
       :performance_bar_allowed_group_path,
       :performance_bar_enabled,
+      :personal_access_token_prefix,
+      :kroki_enabled,
+      :kroki_url,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -263,6 +271,7 @@ module ApplicationSettingsHelper
       :receive_max_input_size,
       :repository_checks_enabled,
       :repository_storages_weighted,
+      :require_admin_approval_after_user_signup,
       :require_two_factor_authentication,
       :restricted_visibility_levels,
       :rsa_key_restriction,
@@ -298,7 +307,6 @@ module ApplicationSettingsHelper
       :unique_ips_limit_per_user,
       :unique_ips_limit_time_window,
       :usage_ping_enabled,
-      :instance_statistics_visibility_private,
       :user_default_external,
       :user_show_add_ssh_key_message,
       :user_default_internal_regex,
@@ -313,7 +321,6 @@ module ApplicationSettingsHelper
       :snowplow_cookie_domain,
       :snowplow_enabled,
       :snowplow_app_id,
-      :snowplow_iglu_registry_url,
       :push_event_hooks_limit,
       :push_event_activities_limit,
       :custom_http_clone_url_root,
@@ -328,7 +335,9 @@ module ApplicationSettingsHelper
       :group_import_limit,
       :group_export_limit,
       :group_download_export_limit,
-      :wiki_page_max_content_bytes
+      :wiki_page_max_content_bytes,
+      :container_registry_delete_tags_service_timeout,
+      :rate_limiting_response_text
     ]
   end
 
@@ -341,6 +350,12 @@ module ApplicationSettingsHelper
       :external_authorization_service_enabled,
       :external_authorization_service_timeout,
       :external_authorization_service_url
+    ]
+  end
+
+  def deprecated_attributes
+    [
+      :admin_notification_email # ok to remove in REST API v5
     ]
   end
 
@@ -380,6 +395,14 @@ module ApplicationSettingsHelper
       'self_monitoring_project_full_path' =>
         Gitlab::CurrentSettings.self_monitoring_project&.full_path
     }
+  end
+
+  def show_documentation_base_url_field?
+    Feature.enabled?(:help_page_documentation_redirect)
+  end
+
+  def signup_enabled?
+    !!Gitlab::CurrentSettings.signup_enabled
   end
 end
 

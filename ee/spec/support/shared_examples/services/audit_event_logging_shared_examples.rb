@@ -57,8 +57,8 @@ RSpec.shared_examples 'logs the custom audit event' do
                                           ip_address: ip_address,
                                           custom_message: custom_message)
 
-    expect { service.security_event }.to change(SecurityEvent, :count).by(1)
-    security_event = SecurityEvent.last
+    expect { service.security_event }.to change(AuditEvent, :count).by(1)
+    security_event = AuditEvent.last
 
     expect(security_event.details).to eq(custom_message: custom_message,
                                          ip_address: ip_address,
@@ -97,9 +97,9 @@ RSpec.shared_examples 'logs the release audit event' do
                                           target_id: target_id,
                                           target_type: target_type)
 
-    expect { service.security_event }.to change(SecurityEvent, :count).by(1)
+    expect { service.security_event }.to change(AuditEvent, :count).by(1)
 
-    security_event = SecurityEvent.last
+    security_event = AuditEvent.last
 
     expect(security_event.details).to eq(custom_message: custom_message,
                                          ip_address: ip_address,

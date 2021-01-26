@@ -45,7 +45,7 @@ RSpec.describe 'EE-specific admin routing' do
   end
 
   describe Admin::Geo::ReplicablesController, 'routing' do
-    Gitlab::Geo.replicator_classes.map(&:replicable_name_plural).each do |replicable_name_plural|
+    Gitlab::Geo.enabled_replicator_classes.map(&:replicable_name_plural).each do |replicable_name_plural|
       it "routes /admin/geo/replication/#{replicable_name_plural} to replicables#index" do
         expect(get("/admin/geo/replication/#{replicable_name_plural}")).to route_to('admin/geo/replicables#index', replicable_name_plural: replicable_name_plural)
       end
@@ -104,6 +104,11 @@ RSpec.describe 'EE-specific admin routing' do
     it 'routes to #templates' do
       expect(get('/admin/application_settings/templates')).to route_to('admin/application_settings#templates')
       expect(patch('/admin/application_settings/templates')).to route_to('admin/application_settings#templates')
+    end
+
+    it 'redirects /advanced_search to to #advanced_search' do
+      expect(get('/admin/application_settings/advanced_search')).to route_to('admin/application_settings#advanced_search')
+      expect(patch('/admin/application_settings/advanced_search')).to route_to('admin/application_settings#advanced_search')
     end
   end
 end

@@ -7,8 +7,7 @@ module Elastic
         options[:in] = %w(title^2 description)
 
         query_hash = basic_query_hash(options[:in], query)
-
-        query_hash = project_ids_filter(query_hash, options)
+        query_hash = context.name(:milestone, :related) { project_ids_filter(query_hash, options) }
 
         search(query_hash, options)
       end

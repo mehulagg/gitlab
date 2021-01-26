@@ -1,7 +1,7 @@
+import { shallowMount } from '@vue/test-utils';
+import { GlLink, GlSprintf, GlAlert } from '@gitlab/ui';
 import AncestorNotice from '~/clusters_list/components/ancestor_notice.vue';
 import ClusterStore from '~/clusters_list/store';
-import { shallowMount } from '@vue/test-utils';
-import { GlLink, GlSprintf } from '@gitlab/ui';
 
 describe('ClustersAncestorNotice', () => {
   let store;
@@ -9,7 +9,7 @@ describe('ClustersAncestorNotice', () => {
 
   const createWrapper = () => {
     store = ClusterStore({ ancestorHelperPath: '/some/ancestor/path' });
-    wrapper = shallowMount(AncestorNotice, { store, stubs: { GlSprintf } });
+    wrapper = shallowMount(AncestorNotice, { store, stubs: { GlSprintf, GlAlert } });
     return wrapper.vm.$nextTick();
   };
 
@@ -28,7 +28,7 @@ describe('ClustersAncestorNotice', () => {
     });
 
     it('displays no notice', () => {
-      expect(wrapper.isEmpty()).toBe(true);
+      expect(wrapper.html()).toBe('');
     });
   });
 
@@ -45,7 +45,7 @@ describe('ClustersAncestorNotice', () => {
     });
 
     it('displays link', () => {
-      expect(wrapper.contains(GlLink)).toBe(true);
+      expect(wrapper.find(GlLink).exists()).toBe(true);
     });
   });
 });

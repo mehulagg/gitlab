@@ -9,6 +9,16 @@ module Gitlab
   module Auth
     module OAuth
       class User
+        class << self
+          # rubocop: disable CodeReuse/ActiveRecord
+          def find_by_uid_and_provider(uid, provider)
+            identity = ::Identity.with_extern_uid(provider, uid).take
+
+            identity && identity.user
+          end
+          # rubocop: enable CodeReuse/ActiveRecord
+        end
+
         SignupDisabledError = Class.new(StandardError)
         SigninDisabledForProviderError = Class.new(StandardError)
 
@@ -62,6 +72,7 @@ module Gitlab
         def find_user
           user = find_by_uid_and_provider
 
+          user ||= find_by_email if auto_link_user?
           user ||= find_or_build_ldap_user if auto_link_ldap_user?
           user ||= build_new_user if signup_enabled?
 
@@ -150,6 +161,7 @@ module Gitlab
         def find_ldap_person(auth_hash, adapter)
           Gitlab::Auth::Ldap::Person.find_by_uid(auth_hash.uid, adapter) ||
             Gitlab::Auth::Ldap::Person.find_by_email(auth_hash.uid, adapter) ||
+            Gitlab::Auth::Ldap::Person.find_by_email(auth_hash.email, adapter) ||
             Gitlab::Auth::Ldap::Person.find_by_dn(auth_hash.uid, adapter)
         rescue Gitlab::Auth::Ldap::LdapConnectionError
           nil
@@ -188,15 +200,12 @@ module Gitlab
           @auth_hash = AuthHash.new(auth_hash)
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
         def find_by_uid_and_provider
-          identity = Identity.with_extern_uid(auth_hash.provider, auth_hash.uid).take
-          identity&.user
+          self.class.find_by_uid_and_provider(auth_hash.uid, auth_hash.provider)
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
-        def build_new_user
-          user_params = user_attributes.merge(skip_confirmation: true)
+        def build_new_user(skip_confirmation: true)
+          user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
           Users::BuildService.new(nil, user_params).execute(skip_authorization: true)
         end
 
@@ -268,6 +277,14 @@ module Gitlab
           Gitlab::CurrentSettings.current_application_settings
                                 .disabled_oauth_sign_in_sources
                                 .include?(auth_hash.provider)
+        end
+
+        def auto_link_user?
+          auto_link = Gitlab.config.omniauth.auto_link_user
+          return auto_link if [true, false].include?(auto_link)
+
+          auto_link = Array(auto_link)
+          auto_link.include?(auth_hash.provider)
         end
       end
     end

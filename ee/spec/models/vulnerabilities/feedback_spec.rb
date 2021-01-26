@@ -11,6 +11,7 @@ RSpec.describe Vulnerabilities::Feedback do
     )
   }
   it { is_expected.to define_enum_for(:category) }
+  it { is_expected.to define_enum_for(:dismissal_reason) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
@@ -28,8 +29,10 @@ RSpec.describe Vulnerabilities::Feedback do
     it { is_expected.to validate_presence_of(:category) }
     it { is_expected.to validate_presence_of(:project_fingerprint) }
 
+    let_it_be(:project) { create(:project) }
+
     context 'pipeline is nil' do
-      let(:feedback) { build(:vulnerability_feedback, pipeline_id: nil) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, pipeline_id: nil) }
 
       it 'is valid' do
         expect(feedback).to be_valid
@@ -37,7 +40,7 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'pipeline has the same project_id' do
-      let(:feedback) { build(:vulnerability_feedback) }
+      let(:feedback) { build(:vulnerability_feedback, project: project) }
 
       it 'is valid' do
         expect(feedback.project_id).to eq(feedback.pipeline.project_id)
@@ -46,15 +49,15 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'pipeline_id does not exist' do
-      let(:feedback) { build(:vulnerability_feedback, pipeline_id: -100) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, pipeline_id: -100) }
 
       it 'is invalid' do
         expect(feedback.project_id).not_to eq(feedback.pipeline_id)
         expect(feedback).not_to be_valid
       end
     end
+
     context 'pipeline has a different project_id' do
-      let(:project) { create(:project) }
       let(:pipeline) { create(:ci_pipeline, project: create(:project)) }
       let(:feedback) { build(:vulnerability_feedback, project: project, pipeline: pipeline) }
 
@@ -65,7 +68,7 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'comment is set' do
-      let(:feedback) { build(:vulnerability_feedback, comment: 'a comment' ) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, comment: 'a comment' ) }
 
       it 'validates presence of comment_timestamp' do
         expect(feedback).to validate_presence_of(:comment_timestamp)
@@ -74,6 +77,85 @@ RSpec.describe Vulnerabilities::Feedback do
       it 'validates presence of comment_author' do
         expect(feedback).to validate_presence_of(:comment_author)
       end
+    end
+  end
+
+  describe 'callbacks' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:pipeline) { create(:ci_pipeline, project: project) }
+
+    shared_examples 'touches the pipeline' do
+      context 'when feedback is for dismissal' do
+        let_it_be_with_refind(:feedback) { create(:vulnerability_feedback, :dismissal, project: project) }
+
+        context 'when pipeline is not assigned to feedback' do
+          it 'does not touch the pipeline' do
+            expect(pipeline).not_to receive(:touch)
+            subject
+          end
+        end
+
+        context 'when pipeline is assigned to feedback' do
+          before do
+            feedback.update(pipeline: pipeline)
+          end
+
+          context 'when pipeline was updated less than 5 minutes ago' do
+            before do
+              pipeline.touch(time: 3.minutes.ago)
+            end
+
+            it 'touches the pipeline' do
+              expect(pipeline).not_to receive(:touch)
+              subject
+            end
+          end
+
+          context 'when pipeline was updated more than 5 minutes ago' do
+            before do
+              pipeline.touch(time: 6.minutes.ago)
+            end
+
+            it 'touches the pipeline' do
+              expect(pipeline).to receive(:touch)
+              subject
+            end
+
+            context 'when pipeline touch raises ActiveRecord::StaleObjectError' do
+              before do
+                allow(pipeline).to receive(:touch).and_raise(ActiveRecord::StaleObjectError)
+              end
+
+              it 'does not raise an error' do
+                expect {subject}.not_to raise_error
+              end
+            end
+          end
+        end
+      end
+
+      context 'when feedback is not for dismissal' do
+        let_it_be_with_refind(:feedback) { create(:vulnerability_feedback, :issue) }
+
+        context 'when pipeline is not assigned to feedback' do
+          it 'does not touch the pipeline' do
+            expect(pipeline).not_to receive(:touch)
+            subject
+          end
+        end
+      end
+    end
+
+    context 'after_save :touch_pipeline' do
+      subject { feedback.update!(vulnerability_data: { category: 'dependency_scanning' }) }
+
+      it_behaves_like 'touches the pipeline'
+    end
+
+    context 'after_destroy :touch_pipeline' do
+      subject { feedback.destroy! }
+
+      it_behaves_like 'touches the pipeline'
     end
   end
 
@@ -128,7 +210,9 @@ RSpec.describe Vulnerabilities::Feedback do
   end
 
   describe '#has_comment?' do
-    let(:feedback) { build(:vulnerability_feedback, comment: comment, comment_author: comment_author) }
+    let_it_be(:project) { create(:project) }
+
+    let(:feedback) { build(:vulnerability_feedback, project: project, comment: comment, comment_author: comment_author) }
     let(:comment) { 'a comment' }
     let(:comment_author) { build(:user) }
 
@@ -194,6 +278,32 @@ RSpec.describe Vulnerabilities::Feedback do
         expect(existing_feedback).to eq(feedback)
       end
 
+      context 'when a finding_uuid is provided' do
+        let(:finding) { create(:vulnerabilities_finding) }
+        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: finding.uuid) }
+
+        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
+
+        it 'sets finding_uuid' do
+          feedback.save!
+
+          expect(feedback.finding_uuid).to eq(finding.uuid)
+        end
+      end
+
+      context 'when the finding_uuid provided is nil' do
+        let(:finding) { create(:vulnerabilities_finding) }
+        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: nil) }
+
+        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
+
+        it 'sets finding_uuid as nil' do
+          feedback.save!
+
+          expect(feedback.finding_uuid).to be_nil
+        end
+      end
+
       context 'when attempting to save duplicate' do
         it 'raises ActiveRecord::RecordInvalid' do
           duplicate = described_class.find_or_init_for(feedback_params)
@@ -222,14 +332,34 @@ RSpec.describe Vulnerabilities::Feedback do
   end
 
   describe '#occurrence_key' do
-    let(:project_id) { 1 }
+    let(:project) { create(:project) }
     let(:category) { 'sast' }
     let(:project_fingerprint) { Digest::SHA1.hexdigest('foo') }
-    let(:expected_occurrence_key) { { project_id: project_id, category: category, project_fingerprint: project_fingerprint } }
-    let(:feedback) { build(:vulnerability_feedback, expected_occurrence_key) }
+    let(:feedback) { build(:vulnerability_feedback, project: project, category: category, project_fingerprint: project_fingerprint) }
 
     subject { feedback.finding_key }
 
-    it { is_expected.to eq(expected_occurrence_key) }
+    it { is_expected.to eq({ project_id: project.id, category: category, project_fingerprint: project_fingerprint }) }
+  end
+
+  describe '#finding' do
+    let_it_be(:feedback) { create(:vulnerability_feedback) }
+
+    subject { feedback.finding }
+
+    context 'when the is no finding persisted' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'when there is a persisted finding' do
+      let!(:finding) do
+        create(:vulnerabilities_finding,
+               project: feedback.project,
+               report_type: feedback.category,
+               project_fingerprint: feedback.project_fingerprint)
+      end
+
+      it { is_expected.to eq(finding) }
+    end
   end
 end

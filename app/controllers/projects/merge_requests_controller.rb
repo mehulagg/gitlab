@@ -10,8 +10,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   include IssuableCollections
   include RecordUserLastActivity
   include SourcegraphDecorator
+  include DiffHelper
 
-  skip_before_action :merge_request, only: [:index, :bulk_update]
+  skip_before_action :merge_request, only: [:index, :bulk_update, :export_csv]
+  before_action :apply_diff_view_cookie!, only: [:show]
   before_action :whitelist_query_limiting, only: [:assign_related_issues, :update]
   before_action :authorize_update_issuable!, only: [:close, :edit, :update, :remove_wip, :sort]
   before_action :authorize_read_actual_head_pipeline!, only: [
@@ -19,40 +21,55 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     :exposed_artifacts,
     :coverage_reports,
     :terraform_reports,
-    :accessibility_reports
+    :accessibility_reports,
+    :codequality_reports
   ]
   before_action :set_issuables_index, only: [:index]
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_feature_flag(:diffs_batch_load, @project, default_enabled: true)
-    push_frontend_feature_flag(:deploy_from_footer, @project, default_enabled: true)
-    push_frontend_feature_flag(:single_mr_diff_view, @project, default_enabled: true)
-    push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
-    push_frontend_feature_flag(:code_navigation, @project, default_enabled: true)
-    push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
-    push_frontend_feature_flag(:merge_ref_head_comments, @project, default_enabled: true)
-    push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
-    push_frontend_feature_flag(:multiline_comments, @project)
+    push_frontend_feature_flag(:multiline_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:file_identifier_hash)
     push_frontend_feature_flag(:batch_suggestions, @project, default_enabled: true)
-    push_frontend_feature_flag(:auto_expand_collapsed_diffs, @project, default_enabled: true)
-    push_frontend_feature_flag(:hide_jump_to_next_unresolved_in_threads, @project)
+    push_frontend_feature_flag(:approvals_commented_by, @project, default_enabled: true)
+    push_frontend_feature_flag(:merge_request_widget_graphql, @project)
+    push_frontend_feature_flag(:drag_comment_selection, @project, default_enabled: true)
+    push_frontend_feature_flag(:unified_diff_components, @project, default_enabled: true)
+    push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
+    push_frontend_feature_flag(:core_security_mr_widget, @project, default_enabled: true)
+    push_frontend_feature_flag(:core_security_mr_widget_counts, @project)
+    push_frontend_feature_flag(:remove_resolve_note, @project, default_enabled: true)
+    push_frontend_feature_flag(:diffs_gradual_load, @project, default_enabled: true)
+    push_frontend_feature_flag(:codequality_mr_diff, @project)
+    push_frontend_feature_flag(:suggestions_custom_commit, @project)
+    push_frontend_feature_flag(:local_file_reviews, default_enabled: :yaml)
+
+    record_experiment_user(:invite_members_version_a)
+    record_experiment_user(:invite_members_version_b)
   end
 
   before_action do
-    push_frontend_feature_flag(:vue_issuable_sidebar, @project.group)
-    push_frontend_feature_flag(:junit_pipeline_view, @project.group)
+    push_frontend_feature_flag(:merge_request_reviewers, @project, default_enabled: true)
+    push_frontend_feature_flag(:mr_collapsed_approval_rules, @project)
+    push_frontend_feature_flag(:reviewer_approval_rules, @project, default_enabled: :yaml)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]
 
-  feature_category :source_code_management,
-                   unless: -> (action) { action.ends_with?("_reports") }
-  feature_category :code_testing,
-                   only: [:test_reports, :coverage_reports, :terraform_reports]
-  feature_category :accessibility_testing,
-                   only: [:accessibility_reports]
+  after_action :log_merge_request_show, only: [:show]
+
+  feature_category :code_review, [
+                     :assign_related_issues, :bulk_update, :cancel_auto_merge,
+                     :ci_environments_status, :commit_change_content, :commits,
+                     :context_commits, :destroy, :diff_for_path, :discussions,
+                     :edit, :exposed_artifacts, :index, :merge,
+                     :pipeline_status, :pipelines, :rebase, :remove_wip, :show,
+                     :toggle_award_emoji, :toggle_subscription, :update
+                   ]
+
+  feature_category :code_testing, [:test_reports, :coverage_reports]
+  feature_category :accessibility_testing, [:accessibility_reports]
+  feature_category :infrastructure_as_code, [:terraform_reports]
 
   def index
     @merge_requests = @issuables
@@ -84,9 +101,9 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
         @noteable = @merge_request
         @commits_count = @merge_request.commits_count + @merge_request.context_commits_count
         @issuable_sidebar = serializer.represent(@merge_request, serializer: 'sidebar')
-        @current_user_data = UserSerializer.new(project: @project).represent(current_user, {}, MergeRequestUserEntity).to_json
+        @current_user_data = UserSerializer.new(project: @project).represent(current_user, {}, MergeRequestCurrentUserEntity).to_json
         @show_whitespace_default = current_user.nil? || current_user.show_whitespace_in_diffs
-        @file_by_file_default = Feature.enabled?(:view_diffs_file_by_file, default_enabled: true) && current_user&.view_diffs_file_by_file
+        @file_by_file_default = current_user&.view_diffs_file_by_file
         @coverage_path = coverage_reports_project_merge_request_path(@project, @merge_request, format: :json) if @merge_request.has_coverage_reports?
         @endpoint_metadata_url = endpoint_metadata_url(@project, @merge_request)
 
@@ -177,6 +194,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     else
       head :no_content
     end
+  end
+
+  def codequality_reports
+    reports_response(@merge_request.compare_codequality_reports)
   end
 
   def terraform_reports
@@ -305,6 +326,14 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     super
   end
 
+  def export_csv
+    IssuableExportCsvWorker.perform_async(:merge_request, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+
+    index_path = project_merge_requests_path(project)
+    message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
+    redirect_to(index_path, notice: message)
+  end
+
   protected
 
   alias_method :subscribable_resource, :merge_request
@@ -426,7 +455,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42438')
   end
 
-  def reports_response(report_comparison)
+  def reports_response(report_comparison, pipeline = nil)
+    if pipeline&.active?
+      ::Gitlab::PollingInterval.set_header(response, interval: 3000)
+
+      render json: '', status: :no_content && return
+    end
+
     case report_comparison[:status]
     when :parsing
       ::Gitlab::PollingInterval.set_header(response, interval: 3000)
@@ -441,13 +476,23 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     end
   end
 
+  def log_merge_request_show
+    return unless current_user && @merge_request
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).log_view(@merge_request)
+  end
+
   def authorize_read_actual_head_pipeline!
     return render_404 unless can?(current_user, :read_build, merge_request.actual_head_pipeline)
   end
 
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
-    params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+    params[:view] = "inline"
+
+    if Feature.enabled?(:default_merge_ref_for_diffs, project)
+      params = params.merge(diff_head: true)
+    end
 
     diffs_metadata_project_json_merge_request_path(project, merge_request, 'json', params)
   end

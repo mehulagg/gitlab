@@ -1,22 +1,19 @@
 import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
-import initRelatedIssues from 'ee/related_issues';
-import initShow from '~/pages/projects/issues/show';
-import UserCallout from '~/user_callout';
 import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initShow();
-  if (gon.features && !gon.features.vueIssuableSidebar) {
-    initSidebarBundle();
-  }
-  initRelatedIssues();
+import initRelatedIssues from '~/related_issues';
+import initShow from '~/pages/projects/issues/show';
+import UserCallout from '~/user_callout';
 
-  // eslint-disable-next-line no-new
-  new UserCallout({ className: 'js-epics-sidebar-callout' });
-  // eslint-disable-next-line no-new
-  new UserCallout({ className: 'js-weight-sidebar-callout' });
+initShow();
+initSidebarBundle();
+initRelatedIssues();
 
-  const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
+// eslint-disable-next-line no-new
+new UserCallout({ className: 'js-epics-sidebar-callout' });
+// eslint-disable-next-line no-new
+new UserCallout({ className: 'js-weight-sidebar-callout' });
 
-  if (assigneeDropdown) trackShowInviteMemberLink(assigneeDropdown);
-});
+const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
+
+if (assigneeDropdown) trackShowInviteMemberLink(assigneeDropdown);

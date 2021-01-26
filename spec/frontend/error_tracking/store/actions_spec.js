@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as actions from '~/error_tracking/store/actions';
 import * as types from '~/error_tracking/store/mutation_types';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -28,7 +28,7 @@ describe('Sentry common store actions', () => {
   const params = { endpoint, redirectUrl, status };
 
   describe('updateStatus', () => {
-    it('should handle successful status update', done => {
+    it('should handle successful status update', (done) => {
       mock.onPut().reply(200, {});
       testAction(
         actions.updateStatus,
@@ -48,7 +48,7 @@ describe('Sentry common store actions', () => {
       );
     });
 
-    it('should handle unsuccessful status update', done => {
+    it('should handle unsuccessful status update', (done) => {
       mock.onPut().reply(400, {});
       testAction(actions.updateStatus, params, {}, [], [], () => {
         expect(visitUrl).not.toHaveBeenCalled();

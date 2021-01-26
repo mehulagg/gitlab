@@ -1,10 +1,13 @@
 <script>
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   name: 'CollapsedCalendarIcon',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
+  },
+  components: {
+    GlIcon,
   },
   props: {
     containerClass: {
@@ -37,17 +40,8 @@ export default {
 </script>
 
 <template>
-  <div
-    v-tooltip
-    :class="containerClass"
-    :title="tooltipText"
-    data-container="body"
-    data-placement="left"
-    data-html="true"
-    data-boundary="viewport"
-    @click="click"
-  >
-    <i v-if="showIcon" class="fa fa-calendar" aria-hidden="true"> </i>
+  <div v-gl-tooltip.left.viewport :class="containerClass" :title="tooltipText" @click="click">
+    <gl-icon v-if="showIcon" name="calendar" />
     <slot>
       <span> {{ text }} </span>
     </slot>

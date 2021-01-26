@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'diff statistics' do |test_include_stats_flag: true|
-  subject { described_class.new(diffable, collection_default_args) }
+  subject { described_class.new(diffable, **collection_default_args) }
 
   def stub_stats_find_by_path(path, stats_mock)
     expect_next_instance_of(Gitlab::Git::DiffStatsCollection) do |collection|
@@ -140,6 +140,58 @@ RSpec.shared_examples 'cacheable diff collection' do
 
         subject.diff_files
       end
+    end
+  end
+end
+
+shared_examples_for 'sortable diff files' do
+  subject { described_class.new(diffable, **collection_default_args) }
+
+  describe '#raw_diff_files' do
+    let(:raw_diff_files_paths) do
+      subject.raw_diff_files(sorted: sorted).map { |file| file.new_path.presence || file.old_path }
+    end
+
+    context 'when sorted is false (default)' do
+      let(:sorted) { false }
+
+      it 'returns unsorted diff files' do
+        expect(raw_diff_files_paths).to eq(unsorted_diff_files_paths)
+      end
+    end
+
+    context 'when sorted is true' do
+      let(:sorted) { true }
+
+      it 'returns sorted diff files' do
+        expect(raw_diff_files_paths).to eq(sorted_diff_files_paths)
+      end
+
+      context 'when sort_diffs feature flag is disabled' do
+        before do
+          stub_feature_flags(sort_diffs: false)
+        end
+
+        it 'returns unsorted diff files' do
+          expect(raw_diff_files_paths).to eq(unsorted_diff_files_paths)
+        end
+      end
+    end
+  end
+end
+
+shared_examples_for 'unsortable diff files' do
+  subject { described_class.new(diffable, **collection_default_args) }
+
+  describe '#raw_diff_files' do
+    it 'does not call Gitlab::Diff::FileCollectionSorter even when sorted is true' do
+      # Ensure that diffable is created before expectation to ensure that we are
+      # not calling it from `FileCollectionSorter` from `#raw_diff_files`.
+      diffable
+
+      expect(Gitlab::Diff::FileCollectionSorter).not_to receive(:new)
+
+      subject.raw_diff_files(sorted: true)
     end
   end
 end

@@ -1,5 +1,0 @@
----
-title: Do not display the export button while projects are loading
-merge_request: 37573
-author:
-type: fixed

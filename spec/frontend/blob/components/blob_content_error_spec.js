@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import BlobContentError from '~/blob/components/blob_content_error.vue';
 import { GlSprintf } from '@gitlab/ui';
+import BlobContentError from '~/blob/components/blob_content_error.vue';
 
 import { BLOB_RENDER_ERRORS } from '~/blob/components/constants';
 
@@ -32,7 +32,7 @@ describe('Blob Content Error component', () => {
         viewerError: error.id,
       });
       expect(wrapper.text()).toContain(reason);
-      options.forEach(option => {
+      options.forEach((option) => {
         expect(wrapper.text()).toContain(option);
       });
     });
@@ -52,7 +52,7 @@ describe('Blob Content Error component', () => {
         },
       });
       expect(wrapper.text()).toContain(reason);
-      options.forEach(option => {
+      options.forEach((option) => {
         expect(wrapper.text()).toContain(option);
       });
     });

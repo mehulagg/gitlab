@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Cycle analytics utils transformRawStages retains all the stage properties 1`] = `
+exports[`Value Stream Analytics utils transformRawStages retains all the stage properties 1`] = `
 Array [
   Object {
     "custom": false,

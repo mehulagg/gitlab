@@ -1,7 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import { s__ } from '~/locale';
 import { GlFormGroup, GlFormCheckbox, GlFormRadio } from '@gitlab/ui';
+import { s__ } from '~/locale';
 
 const commentDetailOptions = [
   {
@@ -91,6 +91,8 @@ export default {
     <gl-form-group
       v-show="showEnableComments"
       :label="s__('Integrations|Comment settings:')"
+      label-for="service[comment_on_event_enabled]"
+      class="gl-pl-6"
       data-testid="comment-settings"
     >
       <input
@@ -106,14 +108,11 @@ export default {
     <gl-form-group
       v-show="showEnableComments && enableComments"
       :label="s__('Integrations|Comment detail:')"
+      label-for="service[comment_detail]"
+      class="gl-pl-9"
       data-testid="comment-detail"
     >
-      <input
-        v-if="isInheriting"
-        name="service[comment_detail]"
-        type="hidden"
-        :value="commentDetail"
-      />
+      <input name="service[comment_detail]" type="hidden" :value="commentDetail" />
       <gl-form-radio
         v-for="commentDetailOption in commentDetailOptions"
         :key="commentDetailOption.value"

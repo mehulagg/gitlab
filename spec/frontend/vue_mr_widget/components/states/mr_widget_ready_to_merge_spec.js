@@ -20,7 +20,7 @@ jest.mock('~/commons/nav/user_merge_requests', () => ({
 const commitMessage = 'This is the commit message';
 const squashCommitMessage = 'This is the squash commit message';
 const commitMessageWithDescription = 'This is the commit message description';
-const createTestMr = customConfig => {
+const createTestMr = (customConfig) => {
   const mr = {
     isPipelineActive: false,
     pipeline: null,
@@ -101,8 +101,6 @@ describe('ReadyToMerge', () => {
       expect(vm.isMakingRequest).toBeFalsy();
       expect(vm.isMergingImmediately).toBeFalsy();
       expect(vm.commitMessage).toBe(vm.mr.commitMessage);
-      expect(vm.successSvg).toBeDefined();
-      expect(vm.warningSvg).toBeDefined();
     });
   });
 
@@ -348,8 +346,8 @@ describe('ReadyToMerge', () => {
     });
 
     describe('handleMergeButtonClick', () => {
-      const returnPromise = status =>
-        new Promise(resolve => {
+      const returnPromise = (status) =>
+        new Promise((resolve) => {
           resolve({
             data: {
               status,
@@ -357,7 +355,7 @@ describe('ReadyToMerge', () => {
           });
         });
 
-      it('should handle merge when pipeline succeeds', done => {
+      it('should handle merge when pipeline succeeds', (done) => {
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
         jest
           .spyOn(vm.service, 'merge')
@@ -383,7 +381,7 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('should handle merge failed', done => {
+      it('should handle merge failed', (done) => {
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
         jest.spyOn(vm.service, 'merge').mockReturnValue(returnPromise('failed'));
         vm.handleMergeButtonClick(false, true);
@@ -400,7 +398,7 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('should handle merge action accepted case', done => {
+      it('should handle merge action accepted case', (done) => {
         jest.spyOn(vm.service, 'merge').mockReturnValue(returnPromise('success'));
         jest.spyOn(vm, 'initiateMergePolling').mockImplementation(() => {});
         vm.handleMergeButtonClick();
@@ -435,8 +433,8 @@ describe('ReadyToMerge', () => {
     });
 
     describe('handleMergePolling', () => {
-      const returnPromise = state =>
-        new Promise(resolve => {
+      const returnPromise = (state) =>
+        new Promise((resolve) => {
           resolve({
             data: {
               state,
@@ -449,7 +447,7 @@ describe('ReadyToMerge', () => {
         loadFixtures('merge_requests/merge_request_of_current_user.html');
       });
 
-      it('should call start and stop polling when MR merged', done => {
+      it('should call start and stop polling when MR merged', (done) => {
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise('merged'));
         jest.spyOn(vm, 'initiateRemoveSourceBranchPolling').mockImplementation(() => {});
@@ -478,11 +476,14 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('updates status box', done => {
+      it('updates status box', (done) => {
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise('merged'));
         jest.spyOn(vm, 'initiateRemoveSourceBranchPolling').mockImplementation(() => {});
 
-        vm.handleMergePolling(() => {}, () => {});
+        vm.handleMergePolling(
+          () => {},
+          () => {},
+        );
 
         setImmediate(() => {
           const statusBox = document.querySelector('.status-box');
@@ -494,24 +495,14 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('hides close button', done => {
+      it('updates merge request count badge', (done) => {
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise('merged'));
         jest.spyOn(vm, 'initiateRemoveSourceBranchPolling').mockImplementation(() => {});
 
-        vm.handleMergePolling(() => {}, () => {});
-
-        setImmediate(() => {
-          expect(document.querySelector('.btn-close').classList.contains('hidden')).toBeTruthy();
-
-          done();
-        });
-      });
-
-      it('updates merge request count badge', done => {
-        jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise('merged'));
-        jest.spyOn(vm, 'initiateRemoveSourceBranchPolling').mockImplementation(() => {});
-
-        vm.handleMergePolling(() => {}, () => {});
+        vm.handleMergePolling(
+          () => {},
+          () => {},
+        );
 
         setImmediate(() => {
           expect(document.querySelector('.js-merge-counter').textContent).toBe('0');
@@ -520,7 +511,7 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('should continue polling until MR is merged', done => {
+      it('should continue polling until MR is merged', (done) => {
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise('some_other_state'));
         jest.spyOn(vm, 'initiateRemoveSourceBranchPolling').mockImplementation(() => {});
 
@@ -556,8 +547,8 @@ describe('ReadyToMerge', () => {
     });
 
     describe('handleRemoveBranchPolling', () => {
-      const returnPromise = state =>
-        new Promise(resolve => {
+      const returnPromise = (state) =>
+        new Promise((resolve) => {
           resolve({
             data: {
               source_branch_exists: state,
@@ -565,7 +556,7 @@ describe('ReadyToMerge', () => {
           });
         });
 
-      it('should call start and stop polling when MR merged', done => {
+      it('should call start and stop polling when MR merged', (done) => {
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise(false));
 
@@ -598,7 +589,7 @@ describe('ReadyToMerge', () => {
         });
       });
 
-      it('should continue polling until MR is merged', done => {
+      it('should continue polling until MR is merged', (done) => {
         jest.spyOn(vm.service, 'poll').mockReturnValue(returnPromise(true));
 
         let cpc = false; // continuePollingCalled
@@ -672,10 +663,7 @@ describe('ReadyToMerge', () => {
     const findCommitsHeaderElement = () => wrapper.find(CommitsHeader);
     const findCommitEditElements = () => wrapper.findAll(CommitEdit);
     const findCommitDropdownElement = () => wrapper.find(CommitMessageDropdown);
-    const findFirstCommitEditLabel = () =>
-      findCommitEditElements()
-        .at(0)
-        .props('label');
+    const findFirstCommitEditLabel = () => findCommitEditElements().at(0).props('label');
 
     describe('squash checkbox', () => {
       it('should be rendered when squash before merge is enabled and there is more than 1 commit', () => {

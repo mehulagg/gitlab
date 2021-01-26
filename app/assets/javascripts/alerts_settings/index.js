@@ -1,8 +1,17 @@
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import AlertSettingsForm from './components/alerts_settings_form.vue';
+import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
+import apolloProvider from './graphql';
 
-export default el => {
+apolloProvider.clients.defaultClient.cache.writeData({
+  data: {
+    currentIntegration: null,
+  },
+});
+Vue.use(GlToast);
+
+export default (el) => {
   if (!el) {
     return null;
   }
@@ -20,48 +29,38 @@ export default el => {
     formPath,
     authorizationKey,
     url,
-    opsgenieMvcAvailable,
-    opsgenieMvcFormPath,
-    opsgenieMvcEnabled,
-    opsgenieMvcTargetUrl,
+    projectPath,
+    multiIntegrations,
   } = el.dataset;
-
-  const genericActivated = parseBoolean(activatedStr);
-  const prometheusIsActivated = parseBoolean(prometheusActivated);
-  const opsgenieMvcActivated = parseBoolean(opsgenieMvcEnabled);
-  const opsgenieMvcIsAvailable = parseBoolean(opsgenieMvcAvailable);
-
-  const props = {
-    prometheus: {
-      activated: prometheusIsActivated,
-      prometheusUrl,
-      prometheusAuthorizationKey,
-      prometheusFormPath,
-      prometheusResetKeyPath,
-      prometheusApiUrl,
-    },
-    generic: {
-      alertsSetupUrl,
-      alertsUsageUrl,
-      activated: genericActivated,
-      formPath,
-      initialAuthorizationKey: authorizationKey,
-      url,
-    },
-    opsgenie: {
-      formPath: opsgenieMvcFormPath,
-      activated: opsgenieMvcActivated,
-      opsgenieMvcTargetUrl,
-      opsgenieMvcIsAvailable,
-    },
-  };
 
   return new Vue({
     el,
+    components: {
+      AlertSettingsWrapper,
+    },
+    provide: {
+      prometheus: {
+        active: parseBoolean(prometheusActivated),
+        url: prometheusUrl,
+        token: prometheusAuthorizationKey,
+        prometheusFormPath,
+        prometheusResetKeyPath,
+        prometheusApiUrl,
+      },
+      generic: {
+        alertsSetupUrl,
+        alertsUsageUrl,
+        active: parseBoolean(activatedStr),
+        formPath,
+        token: authorizationKey,
+        url,
+      },
+      projectPath,
+      multiIntegrations: parseBoolean(multiIntegrations),
+    },
+    apolloProvider,
     render(createElement) {
-      return createElement(AlertSettingsForm, {
-        props,
-      });
+      return createElement('alert-settings-wrapper');
     },
   });
 };

@@ -105,8 +105,8 @@ RSpec.describe PersonalAccessToken, 'TokenAuthenticatable' do
     it 'sets new token' do
       subject
 
-      expect(personal_access_token.token).to eq(token_value)
-      expect(personal_access_token.token_digest).to eq(Gitlab::CryptoHelper.sha256(token_value))
+      expect(personal_access_token.token).to eq("#{PersonalAccessToken.token_prefix}#{token_value}")
+      expect(personal_access_token.token_digest).to eq(Gitlab::CryptoHelper.sha256("#{PersonalAccessToken.token_prefix}#{token_value}"))
     end
   end
 
@@ -137,7 +137,7 @@ RSpec.describe PersonalAccessToken, 'TokenAuthenticatable' do
     subject { PersonalAccessToken.find_by_token(token_value) }
 
     it 'finds the token' do
-      personal_access_token.save
+      personal_access_token.save!
 
       expect(subject).to eq(personal_access_token)
     end

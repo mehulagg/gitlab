@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovalSettings < ::Grape::API::Instance
+  class ProjectApprovalSettings < ::API::Base
     before { authenticate! }
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers
+
+    feature_category :source_code_management
 
     params do
       requires :id, type: String, desc: 'The ID of a project'

@@ -34,6 +34,10 @@ class NoteEntity < API::Entities::Note
     expose :can_resolve do |note|
       note.resolvable? && can?(current_user, :resolve_note, note)
     end
+
+    expose :can_resolve_discussion do |note|
+      note.discussion.resolvable? && note.discussion.can_resolve?(current_user)
+    end
   end
 
   expose :suggestions, using: SuggestionEntity
@@ -44,6 +48,10 @@ class NoteEntity < API::Entities::Note
 
   expose :system_note_icon_name, if: -> (note, _) { note.system? } do |note|
     SystemNoteHelper.system_note_icon_name(note)
+  end
+
+  expose :is_noteable_author do |note|
+    note.noteable_author?(request.noteable)
   end
 
   expose :discussion_id do |note|
@@ -73,10 +81,24 @@ class NoteEntity < API::Entities::Note
 
   expose :cached_markdown_version
 
+  # Correctly rendering a note requires some background information about any
+  # discussion it is part of. This is essential for the notes endpoint, but
+  # optional for the discussions endpoint, which will include the discussion
+  # along with the note
+  expose :discussion, as: :base_discussion, using: BaseDiscussionEntity, if: -> (_, _) { with_base_discussion? }
+
   private
+
+  def discussion
+    @discussion ||= object.to_discussion(request.noteable)
+  end
 
   def current_user
     request.current_user
+  end
+
+  def with_base_discussion?
+    options.fetch(:with_base_discussion, true)
   end
 end
 

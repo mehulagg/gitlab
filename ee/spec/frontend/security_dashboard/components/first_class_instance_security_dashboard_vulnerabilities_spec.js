@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
+import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver } from '@gitlab/ui';
+import Vuex from 'vuex';
 import FirstClassInstanceVulnerabilities from 'ee/security_dashboard/components/first_class_instance_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';
@@ -15,6 +15,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findVulnerabilities = () => wrapper.find(VulnerabilityList);
   const findAlert = () => wrapper.find(GlAlert);
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   const createWrapper = ({ stubs, loading = false, isUpdatingProjects, data } = {}) => {
     store = new Vuex.Store({
@@ -46,6 +47,7 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
         fetchNextPage: () => {},
       },
       data,
+      provide: { hasVulnerabilities: true },
     });
   };
 
@@ -63,6 +65,10 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
     it('passes down isLoading correctly', () => {
       expect(findVulnerabilities().props()).toMatchObject({ isLoading: true });
+    });
+
+    it('does not render the loading spinner', () => {
+      expect(findLoadingIcon().exists()).toBe(false);
     });
   });
 
@@ -119,13 +125,28 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
       expect(findVulnerabilities().props()).toEqual({
         filters: {},
         isLoading: false,
-        shouldShowIdentifier: false,
         securityScanners: {},
-        shouldShowReportType: false,
         shouldShowSelection: true,
         shouldShowProjectNamespace: true,
         vulnerabilities,
       });
+    });
+
+    it('defaults to severity column for sorting', () => {
+      expect(wrapper.vm.sortBy).toBe('severity');
+    });
+
+    it('defaults to desc as sorting direction', () => {
+      expect(wrapper.vm.sortDirection).toBe('desc');
+    });
+
+    it('handles sorting', () => {
+      findVulnerabilities().vm.$listeners['sort-changed']({
+        sortBy: 'description',
+        sortDesc: false,
+      });
+      expect(wrapper.vm.sortBy).toBe('description');
+      expect(wrapper.vm.sortDirection).toBe('asc');
     });
   });
 
@@ -145,6 +166,27 @@ describe('First Class Instance Dashboard Vulnerabilities Component', () => {
 
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
+    });
+  });
+
+  describe('when the query is loading and there is another page', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({
+        loading: true,
+        data: () => ({
+          pageInfo: {
+            hasNextPage: true,
+          },
+        }),
+      });
+    });
+
+    it('should render the observer component', () => {
+      expect(findIntersectionObserver().exists()).toBe(true);
+    });
+
+    it('should render the loading spinner', () => {
+      expect(findLoadingIcon().exists()).toBe(true);
     });
   });
 });

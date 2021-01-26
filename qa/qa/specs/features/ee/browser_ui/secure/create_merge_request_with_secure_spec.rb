@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     describe 'Security Reports in a Merge Request' do
       let(:sast_vuln_count) { 5 }
       let(:dependency_scan_vuln_count) { 4 }
@@ -46,20 +46,19 @@ module QA
         merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = @project
           mr.source_branch = 'secure-mr'
-          mr.target_branch = 'master'
+          mr.target_branch = @project.default_branch
           mr.source = @source
-          mr.target = 'master'
+          mr.target = @project.default_branch
           mr.target_new_branch = false
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
 
         merge_request.visit!
       end
 
-      it 'displays the Security reports in the merge request' do
+      it 'displays the Security reports in the merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/538' do
         Page::MergeRequest::Show.perform do |merge_request|
           expect(merge_request).to have_vulnerability_report
           expect(merge_request).to have_vulnerability_count

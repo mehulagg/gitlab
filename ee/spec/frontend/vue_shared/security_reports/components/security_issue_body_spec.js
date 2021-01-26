@@ -1,8 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
-import { STATUS_FAILED } from '~/reports/constants';
+import {
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import SecurityIssueBody from 'ee/vue_shared/security_reports/components/security_issue_body.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import ReportLink from '~/reports/components/report_link.vue';
+import { STATUS_FAILED } from '~/reports/constants';
 import {
   sastParsedIssues,
   dockerReportParsed,
@@ -10,19 +16,13 @@ import {
   dependencyScanningIssues,
   secretScanningParsedIssues,
 } from '../mock_data';
-import {
-  CRITICAL,
-  HIGH,
-  MEDIUM,
-  LOW,
-} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 
 describe('Security Issue Body', () => {
   let wrapper;
 
   const findReportLink = () => wrapper.find(ReportLink);
 
-  const createComponent = issue => {
+  const createComponent = (issue) => {
     wrapper = shallowMount(SecurityIssueBody, {
       propsData: {
         issue,
@@ -53,7 +53,7 @@ describe('Security Issue Body', () => {
       });
     } else {
       it(`does not show SeverityBadge if severity is not present`, () => {
-        expect(wrapper.contains(SeverityBadge)).toBe(false);
+        expect(wrapper.find(SeverityBadge).exists()).toBe(false);
       });
     }
 

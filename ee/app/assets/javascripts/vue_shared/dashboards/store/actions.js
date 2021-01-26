@@ -3,7 +3,7 @@ import { find } from 'lodash';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
@@ -27,9 +27,9 @@ export const forceProjectsRequest = () => {
 export const addProjectsToDashboard = ({ state, dispatch }) =>
   axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsToDashboardError'));
 
 export const toggleSelectedProject = ({ commit, state }, project) => {
@@ -49,8 +49,8 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -95,17 +95,23 @@ export const receiveAddProjectsToDashboardError = ({ state }) => {
   );
 };
 
-export const fetchProjects = ({ state, dispatch }) => {
+export const fetchProjects = ({ state, dispatch, commit }, page) => {
   if (eTagPoll) return;
 
   dispatch('requestProjects');
 
   eTagPoll = new Poll({
     resource: {
-      fetchProjects: () => axios.get(state.projectEndpoints.list),
+      fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: ({ data }) => dispatch('receiveProjectsSuccess', data),
+    successCallback: (response) => {
+      const {
+        data: { projects },
+        headers,
+      } = response;
+      commit(types.RECEIVE_PROJECTS_SUCCESS, { projects, headers });
+    },
     errorCallback: () => dispatch('receiveProjectsError'),
   });
 
@@ -126,10 +132,6 @@ export const requestProjects = ({ commit }) => {
   commit(types.REQUEST_PROJECTS);
 };
 
-export const receiveProjectsSuccess = ({ commit }, data) => {
-  commit(types.RECEIVE_PROJECTS_SUCCESS, data.projects);
-};
-
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
   createFlash(__('Something went wrong, unable to get projects'));
@@ -145,7 +147,7 @@ export const removeProject = ({ dispatch }, removePath) => {
 export const receiveRemoveProjectSuccess = ({ dispatch }) => dispatch('forceProjectsRequest');
 
 export const receiveRemoveProjectError = () => {
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
 export const setSearchQuery = ({ commit }, query) => commit(types.SET_SEARCH_QUERY, query);
@@ -158,7 +160,7 @@ export const fetchSearchResults = ({ state, dispatch }) => {
     dispatch('minimumQueryMessage');
   } else {
     Api.projects(searchQuery, {})
-      .then(results => dispatch('receiveSearchResultsSuccess', results))
+      .then((results) => dispatch('receiveSearchResultsSuccess', results))
       .catch(() => dispatch('receiveSearchResultsError'));
   }
 };
@@ -168,7 +170,7 @@ export const fetchNextPage = ({ state, dispatch }) => {
     return;
   }
   Api.projects(state.searchQuery, { page: state.pageInfo.nextPage })
-    .then(results => dispatch('receiveNextPageSuccess', results))
+    .then((results) => dispatch('receiveNextPageSuccess', results))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 
@@ -197,4 +199,12 @@ export const minimumQueryMessage = ({ commit }) => {
 
 export const setProjects = ({ commit }, projects) => {
   commit(types.SET_PROJECTS, projects);
+};
+
+export const paginateDashboard = ({ dispatch }, newPage) => {
+  return Promise.all([
+    dispatch('stopProjectsPolling'),
+    dispatch('clearProjectsEtagPoll'),
+    dispatch('fetchProjects', newPage),
+  ]);
 };

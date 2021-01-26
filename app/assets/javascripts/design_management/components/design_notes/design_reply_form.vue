@@ -1,13 +1,14 @@
 <script>
-import { GlDeprecatedButton, GlModal } from '@gitlab/ui';
+import { GlButton, GlModal } from '@gitlab/ui';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import { s__ } from '~/locale';
+import { helpPagePath } from '~/helpers/help_page_helper';
 
 export default {
   name: 'DesignReplyForm',
   components: {
     MarkdownField,
-    GlDeprecatedButton,
+    GlButton,
     GlModal,
   },
   props: {
@@ -60,19 +61,22 @@ export default {
         ? s__('DesignManagement|Comment')
         : s__('DesignManagement|Save comment');
     },
+    markdownDocsPath() {
+      return helpPagePath('user/markdown');
+    },
   },
   mounted() {
     this.focusInput();
   },
   methods: {
     submitForm() {
-      if (this.hasValue) this.$emit('submitForm');
+      if (this.hasValue) this.$emit('submit-form');
     },
     cancelComment() {
       if (this.hasValue && this.formText !== this.value) {
         this.$refs.cancelCommentModal.show();
       } else {
-        this.$emit('cancelForm');
+        this.$emit('cancel-form');
       }
     },
     focusInput() {
@@ -89,7 +93,7 @@ export default {
       :can-attach-file="false"
       :enable-autocomplete="true"
       :textarea-value="value"
-      markdown-docs-path="/help/user/markdown"
+      :markdown-docs-path="markdownDocsPath"
       class="bordered-box"
     >
       <template #textarea>
@@ -110,22 +114,23 @@ export default {
         </textarea>
       </template>
     </markdown-field>
-    <slot name="resolveCheckbox"></slot>
+    <slot name="resolve-checkbox"></slot>
     <div class="note-form-actions gl-display-flex gl-justify-content-space-between">
-      <gl-deprecated-button
+      <gl-button
         ref="submitButton"
         :disabled="!hasValue || isSaving"
+        category="primary"
         variant="success"
         type="submit"
         data-track-event="click_button"
         data-qa-selector="save_comment_button"
-        @click="$emit('submitForm')"
+        @click="$emit('submit-form')"
       >
         {{ buttonText }}
-      </gl-deprecated-button>
-      <gl-deprecated-button ref="cancelButton" @click="cancelComment">{{
+      </gl-button>
+      <gl-button ref="cancelButton" variant="default" category="primary" @click="cancelComment">{{
         __('Cancel')
-      }}</gl-deprecated-button>
+      }}</gl-button>
     </div>
     <gl-modal
       ref="cancelCommentModal"
@@ -134,7 +139,7 @@ export default {
       :ok-title="modalSettings.okTitle"
       :cancel-title="modalSettings.cancelTitle"
       modal-id="cancel-comment-modal"
-      @ok="$emit('cancelForm')"
+      @ok="$emit('cancel-form')"
       >{{ modalSettings.content }}
     </gl-modal>
   </form>

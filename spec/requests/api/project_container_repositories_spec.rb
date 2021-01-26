@@ -31,7 +31,6 @@ RSpec.describe API::ProjectContainerRepositories do
     project.add_reporter(reporter)
     project.add_guest(guest)
 
-    stub_feature_flags(container_registry_api: true)
     stub_container_registry_config(enabled: true)
 
     root_repository
@@ -45,7 +44,7 @@ RSpec.describe API::ProjectContainerRepositories do
 
     it_behaves_like 'rejected container repository access', :guest, :forbidden
     it_behaves_like 'rejected container repository access', :anonymous, :not_found
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'list_repositories'
+    it_behaves_like 'a package tracking event', described_class.name, 'list_repositories'
 
     it_behaves_like 'returns repositories for allowed users', :reporter, 'project' do
       let(:object) { project }
@@ -57,7 +56,7 @@ RSpec.describe API::ProjectContainerRepositories do
 
     it_behaves_like 'rejected container repository access', :developer, :forbidden
     it_behaves_like 'rejected container repository access', :anonymous, :not_found
-    it_behaves_like 'a gitlab tracking event', described_class.name, 'delete_repository'
+    it_behaves_like 'a package tracking event', described_class.name, 'delete_repository'
 
     context 'for maintainer' do
       let(:api_user) { maintainer }
@@ -86,7 +85,7 @@ RSpec.describe API::ProjectContainerRepositories do
         stub_container_registry_tags(repository: root_repository.path, tags: %w(rootA latest))
       end
 
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'list_tags'
+      it_behaves_like 'a package tracking event', described_class.name, 'list_tags'
 
       it 'returns a list of tags' do
         subject
@@ -114,7 +113,7 @@ RSpec.describe API::ProjectContainerRepositories do
 
       it_behaves_like 'rejected container repository access', :developer, :forbidden
       it_behaves_like 'rejected container repository access', :anonymous, :not_found
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'delete_tag_bulk'
+      it_behaves_like 'a package tracking event', described_class.name, 'delete_tag_bulk'
     end
 
     context 'for maintainer' do
@@ -300,7 +299,7 @@ RSpec.describe API::ProjectContainerRepositories do
     it_behaves_like 'rejected container repository access', :reporter, :forbidden
     it_behaves_like 'rejected container repository access', :anonymous, :not_found
 
-    context 'for developer' do
+    context 'for developer', :snowplow do
       let(:api_user) { developer }
 
       context 'when there are multiple tags' do
@@ -311,11 +310,11 @@ RSpec.describe API::ProjectContainerRepositories do
         it 'properly removes tag' do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
 
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect_snowplow_event(category: described_class.name, action: 'delete_tag')
         end
       end
 
@@ -327,11 +326,11 @@ RSpec.describe API::ProjectContainerRepositories do
         it 'properly removes tag' do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
 
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect_snowplow_event(category: described_class.name, action: 'delete_tag')
         end
       end
     end

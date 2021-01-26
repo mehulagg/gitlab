@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -11,7 +14,7 @@ To access the Admin Area, either:
 - Click the Admin Area icon (**{admin}**).
 - Visit `/admin` on your self-managed instance.
 
-NOTE: **Note:**
+NOTE:
 Only admin users can access the Admin Area.
 
 ## Admin Area sections
@@ -20,8 +23,8 @@ The Admin Area is made up of the following sections:
 
 | Section                                        | Description                                                                                                                                                                                                                                                                              |
 |:-----------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **{overview}** [Overview](#overview-section)   | View your GitLab [Dashboard](#admin-dashboard), and administer [projects](#administering-projects), [users](#administering-users), [groups](#administering-groups), [jobs](#administering-jobs), [Runners](#administering-runners), and [Gitaly servers](#administering-gitaly-servers). |
-| **{monitor}** Monitoring                       | View GitLab [system information](#system-info), and information on [background jobs](#background-jobs), [logs](#logs), [health checks](monitoring/health_check.md), [requests profiles](#requests-profiles), and [audit logs](#audit-log-premium-only).                                  |
+| **{overview}** [Overview](#overview-section)   | View your GitLab [Dashboard](#admin-dashboard), and administer [projects](#administering-projects), [users](#administering-users), [groups](#administering-groups), [jobs](#administering-jobs), [runners](#administering-runners), and [Gitaly servers](#administering-gitaly-servers). |
+| **{monitor}** Monitoring                       | View GitLab [system information](#system-info), and information on [background jobs](#background-jobs), [logs](#logs), [health checks](monitoring/health_check.md), [requests profiles](#requests-profiles), and [audit events](#audit-events).                                  |
 | **{messages}** Messages                        | Send and manage [broadcast messages](broadcast_messages.md) for your users.                                                                                                                                                                                                              |
 | **{hook}** System Hooks                        | Configure [system hooks](../../system_hooks/system_hooks.md) for many events.                                                                                                                                                                                                            |
 | **{applications}** Applications                | Create system [OAuth applications](../../integration/oauth_provider.md) for integrations with other services.                                                                                                                                                                            |
@@ -34,7 +37,7 @@ The Admin Area is made up of the following sections:
 | **{lock}** Credentials **(ULTIMATE ONLY)**     | View [credentials](credentials_inventory.md) that can be used to access your instance.                                                                                                                                                                                                   |
 | **{template}** Service Templates               | Create [service templates](../project/integrations/services_templates.md) for projects.                                                                                                                                                                                                  |
 | **{labels}** Labels                            | Create and maintain [labels](labels.md) for your GitLab instance.                                                                                                                                                                                                                        |
-| **{appearance}** Appearance                    | Customize [GitLab's appearance](appearance.md).                                                                                                                                                                                                                                          |
+| **{appearance}** Appearance                    | Customize [GitLab appearance](appearance.md).                                                                                                                                                                                                                                          |
 | **{settings}** Settings                        | Modify the [settings](settings/index.md) for your GitLab instance.                                                                                                                                                                                                                       |
 
 ## Admin Dashboard
@@ -91,7 +94,7 @@ The list of projects can be sorted by:
 
 A user can choose to hide or show archived projects in the list.
 
-In the **Filter by name** field, type the project name you want to find, and GitLab will filter
+In the **Filter by name** field, type the project name you want to find, and GitLab filters
 them as you type.
 
 Select from the **Namespace** dropdown to filter only projects in that namespace.
@@ -118,8 +121,15 @@ To list users matching a specific criteria, click on one of the following tabs o
 - **[Deactivated](activating_deactivating_users.md)**
 - **Without projects**
 
-For each user, their username, email address, are listed, also the date their account was
-created and the date of last activity. To edit a user, click the **Edit** button in that user's
+For each user, the following are listed:
+
+1. Username
+1. Email address
+1. Project membership count
+1. Date of account creation
+1. Date of last activity
+
+To edit a user, click the **Edit** button in that user's
 row. To delete the user, or delete the user and their contributions, click the cog dropdown in
 that user's row, and select the desired option.
 
@@ -136,22 +146,16 @@ you must provide the complete email address.
 
 #### Users statistics
 
-The **Users statistics** page provides an overview of user accounts by role, such as _Users with
-highest role Maintainer_.
+The **Users statistics** page provides an overview of user accounts by role. These statistics are
+calculated daily, so user changes made since the last update are not reflected.
 
 The following totals are also included:
 
-- Active users
+- Billable users
 - Blocked users
 - Total users
 
-GitLab billing is based on the number of **Active users**, calculated as **Total users** -
-**Blocked users**. For details of active users, see
-[Choosing the number of users](../../subscriptions/index.md#choosing-the-number-of-users).
-
-NOTE: **Note:**
-Users statistics are calculated daily, so user changes made since the last update won't be
-reflected in the statistics.
+GitLab billing is based on the number of [**Billable users**](../../subscriptions/self_managed/index.md#billable-users).
 
 ### Administering Groups
 
@@ -196,51 +200,51 @@ For each job, the following details are listed:
 | Timing   | Duration of the job, and how long ago the job completed.                |
 | Coverage | Percentage of tests coverage.                                           |
 
-### Administering Runners
+### Administering runners
 
-You can administer all Runners in the GitLab instance from the Admin Area's **Runners** page. See
-[GitLab Runner](https://docs.gitlab.com/runner/) for more information on Runner itself.
+You can administer all runners in the GitLab instance from the Admin Area's **Runners** page. See
+[GitLab Runner](https://docs.gitlab.com/runner/) for more information.
 
 To access the **Runners** page, go to **Admin Area > Overview > Runners**.
 
 The **Runners** page features:
 
-- A description of Runners, and their possible states.
-- Instructions on installing a Runner.
-- A list of all registered Runners.
+- A description of runners and their possible states.
+- Instructions on installing a runner.
+- A list of all registered runners.
 
 Runners are listed in descending order by the date they were created, by default. You can change
 the sort order to *Last Contacted* from the dropdown beside the search field.
 
-To search Runners' descriptions:
+To search runners' descriptions:
 
-1. In the **Search or filter results...** field, type the description of the Runner you want to
+1. In the **Search or filter results...** field, type the description of the runner you want to
    find.
 1. Press Enter.
 
-You can also filter Runners by status, type, and tag. To filter:
+You can also filter runners by status, type, and tag. To filter:
 
 1. Click in the **Search or filter results...** field.
 1. Select **status:**, **type:**, or **tag:**.
 1. Select or enter your search criteria.
 
-![Attributes of a Runner, with the **Search or filter results...** field active](img/index_runners_search_or_filter.png)
+![Attributes of a runner, with the **Search or filter results...** field active](img/index_runners_search_or_filter.png)
 
-For each Runner, the following attributes are listed:
+For each runner, the following attributes are listed:
 
 | Attribute    | Description |
 | ------------ | ----------- |
 | Type         | One or more of the following states: shared, group, specific, locked, or paused |
-| Runner token | Token used to identify the Runner, and which the Runner uses to communicate with the GitLab instance |
-| Description  | Description given to the Runner when it was created |
+| Runner token | Token used to identify the runner, and which the runner uses to communicate with the GitLab instance |
+| Description  | Description given to the runner when it was created |
 | Version      | GitLab Runner version |
-| IP address   | IP address of the host on which the Runner is registered |
-| Projects     | Projects to which the Runner is assigned |
-| Jobs         | Total of jobs run by the Runner |
-| Tags         | Tags associated with the Runner |
-| Last contact | Timestamp indicating when the GitLab instance last contacted the Runner |
+| IP address   | IP address of the host on which the runner is registered |
+| Projects     | Projects to which the runner is assigned |
+| Jobs         | Total of jobs run by the runner |
+| Tags         | Tags associated with the runner |
+| Last contact | Timestamp indicating when the GitLab instance last contacted the runner |
 
-You can also edit, pause, or remove each Runner.
+You can also edit, pause, or remove each runner.
 
 ### Administering Gitaly servers
 
@@ -296,7 +300,9 @@ The Sidekiq dashboard consists of the following elements:
 
 ### Logs
 
-The **Logs** page provides access to the following log files:
+Since GitLab 13.0, **Log** view has been removed from the admin dashboard since the logging does not work in multi-node setups and could cause confusion for administrators by displaying partial information.
+
+For multi-node systems we recommend ingesting the logs into services like Elasticsearch and Splunk.
 
 | Log file                | Contents |
 | :---------------------- | :------- |
@@ -308,7 +314,7 @@ The **Logs** page provides access to the following log files:
 | `integrations_json.log` | Activity between GitLab and integrated systems |
 | `kubernetes.log`        | Kubernetes activity |
 
-The contents of these log files can be useful when troubleshooting a problem. Access is available to GitLab admins, without requiring direct access to the log files.
+The contents of these log files can be useful when troubleshooting a problem. 
 
 For details of these log files and their contents, see [Log system](../../administration/logs.md).
 
@@ -318,6 +324,6 @@ The content of each log file is listed in chronological order. To minimize perfo
 
 The **Requests Profiles** page contains the token required for profiling. For more details, see [Request Profiling](../../administration/monitoring/performance/request_profiling.md).
 
-### Audit Log **(PREMIUM ONLY)**
+### Audit Events **(PREMIUM ONLY)**
 
-The **Audit Log** page lists changes made within the GitLab server. With this information you can control, analyze, and track every change.
+The **Audit Events** page lists changes made within the GitLab server. With this information you can control, analyze, and track every change.

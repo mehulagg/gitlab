@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import GraphGroup from '~/monitoring/components/graph_group.vue';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import GraphGroup from '~/monitoring/components/graph_group.vue';
 
 describe('Graph group component', () => {
   let wrapper;
@@ -11,7 +11,7 @@ describe('Graph group component', () => {
   const findCaretIcon = () => wrapper.find(GlIcon);
   const findToggleButton = () => wrapper.find('[data-testid="group-toggle-button"]');
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(GraphGroup, {
       propsData,
     });
@@ -50,7 +50,7 @@ describe('Graph group component', () => {
     it('should contain a tab index for the collapse button', () => {
       const groupToggle = findToggleButton();
 
-      expect(groupToggle.is('[tabindex]')).toBe(true);
+      expect(groupToggle.attributes('tabindex')).toBeDefined();
     });
 
     it('should show the open the group when collapseGroup is set to true', () => {

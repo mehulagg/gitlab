@@ -7,9 +7,12 @@ module EE
 
       prepended do
         %i[epics group_timelogs].each do |feature|
-          field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true, resolve: -> (group, args, ctx) do
-            group.feature_available?(feature)
-          end, description: "Indicates if #{feature.to_s.humanize} are enabled for namespace"
+          field "#{feature}_enabled", GraphQL::BOOLEAN_TYPE, null: true,
+                description: "Indicates if #{feature.to_s.humanize} are enabled for namespace"
+
+          define_method "#{feature}_enabled" do
+            object.feature_available?(feature)
+          end
         end
 
         field :epic, ::Types::EpicType, null: true,
@@ -18,8 +21,19 @@ module EE
 
         field :epics, ::Types::EpicType.connection_type, null: true,
               description: 'Find epics',
+              extras: [:lookahead],
               max_page_size: 2000,
               resolver: ::Resolvers::EpicsResolver
+
+        field :epic_board,
+              ::Types::Boards::EpicBoardType, null: true,
+              description: 'Find a single epic board',
+              resolver: ::Resolvers::Boards::EpicBoardsResolver.single
+
+        field :epic_boards,
+              ::Types::Boards::EpicBoardType.connection_type, null: true,
+              description: 'Find epic boards',
+              resolver: ::Resolvers::Boards::EpicBoardsResolver
 
         field :iterations, ::Types::IterationType.connection_type, null: true,
               description: 'Find iterations',
@@ -27,6 +41,7 @@ module EE
 
         field :timelogs, ::Types::TimelogType.connection_type, null: false,
               description: 'Time logged in issues by group members',
+              extras: [:lookahead],
               complexity: 5,
               resolver: ::Resolvers::TimelogResolver
 
@@ -39,8 +54,12 @@ module EE
         field :vulnerability_scanners,
               ::Types::VulnerabilityScannerType.connection_type,
               null: true,
-              description: 'Vulnerability scanners reported on the project vulnerabilties of the group and its subgroups',
+              description: 'Vulnerability scanners reported on the project vulnerabilities of the group and its subgroups',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
+
+        field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
+              description: 'Counts for each vulnerability severity in the group and its subgroups',
+              resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
@@ -59,9 +78,19 @@ module EE
               [::Types::VulnerableProjectsByGradeType],
               null: false,
               description: 'Represents vulnerable project counts for each grade',
-              resolve: -> (obj, _args, ctx) {
-                ::Gitlab::Graphql::Aggregations::VulnerabilityStatistics::LazyAggregate.new(ctx, obj)
-              }
+              resolver: ::Resolvers::VulnerabilitiesGradeResolver
+
+        field :code_coverage_activities,
+              ::Types::Ci::CodeCoverageActivityType.connection_type,
+              null: true,
+              description: 'Represents the code coverage activity for this group',
+              resolver: ::Resolvers::Ci::CodeCoverageActivitiesResolver
+
+        field :stats,
+              ::Types::GroupStatsType,
+              null: true,
+              description: 'Group statistics',
+              method: :itself
       end
     end
   end

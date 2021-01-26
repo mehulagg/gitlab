@@ -11,6 +11,8 @@ class Projects::NotesController < Projects::ApplicationController
   before_action :authorize_create_note!, only: [:create]
   before_action :authorize_resolve_note!, only: [:resolve, :unresolve]
 
+  feature_category :issue_tracking
+
   def delete_attachment
     note.remove_attachment!
     note.update_attribute(:attachment, nil)
@@ -58,7 +60,7 @@ class Projects::NotesController < Projects::ApplicationController
   def render_json_with_notes_serializer
     prepare_notes_for_rendering([note])
 
-    render json: note_serializer.represent(note)
+    render json: note_serializer.represent(note, render_truncated_diff_lines: true)
   end
 
   def note

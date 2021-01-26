@@ -1,10 +1,9 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { s__ } from '~/locale';
-import CodeInstruction from './code_instruction.vue';
-import { TrackingActions, TrackingLabels } from '../constants';
 import { mapGetters, mapState } from 'vuex';
-import InstallationTabs from './installation_tabs.vue';
+import { s__ } from '~/locale';
+import CodeInstruction from '~/vue_shared/components/registry/code_instruction.vue';
+import { TrackingActions, TrackingLabels } from '../constants';
 
 export default {
   name: 'NugetInstallation',
@@ -12,7 +11,6 @@ export default {
     CodeInstruction,
     GlLink,
     GlSprintf,
-    InstallationTabs,
   },
   computed: {
     ...mapState(['nugetHelpPath']),
@@ -24,37 +22,33 @@ export default {
     ),
   },
   trackingActions: { ...TrackingActions },
-  trackingLabel: TrackingLabels.NUGET_INSTALLATION,
+  TrackingLabels,
 };
 </script>
 
 <template>
-  <installation-tabs :tracking-label="$options.trackingLabel">
-    <template #installation>
-      <p class="gl-mt-3 font-weight-bold">{{ s__('PackageRegistry|NuGet Command') }}</p>
-      <code-instruction
-        :instruction="nugetInstallationCommand"
-        :copy-text="s__('PackageRegistry|Copy NuGet Command')"
-        class="js-nuget-command"
-        :tracking-action="$options.trackingActions.COPY_NUGET_INSTALL_COMMAND"
-      />
-    </template>
+  <div>
+    <h3 class="gl-font-lg">{{ __('Installation') }}</h3>
+    <code-instruction
+      :label="s__('PackageRegistry|NuGet Command')"
+      :instruction="nugetInstallationCommand"
+      :copy-text="s__('PackageRegistry|Copy NuGet Command')"
+      :tracking-action="$options.trackingActions.COPY_NUGET_INSTALL_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
+    <h3 class="gl-font-lg">{{ __('Registry setup') }}</h3>
 
-    <template #setup>
-      <p class="gl-mt-3 font-weight-bold">
-        {{ s__('PackageRegistry|Add NuGet Source') }}
-      </p>
-      <code-instruction
-        :instruction="nugetSetupCommand"
-        :copy-text="s__('PackageRegistry|Copy NuGet Setup Command')"
-        class="js-nuget-setup"
-        :tracking-action="$options.trackingActions.COPY_NUGET_SETUP_COMMAND"
-      />
-      <gl-sprintf :message="$options.i18n.helpText">
-        <template #link="{ content }">
-          <gl-link :href="nugetHelpPath" target="_blank">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
-    </template>
-  </installation-tabs>
+    <code-instruction
+      :label="s__('PackageRegistry|Add NuGet Source')"
+      :instruction="nugetSetupCommand"
+      :copy-text="s__('PackageRegistry|Copy NuGet Setup Command')"
+      :tracking-action="$options.trackingActions.COPY_NUGET_SETUP_COMMAND"
+      :tracking-label="$options.TrackingLabels.CODE_INSTRUCTION"
+    />
+    <gl-sprintf :message="$options.i18n.helpText">
+      <template #link="{ content }">
+        <gl-link :href="nugetHelpPath" target="_blank">{{ content }}</gl-link>
+      </template>
+    </gl-sprintf>
+  </div>
 </template>

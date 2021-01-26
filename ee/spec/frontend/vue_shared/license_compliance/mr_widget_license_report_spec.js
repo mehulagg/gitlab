@@ -1,10 +1,10 @@
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import ReportSection from '~/reports/components/report_section.vue';
-import ReportItem from '~/reports/components/report_item.vue';
-import { LOADING, ERROR, SUCCESS } from 'ee/vue_shared/security_reports/store/constants';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
+import ReportItem from '~/reports/components/report_item.vue';
+import ReportSection from '~/reports/components/report_section.vue';
+import { LOADING, ERROR, SUCCESS } from '~/reports/constants';
 import {
   approvedLicense,
   blacklistedLicense,
@@ -225,7 +225,7 @@ describe('License Report MR Widget', () => {
       `(
         'given reports for: $givenStatuses it has $expectedNumberOfReportHeadings report headings',
         ({ givenStatuses, expectedNumberOfReportHeadings }) => {
-          const mockReportGroups = givenStatuses.map(status => generateReportGroup({ status }));
+          const mockReportGroups = givenStatuses.map((status) => generateReportGroup({ status }));
 
           mountComponent({
             getters: {
@@ -245,7 +245,7 @@ describe('License Report MR Widget', () => {
 
       it.each([0, 1, 2])(
         'should include %d report items when section has that many licenses',
-        numberOfLicenses => {
+        (numberOfLicenses) => {
           const mockReportGroups = [
             generateReportGroup({
               numberOfLicenses,
@@ -308,7 +308,7 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, fullReportPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
   });
 
@@ -329,14 +329,8 @@ describe('License Report MR Widget', () => {
       const props = { ...defaultProps, licenseManagementSettingsPath: null };
       mountComponent({ props });
 
-      expect(wrapper.contains(selector)).toBe(false);
+      expect(wrapper.find(selector).exists()).toBe(false);
     });
-  });
-
-  it('should render set approval modal', () => {
-    mountComponent();
-
-    expect(wrapper.find('#modal-set-license-approval')).not.toBeNull();
   });
 
   it('should init store after mount', () => {
@@ -347,26 +341,17 @@ describe('License Report MR Widget', () => {
     };
     mountComponent({ actions });
 
-    expect(actions.setAPISettings).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        apiUrlManageLicenses: apiUrl,
-        licensesApiPath: defaultProps.licensesApiPath,
-        approvalsApiPath: defaultProps.approvalsApiPath,
-        canManageLicenses: true,
-      },
-      undefined,
-    );
+    expect(actions.setAPISettings).toHaveBeenCalledWith(expect.any(Object), {
+      apiUrlManageLicenses: apiUrl,
+      licensesApiPath: defaultProps.licensesApiPath,
+      approvalsApiPath: defaultProps.approvalsApiPath,
+      canManageLicenses: true,
+    });
 
-    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(
-      expect.any(Object),
-      undefined,
-      undefined,
-    );
+    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(expect.any(Object), undefined);
 
     expect(actions.fetchLicenseCheckApprovalRule).toHaveBeenCalledWith(
       expect.any(Object),
-      undefined,
       undefined,
     );
   });

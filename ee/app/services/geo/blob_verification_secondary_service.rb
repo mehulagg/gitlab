@@ -36,7 +36,7 @@ module Geo
     end
 
     def verify_checksum
-      checksum = model_record.calculate_checksum!
+      checksum = model_record.calculate_checksum
 
       if mismatch?(checksum)
         update_registry!(mismatch: checksum, failure: 'checksum mismatch')

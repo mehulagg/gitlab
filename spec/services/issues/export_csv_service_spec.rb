@@ -20,7 +20,9 @@ RSpec.describe Issues::ExportCsvService do
     end
 
     it 'renders with a target filesize' do
-      expect(subject.csv_builder).to receive(:render).with(described_class::TARGET_FILESIZE)
+      expect_next_instance_of(CsvBuilder) do |csv_builder|
+        expect(csv_builder).to receive(:render).with(described_class::TARGET_FILESIZE).once
+      end
 
       subject.email(user)
     end
@@ -38,8 +40,8 @@ RSpec.describe Issues::ExportCsvService do
     before do
       # Creating a timelog touches the updated_at timestamp of issue,
       # so create these first.
-      issue.timelogs.create(time_spent: 360, user: user)
-      issue.timelogs.create(time_spent: 200, user: user)
+      issue.timelogs.create!(time_spent: 360, user: user)
+      issue.timelogs.create!(time_spent: 200, user: user)
       issue.update!(milestone: milestone,
                     assignees: [user],
                     description: 'Issue with details',

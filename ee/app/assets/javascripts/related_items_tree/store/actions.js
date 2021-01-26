@@ -1,11 +1,12 @@
 import Api from 'ee/api';
+import epicChildren from 'shared_queries/epic/epic_children.query.graphql';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   pathIndeterminateErrorMap,
   relatedIssuesRemoveErrorMap,
-} from 'ee/related_issues/constants';
-import flash from '~/flash';
+} from '~/related_issues/constants';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__, __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -14,7 +15,6 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
 import { ChildType, ChildState, idProp, relativePositions } from '../constants';
 
-import epicChildren from '../queries/epicChildren.query.graphql';
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
 
 import * as types from './mutation_types';
@@ -269,7 +269,7 @@ export const setItemInputValue = ({ commit }, data) => commit(types.SET_ITEM_INP
 
 export const requestAddItem = ({ commit }) => commit(types.REQUEST_ADD_ITEM);
 export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems }) => {
-  const items = rawItems.map(item => {
+  const items = rawItems.map((item) => {
     // This is needed since Rails API to add Epic/Issue
     // doesn't return global ID string.
     // We can remove this change once add epic/issue
@@ -300,7 +300,7 @@ export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems 
     items,
   });
 
-  items.forEach(item => {
+  items.forEach((item) => {
     dispatch('updateChildrenCount', { item });
   });
 
@@ -332,7 +332,7 @@ export const addItem = ({ state, dispatch, getters }) => {
         rawItems: data.issuables.slice(0, state.pendingReferences.length),
       });
     })
-    .catch(data => {
+    .catch((data) => {
       const { response } = data;
       if (response.status === httpStatusCodes.NOT_FOUND) {
         dispatch('receiveAddItemFailure', { itemAddFailureType: itemAddFailureTypesMap.NOT_FOUND });
@@ -385,12 +385,13 @@ export const receiveCreateItemFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
   flash(s__('Epics|Something went wrong while creating child epics.'));
 };
-export const createItem = ({ state, dispatch }, { itemTitle }) => {
+export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
-    groupId: state.parentItem.fullPath,
-    parentEpicIid: state.parentItem.iid,
+    confidential: state.parentItem.confidential,
+    groupId: groupFullPath || state.parentItem.fullPath,
+    parentEpicId: Number(state.parentItem.id.match(/\d.*/)),
     title: itemTitle,
   })
     .then(({ data }) => {
@@ -403,6 +404,9 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
       });
 
       dispatch('receiveCreateItemSuccess', { rawItem: data });
+      dispatch('fetchItems', {
+        parentItem: state.parentItem,
+      });
     })
     .catch(() => {
       dispatch('receiveCreateItemFailure');
@@ -553,7 +557,7 @@ export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) =
         parentItem,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       dispatch('receiveCreateIssueFailure');
       throw e;
     });
@@ -588,4 +592,16 @@ export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => dispatch('receiveProjectsFailure'));
+};
+
+export const fetchDescendantGroups = ({ commit }, { groupId, search = '' }) => {
+  commit(types.REQUEST_DESCENDANT_GROUPS);
+
+  return Api.descendantGroups({ groupId, search })
+    .then(({ data }) => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_SUCCESS, data);
+    })
+    .catch(() => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_FAILURE);
+    });
 };

@@ -27,11 +27,6 @@ export default {
       required: false,
       default: false,
     },
-    qaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
   },
   data() {
     return {
@@ -90,8 +85,8 @@ export default {
 </script>
 
 <template>
-  <div class="audit-log-table" data-testid="audit-events-table" :data-qa-selector="qaSelector">
-    <gl-table class="mt-3" :fields="$options.fields" :items="events" show-empty>
+  <div class="audit-log-table" data-qa-selector="audit_log_table">
+    <gl-table class="gl-mt-5" :fields="$options.fields" :items="events" show-empty stacked="md">
       <template #cell(author)="{ value: { url, name } }">
         <url-table-cell :url="url" :name="name" />
       </template>

@@ -1,16 +1,16 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/security_dashboard/store/modules/project_selector/actions';
+import * as types from 'ee/security_dashboard/store/modules/project_selector/mutation_types';
+import createState from 'ee/security_dashboard/store/modules/project_selector/state';
 import testAction from 'helpers/vuex_action_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import createState from 'ee/security_dashboard/store/modules/project_selector/state';
-import * as types from 'ee/security_dashboard/store/modules/project_selector/mutation_types';
-import * as actions from 'ee/security_dashboard/store/modules/project_selector/actions';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
 
 describe('EE projectSelector actions', () => {
-  const getMockProjects = n => [...Array(n).keys()].map(i => ({ id: i, name: `project-${i}` }));
+  const getMockProjects = (n) => [...Array(n).keys()].map((i) => ({ id: i, name: `project-${i}` }));
 
   const mockAddEndpoint = 'mock-add_endpoint';
   const mockListEndpoint = 'mock-list_endpoint';
@@ -45,7 +45,7 @@ describe('EE projectSelector actions', () => {
   });
 
   describe('toggleSelectedProject', () => {
-    it('adds a project to selectedProjects if it does not already exist in the list', done => {
+    it('adds a project to selectedProjects if it does not already exist in the list', (done) => {
       const payload = getMockProjects(1);
 
       testAction(
@@ -86,7 +86,10 @@ describe('EE projectSelector actions', () => {
     it(`posts the selected project's ids to the add-endpoint`, () => {
       const projectIds = ['1', '2'];
 
-      state.selectedProjects = [{ id: projectIds[0], name: '1' }, { id: projectIds[1], name: '2' }];
+      state.selectedProjects = [
+        { id: projectIds[0], name: '1' },
+        { id: projectIds[1], name: '2' },
+      ];
       state.projectEndpoints.add = mockAddEndpoint;
 
       mockAxios.onPost(mockAddEndpoint).replyOnce(200, mockResponse);
@@ -430,7 +433,7 @@ describe('EE projectSelector actions', () => {
       actions.receiveRemoveProjectError(mockDispatchContext);
 
       expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith('Something went wrong, unable to remove project');
+      expect(createFlash).toHaveBeenCalledWith('Something went wrong, unable to delete project');
     });
   });
 
@@ -456,7 +459,7 @@ describe('EE projectSelector actions', () => {
   describe('fetchSearchResults', () => {
     it.each([null, undefined, false, NaN, 0, ''])(
       'dispatches setMinimumQueryMessage if the search query is falsy',
-      searchQuery => {
+      (searchQuery) => {
         state.searchQuery = searchQuery;
 
         return testAction(
@@ -478,7 +481,7 @@ describe('EE projectSelector actions', () => {
 
     it.each(['a', 'aa'])(
       'dispatches setMinimumQueryMessage if the search query was not long enough',
-      shortSearchQuery => {
+      (shortSearchQuery) => {
         state.searchQuery = shortSearchQuery;
 
         return testAction(

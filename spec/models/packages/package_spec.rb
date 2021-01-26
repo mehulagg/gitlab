@@ -6,9 +6,12 @@ RSpec.describe Packages::Package, type: :model do
 
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:creator) }
     it { is_expected.to have_many(:package_files).dependent(:destroy) }
     it { is_expected.to have_many(:dependency_links).inverse_of(:package) }
     it { is_expected.to have_many(:tags).inverse_of(:package) }
+    it { is_expected.to have_many(:build_infos).inverse_of(:package) }
+    it { is_expected.to have_many(:pipelines).through(:build_infos) }
     it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
@@ -84,7 +87,7 @@ RSpec.describe Packages::Package, type: :model do
   end
 
   describe 'validations' do
-    subject { create(:package) }
+    subject { build(:package) }
 
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id, :version, :package_type) }
@@ -95,7 +98,7 @@ RSpec.describe Packages::Package, type: :model do
       it { is_expected.not_to allow_value("my(dom$$$ain)com.my-app").for(:name) }
 
       context 'conan package' do
-        subject { create(:conan_package) }
+        subject { build_stubbed(:conan_package) }
 
         let(:fifty_one_characters) {'f_b' * 17}
 
@@ -107,12 +110,59 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('.foobar').for(:name) }
         it { is_expected.not_to allow_value('%foo%bar').for(:name) }
       end
+
+      context 'debian package' do
+        subject { build(:debian_package) }
+
+        it { is_expected.to allow_value('0ad').for(:name) }
+        it { is_expected.to allow_value('g++').for(:name) }
+        it { is_expected.not_to allow_value('a_b').for(:name) }
+      end
+
+      context 'debian incoming' do
+        subject { create(:debian_incoming) }
+
+        # Only 'incoming' is accepted
+        it { is_expected.to allow_value('incoming').for(:name) }
+        it { is_expected.not_to allow_value('0ad').for(:name) }
+        it { is_expected.not_to allow_value('g++').for(:name) }
+        it { is_expected.not_to allow_value('a_b').for(:name) }
+      end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to allow_value('123').for(:name) }
+        it { is_expected.to allow_value('foo').for(:name) }
+        it { is_expected.to allow_value('foo.bar.baz-2.0-20190901.47283-1').for(:name) }
+        it { is_expected.not_to allow_value('../../foo').for(:name) }
+        it { is_expected.not_to allow_value('..\..\foo').for(:name) }
+        it { is_expected.not_to allow_value('%2f%2e%2e%2f%2essh%2fauthorized_keys').for(:name) }
+        it { is_expected.not_to allow_value('$foo/bar').for(:name) }
+        it { is_expected.not_to allow_value('my file name').for(:name) }
+        it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
+      end
+
+      context 'nuget package' do
+        subject { build_stubbed(:nuget_package) }
+
+        it { is_expected.to allow_value('My.Package').for(:name) }
+        it { is_expected.to allow_value('My.Package.Mvc').for(:name) }
+        it { is_expected.to allow_value('MyPackage').for(:name) }
+        it { is_expected.to allow_value('My.23.Package').for(:name) }
+        it { is_expected.to allow_value('My23Package').for(:name) }
+        it { is_expected.to allow_value('runtime.my-test64.runtime.package.Mvc').for(:name) }
+        it { is_expected.to allow_value('my_package').for(:name) }
+        it { is_expected.not_to allow_value('My/package').for(:name) }
+        it { is_expected.not_to allow_value('../../../my_package').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy_package').for(:name) }
+      end
     end
 
     describe '#version' do
       RSpec.shared_examples 'validating version to be SemVer compliant for' do |factory_name|
         context "for #{factory_name}" do
-          subject { create(factory_name) }
+          subject { build_stubbed(factory_name) }
 
           it { is_expected.to allow_value('1.2.3').for(:version) }
           it { is_expected.to allow_value('1.2.3-beta').for(:version) }
@@ -126,7 +176,7 @@ RSpec.describe Packages::Package, type: :model do
       end
 
       context 'conan package' do
-        subject { create(:conan_package) }
+        subject { build_stubbed(:conan_package) }
 
         let(:fifty_one_characters) {'1.2' * 17}
 
@@ -141,8 +191,30 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
       end
 
+      context 'composer package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :composer_package
+
+        it { is_expected.to allow_value('dev-master').for(:version) }
+        it { is_expected.to allow_value('2.x-dev').for(:version) }
+      end
+
+      context 'debian package' do
+        subject { build(:debian_package) }
+
+        it { is_expected.to allow_value('2:4.9.5+dfsg-5+deb10u1').for(:version) }
+        it { is_expected.not_to allow_value('1_0').for(:version) }
+      end
+
+      context 'debian incoming' do
+        subject { create(:debian_incoming) }
+
+        it { is_expected.to allow_value(nil).for(:version) }
+        it { is_expected.not_to allow_value('2:4.9.5+dfsg-5+deb10u1').for(:version) }
+        it { is_expected.not_to allow_value('1_0').for(:version) }
+      end
+
       context 'maven package' do
-        subject { create(:maven_package) }
+        subject { build_stubbed(:maven_package) }
 
         it { is_expected.to allow_value('0').for(:version) }
         it { is_expected.to allow_value('1').for(:version) }
@@ -169,8 +241,99 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
       end
 
+      context 'pypi package' do
+        subject { create(:pypi_package) }
+
+        it { is_expected.to allow_value('0.1').for(:version) }
+        it { is_expected.to allow_value('2.0').for(:version) }
+        it { is_expected.to allow_value('1.2.0').for(:version) }
+        it { is_expected.to allow_value('0100!0.0').for(:version) }
+        it { is_expected.to allow_value('00!1.2').for(:version) }
+        it { is_expected.to allow_value('1.0a').for(:version) }
+        it { is_expected.to allow_value('1.0-a').for(:version) }
+        it { is_expected.to allow_value('1.0.a1').for(:version) }
+        it { is_expected.to allow_value('1.0a1').for(:version) }
+        it { is_expected.to allow_value('1.0-a1').for(:version) }
+        it { is_expected.to allow_value('1.0alpha1').for(:version) }
+        it { is_expected.to allow_value('1.0b1').for(:version) }
+        it { is_expected.to allow_value('1.0beta1').for(:version) }
+        it { is_expected.to allow_value('1.0rc1').for(:version) }
+        it { is_expected.to allow_value('1.0pre1').for(:version) }
+        it { is_expected.to allow_value('1.0preview1').for(:version) }
+        it { is_expected.to allow_value('1.0.dev1').for(:version) }
+        it { is_expected.to allow_value('1.0.DEV1').for(:version) }
+        it { is_expected.to allow_value('1.0.post1').for(:version) }
+        it { is_expected.to allow_value('1.0.rev1').for(:version) }
+        it { is_expected.to allow_value('1.0.r1').for(:version) }
+        it { is_expected.to allow_value('1.0c2').for(:version) }
+        it { is_expected.to allow_value('2012.15').for(:version) }
+        it { is_expected.to allow_value('1.0+5').for(:version) }
+        it { is_expected.to allow_value('1.0+abc.5').for(:version) }
+        it { is_expected.to allow_value('1!1.1').for(:version) }
+        it { is_expected.to allow_value('1.0c3').for(:version) }
+        it { is_expected.to allow_value('1.0rc2').for(:version) }
+        it { is_expected.to allow_value('1.0c1').for(:version) }
+        it { is_expected.to allow_value('1.0b2-346').for(:version) }
+        it { is_expected.to allow_value('1.0b2.post345').for(:version) }
+        it { is_expected.to allow_value('1.0b2.post345.dev456').for(:version) }
+        it { is_expected.to allow_value('1.2.rev33+123456').for(:version) }
+        it { is_expected.to allow_value('1.1.dev1').for(:version) }
+        it { is_expected.to allow_value('1.0b1.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0a12.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0b2').for(:version) }
+        it { is_expected.to allow_value('1.0.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0c1.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0.post456').for(:version) }
+        it { is_expected.to allow_value('1.0.post456.dev34').for(:version) }
+        it { is_expected.to allow_value('1.2+123abc').for(:version) }
+        it { is_expected.to allow_value('1.2+abc').for(:version) }
+        it { is_expected.to allow_value('1.2+abc123').for(:version) }
+        it { is_expected.to allow_value('1.2+abc123def').for(:version) }
+        it { is_expected.to allow_value('1.2+1234.abc').for(:version) }
+        it { is_expected.to allow_value('1.2+123456').for(:version) }
+        it { is_expected.to allow_value('1.2.r32+123456').for(:version) }
+        it { is_expected.to allow_value('1!1.2.rev33+123456').for(:version) }
+        it { is_expected.to allow_value('1.0a12').for(:version) }
+        it { is_expected.to allow_value('1.2.3-45+abcdefgh').for(:version) }
+        it { is_expected.to allow_value('v1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-45-abcdefgh').for(:version) }
+        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+        it { is_expected.not_to allow_value('1./2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
+        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to validate_presence_of(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.3.350').for(:version) }
+        it { is_expected.not_to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
+        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.not_to allow_value(nil).for(:version) }
+      end
+
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
-      it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+      context 'nuget package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
+
+        it { is_expected.to allow_value('1.2.3.4').for(:version) }
+      end
     end
 
     describe '#package_already_taken' do
@@ -178,7 +341,7 @@ RSpec.describe Packages::Package, type: :model do
         let!(:package) { create(:npm_package) }
 
         it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, name: package.name)
+          new_package = build(:npm_package, project: create(:project), name: package.name)
 
           expect(new_package).not_to be_valid
         end
@@ -410,6 +573,14 @@ RSpec.describe Packages::Package, type: :model do
 
       it { is_expected.to match_array([package1, package2]) }
     end
+
+    describe '.with_normalized_pypi_name' do
+      let_it_be(:pypi_package) { create(:pypi_package, name: 'Foo.bAr---BAZ_buz') }
+
+      subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
+
+      it { is_expected.to match_array([pypi_package]) }
+    end
   end
 
   describe '.select_distinct_name' do
@@ -425,6 +596,20 @@ RSpec.describe Packages::Package, type: :model do
 
       expect(packages.size).to eq(2)
       expect(packages.pluck(:name)).to match_array([nuget_package.name, maven_package.name])
+    end
+  end
+
+  describe '.order_by_package_file' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:package1) { create(:maven_package, project: project) }
+    let_it_be(:package2) { create(:maven_package, project: project) }
+
+    it 'orders packages their associated package_file\'s created_at date', :aggregate_failures do
+      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2])
+
+      create(:package_file, :xml, package: package1)
+
+      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2, package1])
     end
   end
 
@@ -444,7 +629,7 @@ RSpec.describe Packages::Package, type: :model do
   end
 
   describe '#pipeline' do
-    let_it_be(:package) { create(:maven_package) }
+    let_it_be_with_refind(:package) { create(:maven_package) }
 
     context 'package without pipeline' do
       it 'returns nil if there is no pipeline' do
@@ -456,7 +641,7 @@ RSpec.describe Packages::Package, type: :model do
       let_it_be(:pipeline) { create(:ci_pipeline) }
 
       before do
-        package.create_build_info!(pipeline: pipeline)
+        package.build_infos.create!(pipeline: pipeline)
       end
 
       it 'returns the pipeline' do
@@ -480,6 +665,94 @@ RSpec.describe Packages::Package, type: :model do
       end
 
       it { is_expected.to contain_exactly(*tags) }
+    end
+  end
+
+  describe '#debian_incoming?' do
+    let(:package) { build(:package) }
+
+    subject { package.debian_incoming? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with debian_incoming' do
+      let(:package) { create(:debian_incoming) }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'with debian_package' do
+      let(:package) { create(:debian_package) }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#debian_package?' do
+    let(:package) { build(:package) }
+
+    subject { package.debian_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with debian_incoming' do
+      let(:package) { create(:debian_incoming) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with debian_package' do
+      let(:package) { create(:debian_package) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
+  describe 'plan_limits' do
+    Packages::Package.package_types.keys.without('composer').each do |pt|
+      plan_limit_name = if pt == 'generic'
+                          "#{pt}_packages_max_file_size"
+                        else
+                          "#{pt}_max_file_size"
+                        end
+
+      context "File size limits for #{pt}" do
+        let(:package) { create("#{pt}_package") }
+
+        it "plan_limits includes column #{plan_limit_name}" do
+          expect { package.project.actual_limits.send(plan_limit_name) }
+            .not_to raise_error(NoMethodError)
+        end
+      end
+    end
+  end
+
+  describe '#original_build_info' do
+    let_it_be_with_refind(:package) { create(:npm_package) }
+
+    context 'without build_infos' do
+      it 'returns nil' do
+        expect(package.original_build_info).to be_nil
+      end
+    end
+
+    context 'with build_infos' do
+      let_it_be(:first_build_info) { create(:package_build_info, :with_pipeline, package: package) }
+      let_it_be(:second_build_info) { create(:package_build_info, :with_pipeline, package: package) }
+
+      it 'returns the first build info' do
+        expect(package.original_build_info).to eq(first_build_info)
+      end
+    end
+  end
+
+  describe '#package_settings' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:package) { create(:maven_package, project: project) }
+
+    it 'returns the namespace package_settings' do
+      expect(package.package_settings).to eq(group.package_settings)
     end
   end
 end

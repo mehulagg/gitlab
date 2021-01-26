@@ -13,7 +13,7 @@ module EE
     def filter_params(issuable)
       can_admin_issuable = can_admin_issuable?(issuable)
 
-      unless can_admin_issuable && issuable.supports_weight?
+      unless can_admin_issuable && issuable.weight_available?
         params.delete(:weight)
       end
 

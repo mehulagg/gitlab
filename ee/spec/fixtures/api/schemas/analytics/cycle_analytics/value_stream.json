@@ -1,12 +1,21 @@
 {
   "type": "object",
-  "required": ["name", "id"],
+  "required": ["name", "id", "is_custom"],
   "properties": {
     "id": {
       "type": ["integer", "string"]
     },
     "name": {
       "type": "string"
+    },
+    "is_custom": {
+      "type": "boolean"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "$ref": "stage.json"
+      }
     }
   },
   "additionalProperties": false

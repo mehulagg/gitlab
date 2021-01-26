@@ -1,21 +1,38 @@
 import Tracking from '~/tracking';
+import Api from '~/api';
 
-// Tracking Constants
-const DESIGN_TRACKING_CONTEXT_SCHEMA = 'iglu:com.gitlab/design_management_context/jsonschema/1-0-0';
-const DESIGN_TRACKING_PAGE_NAME = 'projects:issues:design';
-const DESIGN_TRACKING_EVENT_NAME = 'view_design';
+// Snowplow tracking constants
+const DESIGN_TRACKING_CONTEXT_SCHEMAS = {
+  VIEW_DESIGN_SCHEMA: 'iglu:com.gitlab/design_management_context/jsonschema/1-0-0',
+};
 
-// eslint-disable-next-line import/prefer-default-export
+export const DESIGN_TRACKING_PAGE_NAME = 'projects:issues:design';
+
+export const DESIGN_SNOWPLOW_EVENT_TYPES = {
+  VIEW_DESIGN: 'view_design',
+  CREATE_DESIGN: 'create_design',
+  UPDATE_DESIGN: 'update_design',
+};
+
+export const DESIGN_USAGE_PING_EVENT_TYPES = {
+  DESIGN_ACTION: 'design_action',
+};
+
+/**
+ * Track "design detail" view in Snowplow
+ */
 export function trackDesignDetailView(
   referer = '',
   owner = '',
   designVersion = 1,
   latestVersion = false,
 ) {
-  Tracking.event(DESIGN_TRACKING_PAGE_NAME, DESIGN_TRACKING_EVENT_NAME, {
-    label: DESIGN_TRACKING_EVENT_NAME,
+  const eventName = DESIGN_SNOWPLOW_EVENT_TYPES.VIEW_DESIGN;
+
+  Tracking.event(DESIGN_TRACKING_PAGE_NAME, eventName, {
+    label: eventName,
     context: {
-      schema: DESIGN_TRACKING_CONTEXT_SCHEMA,
+      schema: DESIGN_TRACKING_CONTEXT_SCHEMAS.VIEW_DESIGN_SCHEMA,
       data: {
         'design-version-number': designVersion,
         'design-is-current-version': latestVersion,
@@ -24,4 +41,19 @@ export function trackDesignDetailView(
       },
     },
   });
+}
+
+export function trackDesignCreate() {
+  return Tracking.event(DESIGN_TRACKING_PAGE_NAME, DESIGN_SNOWPLOW_EVENT_TYPES.CREATE_DESIGN);
+}
+
+export function trackDesignUpdate() {
+  return Tracking.event(DESIGN_TRACKING_PAGE_NAME, DESIGN_SNOWPLOW_EVENT_TYPES.UPDATE_DESIGN);
+}
+
+/**
+ * Track "design detail" view via usage ping
+ */
+export function usagePingDesignDetailView() {
+  Api.trackRedisHllUserEvent(DESIGN_USAGE_PING_EVENT_TYPES.DESIGN_ACTION);
 }

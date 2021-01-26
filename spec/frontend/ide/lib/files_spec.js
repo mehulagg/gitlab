@@ -1,32 +1,22 @@
-import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
 import { decorateFiles, splitParent } from '~/ide/lib/files';
 import { decorateData } from '~/ide/stores/utils';
 
-const TEST_BRANCH_ID = 'lorem-ipsum';
-const TEST_PROJECT_ID = 10;
+const TEST_BLOB_DATA = { mimeType: 'test/mime' };
 
-const createEntries = paths => {
+const createEntries = (paths) => {
   const createEntry = (acc, { path, type, children }) => {
-    // Sometimes we need to end the url with a '/'
-    const createUrl = base => (type === 'tree' ? `${base}/` : base);
-
     const { name, parent } = splitParent(path);
-    const previewMode = viewerInformationForPath(name);
 
     acc[path] = {
       ...decorateData({
-        projectId: TEST_PROJECT_ID,
-        branchId: TEST_BRANCH_ID,
         id: path,
         name,
         path,
-        url: createUrl(`/${TEST_PROJECT_ID}/${type}/${TEST_BRANCH_ID}/-/${path}`),
         type,
-        previewMode,
-        binary: (previewMode && previewMode.binary) || false,
         parentPath: parent,
       }),
-      tree: children.map(childName => expect.objectContaining({ name: childName })),
+      tree: children.map((childName) => expect.objectContaining({ name: childName })),
+      ...(type === 'blob' ? TEST_BLOB_DATA : {}),
     };
 
     return acc;
@@ -56,18 +46,14 @@ describe('IDE lib decorate files', () => {
       { path: 'README.md', type: 'blob', children: [] },
     ]);
 
-    const { entries, treeList } = decorateFiles({
-      data,
-      branchId: TEST_BRANCH_ID,
-      projectId: TEST_PROJECT_ID,
-    });
+    const { entries, treeList } = decorateFiles({ data, blobData: TEST_BLOB_DATA });
 
     // Here we test the keys and then each key/value individually because `expect(entries).toEqual(expectedEntries)`
     // was taking a very long time for some reason. Probably due to large objects and nested `expect.objectContaining`.
     const entryKeys = Object.keys(entries);
 
     expect(entryKeys).toEqual(Object.keys(expectedEntries));
-    entryKeys.forEach(key => {
+    entryKeys.forEach((key) => {
       expect(entries[key]).toEqual(expectedEntries[key]);
     });
 

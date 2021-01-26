@@ -7,7 +7,7 @@ require 'rubocop/rspec/support'
 
 require_relative '../../../rubocop/cop/include_sidekiq_worker'
 
-RSpec.describe RuboCop::Cop::IncludeSidekiqWorker, type: :rubocop do
+RSpec.describe RuboCop::Cop::IncludeSidekiqWorker do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -16,7 +16,7 @@ RSpec.describe RuboCop::Cop::IncludeSidekiqWorker, type: :rubocop do
     let(:source) { 'include Sidekiq::Worker' }
     let(:correct_source) { 'include ApplicationWorker' }
 
-    it 'registers an offense ' do
+    it 'registers an offense' do
       inspect_source(source)
 
       aggregate_failures do

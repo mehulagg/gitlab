@@ -28,7 +28,7 @@ export default class FilteredSearchDropdown {
   }
 
   getCurrentHook() {
-    return this.droplab.hooks.filter(h => h.id === this.hookId)[0] || null;
+    return this.droplab.hooks.filter((h) => h.id === this.hookId)[0] || null;
   }
 
   itemClicked(e, getValueFunction) {
@@ -83,16 +83,16 @@ export default class FilteredSearchDropdown {
     }
   }
 
-  render(forceRenderContent = false, forceShowList = false) {
+  render(forceRenderContent = false, forceShowList = false, hideNotEqual = false) {
     this.setAsDropdown();
 
     const currentHook = this.getCurrentHook();
     const firstTimeInitialized = currentHook === null;
 
     if (firstTimeInitialized || forceRenderContent) {
-      this.renderContent(forceShowList);
+      this.renderContent(forceShowList, hideNotEqual);
     } else if (currentHook.list.list.id !== this.dropdown.id) {
-      this.renderContent(forceShowList);
+      this.renderContent(forceShowList, hideNotEqual);
     }
   }
 
@@ -134,7 +134,7 @@ export default class FilteredSearchDropdown {
 
       if (!data) return;
 
-      const results = data.map(o => {
+      const results = data.map((o) => {
         const updated = o;
         updated.droplab_hidden = false;
         return updated;
@@ -157,7 +157,7 @@ export default class FilteredSearchDropdown {
 
       // Iterate over all the static dropdown values,
       // then hide `None` and `Any` items.
-      Array.from(dropdownEl.querySelectorAll('li[data-value]')).forEach(itemEl => {
+      Array.from(dropdownEl.querySelectorAll('li[data-value]')).forEach((itemEl) => {
         const {
           dataset: { value },
         } = itemEl;

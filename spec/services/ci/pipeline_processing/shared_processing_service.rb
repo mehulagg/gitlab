@@ -259,14 +259,14 @@ RSpec.shared_examples 'Pipeline Processing Service' do
 
           expect(builds_names_and_statuses).to eq({ 'build': 'success', 'rollout10%': 'scheduled' })
 
-          Timecop.travel 2.minutes.from_now do
+          travel_to 2.minutes.from_now do
             enqueue_scheduled('rollout10%')
           end
           succeed_pending
 
           expect(builds_names_and_statuses).to eq({ 'build': 'success', 'rollout10%': 'success', 'rollout100%': 'scheduled' })
 
-          Timecop.travel 2.minutes.from_now do
+          travel_to 2.minutes.from_now do
             enqueue_scheduled('rollout100%')
           end
           succeed_pending
@@ -330,7 +330,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
 
           expect(builds_names_and_statuses).to eq({ 'build': 'success', 'rollout10%': 'scheduled' })
 
-          Timecop.travel 2.minutes.from_now do
+          travel_to 2.minutes.from_now do
             enqueue_scheduled('rollout10%')
           end
           fail_running_or_pending
@@ -398,7 +398,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
         expect(process_pipeline).to be_truthy
         expect(builds_names_and_statuses).to eq({ 'delayed1': 'scheduled', 'delayed2': 'scheduled' })
 
-        Timecop.travel 2.minutes.from_now do
+        travel_to 2.minutes.from_now do
           enqueue_scheduled('delayed1')
         end
 
@@ -419,7 +419,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
         expect(process_pipeline).to be_truthy
         expect(builds_names_and_statuses).to eq({ 'delayed': 'scheduled' })
 
-        Timecop.travel 2.minutes.from_now do
+        travel_to 2.minutes.from_now do
           enqueue_scheduled('delayed')
         end
         fail_running_or_pending
@@ -788,8 +788,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
       let!(:deploy_pages) { create_build('deploy_pages', stage: 'deploy', stage_idx: 2, scheduling_type: :dag) }
 
       it 'runs deploy_pages without waiting prior stages' do
-        # Ci::PipelineProcessing::LegacyProcessingService requires :initial_process parameter
-        expect(process_pipeline(initial_process: true)).to be_truthy
+        expect(process_pipeline).to be_truthy
 
         expect(stages).to eq(%w(pending created pending))
         expect(builds.pending).to contain_exactly(linux_build, mac_build, deploy_pages)

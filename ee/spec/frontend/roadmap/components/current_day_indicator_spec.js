@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
 
 import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import {
   getTimeframeForQuartersView,
   getTimeframeForMonthsView,
   getTimeframeForWeeksView,
 } from 'ee/roadmap/utils/roadmap_utils';
-import { PRESET_TYPES } from 'ee/roadmap/constants';
 
 import { mockTimeframeInitialDate } from 'ee_jest/roadmap/mock_data';
 

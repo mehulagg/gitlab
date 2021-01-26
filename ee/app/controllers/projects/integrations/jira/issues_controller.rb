@@ -11,11 +11,14 @@ module Projects
         before_action :check_feature_enabled!
 
         before_action do
-          push_frontend_feature_flag(:jira_issues_integration, project, { default_enabled: true })
+          push_frontend_feature_flag(:jira_issues_integration, project, type: :licensed, default_enabled: true)
+          push_frontend_feature_flag(:jira_issues_list, project, type: :development)
         end
 
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::RequestError, with: :render_request_error
+
+        feature_category :integrations
 
         def index
           params[:state] = params[:state].presence || default_state
@@ -31,8 +34,11 @@ module Projects
         private
 
         def issues_json
-          jira_issues = finder.execute
-          jira_issues = Kaminari.paginate_array(jira_issues, limit: finder.per_page, total_count: finder.total_count)
+          jira_issues = Kaminari.paginate_array(
+            finder.execute,
+            limit: finder.per_page,
+            total_count: finder.total_count
+          )
 
           ::Integrations::Jira::IssueSerializer.new
             .with_pagination(request, response)
@@ -40,11 +46,7 @@ module Projects
         end
 
         def finder
-          @finder ||= finder_type.new(project, finder_options)
-        end
-
-        def finder_type
-          ::Projects::Integrations::Jira::IssuesFinder
+          @finder ||= ::Projects::Integrations::Jira::IssuesFinder.new(project, finder_options)
         end
 
         def finder_options
@@ -53,7 +55,7 @@ module Projects
           # Used by view to highlight active option
           @sort = options[:sort]
 
-          params.permit(finder_type.valid_params).merge(options)
+          params.permit(::Projects::Integrations::Jira::IssuesFinder.valid_params).merge(options)
         end
 
         def default_state
@@ -71,7 +73,7 @@ module Projects
         protected
 
         def check_feature_enabled!
-          return render_404 unless project.jira_issues_integration_available? && project.external_issue_tracker
+          return render_404 unless project.jira_issues_integration_available? && project.jira_service.issues_enabled
         end
 
         # Return the informational message to the user

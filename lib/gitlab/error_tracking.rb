@@ -26,6 +26,8 @@ module Gitlab
           # Sanitize fields based on those sanitized from Rails.
           config.sanitize_fields = Rails.application.config.filter_parameters.map(&:to_s)
           config.processors << ::Gitlab::ErrorTracking::Processor::SidekiqProcessor
+          config.processors << ::Gitlab::ErrorTracking::Processor::GrpcErrorProcessor
+
           # Sanitize authentication headers
           config.sanitize_http_headers = %w[Authorization Private-Token]
           config.tags = extra_tags_from_env.merge(program: Gitlab.process_name)
@@ -109,8 +111,8 @@ module Gitlab
       private
 
       def before_send(event, hint)
-        event = add_context_from_exception_type(event, hint)
-        event = custom_fingerprinting(event, hint)
+        inject_context_for_exception(event, hint[:exception])
+        custom_fingerprinting(event, hint[:exception])
 
         event
       end
@@ -174,31 +176,21 @@ module Gitlab
         {}
       end
 
-      # Debugging for https://gitlab.com/gitlab-org/gitlab-foss/issues/57727
-      def add_context_from_exception_type(event, hint)
-        if ActiveModel::MissingAttributeError === hint[:exception]
-          columns_hash = ActiveRecord::Base
-                            .connection
-                            .schema_cache
-                            .instance_variable_get(:@columns_hash)
-                            .transform_values { |v| v.map(&:first) }
-
-          event.extra.merge!(columns_hash)
-        end
-
-        event
-      end
-
       # Group common, mostly non-actionable exceptions by type and message,
       # rather than cause
-      def custom_fingerprinting(event, hint)
-        ex = hint[:exception]
-
+      def custom_fingerprinting(event, ex)
         return event unless CUSTOM_FINGERPRINTING.include?(ex.class.name)
 
         event.fingerprint = [ex.class.name, ex.message]
+      end
 
-        event
+      def inject_context_for_exception(event, ex)
+        case ex
+        when ActiveRecord::StatementInvalid
+          event.extra[:sql] = PgQuery.normalize(ex.sql.to_s)
+        else
+          inject_context_for_exception(event, ex.cause) if ex.cause.present?
+        end
       end
     end
   end

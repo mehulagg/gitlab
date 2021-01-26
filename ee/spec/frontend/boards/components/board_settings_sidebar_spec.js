@@ -1,13 +1,14 @@
 import '~/boards/models/list';
-import MockAdapter from 'axios-mock-adapter';
-import axios from 'axios';
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
-import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import BoardSettingsListTypes from 'ee_component/boards/components/board_settings_list_types.vue';
+import BoardSettingsWipLimit from 'ee_component/boards/components/board_settings_wip_limit.vue';
+import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
+import { LIST } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
-import { inactiveId } from '~/boards/constants';
+import getters from '~/boards/stores/getters';
 
 const localVue = createLocalVue();
 
@@ -21,17 +22,23 @@ describe('ee/BoardSettingsSidebar', () => {
   const listId = 1;
   let mock;
 
-  const createComponent = (state = { activeId: inactiveId }, actions = {}) => {
+  const createComponent = (actions = {}, isWipLimitsOn = false) => {
     storeActions = actions;
 
     const store = new Vuex.Store({
-      state,
+      state: { sidebarType: LIST, activeId: listId },
+      getters,
       actions: storeActions,
     });
 
     wrapper = shallowMount(BoardSettingsSidebar, {
       store,
       localVue,
+      provide: {
+        glFeatures: {
+          wipLimits: isWipLimitsOn,
+        },
+      },
       stubs: {
         'board-settings-sidebar-wip-limit': BoardSettingsWipLimit,
         'board-settings-list-types': BoardSettingsListTypes,
@@ -57,7 +64,7 @@ describe('ee/BoardSettingsSidebar', () => {
       list_type: 'label',
     });
 
-    createComponent({ activeId: listId });
+    createComponent({}, true);
 
     expect(wrapper.find(BoardSettingsWipLimit).exists()).toBe(true);
   });
@@ -73,7 +80,7 @@ describe('ee/BoardSettingsSidebar', () => {
       list_type: 'milestone',
     });
 
-    createComponent({ activeId: listId });
+    createComponent();
 
     expect(wrapper.find(BoardSettingsListTypes).exists()).toBe(true);
   });

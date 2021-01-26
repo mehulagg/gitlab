@@ -102,7 +102,7 @@ module Gitlab
         end
       end
 
-      def user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+      def user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
         request = Gitaly::UserMergeToRefRequest.new(
           repository: @gitaly_repo,
           source_sha: source_sha,
@@ -110,7 +110,8 @@ module Gitlab
           target_ref: encode_binary(target_ref),
           user: Gitlab::Git::User.from_gitlab(user).to_gitaly,
           message: encode_binary(message),
-          first_parent_ref: encode_binary(first_parent_ref)
+          first_parent_ref: encode_binary(first_parent_ref),
+          allow_conflicts: allow_conflicts
         )
 
         response = GitalyClient.call(@repository.storage, :operation_service,
@@ -179,7 +180,7 @@ module Gitlab
         )
 
         if response.pre_receive_error.present?
-          raise Gitlab::Git::PreReceiveError.new(response.pre_receive_error, "GL-HOOK-ERR: pre-receive hook failed.")
+          raise Gitlab::Git::PreReceiveError.new(response.pre_receive_error, fallback_message: "pre-receive hook failed.")
         end
 
         Gitlab::Git::OperationService::BranchUpdate.from_gitaly(response.branch_update)

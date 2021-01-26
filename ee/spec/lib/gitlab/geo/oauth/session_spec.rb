@@ -71,7 +71,7 @@ RSpec.describe Gitlab::Geo::Oauth::Session, :geo do
       it 'includes primary relative URL path' do
         api_url = 'http://localhost/relative-path/'
 
-        primary_node.update(url: api_url)
+        primary_node.update!(url: api_url)
 
         api_response = double(parsed: true)
 
@@ -88,7 +88,7 @@ RSpec.describe Gitlab::Geo::Oauth::Session, :geo do
     context 'primary is configured with relative URL' do
       it "makes the request to a primary's relative URL" do
         response = ActiveSupport::JSON.encode({ access_token: 'fake-token' }.as_json)
-        primary_node.update(url: 'http://example.com/gitlab/')
+        primary_node.update!(url: 'http://example.com/gitlab/')
         api_url = "#{primary_node.internal_url}oauth/token"
 
         stub_request(:post, api_url).to_return(

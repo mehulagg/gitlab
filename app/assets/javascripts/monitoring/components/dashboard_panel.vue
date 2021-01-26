@@ -1,20 +1,23 @@
 <script>
 import { mapState } from 'vuex';
-import { pickBy } from 'lodash';
-import invalidUrl from '~/lib/utils/invalid_url';
-import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
+import { mapValues, pickBy } from 'lodash';
 import {
   GlResizeObserverDirective,
   GlIcon,
+  GlLink,
   GlLoadingIcon,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlModal,
   GlModalDirective,
+  GlSprintf,
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import invalidUrl from '~/lib/utils/invalid_url';
+import { convertToFixedRange } from '~/lib/utils/datetime_range';
+import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
 import { panelTypes } from '../constants';
 
@@ -43,12 +46,14 @@ export default {
     MonitorEmptyChart,
     AlertWidget,
     GlIcon,
+    GlLink,
     GlLoadingIcon,
     GlTooltip,
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
     GlModal,
+    GlSprintf,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
@@ -130,6 +135,15 @@ export default {
         return getters[`${this.namespace}/selectedDashboard`];
       },
     }),
+    fixedCurrentTimeRange() {
+      // convertToFixedRange throws an error if the time range
+      // is not properly set.
+      try {
+        return convertToFixedRange(this.timeRange);
+      } catch {
+        return {};
+      }
+    },
     title() {
       return this.graphData?.title || '';
     },
@@ -257,8 +271,8 @@ export default {
   methods: {
     getGraphAlerts(queries) {
       if (!this.allAlerts) return {};
-      const metricIdsForChart = queries.map(q => q.metricId);
-      return pickBy(this.allAlerts, alert => metricIdsForChart.includes(alert.metricId));
+      const metricIdsForChart = queries.map((q) => q.metricId);
+      return pickBy(this.allAlerts, (alert) => metricIdsForChart.includes(alert.metricId));
     },
     getGraphAlertValues(queries) {
       return Object.values(this.getGraphAlerts(queries));
@@ -331,6 +345,19 @@ export default {
         this.$refs.copyChartLink.$el.firstChild.click();
       }
     },
+    getAlertRunbooks(queries) {
+      const hasRunbook = (alert) => Boolean(alert.runbookUrl);
+      const graphAlertsWithRunbooks = pickBy(this.getGraphAlerts(queries), hasRunbook);
+      const alertToRunbookTransform = (alert) => {
+        const alertQuery = queries.find((query) => query.metricId === alert.metricId);
+        return {
+          key: alert.metricId,
+          href: alert.runbookUrl,
+          label: alertQuery.label,
+        };
+      };
+      return mapValues(graphAlertsWithRunbooks, alertToRunbookTransform);
+    },
   },
   panelTypes,
 };
@@ -338,7 +365,7 @@ export default {
 <template>
   <div v-gl-resize-observer="onResize" class="prometheus-graph">
     <div class="d-flex align-items-center">
-      <slot name="topLeft"></slot>
+      <slot name="top-left"></slot>
       <h5
         ref="graphTitle"
         class="prometheus-graph-title gl-font-lg font-weight-bold text-truncate gl-mr-3"
@@ -367,15 +394,21 @@ export default {
         data-qa-selector="prometheus_graph_widgets"
       >
         <div data-testid="dropdown-wrapper" class="d-flex align-items-center">
+          <!--
+            This component should be replaced with a variant developed
+            as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
+            The variant will create a dropdown with an icon, no text and no caret
+           -->
           <gl-dropdown
             v-gl-tooltip
-            toggle-class="shadow-none border-0"
+            toggle-class="gl-px-3!"
+            no-caret
             data-qa-selector="prometheus_widgets_dropdown"
             right
             :title="__('More actions')"
           >
-            <template slot="button-content">
-              <gl-icon name="ellipsis_v" class="dropdown-icon text-secondary" />
+            <template #button-content>
+              <gl-icon class="gl-mr-0!" name="ellipsis_v" />
             </template>
             <gl-dropdown-item
               v-if="expandBtnAvailable"
@@ -426,6 +459,25 @@ export default {
             >
               {{ __('Alerts') }}
             </gl-dropdown-item>
+            <gl-dropdown-item
+              v-for="runbook in getAlertRunbooks(graphData.metrics)"
+              :key="runbook.key"
+              :href="safeUrl(runbook.href)"
+              data-testid="runbookLink"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+                <span>
+                  <gl-sprintf :message="s__('Metrics|View runbook - %{label}')">
+                    <template #label>
+                      {{ runbook.label }}
+                    </template>
+                  </gl-sprintf>
+                </span>
+                <gl-icon name="external-link" />
+              </span>
+            </gl-dropdown-item>
 
             <template v-if="graphData.links && graphData.links.length">
               <gl-dropdown-divider />
@@ -468,6 +520,7 @@ export default {
       :thresholds="getGraphAlertValues(graphData.metrics)"
       :group-id="groupId"
       :timezone="dashboardTimezone"
+      :time-range="fixedCurrentTimeRange"
       v-bind="$attrs"
       v-on="$listeners"
       @datazoom="onDatazoom"

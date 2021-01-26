@@ -174,6 +174,7 @@ RSpec.describe API::MergeRequestApprovals do
       expect(rule_response['name']).to eq('foo')
       expect(rule_response['approvers'][0]['username']).to eq(approver.username)
       expect(rule_response['approved_by'][0]['username']).to eq(approver.username)
+      expect(rule_response['commented_by']).to eq([])
       expect(rule_response['source_rule']).to be_nil
       expect(rule_response['section']).to be_nil
     end

@@ -12,7 +12,7 @@ module QA
             element :authenticate_button
           end
 
-          view 'app/assets/javascripts/import_projects/components/provider_repo_table_row.vue' do
+          view 'app/assets/javascripts/import_entities/import_projects/components/provider_repo_table_row.vue' do
             element :project_import_row
             element :project_namespace_select
             element :project_path_field
@@ -67,7 +67,9 @@ module QA
           end
 
           def wait_for_success
-            wait_until(max_duration: 60, sleep_interval: 1.0, reload: false) do
+            # TODO: set reload:false and remove skip_finished_loading_check_on_refresh when
+            # https://gitlab.com/gitlab-org/gitlab/-/issues/231542 is fixed
+            wait_until(max_duration: 60, sleep_interval: 5.0, reload: true, skip_finished_loading_check_on_refresh: true) do
               page.has_content?('Done', wait: 1.0)
             end
           end

@@ -29,15 +29,15 @@ RSpec.describe Members::DestroyService do
     end
 
     it 'destroys the member' do
-      expect { described_class.new(current_user).execute(member, opts) }.to change { member.source.members_and_requesters.count }.by(-1)
+      expect { described_class.new(current_user).execute(member, **opts) }.to change { member.source.members_and_requesters.count }.by(-1)
     end
 
     it 'destroys member notification_settings' do
       if member_user.notification_settings.any?
-        expect { described_class.new(current_user).execute(member, opts) }
+        expect { described_class.new(current_user).execute(member, **opts) }
           .to change { member_user.notification_settings.count }.by(-1)
       else
-        expect { described_class.new(current_user).execute(member, opts) }
+        expect { described_class.new(current_user).execute(member, **opts) }
           .not_to change { member_user.notification_settings.count }
       end
     end
@@ -63,7 +63,7 @@ RSpec.describe Members::DestroyService do
         expect(service).to receive(:enqueue_unassign_issuables).with(member)
       end
 
-      service.execute(member, opts)
+      service.execute(member, **opts)
 
       expect(member_user.assigned_open_merge_requests_count).to be(0)
       expect(member_user.assigned_open_issues_count).to be(0)
@@ -83,14 +83,14 @@ RSpec.describe Members::DestroyService do
     it 'calls Member#after_decline_request' do
       expect_any_instance_of(NotificationService).to receive(:decline_access_request).with(member)
 
-      described_class.new(current_user).execute(member, opts)
+      described_class.new(current_user).execute(member, **opts)
     end
 
     context 'when current user is the member' do
       it 'does not call Member#after_decline_request' do
         expect_any_instance_of(NotificationService).not_to receive(:decline_access_request).with(member)
 
-        described_class.new(member_user).execute(member, opts)
+        described_class.new(member_user).execute(member, **opts)
       end
     end
   end
@@ -192,8 +192,8 @@ RSpec.describe Members::DestroyService do
 
   context 'with an access requester' do
     before do
-      group_project.update(request_access_enabled: true)
-      group.update(request_access_enabled: true)
+      group_project.update!(request_access_enabled: true)
+      group.update!(request_access_enabled: true)
       group_project.request_access(member_user)
       group.request_access(member_user)
     end
@@ -280,7 +280,6 @@ RSpec.describe Members::DestroyService do
   context 'subresources' do
     let(:user) { create(:user) }
     let(:member_user) { create(:user) }
-    let(:opts) { {} }
 
     let(:group) { create(:group, :public) }
     let(:subgroup) { create(:group, parent: group) }
@@ -292,6 +291,10 @@ RSpec.describe Members::DestroyService do
 
     before do
       create(:group_member, :developer, group: subsubgroup, user: member_user)
+      create(:project_member, :invited, project: group_project, created_by: member_user)
+      create(:group_member, :invited, group: group, created_by: member_user)
+      create(:project_member, :invited, project: subsubproject, created_by: member_user)
+      create(:group_member, :invited, group: subgroup, created_by: member_user)
 
       subsubproject.add_developer(member_user)
       control_project.add_maintainer(user)
@@ -299,7 +302,7 @@ RSpec.describe Members::DestroyService do
 
       group_member = create(:group_member, :developer, group: group, user: member_user)
 
-      described_class.new(user).execute(group_member, opts)
+      described_class.new(user).execute(group_member)
     end
 
     it 'removes the project membership' do
@@ -324,6 +327,41 @@ RSpec.describe Members::DestroyService do
 
     it 'does not remove the user from the control project' do
       expect(control_project.members.map(&:user)).to include(user)
+    end
+
+    it 'removes group members invited by deleted user' do
+      expect(group.members.not_accepted_invitations_by_user(member_user)).to be_empty
+    end
+
+    it 'removes project members invited by deleted user' do
+      expect(group_project.members.not_accepted_invitations_by_user(member_user)).to be_empty
+    end
+
+    it 'removes subgroup members invited by deleted user' do
+      expect(subgroup.members.not_accepted_invitations_by_user(member_user)).to be_empty
+    end
+
+    it 'removes subproject members invited by deleted user' do
+      expect(subsubproject.members.not_accepted_invitations_by_user(member_user)).to be_empty
+    end
+  end
+
+  context 'deletion of invitations created by deleted project member' do
+    let(:user) { project.owner }
+    let(:member_user) { create(:user) }
+
+    let(:project) { create(:project) }
+
+    before do
+      create(:project_member, :invited, project: project, created_by: member_user)
+
+      project_member = create(:project_member, :maintainer, user: member_user, project: project)
+
+      described_class.new(user).execute(project_member)
+    end
+
+    it 'removes project members invited by deleted user' do
+      expect(project.members.not_accepted_invitations_by_user(member_user)).to be_empty
     end
   end
 end

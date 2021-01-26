@@ -1,63 +1,52 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Metrics dashboard for your CI/CD environment **(CORE)**
+# Monitor your environment's metrics **(CORE)**
 
-After [configuring Prometheus for a cluster](../../user/project/integrations/prometheus.md),
-GitLab attempts to retrieve performance metrics for any [environment](../../ci/environments/index.md) with
-a successful deployment.
+GitLab helps your team monitor the health and performance of your applications
+and infrastructure by turning statistics and log files into charts and graphs
+that are easy to understand, especially when time is short and decisions are
+critical. For GitLab to display your information in charts, you must:
 
-GitLab scans the Prometheus server for metrics from known servers like Kubernetes
-and NGINX, and attempts to identify individual environments. To learn more about
-the supported metrics and scan processes, see the
-[Prometheus Metrics Library documentation](../../user/project/integrations/prometheus_library/index.md).
+1. **Instrument your application** - Collect accurate and complete measurements.
+   <I class="fa fa-youtube-play youtube" aria-hidden="true"></I>
+   For an overview, see [How to instrument Prometheus metrics in GitLab](https://www.youtube.com/watch?v=tuI2oJ3TTB4).
+1. **Expose metrics for capture** - Make logs, metrics, and traces available for capture.
+1. [**Configure Prometheus to gather metrics**](#configure-prometheus-to-gather-metrics) -
+   Deploy managed applications like Elasticsearch, Prometheus, and Jaeger to gather
+   the data you've exposed.
+1. **GitLab collects metrics** - GitLab uses Prometheus to scrape the data you've
+   captured in your managed apps, and prepares the data for display. To learn more, read
+   [Collect and process metrics](#collect-and-process-metrics).
+1. **Display charts in the GitLab user interface** - GitLab converts your metrics
+   into easy-to-read charts on a default dashboard. You can create as many custom charts
+   and custom dashboards as needed so your team has full insight into your
+   application's health.
 
-To view the metrics dashboard for an environment that has
-[completed at least one deployment](#populate-your-metrics-dashboard):
+## Configure Prometheus to gather metrics
 
-1. *If the metrics dashboard is only visible to project members,* sign in to
-   GitLab as a member of a project. Learn more about [metrics dashboard visibility](#metrics-dashboard-visibility).
-1. In your project, navigate to **Operations > Metrics**.
+You must connect a Prometheus instance to GitLab to collect metrics. How you configure
+your Prometheus integration depends on where your apps are running:
 
-GitLab displays the default metrics dashboard for the environment, like the
-following example:
+- **For manually-configured Prometheus** -
+  [Specify your Prometheus server](../../user/project/integrations/prometheus.md#manual-configuration-of-prometheus),
+  and define at least one environment.
+- **For GitLab-managed Prometheus** - GitLab can
+  [deploy and manage Prometheus](../../user/project/integrations/prometheus.md#managed-prometheus-on-kubernetes) for you.
+  You must also complete a code deployment, as described in
+  [Deploy code with GitLab-managed Prometheus](#deploy-code-with-gitlab-managed-prometheus),
+  for the **Operations > Metrics** page to contain data.
 
-![Example of metrics dashboard](img/example-dashboard_v13_1.png)
+### Deploy code with GitLab-managed Prometheus
 
-The top of the dashboard contains a navigation bar. From left to right, the
-navigation bar contains:
-
-- **Dashboard** - A dropdown list of all dashboards available for the project,
-  with starred dashboards listed first.
-- **Environment** - A dropdown list of all [environments](../index.md) that searches
-  through all environments as you type.
-- **Range** - The time period of data to display.
-- **Refresh dashboard** **{retry}** - Reload the dashboard with current data.
-- **Set refresh rate** - Set a time frame for refreshing the data displayed.
-- **Star dashboard** **{star-o}** - Click to mark a dashboard as a favorite.
-  Starred dashboards display a solid star **{star}** button, and display first
-  in the **Dashboard** dropdown list.
-  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214582) in GitLab 13.0.)
-- **Edit dashboard** - Edit the source YAML file of a custom dashboard. Only available on
-  [custom dashboards](dashboards/index.md).
-  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34779) in GitLab 12.5.)
-- **Create dashboard** **{file-addition-solid}** - Create a
-  [new custom dashboard for your project](dashboards/index.md#add-a-new-dashboard-to-your-project).
-- **Metrics settings** - Configure the
-  [settings for this dashboard](dashboards/index.md#manage-the-metrics-dashboard-settings).
-
-## Populate your metrics dashboard
-
-After [configuring Prometheus for a cluster](../../user/project/integrations/prometheus.md),
-you must also deploy code for the **Operations > Metrics** page
-to contain data. Setting up [Auto DevOps](../../topics/autodevops/index.md)
-helps quickly create a deployment:
+For GitLab-managed Prometheus, you can set up [Auto DevOps](../../topics/autodevops/index.md)
+to quickly create a deployment:
 
 1. Navigate to your project's **Operations > Kubernetes** page.
-1. Ensure that, in addition to Prometheus, you also have Runner and Ingress
+1. Ensure that, in addition to Prometheus, you also have GitLab Runner and Ingress
    installed.
 1. After installing Ingress, copy its endpoint.
 1. Navigate to your project's **Settings > CI/CD** page. In the
@@ -70,7 +59,56 @@ helps quickly create a deployment:
 1. When the pipeline has run successfully, graphs are available on the
    **Operations > Metrics** page.
 
-![Monitoring Dashboard](img/prometheus_monitoring_dashboard_v13_1.png)
+![Monitoring Dashboard](img/prometheus_monitoring_dashboard_v13_3.png)
+
+## Collect and process metrics
+
+After [configuring Prometheus for a cluster](../../user/project/integrations/prometheus.md),
+GitLab attempts to retrieve performance metrics for any [environment](../../ci/environments/index.md) with
+a successful deployment.
+
+GitLab scans the Prometheus server for metrics from known servers like Kubernetes
+and NGINX, and attempts to identify individual environments. To learn more about
+the supported metrics and scan processes, see the
+[Prometheus Metrics Library documentation](../../user/project/integrations/prometheus_library/index.md).
+
+To view the [default metrics dashboard](dashboards/default.md) for an environment that is
+[configured to gather metrics](#configure-prometheus-to-gather-metrics):
+
+1. *If the metrics dashboard is only visible to project members,* sign in to
+   GitLab as a member of a project. Learn more about [metrics dashboard visibility](#metrics-dashboard-visibility).
+1. In your project, navigate to **Operations > Metrics**.
+
+GitLab displays the [default metrics dashboard](dashboards/default.md) for the environment,
+like the following example:
+
+![Example of metrics dashboard](img/example-dashboard_v13_3.png)
+
+The top of the dashboard contains a navigation bar. From left to right, the
+navigation bar contains:
+
+- **Dashboard** - A dropdown list of all dashboards available for the project,
+  with starred dashboards listed first.
+- **Environment** - A dropdown list of all [environments](../index.md) that searches
+  through all environments as you type.
+- **Range** - The time period of data to display.
+- **Refresh dashboard** **{retry}** - Reload the dashboard with current data.
+- **Set refresh rate** - Set a time frame for refreshing the data displayed.
+- **More actions** **{ellipsis_v}** - More dashboard actions
+  - **Add metric** - Adds a [custom metric](#adding-custom-metrics). Only available on GitLab-defined dashboards.
+  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34779) in GitLab 12.5.)
+  - **Edit dashboard YAML** - Edit the source YAML file of a custom dashboard. Only available on
+  [custom dashboards](dashboards/index.md).
+  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34779) in GitLab 12.5.)
+  - **Duplicate current dashboard** - Save a [complete copy of a dashboard](dashboards/index.md#duplicate-a-gitlab-defined-dashboard). Only available on GitLab-defined dashboards.
+  - **Star dashboard** **{star-o}** - Click to mark a dashboard as a favorite.
+  Starred dashboards display a solid star **{star}** button, and display first
+  in the **Dashboard** dropdown list.
+  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214582) in GitLab 13.0.)
+  - **Create new dashboard** - Create a [new custom dashboard for your project](dashboards/index.md#add-a-new-dashboard-to-your-project).
+  ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228856) in GitLab 13.3.)
+- **Metrics settings** - Configure the
+  [settings for this dashboard](dashboards/index.md#manage-the-metrics-dashboard-settings).
 
 ## Customize your metrics dashboard
 
@@ -80,7 +118,7 @@ After creating your dashboard, you can customize it to meet your needs:
   [create custom metrics](#adding-custom-metrics) and display them on your metrics dashboard.
 - **Configure alerts for metrics**: [Configure custom alerts](alerts.md) for your team when
   environment performance falls outside of the boundaries you set.
-- **Trigger actions from alerts**: [Open new issues for your team](alerts.md#trigger-actions-from-alerts-ultimate) **(ULTIMATE)**
+- **Trigger actions from alerts**: [Open new issues for your team](alerts.md#trigger-actions-from-alerts) **(ULTIMATE)**
   when environment performance falls outside of the boundaries you set.
 
 ## Metrics dashboard visibility
@@ -109,7 +147,7 @@ After saving them, they display on the environment metrics dashboard provided th
 A few fields are required:
 
 - **Name**: Chart title
-- **Type**: Type of metric. Metrics of the same type will be shown together.
+- **Type**: Type of metric. Metrics of the same type are shown together.
 - **Query**: Valid [PromQL query](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 - **Y-axis label**: Y axis title to display on the dashboard.
 - **Unit label**: Query units, for example `req / sec`. Shown next to the value.

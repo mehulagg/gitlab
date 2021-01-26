@@ -32,7 +32,7 @@
   = render_if_exists 'shared/repository_size_limit_setting', form: f, type: :project
 
   .form-group.gl-mt-3.gl-mb-3
-    .avatar-container.s90
+    .avatar-container.rect-avatar.s90
       = project_icon(@project, alt: _('Project avatar'), class: 'avatar project-avatar s90')
     = f.label :avatar, _('Project avatar'), class: 'label-bold d-block'
     = render 'shared/choose_avatar_button', f: f
@@ -40,5 +40,4 @@
       %hr
       = link_to _('Remove avatar'), project_avatar_path(@project), data: { confirm: _('Avatar will be removed. Are you sure?')}, method: :delete, class: 'btn btn-link'
 
-
-  = f.submit _('Save changes'), class: "btn btn-success mt-4 qa-save-naming-topics-avatar-button"
+  = f.submit _('Save changes'), class: "gl-button btn btn-success gl-mt-6 qa-save-naming-topics-avatar-button"

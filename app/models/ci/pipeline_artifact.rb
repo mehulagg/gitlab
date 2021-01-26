@@ -5,30 +5,48 @@
 module Ci
   class PipelineArtifact < ApplicationRecord
     extend Gitlab::Ci::Model
-
-    FILE_STORE_SUPPORTED = [
-      ObjectStorage::Store::LOCAL,
-      ObjectStorage::Store::REMOTE
-    ].freeze
+    include UpdateProjectStatistics
+    include Artifactable
+    include FileStoreMounter
+    include Presentable
 
     FILE_SIZE_LIMIT = 10.megabytes.freeze
+    EXPIRATION_DATE = 1.week.freeze
+
+    DEFAULT_FILE_NAMES = {
+      code_coverage: 'code_coverage.json',
+      code_quality: 'code_quality.json'
+    }.freeze
 
     belongs_to :project, class_name: "Project", inverse_of: :pipeline_artifacts
     belongs_to :pipeline, class_name: "Ci::Pipeline", inverse_of: :pipeline_artifacts
 
-    validates :pipeline, :project, :file_format, presence: true
-    validates :file_store, presence: true, inclusion: { in: FILE_STORE_SUPPORTED }
+    validates :pipeline, :project, :file_format, :file, presence: true
+    validates :file_store, presence: true, inclusion: { in: ObjectStorage::SUPPORTED_STORES }
     validates :size, presence: true, numericality: { less_than_or_equal_to: FILE_SIZE_LIMIT }
-    validates :file_type, presence: true, uniqueness: { scope: [:pipeline_id] }
+    validates :file_type, presence: true
+
+    mount_file_store_uploader Ci::PipelineArtifactUploader
+
+    update_project_statistics project_statistics_name: :pipeline_artifacts_size
 
     enum file_type: {
-      code_coverage: 1
+      code_coverage: 1,
+      code_quality: 2
     }
 
-    enum file_format: {
-      raw: 1,
-      zip: 2,
-      gzip: 3
-    }, _suffix: true
+    class << self
+      def has_report?(file_type)
+        where(file_type: file_type).exists?
+      end
+
+      def find_by_file_type(file_type)
+        find_by(file_type: file_type)
+      end
+    end
+
+    def present
+      super(presenter_class: "Ci::PipelineArtifacts::#{self.file_type.camelize}Presenter".constantize)
+    end
   end
 end

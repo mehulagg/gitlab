@@ -5,8 +5,10 @@ require 'spec_helper'
 RSpec.describe GitlabSchema.types['Group'] do
   describe 'nested epic request' do
     it { expect(described_class).to have_graphql_field(:epicsEnabled) }
-    it { expect(described_class).to have_graphql_field(:epics) }
     it { expect(described_class).to have_graphql_field(:epic) }
+    it { expect(described_class).to have_graphql_field(:epics) }
+    it { expect(described_class).to have_graphql_field(:epic_board) }
+    it { expect(described_class).to have_graphql_field(:epic_boards) }
   end
 
   it { expect(described_class).to have_graphql_field(:iterations) }
@@ -16,6 +18,8 @@ RSpec.describe GitlabSchema.types['Group'] do
   it { expect(described_class).to have_graphql_field(:vulnerability_scanners) }
   it { expect(described_class).to have_graphql_field(:vulnerabilities_count_by_day_and_severity) }
   it { expect(described_class).to have_graphql_field(:vulnerability_grades) }
+  it { expect(described_class).to have_graphql_field(:code_coverage_activities) }
+  it { expect(described_class).to have_graphql_field(:stats) }
 
   describe 'timelogs field' do
     subject { described_class.fields['timelogs'] }
@@ -38,7 +42,7 @@ RSpec.describe GitlabSchema.types['Group'] do
     let_it_be(:query) do
       %(
         query {
-          group(fullPath:"#{group.full_path}") {
+          group(fullPath: "#{group.full_path}") {
             name
             vulnerabilities {
               nodes {

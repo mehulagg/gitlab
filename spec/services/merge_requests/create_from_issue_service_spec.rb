@@ -66,10 +66,11 @@ RSpec.describe MergeRequests::CreateFromIssueService do
         expect { service.execute }.to change(target_project.merge_requests, :count).by(1)
       end
 
-      it 'sets the merge request author to current user', :sidekiq_might_not_need_inline do
+      it 'sets the merge request author to current user and assigns them', :sidekiq_might_not_need_inline do
         result = service.execute
 
         expect(result[:merge_request].author).to eq(user)
+        expect(result[:merge_request].assignees).to eq([user])
       end
 
       it 'sets the merge request source branch to the new issue branch', :sidekiq_might_not_need_inline do
@@ -154,7 +155,7 @@ RSpec.describe MergeRequests::CreateFromIssueService do
 
         result = service.execute
 
-        expect(result[:merge_request].label_ids).to eq(label_ids)
+        expect(result[:merge_request].label_ids).to match_array(label_ids)
       end
 
       it "inherits milestones" do

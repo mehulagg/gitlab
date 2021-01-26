@@ -8,6 +8,8 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
   let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, ended_at: 1.year.ago, events: 2, severity: :high) }
   let_it_be(:ignored_alert) { create(:alert_management_alert, :all_fields, :ignored, project: project, events: 1, severity: :critical) }
   let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields) }
+  let_it_be(:threat_monitroing_alert) { create(:alert_management_alert, domain: 'threat_monitoring') }
+
   let(:params) { {} }
 
   describe '#execute' do
@@ -20,6 +22,32 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
     context 'user is developer' do
       before do
         project.add_developer(current_user)
+      end
+
+      context 'domain' do
+        context 'domain is threat management' do
+          let(:params) { { domain: 'threat_management' } }
+
+          it { is_expected.to contain_exactly(resolved_alert, ignored_alert) }
+        end
+
+        context 'domain is unknown' do
+          let(:params) { { domain: 'unkown' } }
+
+          it { is_expected.to contain_exactly(resolved_alert, ignored_alert) }
+        end
+
+        context 'domain is missing' do
+          let(:params) { {} }
+
+          it { is_expected.to contain_exactly(resolved_alert, ignored_alert) }
+        end
+
+        context 'skips domain if iid is given' do
+          let(:params) { { iid: resolved_alert.iid, domain: 'threat_monitoring' } }
+
+          it { is_expected.to contain_exactly(resolved_alert) }
+        end
       end
 
       context 'empty params' do
@@ -39,19 +67,19 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
       end
 
       context 'status given' do
-        let(:params) { { status: AlertManagement::Alert::STATUSES[:resolved] } }
+        let(:params) { { status: :resolved } }
 
         it { is_expected.to match_array(resolved_alert) }
 
         context 'with an array of statuses' do
           let(:triggered_alert) { create(:alert_management_alert) }
-          let(:params) { { status: [AlertManagement::Alert::STATUSES[:resolved]] } }
+          let(:params) { { status: [:resolved] } }
 
           it { is_expected.to match_array(resolved_alert) }
         end
 
         context 'with no alerts of status' do
-          let(:params) { { status: AlertManagement::Alert::STATUSES[:acknowledged] } }
+          let(:params) { { status: :acknowledged } }
 
           it { is_expected.to be_empty }
         end
@@ -169,12 +197,6 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
         end
 
         context 'when sorting by status' do
-          let(:statuses) { AlertManagement::Alert::STATUSES }
-          let(:triggered) { statuses[:triggered] }
-          let(:acknowledged) { statuses[:acknowledged] }
-          let(:resolved) { statuses[:resolved] }
-          let(:ignored) { statuses[:ignored] }
-
           let_it_be(:alert_triggered) { create(:alert_management_alert, project: project) }
           let_it_be(:alert_acknowledged) { create(:alert_management_alert, :acknowledged, project: project) }
           let_it_be(:alert_resolved) { create(:alert_management_alert, :resolved, project: project) }
@@ -184,7 +206,7 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
             let(:params) { { sort: 'status_asc' } }
 
             it 'sorts by status: Ignored > Resolved > Acknowledged > Triggered' do
-              expect(execute.map(&:status).uniq).to eq([ignored, resolved, acknowledged, triggered])
+              expect(execute.map(&:status_name).uniq).to eq([:ignored, :resolved, :acknowledged, :triggered])
             end
           end
 
@@ -192,64 +214,71 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
             let(:params) { { sort: 'status_desc' } }
 
             it 'sorts by status: Triggered > Acknowledged > Resolved > Ignored' do
-              expect(execute.map(&:status).uniq).to eq([triggered, acknowledged, resolved, ignored])
+              expect(execute.map(&:status_name).uniq).to eq([:triggered, :acknowledged, :resolved, :ignored])
             end
           end
         end
       end
-    end
 
-    context 'search query given' do
-      let_it_be(:alert) do
-        create(:alert_management_alert,
-          :with_fingerprint,
-          title: 'Title',
-          description: 'Desc',
-          service: 'Service',
-          monitoring_tool: 'Monitor'
-        )
+      context 'search query given' do
+        let_it_be(:alert) do
+          create(:alert_management_alert,
+                 :with_fingerprint,
+                 project: project,
+                 title: 'Title',
+                 description: 'Desc',
+                 service: 'Service',
+                 monitoring_tool: 'Monitor'
+                )
+        end
+
+        context 'searching title' do
+          let(:params) { { search: alert.title } }
+
+          it { is_expected.to match_array([alert]) }
+        end
+
+        context 'searching description' do
+          let(:params) { { search: alert.description } }
+
+          it { is_expected.to match_array([alert]) }
+        end
+
+        context 'searching service' do
+          let(:params) { { search: alert.service } }
+
+          it { is_expected.to match_array([alert]) }
+        end
+
+        context 'searching monitoring tool' do
+          let(:params) { { search: alert.monitoring_tool } }
+
+          it { is_expected.to match_array([alert]) }
+        end
+
+        context 'searching something else' do
+          let(:params) { { search: alert.fingerprint } }
+
+          it { is_expected.to be_empty }
+        end
       end
 
-      before do
-        alert.project.add_developer(current_user)
-      end
+      context 'assignee username given' do
+        let_it_be(:assignee) { create(:user) }
+        let_it_be(:alert) { create(:alert_management_alert, project: project, assignees: [assignee]) }
+        let(:params) { { assignee_username: username } }
 
-      subject { described_class.new(current_user, alert.project, params).execute }
+        context 'with valid assignee_username' do
+          let(:username) { assignee.username }
 
-      context 'searching title' do
-        let(:params) { { search: alert.title } }
+          it { is_expected.to match_array([alert]) }
+        end
 
-        it { is_expected.to match_array([alert]) }
-      end
+        context 'with invalid assignee_username' do
+          let(:username) { 'unknown username' }
 
-      context 'searching description' do
-        let(:params) { { search: alert.description } }
-
-        it { is_expected.to match_array([alert]) }
-      end
-
-      context 'searching service' do
-        let(:params) { { search: alert.service } }
-
-        it { is_expected.to match_array([alert]) }
-      end
-
-      context 'searching monitoring tool' do
-        let(:params) { { search: alert.monitoring_tool } }
-
-        it { is_expected.to match_array([alert]) }
-      end
-
-      context 'searching something else' do
-        let(:params) { { search: alert.fingerprint } }
-
-        it { is_expected.to be_empty }
-      end
-
-      context 'empty search' do
-        let(:params) { { search: ' ' } }
-
-        it { is_expected.to match_array([alert]) }
+          it { is_expected.to be_empty }
+        end
       end
     end
   end
@@ -261,12 +290,12 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
       project.add_developer(current_user)
     end
 
-    it { is_expected.to match({ 2 => 1, 3 => 1 }) } # one resolved and one ignored
+    it { is_expected.to match(resolved: 1, ignored: 1) }
 
     context 'when filtering params are included' do
-      let(:params) { { status: AlertManagement::Alert::STATUSES[:resolved] } }
+      let(:params) { { status: :resolved } }
 
-      it { is_expected.to match({ 2 => 1 }) } # one resolved
+      it { is_expected.to match(resolved: 1) }
     end
   end
 end

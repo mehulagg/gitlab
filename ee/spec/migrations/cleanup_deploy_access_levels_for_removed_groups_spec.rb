@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191125024005_cleanup_deploy_access_levels_for_removed_groups.rb')
+require_migration!
 
 RSpec.describe CleanupDeployAccessLevelsForRemovedGroups do
   let(:namespaces) { table(:namespaces) }

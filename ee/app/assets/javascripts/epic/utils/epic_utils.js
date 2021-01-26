@@ -24,7 +24,7 @@ const bindDocumentEvent = (eventName, callback) => {
   $(document).on(eventName, callback);
 };
 
-const toggleContainerClass = className => {
+const toggleContainerClass = (className) => {
   const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
   if (containerEl) {
@@ -34,7 +34,7 @@ const toggleContainerClass = className => {
 
 const getCollapsedGutter = () => parseBoolean(Cookies.get('collapsed_gutter'));
 
-const setCollapsedGutter = value => Cookies.set('collapsed_gutter', value);
+const setCollapsedGutter = (value) => Cookies.set('collapsed_gutter', value);
 
 const getDateValidity = (startDateTime, dueDateTime) => {
   // If both dates are defined

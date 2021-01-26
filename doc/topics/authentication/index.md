@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Authentication
 
 This page gathers all the resources for the topic **Authentication** within GitLab.

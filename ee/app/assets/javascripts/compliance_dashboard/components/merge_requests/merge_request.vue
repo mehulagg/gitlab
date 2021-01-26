@@ -28,8 +28,8 @@ export default {
     <a :href="mergeRequest.path" class="gl-display-block gl-text-gray-900 gl-font-weight-bold">
       {{ mergeRequest.title }}
     </a>
-    <span class="gl-text-gray-700">{{ mergeRequest.issuable_reference }}</span>
-    <span class="issuable-authored gl-text-gray-700 gl-display-inline-flex gl-align-items-center">
+    <span class="gl-text-gray-500">{{ mergeRequest.issuable_reference }}</span>
+    <span class="issuable-authored gl-text-gray-500 gl-display-inline-flex gl-align-items-center">
       - {{ $options.strings.createdBy }}
       <gl-avatar-link
         :key="mergeRequest.author.id"

@@ -1,9 +1,6 @@
+import * as Sentry from '~/sentry/wrapper';
 import axios from '~/lib/utils/axios_utils';
-import * as Sentry from '@sentry/browser';
 import * as types from './mutation_types';
-
-export const setSecurityConfigurationEndpoint = ({ commit }, endpoint) =>
-  commit(types.SET_SECURITY_CONFIGURATION_ENDPOINT, endpoint);
 
 export const fetchSecurityConfiguration = ({ commit, state }) => {
   if (!state.securityConfigurationPath) {
@@ -15,11 +12,11 @@ export const fetchSecurityConfiguration = ({ commit, state }) => {
     method: 'GET',
     url: state.securityConfigurationPath,
   })
-    .then(response => {
+    .then((response) => {
       const { data } = response;
       commit(types.RECEIVE_SECURITY_CONFIGURATION_SUCCESS, data);
     })
-    .catch(error => {
+    .catch((error) => {
       Sentry.captureException(error);
       commit(types.RECEIVE_SECURITY_CONFIGURATION_ERROR);
     });

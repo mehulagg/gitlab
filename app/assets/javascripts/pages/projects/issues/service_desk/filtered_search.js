@@ -9,6 +9,7 @@ export default class FilteredSearchServiceDesk extends FilteredSearchManager {
     super({
       page: 'service_desk',
       filteredSearchTokenKeys: IssuableFilteredSearchTokenKeys,
+      useDefaultState: true,
     });
 
     this.supportBotData = supportBotData;
@@ -20,7 +21,7 @@ export default class FilteredSearchServiceDesk extends FilteredSearchManager {
 
   modifyUrlParams(paramsArray) {
     const supportBotParamPair = `${AUTHOR_PARAM_KEY}=${this.supportBotData.username}`;
-    const onlyValidParams = paramsArray.filter(param => param.indexOf(AUTHOR_PARAM_KEY) === -1);
+    const onlyValidParams = paramsArray.filter((param) => param.indexOf(AUTHOR_PARAM_KEY) === -1);
 
     // unshift ensures author param is always first token element
     onlyValidParams.unshift(supportBotParamPair);

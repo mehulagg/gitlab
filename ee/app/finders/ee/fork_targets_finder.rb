@@ -7,7 +7,7 @@ module EE
 
     override :execute
     # rubocop: disable CodeReuse/ActiveRecord
-    def execute
+    def execute(options = {})
       targets = super
 
       root_group = project.group&.root_ancestor

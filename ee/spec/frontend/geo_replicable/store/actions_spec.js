@@ -1,14 +1,14 @@
-import testAction from 'helpers/vuex_action_helper';
-import flash from '~/flash';
-import toast from '~/vue_shared/plugins/global_toast';
-import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import Api from 'ee/api';
+import { ACTION_TYPES, PREV, NEXT, DEFAULT_PAGE_SIZE } from 'ee/geo_replicable/constants';
+import buildReplicableTypeQuery from 'ee/geo_replicable/graphql/replicable_type_query_builder';
 import * as actions from 'ee/geo_replicable/store/actions';
 import * as types from 'ee/geo_replicable/store/mutation_types';
 import createState from 'ee/geo_replicable/store/state';
-import { ACTION_TYPES, PREV, NEXT, DEFAULT_PAGE_SIZE } from 'ee/geo_replicable/constants';
 import { gqClient } from 'ee/geo_replicable/utils';
-import buildReplicableTypeQuery from 'ee/geo_replicable/graphql/replicable_type_query_builder';
+import testAction from 'helpers/vuex_action_helper';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import toast from '~/vue_shared/plugins/global_toast';
 import {
   MOCK_BASIC_FETCH_DATA_MAP,
   MOCK_BASIC_FETCH_RESPONSE,
@@ -31,7 +31,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('requestReplicableItems', () => {
-    it('should commit mutation REQUEST_REPLICABLE_ITEMS', done => {
+    it('should commit mutation REQUEST_REPLICABLE_ITEMS', (done) => {
       testAction(
         actions.requestReplicableItems,
         null,
@@ -44,7 +44,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('receiveReplicableItemsSuccess', () => {
-    it('should commit mutation RECEIVE_REPLICABLE_ITEMS_SUCCESS', done => {
+    it('should commit mutation RECEIVE_REPLICABLE_ITEMS_SUCCESS', (done) => {
       testAction(
         actions.receiveReplicableItemsSuccess,
         { data: MOCK_BASIC_FETCH_DATA_MAP, pagination: MOCK_RESTFUL_PAGINATION_DATA },
@@ -82,7 +82,7 @@ describe('GeoReplicable Store Actions', () => {
         state.useGraphQl = true;
       });
 
-      it('calls fetchReplicableItemsGraphQl', done => {
+      it('calls fetchReplicableItemsGraphQl', (done) => {
         testAction(
           actions.fetchReplicableItems,
           null,
@@ -102,7 +102,7 @@ describe('GeoReplicable Store Actions', () => {
         state.useGraphQl = false;
       });
 
-      it('calls fetchReplicableItemsRestful', done => {
+      it('calls fetchReplicableItemsRestful', (done) => {
         testAction(
           actions.fetchReplicableItems,
           null,
@@ -120,6 +120,38 @@ describe('GeoReplicable Store Actions', () => {
       state.graphqlFieldName = MOCK_GRAPHQL_REGISTRY;
     });
 
+    describe('on success with no registry data', () => {
+      beforeEach(() => {
+        jest.spyOn(gqClient, 'query').mockResolvedValue({
+          data: {},
+        });
+      });
+
+      const direction = null;
+      const data = [];
+
+      it('should not error and pass empty values to the mutations', () => {
+        testAction(
+          actions.fetchReplicableItemsGraphQl,
+          direction,
+          state,
+          [],
+          [
+            {
+              type: 'receiveReplicableItemsSuccess',
+              payload: { data, pagination: null },
+            },
+          ],
+          () => {
+            expect(gqClient.query).toHaveBeenCalledWith({
+              query: buildReplicableTypeQuery(MOCK_GRAPHQL_REGISTRY),
+              variables: { before: '', after: '', first: DEFAULT_PAGE_SIZE, last: null },
+            });
+          },
+        );
+      });
+    });
+
     describe('on success', () => {
       beforeEach(() => {
         jest.spyOn(gqClient, 'query').mockResolvedValue({
@@ -131,7 +163,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with no direction set', () => {
         const direction = null;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with no before/after variables as well as a first variable but no last variable', () => {
@@ -158,7 +190,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with direction set to "next"', () => {
         const direction = NEXT;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with after variable but no before variable as well as a first variable but no last variable', () => {
@@ -190,7 +222,7 @@ describe('GeoReplicable Store Actions', () => {
 
       describe('with direction set to "prev"', () => {
         const direction = PREV;
-        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode?.packageFileRegistries;
+        const registries = MOCK_BASIC_GRAPHQL_QUERY_RESPONSE.geoNode[MOCK_GRAPHQL_REGISTRY];
         const data = registries.nodes;
 
         it('should call gqClient with before variable but no after variable as well as a last variable but no first variable', () => {
@@ -226,7 +258,7 @@ describe('GeoReplicable Store Actions', () => {
         jest.spyOn(gqClient, 'query').mockRejectedValue();
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           actions.fetchReplicableItemsGraphQl,
           null,
@@ -313,7 +345,7 @@ describe('GeoReplicable Store Actions', () => {
         jest.spyOn(Api, 'getGeoReplicableItems').mockRejectedValue(new Error(500));
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           actions.fetchReplicableItemsRestful,
           {},
@@ -327,7 +359,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('requestInitiateAllReplicableSyncs', () => {
-    it('should commit mutation REQUEST_INITIATE_ALL_REPLICABLE_SYNCS', done => {
+    it('should commit mutation REQUEST_INITIATE_ALL_REPLICABLE_SYNCS', (done) => {
       testAction(
         actions.requestInitiateAllReplicableSyncs,
         null,
@@ -407,7 +439,7 @@ describe('GeoReplicable Store Actions', () => {
         jest.spyOn(Api, 'initiateAllGeoReplicableSyncs').mockRejectedValue(new Error(500));
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           actions.initiateAllReplicableSyncs,
           action,
@@ -424,7 +456,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('requestInitiateReplicableSync', () => {
-    it('should commit mutation REQUEST_INITIATE_REPLICABLE_SYNC', done => {
+    it('should commit mutation REQUEST_INITIATE_REPLICABLE_SYNC', (done) => {
       testAction(
         actions.requestInitiateReplicableSync,
         null,
@@ -508,7 +540,7 @@ describe('GeoReplicable Store Actions', () => {
         jest.spyOn(Api, 'initiateGeoReplicableSync').mockRejectedValue(new Error(500));
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           actions.initiateReplicableSync,
           { projectId, name, action },
@@ -528,7 +560,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('setFilter', () => {
-    it('should commit mutation SET_FILTER', done => {
+    it('should commit mutation SET_FILTER', (done) => {
       const testValue = 1;
 
       testAction(
@@ -543,7 +575,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('setSearch', () => {
-    it('should commit mutation SET_SEARCH', done => {
+    it('should commit mutation SET_SEARCH', (done) => {
       const testValue = 'Test Search';
 
       testAction(
@@ -558,7 +590,7 @@ describe('GeoReplicable Store Actions', () => {
   });
 
   describe('setPage', () => {
-    it('should commit mutation SET_PAGE', done => {
+    it('should commit mutation SET_PAGE', (done) => {
       state.paginationData.page = 1;
 
       const testValue = 2;

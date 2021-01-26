@@ -1,4 +1,10 @@
-export default {
+import {
+  HEADER_TOTAL_ENTRIES,
+  HEADER_PAGE_NUMBER,
+  HEADER_ITEMS_PER_PAGE,
+} from 'ee/billings/constants';
+
+export const mockDataSubscription = {
   gold: {
     plan: {
       name: 'Gold',
@@ -58,3 +64,64 @@ export default {
     },
   },
 };
+
+export const mockDataSeats = {
+  data: [
+    {
+      name: 'Administrator',
+      username: 'root',
+      avatar_url: 'path/to/img_administrator',
+      web_url: 'path/to/administrator',
+      email: 'administrator@email.com',
+    },
+    {
+      name: 'Agustin Walker',
+      username: 'lester.orn',
+      avatar_url: 'path/to/img_agustin_walker',
+      web_url: 'path/to/agustin_walker',
+      email: 'agustin_walker@email.com',
+    },
+    {
+      name: 'Joella Miller',
+      username: 'era',
+      avatar_url: 'path/to/img_joella_miller',
+      web_url: 'path/to/joella_miller',
+      email: null,
+    },
+  ],
+  headers: {
+    [HEADER_TOTAL_ENTRIES]: '3',
+    [HEADER_PAGE_NUMBER]: '1',
+    [HEADER_ITEMS_PER_PAGE]: '1',
+  },
+};
+
+export const mockTableItems = [
+  {
+    email: 'administrator@email.com',
+    user: {
+      avatar_url: 'path/to/img_administrator',
+      name: 'Administrator',
+      username: '@root',
+      web_url: 'path/to/administrator',
+    },
+  },
+  {
+    email: 'agustin_walker@email.com',
+    user: {
+      avatar_url: 'path/to/img_agustin_walker',
+      name: 'Agustin Walker',
+      username: '@lester.orn',
+      web_url: 'path/to/agustin_walker',
+    },
+  },
+  {
+    email: null,
+    user: {
+      avatar_url: 'path/to/img_joella_miller',
+      name: 'Joella Miller',
+      username: '@era',
+      web_url: 'path/to/joella_miller',
+    },
+  },
+];

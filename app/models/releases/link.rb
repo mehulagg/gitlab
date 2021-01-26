@@ -6,7 +6,9 @@ module Releases
 
     belongs_to :release
 
-    FILEPATH_REGEX = %r{\A/(?:[\-\.\w]+/?)*[\da-zA-Z]+\z}.freeze
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/218753
+    # Regex modified to prevent catastrophic backtracking
+    FILEPATH_REGEX = %r{\A\/[^\/](?!.*\/\/.*)[\-\.\w\/]+[\da-zA-Z]+\z}.freeze
 
     validates :url, presence: true, addressable_url: { schemes: %w(http https ftp) }, uniqueness: { scope: :release }
     validates :name, presence: true, uniqueness: { scope: :release }
@@ -27,6 +29,16 @@ module Releases
 
     def external?
       !internal?
+    end
+
+    def hook_attrs
+      {
+        id: id,
+        external: external?,
+        link_type: link_type,
+        name: name,
+        url: url
+      }
     end
   end
 end

@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import MirrorRepos from '~/mirrors/mirror_repos';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 
 export default class EEMirrorRepos extends MirrorRepos {
   constructor(...args) {
@@ -36,7 +37,7 @@ export default class EEMirrorRepos extends MirrorRepos {
   }
 
   hideForm() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.$insertionPoint.html()) return resolve();
 
       this.$insertionPoint.one('hidden.bs.collapse', () => {
@@ -47,7 +48,7 @@ export default class EEMirrorRepos extends MirrorRepos {
   }
 
   showForm() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.$insertionPoint.one('shown.bs.collapse', () => {
         resolve();
       });
@@ -78,10 +79,15 @@ export default class EEMirrorRepos extends MirrorRepos {
   initSelect2() {
     import(/* webpackChunkName: 'select2' */ 'select2/select2')
       .then(() => {
-        $('.js-mirror-user', this.$form).select2({
-          width: 'resolve',
-          dropdownAutoWidth: true,
-        });
+        // eslint-disable-next-line promise/no-nesting
+        loadCSSFile(gon.select2_css_path)
+          .then(() => {
+            $('.js-mirror-user', this.$form).select2({
+              width: 'resolve',
+              dropdownAutoWidth: true,
+            });
+          })
+          .catch(() => {});
       })
       .catch(() => {});
   }

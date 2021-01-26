@@ -24,15 +24,22 @@ module Ci
 
     def status
       strong_memoize(:status) do
-        if ::Gitlab::Ci::Features.composite_status?(project)
-          Gitlab::Ci::Status::Composite
-            .new(@jobs)
-            .status
-        else
-          CommitStatus
-            .where(id: @jobs)
-            .legacy_status
-        end
+        status_struct.status
+      end
+    end
+
+    def success?
+      status.to_s == 'success'
+    end
+
+    def has_warnings?
+      status_struct.warnings?
+    end
+
+    def status_struct
+      strong_memoize(:status_struct) do
+        Gitlab::Ci::Status::Composite
+          .new(@jobs)
       end
     end
 
@@ -45,8 +52,13 @@ module Ci
       end
     end
 
-    def self.fabricate(project, stage)
-      stage.latest_statuses
+    # Construct a grouping of statuses for this stage.
+    # We allow the caller to pass in statuses for efficiency (avoiding N+1
+    # queries).
+    def self.fabricate(project, stage, statuses = nil)
+      statuses ||= stage.latest_statuses
+
+      statuses
         .sort_by(&:sortable_name).group_by(&:group_name)
         .map do |group_name, grouped_statuses|
           self.new(project, stage, name: group_name, jobs: grouped_statuses)

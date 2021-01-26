@@ -1,16 +1,14 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import Tracking from '~/tracking';
-import { ESC_KEY, ESC_KEY_IE11 } from '~/lib/utils/keys';
-import { GlModal, GlButton } from '@gitlab/ui';
-import { objectToQuery } from '~/lib/utils/url_utility';
 import VueDraggable from 'vuedraggable';
 import MockAdapter from 'axios-mock-adapter';
+import { TEST_HOST } from 'helpers/test_constants';
+import { ESC_KEY } from '~/lib/utils/keys';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
 import Dashboard from '~/monitoring/components/dashboard.vue';
 
 import DashboardHeader from '~/monitoring/components/dashboard_header.vue';
-import CustomMetricsFormFields from '~/custom_metrics/components/custom_metrics_form_fields.vue';
 import EmptyState from '~/monitoring/components/empty_state.vue';
 import GroupEmptyState from '~/monitoring/components/group_empty_state.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
@@ -32,8 +30,7 @@ import {
   metricsDashboardPanelCount,
   dashboardProps,
 } from '../fixture_data';
-import createFlash from '~/flash';
-import { TEST_HOST } from 'helpers/test_constants';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -41,8 +38,6 @@ describe('Dashboard', () => {
   let store;
   let wrapper;
   let mock;
-
-  const findDashboardHeader = () => wrapper.find(DashboardHeader);
 
   const createShallowWrapper = (props = {}, options = {}) => {
     wrapper = shallowMount(Dashboard, {
@@ -131,7 +126,7 @@ describe('Dashboard', () => {
   });
 
   describe('panel containers layout', () => {
-    const findPanelLayoutWrapperAt = index => {
+    const findPanelLayoutWrapperAt = (index) => {
       return wrapper
         .find(GraphGroup)
         .findAll('[data-testid="dashboard-panel-layout-wrapper"]')
@@ -230,7 +225,7 @@ describe('Dashboard', () => {
   describe('when the URL contains a reference to a panel', () => {
     let location;
 
-    const setSearch = search => {
+    const setSearch = (search) => {
       window.location = { ...location, search };
     };
 
@@ -396,7 +391,7 @@ describe('Dashboard', () => {
   });
 
   describe('when all panels in the first group are loading', () => {
-    const findGroupAt = i => wrapper.findAll(GraphGroup).at(i);
+    const findGroupAt = (i) => wrapper.findAll(GraphGroup).at(i);
 
     beforeEach(() => {
       setupStoreWithDashboard(store);
@@ -439,86 +434,8 @@ describe('Dashboard', () => {
       setupStoreWithData(store);
 
       wrapper.vm.$nextTick(() => {
-        wrapper.findAll(GraphGroup).wrappers.forEach(groupWrapper => {
+        wrapper.findAll(GraphGroup).wrappers.forEach((groupWrapper) => {
           expect(groupWrapper.props('isLoading')).toBe(false);
-        });
-      });
-    });
-  });
-
-  describe('star dashboards', () => {
-    const findToggleStar = () => findDashboardHeader().find({ ref: 'toggleStarBtn' });
-
-    beforeEach(() => {
-      createShallowWrapper();
-      setupAllDashboards(store);
-    });
-
-    it('toggle star button is shown', () => {
-      expect(findToggleStar().exists()).toBe(true);
-      expect(findToggleStar().props('disabled')).toBe(false);
-    });
-
-    it('toggle star button is disabled when starring is taking place', () => {
-      store.commit(`monitoringDashboard/${types.REQUEST_DASHBOARD_STARRING}`);
-
-      return wrapper.vm.$nextTick(() => {
-        expect(findToggleStar().exists()).toBe(true);
-        expect(findToggleStar().props('disabled')).toBe(true);
-      });
-    });
-
-    describe('when the dashboard list is loaded', () => {
-      // Tooltip element should wrap directly
-      const getToggleTooltip = () => findToggleStar().element.parentElement.getAttribute('title');
-
-      beforeEach(() => {
-        setupAllDashboards(store);
-        jest.spyOn(store, 'dispatch');
-      });
-
-      it('dispatches a toggle star action', () => {
-        findToggleStar().vm.$emit('click');
-
-        return wrapper.vm.$nextTick().then(() => {
-          expect(store.dispatch).toHaveBeenCalledWith(
-            'monitoringDashboard/toggleStarredValue',
-            undefined,
-          );
-        });
-      });
-
-      describe('when dashboard is not starred', () => {
-        beforeEach(() => {
-          store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-            currentDashboard: dashboardGitResponse[0].path,
-          });
-          return wrapper.vm.$nextTick();
-        });
-
-        it('toggle star button shows "Star dashboard"', () => {
-          expect(getToggleTooltip()).toBe('Star dashboard');
-        });
-
-        it('toggle star button shows  an unstarred state', () => {
-          expect(findToggleStar().attributes('icon')).toBe('star-o');
-        });
-      });
-
-      describe('when dashboard is starred', () => {
-        beforeEach(() => {
-          store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-            currentDashboard: dashboardGitResponse[1].path,
-          });
-          return wrapper.vm.$nextTick();
-        });
-
-        it('toggle star button shows "Star dashboard"', () => {
-          expect(getToggleTooltip()).toBe('Unstar dashboard');
-        });
-
-        it('toggle star button shows a starred state', () => {
-          expect(findToggleStar().attributes('icon')).toBe('star');
         });
       });
     });
@@ -588,10 +505,10 @@ describe('Dashboard', () => {
       let group;
       let panel;
 
-      const mockKeyup = key => window.dispatchEvent(new KeyboardEvent('keyup', { key }));
+      const mockKeyup = (key) => window.dispatchEvent(new KeyboardEvent('keyup', { key }));
 
       const MockPanel = {
-        template: `<div><slot name="topLeft"/></div>`,
+        template: `<div><slot name="top-left"/></div>`,
       };
 
       beforeEach(() => {
@@ -615,7 +532,7 @@ describe('Dashboard', () => {
 
       it('displays a single panel and others are hidden', () => {
         const panels = wrapper.findAll(MockPanel);
-        const visiblePanels = panels.filter(w => w.isVisible());
+        const visiblePanels = panels.filter((w) => w.isVisible());
 
         expect(findExpandedPanel().isVisible()).toBe(true);
         // v-show for hiding panels is more performant than v-if
@@ -649,15 +566,6 @@ describe('Dashboard', () => {
           undefined,
         );
       });
-
-      it('restores dashboard from full screen by typing the Escape key on IE11', () => {
-        mockKeyup(ESC_KEY_IE11);
-
-        expect(store.dispatch).toHaveBeenCalledWith(
-          `monitoringDashboard/clearExpandedPanel`,
-          undefined,
-        );
-      });
     });
   });
 
@@ -679,18 +587,15 @@ describe('Dashboard', () => {
     });
 
     it('group empty area displays a NO_DATA state', () => {
-      expect(
-        wrapper
-          .findAll({ ref: 'empty-group' })
-          .at(0)
-          .props('selectedState'),
-      ).toEqual(metricStates.NO_DATA);
+      expect(wrapper.findAll({ ref: 'empty-group' }).at(0).props('selectedState')).toEqual(
+        metricStates.NO_DATA,
+      );
     });
   });
 
   describe('drag and drop function', () => {
     const findDraggables = () => wrapper.findAll(VueDraggable);
-    const findEnabledDraggables = () => findDraggables().filter(f => !f.attributes('disabled'));
+    const findEnabledDraggables = () => findDraggables().filter((f) => !f.attributes('disabled'));
     const findDraggablePanels = () => wrapper.findAll('.js-draggable-panel');
     const findRearrangeButton = () => wrapper.find('.js-rearrange-button');
 
@@ -726,9 +631,7 @@ describe('Dashboard', () => {
 
       describe('when rearrange button is clicked', () => {
         const findFirstDraggableRemoveButton = () =>
-          findDraggablePanels()
-            .at(0)
-            .find('.js-draggable-remove');
+          findDraggablePanels().at(0).find('.js-draggable-remove');
 
         beforeEach(() => {
           findRearrangeButton().vm.$emit('click');
@@ -737,7 +640,7 @@ describe('Dashboard', () => {
 
         it('it enables draggables', () => {
           expect(findRearrangeButton().attributes('pressed')).toBeTruthy();
-          expect(findEnabledDraggables()).toEqual(findDraggables());
+          expect(findEnabledDraggables().wrappers).toEqual(findDraggables().wrappers);
         });
 
         it('metrics can be swapped', () => {
@@ -760,7 +663,7 @@ describe('Dashboard', () => {
         });
 
         it('shows a remove button, which removes a panel', () => {
-          expect(findFirstDraggableRemoveButton().isEmpty()).toBe(false);
+          expect(findFirstDraggableRemoveButton().find('a').exists()).toBe(true);
 
           expect(findDraggablePanels().length).toEqual(metricsDashboardPanelCount);
           findFirstDraggableRemoveButton().trigger('click');
@@ -795,35 +698,7 @@ describe('Dashboard', () => {
     });
 
     it('renders correctly', () => {
-      expect(wrapper.isVueInstance()).toBe(true);
-      expect(wrapper.exists()).toBe(true);
-    });
-  });
-
-  describe('dashboard edit link', () => {
-    const findEditLink = () => wrapper.find('.js-edit-link');
-
-    beforeEach(() => {
-      createShallowWrapper({ hasMetrics: true });
-
-      setupAllDashboards(store);
-      return wrapper.vm.$nextTick();
-    });
-
-    it('is not present for the overview dashboard', () => {
-      expect(findEditLink().exists()).toBe(false);
-    });
-
-    it('is present for a custom dashboard, and links to its edit_path', () => {
-      const dashboard = dashboardGitResponse[1];
-      store.commit(`monitoringDashboard/${types.SET_INITIAL_STATE}`, {
-        currentDashboard: dashboard.path,
-      });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findEditLink().exists()).toBe(true);
-        expect(findEditLink().attributes('href')).toBe(dashboard.project_blob_path);
-      });
+      expect(wrapper.html()).not.toBe('');
     });
   });
 
@@ -883,36 +758,12 @@ describe('Dashboard', () => {
     });
   });
 
-  describe('external dashboard link', () => {
-    beforeEach(() => {
-      createMountedWrapper({
-        hasMetrics: true,
-        showPanels: false,
-        showTimeWindowDropdown: false,
-        externalDashboardUrl: '/mockUrl',
-      });
-
-      return wrapper.vm.$nextTick();
-    });
-
-    it('shows the link', () => {
-      const externalDashboardButton = wrapper.find('.js-external-dashboard-link');
-
-      expect(externalDashboardButton.exists()).toBe(true);
-      expect(externalDashboardButton.is(GlButton)).toBe(true);
-      expect(externalDashboardButton.text()).toContain('View full dashboard');
-    });
-  });
-
   describe('Clipboard text in panels', () => {
     const currentDashboard = dashboardGitResponse[1].path;
     const panelIndex = 1; // skip expanded panel
 
     const getClipboardTextFirstPanel = () =>
-      wrapper
-        .findAll(DashboardPanel)
-        .at(panelIndex)
-        .props('clipboardText');
+      wrapper.findAll(DashboardPanel).at(panelIndex).props('clipboardText');
 
     beforeEach(() => {
       setupStoreWithData(store);
@@ -959,76 +810,6 @@ describe('Dashboard', () => {
       const dashboardPanel = getDashboardPanel();
 
       expect(dashboardPanel.exists()).toBe(true);
-    });
-  });
-
-  describe('add custom metrics', () => {
-    const findAddMetricButton = () => findDashboardHeader().find({ ref: 'addMetricBtn' });
-
-    describe('when not available', () => {
-      beforeEach(() => {
-        createShallowWrapper({
-          hasMetrics: true,
-          customMetricsPath: '/endpoint',
-        });
-      });
-      it('does not render add button on the dashboard', () => {
-        expect(findAddMetricButton().exists()).toBe(false);
-      });
-    });
-
-    describe('when available', () => {
-      let origPage;
-      beforeEach(done => {
-        jest.spyOn(Tracking, 'event').mockReturnValue();
-        createShallowWrapper({
-          hasMetrics: true,
-          customMetricsPath: '/endpoint',
-          customMetricsAvailable: true,
-        });
-        setupStoreWithData(store);
-
-        origPage = document.body.dataset.page;
-        document.body.dataset.page = 'projects:environments:metrics';
-
-        wrapper.vm.$nextTick(done);
-      });
-      afterEach(() => {
-        document.body.dataset.page = origPage;
-      });
-
-      it('renders add button on the dashboard', () => {
-        expect(findAddMetricButton()).toBeDefined();
-      });
-
-      it('uses modal for custom metrics form', () => {
-        expect(wrapper.find(GlModal).exists()).toBe(true);
-        expect(wrapper.find(GlModal).attributes().modalid).toBe('addMetric');
-      });
-      it('adding new metric is tracked', done => {
-        const submitButton = wrapper
-          .find(DashboardHeader)
-          .find({ ref: 'submitCustomMetricsFormBtn' }).vm;
-        wrapper.vm.$nextTick(() => {
-          submitButton.$el.click();
-          wrapper.vm.$nextTick(() => {
-            expect(Tracking.event).toHaveBeenCalledWith(
-              document.body.dataset.page,
-              'click_button',
-              {
-                label: 'add_new_metric',
-                property: 'modal',
-                value: undefined,
-              },
-            );
-            done();
-          });
-        });
-      });
-
-      it('renders custom metrics form fields', () => {
-        expect(wrapper.find(CustomMetricsFormFields).exists()).toBe(true);
-      });
     });
   });
 });

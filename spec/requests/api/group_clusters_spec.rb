@@ -89,6 +89,8 @@ RSpec.describe API::GroupClusters do
         expect(json_response['environment_scope']).to eq('*')
         expect(json_response['cluster_type']).to eq('group_type')
         expect(json_response['domain']).to eq('example.com')
+        expect(json_response['enabled']).to be_truthy
+        expect(json_response['managed']).to be_truthy
       end
 
       it 'returns group information' do
@@ -172,6 +174,8 @@ RSpec.describe API::GroupClusters do
         name: 'test-cluster',
         domain: 'domain.example.com',
         managed: false,
+        enabled: false,
+        namespace_per_environment: false,
         platform_kubernetes_attributes: platform_kubernetes_attributes,
         management_project_id: management_project_id
       }
@@ -205,7 +209,9 @@ RSpec.describe API::GroupClusters do
           expect(cluster_result.name).to eq('test-cluster')
           expect(cluster_result.domain).to eq('domain.example.com')
           expect(cluster_result.managed).to be_falsy
+          expect(cluster_result.enabled).to be_falsy
           expect(cluster_result.management_project_id).to eq management_project_id
+          expect(cluster_result.namespace_per_environment).to eq(false)
           expect(platform_kubernetes.rbac?).to be_truthy
           expect(platform_kubernetes.api_url).to eq(api_url)
           expect(platform_kubernetes.token).to eq('sample-token')
@@ -234,6 +240,22 @@ RSpec.describe API::GroupClusters do
           cluster_result = Clusters::Cluster.find(json_response['id'])
 
           expect(cluster_result.platform.abac?).to be_truthy
+        end
+      end
+
+      context 'when namespace_per_environment is not set' do
+        let(:cluster_params) do
+          {
+            name: 'test-cluster',
+            domain: 'domain.example.com',
+            platform_kubernetes_attributes: platform_kubernetes_attributes
+          }
+        end
+
+        it 'defaults to true' do
+          cluster_result = Clusters::Cluster.find(json_response['id'])
+
+          expect(cluster_result).to be_namespace_per_environment
         end
       end
 
@@ -324,7 +346,9 @@ RSpec.describe API::GroupClusters do
       {
         domain: domain,
         platform_kubernetes_attributes: platform_kubernetes_attributes,
-        management_project_id: management_project_id
+        management_project_id: management_project_id,
+        managed: false,
+        enabled: false
       }
     end
 
@@ -363,6 +387,8 @@ RSpec.describe API::GroupClusters do
         it 'updates cluster attributes' do
           expect(cluster.domain).to eq('new-domain.com')
           expect(cluster.management_project).to eq(management_project)
+          expect(cluster.managed).to be_falsy
+          expect(cluster.enabled).to be_falsy
         end
       end
 
@@ -376,6 +402,8 @@ RSpec.describe API::GroupClusters do
         it 'does not update cluster attributes' do
           expect(cluster.domain).to eq('old-domain.com')
           expect(cluster.management_project).to be_nil
+          expect(cluster.managed).to be_truthy
+          expect(cluster.enabled).to be_truthy
         end
 
         it 'returns validation errors' do

@@ -1,7 +1,6 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlFormInput } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlFormInput, GlButton } from '@gitlab/ui';
 import ErrorTrackingForm from '~/error_tracking_settings/components/error_tracking_form.vue';
 import createStore from '~/error_tracking_settings/store';
 import { defaultProps } from '../mock';
@@ -36,14 +35,9 @@ describe('error tracking settings form', () => {
     it('is rendered', () => {
       expect(wrapper.findAll(GlFormInput).length).toBe(2);
       expect(wrapper.find(GlFormInput).attributes('id')).toBe('error-tracking-api-host');
-      expect(
-        wrapper
-          .findAll(GlFormInput)
-          .at(1)
-          .attributes('id'),
-      ).toBe('error-tracking-token');
+      expect(wrapper.findAll(GlFormInput).at(1).attributes('id')).toBe('error-tracking-token');
 
-      expect(wrapper.findAll(LoadingButton).exists()).toBe(true);
+      expect(wrapper.findAll(GlButton).exists()).toBe(true);
     });
 
     it('is rendered with labels and placeholders', () => {
@@ -57,12 +51,9 @@ describe('error tracking settings form', () => {
       );
 
       expect(pageText).not.toContain('Connection has failed. Re-check Auth Token and try again');
-      expect(
-        wrapper
-          .findAll(GlFormInput)
-          .at(0)
-          .attributes('placeholder'),
-      ).toContain('https://mysentryserver.com');
+      expect(wrapper.findAll(GlFormInput).at(0).attributes('placeholder')).toContain(
+        'https://mysentryserver.com',
+      );
     });
   });
 
@@ -72,9 +63,10 @@ describe('error tracking settings form', () => {
     });
 
     it('shows loading spinner', () => {
-      const { label, loading } = wrapper.find(LoadingButton).props();
-      expect(loading).toBe(true);
-      expect(label).toBe('Connecting');
+      const buttonEl = wrapper.find(GlButton);
+
+      expect(buttonEl.props('loading')).toBe(true);
+      expect(buttonEl.text()).toBe('Connecting');
     });
   });
 

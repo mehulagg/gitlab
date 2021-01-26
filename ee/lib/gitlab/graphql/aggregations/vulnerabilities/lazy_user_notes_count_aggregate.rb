@@ -5,6 +5,8 @@ module Gitlab
     module Aggregations
       module Vulnerabilities
         class LazyUserNotesCountAggregate
+          include ::Gitlab::Graphql::Deferred
+
           attr_reader :vulnerability, :lazy_state
 
           def initialize(query_ctx, vulnerability)
@@ -12,7 +14,7 @@ module Gitlab
 
             # Initialize the loading state for this query,
             # or get the previously-initiated state
-            @lazy_state = query_ctx[:lazy_aggregate] ||= {
+            @lazy_state = query_ctx[:lazy_user_notes_count_aggregate] ||= {
               pending_vulnerability_ids: Set.new,
               loaded_objects: {}
             }
@@ -21,7 +23,7 @@ module Gitlab
           end
 
           # Return the loaded record, hitting the database if needed
-          def user_notes_count_aggregate
+          def execute
             # Check if the record was already loaded
             if @lazy_state[:pending_vulnerability_ids].present?
               load_records_into_loaded_objects

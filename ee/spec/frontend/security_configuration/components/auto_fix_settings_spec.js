@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
-import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import AutoFixSettings from 'ee/security_configuration/components/auto_fix_settings.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash.js');
 
@@ -55,10 +55,7 @@ describe('Auto-fix Settings', () => {
   const findCheckbox = () => wrapper.find('input[type="checkbox"]');
   const findFooter = () => wrapper.find('footer');
   const findFooterLinks = () => findFooter().findAll('a');
-  const getFooterTextContent = () =>
-    findFooter()
-      .text()
-      .trim();
+  const getFooterTextContent = () => findFooter().text().trim();
 
   const expectCheckboxDisabled = () => expect(findCheckbox().attributes().disabled).toBeTruthy();
 

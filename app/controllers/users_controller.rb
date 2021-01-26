@@ -17,9 +17,11 @@ class UsersController < ApplicationController
 
   skip_before_action :authenticate_user!
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
-  before_action :user, except: [:exists, :suggests]
+  before_action :user, except: [:exists, :suggests, :ssh_keys]
   before_action :authorize_read_user_profile!,
-                only: [:calendar, :calendar_activities, :groups, :projects, :contributed_projects, :starred_projects, :snippets]
+                only: [:calendar, :calendar_activities, :groups, :projects, :contributed, :starred, :snippets]
+
+  feature_category :users
 
   def show
     respond_to do |format|
@@ -31,22 +33,37 @@ class UsersController < ApplicationController
       end
 
       format.json do
-        load_events
-        pager_json("events/_events", @events.count, events: @events)
+        msg = "This endpoint is deprecated. Use %s instead." % user_activity_path
+        render json: { message: msg }, status: :not_found
       end
     end
   end
 
   # Get all keys of a user(params[:username]) in a text format
   # Helpful for sysadmins to put in respective servers
+  #
+  # Uses `UserFinder` rather than `find_routable!` because this endpoint should
+  # be publicly available regardless of instance visibility settings.
   def ssh_keys
+    user = UserFinder.new(params[:username]).find_by_username
+
     render plain: user.all_ssh_keys.join("\n")
   end
 
   def activity
     respond_to do |format|
       format.html { render 'show' }
+
+      format.json do
+        load_events
+        pager_json("events/_events", @events.count, events: @events)
+      end
     end
+  end
+
+  # Get all gpg keys of a user(params[:username]) in a text format
+  def gpg_keys
+    render plain: user.gpg_keys.select(&:verified?).map(&:key).join("\n")
   end
 
   def groups
@@ -112,7 +129,7 @@ class UsersController < ApplicationController
 
   def calendar_activities
     @calendar_date = Date.parse(params[:date]) rescue Date.today
-    @events = contributions_calendar.events_by_date(@calendar_date)
+    @events = contributions_calendar.events_by_date(@calendar_date).map(&:present)
 
     render 'calendar_activities', layout: false
   end

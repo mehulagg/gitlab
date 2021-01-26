@@ -12,7 +12,9 @@ RSpec.describe "Admin::Users" do
   let!(:current_user) { create(:admin, last_activity_on: 5.days.ago) }
 
   before do
+    stub_feature_flags(vue_admin_users: false)
     sign_in(current_user)
+    gitlab_enable_admin_mode_sign_in(current_user)
   end
 
   describe 'GET /admin/users' do
@@ -25,7 +27,7 @@ RSpec.describe "Admin::Users" do
         it "shows the 'Send email to users' link" do
           visit admin_users_path
 
-          expect(page).to have_link('Send email to users', href: admin_email_path)
+          expect(page).to have_link(href: admin_email_path)
         end
       end
 
@@ -37,7 +39,33 @@ RSpec.describe "Admin::Users" do
         it "does not show the 'Send email to users' link" do
           visit admin_users_path
 
-          expect(page).not_to have_link('Send email to users', href: admin_email_path)
+          expect(page).not_to have_link(href: admin_email_path)
+        end
+      end
+    end
+
+    describe 'user permission export' do
+      context 'when `export_user_permissions` feature is available' do
+        before do
+          stub_licensed_features(export_user_permissions: true)
+        end
+
+        it "shows the 'Export Permissions' link" do
+          visit admin_users_path
+
+          expect(page).to have_link(href: admin_user_permission_exports_path(format: :csv))
+        end
+      end
+
+      context 'when `export_user_permissions` feature is disabled' do
+        before do
+          stub_licensed_features(export_user_permissions: false)
+        end
+
+        it "does not show the 'Export Permissions' link" do
+          visit admin_users_path
+
+          expect(page).not_to have_link(href: admin_user_permission_exports_path(format: :csv))
         end
       end
     end
@@ -134,13 +162,13 @@ RSpec.describe "Admin::Users" do
       # SSH key should be the first in the list
       within('ul.content-list li.key-list-item:nth-of-type(1)') do
         expect(page).to have_content(key2.title)
-        expect(page).to have_css('a[data-method=delete]', text: 'Remove')
+        expect(page).to have_button('Delete')
       end
 
       # Next, LDAP key
       within('ul.content-list li.key-list-item:nth-of-type(2)') do
         expect(page).to have_content(key1.title)
-        expect(page).not_to have_css('a[data-method=delete]')
+        expect(page).not_to have_button('Delete')
       end
     end
   end

@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import Vue from 'vue';
 import { GlLabel } from '@gitlab/ui';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { sprintf, __ } from '~/locale';
 import Sidebar from '~/right_sidebar';
 import eventHub from '~/sidebar/event_hub';
@@ -68,7 +68,7 @@ export default Vue.extend({
         : __('Label');
     },
     selectedLabels() {
-      return this.hasLabels ? this.issue.labels.map(l => l.title).join(',') : '';
+      return this.hasLabels ? this.issue.labels.map((l) => l.title).join(',') : '';
     },
   },
   watch: {
@@ -82,9 +82,7 @@ export default Vue.extend({
             });
 
           $('.js-issue-board-sidebar', this.$el).each((i, el) => {
-            $(el)
-              .data('glDropdown')
-              .clearMenu();
+            $(el).data('deprecatedJQueryDropdown').clearMenu();
           });
         }
 
@@ -95,7 +93,7 @@ export default Vue.extend({
     },
   },
   created() {
-    // Get events from glDropdown
+    // Get events from deprecatedJQueryDropdown
     eventHub.$on('sidebar.removeAssignee', this.removeAssignee);
     eventHub.$on('sidebar.addAssignee', this.addAssignee);
     eventHub.$on('sidebar.removeAllAssignees', this.removeAllAssignees);

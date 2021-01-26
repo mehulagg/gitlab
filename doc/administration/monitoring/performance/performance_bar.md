@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Health
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Performance Bar
+# Performance Bar **(CORE)**
 
 You can display the GitLab Performance Bar to see statistics for the performance
 of a page. When activated, it looks as follows:
@@ -15,7 +15,7 @@ From left to right, it displays:
 
 - **Current Host**: the current host serving the page.
 - **Database queries**: the time taken (in milliseconds) and the total number
-  of database queries, displayed in the format `00ms / 00pg`. Click to display
+  of database queries, displayed in the format `00ms / 00 (00 cached) pg`. Click to display
   a modal window with more details:
   ![SQL profiling using the Performance Bar](img/performance_bar_sql_queries.png)
 - **Gitaly calls**: the time taken (in milliseconds) and the total number of
@@ -31,6 +31,10 @@ From left to right, it displays:
   ![Redis profiling using the Performance Bar](img/performance_bar_redis_calls.png)
 - **Elasticsearch calls**: the time taken (in milliseconds) and the total number of
   Elasticsearch calls. Click to display a modal window with more details.
+- **External HTTP calls**: the time taken (in milliseconds) and the total
+  number of external calls to other systems. Click to display a modal window
+  with more details
+  ![External call details in the Performance Bar](img/performance_bar_external_http_calls.png)
 - **Load timings** of the page: if your browser supports load timings (Chromium
   and Chrome) several values in milliseconds, separated by slashes.
   Click to display a modal window with more details. The values, from left to right:

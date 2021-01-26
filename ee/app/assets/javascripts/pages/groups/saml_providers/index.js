@@ -18,8 +18,6 @@ function initMembers(el) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const el = document.querySelector('.js-saml-members');
-  initMembers(el);
-  initSAML();
-});
+const el = document.querySelector('.js-saml-members');
+initMembers(el);
+initSAML();

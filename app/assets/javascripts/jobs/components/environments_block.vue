@@ -1,8 +1,8 @@
 <script>
 import { isEmpty } from 'lodash';
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import { __ } from '../../locale';
-import { GlSprintf, GlLink } from '@gitlab/ui';
 
 export default {
   creatingEnvironment: 'creating',
@@ -201,9 +201,7 @@ export default {
             />
             <template v-else>{{ clusterNameOrLink.name }}</template>
           </template>
-          <template #kubernetesNamespace>
-            <template>{{ kubernetesNamespace }}</template>
-          </template>
+          <template #kubernetesNamespace>{{ kubernetesNamespace }}</template>
           <template #deploymentLink>
             <gl-link
               :href="deploymentLink.path"

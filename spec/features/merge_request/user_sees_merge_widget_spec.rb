@@ -127,8 +127,10 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     end
   end
 
-  context 'when merge request is in the blocked pipeline state' do
+  context 'when merge request is in the blocked pipeline state and pipeline must succeed' do
     before do
+      project.update_attribute(:only_allow_merge_if_pipeline_succeeds, true)
+
       create(
         :ci_pipeline,
         project: project,
@@ -302,7 +304,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
-      merge_request.update(
+      merge_request.update!(
         auto_merge_enabled: true,
         auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
         merge_user: merge_request.author,
@@ -324,7 +326,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request with MWPS enabled but automatically merge fails' do
     before do
-      merge_request.update(
+      merge_request.update!(
         merge_when_pipeline_succeeds: true,
         merge_user: merge_request.author,
         merge_error: 'Something went wrong'
@@ -345,9 +347,9 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
   context 'view merge request where fast-forward merge is not possible' do
     before do
-      project.update(merge_requests_ff_only_enabled: true)
+      project.update!(merge_requests_ff_only_enabled: true)
 
-      merge_request.update(
+      merge_request.update!(
         merge_user: merge_request.author,
         merge_status: :cannot_be_merged
       )
@@ -380,19 +382,19 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     end
   end
 
-  context 'user can merge into source project but cannot push to fork', :js do
-    let(:fork_project) { create(:project, :public, :repository) }
+  context 'user can merge into target project but cannot push to fork', :js do
+    let(:forked_project) { fork_project(project, nil, repository: true) }
     let(:user2) { create(:user) }
 
     before do
       project.add_maintainer(user2)
       sign_out(:user)
       sign_in(user2)
-      merge_request.update(target_project: fork_project)
+      merge_request.update!(source_project: forked_project)
       visit project_merge_request_path(project, merge_request)
     end
 
-    it 'user can merge into the source project' do
+    it 'user can merge into the target project', :sidekiq_inline do
       expect(page).to have_button('Merge', disabled: false)
     end
 
@@ -409,7 +411,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       project.add_developer(user2)
       sign_out(:user)
       sign_in(user2)
-      merge_request.update(
+      merge_request.update!(
         source_project: forked_project,
         target_project: project,
         merge_params: { 'force_remove_source_branch' => '1' }
@@ -556,8 +558,9 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
       end
 
       before do
-        allow_any_instance_of(TestSuiteComparerEntity)
-          .to receive(:max_tests).and_return(2)
+        stub_const("Gitlab::Ci::Reports::TestSuiteComparer::DEFAULT_MAX_TESTS", 2)
+        stub_const("Gitlab::Ci::Reports::TestSuiteComparer::DEFAULT_MIN_TESTS", 1)
+
         allow_any_instance_of(MergeRequest)
           .to receive(:has_test_reports?).and_return(true)
         allow_any_instance_of(MergeRequest)
@@ -602,10 +605,13 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('6.66')
-                expect(page).to have_content(sample_java_failed_message.gsub(/\s+/, ' ').strip)
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('6.66')
+              expect(page).to have_content(sample_java_failed_message.gsub(/\s+/, ' ').strip)
             end
           end
         end
@@ -647,10 +653,13 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'Test#sum when a is 1 and b is 3 returns summary'
-
-                expect(page).to have_content('2.22')
-                expect(page).to have_content(sample_rspec_failed_message.gsub(/\s+/, ' ').strip)
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('Test#sum when a is 1 and b is 3 returns summary')
+              expect(page).to have_content('2.22')
+              expect(page).to have_content(sample_rspec_failed_message.gsub(/\s+/, ' ').strip)
             end
           end
         end
@@ -691,9 +700,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('5.55')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('5.55')
             end
           end
         end
@@ -735,9 +747,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('8.88')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('8.88')
             end
           end
         end
@@ -779,9 +794,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'Test#sum when a is 4 and b is 4 returns summary'
-
-                expect(page).to have_content('4.44')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('Test#sum when a is 4 and b is 4 returns summary')
+              expect(page).to have_content('4.44')
             end
           end
         end
@@ -822,9 +840,12 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
 
               within(".js-report-section-container") do
                 click_button 'addTest'
-
-                expect(page).to have_content('5.55')
               end
+            end
+
+            within("#modal-mrwidget-reports") do
+              expect(page).to have_content('addTest')
+              expect(page).to have_content('5.55')
             end
           end
         end
@@ -879,7 +900,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
     let!(:pipeline) { create(:ci_pipeline, status: 'success', sha: sha, project: project, ref: merge_request.source_branch) }
 
     before do
-      project.update(
+      project.update!(
         visibility_level: Gitlab::VisibilityLevel::PUBLIC,
         public_builds: false
       )

@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # reCAPTCHA
 
 GitLab leverages [Google's reCAPTCHA](https://www.google.com/recaptcha/about/)
@@ -19,7 +25,7 @@ To use reCAPTCHA, first you must create a site and private key.
    to `return CONDITONAL_ALLOW` so that the spam check short-circuits and triggers the response to
    return `recaptcha_html`.
 
-NOTE: **Note:**
+NOTE:
 Make sure you are viewing an issuable in a project that is public, and if you're working with an issue, the issue is public.
 
 ## Enabling reCAPTCHA for user logins via passwords

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GroupExport < Grape::API::Instance
+  class GroupExport < ::API::Base
     helpers Helpers::RateLimiter
 
     before do
@@ -9,6 +9,8 @@ module API
 
       authorize! :admin_group, user_group
     end
+
+    feature_category :importers
 
     params do
       requires :id, type: String, desc: 'The ID of a group'

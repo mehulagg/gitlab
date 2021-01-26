@@ -1,10 +1,10 @@
 <script>
-import * as Sentry from '@sentry/browser';
 import { GlButton } from '@gitlab/ui';
+import * as Sentry from '~/sentry/wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   components: {
@@ -55,7 +55,7 @@ export default {
 
           redirectTo(filePath);
         })
-        .catch(error => {
+        .catch((error) => {
           this.isCreatingMergeRequest = false;
           createFlash(
             s__('SecurityConfiguration|An error occurred while creating the merge request.'),

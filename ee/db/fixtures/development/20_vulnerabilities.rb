@@ -12,7 +12,7 @@ class Gitlab::Seeder::Vulnerabilities
   def seed!
     return unless pipeline
 
-    10.times do |rank|
+    30.times do |rank|
       primary_identifier = create_identifier(rank)
       vulnerability = create_vulnerability
       occurrence = create_occurrence(vulnerability, rank, primary_identifier)
@@ -67,7 +67,7 @@ class Gitlab::Seeder::Vulnerabilities
   def create_occurrence(vulnerability, rank, primary_identifier)
     scanner = FactoryBot.create(:vulnerabilities_scanner, project: vulnerability.project)
     FactoryBot.create(
-      :vulnerabilities_occurrence,
+      :vulnerabilities_finding,
       project: project,
       vulnerability: vulnerability,
       scanner: scanner,
@@ -128,15 +128,15 @@ class Gitlab::Seeder::Vulnerabilities
   end
 
   def random_confidence_level
-    ::Vulnerabilities::Finding::CONFIDENCE_LEVELS.keys.sample
+    ::Enums::Vulnerability.confidence_levels.keys.sample
   end
 
   def random_severity_level
-    ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys.sample
+    ::Enums::Vulnerability.severity_levels.keys.sample
   end
 
   def random_report_type
-    ::Vulnerabilities::Finding::REPORT_TYPES.keys.sample
+    ::Enums::Vulnerability.report_types.keys.sample
   end
 
   def metadata(line)

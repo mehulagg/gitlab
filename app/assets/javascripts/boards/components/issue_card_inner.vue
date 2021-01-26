@@ -1,21 +1,22 @@
 <script>
 import { sortBy } from 'lodash';
-import { mapState } from 'vuex';
-import { GlLabel, GlTooltipDirective } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { GlLabel, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
-import { sprintf, __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
+import { sprintf, __, n__ } from '~/locale';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueDueDate from './issue_due_date.vue';
 import IssueTimeEstimate from './issue_time_estimate.vue';
-import boardsStore from '../stores/boards_store';
+import eventHub from '../eventhub';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import { ListType } from '../constants';
+import { updateHistory } from '~/lib/utils/url_utility';
 
 export default {
   components: {
     GlLabel,
-    Icon,
+    GlIcon,
     UserAvatarLink,
     TooltipOnTruncate,
     IssueDueDate,
@@ -26,13 +27,10 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [issueCardInner],
+  inject: ['groupId', 'rootPath', 'scopedLabelsAvailable'],
   props: {
     issue: {
       type: Object,
-      required: true,
-    },
-    issueLinkBase: {
-      type: String,
       required: true,
     },
     list: {
@@ -40,19 +38,10 @@ export default {
       required: false,
       default: () => ({}),
     },
-    rootPath: {
-      type: String,
-      required: true,
-    },
     updateFilters: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    groupId: {
-      type: Number,
-      required: false,
-      default: null,
     },
   },
   data() {
@@ -64,6 +53,16 @@ export default {
   },
   computed: {
     ...mapState(['isShowingLabels']),
+    cappedAssignees() {
+      // e.g. maxRender is 4,
+      // Render up to all 4 assignees if there are only 4 assigness
+      // Otherwise render up to the limitBeforeCounter
+      if (this.issue.assignees.length <= this.maxRender) {
+        return this.issue.assignees.slice(0, this.maxRender);
+      }
+
+      return this.issue.assignees.slice(0, this.limitBeforeCounter);
+    },
     numberOverLimit() {
       return this.issue.assignees.length - this.limitBeforeCounter;
     },
@@ -102,19 +101,16 @@ export default {
     orderedLabels() {
       return sortBy(this.issue.labels.filter(this.isNonListLabel), 'title');
     },
+    blockedLabel() {
+      if (this.issue.blockedByCount) {
+        return n__(`Blocked by %d issue`, `Blocked by %d issues`, this.issue.blockedByCount);
+      }
+      return __('Blocked issue');
+    },
   },
   methods: {
+    ...mapActions(['performSearch']),
     isIndexLessThanlimit(index) {
-      return index < this.limitBeforeCounter;
-    },
-    shouldRenderAssignee(index) {
-      // Eg. maxRender is 4,
-      // Render up to all 4 assignees if there are only 4 assigness
-      // Otherwise render up to the limitBeforeCounter
-      if (this.issue.assignees.length <= this.maxRender) {
-        return index < this.maxRender;
-      }
-
       return index < this.limitBeforeCounter;
     },
     assigneeUrl(assignee) {
@@ -124,39 +120,55 @@ export default {
     avatarUrlTitle(assignee) {
       return sprintf(__(`Avatar for %{assigneeName}`), { assigneeName: assignee.name });
     },
+    avatarUrl(assignee) {
+      return assignee.avatarUrl || assignee.avatar || gon.default_avatar_url;
+    },
     showLabel(label) {
       if (!label.id) return false;
       return true;
     },
     isNonListLabel(label) {
-      return label.id && !(this.list.type === 'label' && this.list.title === label.title);
+      return (
+        label.id &&
+        !(
+          (this.list.type || this.list.listType) === ListType.label &&
+          this.list.title === label.title
+        )
+      );
     },
     filterByLabel(label) {
       if (!this.updateFilters) return;
-      const labelTitle = encodeURIComponent(label.title);
-      const filter = `label_name[]=${labelTitle}`;
+      const filterPath = window.location.search ? `${window.location.search}&` : '?';
+      const filter = `label_name[]=${encodeURIComponent(label.title)}`;
 
-      boardsStore.toggleFilter(filter);
+      if (!filterPath.includes(filter)) {
+        updateHistory({
+          url: `${filterPath}${filter}`,
+        });
+        this.performSearch();
+        eventHub.$emit('updateTokens');
+      }
     },
     showScopedLabel(label) {
-      return boardsStore.scopedLabels.enabled && isScopedLabel(label);
+      return this.scopedLabelsAvailable && isScopedLabel(label);
     },
   },
 };
 </script>
 <template>
   <div>
-    <div class="d-flex board-card-header" dir="auto">
+    <div class="gl-display-flex" dir="auto">
       <h4 class="board-card-title gl-mb-0 gl-mt-0">
-        <icon
+        <gl-icon
           v-if="issue.blocked"
           v-gl-tooltip
           name="issue-block"
-          :title="__('Blocked issue')"
+          :title="blockedLabel"
           class="issue-blocked-icon gl-mr-2"
-          :aria-label="__('Blocked issue')"
+          :aria-label="blockedLabel"
+          data-testid="issue-blocked-icon"
         />
-        <icon
+        <gl-icon
           v-if="issue.confidential"
           v-gl-tooltip
           name="eye-slash"
@@ -164,12 +176,16 @@ export default {
           class="confidential-icon gl-mr-2"
           :aria-label="__('Confidential')"
         />
-        <a :href="issue.path" :title="issue.title" class="js-no-trigger" @mousemove.stop>{{
-          issue.title
-        }}</a>
+        <a
+          :href="issue.path || issue.webUrl || ''"
+          :title="issue.title"
+          class="js-no-trigger"
+          @mousemove.stop
+          >{{ issue.title }}</a
+        >
       </h4>
     </div>
-    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 d-flex flex-wrap">
+    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-display-flex gl-flex-wrap">
       <template v-for="label in orderedLabels">
         <gl-label
           :key="label.id"
@@ -182,25 +198,31 @@ export default {
         />
       </template>
     </div>
-    <div class="board-card-footer d-flex justify-content-between align-items-end">
+    <div
+      class="board-card-footer gl-display-flex gl-justify-content-space-between gl-align-items-flex-end"
+    >
       <div
-        class="d-flex align-items-start flex-wrap-reverse board-card-number-container overflow-hidden js-board-card-number-container"
+        class="gl-display-flex align-items-start flex-wrap-reverse board-card-number-container gl-overflow-hidden js-board-card-number-container"
       >
         <span
           v-if="issue.referencePath"
-          class="board-card-number overflow-hidden d-flex gl-mr-3 gl-mt-3"
+          class="board-card-number gl-overflow-hidden gl-display-flex gl-mr-3 gl-mt-3"
         >
           <tooltip-on-truncate
             v-if="issueReferencePath"
             :title="issueReferencePath"
             placement="bottom"
-            class="board-issue-path block-truncated bold"
+            class="board-issue-path gl-text-truncate gl-font-weight-bold"
             >{{ issueReferencePath }}</tooltip-on-truncate
           >
           #{{ issue.iid }}
         </span>
-        <span class="board-info-items gl-mt-3 d-inline-block">
-          <issue-due-date v-if="issue.dueDate" :date="issue.dueDate" :closed="issue.closed" />
+        <span class="board-info-items gl-mt-3 gl-display-inline-block">
+          <issue-due-date
+            v-if="issue.dueDate"
+            :date="issue.dueDate"
+            :closed="issue.closed || Boolean(issue.closedAt)"
+          />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
           <issue-card-weight
             v-if="validIssueWeight"
@@ -209,20 +231,19 @@ export default {
           />
         </span>
       </div>
-      <div class="board-card-assignee d-flex">
+      <div class="board-card-assignee gl-display-flex">
         <user-avatar-link
-          v-for="(assignee, index) in issue.assignees"
-          v-if="shouldRenderAssignee(index)"
+          v-for="assignee in cappedAssignees"
           :key="assignee.id"
           :link-href="assigneeUrl(assignee)"
           :img-alt="avatarUrlTitle(assignee)"
-          :img-src="assignee.avatar || assignee.avatar_url"
+          :img-src="avatarUrl(assignee)"
           :img-size="24"
           class="js-no-trigger"
           tooltip-placement="bottom"
         >
           <span class="js-assignee-tooltip">
-            <span class="bold d-block">{{ __('Assignee') }}</span>
+            <span class="gl-font-weight-bold gl-display-block">{{ __('Assignee') }}</span>
             {{ assignee.name }}
             <span class="text-white-50">@{{ assignee.username }}</span>
           </span>

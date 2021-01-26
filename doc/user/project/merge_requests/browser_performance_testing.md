@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -37,18 +37,18 @@ Consider the following workflow:
 ## How browser performance testing works
 
 First, define a job in your `.gitlab-ci.yml` file that generates the
-[Browser Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsperformance-premium).
+[Browser Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsperformance).
 GitLab then checks this report, compares key performance metrics for each page
 between the source and target branches, and shows the information in the merge request.
 
 For an example Performance job, see
 [Configuring Browser Performance Testing](#configuring-browser-performance-testing).
 
-NOTE: **Note:**
+NOTE:
 If the Browser Performance report has no data to compare, such as when you add the
 Browser Performance job in your `.gitlab-ci.yml` for the very first time,
-the Browser Performance report widget won't show. It must have run at least
-once on the target branch (`master`, for example), before it will display in a
+the Browser Performance report widget doesn't show. It must have run at least
+once on the target branch (`master`, for example), before it displays in a
 merge request targeting that branch.
 
 ![Browser Performance Widget](img/browser_performance_testing.png)
@@ -60,7 +60,7 @@ on your code by using GitLab CI/CD and [sitespeed.io](https://www.sitespeed.io)
 using Docker-in-Docker.
 
 1. First, set up GitLab Runner with a
-   [Docker-in-Docker build](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor).
+   [Docker-in-Docker build](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker).
 1. Configure the default Browser Performance Testing CI job as follows in your `.gitlab-ci.yml` file:
 
    ```yaml
@@ -72,7 +72,7 @@ using Docker-in-Docker.
        URL: https://example.com
    ```
 
-NOTE: **Note:**
+NOTE:
 For versions before 12.4, see the information for [older GitLab versions](#gitlab-versions-123-and-older).
 If you are using a Kubernetes cluster, use [`template: Jobs/Browser-Performance-Testing.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Browser-Performance-Testing.gitlab-ci.yml)
 instead.
@@ -81,11 +81,11 @@ The above example creates a `performance` job in your CI/CD pipeline and runs
 sitespeed.io against the webpage you defined in `URL` to gather key metrics.
 
 The example uses a CI/CD template that is included in all GitLab installations since
-12.4, but it will not work with Kubernetes clusters. If you are using GitLab 12.3
+12.4, but it doesn't work with Kubernetes clusters. If you are using GitLab 12.3
 or older, you must [add the configuration manually](#gitlab-versions-123-and-older)
 
 The template uses the [GitLab plugin for sitespeed.io](https://gitlab.com/gitlab-org/gl-performance),
-and it saves the full HTML sitespeed.io report as a [Browser Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsperformance-premium)
+and it saves the full HTML sitespeed.io report as a [Browser Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsperformance)
 that you can later download and analyze. This implementation always takes the latest
 Browser Performance artifact available. If [GitLab Pages](../pages/index.md) is enabled,
 you can view the report directly in your browser.
@@ -93,7 +93,7 @@ you can view the report directly in your browser.
 You can also customize the jobs with environment variables:
 
 - `SITESPEED_IMAGE`: Configure the Docker image to use for the job (default `sitespeedio/sitespeed.io`), but not the image version.
-- `SITESPEED_VERSION`: Configure the version of the Docker image to use for the job (default `13.3.0`).
+- `SITESPEED_VERSION`: Configure the version of the Docker image to use for the job (default `14.1.0`).
 - `SITESPEED_OPTIONS`: Configure any additional sitespeed.io options as required (default `nil`). Refer to the [sitespeed.io documentation](https://www.sitespeed.io/documentation/sitespeed.io/configuration/) for more details.
 
 For example, you can override the number of runs sitespeed.io
@@ -115,7 +115,7 @@ performance:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27599) in GitLab 13.0.
 
 You can configure the sensitivity of degradation alerts to avoid getting alerts for minor drops in metrics.
-This is done by setting the `DEGRADATION_THRESHOLD` variable. In the example below, the alert will only show up
+This is done by setting the `DEGRADATION_THRESHOLD` variable. In the example below, the alert only shows up
 if the `Total Score` metric degrades by 5 points or more:
 
 ```yaml
@@ -181,7 +181,7 @@ performance:
 ### GitLab versions 12.3 and older
 
 Browser Performance Testing has gone through several changes since it's introduction.
-In this section we'll detail these changes and how you can run the test based on your
+In this section we detail these changes and how you can run the test based on your
 GitLab version:
 
 - In GitLab 12.4 [a job template was made available](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Verify/Browser-Performance.gitlab-ci.yml).
@@ -196,13 +196,13 @@ performance:
   image: docker:git
   variables:
     URL: https://example.com
-    SITESPEED_VERSION: 13.3.0
+    SITESPEED_VERSION: 14.1.0
     SITESPEED_OPTIONS: ''
   services:
     - docker:stable-dind
   script:
     - mkdir gitlab-exporter
-    - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/master/index.js
+    - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/1.1.0/index.js
     - mkdir sitespeed-results
     - docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:$SITESPEED_VERSION --plugins.add ./gitlab-exporter --outputFolder sitespeed-results $URL $SITESPEED_OPTIONS
     - mv sitespeed-results/data/performance.json performance.json
@@ -226,7 +226,7 @@ performance:
     - docker:stable-dind
   script:
     - mkdir gitlab-exporter
-    - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/master/index.js
+    - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/1.1.0/index.js
     - mkdir sitespeed-results
     - docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results $URL
     - mv sitespeed-results/data/performance.json performance.json

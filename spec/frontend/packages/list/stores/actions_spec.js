@@ -1,11 +1,12 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as actions from '~/packages/list/stores/actions';
 import * as types from '~/packages/list/stores/mutation_types';
-import { MISSING_DELETE_PATH_ERROR, DELETE_PACKAGE_ERROR_MESSAGE } from '~/packages/list/constants';
-import testAction from 'helpers/vuex_action_helper';
+import { MISSING_DELETE_PATH_ERROR } from '~/packages/list/constants';
+import { DELETE_PACKAGE_ERROR_MESSAGE } from '~/packages/shared/constants';
 
 jest.mock('~/flash.js');
 jest.mock('~/api.js');
@@ -29,7 +30,7 @@ describe('Actions Package list store', () => {
       sort: 'asc',
       orderBy: 'version',
     };
-    it('should fetch the project packages list when isGroupPage is false', done => {
+    it('should fetch the project packages list when isGroupPage is false', (done) => {
       testAction(
         actions.requestPackagesList,
         undefined,
@@ -49,7 +50,7 @@ describe('Actions Package list store', () => {
       );
     });
 
-    it('should fetch the group packages list when  isGroupPage is true', done => {
+    it('should fetch the group packages list when  isGroupPage is true', (done) => {
       testAction(
         actions.requestPackagesList,
         undefined,
@@ -69,7 +70,7 @@ describe('Actions Package list store', () => {
       );
     });
 
-    it('should fetch packages of a certain type when selectedType is present', done => {
+    it('should fetch packages of a certain type when selectedType is present', (done) => {
       const packageType = 'maven';
 
       testAction(
@@ -101,14 +102,17 @@ describe('Actions Package list store', () => {
       );
     });
 
-    it('should create flash on API error', done => {
+    it('should create flash on API error', (done) => {
       Api.projectPackages = jest.fn().mockRejectedValue();
       testAction(
         actions.requestPackagesList,
         undefined,
         { config: { isGroupPage: false, resourceId: 2 }, sorting },
         [],
-        [{ type: 'setLoading', payload: true }, { type: 'setLoading', payload: false }],
+        [
+          { type: 'setLoading', payload: true },
+          { type: 'setLoading', payload: false },
+        ],
         () => {
           expect(createFlash).toHaveBeenCalled();
           done();
@@ -118,7 +122,7 @@ describe('Actions Package list store', () => {
   });
 
   describe('receivePackagesListSuccess', () => {
-    it('should set received packages', done => {
+    it('should set received packages', (done) => {
       const data = 'foo';
 
       testAction(
@@ -136,7 +140,7 @@ describe('Actions Package list store', () => {
   });
 
   describe('setInitialState', () => {
-    it('should commit setInitialState', done => {
+    it('should commit setInitialState', (done) => {
       testAction(
         actions.setInitialState,
         '1',
@@ -149,7 +153,7 @@ describe('Actions Package list store', () => {
   });
 
   describe('setLoading', () => {
-    it('should commit set main loading', done => {
+    it('should commit set main loading', (done) => {
       testAction(
         actions.setLoading,
         true,
@@ -167,7 +171,7 @@ describe('Actions Package list store', () => {
         delete_api_path: 'foo',
       },
     };
-    it('should perform a delete operation on _links.delete_api_path', done => {
+    it('should perform a delete operation on _links.delete_api_path', (done) => {
       mock.onDelete(payload._links.delete_api_path).replyOnce(200);
       Api.projectPackages = jest.fn().mockResolvedValue({ data: 'foo' });
 
@@ -184,14 +188,17 @@ describe('Actions Package list store', () => {
       );
     });
 
-    it('should stop the loading and call create flash on api error', done => {
+    it('should stop the loading and call create flash on api error', (done) => {
       mock.onDelete(payload._links.delete_api_path).replyOnce(400);
       testAction(
         actions.requestDeletePackage,
         payload,
         null,
         [],
-        [{ type: 'setLoading', payload: true }, { type: 'setLoading', payload: false }],
+        [
+          { type: 'setLoading', payload: true },
+          { type: 'setLoading', payload: false },
+        ],
         () => {
           expect(createFlash).toHaveBeenCalled();
           done();
@@ -204,7 +211,7 @@ describe('Actions Package list store', () => {
       ${'_links'}          | ${{}}
       ${'delete_api_path'} | ${{ _links: {} }}
     `('should reject and createFlash when $property is missing', ({ actionPayload }, done) => {
-      testAction(actions.requestDeletePackage, actionPayload, null, [], []).catch(e => {
+      testAction(actions.requestDeletePackage, actionPayload, null, [], []).catch((e) => {
         expect(e).toEqual(new Error(MISSING_DELETE_PATH_ERROR));
         expect(createFlash).toHaveBeenCalledWith(DELETE_PACKAGE_ERROR_MESSAGE);
         done();
@@ -213,7 +220,7 @@ describe('Actions Package list store', () => {
   });
 
   describe('setSorting', () => {
-    it('should commit SET_SORTING', done => {
+    it('should commit SET_SORTING', (done) => {
       testAction(
         actions.setSorting,
         'foo',
@@ -226,7 +233,7 @@ describe('Actions Package list store', () => {
   });
 
   describe('setFilter', () => {
-    it('should commit SET_FILTER', done => {
+    it('should commit SET_FILTER', (done) => {
       testAction(
         actions.setFilter,
         'foo',

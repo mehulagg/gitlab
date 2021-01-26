@@ -1,9 +1,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
-
 import AuditFilterToken from 'ee/audit_events/components/tokens/shared/audit_filter_token.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 jest.mock('~/flash');
 
@@ -20,7 +19,7 @@ describe('AuditFilterToken', () => {
   ];
 
   const findFilteredSearchToken = () => wrapper.find('#filtered-search-token');
-  const findLoadingIcon = type => wrapper.find(type).find(GlLoadingIcon);
+  const findLoadingIcon = (type) => wrapper.find(type).find(GlLoadingIcon);
 
   const tokenMethods = {
     fetchItem: jest.fn().mockResolvedValue(item),

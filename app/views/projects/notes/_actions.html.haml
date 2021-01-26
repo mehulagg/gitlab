@@ -1,9 +1,10 @@
-- access = note_max_access_for_user(note)
-- if note.has_special_role?(Note::SpecialRole::FIRST_TIME_CONTRIBUTOR)
-  %span.note-role.note-role-special.has-tooltip{ title: _("This is the author's first Merge Request to this project.") }
-    = sprite_icon('first-contribution', size: 16, css_class: 'gl-icon gl-vertical-align-top')
-- if access.nonzero?
-  %span.note-role.user-access-role= Gitlab::Access.human_access(access)
+- access = note_human_max_access(note)
+- if note.noteable_author?(@noteable)
+  %span{ class: 'note-role user-access-role has-tooltip d-none d-md-inline-block', title: _("This user is the author of this %{noteable}.") % { noteable: @noteable.human_class_name } }= _("Author")
+- if access
+  %span{ class: 'note-role user-access-role has-tooltip', title: _("This user has the %{access} role in the %{name} project.") % { access: access.downcase, name: note.project_name } }= access
+- elsif note.contributor?
+  %span{ class: 'note-role user-access-role has-tooltip', title: _("This user has previously committed to the %{name} project.") % { name: note.project_name } }= _("Contributor")
 
 - if note.resolvable?
   - can_resolve = can?(current_user, :resolve_note, note)
@@ -38,15 +39,15 @@
 - if can?(current_user, :award_emoji, note)
   - if note.emoji_awardable?
     .note-actions-item
-      = button_tag title: 'Add reaction', class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip btn btn-transparent", data: { position: 'right', container: 'body' } do
-        %span{ class: 'link-highlight award-control-icon-neutral' }= sprite_icon('slight-smile')
-        %span{ class: 'link-highlight award-control-icon-positive' }= sprite_icon('smiley')
-        %span{ class: 'link-highlight award-control-icon-super-positive' }= sprite_icon('smile')
+      = button_tag title: 'Add reaction', class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip btn gl-button btn-icon btn-default-tertiary btn-transparent", data: { position: 'right', container: 'body' } do
+        = sprite_icon('slight-smile', css_class: 'link-highlight award-control-icon-neutral gl-button-icon gl-icon gl-text-gray-400')
+        = sprite_icon('smiley', css_class: 'link-highlight award-control-icon-positive gl-button-icon gl-icon gl-left-3!')
+        = sprite_icon('smile', css_class: 'link-highlight award-control-icon-super-positive gl-button-icon gl-icon gl-left-3! ')
 
   - if note_editable
-    .note-actions-item
-      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip btn btn-transparent', data: { container: 'body', qa_selector: 'edit_comment_button' } do
+    .note-actions-item.gl-ml-0
+      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip btn gl-button btn-default-tertiary btn-transparent gl-px-2!', data: { container: 'body', qa_selector: 'edit_comment_button' } do
         %span.link-highlight
-          = custom_icon('icon_pencil')
+          = sprite_icon('pencil', css_class: 'gl-button-icon gl-icon gl-text-gray-400 s16')
 
   = render 'projects/notes/more_actions_dropdown', note: note, note_editable: note_editable

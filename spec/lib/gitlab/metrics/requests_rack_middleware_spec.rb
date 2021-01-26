@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
+RSpec.describe Gitlab::Metrics::RequestsRackMiddleware, :aggregate_failures do
   let(:app) { double('app') }
 
   subject { described_class.new(app) }
@@ -21,86 +21,51 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
         allow(app).to receive(:call).and_return([200, nil, nil])
       end
 
-      it 'increments requests count' do
-        expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get')
-
-        subject.call(env)
-      end
-
       RSpec::Matchers.define :a_positive_execution_time do
         match { |actual| actual > 0 }
       end
 
-      it 'measures execution time' do
-        expect(described_class).to receive_message_chain(:http_request_duration_seconds, :observe).with({ status: '200', method: 'get' }, a_positive_execution_time)
+      it 'tracks request count and duration' do
+        expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
+        expect(described_class).to receive_message_chain(:http_request_duration_seconds, :observe).with({ method: 'get' }, a_positive_execution_time)
 
-        Timecop.scale(3600) { subject.call(env) }
+        subject.call(env)
       end
 
       context 'request is a health check endpoint' do
-        it 'increments health endpoint counter' do
-          env['PATH_INFO'] = '/-/liveness'
+        ['/-/liveness', '/-/liveness/', '/-/%6D%65%74%72%69%63%73'].each do |path|
+          context "when path is #{path}" do
+            before do
+              env['PATH_INFO'] = path
+            end
 
-          expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
+            it 'increments health endpoint counter rather than overall counter and does not record duration' do
+              expect(described_class).not_to receive(:http_request_duration_seconds)
+              expect(described_class).not_to receive(:http_requests_total)
+              expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: '200')
 
-          subject.call(env)
-        end
-
-        context 'with trailing slash' do
-          before do
-            env['PATH_INFO'] = '/-/liveness/'
-          end
-
-          it 'increments health endpoint counter' do
-            expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
-
-            subject.call(env)
-          end
-        end
-
-        context 'with percent encoded values' do
-          before do
-            env['PATH_INFO'] = '/-/%6D%65%74%72%69%63%73' # /-/metrics
-          end
-
-          it 'increments health endpoint counter' do
-            expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
-
-            subject.call(env)
+              subject.call(env)
+            end
           end
         end
       end
 
       context 'request is not a health check endpoint' do
-        it 'does not increment health endpoint counter' do
-          env['PATH_INFO'] = '/-/ordinary-requests'
+        ['/-/ordinary-requests', '/-/', '/-/health/subpath'].each do |path|
+          context "when path is #{path}" do
+            before do
+              env['PATH_INFO'] = path
+            end
 
-          expect(described_class).not_to receive(:http_health_requests_total)
+            it 'increments regular counters and tracks duration' do
+              expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
+              expect(described_class).not_to receive(:http_health_requests_total)
+              expect(described_class)
+                .to receive_message_chain(:http_request_duration_seconds, :observe)
+                      .with({ method: 'get' }, a_positive_execution_time)
 
-          subject.call(env)
-        end
-
-        context 'path info is a root path' do
-          before do
-            env['PATH_INFO'] = '/-/'
-          end
-
-          it 'does not increment health endpoint counter' do
-            expect(described_class).not_to receive(:http_health_requests_total)
-
-            subject.call(env)
-          end
-        end
-
-        context 'path info is a subpath' do
-          before do
-            env['PATH_INFO'] = '/-/health/subpath'
-          end
-
-          it 'does not increment health endpoint counter' do
-            expect(described_class).not_to receive(:http_health_requests_total)
-
-            subject.call(env)
+              subject.call(env)
+            end
           end
         end
       end
@@ -108,42 +73,90 @@ RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
 
     context '@app.call throws exception' do
       let(:http_request_duration_seconds) { double('http_request_duration_seconds') }
+      let(:http_requests_total) { double('http_requests_total') }
 
       before do
         allow(app).to receive(:call).and_raise(StandardError)
         allow(described_class).to receive(:http_request_duration_seconds).and_return(http_request_duration_seconds)
+        allow(described_class).to receive(:http_requests_total).and_return(http_requests_total)
       end
 
-      it 'increments exceptions count' do
+      it 'tracks the correct metrics' do
         expect(described_class).to receive_message_chain(:rack_uncaught_errors_count, :increment)
-
-        expect { subject.call(env) }.to raise_error(StandardError)
-      end
-
-      it 'increments requests count' do
-        expect(described_class).to receive_message_chain(:http_request_total, :increment).with(method: 'get')
-
-        expect { subject.call(env) }.to raise_error(StandardError)
-      end
-
-      it "does't measure request execution time" do
-        expect(described_class.http_request_duration_seconds).not_to receive(:increment)
+        expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: 'undefined', feature_category: 'unknown')
+        expect(described_class.http_request_duration_seconds).not_to receive(:observe)
 
         expect { subject.call(env) }.to raise_error(StandardError)
       end
     end
 
-    describe '.initialize_http_request_duration_seconds' do
-      it "sets labels" do
+    context 'feature category header' do
+      context 'when a feature category header is present' do
+        before do
+          allow(app).to receive(:call).and_return([200, { described_class::FEATURE_CATEGORY_HEADER => 'issue_tracking' }, nil])
+        end
+
+        it 'adds the feature category to the labels for http_requests_total' do
+          expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'issue_tracking')
+          expect(described_class).not_to receive(:http_health_requests_total)
+
+          subject.call(env)
+        end
+
+        it 'does not record a feature category for health check endpoints' do
+          env['PATH_INFO'] = '/-/liveness'
+
+          expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get', status: '200')
+          expect(described_class).not_to receive(:http_requests_total)
+
+          subject.call(env)
+        end
+      end
+
+      context 'when the feature category header is an empty string' do
+        before do
+          allow(app).to receive(:call).and_return([200, { described_class::FEATURE_CATEGORY_HEADER => '' }, nil])
+        end
+
+        it 'sets the feature category to unknown' do
+          expect(described_class).to receive_message_chain(:http_requests_total, :increment).with(method: 'get', status: '200', feature_category: 'unknown')
+          expect(described_class).not_to receive(:http_health_requests_total)
+
+          subject.call(env)
+        end
+      end
+    end
+
+    describe '.initialize_metrics', :prometheus do
+      it "sets labels for http_requests_total" do
         expected_labels = []
+
         described_class::HTTP_METHODS.each do |method, statuses|
           statuses.each do |status|
-            expected_labels << { method: method, status: status.to_s }
+            described_class::FEATURE_CATEGORIES_TO_INITIALIZE.each do |feature_category|
+              expected_labels << { method: method.to_s, status: status.to_s, feature_category: feature_category.to_s }
+            end
           end
         end
 
-        described_class.initialize_http_request_duration_seconds
+        described_class.initialize_metrics
+
+        expect(described_class.http_requests_total.values.keys).to contain_exactly(*expected_labels)
+      end
+
+      it 'sets labels for http_request_duration_seconds' do
+        expected_labels = described_class::HTTP_METHODS.keys.map { |method| { method: method } }
+
+        described_class.initialize_metrics
+
         expect(described_class.http_request_duration_seconds.values.keys).to include(*expected_labels)
+      end
+
+      it 'has every label in config/feature_categories.yml' do
+        defaults = [described_class::FEATURE_CATEGORY_DEFAULT, 'not_owned']
+        feature_categories = YAML.load_file(Rails.root.join('config', 'feature_categories.yml')).map(&:strip) + defaults
+
+        expect(described_class::FEATURE_CATEGORIES_TO_INITIALIZE).to all(be_in(feature_categories))
       end
     end
   end

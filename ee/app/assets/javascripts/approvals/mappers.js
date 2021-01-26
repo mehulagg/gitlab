@@ -24,7 +24,7 @@ function withDefaultEmptyRule(rules = []) {
   ];
 }
 
-export const mapApprovalRuleRequest = req => ({
+export const mapApprovalRuleRequest = (req) => ({
   name: req.name,
   approvals_required: req.approvalsRequired,
   users: req.users,
@@ -33,11 +33,11 @@ export const mapApprovalRuleRequest = req => ({
   protected_branch_ids: req.protectedBranchIds,
 });
 
-export const mapApprovalFallbackRuleRequest = req => ({
+export const mapApprovalFallbackRuleRequest = (req) => ({
   fallback_approvals_required: req.approvalsRequired,
 });
 
-export const mapApprovalRuleResponse = res => ({
+export const mapApprovalRuleResponse = (res) => ({
   id: res.id,
   hasSource: Boolean(res.source_rule),
   name: res.name,
@@ -52,7 +52,7 @@ export const mapApprovalRuleResponse = res => ({
   overridden: res.overridden,
 });
 
-export const mapApprovalSettingsResponse = res => ({
+export const mapApprovalSettingsResponse = (res) => ({
   rules: withDefaultEmptyRule(res.rules.map(mapApprovalRuleResponse)),
   fallbackApprovalsRequired: res.fallback_approvals_required,
 });
@@ -78,7 +78,7 @@ export const mapMRSourceRule = ({ id, ...rule }) => ({
  * - If needed, extract the fallback approvals required
  *   from the fallback rule.
  */
-export const mapMRApprovalSettingsResponse = res => {
+export const mapMRApprovalSettingsResponse = (res) => {
   const rules = res.rules.filter(({ rule_type }) => visibleTypes.has(rule_type));
 
   const fallbackApprovalsRequired = res.fallback_approvals_required || 0;
@@ -87,7 +87,7 @@ export const mapMRApprovalSettingsResponse = res => {
     rules: withDefaultEmptyRule(
       rules
         .map(mapApprovalRuleResponse)
-        .map(res.approval_rules_overwritten ? x => x : mapMRSourceRule),
+        .map(res.approval_rules_overwritten ? (x) => x : mapMRSourceRule),
     ),
     fallbackApprovalsRequired,
     minFallbackApprovalsRequired: 0,

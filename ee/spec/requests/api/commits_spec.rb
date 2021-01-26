@@ -11,31 +11,42 @@ RSpec.describe API::Commits do
     project.add_maintainer(user)
   end
 
-  shared_examples_for "returns a 400 from a codeowners violation" do
-    let(:error_msg) { "CodeOwners error msg" }
-
-    before do
-      allow(ProtectedBranch)
-        .to receive(:branch_requires_code_owner_approval?)
-        .with(project, branch).and_return(code_owner_approval_required)
-    end
-
-    it "creates a new validator with expected parameters" do
+  shared_examples_for "handling the codeowners interaction" do
+    it "does not create a new validator" do
       expect(Gitlab::CodeOwners::Validator)
-        .to receive(:new).with(project, branch, Array(paths)).and_call_original
+        .not_to receive(:new)
 
       subject
     end
 
-    specify do
-      expect_next_instance_of(Gitlab::CodeOwners::Validator) do |validator|
-        expect(validator).to receive(:execute).and_return(error_msg)
+    context 'when push_rules_supersede_code_owners is false' do
+      let(:error_msg) { "CodeOwners error msg" }
+
+      before do
+        stub_feature_flags(push_rules_supersede_code_owners: false)
+
+        allow(ProtectedBranch)
+          .to receive(:branch_requires_code_owner_approval?)
+          .with(project, branch).and_return(code_owner_approval_required)
       end
 
-      subject
+      it "creates a new validator with expected parameters" do
+        expect(Gitlab::CodeOwners::Validator)
+          .to receive(:new).with(project, branch, Array(paths)).and_call_original
 
-      expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response["message"]).to include(error_msg)
+        subject
+      end
+
+      specify do
+        expect_next_instance_of(Gitlab::CodeOwners::Validator) do |validator|
+          expect(validator).to receive(:execute).and_return(error_msg)
+        end
+
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response["message"]).to include(error_msg)
+      end
     end
   end
 
@@ -80,7 +91,7 @@ RSpec.describe API::Commits do
           let(:branch) { valid_c_params[:branch] }
           let(:paths)  { valid_c_params[:actions].first[:file_path] }
 
-          it_behaves_like "returns a 400 from a codeowners violation"
+          it_behaves_like "handling the codeowners interaction"
         end
       end
     end
@@ -115,7 +126,7 @@ RSpec.describe API::Commits do
         let(:branch) { valid_d_params[:branch] }
         let(:paths)  { valid_d_params[:actions].first[:file_path] }
 
-        it_behaves_like "returns a 400 from a codeowners violation"
+        it_behaves_like "handling the codeowners interaction"
       end
     end
 
@@ -154,7 +165,7 @@ RSpec.describe API::Commits do
           [action[:file_path], action[:previous_path]]
         end
 
-        it_behaves_like "returns a 400 from a codeowners violation"
+        it_behaves_like "handling the codeowners interaction"
       end
     end
   end
@@ -185,7 +196,7 @@ RSpec.describe API::Commits do
         let(:code_owner_approval_required) { true }
         let(:paths) { commit.raw_deltas.flat_map { |diff| [diff.new_path, diff.old_path] }.uniq }
 
-        it_behaves_like "returns a 400 from a codeowners violation"
+        it_behaves_like "handling the codeowners interaction"
       end
     end
   end
@@ -219,7 +230,7 @@ RSpec.describe API::Commits do
         let(:code_owner_approval_required) { true }
         let(:paths) { commit.raw_deltas.flat_map { |diff| [diff.new_path, diff.old_path] }.uniq }
 
-        it_behaves_like "returns a 400 from a codeowners violation"
+        it_behaves_like "handling the codeowners interaction"
       end
     end
   end

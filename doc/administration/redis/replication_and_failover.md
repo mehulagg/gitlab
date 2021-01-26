@@ -2,16 +2,16 @@
 type: howto
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Redis replication and failover with Omnibus GitLab **(PREMIUM ONLY)**
 
-NOTE: **Note:**
+NOTE:
 This is the documentation for the Omnibus GitLab packages. For using your own
 non-bundled Redis, follow the [relevant documentation](replication_and_failover_external.md).
 
-NOTE: **Note:**
+NOTE:
 In Redis lingo, primary is called master. In this document, primary is used
 instead of master, except the settings where `master` is required.
 
@@ -124,9 +124,9 @@ each other over the network.
 ### Sentinel setup overview
 
 Sentinels watch both other Sentinels and Redis nodes. Whenever a Sentinel
-detects that a Redis node is not responding, it will announce that to the
-other Sentinels. They have to reach the **quorum**, that is the minimum amount
-of Sentinels that agrees a node is down, in order to be able to start a failover.
+detects that a Redis node isn't responding, it announces the node's status to
+the other Sentinels. The Sentinels have to reach a _quorum_ (the minimum amount
+of Sentinels agreeing a node is down) to be able to start a failover.
 
 Whenever the **quorum** is met, the **majority** of all known Sentinel nodes
 need to be available and reachable, so that they can elect the Sentinel **leader**
@@ -162,7 +162,7 @@ is not achieved (see the odd number of nodes requirement above). In that case,
 a new attempt will be made after the amount of time defined in
 `sentinel['failover_timeout']` (in milliseconds).
 
-NOTE: **Note:**
+NOTE:
 We will see where `sentinel['failover_timeout']` is defined later.
 
 The `failover_timeout` variable has a lot of different use cases. According to
@@ -194,7 +194,7 @@ It is assumed that you have installed GitLab and all its components from scratch
 If you already have Redis installed and running, read how to
 [switch from a single-machine installation](#switching-from-an-existing-single-machine-installation).
 
-NOTE: **Note:**
+NOTE:
 Redis nodes (both primary and replica) will need the same password defined in
 `redis['password']`. At any time during a failover the Sentinels can
 reconfigure a node and change its status from primary to replica and vice versa.
@@ -277,7 +277,7 @@ If you fail to replicate first, you may loose data (unprocessed background jobs)
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-NOTE: **Note:**
+NOTE:
 You can specify multiple roles like sentinel and Redis as:
 `roles ['redis_sentinel_role', 'redis_master_role']`.
 Read more about [roles](https://docs.gitlab.com/omnibus/roles/).
@@ -327,7 +327,7 @@ Read more about [roles](https://docs.gitlab.com/omnibus/roles/).
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 1. Go through the steps again for all the other replica nodes.
 
-NOTE: **Note:**
+NOTE:
 You can specify multiple roles like sentinel and Redis as:
 `roles ['redis_sentinel_role', 'redis_master_role']`.
 Read more about [roles](https://docs.gitlab.com/omnibus/roles/).
@@ -339,7 +339,7 @@ the same Sentinels.
 
 ### Step 3. Configuring the Redis Sentinel instances
 
-NOTE: **Note:**
+NOTE:
 If you are using an external Redis Sentinel instance, be sure
 to exclude the `requirepass` parameter from the Sentinel
 configuration. This parameter will cause clients to report `NOAUTH
@@ -465,7 +465,7 @@ the correct credentials for the Sentinel nodes.
 While it doesn't require a list of all Sentinel nodes, in case of a failure,
 it needs to access at least one of the listed.
 
-NOTE: **Note:**
+NOTE:
 The following steps should be performed in the GitLab application server
 which ideally should not have Redis or Sentinels on it for a HA setup.
 
@@ -637,47 +637,63 @@ lives easier. If you want to know what happens underneath keep reading.
 
 ### Running multiple Redis clusters
 
-GitLab supports running [separate Redis clusters for different persistent
-classes](https://docs.gitlab.com/omnibus/settings/redis.html#running-with-multiple-redis-instances):
-cache, queues, and shared_state. To make this work with Sentinel:
+Omnibus GitLab supports running separate Redis and Sentinel instances for different
+persistence classes.
 
-1. Set the appropriate variable in `/etc/gitlab/gitlab.rb` for each instance you are using:
+| Class          | Purpose                                          |
+| -------------- | ------------------------------------------------ |
+| `cache`        | Store cached data.                               |
+| `queues`       | Store Sidekiq background jobs.                   |
+| `shared_state` | Store session-related and other persistent data. |
+| `actioncable`  | Pub/Sub queue backend for ActionCable.           |
+
+To make this work with Sentinel:
+
+1. [Configure the different Redis/Sentinels](#configuring-redis) instances based on your needs.
+1. For each Rails application instance, edit its `/etc/gitlab/gitlab.rb` file:
 
    ```ruby
    gitlab_rails['redis_cache_instance'] = REDIS_CACHE_URL
    gitlab_rails['redis_queues_instance'] = REDIS_QUEUES_URL
    gitlab_rails['redis_shared_state_instance'] = REDIS_SHARED_STATE_URL
-   ```
+   gitlab_rails['redis_actioncable_instance'] = REDIS_ACTIONCABLE_URL
 
-    **Note**: Redis URLs should be in the format: `redis://:PASSWORD@SENTINEL_PRIMARY_NAME`
-
-   1. PASSWORD is the plaintext password for the Redis instance
-   1. SENTINEL_PRIMARY_NAME is the Sentinel primary name (e.g. `gitlab-redis-cache`)
-
-1. Include an array of hashes with host/port combinations, such as the following:
-
-   ```ruby
+   # Configure the Sentinels
    gitlab_rails['redis_cache_sentinels'] = [
-     { host: REDIS_CACHE_SENTINEL_HOST, port: PORT1 },
-     { host: REDIS_CACHE_SENTINEL_HOST2, port: PORT2 }
+     { host: REDIS_CACHE_SENTINEL_HOST, port: 26379 },
+     { host: REDIS_CACHE_SENTINEL_HOST2, port: 26379 }
    ]
    gitlab_rails['redis_queues_sentinels'] = [
-     { host: REDIS_QUEUES_SENTINEL_HOST, port: PORT1 },
-     { host: REDIS_QUEUES_SENTINEL_HOST2, port: PORT2 }
+     { host: REDIS_QUEUES_SENTINEL_HOST, port: 26379 },
+     { host: REDIS_QUEUES_SENTINEL_HOST2, port: 26379 }
    ]
    gitlab_rails['redis_shared_state_sentinels'] = [
-     { host: SHARED_STATE_SENTINEL_HOST, port: PORT1 },
-     { host: SHARED_STATE_SENTINEL_HOST2, port: PORT2 }
+     { host: SHARED_STATE_SENTINEL_HOST, port: 26379 },
+     { host: SHARED_STATE_SENTINEL_HOST2, port: 26379 }
+   ]
+   gitlab_rails['redis_actioncable_sentinels'] = [
+     { host: ACTIONCABLE_SENTINEL_HOST, port: 26379 },
+     { host: ACTIONCABLE_SENTINEL_HOST2, port: 26379 }
    ]
    ```
 
-1. Note that for each persistence class, GitLab will default to using the
-   configuration specified in `gitlab_rails['redis_sentinels']` unless
-   overridden by the settings above.
-1. Be sure to include BOTH configuration options for each persistent classes. For example,
-   if you choose to configure a cache instance, you must specify both `gitlab_rails['redis_cache_instance']`
-   and `gitlab_rails['redis_cache_sentinels']` for GitLab to generate the proper configuration files.
-1. Run `gitlab-ctl reconfigure`
+   Note that:
+
+   - Redis URLs should be in the format: `redis://:PASSWORD@SENTINEL_PRIMARY_NAME`, where:
+     - `PASSWORD` is the plaintext password for the Redis instance.
+     - `SENTINEL_PRIMARY_NAME` is the Sentinel primary name set with `redis['master_name']`,
+        for example `gitlab-redis-cache`.
+
+1. Save the file and reconfigure GitLab for the change to take effect:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   ```
+
+NOTE:
+For each persistence class, GitLab will default to using the
+configuration specified in `gitlab_rails['redis_sentinels']` unless
+overridden by the previously described settings.
 
 ### Control running services
 

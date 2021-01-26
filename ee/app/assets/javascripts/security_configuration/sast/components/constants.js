@@ -1,8 +1,8 @@
 import { s__ } from '~/locale';
 
-export const SMALL = 'small';
-export const MEDIUM = 'medium';
-export const LARGE = 'large';
+export const SMALL = 'SMALL';
+export const MEDIUM = 'MEDIUM';
+export const LARGE = 'LARGE';
 
 // The backend will supply sizes matching the keys of this map; the values
 // correspond to values acceptable to the underlying components' size props.

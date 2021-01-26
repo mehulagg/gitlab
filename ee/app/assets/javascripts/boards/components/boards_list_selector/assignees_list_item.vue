@@ -1,7 +1,11 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 export default {
+  components: {
+    GlButton,
+  },
   props: {
     item: {
       type: Object,
@@ -25,7 +29,7 @@ export default {
 
 <template>
   <li class="filter-dropdown-item" @click="handleItemClick">
-    <button class="btn btn-link dropdown-user d-flex py-2 px-4" type="button">
+    <gl-button variant="link" category="primary" class="dropdown-user">
       <div class="avatar-container s32 flex-shrink-0">
         <img :alt="avatarAltText" :src="item.avatar_url" class="avatar s32 lazy" />
       </div>
@@ -33,6 +37,6 @@ export default {
         <div class="text-truncate">{{ item.name }}</div>
         <div class="text-truncate dropdown-light-content">@{{ item.username }}</div>
       </div>
-    </button>
+    </gl-button>
   </li>
 </template>

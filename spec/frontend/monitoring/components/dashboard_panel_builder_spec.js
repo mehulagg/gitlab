@@ -4,8 +4,10 @@ import { createStore } from '~/monitoring/stores';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
 import * as types from '~/monitoring/stores/mutation_types';
 import { metricsDashboardResponse } from '../fixture_data';
+import { mockTimeRange } from '../mock_data';
 
 import DashboardPanelBuilder from '~/monitoring/components/dashboard_panel_builder.vue';
+import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
 
 const mockPanel = metricsDashboardResponse.dashboard.panel_groups[0].panels[0];
 
@@ -37,6 +39,8 @@ describe('dashboard invalid url parameters', () => {
   const findViewDocumentationBtn = () => wrapper.find({ ref: 'viewDocumentationBtn' });
   const findOpenRepositoryBtn = () => wrapper.find({ ref: 'openRepositoryBtn' });
   const findPanel = () => wrapper.find(DashboardPanel);
+  const findTimeRangePicker = () => wrapper.find(DateTimePicker);
+  const findRefreshButton = () => wrapper.find('[data-testid="previewRefreshButton"]');
 
   beforeEach(() => {
     mockShowToast = jest.fn();
@@ -64,7 +68,7 @@ describe('dashboard invalid url parameters', () => {
     it('form exists and can be submitted', () => {
       expect(findForm().exists()).toBe(true);
       expect(findSubmitBtn().exists()).toBe(true);
-      expect(findSubmitBtn().is('[disabled]')).toBe(false);
+      expect(findSubmitBtn().props('disabled')).toBe(false);
     });
 
     it('form has a text area with a default value', () => {
@@ -105,7 +109,61 @@ describe('dashboard invalid url parameters', () => {
       });
 
       it('submit button is disabled', () => {
-        expect(findSubmitBtn().is('[disabled]')).toBe(true);
+        expect(findSubmitBtn().props('disabled')).toBe(true);
+      });
+    });
+  });
+
+  describe('time range picker', () => {
+    it('is visible by default', () => {
+      expect(findTimeRangePicker().exists()).toBe(true);
+    });
+
+    it('when changed does not trigger data fetch unless preview panel button is clicked', () => {
+      // mimic initial state where SET_PANEL_PREVIEW_IS_SHOWN is set to false
+      store.commit(`monitoringDashboard/${types.SET_PANEL_PREVIEW_IS_SHOWN}`, false);
+
+      return wrapper.vm.$nextTick(() => {
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
+    });
+
+    it('when changed triggers data fetch if preview panel button is clicked', () => {
+      findForm().vm.$emit('submit', new Event('submit'));
+
+      store.commit(`monitoringDashboard/${types.SET_PANEL_PREVIEW_TIME_RANGE}`, mockTimeRange);
+
+      return wrapper.vm.$nextTick(() => {
+        expect(store.dispatch).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('refresh', () => {
+    it('is visible by default', () => {
+      expect(findRefreshButton().exists()).toBe(true);
+    });
+
+    it('when clicked does not trigger data fetch unless preview panel button is clicked', () => {
+      // mimic initial state where SET_PANEL_PREVIEW_IS_SHOWN is set to false
+      store.commit(`monitoringDashboard/${types.SET_PANEL_PREVIEW_IS_SHOWN}`, false);
+
+      return wrapper.vm.$nextTick(() => {
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
+    });
+
+    it('when clicked triggers data fetch if preview panel button is clicked', () => {
+      // mimic state where preview is visible. SET_PANEL_PREVIEW_IS_SHOWN is set to true
+      store.commit(`monitoringDashboard/${types.SET_PANEL_PREVIEW_IS_SHOWN}`, true);
+
+      findRefreshButton().vm.$emit('click');
+
+      return wrapper.vm.$nextTick(() => {
+        expect(store.dispatch).toHaveBeenCalledWith(
+          'monitoringDashboard/fetchPanelPreviewMetrics',
+          undefined,
+        );
       });
     });
   });
@@ -145,6 +203,14 @@ describe('dashboard invalid url parameters', () => {
 
     it('displays an empty dashboard panel', () => {
       expect(findPanel().props('graphData')).toBe(null);
+    });
+
+    it('changing time range should not refetch data', () => {
+      store.commit(`monitoringDashboard/${types.SET_PANEL_PREVIEW_TIME_RANGE}`, mockTimeRange);
+
+      return wrapper.vm.$nextTick(() => {
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
     });
   });
 

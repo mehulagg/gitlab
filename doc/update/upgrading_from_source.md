@@ -1,11 +1,14 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
 # Upgrading Community Edition and Enterprise Edition from source
 
-NOTE: **Note:**
-Users wishing to upgrade to 12.0.0 will have to take some extra steps. See the
+NOTE:
+Users wishing to upgrade to 12.0.0 must take some extra steps. See the
 version specific upgrade instructions for 12.0.0 for more details.
 
 Make sure you view this update guide from the branch (version) of GitLab you
@@ -42,7 +45,7 @@ specific guidelines (should there be any) are covered separately.
 
 ### 1. Backup
 
-NOTE: If you installed GitLab from source, make sure `rsync` is installed.
+If you installed GitLab from source, make sure `rsync` is installed.
 
 ```shell
 cd /home/git/gitlab
@@ -58,8 +61,9 @@ sudo service gitlab stop
 
 ### 3. Update Ruby
 
-NOTE: Beginning in GitLab 12.2, we only support Ruby 2.6 or higher, and dropped
-support for Ruby 2.5. Be sure to upgrade if necessary.
+NOTE:
+Beginning in GitLab 13.6, we only support Ruby 2.7 or higher, and dropped
+support for Ruby 2.6. Be sure to upgrade if necessary.
 
 You can check which version you are running with `ruby -v`.
 
@@ -67,24 +71,18 @@ Download Ruby and compile it:
 
 ```shell
 mkdir /tmp/ruby && cd /tmp/ruby
-curl --remote-name --progress https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz
-echo '2d78048e293817f38d4ede4ebc7873013e97bb0b  ruby-2.6.6.tar.gz' | shasum -c - && tar xzf ruby-2.6.6.tar.gz
-cd ruby-2.6.6
+curl --remote-name --progress "https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz"
+echo 'cb9731a17487e0ad84037490a6baf8bfa31a09e8  ruby-2.7.2.tar.gz' | shasum -c - && tar xzf ruby-2.7.2.tar.gz
+cd ruby-2.7.2
 
 ./configure --disable-install-rdoc
 make
 sudo make install
 ```
 
-Install Bundler:
-
-```shell
-sudo gem install bundler --no-document --version '< 2'
-```
-
 ### 4. Update Node.js
 
-NOTE: To check the minimum required Node.js version, see [Node.js versions](../install/requirements.md#nodejs-versions).
+To check the minimum required Node.js version, see [Node.js versions](../install/requirements.md#nodejs-versions).
 
 GitLab also requires the use of Yarn `>= v1.10.0` to manage JavaScript
 dependencies.
@@ -92,7 +90,7 @@ dependencies.
 In Debian or Ubuntu:
 
 ```shell
-curl --silent --show-error https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+curl --silent --show-error "https://dl.yarnpkg.com/debian/pubkey.gpg" | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
 sudo apt-get install yarn
@@ -102,7 +100,7 @@ More information can be found on the [Yarn website](https://classic.yarnpkg.com/
 
 ### 5. Update Go
 
-NOTE: To check the minimum required Go version, see [Go versions](../install/requirements.md#go-versions).
+To check the minimum required Go version, see [Go versions](../install/requirements.md#go-versions).
 
 You can check which version you are running with `go version`.
 
@@ -112,7 +110,7 @@ Download and install Go (for Linux, 64-bit):
 # Remove former Go installation folder
 sudo rm -rf /usr/local/go
 
-curl --remote-name --progress https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz
+curl --remote-name --progress "https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz"
 echo '512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569  go1.13.5.linux-amd64.tar.gz' | shasum -a256 -c - && \
   sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
 sudo ln -sf /usr/local/go/bin/{go,godoc,gofmt} /usr/local/bin/
@@ -122,9 +120,9 @@ rm go1.13.5.linux-amd64.tar.gz
 
 ### 6. Update Git
 
-CAUTION: **Caution:**
+WARNING:
 From GitLab 13.1, you must use at least Git v2.24 (previous minimum version was v2.22).
-From GitLab 13.3, you must use at least Git v2.28.
+Git v2.28 is recommended.
 
 To check you are running the minimum required Git version, see
 [Git versions](../install/requirements.md#git-versions).
@@ -132,7 +130,7 @@ To check you are running the minimum required Git version, see
 In Debian or Ubuntu:
 
 ```shell
-# Make sure Git is version 2.28.0 or higher
+# Make sure Git is version 2.29.0 or higher
 git --version
 
 # Remove packaged Git
@@ -142,7 +140,7 @@ sudo apt-get remove git-core
 sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev build-essential
 
 # Download and compile pcre2 from source
-curl --silent --show-error --location https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz --output pcre2.tar.gz
+curl --silent --show-error --location "https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz" --output pcre2.tar.gz
 tar -xzf pcre2.tar.gz
 cd pcre2-10.33
 chmod +x configure
@@ -152,9 +150,9 @@ make install
 
 # Download and compile from source
 cd /tmp
-curl --remote-name --location --progress https://www.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz
-echo 'f914c60a874d466c1e18467c864a910dd4ea22281ba6d4d58077cb0c3f115170  git-2.28.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.28.0.tar.gz
-cd git-2.28.0/
+curl --remote-name --location --progress "https://www.kernel.org/pub/software/scm/git/git-2.29.0.tar.gz"
+echo 'fa08dc8424ef80c0f9bf307877f9e2e49f1a6049e873530d6747c2be770742ff  git-2.29.0.tar.gz' | shasum -a256 -c - && tar -xzf git-2.29.0.tar.gz
+cd git-2.29.0/
 ./configure --with-libpcre
 make prefix=/usr/local all
 
@@ -164,7 +162,16 @@ sudo make prefix=/usr/local install
 # You should edit config/gitlab.yml, change the git -> bin_path to /usr/local/bin/git
 ```
 
-### 7. Get latest code
+### 7. Update PostgreSQL
+
+WARNING:
+From GitLab 13.0, you must use at least PostgreSQL 11.
+
+The latest version of GitLab might depend on a more recent PostgreSQL version than what you are currently running (see the [PostgreSQL requirements](../install/requirements.md#postgresql-requirements)).
+
+In order to upgrade PostgreSQL, please refer to its [documentation](https://www.postgresql.org/docs/11/upgrading.html).
+
+### 8. Get latest code
 
 ```shell
 cd /home/git/gitlab
@@ -192,7 +199,7 @@ cd /home/git/gitlab
 sudo -u git -H git checkout BRANCH-ee
 ```
 
-### 8. Update GitLab Shell
+### 9. Update GitLab Shell
 
 ```shell
 cd /home/git/gitlab-shell
@@ -202,22 +209,17 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_SHELL_VERSION)
 sudo -u git -H make build
 ```
 
-### 9. Update GitLab Workhorse
+### 10. Update GitLab Workhorse
 
-Install and compile GitLab Workhorse. GitLab Workhorse uses
-[GNU Make](https://www.gnu.org/software/make/).
-If you are not using Linux you may have to run `gmake` instead of
-`make` below.
+Install and compile GitLab Workhorse.
 
 ```shell
-cd /home/git/gitlab-workhorse
+cd /home/git/gitlab
 
-sudo -u git -H git fetch --all --tags --prune
-sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_WORKHORSE_VERSION)
-sudo -u git -H make
+sudo -u git -H bundle exec rake "gitlab:workhorse:install[/home/git/gitlab-workhorse]" RAILS_ENV=production
 ```
 
-### 10. Update Gitaly
+### 11. Update Gitaly
 
 #### Compile Gitaly
 
@@ -228,7 +230,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITALY_SERVER_VERSION)
 sudo -u git -H make
 ```
 
-### 11. Update GitLab Pages
+### 12. Update GitLab Pages
 
 #### Only needed if you use GitLab Pages
 
@@ -245,7 +247,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_PAGES_VERSION)
 sudo -u git -H make
 ```
 
-### 12. Update configuration files
+### 13. Update configuration files
 
 #### New configuration options for `gitlab.yml`
 
@@ -278,12 +280,12 @@ longer handles setting it.
 
 If you are using Apache instead of NGINX see the updated [Apache templates](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/web-server/apache).
 Also note that because Apache does not support upstreams behind Unix sockets you
-will need to let GitLab Workhorse listen on a TCP port. You can do this
+must let GitLab Workhorse listen on a TCP port. You can do this
 via [`/etc/default/gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/support/init.d/gitlab.default.example#L38).
 
 #### SMTP configuration
 
-If you're installing from source and use SMTP to deliver mail, you will need to
+If you're installing from source and use SMTP to deliver mail, you must
 add the following line to `config/initializers/smtp_settings.rb`:
 
 ```ruby
@@ -318,7 +320,7 @@ For Ubuntu 16.04.1 LTS:
 sudo systemctl daemon-reload
 ```
 
-### 13. Install libraries, migrations, etc
+### 14. Install libraries, migrations, etc
 
 ```shell
 cd /home/git/gitlab
@@ -342,14 +344,14 @@ sudo -u git -H bundle exec rake yarn:install gitlab:assets:clean gitlab:assets:c
 sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 ```
 
-### 14. Start application
+### 15. Start application
 
 ```shell
 sudo service gitlab start
 sudo service nginx restart
 ```
 
-### 15. Check application status
+### 16. Check application status
 
 Check if GitLab and its environment are configured correctly:
 

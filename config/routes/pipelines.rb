@@ -7,6 +7,7 @@ resources :pipelines, only: [:index, :new, :create, :show, :destroy] do
     scope '(*ref)', constraints: { ref: Gitlab::PathRegex.git_reference_regex } do
       get :latest, action: :show, defaults: { latest: true }
     end
+    get :config_variables
   end
 
   member do
@@ -19,7 +20,6 @@ resources :pipelines, only: [:index, :new, :create, :show, :destroy] do
     get :failures
     get :status
     get :test_report
-    get :test_reports_count
   end
 
   resources :stages, only: [], param: :name, controller: 'pipelines/stages' do

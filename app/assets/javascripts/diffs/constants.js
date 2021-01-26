@@ -34,7 +34,6 @@ export const COUNT_OF_AVATARS_IN_GUTTER = 3;
 export const LENGTH_OF_AVATAR_TOOLTIP = 17;
 
 export const LINES_TO_BE_RENDERED_DIRECTLY = 100;
-export const MAX_LINES_TO_BE_RENDERED = 2000;
 
 export const DIFF_FILE_SYMLINK_MODE = '120000';
 export const DIFF_FILE_DELETED_MODE = '0';
@@ -69,6 +68,20 @@ export const DIFFS_PER_PAGE = 20;
 export const DIFF_COMPARE_BASE_VERSION_INDEX = -1;
 export const DIFF_COMPARE_HEAD_VERSION_INDEX = -2;
 
+// Diff View Alerts
+export const ALERT_OVERFLOW_HIDDEN = 'overflow';
+export const ALERT_MERGE_CONFLICT = 'merge-conflict';
+export const ALERT_COLLAPSED_FILES = 'collapsed';
+
+// Diff File collapse types
+export const DIFF_FILE_AUTOMATIC_COLLAPSE = 'automatic';
+export const DIFF_FILE_MANUAL_COLLAPSE = 'manual';
+
+// Diff view single file mode
+export const DIFF_FILE_BY_FILE_COOKIE_NAME = 'fileViewMode';
+export const DIFF_VIEW_FILE_BY_FILE = 'single';
+export const DIFF_VIEW_ALL_FILES = 'all';
+
 // State machine states
 export const STATE_IDLING = 'idle';
 export const STATE_LOADING = 'loading';
@@ -87,3 +100,18 @@ export const RENAMED_DIFF_TRANSITIONS = {
   [`${STATE_ERRORED}:${TRANSITION_LOAD_START}`]: STATE_LOADING,
   [`${STATE_ERRORED}:${TRANSITION_ACKNOWLEDGE_ERROR}`]: STATE_IDLING,
 };
+
+// MR Diffs known events
+export const EVT_EXPAND_ALL_FILES = 'mr:diffs:expandAllFiles';
+export const EVT_VIEW_FILE_BY_FILE = 'mr:diffs:preference:fileByFile';
+export const EVT_PERF_MARK_FILE_TREE_START = 'mr:diffs:perf:fileTreeStart';
+export const EVT_PERF_MARK_FILE_TREE_END = 'mr:diffs:perf:fileTreeEnd';
+export const EVT_PERF_MARK_DIFF_FILES_START = 'mr:diffs:perf:filesStart';
+export const EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN = 'mr:diffs:perf:firstFileShown';
+export const EVT_PERF_MARK_DIFF_FILES_END = 'mr:diffs:perf:filesEnd';
+
+export const CONFLICT_OUR = 'conflict_our';
+export const CONFLICT_THEIR = 'conflict_their';
+export const CONFLICT_MARKER = 'conflict_marker';
+export const CONFLICT_MARKER_OUR = 'conflict_marker_our';
+export const CONFLICT_MARKER_THEIR = 'conflict_marker_their';

@@ -9,6 +9,12 @@ const fileExtensionIcons = {
   'md.rendered': 'markdown',
   markdown: 'markdown',
   'markdown.rendered': 'markdown',
+  mdown: 'markdown',
+  'mdown.rendered': 'markdown',
+  mkd: 'markdown',
+  'mkd.rendered': 'markdown',
+  mkdn: 'markdown',
+  'mkdn.rendered': 'markdown',
   rst: 'markdown',
   blink: 'blink',
   css: 'css',
@@ -587,15 +593,6 @@ const fileNameIcons = {
 
 export default function getIconForFile(name) {
   return (
-    fileNameIcons[name] ||
-    fileExtensionIcons[
-      name
-        ? name
-            .split('.')
-            .pop()
-            .toLowerCase()
-        : ''
-    ] ||
-    ''
+    fileNameIcons[name] || fileExtensionIcons[name ? name.split('.').pop().toLowerCase() : ''] || ''
   );
 }

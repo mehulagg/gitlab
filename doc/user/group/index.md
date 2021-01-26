@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Groups
@@ -130,7 +130,7 @@ give a user access to all projects in the group with one action.
 
 Add members to a group by navigating to the group's dashboard and clicking **Members**.
 
-![add members to group](img/add_new_members.png)
+![add members to group](img/add_new_members_v13_7.png)
 
 Select the [permission level](../permissions.md#permissions), and add the new member. You can also set the expiring date for that user; this is the date on which they will no longer have access to your group.
 
@@ -211,6 +211,61 @@ To remove a member from a group:
 1. (Optional) Select the **Also unassign this user from related issues and merge requests** checkbox.
 1. Click **Remove member**.
 
+## Filter and sort members in a group
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/21727) in GitLab 12.6.
+> - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/228675) in GitLab 13.7.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/289911) in GitLab 13.8.
+
+The following sections illustrate how you can filter and sort members in a group. To view these options,
+navigate to your desired group, go to **Members**, and include the noted search terms.
+
+### Membership filter
+
+By default, inherited and direct members are displayed. The [membership](subgroups/index.md#membership) filter can be used to display only inherited or only direct members.
+
+#### Only display inherited members
+
+Include `Membership` `=` `Inherited` in the search text box.
+
+![Group members filter inherited](img/group_members_filter_inherited_13_7.png)
+
+#### Only display direct members
+
+Include `Membership` `=` `Direct` in the search text box.
+
+![Group members filter direct](img/group_members_filter_direct_13_7.png)
+
+### 2FA filter
+
+[Owner](../permissions.md#group-members-permissions) permissions required.
+
+By default, members with 2FA enabled and disabled are displayed. The 2FA filter can be used to display only members with 2FA enabled or only members with 2FA disabled.
+
+#### Only display members with 2FA enabled
+
+Include `2FA` `=` `Enabled` in the search text box.
+
+![Group members filter 2FA enabled](img/group_members_filter_2fa_enabled_13_7.png)
+
+#### Only display members with 2FA disabled
+
+Include `2FA` `=` `Disabled` in the search text box.
+
+![Group members filter 2FA disabled](img/group_members_filter_2fa_disabled_13_7.png)
+
+### Search
+
+You can search for members by name, username, or email.
+
+![Group members search](img/group_members_search_13_7.png)
+
+### Sort
+
+You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in** in ascending or descending order.
+
+![Group members sort](img/group_members_sort_13_7.png)
+
 ## Changing the default branch protection of a group
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7583) in GitLab 12.9.
@@ -226,8 +281,8 @@ To change this setting for a specific group:
 
 To change this setting globally, see [Default branch protection](../admin_area/settings/visibility_and_access_controls.md#default-branch-protection).
 
-NOTE: **Note:**
-In [GitLab Premium or higher](https://about.gitlab.com/pricing/), GitLab administrators can choose to [disable group owners from updating the default branch protection](../admin_area/settings/visibility_and_access_controls.md#disable-group-owners-from-updating-default-branch-protection-premium-only).
+NOTE:
+In [GitLab Premium or higher](https://about.gitlab.com/pricing/), GitLab administrators can choose to [disable group owners from updating the default branch protection](../admin_area/settings/visibility_and_access_controls.md#disable-group-owners-from-updating-default-branch-protection).
 
 ## Add projects to a group
 
@@ -235,7 +290,7 @@ There are two different ways to add a new project to a group:
 
 - Select a group, and then click **New project**. You can then continue [creating your project](../../gitlab-basics/create-project.md).
 
-  ![New project](img/create_new_project_from_group.png)
+  ![New project](img/create_new_project_from_group_v13_6.png)
 
 - While you are creating a project, select a group namespace
   you've already created from the dropdown menu.
@@ -340,14 +395,16 @@ Group syncing allows LDAP groups to be mapped to GitLab groups. This provides mo
 
 Group links can be created using either a CN or a filter. These group links are created on the **Group Settings -> LDAP Synchronization** page. After configuring the link, it may take over an hour for the users to sync with the GitLab group.
 
-For more information on the administration of LDAP and group sync, refer to the [main LDAP documentation](../../administration/auth/ldap/index.md#group-sync-starter-only).
+For more information on the administration of LDAP and group sync, refer to the [main LDAP documentation](../../administration/auth/ldap/index.md#group-sync).
 
-NOTE: **Note:**
+NOTE:
 If an LDAP user is a group member when LDAP Synchronization is added, and they are not part of the LDAP group, they will be removed from the group.
 
 ### Creating group links via CN **(STARTER ONLY)**
 
 To create group links via CN:
+
+<!-- vale gitlab.Spelling = NO -->
 
 1. Select the **LDAP Server** for the link.
 1. Select `LDAP Group cn` as the **Sync method**.
@@ -357,13 +414,15 @@ To create group links via CN:
 
 ![Creating group links via CN](img/ldap_sync_cn_v13_1.png)
 
+<!-- vale gitlab.Spelling = YES -->
+
 ### Creating group links via filter **(PREMIUM ONLY)**
 
 To create group links via filter:
 
 1. Select the **LDAP Server** for the link.
 1. Select `LDAP user filter` as the **Sync method**.
-1. Input your filter in the **LDAP User filter** box. Follow the [documentation on user filters](../../administration/auth/ldap/index.md#set-up-ldap-user-filter-core-only).
+1. Input your filter in the **LDAP User filter** box. Follow the [documentation on user filters](../../administration/auth/ldap/index.md#set-up-ldap-user-filter).
 1. In the **LDAP Access** section, select the [permission level](../permissions.md) for users synced in this group.
 1. Click the `Add Synchronization` button to save this group link.
 
@@ -371,13 +430,13 @@ To create group links via filter:
 
 ### Overriding user permissions **(STARTER ONLY)**
 
-Since GitLab [v8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) LDAP user permissions can now be manually overridden by an admin user. To override a user's permissions:
+In GitLab [8.15](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/822) and later, LDAP user permissions can now be manually overridden by an admin user. To override a user's permissions:
 
 1. Go to your group's **Members** page.
 1. Select the pencil icon in the row for the user you are editing.
-1. Select the orange `Change permissions` button.
+1. Select the brown `Edit permissions` button in the modal.
 
-![Setting manual permissions](img/manual_permissions_v13_1.png)
+![Setting manual permissions](img/manual_permissions_v13_7.png)
 
 Now you will be able to edit the user's permissions from the **Members** page.
 
@@ -391,11 +450,35 @@ milestones.
 
 [Learn more about Epics.](epics/index.md)
 
+## Group wikis **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
+
+Group wikis work the same way as [project wikis](../project/wiki/index.md), please refer to those docs for details on usage.
+
+Group wikis can be edited by members with [Developer permissions](../../user/permissions.md#group-members-permissions)
+and above.
+
+### Group wikis limitations
+
+There are a few limitations compared to project wikis:
+
+- Git LFS is not supported.
+- Group wikis are not included in global search, group exports, and Geo replication.
+- Changes to group wikis don't show up in the group's activity feed.
+- Group wikis [can't be moved](../../api/project_repository_storage_moves.md#limitations) using the project
+  repository moves API.
+
+For updates, you can follow:
+
+- [The epic tracking feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
+- [The issue for adding the ability to move group wikis using the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
+
 ## Group Security Dashboard **(ULTIMATE)**
 
 Get an overview of the vulnerabilities of all the projects in a group and its subgroups.
 
-[Learn more about the Group Security Dashboard.](security_dashboard/index.md)
+[Learn more about the Group Security Dashboard.](../application_security/security_dashboard/index.md)
 
 ## Insights **(ULTIMATE)**
 
@@ -458,15 +541,32 @@ To change your group path (group URL):
 1. Enter a new name under **Change group URL**.
 1. Click **Change group URL**.
 
-CAUTION: **Caution:**
+WARNING:
 It is currently not possible to rename a namespace if it contains a
 project with [Container Registry](../packages/container_registry/index.md) tags,
 because the project cannot be moved.
 
-TIP: **Tip:**
+NOTE:
 If you want to retain ownership over the original namespace and
 protect the URL redirects, then instead of changing a group's path or renaming a
 username, you can create a new group and transfer projects to it.
+
+### Group repository settings
+
+You can change settings that are specific to repositories in your group.
+
+#### Custom initial branch name **(CORE ONLY)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
+
+By default, when you create a new project in GitLab, the initial branch is called `master`.
+For groups, a group administrator can customize the initial branch name to something
+else. This way, every new project created under that group from then on will start from the custom branch name rather than `master`. To do so:
+
+1. Go to the **Group page > Settings > Repository** and expand **Default initial
+   branch name**.
+1. Change the default initial branch to a custom name of your choice.
+1. **Save Changes**.
 
 ### Remove a group
 
@@ -480,7 +580,10 @@ To remove a group and its contents:
 This action either:
 
 - Removes the group, and also queues a background job to delete all projects in that group.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/premium/) or higher tiers, marks a group for deletion. The deletion will happen 7 days later by default, but this can be changed in the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-adjourned-period-premium-only).
+- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/premium/) or higher tiers, this action adds a background job to mark a group for deletion. By default, the job schedules the deletion 7 days in the future. You can modify this waiting period through the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+
+Since [GitLab 13.6](https://gitlab.com/gitlab-org/gitlab/-/issues/39504), if the user who sets up the deletion leaves or is otherwise removed from the group before the
+actual deletion happens, the job is cancelled, and the group is no longer scheduled for deletion.
 
 ### Restore a group **(PREMIUM)**
 
@@ -538,11 +641,17 @@ request to add a new user to a project through API will not be possible.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate and Gold](https://about.gitlab.com/pricing/) 12.0.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium and Silver](https://about.gitlab.com/pricing/) in 13.1.
 
+NOTE:
+IP Access Restrictions are currently not functioning as expected on GitLab.com. Some users
+may experience blocked Git operations or have difficulties accessing projects. Please
+review the [following bug report](https://gitlab.com/gitlab-org/gitlab/-/issues/271673) for
+more information.
+
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
-underlying projects, issues, etc, by IP address. This can help ensure that
+underlying subgroups, projects, issues, and so on, by IP address. This can help ensure that
 particular content doesn't leave the premises, while not blocking off access to
-the entire instance.
+the entire instance. IP access restrictions can only be configured at the group level.
 
 Add one or more allowed IP subnets using CIDR notation to the group settings and anyone
 coming from a different IP address won't be able to access the restricted
@@ -562,6 +671,8 @@ To enable this feature:
 1. Navigate to the group’s **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section, and enter IP address ranges into **Allow access to the following IP addresses** field.
 1. Click **Save changes**.
+
+![Domain restriction by IP address](img/restrict-by-ip.gif)
 
 #### Allowed domain restriction **(PREMIUM)**
 
@@ -590,6 +701,8 @@ To enable this feature:
 1. Navigate to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section, and enter the domain names into **Restrict membership by email** field.
 1. Click **Save changes**.
+
+![Domain restriction by email](img/restrict-by-email.gif)
 
 This will enable the domain-checking for all new users added to the group from this moment on.
 
@@ -660,13 +773,16 @@ Optionally, on [Premium or Silver](https://about.gitlab.com/pricing/) or higher 
 you can configure the projects within a group to be deleted after a delayed interval.
 
 During this interval period, the projects will be in a read-only state and can be restored, if required.
-The interval period defaults to 7 days, and can be modified by an admin in the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-adjourned-period-premium-only).
+The interval period defaults to 7 days, and can be modified by an admin in the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
 To enable delayed deletion of projects:
 
 1. Navigate to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section, and check **Enable delayed project removal**.
 1. Click **Save changes**.
+
+NOTE:
+The group setting for delayed deletion is not inherited by sub-groups and has to be individually defined for each group.
 
 #### Prevent project forking outside group **(PREMIUM)**
 
@@ -694,24 +810,12 @@ To enable prevent project forking:
 - **Audit Events**: View [Audit Events](../../administration/audit_events.md)
   for the group. **(STARTER ONLY)**
 - **Pipelines quota**: Keep track of the [pipeline quota](../admin_area/settings/continuous_integration.md) for the group.
-
-#### Storage usage quota **(STARTER)**
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/13294) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.0.
-
-A group owner can check the aggregated storage usage for all the projects in a group, sub-groups included, in the **Storage** tab of the **Usage Quotas** page available to the group page settings list.
-
-![Group storage usage quota](img/group_storage_usage_quota.png)
-
-The total usage of the storage is updated if any relevant event that
-will affect its value is triggered (e.g., a commit push).
-For performance reasons, we may delay the update up to 1 hour and 30 minutes.
-
-If your namespace shows `N/A` as the total storage usage, you can trigger a recalculation by pushing a commit to any project in that namespace.
+- **Integrations**: Configure [integrations](../admin_area/settings/project_integration_management.md) for your group.
 
 #### Group push rules **(STARTER)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34370) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34370) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.8.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/224129) in GitLab 13.4.
 
 Group push rules allow group maintainers to set
 [push rules](../../push_rules/push_rules.md) for newly created projects within the specific group.
@@ -724,18 +828,10 @@ When set, new subgroups have push rules set for them based on either:
 - The closest parent group with push rules defined.
 - Push rules set at the instance level, if no parent groups have push rules defined.
 
-##### Enabling the feature
-
-This feature comes with the `:group_push_rules` feature flag disabled by default. It can be enabled for specific group using feature flag [API endpoint](../../api/features.md#set-or-create-a-feature) or by GitLab administrator with Rails console access by running:
-
-```ruby
-Feature.enable(:group_push_rules)
-```
-
 ### Maximum artifacts size **(CORE ONLY)**
 
 For information about setting a maximum artifact size for a group, see
-[Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size-core-only).
+[Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size).
 
 ## User contribution analysis **(STARTER)**
 
@@ -743,11 +839,28 @@ With [GitLab Contribution Analytics](contribution_analytics/index.md),
 you have an overview of the contributions (pushes, merge requests,
 and issues) performed by your group members.
 
-## Issues analytics **(PREMIUM)**
+## Issue analytics **(PREMIUM)**
 
-With [GitLab Issues Analytics](issues_analytics/index.md), you can see a bar chart of the number of issues created each month in your groups.
+With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar chart of the number of issues created each month in your groups.
 
-## Dependency Proxy **(PREMIUM)**
+## Repositories analytics **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in GitLab 13.6.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/276003) in GitLab 13.7.
+
+With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
+
+### Check code coverage for all projects
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263478) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.7.
+
+See the overall activity of all projects with code coverage with [GitLab Repositories Analytics](repositories_analytics/index.md).
+
+It displays the current code coverage data available for your projects:
+
+![Group repositories analytics](img/group_code_coverage_analytics_v13_7.png)
+
+## Dependency Proxy
 
 Use GitLab as a [dependency proxy](../packages/dependency_proxy/index.md) for upstream Docker images.
 

@@ -1,13 +1,16 @@
 import Vuex from 'vuex';
 import { mount } from '@vue/test-utils';
-import ReleaseEditNewApp from '~/releases/components/app_edit_new.vue';
-import { release as originalRelease, milestones as originalMilestones } from '../mock_data';
-import * as commonUtils from '~/lib/utils/common_utils';
-import { BACK_URL_PARAM } from '~/releases/constants';
-import AssetLinksForm from '~/releases/components/asset_links_form.vue';
 import { merge } from 'lodash';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { getJSONFixture } from 'helpers/fixtures';
+import ReleaseEditNewApp from '~/releases/components/app_edit_new.vue';
+import * as commonUtils from '~/lib/utils/common_utils';
+import { BACK_URL_PARAM } from '~/releases/constants';
+import AssetLinksForm from '~/releases/components/asset_links_form.vue';
+
+const originalRelease = getJSONFixture('api/releases/release.json');
+const originalMilestones = originalRelease.milestones;
 
 describe('Release edit/new component', () => {
   let wrapper;
@@ -17,18 +20,19 @@ describe('Release edit/new component', () => {
   let state;
   let mock;
 
-  const factory = ({ featureFlags = {}, store: storeUpdates = {} } = {}) => {
+  const factory = async ({ featureFlags = {}, store: storeUpdates = {} } = {}) => {
     state = {
       release,
       markdownDocsPath: 'path/to/markdown/docs',
-      updateReleaseApiDocsPath: 'path/to/update/release/api/docs',
       releasesPagePath: 'path/to/releases/page',
       projectId: '8',
+      groupId: '42',
+      groupMilestonesAvailable: true,
     };
 
     actions = {
-      fetchRelease: jest.fn(),
-      updateRelease: jest.fn(),
+      initializeRelease: jest.fn(),
+      saveRelease: jest.fn(),
       addEmptyAssetLink: jest.fn(),
     };
 
@@ -64,6 +68,10 @@ describe('Release edit/new component', () => {
         glFeatures: featureFlags,
       },
     });
+
+    await wrapper.vm.$nextTick();
+
+    wrapper.element.querySelectorAll('input').forEach((input) => jest.spyOn(input, 'focus'));
   };
 
   beforeEach(() => {
@@ -81,14 +89,25 @@ describe('Release edit/new component', () => {
   });
 
   const findSubmitButton = () => wrapper.find('button[type=submit]');
+  const findForm = () => wrapper.find('form');
 
   describe(`basic functionality tests: all tests unrelated to the "${BACK_URL_PARAM}" parameter`, () => {
-    beforeEach(() => {
-      factory();
+    beforeEach(async () => {
+      await factory();
     });
 
-    it('calls fetchRelease when the component is created', () => {
-      expect(actions.fetchRelease).toHaveBeenCalledTimes(1);
+    it('calls initializeRelease when the component is created', () => {
+      expect(actions.initializeRelease).toHaveBeenCalledTimes(1);
+    });
+
+    it('focuses the first non-disabled input element once the page is shown', () => {
+      const firstEnabledInput = wrapper.element.querySelector('input:enabled');
+      const allInputs = wrapper.element.querySelectorAll('input');
+
+      allInputs.forEach((input) => {
+        const expectedFocusCalls = input === firstEnabledInput ? 1 : 0;
+        expect(input.focus).toHaveBeenCalledTimes(expectedFocusCalls);
+      });
     });
 
     it('renders the description text at the top of the page', () => {
@@ -109,15 +128,16 @@ describe('Release edit/new component', () => {
       expect(findSubmitButton().attributes('type')).toBe('submit');
     });
 
-    it('calls updateRelease when the form is submitted', () => {
-      wrapper.find('form').trigger('submit');
-      expect(actions.updateRelease).toHaveBeenCalledTimes(1);
+    it('calls saveRelease when the form is submitted', () => {
+      findForm().trigger('submit');
+
+      expect(actions.saveRelease).toHaveBeenCalledTimes(1);
     });
   });
 
   describe(`when the URL does not contain a "${BACK_URL_PARAM}" parameter`, () => {
-    beforeEach(() => {
-      factory();
+    beforeEach(async () => {
+      await factory();
     });
 
     it(`renders a "Cancel" button with an href pointing to "${BACK_URL_PARAM}"`, () => {
@@ -129,12 +149,12 @@ describe('Release edit/new component', () => {
   describe(`when the URL contains a "${BACK_URL_PARAM}" parameter`, () => {
     const backUrl = 'https://example.gitlab.com/back/url';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       commonUtils.getParameterByName = jest
         .fn()
-        .mockImplementation(paramToGet => ({ [BACK_URL_PARAM]: backUrl }[paramToGet]));
+        .mockImplementation((paramToGet) => ({ [BACK_URL_PARAM]: backUrl }[paramToGet]));
 
-      factory();
+      await factory();
     });
 
     it('renders a "Cancel" button with an href pointing to the main Releases page', () => {
@@ -143,34 +163,48 @@ describe('Release edit/new component', () => {
     });
   });
 
-  describe('asset links form', () => {
-    const findAssetLinksForm = () => wrapper.find(AssetLinksForm);
-
-    describe('when the release_asset_link_editing feature flag is disabled', () => {
-      beforeEach(() => {
-        factory({ featureFlags: { releaseAssetLinkEditing: false } });
-      });
-
-      it('does not render the asset links portion of the form', () => {
-        expect(findAssetLinksForm().exists()).toBe(false);
+  describe('when creating a new release', () => {
+    beforeEach(async () => {
+      await factory({
+        store: {
+          modules: {
+            detail: {
+              getters: {
+                isExistingRelease: () => false,
+              },
+            },
+          },
+        },
       });
     });
 
-    describe('when the release_asset_link_editing feature flag is enabled', () => {
-      beforeEach(() => {
-        factory({ featureFlags: { releaseAssetLinkEditing: true } });
-      });
+    it('renders the submit button with the text "Create release"', () => {
+      expect(findSubmitButton().text()).toBe('Create release');
+    });
+  });
 
-      it('renders the asset links portion of the form', () => {
-        expect(findAssetLinksForm().exists()).toBe(true);
-      });
+  describe('when editing an existing release', () => {
+    beforeEach(async () => {
+      await factory();
+    });
+
+    it('renders the submit button with the text "Save changes"', () => {
+      expect(findSubmitButton().text()).toBe('Save changes');
+    });
+  });
+
+  describe('asset links form', () => {
+    beforeEach(factory);
+
+    it('renders the asset links portion of the form', () => {
+      expect(wrapper.find(AssetLinksForm).exists()).toBe(true);
     });
   });
 
   describe('validation', () => {
     describe('when the form is valid', () => {
-      beforeEach(() => {
-        factory({
+      beforeEach(async () => {
+        await factory({
           store: {
             modules: {
               detail: {
@@ -189,8 +223,8 @@ describe('Release edit/new component', () => {
     });
 
     describe('when the form is invalid', () => {
-      beforeEach(() => {
-        factory({
+      beforeEach(async () => {
+        await factory({
           store: {
             modules: {
               detail: {
@@ -205,6 +239,12 @@ describe('Release edit/new component', () => {
 
       it('renders the submit button as disabled', () => {
         expect(findSubmitButton().attributes('disabled')).toBe('disabled');
+      });
+
+      it('does not allow the form to be submitted', () => {
+        findForm().trigger('submit');
+
+        expect(actions.saveRelease).not.toHaveBeenCalled();
       });
     });
   });

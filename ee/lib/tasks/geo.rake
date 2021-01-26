@@ -190,23 +190,7 @@ namespace :geo do
   task set_secondary_as_primary: :environment do
     abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
 
-    ActiveRecord::Base.transaction do
-      primary_node = GeoNode.primary_node
-
-      unless primary_node
-        abort 'The primary is not set'
-      end
-
-      primary_node.destroy
-
-      current_node = GeoNode.current_node
-
-      unless current_node.secondary?
-        abort 'This is not a secondary node'
-      end
-
-      current_node.update!(primary: true)
-    end
+    Gitlab::Geo::GeoTasks.set_secondary_as_primary
   end
 
   desc 'GitLab | Geo | Update Geo primary node URL'

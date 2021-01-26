@@ -1,13 +1,11 @@
 <script>
 import { throttle, isEmpty } from 'lodash';
 import { mapGetters, mapState, mapActions } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlSafeHtmlDirective as SafeHtml, GlAlert } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 import { polyfillSticky } from '~/lib/utils/sticky';
 import CiHeader from '~/vue_shared/components/header_ci_component.vue';
-import Callout from '~/vue_shared/components/callout.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import EmptyState from './empty_state.vue';
 import EnvironmentsBlock from './environments_block.vue';
 import ErasedBlock from './erased_block.vue';
@@ -23,11 +21,10 @@ export default {
   name: 'JobPageApp',
   components: {
     CiHeader,
-    Callout,
     EmptyState,
     EnvironmentsBlock,
     ErasedBlock,
-    Icon,
+    GlIcon,
     Log,
     LogTopBar,
     StuckBlock,
@@ -35,9 +32,18 @@ export default {
     Sidebar,
     GlLoadingIcon,
     SharedRunner: () => import('ee_component/jobs/components/shared_runner_limit_block.vue'),
+    GlAlert,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [delayedJobMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerSettingsUrl: {
       type: String,
       required: false,
@@ -128,7 +134,7 @@ export default {
       if (isEmpty(oldVal) && !isEmpty(newVal.pipeline)) {
         const stages = this.job.pipeline.details.stages || [];
 
-        const defaultStage = stages.find(stage => stage && stage.name === this.selectedStage);
+        const defaultStage = stages.find((stage) => stage && stage.name === this.selectedStage);
 
         if (defaultStage) {
           this.fetchJobsForStage(defaultStage);
@@ -216,10 +222,14 @@ export default {
               @clickedSidebarButton="toggleSidebar"
             />
           </div>
-
-          <callout v-if="shouldRenderHeaderCallout">
-            <div v-html="job.callout_message"></div>
-          </callout>
+          <gl-alert
+            v-if="shouldRenderHeaderCallout"
+            variant="danger"
+            class="gl-mt-3"
+            :dismissible="false"
+          >
+            <div v-safe-html="job.callout_message"></div>
+          </gl-alert>
         </header>
         <!-- EO Header Section -->
 
@@ -266,7 +276,7 @@ export default {
           :class="{ 'sticky-top border-bottom-0': hasTrace }"
           data-testid="archived-job"
         >
-          <icon name="lock" class="align-text-bottom" />
+          <gl-icon name="lock" class="align-text-bottom" />
           {{ __('This job is archived. Only the complete pipeline can be retried.') }}
         </div>
         <!-- job log -->
@@ -319,6 +329,7 @@ export default {
         'right-sidebar-expanded': isSidebarOpen,
         'right-sidebar-collapsed': !isSidebarOpen,
       }"
+      :artifact-help-url="artifactHelpUrl"
       :runner-help-url="runnerHelpUrl"
       data-testid="job-sidebar"
     />

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Projects > Snippets > Create Snippet', :js do
   include DropzoneHelper
+  include Spec::Support::Helpers::Features::SnippetSpecHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) do
@@ -17,41 +18,25 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
   let(:md_description) { 'My Snippet **Description**' }
   let(:description) { 'My Snippet Description' }
 
-  before do
-    stub_feature_flags(snippets_vue: false)
-    stub_feature_flags(snippets_edit_vue: false)
+  def fill_form
+    snippet_fill_in_form(title: title, content: file_content, description: md_description)
+  end
 
+  before do
     sign_in(user)
 
     visit new_project_snippet_path(project)
   end
 
-  def description_field
-    find('.js-description-input').find('input,textarea')
-  end
-
-  def fill_form
-    fill_in 'project_snippet_title', with: title
-
-    # Click placeholder first to expand full description field
-    description_field.click
-    fill_in 'project_snippet_description', with: md_description
-
-    page.within('.file-editor') do
-      el = find('.inputarea')
-      el.send_keys file_content
-    end
-  end
-
   it 'shows collapsible description input' do
-    collapsed = description_field
+    collapsed = snippet_description_field_collapsed
 
-    expect(page).not_to have_field('project_snippet_description')
+    expect(page).not_to have_field(snippet_description_locator)
     expect(collapsed).to be_visible
 
     collapsed.click
 
-    expect(page).to have_field('project_snippet_description')
+    expect(page).to have_field(snippet_description_locator)
     expect(collapsed).not_to be_visible
   end
 
@@ -62,7 +47,7 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
 
     expect(page).to have_content(title)
     expect(page).to have_content(file_content)
-    page.within('.snippet-header .description') do
+    page.within('.snippet-header .snippet-description') do
       expect(page).to have_content(description)
       expect(page).to have_selector('strong')
     end
@@ -72,21 +57,13 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
     fill_form
     dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
 
-    expect(page.find_field('project_snippet_description').value).to have_content('banana_sample')
+    expect(snippet_description_value).to have_content('banana_sample')
 
     click_button('Create snippet')
     wait_for_requests
 
-    link = find('a.no-attachment-icon img[alt="banana_sample"]')['src']
+    link = find('a.no-attachment-icon img.js-lazy-loaded[alt="banana_sample"]')['src']
     expect(link).to match(%r{/#{Regexp.escape(project.full_path)}/uploads/\h{32}/banana_sample\.gif\z})
-  end
-
-  it 'displays validation errors' do
-    fill_in 'project_snippet_title', with: title
-    click_button('Create snippet')
-    wait_for_requests
-
-    expect(page).to have_selector('#error_explanation')
   end
 
   context 'when the git operation fails' do
@@ -107,5 +84,14 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
       expect(page).to have_content(error)
       expect(page).to have_content('New Snippet')
     end
+  end
+
+  it 'does not allow submitting the form without title and content' do
+    snippet_fill_in_title(title)
+
+    expect(page).not_to have_button('Create snippet')
+
+    snippet_fill_in_form(title: title, content: file_content)
+    expect(page).to have_button('Create snippet')
   end
 end

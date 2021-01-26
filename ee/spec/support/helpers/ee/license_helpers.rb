@@ -8,9 +8,9 @@ module EE
     #
     # Example:
     #
-    #   stub_licensed_features(geo: true, deploy_board: false)
+    #   stub_licensed_features(geo: true, file_locks: false)
     #
-    # This enables `geo` and disables `deploy_board` features for a spec.
+    # This enables `geo` and disables `file_locks` features for a spec.
     # Other features are still enabled/disabled as defined in the license.
 
     prepended do

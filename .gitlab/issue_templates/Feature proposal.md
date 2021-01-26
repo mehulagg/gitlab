@@ -1,6 +1,10 @@
-<!-- The first four sections: "Problem to solve", "Intended users", "User experience goal", and "Proposal", are strongly recommended, while the rest of the sections can be filled out during the problem validation or breakdown phase. However, keep in mind that providing complete and relevant information early helps our product team validate the problem and start working on a solution. -->
+<!-- The first section "Release notes" is required if you want to have your release post blog MR auto generated. Currently in BETA, details on the **release post item generator** can be found in the handbook:  https://about.gitlab.com/handbook/marketing/blog/release-posts/#release-post-item-generator and this video: https://www.youtube.com/watch?v=rfn9ebgTwKg. The next four sections: "Problem to solve", "Intended users", "User experience goal", and "Proposal", are strongly recommended in your first draft, while the rest of the sections can be filled out during the problem validation or breakdown phase. However, keep in mind that providing complete and relevant information early helps our product team validate the problem and start working on a solution. -->
 
-### Problem to solve
+### Release notes
+
+<!-- What is the problem and solution you're proposing? This content sets the overall vision for the feature and serves as the release notes that will populate in various places, including the [release post blog](https://about.gitlab.com/releases/categories/releases/) and [Gitlab project releases](https://gitlab.com/gitlab-org/gitlab/-/releases). " -->
+
+### Problem to solve 
 
 <!-- What problem do we solve? Try to define the who/what/why of the opportunity as a user story. For example, "As a (who), I want (what), so I can (why/value)." -->
 
@@ -18,19 +22,20 @@ Personas are described at https://about.gitlab.com/handbook/marketing/product-ma
 * [Devon (DevOps Engineer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#devon-devops-engineer)
 * [Sidney (Systems Administrator)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#sidney-systems-administrator)
 * [Sam (Security Analyst)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#sam-security-analyst)
-* [Rachel (Release Manager)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#rachel-release-manager) 
+* [Rachel (Release Manager)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#rachel-release-manager)
 * [Alex (Security Operations Engineer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#alex-security-operations-engineer)
 * [Simone (Software Engineer in Test)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#simone-software-engineer-in-test)
-* [Allison (Application Ops)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#allison-application-ops) 
+* [Allison (Application Ops)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#allison-application-ops)
 * [Priyanka (Platform Engineer)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#priyanka-platform-engineer)
 * [Dana (Data Analyst)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#dana-data-analyst)
+* [Eddie (Content Editor)](https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/#eddie-content-editor)
 -->
 
 ### User experience goal
 
-<!-- What is the single user experience workflow this problem addresses? 
+<!-- What is the single user experience workflow this problem addresses?
 For example, "The user should be able to use the UI/API/.gitlab-ci.yml with GitLab to <perform a specific task>"
-https://about.gitlab.com/handbook/engineering/ux/ux-research-training/user-story-mapping/ --> 
+https://about.gitlab.com/handbook/engineering/ux/ux-research-training/user-story-mapping/ -->
 
 
 ### Proposal
@@ -48,7 +53,7 @@ Consider adding checkboxes and expectations of users with certain levels of memb
 * [ ] Add expected impact to members with no access (0)
 * [ ] Add expected impact to Guest (10) members
 * [ ] Add expected impact to Reporter (20) members
-* [ ] Add expected impact to Developer (30) members 
+* [ ] Add expected impact to Developer (30) members
 * [ ] Add expected impact to Maintainer (40) members
 * [ ] Add expected impact to Owner (50) members -->
 
@@ -72,9 +77,22 @@ Please list the test areas (unit, integration and end-to-end) that needs to be a
 
 See the test engineering planning process and reach out to your counterpart Software Engineer in Test for assistance: https://about.gitlab.com/handbook/engineering/quality/test-engineering/#test-planning -->
 
+### Available Tier
+
+<!-- This section should be used for setting the appropriate tier that this feature will belong to. Pricing can be found here: https://about.gitlab.com/pricing/
+
+* Free
+* Premium/Silver
+* Ultimate/Gold
+-->
+
 ### What does success look like, and how can we measure that?
 
-<!-- Define both the success metrics and acceptance criteria. Note that success metrics indicate the desired business outcomes, while acceptance criteria indicate when the solution is working correctly. If there is no way to measure success, link to an issue that will implement a way to measure this. -->
+<!--
+Define both the success metrics and acceptance criteria. Note that success metrics indicate the desired business outcomes, while acceptance criteria indicate when the solution is working correctly. If there is no way to measure success, link to an issue that will implement a way to measure this.
+
+Create tracking issue using the the Snowplow event tracking template. See https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Snowplow%20event%20tracking.md
+-->
 
 ### What is the type of buyer?
 
@@ -87,18 +105,11 @@ In which enterprise tier should this feature go? See https://about.gitlab.com/ha
 
 ### Links / references
 
-<!--  Label reminders - you should have one of each of the following labels if you can find the correct ones!
-
-Type - for example ~feature ~bug ~documentation ~meta /label ~"feature::addition" ~"feature::maintenance" ~tooling ~"tooling::pipelines" ~"tooling::workflow" per https://docs.gitlab.com/ee/development/contributing/issue_workflow.html#type-labels
-
-DevOps stage - for example ~"devops::secure" 
-
-Group - for example ~"group::composition analysis"
-
-Category - for example ~"Category:Dependency Scanning"
-<!--  Label reminders - you should have one of each of the following labels if you can figure out the correct ones! -->
-/label ~"devops:: 
-/label ~"group::
-/label ~"Category:
+<!-- Label reminders - you should have one of each of the following labels.
+Use the following resources to find the appropriate labels:
+- https://gitlab.com/gitlab-org/gitlab/-/labels
+- https://about.gitlab.com/handbook/product/categories/features/
+-->
+/label ~devops:: ~group: ~Category:
 
 /label ~feature

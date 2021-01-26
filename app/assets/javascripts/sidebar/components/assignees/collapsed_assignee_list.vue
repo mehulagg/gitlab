@@ -1,5 +1,5 @@
 <script>
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import CollapsedAssignee from './collapsed_assignee.vue';
 
@@ -12,6 +12,7 @@ export default {
   },
   components: {
     CollapsedAssignee,
+    GlIcon,
   },
   props: {
     users: {
@@ -38,7 +39,7 @@ export default {
       return this.users.length > 2;
     },
     allAssigneesCanMerge() {
-      return this.users.every(user => user.can_merge);
+      return this.users.every((user) => user.can_merge);
     },
     sidebarAvatarCounter() {
       if (this.users.length > DEFAULT_MAX_COUNTER) {
@@ -57,7 +58,7 @@ export default {
         return '';
       }
 
-      const mergeLength = this.users.filter(u => u.can_merge).length;
+      const mergeLength = this.users.filter((u) => u.can_merge).length;
 
       if (mergeLength === this.users.length) {
         return '';
@@ -73,7 +74,7 @@ export default {
     tooltipTitle() {
       const maxRender = Math.min(DEFAULT_RENDER_COUNT, this.users.length);
       const renderUsers = this.users.slice(0, maxRender);
-      const names = renderUsers.map(u => u.name);
+      const names = renderUsers.map((u) => u.name);
 
       if (!this.users.length) {
         return __('Assignee(s)');
@@ -102,7 +103,7 @@ export default {
     :title="tooltipTitle"
     class="sidebar-collapsed-icon sidebar-collapsed-user"
   >
-    <i v-if="hasNoUsers" :aria-label="__('None')" class="fa fa-user"> </i>
+    <gl-icon v-if="hasNoUsers" name="user" :aria-label="__('None')" />
     <collapsed-assignee
       v-for="user in collapsedUsers"
       :key="user.id"
@@ -111,11 +112,12 @@ export default {
     />
     <button v-if="hasMoreThanTwoAssignees" class="btn-link" type="button">
       <span class="avatar-counter sidebar-avatar-counter"> {{ sidebarAvatarCounter }} </span>
-      <i
+      <gl-icon
         v-if="isMergeRequest && !allAssigneesCanMerge"
+        name="warning-solid"
         aria-hidden="true"
-        class="fa fa-exclamation-triangle merge-icon"
-      ></i>
+        class="merge-icon"
+      />
     </button>
   </div>
 </template>

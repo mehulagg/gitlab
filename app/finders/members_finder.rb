@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class MembersFinder
+  RELATIONS = %i(direct inherited descendants invited_groups).freeze
+  DEFAULT_RELATIONS = %i(direct inherited).freeze
+
   # Params can be any of the following:
   #   sort:       string
   #   search:     string
@@ -13,7 +16,7 @@ class MembersFinder
     @params = params
   end
 
-  def execute(include_relations: [:inherited, :direct])
+  def execute(include_relations: DEFAULT_RELATIONS)
     members = find_members(include_relations)
 
     filter_members(members)
@@ -56,24 +59,24 @@ class MembersFinder
   def group_union_members(include_relations)
     [].tap do |members|
       members << direct_group_members(include_relations.include?(:descendants)) if group
-      members << project_invited_groups_members if include_relations.include?(:invited_groups_members)
+      members << project_invited_groups if include_relations.include?(:invited_groups)
     end
   end
 
   def direct_group_members(include_descendants)
     requested_relations = [:inherited, :direct]
     requested_relations << :descendants if include_descendants
-    GroupMembersFinder.new(group).execute(include_relations: requested_relations).non_invite # rubocop: disable CodeReuse/Finder
+    GroupMembersFinder.new(group).execute(include_relations: requested_relations).non_invite.non_minimal_access # rubocop: disable CodeReuse/Finder
   end
 
-  def project_invited_groups_members
+  def project_invited_groups
     invited_groups_ids_including_ancestors = Gitlab::ObjectHierarchy
       .new(project.invited_groups)
       .base_and_ancestors
       .public_or_visible_to_user(current_user)
       .select(:id)
 
-    GroupMember.with_source_id(invited_groups_ids_including_ancestors)
+    GroupMember.with_source_id(invited_groups_ids_including_ancestors).non_minimal_access
   end
 
   def distinct_union_of_members(union_members)

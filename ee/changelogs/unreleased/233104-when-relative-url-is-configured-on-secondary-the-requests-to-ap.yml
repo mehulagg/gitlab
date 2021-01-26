@@ -1,5 +1,0 @@
----
-title: Fix GraphQL for read-only instances with relative URLs
-merge_request: 38402
-author:
-type: fixed

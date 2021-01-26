@@ -18,7 +18,7 @@ const groupPageInfo = ({ page, nextPage, total, totalPages }) => ({
  * @param {{headers}} res
  * @returns {*}
  */
-const getHeaders = res => res.headers;
+const getHeaders = (res) => res.headers;
 
 /**
  * Takes an XHR-response object and returns an object containing pagination related
@@ -27,12 +27,7 @@ const getHeaders = res => res.headers;
  * @param {{headers}}
  * @returns {{pageInfo: {}}}
  */
-const pageInfo = flow(
-  getHeaders,
-  normalizeHeaders,
-  parseIntPagination,
-  groupPageInfo,
-);
+const pageInfo = flow(getHeaders, normalizeHeaders, parseIntPagination, groupPageInfo);
 
 /**
  * Takes an XHR-response object and adds pagination related data do it
@@ -41,6 +36,6 @@ const pageInfo = flow(
  * @param {Object} res
  * @return {Object}
  */
-const addPageInfo = res => (res?.headers ? { ...res, ...pageInfo(res) } : res);
+const addPageInfo = (res) => (res?.headers ? { ...res, ...pageInfo(res) } : res);
 
 export default addPageInfo;

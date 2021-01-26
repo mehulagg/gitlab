@@ -1,5 +1,5 @@
 import Api from 'ee/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import { __, sprintf } from '~/locale';
 import {
@@ -54,8 +54,13 @@ export const fetchReplicableItemsGraphQl = ({ state, dispatch }, direction) => {
       query: buildReplicableTypeQuery(state.graphqlFieldName),
       variables: { first, last, before, after },
     })
-    .then(res => {
-      const registries = res.data.geoNode.packageFileRegistries;
+    .then((res) => {
+      if (!res.data.geoNode || !(state.graphqlFieldName in res.data.geoNode)) {
+        dispatch('receiveReplicableItemsSuccess', { data: [], pagination: null });
+        return;
+      }
+
+      const registries = res.data.geoNode[state.graphqlFieldName];
       const data = registries.nodes;
       const pagination = {
         ...registries.pageInfo,
@@ -81,7 +86,7 @@ export const fetchReplicableItemsRestful = ({ state, dispatch }) => {
   };
 
   Api.getGeoReplicableItems(state.replicableType, query)
-    .then(res => {
+    .then((res) => {
       const normalizedHeaders = normalizeHeaders(res.headers);
       const pagination = parseIntPagination(normalizedHeaders);
       const data = convertObjectPropsToCamelCase(res.data, { deep: true });

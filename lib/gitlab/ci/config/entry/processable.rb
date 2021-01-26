@@ -102,7 +102,7 @@ module Gitlab
             last_rule = rules_value.last
 
             if last_rule&.keys == [:when] && last_rule[:when] != 'never'
-              docs_url = 'read more: https://docs.gitlab.com/ee/ci/yaml/README.html#differences-between-rules-and-onlyexcept'
+              docs_url = 'read more: https://docs.gitlab.com/ee/ci/troubleshooting.html#pipeline-warnings'
               add_warning("may allow multiple pipelines to run for a single action due to `rules:when` clause with no `workflow:rules` - #{docs_url}")
             end
           end
@@ -135,6 +135,10 @@ module Gitlab
             end
 
             root_variables.merge(variables_value.to_h)
+          end
+
+          def manual_action?
+            self.when == 'manual'
           end
         end
       end

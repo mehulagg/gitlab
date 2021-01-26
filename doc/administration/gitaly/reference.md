@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -66,7 +66,7 @@ token = "the secret token"
 transitioning = true
 ```
 
-CAUTION: **Warning:**
+WARNING:
 Remember to disable `transitioning` when you are done
 changing your token settings.
 
@@ -75,7 +75,7 @@ the `gitaly_authentications_total` metric.
 
 ### TLS
 
-Gitaly supports TLS encryption. You will need to bring your own certificates as
+Gitaly supports TLS encryption. You need to bring your own certificates as
 this isn't provided automatically.
 
 | Name | Type | Required | Description |
@@ -128,7 +128,7 @@ The following values can be set in the `[git]` section of the configuration file
 
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
-| `bin_path` | string | no | Path to Git binary. If not set, will be resolved using `PATH`. |
+| `bin_path` | string | no | Path to Git binary. If not set, is resolved using `PATH`. |
 | `catfile_cache_size` | integer | no | Maximum number of cached [cat-file processes](#cat-file-cache). Default is `100`. |
 
 #### `cat-file` cache
@@ -138,8 +138,8 @@ Most of the time we use `git cat-file --batch` processes for that. For
 better performance, Gitaly can re-use these `git cat-file` processes
 across RPC calls. Previously used processes are kept around in a
 ["Git cat-file cache"](https://about.gitlab.com/blog/2019/07/08/git-performance-on-nfs/#enter-cat-file-cache).
-In order to control how much system resources this uses, we have a maximum number
-of cat-file processes that can go into the cache.
+To control how much system resources this uses, we have a maximum number of
+cat-file processes that can go into the cache.
 
 The default limit is 100 `cat-file`s, which constitute a pair of
 `git cat-file --batch` and `git cat-file --batch-check` processes. If
@@ -192,8 +192,8 @@ For historical reasons
 [GitLab Shell](https://gitlab.com/gitlab-org/gitlab-shell) contains
 the Git hooks that allow GitLab to validate and react to Git pushes.
 Because Gitaly "owns" Git pushes, GitLab Shell must therefore be
-installed alongside Gitaly. This will be [simplified in the
-future](https://gitlab.com/gitlab-org/gitaly/-/issues/1226).
+installed alongside Gitaly. We plan to
+[simplify this](https://gitlab.com/gitlab-org/gitaly/-/issues/1226).
 
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
@@ -233,14 +233,16 @@ The following values configure logging in Gitaly under the `[logging]` section.
 | `format` | string | no | Log format: `text` or `json`. Default: `text`. |
 | `level`  | string | no | Log level: `debug`, `info`, `warn`, `error`, `fatal`, or `panic`. Default: `info`. |
 | `sentry_dsn` | string | no | Sentry DSN for exception monitoring. |
-| `sentry_environment` | string | no | [Sentry Environment](https://docs.sentry.io/enriching-error-data/environments/) for exception monitoring. |
+| `sentry_environment` | string | no | [Sentry Environment](https://docs.sentry.io/product/sentry-basics/environments/) for exception monitoring. |
 | `ruby_sentry_dsn` | string | no | Sentry DSN for `gitaly-ruby` exception monitoring. |
 
 While the main Gitaly application logs go to `stdout`, there are some extra log
 files that go to a configured directory, like the GitLab Shell logs.
-GitLab Shell does not support `panic` or `trace` level logs. `panic` will fall
-back to `error`, while `trace` will fall back to `debug`. Any other invalid log
-levels will default to `info`.
+GitLab Shell does not support `panic` or `trace` level logs:
+
+- `panic` falls back to `error`.
+- `trace` falls back to `debug`.
+- Any other invalid log levels default to `info`.
 
 Example:
 

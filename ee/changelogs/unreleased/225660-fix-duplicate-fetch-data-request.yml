@@ -1,5 +1,0 @@
----
-title: Fix duplicate dispatch of 'fetchCycleAnalyticsData' action
-merge_request: 37458
-author:
-type: fixed

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 module API
-  class MavenPackages < Grape::API::Instance
+  class MavenPackages < ::API::Base
     MAVEN_ENDPOINT_REQUIREMENTS = {
       file_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
+
+    feature_category :package_registry
 
     content_type :md5, 'text/plain'
     content_type :sha1, 'text/plain'
@@ -32,10 +34,10 @@ module API
       end
 
       def verify_package_file(package_file, uploaded_file)
-        stored_sha1 = Digest::SHA256.hexdigest(package_file.file_sha1)
-        expected_sha1 = uploaded_file.sha256
+        stored_sha256 = Digest::SHA256.hexdigest(package_file.file_sha1)
+        expected_sha256 = uploaded_file.sha256
 
-        if stored_sha1 == expected_sha1
+        if stored_sha256 == expected_sha256
           no_content!
         else
           conflict!
@@ -107,7 +109,7 @@ module API
       when 'sha1'
         package_file.file_sha1
       else
-        track_event('pull_package') if jar_file?(format)
+        track_package_event('pull_package', :maven) if jar_file?(format)
         present_carrierwave_file_with_head_support!(package_file.file)
       end
     end
@@ -145,7 +147,7 @@ module API
         when 'sha1'
           package_file.file_sha1
         else
-          track_event('pull_package') if jar_file?(format)
+          track_package_event('pull_package', :maven) if jar_file?(format)
 
           present_carrierwave_file_with_head_support!(package_file.file)
         end
@@ -181,7 +183,7 @@ module API
         when 'sha1'
           package_file.file_sha1
         else
-          track_event('pull_package') if jar_file?(format)
+          track_package_event('pull_package', :maven) if jar_file?(format)
 
           present_carrierwave_file_with_head_support!(package_file.file)
         end
@@ -200,7 +202,7 @@ module API
 
         status 200
         content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
-        ::Packages::PackageFileUploader.workhorse_authorize(has_length: true)
+        ::Packages::PackageFileUploader.workhorse_authorize(has_length: true, maximum_size: user_project.actual_limits.maven_max_file_size)
       end
 
       desc 'Upload the maven package file' do
@@ -214,11 +216,16 @@ module API
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       put ':id/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
         authorize_upload!
+        bad_request!('File is too large') if user_project.actual_limits.exceeded?(:maven_max_file_size, params[:file].size)
 
         file_name, format = extract_format(params[:file_name])
 
-        package = ::Packages::Maven::FindOrCreatePackageService
+        result = ::Packages::Maven::FindOrCreatePackageService
           .new(user_project, current_user, params.merge(build: current_authenticated_job)).execute
+
+        bad_request!(result.errors.first) if result.error?
+
+        package = result.payload[:package]
 
         case format
         when 'sha1'
@@ -230,9 +237,9 @@ module API
 
           verify_package_file(package_file, params[:file])
         when 'md5'
-          nil
+          ''
         else
-          track_event('push_package') if jar_file?(format)
+          track_package_event('push_package', :maven) if jar_file?(format)
 
           file_params = {
             file:      params[:file],
@@ -243,7 +250,7 @@ module API
             file_md5:  params['file.md5']
           }
 
-          ::Packages::CreatePackageFileService.new(package, file_params).execute
+          ::Packages::CreatePackageFileService.new(package, file_params.merge(build: current_authenticated_job)).execute
         end
       end
     end

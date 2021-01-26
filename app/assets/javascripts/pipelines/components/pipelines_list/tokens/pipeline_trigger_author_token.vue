@@ -3,12 +3,12 @@ import {
   GlFilteredSearchToken,
   GlAvatar,
   GlFilteredSearchSuggestion,
-  GlDeprecatedDropdownDivider,
+  GlDropdownDivider,
   GlLoadingIcon,
 } from '@gitlab/ui';
-import Api from '~/api';
-import createFlash from '~/flash';
 import { debounce } from 'lodash';
+import Api from '~/api';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   ANY_TRIGGER_AUTHOR,
   FETCH_AUTHOR_ERROR_MESSAGE,
@@ -21,7 +21,7 @@ export default {
     GlFilteredSearchToken,
     GlAvatar,
     GlFilteredSearchSuggestion,
-    GlDeprecatedDropdownDivider,
+    GlDropdownDivider,
     GlLoadingIcon,
   },
   props: {
@@ -45,7 +45,7 @@ export default {
       return this.value.data.toLowerCase();
     },
     activeUser() {
-      return this.users.find(user => {
+      return this.users.find((user) => {
         return user.username.toLowerCase() === this.currentValue;
       });
     },
@@ -56,11 +56,11 @@ export default {
   methods: {
     fetchProjectUsers(searchTerm) {
       Api.projectUsers(this.config.projectId, searchTerm)
-        .then(users => {
+        .then((users) => {
           this.users = users;
           this.loading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           createFlash(FETCH_AUTHOR_ERROR_MESSAGE);
           this.loading = false;
           throw err;
@@ -80,7 +80,7 @@ export default {
     v-on="$listeners"
     @input="searchAuthors"
   >
-    <template #view="{inputValue}">
+    <template #view="{ inputValue }">
       <gl-avatar
         v-if="activeUser"
         :size="16"
@@ -94,7 +94,7 @@ export default {
       <gl-filtered-search-suggestion :value="$options.anyTriggerAuthor">{{
         $options.anyTriggerAuthor
       }}</gl-filtered-search-suggestion>
-      <gl-deprecated-dropdown-divider />
+      <gl-dropdown-divider />
 
       <gl-loading-icon v-if="loading" />
       <template v-else>

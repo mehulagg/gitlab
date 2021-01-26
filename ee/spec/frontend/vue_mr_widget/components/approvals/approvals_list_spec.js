@@ -1,14 +1,15 @@
 import { shallowMount } from '@vue/test-utils';
-import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
-const testApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
+const testApprovers = () => Array.from({ length: 11 }, (_, i) => i).map((id) => ({ id }));
 const testRuleApproved = () => ({
   id: 1,
   name: 'Lorem',
   approvals_required: 2,
   approved_by: [{ id: 1 }, { id: 2 }, { id: 3 }],
+  commented_by: [{ id: 1 }, { id: 2 }, { id: 3 }],
   approvers: testApprovers(),
   approved: true,
 });
@@ -17,6 +18,7 @@ const testRuleUnapproved = () => ({
   name: 'Ipsum',
   approvals_required: 1,
   approved_by: [],
+  commented_by: [],
   approvers: testApprovers(),
   approved: false,
 });
@@ -25,6 +27,7 @@ const testRuleOptional = () => ({
   name: 'Dolar',
   approvals_required: 0,
   approved_by: [{ id: 1 }],
+  commented_by: [{ id: 1 }],
   approvers: testApprovers(),
   approved: false,
 });
@@ -35,6 +38,7 @@ const testRuleFallback = () => ({
   rule_type: 'any_approver',
   approvals_required: 3,
   approved_by: [{ id: 1 }, { id: 2 }],
+  commented_by: [{ id: 1 }, { id: 2 }],
   approvers: [],
   approved: false,
 });
@@ -44,6 +48,7 @@ const testRuleCodeOwner = () => ({
   fallback: true,
   approvals_required: 3,
   approved_by: [{ id: 1 }, { id: 2 }],
+  commented_by: [{ id: 1 }, { id: 2 }],
   approvers: [],
   approved: false,
   rule_type: 'code_owner',
@@ -54,15 +59,22 @@ const testRules = () => [testRuleApproved(), testRuleUnapproved(), testRuleOptio
 describe('EE MRWidget approvals list', () => {
   let wrapper;
 
-  const createComponent = (props = {}) => {
+  const createComponent = (props = {}, options = {}) => {
+    const { approvalsCommentedBy = true } = options;
+
     wrapper = shallowMount(ApprovalsList, {
       propsData: props,
+      provide: {
+        glFeatures: {
+          approvalsCommentedBy,
+        },
+      },
     });
   };
 
   const findRows = () => wrapper.findAll('tbody tr');
   const findRowElement = (row, name) => row.find(`.js-${name}`);
-  const findRowIcon = row => row.find(ApprovedIcon);
+  const findRowIcon = (row) => row.find(ApprovedIcon);
 
   afterEach(() => {
     wrapper.destroy();
@@ -79,10 +91,10 @@ describe('EE MRWidget approvals list', () => {
     it('renders a row for each rule', () => {
       const expected = testRules();
       const rows = findRows();
-      const names = rows.wrappers.map(row => findRowElement(row, 'name').text());
+      const names = rows.wrappers.map((row) => findRowElement(row, 'name').text());
 
       expect(rows).toHaveLength(expected.length);
-      expect(names).toEqual(expected.map(x => x.name));
+      expect(names).toEqual(expected.map((x) => x.name));
     });
 
     it('does not render a code owner subtitle', () => {
@@ -165,6 +177,18 @@ describe('EE MRWidget approvals list', () => {
       );
     });
 
+    it('renders commented by user avatar list', () => {
+      const commentedRow = findRowElement(row, 'commented-by');
+      const commentedBy = commentedRow.find(UserAvatarList);
+
+      expect(commentedBy.props()).toEqual(
+        expect.objectContaining({
+          items: rule.commented_by,
+          emptyText: '',
+        }),
+      );
+    });
+
     describe('summary text', () => {
       let summary;
 
@@ -191,10 +215,19 @@ describe('EE MRWidget approvals list', () => {
         );
       });
 
-      it('renders approved by list', () => {
-        const approvedBy = summary.findAll(UserAvatarList).at(1);
+      it('renders commented by list', () => {
+        const commentedBy = summary.findAll(UserAvatarList).at(1);
 
-        expect(approvedBy.exists()).toBe(true);
+        expect(commentedBy.props()).toEqual(
+          expect.objectContaining({
+            items: rule.commented_by,
+          }),
+        );
+      });
+
+      it('renders approved by list', () => {
+        const approvedBy = summary.findAll(UserAvatarList).at(2);
+
         expect(approvedBy.props()).toEqual(
           expect.objectContaining({
             items: rule.approved_by,
@@ -281,8 +314,9 @@ describe('EE MRWidget approvals list', () => {
       const summary = findRowElement(row, 'summary');
       const lists = summary.findAll(UserAvatarList);
 
-      expect(lists).toHaveLength(1);
-      expect(lists.at(0).props('items')).toEqual(rule.approved_by);
+      expect(lists).toHaveLength(2);
+      expect(lists.at(0).props('items')).toEqual(rule.commented_by);
+      expect(lists.at(1).props('items')).toEqual(rule.approved_by);
     });
   });
 
@@ -316,7 +350,7 @@ describe('EE MRWidget approvals list', () => {
     it('renders the name in a monospace font', () => {
       const codeOwnerRow = findRowElement(row, 'name');
 
-      expect(codeOwnerRow.find('.monospace').exists()).toEqual(true);
+      expect(codeOwnerRow.find('.gl-font-monospace').exists()).toEqual(true);
       expect(codeOwnerRow.text()).toContain(rule.name);
     });
 
@@ -325,6 +359,37 @@ describe('EE MRWidget approvals list', () => {
 
       expect(ruleSection.at(0).text()).toEqual(ruleDocsSection.section);
       expect(ruleSection.at(1).text()).toEqual(rule.section);
+    });
+  });
+
+  describe('approvalsCommentedBy feature flag is off', () => {
+    let row;
+
+    beforeEach(() => {
+      const rule = testRuleApproved();
+      createComponent(
+        {
+          approvalRules: [rule],
+        },
+        { approvalsCommentedBy: false },
+      );
+      row = findRows().at(0);
+    });
+
+    it('does not render commented by in table head', () => {
+      expect(wrapper.find('thead').text()).not.toContain('Commented by');
+    });
+
+    it('does not render commented by in summary text', () => {
+      const summary = findRowElement(row, 'summary');
+
+      expect(summary.findAll(UserAvatarList).length).toBe(2);
+    });
+
+    it('does not render commented by in user avatar list', () => {
+      const commentedBy = findRowElement(row, 'commented-by');
+
+      expect(commentedBy.exists()).toBe(false);
     });
   });
 });

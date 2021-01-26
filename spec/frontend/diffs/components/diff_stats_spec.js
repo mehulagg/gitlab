@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlIcon } from '@gitlab/ui';
 import DiffStats from '~/diffs/components/diff_stats.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const TEST_ADDED_LINES = 100;
 const TEST_REMOVED_LINES = 200;
@@ -39,7 +39,7 @@ describe('diff_stats', () => {
   });
 
   describe('line changes', () => {
-    const findFileLine = name => wrapper.find(name);
+    const findFileLine = (name) => wrapper.find(name);
 
     it('shows the amount of lines added', () => {
       expect(findFileLine('.js-file-addition-line').text()).toBe(TEST_ADDED_LINES.toString());
@@ -51,10 +51,10 @@ describe('diff_stats', () => {
   });
 
   describe('files changes', () => {
-    const findIcon = name =>
+    const findIcon = (name) =>
       wrapper
-        .findAll(Icon)
-        .filter(c => c.attributes('name') === name)
+        .findAll(GlIcon)
+        .filter((c) => c.attributes('name') === name)
         .at(0).element.parentNode;
 
     it('shows amount of file changed with plural "files" when 0 files has changed', () => {

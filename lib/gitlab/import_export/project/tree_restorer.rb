@@ -70,7 +70,7 @@ module Gitlab
         end
 
         def relation_tree_restorer
-          @relation_tree_restorer ||= RelationTreeRestorer.new(
+          @relation_tree_restorer ||= relation_tree_restorer_class.new(
             user: @user,
             shared: @shared,
             relation_reader: relation_reader,
@@ -82,6 +82,10 @@ module Gitlab
             importable_attributes: @project_attributes,
             importable_path: importable_path
           )
+        end
+
+        def relation_tree_restorer_class
+          RelationTreeRestorer
         end
 
         def members_mapper

@@ -8,7 +8,7 @@ import {
   GlFormInput,
 } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     labelIds() {
-      return this.labels.map(label => label.id);
+      return this.labels.map((label) => label.id);
     },
   },
   i18n: {
@@ -102,7 +102,7 @@ export default {
       const ids = [];
       const allLabels = [...labels, ...this.labels];
 
-      this.labels = allLabels.filter(label => {
+      this.labels = allLabels.filter((label) => {
         const exists = ids.includes(label.id);
         ids.push(label.id);
 
@@ -118,12 +118,13 @@ export default {
     <h3 class="page-title gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-pb-5 gl-mb-6">
       {{ __('New Epic') }}
     </h3>
-    <gl-form class="common-note-form new-epic-form" @submit="save">
+    <gl-form class="common-note-form new-epic-form" @submit.prevent="save">
       <gl-form-group :label="__('Title')" label-for="epic-title">
         <gl-form-input
           id="epic-title"
           v-model="title"
           data-testid="epic-title"
+          data-qa-selector="epic_title_field"
           :placeholder="s__('Epics|Enter a title for your epic')"
           autocomplete="off"
           autofocus
@@ -162,6 +163,7 @@ export default {
           id="epic-confidentiality"
           v-model="confidential"
           data-testid="epic-confidentiality"
+          data-qa-selector="confidential_epic_checkbox"
         >
           {{ $options.i18n.confidentialityLabel }}
         </gl-form-checkbox>
@@ -226,6 +228,7 @@ export default {
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"
+          data-qa-selector="create_epic_button"
         >
           {{ __('Create epic') }}
         </gl-button>

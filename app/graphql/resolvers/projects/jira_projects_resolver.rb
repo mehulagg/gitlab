@@ -5,10 +5,13 @@ module Resolvers
     class JiraProjectsResolver < BaseResolver
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
+      type Types::Projects::Services::JiraProjectType.connection_type, null: true
+      authorize :admin_project
+
       argument :name,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'Project name or key'
+               description: 'Project name or key.'
 
       def resolve(name: nil, **args)
         authorize!(project)
@@ -22,15 +25,11 @@ module Resolvers
             projects_array,
             # override default max_page_size to whatever the size of the response is,
             # see https://gitlab.com/gitlab-org/gitlab/-/issues/231394
-            args.merge({ max_page_size: projects_array.size })
+            **args.merge({ max_page_size: projects_array.size })
           )
         else
           raise Gitlab::Graphql::Errors::BaseError, response.message
         end
-      end
-
-      def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
       end
 
       private

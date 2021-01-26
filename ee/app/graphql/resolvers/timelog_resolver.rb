@@ -2,23 +2,27 @@
 
 module Resolvers
   class TimelogResolver < BaseResolver
+    include LooksAhead
+
+    type ::Types::TimelogType.connection_type, null: false
+
     argument :start_date, Types::TimeType,
               required: false,
-              description: 'List time logs within a date range where the logged date is equal to or after startDate'
+              description: 'List time logs within a date range where the logged date is equal to or after startDate.'
 
     argument :end_date, Types::TimeType,
               required: false,
-              description: 'List time logs within a date range where the logged date is equal to or before endDate'
+              description: 'List time logs within a date range where the logged date is equal to or before endDate.'
 
     argument :start_time, Types::TimeType,
               required: false,
-              description: 'List time-logs within a time range where the logged time is equal to or after startTime'
+              description: 'List time-logs within a time range where the logged time is equal to or after startTime.'
 
     argument :end_time, Types::TimeType,
               required: false,
-              description: 'List time-logs within a time range where the logged time is equal to or before endTime'
+              description: 'List time-logs within a time range where the logged time is equal to or before endTime.'
 
-    def resolve(**args)
+    def resolve_with_lookahead(**args)
       return Timelog.none unless timelogs_available_for_user?
 
       validate_params_presence!(args)
@@ -30,8 +34,14 @@ module Resolvers
 
     private
 
+    def preloads
+      {
+        note: [:note]
+      }
+    end
+
     def find_timelogs(args)
-      group.timelogs(args[:start_time], args[:end_time])
+      apply_lookahead(group.timelogs(args[:start_time], args[:end_time]))
     end
 
     def timelogs_available_for_user?

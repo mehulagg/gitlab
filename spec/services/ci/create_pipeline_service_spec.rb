@@ -6,7 +6,7 @@ RSpec.describe Ci::CreatePipelineService do
   include ProjectForksHelper
 
   let_it_be(:project, reload: true) { create(:project, :repository) }
-  let(:user) { create(:admin) }
+  let_it_be(:user, reload: true) { project.owner }
   let(:ref_name) { 'refs/heads/master' }
 
   before do
@@ -41,7 +41,9 @@ RSpec.describe Ci::CreatePipelineService do
         save_on_errors: save_on_errors,
         trigger_request: trigger_request,
         merge_request: merge_request,
-        external_pull_request: external_pull_request)
+        external_pull_request: external_pull_request) do |pipeline|
+        yield(pipeline) if block_given?
+      end
     end
     # rubocop:enable Metrics/ParameterLists
 
@@ -89,10 +91,28 @@ RSpec.describe Ci::CreatePipelineService do
           .with({ source: 'push' }, 5)
       end
 
+      it 'tracks included template usage' do
+        expect_next_instance_of(Gitlab::Ci::Pipeline::Chain::TemplateUsage) do |instance|
+          expect(instance).to receive(:perform!)
+        end
+
+        execute_service
+      end
+
+      describe 'recording a conversion event' do
+        it 'schedules a record conversion event worker' do
+          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:ci_syntax_templates, user.id)
+          expect(Experiments::RecordConversionEventWorker).to receive(:perform_async).with(:pipelines_empty_state, user.id)
+
+          pipeline
+        end
+      end
+
       context 'when merge requests already exist for this source branch' do
         let(:merge_request_1) do
           create(:merge_request, source_branch: 'feature', target_branch: "master", source_project: project)
         end
+
         let(:merge_request_2) do
           create(:merge_request, source_branch: 'feature', target_branch: "v1.1.0", source_project: project)
         end
@@ -152,6 +172,11 @@ RSpec.describe Ci::CreatePipelineService do
         context 'when merge request target project is different from source project' do
           let!(:project) { fork_project(target_project, nil, repository: true) }
           let!(:target_project) { create(:project, :repository) }
+          let!(:user) { create(:user) }
+
+          before do
+            project.add_developer(user)
+          end
 
           it 'updates head pipeline for merge request', :sidekiq_might_not_need_inline do
             merge_request = create(:merge_request, source_branch: 'feature',
@@ -222,7 +247,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel enabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'enabled')
+          project.update!(auto_cancel_pending_pipelines: 'enabled')
         end
 
         it 'does not cancel HEAD pipeline' do
@@ -247,7 +272,7 @@ RSpec.describe Ci::CreatePipelineService do
         end
 
         it 'cancel created outdated pipelines', :sidekiq_might_not_need_inline do
-          pipeline_on_previous_commit.update(status: 'created')
+          pipeline_on_previous_commit.update!(status: 'created')
           pipeline
 
           expect(pipeline_on_previous_commit.reload).to have_attributes(status: 'canceled', auto_canceled_by_id: pipeline.id)
@@ -438,7 +463,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel disabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'disabled')
+          project.update!(auto_cancel_pending_pipelines: 'disabled')
         end
 
         it 'does not auto cancel pending non-HEAD pipelines' do
@@ -473,6 +498,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       expect(execute_service).not_to be_persisted
       expect(Ci::Pipeline.count).to eq(0)
+      expect(Namespaces::OnboardingPipelineCreatedWorker).not_to receive(:perform_async)
     end
 
     shared_examples 'a failed pipeline' do
@@ -512,7 +538,7 @@ RSpec.describe Ci::CreatePipelineService do
         it 'pull it from Auto-DevOps' do
           pipeline = execute_service
           expect(pipeline).to be_auto_devops_source
-          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch secrets-sast test])
+          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
         end
       end
 
@@ -730,30 +756,11 @@ RSpec.describe Ci::CreatePipelineService do
             .and_call_original
         end
 
-        context 'when ci_pipeline_rewind_iid is enabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: true)
-          end
+        it 'rewinds iid' do
+          result = execute_service
 
-          it 'rewinds iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(0)
-          end
-        end
-
-        context 'when ci_pipeline_rewind_iid is disabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: false)
-          end
-
-          it 'does not rewind iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(1)
-          end
+          expect(result).not_to be_persisted
+          expect(internal_id.last_value).to eq(0)
         end
       end
     end
@@ -1429,6 +1436,13 @@ RSpec.describe Ci::CreatePipelineService do
               pipeline
             end
 
+            it 'schedules a namespace onboarding create action worker' do
+              expect(Namespaces::OnboardingPipelineCreatedWorker)
+                .to receive(:perform_async).with(project.namespace_id)
+
+              pipeline
+            end
+
             context 'when target sha is specified' do
               let(:target_sha) { merge_request.target_branch_sha }
 
@@ -1458,6 +1472,11 @@ RSpec.describe Ci::CreatePipelineService do
               let(:ref_name) { 'refs/heads/feature' }
               let!(:project) { fork_project(target_project, nil, repository: true) }
               let!(:target_project) { create(:project, :repository) }
+              let!(:user) { create(:user) }
+
+              before do
+                project.add_developer(user)
+              end
 
               it 'creates a legacy detached merge request pipeline in the forked project', :sidekiq_might_not_need_inline do
                 expect(pipeline).to be_persisted
@@ -1691,16 +1710,25 @@ RSpec.describe Ci::CreatePipelineService do
       context 'when pipeline on feature is created' do
         let(:ref_name) { 'refs/heads/feature' }
 
+        shared_examples 'has errors' do
+          it 'contains the expected errors' do
+            expect(pipeline.builds).to be_empty
+
+            error_message = "'test_a' job needs 'build_a' job, but it was not added to the pipeline"
+            expect(pipeline.yaml_errors).to eq(error_message)
+            expect(pipeline.error_messages.map(&:content)).to contain_exactly(error_message)
+            expect(pipeline.errors[:base]).to contain_exactly(error_message)
+          end
+        end
+
         context 'when save_on_errors is enabled' do
           let(:pipeline) { execute_service(save_on_errors: true) }
 
           it 'does create a pipeline as test_a depends on build_a' do
             expect(pipeline).to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
-            expect(pipeline.messages.pluck(:content)).to contain_exactly("test_a: needs 'build_a'")
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
 
         context 'when save_on_errors is disabled' do
@@ -1708,11 +1736,9 @@ RSpec.describe Ci::CreatePipelineService do
 
           it 'does not create a pipeline as test_a depends on build_a' do
             expect(pipeline).not_to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to be_nil
-            expect(pipeline.messages).not_to be_empty
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
       end
 
@@ -1871,6 +1897,12 @@ RSpec.describe Ci::CreatePipelineService do
                 - changes:
                   - README.md
                   allow_failure: true
+
+            README:
+              script: "I use variables for changes!"
+              rules:
+                - changes:
+                  - $CI_JOB_NAME*
           EOY
         end
 
@@ -1880,10 +1912,10 @@ RSpec.describe Ci::CreatePipelineService do
               .to receive(:modified_paths).and_return(%w[README.md])
           end
 
-          it 'creates two jobs' do
+          it 'creates five jobs' do
             expect(pipeline).to be_persisted
             expect(build_names)
-              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job')
+              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job', 'README')
           end
 
           it 'sets when: for all jobs' do
@@ -2283,6 +2315,167 @@ RSpec.describe Ci::CreatePipelineService do
               Timecop.freeze(2020, 4, 10, 23, 1) do
                 expect(pipeline).not_to be_persisted
               end
+            end
+          end
+        end
+      end
+
+      context 'with workflow rules with persisted variables' do
+        let(:config) do
+          <<-EOY
+            workflow:
+              rules:
+                - if: $CI_COMMIT_REF_NAME == "master"
+
+            regular-job:
+              script: 'echo Hello, World!'
+          EOY
+        end
+
+        context 'with matches' do
+          it 'creates a pipeline' do
+            expect(pipeline).to be_persisted
+            expect(build_names).to contain_exactly('regular-job')
+          end
+        end
+
+        context 'with no matches' do
+          let(:ref_name) { 'refs/heads/feature' }
+
+          it 'does not create a pipeline' do
+            expect(pipeline).not_to be_persisted
+          end
+        end
+      end
+
+      context 'with workflow rules with pipeline variables' do
+        let(:pipeline) do
+          execute_service(variables_attributes: variables_attributes)
+        end
+
+        let(:config) do
+          <<-EOY
+            workflow:
+              rules:
+                - if: $SOME_VARIABLE
+
+            regular-job:
+              script: 'echo Hello, World!'
+          EOY
+        end
+
+        context 'with matches' do
+          let(:variables_attributes) do
+            [{ key: 'SOME_VARIABLE', secret_value: 'SOME_VAR' }]
+          end
+
+          it 'creates a pipeline' do
+            expect(pipeline).to be_persisted
+            expect(build_names).to contain_exactly('regular-job')
+          end
+        end
+
+        context 'with no matches' do
+          let(:variables_attributes) { {} }
+
+          it 'does not create a pipeline' do
+            expect(pipeline).not_to be_persisted
+          end
+        end
+      end
+
+      context 'with workflow rules with trigger variables' do
+        let(:pipeline) do
+          execute_service do |pipeline|
+            pipeline.variables.build(variables)
+          end
+        end
+
+        let(:config) do
+          <<-EOY
+            workflow:
+              rules:
+                - if: $SOME_VARIABLE
+
+            regular-job:
+              script: 'echo Hello, World!'
+          EOY
+        end
+
+        context 'with matches' do
+          let(:variables) do
+            [{ key: 'SOME_VARIABLE', secret_value: 'SOME_VAR' }]
+          end
+
+          it 'creates a pipeline' do
+            expect(pipeline).to be_persisted
+            expect(build_names).to contain_exactly('regular-job')
+          end
+
+          context 'when a job requires the same variable' do
+            let(:config) do
+              <<-EOY
+                workflow:
+                  rules:
+                    - if: $SOME_VARIABLE
+
+                build:
+                  stage: build
+                  script: 'echo build'
+                  rules:
+                    - if: $SOME_VARIABLE
+
+                test1:
+                  stage: test
+                  script: 'echo test1'
+                  needs: [build]
+
+                test2:
+                  stage: test
+                  script: 'echo test2'
+              EOY
+            end
+
+            it 'creates a pipeline' do
+              expect(pipeline).to be_persisted
+              expect(build_names).to contain_exactly('build', 'test1', 'test2')
+            end
+          end
+        end
+
+        context 'with no matches' do
+          let(:variables) { {} }
+
+          it 'does not create a pipeline' do
+            expect(pipeline).not_to be_persisted
+          end
+
+          context 'when a job requires the same variable' do
+            let(:config) do
+              <<-EOY
+                workflow:
+                  rules:
+                    - if: $SOME_VARIABLE
+
+                build:
+                  stage: build
+                  script: 'echo build'
+                  rules:
+                    - if: $SOME_VARIABLE
+
+                test1:
+                  stage: test
+                  script: 'echo test1'
+                  needs: [build]
+
+                test2:
+                  stage: test
+                  script: 'echo test2'
+              EOY
+            end
+
+            it 'does not create a pipeline' do
+              expect(pipeline).not_to be_persisted
             end
           end
         end

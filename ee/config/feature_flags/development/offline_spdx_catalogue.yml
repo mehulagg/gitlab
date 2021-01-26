@@ -1,0 +1,8 @@
+---
+name: offline_spdx_catalogue
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38691
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/212388
+milestone: '13.3'
+type: development
+group: group::composition analysis
+default_enabled: true

@@ -63,10 +63,6 @@
 }
 
 .prometheus-graphs-header {
-  .monitor-environment-dropdown-header header {
-    font-size: $gl-font-size;
-  }
-
   .monitor-environment-dropdown-menu,
   .monitor-dashboard-dropdown-menu {
     &.show {
@@ -339,4 +335,12 @@
   fill: none;
   opacity: 0;
   pointer-events: all;
+}
+
+.prometheus-panel-builder {
+  .preview-date-time-picker {
+    // same as in .dropdown-menu-toggle
+    // see app/assets/stylesheets/framework/dropdowns.scss
+    width: 160px;
+  }
 }

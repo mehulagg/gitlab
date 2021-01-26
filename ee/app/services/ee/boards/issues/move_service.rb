@@ -8,9 +8,10 @@ module EE
 
         override :issue_params
         def issue_params(issue)
-          return super unless move_between_lists?
-
           args = super
+          args[:epic_id] = params[:epic_id] if params.has_key?(:epic_id)
+
+          return args unless move_between_lists?
 
           unless both_are_same_type? || !moving_to_list.movable?
             args.delete(:remove_label_ids)
@@ -33,19 +34,28 @@ module EE
           assignee_ids = assignee_ids(issue)
           milestone_id = milestone_id(issue)
 
-          {
+          movement_args = {
             assignee_ids: assignee_ids,
             milestone_id: milestone_id
           }
+
+          movement_args[:sprint_id] = iteration_id(issue) if ::Feature.enabled?(:iteration_board_lists, parent)
+
+          movement_args
         end
 
         def milestone_id(issue)
-          # We want to nullify the issue milestone.
           return if moving_to_list.backlog? && moving_from_list.milestone?
+          return moving_to_list.milestone_id if moving_to_list.milestone?
 
-          # Moving to a list which is not a 'milestone list' will keep
-          # the already existent milestone.
-          [issue.milestone_id, moving_to_list.milestone_id].compact.last
+          issue.milestone_id
+        end
+
+        def iteration_id(issue)
+          return if moving_to_list.backlog? && moving_from_list.iteration?
+          return moving_to_list.iteration_id if moving_to_list.iteration?
+
+          issue.sprint_id
         end
 
         def assignee_ids(issue)

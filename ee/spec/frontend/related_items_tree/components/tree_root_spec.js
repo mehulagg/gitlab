@@ -1,14 +1,13 @@
+import { GlButton } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
-
 import Draggable from 'vuedraggable';
+import Vuex from 'vuex';
 
 import TreeRoot from 'ee/related_items_tree/components/tree_root.vue';
 
+import { treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 
 import {
   mockQueryResponse,
@@ -410,13 +409,13 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders `Show more` link', () => {
-        expect(wrapper.find(GlDeprecatedButton).text()).toBe('Show more');
+        expect(wrapper.find(GlButton).text()).toBe('Show more');
       });
 
       it('calls `handleShowMoreClick` when `Show more` link is clicked', () => {
         jest.spyOn(wrapper.vm, 'handleShowMoreClick').mockImplementation(() => {});
 
-        wrapper.find(GlDeprecatedButton).vm.$emit('click');
+        wrapper.find(GlButton).vm.$emit('click');
 
         expect(wrapper.vm.handleShowMoreClick).toHaveBeenCalled();
       });

@@ -1,25 +1,35 @@
 import Vue from 'vue';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import Translate from '~/vue_shared/translate';
 import { __ } from '~/locale';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
-import pipelineGraph from './components/graph/graph_component.vue';
-import Dag from './components/dag/dag.vue';
+import PipelineGraphLegacy from './components/graph/graph_component_legacy.vue';
+import createDagApp from './pipeline_details_dag';
 import GraphBundleMixin from './mixins/graph_pipeline_bundle_mixin';
-import PipelinesMediator from './pipeline_details_mediator';
-import pipelineHeader from './components/header_component.vue';
+import legacyPipelineHeader from './components/legacy_header_component.vue';
 import eventHub from './event_hub';
 import TestReports from './components/test_reports/test_reports.vue';
 import createTestReportsStore from './stores/test_reports';
+import { reportToSentry } from './components/graph/utils';
 
 Vue.use(Translate);
 
-const createPipelinesDetailApp = mediator => {
+const SELECTORS = {
+  PIPELINE_DETAILS: '.js-pipeline-details-vue',
+  PIPELINE_GRAPH: '#js-pipeline-graph-vue',
+  PIPELINE_HEADER: '#js-pipeline-header-vue',
+  PIPELINE_TESTS: '#js-pipeline-tests-detail',
+};
+
+const createLegacyPipelinesDetailApp = (mediator) => {
+  if (!document.querySelector(SELECTORS.PIPELINE_GRAPH)) {
+    return;
+  }
   // eslint-disable-next-line no-new
   new Vue({
-    el: '#js-pipeline-graph-vue',
+    el: SELECTORS.PIPELINE_GRAPH,
     components: {
-      pipelineGraph,
+      PipelineGraphLegacy,
     },
     mixins: [GraphBundleMixin],
     data() {
@@ -27,8 +37,11 @@ const createPipelinesDetailApp = mediator => {
         mediator,
       };
     },
+    errorCaptured(err, _vm, info) {
+      reportToSentry('pipeline_details_bundle_legacy_details', `error: ${err}, info: ${info}`);
+    },
     render(createElement) {
-      return createElement('pipeline-graph', {
+      return createElement('pipeline-graph-legacy', {
         props: {
           isLoading: this.mediator.state.isLoading,
           pipeline: this.mediator.store.state.pipeline,
@@ -36,22 +49,25 @@ const createPipelinesDetailApp = mediator => {
         },
         on: {
           refreshPipelineGraph: this.requestRefreshPipelineGraph,
-          onResetTriggered: (parentPipeline, pipeline) =>
-            this.resetTriggeredPipelines(parentPipeline, pipeline),
-          onClickTriggeredBy: pipeline => this.clickTriggeredByPipeline(pipeline),
-          onClickTriggered: pipeline => this.clickTriggeredPipeline(pipeline),
+          onResetDownstream: (parentPipeline, pipeline) =>
+            this.resetDownstreamPipelines(parentPipeline, pipeline),
+          onClickUpstreamPipeline: (pipeline) => this.clickUpstreamPipeline(pipeline),
+          onClickDownstreamPipeline: (pipeline) => this.clickDownstreamPipeline(pipeline),
         },
       });
     },
   });
 };
 
-const createPipelineHeaderApp = mediator => {
+const createLegacyPipelineHeaderApp = (mediator) => {
+  if (!document.querySelector(SELECTORS.PIPELINE_HEADER)) {
+    return;
+  }
   // eslint-disable-next-line no-new
   new Vue({
-    el: '#js-pipeline-header-vue',
+    el: SELECTORS.PIPELINE_HEADER,
     components: {
-      pipelineHeader,
+      legacyPipelineHeader,
     },
     data() {
       return {
@@ -65,6 +81,9 @@ const createPipelineHeaderApp = mediator => {
     beforeDestroy() {
       eventHub.$off('headerPostAction', this.postAction);
       eventHub.$off('headerDeleteAction', this.deleteAction);
+    },
+    errorCaptured(err, _vm, info) {
+      reportToSentry('pipeline_details_bundle_legacy', `error: ${err}, info: ${info}`);
     },
     methods: {
       postAction(path) {
@@ -82,7 +101,7 @@ const createPipelineHeaderApp = mediator => {
       },
     },
     render(createElement) {
-      return createElement('pipeline-header', {
+      return createElement('legacy-pipeline-header', {
         props: {
           isLoading: this.mediator.state.isLoading,
           pipeline: this.mediator.store.state.pipeline,
@@ -93,13 +112,8 @@ const createPipelineHeaderApp = mediator => {
 };
 
 const createTestDetails = () => {
-  if (!window.gon?.features?.junitPipelineView) {
-    return;
-  }
-
-  const el = document.querySelector('#js-pipeline-tests-detail');
+  const el = document.querySelector(SELECTORS.PIPELINE_TESTS);
   const { summaryEndpoint, suiteEndpoint } = el?.dataset || {};
-
   const testReportsStore = createTestReportsStore({
     summaryEndpoint,
     suiteEndpoint,
@@ -118,39 +132,53 @@ const createTestDetails = () => {
   });
 };
 
-const createDagApp = () => {
-  if (!window.gon?.features?.dagPipelineTab) {
-    return;
-  }
-
-  const el = document.querySelector('#js-pipeline-dag-vue');
-  const { pipelineDataPath, emptySvgPath, dagDocPath } = el?.dataset;
-
-  // eslint-disable-next-line no-new
-  new Vue({
-    el,
-    components: {
-      Dag,
-    },
-    render(createElement) {
-      return createElement('dag', {
-        props: {
-          graphUrl: pipelineDataPath,
-          emptySvgPath,
-          dagDocPath,
-        },
-      });
-    },
-  });
-};
-
-export default () => {
-  const { dataset } = document.querySelector('.js-pipeline-details-vue');
-  const mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
-  mediator.fetchPipeline();
-
-  createPipelinesDetailApp(mediator);
-  createPipelineHeaderApp(mediator);
+export default async function () {
   createTestDetails();
   createDagApp();
-};
+
+  const canShowNewPipelineDetails =
+    gon.features.graphqlPipelineDetails || gon.features.graphqlPipelineDetailsUsers;
+
+  const { dataset } = document.querySelector(SELECTORS.PIPELINE_DETAILS);
+  let mediator;
+
+  if (!gon.features.graphqlPipelineHeader || !canShowNewPipelineDetails) {
+    try {
+      const { default: PipelinesMediator } = await import(
+        /* webpackChunkName: 'PipelinesMediator' */ './pipeline_details_mediator'
+      );
+      mediator = new PipelinesMediator({ endpoint: dataset.endpoint });
+      mediator.fetchPipeline();
+    } catch {
+      Flash(__('An error occurred while loading the pipeline.'));
+    }
+  }
+
+  if (canShowNewPipelineDetails) {
+    try {
+      const { createPipelinesDetailApp } = await import(
+        /* webpackChunkName: 'createPipelinesDetailApp' */ './pipeline_details_graph'
+      );
+
+      const { pipelineProjectPath, pipelineIid } = dataset;
+      createPipelinesDetailApp(SELECTORS.PIPELINE_GRAPH, pipelineProjectPath, pipelineIid);
+    } catch {
+      Flash(__('An error occurred while loading the pipeline.'));
+    }
+  } else {
+    createLegacyPipelinesDetailApp(mediator);
+  }
+
+  if (gon.features.graphqlPipelineHeader) {
+    try {
+      const { createPipelineHeaderApp } = await import(
+        /* webpackChunkName: 'createPipelineHeaderApp' */ './pipeline_details_header'
+      );
+      createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
+    } catch {
+      Flash(__('An error occurred while loading a section of this page.'));
+    }
+  } else {
+    createLegacyPipelineHeaderApp(mediator);
+  }
+}

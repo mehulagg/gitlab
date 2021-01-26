@@ -1,5 +1,0 @@
----
-title: Deprecate vulnerabilitiesCountByDayAndSeverity on Group and InstanceSecurityDashboard GraphQL API
-merge_request: 38197
-author:
-type: deprecated

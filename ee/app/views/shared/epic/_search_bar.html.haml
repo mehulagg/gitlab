@@ -81,7 +81,7 @@
                       {{ title }}
 
           %button.clear-search.hidden{ type: 'button' }
-            = icon('times')
+            = sprite_icon('close', size: 16, css_class: 'clear-search-icon')
         - unless hide_sort_dropdown
           .filter-dropdown-container
             = render 'shared/epic/sort_dropdown', hide_extra_sort_options: hide_extra_sort_options

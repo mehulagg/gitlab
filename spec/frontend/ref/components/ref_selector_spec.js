@@ -2,9 +2,10 @@ import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { GlLoadingIcon, GlSearchBoxByType, GlNewDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlSearchBoxByType, GlDropdownItem, GlIcon } from '@gitlab/ui';
 import { trimText } from 'helpers/text_helper';
 import { sprintf } from '~/locale';
+import { ENTER_KEY } from '~/lib/utils/keys';
 import RefSelector from '~/ref/components/ref_selector.vue';
 import { X_TOTAL_HEADER, DEFAULT_I18N } from '~/ref/constants';
 import createStore from '~/ref/stores/';
@@ -36,7 +37,7 @@ describe('Ref selector component', () => {
       attrs,
       listeners: {
         // simulate a parent component v-model binding
-        input: selectedRef => {
+        input: (selectedRef) => {
           wrapper.setProps({ value: selectedRef });
         },
       },
@@ -60,13 +61,13 @@ describe('Ref selector component', () => {
 
     mock
       .onGet(`/api/v4/projects/${projectId}/repository/branches`)
-      .reply(config => branchesApiCallSpy(config));
+      .reply((config) => branchesApiCallSpy(config));
     mock
       .onGet(`/api/v4/projects/${projectId}/repository/tags`)
-      .reply(config => tagsApiCallSpy(config));
+      .reply((config) => tagsApiCallSpy(config));
     mock
       .onGet(new RegExp(`/api/v4/projects/${projectId}/repository/commits/.*`))
-      .reply(config => commitApiCallSpy(config));
+      .reply((config) => commitApiCallSpy(config));
   });
 
   afterEach(() => {
@@ -83,16 +84,18 @@ describe('Ref selector component', () => {
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
+  const findSearchBox = () => wrapper.find(GlSearchBoxByType);
+
   const findBranchesSection = () => wrapper.find('[data-testid="branches-section"]');
-  const findBranchDropdownItems = () => findBranchesSection().findAll(GlNewDropdownItem);
+  const findBranchDropdownItems = () => findBranchesSection().findAll(GlDropdownItem);
   const findFirstBranchDropdownItem = () => findBranchDropdownItems().at(0);
 
   const findTagsSection = () => wrapper.find('[data-testid="tags-section"]');
-  const findTagDropdownItems = () => findTagsSection().findAll(GlNewDropdownItem);
+  const findTagDropdownItems = () => findTagsSection().findAll(GlDropdownItem);
   const findFirstTagDropdownItem = () => findTagDropdownItems().at(0);
 
   const findCommitsSection = () => wrapper.find('[data-testid="commits-section"]');
-  const findCommitDropdownItems = () => findCommitsSection().findAll(GlNewDropdownItem);
+  const findCommitDropdownItems = () => findCommitsSection().findAll(GlDropdownItem);
   const findFirstCommitDropdownItem = () => findCommitDropdownItems().at(0);
 
   //
@@ -119,20 +122,23 @@ describe('Ref selector component', () => {
   //
   // Convenience methods
   //
-  const updateQuery = newQuery => {
-    wrapper.find(GlSearchBoxByType).vm.$emit('input', newQuery);
+  const updateQuery = (newQuery) => {
+    findSearchBox().vm.$emit('input', newQuery);
   };
 
   const selectFirstBranch = () => {
     findFirstBranchDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const selectFirstTag = () => {
     findFirstTagDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const selectFirstCommit = () => {
     findFirstCommitDropdownItem().vm.$emit('click');
+    return wrapper.vm.$nextTick();
   };
 
   const waitForRequests = ({ andClearMocks } = { andClearMocks: false }) =>
@@ -174,7 +180,7 @@ describe('Ref selector component', () => {
         return waitForRequests();
       });
 
-      it('adds the provided ID to the GlNewDropdown instance', () => {
+      it('adds the provided ID to the GlDropdown instance', () => {
         expect(wrapper.attributes().id).toBe(id);
       });
     });
@@ -244,6 +250,23 @@ describe('Ref selector component', () => {
       });
     });
 
+    describe('when the Enter is pressed', () => {
+      beforeEach(() => {
+        createComponent();
+
+        return waitForRequests({ andClearMocks: true });
+      });
+
+      it('requeries the endpoints when Enter is pressed', () => {
+        findSearchBox().vm.$emit('keydown', new KeyboardEvent({ key: ENTER_KEY }));
+
+        return waitForRequests().then(() => {
+          expect(branchesApiCallSpy).toHaveBeenCalledTimes(1);
+          expect(tagsApiCallSpy).toHaveBeenCalledTimes(1);
+        });
+      });
+    });
+
     describe('when no results are found', () => {
       beforeEach(() => {
         branchesApiCallSpy = jest.fn().mockReturnValue([200, [], { [X_TOTAL_HEADER]: '0' }]);
@@ -290,10 +313,8 @@ describe('Ref selector component', () => {
 
         it('renders the "Branches" heading with a total number indicator', () => {
           expect(
-            findBranchesSection()
-              .find('[data-testid="section-header"]')
-              .text(),
-          ).toBe('Branches 123');
+            findBranchesSection().find('[data-testid="section-header"]').text(),
+          ).toMatchInterpolatedText('Branches 123');
         });
 
         it("does not render an error message in the branches section's body", () => {
@@ -313,7 +334,7 @@ describe('Ref selector component', () => {
         it('renders the default branch as a selectable item with a "default" badge', () => {
           const dropdownItems = findBranchDropdownItems();
 
-          const defaultBranch = fixtures.branches.find(b => b.default);
+          const defaultBranch = fixtures.branches.find((b) => b.default);
           const defaultBranchIndex = fixtures.branches.indexOf(defaultBranch);
 
           expect(trimText(dropdownItems.at(defaultBranchIndex).text())).toBe(
@@ -369,10 +390,8 @@ describe('Ref selector component', () => {
 
         it('renders the "Tags" heading with a total number indicator', () => {
           expect(
-            findTagsSection()
-              .find('[data-testid="section-header"]')
-              .text(),
-          ).toBe('Tags 456');
+            findTagsSection().find('[data-testid="section-header"]').text(),
+          ).toMatchInterpolatedText('Tags 456');
         });
 
         it("does not render an error message in the tags section's body", () => {
@@ -437,10 +456,8 @@ describe('Ref selector component', () => {
 
         it('renders the "Commits" heading with a total number indicator', () => {
           expect(
-            findCommitsSection()
-              .find('[data-testid="section-header"]')
-              .text(),
-          ).toBe('Commits 1');
+            findCommitsSection().find('[data-testid="section-header"]').text(),
+          ).toMatchInterpolatedText('Commits 1');
         });
 
         it("does not render an error message in the comits section's body", () => {
@@ -502,75 +519,73 @@ describe('Ref selector component', () => {
         return waitForRequests();
       });
 
-      it('renders a checkmark by the selected item', () => {
+      it('renders a checkmark by the selected item', async () => {
         expect(findFirstBranchDropdownItem().find(GlIcon).element).toHaveClass(
           'gl-visibility-hidden',
         );
 
-        selectFirstBranch();
+        await selectFirstBranch();
 
-        return localVue.nextTick().then(() => {
-          expect(findFirstBranchDropdownItem().find(GlIcon).element).not.toHaveClass(
-            'gl-visibility-hidden',
-          );
-        });
+        expect(findFirstBranchDropdownItem().find(GlIcon).element).not.toHaveClass(
+          'gl-visibility-hidden',
+        );
       });
 
       describe('when a branch is seleceted', () => {
-        it("displays the branch name in the dropdown's button", () => {
+        it("displays the branch name in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstBranch();
+          await selectFirstBranch();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.branches[0].name);
           });
         });
 
-        it("updates the v-model binding with the branch's name", () => {
+        it("updates the v-model binding with the branch's name", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstBranch();
+          await selectFirstBranch();
 
           expect(wrapper.vm.value).toEqual(fixtures.branches[0].name);
         });
       });
 
       describe('when a tag is seleceted', () => {
-        it("displays the tag name in the dropdown's button", () => {
+        it("displays the tag name in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstTag();
+          await selectFirstTag();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.tags[0].name);
           });
         });
 
-        it("updates the v-model binding with the tag's name", () => {
+        it("updates the v-model binding with the tag's name", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstTag();
+          await selectFirstTag();
 
           expect(wrapper.vm.value).toEqual(fixtures.tags[0].name);
         });
       });
 
       describe('when a commit is selected', () => {
-        it("displays the full SHA in the dropdown's button", () => {
+        it("displays the full SHA in the dropdown's button", async () => {
           expect(findButtonContent().text()).toBe(DEFAULT_I18N.noRefSelected);
 
-          selectFirstCommit();
+          await selectFirstCommit();
 
           return localVue.nextTick().then(() => {
             expect(findButtonContent().text()).toBe(fixtures.commit.id);
           });
         });
 
-        it("updates the v-model binding with the commit's full SHA", () => {
+        it("updates the v-model binding with the commit's full SHA", async () => {
           expect(wrapper.vm.value).toEqual('');
 
-          selectFirstCommit();
+          await selectFirstCommit();
 
           expect(wrapper.vm.value).toEqual(fixtures.commit.id);
         });

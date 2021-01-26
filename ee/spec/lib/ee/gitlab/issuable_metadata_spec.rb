@@ -21,7 +21,7 @@ RSpec.describe Gitlab::IssuableMetadata do
       create(:issue_link, source: blocking_issue_1, target: blocked_issue_1, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: blocking_issue_2, target: blocked_issue_2, link_type: IssueLink::TYPE_BLOCKS)
       create(:issue_link, source: blocking_issue_1, target: closed_blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
-      create(:issue_link, source: blocked_issue_3, target: blocking_issue_1, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+      create(:issue_link, source: blocking_issue_1, target: blocked_issue_3, link_type: IssueLink::TYPE_BLOCKS)
     end
 
     it 'aggregates stats on issues' do
@@ -31,22 +31,6 @@ RSpec.describe Gitlab::IssuableMetadata do
       expect(data[blocking_issue_1.id].blocking_issues_count).to eq(2)
       expect(data[blocking_issue_2.id].blocking_issues_count).to eq(1)
       expect(data[blocked_issue_1.id].blocking_issues_count).to eq(0)
-    end
-
-    context 'when blocking_issues_counts feature flag is disabled' do
-      before do
-        stub_feature_flags(blocking_issues_counts: false)
-      end
-
-      it 'does not return blocking_issues_counts' do
-        create(:award_emoji, :upvote, awardable: blocking_issue_1)
-
-        meta_data = described_class.new(user, Issue.all.limit(7)).data # rubocop: disable CodeReuse/ActiveRecord
-
-        expect(meta_data.values.map { |value| value.blocking_issues_count }.uniq).to eq([nil])
-        # Make sure other properties are still being fetched
-        expect(meta_data[blocking_issue_1.id].upvotes).to eq(1)
-      end
     end
   end
 end

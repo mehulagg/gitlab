@@ -37,7 +37,7 @@ describe('GeoNodeHeader', () => {
         expect(vm.isNodeHTTP).toBe(true);
       });
 
-      it('returns `false` when Node URL protocol is HTTPS', done => {
+      it('returns `false` when Node URL protocol is HTTPS', (done) => {
         vm.node.url = 'https://127.0.0.1:3001/';
         Vue.nextTick()
           .then(() => {
@@ -65,7 +65,7 @@ describe('GeoNodeHeader', () => {
       });
 
       it(`should ${showWarning ? 'render' : 'not render'} the status icon`, () => {
-        expect(Boolean(vm.$el.querySelector('.ic-warning'))).toBe(showWarning);
+        expect(Boolean(vm.$el.querySelector('[data-testid="warning-icon"]'))).toBe(showWarning);
       });
     });
   });

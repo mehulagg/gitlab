@@ -8,9 +8,35 @@ RSpec.shared_examples 'assigns build to package' do
     it 'assigns the pipeline to the package' do
       package = subject
 
-      expect(package.build_info).to be_present
-      expect(package.build_info.pipeline).to eq job.pipeline
+      expect(package.original_build_info).to be_present
+      expect(package.original_build_info.pipeline).to eq job.pipeline
     end
+  end
+end
+
+RSpec.shared_examples 'assigns build to package file' do
+  context 'with build info' do
+    let(:job) { create(:ci_build, user: user) }
+    let(:params) { super().merge(build: job) }
+
+    it 'assigns the pipeline to the package' do
+      package_file = subject
+
+      expect(package_file.package_file_build_infos).to be_present
+      expect(package_file.pipelines.first).to eq job.pipeline
+    end
+
+    it 'creates a new PackageFileBuildInfo record' do
+      expect { subject }.to change { Packages::PackageFileBuildInfo.count }.by(1)
+    end
+  end
+end
+
+RSpec.shared_examples 'assigns the package creator' do
+  it 'assigns the package creator' do
+    subject
+
+    expect(package.creator).to eq user
   end
 end
 
@@ -161,6 +187,9 @@ RSpec.shared_examples 'filters on each package_type' do |is_project: false|
   let_it_be(:package4) { create(:nuget_package, project: project) }
   let_it_be(:package5) { create(:pypi_package, project: project) }
   let_it_be(:package6) { create(:composer_package, project: project) }
+  let_it_be(:package7) { create(:generic_package, project: project) }
+  let_it_be(:package8) { create(:golang_package, project: project) }
+  let_it_be(:package9) { create(:debian_package, project: project) }
 
   Packages::Package.package_types.keys.each do |package_type|
     context "for package type #{package_type}" do
@@ -188,6 +217,48 @@ RSpec.shared_examples 'package workhorse uploads' do
       expect(Gitlab::ErrorTracking).to receive(:track_exception).once
 
       subject
+    end
+  end
+end
+
+RSpec.shared_examples 'with versionless packages' do
+  context 'with versionless package' do
+    let!(:versionless_package) { create(:maven_package, project: project, version: nil) }
+
+    shared_examples 'not including the package' do
+      it 'does not return the package' do
+        subject
+
+        expect(json_response.map { |package| package['id'] }).not_to include(versionless_package.id)
+      end
+    end
+
+    it_behaves_like 'not including the package'
+
+    context 'with include_versionless param' do
+      context 'with true include_versionless param' do
+        [true, 'true', 1, '1'].each do |param|
+          context "for param #{param}" do
+            let(:params) { super().merge(include_versionless: param) }
+
+            it 'returns the package' do
+              subject
+
+              expect(json_response.map { |package| package['id'] }).to include(versionless_package.id)
+            end
+          end
+        end
+      end
+
+      context 'with falsy include_versionless param' do
+        [false, '', nil, 'false', 0, '0'].each do |param|
+          context "for param #{param}" do
+            let(:params) { super().merge(include_versionless: param) }
+
+            it_behaves_like 'not including the package'
+          end
+        end
+      end
     end
   end
 end

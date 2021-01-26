@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix consuming events of blobs that should not be synced'
-merge_request: 38089
-author:
-type: fixed

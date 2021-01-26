@@ -1,8 +1,8 @@
+import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
 import axios from '~/lib/utils/axios_utils';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import * as types from './mutation_types';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
-import { LICENSE_CHECK_NAME } from 'ee/approvals/constants';
 import { convertToOldReportFormat } from './utils';
 
 export const setAPISettings = ({ commit }, data) => {
@@ -12,6 +12,15 @@ export const setAPISettings = ({ commit }, data) => {
 export const setLicenseInModal = ({ commit }, license) => {
   commit(types.SET_LICENSE_IN_MODAL, license);
 };
+
+export const setIsAdmin = ({ commit }, payload) => {
+  commit(types.SET_IS_ADMIN, payload);
+};
+
+export const setKnownLicenses = ({ commit }, licenses) => {
+  commit(types.SET_KNOWN_LICENSES, licenses);
+};
+
 export const resetLicenseInModal = ({ commit }) => {
   commit(types.RESET_LICENSE_IN_MODAL);
 };
@@ -38,7 +47,7 @@ export const deleteLicense = ({ dispatch, state }) => {
     .then(() => {
       dispatch('receiveDeleteLicense', licenseId);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveDeleteLicenseError', error);
       dispatch('removePendingLicense', licenseId);
     });
@@ -63,7 +72,7 @@ export const fetchManagedLicenses = ({ dispatch, state }) => {
     .then(({ data }) => {
       dispatch('receiveManagedLicensesSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveManagedLicensesError', error);
     });
 };
@@ -86,7 +95,7 @@ export const fetchParsedLicenseReport = ({ dispatch, state }) => {
       const existingLicenses = (data.existing_licenses || []).map(convertToOldReportFormat);
       dispatch('receiveParsedLicenseReportSuccess', { newLicenses, existingLicenses });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveParsedLicenseReportError', error);
     });
 };
@@ -130,13 +139,13 @@ export const fetchLicenseCheckApprovalRule = ({ dispatch, state }) => {
   return axios
     .get(state.approvalsApiPath)
     .then(({ data }) => {
-      const hasLicenseCheckApprovalRule = data.approval_rules_left.some(rule => {
+      const hasLicenseCheckApprovalRule = data.approval_rules_left.some((rule) => {
         return rule.name === LICENSE_CHECK_NAME;
       });
 
       dispatch('receiveLicenseCheckApprovalRuleSuccess', { hasLicenseCheckApprovalRule });
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveLicenseCheckApprovalRuleError', error);
     });
 };
@@ -151,10 +160,6 @@ export const receiveLicenseCheckApprovalRuleSuccess = ({ commit }, rule) => {
 
 export const receiveLicenseCheckApprovalRuleError = ({ commit }, error) => {
   commit(types.RECEIVE_LICENSE_CHECK_APPROVAL_RULE_ERROR, error);
-};
-
-export const setIsAdmin = ({ commit }, payload) => {
-  commit(types.SET_IS_ADMIN, payload);
 };
 
 export const addPendingLicense = ({ state, commit }, id = null) => {
@@ -191,7 +196,7 @@ export const setLicenseApproval = ({ dispatch, state }, payload) => {
     .then(() => {
       dispatch('receiveSetLicenseApproval', id);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveSetLicenseApprovalError', error);
       dispatch('removePendingLicense', id);
     });

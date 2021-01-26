@@ -63,6 +63,30 @@ RSpec.describe 'getting a requirement list for a project' do
       end
     end
 
+    context 'query performance with test reports' do
+      let_it_be(:test_report) { create(:test_report, requirement: requirement, state: "passed") }
+      let(:fields) do
+        <<~QUERY
+        edges {
+          node {
+            lastTestReportState
+            lastTestReportManuallyCreated
+          }
+        }
+        QUERY
+      end
+
+      it 'avoids N+1 queries' do
+        control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
+
+        create_list(:requirement, 3, project: project) do |requirement|
+          create(:test_report, requirement: requirement, state: "passed")
+        end
+
+        expect { post_graphql(query, current_user: current_user) }.not_to exceed_query_limit(control)
+      end
+    end
+
     describe 'filtering' do
       let_it_be(:filter_project) { create(:project, :public) }
       let_it_be(:other_project) { create(:project, :public) }
@@ -137,16 +161,12 @@ RSpec.describe 'getting a requirement list for a project' do
     describe 'sorting and pagination' do
       let_it_be(:data_path) { [:project, :requirements] }
 
-      def pagination_query(params, page_info)
-        graphql_query_for(
-          'project',
-          { 'fullPath' => sort_project.full_path },
-          query_graphql_field('requirements', params, "#{page_info} edges { node { iid createdAt} }")
-        )
+      def pagination_query(params)
+        nested_internal_id_query(:project, sort_project, :requirements, params)
       end
 
       def pagination_results_data(data)
-        data.map { |issue| issue.dig('node', 'iid').to_i }
+        data.map { |issue| issue.dig('iid').to_i }
       end
 
       context 'when sorting by created_at' do
@@ -159,7 +179,7 @@ RSpec.describe 'getting a requirement list for a project' do
 
         context 'when ascending' do
           it_behaves_like 'sorted paginated query' do
-            let(:sort_param)       { 'created_asc' }
+            let(:sort_param)       { :CREATED_ASC }
             let(:first_param)      { 2 }
             let(:expected_results) { [requirement4.iid, requirement3.iid, requirement5.iid, requirement1.iid, requirement2.iid] }
           end
@@ -167,7 +187,7 @@ RSpec.describe 'getting a requirement list for a project' do
 
         context 'when descending' do
           it_behaves_like 'sorted paginated query' do
-            let(:sort_param)       { 'created_desc' }
+            let(:sort_param)       { :CREATED_DESC }
             let(:first_param)      { 2 }
             let(:expected_results) { [requirement2.iid, requirement1.iid, requirement5.iid, requirement3.iid, requirement4.iid] }
           end

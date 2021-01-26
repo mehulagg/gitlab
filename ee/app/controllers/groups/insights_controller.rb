@@ -9,6 +9,8 @@ class Groups::InsightsController < Groups::ApplicationController
 
   track_unique_visits :show, target_id: 'g_analytics_insights'
 
+  feature_category :insights
+
   private
 
   def authorize_read_group!

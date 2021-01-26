@@ -7,6 +7,82 @@ RSpec.describe Projects::BlobController do
 
   let(:project) { create(:project, :public, :repository) }
 
+  describe "GET new" do
+    context 'with no jobs' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:file_name) { '.gitlab-ci.yml' }
+
+      def request
+        get(:new, params: { namespace_id: project.namespace, project_id: project, id: 'master', file_name: file_name } )
+      end
+
+      before do
+        project.add_maintainer(user)
+        sign_in(user)
+
+        stub_experiment(ci_syntax_templates: experiment_active)
+        stub_experiment_for_subject(ci_syntax_templates: in_experiment_group)
+      end
+
+      context 'when the experiment is not active' do
+        let(:experiment_active) { false }
+        let(:in_experiment_group) { false }
+
+        it 'does not record the experiment user' do
+          expect(Experiment).not_to receive(:add_user)
+
+          request
+        end
+      end
+
+      context 'when the experiment is active and the user is in the control group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { false }
+
+        it 'records the experiment user in the control group' do
+          expect(Experiment).to receive(:add_user)
+            .with(:ci_syntax_templates, :control, user, namespace_id: project.namespace_id)
+
+          request
+        end
+      end
+
+      context 'when the experiment is active and the user is in the experimental group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { true }
+
+        it 'records the experiment user in the experimental group' do
+          expect(Experiment).to receive(:add_user)
+            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
+
+          request
+        end
+
+        context 'when requesting a non default config file type' do
+          let(:file_name) { '.non_default_ci_config' }
+          let(:project) { create(:project, :public, :repository, ci_config_path: file_name) }
+
+          it 'records the experiment user in the experimental group' do
+            expect(Experiment).to receive(:add_user)
+            .with(:ci_syntax_templates, :experimental, user, namespace_id: project.namespace_id)
+
+            request
+          end
+        end
+
+        context 'when requesting a different file type' do
+          let(:file_name) { '.gitignore' }
+
+          it 'does not record the experiment user' do
+            expect(Experiment).not_to receive(:add_user)
+
+            request
+          end
+        end
+      end
+    end
+  end
+
   describe "GET show" do
     def request
       get(:show, params: { namespace_id: project.namespace, project_id: project, id: id })
@@ -347,6 +423,13 @@ RSpec.describe Projects::BlobController do
         end
       end
     end
+
+    it_behaves_like 'tracking unique hll events', :track_editor_edit_actions do
+      subject(:request) { put :update, params: default_params }
+
+      let(:target_id) { 'g_edit_by_sfe' }
+      let(:expected_type) { instance_of(Integer) }
+    end
   end
 
   describe 'DELETE destroy' do
@@ -434,6 +517,34 @@ RSpec.describe Projects::BlobController do
           expect(response).to redirect_to(after_delete_path)
         end
       end
+    end
+  end
+
+  describe 'POST create' do
+    let(:user) { create(:user) }
+    let(:default_params) do
+      {
+        namespace_id: project.namespace,
+        project_id: project,
+        id: 'master',
+        branch_name: 'master',
+        file_name: 'docs/EXAMPLE_FILE',
+        content: 'Added changes',
+        commit_message: 'Create CHANGELOG'
+      }
+    end
+
+    before do
+      project.add_developer(user)
+
+      sign_in(user)
+    end
+
+    it_behaves_like 'tracking unique hll events', :track_editor_edit_actions do
+      subject(:request) { post :create, params: default_params }
+
+      let(:target_id) { 'g_edit_by_sfe' }
+      let(:expected_type) { instance_of(Integer) }
     end
   end
 end

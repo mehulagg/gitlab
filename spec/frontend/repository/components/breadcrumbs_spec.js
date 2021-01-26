@@ -1,5 +1,5 @@
 import { shallowMount, RouterLinkStub } from '@vue/test-utils';
-import { GlDeprecatedDropdown } from '@gitlab/ui';
+import { GlDropdown } from '@gitlab/ui';
 import Breadcrumbs from '~/repository/components/breadcrumbs.vue';
 
 let vm;
@@ -36,23 +36,15 @@ describe('Repository breadcrumbs component', () => {
   it('escapes hash in directory path', () => {
     factory('app/assets/javascripts#');
 
-    expect(
-      vm
-        .findAll(RouterLinkStub)
-        .at(3)
-        .props('to'),
-    ).toEqual('/-/tree/app/assets/javascripts%23');
+    expect(vm.findAll(RouterLinkStub).at(3).props('to')).toEqual(
+      '/-/tree/app/assets/javascripts%23',
+    );
   });
 
   it('renders last link as active', () => {
     factory('app/assets');
 
-    expect(
-      vm
-        .findAll(RouterLinkStub)
-        .at(2)
-        .attributes('aria-current'),
-    ).toEqual('page');
+    expect(vm.findAll(RouterLinkStub).at(2).attributes('aria-current')).toEqual('page');
   });
 
   it('does not render add to tree dropdown when permissions are false', () => {
@@ -61,7 +53,7 @@ describe('Repository breadcrumbs component', () => {
     vm.setData({ userPermissions: { forkProject: false, createMergeRequestIn: false } });
 
     return vm.vm.$nextTick(() => {
-      expect(vm.find(GlDeprecatedDropdown).exists()).toBe(false);
+      expect(vm.find(GlDropdown).exists()).toBe(false);
     });
   });
 
@@ -71,7 +63,7 @@ describe('Repository breadcrumbs component', () => {
     vm.setData({ userPermissions: { forkProject: true, createMergeRequestIn: true } });
 
     return vm.vm.$nextTick(() => {
-      expect(vm.find(GlDeprecatedDropdown).exists()).toBe(true);
+      expect(vm.find(GlDropdown).exists()).toBe(true);
     });
   });
 });

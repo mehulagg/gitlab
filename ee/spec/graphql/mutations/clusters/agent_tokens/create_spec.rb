@@ -1,0 +1,60 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe Mutations::Clusters::AgentTokens::Create do
+  subject(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+
+  let_it_be(:cluster_agent) { create(:cluster_agent) }
+  let_it_be(:user) { create(:user) }
+  let(:context) do
+    GraphQL::Query::Context.new(
+      query: OpenStruct.new(schema: nil),
+      values: { current_user: user },
+      object: nil
+    )
+  end
+
+  specify { expect(described_class).to require_graphql_authorizations(:create_cluster) }
+
+  describe '#resolve' do
+    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id) }
+
+    context 'without token permissions' do
+      it 'raises an error if the resource is not accessible to the user' do
+        expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+      end
+    end
+
+    context 'without premium plan' do
+      before do
+        stub_licensed_features(cluster_agents: false)
+        cluster_agent.project.add_maintainer(user)
+      end
+
+      it { expect(subject[:secret]).to be_nil }
+      it { expect(subject[:errors]).to eq(['This feature is only available for premium plans']) }
+    end
+
+    context 'with premium plan and user permissions' do
+      before do
+        stub_licensed_features(cluster_agents: true)
+        cluster_agent.project.add_maintainer(user)
+      end
+
+      it 'creates a new token', :aggregate_failures do
+        expect { subject }.to change { ::Clusters::AgentToken.count }.by(1)
+        expect(subject[:secret]).not_to be_nil
+        expect(subject[:errors]).to eq([])
+      end
+
+      context 'invalid params' do
+        subject { mutation.resolve(cluster_agent_id: cluster_agent.id) }
+
+        it 'generates an error message when id invalid', :aggregate_failures do
+          expect { subject }.to raise_error(::GraphQL::CoercionError)
+        end
+      end
+    end
+  end
+end

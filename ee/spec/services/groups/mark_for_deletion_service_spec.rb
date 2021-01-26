@@ -54,7 +54,7 @@ RSpec.describe Groups::MarkForDeletionService do
                  deleting_user: user)
         end
 
-        it 'does not change the attributes associated with adjourned deletion' do
+        it 'does not change the attributes associated with delayed deletion' do
           subject
 
           expect(group.marked_for_deletion_on).to eq(deletion_date.to_date)

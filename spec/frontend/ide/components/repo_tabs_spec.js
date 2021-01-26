@@ -1,27 +1,40 @@
-import Vue from 'vue';
-import repoTabs from '~/ide/components/repo_tabs.vue';
-import createComponent from '../../helpers/vue_mount_component_helper';
+import Vuex from 'vuex';
+import { mount, createLocalVue } from '@vue/test-utils';
+import { createStore } from '~/ide/stores';
+import RepoTabs from '~/ide/components/repo_tabs.vue';
 import { file } from '../helpers';
 
-describe('RepoTabs', () => {
-  const openedFiles = [file('open1'), file('open2')];
-  const RepoTabs = Vue.extend(repoTabs);
-  let vm;
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
-  afterEach(() => {
-    vm.$destroy();
+describe('RepoTabs', () => {
+  let wrapper;
+  let store;
+
+  beforeEach(() => {
+    store = createStore();
+    store.state.openFiles = [file('open1'), file('open2')];
+
+    wrapper = mount(RepoTabs, {
+      propsData: {
+        files: store.state.openFiles,
+        viewer: 'editor',
+        activeFile: file('activeFile'),
+      },
+      store,
+      localVue,
+    });
   });
 
-  it('renders a list of tabs', done => {
-    vm = createComponent(RepoTabs, {
-      files: openedFiles,
-      viewer: 'editor',
-      activeFile: file('activeFile'),
-    });
-    openedFiles[0].active = true;
+  afterEach(() => {
+    wrapper.destroy();
+  });
 
-    vm.$nextTick(() => {
-      const tabs = [...vm.$el.querySelectorAll('.multi-file-tab')];
+  it('renders a list of tabs', (done) => {
+    store.state.openFiles[0].active = true;
+
+    wrapper.vm.$nextTick(() => {
+      const tabs = [...wrapper.vm.$el.querySelectorAll('.multi-file-tab')];
 
       expect(tabs.length).toEqual(2);
       expect(tabs[0].parentNode.classList.contains('active')).toEqual(true);

@@ -27,9 +27,12 @@ export default {
       return __('Merge when pipeline succeeds');
     },
     shouldShowMergeImmediatelyDropdown() {
-      return this.mr.isPipelineActive && !this.mr.onlyAllowMergeIfPipelineSucceeds;
+      return this.isPipelineActive && !this.stateData.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {
+      return false;
+    },
+    shouldRenderMergeTrainHelperText() {
       return false;
     },
   },

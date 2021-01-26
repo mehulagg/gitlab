@@ -10,21 +10,18 @@ describe('U2FRegister', () => {
 
   preloadFixtures('u2f/register.html');
 
-  beforeEach(done => {
+  beforeEach((done) => {
     loadFixtures('u2f/register.html');
     u2fDevice = new MockU2FDevice();
-    container = $('#js-register-u2f');
-    component = new U2FRegister(container, $('#js-register-u2f-templates'), {}, 'token');
-    component
-      .start()
-      .then(done)
-      .catch(done.fail);
+    container = $('#js-register-token-2fa');
+    component = new U2FRegister(container, {});
+    component.start().then(done).catch(done.fail);
   });
 
   it('allows registering a U2F device', () => {
-    const setupButton = container.find('#js-setup-u2f-device');
+    const setupButton = container.find('#js-setup-token-2fa-device');
 
-    expect(setupButton.text()).toBe('Set up new U2F device');
+    expect(setupButton.text()).toBe('Set up new device');
     setupButton.trigger('click');
     const inProgressMessage = container.children('p');
 
@@ -41,7 +38,7 @@ describe('U2FRegister', () => {
 
   describe('errors', () => {
     it("doesn't allow the same device to be registered twice (for the same user", () => {
-      const setupButton = container.find('#js-setup-u2f-device');
+      const setupButton = container.find('#js-setup-token-2fa-device');
       setupButton.trigger('click');
       u2fDevice.respondToRegisterRequest({
         errorCode: 4,
@@ -52,7 +49,7 @@ describe('U2FRegister', () => {
     });
 
     it('displays an error message for other errors', () => {
-      const setupButton = container.find('#js-setup-u2f-device');
+      const setupButton = container.find('#js-setup-token-2fa-device');
       setupButton.trigger('click');
       u2fDevice.respondToRegisterRequest({
         errorCode: 'error!',
@@ -63,14 +60,14 @@ describe('U2FRegister', () => {
     });
 
     it('allows retrying registration after an error', () => {
-      let setupButton = container.find('#js-setup-u2f-device');
+      let setupButton = container.find('#js-setup-token-2fa-device');
       setupButton.trigger('click');
       u2fDevice.respondToRegisterRequest({
         errorCode: 'error!',
       });
-      const retryButton = container.find('#U2FTryAgain');
+      const retryButton = container.find('#js-token-2fa-try-again');
       retryButton.trigger('click');
-      setupButton = container.find('#js-setup-u2f-device');
+      setupButton = container.find('#js-setup-token-2fa-device');
       setupButton.trigger('click');
       u2fDevice.respondToRegisterRequest({
         deviceData: 'this is data from the device',

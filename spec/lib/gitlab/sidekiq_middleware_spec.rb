@@ -63,6 +63,7 @@ RSpec.describe Gitlab::SidekiqMiddleware do
        Gitlab::SidekiqMiddleware::DuplicateJobs::Server
       ]
     end
+
     let(:enabled_sidekiq_middlewares) { all_sidekiq_middlewares - disabled_sidekiq_middlewares }
 
     shared_examples "a server middleware chain" do
@@ -99,7 +100,7 @@ RSpec.describe Gitlab::SidekiqMiddleware do
                   "subject",
                   "body"
                 ],
-                "_aj_symbol_keys" => ["args"]
+                ActiveJob::Arguments.const_get('RUBY2_KEYWORDS_KEY', false) => ["args"]
               }
             ],
             "executions" => 0,

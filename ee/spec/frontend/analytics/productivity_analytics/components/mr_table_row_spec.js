@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
-import MergeRequestTableRow from 'ee/analytics/productivity_analytics/components/mr_table_row.vue';
-import MetricColumn from 'ee/analytics/productivity_analytics/components/metric_column.vue';
 import { GlAvatar } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import MetricColumn from 'ee/analytics/productivity_analytics/components/metric_column.vue';
+import MergeRequestTableRow from 'ee/analytics/productivity_analytics/components/mr_table_row.vue';
 import { mockMergeRequests } from '../mock_data';
 
 describe('MergeRequestTableRow component', () => {
@@ -82,11 +82,9 @@ describe('MergeRequestTableRow component', () => {
       });
 
       it('renders the "Time to merge" metric column with the "days_to_merge" metric', () => {
-        expect(
-          findMetricColumns()
-            .at(0)
-            .props('value'),
-        ).toBe(defaultProps.mergeRequest.days_to_merge);
+        expect(findMetricColumns().at(0).props('value')).toBe(
+          defaultProps.mergeRequest.days_to_merge,
+        );
       });
     });
   });

@@ -1,9 +1,11 @@
 <script>
+import { GlFormGroup } from '@gitlab/ui';
 import FormInput from './form_input.vue';
 import { isValidConfigurationEntity } from './utils';
 
 export default {
   components: {
+    GlFormGroup,
     FormInput,
   },
   model: {
@@ -14,7 +16,12 @@ export default {
     entities: {
       type: Array,
       required: true,
-      validator: value => value.every(isValidConfigurationEntity),
+      validator: (value) => value.every(isValidConfigurationEntity),
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   methods: {
@@ -47,14 +54,15 @@ export default {
 </script>
 
 <template>
-  <div>
+  <gl-form-group :disabled="disabled">
     <component
       :is="componentForEntity(entity)"
       v-for="entity in entities"
       ref="fields"
       :key="entity.field"
+      :disabled="disabled"
       v-bind="entity"
       @input="onInput(entity.field, $event)"
     />
-  </div>
+  </gl-form-group>
 </template>

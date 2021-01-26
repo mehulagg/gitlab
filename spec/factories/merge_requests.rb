@@ -24,6 +24,14 @@ FactoryBot.define do
     trait :with_diffs do
     end
 
+    trait :jira_title do
+      title { generate(:jira_title) }
+    end
+
+    trait :jira_branch do
+      source_branch { generate(:jira_branch) }
+    end
+
     trait :with_image_diffs do
       source_branch { "add_images_and_changes" }
       target_branch { "master" }
@@ -41,6 +49,21 @@ FactoryBot.define do
 
     trait :merged do
       state_id { MergeRequest.available_states[:merged] }
+    end
+
+    trait :with_merged_metrics do
+      merged
+
+      transient do
+        merged_by { author }
+      end
+
+      after(:build) do |merge_request, evaluator|
+        metrics = merge_request.build_metrics
+        metrics.merged_at = 1.week.from_now
+        metrics.merged_by = evaluator.merged_by
+        metrics.pipeline = create(:ci_empty_pipeline)
+      end
     end
 
     trait :merged_target do
@@ -144,9 +167,25 @@ FactoryBot.define do
       end
     end
 
+    trait :with_codequality_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_codequality_reports,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
     trait :unique_branches do
       source_branch { generate(:branch) }
       target_branch { generate(:branch) }
+    end
+
+    trait :unique_author do
+      author { association(:user) }
     end
 
     trait :with_coverage_reports do
@@ -154,7 +193,7 @@ FactoryBot.define do
         merge_request.head_pipeline = build(
           :ci_pipeline,
           :success,
-          :with_coverage_reports,
+          :with_coverage_report_artifact,
           project: merge_request.source_project,
           ref: merge_request.source_branch,
           sha: merge_request.diff_head_sha)
@@ -218,7 +257,7 @@ FactoryBot.define do
       target_branch { 'pages-deploy-target' }
 
       transient do
-        deployment { create(:deployment, :review_app) }
+        deployment { association(:deployment, :review_app) }
       end
 
       after(:build) do |merge_request, evaluator|
@@ -237,7 +276,7 @@ FactoryBot.define do
       source_project = merge_request.source_project
 
       # Fake `fetch_ref!` if we don't have repository
-      # We have too many existing tests replying on this behaviour
+      # We have too many existing tests relying on this behaviour
       unless [target_project, source_project].all?(&:repository_exists?)
         allow(merge_request).to receive(:fetch_ref!)
       end
@@ -271,5 +310,7 @@ FactoryBot.define do
         merge_request.update!(labels: evaluator.labels)
       end
     end
+
+    factory :merge_request_without_merge_request_diff, class: 'MergeRequestWithoutMergeRequestDiff'
   end
 end

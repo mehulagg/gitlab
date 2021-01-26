@@ -9,7 +9,7 @@ class BuildDetailsEntity < JobEntity
   expose :user, using: UserEntity
   expose :runner, using: RunnerEntity
   expose :metadata, using: BuildMetadataEntity
-  expose :pipeline, using: PipelineEntity
+  expose :pipeline, using: Ci::PipelineEntity
 
   expose :deployment_status, if: -> (*) { build.starts_environment? } do
     expose :deployment_status, as: :status
@@ -26,16 +26,16 @@ class BuildDetailsEntity < JobEntity
     DeploymentClusterEntity.represent(build.deployment, options)
   end
 
-  expose :artifact, if: -> (*) { can?(current_user, :read_build, build) } do
-    expose :download_path, if: -> (*) { build.artifacts? } do |build|
+  expose :artifact, if: -> (*) { can?(current_user, :read_job_artifacts, build) } do
+    expose :download_path, if: -> (*) { build.locked_artifacts? || build.artifacts? } do |build|
       download_project_job_artifacts_path(project, build)
     end
 
-    expose :browse_path, if: -> (*) { build.browsable_artifacts? } do |build|
+    expose :browse_path, if: -> (*) { build.locked_artifacts? || build.browsable_artifacts? } do |build|
       browse_project_job_artifacts_path(project, build)
     end
 
-    expose :keep_path, if: -> (*) { build.has_expiring_archive_artifacts? && can?(current_user, :update_build, build) } do |build|
+    expose :keep_path, if: -> (*) { (build.has_expired_locked_archive_artifacts? || build.has_expiring_archive_artifacts?) && can?(current_user, :update_build, build) } do |build|
       keep_project_job_artifacts_path(project, build)
     end
 
@@ -45,6 +45,10 @@ class BuildDetailsEntity < JobEntity
 
     expose :expired, if: -> (*) { build.artifacts_expire_at.present? } do |build|
       build.artifacts_expired?
+    end
+
+    expose :locked do |build|
+      build.pipeline.artifacts_locked?
     end
   end
 
@@ -129,10 +133,10 @@ class BuildDetailsEntity < JobEntity
   def callout_message
     return super unless build.failure_reason.to_sym == :missing_dependency_failure
 
-    docs_url = "https://docs.gitlab.com/ce/ci/yaml/README.html#dependencies"
+    docs_url = "https://docs.gitlab.com/ee/ci/yaml/README.html#dependencies"
 
     [
-      failure_message.html_safe,
+      failure_message,
       help_message(docs_url).html_safe
     ].join("<br />")
   end

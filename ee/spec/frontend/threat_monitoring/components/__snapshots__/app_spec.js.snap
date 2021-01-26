@@ -19,6 +19,7 @@ exports[`ThreatMonitoringApp component given there is a default environment with
 exports[`ThreatMonitoringApp component given there is a default environment with data renders the network policy tab 1`] = `
 <gl-tab-stub
   title="Policies"
+  titlelinkclass=""
 >
   <network-policy-list-stub
     documentationpath="/docs"

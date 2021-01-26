@@ -98,7 +98,7 @@ RSpec.describe Projects::NotesController do
       let(:page_2_boundary) { microseconds(page_2.last.updated_at + NotesFinder::FETCH_OVERLAP) }
 
       around do |example|
-        Timecop.freeze do
+        freeze_time do
           example.run
         end
       end
@@ -113,6 +113,8 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the first page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           get :index, params: request_params
 
           expect(json_response['notes'].count).to eq(page_1.count)
@@ -122,6 +124,8 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the second page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           request.headers['X-Last-Fetched-At'] = page_1_boundary
 
           get :index, params: request_params
@@ -133,11 +137,26 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the final page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           request.headers['X-Last-Fetched-At'] = page_2_boundary
 
           get :index, params: request_params
 
           expect(json_response['notes'].count).to eq(page_3.count)
+          expect(json_response['more']).to be_falsy
+          expect(json_response['last_fetched_at']).to eq(microseconds(Time.zone.now))
+          expect(response.headers['Poll-Interval'].to_i).to be > 1
+        end
+
+        it 'returns an empty page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).not_to receive(:skip!)
+
+          request.headers['X-Last-Fetched-At'] = microseconds(Time.zone.now)
+
+          get :index, params: request_params
+
+          expect(json_response['notes']).to be_empty
           expect(json_response['more']).to be_falsy
           expect(json_response['last_fetched_at']).to eq(microseconds(Time.zone.now))
           expect(response.headers['Poll-Interval'].to_i).to be > 1
@@ -302,6 +321,7 @@ RSpec.describe Projects::NotesController do
         target_id: merge_request.id
       }.merge(extra_request_params)
     end
+
     let(:extra_request_params) { {} }
 
     let(:project_visibility) { Gitlab::VisibilityLevel::PUBLIC }
@@ -406,7 +426,7 @@ RSpec.describe Projects::NotesController do
           let(:note_text) { "/award :thumbsup:\n/estimate 1d\n/spend 3h" }
           let(:extra_request_params) { { format: :json } }
 
-          it 'includes changes in commands_changes ' do
+          it 'includes changes in commands_changes' do
             create!
 
             expect(response).to have_gitlab_http_status(:ok)

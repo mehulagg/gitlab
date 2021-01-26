@@ -1,10 +1,10 @@
-- return unless can?(current_user, :read_environment, @project)
+- return unless can?(current_user, :admin_operations, @project)
 
 - setting = error_tracking_setting
 
 %section.settings.no-animate.js-error-tracking-settings
   .settings-header
-    %h3{ :class => "h4" }
+    %h4
       = _('Error tracking')
     %button.btn.js-settings-toggle{ type: 'button' }
       = _('Expand')

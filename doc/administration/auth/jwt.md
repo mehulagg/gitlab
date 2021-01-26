@@ -2,7 +2,7 @@
 type: reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # JWT OmniAuth provider
@@ -38,7 +38,7 @@ JWT will provide you with a secret key for you to use.
          algorithm: 'HS256', # Supported algorithms: 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'HS256', 'HS384', 'HS512'
          uid_claim: 'email',
          required_claims: ['name', 'email'],
-         info_maps: { name: 'name', email: 'email' },
+         info_map: { name: 'name', email: 'email' },
          auth_url: 'https://example.com/',
          valid_within: 3600 # 1 hour
        }
@@ -62,7 +62,7 @@ JWT will provide you with a secret key for you to use.
      }
    ```
 
-   NOTE: **Note:**
+   NOTE:
    For more information on each configuration option refer to
    the [OmniAuth JWT usage documentation](https://github.com/mbleigh/omniauth-jwt#usage).
 

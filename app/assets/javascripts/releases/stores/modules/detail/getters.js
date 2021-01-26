@@ -5,8 +5,8 @@ import { hasContent } from '~/lib/utils/text_utility';
  * @returns {Boolean} `true` if the app is editing an existing release.
  * `false` if the app is creating a new release.
  */
-export const isExistingRelease = state => {
-  return Boolean(state.originalRelease);
+export const isExistingRelease = (state) => {
+  return Boolean(state.tagName);
 };
 
 /**
@@ -15,19 +15,19 @@ export const isExistingRelease = state => {
  * empty (or whitespace-only) values for both `url` and `name`.
  * Otherwise, `false`.
  */
-const isEmptyReleaseLink = link => !hasContent(link.url) && !hasContent(link.name);
+const isEmptyReleaseLink = (link) => !hasContent(link.url) && !hasContent(link.name);
 
 /** Returns all release links that aren't empty */
-export const releaseLinksToCreate = state => {
+export const releaseLinksToCreate = (state) => {
   if (!state.release) {
     return [];
   }
 
-  return state.release.assets.links.filter(l => !isEmptyReleaseLink(l));
+  return state.release.assets.links.filter((l) => !isEmptyReleaseLink(l));
 };
 
 /** Returns all release links that should be deleted */
-export const releaseLinksToDelete = state => {
+export const releaseLinksToDelete = (state) => {
   if (!state.originalRelease) {
     return [];
   }
@@ -36,7 +36,7 @@ export const releaseLinksToDelete = state => {
 };
 
 /** Returns all validation errors on the release object */
-export const validationErrors = state => {
+export const validationErrors = (state) => {
   const errors = {
     assets: {
       links: {},
@@ -47,12 +47,16 @@ export const validationErrors = state => {
     return errors;
   }
 
+  if (!state.release.tagName?.trim?.().length) {
+    errors.isTagNameEmpty = true;
+  }
+
   // Each key of this object is a URL, and the value is an
   // array of Release link objects that share this URL.
   // This is used for detecting duplicate URLs.
   const urlToLinksMap = new Map();
 
-  state.release.assets.links.forEach(link => {
+  state.release.assets.links.forEach((link) => {
     errors.assets.links[link.id] = {};
 
     // Only validate non-empty URLs
@@ -77,7 +81,7 @@ export const validationErrors = state => {
       // add a validation error for each link that shares this URL
       const duplicates = urlToLinksMap.get(normalizedUrl);
       duplicates.push(link);
-      duplicates.forEach(duplicateLink => {
+      duplicates.forEach((duplicateLink) => {
         errors.assets.links[duplicateLink.id].isDuplicate = true;
       });
     } else {
@@ -96,5 +100,6 @@ export const validationErrors = state => {
 
 /** Returns whether or not the release object is valid */
 export const isValid = (_state, getters) => {
-  return Object.values(getters.validationErrors.assets.links).every(isEmpty);
+  const errors = getters.validationErrors;
+  return Object.values(errors.assets.links).every(isEmpty) && !errors.isTagNameEmpty;
 };

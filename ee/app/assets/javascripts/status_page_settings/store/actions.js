@@ -1,6 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
 import * as mutationTypes from './mutation_types';
 
@@ -34,7 +34,7 @@ export const updateStatusPageSettings = ({ state, dispatch, commit }) => {
       },
     })
     .then(() => dispatch('receiveStatusPageSettingsUpdateSuccess'))
-    .catch(error => dispatch('receiveStatusPageSettingsUpdateError', error))
+    .catch((error) => dispatch('receiveStatusPageSettingsUpdateError', error))
     .finally(() => commit(mutationTypes.LOADING, false));
 };
 

@@ -2,12 +2,14 @@
 
 # PHP composer support (https://getcomposer.org/)
 module API
-  class ComposerPackages < Grape::API::Instance
+  class ComposerPackages < ::API::Base
     helpers ::API::Helpers::PackagesManagerClientsHelpers
     helpers ::API::Helpers::RelatedResourcesHelpers
     helpers ::API::Helpers::Packages::BasicAuthHelpers
     include ::API::Helpers::Packages::BasicAuthHelpers::Constants
     include ::Gitlab::Utils::StrongMemoize
+
+    feature_category :package_registry
 
     content_type :json, 'application/json'
     default_format :json
@@ -26,12 +28,18 @@ module API
       render_api_error!(e.message, 400)
     end
 
+    rescue_from Packages::Composer::ComposerJsonService::InvalidJson do |e|
+      render_api_error!(e.message, 422)
+    end
+
     helpers do
       def packages
         strong_memoize(:packages) do
           packages = ::Packages::Composer::PackagesFinder.new(current_user, user_group).execute
 
           if params[:package_name].present?
+            params[:package_name], params[:sha] = params[:package_name].split('$')
+
             packages = packages.with_name(params[:package_name])
           end
 
@@ -59,7 +67,7 @@ module API
 
       desc 'Composer packages endpoint at group level'
 
-      route_setting :authentication, job_token_allowed: true
+      route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
       get ':id/-/packages/composer/packages' do
         presenter.root
@@ -71,7 +79,7 @@ module API
         requires :sha, type: String, desc: 'Shasum of current json'
       end
 
-      route_setting :authentication, job_token_allowed: true
+      route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
       get ':id/-/packages/composer/p/:sha' do
         presenter.provider
@@ -83,10 +91,11 @@ module API
         requires :package_name, type: String, file_path: true, desc: 'The Composer package name'
       end
 
-      route_setting :authentication, job_token_allowed: true
+      route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
       get ':id/-/packages/composer/*package_name', requirements: COMPOSER_ENDPOINT_REQUIREMENTS, file_path: true do
         not_found! if packages.empty?
+        not_found! if params[:sha].blank?
 
         presenter.package_versions
       end
@@ -104,7 +113,7 @@ module API
       desc 'Composer packages endpoint for registering packages'
 
       namespace ':id/packages/composer' do
-        route_setting :authentication, job_token_allowed: true
+        route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
 
         params do
           optional :branch, type: String, desc: 'The name of the branch'
@@ -123,10 +132,10 @@ module API
             bad_request!
           end
 
-          track_event('register_package')
+          track_package_event('push_package', :composer)
 
           ::Packages::Composer::CreatePackageService
-            .new(authorized_user_project, current_user, declared_params)
+            .new(authorized_user_project, current_user, declared_params.merge(build: current_authenticated_job))
             .execute
 
           created!

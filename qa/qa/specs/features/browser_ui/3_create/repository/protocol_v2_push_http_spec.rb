@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Create' do
     describe 'Push over HTTP using Git protocol version 2', :requires_git_protocol_v2 do
-      it 'user pushes to the repository' do
+      it 'user pushes to the repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/469' do
         Flow::Login.sign_in
 
         # Create a project to push to
@@ -37,8 +37,10 @@ module QA
         project.wait_for_push_new_branch
 
         # Check that the push worked
-        expect(page).to have_content(file_name)
-        expect(page).to have_content(file_content)
+        Page::Project::Show.perform do |project_page|
+          expect(project_page).to have_file(file_name)
+          expect(project_page).to have_readme_content(file_content)
+        end
 
         # And check that the correct Git protocol was used
         expect(git_protocol_reported).to eq(git_protocol)

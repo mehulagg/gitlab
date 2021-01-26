@@ -1,10 +1,10 @@
+import { GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedDropdownItem } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
+import DependenciesActions from 'ee/dependencies/components/dependencies_actions.vue';
 import createStore from 'ee/dependencies/store';
 import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 import { SORT_FIELDS } from 'ee/dependencies/store/modules/list/constants';
-import DependenciesActions from 'ee/dependencies/components/dependencies_actions.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 
 describe('DependenciesActions component', () => {
   let store;
@@ -39,9 +39,9 @@ describe('DependenciesActions component', () => {
   });
 
   it('dispatches the right setSortField action on clicking each item in the dropdown', () => {
-    const dropdownItems = wrapper.findAll(GlDeprecatedDropdownItem).wrappers;
+    const dropdownItems = wrapper.findAll(GlDropdownItem).wrappers;
 
-    dropdownItems.forEach(item => {
+    dropdownItems.forEach((item) => {
       // trigger() does not work on stubbed/shallow mounted components
       // https://github.com/vuejs/vue-test-utils/issues/919
       item.vm.$emit('click');
@@ -49,7 +49,7 @@ describe('DependenciesActions component', () => {
 
     expect(store.dispatch.mock.calls).toEqual(
       expect.arrayContaining(
-        Object.keys(SORT_FIELDS).map(field => [`${namespace}/setSortField`, field]),
+        Object.keys(SORT_FIELDS).map((field) => [`${namespace}/setSortField`, field]),
       ),
     );
   });

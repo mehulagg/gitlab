@@ -8,13 +8,13 @@ module Mutations
       authorize :update_todo
 
       argument :id,
-               GraphQL::ID_TYPE,
+               ::Types::GlobalIDType[::Todo],
                required: true,
-               description: 'The global id of the todo to mark as done'
+               description: 'The global ID of the todo to mark as done.'
 
       field :todo, Types::TodoType,
             null: false,
-            description: 'The requested todo'
+            description: 'The requested todo.'
 
       def resolve(id:)
         todo = authorized_find!(id: id)

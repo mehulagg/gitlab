@@ -13,9 +13,9 @@ module Gitlab
         # @param [LfsObject] lfs_object
         def initialize(lfs_object)
           if lfs_object.local_store?
-            super(local_lfs_object_attributes(lfs_object))
+            super(**local_lfs_object_attributes(lfs_object))
           else
-            super(remote_lfs_object_attributes(lfs_object))
+            super(**remote_lfs_object_attributes(lfs_object))
           end
         end
 

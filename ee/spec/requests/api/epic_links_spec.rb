@@ -151,6 +151,28 @@ RSpec.describe API::EpicLinks do
           expect(epic.reload.children).to include(Epic.last)
         end
 
+        context 'when the parent epic is confidential' do
+          let(:epic) { create(:epic, group: group, confidential: true) }
+
+          it 'copies the confidentiality status from the parent epic' do
+            subject
+
+            expect(Epic.last).to be_confidential
+          end
+
+          it 'does not allow creating a non-confidential sub-epic' do
+            post api(url, user), params: { title: 'child epic', confidential: false }
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        it 'does apply the confidential parameter if set' do
+          post api(url, user), params: { title: 'child epic', confidential: true }
+
+          expect(Epic.last).to be_confidential
+        end
+
         context 'and epic has errors' do
           it 'returns 400 error' do
             child_epic = Epic.new(title: 'with errors')

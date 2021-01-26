@@ -25,72 +25,113 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   describe "GET /:project/jobs" do
-    let!(:job) { create(:ci_build, pipeline: pipeline) }
-
-    context "Pending scope" do
+    context 'with no jobs' do
       before do
-        visit project_jobs_path(project, scope: :pending)
-      end
+        stub_experiment(jobs_empty_state: experiment_active)
+        stub_experiment_for_subject(jobs_empty_state: in_experiment_group)
 
-      it "shows Pending tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Pending')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Running scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :running)
-      end
-
-      it "shows Running tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Running')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Finished scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :finished)
-      end
-
-      it "shows Finished tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Finished')
-        expect(page).to have_content 'No jobs to show'
-      end
-    end
-
-    context "All jobs" do
-      before do
-        project.builds.running_or_pending.each(&:success)
         visit project_jobs_path(project)
       end
 
-      it "shows All tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'All')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
+      context 'when experiment not active' do
+        let(:experiment_active) { false }
+        let(:in_experiment_group) { false }
+
+        it 'shows the empty state control page' do
+          expect(page).to have_content('No jobs to show')
+          expect(page).to have_link('Get started with Pipelines')
+        end
+      end
+
+      context 'when experiment active and user in control group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { false }
+
+        it 'shows the empty state control page' do
+          expect(page).to have_content('No jobs to show')
+          expect(page).to have_link('Get started with Pipelines')
+        end
+      end
+
+      context 'when experiment active and user in experimental group' do
+        let(:experiment_active) { true }
+        let(:in_experiment_group) { true }
+
+        it 'shows the empty state experiment page' do
+          expect(page).to have_content('Use jobs to automate your tasks')
+          expect(page).to have_link('Create CI/CD configuration file')
+        end
       end
     end
 
-    context "when visiting old URL" do
-      let(:jobs_url) do
-        project_jobs_path(project)
+    context 'with a job' do
+      let!(:job) { create(:ci_build, pipeline: pipeline) }
+
+      context "Pending scope" do
+        before do
+          visit project_jobs_path(project, scope: :pending)
+        end
+
+        it "shows Pending tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Pending')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      before do
-        visit jobs_url.sub('/-/jobs', '/builds')
+      context "Running scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :running)
+        end
+
+        it "shows Running tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Running')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      it "redirects to new URL" do
-        expect(page.current_path).to eq(jobs_url)
+      context "Finished scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :finished)
+        end
+
+        it "shows Finished tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Finished')
+          expect(page).to have_content 'No jobs to show'
+        end
+      end
+
+      context "All jobs" do
+        before do
+          project.builds.running_or_pending.each(&:success)
+          visit project_jobs_path(project)
+        end
+
+        it "shows All tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'All')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
+      end
+
+      context "when visiting old URL" do
+        let(:jobs_url) do
+          project_jobs_path(project)
+        end
+
+        before do
+          visit jobs_url.sub('/-/jobs', '/builds')
+        end
+
+        it "redirects to new URL" do
+          expect(page.current_path).to eq(jobs_url)
+        end
       end
     end
   end
@@ -373,13 +414,29 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         let(:expire_at) { Time.now + 7.days }
 
         context 'when user has ability to update job' do
-          it 'keeps artifacts when keep button is clicked' do
-            expect(page).to have_content 'The artifacts will be removed in'
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
 
-            click_link 'Keep'
+            it 'keeps artifacts when keep button is clicked' do
+              expect(page).to have_content 'The artifacts will be removed in'
 
-            expect(page).to have_no_link 'Keep'
-            expect(page).to have_no_content 'The artifacts will be removed in'
+              click_link 'Keep'
+
+              expect(page).to have_no_link 'Keep'
+              expect(page).to have_no_content 'The artifacts will be removed in'
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'shows the keep button' do
+              expect(page).to have_link 'Keep'
+            end
           end
         end
 
@@ -395,9 +452,26 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       context 'when artifacts expired' do
         let(:expire_at) { Time.now - 7.days }
 
-        it 'does not have the Keep button' do
-          expect(page).to have_content 'The artifacts were removed'
-          expect(page).not_to have_link 'Keep'
+        context 'when artifacts are unlocked' do
+          before do
+            job.pipeline.unlocked!
+          end
+
+          it 'does not have the Keep button' do
+            expect(page).to have_content 'The artifacts were removed'
+            expect(page).not_to have_link 'Keep'
+          end
+        end
+
+        context 'when artifacts are locked' do
+          before do
+            job.pipeline.artifacts_locked!
+          end
+
+          it 'has the Keep button' do
+            expect(page).not_to have_content 'The artifacts were removed'
+            expect(page).to have_link 'Keep'
+          end
         end
       end
     end
@@ -980,7 +1054,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       before do
         job.run!
         visit project_job_path(project, job)
-        find('.js-cancel-job').click
+        find('[data-testid="cancel-button"]').click
       end
 
       it 'loads the page and shows all needed controls' do
@@ -997,7 +1071,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        find('.js-retry-button').click
+        find('[data-testid="retry-button"]').click
       end
 
       it 'shows the right status and buttons' do
@@ -1021,6 +1095,31 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       it 'does not show the Retry button' do
         page.within('aside.right-sidebar') do
           expect(page).not_to have_content 'Retry'
+        end
+      end
+    end
+
+    context "Job that failed because of a forward deployment failure" do
+      let(:job) { create(:ci_build, :forward_deployment_failure, pipeline: pipeline) }
+
+      before do
+        visit project_job_path(project, job)
+        wait_for_requests
+
+        find('[data-testid="retry-button"]').click
+      end
+
+      it 'shows a modal to warn the user' do
+        page.within('.modal-header') do
+          expect(page).to have_content 'Are you sure you want to retry this job?'
+        end
+      end
+
+      it 'retries the job' do
+        find('[data-testid="retry-button-modal"]').click
+
+        within '[data-testid="ci-header-content"]' do
+          expect(page).to have_content('pending')
         end
       end
     end
@@ -1113,9 +1212,11 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   describe "GET /:project/jobs/:id/trace.json" do
+    let(:build) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
+
     context "Job from project" do
       before do
-        visit trace_project_job_path(project, job, format: :json)
+        visit trace_project_job_path(project, build, format: :json)
       end
 
       it { expect(page.status_code).to eq(200) }

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Metrics::Samplers::DatabaseSampler do
-  subject { described_class.new(described_class::SAMPLING_INTERVAL_SECONDS) }
+  subject { described_class.new }
 
   describe '#sample' do
     before do

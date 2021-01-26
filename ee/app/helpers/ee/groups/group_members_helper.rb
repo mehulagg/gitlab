@@ -7,4 +7,11 @@ module EE::Groups::GroupMembersHelper
   def group_member_select_options
     super.merge(skip_ldap: @group.ldap_synced?)
   end
+
+  override :group_members_list_data_attributes
+  def group_members_list_data_attributes(group, _members)
+    super.merge!({
+      ldap_override_path: override_group_group_member_path(group, ':id')
+    })
+  end
 end

@@ -1,7 +1,13 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Geo Nodes API **(PREMIUM ONLY)**
 
-In order to interact with Geo node endpoints, you need to authenticate yourself
-as an admin.
+To interact with Geo node endpoints, you need to authenticate yourself as an
+admin.
 
 ## Create a new Geo node
 
@@ -234,7 +240,7 @@ Example response:
 
 Removes the Geo node.
 
-NOTE: **Note:**
+NOTE:
 Only a Geo primary node will accept this request.
 
 ```plaintext
@@ -371,7 +377,13 @@ Example response:
     "package_files_checksum_failed_count": 0,
     "package_files_registry_count": 10,
     "package_files_synced_count": 6,
-    "package_files_failed_count": 3
+    "package_files_failed_count": 3,
+    "snippet_repositories_count": 10,
+    "snippet_repositories_checksummed_count": 10,
+    "snippet_repositories_checksum_failed_count": 0,
+    "snippet_repositories_registry_count": 10,
+    "snippet_repositories_synced_count": 6,
+    "snippet_repositories_failed_count": 3
   },
   {
     "geo_node_id": 2,
@@ -442,12 +454,30 @@ Example response:
     "last_successful_status_check_timestamp": 1510125024,
     "version": "10.3.0",
     "revision": "33d33a096a",
+    "merge_request_diffs_count": 12,
+    "merge_request_diffs_checksummed_count": 8,
+    "merge_request_diffs_checksum_failed_count": 0,
+    "merge_request_diffs_registry_count": 12,
+    "merge_request_diffs_synced_count": 9,
+    "merge_request_diffs_failed_count": 3,
     "package_files_count": 10,
     "package_files_checksummed_count": 10,
     "package_files_checksum_failed_count": 0,
     "package_files_registry_count": 10,
     "package_files_synced_count": 6,
-    "package_files_failed_count": 3
+    "package_files_failed_count": 3,
+    "terraform_state_versions_count": 10,
+    "terraform_state_versions_checksummed_count": 10,
+    "terraform_state_versions_checksum_failed_count": 0,
+    "terraform_state_versions_registry_count": 10,
+    "terraform_state_versions_synced_count": 6,
+    "terraform_state_versions_failed_count": 3,
+    "snippet_repositories_count": 10,
+    "snippet_repositories_checksummed_count": 10,
+    "snippet_repositories_checksum_failed_count": 0,
+    "snippet_repositories_registry_count": 10,
+    "snippet_repositories_synced_count": 6,
+    "snippet_repositories_failed_count": 3
   }
 ]
 ```
@@ -518,7 +548,8 @@ Example response:
 }
 ```
 
-Note: The `health_status` parameter can only be in an "Healthy" or "Unhealthy" state, while the `health` parameter can be empty, "Healthy", or contain the actual error message.
+NOTE:
+The `health_status` parameter can only be in an "Healthy" or "Unhealthy" state, while the `health` parameter can be empty, "Healthy", or contain the actual error message.
 
 ## Retrieve project sync or verification failures that occurred on the current node
 

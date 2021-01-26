@@ -116,9 +116,9 @@ RSpec.describe ApplicationHelper do
       Time.use_zone('UTC') { example.run }
     end
 
-    def element(*arguments)
+    def element(**arguments)
       @time = Time.zone.parse('2015-07-02 08:23')
-      element = helper.time_ago_with_tooltip(@time, *arguments)
+      element = helper.time_ago_with_tooltip(@time, **arguments)
 
       Nokogiri::HTML::DocumentFragment.parse(element).first_element_child
     end
@@ -168,15 +168,38 @@ RSpec.describe ApplicationHelper do
     it { expect(helper.active_when(false)).to eq(nil) }
   end
 
+  describe '#promo_host' do
+    subject { helper.promo_host }
+
+    it 'returns the url' do
+      is_expected.to eq('about.gitlab.com')
+    end
+  end
+
+  describe '#promo_url' do
+    subject { helper.promo_url }
+
+    it 'returns the url' do
+      is_expected.to eq('https://about.gitlab.com')
+    end
+
+    it 'changes if promo_host changes' do
+      allow(helper).to receive(:promo_host).and_return('foobar.baz')
+
+      is_expected.to eq('https://foobar.baz')
+    end
+  end
+
   describe '#contact_sales_url' do
     subject { helper.contact_sales_url }
 
-    it 'passes a smoke test' do
+    it 'returns the url' do
       is_expected.to eq('https://about.gitlab.com/sales')
     end
 
     it 'changes if promo_url changes' do
       allow(helper).to receive(:promo_url).and_return('https://somewhere.else')
+
       is_expected.to eq('https://somewhere.else/sales')
     end
   end
@@ -196,6 +219,32 @@ RSpec.describe ApplicationHelper do
       it 'builds the support url from the promo_url' do
         expect(helper.support_url).to eq(helper.promo_url + '/getting-help/')
       end
+    end
+  end
+
+  describe '#instance_review_permitted?' do
+    let_it_be(:non_admin_user) { create :user }
+    let_it_be(:admin_user) { create :user, :admin }
+
+    before do
+      allow(::Gitlab::CurrentSettings).to receive(:instance_review_permitted?).and_return(app_setting)
+      allow(helper).to receive(:current_user).and_return(current_user)
+    end
+
+    subject { helper.instance_review_permitted? }
+
+    where(app_setting: [true, false], is_admin: [true, false, nil])
+
+    with_them do
+      let(:current_user) do
+        if is_admin.nil?
+          nil
+        else
+          is_admin ? admin_user : non_admin_user
+        end
+      end
+
+      it { is_expected.to be(app_setting && is_admin) }
     end
   end
 

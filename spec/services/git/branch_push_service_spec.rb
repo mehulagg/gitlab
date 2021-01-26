@@ -416,6 +416,7 @@ RSpec.describe Git::BranchPushService, services: true do
       before do
         # project.create_jira_service doesn't seem to invalidate the cache here
         project.has_external_issue_tracker = true
+        stub_jira_service_test
         jira_service_settings
         stub_jira_urls("JIRA-1")
 
@@ -553,7 +554,7 @@ RSpec.describe Git::BranchPushService, services: true do
   end
 
   describe "housekeeping" do
-    let(:housekeeping) { Projects::HousekeepingService.new(project) }
+    let(:housekeeping) { Repositories::HousekeepingService.new(project) }
 
     before do
       # Flush any raw key-value data stored by the housekeeping code.
@@ -561,7 +562,7 @@ RSpec.describe Git::BranchPushService, services: true do
       Gitlab::Redis::Queues.with { |conn| conn.flushall }
       Gitlab::Redis::SharedState.with { |conn| conn.flushall }
 
-      allow(Projects::HousekeepingService).to receive(:new).and_return(housekeeping)
+      allow(Repositories::HousekeepingService).to receive(:new).and_return(housekeeping)
     end
 
     after do
@@ -702,5 +703,69 @@ RSpec.describe Git::BranchPushService, services: true do
     service = described_class.new(project, user, change: change, push_options: push_options)
     service.execute
     service
+  end
+
+  context 'Jira Connect hooks' do
+    let_it_be(:project) { create(:project, :repository) }
+    let(:branch_to_sync) { nil }
+    let(:commits_to_sync) { [] }
+    let(:params) do
+      { change: { oldrev: oldrev, newrev: newrev, ref: ref } }
+    end
+
+    subject do
+      described_class.new(project, user, params)
+    end
+
+    shared_examples 'enqueues Jira sync worker' do
+      specify :aggregate_failures do
+        Sidekiq::Testing.fake! do
+          expect(JiraConnect::SyncBranchWorker).to receive(:perform_async)
+                                                     .with(project.id, branch_to_sync, commits_to_sync, kind_of(Numeric))
+                                                     .and_call_original
+
+          expect { subject.execute }.to change(JiraConnect::SyncBranchWorker.jobs, :size).by(1)
+        end
+      end
+    end
+
+    shared_examples 'does not enqueue Jira sync worker' do
+      specify do
+        Sidekiq::Testing.fake! do
+          expect { subject.execute }.not_to change(JiraConnect::SyncBranchWorker.jobs, :size)
+        end
+      end
+    end
+
+    context 'with a Jira subscription' do
+      before do
+        create(:jira_connect_subscription, namespace: project.namespace)
+      end
+
+      context 'branch name contains Jira issue key' do
+        let(:branch_to_sync) { 'branch-JIRA-123' }
+        let(:ref) { "refs/heads/#{branch_to_sync}" }
+
+        it_behaves_like 'enqueues Jira sync worker'
+      end
+
+      context 'commit message contains Jira issue key' do
+        let(:commits_to_sync) { [newrev] }
+
+        before do
+          allow_any_instance_of(Commit).to receive(:safe_message).and_return('Commit with key JIRA-123')
+        end
+
+        it_behaves_like 'enqueues Jira sync worker'
+      end
+
+      context 'branch name and commit message does not contain Jira issue key' do
+        it_behaves_like 'does not enqueue Jira sync worker'
+      end
+    end
+
+    context 'without a Jira subscription' do
+      it_behaves_like 'does not enqueue Jira sync worker'
+    end
   end
 end

@@ -17,13 +17,15 @@ module EE
     def initialize(type, project, *args, &blk)
       super
 
-      finder = CUSTOM_TEMPLATES.fetch(type)
-      @custom_templates = ::Gitlab::CustomFileTemplates.new(finder, project)
+      if CUSTOM_TEMPLATES.key?(type)
+        finder = CUSTOM_TEMPLATES.fetch(type)
+        @custom_templates = ::Gitlab::CustomFileTemplates.new(finder, project)
+      end
     end
 
     override :execute
     def execute
-      return super unless custom_templates.enabled?
+      return super if custom_templates.nil? || !custom_templates.enabled?
 
       if params[:name]
         custom_templates.find(params[:name]) || super

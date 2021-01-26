@@ -3,20 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe Pages::LookupPath do
-  let(:project) do
-    instance_double(Project,
-      id: 12345,
-      private_pages?: true,
-      pages_https_only?: true,
-      full_path: 'the/full/path'
-    )
-  end
+  let(:project) { create(:project, :pages_private, pages_https_only: true) }
 
   subject(:lookup_path) { described_class.new(project) }
 
+  before do
+    stub_pages_setting(access_control: true, external_https: ["1.1.1.1:443"])
+    stub_pages_object_storage(::Pages::DeploymentUploader)
+  end
+
   describe '#project_id' do
     it 'delegates to Project#id' do
-      expect(lookup_path.project_id).to eq(12345)
+      expect(lookup_path.project_id).to eq(project.id)
     end
   end
 
@@ -47,12 +45,85 @@ RSpec.describe Pages::LookupPath do
   end
 
   describe '#source' do
-    it 'sets the source type to "file"' do
-      expect(lookup_path.source[:type]).to eq('file')
+    let(:source) { lookup_path.source }
+
+    shared_examples 'uses disk storage' do
+      it 'uses disk storage', :aggregate_failures do
+        expect(source[:type]).to eq('file')
+        expect(source[:path]).to eq(project.full_path + "/public/")
+      end
     end
 
-    it 'sets the source path to the project full path suffixed with "public/' do
-      expect(lookup_path.source[:path]).to eq('the/full/path/public/')
+    include_examples 'uses disk storage'
+
+    it 'return nil when legacy storage is disabled and there is no deployment' do
+      stub_feature_flags(pages_serve_from_legacy_storage: false)
+      expect(Gitlab::ErrorTracking).to receive(:track_exception)
+                                         .with(described_class::LegacyStorageDisabledError)
+                                         .and_call_original
+
+      expect(source).to eq(nil)
+    end
+
+    context 'when there is pages deployment' do
+      let(:deployment) { create(:pages_deployment, project: project) }
+
+      before do
+        project.mark_pages_as_deployed
+        project.pages_metadatum.update!(pages_deployment: deployment)
+      end
+
+      it 'uses deployment from object storage' do
+        freeze_time do
+          expect(source).to(
+            eq({
+                 type: 'zip',
+                 path: deployment.file.url(expire_at: 1.day.from_now),
+                 global_id: "gid://gitlab/PagesDeployment/#{deployment.id}",
+                 sha256: deployment.file_sha256,
+                 file_size: deployment.size,
+                 file_count: deployment.file_count
+               })
+          )
+        end
+      end
+
+      context 'when deployment is in the local storage' do
+        before do
+          deployment.file.migrate!(::ObjectStorage::Store::LOCAL)
+        end
+
+        it 'uses file protocol' do
+          freeze_time do
+            expect(source).to(
+              eq({
+                   type: 'zip',
+                   path: 'file://' + deployment.file.path,
+                   global_id: "gid://gitlab/PagesDeployment/#{deployment.id}",
+                   sha256: deployment.file_sha256,
+                   file_size: deployment.size,
+                   file_count: deployment.file_count
+                 })
+            )
+          end
+        end
+
+        context 'when pages_serve_with_zip_file_protocol feature flag is disabled' do
+          before do
+            stub_feature_flags(pages_serve_with_zip_file_protocol: false)
+          end
+
+          include_examples 'uses disk storage'
+        end
+      end
+
+      context 'when pages_serve_from_deployments feature flag is disabled' do
+        before do
+          stub_feature_flags(pages_serve_from_deployments: false)
+        end
+
+        include_examples 'uses disk storage'
+      end
     end
   end
 

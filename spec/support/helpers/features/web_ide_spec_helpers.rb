@@ -36,8 +36,8 @@ module WebIdeSpecHelpers
     ".js-ide-#{mode}-mode"
   end
 
-  def ide_file_row_open?(row)
-    row.matches_css?('.is-open')
+  def ide_folder_row_open?(row)
+    row.matches_css?('.folder.is-open')
   end
 
   # Creates a file in the IDE by expanding directories
@@ -91,7 +91,7 @@ module WebIdeSpecHelpers
   end
 
   def ide_open_file_row(row)
-    return if ide_file_row_open?(row)
+    return if ide_folder_row_open?(row)
 
     row.click
   end

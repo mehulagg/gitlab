@@ -1,14 +1,12 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlButton, GlFormInput, GlFormGroup } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlButton, GlFormInput, GlFormGroup, GlSprintf } from '@gitlab/ui';
+import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import { BACK_URL_PARAM } from '~/releases/constants';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import AssetLinksForm from './asset_links_form.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import MilestoneCombobox from '~/milestones/project_milestone_combobox.vue';
+import MilestoneCombobox from '~/milestones/components/milestone_combobox.vue';
 import TagField from './tag_field.vue';
 
 export default {
@@ -17,15 +15,12 @@ export default {
     GlFormInput,
     GlFormGroup,
     GlButton,
+    GlSprintf,
     MarkdownField,
     AssetLinksForm,
     MilestoneCombobox,
     TagField,
   },
-  directives: {
-    autofocusonshow,
-  },
-  mixins: [glFeatureFlagsMixin()],
   computed: {
     ...mapState('detail', [
       'isFetchingRelease',
@@ -34,27 +29,16 @@ export default {
       'markdownDocsPath',
       'markdownPreviewPath',
       'releasesPagePath',
-      'updateReleaseApiDocsPath',
       'release',
       'newMilestonePath',
       'manageMilestonesPath',
       'projectId',
+      'groupId',
+      'groupMilestonesAvailable',
     ]),
-    ...mapGetters('detail', ['isValid']),
+    ...mapGetters('detail', ['isValid', 'isExistingRelease']),
     showForm() {
-      return !this.isFetchingRelease && !this.fetchError;
-    },
-    subtitleText() {
-      return sprintf(
-        __(
-          'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}.',
-        ),
-        {
-          codeStart: '<code>',
-          codeEnd: '</code>',
-        },
-        false,
-      );
+      return Boolean(!this.isFetchingRelease && !this.fetchError && this.release);
     },
     releaseTitle: {
       get() {
@@ -83,10 +67,10 @@ export default {
     cancelPath() {
       return getParameterByName(BACK_URL_PARAM) || this.releasesPagePath;
     },
-    showAssetLinksForm() {
-      return this.glFeatures.releaseAssetLinkEditing;
+    saveButtonLabel() {
+      return this.isExistingRelease ? __('Save changes') : __('Create release');
     },
-    isSaveChangesDisabled() {
+    isFormSubmissionDisabled() {
       return this.isUpdatingRelease || !this.isValid;
     },
     milestoneComboboxExtraLinks() {
@@ -102,24 +86,45 @@ export default {
       ];
     },
   },
-  created() {
-    this.fetchRelease();
+  mounted() {
+    // eslint-disable-next-line promise/catch-or-return
+    this.initializeRelease().then(() => {
+      // Focus the first non-disabled input element
+      this.$el.querySelector('input:enabled').focus();
+    });
   },
   methods: {
     ...mapActions('detail', [
-      'fetchRelease',
-      'updateRelease',
+      'initializeRelease',
+      'saveRelease',
       'updateReleaseTitle',
       'updateReleaseNotes',
       'updateReleaseMilestones',
     ]),
+    submitForm() {
+      if (!this.isFormSubmissionDisabled) {
+        this.saveRelease();
+      }
+    },
   },
 };
 </script>
 <template>
   <div class="d-flex flex-column">
-    <p class="pt-3 js-subtitle-text" v-html="subtitleText"></p>
-    <form v-if="showForm" @submit.prevent="updateRelease()">
+    <p class="pt-3 js-subtitle-text">
+      <gl-sprintf
+        :message="
+          __(
+            'Releases are based on Git tags. We recommend tags that use semantic versioning, for example %{codeStart}v1.0%{codeEnd}, %{codeStart}v2.0-pre%{codeEnd}.',
+          )
+        "
+      >
+        <template #code="{ content }">
+          <code>{{ content }}</code>
+        </template>
+      </gl-sprintf>
+    </p>
+    <form v-if="showForm" class="js-quick-submit" @submit.prevent="submitForm">
       <tag-field />
       <gl-form-group>
         <label for="release-title">{{ __('Release title') }}</label>
@@ -127,23 +132,23 @@ export default {
           id="release-title"
           ref="releaseTitleInput"
           v-model="releaseTitle"
-          v-autofocusonshow
-          autofocus
           type="text"
           class="form-control"
         />
       </gl-form-group>
-      <gl-form-group class="w-50">
+      <gl-form-group class="w-50" data-testid="milestones-field">
         <label>{{ __('Milestones') }}</label>
         <div class="d-flex flex-column col-md-6 col-sm-10 pl-0">
           <milestone-combobox
             v-model="releaseMilestones"
             :project-id="projectId"
+            :group-id="groupId"
+            :group-milestones-available="groupMilestonesAvailable"
             :extra-links="milestoneComboboxExtraLinks"
           />
         </div>
       </gl-form-group>
-      <gl-form-group>
+      <gl-form-group data-testid="release-notes">
         <label for="release-notes">{{ __('Release notes') }}</label>
         <div class="bordered-box pr-3 pl-3">
           <markdown-field
@@ -151,6 +156,7 @@ export default {
             :markdown-preview-path="markdownPreviewPath"
             :markdown-docs-path="markdownDocsPath"
             :add-spacing-classes="false"
+            :textarea-value="releaseNotes"
             class="gl-mt-3 gl-mb-3"
           >
             <template #textarea>
@@ -162,15 +168,13 @@ export default {
                 data-supports-quick-actions="false"
                 :aria-label="__('Release notes')"
                 :placeholder="__('Write your release notes or drag your files here…')"
-                @keydown.meta.enter="updateRelease()"
-                @keydown.ctrl.enter="updateRelease()"
               ></textarea>
             </template>
           </markdown-field>
         </div>
       </gl-form-group>
 
-      <asset-links-form v-if="showAssetLinksForm" />
+      <asset-links-form />
 
       <div class="d-flex pt-3">
         <gl-button
@@ -178,10 +182,11 @@ export default {
           category="primary"
           variant="success"
           type="submit"
-          :aria-label="__('Save changes')"
-          :disabled="isSaveChangesDisabled"
-          >{{ __('Save changes') }}</gl-button
+          :disabled="isFormSubmissionDisabled"
+          data-testid="submit-button"
         >
+          {{ saveButtonLabel }}
+        </gl-button>
         <gl-button :href="cancelPath" class="js-cancel-button">{{ __('Cancel') }}</gl-button>
       </div>
     </form>

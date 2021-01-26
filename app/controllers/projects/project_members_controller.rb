@@ -8,6 +8,8 @@ class Projects::ProjectMembersController < Projects::ApplicationController
   # Authorize
   before_action :authorize_admin_project_member!, except: [:index, :leave, :request_access]
 
+  feature_category :authentication_and_authorization
+
   def index
     @sort = params[:sort].presence || sort_value_name
 
@@ -15,17 +17,18 @@ class Projects::ProjectMembersController < Projects::ApplicationController
     @skip_groups += @project.group.self_and_ancestors_ids if @project.group
 
     @group_links = @project.project_group_links
-    @group_links = @group_links.search(params[:search]) if params[:search].present?
+    @group_links = @group_links.search(params[:search_groups]) if params[:search_groups].present?
 
-    @project_members = MembersFinder
+    project_members = MembersFinder
       .new(@project, current_user, params: filter_params)
       .execute(include_relations: requested_relations)
 
-    @project_members = present_members(@project_members.page(params[:page]))
+    if helpers.can_manage_project_members?(@project)
+      @invited_members = present_members(project_members.invite)
+      @requesters = present_members(AccessRequestsFinder.new(@project).execute(current_user))
+    end
 
-    @requesters = present_members(
-      AccessRequestsFinder.new(@project).execute(current_user)
-    )
+    @project_members = present_members(project_members.non_invite.page(params[:page]))
 
     @project_member = @project.project_members.new
   end
@@ -54,6 +57,10 @@ class Projects::ProjectMembersController < Projects::ApplicationController
 
   def filter_params
     params.permit(:search).merge(sort: @sort)
+  end
+
+  def membershipable_members
+    project.members
   end
 end
 

@@ -30,6 +30,19 @@ Below this line is a block of HTML.
   <h1>Heading</h1>
   <p>Some paragraph...</p>
 </div>
+
+Below this line is a codeblock of the same HTML that should be ignored and preserved.
+
+\`\`\` html
+<div>
+  <h1>Heading</h1>
+  <p>Some paragraph...</p>
+</div>
+\`\`\`
+
+Below this line is a iframe that should be ignored and preserved
+
+<iframe></iframe>
 `;
   const sourceTemplated = `Below this line is a simple ERB (single-line erb block) example.
 
@@ -69,6 +82,19 @@ Below this line is a block of HTML.
   <p>Some paragraph...</p>
 </div>
 \`\`\`
+
+Below this line is a codeblock of the same HTML that should be ignored and preserved.
+
+\`\`\` html
+<div>
+  <h1>Heading</h1>
+  <p>Some paragraph...</p>
+</div>
+\`\`\`
+
+Below this line is a iframe that should be ignored and preserved
+
+<iframe></iframe>
 `;
 
   it.each`

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class StartPullMirroringService < BaseService
-  INTERVAL = 5.minutes
-
   def execute
     import_state = project.import_state
 
@@ -12,7 +10,7 @@ class StartPullMirroringService < BaseService
       import_state.force_import_job!
     else
       import_state.reset_retry_count if import_state.hard_failed?
-      import_state.update(next_execution_timestamp: INTERVAL.since(import_state.last_update_at))
+      import_state.update(next_execution_timestamp: interval.since(import_state.last_update_at))
     end
 
     success
@@ -20,9 +18,13 @@ class StartPullMirroringService < BaseService
 
   private
 
+  def interval
+    @interval ||= project.actual_limits.pull_mirror_interval_seconds.seconds
+  end
+
   def update_now?(import_state)
     import_state.last_successful_update_at.nil? ||
       import_state.last_update_at.nil? ||
-      import_state.last_update_at < INTERVAL.ago
+      import_state.last_update_at < interval.ago
   end
 end

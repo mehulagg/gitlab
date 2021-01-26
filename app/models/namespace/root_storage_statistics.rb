@@ -1,8 +1,18 @@
 # frozen_string_literal: true
 
 class Namespace::RootStorageStatistics < ApplicationRecord
-  SNIPPETS_SIZE_STAT_NAME = 'snippets_size'.freeze
-  STATISTICS_ATTRIBUTES = %W(storage_size repository_size wiki_size lfs_objects_size build_artifacts_size packages_size #{SNIPPETS_SIZE_STAT_NAME}).freeze
+  SNIPPETS_SIZE_STAT_NAME = 'snippets_size'
+  STATISTICS_ATTRIBUTES = %W(
+    storage_size
+    repository_size
+    wiki_size
+    lfs_objects_size
+    build_artifacts_size
+    packages_size
+    #{SNIPPETS_SIZE_STAT_NAME}
+    pipeline_artifacts_size
+    uploads_size
+  ).freeze
 
   self.primary_key = :namespace_id
 
@@ -40,7 +50,9 @@ class Namespace::RootStorageStatistics < ApplicationRecord
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
         'COALESCE(SUM(ps.packages_size), 0) AS packages_size',
-        "COALESCE(SUM(ps.snippets_size), 0) AS #{SNIPPETS_SIZE_STAT_NAME}"
+        "COALESCE(SUM(ps.snippets_size), 0) AS #{SNIPPETS_SIZE_STAT_NAME}",
+        'COALESCE(SUM(ps.pipeline_artifacts_size), 0) AS pipeline_artifacts_size',
+        'COALESCE(SUM(ps.uploads_size), 0) AS uploads_size'
       )
   end
 

@@ -8,15 +8,15 @@ import {
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
 
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-import { NO_LABEL, DEBOUNCE_DELAY } from '../constants';
+import { stripQuotes } from '../filtered_search_utils';
+import { DEFAULT_LABELS, DEBOUNCE_DELAY } from '../constants';
 
 export default {
-  noLabel: NO_LABEL,
   components: {
     GlToken,
     GlFilteredSearchToken,
@@ -37,6 +37,7 @@ export default {
   data() {
     return {
       labels: this.config.initialLabels || [],
+      defaultLabels: this.config.defaultLabels || DEFAULT_LABELS,
       loading: true,
     };
   },
@@ -45,12 +46,9 @@ export default {
       return this.value.data.toLowerCase();
     },
     activeLabel() {
-      // Strip double quotes
-      const strippedCurrentValue = this.currentValue.includes(' ')
-        ? this.currentValue.substring(1, this.currentValue.length - 1)
-        : this.currentValue;
-
-      return this.labels.find(label => label.title.toLowerCase() === strippedCurrentValue);
+      return this.labels.find(
+        (label) => label.title.toLowerCase() === stripQuotes(this.currentValue),
+      );
     },
     containerStyle() {
       if (this.activeLabel) {
@@ -76,7 +74,7 @@ export default {
       this.loading = true;
       this.config
         .fetchLabels(searchTerm)
-        .then(res => {
+        .then((res) => {
           // We'd want to avoid doing this check but
           // labels.json and /groups/:id/labels & /projects/:id/labels
           // return response differently.
@@ -102,15 +100,19 @@ export default {
     @input="searchLabels"
   >
     <template #view-token="{ inputValue, cssClasses, listeners }">
-      <gl-token variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners">
-        ~{{ activeLabel ? activeLabel.title : inputValue }}
-      </gl-token>
+      <gl-token variant="search-value" :class="cssClasses" :style="containerStyle" v-on="listeners"
+        >~{{ activeLabel ? activeLabel.title : inputValue }}</gl-token
+      >
     </template>
     <template #suggestions>
-      <gl-filtered-search-suggestion :value="$options.noLabel">
-        {{ __('No label') }}
+      <gl-filtered-search-suggestion
+        v-for="label in defaultLabels"
+        :key="label.value"
+        :value="label.value"
+      >
+        {{ label.text }}
       </gl-filtered-search-suggestion>
-      <gl-dropdown-divider />
+      <gl-dropdown-divider v-if="defaultLabels.length" />
       <gl-loading-icon v-if="loading" />
       <template v-else>
         <gl-filtered-search-suggestion v-for="label in labels" :key="label.id" :value="label.title">

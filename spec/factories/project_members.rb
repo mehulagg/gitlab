@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :project_member do
     user
-    project
+    source { association(:project) }
     maintainer
 
     trait(:guest)     { access_level { ProjectMember::GUEST } }
@@ -15,7 +15,9 @@ FactoryBot.define do
     trait(:invited) do
       user_id { nil }
       invite_token { 'xxx' }
-      invite_email { 'email@email.com' }
+      sequence :invite_email do |n|
+        "email#{n}@email.com"
+      end
     end
 
     trait :blocked do

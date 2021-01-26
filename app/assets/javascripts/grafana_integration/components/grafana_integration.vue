@@ -1,7 +1,6 @@
 <script>
-import { GlButton, GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
+import { GlButton, GlFormGroup, GlFormInput, GlFormCheckbox, GlIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
@@ -9,7 +8,7 @@ export default {
     GlFormCheckbox,
     GlFormGroup,
     GlFormInput,
-    Icon,
+    GlIcon,
   },
   data() {
     return { placeholderUrl: 'https://my-url.grafana.net/' };
@@ -55,9 +54,9 @@ export default {
 <template>
   <section id="grafana" class="settings no-animate js-grafana-integration">
     <div class="settings-header">
-      <h3 class="js-section-header h4">
+      <h4 class="js-section-header">
         {{ s__('GrafanaIntegration|Grafana authentication') }}
-      </h3>
+      </h4>
       <gl-button class="js-settings-toggle">{{ __('Expand') }}</gl-button>
       <p class="js-section-sub-header">
         {{ s__('GrafanaIntegration|Embed Grafana charts in GitLab issues.') }}
@@ -89,15 +88,13 @@ export default {
               rel="noopener noreferrer"
             >
               {{ __('More information') }}
-              <icon name="external-link" class="vertical-align-middle" />
+              <gl-icon name="external-link" class="vertical-align-middle" />
             </a>
           </p>
         </gl-form-group>
-        <div class="gl-display-flex gl-justify-content-end">
-          <gl-button variant="success" category="primary" @click="updateGrafanaIntegration">
-            {{ __('Save Changes') }}
-          </gl-button>
-        </div>
+        <gl-button variant="success" category="primary" @click="updateGrafanaIntegration">
+          {{ __('Save Changes') }}
+        </gl-button>
       </form>
     </div>
   </section>

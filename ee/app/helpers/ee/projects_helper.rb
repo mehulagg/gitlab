@@ -7,7 +7,6 @@ module EE
     override :sidebar_settings_paths
     def sidebar_settings_paths
       super + %w[
-        audit_events#index
         operations#show
       ]
     end
@@ -20,8 +19,7 @@ module EE
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
-        tracings
-        feature_flags
+        oncall_schedules
       ]
     end
 
@@ -39,10 +37,6 @@ module EE
         nav_tabs << :merge_request_analytics
       end
 
-      if can?(current_user, :read_feature_flag, project) && !nav_tabs.include?(:operations)
-        nav_tabs << :operations
-      end
-
       if project.feature_available?(:issues_analytics) && can?(current_user, :read_project, project)
         nav_tabs << :issues_analytics
       end
@@ -51,14 +45,29 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
+      if can?(current_user, :read_incident_management_oncall_schedule, project)
+        nav_tabs << :oncall_schedule
+      end
+
       nav_tabs
     end
 
-    override :tab_ability_map
-    def tab_ability_map
-      tab_ability_map = super
-      tab_ability_map[:feature_flags] = :read_feature_flag
-      tab_ability_map
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
     end
 
     override :default_url_to_repo
@@ -80,18 +89,31 @@ module EE
       end
     end
 
-    override :sidebar_operations_link_path
-    def sidebar_operations_link_path(project = @project)
-      super || project_feature_flags_path(project)
-    end
-
     override :remove_project_message
     def remove_project_message(project)
       return super unless project.adjourned_deletion?
 
       date = permanent_deletion_date(Time.now.utc)
-      _("Removing a project places it into a read-only state until %{date}, at which point the project will be permanently removed. Are you ABSOLUTELY sure?") %
+      _("Deleting a project places it into a read-only state until %{date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?") %
         { date: date }
+    end
+
+    def approvals_app_data(project = @project)
+      { data: { 'project_id': project.id,
+      'can_edit': can_modify_approvers.to_s,
+      'project_path': expose_path(api_v4_projects_path(id: project.id)),
+      'settings_path': expose_path(api_v4_projects_approval_settings_path(id: project.id)),
+      'rules_path': expose_path(api_v4_projects_approval_settings_rules_path(id: project.id)),
+      'allow_multi_rule': project.multiple_approval_rules_available?.to_s,
+      'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
+      'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests'),
+      'security_configuration_path': project_security_configuration_path(project),
+      'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
+      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') } }
+    end
+
+    def can_modify_approvers(project = @project)
+      can?(current_user, :modify_approvers_rules, project)
     end
 
     def permanent_delete_message(project)
@@ -140,21 +162,51 @@ module EE
       %w[
         projects/security/configuration#show
         projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show
+        projects/security/vulnerability_report#index
         projects/security/dashboard#index
         projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
         projects/threat_monitoring#new
+        projects/threat_monitoring#edit
+        projects/audit_events#index
       ]
     end
 
     def sidebar_external_tracker_paths
       %w[
         projects/integrations/jira/issues#index
+      ]
+    end
+
+    def sidebar_on_demand_scans_paths
+      %w[
+        projects/on_demand_scans#index
+        projects/on_demand_scans#new
+        projects/on_demand_scans#edit
+      ]
+    end
+
+    def sidebar_security_configuration_paths
+      %w[
+        projects/security/configuration#show
+        projects/security/sast_configuration#show
+        projects/security/api_fuzzing_configuration#show
+        projects/security/dast_profiles#show
+        projects/security/dast_site_profiles#new
+        projects/security/dast_site_profiles#edit
+        projects/security/dast_scanner_profiles#new
+        projects/security/dast_scanner_profiles#edit
       ]
     end
 
@@ -184,25 +236,25 @@ module EE
         {
           has_vulnerabilities: 'false',
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
+          project_full_path: project.full_path
+        }.merge!(security_dashboard_pipeline_data(project))
       else
         {
           has_vulnerabilities: 'true',
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
-          vulnerability_feedback_help_path: help_page_path("user/application_security/index", anchor: "interacting-with-the-vulnerabilities"),
           empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
-          user_callouts_path: user_callouts_path,
-          user_callout_id: UserCalloutsHelper::STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER,
-          show_introduction_banner: show_standalone_vulnerabilities_introduction_banner?.to_s
-        }
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix')
+        }.merge!(security_dashboard_pipeline_data(project))
       end
     end
 
@@ -233,21 +285,25 @@ module EE
       tabs.any? { |tab| project_nav_tab?(tab) }
     end
 
-    def show_discover_project_security?(project)
-      security_feature_available_at = DateTime.new(2019, 11, 1)
+    def top_level_link(project)
+      return project_security_dashboard_index_path(project) if project_nav_tab?(:security)
+      return project_audit_events_path(project) if project_nav_tab?(:audit_events)
 
-      !!current_user &&
-        ::Gitlab.com? &&
-        current_user.created_at > security_feature_available_at &&
-        !project.feature_available?(:security_dashboard) &&
-        can?(current_user, :admin_namespace, project.root_ancestor) &&
-        current_user.ab_feature_enabled?(:discover_security)
+      project_dependencies_path(project)
     end
 
-    def settings_operations_available?
-      return true if super
+    def top_level_qa_selector(project)
+      return 'security_dashboard_link' if project_nav_tab?(:security)
+      return 'audit_events_settings_link' if project_nav_tab?(:audit_events)
 
-      @project.feature_available?(:tracing, current_user) && can?(current_user, :read_environment, @project)
+      'dependency_list_link'
+    end
+
+    def show_discover_project_security?(project)
+      !!current_user &&
+        ::Gitlab.com? &&
+        !project.feature_available?(:security_dashboard) &&
+        can?(current_user, :admin_namespace, project.root_ancestor)
     end
 
     override :can_import_members?
@@ -256,7 +312,7 @@ module EE
     end
 
     def show_compliance_framework_badge?(project)
-      project&.compliance_framework_setting&.present?
+      project&.compliance_framework_setting&.compliance_management_framework.present?
     end
 
     def scheduled_for_deletion?(project)
@@ -289,7 +345,16 @@ module EE
         nav_tabs << :threat_monitoring
       end
 
+      if show_audit_events?(project)
+        nav_tabs << :audit_events
+      end
+
       nav_tabs
+    end
+
+    def show_audit_events?(project)
+      can?(current_user, :read_project_audit_events, project) &&
+        (project.feature_available?(:audit_events) || show_promotions?(current_user))
     end
 
     def remove_message_data(project)
@@ -300,6 +365,32 @@ module EE
         codeOpen: '<code>'.html_safe,
         codeClose: '</code>'.html_safe
       }
+    end
+
+    def security_dashboard_pipeline_data(project)
+      pipeline = project.latest_pipeline_with_security_reports
+      return {} unless pipeline
+
+      {
+        pipeline: {
+          id: pipeline.id,
+          path: pipeline_path(pipeline),
+          created_at: pipeline.created_at.to_s(:iso8601),
+          security_builds: {
+            failed: {
+              count: pipeline.latest_failed_security_builds.count,
+              path: failures_project_pipeline_path(pipeline.project, pipeline)
+            }
+          }
+        }
+      }
+    end
+
+    override :view_operations_tab_ability
+    def view_operations_tab_ability
+      super + [
+        :read_incident_management_oncall_schedule
+      ]
     end
   end
 end

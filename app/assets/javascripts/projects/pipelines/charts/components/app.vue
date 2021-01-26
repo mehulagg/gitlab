@@ -1,148 +1,232 @@
 <script>
-import dateFormat from 'dateformat';
-import { __, sprintf } from '~/locale';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import { getDateInPast } from '~/lib/utils/datetime_utility';
-import StatisticsList from './statistics_list.vue';
-import PipelinesAreaChart from './pipelines_area_chart.vue';
+import { GlAlert, GlTabs, GlTab } from '@gitlab/ui';
+import { s__ } from '~/locale';
+import getPipelineCountByStatus from '../graphql/queries/get_pipeline_count_by_status.query.graphql';
+import getProjectPipelineStatistics from '../graphql/queries/get_project_pipeline_statistics.query.graphql';
+import PipelineCharts from './pipeline_charts.vue';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
+
 import {
-  CHART_CONTAINER_HEIGHT,
-  INNER_CHART_HEIGHT,
-  X_AXIS_LABEL_ROTATION,
-  X_AXIS_TITLE_OFFSET,
-  CHART_DATE_FORMAT,
-  ONE_WEEK_AGO_DAYS,
-  ONE_MONTH_AGO_DAYS,
+  DEFAULT,
+  LOAD_ANALYTICS_FAILURE,
+  LOAD_PIPELINES_FAILURE,
+  PARSE_FAILURE,
+  UNSUPPORTED_DATA,
 } from '../constants';
+
+const defaultAnalyticsValues = {
+  weekPipelinesTotals: [],
+  weekPipelinesLabels: [],
+  weekPipelinesSuccessful: [],
+  monthPipelinesLabels: [],
+  monthPipelinesTotals: [],
+  monthPipelinesSuccessful: [],
+  yearPipelinesLabels: [],
+  yearPipelinesTotals: [],
+  yearPipelinesSuccessful: [],
+  pipelineTimesLabels: [],
+  pipelineTimesValues: [],
+};
+
+const defaultCountValues = {
+  totalPipelines: {
+    count: 0,
+  },
+  successfulPipelines: {
+    count: 0,
+  },
+};
+
+const charts = ['pipelines', 'deployments'];
 
 export default {
   components: {
-    StatisticsList,
-    GlColumnChart,
-    PipelinesAreaChart,
+    GlAlert,
+    GlTabs,
+    GlTab,
+    PipelineCharts,
+    DeploymentFrequencyCharts: () =>
+      import('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'),
   },
-  props: {
-    counts: {
-      type: Object,
-      required: true,
+  inject: {
+    shouldRenderDeploymentFrequencyCharts: {
+      type: Boolean,
+      default: false,
     },
-    timesChartData: {
-      type: Object,
-      required: true,
-    },
-    lastWeekChartData: {
-      type: Object,
-      required: true,
-    },
-    lastMonthChartData: {
-      type: Object,
-      required: true,
-    },
-    lastYearChartData: {
-      type: Object,
-      required: true,
+    projectPath: {
+      type: String,
+      default: '',
     },
   },
   data() {
+    const [chart] = getParameterValues('chart') || charts;
+    const tab = charts.indexOf(chart);
     return {
-      timesChartTransformedData: {
-        full: this.mergeLabelsAndValues(this.timesChartData.labels, this.timesChartData.values),
-      },
+      chart,
+      selectedTab: tab >= 0 ? tab : 0,
+      showFailureAlert: false,
+      failureType: null,
+      analytics: { ...defaultAnalyticsValues },
+      counts: { ...defaultCountValues },
     };
   },
-  computed: {
-    areaCharts() {
-      const { lastWeek, lastMonth, lastYear } = this.$options.chartTitles;
-
-      return [
-        this.buildAreaChartData(lastWeek, this.lastWeekChartData),
-        this.buildAreaChartData(lastMonth, this.lastMonthChartData),
-        this.buildAreaChartData(lastYear, this.lastYearChartData),
-      ];
+  apollo: {
+    counts: {
+      query: getPipelineCountByStatus,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        return data?.project;
+      },
+      error() {
+        this.reportFailure(LOAD_PIPELINES_FAILURE);
+      },
+    },
+    analytics: {
+      query: getProjectPipelineStatistics,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        return data?.project?.pipelineAnalytics;
+      },
+      error() {
+        this.reportFailure(LOAD_ANALYTICS_FAILURE);
+      },
     },
   },
-  methods: {
-    mergeLabelsAndValues(labels, values) {
-      return labels.map((label, index) => [label, values[index]]);
+  computed: {
+    failure() {
+      switch (this.failureType) {
+        case LOAD_ANALYTICS_FAILURE:
+          return {
+            text: this.$options.errorTexts[LOAD_ANALYTICS_FAILURE],
+            variant: 'danger',
+          };
+        case PARSE_FAILURE:
+          return {
+            text: this.$options.errorTexts[PARSE_FAILURE],
+            variant: 'danger',
+          };
+        case UNSUPPORTED_DATA:
+          return {
+            text: this.$options.errorTexts[UNSUPPORTED_DATA],
+            variant: 'info',
+          };
+        default:
+          return {
+            text: this.$options.errorTexts[DEFAULT],
+            variant: 'danger',
+          };
+      }
     },
-    buildAreaChartData(title, data) {
-      const { labels, totals, success } = data;
+    lastWeekChartData() {
+      return {
+        labels: this.analytics.weekPipelinesLabels,
+        totals: this.analytics.weekPipelinesTotals,
+        success: this.analytics.weekPipelinesSuccessful,
+      };
+    },
+    lastMonthChartData() {
+      return {
+        labels: this.analytics.monthPipelinesLabels,
+        totals: this.analytics.monthPipelinesTotals,
+        success: this.analytics.monthPipelinesSuccessful,
+      };
+    },
+    lastYearChartData() {
+      return {
+        labels: this.analytics.yearPipelinesLabels,
+        totals: this.analytics.yearPipelinesTotals,
+        success: this.analytics.yearPipelinesSuccessful,
+      };
+    },
+    timesChartData() {
+      return {
+        labels: this.analytics.pipelineTimesLabels,
+        values: this.analytics.pipelineTimesValues,
+      };
+    },
+    successRatio() {
+      const { successfulPipelines, failedPipelines } = this.counts;
+      const successfulCount = successfulPipelines?.count;
+      const failedCount = failedPipelines?.count;
+      const ratio = (successfulCount / (successfulCount + failedCount)) * 100;
+
+      return failedCount === 0 ? 100 : ratio;
+    },
+    formattedCounts() {
+      const { totalPipelines, successfulPipelines, failedPipelines } = this.counts;
 
       return {
-        title,
-        data: [
-          {
-            name: 'all',
-            data: this.mergeLabelsAndValues(labels, totals),
-          },
-          {
-            name: 'success',
-            data: this.mergeLabelsAndValues(labels, success),
-          },
-        ],
+        total: totalPipelines?.count,
+        success: successfulPipelines?.count,
+        failed: failedPipelines?.count,
+        successRatio: this.successRatio,
       };
     },
   },
-  chartContainerHeight: CHART_CONTAINER_HEIGHT,
-  timesChartOptions: {
-    height: INNER_CHART_HEIGHT,
-    xAxis: {
-      axisLabel: {
-        rotate: X_AXIS_LABEL_ROTATION,
-      },
-      nameGap: X_AXIS_TITLE_OFFSET,
+  methods: {
+    hideAlert() {
+      this.showFailureAlert = false;
+    },
+    reportFailure(type) {
+      this.showFailureAlert = true;
+      this.failureType = type;
+    },
+    onTabChange(index) {
+      this.selectedTab = index;
+      const path = mergeUrlParams({ chart: charts[index] }, window.location.pathname);
+      updateHistory({ url: path });
     },
   },
-  get chartTitles() {
-    const today = dateFormat(new Date(), CHART_DATE_FORMAT);
-    const pastDate = timeScale =>
-      dateFormat(getDateInPast(new Date(), timeScale), CHART_DATE_FORMAT);
-    return {
-      lastWeek: sprintf(__('Pipelines for last week (%{oneWeekAgo} - %{today})'), {
-        oneWeekAgo: pastDate(ONE_WEEK_AGO_DAYS),
-        today,
-      }),
-      lastMonth: sprintf(__('Pipelines for last month (%{oneMonthAgo} - %{today})'), {
-        oneMonthAgo: pastDate(ONE_MONTH_AGO_DAYS),
-        today,
-      }),
-      lastYear: __('Pipelines for last year'),
-    };
+  errorTexts: {
+    [LOAD_ANALYTICS_FAILURE]: s__(
+      'PipelineCharts|An error has ocurred when retrieving the analytics data',
+    ),
+    [LOAD_PIPELINES_FAILURE]: s__(
+      'PipelineCharts|An error has ocurred when retrieving the pipelines data',
+    ),
+    [PARSE_FAILURE]: s__('PipelineCharts|There was an error parsing the data for the charts.'),
+    [DEFAULT]: s__('PipelineCharts|An unknown error occurred while processing CI/CD analytics.'),
   },
 };
 </script>
 <template>
   <div>
-    <div class="mb-3">
-      <h3>{{ s__('PipelineCharts|CI / CD Analytics') }}</h3>
-    </div>
-    <h4 class="my-4">{{ s__('PipelineCharts|Overall statistics') }}</h4>
-    <div class="row">
-      <div class="col-md-6">
-        <statistics-list :counts="counts" />
-      </div>
-      <div class="col-md-6">
-        <strong>
-          {{ __('Duration for the last 30 commits') }}
-        </strong>
-        <gl-column-chart
-          :height="$options.chartContainerHeight"
-          :option="$options.timesChartOptions"
-          :data="timesChartTransformedData"
-          :y-axis-title="__('Minutes')"
-          :x-axis-title="__('Commit')"
-          x-axis-type="category"
+    <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="hideAlert">{{
+      failure.text
+    }}</gl-alert>
+    <gl-tabs v-if="shouldRenderDeploymentFrequencyCharts" :value="selectedTab" @input="onTabChange">
+      <gl-tab :title="__('Pipelines')">
+        <pipeline-charts
+          :counts="formattedCounts"
+          :last-week="lastWeekChartData"
+          :last-month="lastMonthChartData"
+          :last-year="lastYearChartData"
+          :times-chart="timesChartData"
+          :loading="$apollo.queries.counts.loading"
+          @report-failure="reportFailure"
         />
-      </div>
-    </div>
-    <hr />
-    <h4 class="my-4">{{ __('Pipelines charts') }}</h4>
-    <pipelines-area-chart
-      v-for="(chart, index) in areaCharts"
-      :key="index"
-      :chart-data="chart.data"
-    >
-      {{ chart.title }}
-    </pipelines-area-chart>
+      </gl-tab>
+      <gl-tab :title="__('Deployments')">
+        <deployment-frequency-charts />
+      </gl-tab>
+    </gl-tabs>
+    <pipeline-charts
+      v-else
+      :counts="formattedCounts"
+      :last-week="lastWeekChartData"
+      :last-month="lastMonthChartData"
+      :last-year="lastYearChartData"
+      :times-chart="timesChartData"
+      :loading="$apollo.queries.counts.loading"
+      @report-failure="reportFailure"
+    />
   </div>
 </template>

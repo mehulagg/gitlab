@@ -5,15 +5,14 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
     include PreventForkingHelper
+    include GroupInviteMembers
 
     prepended do
       alias_method :ee_authorize_admin_group!, :authorize_admin_group!
 
       before_action :ee_authorize_admin_group!, only: [:restore]
 
-      before_action only: :issues do
-        push_frontend_feature_flag(:scoped_labels, @group)
-      end
+      feature_category :subgroups, [:restore]
     end
 
     override :render_show_html
@@ -97,6 +96,13 @@ module EE
 
     def default_group_view
       EE::User::DEFAULT_GROUP_VIEW
+    end
+
+    override :successful_creation_hooks
+    def successful_creation_hooks
+      super
+
+      invite_members(group)
     end
   end
 end

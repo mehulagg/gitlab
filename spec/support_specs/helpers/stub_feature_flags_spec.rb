@@ -3,12 +3,32 @@
 require 'spec_helper'
 
 RSpec.describe StubFeatureFlags do
-  let(:feature_name) { :test_feature }
+  let_it_be(:dummy_feature_flag) { :dummy_feature_flag }
+
+  let_it_be(:dummy_definition) do
+    Feature::Definition.new(
+      nil,
+      name: dummy_feature_flag,
+      type: 'development',
+      default_enabled: false
+    )
+  end
+
+  # We inject dummy feature flag defintion
+  # to ensure that we strong validate it's usage
+  # as well
+  before(:all) do
+    Feature::Definition.definitions[dummy_feature_flag] = dummy_definition
+  end
+
+  after(:all) do
+    Feature::Definition.definitions.delete(dummy_feature_flag)
+  end
 
   describe '#stub_feature_flags' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:feature_name) { :test_feature }
+    let(:feature_name) { dummy_feature_flag }
 
     context 'when checking global state' do
       where(:feature_actors, :expected_result) do
@@ -28,6 +48,10 @@ RSpec.describe StubFeatureFlags do
         it { expect(Feature.disabled?(feature_name)).not_to eq(expected_result) }
 
         context 'default_enabled does not impact feature state' do
+          before do
+            allow(dummy_definition).to receive(:default_enabled).and_return(true)
+          end
+
           it { expect(Feature.enabled?(feature_name, default_enabled: true)).to eq(expected_result) }
           it { expect(Feature.disabled?(feature_name, default_enabled: true)).not_to eq(expected_result) }
         end
@@ -60,6 +84,10 @@ RSpec.describe StubFeatureFlags do
         it { expect(Feature.disabled?(feature_name, actor(tested_actor))).not_to eq(expected_result) }
 
         context 'default_enabled does not impact feature state' do
+          before do
+            allow(dummy_definition).to receive(:default_enabled).and_return(true)
+          end
+
           it { expect(Feature.enabled?(feature_name, actor(tested_actor), default_enabled: true)).to eq(expected_result) }
           it { expect(Feature.disabled?(feature_name, actor(tested_actor), default_enabled: true)).not_to eq(expected_result) }
         end
@@ -116,6 +144,42 @@ RSpec.describe StubFeatureFlags do
       expect(Feature.enabled?(feature_name)).to eq(false)
       expect(Feature.enabled?(feature_name, actor(:A))).to eq(false)
       expect(Feature.enabled?(feature_name, actor(:B))).to eq(false)
+    end
+  end
+
+  describe 'stub timing' do
+    context 'let_it_be variable' do
+      let_it_be(:let_it_be_var) { Feature.enabled?(dummy_feature_flag) }
+
+      it { expect(let_it_be_var).to eq true }
+    end
+
+    context 'before_all variable' do
+      before_all do
+        @suite_var = Feature.enabled?(dummy_feature_flag)
+      end
+
+      it { expect(@suite_var).to eq true }
+    end
+
+    context 'before(:all) variable' do
+      before(:all) do
+        @suite_var = Feature.enabled?(dummy_feature_flag)
+      end
+
+      it { expect(@suite_var).to eq true }
+    end
+
+    context 'with stub_feature_flags meta' do
+      let(:var) { Feature.enabled?(dummy_feature_flag) }
+
+      context 'as true', :stub_feature_flags do
+        it { expect(var).to eq true }
+      end
+
+      context 'as false', stub_feature_flags: false do
+        it { expect(var).to eq false }
+      end
     end
   end
 

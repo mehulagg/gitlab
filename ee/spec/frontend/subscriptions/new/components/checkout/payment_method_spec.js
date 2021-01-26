@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import Component from 'ee/subscriptions/new/components/checkout/payment_method.vue';
+import Step from 'ee/subscriptions/new/components/checkout/step.vue';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
-import Step from 'ee/subscriptions/new/components/checkout/step.vue';
-import Component from 'ee/subscriptions/new/components/checkout/payment_method.vue';
 
 describe('Payment Method', () => {
   const localVue = createLocalVue();
@@ -56,12 +56,9 @@ describe('Payment Method', () => {
 
   describe('showing the summary', () => {
     it('should show the entered credit card details', () => {
-      expect(
-        wrapper
-          .find('.js-summary-line-1')
-          .html()
-          .replace(/\s+/g, ' '),
-      ).toContain('Visa ending in <strong>4242</strong>');
+      expect(wrapper.find('.js-summary-line-1').html().replace(/\s+/g, ' ')).toContain(
+        'Visa ending in <strong>4242</strong>',
+      );
     });
 
     it('should show the entered credit card expiration date', () => {

@@ -5,6 +5,8 @@ class Groups::LdapsController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :check_enabled_extras!
 
+  feature_category :authentication_and_authorization
+
   def sync
     # A group can transition to pending if it is in the ready or failed
     # state. If it is in the started or pending state, then that means

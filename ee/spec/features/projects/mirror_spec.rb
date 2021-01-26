@@ -52,7 +52,7 @@ RSpec.describe 'Project mirror', :js do
 
       context 'when able to force update' do
         it 'forces import' do
-          Timecop.freeze(timestamp) do
+          travel_to(timestamp) do
             visit project_mirror_path(project)
           end
 
@@ -72,7 +72,7 @@ RSpec.describe 'Project mirror', :js do
         let(:disabled_updating_button) { '[data-qa-selector="updating_button"].disabled' }
 
         it 'disables Update now button' do
-          Timecop.freeze(timestamp) do
+          travel_to(timestamp) do
             visit project_mirror_path(project)
           end
 

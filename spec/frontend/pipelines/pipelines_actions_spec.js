@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'spec/test_constants';
+import { GlButton } from '@gitlab/ui';
+import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import PipelinesActions from '~/pipelines/components/pipelines_list/pipelines_actions.vue';
-import { GlDeprecatedButton } from '@gitlab/ui';
 import GlCountdown from '~/vue_shared/components/gl_countdown.vue';
-import waitForPromises from 'helpers/wait_for_promises';
 
 describe('Pipelines Actions dropdown', () => {
   let wrapper;
@@ -19,7 +19,7 @@ describe('Pipelines Actions dropdown', () => {
     });
   };
 
-  const findAllDropdownItems = () => wrapper.findAll(GlDeprecatedButton);
+  const findAllDropdownItems = () => wrapper.findAll(GlButton);
   const findAllCountdowns = () => wrapper.findAll(GlCountdown);
 
   beforeEach(() => {
@@ -55,18 +55,14 @@ describe('Pipelines Actions dropdown', () => {
     });
 
     it("renders a disabled action when it's not playable", () => {
-      expect(
-        findAllDropdownItems()
-          .at(1)
-          .attributes('disabled'),
-      ).toBe('true');
+      expect(findAllDropdownItems().at(1).attributes('disabled')).toBe('true');
     });
 
     describe('on click', () => {
       it('makes a request and toggles the loading state', () => {
         mock.onPost(mockActions.path).reply(200);
 
-        wrapper.find(GlDeprecatedButton).vm.$emit('click');
+        wrapper.find(GlButton).vm.$emit('click');
 
         expect(wrapper.vm.isLoading).toBe(true);
 
@@ -100,9 +96,7 @@ describe('Pipelines Actions dropdown', () => {
       mock.onPost(scheduledJobAction.path).reply(200);
       jest.spyOn(window, 'confirm').mockReturnValue(true);
 
-      findAllDropdownItems()
-        .at(0)
-        .vm.$emit('click');
+      findAllDropdownItems().at(0).vm.$emit('click');
 
       expect(window.confirm).toHaveBeenCalled();
 
@@ -115,28 +109,20 @@ describe('Pipelines Actions dropdown', () => {
       mock.onPost(scheduledJobAction.path).reply(200);
       jest.spyOn(window, 'confirm').mockReturnValue(false);
 
-      findAllDropdownItems()
-        .at(0)
-        .vm.$emit('click');
+      findAllDropdownItems().at(0).vm.$emit('click');
 
       expect(window.confirm).toHaveBeenCalled();
       expect(mock.history.post.length).toBe(0);
     });
 
     it('displays the remaining time in the dropdown', () => {
-      expect(
-        findAllCountdowns()
-          .at(0)
-          .props('endDateString'),
-      ).toBe(scheduledJobAction.scheduled_at);
+      expect(findAllCountdowns().at(0).props('endDateString')).toBe(
+        scheduledJobAction.scheduled_at,
+      );
     });
 
     it('displays 00:00:00 for expired jobs in the dropdown', () => {
-      expect(
-        findAllCountdowns()
-          .at(1)
-          .props('endDateString'),
-      ).toBe(expiredJobAction.scheduled_at);
+      expect(findAllCountdowns().at(1).props('endDateString')).toBe(expiredJobAction.scheduled_at);
     });
   });
 });

@@ -1,9 +1,9 @@
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
 import * as actions from 'ee/dependencies/store/actions';
+import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 import * as types from 'ee/dependencies/store/mutation_types';
 import createState from 'ee/dependencies/store/state';
-import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 
 describe('Dependencies actions', () => {
   describe('addListType', () => {

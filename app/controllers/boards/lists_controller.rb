@@ -8,6 +8,8 @@ module Boards
     before_action :authorize_read_list, only: [:index]
     skip_before_action :authenticate_user!, only: [:index]
 
+    feature_category :boards
+
     def index
       lists = Boards::Lists::ListService.new(board.resource_parent, current_user).execute(board)
 
@@ -17,12 +19,12 @@ module Boards
     end
 
     def create
-      list = Boards::Lists::CreateService.new(board.resource_parent, current_user, create_list_params).execute(board)
+      response = Boards::Lists::CreateService.new(board.resource_parent, current_user, create_list_params).execute(board)
 
-      if list.valid?
-        render json: serialize_as_json(list)
+      if response.success?
+        render json: serialize_as_json(response.payload[:list])
       else
-        render json: list.errors, status: :unprocessable_entity
+        render json: { errors: response.errors }, status: :unprocessable_entity
       end
     end
 
@@ -42,7 +44,7 @@ module Boards
       list = board.lists.destroyable.find(params[:id])
       service = Boards::Lists::DestroyService.new(board_parent, current_user)
 
-      if service.execute(list)
+      if service.execute(list).success?
         head :ok
       else
         head :unprocessable_entity

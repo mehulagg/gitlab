@@ -79,6 +79,9 @@ module Clusters
     validates :cluster_type, presence: true
     validates :domain, allow_blank: true, hostname: { allow_numeric_hostname: true }
     validates :namespace_per_environment, inclusion: { in: [true, false] }
+    validates :helm_major_version, inclusion: { in: [2, 3] }
+
+    default_value_for :helm_major_version, 3
 
     validate :restrict_modification, on: :update
     validate :no_groups, unless: :group_type?
@@ -99,6 +102,7 @@ module Clusters
     delegate :available?, to: :application_ingress, prefix: true, allow_nil: true
     delegate :available?, to: :application_prometheus, prefix: true, allow_nil: true
     delegate :available?, to: :application_knative, prefix: true, allow_nil: true
+    delegate :available?, to: :application_elastic_stack, prefix: true, allow_nil: true
     delegate :external_ip, to: :application_ingress, prefix: true, allow_nil: true
     delegate :external_hostname, to: :application_ingress, prefix: true, allow_nil: true
 
@@ -145,8 +149,8 @@ module Clusters
 
     scope :for_project_namespace, -> (namespace_id) { joins(:projects).where(projects: { namespace_id: namespace_id }) }
     scope :with_application_prometheus, -> { includes(:application_prometheus).joins(:application_prometheus) }
-    scope :with_project_alert_service_data, -> (project_ids) do
-      conditions = { projects: { alerts_service: [:data] } }
+    scope :with_project_http_integrations, -> (project_ids) do
+      conditions = { projects: :alert_management_http_integrations }
       includes(conditions).joins(conditions).where(projects: { id: project_ids })
     end
 
@@ -355,10 +359,6 @@ module Clusters
       strong_memoize(:serverless_domain) do
         self.application_knative&.serverless_domain_cluster
       end
-    end
-
-    def local_tiller_enabled?
-      Feature.enabled?(:managed_apps_local_tiller, clusterable, default_enabled: true)
     end
 
     def prometheus_adapter

@@ -1,6 +1,7 @@
-import Api from '~/api';
 import { GlFilteredSearchToken, GlFilteredSearchSuggestion, GlLoadingIcon } from '@gitlab/ui';
+import { stubComponent } from 'helpers/stub_component';
 import { shallowMount } from '@vue/test-utils';
+import Api from '~/api';
 import PipelineTriggerAuthorToken from '~/pipelines/components/pipelines_list/tokens/pipeline_trigger_author_token.vue';
 import { users } from '../mock_data';
 
@@ -10,12 +11,6 @@ describe('Pipeline Trigger Author Token', () => {
   const findFilteredSearchToken = () => wrapper.find(GlFilteredSearchToken);
   const findAllFilteredSearchSuggestions = () => wrapper.findAll(GlFilteredSearchSuggestion);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-
-  const stubs = {
-    GlFilteredSearchToken: {
-      template: `<div><slot name="suggestions"></slot></div>`,
-    },
-  };
 
   const defaultProps = {
     config: {
@@ -31,7 +26,7 @@ describe('Pipeline Trigger Author Token', () => {
     },
   };
 
-  const createComponent = (options, data) => {
+  const createComponent = (data) => {
     wrapper = shallowMount(PipelineTriggerAuthorToken, {
       propsData: {
         ...defaultProps,
@@ -41,7 +36,11 @@ describe('Pipeline Trigger Author Token', () => {
           ...data,
         };
       },
-      ...options,
+      stubs: {
+        GlFilteredSearchToken: stubComponent(GlFilteredSearchToken, {
+          template: `<div><slot name="suggestions"></slot></div>`,
+        }),
+      },
     });
   };
 
@@ -69,13 +68,13 @@ describe('Pipeline Trigger Author Token', () => {
 
   describe('displays loading icon correctly', () => {
     it('shows loading icon', () => {
-      createComponent({ stubs }, { loading: true });
+      createComponent({ loading: true });
 
       expect(findLoadingIcon().exists()).toBe(true);
     });
 
     it('does not show loading icon', () => {
-      createComponent({ stubs }, { loading: false });
+      createComponent({ loading: false });
 
       expect(findLoadingIcon().exists()).toBe(false);
     });
@@ -85,22 +84,17 @@ describe('Pipeline Trigger Author Token', () => {
     beforeEach(() => {});
 
     it('renders all trigger authors', () => {
-      createComponent({ stubs }, { users, loading: false });
+      createComponent({ users, loading: false });
 
       // should have length of all users plus the static 'Any' option
       expect(findAllFilteredSearchSuggestions()).toHaveLength(users.length + 1);
     });
 
     it('renders only the trigger author searched for', () => {
-      createComponent(
-        { stubs },
-        {
-          users: [
-            { name: 'Arnold', username: 'admin', state: 'active', avatar_url: 'avatar-link' },
-          ],
-          loading: false,
-        },
-      );
+      createComponent({
+        users: [{ name: 'Arnold', username: 'admin', state: 'active', avatar_url: 'avatar-link' }],
+        loading: false,
+      });
 
       expect(findAllFilteredSearchSuggestions()).toHaveLength(2);
     });

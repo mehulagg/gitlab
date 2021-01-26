@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -11,9 +14,9 @@ as the hardware requirements that are needed to install and use GitLab.
 
 ### Supported Linux distributions
 
-- Ubuntu (16.04/18.04)
-- Debian (8/9/10)
-- CentOS (6/7/8)
+- Ubuntu (16.04/18.04/20.04)
+- Debian (9/10)
+- CentOS (7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
 - Scientific Linux (please use the CentOS packages and instructions)
@@ -32,6 +35,9 @@ For the installation options, see [the main installation page](README.md).
 Installation of GitLab on these operating systems is possible, but not supported.
 Please see the [installation from source guide](installation.md) and the [installation guides](https://about.gitlab.com/install/) for more information.
 
+Please see [OS versions that are no longer supported](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html) for Omnibus installs page
+for a list of supported and unsupported OS versions as well as the last support GitLab version for that OS.
+
 ### Microsoft Windows
 
 GitLab is developed for Linux-based operating systems.
@@ -42,7 +48,13 @@ Please consider using a virtual machine to run GitLab.
 
 ### Ruby versions
 
-GitLab requires Ruby (MRI) 2.6. Beginning in GitLab 12.2, we no longer support Ruby 2.5 and lower.
+From GitLab 13.6:
+
+- Ruby 2.7 and later is required.
+
+From GitLab 12.2:
+
+- Ruby 2.6 and later is required.
 
 You must use the standard MRI implementation of Ruby.
 We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab
@@ -54,14 +66,19 @@ The minimum required Go version is 1.13.
 
 ### Git versions
 
+From GitLab 13.6:
+
+- Git 2.29.x and later is required.
+
 From GitLab 13.1:
 
-- Git 2.28.x and later [is required](https://gitlab.com/gitlab-org/gitaly/-/issues/2959).
+- Git 2.24.x and later is required.
+- Git 2.28.x and later [is recommended](https://gitlab.com/gitlab-org/gitaly/-/issues/2959).
 
 ### Node.js versions
 
-Beginning in GitLab 12.9, we only support node.js 10.13.0 or higher, and we have dropped
-support for node.js 8. (node.js 6 support was dropped in GitLab 11.8)
+Beginning in GitLab 12.9, we only support Node.js 10.13.0 or higher, and we have dropped
+support for Node.js 8. (Node.js 6 support was dropped in GitLab 11.8)
 
 We recommend Node 12.x, as it's faster.
 
@@ -73,9 +90,12 @@ a version older than `v10.13.0`, you need to update it to a newer version. You
 can find instructions to install from community maintained packages or compile
 from source at the [Node.js website](https://nodejs.org/en/download/).
 
-## Redis versions
+### Redis versions
 
-GitLab requires Redis 5.0+. Beginning in GitLab 13.0, lower versions are not supported.
+GitLab 13.0 and later requires Redis version 4.0 or higher.
+
+Redis version 5.0 or higher is recommended, as this is what ships with
+[Omnibus GitLab](https://docs.gitlab.com/omnibus/) packages starting with GitLab 12.7.
 
 ## Hardware requirements
 
@@ -89,12 +109,12 @@ Apart from a local hard drive you can also mount a volume that supports the netw
 
 If you have enough RAM and a recent CPU the speed of GitLab is mainly limited by hard drive seek times. Having a fast drive (7200 RPM and up) or a solid state drive (SSD) will improve the responsiveness of GitLab.
 
-NOTE: **Note:**
-Since file system performance may affect GitLab's overall performance, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
+NOTE:
+Since file system performance may affect the overall performance of GitLab, [we don't recommend using AWS EFS for storage](../administration/nfs.md#avoid-using-awss-elastic-file-system-efs).
 
 ### CPU
 
-CPU requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repo/change size.
+CPU requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repository/change size.
 
 The following is the recommended minimum CPU hardware guidance for a handful of example GitLab user base sizes.
 
@@ -104,7 +124,7 @@ The following is the recommended minimum CPU hardware guidance for a handful of 
 
 ### Memory
 
-Memory requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repo/change size.
+Memory requirements are dependent on the number of users and expected workload. Your exact needs may be more, depending on your workload. Your workload is influenced by factors such as - but not limited to - how active your users are, how much automation you use, mirroring, and repository/change size.
 
 The following is the recommended minimum Memory hardware guidance for a handful of example GitLab user base sizes.
 
@@ -136,29 +156,21 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
-You must also ensure the `pg_trgm` and `btree_gist` extensions are loaded into every
-GitLab database. These extensions [can be enabled](https://www.postgresql.org/docs/11/sql-createextension.html) using a PostgreSQL super user.
+You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
+GitLab database](postgresql_extensions.html).
 
-On some systems you may need to install an additional package (for example,
-`postgresql-contrib`) for this extension to become available.
-
-NOTE: **Note:**
+NOTE:
 Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
-
-- We strongly recommend running Omnibus-managed instances as they are actively
-  developed and tested. We aim to be compatible with most external (not managed
-  by Omnibus) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)) but we don't guarantee compatibility.
-- You must also ensure the `postgres_fdw` extension is loaded into every
-  GitLab database. This extension
-  [can be enabled](https://www.postgresql.org/docs/11/sql-createextension.html)
-  using a PostgreSQL super user.
+If you're using [GitLab Geo](../administration/geo/index.md), we strongly
+recommend running Omnibus GitLab-managed instances, as we actively develop and
+test based on those. We try to be compatible with most external (not managed by
+Omnibus GitLab) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)),
+but we can't guarantee compatibility.
 
 ## Puma settings
 
@@ -186,7 +198,7 @@ optimal settings for your infrastructure.
 ### Puma threads
 
 The recommended number of threads is dependent on several factors, including total memory, and use
-of [legacy Rugged code](../development/gitaly.md#legacy-rugged-code).
+of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-in-gitlab).
 
 - If the operating system has a maximum 2 GB of memory, the recommended number of threads is `1`.
   A higher value will result in excess swapping, and decrease performance.
@@ -217,7 +229,7 @@ Redis stores all user sessions and the background task queue.
 The storage requirements for Redis are minimal, about 25kB per user.
 Sidekiq processes the background jobs with a multithreaded process.
 This process starts with the entire Rails stack (200MB+) but it can grow over time due to memory leaks.
-On a very active server (10,000 active users) the Sidekiq process can use 1GB+ of memory.
+On a very active server (10,000 billable users) the Sidekiq process can use 1GB+ of memory.
 
 ## Prometheus and its exporters
 
@@ -261,10 +273,8 @@ For reference, GitLab.com's [auto-scaling shared runner](../user/gitlab_com/inde
 
 ## Supported web browsers
 
-CAUTION: **Caution:**
+WARNING:
 With GitLab 13.0 (May 2020) we have removed official support for Internet Explorer 11.
-With the release of GitLab 13.4 (September 2020) we will remove all code that supports Internet Explorer 11.
-You can provide feedback [on this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/197987) or via your usual support channels.
 
 GitLab supports the following web browsers:
 
@@ -276,10 +286,10 @@ GitLab supports the following web browsers:
 
 For the listed web browsers, GitLab supports:
 
-- The current and previous major versions of browsers except Internet Explorer.
+- The current and previous major versions of browsers.
 - The current minor version of a supported major version.
 
-NOTE: **Note:**
+NOTE:
 We don't support running GitLab with JavaScript disabled in the browser and have no plans of supporting that
 in the future because we have features such as Issue Boards which require JavaScript extensively.
 

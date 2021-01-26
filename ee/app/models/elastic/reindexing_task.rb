@@ -3,13 +3,19 @@
 class Elastic::ReindexingTask < ApplicationRecord
   self.table_name = 'elastic_reindexing_tasks'
 
+  has_many :subtasks, class_name: 'Elastic::ReindexingSubtask', foreign_key: :elastic_reindexing_task_id
+
   enum state: {
-    initial:         0,
-    indexing_paused: 1,
-    reindexing:      2,
-    success:         10, # states less than 10 are considered in_progress
-    failure:         11
+    initial:                0,
+    indexing_paused:        1,
+    reindexing:             2,
+    success:                10, # states less than 10 are considered in_progress
+    failure:                11,
+    original_index_deleted: 12
   }
+
+  scope :old_indices_scheduled_for_deletion, -> { where(state: :success).where('delete_original_index_at IS NOT NULL') }
+  scope :old_indices_to_be_deleted, -> { old_indices_scheduled_for_deletion.where('delete_original_index_at < NOW()') }
 
   before_save :set_in_progress_flag
 
@@ -19,6 +25,15 @@ class Elastic::ReindexingTask < ApplicationRecord
 
   def self.running?
     current.present?
+  end
+
+  def self.drop_old_indices!
+    old_indices_to_be_deleted.find_each do |task|
+      task.subtasks.each do |subtask|
+        Gitlab::Elastic::Helper.default.delete_index(index_name: subtask.index_name_from)
+      end
+      task.update!(state: :original_index_deleted)
+    end
   end
 
   private

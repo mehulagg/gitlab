@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import InputValidator from '~/validators/input_validator';
 
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
 const debounceTimeoutDuration = 1000;
@@ -20,11 +20,11 @@ export default class UsernameValidator extends InputValidator {
     const container = opts.container || '';
     const validateLengthElements = document.querySelectorAll(`${container} .js-validate-username`);
 
-    this.debounceValidateInput = debounce(inputDomElement => {
+    this.debounceValidateInput = debounce((inputDomElement) => {
       UsernameValidator.validateUsernameInput(inputDomElement);
     }, debounceTimeoutDuration);
 
-    validateLengthElements.forEach(element =>
+    validateLengthElements.forEach((element) =>
       element.addEventListener('input', this.eventHandler.bind(this)),
     );
   }
@@ -42,7 +42,7 @@ export default class UsernameValidator extends InputValidator {
     if (inputDomElement.checkValidity() && username.length > 1) {
       UsernameValidator.setMessageVisibility(inputDomElement, pendingMessageSelector);
       UsernameValidator.fetchUsernameAvailability(username)
-        .then(usernameTaken => {
+        .then((usernameTaken) => {
           UsernameValidator.setInputState(inputDomElement, !usernameTaken);
           UsernameValidator.setMessageVisibility(inputDomElement, pendingMessageSelector, false);
           UsernameValidator.setMessageVisibility(

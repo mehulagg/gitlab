@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module VulnerabilitiesHelper
+  FINDING_FIELDS = %i[metadata identifiers name issue_feedback merge_request_feedback project project_fingerprint scanner uuid].freeze
+
   def vulnerability_details_json(vulnerability, pipeline)
     vulnerability_details(vulnerability, pipeline).to_json
   end
@@ -10,18 +12,38 @@ module VulnerabilitiesHelper
 
     result = {
       timestamp: Time.now.to_i,
-      create_issue_url: create_vulnerability_feedback_issue_path(vulnerability.finding.project),
-      has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
+      new_issue_url: new_issue_url_for(vulnerability),
+      create_jira_issue_url: create_jira_issue_url_for(vulnerability),
+      related_jira_issues_path: project_integrations_jira_issues_path(vulnerability.project, vulnerability_ids: [vulnerability.id]),
+      has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_id),
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
       discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
       notes_url: project_security_vulnerability_notes_path(vulnerability.project, vulnerability),
-      vulnerability_feedback_help_path: help_page_path('user/application_security/index', anchor: 'interacting-with-the-vulnerabilities'),
       related_issues_help_path: help_page_path('user/application_security/index', anchor: 'managing-related-issues-for-a-vulnerability'),
       pipeline: vulnerability_pipeline_data(pipeline),
-      can_modify_related_issues: current_user.can?(:admin_vulnerability_issue_link, vulnerability)
+      can_modify_related_issues: current_user.can?(:admin_vulnerability_issue_link, vulnerability),
+      issue_tracking_help_path: help_page_path('user/project/settings', anchor: 'sharing-and-permissions'),
+      permissions_help_path: help_page_path('user/permissions', anchor: 'project-members-permissions')
     }
 
     result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
+  end
+
+  def new_issue_url_for(vulnerability)
+    return unless vulnerability.project.issues_enabled?
+
+    new_project_issue_path(vulnerability.project, { vulnerability_id: vulnerability.id })
+  end
+
+  def create_jira_issue_url_for(vulnerability)
+    return unless vulnerability.project.jira_vulnerabilities_integration_enabled?
+
+    decorated_vulnerability = vulnerability.present
+    summary = _('Investigate vulnerability: %{title}') % { title: decorated_vulnerability.title }
+    description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb',
+                                               locals: { vulnerability: decorated_vulnerability })
+
+    vulnerability.project.jira_service.new_issue_url_with_predefined_fields(summary, description)
   end
 
   def vulnerability_pipeline_data(pipeline)
@@ -40,25 +62,7 @@ module VulnerabilitiesHelper
   end
 
   def vulnerability_finding_data(vulnerability)
-    finding = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding)
-
-    data = finding.slice(
-      :description,
-      :identifiers,
-      :links,
-      :location,
-      :name,
-      :issue_feedback,
-      :merge_request_feedback,
-      :project,
-      :project_fingerprint,
-      :remediations,
-      :evidence,
-      :scanner,
-      :solution,
-      :request,
-      :response
-    )
+    data = Vulnerabilities::FindingSerializer.new(current_user: current_user).represent(vulnerability.finding, only: FINDING_FIELDS)
 
     if data[:location]['file']
       branch = vulnerability.finding.pipelines&.last&.sha || vulnerability.project.default_branch

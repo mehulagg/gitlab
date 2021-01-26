@@ -10,11 +10,6 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    canaryDeploymentFeatureId: {
-      type: String,
-      required: false,
-      default: null,
-    },
     isLoading: {
       type: Boolean,
       required: true,
@@ -46,11 +41,6 @@ export default {
       required: false,
       default: '',
     },
-    showCanaryDeploymentCallout: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     userCalloutsPath: {
       type: String,
       required: false,
@@ -69,14 +59,12 @@ export default {
   <div class="environments-container">
     <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" label="Loading environments" />
 
-    <slot name="emptyState"></slot>
+    <slot name="empty-state"></slot>
 
     <div v-if="!isLoading && environments.length > 0" class="table-holder">
       <environment-table
         :environments="environments"
         :can-read-environment="canReadEnvironment"
-        :canary-deployment-feature-id="canaryDeploymentFeatureId"
-        :show-canary-deployment-callout="showCanaryDeploymentCallout"
         :user-callouts-path="userCalloutsPath"
         :lock-promotion-svg-path="lockPromotionSvgPath"
         :help-canary-deployments-path="helpCanaryDeploymentsPath"

@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module API
-  class GroupBoards < Grape::API::Instance
+  class GroupBoards < ::API::Base
     include BoardsResponses
     include PaginationParams
 
     prepend_if_ee('EE::API::BoardsResponses') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
-    before do
-      authenticate!
-    end
+    feature_category :boards
+
+    before { authenticate! }
 
     helpers do
       def board_parent
@@ -20,18 +20,8 @@ module API
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end
-
     resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       segment ':id/boards' do
-        desc 'Find a group board' do
-          detail 'This feature was introduced in 10.6'
-          success ::API::Entities::Board
-        end
-        get '/:board_id' do
-          authorize!(:read_board, user_group)
-          present board, with: ::API::Entities::Board
-        end
-
         desc 'Get all group boards' do
           detail 'This feature was introduced in 10.6'
           success Entities::Board
@@ -42,6 +32,28 @@ module API
         get '/' do
           authorize!(:read_board, user_group)
           present paginate(board_parent.boards.with_associations), with: Entities::Board
+        end
+
+        desc 'Find a group board' do
+          detail 'This feature was introduced in 10.6'
+          success Entities::Board
+        end
+        get '/:board_id' do
+          authorize!(:read_board, user_group)
+          present board, with: Entities::Board
+        end
+
+        desc 'Update a group board' do
+          detail 'This feature was introduced in 11.0'
+          success Entities::Board
+        end
+        params do
+          use :update_params
+        end
+        put '/:board_id' do
+          authorize!(:admin_board, board_parent)
+
+          update_board
         end
       end
 
@@ -81,8 +93,6 @@ module API
           use :list_creation_params
         end
         post '/lists' do
-          authorize_list_type_resource!
-
           authorize!(:admin_list, user_group)
 
           create_list

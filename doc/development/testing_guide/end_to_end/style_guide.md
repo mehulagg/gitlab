@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Style guide for writing end-to-end tests
 
 This document describes the conventions used at GitLab for writing End-to-end (E2E) tests using the GitLab QA project.
@@ -68,7 +74,8 @@ We follow a simple formula roughly based on Hungarian notation.
   - `_tab`
   - `_menu_item`
 
-*Note: If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.*
+NOTE:
+If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.
 
 ### Examples
 
@@ -141,7 +148,7 @@ end
 ```
 
 ```ruby
-Page::Project::New.peform do |new_page|
+Page::Project::New.perform do |new_page|
   new_page.do_something
 end
 ```
@@ -155,7 +162,7 @@ end
 ```
 
 ```ruby
-Page::Project::New.peform do |page|
+Page::Project::New.perform do |page|
   page.do_something
 end
 ```

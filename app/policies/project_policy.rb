@@ -102,12 +102,10 @@ class ProjectPolicy < BasePolicy
   end
 
   with_scope :subject
-  condition(:moving_designs_disabled) do
-    !::Feature.enabled?(:reorder_designs, @subject)
-  end
+  condition(:service_desk_enabled) { @subject.service_desk_enabled? }
 
   with_scope :subject
-  condition(:service_desk_enabled) { @subject.service_desk_enabled? }
+  condition(:resource_access_token_available) { resource_access_token_available? }
 
   # We aren't checking `:read_issue` or `:read_merge_request` in this case
   # because it could be possible for a user to see an issuable-iid
@@ -137,6 +135,10 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
+  condition(:user_defined_variables_allowed) do
+    !@subject.restrict_user_defined_variables?
+  end
+
   with_scope :subject
   condition(:packages_disabled) { !@subject.packages_enabled }
 
@@ -149,6 +151,8 @@ class ProjectPolicy < BasePolicy
     builds
     pages
     metrics_dashboard
+    analytics
+    operations
   ]
 
   features.each do |f|
@@ -213,6 +217,7 @@ class ProjectPolicy < BasePolicy
     enable :award_emoji
     enable :read_pages_content
     enable :read_release
+    enable :read_analytics
   end
 
   # These abilities are not allowed to admins that are not members of the project,
@@ -231,9 +236,11 @@ class ProjectPolicy < BasePolicy
     enable :admin_issue
     enable :admin_label
     enable :admin_list
+    enable :admin_issue_link
     enable :read_commit_status
     enable :read_build
     enable :read_container_image
+    enable :read_deploy_board
     enable :read_pipeline
     enable :read_pipeline_schedule
     enable :read_environment
@@ -241,7 +248,6 @@ class ProjectPolicy < BasePolicy
     enable :read_merge_request
     enable :read_sentry_issue
     enable :update_sentry_issue
-    enable :read_incidents
     enable :read_prometheus
     enable :read_metrics_dashboard_annotation
     enable :metrics_dashboard
@@ -272,6 +278,19 @@ class ProjectPolicy < BasePolicy
 
   rule { metrics_dashboard_disabled }.policy do
     prevent(:metrics_dashboard)
+  end
+
+  rule { operations_disabled }.policy do
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(*create_read_update_admin_destroy(:environment))
+    prevent(*create_read_update_admin_destroy(:sentry_issue))
+    prevent(*create_read_update_admin_destroy(:alert_management_alert))
+    prevent(*create_read_update_admin_destroy(:cluster))
+    prevent(*create_read_update_admin_destroy(:terraform_state))
+    prevent(*create_read_update_admin_destroy(:deployment))
+    prevent(:metrics_dashboard)
+    prevent(:read_pod_logs)
+    prevent(:read_prometheus)
   end
 
   rule { can?(:metrics_dashboard) }.policy do
@@ -329,6 +348,12 @@ class ProjectPolicy < BasePolicy
     enable :destroy_design
     enable :read_terraform_state
     enable :read_pod_logs
+    enable :read_feature_flag
+    enable :create_feature_flag
+    enable :update_feature_flag
+    enable :destroy_feature_flag
+    enable :admin_feature_flag
+    enable :admin_feature_flags_user_lists
   end
 
   rule { can?(:developer_access) & user_confirmed? }.policy do
@@ -375,6 +400,7 @@ class ProjectPolicy < BasePolicy
     enable :read_freeze_period
     enable :update_freeze_period
     enable :destroy_freeze_period
+    enable :admin_feature_flags_client
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -419,6 +445,10 @@ class ProjectPolicy < BasePolicy
     prevent(*create_read_update_admin_destroy(:snippet))
   end
 
+  rule { analytics_disabled }.policy do
+    prevent(:read_analytics)
+  end
+
   rule { wiki_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:wiki))
     prevent(:download_wiki_code)
@@ -451,6 +481,8 @@ class ProjectPolicy < BasePolicy
     prevent :read_pipeline
     prevent :read_pipeline_schedule
     prevent(*create_read_update_admin_destroy(:release))
+    prevent(*create_read_update_admin_destroy(:feature_flag))
+    prevent(:admin_feature_flags_user_lists)
   end
 
   rule { container_registry_disabled }.policy do
@@ -487,6 +519,7 @@ class ProjectPolicy < BasePolicy
     enable :download_wiki_code
     enable :read_cycle_analytics
     enable :read_pages_content
+    enable :read_analytics
 
     # NOTE: may be overridden by IssuePolicy
     enable :read_issue
@@ -539,11 +572,10 @@ class ProjectPolicy < BasePolicy
     prevent :create_pipeline
   end
 
-  rule { admin }.enable :change_repository_storage
-
   rule { can?(:read_issue) }.policy do
     enable :read_design
     enable :read_design_activity
+    enable :read_issue_link
   end
 
   # Design abilities could also be prevented in the issue policy.
@@ -555,10 +587,6 @@ class ProjectPolicy < BasePolicy
     prevent :move_design
   end
 
-  rule { moving_designs_disabled }.policy do
-    prevent :move_design
-  end
-
   rule { read_package_registry_deploy_token }.policy do
     enable :read_package
     enable :read_project
@@ -566,6 +594,7 @@ class ProjectPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_project
   end
 
@@ -587,10 +616,23 @@ class ProjectPolicy < BasePolicy
     prevent :read_project
   end
 
+  rule { resource_access_token_available & can?(:admin_project) }.policy do
+    enable :admin_resource_access_tokens
+  end
+
+  rule { user_defined_variables_allowed | can?(:maintainer_access) }.policy do
+    enable :set_pipeline_variables
+  end
+
   private
+
+  def user_is_user?
+    user.is_a?(User)
+  end
 
   def team_member?
     return false if @user.nil?
+    return false unless user_is_user?
 
     greedy_load_subject = false
 
@@ -618,6 +660,7 @@ class ProjectPolicy < BasePolicy
   # rubocop: disable CodeReuse/ActiveRecord
   def project_group_member?
     return false if @user.nil?
+    return false unless user_is_user?
 
     project.group &&
       (
@@ -629,6 +672,7 @@ class ProjectPolicy < BasePolicy
 
   def team_access_level
     return -1 if @user.nil?
+    return -1 unless user_is_user?
 
     lookup_access_level!
   end
@@ -652,6 +696,10 @@ class ProjectPolicy < BasePolicy
     else
       true
     end
+  end
+
+  def resource_access_token_available?
+    true
   end
 
   def project

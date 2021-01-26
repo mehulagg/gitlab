@@ -8,33 +8,28 @@ module EE
       prepended do
         use ::Gitlab::Middleware::IpRestrictor
 
-        mount ::EE::API::Boards
         mount ::EE::API::GroupBoards
 
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ProjectApprovalSettings
-        mount ::API::Unleash
-        mount ::API::DependencyProxy
         mount ::API::EpicIssues
         mount ::API::EpicLinks
         mount ::API::Epics
         mount ::API::ElasticsearchIndexedNamespaces
-        mount ::API::FeatureFlags
-        mount ::API::FeatureFlagsUserLists
-        mount ::API::FeatureFlagScopes
+        mount ::API::Experiments
         mount ::API::Geo
         mount ::API::GeoReplication
         mount ::API::GeoNodes
-        mount ::API::IssueLinks
         mount ::API::Ldap
         mount ::API::LdapGroupLinks
         mount ::API::License
-        mount ::API::PersonalAccessTokens
         mount ::API::ProjectMirror
         mount ::API::ProjectPushRule
+        mount ::API::GroupPushRule
         mount ::API::MergeTrains
         mount ::API::GroupHooks
+        mount ::API::GroupMergeRequestApprovalSettings
         mount ::API::Scim
         mount ::API::ManagedLicenses
         mount ::API::ProjectApprovals
@@ -48,18 +43,11 @@ module EE
         mount ::API::VisualReviewDiscussions
         mount ::API::Analytics::CodeReviewAnalytics
         mount ::API::Analytics::GroupActivityAnalytics
+        mount ::API::Analytics::ProjectDeploymentFrequency
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
-
-        version 'v3', using: :path do
-          # Although the following endpoints are kept behind V3 namespace,
-          # they're not deprecated neither should be removed when V3 get
-          # removed.  They're needed as a layer to integrate with Jira
-          # Development Panel.
-          namespace '/', requirements: ::API::V3::Github::ENDPOINT_REQUIREMENTS do
-            mount ::API::V3::Github
-          end
-        end
+        mount ::API::ResourceIterationEvents
+        mount ::API::Iterations
       end
     end
   end

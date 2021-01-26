@@ -1,5 +1,0 @@
----
-title: Support Indexing files in Elasticsearch with paths longer than 512 bytes
-merge_request: 37834
-author:
-type: fixed

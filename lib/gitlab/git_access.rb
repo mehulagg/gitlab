@@ -43,23 +43,28 @@ module Gitlab
     ALL_COMMANDS = DOWNLOAD_COMMANDS + PUSH_COMMANDS
 
     attr_reader :actor, :protocol, :authentication_abilities,
-                :namespace_path, :redirected_path, :auth_result_type,
+                :repository_path, :redirected_path, :auth_result_type,
                 :cmd, :changes
     attr_accessor :container
 
-    def initialize(actor, container, protocol, authentication_abilities:, namespace_path: nil, repository_path: nil, redirected_path: nil, auth_result_type: nil)
+    def self.error_message(key)
+      self.ancestors.each do |cls|
+        return cls.const_get('ERROR_MESSAGES', false).fetch(key)
+      rescue NameError, KeyError
+        next
+      end
+
+      raise ArgumentError, "No error message defined for #{key}"
+    end
+
+    def initialize(actor, container, protocol, authentication_abilities:, repository_path: nil, redirected_path: nil, auth_result_type: nil)
       @actor     = actor
       @container = container
       @protocol  = protocol
       @authentication_abilities = Array(authentication_abilities)
-      @namespace_path = namespace_path
       @repository_path = repository_path
       @redirected_path = redirected_path
       @auth_result_type = auth_result_type
-    end
-
-    def repository_path
-      @repository_path ||= project&.path
     end
 
     def check(cmd, changes)
@@ -72,6 +77,7 @@ module Gitlab
       check_authentication_abilities!
       check_command_disabled!
       check_command_existence!
+      check_otp_session!
 
       custom_action = check_custom_action
       return custom_action if custom_action
@@ -96,6 +102,13 @@ module Gitlab
 
     def guest_can_download_code?
       Guest.can?(download_ability, container)
+    end
+
+    def deploy_key_can_download_code?
+      authentication_abilities.include?(:download_code) &&
+        deploy_key? &&
+        deploy_key.has_access_to?(container) &&
+        (project? && project&.repository_access_level != ::Featurable::DISABLED)
     end
 
     def user_can_download_code?
@@ -130,6 +143,10 @@ module Gitlab
     private
 
     def check_container!
+      # Strict nil check, to avoid any surprises with Object#present?
+      # which can delegate to #empty?
+      raise NotFoundError, not_found_message if container.nil?
+
       check_project! if project?
     end
 
@@ -197,9 +214,7 @@ module Gitlab
     end
 
     def check_project_accessibility!
-      if project.blank? || !can_read_project?
-        raise NotFoundError, not_found_message
-      end
+      raise NotFoundError, not_found_message unless can_read_project?
     end
 
     def not_found_message
@@ -240,6 +255,31 @@ module Gitlab
       end
     end
 
+    def check_otp_session!
+      return unless ssh?
+      return if !key? || deploy_key?
+      return unless Feature.enabled?(:two_factor_for_cli)
+      return unless user.two_factor_enabled?
+
+      if ::Gitlab::Auth::Otp::SessionEnforcer.new(actor).access_restricted?
+        message = "OTP verification is required to access the repository.\n\n"\
+                  "   Use: #{build_ssh_otp_verify_command}"
+
+        raise ForbiddenError, message
+      end
+    end
+
+    def build_ssh_otp_verify_command
+      user = "#{Gitlab.config.gitlab_shell.ssh_user}@" unless Gitlab.config.gitlab_shell.ssh_user.empty?
+      user_host = "#{user}#{Gitlab.config.gitlab_shell.ssh_host}"
+
+      if Gitlab.config.gitlab_shell.ssh_port != 22
+        "ssh #{user_host} -p #{Gitlab.config.gitlab_shell.ssh_port} 2fa_verify"
+      else
+        "ssh #{user_host} 2fa_verify"
+      end
+    end
+
     def check_db_accessibility!
       return unless receive_pack?
 
@@ -257,7 +297,7 @@ module Gitlab
     end
 
     def check_download_access!
-      passed = deploy_key? ||
+      passed = deploy_key_can_download_code? ||
         deploy_token? ||
         user_can_download_code? ||
         build_can_download_code? ||
@@ -272,10 +312,10 @@ module Gitlab
       error_message(:download)
     end
 
-    # We assume that all git-access classes are in project context by default.
-    # Override this method to be more specific.
     def project?
-      true
+      # Strict nil check, to avoid any surprises with Object#present?
+      # which can delegate to #empty?
+      !project.nil?
     end
 
     def project
@@ -283,7 +323,7 @@ module Gitlab
     end
 
     def check_push_access!
-      if container.repository_read_only?
+      if project&.repository_read_only?
         raise ForbiddenError, error_message(:read_only)
       end
 
@@ -305,11 +345,11 @@ module Gitlab
     end
 
     def check_change_access!
-      # Deploy keys with write access can push anything
-      return if deploy_key?
+      return if deploy_key? && !deploy_keys_on_protected_branches_enabled?
 
       if changes == ANY
-        can_push = user_can_push? ||
+        can_push = (deploy_key? && deploy_keys_on_protected_branches_enabled?) ||
+                   user_can_push? ||
           project&.any_branch_allows_collaboration?(user_access.user)
 
         unless can_push
@@ -385,6 +425,10 @@ module Gitlab
       protocol == 'http'
     end
 
+    def ssh?
+      protocol == 'ssh'
+    end
+
     def upload_pack?
       cmd == 'git-upload-pack'
     end
@@ -404,13 +448,7 @@ module Gitlab
     protected
 
     def error_message(key)
-      self.class.ancestors.each do |cls|
-        return cls.const_get('ERROR_MESSAGES', false).fetch(key)
-      rescue NameError, KeyError
-        next
-      end
-
-      raise ArgumentError, "No error message defined for #{key}"
+      self.class.error_message(key)
     end
 
     def success_result
@@ -441,6 +479,8 @@ module Gitlab
                          CiAccess.new
                        elsif user && request_from_ci_build?
                          BuildAccess.new(user, container: container)
+                       elsif deploy_key? && deploy_keys_on_protected_branches_enabled?
+                         DeployKeyAccess.new(deploy_key, container: container)
                        else
                          UserAccess.new(user, container: container)
                        end
@@ -497,7 +537,7 @@ module Gitlab
       changes_size = 0
 
       changes_list.each do |change|
-        changes_size += repository.new_blobs(change[:newrev]).sum(&:size) # rubocop: disable CodeReuse/ActiveRecord
+        changes_size += repository.new_blobs(change[:newrev]).sum(&:size)
 
         check_size_against_limit(changes_size)
       end
@@ -517,6 +557,10 @@ module Gitlab
 
     def size_checker
       container.repository_size_checker
+    end
+
+    def deploy_keys_on_protected_branches_enabled?
+      Feature.enabled?(:deploy_keys_on_protected_branches, project)
     end
   end
 end

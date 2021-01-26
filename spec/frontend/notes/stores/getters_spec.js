@@ -6,6 +6,7 @@ import {
   noteableDataMock,
   individualNote,
   collapseNotesMock,
+  discussionMock,
   discussion1,
   discussion2,
   discussion3,
@@ -64,6 +65,18 @@ describe('Getters Notes Store', () => {
   describe('discussions', () => {
     it('should return all discussions in the store', () => {
       expect(getters.discussions(state)).toEqual([individualNote]);
+    });
+
+    it('should transform  discussion to individual notes in timeline view', () => {
+      state.discussions = [discussionMock];
+      state.isTimelineEnabled = true;
+
+      expect(getters.discussions(state).length).toEqual(discussionMock.notes.length);
+      getters.discussions(state).forEach((discussion) => {
+        expect(discussion.individual_note).toBe(true);
+        expect(discussion.id).toBe(discussion.notes[0].id);
+        expect(discussion.created_at).toBe(discussion.notes[0].created_at);
+      });
     });
   });
 
@@ -285,17 +298,18 @@ describe('Getters Notes Store', () => {
         };
       });
 
-      [{ step: 1, id: '123', expected: '123' }, { step: -1, id: '123', expected: '123' }].forEach(
-        ({ step, id, expected }) => {
-          it(`with step ${step} and match, returns only value`, () => {
-            const params = createDiscussionNeighborParams(id, true, step);
+      [
+        { step: 1, id: '123', expected: '123' },
+        { step: -1, id: '123', expected: '123' },
+      ].forEach(({ step, id, expected }) => {
+        it(`with step ${step} and match, returns only value`, () => {
+          const params = createDiscussionNeighborParams(id, true, step);
 
-            expect(getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params)).toBe(
-              expected,
-            );
-          });
-        },
-      );
+          expect(getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params)).toBe(
+            expected,
+          );
+        });
+      });
 
       it('with no match, returns only value', () => {
         const params = createDiscussionNeighborParams('bogus', true, 1);

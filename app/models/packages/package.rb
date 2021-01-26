@@ -3,8 +3,11 @@ class Packages::Package < ApplicationRecord
   include Sortable
   include Gitlab::SQL::Pattern
   include UsageStatistics
+  include Gitlab::Utils::StrongMemoize
 
   belongs_to :project
+  belongs_to :creator, class_name: 'User'
+
   # package_files must be destroyed by ruby code in order to properly remove carrierwave uploads and update project statistics
   has_many :package_files, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :dependency_links, inverse_of: :package, class_name: 'Packages::DependencyLink'
@@ -14,7 +17,8 @@ class Packages::Package < ApplicationRecord
   has_one :maven_metadatum, inverse_of: :package, class_name: 'Packages::Maven::Metadatum'
   has_one :nuget_metadatum, inverse_of: :package, class_name: 'Packages::Nuget::Metadatum'
   has_one :composer_metadatum, inverse_of: :package, class_name: 'Packages::Composer::Metadatum'
-  has_one :build_info, inverse_of: :package
+  has_many :build_infos, inverse_of: :package
+  has_many :pipelines, through: :build_infos
 
   accepts_nested_attributes_for :conan_metadatum
   accepts_nested_attributes_for :maven_metadatum
@@ -24,7 +28,7 @@ class Packages::Package < ApplicationRecord
   validates :project, presence: true
   validates :name, presence: true
 
-  validates :name, format: { with: Gitlab::Regex.package_name_regex }, unless: :conan?
+  validates :name, format: { with: Gitlab::Regex.package_name_regex }, unless: -> { conan? || generic? || debian? }
 
   validates :name,
     uniqueness: { scope: %i[project_id version package_type] }, unless: :conan?
@@ -33,19 +37,40 @@ class Packages::Package < ApplicationRecord
   validate :valid_npm_package_name, if: :npm?
   validate :valid_composer_global_name, if: :composer?
   validate :package_already_taken, if: :npm?
-  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { npm? || nuget? }
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
+  validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
+  validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
+  validates :name, format: { with: Gitlab::Regex.debian_package_name_regex }, if: :debian_package?
+  validates :name, inclusion: { in: %w[incoming] }, if: :debian_incoming?
+  validates :version, format: { with: Gitlab::Regex.nuget_version_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
+  validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
+  validates :version, format: { with: Gitlab::Regex.prefixed_semver_regex }, if: :golang?
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { composer_tag_version? || npm? }
 
-  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6 }
+  validates :version,
+    presence: true,
+    format: { with: Gitlab::Regex.generic_package_version_regex },
+    if: :generic?
+  validates :version,
+    presence: true,
+    format: { with: Gitlab::Regex.debian_version_regex },
+    if: :debian_package?
+  validate :forbidden_debian_changes, if: :debian?
+
+  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6, generic: 7, golang: 8, debian: 9 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
+  scope :with_normalized_pypi_name, ->(name) { where("LOWER(regexp_replace(name, '[-_.]+', '-', 'g')) = ?", name.downcase) }
   scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
   scope :with_version, ->(version) { where(version: version) }
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
   scope :with_package_type, ->(package_type) { where(package_type: package_type) }
+  scope :including_build_info, -> { includes(pipelines: :user) }
+  scope :including_project_route, -> { includes(project: { namespace: :route }) }
+  scope :including_tags, -> { includes(:tags) }
 
   scope :with_conan_channel, ->(package_channel) do
     joins(:conan_metadatum).where(packages_conan_metadata: { package_channel: package_channel })
@@ -87,6 +112,7 @@ class Packages::Package < ApplicationRecord
   scope :order_project_name_desc, -> { joins(:project).reorder('projects.name DESC') }
   scope :order_project_path, -> { joins(:project).reorder('projects.path ASC, id ASC') }
   scope :order_project_path_desc, -> { joins(:project).reorder('projects.path DESC, id DESC') }
+  scope :order_by_package_file, -> { joins(:package_files).order('packages_package_files.created_at ASC') }
 
   def self.for_projects(projects)
     return none unless projects.any?
@@ -107,6 +133,10 @@ class Packages::Package < ApplicationRecord
   def self.by_file_name_and_sha256(file_name, sha256)
     joins(:package_files)
       .where(packages_package_files: { file_name: file_name, file_sha256: sha256 }).last!
+  end
+
+  def self.by_name_and_version!(name, version)
+    find_by!(name: name, version: version)
   end
 
   def self.pluck_names
@@ -138,21 +168,49 @@ class Packages::Package < ApplicationRecord
 
   def versions
     project.packages
+           .including_build_info
+           .including_tags
            .with_name(name)
            .where.not(version: version)
            .with_package_type(package_type)
            .order(:version)
   end
 
+  # Technical debt: to be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/281937
+  def original_build_info
+    strong_memoize(:original_build_info) do
+      build_infos.first
+    end
+  end
+
+  # Technical debt: to be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/281937
   def pipeline
-    build_info&.pipeline
+    original_build_info&.pipeline
   end
 
   def tag_names
     tags.pluck(:name)
   end
 
+  def debian_incoming?
+    debian? && version.nil?
+  end
+
+  def debian_package?
+    debian? && !version.nil?
+  end
+
+  def package_settings
+    strong_memoize(:package_settings) do
+      project.namespace.package_settings
+    end
+  end
+
   private
+
+  def composer_tag_version?
+    composer? && !Gitlab::Regex.composer_dev_version_regex.match(version.to_s)
+  end
 
   def valid_conan_package_recipe
     recipe_exists = project.packages
@@ -190,6 +248,15 @@ class Packages::Package < ApplicationRecord
 
     if project.package_already_taken?(name)
       errors.add(:base, _('Package already exists'))
+    end
+  end
+
+  def forbidden_debian_changes
+    return unless persisted?
+
+    # Debian incoming
+    if version_was.nil? || version.nil?
+      errors.add(:version, _('cannot be changed')) if version_changed?
     end
   end
 end

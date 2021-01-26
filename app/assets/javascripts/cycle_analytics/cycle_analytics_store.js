@@ -23,9 +23,6 @@ const EMPTY_STAGE_TEXTS = {
   staging: __(
     'The staging stage shows the time between merging the MR and deploying code to the production environment. The data will be automatically added once you deploy to production for the first time.',
   ),
-  production: __(
-    'The total stage shows the time it takes between creating an issue and deploying the code to production. The data will be automatically added once you have completed the full idea to production cycle.',
-  ),
 };
 
 export default {
@@ -45,11 +42,11 @@ export default {
     newData.stages = data.stats || [];
     newData.summary = data.summary || [];
 
-    newData.summary.forEach(item => {
+    newData.summary.forEach((item) => {
       item.value = item.value || '-';
     });
 
-    newData.stages.forEach(item => {
+    newData.stages.forEach((item) => {
       const stageSlug = dasherize(item.name.toLowerCase());
       item.active = false;
       item.isUserAllowed = data.permissions[stageSlug];
@@ -67,7 +64,7 @@ export default {
     this.state.hasError = state;
   },
   deactivateAllStages() {
-    this.state.stages.forEach(stage => {
+    this.state.stages.forEach((stage) => {
       stage.active = false;
     });
   },
@@ -81,7 +78,7 @@ export default {
   decorateEvents(events, stage) {
     const newEvents = [];
 
-    events.forEach(item => {
+    events.forEach((item) => {
       if (!item) return;
 
       const eventItem = { ...DEFAULT_EVENT_OBJECTS[stage.slug], ...item };
@@ -110,6 +107,6 @@ export default {
     return newEvents;
   },
   currentActiveStage() {
-    return this.state.stages.find(stage => stage.active);
+    return this.state.stages.find((stage) => stage.active);
   },
 };

@@ -1,6 +1,14 @@
 export const generateVulnerabilities = () => [
   {
     id: 'id_0',
+    detectedAt: '2020-07-29T15:36:54Z',
+    hasSolutions: true,
+    mergeRequest: {
+      webUrl: 'www.testmr.com/1',
+      state: 'status_warning',
+      securityAutoFix: true,
+      iid: 1,
+    },
     identifiers: [
       {
         externalType: 'cve',
@@ -13,8 +21,9 @@ export const generateVulnerabilities = () => [
     ],
     title: 'Vulnerability 0',
     severity: 'critical',
-    state: 'dismissed',
+    state: 'DISMISSED',
     reportType: 'SAST',
+    resolvedOnDefaultBranch: true,
     location: {
       image:
         'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
@@ -25,9 +34,14 @@ export const generateVulnerabilities = () => [
     scanner: {
       vendor: 'GitLab',
     },
+    issueLinks: {
+      nodes: [{ issue: { iid: 15 } }],
+    },
   },
   {
     id: 'id_1',
+    detectedAt: '2020-07-22T19:31:24Z',
+    hasSolutions: false,
     identifiers: [
       {
         externalType: 'gemnasium',
@@ -36,7 +50,7 @@ export const generateVulnerabilities = () => [
     ],
     title: 'Vulnerability 1',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     reportType: 'DEPENDENCY_SCANNING',
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
@@ -51,10 +65,11 @@ export const generateVulnerabilities = () => [
   },
   {
     id: 'id_2',
+    detectedAt: '2020-08-22T20:00:12Z',
     identifiers: [],
     title: 'Vulnerability 2',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     reportType: 'CUSTOM_SCANNER_WITHOUT_TRANSLATION',
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
@@ -70,7 +85,7 @@ export const generateVulnerabilities = () => [
     id: 'id_3',
     title: 'Vulnerability 3',
     severity: 'high',
-    state: 'opened',
+    state: 'DETECTED',
     location: {
       file: 'yarn.lock',
     },
@@ -83,8 +98,21 @@ export const generateVulnerabilities = () => [
     id: 'id_4',
     title: 'Vulnerability 4',
     severity: 'critical',
-    state: 'dismissed',
+    state: 'DISMISSED',
     location: {},
+    project: {
+      nameWithNamespace: 'Administrator / Security reports',
+    },
+    scanner: {},
+  },
+  {
+    id: 'id_5',
+    title: 'Vulnerability 5',
+    severity: 'high',
+    state: 'DETECTED',
+    location: {
+      path: '/v1/trees',
+    },
     project: {
       nameWithNamespace: 'Administrator / Security reports',
     },

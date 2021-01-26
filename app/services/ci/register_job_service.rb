@@ -8,8 +8,8 @@ module Ci
 
     JOB_QUEUE_DURATION_SECONDS_BUCKETS = [1, 3, 10, 30, 60, 300, 900, 1800, 3600].freeze
     JOBS_RUNNING_FOR_PROJECT_MAX_BUCKET = 5.freeze
-    METRICS_SHARD_TAG_PREFIX = 'metrics_shard::'.freeze
-    DEFAULT_METRICS_SHARD = 'default'.freeze
+    METRICS_SHARD_TAG_PREFIX = 'metrics_shard::'
+    DEFAULT_METRICS_SHARD = 'default'
 
     Result = Struct.new(:build, :build_json, :valid?)
 
@@ -107,23 +107,15 @@ module Ci
       build.runner_id = runner.id
       build.runner_session_attributes = params[:session] if params[:session].present?
 
-      unless build.has_valid_build_dependencies?
-        build.drop!(:missing_dependency_failure)
-        return false
+      failure_reason, _ = pre_assign_runner_checks.find { |_, check| check.call(build, params) }
+
+      if failure_reason
+        build.drop!(failure_reason)
+      else
+        build.run!
       end
 
-      unless build.supported_runner?(params.dig(:info, :features))
-        build.drop!(:runner_unsupported)
-        return false
-      end
-
-      if build.archived?
-        build.drop!(:archived_failure)
-        return false
-      end
-
-      build.run!
-      true
+      !failure_reason
     end
 
     def scheduler_failure!(build)
@@ -237,6 +229,14 @@ module Ci
 
     def job_queue_duration_seconds
       @job_queue_duration_seconds ||= Gitlab::Metrics.histogram(:job_queue_duration_seconds, 'Request handling execution time', {}, JOB_QUEUE_DURATION_SECONDS_BUCKETS)
+    end
+
+    def pre_assign_runner_checks
+      {
+        missing_dependency_failure: -> (build, _) { !build.has_valid_build_dependencies? },
+        runner_unsupported: -> (build, params) { !build.supported_runner?(params.dig(:info, :features)) },
+        archived_failure: -> (build, _) { build.archived? }
+      }
     end
   end
 end

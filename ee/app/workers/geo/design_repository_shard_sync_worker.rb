@@ -11,10 +11,10 @@ module Geo
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_project_ids_not_synced(except_ids:, batch_size:)
+    def find_jobs_never_attempted_sync(except_ids:, batch_size:)
       project_ids =
         registry_finder
-          .find_never_synced_registries(batch_size: batch_size, except_ids: except_ids)
+          .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
           .pluck_model_foreign_key
 
       find_project_ids_within_shard(project_ids, direction: :desc)
@@ -22,10 +22,10 @@ module Geo
     # rubocop: enable CodeReuse/ActiveRecord
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_project_ids_updated_recently(except_ids:, batch_size:)
+    def find_jobs_needs_sync_again(except_ids:, batch_size:)
       project_ids =
         registry_finder
-          .find_retryable_dirty_registries(batch_size: batch_size, except_ids: except_ids)
+          .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
           .pluck_model_foreign_key
 
       find_project_ids_within_shard(project_ids, direction: :asc)

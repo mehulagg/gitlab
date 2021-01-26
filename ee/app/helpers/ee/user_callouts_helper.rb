@@ -4,24 +4,15 @@ module EE
   module UserCalloutsHelper
     extend ::Gitlab::Utils::Override
 
-    GEO_ENABLE_HASHED_STORAGE = 'geo_enable_hashed_storage'
-    GEO_MIGRATE_HASHED_STORAGE = 'geo_migrate_hashed_storage'
-    CANARY_DEPLOYMENT = 'canary_deployment'
-    GOLD_TRIAL = 'gold_trial'
-    GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
-    THREAT_MONITORING_INFO = 'threat_monitoring_info'
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
-    USERS_OVER_LICENSE_BANNER = 'users_over_license_banner'
-    STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER = 'standalone_vulnerabilities_introduction_banner'
-    ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
-    PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
-
-    def show_canary_deployment_callout?(project)
-      !user_dismissed?(CANARY_DEPLOYMENT) &&
-        show_promotions? &&
-        # use :canary_deployments if we create a feature flag for it in the future
-        !project.feature_available?(:deploy_board)
-    end
+    ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
+    GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
+    GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
+    GOLD_TRIAL                     = 'gold_trial'
+    GOLD_TRIAL_BILLINGS            = 'gold_trial_billings'
+    NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
+    PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
+    THREAT_MONITORING_INFO         = 'threat_monitoring_info'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -56,7 +47,6 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
@@ -84,16 +74,23 @@ module EE
       !user_dismissed?(THREAT_MONITORING_INFO)
     end
 
-    def show_standalone_vulnerabilities_introduction_banner?
-      !user_dismissed?(STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER)
-    end
-
     def show_token_expiry_notification?
       return false unless current_user
 
       !token_expiration_enforced? &&
         current_user.active? &&
         !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
+    end
+
+    def show_new_user_signups_cap_reached?
+      return false unless ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
+      return false unless current_user&.admin?
+      return false if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
+
+      new_user_signups_cap = ::Gitlab::CurrentSettings.current_application_settings.new_user_signups_cap
+      return false if new_user_signups_cap.nil?
+
+      new_user_signups_cap.to_i <= ::User.billable.count
     end
 
     private
@@ -138,6 +135,9 @@ module EE
 
     def token_expiration_enforced?
       ::PersonalAccessToken.expiration_enforced?
+    end
+
+    def current_settings
     end
   end
 end

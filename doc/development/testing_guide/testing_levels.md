@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Testing levels
 
 ![Testing priority triangle](img/testing_triangle.png)
@@ -123,14 +129,14 @@ graph RL
 - **All server requests**:
   When running frontend unit tests, the backend may not be reachable, so all outgoing requests need to be mocked.
 - **Asynchronous background operations**:
-  Background operations cannot be stopped or waited on, so they will continue running in the following tests and cause side effects.
+  Background operations cannot be stopped or waited on, so they continue running in the following tests and cause side effects.
 
 #### What *not* to mock in unit tests
 
 - **Non-exported functions or classes**:
-  Everything that is not exported can be considered private to the module, and will be implicitly tested through the exported classes and functions.
+  Everything that is not exported can be considered private to the module, and is implicitly tested through the exported classes and functions.
 - **Methods of the class under test**:
-  By mocking methods of the class under test, the mocks will be tested and not the real methods.
+  By mocking methods of the class under test, the mocks are tested and not the real methods.
 - **Utility functions (pure functions, or those that only modify parameters)**:
  If a function has no side effects because it has no state, it is safe to not mock it in tests.
 - **Full HTML pages**:
@@ -200,7 +206,7 @@ graph RL
 - **All server requests**:
   Similar to unit tests, when running component tests, the backend may not be reachable, so all outgoing requests need to be mocked.
 - **Asynchronous background operations**:
-  Similar to unit tests, background operations cannot be stopped or waited on. This means they will continue running in the following tests and cause side effects.
+  Similar to unit tests, background operations cannot be stopped or waited on. This means they continue running in the following tests and cause side effects.
 - **Child components**:
   Every component is tested individually, so child components are mocked.
   See also [`shallowMount()`](https://vue-test-utils.vuejs.org/api/#shallowmount)
@@ -208,7 +214,7 @@ graph RL
 #### What *not* to mock in component tests
 
 - **Methods or computed properties of the component under test**:
-  By mocking part of the component under test, the mocks will be tested and not the real component.
+  By mocking part of the component under test, the mocks are tested and not the real component.
 - **Functions and classes independent from Vue**:
   All plain JavaScript code is already covered by unit tests and needs not to be mocked in component tests.
 
@@ -224,7 +230,7 @@ They're useful to test permissions, redirections, what view is rendered etc.
 
 | Code path | Tests path | Testing engine | Notes |
 | --------- | ---------- | -------------- | ----- |
-| `app/controllers/` | `spec/controllers/` | RSpec | For N+1 tests, use [request specs](../query_recorder.md#use-request-specs-instead-of-controller-specs) |
+| `app/controllers/` | `spec/requests/`, `spec/controllers` | RSpec | Request specs are preferred over legacy controller specs. |
 | `app/mailers/` | `spec/mailers/` | RSpec | |
 | `lib/api/` | `spec/requests/api/` | RSpec | |
 | `app/assets/javascripts/` | `spec/javascripts/`, `spec/frontend/` | Karma & Jest | [More details below](#frontend-integration-tests) |
@@ -289,7 +295,7 @@ graph RL
   Similar to unit and component tests, when running component tests, the backend may not be reachable, so all outgoing requests must be mocked.
 - **Asynchronous background operations that are not perceivable on the page**:
   Background operations that affect the page must be tested on this level.
-  All other background operations cannot be stopped or waited on, so they will continue running in the following tests and cause side effects.
+  All other background operations cannot be stopped or waited on, so they continue running in the following tests and cause side effects.
 
 #### What *not* to mock in integration tests
 
@@ -304,6 +310,8 @@ graph RL
 
 ### About controller tests
 
+GitLab is [transitioning from controller specs to request specs](https://gitlab.com/groups/gitlab-org/-/epics/5076).
+
 In an ideal world, controllers should be thin. However, when this is not the
 case, it's acceptable to write a system or feature test without JavaScript instead
 of a controller test. Testing a fat controller usually involves a lot of stubbing, such as:
@@ -312,7 +320,7 @@ of a controller test. Testing a fat controller usually involves a lot of stubbin
 controller.instance_variable_set(:@user, user)
 ```
 
-and use methods which are deprecated in Rails 5 ([#23768](https://gitlab.com/gitlab-org/gitlab/-/issues/16260)).
+and use methods [deprecated in Rails 5](https://gitlab.com/gitlab-org/gitlab/-/issues/16260).
 
 ### About Karma
 
@@ -354,7 +362,7 @@ possible).
 
 | Tests path | Testing engine | Notes |
 | ---------- | -------------- | ----- |
-| `spec/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) | If your test has the `:js` metadata, the browser driver will be [Poltergeist](https://github.com/teamcapybara/capybara#poltergeist), otherwise it's using [RackTest](https://github.com/teamcapybara/capybara#racktest). |
+| `spec/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) | If your test has the `:js` metadata, the browser driver is [Poltergeist](https://github.com/teamcapybara/capybara#poltergeist), otherwise it's using [RackTest](https://github.com/teamcapybara/capybara#racktest). |
 
 ### Frontend feature tests
 
@@ -447,13 +455,13 @@ should take care of not introducing too many (slow and duplicated) tests.
 
 The reasons why we should follow these best practices are as follows:
 
-- System tests are slow to run since they spin up the entire application stack
+- System tests are slow to run because they spin up the entire application stack
   in a headless browser, and even slower when they integrate a JS driver
 - When system tests run with a JavaScript driver, the tests are run in a
   different thread than the application. This means it does not share a
-  database connection and your test will have to commit the transactions in
+  database connection and your test must commit the transactions in
   order for the running application to see the data (and vice-versa). In that
-  case we need to truncate the database after each spec instead of simply
+  case we need to truncate the database after each spec instead of
   rolling back a transaction (the faster strategy that's in use for other kind
   of tests). This is slower than transactions, however, so we want to use
   truncation only when necessary.
@@ -482,7 +490,7 @@ Every new feature should come with a [test plan](https://gitlab.com/gitlab-org/g
 
 | Tests path | Testing engine | Notes |
 | ---------- | -------------- | ----- |
-| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/product-categories/) |
+| `qa/qa/specs/features/` | [Capybara](https://github.com/teamcapybara/capybara) + [RSpec](https://github.com/rspec/rspec-rails#feature-specs) + Custom QA framework | Tests should be placed under their corresponding [Product category](https://about.gitlab.com/handbook/product/categories/) |
 
 > See [end-to-end tests](end_to_end/index.md) for more information.
 

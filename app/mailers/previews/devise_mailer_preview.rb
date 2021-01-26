@@ -24,9 +24,13 @@ class DeviseMailerPreview < ActionMailer::Preview
     DeviseMailer.password_change(unsaved_user, {})
   end
 
+  def user_admin_approval
+    DeviseMailer.user_admin_approval(unsaved_user, {})
+  end
+
   private
 
   def unsaved_user
-    User.new(name: 'Jane Doe', email: 'jdoe@example.com')
+    User.new(name: 'Jane Doe', email: 'jdoe@example.com', created_at: 1.minute.ago)
   end
 end

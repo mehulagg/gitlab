@@ -1,3 +1,5 @@
+import { s__ } from '~/locale';
+
 export const INVALID_CURRENT_ENVIRONMENT_NAME = '–';
 
 export const PREDEFINED_NETWORK_POLICIES = [
@@ -5,28 +7,31 @@ export const PREDEFINED_NETWORK_POLICIES = [
     name: 'drop-outbound',
     isEnabled: false,
     manifest: `---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
   name: drop-outbound
 spec:
-  podSelector: {}
-  policyTypes:
-  - Egress`,
+  endpointSelector: {}
+  egress:
+  - {}`,
   },
   {
     name: 'allow-inbound-http',
     isEnabled: false,
     manifest: `---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
   name: allow-inbound-http
 spec:
-  podSelector: {}
+  endpointSelector: {}
   ingress:
-  - ports:
-    - port: 80
-    - port: 443`,
+  - toPorts:
+    - ports:
+      - port: '80'
+      - port: '443'`,
   },
 ];
+
+export const ALL_ENVIRONMENT_NAME = s__('ThreatMonitoring|All Environments');

@@ -42,7 +42,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Group do
       it 'logs a debug message' do
         group.start_ldap_sync
 
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn)
                 .with(/^Group '\w*' is not ready for LDAP sync. Skipping/)
                 .at_least(:once)
@@ -67,7 +67,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Group do
       end
 
       it 'logs a debug message' do
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn).at_least(:once)
 
         execute
@@ -187,7 +187,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Group do
         it 'does not update permissions unless ldap sync status is started' do
           group.finish_ldap_sync
 
-          expect(Rails.logger)
+          expect(Gitlab::AppLogger)
             .to receive(:warn).with(/status must be 'started' before updating permissions/)
 
           sync_group.update_permissions
@@ -611,7 +611,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Group do
           it 'does not update permissions unless ldap sync status is started' do
             group.finish_ldap_sync
 
-            expect(Rails.logger)
+            expect(Gitlab::AppLogger)
                 .to receive(:warn).with(/status must be 'started' before updating permissions/)
 
             sync_group.update_permissions

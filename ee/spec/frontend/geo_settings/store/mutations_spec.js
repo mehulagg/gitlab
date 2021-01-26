@@ -1,7 +1,7 @@
+import { DEFAULT_TIMEOUT, DEFAULT_ALLOWED_IP } from 'ee/geo_settings/constants';
+import * as types from 'ee/geo_settings/store/mutation_types';
 import mutations from 'ee/geo_settings/store/mutations';
 import createState from 'ee/geo_settings/store/state';
-import * as types from 'ee/geo_settings/store/mutation_types';
-import { DEFAULT_TIMEOUT, DEFAULT_ALLOWED_IP } from 'ee/geo_settings/constants';
 import { MOCK_BASIC_SETTINGS_DATA } from '../mock_data';
 
 describe('GeoSettings Store Mutations', () => {

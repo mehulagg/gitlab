@@ -4,20 +4,24 @@
 
 import $ from 'jquery';
 import { escape, template, uniqBy } from 'lodash';
-import axios from '../lib/utils/axios_utils';
-import { s__, __, sprintf } from '../locale';
-import ModalStore from '../boards/stores/modal_store';
-import { parseBoolean } from '../lib/utils/common_utils';
 import {
   AJAX_USERS_SELECT_OPTIONS_MAP,
   AJAX_USERS_SELECT_PARAMS_MAP,
 } from 'ee_else_ce/users_select/constants';
+import axios from '../lib/utils/axios_utils';
+import { s__, __, sprintf } from '../locale';
+import ModalStore from '../boards/stores/modal_store';
+import { parseBoolean, spriteIcon } from '../lib/utils/common_utils';
 import { getAjaxUsersSelectOptions, getAjaxUsersSelectParams } from './utils';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { fixTitle, dispose } from '~/tooltips';
+import { loadCSSFile } from '../lib/utils/css_utils';
 
 // TODO: remove eventHub hack after code splitting refactor
 window.emitSidebarEvent = window.emitSidebarEvent || $.noop;
 
 function UsersSelect(currentUser, els, options = {}) {
+  const elsClassName = els?.toString().match('.(.+$)')[1];
   const $els = $(els || '.js-user-search');
   this.users = this.users.bind(this);
   this.user = this.user.bind(this);
@@ -45,6 +49,7 @@ function UsersSelect(currentUser, els, options = {}) {
     options.todoStateFilter = $dropdown.data('todoStateFilter');
     options.iid = $dropdown.data('iid');
     options.issuableType = $dropdown.data('issuableType');
+    options.targetBranch = $dropdown.data('targetBranch');
     const showNullUser = $dropdown.data('nullUser');
     const defaultNullUser = $dropdown.data('nullUserDefault');
     const showMenuAbove = $dropdown.data('showMenuAbove');
@@ -54,12 +59,12 @@ function UsersSelect(currentUser, els, options = {}) {
     const defaultLabel = $dropdown.data('defaultLabel');
     const issueURL = $dropdown.data('issueUpdate');
     const $selectbox = $dropdown.closest('.selectbox');
+    const $assignToMeLink = $selectbox.next('.assign-to-me-link');
     let $block = $selectbox.closest('.block');
     const abilityName = $dropdown.data('abilityName');
     let $value = $block.find('.value');
     const $collapsedSidebar = $block.find('.sidebar-collapsed-user');
-    // eslint-disable-next-line no-jquery/no-fade
-    const $loading = $block.find('.block-loading').fadeOut();
+    const $loading = $block.find('.block-loading').addClass('gl-display-none');
     const selectedIdDefault = defaultNullUser && showNullUser ? 0 : null;
     let selectedId = $dropdown.data('selected');
     let assignTo;
@@ -70,7 +75,7 @@ function UsersSelect(currentUser, els, options = {}) {
       selectedId = selectedIdDefault;
     }
 
-    const assignYourself = function() {
+    const assignYourself = function () {
       const unassignedSelected = $dropdown
         .closest('.selectbox')
         .find(`input[name='${$dropdown.data('fieldName')}'][value=0]`);
@@ -103,17 +108,17 @@ function UsersSelect(currentUser, els, options = {}) {
       $block[0].addEventListener('assignYourself', assignYourself);
     }
 
-    const getSelectedUserInputs = function() {
+    const getSelectedUserInputs = function () {
       return $selectbox.find(`input[name="${$dropdown.data('fieldName')}"]`);
     };
 
-    const getSelected = function() {
+    const getSelected = function () {
       return getSelectedUserInputs()
         .map((index, input) => parseInt(input.value, 10))
         .get();
     };
 
-    const checkMaxSelect = function() {
+    const checkMaxSelect = function () {
       const maxSelect = $dropdown.data('maxSelect');
       if (maxSelect) {
         const selected = getSelected();
@@ -125,22 +130,29 @@ function UsersSelect(currentUser, els, options = {}) {
             .find(`input[name='${$dropdown.data('fieldName')}'][value=${firstSelectedId}]`);
 
           firstSelected.remove();
-          emitSidebarEvent('sidebar.removeAssignee', {
-            id: firstSelectedId,
-          });
+
+          if ($dropdown.hasClass(elsClassName)) {
+            emitSidebarEvent('sidebar.removeReviewer', {
+              id: firstSelectedId,
+            });
+          } else {
+            emitSidebarEvent('sidebar.removeAssignee', {
+              id: firstSelectedId,
+            });
+          }
         }
       }
     };
 
-    const getMultiSelectDropdownTitle = function(selectedUser, isSelected) {
-      const selectedUsers = getSelected().filter(u => u !== 0);
+    const getMultiSelectDropdownTitle = function (selectedUser, isSelected) {
+      const selectedUsers = getSelected().filter((u) => u !== 0);
 
       const firstUser = getSelectedUserInputs()
         .map((index, input) => ({
           name: input.dataset.meta,
           value: parseInt(input.value, 10),
         }))
-        .filter(u => u.id !== 0)
+        .filter((u) => u.id !== 0)
         .get(0);
 
       if (selectedUsers.length === 0) {
@@ -148,7 +160,7 @@ function UsersSelect(currentUser, els, options = {}) {
       } else if (selectedUsers.length === 1) {
         return firstUser.name;
       } else if (isSelected) {
-        const otherSelected = selectedUsers.filter(s => s !== selectedUser.id);
+        const otherSelected = selectedUsers.filter((s) => s !== selectedUser.id);
         return sprintf(s__('UsersSelect|%{name} + %{length} more'), {
           name: selectedUser.name,
           length: otherSelected.length,
@@ -160,7 +172,7 @@ function UsersSelect(currentUser, els, options = {}) {
       });
     };
 
-    $('.assign-to-me-link').on('click', e => {
+    $assignToMeLink.on('click', (e) => {
       e.preventDefault();
       $(e.currentTarget).hide();
 
@@ -184,25 +196,23 @@ function UsersSelect(currentUser, els, options = {}) {
       }
     });
 
-    $block.on('click', '.js-assign-yourself', e => {
+    $block.on('click', '.js-assign-yourself', (e) => {
       e.preventDefault();
       return assignTo(userSelect.currentUser.id);
     });
 
-    assignTo = function(selected) {
+    assignTo = function (selected) {
       const data = {};
       data[abilityName] = {};
       data[abilityName].assignee_id = selected != null ? selected : null;
-      // eslint-disable-next-line no-jquery/no-fade
-      $loading.removeClass('hidden').fadeIn();
+      $loading.removeClass('gl-display-none');
       $dropdown.trigger('loading.gl.dropdown');
 
       return axios.put(issueURL, data).then(({ data }) => {
         let user = {};
         let tooltipTitle = user.name;
         $dropdown.trigger('loaded.gl.dropdown');
-        // eslint-disable-next-line no-jquery/no-fade
-        $loading.fadeOut();
+        $loading.addClass('gl-display-none');
         if (data.assignee) {
           user = {
             name: data.assignee.name,
@@ -219,12 +229,16 @@ function UsersSelect(currentUser, els, options = {}) {
           tooltipTitle = s__('UsersSelect|Assignee');
         }
         $value.html(assigneeTemplate(user));
-        $collapsedSidebar.attr('title', tooltipTitle).tooltip('_fixTitle');
+        $collapsedSidebar.attr('title', tooltipTitle);
+        fixTitle($collapsedSidebar);
+
         return $collapsedSidebar.html(collapsedAssigneeTemplate(user));
       });
     };
     collapsedAssigneeTemplate = template(
-      '<% if( avatar ) { %> <a class="author-link" href="/<%- username %>"> <img width="24" class="avatar avatar-inline s24" alt="" src="<%- avatar %>"> </a> <% } else { %> <i class="fa fa-user"></i> <% } %>',
+      `<% if( avatar ) { %> <a class="author-link" href="/<%- username %>"> <img width="24" class="avatar avatar-inline s24" alt="" src="<%- avatar %>"> </a> <% } else { %> ${spriteIcon(
+        'user',
+      )} <% } %>`,
     );
     assigneeTemplate = template(
       `<% if (username) { %> <a class="author-link bold" href="/<%- username %>"> <% if( avatar ) { %> <img width="32" class="avatar avatar-inline s32" alt="" src="<%- avatar %>"> <% } %> <span class="author"><%- name %></span> <span class="username"> @<%- username %> </span> </a> <% } else { %> <span class="no-value assign-yourself">
@@ -233,14 +247,14 @@ function UsersSelect(currentUser, els, options = {}) {
         closingTag: '</a>',
       })}</span> <% } %>`,
     );
-    return $dropdown.glDropdown({
+    return initDeprecatedJQueryDropdown($dropdown, {
       showMenuAbove,
       data(term, callback) {
-        return userSelect.users(term, options, users => {
+        return userSelect.users(term, options, (users) => {
           // GitLabDropdownFilter returns this.instance
           // GitLabDropdownRemote returns this.options.instance
-          const glDropdown = this.instance || this.options.instance;
-          glDropdown.options.processData(term, users, callback);
+          const deprecatedJQueryDropdown = this.instance || this.options.instance;
+          deprecatedJQueryDropdown.options.processData(term, users, callback);
         });
       },
       processData(term, data, callback) {
@@ -252,14 +266,14 @@ function UsersSelect(currentUser, els, options = {}) {
 
           // Potential duplicate entries when dealing with issue board
           // because issue board is also managed by vue
-          const selectedUsers = uniqBy(selectedInputs, a => a.value)
-            .filter(input => {
+          const selectedUsers = uniqBy(selectedInputs, (a) => a.value)
+            .filter((input) => {
               const userId = parseInt(input.value, 10);
-              const inUsersArray = users.find(u => u.id === userId);
+              const inUsersArray = users.find((u) => u.id === userId);
 
               return !inUsersArray && userId !== 0;
             })
-            .map(input => {
+            .map((input) => {
               const userId = parseInt(input.value, 10);
               const { avatarUrl, avatar_url, name, username, canMerge } = input.dataset;
               return {
@@ -320,7 +334,7 @@ function UsersSelect(currentUser, els, options = {}) {
           }
 
           if ($dropdown.hasClass('js-multiselect')) {
-            const selected = getSelected().filter(i => i !== 0);
+            const selected = getSelected().filter((i) => i !== 0);
 
             if (selected.length > 0) {
               if ($dropdown.data('dropdownHeader')) {
@@ -332,12 +346,12 @@ function UsersSelect(currentUser, els, options = {}) {
               }
 
               const selectedUsers = users
-                .filter(u => selected.indexOf(u.id) !== -1)
+                .filter((u) => selected.indexOf(u.id) !== -1)
                 .sort((a, b) => a.name > b.name);
 
-              users = users.filter(u => selected.indexOf(u.id) === -1);
+              users = users.filter((u) => selected.indexOf(u.id) === -1);
 
-              selectedUsers.forEach(selectedUser => {
+              selectedUsers.forEach((selectedUser) => {
                 showDivider += 1;
                 users.splice(showDivider, 0, selectedUser);
               });
@@ -349,7 +363,7 @@ function UsersSelect(currentUser, els, options = {}) {
 
         callback(users);
         if (showMenuAbove) {
-          $dropdown.data('glDropdown').positionMenuAbove();
+          $dropdown.data('deprecatedJQueryDropdown').positionMenuAbove();
         }
       },
       filterable: true,
@@ -359,13 +373,13 @@ function UsersSelect(currentUser, els, options = {}) {
       },
       selectable: true,
       fieldName: $dropdown.data('fieldName'),
-      toggleLabel(selected, el, glDropdown) {
-        const inputValue = glDropdown.filterInput.val();
+      toggleLabel(selected, el, deprecatedJQueryDropdown) {
+        const inputValue = deprecatedJQueryDropdown.filterInput.val();
 
         if (this.multiSelect && inputValue === '') {
           // Remove non-users from the fullData array
-          const users = glDropdown.filteredFullData();
-          const callback = glDropdown.parseData.bind(glDropdown);
+          const users = deprecatedJQueryDropdown.filteredFullData();
+          const callback = deprecatedJQueryDropdown.parseData.bind(deprecatedJQueryDropdown);
 
           // Update the data model
           this.processData(inputValue, users, callback);
@@ -388,7 +402,11 @@ function UsersSelect(currentUser, els, options = {}) {
       defaultLabel,
       hidden() {
         if ($dropdown.hasClass('js-multiselect')) {
-          emitSidebarEvent('sidebar.saveAssignees');
+          if ($dropdown.hasClass(elsClassName)) {
+            emitSidebarEvent('sidebar.saveReviewers');
+          } else {
+            emitSidebarEvent('sidebar.saveAssignees');
+          }
         }
 
         if (!$dropdown.data('alwaysShowSelectbox')) {
@@ -407,7 +425,7 @@ function UsersSelect(currentUser, els, options = {}) {
         const { $el, e, isMarking } = options;
         const user = options.selectedObj;
 
-        $el.tooltip('dispose');
+        dispose($el);
 
         if ($dropdown.hasClass('js-multiselect')) {
           const isActive = $el.hasClass('is-active');
@@ -424,10 +442,18 @@ function UsersSelect(currentUser, els, options = {}) {
             previouslySelected.each((index, element) => {
               element.remove();
             });
-            emitSidebarEvent('sidebar.removeAllAssignees');
+            if ($dropdown.hasClass(elsClassName)) {
+              emitSidebarEvent('sidebar.removeAllReviewers');
+            } else {
+              emitSidebarEvent('sidebar.removeAllAssignees');
+            }
           } else if (isActive) {
             // user selected
-            emitSidebarEvent('sidebar.addAssignee', user);
+            if ($dropdown.hasClass(elsClassName)) {
+              emitSidebarEvent('sidebar.addReviewer', user);
+            } else {
+              emitSidebarEvent('sidebar.addAssignee', user);
+            }
 
             // Remove unassigned selection (if it was previously selected)
             const unassignedSelected = $dropdown
@@ -444,13 +470,17 @@ function UsersSelect(currentUser, els, options = {}) {
             }
 
             // User unselected
-            emitSidebarEvent('sidebar.removeAssignee', user);
+            if ($dropdown.hasClass(elsClassName)) {
+              emitSidebarEvent('sidebar.removeReviewer', user);
+            } else {
+              emitSidebarEvent('sidebar.removeAssignee', user);
+            }
           }
 
-          if (getSelected().find(u => u === gon.current_user_id)) {
-            $('.assign-to-me-link').hide();
+          if (getSelected().find((u) => u === gon.current_user_id)) {
+            $assignToMeLink.hide();
           } else {
-            $('.assign-to-me-link').show();
+            $assignToMeLink.show();
           }
         }
 
@@ -514,7 +544,7 @@ function UsersSelect(currentUser, els, options = {}) {
         }
 
         if (selected.length > 0) {
-          getSelected().forEach(selectedId => highlightSelected(selectedId));
+          getSelected().forEach((selectedId) => highlightSelected(selectedId));
         } else if ($dropdown.hasClass('js-issue-board-sidebar')) {
           highlightSelected(0);
         } else {
@@ -529,7 +559,7 @@ function UsersSelect(currentUser, els, options = {}) {
         let selected = false;
 
         if (this.multiSelect) {
-          selected = getSelected().find(u => user.id === u);
+          selected = getSelected().find((u) => user.id === u);
 
           const { fieldName } = this;
           const field = $dropdown
@@ -553,99 +583,118 @@ function UsersSelect(currentUser, els, options = {}) {
           img = `<img src='${avatar}' class='avatar avatar-inline m-0' width='32' />`;
         }
 
-        return userSelect.renderRow(options.issuableType, user, selected, username, img);
+        return userSelect.renderRow(
+          options.issuableType,
+          user,
+          selected,
+          username,
+          img,
+          elsClassName,
+        );
       },
     });
   });
-  import(/* webpackChunkName: 'select2' */ 'select2/select2')
-    .then(() => {
-      $('.ajax-users-select').each((i, select) => {
-        const options = getAjaxUsersSelectOptions($(select), AJAX_USERS_SELECT_OPTIONS_MAP);
-        options.skipLdap = $(select).hasClass('skip_ldap');
-        const showNullUser = $(select).data('nullUser');
-        const showAnyUser = $(select).data('anyUser');
-        const showEmailUser = $(select).data('emailUser');
-        const firstUser = $(select).data('firstUser');
-        return $(select).select2({
-          placeholder: __('Search for a user'),
-          multiple: $(select).hasClass('multiselect'),
-          minimumInputLength: 0,
-          query(query) {
-            return userSelect.users(query.term, options, users => {
-              let name;
-              const data = {
-                results: users,
-              };
-              if (query.term.length === 0) {
-                if (firstUser) {
-                  // Move current user to the front of the list
-                  const ref = data.results;
 
-                  for (let index = 0, len = ref.length; index < len; index += 1) {
-                    const obj = ref[index];
-                    if (obj.username === firstUser) {
-                      data.results.splice(index, 1);
-                      data.results.unshift(obj);
-                      break;
+  if ($('.ajax-users-select').length) {
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(() => {
+        // eslint-disable-next-line promise/no-nesting
+        loadCSSFile(gon.select2_css_path)
+          .then(() => {
+            $('.ajax-users-select').each((i, select) => {
+              const options = getAjaxUsersSelectOptions($(select), AJAX_USERS_SELECT_OPTIONS_MAP);
+              options.skipLdap = $(select).hasClass('skip_ldap');
+              const showNullUser = $(select).data('nullUser');
+              const showAnyUser = $(select).data('anyUser');
+              const showEmailUser = $(select).data('emailUser');
+              const firstUser = $(select).data('firstUser');
+              return $(select).select2({
+                placeholder: __('Search for a user'),
+                multiple: $(select).hasClass('multiselect'),
+                minimumInputLength: 0,
+                query(query) {
+                  return userSelect.users(query.term, options, (users) => {
+                    let name;
+                    const data = {
+                      results: users,
+                    };
+                    if (query.term.length === 0) {
+                      if (firstUser) {
+                        // Move current user to the front of the list
+                        const ref = data.results;
+
+                        for (let index = 0, len = ref.length; index < len; index += 1) {
+                          const obj = ref[index];
+                          if (obj.username === firstUser) {
+                            data.results.splice(index, 1);
+                            data.results.unshift(obj);
+                            break;
+                          }
+                        }
+                      }
+                      if (showNullUser) {
+                        const nullUser = {
+                          name: s__('UsersSelect|Unassigned'),
+                          id: 0,
+                        };
+                        data.results.unshift(nullUser);
+                      }
+                      if (showAnyUser) {
+                        name = showAnyUser;
+                        if (name === true) {
+                          name = s__('UsersSelect|Any User');
+                        }
+                        const anyUser = {
+                          name,
+                          id: null,
+                        };
+                        data.results.unshift(anyUser);
+                      }
                     }
-                  }
-                }
-                if (showNullUser) {
-                  const nullUser = {
-                    name: s__('UsersSelect|Unassigned'),
-                    id: 0,
-                  };
-                  data.results.unshift(nullUser);
-                }
-                if (showAnyUser) {
-                  name = showAnyUser;
-                  if (name === true) {
-                    name = s__('UsersSelect|Any User');
-                  }
-                  const anyUser = {
-                    name,
-                    id: null,
-                  };
-                  data.results.unshift(anyUser);
-                }
-              }
-              if (showEmailUser && data.results.length === 0 && query.term.match(/^[^@]+@[^@]+$/)) {
-                const trimmed = query.term.trim();
-                const emailUser = {
-                  name: sprintf(__('Invite "%{trimmed}" by email'), { trimmed }),
-                  username: trimmed,
-                  id: trimmed,
-                  invite: true,
-                };
-                data.results.unshift(emailUser);
-              }
-              return query.callback(data);
+                    if (
+                      showEmailUser &&
+                      data.results.length === 0 &&
+                      query.term.match(/^[^@]+@[^@]+$/)
+                    ) {
+                      const trimmed = query.term.trim();
+                      const emailUser = {
+                        name: sprintf(__('Invite "%{trimmed}" by email'), { trimmed }),
+                        username: trimmed,
+                        id: trimmed,
+                        invite: true,
+                      };
+                      data.results.unshift(emailUser);
+                    }
+                    return query.callback(data);
+                  });
+                },
+                initSelection() {
+                  const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+                  return userSelect.initSelection.apply(userSelect, args);
+                },
+                formatResult() {
+                  const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+                  return userSelect.formatResult.apply(userSelect, args);
+                },
+                formatSelection() {
+                  const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+                  return userSelect.formatSelection.apply(userSelect, args);
+                },
+                dropdownCssClass: 'ajax-users-dropdown',
+                // we do not want to escape markup since we are displaying html in results
+                escapeMarkup(m) {
+                  return m;
+                },
+              });
             });
-          },
-          initSelection() {
-            const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-            return userSelect.initSelection.apply(userSelect, args);
-          },
-          formatResult() {
-            const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-            return userSelect.formatResult.apply(userSelect, args);
-          },
-          formatSelection() {
-            const args = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-            return userSelect.formatSelection.apply(userSelect, args);
-          },
-          dropdownCssClass: 'ajax-users-dropdown',
-          // we do not want to escape markup since we are displaying html in results
-          escapeMarkup(m) {
-            return m;
-          },
-        });
-      });
-    })
-    .catch(() => {});
+          })
+          .catch(() => {});
+      })
+      .catch(() => {});
+  }
 }
 
-UsersSelect.prototype.initSelection = function(element, callback) {
+UsersSelect.prototype.initSelection = function (element, callback) {
   const id = $(element).val();
   if (id === '0') {
     const nullUser = {
@@ -657,7 +706,7 @@ UsersSelect.prototype.initSelection = function(element, callback) {
   }
 };
 
-UsersSelect.prototype.formatResult = function(user) {
+UsersSelect.prototype.formatResult = function (user) {
   let avatar = gon.default_avatar_url;
   if (user.avatar_url) {
     avatar = user.avatar_url;
@@ -679,11 +728,11 @@ UsersSelect.prototype.formatResult = function(user) {
   `;
 };
 
-UsersSelect.prototype.formatSelection = function(user) {
+UsersSelect.prototype.formatSelection = function (user) {
   return escape(user.name);
 };
 
-UsersSelect.prototype.user = function(user_id, callback) {
+UsersSelect.prototype.user = function (user_id, callback) {
   if (!/^\d+$/.test(user_id)) {
     return false;
   }
@@ -697,7 +746,7 @@ UsersSelect.prototype.user = function(user_id, callback) {
 
 // Return users list. Filtered by query
 // Only active users retrieved
-UsersSelect.prototype.users = function(query, options, callback) {
+UsersSelect.prototype.users = function (query, options, callback) {
   const url = this.buildUrl(this.usersPath);
   const params = {
     search: query,
@@ -705,8 +754,17 @@ UsersSelect.prototype.users = function(query, options, callback) {
     ...getAjaxUsersSelectParams(options, AJAX_USERS_SELECT_PARAMS_MAP),
   };
 
-  if (options.issuableType === 'merge_request') {
+  const isMergeRequest = options.issuableType === 'merge_request';
+  const isEditMergeRequest = !options.issuableType && options.iid && options.targetBranch;
+  const isNewMergeRequest = !options.issuableType && !options.iid && options.targetBranch;
+
+  if (isMergeRequest || isEditMergeRequest || isNewMergeRequest) {
     params.merge_request_iid = options.iid || null;
+    params.approval_rules = true;
+  }
+
+  if (isNewMergeRequest) {
+    params.target_branch = options.targetBranch || null;
   }
 
   return axios.get(url, { params }).then(({ data }) => {
@@ -714,14 +772,21 @@ UsersSelect.prototype.users = function(query, options, callback) {
   });
 };
 
-UsersSelect.prototype.buildUrl = function(url) {
+UsersSelect.prototype.buildUrl = function (url) {
   if (gon.relative_url_root != null) {
     url = gon.relative_url_root.replace(/\/$/, '') + url;
   }
   return url;
 };
 
-UsersSelect.prototype.renderRow = function(issuableType, user, selected, username, img) {
+UsersSelect.prototype.renderRow = function (
+  issuableType,
+  user,
+  selected,
+  username,
+  img,
+  elsClassName,
+) {
   const tooltip = issuableType === 'merge_request' && !user.can_merge ? __('Cannot merge') : '';
   const tooltipClass = tooltip ? `has-tooltip` : '';
   const selectedClass = selected === true ? 'is-active' : '';
@@ -735,30 +800,53 @@ UsersSelect.prototype.renderRow = function(issuableType, user, selected, usernam
       <a href="#" class="dropdown-menu-user-link d-flex align-items-center ${linkClasses}" ${tooltipAttributes}>
         ${this.renderRowAvatar(issuableType, user, img)}
         <span class="d-flex flex-column overflow-hidden">
-          <strong class="dropdown-menu-user-full-name">
+          <strong class="dropdown-menu-user-full-name gl-font-weight-bold">
             ${escape(user.name)}
           </strong>
-          ${username ? `<span class="dropdown-menu-user-username">${username}</span>` : ''}
+          ${
+            username
+              ? `<span class="dropdown-menu-user-username gl-text-gray-400">${username}</span>`
+              : ''
+          }
+          ${this.renderApprovalRules(elsClassName, user.applicable_approval_rules)}
         </span>
       </a>
     </li>
   `;
 };
 
-UsersSelect.prototype.renderRowAvatar = function(issuableType, user, img) {
+UsersSelect.prototype.renderRowAvatar = function (issuableType, user, img) {
   if (user.beforeDivider) {
     return img;
   }
 
   const mergeIcon =
     issuableType === 'merge_request' && !user.can_merge
-      ? '<i class="fa fa-exclamation-triangle merge-icon"></i>'
+      ? spriteIcon('warning-solid', 's12 merge-icon')
       : '';
 
   return `<span class="position-relative mr-2">
     ${img}
     ${mergeIcon}
   </span>`;
+};
+
+UsersSelect.prototype.renderApprovalRules = function (elsClassName, approvalRules = []) {
+  const count = approvalRules.length;
+
+  if (!gon.features?.reviewerApprovalRules || !elsClassName?.includes('reviewer') || !count) {
+    return '';
+  }
+
+  const [rule] = approvalRules;
+  const countText = sprintf(__('(+%{count}&nbsp;rules)'), { count });
+  const renderApprovalRulesCount = count > 1 ? `<span class="ml-1">${countText}</span>` : '';
+  const ruleName = rule.rule_type === 'code_owner' ? __('Code Owner') : rule.name;
+
+  return `<div class="gl-display-flex gl-font-sm">
+    <span class="gl-text-truncate" title="${ruleName}">${ruleName}</span>
+    ${renderApprovalRulesCount}
+  </div>`;
 };
 
 export default UsersSelect;

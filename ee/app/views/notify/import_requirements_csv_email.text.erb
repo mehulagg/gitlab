@@ -1,0 +1,11 @@
+Your CSV import for project <%= @project.full_name %> (<%= project_url(@project) %>) has been completed.
+
+<%= pluralize(@results[:success], 'requirement') %> imported.
+
+<% if @results[:error_lines].present? %>
+Errors found on line <%= 'number'.pluralize(@results[:error_lines].size) %>: <%= @results[:error_lines].join(', ') %>. Please check if these lines have a requirement title.
+<% end %>
+
+<% if @results[:parse_error] %>
+Error parsing CSV file. Please make sure it has the correct format (<%= help_page_url('user/project/requirements/index.html', anchor: 'imported-csv-file-format') %>).
+<% end %>

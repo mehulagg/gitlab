@@ -106,4 +106,54 @@ RSpec.describe MergeRequestPresenter do
       end
     end
   end
+
+  describe '#missing_security_scan_types' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+    let(:pipeline) { instance_double(Ci::Pipeline) }
+
+    subject(:missing_security_scan_types) { presenter.missing_security_scan_types }
+
+    where(:feature_flag_enabled?, :can_read_pipeline?, :attribute_value) do
+      false | false | nil
+      false | true  | nil
+      true  | false | nil
+      true  | true  | %w(sast)
+    end
+
+    with_them do
+      before do
+        stub_feature_flags(missing_mr_security_scan_types: feature_flag_enabled?)
+        allow(merge_request).to receive(:actual_head_pipeline).and_return(pipeline)
+        allow(presenter).to receive(:can?).with(user, :read_pipeline, pipeline).and_return(can_read_pipeline?)
+        allow(merge_request).to receive(:missing_security_scan_types).and_return(%w(sast))
+      end
+
+      it { is_expected.to eq(attribute_value) }
+    end
+  end
+
+  describe '#discover_project_security_path' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+    let(:can_discover_project_security) { true }
+
+    subject { presenter.discover_project_security_path }
+
+    before do
+      allow(presenter).to receive(:show_discover_project_security?) { can_discover_project_security }
+    end
+
+    context 'when project security is discoverable' do
+      it 'returns path' do
+        is_expected.to eq(presenter.project_security_discover_path(project))
+      end
+    end
+
+    context 'when project security is not discoverable' do
+      let(:can_discover_project_security) { false }
+
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
+    end
+  end
 end

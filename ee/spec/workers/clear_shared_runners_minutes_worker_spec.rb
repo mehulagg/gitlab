@@ -50,7 +50,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
           it 'raises an exception' do
             expect { worker.perform }.to raise_error(
               Ci::Minutes::BatchResetService::BatchNotResetError,
-              'Some namespace shared runner minutes were not reset.'
+              'Some namespace shared runner minutes were not reset'
             )
           end
         end
@@ -146,12 +146,13 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         stub_const("#{described_class}::BATCH_SIZE", 3)
       end
 
-      it 'runs a worker per batch' do
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(2, 4)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(5, 7)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(8, 10)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(11, 13)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(14, 16)
+      it 'runs a worker per batch', :aggregate_failures do
+        # Spread evenly accross 24 hours (86,400 seconds)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(0.seconds, 2, 4)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(21600.seconds, 5, 7)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(43200.seconds, 8, 10)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(64800.seconds, 11, 13)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(86400.seconds, 14, 16)
 
         subject
       end

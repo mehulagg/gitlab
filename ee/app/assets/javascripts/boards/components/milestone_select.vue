@@ -15,9 +15,15 @@ export default {
       type: Object,
       required: true,
     },
-    milestonePath: {
-      type: String,
-      required: true,
+    groupId: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    projectId: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,
@@ -59,7 +65,9 @@ export default {
       } else if (milestone.title === NO_MILESTONE) {
         id = 0;
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone_id = id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone = {
         ...milestone,
         id,
@@ -78,13 +86,14 @@ export default {
       </button>
     </div>
     <div :class="milestoneTitleClass" class="value">{{ milestoneTitle }}</div>
-    <div class="selectbox" style="display: none;">
+    <div class="selectbox" style="display: none">
       <input :value="milestoneId" name="milestone_id" type="hidden" />
       <div class="dropdown">
         <button
           ref="dropdownButton"
           :data-selected="selected"
-          :data-milestones="milestonePath"
+          :data-project-id="projectId"
+          :data-group-id="groupId"
           :data-show-no="true"
           :data-show-any="true"
           :data-show-started="true"
@@ -97,7 +106,7 @@ export default {
           {{ __('Milestone') }}
           <gl-icon
             name="chevron-down"
-            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-700"
+            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
             :size="16"
           />
         </button>
@@ -115,7 +124,7 @@ export default {
             />
             <gl-icon
               name="close"
-              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-700"
+              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-500"
             />
           </div>
           <div class="dropdown-content"></div>

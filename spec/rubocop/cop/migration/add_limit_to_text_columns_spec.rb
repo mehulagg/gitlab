@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 require 'rubocop'
 require_relative '../../../../rubocop/cop/migration/add_limit_to_text_columns'
 
-RSpec.describe RuboCop::Cop::Migration::AddLimitToTextColumns, type: :rubocop do
+RSpec.describe RuboCop::Cop::Migration::AddLimitToTextColumns do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -126,6 +126,28 @@ RSpec.describe RuboCop::Cop::Migration::AddLimitToTextColumns, type: :rubocop do
         RUBY
 
         expect(cop.offenses.map(&:cop_name)).to all(eq('Migration/AddLimitToTextColumns'))
+      end
+    end
+
+    context 'when text columns are used for encryption' do
+      it 'registers no offenses' do
+        expect_no_offenses(<<~RUBY)
+          class TestTextLimits < ActiveRecord::Migration[6.0]
+            DOWNTIME = false
+            disable_ddl_transaction!
+
+            def up
+              create_table :test_text_limits, id: false do |t|
+                t.integer :test_id, null: false
+                t.text :encrypted_name
+              end
+
+              add_column :encrypted_test_text_limits, :encrypted_email, :text
+              add_column_with_default :encrypted_test_text_limits, :encrypted_role, :text, default: 'default'
+              change_column_type_concurrently :encrypted_test_text_limits, :encrypted_test_id, :text
+            end
+          end
+        RUBY
       end
     end
 

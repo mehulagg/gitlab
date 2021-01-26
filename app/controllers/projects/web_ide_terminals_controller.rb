@@ -8,10 +8,12 @@ class Projects::WebIdeTerminalsController < Projects::ApplicationController
   before_action :authorize_read_web_ide_terminal!, except: [:check_config, :create]
   before_action :authorize_update_web_ide_terminal!, only: [:cancel, :retry]
 
+  feature_category :web_ide
+
   def check_config
     return respond_422 unless branch_sha
 
-    result = ::Ci::WebIdeConfigService.new(project, current_user, sha: branch_sha).execute
+    result = ::Ide::TerminalConfigService.new(project, current_user, sha: branch_sha).execute
 
     if result[:status] == :success
       head :ok

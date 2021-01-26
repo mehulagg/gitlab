@@ -1,0 +1,5 @@
+mutation dastScannerProfileDelete($input: DastScannerProfileDeleteInput!) {
+  scannerProfilesDelete: dastScannerProfileDelete(input: $input) {
+    errors
+  }
+}

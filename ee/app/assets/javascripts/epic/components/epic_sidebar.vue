@@ -12,6 +12,10 @@ import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapse
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
 import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
+import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+
+import notesEventHub from '~/notes/event_hub';
+import sidebarEventHub from '~/sidebar/event_hub';
 
 import { dateTypes } from '../constants';
 
@@ -26,6 +30,7 @@ export default {
     AncestorsTree,
     SidebarParticipants,
     SidebarSubscription,
+    ConfidentialIssueSidebar,
   },
   computed: {
     ...mapState([
@@ -45,6 +50,7 @@ export default {
       'dueDateFromMilestones',
       'epicStartDateSaveInProgress',
       'epicDueDateSaveInProgress',
+      'fullPath',
     ]),
     ...mapGetters([
       'isUserSignedIn',
@@ -63,6 +69,10 @@ export default {
   mounted() {
     this.toggleSidebarFlag(epicUtils.getCollapsedGutter());
     this.fetchEpicDetails();
+    sidebarEventHub.$on('updateIssuableConfidentiality', this.updateEpicConfidentiality);
+  },
+  beforeDestroy() {
+    sidebarEventHub.$off('updateIssuableConfidentiality', this.updateEpicConfidentiality);
   },
   methods: {
     ...mapActions([
@@ -118,6 +128,9 @@ export default {
         dateTypeIsFixed: true,
       });
     },
+    updateEpicConfidentiality(confidential) {
+      notesEventHub.$emit('notesApp.updateIssuableConfidentiality', confidential);
+    },
   },
 };
 </script>
@@ -136,6 +149,7 @@ export default {
       <sidebar-todo
         v-show="sidebarCollapsed && isUserSignedIn"
         :sidebar-collapsed="sidebarCollapsed"
+        data-testid="todo"
       />
       <sidebar-date-picker
         v-show="!sidebarCollapsed"
@@ -154,6 +168,7 @@ export default {
         :date-from-milestones="startDateTimeFromMilestones"
         :selected-date="startDateTime"
         :is-date-invalid="isDateInvalid"
+        data-testid="start-date"
         block-class="start-date"
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
         @toggleDateType="changeStartDateType"
@@ -175,6 +190,7 @@ export default {
         :date-from-milestones="dueDateTimeFromMilestones"
         :selected-date="dueDateTime"
         :is-date-invalid="isDateInvalid"
+        data-testid="due-date"
         block-class="due-date"
         @toggleDateType="changeDueDateType"
         @saveDate="saveDueDate"
@@ -186,17 +202,28 @@ export default {
         :max-date="dueDateForCollapsedSidebar"
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
       />
-      <sidebar-labels :can-update="canUpdate" :sidebar-collapsed="sidebarCollapsed" />
+      <sidebar-labels
+        :can-update="canUpdate"
+        :sidebar-collapsed="sidebarCollapsed"
+        data-testid="labels-select"
+      />
       <div v-if="allowSubEpics" class="block ancestors">
-        <ancestors-tree :ancestors="ancestors" :is-fetching="false" />
+        <ancestors-tree :ancestors="ancestors" :is-fetching="false" data-testid="ancestors" />
       </div>
+
+      <confidential-issue-sidebar
+        :is-editable="canUpdate"
+        :full-path="fullPath"
+        issuable-type="epic"
+      />
+
       <div class="block participants">
         <sidebar-participants
           :participants="participants"
           @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
         />
       </div>
-      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" />
+      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" data-testid="subscribe" />
     </div>
   </aside>
 </template>

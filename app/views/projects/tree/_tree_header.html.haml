@@ -1,6 +1,3 @@
-- can_collaborate = can_collaborate_with_project?(@project)
-- can_create_mr_from_fork = can?(current_user, :fork_project, @project) && can?(current_user, :create_merge_request_in, @project)
-
 .tree-ref-container
   .tree-ref-holder
     = render 'shared/ref_switcher', destination: 'tree', path: @path, show_create: true
@@ -13,16 +10,10 @@
     #js-tree-history-link.d-inline-block{ data: { history_link: project_commits_path(@project, @ref) } }
 
     = render 'projects/find_file_link'
-
-    - if can_collaborate || current_user&.already_forked?(@project)
-      #js-tree-web-ide-link.d-inline-block
-    - elsif can_create_mr_from_fork
-      = link_to '#modal-confirm-fork', class: 'btn btn-default qa-web-ide-button', data: { target: '#modal-confirm-fork', toggle: 'modal'} do
-        = _('Web IDE')
-      = render 'shared/confirm_fork_modal', fork_path: ide_fork_and_edit_path(@project, @ref, @path)
+    = render 'shared/web_ide_button', blob: nil
 
     - if show_xcode_link?(@project)
-      .project-action-button.project-xcode.inline<
+      .project-action-button.project-xcode<
         = render "projects/buttons/xcode_link"
 
     = render 'projects/buttons/download', project: @project, ref: @ref

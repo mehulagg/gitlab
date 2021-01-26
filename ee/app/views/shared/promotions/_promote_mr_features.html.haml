@@ -2,7 +2,7 @@
   .user-callout.promotion-callout.append-bottom-20.js-mr-approval-callout#promote_mr_features{ data: { uid: 'promote_mr_features_dismissed' } }
     .bordered-box.content-block
       %button.btn.btn-default.close.js-close-callout{ type: 'button', 'aria-label' => _('Dismiss Merge Request promotion') }
-        = icon('times', class: 'dismiss-icon', 'aria-hidden' => 'true')
+        = sprite_icon('close', size: 16, css_class: 'dismiss-icon')
       .user-callout-copy
         %h4
           - if Gitlab::CurrentSettings.should_check_namespace_plan?

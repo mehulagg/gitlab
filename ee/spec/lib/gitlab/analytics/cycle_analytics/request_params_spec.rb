@@ -42,7 +42,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       end
 
       it 'is valid' do
-        Timecop.travel '2019-03-01' do
+        travel_to '2019-03-01' do
           expect(subject).to be_valid
         end
       end
@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   describe 'optional `project_ids`' do
     context 'when `project_ids` is not empty' do
       def json_project(project)
-        { id: project.id,
+        { id: project.to_gid.to_s,
           name: project.name,
           path_with_namespace: project.path_with_namespace,
           avatar_url: project.avatar_url }.to_json
@@ -165,6 +165,26 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
       end
 
       it { expect(subject.group).to eq(sub_group.id) }
+    end
+  end
+
+  describe 'optional `value_stream`' do
+    context 'when `value_stream` is not empty' do
+      let(:value_stream) { instance_double('Analytics::CycleAnalytics::GroupValueStream') }
+
+      before do
+        params[:value_stream] = value_stream
+      end
+
+      it { expect(subject.value_stream).to eq(value_stream) }
+    end
+
+    context 'when `value_stream` is nil' do
+      before do
+        params[:value_stream] = nil
+      end
+
+      it { expect(subject.value_stream).to eq(nil) }
     end
   end
 

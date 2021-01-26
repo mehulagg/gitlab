@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GroupDescendantsFinder do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
   let(:params) { {} }
 
   subject(:finder) do
@@ -77,9 +77,9 @@ RSpec.describe GroupDescendantsFinder do
       end
     end
 
-    it 'sorts elements by latest created as default' do
-      project1 = create(:project, namespace: group, created_at: 1.hour.ago)
-      project2 = create(:project, namespace: group)
+    it 'sorts elements by name as default' do
+      project1 = create(:project, namespace: group, name: 'z')
+      project2 = create(:project, namespace: group, name: 'a')
 
       expect(subject.execute).to eq([project2, project1])
     end
@@ -126,6 +126,39 @@ RSpec.describe GroupDescendantsFinder do
                                                group_access: Gitlab::Access::MAINTAINER)
 
       expect(finder.execute).to contain_exactly(project)
+    end
+  end
+
+  context 'with shared groups' do
+    let_it_be(:other_group) { create(:group) }
+    let_it_be(:shared_group_link) do
+      create(:group_group_link,
+             shared_group: group,
+             shared_with_group: other_group)
+    end
+
+    context 'without common ancestor' do
+      it { expect(finder.execute).to be_empty }
+    end
+
+    context 'with common ancestor' do
+      let_it_be(:common_ancestor) { create(:group) }
+      let_it_be(:other_group) { create(:group, parent: common_ancestor) }
+      let_it_be(:group) { create(:group, parent: common_ancestor) }
+
+      context 'querying under the common ancestor' do
+        it { expect(finder.execute).to be_empty }
+      end
+
+      context 'querying the common ancestor' do
+        subject(:finder) do
+          described_class.new(current_user: user, parent_group: common_ancestor, params: params)
+        end
+
+        it 'contains shared subgroups' do
+          expect(finder.execute).to contain_exactly(group, other_group)
+        end
+      end
     end
   end
 

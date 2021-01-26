@@ -24,7 +24,9 @@ module Gitlab
         ).freeze
 
         NON_STICKY_READS = %i(
+          sanitize_limit
           select
+          select_one
           quote_column_name
         ).freeze
 

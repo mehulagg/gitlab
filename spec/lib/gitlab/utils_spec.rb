@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Utils do
+  using RSpec::Parameterized::TableSyntax
+
   delegate :to_boolean, :boolean_to_yes_no, :slugify, :random_string, :which,
            :ensure_array_from_string, :to_exclusive_sentence, :bytes_to_megabytes,
            :append_path, :check_path_traversal!, :allowlisted?, :check_allowed_absolute_path!, :decode_path, :ms_to_round_sec, to: :described_class
@@ -49,6 +51,10 @@ RSpec.describe Gitlab::Utils do
       expect(check_path_traversal!('..test/foo')).to eq('..test/foo')
       expect(check_path_traversal!('dir/..foo.rb')).to eq('dir/..foo.rb')
       expect(check_path_traversal!('dir/.foo.rb')).to eq('dir/.foo.rb')
+    end
+
+    it 'does nothing for a non-string' do
+      expect(check_path_traversal!(nil)).to be_nil
     end
   end
 
@@ -386,6 +392,23 @@ RSpec.describe Gitlab::Utils do
     end
   end
 
+  describe ".safe_downcase!" do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:str, :result) do
+      "test".freeze | "test"
+      "Test".freeze | "test"
+      "test" | "test"
+      "Test" | "test"
+    end
+
+    with_them do
+      it "downcases the string" do
+        expect(described_class.safe_downcase!(str)).to eq(result)
+      end
+    end
+  end
+
   describe '.parse_url' do
     it 'returns Addressable::URI object' do
       expect(described_class.parse_url('http://gitlab.com')).to be_instance_of(Addressable::URI)
@@ -446,6 +469,31 @@ RSpec.describe Gitlab::Utils do
           { name: 'obj 3', priority: 3 }
         ])
       end
+    end
+  end
+
+  describe '.valid_brackets?' do
+    where(:input, :allow_nested, :valid) do
+      'no brackets'              | true  | true
+      'no brackets'              | false | true
+      'user[avatar]'             | true  | true
+      'user[avatar]'             | false | true
+      'user[avatar][friends]'    | true  | true
+      'user[avatar][friends]'    | false | true
+      'user[avatar[image[url]]]' | true  | true
+      'user[avatar[image[url]]]' | false | false
+      'user[avatar[]friends]'    | true  | true
+      'user[avatar[]friends]'    | false | false
+      'user[avatar]]'            | true  | false
+      'user[avatar]]'            | false | false
+      'user][avatar]]'           | true  | false
+      'user][avatar]]'           | false | false
+      'user[avatar'              | true  | false
+      'user[avatar'              | false | false
+    end
+
+    with_them do
+      it { expect(described_class.valid_brackets?(input, allow_nested: allow_nested)).to eq(valid) }
     end
   end
 end

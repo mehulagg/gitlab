@@ -1,76 +1,55 @@
 <script>
 import {
+  GlAlert,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-  GlNewDropdownDivider as GlDropdownDivider,
-  GlForm,
-  GlFormInput,
-  GlFormGroup,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
-import { debounce } from 'lodash';
-import { DATA_REFETCH_DELAY } from '../../shared/constants';
-import { DEFAULT_VALUE_STREAM_ID } from '../constants';
+import ValueStreamForm from './value_stream_form.vue';
 
-const ERRORS = {
-  MIN_LENGTH: __('Name is required'),
-  MAX_LENGTH: __('Maximum length 100 characters'),
-};
-
-const validate = ({ name }) => {
-  const errors = { name: [] };
-  if (name.length > 100) {
-    errors.name.push(ERRORS.MAX_LENGTH);
-  }
-  if (!name.length) {
-    errors.name.push(ERRORS.MIN_LENGTH);
-  }
-  return errors;
-};
-
-const hasCustomValueStream = vs => {
-  return Boolean(vs.length > 1 || vs[0].name.toLowerCase().trim() !== DEFAULT_VALUE_STREAM_ID);
+const I18N = {
+  DELETE_NAME: __('Delete %{name}'),
+  DELETE_CONFIRMATION: __('Are you sure you want to delete "%{name}" Value Stream?'),
+  DELETED: __("'%{name}' Value Stream deleted"),
+  DELETE: __('Delete'),
+  CREATE_VALUE_STREAM: __('Create new Value Stream'),
+  CANCEL: __('Cancel'),
 };
 
 export default {
   components: {
+    GlAlert,
     GlButton,
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
-    GlForm,
-    GlFormInput,
-    GlFormGroup,
     GlModal,
+    ValueStreamForm,
   },
   directives: {
     GlModalDirective,
   },
-  data() {
-    return {
-      name: '',
-      errors: {},
-    };
+  props: {
+    hasExtendedFormFields: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     ...mapState({
-      isLoading: 'isCreatingValueStream',
-      initialFormErrors: 'createValueStreamErrors',
+      isDeleting: 'isDeletingValueStream',
+      deleteValueStreamError: 'deleteValueStreamError',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
     }),
-    isValid() {
-      return !this.errors.name?.length;
-    },
-    invalidFeedback() {
-      return this.errors.name?.join('\n');
-    },
     hasValueStreams() {
-      return Boolean(this.data.length && hasCustomValueStream(this.data));
+      return Boolean(this.data.length);
     },
     selectedValueStreamName() {
       return this.selectedValueStream?.name || '';
@@ -78,53 +57,49 @@ export default {
     selectedValueStreamId() {
       return this.selectedValueStream?.id || null;
     },
-    hasFormErrors() {
-      const { initialFormErrors } = this;
-      return Boolean(Object.keys(initialFormErrors).length);
+    canDeleteSelectedStage() {
+      return this.selectedValueStream?.isCustom || false;
     },
-  },
-  watch: {
-    initialFormErrors(newErrors = {}) {
-      this.errors = newErrors;
+    deleteSelectedText() {
+      return sprintf(this.$options.I18N.DELETE_NAME, { name: this.selectedValueStreamName });
     },
-  },
-  mounted() {
-    const { initialFormErrors } = this;
-    if (this.hasFormErrors) {
-      this.errors = initialFormErrors;
-    } else {
-      this.onHandleInput();
-    }
-  },
-  methods: {
-    ...mapActions(['createValueStream', 'setSelectedValueStream']),
-    onSubmit() {
-      const { name } = this;
-      return this.createValueStream({ name }).then(() => {
-        if (!this.hasFormErrors) {
-          this.$toast.show(sprintf(__("'%{name}' Value Stream created"), { name }), {
-            position: 'top-center',
-          });
-          this.name = '';
-        }
+    deleteConfirmationText() {
+      return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
+        name: this.selectedValueStreamName,
       });
     },
-    onHandleInput: debounce(function debouncedValidation() {
-      const { name } = this;
-      this.errors = validate({ name });
-    }, DATA_REFETCH_DELAY),
+  },
+  methods: {
+    ...mapActions(['setSelectedValueStream', 'deleteValueStream']),
+    onSuccess(message) {
+      this.$toast.show(message, { position: 'top-center' });
+    },
     isSelected(id) {
       return Boolean(this.selectedValueStreamId && this.selectedValueStreamId === id);
     },
-    onSelect(id) {
-      this.setSelectedValueStream(id);
+    onSelect(selectedId) {
+      this.setSelectedValueStream(this.data.find(({ id }) => id === selectedId));
+    },
+    onDelete() {
+      const name = this.selectedValueStreamName;
+      return this.deleteValueStream(this.selectedValueStreamId).then(() => {
+        if (!this.deleteValueStreamError) {
+          this.onSuccess(sprintf(this.$options.I18N.DELETED, { name }));
+        }
+      });
     },
   },
+  I18N,
 };
 </script>
 <template>
-  <gl-form>
-    <gl-dropdown v-if="hasValueStreams" :text="selectedValueStreamName" right>
+  <div>
+    <gl-dropdown
+      v-if="hasValueStreams"
+      data-testid="dropdown-value-streams"
+      :text="selectedValueStreamName"
+      right
+    >
       <gl-dropdown-item
         v-for="{ id, name: streamName } in data"
         :key="id"
@@ -134,46 +109,36 @@ export default {
         >{{ streamName }}</gl-dropdown-item
       >
       <gl-dropdown-divider />
-      <gl-dropdown-item v-gl-modal-directive="'create-value-stream-modal'" @click="onHandleInput">{{
-        __('Create new Value Stream')
+      <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'">{{
+        $options.I18N.CREATE_VALUE_STREAM
       }}</gl-dropdown-item>
-    </gl-dropdown>
-    <gl-button v-else v-gl-modal-directive="'create-value-stream-modal'" @click="onHandleInput">{{
-      __('Create new Value Stream')
-    }}</gl-button>
-    <gl-modal
-      ref="modal"
-      modal-id="create-value-stream-modal"
-      :title="__('Value Stream Name')"
-      :action-primary="{
-        text: __('Create Value Stream'),
-        attributes: [
-          { variant: 'success' },
-          {
-            disabled: !isValid,
-          },
-          { loading: isLoading },
-        ],
-      }"
-      :action-cancel="{ text: __('Cancel') }"
-      @primary.prevent="onSubmit"
-    >
-      <gl-form-group
-        :label="__('Name')"
-        label-for="create-value-stream-name"
-        :invalid-feedback="invalidFeedback"
-        :state="isValid"
+      <gl-dropdown-item
+        v-if="canDeleteSelectedStage"
+        v-gl-modal-directive="'delete-value-stream-modal'"
+        variant="danger"
+        data-testid="delete-value-stream"
+        >{{ deleteSelectedText }}</gl-dropdown-item
       >
-        <gl-form-input
-          id="create-value-stream-name"
-          v-model.trim="name"
-          name="create-value-stream-name"
-          :placeholder="__('Example: My Value Stream')"
-          :state="isValid"
-          required
-          @input="onHandleInput"
-        />
-      </gl-form-group>
+    </gl-dropdown>
+    <gl-button v-else v-gl-modal-directive="'value-stream-form-modal'">{{
+      $options.I18N.CREATE_VALUE_STREAM
+    }}</gl-button>
+    <value-stream-form :has-extended-form-fields="hasExtendedFormFields" />
+    <gl-modal
+      data-testid="delete-value-stream-modal"
+      modal-id="delete-value-stream-modal"
+      :title="__('Delete Value Stream')"
+      :action-primary="{
+        text: $options.I18N.DELETE,
+        attributes: [{ variant: 'danger' }, { loading: isDeleting }],
+      }"
+      :action-cancel="{ text: $options.I18N.CANCEL }"
+      @primary.prevent="onDelete"
+    >
+      <gl-alert v-if="deleteValueStreamError" variant="danger">{{
+        deleteValueStreamError
+      }}</gl-alert>
+      <p>{{ deleteConfirmationText }}</p>
     </gl-modal>
-  </gl-form>
+  </div>
 </template>

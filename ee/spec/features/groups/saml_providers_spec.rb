@@ -244,7 +244,7 @@ RSpec.describe 'SAML provider settings' do
             mock_group_saml(uid: identity.extern_uid)
           end
 
-          it 'Sign in button redirects to auth flow' do
+          it 'sign in button redirects to auth flow' do
             visit sso_group_saml_providers_path(group)
 
             click_link 'Sign in with Single Sign-On'

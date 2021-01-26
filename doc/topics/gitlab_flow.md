@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/gitlab_flow.html'
 ---
 
@@ -22,7 +22,7 @@ It offers a simple, transparent, and effective way to work with Git.
 
 When converting to Git, you have to get used to the fact that it takes three steps to share a commit with colleagues.
 Most version control systems have only one step: committing from the working copy to a shared server.
-In Git, you add files from the working copy to the staging area. After that, you commit them to your local repo.
+In Git, you add files from the working copy to the staging area. After that, you commit them to your local repository.
 The third step is pushing to a shared remote repository.
 After getting used to these three steps, the next challenge is the branching model.
 
@@ -151,7 +151,7 @@ In GitLab, you can do this when merging.
 Removing finished branches ensures that the list of branches shows only work in progress.
 It also ensures that if someone reopens the issue, they can use the same branch name without causing problems.
 
-NOTE: **Note:**
+NOTE:
 When you reopen an issue you need to create a new merge request.
 
 ![Remove checkbox for branch in merge requests](img/gitlab_flow_remove_checkbox.png)
@@ -173,7 +173,7 @@ For example, the issue title "As an administrator, I want to remove users withou
 When you are ready to code, create a branch for the issue from the `master` branch.
 This branch is the place for any work related to this change.
 
-NOTE: **Note:**
+NOTE:
 The name of a branch might be dictated by organizational standards.
 
 When you are done or want to discuss the code, open a merge request.
@@ -214,22 +214,22 @@ If you have an issue that spans across multiple repositories, create an issue fo
 With Git, you can use an interactive rebase (`rebase -i`) to squash multiple commits into one or reorder them.
 This functionality is useful if you want to replace a couple of small commits with a single commit, or if you want to make the order more logical.
 
-However, you should never rebase commits you have pushed to a remote server.
-Rebasing creates new commits for all your changes, which can cause confusion because the same change would have multiple identifiers.
-It also causes merge errors for anyone working on the same branch because their history would not match with yours.
+However, you should avoid rebasing commits you have pushed to a remote server if you have other active contributors in the same branch.
+Since rebasing creates new commits for all your changes, it can cause confusion because the same change would have multiple identifiers.
+It would cause merge errors for anyone working on the same branch because their history would not match with yours. It can be really troublesome for the author or other contributors.
 Also, if someone has already reviewed your code, rebasing makes it hard to tell what changed since the last review.
 
-You should also never rebase commits authored by other people.
+You should never rebase commits authored by other people unless you've agreed otherwise.
 Not only does this rewrite history, but it also loses authorship information.
 Rebasing prevents the other authors from being attributed and sharing part of the [`git blame`](https://git-scm.com/docs/git-blame).
 
 If a merge involves many commits, it may seem more difficult to undo.
-You might think to solve this by squashing all the changes into one commit before merging, but as discussed earlier, it is a bad idea to rebase commits that you have already pushed.
+You might consider solving this by squashing all the changes into one commit just before merging by using the GitLab [Squash-and-Merge](../user/project/merge_requests/squash_and_merge.md) feature.
 Fortunately, there is an easy way to undo a merge with all its commits.
 The way to do this is by reverting the merge commit.
 Preserving this ability to revert a merge is a good reason to always use the "no fast-forward" (`--no-ff`) strategy when you merge manually.
 
-NOTE: **Note:**
+NOTE:
 If you revert a merge commit and then change your mind, revert the revert commit to redo the merge.
 Git does not allow you to merge the code again otherwise.
 
@@ -241,21 +241,20 @@ Having lots of merge commits can make your repository history messy.
 Therefore, you should try to avoid merge commits in feature branches.
 Often, people avoid merge commits by just using rebase to reorder their commits after the commits on the `master` branch.
 Using rebase prevents a merge commit when merging `master` into your feature branch, and it creates a neat linear history.
-However, as discussed in [the section about rebasing](#squashing-commits-with-rebase), you should never rebase commits you have pushed to a remote server.
-This restriction makes it impossible to rebase work in progress that you already shared with your team, which is something we recommend.
+However, as discussed in [the section about rebasing](#squashing-commits-with-rebase), you should avoid rebasing commits in a feature branch that you're sharing with others.
 
-Rebasing also creates more work, since every time you rebase, you have to resolve similar conflicts.
+Rebasing could create more work, since every time you rebase, you may need to resolve the same conflicts.
 Sometimes you can reuse recorded resolutions (`rerere`), but merging is better since you only have to resolve conflicts once.
 Atlassian has a more thorough explanation of the tradeoffs between merging and rebasing [on their blog](https://www.atlassian.com/blog/git/git-team-workflows-merge-or-rebase).
 
 A good way to prevent creating many merge commits is to not frequently merge `master` into the feature branch.
 There are three reasons to merge in `master`: utilizing new code, resolving merge conflicts, and updating long-running branches.
 
-If you need to utilize some code that was introduced in `master` after you created the feature branch, you can often solve this by just cherry-picking a commit.
+If you need to use some code that was introduced in `master` after you created the feature branch, you can often solve this by just cherry-picking a commit.
 
 If your feature branch has a merge conflict, creating a merge commit is a standard way of solving this.
 
-NOTE: **Note:**
+NOTE:
 Sometimes you can use `.gitattributes` to reduce merge conflicts.
 For example, you can set your changelog file to use the [union merge driver](https://git-scm.com/docs/gitattributes#gitattributes-union) so that multiple new entries don't conflict with each other.
 
@@ -269,7 +268,7 @@ One option is to use continuous integration (CI) to merge in `master` at the sta
 Another option is to only merge in from well-defined points in time, for example, a tagged release.
 You could also use [feature toggles](https://martinfowler.com/bliki/FeatureToggle.html) to hide incomplete features so you can still merge back into `master` every day.
 
-NOTE: **Note:**
+NOTE:
 Don't confuse automatic branch testing with continuous integration.
 Martin Fowler makes this distinction in [his article about feature branches](https://martinfowler.com/bliki/FeatureBranch.html):
 "I've heard people say they are doing CI because they are running builds, perhaps using a CI server, on every branch with every commit.

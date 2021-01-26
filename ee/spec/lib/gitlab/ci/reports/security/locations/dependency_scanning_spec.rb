@@ -13,6 +13,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Locations::DependencyScanning do
 
   let(:mandatory_params) { %i[file_path package_name] }
   let(:expected_fingerprint) { Digest::SHA1.hexdigest('app/pom.xml:io.netty/netty') }
+  let(:expected_fingerprint_path) { 'pom.xml' }
 
   it_behaves_like 'vulnerability location'
 end

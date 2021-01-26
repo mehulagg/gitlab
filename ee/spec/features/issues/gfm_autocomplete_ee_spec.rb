@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe 'GFM autocomplete EE', :js do
-  let(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
-  let(:another_user) { create(:user, name: 'another user', username: 'another.user') }
-  let(:project) { create(:project) }
-  let(:issue) { create(:issue, project: project) }
+  let_it_be(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
+  let_it_be(:another_user) { create(:user, name: 'another user', username: 'another.user') }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:epic) { create(:epic, group: group) }
 
   before do
     project.add_maintainer(user)
@@ -46,6 +48,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
 
     describe 'when tribute_autocomplete feature flag is on' do
       before do
+        stub_licensed_features(epics: true)
         stub_feature_flags(tribute_autocomplete: true)
 
         issue_assignee.update!(assignees: [user])
@@ -59,18 +62,28 @@ RSpec.describe 'GFM autocomplete EE', :js do
       it 'only lists users who are currently assigned to the issue when using /unassign' do
         note = find('#note-body')
         page.within '.timeline-content-form' do
-          note.native.send_keys('/una')
+          note.native.send_keys('/unassign ')
+          # The `/unassign` ajax response might replace the one by `@` below causing a failed test
+          # so we need to wait for the `/assign` ajax request to finish first
+          wait_for_requests
+          note.native.send_keys('@')
+          wait_for_requests
         end
 
-        find('.atwho-view li', text: '/unassign')
-        note.native.send_keys(:tab)
-        note.native.send_keys(:right)
+        users = find('.tribute-container ul', visible: true)
+        expect(users).to have_content(user.username)
+        expect(users).not_to have_content(another_user.username)
+      end
+
+      it 'shows epics' do
+        note = find('#note-body')
+        page.within('.timeline-content-form') do
+          note.native.send_keys('&')
+        end
 
         wait_for_requests
 
-        users = find('.tribute-container ul')
-        expect(users).to have_content(user.username)
-        expect(users).not_to have_content(another_user.username)
+        expect(find('.tribute-container ul', visible: true).text).to have_content(epic.title)
       end
     end
   end

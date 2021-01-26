@@ -14,14 +14,13 @@ describe('RelatedMergeRequests', () => {
   let mock;
   let mockData;
 
-  beforeEach(done => {
+  beforeEach((done) => {
     loadFixtures(FIXTURE_PATH);
     mockData = getJSONFixture(FIXTURE_PATH);
 
     // put the fixture in DOM as the component expects
-    document.body.innerHTML = `<div id="js-issuable-app-initial-data">${JSON.stringify(
-      mockData,
-    )}</div>`;
+    document.body.innerHTML = `<div id="js-issuable-app"></div>`;
+    document.getElementById('js-issuable-app').dataset.initial = JSON.stringify(mockData);
 
     mock = new MockAdapter(axios);
     mock.onGet(`${API_ENDPOINT}?per_page=100`).reply(200, mockData, { 'x-total': 2 });
@@ -74,10 +73,7 @@ describe('RelatedMergeRequests', () => {
       expect(wrapper.find('.js-items-count').text()).toEqual('2');
       expect(wrapper.findAll(RelatedIssuableItem).length).toEqual(2);
 
-      const props = wrapper
-        .findAll(RelatedIssuableItem)
-        .at(1)
-        .props();
+      const props = wrapper.findAll(RelatedIssuableItem).at(1).props();
       const data = mockData[1];
 
       expect(props.idKey).toEqual(data.id);

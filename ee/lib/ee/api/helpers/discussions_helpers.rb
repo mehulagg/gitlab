@@ -9,9 +9,9 @@ module EE
         class_methods do
           extend ::Gitlab::Utils::Override
 
-          override :noteable_types
-          def noteable_types
-            [::Epic, *super]
+          override :feature_category_per_noteable_type
+          def feature_category_per_noteable_type
+            super.merge!(::Epic => :issue_tracking)
           end
         end
       end

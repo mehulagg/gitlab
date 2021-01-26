@@ -1,6 +1,0 @@
----
-title: Switch to faraday_middleware-aws-sigv4 gem for signing Elasticsearch request
-  in AWS
-merge_request: 38016
-author:
-type: other

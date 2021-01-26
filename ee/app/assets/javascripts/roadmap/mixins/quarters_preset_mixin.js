@@ -5,9 +5,9 @@ export default {
     /**
      * Check if current epic starts within current quarter (timeline cell)
      */
-    hasStartDateForQuarter() {
-      const quarterStart = this.timeframeItem.range[0];
-      const quarterEnd = this.timeframeItem.range[2];
+    hasStartDateForQuarter(timeframeItem) {
+      const quarterStart = timeframeItem.range[0];
+      const quarterEnd = timeframeItem.range[2];
 
       return (
         this.startDateValues.time >= quarterStart.getTime() &&

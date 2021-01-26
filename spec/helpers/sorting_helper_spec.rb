@@ -50,6 +50,24 @@ RSpec.describe SortingHelper do
     end
   end
 
+  describe '#search_sort_direction_button' do
+    before do
+      set_sorting_url 'test_label'
+    end
+
+    it 'keeps label filter param' do
+      expect(search_sort_direction_button('created_asc')).to include('label_name=test_label')
+    end
+
+    it 'returns icon with sort-lowest when sort is asc' do
+      expect(search_sort_direction_button('created_asc')).to include('sort-lowest')
+    end
+
+    it 'returns icon with sort-highest when sort is desc' do
+      expect(search_sort_direction_button('created_desc')).to include('sort-highest')
+    end
+  end
+
   def stub_controller_path(value)
     allow(helper.controller).to receive(:controller_path).and_return(value)
   end
@@ -59,6 +77,7 @@ RSpec.describe SortingHelper do
       sort_value_latest_activity  => sort_title_latest_activity,
       sort_value_recently_created => sort_title_created_date,
       sort_value_name             => sort_title_name,
+      sort_value_name_desc        => sort_title_name_desc,
       sort_value_stars_desc       => sort_title_stars
     }
   end

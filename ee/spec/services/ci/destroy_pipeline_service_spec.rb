@@ -15,7 +15,7 @@ RSpec.describe ::Ci::DestroyPipelineService do
     end
 
     it 'does not log an audit event' do
-      expect { subject }.not_to change { SecurityEvent.count }
+      expect { subject }.not_to change { AuditEvent.count }
     end
   end
 end

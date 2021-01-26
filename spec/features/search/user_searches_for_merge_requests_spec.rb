@@ -30,10 +30,12 @@ RSpec.describe 'User searches for merge requests', :js do
 
   context 'when on a project page' do
     it 'finds a merge request' do
-      find('.js-search-project-dropdown').click
+      find('[data-testid="project-filter"]').click
 
-      page.within('.project-filter') do
-        click_link(project.full_name)
+      wait_for_requests
+
+      page.within('[data-testid="project-filter"]') do
+        click_on(project.full_name)
       end
 
       fill_in('dashboard_search', with: merge_request1.title)

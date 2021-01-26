@@ -10,16 +10,6 @@ RSpec.describe Admin::IntegrationsController do
   end
 
   describe '#edit' do
-    context 'when instance_level_integrations not enabled' do
-      it 'returns not_found' do
-        stub_feature_flags(instance_level_integrations: false)
-
-        get :edit, params: { id: Service.available_services_names.sample }
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
     Service.available_services_names.each do |integration_name|
       context "#{integration_name}" do
         it 'successfully displays the template' do
@@ -30,15 +20,30 @@ RSpec.describe Admin::IntegrationsController do
         end
       end
     end
+
+    context 'when GitLab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?) { true }
+      end
+
+      it 'returns 404' do
+        get :edit, params: { id: Service.available_services_names.sample }
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
   end
 
   describe '#update' do
+    include JiraServiceHelper
+
     let(:integration) { create(:jira_service, :instance) }
 
     before do
+      stub_jira_service_test
       allow(PropagateIntegrationWorker).to receive(:perform_async)
 
-      put :update, params: { id: integration.class.to_param, overwrite: true, service: { url: url } }
+      put :update, params: { id: integration.class.to_param, service: { url: url } }
     end
 
     context 'valid params' do
@@ -50,7 +55,7 @@ RSpec.describe Admin::IntegrationsController do
       end
 
       it 'calls to PropagateIntegrationWorker' do
-        expect(PropagateIntegrationWorker).to have_received(:perform_async).with(integration.id, true)
+        expect(PropagateIntegrationWorker).to have_received(:perform_async).with(integration.id)
       end
     end
 
@@ -66,6 +71,30 @@ RSpec.describe Admin::IntegrationsController do
       it 'does not call to PropagateIntegrationWorker' do
         expect(PropagateIntegrationWorker).not_to have_received(:perform_async)
       end
+    end
+  end
+
+  describe '#reset' do
+    let_it_be(:integration) { create(:jira_service, :instance) }
+    let_it_be(:inheriting_integration) { create(:jira_service, inherit_from_id: integration.id) }
+
+    subject do
+      post :reset, params: { id: integration.class.to_param }
+    end
+
+    it 'returns 200 OK', :aggregate_failures do
+      subject
+
+      expected_json = {}.to_json
+
+      expect(flash[:notice]).to eq('This integration, and inheriting projects were reset.')
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response.body).to eq(expected_json)
+    end
+
+    it 'deletes the integration and all inheriting integrations' do
+      expect { subject }.to change { JiraService.for_instance.count }.by(-1)
+        .and change { JiraService.inherit_from_id(integration.id).count }.by(-1)
     end
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Ordering Table Columns in PostgreSQL
 
 For GitLab we require that columns of new tables are ordered to use the
@@ -45,7 +51,6 @@ In these examples, the `id` and `user_id` columns are packed together, which
 means we only need 8 bytes to store _both_ of them. This in turn means each row
 will require 8 bytes less space.
 
-Note: **NOTE:**
 Since Ruby on Rails 5.1, the default data type for IDs is `bigint`, which uses 8 bytes.
 We are using `integer` in the examples to showcase a more realistic reordering scenario.
 
@@ -58,17 +63,17 @@ bits platform and 8 bytes for a 64 bits platform.
 
 | Type             | Size                                 | Alignment needed |
 |:-----------------|:-------------------------------------|:-----------|
-| smallint         | 2 bytes                              | 1 word     |
-| integer          | 4 bytes                              | 1 word     |
-| bigint           | 8 bytes                              | 8 bytes    |
-| real             | 4 bytes                              | 1 word     |
-| double precision | 8 bytes                              | 8 bytes    |
-| boolean          | 1 byte                               | not needed |
-| text / string    | variable, 1 byte plus the data       | 1 word     |
-| bytea            | variable, 1 or 4 bytes plus the data | 1 word     |
-| timestamp        | 8 bytes                              | 8 bytes    |
-| timestamptz      | 8 bytes                              | 8 bytes    |
-| date             | 4 bytes                              | 1 word     |
+| `smallint`         | 2 bytes                              | 1 word     |
+| `integer`          | 4 bytes                              | 1 word     |
+| `bigint`           | 8 bytes                              | 8 bytes    |
+| `real`             | 4 bytes                              | 1 word     |
+| `double precision` | 8 bytes                              | 8 bytes    |
+| `boolean`          | 1 byte                               | not needed |
+| `text` / `string`    | variable, 1 byte plus the data       | 1 word     |
+| `bytea`            | variable, 1 or 4 bytes plus the data | 1 word     |
+| `timestamp`        | 8 bytes                              | 8 bytes    |
+| `timestamptz`      | 8 bytes                              | 8 bytes    |
+| `date`             | 4 bytes                              | 1 word     |
 
 A "variable" size means the actual size depends on the value being stored. If
 PostgreSQL determines this can be embedded directly into a row it may do so, but

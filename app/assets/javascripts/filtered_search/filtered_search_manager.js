@@ -3,7 +3,7 @@ import recentSearchesStorageKeys from 'ee_else_ce/filtered_search/recent_searche
 import { getParameterByName, getUrlParamsArray } from '~/lib/utils/common_utils';
 import IssuableFilteredSearchTokenKeys from '~/filtered_search/issuable_filtered_search_token_keys';
 import { visitUrl } from '../lib/utils/url_utility';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import FilteredSearchContainer from './container';
 import RecentSearchesRoot from './recent_searches_root';
 import RecentSearchesStore from './stores/recent_searches_store';
@@ -29,6 +29,7 @@ export default class FilteredSearchManager {
     isGroup = false,
     isGroupAncestor = true,
     isGroupDecendent = false,
+    useDefaultState = false,
     filteredSearchTokenKeys = IssuableFilteredSearchTokenKeys,
     stateFiltersSelector = '.issues-state-filters',
     placeholder = __('Search or filter results...'),
@@ -37,6 +38,7 @@ export default class FilteredSearchManager {
     this.isGroup = isGroup;
     this.isGroupAncestor = isGroupAncestor;
     this.isGroupDecendent = isGroupDecendent;
+    this.useDefaultState = useDefaultState;
     this.states = ['opened', 'closed', 'merged', 'all'];
 
     this.page = page;
@@ -50,14 +52,22 @@ export default class FilteredSearchManager {
     this.placeholder = placeholder;
     this.anchor = anchor;
 
-    const { multipleAssignees } = this.filteredSearchInput.dataset;
+    const {
+      multipleAssignees,
+      epicsEndpoint,
+      iterationsEndpoint,
+    } = this.filteredSearchInput.dataset;
+
     if (multipleAssignees && this.filteredSearchTokenKeys.enableMultipleAssignees) {
       this.filteredSearchTokenKeys.enableMultipleAssignees();
     }
 
-    const { epicsEndpoint } = this.filteredSearchInput.dataset;
     if (!epicsEndpoint && this.filteredSearchTokenKeys.removeEpicToken) {
       this.filteredSearchTokenKeys.removeEpicToken();
+    }
+
+    if (!iterationsEndpoint && this.filteredSearchTokenKeys.removeIterationToken) {
+      this.filteredSearchTokenKeys.removeIterationToken();
     }
 
     this.recentSearchesStore = new RecentSearchesStore({
@@ -80,14 +90,14 @@ export default class FilteredSearchManager {
     // Fetch recent searches from localStorage
     this.fetchingRecentSearchesPromise = this.recentSearchesService
       .fetch()
-      .catch(error => {
+      .catch((error) => {
         if (error.name === 'RecentSearchesServiceError') return undefined;
         // eslint-disable-next-line no-new
         new Flash(__('An error occurred while parsing recent searches'));
         // Gracefully fail to empty array
         return [];
       })
-      .then(searches => {
+      .then((searches) => {
         if (!searches) {
           return;
         }
@@ -108,7 +118,9 @@ export default class FilteredSearchManager {
         labelsEndpoint = '',
         milestonesEndpoint = '',
         releasesEndpoint = '',
+        environmentsEndpoint = '',
         epicsEndpoint = '',
+        iterationsEndpoint = '',
       } = this.filteredSearchInput.dataset;
 
       this.dropdownManager = new FilteredSearchDropdownManager({
@@ -116,7 +128,9 @@ export default class FilteredSearchManager {
         labelsEndpoint,
         milestonesEndpoint,
         releasesEndpoint,
+        environmentsEndpoint,
         epicsEndpoint,
+        iterationsEndpoint,
         tokenizer: this.tokenizer,
         page: this.page,
         isGroup: this.isGroup,
@@ -155,7 +169,7 @@ export default class FilteredSearchManager {
     if (this.stateFilters) {
       this.searchStateWrapper = this.searchState.bind(this);
 
-      this.applyToStateFilters(filterEl => {
+      this.applyToStateFilters((filterEl) => {
         filterEl.addEventListener('click', this.searchStateWrapper);
       });
     }
@@ -163,14 +177,14 @@ export default class FilteredSearchManager {
 
   unbindStateEvents() {
     if (this.stateFilters) {
-      this.applyToStateFilters(filterEl => {
+      this.applyToStateFilters((filterEl) => {
         filterEl.removeEventListener('click', this.searchStateWrapper);
       });
     }
   }
 
   applyToStateFilters(callback) {
-    this.stateFilters.querySelectorAll('a[data-state]').forEach(filterEl => {
+    this.stateFilters.querySelectorAll('a[data-state]').forEach((filterEl) => {
       if (this.states.indexOf(filterEl.dataset.state) > -1) {
         callback(filterEl);
       }
@@ -249,7 +263,7 @@ export default class FilteredSearchManager {
     let backspaceCount = 0;
 
     // closure for keeping track of the number of backspace keystrokes
-    return e => {
+    return (e) => {
       // 8 = Backspace Key
       // 46 = Delete Key
       // Handled by respective backspace-combination check functions
@@ -433,7 +447,7 @@ export default class FilteredSearchManager {
 
     const removeElements = [];
 
-    [].forEach.call(this.tokensContainer.children, t => {
+    [].forEach.call(this.tokensContainer.children, (t) => {
       let canClearToken = t.classList.contains('js-visual-token');
 
       if (canClearToken) {
@@ -446,7 +460,7 @@ export default class FilteredSearchManager {
       }
     });
 
-    removeElements.forEach(el => {
+    removeElements.forEach((el) => {
       el.parentElement.removeChild(el);
     });
 
@@ -474,7 +488,7 @@ export default class FilteredSearchManager {
     const { isLastVisualTokenValid } = FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
 
     if (isLastVisualTokenValid) {
-      tokens.forEach(t => {
+      tokens.forEach((t) => {
         input.value = input.value.replace(`${t.key}:${t.operator}${t.symbol}${t.value}`, '');
 
         FilteredSearchVisualTokens.addFilterVisualToken(
@@ -571,7 +585,7 @@ export default class FilteredSearchManager {
      */
     const notKeyValueRegex = new RegExp(/not\[(\w+)\]\[?\]?=(.*)/);
 
-    return params.map(query => {
+    return params.map((query) => {
       // Check if there are matches for `not` operator
       const matches = query.match(notKeyValueRegex);
       if (matches && matches.length === 3) {
@@ -610,7 +624,7 @@ export default class FilteredSearchManager {
     const usernameParams = this.getUsernameParams();
     let hasFilteredSearch = false;
 
-    params.forEach(p => {
+    params.forEach((p) => {
       const split = p.split('=');
       const keyParam = decodeURIComponent(split[0]);
       const value = split[1];
@@ -724,10 +738,15 @@ export default class FilteredSearchManager {
   search(state = null) {
     const paths = [];
     const { tokens, searchToken } = this.getSearchTokens();
-    const currentState = state || getParameterByName('state') || 'opened';
-    paths.push(`state=${currentState}`);
+    let currentState = state || getParameterByName('state');
+    if (!currentState && this.useDefaultState) {
+      currentState = 'opened';
+    }
+    if (this.states.includes(currentState)) {
+      paths.push(`state=${currentState}`);
+    }
 
-    tokens.forEach(token => {
+    tokens.forEach((token) => {
       const condition = this.filteredSearchTokenKeys.searchByConditionKeyValue(
         token.key,
         token.operator,
@@ -776,7 +795,7 @@ export default class FilteredSearchManager {
     if (searchToken) {
       const sanitized = searchToken
         .split(' ')
-        .map(t => encodeURIComponent(t))
+        .map((t) => encodeURIComponent(t))
         .join('+');
       paths.push(`search=${sanitized}`);
     }
@@ -798,7 +817,7 @@ export default class FilteredSearchManager {
     const usernamesById = {};
     try {
       const attribute = this.filteredSearchInput.getAttribute('data-username-params');
-      JSON.parse(attribute).forEach(user => {
+      JSON.parse(attribute).forEach((user) => {
         usernamesById[user.id] = user.username;
       });
     } catch (e) {

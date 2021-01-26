@@ -1,12 +1,12 @@
-import { createStore } from '~/serverless/store';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { createStore } from '~/serverless/store';
 import missingPrometheusComponent from '~/serverless/components/missing_prometheus.vue';
 
 describe('missingPrometheusComponent', () => {
   let wrapper;
 
-  const createComponent = missingData => {
+  const createComponent = (missingData) => {
     const store = createStore({ clustersPath: '/clusters', helpPath: '/help' });
 
     wrapper = shallowMount(missingPrometheusComponent, { store, propsData: { missingData } });
@@ -24,7 +24,7 @@ describe('missingPrometheusComponent', () => {
       'Function invocation metrics require Prometheus to be installed first.',
     );
 
-    expect(wrapper.find(GlDeprecatedButton).attributes('variant')).toBe('success');
+    expect(wrapper.find(GlButton).attributes('variant')).toBe('success');
   });
 
   it('should render no prometheus data message', () => {

@@ -10,7 +10,7 @@ module Gitlab
           attr_reader :base_report, :head_report
 
           def initialize(base_report, head_report)
-            @base_report = base_report || ::Gitlab::Ci::Reports::LicenseScanning::Report.new
+            @base_report = base_report
             @head_report = head_report
           end
 

@@ -6,17 +6,19 @@ module EE
       extend ::Gitlab::Utils::Override
       extend ActiveSupport::Concern
 
-      include ::Admin::MergeRequestApprovalSettingsHelper
-
       prepended do
-        before_action :elasticsearch_reindexing_task, only: [:integrations]
+        before_action :elasticsearch_reindexing_task, only: [:advanced_search]
+
+        feature_category :license, [:seat_link_payload]
+        feature_category :source_code_management, [:templates]
+        feature_category :global_search, [:advanced_search]
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
         end
       end
 
-      EE_VALID_SETTING_PANELS = %w(templates).freeze
+      EE_VALID_SETTING_PANELS = %w(advanced_search templates).freeze
 
       EE_VALID_SETTING_PANELS.each do |action|
         define_method(action) { perform_update if submitted? }
@@ -51,14 +53,12 @@ module EE
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if show_compliance_merge_request_approval_settings?
-          attrs << { compliance_frameworks: [] }
-        end
-
         if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end
+
+        attrs << :new_user_signups_cap if ::Feature.enabled?(:admin_new_user_signups_cap, default_enabled: true )
 
         attrs
       end

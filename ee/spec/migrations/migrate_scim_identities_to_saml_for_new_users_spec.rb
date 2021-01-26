@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200506154421_migrate_scim_identities_to_saml_for_new_users.rb')
+require_migration!
 
 RSpec.describe MigrateScimIdentitiesToSamlForNewUsers, :migration do
   let(:group1) { table(:namespaces).create!(name: 'group1', path: 'group1') }

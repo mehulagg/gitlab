@@ -4,9 +4,9 @@ module EE
   module GeoHelper
     STATUS_ICON_NAMES_BY_STATE = {
         synced: 'check',
-        pending: 'clock-o',
-        failed: 'exclamation-triangle',
-        never: 'circle-o'
+        pending: 'clock',
+        failed: 'warning-solid',
+        never: 'status_notfound'
     }.freeze
 
     def self.current_node_human_status
@@ -44,17 +44,6 @@ module EE
       node.namespaces.map(&:human_name).sort.join(', ')
     end
 
-    def node_status_icon(node)
-      unless node.primary?
-        status = node.enabled? ? 'unknown' : 'disabled'
-        icon = status == 'healthy' ? 'check' : 'times'
-
-        icon "#{icon} fw",
-             class: "js-geo-node-icon geo-node-#{status}",
-             title: status.capitalize
-      end
-    end
-
     def selective_sync_types_json
       options = {
         ALL: {
@@ -72,10 +61,6 @@ module EE
       }
 
       options.to_json
-    end
-
-    def status_loading_icon
-      icon "spinner spin fw", class: 'js-geo-node-loading'
     end
 
     def node_class(node)
@@ -118,7 +103,7 @@ module EE
     end
 
     def geo_registry_status_icon(registry)
-      icon STATUS_ICON_NAMES_BY_STATE.fetch(registry.synchronization_state, 'exclamation-triangle')
+      sprite_icon(STATUS_ICON_NAMES_BY_STATE.fetch(registry.synchronization_state, 'warning-solid'))
     end
 
     def geo_registry_status_text(registry)
@@ -184,8 +169,8 @@ module EE
         {
           title: _('LFS object'),
           title_plural: _('LFS objects'),
-          name: 'lfs',
-          name_plural: 'lfs'
+          name: 'lfs_object',
+          name_plural: 'lfs_objects'
         },
         {
           title: _('Attachment'),
@@ -216,7 +201,7 @@ module EE
       ]
 
       # Adds all the SSF Data Types automatically
-      replicator_classes.each do |replicator_class|
+      enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
             title: replicator_class.replicable_title,
@@ -231,8 +216,8 @@ module EE
       replicable_types
     end
 
-    def replicator_classes
-      ::Gitlab::Geo.replicator_classes
+    def enabled_replicator_classes
+      ::Gitlab::Geo.enabled_replicator_classes
     end
   end
 end

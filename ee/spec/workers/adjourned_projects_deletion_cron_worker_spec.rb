@@ -35,7 +35,7 @@ RSpec.describe AdjournedProjectsDeletionCronWorker do
     context 'marked for deletion exectly before number of days from settings' do
       let(:marked_for_deletion_at) { 7.days.ago }
 
-      it 'schedules to delete project ' do
+      it 'schedules to delete project' do
         expect(AdjournedProjectDeletionWorker).to receive(:perform_in).with(0, project_marked_for_deletion.id)
 
         worker.perform

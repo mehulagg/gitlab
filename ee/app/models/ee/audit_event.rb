@@ -28,14 +28,26 @@ module EE
       AuditEventPresenter.new(self)
     end
 
+    def target_type
+      super || details[:target_type]
+    end
+
+    def target_id
+      details[:target_id]
+    end
+
     def target_details
       super || details[:target_details]
+    end
+
+    def ip_address
+      super&.to_s || details[:ip_address]
     end
 
     def lazy_entity
       BatchLoader.for(entity_id)
         .batch(
-          key: entity_type, default_value: ::Gitlab::Audit::NullEntity.new
+          key: entity_type, default_value: ::Gitlab::Audit::NullEntity.new, replace_methods: false
         ) do |ids, loader, args|
           model = Object.const_get(args[:key], false)
           model.where(id: ids).find_each { |record| loader.call(record.id, record) }

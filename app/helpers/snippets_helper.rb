@@ -12,7 +12,7 @@ module SnippetsHelper
   end
 
   def download_raw_snippet_button(snippet)
-    link_to(icon('download'),
+    link_to(sprite_icon('download'),
             gitlab_raw_snippet_path(snippet, inline: false),
             target: '_blank',
             rel: 'noopener noreferrer',
@@ -30,31 +30,6 @@ module SnippetsHelper
     else # assume subject === User
       dashboard_snippets_path(opts)
     end
-  end
-
-  # Get an array of line numbers surrounding a matching
-  # line, bounded by min/max.
-  #
-  # @returns Array of line numbers
-  def bounded_line_numbers(line, min, max, surrounding_lines)
-    lower = line - surrounding_lines > min ? line - surrounding_lines : min
-    upper = line + surrounding_lines < max ? line + surrounding_lines : max
-    (lower..upper).to_a
-  end
-
-  def snippet_embed_tag(snippet)
-    content_tag(:script, nil, src: gitlab_snippet_url(snippet, format: :js))
-  end
-
-  def snippet_embed_input(snippet)
-    content_tag(:input,
-                nil,
-                type: :text,
-                readonly: true,
-                class: 'js-snippet-url-area snippet-embed-input form-control',
-                data: { url: gitlab_snippet_url(snippet) },
-                value: snippet_embed_tag(snippet),
-                autocomplete: 'off')
   end
 
   def snippet_badge(snippet)

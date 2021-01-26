@@ -7,11 +7,11 @@ import {
   GlSprintf,
   GlModalDirective,
 } from '@gitlab/ui';
+import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { __ } from '~/locale';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { getFormattedSummary } from '../helpers';
 import { COLLAPSE_SECURITY_REPORTS_SUMMARY_LOCAL_STORAGE_KEY as LOCAL_STORAGE_KEY } from '../constants';
-import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 
 export default {
   name: 'SecurityReportsSummary',

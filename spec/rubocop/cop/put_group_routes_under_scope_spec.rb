@@ -4,7 +4,7 @@ require 'fast_spec_helper'
 require 'rubocop'
 require_relative '../../../rubocop/cop/put_group_routes_under_scope'
 
-RSpec.describe RuboCop::Cop::PutGroupRoutesUnderScope, type: :rubocop do
+RSpec.describe RuboCop::Cop::PutGroupRoutesUnderScope do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -43,6 +43,20 @@ RSpec.describe RuboCop::Cop::PutGroupRoutesUnderScope, type: :rubocop do
             resource :notes
           end
         end
+      end
+    PATTERN
+  end
+
+  it 'does not register an offense for the root route' do
+    expect_no_offenses(<<~PATTERN)
+      get '/'
+    PATTERN
+  end
+
+  it 'does not register an offense for the root route within scope' do
+    expect_no_offenses(<<~PATTERN)
+      scope(path: 'groups/*group_id/-', module: :groups) do
+        get '/'
       end
     PATTERN
   end

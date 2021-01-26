@@ -1,5 +1,0 @@
----
-title: Fix persisting multiple default Value Stream Analytics stages per value stream
-merge_request: 38072
-author:
-type: fixed

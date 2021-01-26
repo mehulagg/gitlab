@@ -1,12 +1,12 @@
+import { GlBadge, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlDeprecatedBadge as GlBadge, GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
 import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 
-const getArrayWithLength = n => [...Array(n).keys()];
+const getArrayWithLength = (n) => [...Array(n).keys()];
 const generateMockProjects = (projectsCount, mockProject = {}) =>
-  getArrayWithLength(projectsCount).map(id => ({ id, ...mockProject }));
+  getArrayWithLength(projectsCount).map((id) => ({ id, ...mockProject }));
 
 describe('Project List component', () => {
   let wrapper;
@@ -49,7 +49,7 @@ describe('Project List component', () => {
 
   it.each([0, 1, 2])(
     'renders a list of projects and displays a count of how many there are',
-    projectsCount => {
+    (projectsCount) => {
       factory({ projects: generateMockProjects(projectsCount) });
 
       expect(getAllProjectItems()).toHaveLength(projectsCount);
@@ -60,11 +60,7 @@ describe('Project List component', () => {
   it('renders a project-item with an avatar', () => {
     factory({ projects: generateMockProjects(1) });
 
-    expect(
-      getFirstProjectItem()
-        .find(ProjectAvatar)
-        .exists(),
-    ).toBe(true);
+    expect(getFirstProjectItem().find(ProjectAvatar).exists()).toBe(true);
   });
 
   it('renders a project-item with a project name', () => {
@@ -96,7 +92,7 @@ describe('Project List component', () => {
     const mockProjects = generateMockProjects(1);
     const [projectData] = mockProjects;
 
-    factory({ projects: mockProjects, stubs: { GlDeprecatedButton } });
+    factory({ projects: mockProjects, stubs: { GlButton } });
 
     getFirstRemoveButton().vm.$emit('click');
 

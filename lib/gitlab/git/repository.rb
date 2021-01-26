@@ -19,15 +19,15 @@ module Gitlab
       GITLAB_PROJECTS_TIMEOUT = Gitlab.config.gitlab_shell.git_timeout
       EMPTY_REPOSITORY_CHECKSUM = '0000000000000000000000000000000000000000'
 
-      NoRepository = Class.new(StandardError)
-      InvalidRepository = Class.new(StandardError)
-      InvalidBlobName = Class.new(StandardError)
-      InvalidRef = Class.new(StandardError)
-      GitError = Class.new(StandardError)
-      DeleteBranchError = Class.new(StandardError)
-      TagExistsError = Class.new(StandardError)
-      ChecksumError = Class.new(StandardError)
-      class CreateTreeError < StandardError
+      NoRepository = Class.new(::Gitlab::Git::BaseError)
+      InvalidRepository = Class.new(::Gitlab::Git::BaseError)
+      InvalidBlobName = Class.new(::Gitlab::Git::BaseError)
+      InvalidRef = Class.new(::Gitlab::Git::BaseError)
+      GitError = Class.new(::Gitlab::Git::BaseError)
+      DeleteBranchError = Class.new(::Gitlab::Git::BaseError)
+      TagExistsError = Class.new(::Gitlab::Git::BaseError)
+      ChecksumError = Class.new(::Gitlab::Git::BaseError)
+      class CreateTreeError < ::Gitlab::Git::BaseError
         attr_reader :error_code
 
         def initialize(error_code)
@@ -297,9 +297,16 @@ module Gitlab
           end
 
         file_name = "#{name}.#{extension}"
-        File.join(storage_path, self.gl_repository, sha, file_name)
+        File.join(storage_path, self.gl_repository, sha, archive_version_path, file_name)
       end
       private :archive_file_path
+
+      def archive_version_path
+        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive, default_enabled: true)
+
+        '@v2'
+      end
+      private :archive_version_path
 
       # Return repo size in megabytes
       def size
@@ -460,6 +467,18 @@ module Gitlab
         empty_diff_stats
       end
 
+      def find_changed_paths(commits)
+        processed_commits = commits.reject { |ref| ref.blank? || Gitlab::Git.blank_ref?(ref) }
+
+        return [] if processed_commits.empty?
+
+        wrapped_gitaly_errors do
+          gitaly_commit_client.find_changed_paths(processed_commits)
+        end
+      rescue CommandError, TypeError, NoRepository
+        []
+      end
+
       # Returns a RefName for a given SHA
       def ref_name_for_sha(ref_path, sha)
         raise ArgumentError, "sha can't be empty" unless sha.present?
@@ -580,9 +599,9 @@ module Gitlab
         tags.find { |tag| tag.name == name }
       end
 
-      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref)
+          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
         end
       end
 
@@ -610,7 +629,7 @@ module Gitlab
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_revert(args)
+          gitaly_operation_client.user_revert(**args)
         end
       end
 
@@ -626,7 +645,7 @@ module Gitlab
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_cherry_pick(args)
+          gitaly_operation_client.user_cherry_pick(**args)
         end
       end
 
@@ -640,7 +659,7 @@ module Gitlab
         }
 
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_update_submodule(args)
+          gitaly_operation_client.user_update_submodule(**args)
         end
       end
 
@@ -782,7 +801,8 @@ module Gitlab
       # forced - should we use --force flag?
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
-      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true)
+      # check_tags_changed - should we ask gitaly to calculate whether any tags changed?
+      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true, check_tags_changed: false)
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             remote,
@@ -790,6 +810,7 @@ module Gitlab
             forced: forced,
             no_tags: no_tags,
             prune: prune,
+            check_tags_changed: check_tags_changed,
             timeout: GITLAB_PROJECTS_TIMEOUT
           )
         end
@@ -955,7 +976,7 @@ module Gitlab
           gitaly_repository_client.cleanup if exists?
         end
       rescue Gitlab::Git::CommandError => e # Don't fail if we can't cleanup
-        Rails.logger.error("Unable to clean repository on storage #{storage} with relative path #{relative_path}: #{e.message}") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.error("Unable to clean repository on storage #{storage} with relative path #{relative_path}: #{e.message}")
         Gitlab::Metrics.counter(
           :failed_repository_cleanup_total,
           'Number of failed repository cleanup events'

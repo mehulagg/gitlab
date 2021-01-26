@@ -1,5 +1,0 @@
----
-title: 'Geo: Replace geo_self_service_framework_replication feature flag with replicable specific flags'
-merge_request: 37112
-author:
-type: changed

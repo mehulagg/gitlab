@@ -5,6 +5,8 @@ import {
   DIFF_VIEW_COOKIE_NAME,
   DIFF_WHITESPACE_COOKIE_NAME,
 } from '../../constants';
+
+import { fileByFile } from '../../utils/preferences';
 import { getDefaultWhitespace } from '../utils';
 
 const viewTypeFromQueryString = getParameterValues('view')[0];
@@ -34,12 +36,16 @@ export default () => ({
   showTreeList: true,
   currentDiffFileId: '',
   projectPath: '',
+  viewedDiffFileIds: {},
   commentForms: [],
   highlightedRow: null,
   renderTreeList: true,
   showWhitespace: getDefaultWhitespace(whiteSpaceFromQueryString, whiteSpaceFromCookie),
+  viewDiffsFileByFile: fileByFile(),
   fileFinderVisible: false,
   dismissEndpoint: '',
   showSuggestPopover: true,
-  useSingleDiffStyle: false,
+  defaultSuggestionCommitMessage: '',
+  mrReviews: {},
+  latestDiff: true,
 });

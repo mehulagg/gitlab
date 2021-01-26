@@ -9,7 +9,6 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
   describe '#perform' do
     let_it_be(:started_at) { Time.now.rfc3339 }
     let_it_be(:payload) { { 'title' => 'title', 'start_time' => started_at } }
-    let_it_be(:parsed_payload) { Gitlab::Alerting::NotificationPayloadParser.call(payload, project) }
     let_it_be(:alert) { create(:alert_management_alert, project: project, payload: payload, started_at: started_at) }
     let(:created_issue) { Issue.last! }
 
@@ -18,15 +17,15 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
     before do
       allow(Gitlab::AppLogger).to receive(:warn).and_call_original
 
-      allow(IncidentManagement::CreateIssueService)
-        .to receive(:new).with(alert.project, parsed_payload)
+      allow(AlertManagement::CreateAlertIssueService)
+        .to receive(:new).with(alert, User.alert_bot)
         .and_call_original
     end
 
     shared_examples 'creates issue successfully' do
       it 'creates an issue' do
-        expect(IncidentManagement::CreateIssueService)
-          .to receive(:new).with(alert.project, parsed_payload)
+        expect(AlertManagement::CreateAlertIssueService)
+          .to receive(:new).with(alert, User.alert_bot)
 
         expect { subject }.to change { Issue.count }.by(1)
       end
@@ -58,17 +57,16 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
           subject
 
           expect(Gitlab::AppLogger).to have_received(:warn).with(
-            message: 'Cannot link an Issue with Alert',
+            message: 'Cannot process an Incident',
             issue_id: created_issue.id,
             alert_id: alert.id,
-            alert_errors: { hosts: ['hosts array is over 255 chars'] }
+            errors: 'Hosts hosts array is over 255 chars'
           )
         end
       end
 
       context 'prometheus alert' do
         let_it_be(:alert) { create(:alert_management_alert, :prometheus, project: project, started_at: started_at) }
-        let_it_be(:parsed_payload) { alert.payload }
 
         it_behaves_like 'creates issue successfully'
       end
@@ -80,7 +78,7 @@ RSpec.describe IncidentManagement::ProcessAlertWorker do
       subject { described_class.new.perform(nil, nil, invalid_alert_id) }
 
       it 'does not create issues' do
-        expect(IncidentManagement::CreateIssueService).not_to receive(:new)
+        expect(AlertManagement::CreateAlertIssueService).not_to receive(:new)
 
         expect { subject }.not_to change { Issue.count }
       end

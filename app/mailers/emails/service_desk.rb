@@ -47,7 +47,7 @@ module Emails
     def service_desk_options(email_sender, email_type)
       {
         from: email_sender,
-        to: @issue.service_desk_reply_to
+        to: @issue.external_author
       }.tap do |options|
         next unless template_body = template_content(email_type)
 
@@ -58,10 +58,12 @@ module Emails
 
     def template_content(email_type)
       template = Gitlab::Template::ServiceDeskTemplate.find(email_type, @project)
-
       text = substitute_template_replacements(template.content)
 
-      markdown(text, project: @project)
+      context = { project: @project, pipeline: :email }
+      context[:author] = @note.author if email_type == 'new_note'
+
+      markdown(text, context)
     rescue Gitlab::Template::Finders::RepoTemplateFinder::FileNotFoundError
       nil
     end

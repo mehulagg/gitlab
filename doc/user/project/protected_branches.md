@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -21,8 +21,8 @@ By default, a protected branch does four simple things:
 - It prevents **anyone** from force pushing to the branch.
 - It prevents **anyone** from deleting the branch.
 
-NOTE: **Note:**
-A GitLab admin is allowed to push to the protected branches.
+NOTE:
+A GitLab administrator is allowed to push to the protected branches.
 
 See the [Changelog](#changelog) section for changes over time.
 
@@ -48,7 +48,7 @@ that the `master` branch is protected by default.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5081) in GitLab 8.11.
 
-Since GitLab 8.11, we added another layer of branch protection which provides
+In GitLab 8.11 and later, we added another layer of branch protection which provides
 more granular management of protected branches. The "Developers can push"
 option was replaced by an "Allowed to push" setting which can be set to
 allow/prohibit Maintainers and/or Developers to push to a protected branch.
@@ -73,6 +73,33 @@ dropdown list in the "Already protected" area.
 
 If you don't choose any of those options while creating a protected branch,
 they are set to "Maintainers" by default.
+
+### Allow Deploy Keys to push to a protected branch
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30769) in GitLab 13.7.
+> - This feature is being selectively deployed in GitLab.com 13.7, and may not be available for all users.
+
+You can allow specific machines to access protected branches in your repository with
+[Deploy Keys](deploy_keys/index.md). This can be useful for your CI/CD workflow,
+for example.
+
+Deploy keys can be selected in the **Allowed to push** dropdown when:
+
+- Defining a protected branch.
+- Updating an existing branch.
+
+Select a deploy key to allow the owner of the key to push to the chosen protected branch,
+even if they aren't a member of the related project. The owner of the selected deploy
+key must have at least read access to the given project.
+
+For a deploy key to be selectable:
+
+- It must be [enabled for your project](deploy_keys/index.md#how-to-enable-deploy-keys).
+- It must have [write access](deploy_keys/index.md#deploy-keys-permissions) to your project repository.
+
+Deploy Keys are not available in the **Allowed to merge** dropdown.
+
+![Deploy Keys on protected branches](img/protected_branches_deploy_keys_v13_5.png)
 
 ## Restricting push and merge access to certain users **(STARTER)**
 
@@ -143,7 +170,7 @@ From time to time, it may be required to delete or clean up branches that are
 protected.
 
 User with [Maintainer permissions](../permissions.md) and up can manually delete protected
-branches via GitLab's web interface:
+branches via the GitLab web interface:
 
 1. Visit **Repository > Branches**
 1. Click on the delete icon next to the branch you wish to delete
@@ -185,6 +212,8 @@ When enabled, all merge requests targeting these branches will require approval
 by a Code Owner per matched rule before they can be merged.
 Additionally, direct pushes to the protected branch are denied if a rule is matched.
 
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35097) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5, users and groups who are allowed to push to protected branches do not require a merge request to merge their feature branches. Thus, they can skip merge request approval rules.
+
 ## Running pipelines on protected branches
 
 The permission to merge or push to protected branches is used to define if a user can
@@ -194,6 +223,10 @@ See [Security on protected branches](../../ci/pipelines/index.md#pipeline-securi
 for details about the pipelines security model.
 
 ## Changelog
+
+**13.5**
+
+- [Allow Deploy keys to push to protected branches once more](https://gitlab.com/gitlab-org/gitlab/-/issues/30769).
 
 **11.9**
 

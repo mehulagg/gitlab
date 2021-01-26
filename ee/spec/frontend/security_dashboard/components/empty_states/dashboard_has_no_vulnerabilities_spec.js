@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlEmptyState, GlButton } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import DashboardHasNoVulnerabilities from 'ee/security_dashboard/components/empty_states/dashboard_has_no_vulnerabilities.vue';
 
 describe('dashboard has no vulnerabilities empty state', () => {

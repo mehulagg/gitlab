@@ -14,10 +14,9 @@ describe('Applications', () => {
 
   beforeEach(() => {
     gon.features = gon.features || {};
-    gon.features.managedAppsLocalTiller = false;
   });
 
-  const createApp = ({ applications, type, props } = {}, isShallow) => {
+  const createComponent = ({ applications, type, propsData } = {}, isShallow) => {
     const mountMethod = isShallow ? shallowMount : mount;
 
     wrapper = mountMethod(Applications, {
@@ -25,24 +24,20 @@ describe('Applications', () => {
       propsData: {
         type,
         applications: { ...APPLICATIONS_MOCK_STATE, ...applications },
-        ...props,
+        ...propsData,
       },
     });
   };
 
-  const createShallowApp = options => createApp(options, true);
-  const findByTestId = id => wrapper.find(`[data-testid="${id}"]`);
+  const createShallowComponent = (options) => createComponent(options, true);
+  const findByTestId = (id) => wrapper.find(`[data-testid="${id}"]`);
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('Project cluster applications', () => {
     beforeEach(() => {
-      createApp({ type: CLUSTER_TYPE.PROJECT });
-    });
-
-    it('renders a row for Helm Tiller', () => {
-      expect(wrapper.find('.js-cluster-application-row-helm').exists()).toBe(true);
+      createComponent({ type: CLUSTER_TYPE.PROJECT });
     });
 
     it('renders a row for Ingress', () => {
@@ -87,11 +82,7 @@ describe('Applications', () => {
 
   describe('Group cluster applications', () => {
     beforeEach(() => {
-      createApp({ type: CLUSTER_TYPE.GROUP });
-    });
-
-    it('renders a row for Helm Tiller', () => {
-      expect(wrapper.find('.js-cluster-application-row-helm').exists()).toBe(true);
+      createComponent({ type: CLUSTER_TYPE.GROUP });
     });
 
     it('renders a row for Ingress', () => {
@@ -137,11 +128,7 @@ describe('Applications', () => {
 
   describe('Instance cluster applications', () => {
     beforeEach(() => {
-      createApp({ type: CLUSTER_TYPE.INSTANCE });
-    });
-
-    it('renders a row for Helm Tiller', () => {
-      expect(wrapper.find('.js-cluster-application-row-helm').exists()).toBe(true);
+      createComponent({ type: CLUSTER_TYPE.INSTANCE });
     });
 
     it('renders a row for Ingress', () => {
@@ -186,21 +173,15 @@ describe('Applications', () => {
   });
 
   describe('Helm application', () => {
-    describe('when managedAppsLocalTiller enabled', () => {
-      beforeEach(() => {
-        gon.features.managedAppsLocalTiller = true;
-      });
-
-      it('does not render a row for Helm Tiller', () => {
-        createApp();
-        expect(wrapper.find('.js-cluster-application-row-helm').exists()).toBe(false);
-      });
+    it('does not render a row for Helm Tiller', () => {
+      createComponent();
+      expect(wrapper.find('.js-cluster-application-row-helm').exists()).toBe(false);
     });
   });
 
   describe('Ingress application', () => {
     it('shows the correct warning message', () => {
-      createApp();
+      createComponent();
       expect(findByTestId('ingressCostWarning').element).toMatchSnapshot();
     });
 
@@ -214,7 +195,7 @@ describe('Applications', () => {
         },
       };
 
-      beforeEach(() => createShallowApp(propsData));
+      beforeEach(() => createShallowComponent(propsData));
 
       it('renders IngressModsecuritySettings', () => {
         const modsecuritySettings = wrapper.find(IngressModsecuritySettings);
@@ -225,7 +206,7 @@ describe('Applications', () => {
     describe('when installed', () => {
       describe('with ip address', () => {
         it('renders ip address with a clipboard button', () => {
-          createApp({
+          createComponent({
             applications: {
               ingress: {
                 title: 'Ingress',
@@ -244,7 +225,7 @@ describe('Applications', () => {
 
       describe('with hostname', () => {
         it('renders hostname with a clipboard button', () => {
-          createApp({
+          createComponent({
             applications: {
               ingress: {
                 title: 'Ingress',
@@ -252,7 +233,6 @@ describe('Applications', () => {
                 externalHostname: 'localhost.localdomain',
                 modsecurity_enabled: false,
               },
-              helm: { title: 'Helm Tiller' },
               cert_manager: { title: 'Cert-Manager' },
               crossplane: { title: 'Crossplane', stack: '' },
               runner: { title: 'GitLab Runner' },
@@ -275,7 +255,7 @@ describe('Applications', () => {
 
       describe('without ip address', () => {
         it('renders an input text with a loading icon and an alert text', () => {
-          createApp({
+          createComponent({
             applications: {
               ingress: {
                 title: 'Ingress',
@@ -292,7 +272,7 @@ describe('Applications', () => {
 
     describe('before installing', () => {
       it('does not render the IP address', () => {
-        createApp();
+        createComponent();
 
         expect(wrapper.text()).not.toContain('Ingress IP Address');
         expect(wrapper.find('.js-endpoint').exists()).toBe(false);
@@ -302,13 +282,13 @@ describe('Applications', () => {
 
   describe('Cert-Manager application', () => {
     it('shows the correct description', () => {
-      createApp();
+      createComponent();
       expect(findByTestId('certManagerDescription').element).toMatchSnapshot();
     });
 
     describe('when not installed', () => {
       it('renders email & allows editing', () => {
-        createApp({
+        createComponent({
           applications: {
             cert_manager: {
               title: 'Cert-Manager',
@@ -325,7 +305,7 @@ describe('Applications', () => {
 
     describe('when installed', () => {
       it('renders email in readonly', () => {
-        createApp({
+        createComponent({
           applications: {
             cert_manager: {
               title: 'Cert-Manager',
@@ -344,7 +324,7 @@ describe('Applications', () => {
   describe('Jupyter application', () => {
     describe('with ingress installed with ip & jupyter installable', () => {
       it('renders hostname active input', () => {
-        createApp({
+        createComponent({
           applications: {
             ingress: {
               title: 'Ingress',
@@ -362,7 +342,7 @@ describe('Applications', () => {
 
     describe('with ingress installed without external ip', () => {
       it('does not render hostname input', () => {
-        createApp({
+        createComponent({
           applications: {
             ingress: { title: 'Ingress', status: 'installed' },
           },
@@ -376,7 +356,7 @@ describe('Applications', () => {
 
     describe('with ingress & jupyter installed', () => {
       it('renders readonly input', () => {
-        createApp({
+        createComponent({
           applications: {
             ingress: {
               title: 'Ingress',
@@ -395,7 +375,7 @@ describe('Applications', () => {
 
     describe('without ingress installed', () => {
       beforeEach(() => {
-        createApp();
+        createComponent();
       });
 
       it('does not render input', () => {
@@ -403,20 +383,12 @@ describe('Applications', () => {
           false,
         );
       });
-
-      it('renders disabled install button', () => {
-        expect(
-          wrapper
-            .find('.js-cluster-application-row-jupyter .js-cluster-application-install-button')
-            .attributes('disabled'),
-        ).toEqual('disabled');
-      });
     });
   });
 
   describe('Prometheus application', () => {
     it('shows the correct description', () => {
-      createApp();
+      createComponent();
       expect(findByTestId('prometheusDescription').element).toMatchSnapshot();
     });
   });
@@ -442,14 +414,14 @@ describe('Applications', () => {
     let knativeDomainEditor;
 
     beforeEach(() => {
-      createShallowApp(propsData);
+      createShallowComponent(propsData);
       jest.spyOn(eventHub, '$emit');
 
       knativeDomainEditor = wrapper.find(KnativeDomainEditor);
     });
 
     it('shows the correct description', async () => {
-      createApp();
+      createComponent();
       wrapper.setProps({
         providerType: PROVIDER_TYPE.GCP,
         preInstalledKnative: true,
@@ -457,7 +429,7 @@ describe('Applications', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(findByTestId('installedVia').element).toMatchSnapshot();
+      expect(findByTestId('installed-via').element).toMatchSnapshot();
     });
 
     it('emits saveKnativeDomain event when knative domain editor emits save event', () => {
@@ -515,7 +487,7 @@ describe('Applications', () => {
       },
     };
 
-    beforeEach(() => createShallowApp(propsData));
+    beforeEach(() => createShallowComponent(propsData));
 
     it('renders the correct Component', () => {
       const crossplane = wrapper.find(CrossplaneProviderStack);
@@ -523,15 +495,15 @@ describe('Applications', () => {
     });
 
     it('shows the correct description', () => {
-      createApp();
+      createComponent();
       expect(findByTestId('crossplaneDescription').element).toMatchSnapshot();
     });
   });
 
   describe('Elastic Stack application', () => {
     describe('with elastic stack installable', () => {
-      it('renders hostname active input', () => {
-        createApp();
+      it('renders the install button enabled', () => {
+        createComponent();
 
         expect(
           wrapper
@@ -539,13 +511,13 @@ describe('Applications', () => {
               '.js-cluster-application-row-elastic_stack .js-cluster-application-install-button',
             )
             .attributes('disabled'),
-        ).toEqual('disabled');
+        ).toBeUndefined();
       });
     });
 
     describe('elastic stack installed', () => {
       it('renders uninstall button', () => {
-        createApp({
+        createComponent({
           applications: {
             elastic_stack: { title: 'Elastic Stack', status: 'installed' },
           },
@@ -563,7 +535,7 @@ describe('Applications', () => {
   });
 
   describe('Fluentd application', () => {
-    beforeEach(() => createShallowApp());
+    beforeEach(() => createShallowComponent());
 
     it('renders the correct Component', () => {
       expect(wrapper.find(FluentdOutputSettings).exists()).toBe(true);
@@ -572,7 +544,7 @@ describe('Applications', () => {
 
   describe('Cilium application', () => {
     it('shows the correct description', () => {
-      createApp({ props: { ciliumHelpPath: 'cilium-help-path' } });
+      createComponent({ propsData: { ciliumHelpPath: 'cilium-help-path' } });
       expect(findByTestId('ciliumDescription').element).toMatchSnapshot();
     });
   });

@@ -28,7 +28,7 @@ module Gitlab
         end
 
         def self.servers
-          Gitlab.config.ldap['servers']&.values || []
+          Gitlab.config.ldap.servers&.values || []
         end
 
         def self.available_servers
@@ -42,8 +42,17 @@ module Gitlab
         end
 
         def self.providers
-          servers.map { |server| server['provider_name'] }
+          provider_names_from_servers(servers)
         end
+
+        def self.available_providers
+          provider_names_from_servers(available_servers)
+        end
+
+        def self.provider_names_from_servers(servers)
+          servers&.map { |server| server['provider_name'] } || []
+        end
+        private_class_method :provider_names_from_servers
 
         def self.valid_provider?(provider)
           providers.include?(provider)
@@ -51,6 +60,10 @@ module Gitlab
 
         def self.invalid_provider(provider)
           raise InvalidProvider.new("Unknown provider (#{provider}). Available providers: #{providers}")
+        end
+
+        def self.encrypted_secrets
+          Settings.encrypted(Gitlab.config.ldap.secret_file)
         end
 
         def initialize(provider)
@@ -89,8 +102,8 @@ module Gitlab
 
           if has_auth?
             opts.merge!(
-              bind_dn: options['bind_dn'],
-              password: options['password']
+              bind_dn: auth_username,
+              password: auth_password
             )
           end
 
@@ -155,7 +168,7 @@ module Gitlab
         end
 
         def has_auth?
-          options['password'] || options['bind_dn']
+          auth_password || auth_username
         end
 
         def allow_username_or_email_login
@@ -248,7 +261,7 @@ module Gitlab
             begin
               custom_options[:cert] = OpenSSL::X509::Certificate.new(custom_options[:cert])
             rescue OpenSSL::X509::CertificateError => e
-              Rails.logger.error "LDAP TLS Options 'cert' is invalid for provider #{provider}: #{e.message}" # rubocop:disable Gitlab/RailsLogger
+              Gitlab::AppLogger.error "LDAP TLS Options 'cert' is invalid for provider #{provider}: #{e.message}"
             end
           end
 
@@ -256,7 +269,7 @@ module Gitlab
             begin
               custom_options[:key] = OpenSSL::PKey.read(custom_options[:key])
             rescue OpenSSL::PKey::PKeyError => e
-              Rails.logger.error "LDAP TLS Options 'key' is invalid for provider #{provider}: #{e.message}" # rubocop:disable Gitlab/RailsLogger
+              Gitlab::AppLogger.error "LDAP TLS Options 'key' is invalid for provider #{provider}: #{e.message}"
             end
           end
 
@@ -267,10 +280,30 @@ module Gitlab
           {
             auth: {
               method: :simple,
-              username: options['bind_dn'],
-              password: options['password']
+              username: auth_username,
+              password: auth_password
             }
           }
+        end
+
+        def secrets
+          @secrets ||= self.class.encrypted_secrets[@provider.delete_prefix('ldap').to_sym]
+        rescue => e
+          Gitlab::AppLogger.error "LDAP encrypted secrets are invalid: #{e.inspect}"
+
+          nil
+        end
+
+        def auth_password
+          return options['password'] if options['password']
+
+          secrets&.fetch(:password, nil)&.chomp
+        end
+
+        def auth_username
+          return options['bind_dn'] if options['bind_dn']
+
+          secrets&.fetch(:bind_dn, nil)&.chomp
         end
 
         def omniauth_user_filter

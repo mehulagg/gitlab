@@ -4,14 +4,42 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Manage members' do
   include Select2Helper
-  include Spec::Support::Helpers::Features::ListRowsHelpers
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let(:user1) { create(:user, name: 'John Doe') }
   let(:user2) { create(:user, name: 'Mary Jane') }
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(invite_members_group_modal: false)
     sign_in(user1)
+  end
+
+  shared_examples 'includes the correct Invite Members link' do |should_include, should_not_include|
+    it 'includes either the form or the modal trigger' do
+      group.add_owner(user1)
+
+      visit group_group_members_path(group)
+
+      expect(page).to have_selector(should_include)
+      expect(page).not_to have_selector(should_not_include)
+    end
+  end
+
+  context 'when Invite Members modal is enabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: true)
+    end
+
+    it_behaves_like 'includes the correct Invite Members link', '.js-invite-members-trigger', '.invite-users-form'
+  end
+
+  context 'when Invite Members modal is disabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: false)
+    end
+
+    it_behaves_like 'includes the correct Invite Members link', '.invite-users-form', '.js-invite-members-trigger'
   end
 
   it 'update user to owner level', :js do
@@ -22,7 +50,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     page.within(second_row) do
       click_button('Developer')
-      click_link('Owner')
+      click_button('Owner')
 
       expect(page).to have_button('Owner')
     end
@@ -69,11 +97,14 @@ RSpec.describe 'Groups > Members > Manage members' do
     visit group_group_members_path(group)
 
     # Open modal
-    find(:css, '.project-members-page li', text: user2.name).find(:css, 'button.btn-remove').click
+    page.within(second_row) do
+      click_button 'Remove member'
+    end
 
-    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
-
-    click_on('Remove member')
+    page.within('[role="dialog"]') do
+      expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+      click_button('Remove member')
+    end
 
     wait_for_requests
 
@@ -101,16 +132,17 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     add_user('test@example.com', 'Reporter')
 
-    click_link('Pending')
+    expect(page).to have_link 'Invited'
+    click_link 'Invited'
 
-    page.within('.content-list.members-list') do
+    page.within(members_table) do
       expect(page).to have_content('test@example.com')
       expect(page).to have_content('Invited')
       expect(page).to have_button('Reporter')
     end
   end
 
-  it 'guest can not manage other users' do
+  it 'guest can not manage other users', :js do
     group.add_guest(user1)
     group.add_developer(user2)
 
@@ -124,7 +156,7 @@ RSpec.describe 'Groups > Members > Manage members' do
       expect(page).not_to have_button 'Developer'
 
       # Can not remove user2
-      expect(page).not_to have_css('a.btn-remove')
+      expect(page).not_to have_selector 'button[title="Remove member"]'
     end
   end
 

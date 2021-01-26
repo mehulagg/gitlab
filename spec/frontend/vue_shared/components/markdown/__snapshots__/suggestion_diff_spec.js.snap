@@ -7,9 +7,11 @@ exports[`Suggestion Diff component matches snapshot 1`] = `
   <suggestion-diff-header-stub
     batchsuggestionscount="1"
     class="qa-suggestion-diff-header js-suggestion-diff-header"
+    defaultcommitmessage="Apply suggestion"
     helppagepath="path_to_docs"
     isapplyingbatch="true"
     isbatched="true"
+    suggestionscount="0"
   />
    
   <table

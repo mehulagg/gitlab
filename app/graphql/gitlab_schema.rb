@@ -30,6 +30,8 @@ class GitlabSchema < GraphQL::Schema
 
   default_max_page_size 100
 
+  lazy_resolve ::Gitlab::Graphql::Lazy, :force
+
   class << self
     def multiplex(queries, **kwargs)
       kwargs[:max_complexity] ||= max_query_complexity(kwargs[:context])
@@ -46,6 +48,13 @@ class GitlabSchema < GraphQL::Schema
       kwargs[:max_depth] ||= max_query_depth(kwargs[:context])
 
       super(query_str, **kwargs)
+    end
+
+    def get_type(type_name)
+      # This is a backwards compatibility hack to work around an accidentally
+      # released argument typed as EEIterationID
+      type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+      super(type_name)
     end
 
     def id_from_object(object, _type = nil, _ctx = nil)
@@ -67,6 +76,13 @@ class GitlabSchema < GraphQL::Schema
       gid = parse_gid(global_id, ctx)
 
       find_by_gid(gid)
+    end
+
+    def resolve_type(type, object, ctx = :__undefined__)
+      tc = type.metadata[:type_class]
+      return if tc.respond_to?(:assignable?) && !tc.assignable?(object)
+
+      super
     end
 
     # Find an object by looking it up from its 'GlobalID'.
@@ -109,11 +125,11 @@ class GitlabSchema < GraphQL::Schema
       expected_type = ctx[:expected_type]
       gid = GlobalID.parse(global_id)
 
-      raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab id." unless gid
+      raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 
       if expected_type && !gid.model_class.ancestors.include?(expected_type)
         vars = { global_id: global_id, expected_type: expected_type }
-        msg = _('%{global_id} is not a valid id for %{expected_type}.') % vars
+        msg = _('%{global_id} is not a valid ID for %{expected_type}.') % vars
         raise Gitlab::Graphql::Errors::ArgumentError, msg
       end
 
@@ -143,6 +159,13 @@ class GitlabSchema < GraphQL::Schema
         DEFAULT_MAX_DEPTH
       end
     end
+  end
+
+  # This is a backwards compatibility hack to work around an accidentally
+  # released argument typed as EE{Type}ID
+  def get_type(type_name)
+    type_name = type_name.gsub(/^EE/, '') if type_name.end_with?('ID')
+    super(type_name)
   end
 end
 

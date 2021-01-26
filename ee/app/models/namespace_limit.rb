@@ -23,7 +23,7 @@ class NamespaceLimit < ApplicationRecord
   def eligible_for_temporary_storage_increase?
     return false unless ::Feature.enabled?(:temporary_storage_increase, namespace)
 
-    EE::Namespace::RootStorageSize.new(namespace).usage_ratio >= MIN_REQURIED_STORAGE_USAGE_RATIO
+    namespace.root_storage_size.usage_ratio >= MIN_REQURIED_STORAGE_USAGE_RATIO
   end
 
   private

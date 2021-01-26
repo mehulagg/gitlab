@@ -30,17 +30,13 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
       Merge request 0
     </div>
      
-    <div
-      class="gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
-    >
-      <!---->
-    </div>
+    <status-stub
+      status="[object Object]"
+    />
      
-    <div
-      class="dashboard-pipeline gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
-    >
-      <!---->
-    </div>
+    <status-stub
+      status="[object Object]"
+    />
      
     <div
       class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
@@ -51,13 +47,12 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
        
       <!---->
        
-      <span
-        class="gl-text-gray-700"
-      >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
+      <time-ago-tooltip-stub
+        class="gl-text-gray-500"
+        cssclass=""
+        time="2020-01-01T00:00:00.000Z"
+        tooltipplacement="bottom"
+      />
     </div>
     <div
       data-testid="merge-request"
@@ -65,17 +60,13 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
       Merge request 1
     </div>
      
-    <div
-      class="gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
-    >
-      <!---->
-    </div>
+    <status-stub
+      status="[object Object]"
+    />
      
-    <div
-      class="dashboard-pipeline gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
-    >
-      <!---->
-    </div>
+    <status-stub
+      status="[object Object]"
+    />
      
     <div
       class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
@@ -86,13 +77,12 @@ exports[`MergeRequestsGrid component when intialized matches the snapshot 1`] = 
        
       <!---->
        
-      <span
-        class="gl-text-gray-700"
-      >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
+      <time-ago-tooltip-stub
+        class="gl-text-gray-500"
+        cssclass=""
+        time="2020-01-01T00:00:00.000Z"
+        tooltipplacement="bottom"
+      />
     </div>
   </div>
    

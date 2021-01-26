@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :design, class: 'DesignManagement::Design' do
-    issue { create(:issue) }
-    project { issue&.project || create(:project) }
+  factory :design, traits: [:has_internal_id], class: 'DesignManagement::Design' do
+    issue { association(:issue) }
+    project { issue&.project || association(:project) }
     sequence(:filename) { |n| "homescreen-#{n}.jpg" }
 
     transient do
@@ -75,7 +75,7 @@ FactoryBot.define do
     end
 
     # Use this trait if you want versions in a particular history, but don't
-    # want to pay for gitlay calls.
+    # want to pay for gitaly calls.
     trait :with_versions do
       transient do
         deleted { false }

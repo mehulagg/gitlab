@@ -8,7 +8,6 @@ RSpec.describe 'geo rake tasks', :geo do
   before do
     Rake.application.rake_require 'tasks/geo'
     stub_licensed_features(geo: true)
-    stub_feature_flags(geo_terraform_state_replication: false)
   end
 
   it 'Gitlab:Geo::DatabaseTasks responds to all methods used in Geo rake tasks' do
@@ -345,27 +344,30 @@ RSpec.describe 'geo rake tasks', :geo do
         end
 
         it 'prints messages for all the checks' do
-          [
-            /Name/,
-            /URL/,
-            /GitLab Version/,
-            /Geo Role/,
-            /Health Status/,
-            /Sync Settings/,
-            /Database replication lag/,
-            /Repositories/,
-            /Verified Repositories/,
-            /Wikis/,
-            /Verified Wikis/,
-            /LFS Objects/,
-            /Attachments/,
-            /CI job artifacts/,
-            /Container repositories/,
-            /Design repositories/,
-            /Repositories Checked/,
-            /Last event ID seen from primary/,
-            /Last status report was/
-          ].each do |text|
+          checks = [
+            /Name: /,
+            /URL: /,
+            /GitLab Version: /,
+            /Geo Role: /,
+            /Health Status: /,
+            /Sync Settings: /,
+            /Database replication lag: /,
+            /Repositories: /,
+            /Verified Repositories: /,
+            /Wikis: /,
+            /Verified Wikis: /,
+            /LFS Objects: /,
+            /Attachments: /,
+            /CI job artifacts: /,
+            /Container repositories: /,
+            /Design repositories: /,
+            /Repositories Checked: /,
+            /Last event ID seen from primary: /,
+            /Last status report was: /
+          ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
+              Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+
+          checks.each do |text|
             expect { run_rake_task('geo:status') }.to output(text).to_stdout
           end
         end

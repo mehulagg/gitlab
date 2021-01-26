@@ -42,6 +42,7 @@ RSpec.describe Featurable do
         end
       end
     end
+
     let!(:instance) { klass.new }
 
     it { expect(klass.available_features).to eq [:feature1, :feature2] }
@@ -133,22 +134,6 @@ RSpec.describe Featurable do
         expect(project.feature_available?(:issues, user)).to eq(true)
       end
     end
-
-    context 'when feature is disabled by a feature flag' do
-      it 'returns false' do
-        stub_feature_flags(issues: false)
-
-        expect(project.feature_available?(:issues, user)).to eq(false)
-      end
-    end
-
-    context 'when feature is enabled by a feature flag' do
-      it 'returns true' do
-        stub_feature_flags(issues: true)
-
-        expect(project.feature_available?(:issues, user)).to eq(true)
-      end
-    end
   end
 
   describe '#*_enabled?' do
@@ -179,6 +164,6 @@ RSpec.describe Featurable do
 
   def update_all_project_features(project, features, value)
     project_feature_attributes = features.map { |f| ["#{f}_access_level", value] }.to_h
-    project.project_feature.update(project_feature_attributes)
+    project.project_feature.update!(project_feature_attributes)
   end
 end

@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { sprintf, s__ } from '../../../locale';
 import { joinPaths } from '~/lib/utils/url_utility';
 
@@ -33,7 +34,7 @@ export default {
 </script>
 
 <template>
-  <div class="time-tracking-help-state">
+  <div data-testid="helpPane" class="time-tracking-help-state">
     <div class="time-tracking-info">
       <h4>{{ __('Track time with quick actions') }}</h4>
       <p>{{ __('Quick actions can be used in the issues description and comment boxes.') }}</p>

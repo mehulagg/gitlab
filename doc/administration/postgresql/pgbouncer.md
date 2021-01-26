@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -33,7 +36,7 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 
 1. Run `gitlab-ctl reconfigure`
 
-   NOTE: **Note:**
+   NOTE:
    If the database was already running, it will need to be restarted after reconfigure by running `gitlab-ctl restart postgresql`.
 
 1. On the node you are running PgBouncer on, make sure the following is set in `/etc/gitlab/gitlab.rb`
@@ -62,6 +65,12 @@ This content has been moved to a [new location](replication_and_failover.md#conf
 1. Run `gitlab-ctl reconfigure`
 
 1. At this point, your instance should connect to the database through PgBouncer. If you are having issues, see the [Troubleshooting](#troubleshooting) section
+
+## Backups
+
+Do not backup or restore GitLab through a PgBouncer connection: this will cause a GitLab outage.
+
+[Read more about this and how to reconfigure backups](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer).
 
 ## Enable Monitoring
 
@@ -144,6 +153,38 @@ ote_pid | tls
   19980 |
 (1 row)
 ```
+
+## Procedure for bypassing PgBouncer
+
+Some database changes have to be done directly, and not through PgBouncer.
+
+Read more about the affected tasks: [database restores](../../raketasks/backup_restore.md#backup-and-restore-for-installations-using-pgbouncer)
+and [GitLab upgrades](https://docs.gitlab.com/omnibus/update/README.html#use-postgresql-ha).
+
+1. To find the primary node, run the following on a database node:
+
+   ```shell
+   sudo gitlab-ctl repmgr cluster show
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` on the application node you're performing the task on, and update
+   `gitlab_rails['db_host']` and `gitlab_rails['db_port']` with the database
+   primary's host and port.
+
+1. Run reconfigure:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   ```
+
+Once you've performed the tasks or procedure, switch back to using PgBouncer:
+
+1. Change back `/etc/gitlab/gitlab.rb` to point to PgBouncer.
+1. Run reconfigure:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   ```
 
 ## Troubleshooting
 

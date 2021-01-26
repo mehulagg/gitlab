@@ -6,7 +6,7 @@
 = form_errors(issuable)
 
 - if @conflict
-  .alert.alert-danger
+  .gl-alert.gl-alert-danger.gl-mb-5
     Someone edited the #{issuable.class.model_name.human.downcase} the same time you did.
     Please check out
     = link_to "the #{issuable.class.model_name.human.downcase}", polymorphic_path([@project, issuable]), target: "_blank", rel: 'noopener noreferrer'
@@ -20,7 +20,8 @@
   = render 'shared/issuable/form/title', issuable: issuable, form: form, has_wip_commits: commits && commits.detect(&:work_in_progress?)
 #js-suggestions{ data: { project_path: @project.full_path } }
 
-= render 'shared/form_elements/apply_template_warning'
+= render 'shared/issuable/form/type_selector', issuable: issuable, form: form
+
 = render 'shared/form_elements/description', model: issuable, form: form, project: project
 
 - if issuable.respond_to?(:confidential)
@@ -31,7 +32,7 @@
         = form.label :confidential, class: 'form-check-label' do
           This issue is confidential and should only be visible to team members with at least Reporter access.
 
-= render 'shared/issuable/form/metadata', issuable: issuable, form: form, project: project
+= render 'shared/issuable/form/metadata', issuable: issuable, form: form, project: project, presenter: presenter
 
 = render_if_exists 'shared/issuable/approvals', issuable: issuable, presenter: presenter, form: form
 
@@ -42,7 +43,7 @@
 - if @merge_request_to_resolve_discussions_of
   .form-group.row
     .col-sm-10.offset-sm-2
-      = icon('info-circle')
+      = sprite_icon('information-o')
       - if @merge_request_to_resolve_discussions_of.discussions_can_be_resolved_by?(current_user)
         = hidden_field_tag 'merge_request_to_resolve_discussions_of', @merge_request_to_resolve_discussions_of.iid
         - if @discussion_to_resolve
@@ -83,4 +84,10 @@
 
 = render_if_exists 'shared/issuable/remove_approver'
 
+- if issuable.respond_to?(:issue_type)
+  = form.hidden_field :issue_type
+
 = form.hidden_field :lock_version
+
+- if @vulnerability_id
+  = hidden_field_tag 'vulnerability_id', @vulnerability_id

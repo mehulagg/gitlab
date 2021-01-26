@@ -5,6 +5,16 @@ class Projects::TemplatesController < Projects::ApplicationController
   before_action :authorize_can_read_issuable!
   before_action :get_template_class
 
+  feature_category :templates
+
+  def index
+    templates = @template_type.template_subsets(project)
+
+    respond_to do |format|
+      format.json { render json: templates.to_json }
+    end
+  end
+
   def show
     template = @template_type.find(params[:key], project)
 

@@ -1,6 +1,7 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import footerEEMixin from 'ee_else_ce/boards/mixins/modal_footer';
-import Flash from '../../../flash';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import { __, n__ } from '../../../locale';
 import ListsDropdown from './lists_dropdown.vue';
 import ModalStore from '../../stores/modal_store';
@@ -10,6 +11,7 @@ import boardsStore from '../../stores/boards_store';
 export default {
   components: {
     ListsDropdown,
+    GlButton,
   },
   mixins: [modalMixin, footerEEMixin],
   data() {
@@ -38,21 +40,21 @@ export default {
       const firstListIndex = 1;
       const list = this.modal.selectedList || this.state.lists[firstListIndex];
       const selectedIssues = ModalStore.getSelectedIssues();
-      const issueIds = selectedIssues.map(issue => issue.id);
+      const issueIds = selectedIssues.map((issue) => issue.id);
       const req = this.buildUpdateRequest(list);
 
       // Post the data to the backend
       boardsStore.bulkUpdate(issueIds, req).catch(() => {
         Flash(__('Failed to update issues, please try again.'));
 
-        selectedIssues.forEach(issue => {
+        selectedIssues.forEach((issue) => {
           list.removeIssue(issue);
           list.issuesSize -= 1;
         });
       });
 
       // Add the issues on the frontend
-      selectedIssues.forEach(issue => {
+      selectedIssues.forEach((issue) => {
         list.addIssue(issue);
         list.issuesSize += 1;
       });
@@ -65,14 +67,14 @@ export default {
 <template>
   <footer class="form-actions add-issues-footer">
     <div class="float-left">
-      <button :disabled="submitDisabled" class="btn btn-success" type="button" @click="addIssues">
+      <gl-button :disabled="submitDisabled" category="primary" variant="success" @click="addIssues">
         {{ submitText }}
-      </button>
+      </gl-button>
       <span class="inline add-issues-footer-to-list">{{ __('to list') }}</span>
       <lists-dropdown />
     </div>
-    <button class="btn btn-default float-right" type="button" @click="toggleModal(false)">
+    <gl-button class="float-right" @click="toggleModal(false)">
       {{ __('Cancel') }}
-    </button>
+    </gl-button>
   </footer>
 </template>

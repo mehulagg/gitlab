@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner do
+  RSpec.describe 'Verify', :runner do
     describe 'Code coverage statistics' do
       let(:simplecov) { '\(\d+.\d+\%\) covered' }
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
@@ -33,7 +33,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'creates an MR with code coverage statistics' do
+      it 'creates an MR with code coverage statistics', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/807' do
         runner.project.visit!
         configure_code_coverage(simplecov)
         merge_request.visit!

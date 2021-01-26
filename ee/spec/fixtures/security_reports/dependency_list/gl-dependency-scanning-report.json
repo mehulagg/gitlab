@@ -306,115 +306,231 @@
           "package": {
             "name": "async"
           },
-          "version": "0.2.10"
+          "version": "0.2.10",
+          "iid": 1,
+          "direct":true
         },
         {
           "package": {
             "name": "async"
           },
-          "version": "1.5.2"
+          "version": "1.5.2",
+          "iid": 2,
+          "dependency_path": [
+            {
+              "iid": 7
+            },
+            {
+              "iid": 16
+            }
+          ]
         },
         {
           "package": {
             "name": "debug"
           },
-          "version": "1.0.5"
+          "version": "1.0.5",
+          "iid": 3,
+          "direct":true
         },
         {
           "package": {
             "name": "ejs"
           },
-          "version": "0.8.8"
+          "version": "0.8.8",
+          "iid": 4,
+          "direct":true
         },
         {
           "package": {
             "name": "ms"
           },
-          "version": "2.0.0"
+          "version": "2.0.0",
+          "iid": 5,
+          "dependency_path": [
+            {
+              "iid": 3
+            },
+            {
+              "iid": 17
+            }
+          ]
         },
         {
           "package": {
             "name": "node-forge"
           },
-          "version": "0.2.24"
+          "version": "0.2.24",
+          "iid": 6,
+          "direct":true
         },
         {
           "package": {
             "name": "saml2-js"
           },
-          "version": "1.5.0"
+          "version": "1.5.0",
+          "iid": 7,
+          "direct":true
         },
         {
           "package": {
             "name": "sax"
           },
-          "version": "1.2.4"
+          "version": "1.2.4",
+          "iid": 8,
+          "dependency_path": [
+            {
+              "iid": 12
+            },
+            {
+              "iid": 11
+            },
+            {
+              "iid": 9
+            }
+          ]
         },
         {
           "package": {
             "name": "underscore"
           },
-          "version": "1.9.1"
+          "version": "1.9.1",
+          "iid": 9,
+          "dependency_path": [
+            {
+              "iid": 12
+            },
+            {
+              "iid": 11
+            }
+          ]
         },
         {
           "package": {
             "name": "underscore"
           },
-          "version": "1.6.0"
+          "version": "1.6.0",
+          "iid": 10,
+          "direct":true
         },
         {
           "package": {
             "name": "xml-crypto"
           },
-          "version": "0.8.5"
+          "version": "0.8.5",
+          "iid": 11,
+          "dependency_path": [
+            {
+              "iid": 12
+            }
+          ]
         },
         {
           "package": {
             "name": "xml-encryption"
           },
-          "version": "0.7.4"
+          "version": "0.7.4",
+          "iid": 12,
+          "direct":true
         },
         {
           "package": {
             "name": "xml2js"
           },
-          "version": "0.4.19"
+          "version":"0.4.19",
+          "iid": 13,
+          "dependency_path": [
+            {
+              "iid": 7
+            }
+          ]
         },
         {
           "package": {
             "name": "xmlbuilder"
           },
-          "version": "2.1.0"
+          "version": "2.1.0",
+          "iid": 14,
+          "dependency_path":[
+            {
+              "iid": 12
+            },
+            {
+              "iid": 11
+            },
+            {
+              "iid": 9
+            }
+          ]
         },
         {
           "package": {
             "name": "xmlbuilder"
           },
-          "version": "9.0.7"
+          "version": "9.0.7",
+          "iid": 15,
+          "dependency_path": [
+            {
+              "iid": 12
+            },
+            {
+              "iid": 11
+            },
+            {
+              "iid": 9
+            }
+          ]
         },
         {
           "package": {
             "name": "xmldom"
           },
-          "version": "0.1.19"
+          "version": "0.1.19",
+          "iid": 16,
+          "dependency_path":
+          [
+            {
+              "iid": 7
+            }
+          ]
         },
         {
           "package": {
             "name": "xmldom"
           },
-          "version": "0.1.27"
+          "version": "0.1.27",
+          "iid": 17,
+          "dependency_path": [
+            {
+              "iid": 3
+            }
+          ]
         },
         {
           "package": {
             "name": "xpath.js"
           },
-          "version": "1.1.0"
+          "version": "1.1.0",
+          "iid": 18,
+          "dependency_path": [
+            {
+              "iid": 3
+            },
+            {
+              "iid": 17
+            },
+            {
+              "iid": 5
+            }
+          ]
         },
         {
           "package": {
             "name": "xpath"
           },
-          "version": "0.0.5"
+          "version": "0.0.5",
+          "iid": 19,
+          "direct":true
         }
       ]
     }

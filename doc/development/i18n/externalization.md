@@ -1,18 +1,27 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Internationalization for GitLab
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10669) in GitLab 9.2.
 
 For working with internationalization (i18n),
 [GNU gettext](https://www.gnu.org/software/gettext/) is used given it's the most
-used tool for this task and there are a lot of applications that will help us to
+used tool for this task and there are a lot of applications that help us
 work with it.
+
+NOTE:
+All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
 
 ## Setting up GitLab Development Kit (GDK)
 
 In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
 project you must download and configure it through [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/set-up-gdk.md).
 
-Once you have the GitLab project ready, you can start working on the translation.
+After you have the GitLab project ready, you can start working on the translation.
 
 ## Tools
 
@@ -95,9 +104,8 @@ Active Record's `:message` option accepts a `Proc`, so we can do this instead:
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-NOTE: **Note:**
 Messages in the API (`lib/api/` or `app/graphql`) do
-not need to be externalised.
+not need to be externalized.
 
 ### HAML files
 
@@ -138,7 +146,90 @@ const label = __('Subscribe');
 ```
 
 In order to test JavaScript translations you have to change the GitLab
-localization to other language than English and you have to generate JSON files
+localization to another language than English and you have to generate JSON files
+using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
+
+### Vue files
+
+In Vue files we make both the `__()` (double underscore parenthesis) function and the `s__()` (namespaced double underscore parenthesis) function available that you can import from the `~/locale` file. For instance:
+
+```javascript
+import { __, s__ } from '~/locale';
+const label = __('Subscribe');
+const nameSpacedlabel = __('Plan|Subscribe');
+```
+
+For the static text strings we suggest two patterns for using these translations in Vue files:
+
+- External constants file:
+
+  ```javascript
+  javascripts
+  │
+  └───alert_settings
+  │   │   constants.js
+  │   └───components
+  │       │   alert_settings_form.vue
+
+
+  // constants.js
+
+  import { s__ } from '~/locale';
+
+  /* Integration constants */
+
+  export const I18N_ALERT_SETTINGS_FORM = {
+    saveBtnLabel: __('Save changes'),
+  };
+
+
+  // alert_settings_form.vue
+
+  import {
+    I18N_ALERT_SETTINGS_FORM,
+  } from '../constants';
+
+  <script>
+    export default {
+      i18n: {
+        I18N_ALERT_SETTINGS_FORM,
+      }
+    }
+  </script>
+
+  <template>
+    <gl-button
+      ref="submitBtn"
+      variant="success"
+      type="submit"
+    >
+      {{ $options.i18n.I18N_ALERT_SETTINGS_FORM }}
+    </gl-button>
+  </template>
+  ```
+
+  When possible, you should opt for this pattern, as this allows you to import these strings directly into your component specs for re-use during testing.
+
+- Internal component `$options` object:
+
+  ```javascript
+  <script>
+    export default {
+      i18n: {
+        buttonLabel: s__('Plan|Button Label')
+      }
+    },
+  </script>
+
+  <template>
+    <gl-button :aria-label="$options.i18n.buttonLabel">
+      {{ $options.i18n.buttonLabel }}
+    </gl-button>
+  </template>
+  ```
+
+In order to visually test the Vue translations you have to change the GitLab
+localization to another language than English and you have to generate JSON files
 using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
 
 ### Dynamic translations
@@ -196,7 +287,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   // => 'This is &lt;strong&gt;&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;&lt;/strong&gt;'
 
   // OK:
-  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>`, false);
+  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>` }, false);
   // => 'This is <strong>&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;</strong>'
   ```
 
@@ -285,7 +376,7 @@ Namespaces should be PascalCase.
   s_('OpenedNDaysAgo|Opened')
   ```
 
-  In case the translation is not found it will return `Opened`.
+  In case the translation is not found it returns `Opened`.
 
 - In JavaScript:
 
@@ -293,8 +384,8 @@ Namespaces should be PascalCase.
   s__('OpenedNDaysAgo|Opened')
   ```
 
-Note: The namespace should be removed from the translation. See the [translation
-guidelines for more details](translation.md#namespaced-strings).
+The namespace should be removed from the translation. See the
+[translation guidelines for more details](translation.md#namespaced-strings).
 
 ### HTML
 
@@ -326,12 +417,12 @@ To include formatting in the translated string, we can do the following:
 
   See the section on [interpolation](#interpolation).
 
-When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we'll update the
+When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we plan to update the
 process of including formatting in translated strings.
 
 #### Including Angle Brackets
 
-If a string contains angles brackets (`<`/`>`) that are not used for HTML, it will still be flagged by the
+If a string contains angles brackets (`<`/`>`) that are not used for HTML, it is still flagged by the
 `rake gettext:lint` linter.
 To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) instead:
 
@@ -346,9 +437,9 @@ To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) inst
 - In JavaScript:
 
   ```javascript
-  import sanitize from 'sanitize-html';
+  import { sanitize } from '~/lib/dompurify';
 
-  const i18n = { LESS_THAN_ONE_HOUR: sanitize(__('In &lt; 1 hours'), { allowedTags: [] }) };
+  const i18n = { LESS_THAN_ONE_HOUR: sanitize(__('In &lt; 1 hour'), { ALLOWED_TAGS: [] }) };
 
   // ... using the string
   element.innerHTML = i18n.LESS_THAN_ONE_HOUR;
@@ -382,12 +473,27 @@ This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/do
   1. **Through the `l` helper**, i.e. `l(active_session.created_at, format: :short)`. We have some predefined formats for
      [dates](https://gitlab.com/gitlab-org/gitlab/blob/4ab54c2233e91f60a80e5b6fa2181e6899fdcc3e/config/locales/en.yml#L54) and [times](https://gitlab.com/gitlab-org/gitlab/blob/4ab54c2233e91f60a80e5b6fa2181e6899fdcc3e/config/locales/en.yml#L262).
      If you need to add a new format, because other parts of the code could benefit from it,
-     you'll need to add it to [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) file.
+     you can add it to [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) file.
   1. **Through `strftime`**, i.e. `milestone.start_date.strftime('%b %-d')`. We use `strftime` in case none of the formats
      defined on [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) matches the date/time
      specifications we need, and if there is no need to add it as a new format because is very particular (i.e. it's only used in a single view).
 
 ## Best practices
+
+### Minimize translation updates
+
+Updates can result in the loss of the translations for this string. To minimize risks,
+avoid changes to strings, unless they:
+
+- Add value to the user.
+- Include extra context for translators.
+
+For example, we should avoid changes like this:
+
+```diff
+- _('Number of things: %{count}') % { count: 10 }
++ n_('Number of things: %d', 10)
+```
 
 ### Keep translations dynamic
 
@@ -398,7 +504,7 @@ Examples:
 - Mappings for a dropdown list
 - Error messages
 
-To store these kinds of data, using a constant seems like the best choice, however this won't work for translations.
+To store these kinds of data, using a constant seems like the best choice, however this doesn't work for translations.
 
 Bad, avoid it:
 
@@ -412,7 +518,7 @@ class MyPresenter
 end
 ```
 
-The translation method (`_`) will be called when the class is loaded for the first time and translates the text to the default locale. Regardless of what's the user's locale, these values will not be translated again.
+The translation method (`_`) is called when the class is loaded for the first time and translates the text to the default locale. Regardless of the user's locale, these values are not translated a second time.
 
 Similar thing happens when using class methods with memoization.
 
@@ -430,7 +536,7 @@ class MyModel
 end
 ```
 
-This method will memoize the translations using the locale of the user, who first "called" this method.
+This method memorizes the translations using the locale of the user, who first "called" this method.
 
 To avoid these problems, keep the translations dynamic.
 
@@ -594,9 +700,9 @@ Now that the new content is marked for translation, we need to update
 bin/rake gettext:regenerate
 ```
 
-This command will update `locale/gitlab.pot` file with the newly externalized
+This command updates `locale/gitlab.pot` file with the newly externalized
 strings and remove any strings that aren't used anymore. You should check this
-file in. Once the changes are on master, they will be picked up by
+file in. Once the changes are on master, they are picked up by
 [CrowdIn](https://translate.gitlab.com) and be presented for
 translation.
 
@@ -613,7 +719,7 @@ running on CI as part of the `static-analysis` job.
 
 To lint the adjustments in PO files locally you can run `rake gettext:lint`.
 
-The linter will take the following into account:
+The linter takes the following into account:
 
 - Valid PO-file syntax
 - Variable usage
@@ -636,7 +742,7 @@ Errors in `locale/zh_HK/gitlab.po`:
     Syntax error in msgstr
     Syntax error in message_line
     There should be only whitespace until the end of line after the double quote character of a message text.
-    Parsing result before error: '{:msgid=>["", "You are going to remove %{project_name_with_namespace}.\\n", "Removed project CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
+    Parsing result before error: '{:msgid=>["", "You are going to delete %{project_name_with_namespace}.\\n", "Deleted projects CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
     SimplePoParser filtered backtrace: SimplePoParser::ParserError
 Errors in `locale/zh_TW/gitlab.po`:
   1 pipeline
@@ -650,9 +756,9 @@ aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
 
-NOTE: **Note:**
+NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
-Languages with less than 2% of translations won't be available in the UI.
+Languages with less than 2% of translations are not available in the UI.
 
 Let's suppose you want to add translations for a new language, let's say French.
 

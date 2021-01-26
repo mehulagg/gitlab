@@ -1,4 +1,5 @@
 <script>
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -8,19 +9,23 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
-import { n__, s__ } from '~/locale';
+import { n__, s__, __ } from '~/locale';
 import AccessorUtilities from '../../lib/utils/accessor';
-import BoardDelete from './board_delete';
 import IssueCount from './issue_count.vue';
-import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
+import sidebarEventHub from '~/sidebar/event_hub';
+import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import { isListDraggable } from '~/boards/boards_util';
 
 export default {
+  i18n: {
+    newIssue: __('New issue'),
+    listSettings: __('List settings'),
+    expand: s__('Boards|Expand'),
+    collapse: s__('Boards|Collapse'),
+  },
   components: {
-    BoardDelete,
     GlButtonGroup,
     GlButton,
     GlLabel,
@@ -32,7 +37,20 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [isWipLimitsOn],
+  inject: {
+    boardId: {
+      default: '',
+    },
+    weightFeatureAvailable: {
+      default: false,
+    },
+    scopedLabelsAvailable: {
+      default: false,
+    },
+    currentUserId: {
+      default: null,
+    },
+  },
   props: {
     list: {
       type: Object,
@@ -43,81 +61,60 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     isSwimlanesHeader: {
       type: Boolean,
       required: false,
       default: false,
     },
   },
-  data() {
-    return {
-      weightFeatureAvailable: false,
-    };
-  },
   computed: {
+    ...mapState(['activeId']),
     isLoggedIn() {
-      return Boolean(gon.current_user_id);
+      return Boolean(this.currentUserId);
     },
     listType() {
-      return this.list.type;
+      return this.list.listType;
     },
     listAssignee() {
       return this.list?.assignee?.username || '';
     },
     listTitle() {
-      return this.list?.label?.description || this.list.title || '';
+      return this.list?.label?.description || this.list?.assignee?.name || this.list.title || '';
     },
     showListHeaderButton() {
-      return (
-        !this.disabled &&
-        this.listType !== ListType.closed &&
-        this.listType !== ListType.blank &&
-        this.listType !== ListType.promotion
-      );
+      return !this.disabled && this.listType !== ListType.closed;
     },
     showMilestoneListDetails() {
       return (
-        this.list.type === 'milestone' &&
+        this.listType === ListType.milestone &&
         this.list.milestone &&
-        (this.list.isExpanded || !this.isSwimlanesHeader)
+        (!this.list.collapsed || !this.isSwimlanesHeader)
       );
     },
     showAssigneeListDetails() {
-      return this.list.type === 'assignee' && (this.list.isExpanded || !this.isSwimlanesHeader);
+      return (
+        this.listType === ListType.assignee && (!this.list.collapsed || !this.isSwimlanesHeader)
+      );
+    },
+    issuesCount() {
+      return this.list.issuesCount;
     },
     issuesTooltipLabel() {
-      const { issuesSize } = this.list;
-
-      return n__(`%d issue`, `%d issues`, issuesSize);
+      return n__(`%d issue`, `%d issues`, this.issuesCount);
     },
     chevronTooltip() {
-      return this.list.isExpanded ? s__('Boards|Collapse') : s__('Boards|Expand');
+      return this.list.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
     },
     chevronIcon() {
-      return this.list.isExpanded ? 'chevron-right' : 'chevron-down';
+      return this.list.collapsed ? 'chevron-down' : 'chevron-right';
     },
     isNewIssueShown() {
       return this.listType === ListType.backlog || this.showListHeaderButton;
     },
     isSettingsShown() {
       return (
-        this.listType !== ListType.backlog &&
-        this.showListHeaderButton &&
-        this.list.isExpanded &&
-        this.isWipLimitsOn
+        this.listType !== ListType.backlog && this.showListHeaderButton && !this.list.collapsed
       );
-    },
-    showBoardListAndBoardInfo() {
-      return this.listType !== ListType.blank && this.listType !== ListType.promotion;
     },
     uniqueKey() {
       // eslint-disable-next-line @gitlab/require-i18n-strings
@@ -126,31 +123,50 @@ export default {
     collapsedTooltipTitle() {
       return this.listTitle || this.listAssignee;
     },
+    headerStyle() {
+      return { borderTopColor: this.list?.label?.color };
+    },
+    userCanDrag() {
+      return !this.disabled && isListDraggable(this.list);
+    },
   },
   methods: {
+    ...mapActions(['updateList', 'setActiveId']),
+    openSidebarSettings() {
+      if (this.activeId === inactiveId) {
+        sidebarEventHub.$emit('sidebar.closeAll');
+      }
+
+      this.setActiveId({ id: this.list.id, sidebarType: LIST });
+    },
     showScopedLabels(label) {
-      return boardsStore.scopedLabels.enabled && isScopedLabel(label);
+      return this.scopedLabelsAvailable && isScopedLabel(label);
     },
 
     showNewIssueForm() {
       eventHub.$emit(`toggle-issue-form-${this.list.id}`);
     },
     toggleExpanded() {
-      if (this.list.isExpandable) {
-        this.list.isExpanded = !this.list.isExpanded;
+      // eslint-disable-next-line vue/no-mutating-props
+      this.list.collapsed = !this.list.collapsed;
 
-        if (AccessorUtilities.isLocalStorageAccessSafe() && !this.isLoggedIn) {
-          localStorage.setItem(`${this.uniqueKey}.expanded`, this.list.isExpanded);
-        }
-
-        if (this.isLoggedIn) {
-          this.list.update();
-        }
-
-        // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
-        // Close all tooltips manually to prevent dangling tooltips.
-        this.$root.$emit('bv::hide::tooltip');
+      if (!this.isLoggedIn) {
+        this.addToLocalStorage();
+      } else {
+        this.updateListFunction();
       }
+
+      // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
+      // Close all tooltips manually to prevent dangling tooltips.
+      this.$root.$emit('bv::hide::tooltip');
+    },
+    addToLocalStorage() {
+      if (AccessorUtilities.isLocalStorageAccessSafe()) {
+        localStorage.setItem(`${this.uniqueKey}.expanded`, !this.list.collapsed);
+      }
+    },
+    updateListFunction() {
+      this.updateList({ listId: this.list.id, collapsed: this.list.collapsed });
     },
   },
 };
@@ -160,137 +176,147 @@ export default {
   <header
     :class="{
       'has-border': list.label && list.label.color,
-      'gl-relative': list.isExpanded,
-      'gl-h-full': !list.isExpanded,
+      'gl-h-full': list.collapsed,
       'board-inner gl-rounded-top-left-base gl-rounded-top-right-base': isSwimlanesHeader,
     }"
-    :style="{ borderTopColor: list.label && list.label.color ? list.label.color : null }"
+    :style="headerStyle"
     class="board-header gl-relative"
     data-qa-selector="board_list_header"
     data-testid="board-list-header"
   >
     <h3
       :class="{
-        'user-can-drag': !disabled && !list.preset,
-        'gl-py-3': !list.isExpanded && !isSwimlanesHeader,
-        'gl-border-b-0': !list.isExpanded || isSwimlanesHeader,
-        'gl-py-2': !list.isExpanded && isSwimlanesHeader,
+        'user-can-drag': userCanDrag,
+        'gl-py-3 gl-h-full': list.collapsed && !isSwimlanesHeader,
+        'gl-border-b-0': list.collapsed || isSwimlanesHeader,
+        'gl-py-2': list.collapsed && isSwimlanesHeader,
+        'gl-flex-direction-column': list.collapsed,
       }"
-      class="board-title gl-m-0 gl-display-flex js-board-handle"
+      class="board-title gl-m-0 gl-display-flex gl-align-items-center gl-font-base gl-px-3 js-board-handle"
     >
       <gl-button
-        v-if="list.isExpandable"
         v-gl-tooltip.hover
         :aria-label="chevronTooltip"
         :title="chevronTooltip"
         :icon="chevronIcon"
         class="board-title-caret no-drag gl-cursor-pointer"
-        variant="link"
+        category="tertiary"
+        size="small"
         @click="toggleExpanded"
       />
-      <!-- The following is only true in EE and if it is a milestone -->
-      <span v-if="showMilestoneListDetails" aria-hidden="true" class="gl-mr-2 milestone-icon">
+      <!-- EE start -->
+      <span
+        v-if="showMilestoneListDetails"
+        aria-hidden="true"
+        class="milestone-icon"
+        :class="{
+          'gl-mt-3 gl-rotate-90': list.collapsed,
+          'gl-mr-2': !list.collapsed,
+        }"
+      >
         <gl-icon name="timer" />
       </span>
 
       <a
         v-if="showAssigneeListDetails"
-        :href="list.assignee.path"
+        :href="list.assignee.webUrl"
         class="user-avatar-link js-no-trigger"
+        :class="{
+          'gl-mt-3 gl-rotate-90': list.collapsed,
+        }"
       >
         <img
           v-gl-tooltip.hover.bottom
           :title="listAssignee"
           :alt="list.assignee.name"
-          :src="list.assignee.avatar"
+          :src="list.assignee.avatarUrl"
           class="avatar s20"
           height="20"
           width="20"
         />
       </a>
+      <!-- EE end -->
       <div
         class="board-title-text"
-        :class="{ 'gl-display-none': !list.isExpanded && isSwimlanesHeader }"
+        :class="{
+          'gl-display-none': list.collapsed && isSwimlanesHeader,
+          'gl-flex-grow-0 gl-my-3 gl-mx-0': list.collapsed,
+          'gl-flex-grow-1': !list.collapsed,
+        }"
       >
+        <!-- EE start -->
         <span
-          v-if="list.type !== 'label'"
+          v-if="listType !== 'label'"
           v-gl-tooltip.hover
           :class="{
-            'gl-display-inline-block': list.type === 'milestone',
+            'gl-display-block': list.collapsed || listType === 'milestone',
           }"
           :title="listTitle"
-          class="board-title-main-text block-truncated"
+          class="board-title-main-text gl-text-truncate"
         >
-          {{ list.title }}
+          {{ listTitle }}
         </span>
-        <span v-if="list.type === 'assignee'" class="board-title-sub-text gl-ml-2">
+        <span
+          v-if="listType === 'assignee'"
+          v-show="!list.collapsed"
+          class="gl-ml-2 gl-font-weight-normal gl-text-gray-500"
+        >
           @{{ listAssignee }}
         </span>
+        <!-- EE end -->
         <gl-label
-          v-if="list.type === 'label'"
+          v-if="listType === 'label'"
           v-gl-tooltip.hover.bottom
           :background-color="list.label.color"
           :description="list.label.description"
           :scoped="showScopedLabels(list.label)"
-          :size="!list.isExpanded ? 'sm' : ''"
+          :size="list.collapsed ? 'sm' : ''"
           :title="list.label.title"
         />
       </div>
 
+      <!-- EE start -->
       <span
-        v-if="isSwimlanesHeader && !list.isExpanded"
+        v-if="isSwimlanesHeader && list.collapsed"
         ref="collapsedInfo"
         aria-hidden="true"
-        class="board-header-collapsed-info-icon gl-mt-2 gl-cursor-pointer gl-text-gray-700"
+        class="board-header-collapsed-info-icon gl-cursor-pointer gl-text-gray-500"
       >
         <gl-icon name="information" />
       </span>
-      <gl-tooltip v-if="isSwimlanesHeader && !list.isExpanded" :target="() => $refs.collapsedInfo">
+      <gl-tooltip v-if="isSwimlanesHeader && list.collapsed" :target="() => $refs.collapsedInfo">
         <div class="gl-font-weight-bold gl-pb-2">{{ collapsedTooltipTitle }}</div>
         <div v-if="list.maxIssueCount !== 0">
-          &#8226;
+          •
           <gl-sprintf :message="__('%{issuesSize} with a limit of %{maxIssueCount}')">
             <template #issuesSize>{{ issuesTooltipLabel }}</template>
             <template #maxIssueCount>{{ list.maxIssueCount }}</template>
           </gl-sprintf>
         </div>
-        <div v-else>&#8226; {{ issuesTooltipLabel }}</div>
+        <div v-else>• {{ issuesTooltipLabel }}</div>
         <div v-if="weightFeatureAvailable">
-          &#8226;
+          •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
             <template #totalWeight>{{ list.totalWeight }}</template>
           </gl-sprintf>
         </div>
       </gl-tooltip>
+      <!-- EE end -->
 
-      <board-delete
-        v-if="canAdminList && !list.preset && list.id"
-        :list="list"
-        inline-template="true"
-      >
-        <gl-button
-          v-gl-tooltip.hover.bottom
-          :class="{ 'gl-display-none': !list.isExpanded }"
-          :aria-label="__('Delete list')"
-          class="board-delete no-drag gl-pr-0 gl-shadow-none! gl-mr-3"
-          :title="__('Delete list')"
-          icon="remove"
-          size="small"
-          @click.stop="deleteBoard"
-        />
-      </board-delete>
       <div
-        v-if="showBoardListAndBoardInfo"
-        class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag text-secondary"
-        :class="{ 'gl-display-none!': !list.isExpanded && isSwimlanesHeader }"
+        class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag gl-text-gray-500"
+        :class="{
+          'gl-display-none!': list.collapsed && isSwimlanesHeader,
+          'gl-p-0': list.collapsed,
+        }"
       >
         <span class="gl-display-inline-flex">
           <gl-tooltip :target="() => $refs.issueCount" :title="issuesTooltipLabel" />
           <span ref="issueCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" name="issues" />
-            <issue-count :issues-size="list.issuesSize" :max-issue-count="list.maxIssueCount" />
+            <issue-count :issues-size="issuesCount" :max-issue-count="list.maxIssueCount" />
           </span>
-          <!-- The following is only true in EE. -->
+          <!-- EE start -->
           <template v-if="weightFeatureAvailable">
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
@@ -298,6 +324,7 @@ export default {
               {{ list.totalWeight }}
             </span>
           </template>
+          <!-- EE end -->
         </span>
       </div>
       <gl-button-group
@@ -306,13 +333,11 @@ export default {
       >
         <gl-button
           v-if="isNewIssueShown"
+          v-show="!list.collapsed"
           ref="newIssueBtn"
           v-gl-tooltip.hover
-          :class="{
-            'gl-display-none': !list.isExpanded,
-          }"
-          :aria-label="__('New issue')"
-          :title="__('New issue')"
+          :aria-label="$options.i18n.newIssue"
+          :title="$options.i18n.newIssue"
           class="issue-count-badge-add-button no-drag"
           icon="plus"
           @click="showNewIssueForm"
@@ -322,13 +347,13 @@ export default {
           v-if="isSettingsShown"
           ref="settingsBtn"
           v-gl-tooltip.hover
-          :aria-label="__('List settings')"
+          :aria-label="$options.i18n.listSettings"
           class="no-drag js-board-settings-button"
-          :title="__('List settings')"
+          :title="$options.i18n.listSettings"
           icon="settings"
           @click="openSidebarSettings"
         />
-        <gl-tooltip :target="() => $refs.settingsBtn">{{ __('List settings') }}</gl-tooltip>
+        <gl-tooltip :target="() => $refs.settingsBtn">{{ $options.i18n.listSettings }}</gl-tooltip>
       </gl-button-group>
     </h3>
   </header>

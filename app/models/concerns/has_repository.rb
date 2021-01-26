@@ -15,15 +15,6 @@ module HasRepository
 
   delegate :base_dir, :disk_path, to: :storage
 
-  class_methods do
-    def pick_repository_storage
-      # We need to ensure application settings are fresh when we pick
-      # a repository storage to use.
-      Gitlab::CurrentSettings.expire_current_application_settings
-      Gitlab::CurrentSettings.pick_repository_storage
-    end
-  end
-
   def valid_repo?
     repository.exists?
   rescue
@@ -71,6 +62,10 @@ module HasRepository
     raise NotImplementedError
   end
 
+  def lfs_enabled?
+    false
+  end
+
   def empty_repo?
     repository.empty?
   end
@@ -80,7 +75,11 @@ module HasRepository
   end
 
   def default_branch_from_preferences
-    empty_repo? ? Gitlab::CurrentSettings.default_branch_name : nil
+    return unless empty_repo?
+
+    group_branch_default_name = group&.default_branch_name if respond_to?(:group)
+
+    (group_branch_default_name || Gitlab::CurrentSettings.default_branch_name).presence
   end
 
   def reload_default_branch
@@ -99,6 +98,11 @@ module HasRepository
 
   def http_url_to_repo
     Gitlab::RepositoryUrlBuilder.build(repository.full_path, protocol: :http)
+  end
+
+  # Is overridden in EE::Project for Geo support
+  def lfs_http_url_to_repo(_operation = nil)
+    http_url_to_repo
   end
 
   def web_url(only_path: nil)

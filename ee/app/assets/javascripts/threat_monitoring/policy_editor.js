@@ -4,18 +4,36 @@ import createStore from './store';
 
 export default () => {
   const el = document.querySelector('#js-policy-builder-app');
-  const { networkPoliciesEndpoint } = el.dataset;
+  const {
+    environmentsEndpoint,
+    networkPoliciesEndpoint,
+    threatMonitoringPath,
+    policy,
+    environmentId,
+  } = el.dataset;
 
   const store = createStore();
+  store.dispatch('threatMonitoring/setEndpoints', {
+    environmentsEndpoint,
+  });
   store.dispatch('networkPolicies/setEndpoints', {
     networkPoliciesEndpoint,
   });
+
+  if (environmentId !== undefined) {
+    store.dispatch('threatMonitoring/setCurrentEnvironmentId', parseInt(environmentId, 10));
+  }
+
+  const props = { threatMonitoringPath };
+  if (policy) {
+    props.existingPolicy = JSON.parse(policy);
+  }
 
   return new Vue({
     el,
     store,
     render(createElement) {
-      return createElement(PolicyEditorApp, {});
+      return createElement(PolicyEditorApp, { props });
     },
   });
 };

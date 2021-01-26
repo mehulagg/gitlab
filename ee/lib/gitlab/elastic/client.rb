@@ -12,9 +12,10 @@ module Gitlab
       def self.build(config)
         base_config = {
           urls: config[:url],
+          request_timeout: config[:client_request_timeout],
           randomize_hosts: true,
           retry_on_failure: true
-        }
+        }.compact
 
         if config[:aws]
           creds = resolve_aws_credentials(config)

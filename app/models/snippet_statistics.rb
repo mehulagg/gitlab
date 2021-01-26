@@ -25,7 +25,7 @@ class SnippetStatistics < ApplicationRecord
 
   def update_file_count
     count = if snippet.repository_exists?
-              repository.ls_files(repository.root_ref).size
+              repository.ls_files(snippet.default_branch).size
             else
               0
             end
@@ -34,6 +34,8 @@ class SnippetStatistics < ApplicationRecord
   end
 
   def refresh!
+    return if Gitlab::Database.read_only?
+
     update_commit_count
     update_repository_size
     update_file_count

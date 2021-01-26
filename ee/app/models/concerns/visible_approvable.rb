@@ -17,7 +17,7 @@ module VisibleApprovable
     options = { target: :users }
     options[:code_owner] = false if exclude_code_owners
 
-    approvers = approval_state.filtered_approvers(options)
+    approvers = approval_state.filtered_approvers(**options)
     approvers.uniq!
     approvers
   end

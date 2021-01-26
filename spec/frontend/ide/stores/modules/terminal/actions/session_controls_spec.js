@@ -6,7 +6,7 @@ import * as mutationTypes from '~/ide/stores/modules/terminal/mutation_types';
 import * as actions from '~/ide/stores/modules/terminal/actions/session_controls';
 import httpStatus from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -281,7 +281,7 @@ describe('IDE store terminal session controls actions', () => {
       );
     });
 
-    [httpStatus.NOT_FOUND, httpStatus.UNPROCESSABLE_ENTITY].forEach(status => {
+    [httpStatus.NOT_FOUND, httpStatus.UNPROCESSABLE_ENTITY].forEach((status) => {
       it(`dispatches request and startSession on ${status}`, () => {
         mock
           .onPost(state.session.retryPath, { branch: rootState.currentBranchId, format: 'json' })

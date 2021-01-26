@@ -1,0 +1,7 @@
+- return unless show_trial_status_widget?(group)
+
+= nav_link do
+  #js-trial-status-widget{ data: { href: group_billings_path(group),
+    nav_icon_image_path: image_path('illustrations/golden_tanuki.svg'),
+    title: trial_days_remaining_in_words(group),
+    percentage_complete: group.trial_percentage_complete } }

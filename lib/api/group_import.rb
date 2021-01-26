@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class GroupImport < Grape::API::Instance
+  class GroupImport < ::API::Base
+    feature_category :importers
+
     helpers Helpers::FileUploadHelpers
 
     helpers do

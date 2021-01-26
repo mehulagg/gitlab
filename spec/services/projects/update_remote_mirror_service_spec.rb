@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Projects::UpdateRemoteMirrorService do
-  let(:project) { create(:project, :repository) }
-  let(:remote_project) { create(:forked_project_with_submodules) }
-  let(:remote_mirror) { create(:remote_mirror, project: project, enabled: true) }
+  let_it_be(:project) { create(:project, :repository, lfs_enabled: true) }
+  let_it_be(:remote_project) { create(:forked_project_with_submodules) }
+  let_it_be(:remote_mirror) { create(:remote_mirror, project: project, enabled: true) }
+
   let(:remote_name) { remote_mirror.remote_name }
 
   subject(:service) { described_class.new(project, project.creator) }
@@ -56,6 +57,26 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
       expect(remote_mirror.last_error).to include('Badly broken')
     end
 
+    context 'when the URL is blocked' do
+      before do
+        allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(true)
+      end
+
+      it 'fails and returns error status' do
+        expect(execute!).to eq(status: :error, message: 'The remote mirror URL is invalid.')
+      end
+    end
+
+    context "when given URLs containing escaped elements" do
+      it_behaves_like "URLs containing escaped elements return expected status" do
+        let(:result) { execute! }
+
+        before do
+          allow(remote_mirror).to receive(:url).and_return(url)
+        end
+      end
+    end
+
     context 'when the update fails because of a `Gitlab::Git::CommandError`' do
       before do
         allow(remote_mirror).to receive(:update_repository)
@@ -92,6 +113,46 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
         expect(remote_mirror.last_error).to include("Some refs have diverged")
         expect(remote_mirror.last_error).to include("refs/heads/master\n")
         expect(remote_mirror.last_error).to include("refs/heads/develop")
+      end
+    end
+
+    context "sending lfs objects" do
+      let_it_be(:lfs_pointer) { create(:lfs_objects_project, project: project) }
+
+      before do
+        stub_lfs_setting(enabled: true)
+      end
+
+      it 'pushes LFS objects to a HTTP repository' do
+        expect_next_instance_of(Lfs::PushService) do |service|
+          expect(service).to receive(:execute)
+        end
+
+        execute!
+      end
+
+      it 'does nothing to an SSH repository' do
+        remote_mirror.update!(url: 'ssh://example.com')
+
+        expect_any_instance_of(Lfs::PushService).not_to receive(:execute)
+
+        execute!
+      end
+
+      it 'does nothing if LFS is disabled' do
+        expect(project).to receive(:lfs_enabled?) { false }
+
+        expect_any_instance_of(Lfs::PushService).not_to receive(:execute)
+
+        execute!
+      end
+
+      it 'does nothing if non-password auth is specified' do
+        remote_mirror.update!(auth_method: 'ssh_public_key')
+
+        expect_any_instance_of(Lfs::PushService).not_to receive(:execute)
+
+        execute!
       end
     end
   end

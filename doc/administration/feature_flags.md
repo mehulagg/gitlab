@@ -1,7 +1,7 @@
 ---
-stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
 type: reference
 description: "GitLab administrator: enable and disable GitLab features deployed behind feature flags"
 ---
@@ -13,12 +13,12 @@ to deploy features in an early stage of development so that they can be
 incrementally rolled out.
 
 Before making them permanently available, features can be deployed behind
-flags for a [number of reasons](../development/feature_flags/process.md#when-to-use-feature-flags), such as:
+flags for a [number of reasons](../development/feature_flags/index.md#when-to-use-feature-flags), such as:
 
 - To test the feature.
 - To get feedback from users and customers while in an early stage of the development of the feature.
 - To evaluate users adoption.
-- To evaluate how it impacts GitLab's performance.
+- To evaluate how it impacts the performance of GitLab.
 - To build it in smaller pieces throughout releases.
 
 Features behind flags can be gradually rolled out, typically:
@@ -36,8 +36,8 @@ error, it's very important that you [**provide feedback**](https://gitlab.com/gi
 as possible so we can improve or fix it while behind a flag. When you upgrade
 GitLab to an earlier version, the feature flag status may change.
 
-NOTE: **Note:**
-Mind that features deployed behind feature flags may not be ready for
+WARNING:
+Features deployed behind feature flags may not be ready for
 production use. However, disabling features behind flags that were deployed
 enabled by default may also present a risk. If they're enabled, we recommend
 you leave them as-is.
@@ -65,7 +65,7 @@ For installations from the source:
 sudo -u git -H bundle exec rails console -e production
 ```
 
-For details, see [starting a Rails console session](troubleshooting/debug.md#starting-a-rails-console-session).
+For details, see [starting a Rails console session](operations/rails_console.md#starting-a-rails-console-session).
 
 ### Enable or disable the feature
 
@@ -79,10 +79,10 @@ To enable a feature, run:
 Feature.enable(:<feature flag>)
 ```
 
-Example, to enable Evidence Collection:
+Example, to enable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.enable(:release_evidence_collection)
+Feature.enable(:my_awesome_feature)
 ```
 
 To disable a feature, run:
@@ -91,10 +91,10 @@ To disable a feature, run:
 Feature.disable(:<feature flag>)
 ```
 
-Example, to disable Evidence Collection:
+Example, to disable a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.disable(:release_evidence_collection)
+Feature.disable(:my_awesome_feature)
 ```
 
 Some feature flags can be enabled or disabled on a per project basis:
@@ -103,27 +103,27 @@ Some feature flags can be enabled or disabled on a per project basis:
 Feature.enable(:<feature flag>, Project.find(<project id>))
 ```
 
-For example, to enable the [`:junit_pipeline_view`](../ci/junit_test_reports.md#enabling-the-junit-test-reports-feature-core-only) feature flag for project `1234`:
+For example, to enable the [`:product_analytics`](../operations/product_analytics.md#enable-or-disable-product-analytics) feature flag for project `1234`:
 
 ```ruby
-Feature.enable(:junit_pipeline_view, Project.find(1234))
+Feature.enable(:product_analytics, Project.find(1234))
 ```
 
 `Feature.enable` and `Feature.disable` always return `nil`, this is not an indication that the command failed:
 
 ```ruby
-irb(main):001:0> Feature.enable(:release_evidence_collection)
+irb(main):001:0> Feature.enable(:my_awesome_feature)
 => nil
 ```
 
-To check if a flag is enabled or disabled you can use `Feature.enabled?` or `Feature.disabled?`:
+To check if a flag is enabled or disabled you can use `Feature.enabled?` or `Feature.disabled?`. For example, for a fictional feature flag named `my_awesome_feature`:
 
 ```ruby
-Feature.enable(:release_evidence_collection)
+Feature.enable(:my_awesome_feature)
 => nil
-Feature.enabled?(:release_evidence_collection)
+Feature.enabled?(:my_awesome_feature)
 => true
-Feature.disabled?(:release_evidence_collection)
+Feature.disabled?(:my_awesome_feature)
 => false
 ```
 

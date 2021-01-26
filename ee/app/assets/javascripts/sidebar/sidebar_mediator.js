@@ -23,7 +23,7 @@ export default class SidebarMediator extends CESidebarMediator {
         this.store.setWeight(data.weight);
         this.store.setLoadingState('weight', false);
       })
-      .catch(err => {
+      .catch((err) => {
         this.store.setLoadingState('weight', false);
         throw err;
       });
@@ -39,7 +39,7 @@ export default class SidebarMediator extends CESidebarMediator {
         }
         this.store.setStatus(data?.updateIssue?.issue?.healthStatus);
       })
-      .catch(error => {
+      .catch((error) => {
         throw error;
       })
       .finally(() => this.store.setFetchingState('status', false));

@@ -1,6 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 
 import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
@@ -23,7 +23,7 @@ export const fetchReport = ({ state, dispatch }) => {
       if (!state.blobPath) throw new Error();
       dispatch('receiveReportSuccess', data);
     })
-    .catch(error => {
+    .catch((error) => {
       dispatch('receiveReportError', error);
       createFlash(s__('ciReport|There was an error fetching the codequality report.'));
     });

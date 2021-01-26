@@ -120,7 +120,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
 
     let(:expected_extension) { 'tar.gz' }
     let(:expected_filename) { "#{expected_prefix}.#{expected_extension}" }
-    let(:expected_path) { File.join(storage_path, cache_key, expected_filename) }
+    let(:expected_path) { File.join(storage_path, cache_key, "@v2", expected_filename) }
     let(:expected_prefix) { "gitlab-git-test-#{ref}-#{SeedRepo::LastCommit::ID}" }
 
     subject(:metadata) { repository.archive_metadata(ref, storage_path, 'gitlab-git-test', format, append_sha: append_sha, path: path) }
@@ -133,12 +133,32 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       expect(metadata['ArchivePrefix']).to eq(expected_prefix)
     end
 
-    it 'sets ArchivePath to the expected globally-unique path' do
-      # This is really important from a security perspective. Think carefully
-      # before changing it: https://gitlab.com/gitlab-org/gitlab-foss/issues/45689
-      expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+    context 'when :include_lfs_blobs_in_archive feature flag is disabled' do
+      let(:expected_path) { File.join(storage_path, cache_key, expected_filename) }
 
-      expect(metadata['ArchivePath']).to eq(expected_path)
+      before do
+        stub_feature_flags(include_lfs_blobs_in_archive: false)
+      end
+
+      it 'sets ArchivePath to the expected globally-unique path' do
+        # This is really important from a security perspective. Think carefully
+        # before changing it: https://gitlab.com/gitlab-org/gitlab-foss/issues/45689
+        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+
+        expect(metadata['ArchivePath']).to eq(expected_path)
+      end
+    end
+
+    context 'when :include_lfs_blobs_in_archive feature flag is enabled' do
+      before do
+        stub_feature_flags(include_lfs_blobs_in_archive: true)
+      end
+
+      it 'sets ArchivePath to the expected globally-unique path' do
+        expect(expected_path).to include(File.join(repository.gl_repository, SeedRepo::LastCommit::ID))
+
+        expect(metadata['ArchivePath']).to eq(expected_path)
+      end
     end
 
     context 'path is set' do
@@ -500,12 +520,13 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
         forced: true,
         no_tags: true,
         timeout: described_class::GITLAB_PROJECTS_TIMEOUT,
-        prune: false
+        prune: false,
+        check_tags_changed: false
       }
 
       expect(repository.gitaly_repository_client).to receive(:fetch_remote).with('remote-name', expected_opts)
 
-      repository.fetch_remote('remote-name', ssh_auth: ssh_auth, forced: true, no_tags: true, prune: false)
+      repository.fetch_remote('remote-name', ssh_auth: ssh_auth, forced: true, no_tags: true, prune: false, check_tags_changed: false)
     end
 
     it_behaves_like 'wrapping gRPC errors', Gitlab::GitalyClient::RepositoryService, :fetch_remote do
@@ -579,9 +600,11 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       let(:commit_with_old_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_old_name_id)
       end
+
       let(:commit_with_new_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_new_name_id)
       end
+
       let(:rename_commit) do
         Gitlab::Git::Commit.find(repository, @rename_commit_id)
       end
@@ -907,7 +930,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       end
 
       context 'with max_count' do
-        it 'returns the number of commits with path ' do
+        it 'returns the number of commits with path' do
           options = { ref: 'master', max_count: 5 }
 
           expect(repository.count_commits(options)).to eq(5)
@@ -915,7 +938,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       end
 
       context 'with path' do
-        it 'returns the number of commits with path ' do
+        it 'returns the number of commits with path' do
           options = { ref: 'master', path: 'encoding' }
 
           expect(repository.count_commits(options)).to eq(2)
@@ -943,7 +966,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
           end
 
           context 'with max_count' do
-            it 'returns the number of commits with path ' do
+            it 'returns the number of commits with path' do
               options = { from: 'fix-mode', to: 'fix-blob-path', left_right: true, max_count: 1 }
 
               expect(repository.count_commits(options)).to eq([1, 1])
@@ -1158,6 +1181,66 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       collection = repository.diff_stats(Gitlab::Git::BLANK_SHA, 'master')
 
       expect(collection).to be_a(Gitlab::Git::DiffStatsCollection)
+      expect(collection).to be_a(Enumerable)
+      expect(collection.to_a).to be_empty
+    end
+  end
+
+  describe '#find_changed_paths' do
+    let(:commit_1) { 'fa1b1e6c004a68b7d8763b86455da9e6b23e36d6' }
+    let(:commit_2) { '4b4918a572fa86f9771e5ba40fbd48e1eb03e2c6' }
+    let(:commit_3) { '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9' }
+    let(:commit_1_files) do
+      [
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "files/executables/ls"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "files/executables/touch"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "files/links/regex.rb"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "files/links/ruby-style-guide.md"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "files/links/touch"),
+        Gitlab::Git::ChangedPath.new(status: :MODIFIED, path: ".gitmodules"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "deeper/nested/six"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "nested/six")
+      ]
+    end
+
+    let(:commit_2_files) do
+      [Gitlab::Git::ChangedPath.new(status: :ADDED, path: "bin/executable")]
+    end
+
+    let(:commit_3_files) do
+      [
+        Gitlab::Git::ChangedPath.new(status: :MODIFIED, path: ".gitmodules"),
+        Gitlab::Git::ChangedPath.new(status: :ADDED, path: "gitlab-shell")
+      ]
+    end
+
+    it 'returns a list of paths' do
+      collection = repository.find_changed_paths([commit_1, commit_2, commit_3])
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.as_json).to eq((commit_1_files + commit_2_files + commit_3_files).as_json)
+    end
+
+    it 'returns no paths when SHAs are invalid' do
+      collection = repository.find_changed_paths(['invalid', commit_1])
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.to_a).to be_empty
+    end
+
+    it 'returns a list of paths even when containing a blank ref' do
+      collection = repository.find_changed_paths([nil, commit_1])
+
+      expect(collection).to be_a(Enumerable)
+      expect(collection.as_json).to eq(commit_1_files.as_json)
+    end
+
+    it 'returns no paths when the commits are nil' do
+      expect_any_instance_of(Gitlab::GitalyClient::CommitService)
+        .not_to receive(:find_changed_paths)
+
+      collection = repository.find_changed_paths([nil, nil])
+
       expect(collection).to be_a(Enumerable)
       expect(collection.to_a).to be_empty
     end
@@ -1628,13 +1711,14 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:right_branch) { 'test-master' }
     let(:first_parent_ref) { 'refs/heads/test-master' }
     let(:target_ref) { 'refs/merge-requests/999/merge' }
+    let(:allow_conflicts) { false }
 
     before do
       repository.create_branch(right_branch, branch_head) unless repository.ref_exists?(first_parent_ref)
     end
 
     def merge_to_ref
-      repository.merge_to_ref(user, left_sha, right_branch, target_ref, 'Merge message', first_parent_ref)
+      repository.merge_to_ref(user, left_sha, right_branch, target_ref, 'Merge message', first_parent_ref, allow_conflicts)
     end
 
     it 'generates a commit in the target_ref' do
@@ -2077,7 +2161,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:object_pool_rugged) { Rugged::Repository.new(object_pool_path) }
 
     before do
-      object_pool.create
+      object_pool.create # rubocop:disable Rails/SaveBang
     end
 
     it 'does not raise an error when disconnecting a non-linked repository' do
@@ -2178,6 +2262,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:new_repository) do
       Gitlab::Git::Repository.new('test_second_storage', TEST_REPO_PATH, '', 'group/project')
     end
+
     let(:new_repository_path) { File.join(TestEnv::SECOND_STORAGE_PATH, new_repository.relative_path) }
 
     subject { new_repository.replicate(repository) }

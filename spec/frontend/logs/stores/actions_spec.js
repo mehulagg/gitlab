@@ -17,7 +17,7 @@ import {
 import { defaultTimeRange } from '~/vue_shared/constants';
 
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 
 import {
   mockPodName,
@@ -62,7 +62,7 @@ describe('Logs Store actions', () => {
 
   const latestGetParams = () => mock.history.get[mock.history.get.length - 1].params;
 
-  convertToFixedRange.mockImplementation(range => {
+  convertToFixedRange.mockImplementation((range) => {
     if (range === defaultTimeRange) {
       return { ...mockDefaultRange };
     }

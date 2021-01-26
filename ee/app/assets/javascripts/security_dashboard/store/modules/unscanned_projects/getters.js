@@ -9,7 +9,7 @@ export const untestedProjectsCount = (state, getters) => getters.untestedProject
 export const outdatedProjects = ({ projects }) =>
   groupByDateRanges({
     ranges: UNSCANNED_PROJECTS_DATE_RANGES,
-    dateFn: x => x.securityTestsLastSuccessfulRun,
+    dateFn: (x) => x.securityTestsLastSuccessfulRun,
     projects,
   });
 

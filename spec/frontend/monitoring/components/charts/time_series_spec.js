@@ -2,7 +2,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { setTestTimeout } from 'helpers/timeout';
 import timezoneMock from 'timezone-mock';
 import { GlLink } from '@gitlab/ui';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import { TEST_HOST } from 'helpers/test_constants';
 import {
   GlAreaChart,
   GlLineChart,
@@ -12,20 +12,25 @@ import {
 import { shallowWrapperContainsSlotText } from 'helpers/vue_test_utils_helper';
 import { panelTypes, chartHeight } from '~/monitoring/constants';
 import TimeSeries from '~/monitoring/components/charts/time_series.vue';
-import { deploymentData, mockProjectDir, annotationsData } from '../../mock_data';
+import {
+  deploymentData,
+  mockProjectDir,
+  annotationsData,
+  mockFixedTimeRange,
+} from '../../mock_data';
 
 import { timeSeriesGraphData } from '../../graph_data';
 
 jest.mock('lodash/throttle', () =>
   // this throttle mock executes immediately
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.cancel = jest.fn();
     return func;
   }),
 );
 jest.mock('~/lib/utils/icon_utils', () => ({
-  getSvgIconPathContent: jest.fn().mockImplementation(icon => Promise.resolve(`${icon}-content`)),
+  getSvgIconPathContent: jest.fn().mockImplementation((icon) => Promise.resolve(`${icon}-content`)),
 }));
 
 describe('Time series component', () => {
@@ -42,12 +47,13 @@ describe('Time series component', () => {
         deploymentData,
         annotations: annotationsData,
         projectPath: `${TEST_HOST}${mockProjectDir}`,
+        timeRange: mockFixedTimeRange,
         ...props,
       },
       stubs: {
         GlPopover: true,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
   };
 
@@ -116,7 +122,7 @@ describe('Time series component', () => {
                   },
                 ],
               }),
-              off: jest.fn(eChartEvent => {
+              off: jest.fn((eChartEvent) => {
                 delete eChartMock.handlers[eChartEvent];
               }),
               on: jest.fn((eChartEvent, fn) => {
@@ -187,7 +193,7 @@ describe('Time series component', () => {
           it('does not throw error if data point is outside the zoom range', () => {
             const seriesDataWithoutValue = {
               ...mockLineSeriesData(),
-              seriesData: mockLineSeriesData().seriesData.map(data => ({
+              seriesData: mockLineSeriesData().seriesData.map((data) => ({
                 ...data,
                 value: undefined,
               })),
@@ -220,7 +226,7 @@ describe('Time series component', () => {
               ]);
 
               expect(
-                shallowWrapperContainsSlotText(wrapper.find(GlLineChart), 'tooltipContent', value),
+                shallowWrapperContainsSlotText(wrapper.find(GlLineChart), 'tooltip-content', value),
               ).toBe(true);
             });
 
@@ -264,7 +270,7 @@ describe('Time series component', () => {
             beforeEach(() => {
               wrapper.vm.formatTooltipText({
                 ...mockAnnotationsSeriesData,
-                seriesData: mockAnnotationsSeriesData.seriesData.map(data => ({
+                seriesData: mockAnnotationsSeriesData.seriesData.map((data) => ({
                   ...data,
                   data: annotationsMetadata,
                 })),
@@ -382,6 +388,25 @@ describe('Time series component', () => {
         });
 
         describe('chartOptions', () => {
+          describe('x-Axis bounds', () => {
+            it('is set to the time range bounds', () => {
+              expect(getChartOptions().xAxis).toMatchObject({
+                min: mockFixedTimeRange.start,
+                max: mockFixedTimeRange.end,
+              });
+            });
+
+            it('is not set if time range is not set or incorrectly set', () => {
+              wrapper.setProps({
+                timeRange: {},
+              });
+              return wrapper.vm.$nextTick(() => {
+                expect(getChartOptions().xAxis).not.toHaveProperty('min');
+                expect(getChartOptions().xAxis).not.toHaveProperty('max');
+              });
+            });
+          });
+
           describe('dataZoom', () => {
             it('renders with scroll handle icons', () => {
               expect(getChartOptions().dataZoom).toHaveLength(1);
@@ -521,7 +546,7 @@ describe('Time series component', () => {
         describe('xAxisLabel', () => {
           const mockDate = Date.UTC(2020, 4, 26, 20); // 8:00 PM in GMT
 
-          const useXAxisFormatter = date => {
+          const useXAxisFormatter = (date) => {
             const { xAxis } = getChartOptions();
             const { formatter } = xAxis.axisLabel;
             return formatter(date);
@@ -595,7 +620,7 @@ describe('Time series component', () => {
         },
       ];
 
-      glChartComponents.forEach(dynamicComponent => {
+      glChartComponents.forEach((dynamicComponent) => {
         describe(`GitLab UI: ${dynamicComponent.chartType}`, () => {
           const findChartComponent = () => wrapper.find(dynamicComponent.component);
 
@@ -607,9 +632,8 @@ describe('Time series component', () => {
             return wrapper.vm.$nextTick();
           });
 
-          it('is a Vue instance', () => {
+          it('exists', () => {
             expect(findChartComponent().exists()).toBe(true);
-            expect(findChartComponent().isVueInstance()).toBe(true);
           });
 
           it('receives data properties needed for proper chart render', () => {
@@ -627,7 +651,7 @@ describe('Time series component', () => {
 
             return wrapper.vm.$nextTick(() => {
               expect(
-                shallowWrapperContainsSlotText(findChartComponent(), 'tooltipTitle', mockTitle),
+                shallowWrapperContainsSlotText(findChartComponent(), 'tooltip-title', mockTitle),
               ).toBe(true);
             });
           });
@@ -647,7 +671,7 @@ describe('Time series component', () => {
 
             it('uses deployment title', () => {
               expect(
-                shallowWrapperContainsSlotText(findChartComponent(), 'tooltipTitle', 'Deployed'),
+                shallowWrapperContainsSlotText(findChartComponent(), 'tooltip-title', 'Deployed'),
               ).toBe(true);
             });
 
@@ -681,7 +705,7 @@ describe('Time series component', () => {
         let lineColors;
 
         beforeEach(() => {
-          lineColors = wrapper.find(GlAreaChart).vm.series.map(item => item.lineStyle.color);
+          lineColors = wrapper.find(GlAreaChart).vm.series.map((item) => item.lineStyle.color);
         });
 
         it('should contain different colors for contiguous time series', () => {
@@ -703,7 +727,7 @@ describe('Time series component', () => {
           const legendColors = wrapper
             .find(GlChartLegend)
             .props('seriesInfo')
-            .map(item => item.color);
+            .map((item) => item.color);
 
           lineColors.forEach((color, index) => {
             expect(color).toBe(legendColors[index]);

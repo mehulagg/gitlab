@@ -10,6 +10,7 @@ RSpec.describe 'User comments on a diff', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:user) { create(:user) }
 
   before do
@@ -30,10 +31,11 @@ RSpec.describe 'User comments on a diff', :js do
             click_button('Add comment now')
           end
 
-          page.within('.diff-files-holder > div:nth-child(3)') do
+          page.within('.diff-files-holder > div:nth-child(6)') do
             expect(page).to have_content('Line is wrong')
 
-            find('.js-btn-vue-toggle-comments').click
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
@@ -51,7 +53,7 @@ RSpec.describe 'User comments on a diff', :js do
 
           wait_for_requests
 
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
@@ -65,29 +67,31 @@ RSpec.describe 'User comments on a diff', :js do
           wait_for_requests
 
           # Hide the comment.
-          page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+          page.within('.diff-files-holder > div:nth-child(6)') do
+            find('.js-diff-more-actions').click
+            click_button 'Hide comments on this file'
 
             expect(page).not_to have_content('Line is wrong')
           end
 
           # At this moment a user should see only one comment.
           # The other one should be hidden.
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
           # Show the comment.
-          page.within('.diff-files-holder > div:nth-child(3)') do
-            find('.js-btn-vue-toggle-comments').click
+          page.within('.diff-files-holder > div:nth-child(6)') do
+            find('.js-diff-more-actions').click
+            click_button 'Show comments on this file'
           end
 
           # Now both the comments should be shown.
-          page.within('.diff-files-holder > div:nth-child(3) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(6) .note-body > .note-text') do
             expect(page).to have_content('Line is wrong')
           end
 
-          page.within('.diff-files-holder > div:nth-child(2) .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
 
@@ -98,11 +102,11 @@ RSpec.describe 'User comments on a diff', :js do
 
           wait_for_requests
 
-          page.within('.diff-files-holder > div:nth-child(3) .parallel .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(6) .parallel .note-body > .note-text') do
             expect(page).to have_content('Line is wrong')
           end
 
-          page.within('.diff-files-holder > div:nth-child(2) .parallel .note-body > .note-text') do
+          page.within('.diff-files-holder > div:nth-child(5) .parallel .note-body > .note-text') do
             expect(page).to have_content('Line is correct')
           end
         end
@@ -132,13 +136,7 @@ RSpec.describe 'User comments on a diff', :js do
         add_comment('-13', '+15')
       end
 
-      it 'allows comments to start above hidden lines and end below' do
-        # click +28, select 21 add and verify comment
-        click_diff_line(find('div[data-path="files/ruby/popen.rb"] .new_line a[data-linenumber="28"]').find(:xpath, '../..'), 'right')
-        add_comment('21', '+28')
-      end
-
-      it 'allows comments on previously hidden lines at the top of a file' do
+      it 'allows comments on previously hidden lines at the top of a file', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/285294' do
         # Click -9, expand up, select 1 add and verify comment
         page.within('[data-path="files/ruby/popen.rb"]') do
           all('.js-unfold-all')[0].click
@@ -206,7 +204,7 @@ RSpec.describe 'User comments on a diff', :js do
         click_button('Add comment now')
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         find('.js-note-edit').click
 
         page.within('.current-note-edit-form') do
@@ -217,7 +215,7 @@ RSpec.describe 'User comments on a diff', :js do
         expect(page).not_to have_button('Save comment', disabled: true)
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         expect(page).to have_content('Typo, please fix').and have_no_content('Line is wrong')
       end
     end
@@ -236,7 +234,7 @@ RSpec.describe 'User comments on a diff', :js do
         expect(page).to have_content('1')
       end
 
-      page.within('.diff-file:nth-of-type(5) .discussion .note') do
+      page.within('.diff-file:nth-of-type(1) .discussion .note') do
         find('.more-actions').click
         find('.more-actions .dropdown-menu li', match: :first)
 

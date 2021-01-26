@@ -17,6 +17,46 @@ RSpec.describe API::Groups do
     group.ldap_group_links.create cn: 'ldap-group', group_access: Gitlab::Access::MAINTAINER, provider: 'ldap'
   end
 
+  shared_examples 'inaccessable by reporter role and lower' do
+    context 'for reporter' do
+      before do
+        reporter = create(:user)
+        group.add_reporter(reporter)
+
+        get api(path, reporter)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for guest' do
+      before do
+        guest = create(:user)
+        group.add_guest(guest)
+
+        get api(path, guest)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'for anonymous' do
+      before do
+        anonymous = create(:user)
+
+        get api(path, anonymous)
+      end
+
+      it 'returns 403 response' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+  end
+
   describe "GET /groups" do
     context "when authenticated as user" do
       it "returns ldap details" do
@@ -203,7 +243,7 @@ RSpec.describe API::Groups do
         let(:user) { admin }
 
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_NONE
           false | false | Gitlab::Access::PROTECTION_NONE
@@ -226,7 +266,7 @@ RSpec.describe API::Groups do
 
       context 'authenticated a normal user' do
         where(:feature_enabled, :setting_enabled, :default_branch_protection) do
-          false | false | Gitlab::Access::PROTECTION_NONE
+          true  | true  | Gitlab::Access::PROTECTION_NONE
           false | true  | Gitlab::Access::PROTECTION_NONE
           true  | false | Gitlab::Access::PROTECTION_FULL
           false | false | Gitlab::Access::PROTECTION_NONE
@@ -507,9 +547,21 @@ RSpec.describe API::Groups do
   describe 'GET group/:id/audit_events' do
     let(:path) { "/groups/#{group.id}/audit_events" }
 
-    context 'when authenticated, as a user' do
-      it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a member' do
+      before do
+        stub_licensed_features(audit_events: true)
+        group.add_developer(user)
+      end
+
+      it 'returns only events authored by current user' do
+        group_audit_event = create(:group_audit_event, entity_id: group.id, author_id: user.id)
+        create(:group_audit_event, entity_id: group.id, author_id: another_user.id)
+
+        get api(path, user)
+
+        expect_response_contain_exactly(group_audit_event.id)
       end
     end
 
@@ -602,9 +654,33 @@ RSpec.describe API::Groups do
 
     let_it_be(:group_audit_event) { create(:group_audit_event, created_at: Date.new(2000, 1, 10), entity_id: group.id) }
 
-    context 'when authenticated, as a user' do
-      it_behaves_like '403 response' do
-        let(:request) { get api(path, create(:user)) }
+    it_behaves_like 'inaccessable by reporter role and lower'
+
+    context 'when authenticated, as a member' do
+      let_it_be(:developer) { create(:user) }
+
+      before do
+        stub_licensed_features(audit_events: true)
+        group.add_developer(developer)
+      end
+
+      it 'returns 200 response' do
+        audit_event = create(:group_audit_event, entity_id: group.id, author_id: developer.id)
+        path = "/groups/#{group.id}/audit_events/#{audit_event.id}"
+
+        get api(path, developer)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'existing audit event of a different user' do
+        let_it_be(:audit_event) { create(:group_audit_event, entity_id: group.id, author_id: another_user.id) }
+
+        let(:path) { "/groups/#{group.id}/audit_events/#{audit_event.id}" }
+
+        it_behaves_like '404 response' do
+          let(:request) { get api(path, developer) }
+        end
       end
     end
 
@@ -690,13 +766,13 @@ RSpec.describe API::Groups do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'period for adjourned deletion is greater than 0' do
+      context 'period for delayed deletion is greater than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
 
         context 'success' do
-          it 'marks the group for adjourned deletion' do
+          it 'marks the group for delayed deletion' do
             subject
             group.reload
 
@@ -724,7 +800,7 @@ RSpec.describe API::Groups do
         end
       end
 
-      context 'period of adjourned deletion is set to 0' do
+      context 'period of delayed deletion is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end

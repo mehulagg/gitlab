@@ -51,7 +51,7 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
     create(:geo_lfs_object_registry, :failed, lfs_object: lfs_object_2)
 
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 5)
-    secondary.update!(files_max_capacity: 2)
+    secondary.update!(files_max_capacity: 4)
     allow(Gitlab::SidekiqStatus).to receive(:job_status).with([]).and_return([]).twice
     allow(Gitlab::SidekiqStatus).to receive(:job_status).with(%w[123 456]).and_return([true, true], [true, true], [false, false])
 
@@ -70,7 +70,7 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
     create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_3)
 
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 3)
-    secondary.update!(files_max_capacity: 3)
+    secondary.update!(files_max_capacity: 6)
 
     expect(Geo::FileDownloadWorker).to receive(:perform_async).with('lfs', lfs_object_1.id).once do
       Thread.new do
@@ -368,7 +368,7 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
   # 2. We send 2, wait for 1 to finish, and then send again.
   it 'attempts to load a new batch without pending downloads' do
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 5)
-    secondary.update!(files_max_capacity: 2)
+    secondary.update!(files_max_capacity: 4)
     result_object = double(:result, success: true, bytes_downloaded: 100, primary_missing_file: false)
     allow_any_instance_of(::Gitlab::Geo::Replication::BaseTransfer).to receive(:download_from_primary).and_return(result_object)
 

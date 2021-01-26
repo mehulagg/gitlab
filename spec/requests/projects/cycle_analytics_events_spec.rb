@@ -12,7 +12,7 @@ RSpec.describe 'value stream analytics events' do
       project.add_developer(user)
 
       3.times do |count|
-        Timecop.freeze(Time.now + count.days) do
+        travel_to(Time.now + count.days) do
           create_cycle
         end
       end
@@ -50,7 +50,7 @@ RSpec.describe 'value stream analytics events' do
       expect(json_response['events'].first['iid']).to eq(first_mr_iid)
     end
 
-    it 'lists the test events', :sidekiq_might_not_need_inline do
+    it 'lists the test events', :sidekiq_inline do
       get project_cycle_analytics_test_path(project, format: :json)
 
       expect(json_response['events']).not_to be_empty
@@ -66,31 +66,11 @@ RSpec.describe 'value stream analytics events' do
       expect(json_response['events'].first['iid']).to eq(first_mr_iid)
     end
 
-    it 'lists the staging events', :sidekiq_might_not_need_inline do
+    it 'lists the staging events', :sidekiq_inline do
       get project_cycle_analytics_staging_path(project, format: :json)
 
       expect(json_response['events']).not_to be_empty
       expect(json_response['events'].first['date']).not_to be_empty
-    end
-
-    it 'lists the production events', :sidekiq_might_not_need_inline do
-      get project_cycle_analytics_production_path(project, format: :json)
-
-      first_issue_iid = project.issues.sort_by_attribute(:created_desc).pluck(:iid).first.to_s
-
-      expect(json_response['events']).not_to be_empty
-      expect(json_response['events'].first['iid']).to eq(first_issue_iid)
-    end
-
-    context 'specific branch' do
-      it 'lists the test events', :sidekiq_might_not_need_inline do
-        branch = project.merge_requests.first.source_branch
-
-        get project_cycle_analytics_test_path(project, format: :json, branch: branch)
-
-        expect(json_response['events']).not_to be_empty
-        expect(json_response['events'].first['date']).not_to be_empty
-      end
     end
 
     context 'with private project and builds' do
@@ -132,5 +112,7 @@ RSpec.describe 'value stream analytics events' do
     merge_merge_requests_closing_issue(user, project, issue)
 
     ProcessCommitWorker.new.perform(project.id, user.id, mr.commits.last.to_hash)
+
+    mr.metrics.update!(latest_build_started_at: 1.hour.ago, latest_build_finished_at: Time.now)
   end
 end

@@ -26,6 +26,9 @@ RSpec.describe Mutations::AlertManagement::CreateAlertIssue do
             errors: []
           )
         end
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_created
+        it_behaves_like 'an incident management tracked event', :incident_management_alert_create_incident
       end
 
       context 'when CreateAlertIssue responds with an error' do

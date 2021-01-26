@@ -3,12 +3,15 @@
 module Gitlab
   module Template
     class GitlabCiYmlTemplate < BaseTemplate
-      def content
-        explanation = "# This file is a template, and might need editing before it works on your project."
-        [explanation, super].join("\n")
+      BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}].freeze
+
+      def description
+        "# This file is a template, and might need editing before it works on your project."
       end
 
       class << self
+        include Gitlab::Utils::StrongMemoize
+
         def extension
           '.gitlab-ci.yml'
         end
@@ -22,10 +25,20 @@ module Gitlab
           }
         end
 
-        def disabled_templates
-          %w[
-            Verify/Browser-Performance
-          ]
+        def include_categories_for_file
+          {
+            "SAST#{self.extension}" => { 'Security' => 'Security' }
+          }
+        end
+
+        def excluded_patterns
+          strong_memoize(:excluded_patterns) do
+            BASE_EXCLUDED_PATTERNS + additional_excluded_patterns
+          end
+        end
+
+        def additional_excluded_patterns
+          [%r{Verify/Browser-Performance}]
         end
 
         def base_dir
@@ -34,7 +47,11 @@ module Gitlab
 
         def finder(project = nil)
           Gitlab::Template::Finders::GlobalTemplateFinder.new(
-            self.base_dir, self.extension, self.categories, exclusions: self.disabled_templates
+            self.base_dir,
+            self.extension,
+            self.categories,
+            self.include_categories_for_file,
+            excluded_patterns: self.excluded_patterns
           )
         end
       end

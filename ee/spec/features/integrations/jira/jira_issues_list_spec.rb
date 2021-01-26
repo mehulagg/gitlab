@@ -9,6 +9,7 @@ RSpec.describe 'Jira issues list' do
 
   before do
     stub_licensed_features(jira_issues_integration: true)
+    stub_feature_flags(jira_issues_list: false)
     project.add_user(user, :developer)
     sign_in(user)
   end

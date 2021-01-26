@@ -134,6 +134,16 @@ module Gitlab
           end
         end
 
+        class HashOrBooleanValidator < ActiveModel::EachValidator
+          include LegacyValidationHelpers
+
+          def validate_each(record, attribute, value)
+            unless value.is_a?(Hash) || validate_boolean(value)
+              record.errors.add(attribute, 'should be a hash or a boolean value')
+            end
+          end
+        end
+
         class KeyValidator < ActiveModel::EachValidator
           include LegacyValidationHelpers
 
@@ -155,6 +165,22 @@ module Gitlab
             elsif path == '.' || path == '..'
               record.errors.add(attribute, 'cannot be "." or ".."')
             end
+          end
+        end
+
+        class ArrayOfIntegersOrIntegerValidator < ActiveModel::EachValidator
+          include LegacyValidationHelpers
+
+          def validate_each(record, attribute, value)
+            unless validate_integer(value) || validate_array_of_integers(value)
+              record.errors.add(attribute, 'should be an array of integers or an integer')
+            end
+          end
+
+          private
+
+          def validate_array_of_integers(values)
+            values.is_a?(Array) && values.all? { |value| validate_integer(value) }
           end
         end
 
@@ -274,6 +300,8 @@ module Gitlab
           def validate_each(record, attribute, value)
             if options[:array_values]
               validate_key_array_values(record, attribute, value)
+            elsif options[:allowed_value_data]
+              validate_key_hash_values(record, attribute, value, options[:allowed_value_data])
             else
               validate_key_values(record, attribute, value)
             end
@@ -288,6 +316,12 @@ module Gitlab
           def validate_key_array_values(record, attribute, value)
             unless validate_array_value_variables(value)
               record.errors.add(attribute, 'should be a hash of key value pairs, value can be an array')
+            end
+          end
+
+          def validate_key_hash_values(record, attribute, value, allowed_value_data)
+            unless validate_string_or_hash_value_variables(value, allowed_value_data)
+              record.errors.add(attribute, 'should be a hash of key value pairs, value can be a hash')
             end
           end
         end

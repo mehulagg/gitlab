@@ -4,12 +4,20 @@ exports[`ComplianceDashboard component when there are merge requests and the sho
 <div
   class="compliance-dashboard"
 >
-  <header
-    class="gl-my-5"
-  >
-    <h4>
-      Compliance Dashboard
-    </h4>
+  <header>
+    <div
+      class="gl-mt-5 d-flex"
+    >
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
+      >
+        Compliance Dashboard
+      </h4>
+       
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
+    </div>
      
     <p>
       Here you will find recent merge request activity
@@ -44,12 +52,20 @@ exports[`ComplianceDashboard component when there are merge requests matches the
 <div
   class="compliance-dashboard"
 >
-  <header
-    class="gl-my-5"
-  >
-    <h4>
-      Compliance Dashboard
-    </h4>
+  <header>
+    <div
+      class="gl-mt-5 d-flex"
+    >
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
+      >
+        Compliance Dashboard
+      </h4>
+       
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
+    </div>
      
     <p>
       Here you will find recent merge request activity

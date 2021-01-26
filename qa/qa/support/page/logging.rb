@@ -10,7 +10,7 @@ module QA
           super
         end
 
-        def refresh
+        def refresh(skip_finished_loading_check: false)
           log("refreshing #{current_url}")
 
           super
@@ -60,6 +60,12 @@ module QA
 
         def uncheck_element(name)
           log("unchecking :#{name}")
+
+          super
+        end
+
+        def click_element_coordinates(name)
+          log(%Q(clicking the coordinates of :#{name}))
 
           super
         end
@@ -137,12 +143,12 @@ module QA
           super
         end
 
-        def within_element(name, text: nil)
-          log("within element :#{name}")
+        def within_element(name, **kwargs)
+          log("within element :#{name} with args #{kwargs}")
 
           element = super
 
-          log("end within element :#{name}")
+          log("end within element :#{name} with args #{kwargs}")
 
           element
         end

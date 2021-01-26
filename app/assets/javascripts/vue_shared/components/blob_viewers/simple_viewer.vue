@@ -1,6 +1,7 @@
 <script>
-import ViewerMixin from './mixins';
+/* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
+import ViewerMixin from './mixins';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
 
 export default {
@@ -8,6 +9,7 @@ export default {
     GlIcon,
   },
   mixins: [ViewerMixin],
+  inject: ['blobHash'],
   data() {
     return {
       highlightedLine: null,
@@ -63,7 +65,7 @@ export default {
       </a>
     </div>
     <div class="blob-content">
-      <pre class="code highlight"><code id="blob-code-content" v-html="content"></code></pre>
+      <pre class="code highlight"><code :data-blob-hash="blobHash" v-html="content"></code></pre>
     </div>
   </div>
 </template>

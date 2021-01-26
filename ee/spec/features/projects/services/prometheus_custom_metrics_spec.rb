@@ -10,7 +10,7 @@ RSpec.describe 'Prometheus custom metrics', :js do
   let!(:prometheus_metric) { create(:prometheus_metric, project: project) }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   before do

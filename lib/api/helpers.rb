@@ -89,16 +89,15 @@ module API
       @project ||= find_project!(params[:id])
     end
 
-    def available_labels_for(label_parent, include_ancestor_groups: true)
-      search_params = { include_ancestor_groups: include_ancestor_groups }
-
+    def available_labels_for(label_parent, params = { include_ancestor_groups: true, only_group_labels: true })
       if label_parent.is_a?(Project)
-        search_params[:project_id] = label_parent.id
+        params.delete(:only_group_labels)
+        params[:project_id] = label_parent.id
       else
-        search_params.merge!(group_id: label_parent.id, only_group_labels: true)
+        params[:group_id] = label_parent.id
       end
 
-      LabelsFinder.new(current_user, search_params).execute
+      LabelsFinder.new(current_user, params).execute
     end
 
     def find_user(id)
@@ -221,6 +220,10 @@ module API
       user_project.builds.find(id.to_i)
     end
 
+    def find_job!(id)
+      user_project.processables.find(id.to_i)
+    end
+
     def authenticate!
       unauthorized! unless current_user
     end
@@ -272,6 +275,14 @@ module API
       authorize! :read_build, user_project
     end
 
+    def authorize_read_build_trace!(build)
+      authorize! :read_build_trace, build
+    end
+
+    def authorize_read_job_artifacts!(build)
+      authorize! :read_job_artifacts, build
+    end
+
     def authorize_destroy_artifacts!
       authorize! :destroy_artifacts, user_project
     end
@@ -319,7 +330,7 @@ module API
     #   keys (required) - A hash consisting of keys that must be present
     def required_attributes!(keys)
       keys.each do |key|
-        bad_request!(key) unless params[key].present?
+        bad_request_missing_attribute!(key) unless params[key].present?
       end
     end
 
@@ -361,14 +372,18 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
-    def bad_request!(attribute)
-      message = ["400 (Bad request)"]
-      message << "\"" + attribute.to_s + "\" not given" if attribute
+    def bad_request!(reason = nil)
+      message = ['400 Bad request']
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 400)
+    end
+
+    def bad_request_missing_attribute!(attribute)
+      bad_request!("\"#{attribute}\" not given")
     end
 
     def not_found!(resource = nil)
@@ -388,8 +403,8 @@ module API
       render_api_error!('401 Unauthorized', 401)
     end
 
-    def not_allowed!
-      render_api_error!('405 Method Not Allowed', 405)
+    def not_allowed!(message = nil)
+      render_api_error!(message || '405 Method Not Allowed', :method_not_allowed)
     end
 
     def not_acceptable!
@@ -506,7 +521,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
         sendfile path
       end
@@ -522,7 +537,7 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 
@@ -532,9 +547,36 @@ module API
 
       ::Gitlab::Tracking.event(category, action.to_s, **args)
     rescue => error
-      Rails.logger.warn( # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.warn(
         "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
       )
+    end
+
+    def increment_counter(event_name)
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
+
+      Gitlab::UsageDataCounters.count(event_name)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    # @param event_name [String] the event name
+    # @param values [Array|String] the values counted
+    def increment_unique_values(event_name, values)
+      return unless values.present?
+
+      feature_flag = "usage_data_#{event_name}"
+
+      return unless Feature.enabled?(feature_flag, default_enabled: true)
+
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    def with_api_params(&block)
+      yield({ api: true, request: request })
     end
 
     protected

@@ -1,9 +1,16 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Icons and SVG Illustrations
 
-We manage our own Icon and Illustration library in the [`gitlab-svgs`](https://gitlab.com/gitlab-org/gitlab-svgs) repository.
-This repository is published on [npm](https://www.npmjs.com/package/@gitlab/svgs) and managed as a dependency via yarn.
-You can browse all available Icons and Illustrations [here](https://gitlab-org.gitlab.io/gitlab-svgs).
-To upgrade to a new version run `yarn upgrade @gitlab/svgs`.
+We manage our own icon and illustration library in the [`gitlab-svgs`](https://gitlab.com/gitlab-org/gitlab-svgs)
+repository. This repository is published on [npm](https://www.npmjs.com/package/@gitlab/svgs),
+and is managed as a dependency with yarn. You can browse all available
+[icons and illustrations](https://gitlab-org.gitlab.io/gitlab-svgs). To upgrade
+to a new version run `yarn upgrade @gitlab/svgs`.
 
 ## Icons
 
@@ -11,20 +18,19 @@ We are using SVG Icons in GitLab with a SVG Sprite.
 This means the icons are only loaded once, and are referenced through an ID.
 The sprite SVG is located under `/assets/icons.svg`.
 
-Our goal is to replace one by one all inline SVG Icons (as those currently bloat the HTML) and also all Font Awesome icons.
-
 ### Usage in HAML/Rails
 
-To use a sprite Icon in HAML or Rails we use a specific helper function :
+To use a sprite Icon in HAML or Rails we use a specific helper function:
 
 ```ruby
 sprite_icon(icon_name, size: nil, css_class: '')
 ```
 
-- **icon_name** Use the icon_name that you can find in the SVG Sprite
-  ([Overview is available here](https://gitlab-org.gitlab.io/gitlab-svgs)).
-- **size (optional)** Use one of the following sizes : 16, 24, 32, 48, 72 (this will be translated into a `s16` class)
-- **css_class (optional)** If you want to add additional CSS classes
+- **icon_name**: Use the icon_name for the SVG sprite in the list of
+  ([GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs)).
+- **size (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
+  is translated into a `s16` class)
+- **css_class (optional)**: If you want to add additional CSS classes.
 
 **Example**
 
@@ -66,10 +72,12 @@ export default {
 </template>
 ```
 
-- **name** Name of the Icon in the SVG Sprite ([Overview is available here](https://gitlab-org.gitlab.io/gitlab-svgs)).
-- **size (optional)** Number value for the size which is then mapped to a specific CSS class
-  (Available Sizes: 8, 12, 16, 18, 24, 32, 48, 72 are mapped to `sXX` CSS classes)
-- **class (optional)** Additional CSS Classes to add to the SVG tag.
+- **name**: Name of the icon of the SVG sprite, as listed in the
+  ([GitLab SVG Previewer](https://gitlab-org.gitlab.io/gitlab-svgs)).
+- **size: (optional)** Number value for the size which is then mapped to a
+  specific CSS class (Available sizes: 8, 12, 16, 18, 24, 32, 48, 72 are mapped
+  to `sXX` CSS classes)
+- **class (optional)**: Additional CSS classes to add to the SVG tag.
 
 ### Usage in HTML/JS
 
@@ -79,11 +87,6 @@ Please use the following function inside JS to render an icon:
 ## Loading icon
 
 ### Usage in HAML/Rails
-
-DANGER: **Danger:**
-Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
-loading icons. These helpers rely on the Font Awesome icon library which is
-deprecated.
 
 To insert a loading spinner in HAML or Rails use the `loading_icon` helper:
 
@@ -97,7 +100,7 @@ by the examples that follow:
 - `container` (optional): wraps the loading icon in a container, which centers the loading icon using the `text-center` CSS property.
 - `color` (optional): either `orange` (default), `light`, or `dark`.
 - `size` (optional): either `sm` (default), `md`, `lg`, or `xl`.
-- `css_class` (optional): defaults to an empty string, but can be useful for utility classes to fine-tune alignment or spacing.
+- `css_class` (optional): defaults to an empty string, but can be used for utility classes to fine-tune alignment or spacing.
 
 **Example 1:**
 
@@ -161,8 +164,8 @@ export default {
 
 ## SVG Illustrations
 
-Please use from now on for any SVG based illustrations simple `img` tags to show an illustration by simply using either `image_tag` or `image_path` helpers.
-Please use the class `svg-content` around it to ensure nice rendering.
+From now on, use `img` tags to display any SVG based illustrations with either `image_tag` or `image_path` helpers.
+Using the class `svg-content` around it ensures nice rendering.
 
 ### Usage in HAML/Rails
 

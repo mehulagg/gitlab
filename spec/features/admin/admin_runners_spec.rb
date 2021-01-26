@@ -9,7 +9,9 @@ RSpec.describe "Admin Runners" do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe "Runners page" do
@@ -21,7 +23,7 @@ RSpec.describe "Admin Runners" do
         create(:ci_build, pipeline: pipeline, runner_id: runner.id)
         visit admin_runners_path
 
-        expect(page).to have_text "Set up a shared Runner manually"
+        expect(page).to have_text "Set up a shared runner manually"
         expect(page).to have_text "Runners currently online: 1"
       end
 
@@ -225,7 +227,7 @@ RSpec.describe "Admin Runners" do
       end
 
       it 'has all necessary texts including no runner message' do
-        expect(page).to have_text "Set up a shared Runner manually"
+        expect(page).to have_text "Set up a shared runner manually"
         expect(page).to have_text "Runners currently online: 0"
         expect(page).to have_text 'No runners found'
       end
@@ -280,6 +282,12 @@ RSpec.describe "Admin Runners" do
       @project1 = create(:project)
       @project2 = create(:project)
       visit admin_runner_path(runner)
+    end
+
+    describe 'runner page breadcrumbs' do
+      it 'contains the current runner’s short sha' do
+        expect(page.find('h2')).to have_content(runner.short_sha)
+      end
     end
 
     describe 'projects' do
@@ -381,7 +389,7 @@ RSpec.describe "Admin Runners" do
       let(:page_token) { find('#registration_token').text }
 
       before do
-        click_button 'Reset runners registration token'
+        click_button 'Reset registration token'
       end
 
       it 'changes registration token' do

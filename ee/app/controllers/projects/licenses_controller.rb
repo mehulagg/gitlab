@@ -4,9 +4,8 @@ module Projects
   class LicensesController < Projects::ApplicationController
     before_action :authorize_read_licenses!, only: [:index]
     before_action :authorize_admin_software_license_policy!, only: [:create, :update]
-    before_action do
-      push_frontend_feature_flag(:license_compliance_denies_mr, default_enabled: false)
-    end
+
+    feature_category :license_compliance
 
     def index
       respond_to do |format|
@@ -20,7 +19,8 @@ module Projects
           license_compliance = project.license_compliance
           render json: serializer.represent(
             pageable(matching_policies_from(license_compliance)),
-            build: license_compliance.latest_build_for_default_branch
+            build: license_compliance.latest_build_for_default_branch,
+            project: project
           )
         end
       end

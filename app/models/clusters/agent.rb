@@ -8,6 +8,9 @@ module Clusters
 
     has_many :agent_tokens, class_name: 'Clusters::AgentToken'
 
+    scope :ordered_by_name, -> { order(:name) }
+    scope :with_name, -> (name) { where(name: name) }
+
     validates :name,
       presence: true,
       length: { maximum: 63 },
@@ -16,5 +19,9 @@ module Clusters
         with: Gitlab::Regex.cluster_agent_name_regex,
         message: Gitlab::Regex.cluster_agent_name_regex_message
       }
+
+    def has_access_to?(requested_project)
+      requested_project == project
+    end
   end
 end

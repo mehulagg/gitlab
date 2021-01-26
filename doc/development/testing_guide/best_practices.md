@@ -1,3 +1,11 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+description: "GitLab development guidelines - testing best practices."
+---
+
 # Testing best practices
 
 ## Test Design
@@ -5,30 +13,15 @@
 Testing at GitLab is a first class citizen, not an afterthought. It's important we consider the design of our tests
 as we do the design of our features.
 
-When implementing a feature, we think about developing the right capabilities the right way, which helps us
+When implementing a feature, we think about developing the right capabilities the right way. This helps us
 narrow our scope to a manageable level. When implementing tests for a feature, we must think about developing
-the right tests, but then cover _all_ the important ways the test may fail, which can quickly widen our scope to
+the right tests, but then cover _all_ the important ways the test may fail. This can quickly widen our scope to
 a level that is difficult to manage.
 
 Test heuristics can help solve this problem. They concisely address many of the common ways bugs
-manifest themselves within our code. When designing our tests, take time to review known test heuristics to inform
+manifest themselves in our code. When designing our tests, take time to review known test heuristics to inform
 our test design. We can find some helpful heuristics documented in the Handbook in the
 [Test Engineering](https://about.gitlab.com/handbook/engineering/quality/test-engineering/#test-heuristics) section.
-
-## Test speed
-
-GitLab has a massive test suite that, without [parallelization](ci.md#test-suite-parallelization-on-the-ci), can take hours
-to run. It's important that we make an effort to write tests that are accurate
-and effective _as well as_ fast.
-
-Here are some things to keep in mind regarding test performance:
-
-- `instance_double` and `spy` are faster than `FactoryBot.build(...)`
-- `FactoryBot.build(...)` and `.build_stubbed` are faster than `.create`.
-- Don't `create` an object when `build`, `build_stubbed`, `attributes_for`,
-  `spy`, or `instance_double` will do. Database persistence is slow!
-- Don't mark a feature as requiring JavaScript (through `:js` in RSpec) unless it's _actually_ required for the test
-  to be valid. Headless browser testing is slow!
 
 ## RSpec
 
@@ -57,12 +50,236 @@ bundle exec guard
 
 When using spring and guard together, use `SPRING=1 bundle exec guard` instead to make use of spring.
 
-Use [Factory Doctor](https://test-prof.evilmartians.io/#/profilers/factory_doctor) to find cases on un-necessary database manipulation, which can cause slow tests.
+### Ruby warnings
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47767) in GitLab 13.7.
+
+We've enabled [deprecation warnings](https://ruby-doc.org/core-2.7.2/Warning.html)
+by default when running specs. Making these warnings more visible to developers
+helps upgrading to newer Ruby versions.
+
+You can silence deprecation warnings by setting the environment variable
+`SILENCE_DEPRECATIONS`, for example:
+
+```shell
+# silence all deprecation warnings
+SILENCE_DEPRECATIONS=1 bin/rspec spec/models/project_spec.rb
+```
+
+### Test speed
+
+GitLab has a massive test suite that, without [parallelization](ci.md#test-suite-parallelization-on-the-ci), can take hours
+to run. It's important that we make an effort to write tests that are accurate
+and effective _as well as_ fast.
+
+Test performance is important to maintaining quality and velocity, and has a
+direct impact on CI build times and thus fixed costs. We want thorough, correct,
+and fast tests. Here you can find some information about tools and techniques
+available to you to achieve that.
+
+#### Don't request capabilities you don't need
+
+We make it easy to add capabilities to our examples by annotating the example or
+a parent context. Examples of these are:
+
+- `:js` in feature specs, which runs a full JavaScript capable headless browser.
+- `:clean_gitlab_redis_cache` which provides a clean Redis cache to the examples.
+- `:request_store` which provides a request store to the examples.
+
+Obviously we should reduce test dependencies, and avoiding
+capabilities also reduces the amount of set-up needed.
+
+`:js` is particularly important to avoid. This must only be used if the feature
+test requires JavaScript reactivity in the browser. Using a headless
+browser is much slower than parsing the HTML response from the app.
+
+#### Optimize factory usage
+
+A common cause of slow tests is excessive creation of objects, and thus
+computation and DB time. Factories are essential to development, but they can
+make inserting data into the DB so easy that we may be able to optimize.
+
+The two basic techniques to bear in mind here are:
+
+- **Reduce**: avoid creating objects, and avoid persisting them.
+- **Reuse**: shared objects, especially nested ones we do not examine, can generally be shared.
+
+To avoid creation, it is worth bearing in mind that:
+
+- `instance_double` and `spy` are faster than `FactoryBot.build(...)`.
+- `FactoryBot.build(...)` and `.build_stubbed` are faster than `.create`.
+- Don't `create` an object when you can use `build`, `build_stubbed`, `attributes_for`,
+  `spy`, or `instance_double`. Database persistence is slow!
+
+Use [Factory Doctor](https://test-prof.evilmartians.io/#/profilers/factory_doctor) to find cases where database persistence is not needed in a given test.
 
 ```shell
 # run test for path
 FDOC=1 bin/rspec spec/[path]/[to]/[spec].rb
 ```
+
+A common change is to use `build` or `build_stubbed` instead of `create`:
+
+```ruby
+# Old
+let(:project) { create(:project) }
+
+# New
+let(:project) { build(:project) }
+```
+
+[Factory Profiler](https://test-prof.evilmartians.io/#/profilers/factory_prof) can help to identify repetitive database persistence via factories.
+
+```shell
+# run test for path
+FPROF=1 bin/rspec spec/[path]/[to]/[spec].rb
+
+# to visualize with a flamegraph
+FPROF=flamegraph bin/rspec spec/[path]/[to]/[spec].rb
+```
+
+A common change is to use [`let_it_be`](#common-test-setup):
+
+```ruby
+# Old
+let(:project) { create(:project) }
+
+# New
+let_it_be(:project) { create(:project) }
+```
+
+A common cause of a large number of created factories is [factory cascades](https://github.com/test-prof/test-prof/blob/master/docs/profilers/factory_prof.md#factory-flamegraph), which result when factories create and recreate associations.
+They can be identified by a noticeable difference between `total time` and `top-level time` numbers:
+
+```plaintext
+   total   top-level     total time      time per call      top-level time               name
+
+     208           0        9.5812s            0.0461s             0.0000s          namespace
+     208          76       37.4214s            0.1799s            13.8749s            project
+```
+
+The table above shows us that we never create any `namespace` objects explicitly
+(`top-level == 0`) - they are all created implicitly for us. But we still end up
+with 208 of them (one for each project) and this takes 9.5 seconds.
+
+In order to reuse a single object for all calls to a named factory in implicit parent associations,
+[`FactoryDefault`](https://github.com/test-prof/test-prof/blob/master/docs/recipes/factory_default.md)
+can be used:
+
+```ruby
+RSpec.describe API::Search, factory_default: :keep do
+  let_it_be(:namespace) { create_default(:namespace) }
+```
+
+Then every project we create uses this `namespace`, without us having to pass
+it as `namespace: namespace`. In order to make it work along with `let_it_be`, `factory_default: :keep`
+must be explicitly specified. That keeps the default factory for every example in a suite instead of
+recreating it for each example.
+
+Maybe we don't need to create 208 different projects - we
+can create one and reuse it. In addition, we can see that only about 1/3 of the
+projects we create are ones we ask for (76/208). There is benefit in setting
+a default value for projects as well:
+
+```ruby
+  let_it_be(:project) { create_default(:project) }
+```
+
+In this case, the `total time` and `top-level time` numbers match more closely:
+
+```plaintext
+   total   top-level     total time      time per call      top-level time               name
+
+      31          30        4.6378s            0.1496s             4.5366s            project
+       8           8        0.0477s            0.0477s             0.0477s          namespace
+```
+
+#### Identify slow tests
+
+Running a spec with profiling is a good way to start optimizing a spec. This can
+be done with:
+
+```shell
+bundle exec rspec --profile -- path/to/spec_file.rb
+```
+
+Which includes information like the following:
+
+```plaintext
+Top 10 slowest examples (10.69 seconds, 7.7% of total time):
+  Issue behaves like an editable mentionable creates new cross-reference notes when the mentionable text is edited
+    1.62 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:164
+  Issue relative positioning behaves like a class that supports relative positioning .move_nulls_to_end manages to move nulls to the end, stacking if we cannot create enough space
+    1.39 seconds ./spec/support/shared_examples/models/relative_positioning_shared_examples.rb:88
+  Issue relative positioning behaves like a class that supports relative positioning .move_nulls_to_start manages to move nulls to the end, stacking if we cannot create enough space
+    1.27 seconds ./spec/support/shared_examples/models/relative_positioning_shared_examples.rb:180
+  Issue behaves like an editable mentionable behaves like a mentionable extracts references from its reference property
+    0.99253 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:69
+  Issue behaves like an editable mentionable behaves like a mentionable creates cross-reference notes
+    0.94987 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:101
+  Issue behaves like an editable mentionable behaves like a mentionable when there are cached markdown fields sends in cached markdown fields when appropriate
+    0.94148 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:86
+  Issue behaves like an editable mentionable when there are cached markdown fields when the markdown cache is stale persists the refreshed cache so that it does not have to be refreshed every time
+    0.92833 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:153
+  Issue behaves like an editable mentionable when there are cached markdown fields refreshes markdown cache if necessary
+    0.88153 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:130
+  Issue behaves like an editable mentionable behaves like a mentionable generates a descriptive back-reference
+    0.86914 seconds ./spec/support/shared_examples/models/mentionable_shared_examples.rb:65
+  Issue#related_issues returns only authorized related issues for given user
+    0.84242 seconds ./spec/models/issue_spec.rb:335
+
+Finished in 2 minutes 19 seconds (files took 1 minute 4.42 seconds to load)
+277 examples, 0 failures, 1 pending
+```
+
+From this result, we can see the most expensive examples in our spec, giving us
+a place to start. The most expensive examples here are in
+shared examples; any reductions generally have a larger impact as
+they are called in multiple places.
+
+#### Avoid repeating expensive actions
+
+While isolated examples are very clear, and help serve the purpose of specs as
+specification, the following example shows how we can combine expensive
+actions:
+
+```ruby
+subject { described_class.new(arg_0, arg_1) }
+
+it 'creates an event' do
+  expect { subject.execute }.to change(Event, :count).by(1)
+end
+
+it 'sets the frobulance' do
+  expect { subject.execute }.to change { arg_0.reset.frobulance }.to('wibble')
+end
+
+it 'schedules a background job' do
+  expect(BackgroundJob).to receive(:perform_async)
+
+  subject.execute
+end
+```
+
+If the call to `subject.execute` is expensive, then we are repeating the same
+action just to make different assertions. We can reduce this repetition by
+combining the examples:
+
+```ruby
+it 'performs the expected side-effects' do
+  expect(BackgroundJob).to receive(:perform_async)
+
+  expect { subject.execute }
+    .to change(Event, :count).by(1)
+    .and change { arg_0.frobulance }.to('wibble')
+end
+```
+
+Be careful doing this, as this sacrifices clarity and test independence for
+performance gains.
+
+When combining tests, consider using `:aggregate_failures`, so that the full
+results are available, and not just the first failure.
 
 ### General guidelines
 
@@ -70,7 +287,7 @@ FDOC=1 bin/rspec spec/[path]/[to]/[spec].rb
 - Use `.method` to describe class methods and `#method` to describe instance
   methods.
 - Use `context` to test branching logic.
-- Try to match the ordering of tests to the ordering within the class.
+- Try to match the ordering of tests to the ordering in the class.
 - Try to follow the [Four-Phase Test](https://thoughtbot.com/blog/four-phase-test) pattern, using newlines
   to separate phases.
 - Use `Gitlab.config.gitlab.host` rather than hard coding `'localhost'`
@@ -78,10 +295,10 @@ FDOC=1 bin/rspec spec/[path]/[to]/[spec].rb
   [Gotchas](../gotchas.md#do-not-assert-against-the-absolute-value-of-a-sequence-generated-attribute)).
 - Avoid using `expect_any_instance_of` or `allow_any_instance_of` (see
   [Gotchas](../gotchas.md#do-not-assert-against-the-absolute-value-of-a-sequence-generated-attribute)).
-- Don't supply the `:each` argument to hooks since it's the default.
+- Don't supply the `:each` argument to hooks because it's the default.
 - On `before` and `after` hooks, prefer it scoped to `:context` over `:all`
 - When using `evaluate_script("$('.js-foo').testSomething()")` (or `execute_script`) which acts on a given element,
-  use a Capybara matcher beforehand (e.g. `find('.js-foo')`) to ensure the element actually exists.
+  use a Capybara matcher beforehand (such as `find('.js-foo')`) to ensure the element actually exists.
 - Use `focus: true` to isolate parts of the specs you want to run.
 - Use [`:aggregate_failures`](https://relishapp.com/rspec/rspec-core/docs/expectation-framework-integration/aggregating-failures) when there is more than one expectation in a test.
 - For [empty test description blocks](https://github.com/rubocop-hq/rspec-style-guide#it-and-specify), use `specify` rather than `it do` if the test is self-explanatory.
@@ -110,7 +327,7 @@ Use the coverage reports to ensure your tests cover 100% of your code.
 
 ### System / Feature tests
 
-NOTE: **Note:**
+NOTE:
 Before writing a new system test, [please consider **not**
 writing one](testing_levels.md#consider-not-writing-a-system-test)!
 
@@ -126,7 +343,7 @@ writing one](testing_levels.md#consider-not-writing-a-system-test)!
   For instance, if you want to verify that a record was created, add
   expectations that its attributes are displayed on the page, not that
   `Model.count` increased by one.
-- It's ok to look for DOM elements but don't abuse it since it makes the tests
+- It's ok to look for DOM elements, but don't abuse it, because it makes the tests
   more brittle
 
 #### Debugging Capybara
@@ -136,7 +353,7 @@ Sometimes you may need to debug Capybara tests by observing browser behavior.
 #### Live debug
 
 You can pause Capybara and view the website on the browser by using the
-`live_debug` method in your spec. The current page will be automatically opened
+`live_debug` method in your spec. The current page is automatically opened
 in your default browser.
 You may need to sign in first (the current user's credentials are displayed in
 the terminal).
@@ -160,17 +377,17 @@ Finished in 34.51 seconds (files took 0.76702 seconds to load)
 1 example, 0 failures
 ```
 
-Note: `live_debug` only works on JavaScript enabled specs.
+`live_debug` only works on JavaScript enabled specs.
 
 #### Run `:js` spec in a visible browser
 
-Run the spec with `CHROME_HEADLESS=0`, e.g.:
+Run the spec with `CHROME_HEADLESS=0`, like this:
 
 ```shell
 CHROME_HEADLESS=0 bin/rspec some_spec.rb
 ```
 
-The test will go by quickly, but this will give you an idea of what's happening.
+The test completes quickly, but this gives you an idea of what's happening.
 Using `live_debug` with `CHROME_HEADLESS=0` pauses the open browser, and does not
 open the page again. This can be used to debug and inspect elements.
 
@@ -199,20 +416,20 @@ There is a [small hack](https://gitlab.com/gitlab-org/gitlab-foss/snippets/17184
 
 ### Fast unit tests
 
-Some classes are well-isolated from Rails and you should be able to test them
+Some classes are well-isolated from Rails. You should be able to test them
 without the overhead added by the Rails environment and Bundler's `:default`
 group's gem loading. In these cases, you can `require 'fast_spec_helper'`
 instead of `require 'spec_helper'` in your test file, and your test should run
-really fast since:
+really fast because:
 
-- Gems loading is skipped
+- Gem loading is skipped
 - Rails app boot is skipped
 - GitLab Shell and Gitaly setup are skipped
 - Test repositories setup are skipped
 
 `fast_spec_helper` also support autoloading classes that are located inside the
-`lib/` directory. It means that as long as your class / module is using only
-code from the `lib/` directory you will not need to explicitly load any
+`lib/` directory. If your class or module is using only
+code from the `lib/` directory, you don't need to explicitly load any
 dependencies. `fast_spec_helper` also loads all ActiveSupport extensions,
 including core extensions that are commonly used in the Rails environment.
 
@@ -222,16 +439,18 @@ in `lib/`.
 
 For example, if you want to test your code that is calling the
 `Gitlab::UntrustedRegexp` class, which under the hood uses `re2` library, you
-should either add `require_dependency 're2'` to files in your library that
-need `re2` gem, to make this requirement explicit, or you can add it to the
-spec itself, but the former is preferred.
+should either:
+
+- Add `require_dependency 're2'` to files in your library that need `re2` gem,
+  to make this requirement explicit. This approach is preferred.
+- Add it to the spec itself.
 
 It takes around one second to load tests that are using `fast_spec_helper`
 instead of 30+ seconds in case of a regular `spec_helper`.
 
-### `let` variables
+### `subject` and `let` variables
 
-GitLab's RSpec suite has made extensive use of `let`(along with it strict, non-lazy
+The GitLab RSpec suite has made extensive use of `let`(along with its strict, non-lazy
 version `let!`) variables to reduce duplication. However, this sometimes [comes at the cost of clarity](https://thoughtbot.com/blog/lets-not),
 so we need to set some guidelines for their use going forward:
 
@@ -248,14 +467,17 @@ so we need to set some guidelines for their use going forward:
 - Don't define a `let` variable that's only used by the definition of another.
   Use a helper method instead.
 - `let!` variables should be used only in case if strict evaluation with defined
-  order is required, otherwise `let` will suffice. Remember that `let` is lazy and won't
+  order is required, otherwise `let` suffices. Remember that `let` is lazy and won't
   be evaluated until it is referenced.
+- Avoid referencing `subject` in examples. Use a named subject `subject(:name)`, or a `let` variable instead, so
+  the variable has a contextual name.
+- If the `subject` is never referenced inside examples, then it's acceptable to define the `subject` without a name.
 
 ### Common test setup
 
 In some cases, there is no need to recreate the same object for tests
 again for each example. For example, a project and a guest of that project
-is needed to test issues on the same project, one project and user will do for the entire file.
+are needed to test issues on the same project, so one project and user are enough for the entire file.
 
 As much as possible, do not implement this using `before(:all)` or `before(:context)`. If you do,
 you would need to manually clean up the data as those hooks run outside a database transaction.
@@ -274,32 +496,65 @@ before_all do
 end
 ```
 
-This will result in only one `Project`, `User`, and `ProjectMember` created for this context.
+This results in only one `Project`, `User`, and `ProjectMember` created for this context.
 
-`let_it_be` and `before_all` are also available within nested contexts. Cleanup after the context
+`let_it_be` and `before_all` are also available in nested contexts. Cleanup after the context
 is handled automatically using a transaction rollback.
 
 Note that if you modify an object defined inside a `let_it_be` block,
-then you will need to reload the object as needed, or specify the `reload`
-option to reload for every example.
+then you must do one of the following:
+
+- Reload the object as needed.
+- Use the `let_it_be_with_reload` alias.
+- Specify the `reload` option to reload for every example.
 
 ```ruby
+let_it_be_with_reload(:project) { create(:project) }
 let_it_be(:project, reload: true) { create(:project) }
 ```
 
-You can also specify the `refind` option as well to completely load a
-new object.
+You can also use the `let_it_be_with_refind` alias, or specify the `refind`
+option as well to completely load a new object.
 
 ```ruby
+let_it_be_with_refind(:project) { create(:project) }
 let_it_be(:project, refind: true) { create(:project) }
+```
+
+### License stubbing with `let_it_be`
+
+`let_it_be_with_refind` is also useful when using `stub_licensed_features` in your tests:
+
+```ruby
+let_it_be_with_refind(:project) { create(:project) }
+# Project#licensed_feature_available? is memoized, and so we need to refind
+# the project for license updates to be applied.
+# An alternative is `project.clear_memoization(:licensed_feature_available)`.
+
+subject { project.allows_multiple_assignees? }
+
+context 'with license multiple_issue_assignees disabled' do
+  before do
+    stub_licensed_features(multiple_issue_assignees: true)
+  end
+
+  it { is_expected.to eq(true) }
+end
+
+context 'with license multiple_issue_assignees disabled' do
+  before do
+    stub_licensed_features(multiple_issue_assignees: false)
+  end
+
+  it { is_expected.to eq(false) }
+end
 ```
 
 ### Time-sensitive tests
 
-[Timecop](https://github.com/travisjeffery/timecop) is available in our
-Ruby-based tests for verifying things that are time-sensitive. Any test that
-exercises or verifies something time-sensitive should make use of Timecop to
-prevent transient test failures.
+[`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
+can be used to verify things that are time-sensitive. Any test that exercises or verifies something time-sensitive
+should make use of these helpers to prevent transient test failures.
 
 Example:
 
@@ -307,7 +562,7 @@ Example:
 it 'is overdue' do
   issue = build(:issue, due_date: Date.tomorrow)
 
-  Timecop.freeze(3.days.from_now) do
+  travel_to(3.days.from_now) do
     expect(issue).to be_overdue
   end
 end
@@ -321,14 +576,14 @@ This section was moved to [developing with feature flags](../feature_flags/devel
 
 The code exercised by a single GitLab test may access and modify many items of
 data. Without careful preparation before a test runs, and cleanup afterward,
-data can be changed by a test in such a way that it affects the behavior of
+a test can change data in a way that affects the behavior of
 following tests. This should be avoided at all costs! Fortunately, the existing
 test framework handles most cases already.
 
 When the test environment does get polluted, a common outcome is
-[flaky tests](flaky_tests.md). Pollution will often manifest as an order
-dependency: running spec A followed by spec B will reliably fail, but running
-spec B followed by spec A will reliably succeed. In these cases, you can use
+[flaky tests](flaky_tests.md). Pollution often manifests as an order
+dependency: running spec A followed by spec B reliably fails, but running
+spec B followed by spec A reliably succeeds. In these cases, you can use
 `rspec --bisect` (or a manual pairwise bisect of spec files) to determine which
 spec is at fault. Fixing the problem requires some understanding of how the test
 suite ensures the environment is pristine. Read on to discover more about each
@@ -337,15 +592,15 @@ data store!
 #### SQL database
 
 This is managed for us by the `database_cleaner` gem. Each spec is surrounded in
-a transaction, which is rolled back once the test completes. Certain specs will
-instead issue `DELETE FROM` queries against every table after completion; this
+a transaction, which is rolled back after the test completes. Certain specs
+instead issue `DELETE FROM` queries against every table after completion. This
 allows the created rows to be viewed from multiple database connections, which
 is important for specs that run in a browser, or migration specs, among others.
 
 One consequence of using these strategies, instead of the well-known
 `TRUNCATE TABLES` approach, is that primary keys and other sequences are **not**
 reset across specs. So if you create a project in spec A, then create a project
-in spec B, the first will have `id=1`, while the second will have `id=2`.
+in spec B, the first has `id=1`, while the second has `id=2`.
 
 This means that specs should **never** rely on the value of an ID, or any other
 sequence-generated column. To avoid accidental conflicts, specs should also
@@ -376,9 +631,9 @@ this trait should be either fixed to not rely on Sidekiq processing jobs, or the
 `:sidekiq_might_not_need_inline` trait should be updated to `:sidekiq_inline` if
 the processing of background jobs is needed/expected.
 
-NOTE: **Note:**
-The usage of `perform_enqueued_jobs` is only useful for testing delayed mail
-deliveries since our Sidekiq workers aren't inheriting from `ApplicationJob` / `ActiveJob::Base`.
+The usage of `perform_enqueued_jobs` is useful only for testing delayed mail
+deliveries, because our Sidekiq workers aren't inheriting from `ApplicationJob`
+/ `ActiveJob::Base`.
 
 #### DNS
 
@@ -386,7 +641,7 @@ DNS requests are stubbed universally in the test suite
 (as of [!22368](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22368)), as DNS can
 cause issues depending on the developer's local network. There are RSpec labels
 available in `spec/support/dns.rb` which you can apply to tests if you need to
-bypass the DNS stubbing, e.g.:
+bypass the DNS stubbing, like this:
 
 ```ruby
 it "really connects to Prometheus", :permit_dns do
@@ -395,19 +650,45 @@ it "really connects to Prometheus", :permit_dns do
 And if you need more specific control, the DNS blocking is implemented in
 `spec/support/helpers/dns_helpers.rb` and these methods can be called elsewhere.
 
-#### Filesystem
+#### Stubbing File methods
 
-Filesystem data can be roughly split into "repositories", and "everything else".
+In the situations where you need to
+[stub](https://relishapp.com/rspec/rspec-mocks/v/3-9/docs/basics/allowing-messages)
+methods such as `File.read`, make sure to:
+
+1. Stub `File.read` for only the file path you are interested in.
+1. Call the original implementation for other file paths.
+
+Otherwise `File.read` calls from other parts of the codebase get
+stubbed incorrectly. You should use the `stub_file_read`, and
+`expect_file_read` helper methods which does the stubbing for
+`File.read` correctly.
+
+```ruby
+# bad, all Files will read and return nothing
+allow(File).to receive(:read)
+
+# good
+stub_file_read(my_filepath)
+
+# also OK
+allow(File).to receive(:read).and_call_original
+allow(File).to receive(:read).with(my_filepath)
+```
+
+#### File system
+
+File system data can be roughly split into "repositories", and "everything else".
 Repositories are stored in `tmp/tests/repositories`. This directory is emptied
 before a test run starts, and after the test run ends. It is not emptied between
-specs, so created repositories accumulate within this directory over the
+specs, so created repositories accumulate in this directory over the
 lifetime of the process. Deleting them is expensive, but this could lead to
 pollution unless carefully managed.
 
 To avoid this, [hashed storage](../../administration/repository_storage_types.md)
 is enabled in the test suite. This means that repositories are given a unique
-path that depends on their project's ID. Since the project IDs are not reset
-between specs, this guarantees that each spec gets its own repository on disk,
+path that depends on their project's ID. Because the project IDs are not reset
+between specs, each spec gets its own repository on disk,
 and prevents changes from being visible between specs.
 
 If a spec manually specifies a project ID, or inspects the state of the
@@ -421,9 +702,9 @@ written to disk in locations determined by ID, so conflicts should not occur.
 
 Some specs disable hashed storage by passing the `:legacy_storage` trait to the
 `projects` factory. Specs that do this must **never** override the `path` of the
-project, or any of its groups. The default path includes the project ID, so will
-not conflict; but if two specs create a `:legacy_storage` project with the same
-path, they will use the same repository on disk and lead to test environment
+project, or any of its groups. The default path includes the project ID, so it
+does not conflict. If two specs create a `:legacy_storage` project with the same
+path, they use the same repository on disk and lead to test environment
 pollution.
 
 Other files must be managed manually by the spec. If you run code that creates a
@@ -462,11 +743,52 @@ If you need to modify the contents of the `ENV` constant, you can use the
 While most Ruby **instances** are not shared between specs, **classes**
 and **modules** generally are. Class and module instance variables, accessors,
 class variables, and other stateful idioms, should be treated in the same way as
-global variables - don't modify them unless you have to! In particular, prefer
+global variables. Don't modify them unless you have to! In particular, prefer
 using expectations, or dependency injection along with stubs, to avoid the need
-for modifications. If you have no other choice, an `around` block similar to the
-example for global variables, above, can be used, but this should be avoided if
-at all possible.
+for modifications. If you have no other choice, an `around` block like the global
+variables example can be used, but avoid this if at all possible.
+
+#### Test Snowplow events
+
+WARNING:
+Snowplow performs **runtime type checks** by using the [contracts gem](https://rubygems.org/gems/contracts).
+Because Snowplow is **by default disabled in tests and development**, it can be hard to
+**catch exceptions** when mocking `Gitlab::Tracking`.
+
+To catch runtime errors due to type checks, you can enable Snowplow in tests. Mark the spec with
+`:snowplow` and use the `expect_snowplow_event` helper, which checks for
+calls to `Gitlab::Tracking#event`.
+
+```ruby
+describe '#show', :snowplow do
+  it 'tracks snowplow events' do
+    get :show
+
+    expect_snowplow_event(
+      category: 'Experiment',
+      action: 'start',
+    )
+    expect_snowplow_event(
+      category: 'Experiment',
+      action: 'sent',
+      property: 'property',
+      label: 'label'
+    )
+  end
+end
+```
+
+When you want to ensure that no event got called, you can use `expect_no_snowplow_event`.
+
+```ruby
+  describe '#show', :snowplow do
+    it 'does not track any snowplow events' do
+      get :show
+
+      expect_no_snowplow_event
+    end
+  end
+```
 
 ### Table-based / Parameterized tests
 
@@ -500,9 +822,9 @@ describe "#==" do
 end
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Only use simple values as input in the `where` block. Using procs, stateful
-objects, FactoryBot-created objects etc. can lead to
+objects, FactoryBot-created objects, and similar items can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).
 
 ### Prometheus tests
@@ -515,7 +837,7 @@ reset before each example, add the `:prometheus` tag to the RSpec test.
 Custom matchers should be created to clarify the intent and/or hide the
 complexity of RSpec expectations. They should be placed under
 `spec/support/matchers/`. Matchers can be placed in subfolder if they apply to
-a certain type of specs only (e.g. features, requests etc.) but shouldn't be if
+a certain type of specs only (such as features or requests) but shouldn't be if
 they apply to multiple type of specs.
 
 #### `be_like_time`
@@ -550,17 +872,52 @@ Example:
 expect(response).to have_gitlab_http_status(:ok)
 ```
 
+#### `match_schema` and `match_response_schema`
+
+The `match_schema` matcher allows validating that the subject matches a
+[JSON schema](https://json-schema.org/). The item inside `expect` can be
+a JSON string or a JSON-compatible data structure.
+
+`match_response_schema` is a convenience matcher for using with a
+response object. from a [request
+spec](testing_levels.md#integration-tests).
+
+Examples:
+
+```ruby
+# Matches against spec/fixtures/api/schemas/prometheus/additional_metrics_query_result.json
+expect(data).to match_schema('prometheus/additional_metrics_query_result')
+
+# Matches against ee/spec/fixtures/api/schemas/board.json
+expect(data).to match_schema('board', dir: 'ee')
+
+# Matches against a schema made up of Ruby data structures
+expect(data).to match_schema(Atlassian::Schemata.build_info)
+```
+
+#### `be_valid_json`
+
+`be_valid_json` allows validating that a string parses as JSON and gives
+a non-empty result. To combine it with the schema matching above, use
+`and`:
+
+```ruby
+expect(json_string).to be_valid_json
+
+expect(json_string).to be_valid_json.and match_schema(schema)
+```
+
 ### Testing query performance
 
 Testing query performance allows us to:
 
-- Assert that N+1 problems do not exist within a block of code.
-- Ensure that the number of queries within a block of code does not increase unnoticed.
+- Assert that N+1 problems do not exist in a block of code.
+- Ensure that the number of queries in a block of code does not increase unnoticed.
 
 #### QueryRecorder
 
 `QueryRecorder` allows profiling and testing of the number of database queries
-performed within a given block of code.
+performed in a given block of code.
 
 See the [`QueryRecorder`](../query_recorder.md) section for more details.
 
@@ -578,9 +935,9 @@ Any shared contexts used by more than one spec file:
 
 - Should be placed under `spec/support/shared_contexts/`.
 - Can be placed in subfolder if they apply to a certain type of specs only
-  (e.g. features, requests etc.) but shouldn't be if they apply to multiple type of specs.
+  (such as features or requests) but shouldn't be if they apply to multiple type of specs.
 
-Each file should include only one context and have a descriptive name, e.g.
+Each file should include only one context and have a descriptive name, such as
 `spec/support/shared_contexts/controllers/githubish_import_controller_shared_context.rb`.
 
 ### Shared examples
@@ -590,9 +947,9 @@ Any shared examples used by more than one spec file:
 
 - Should be placed under `spec/support/shared_examples/`.
 - Can be placed in subfolder if they apply to a certain type of specs only
-  (e.g. features, requests etc.) but shouldn't be if they apply to multiple type of specs.
+  (such as features or requests) but shouldn't be if they apply to multiple type of specs.
 
-Each file should include only one context and have a descriptive name, e.g.
+Each file should include only one context and have a descriptive name, such as
 `spec/support/shared_examples/controllers/githubish_import_controller_shared_example.rb`.
 
 ### Helpers
@@ -600,8 +957,8 @@ Each file should include only one context and have a descriptive name, e.g.
 Helpers are usually modules that provide some methods to hide the complexity of
 specific RSpec examples. You can define helpers in RSpec files if they're not
 intended to be shared with other specs. Otherwise, they should be placed
-under `spec/support/helpers/`. Helpers can be placed in subfolder if they apply
-to a certain type of specs only (e.g. features, requests etc.) but shouldn't be
+under `spec/support/helpers/`. Helpers can be placed in a subfolder if they apply
+to a certain type of specs only (such as features or requests) but shouldn't be
 if they apply to multiple type of specs.
 
 Helpers should follow the Rails naming / namespacing convention. For instance
@@ -645,6 +1002,10 @@ GitLab uses [factory_bot](https://github.com/thoughtbot/factory_bot) as a test f
   resulting record to pass validation.
 - When instantiating from a factory, don't supply attributes that aren't
   required by the test.
+- Prefer [implicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#implicit-definition)
+  or [explicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#explicit-definition)
+  association definitions instead of using `create` / `build` for association setup.
+  See [issue #262624](https://gitlab.com/gitlab-org/gitlab/-/issues/262624) for further context.
 - Factories don't have to be limited to `ActiveRecord` objects.
   [See example](https://gitlab.com/gitlab-org/gitlab-foss/commit/0b8cefd3b2385a21cfed779bd659978c0402766d).
 
@@ -654,7 +1015,7 @@ All fixtures should be placed under `spec/fixtures/`.
 
 ### Repositories
 
-Testing some functionality, e.g., merging a merge request, requires a Git
+Testing some functionality, such as merging a merge request, requires a Git
 repository with a certain state to be present in the test environment. GitLab
 maintains the [`gitlab-test`](https://gitlab.com/gitlab-org/gitlab-test)
 repository for certain common cases - you can ensure a copy of the repository is
@@ -665,7 +1026,7 @@ let(:project) { create(:project, :repository) }
 ```
 
 Where you can, consider using the `:custom_repo` trait instead of `:repository`.
-This allows you to specify exactly what files will appear in the `master` branch
+This allows you to specify exactly what files appear in the `master` branch
 of the project's repository. For example:
 
 ```ruby
@@ -680,17 +1041,17 @@ let(:project) do
 end
 ```
 
-This will create a repository containing two files, with default permissions and
+This creates a repository containing two files, with default permissions and
 the specified content.
 
 ### Configuration
 
-RSpec configuration files are files that change the RSpec configuration (i.e.
+RSpec configuration files are files that change the RSpec configuration (like
 `RSpec.configure do |config|` blocks). They should be placed under
 `spec/support/`.
 
-Each file should be related to a specific domain, e.g.
-`spec/support/capybara.rb`, `spec/support/carrierwave.rb`, etc.
+Each file should be related to a specific domain, such as
+`spec/support/capybara.rb` or `spec/support/carrierwave.rb`.
 
 If a helpers module applies only to a certain kind of specs, it should add
 modifiers to the `config.include` call. For instance if
@@ -716,7 +1077,7 @@ file which is used by the `spec/fast_spec_helper.rb` file. See
 
 Services for the test environment are automatically configured and started when
 tests are run, including Gitaly, Workhorse, Elasticsearch, and Capybara. When run in CI, or
-if the service needs to be installed, the test environment will log information
+if the service needs to be installed, the test environment logs information
 about set-up time, producing log messages like the following:
 
 ```plaintext

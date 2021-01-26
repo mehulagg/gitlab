@@ -7,20 +7,29 @@ module Resolvers
 
       argument :iid, GraphQL::STRING_TYPE,
                 required: false,
-                description: 'IID of the alert. For example, "1"'
+                description: 'IID of the alert. For example, "1".'
 
       argument :statuses, [Types::AlertManagement::StatusEnum],
                 as: :status,
                 required: false,
-                description: 'Alerts with the specified statues. For example, [TRIGGERED]'
+                description: 'Alerts with the specified statues. For example, [TRIGGERED].'
 
       argument :sort, Types::AlertManagement::AlertSortEnum,
-                description: 'Sort alerts by this criteria',
+                description: 'Sort alerts by this criteria.',
                 required: false
 
+      argument :domain, Types::AlertManagement::DomainFilterEnum,
+                description: 'Filter query for given domain.',
+                required: true,
+                default_value: 'operations'
+
       argument :search, GraphQL::STRING_TYPE,
-                description: 'Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.',
+                description: 'Search query for title, description, service, or monitoring_tool.',
                 required: false
+
+      argument :assignee_username, GraphQL::STRING_TYPE,
+                required: false,
+                description: 'Username of a user assigned to the issue.'
 
       type Types::AlertManagement::AlertType, null: true
 

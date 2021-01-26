@@ -1,0 +1,5 @@
+---
+title: Fix line spacing in billing card header
+merge_request: 52521
+author:
+type: fixed

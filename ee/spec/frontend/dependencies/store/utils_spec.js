@@ -1,5 +1,5 @@
-import { addListType } from 'ee/dependencies/store/utils';
 import listModule from 'ee/dependencies/store/modules/list';
+import { addListType } from 'ee/dependencies/store/utils';
 
 const mockModule = { mock: true };
 jest.mock('ee/dependencies/store/modules/list', () => ({

@@ -1,20 +1,20 @@
 import * as pathUtils from 'path';
 import { decorateData } from '~/ide/stores/utils';
+import { commitActionTypes } from '~/ide/constants';
 
 export const file = (name = 'name', id = name, type = '', parent = null) =>
   decorateData({
     id,
     type,
     icon: 'icon',
-    url: 'url',
     name,
     path: parent ? `${parent.path}/${name}` : name,
     parentPath: parent ? parent.path : '',
   });
 
-export const createEntriesFromPaths = paths =>
+export const createEntriesFromPaths = (paths) =>
   paths
-    .map(path => ({
+    .map((path) => ({
       name: pathUtils.basename(path),
       dir: pathUtils.dirname(path),
       ext: pathUtils.extname(path),
@@ -29,3 +29,22 @@ export const createEntriesFromPaths = paths =>
         ...entries,
       };
     }, {});
+
+export const createTriggerChangeAction = (payload) => ({
+  type: 'triggerFilesChange',
+  ...(payload ? { payload } : {}),
+});
+
+export const createTriggerRenamePayload = (path, newPath) => ({
+  type: commitActionTypes.move,
+  path,
+  newPath,
+});
+
+export const createTriggerUpdatePayload = (path) => ({
+  type: commitActionTypes.update,
+  path,
+});
+
+export const createTriggerRenameAction = (path, newPath) =>
+  createTriggerChangeAction(createTriggerRenamePayload(path, newPath));

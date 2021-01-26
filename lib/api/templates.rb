@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class Templates < Grape::API::Instance
+  class Templates < ::API::Base
     include PaginationParams
+
+    feature_category :templates
 
     GLOBAL_TEMPLATE_TYPES = {
       gitignores: {
@@ -10,6 +12,9 @@ module API
       },
       gitlab_ci_ymls: {
         gitlab_version: 8.9
+      },
+      gitlab_ci_syntax_ymls: {
+        gitlab_version: 13.8
       },
       dockerfiles: {
         gitlab_version: 8.15

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
 
@@ -71,7 +71,7 @@ Find your Heroku API key in [Manage Account](https://dashboard.heroku.com/accoun
 For each of your environments, you'll need to create a new Heroku application.
 You can do this through the [Dashboard](https://dashboard.heroku.com/).
 
-## Create Runner
+## Create a runner
 
 First install [Docker Engine](https://docs.docker.com/installation/).
 

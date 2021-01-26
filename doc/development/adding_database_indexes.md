@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Adding Database Indexes
 
 Indexes can be used to speed up database queries, but when should you add a new
@@ -121,3 +127,102 @@ may be affected by factors such as (but not limited to):
 In other words, this data is only reliable for a frequently used database with
 plenty of data and with as many GitLab features enabled (and being used) as
 possible.
+
+## Requirements for naming indexes
+
+Indexes with complex definitions need to be explicitly named rather than
+relying on the implicit naming behavior of migration methods. In short,
+that means you **must** provide an explicit name argument for an index
+created with one or more of the following options:
+
+- `where`
+- `using`
+- `order`
+- `length`
+- `type`
+- `opclass`
+
+### Considerations for index names
+
+Index names don't have any significance in the database, so they should
+attempt to communicate intent to others. The most important rule to
+remember is that generic names are more likely to conflict or be duplicated,
+and should not be used. Some other points to consider:
+
+- For general indexes, use a template, like: `index_{table}_{column}_{options}`.
+- For indexes added to solve a very specific problem, it may make sense
+  for the name to reflect their use.
+- Identifiers in PostgreSQL have a maximum length of 63 bytes.
+- Check `db/structure.sql` for conflicts and ideas.
+
+### Why explicit names are required
+
+As Rails is database agnostic, it generates an index name only
+from the required options of all indexes: table name and column name(s).
+For example, imagine the following two indexes are created in a migration:
+
+```ruby
+def up
+  add_index :my_table, :my_column
+
+  add_index :my_table, :my_column, where: 'my_column IS NOT NULL'
+end
+```
+
+Creation of the second index would fail, because Rails would generate
+the same name for both indexes.
+
+This is further complicated by the behavior of the `index_exists?` method.
+It considers only the table name, column name(s) and uniqueness specification
+of the index when making a comparison. Consider:
+
+```ruby
+def up
+  unless index_exists?(:my_table, :my_column, where: 'my_column IS NOT NULL')
+    add_index :my_table, :my_column, where: 'my_column IS NOT NULL'
+  end
+end
+```
+
+The call to `index_exists?` will return true if **any** index exists on
+`:my_table` and `:my_column`, and index creation will be bypassed.
+
+The `add_concurrent_index` helper is a requirement for creating indexes
+on populated tables. Since it cannot be used inside a transactional
+migration, it has a built-in check that detects if the index already
+exists. In the event a match is found, index creation is skipped.
+Without an explicit name argument, Rails can return a false positive
+for `index_exists?`, causing a required index to not be created
+properly. By always requiring a name for certain types of indexes, the
+chance of error is greatly reduced.
+
+## Temporary indexes
+
+There may be times when an index is only needed temporarily.
+
+For example, in a migration, a column of a table might be conditionally
+updated. To query which columns need to be updated within the
+[query performance guidelines](query_performance.md), an index is needed that would otherwise
+not be used.
+
+In these cases, a temporary index should be considered. To specify a
+temporary index:
+
+1. Prefix the index name with `tmp_` and follow the [naming conventions](database/constraint_naming_convention.md) and [requirements for naming indexes](#requirements-for-naming-indexes) for the rest of the name.
+1. Create a follow-up issue to remove the index in the next (or future) milestone.
+1. Add a comment in the migration mentioning the removal issue.
+
+A temporary migration would look like:
+
+```ruby
+INDEX_NAME = 'tmp_index_projects_on_owner_where_emails_disabled'
+
+def up
+  # Temporary index to be removed in 13.9 https://gitlab.com/gitlab-org/gitlab/-/issues/1234
+  add_concurrent_index :projects, :creator_id, where: 'emails_disabled = false', name: INDEX_NAME
+end
+
+def down
+  remove_concurrent_index_by_name :projects, INDEX_NAME
+end
+```

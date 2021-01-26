@@ -52,7 +52,7 @@ RSpec.describe SubmitUsagePingService do
   shared_examples 'does not run' do
     it do
       expect(Gitlab::HTTP).not_to receive(:post)
-      expect(Gitlab::UsageData).not_to receive(:to_json)
+      expect(Gitlab::UsageData).not_to receive(:data)
 
       subject.execute
     end
@@ -68,15 +68,15 @@ RSpec.describe SubmitUsagePingService do
     end
   end
 
-  shared_examples 'saves DevOps score data from the response' do
+  shared_examples 'saves DevOps report data from the response' do
     it do
       expect { subject.execute }
-        .to change { DevOpsScore::Metric.count }
+        .to change { DevOpsReport::Metric.count }
         .by(1)
 
-      expect(DevOpsScore::Metric.last.leader_issues).to eq 10.2
-      expect(DevOpsScore::Metric.last.instance_issues).to eq 3.2
-      expect(DevOpsScore::Metric.last.percentage_issues).to eq 31.37
+      expect(DevOpsReport::Metric.last.leader_issues).to eq 10.2
+      expect(DevOpsReport::Metric.last.instance_issues).to eq 3.2
+      expect(DevOpsReport::Metric.last.percentage_issues).to eq 31.37
     end
   end
 
@@ -113,7 +113,7 @@ RSpec.describe SubmitUsagePingService do
     it 'forces a refresh of usage data statistics before submitting' do
       stub_response(body: without_dev_ops_score_params)
 
-      expect(Gitlab::UsageData).to receive(:to_json).with(force_refresh: true).and_call_original
+      expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_call_original
 
       subject.execute
     end
@@ -123,15 +123,39 @@ RSpec.describe SubmitUsagePingService do
         stub_response(body: with_conv_index_params)
       end
 
-      it_behaves_like 'saves DevOps score data from the response'
+      it_behaves_like 'saves DevOps report data from the response'
     end
 
-    context 'when DevOps score data is passed' do
+    context 'when DevOps report data is passed' do
       before do
         stub_response(body: with_dev_ops_score_params)
       end
 
-      it_behaves_like 'saves DevOps score data from the response'
+      it_behaves_like 'saves DevOps report data from the response'
+    end
+
+    context 'with saving raw_usage_data' do
+      before do
+        stub_response(body: with_dev_ops_score_params)
+      end
+
+      it 'creates a raw_usage_data record' do
+        expect { subject.execute }.to change(RawUsageData, :count).by(1)
+      end
+
+      it 'saves the correct payload' do
+        recorded_at = Time.current
+        usage_data = { uuid: 'uuid', recorded_at: recorded_at }
+
+        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+
+        subject.execute
+
+        raw_usage_data = RawUsageData.find_by(recorded_at: recorded_at)
+
+        expect(raw_usage_data.recorded_at).to be_like_time(recorded_at)
+        expect(raw_usage_data.payload.to_json).to eq(usage_data.to_json)
+      end
     end
 
     context 'and usage ping response has unsuccessful status' do
@@ -148,7 +172,7 @@ RSpec.describe SubmitUsagePingService do
 
     context 'and usage data is empty string' do
       before do
-        allow(Gitlab::UsageData).to receive(:to_json).and_return("")
+        allow(Gitlab::UsageData).to receive(:data).and_return({})
       end
 
       it_behaves_like 'does not send a blank usage ping payload'
@@ -156,7 +180,7 @@ RSpec.describe SubmitUsagePingService do
 
     context 'and usage data is nil' do
       before do
-        allow(Gitlab::UsageData).to receive(:to_json).and_return(nil)
+        allow(Gitlab::UsageData).to receive(:data).and_return(nil)
       end
 
       it_behaves_like 'does not send a blank usage ping payload'
@@ -164,7 +188,7 @@ RSpec.describe SubmitUsagePingService do
   end
 
   def stub_response(body:, status: 201)
-    stub_full_request('https://version.gitlab.com/usage_data', method: :post)
+    stub_full_request(SubmitUsagePingService::STAGING_URL, method: :post)
       .to_return(
         headers: { 'Content-Type' => 'application/json' },
         body: body.to_json,

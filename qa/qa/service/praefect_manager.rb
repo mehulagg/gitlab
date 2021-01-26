@@ -10,7 +10,7 @@ module QA
       PrometheusQueryError = Class.new(StandardError)
 
       def initialize
-        @gitlab = 'gitlab-gitaly-ha'
+        @gitlab = 'gitlab-gitaly-cluster'
         @praefect = 'praefect'
         @postgres = 'postgres'
         @primary_node = 'gitaly1'
@@ -28,7 +28,7 @@ module QA
 
       def replicated?(project_id)
         Support::Retrier.retry_until(raise_on_failure: false) do
-          replicas = wait_until_shell_command(%(docker exec gitlab-gitaly-ha bash -c 'gitlab-rake "gitlab:praefect:replicas[#{project_id}]"')) do |line|
+          replicas = wait_until_shell_command(%(docker exec #{@gitlab} bash -c 'gitlab-rake "gitlab:praefect:replicas[#{project_id}]"')) do |line|
             QA::Runtime::Logger.debug(line.chomp)
             # The output of the rake task looks something like this:
             #
@@ -39,6 +39,7 @@ module QA
             break line if line.start_with?('gitaly_cluster')
             break nil if line.include?('Something went wrong when getting replicas')
           end
+          next false unless replicas
 
           # We want to know if the checksums are identical
           replicas&.split('|')&.map(&:strip)&.slice(1..3)&.uniq&.one?
@@ -76,6 +77,7 @@ module QA
       def trigger_failover_by_stopping_primary_node
         QA::Runtime::Logger.info("Stopping node #{@primary_node} to trigger failover")
         stop_node(@primary_node)
+        wait_for_new_primary
       end
 
       def clear_replication_queue
@@ -120,7 +122,7 @@ module QA
       end
 
       def query_read_distribution
-        output = shell "docker exec gitlab-gitaly-ha bash -c 'curl -s http://localhost:9090/api/v1/query?query=gitaly_praefect_read_distribution'" do |line|
+        output = shell "docker exec #{@gitlab} bash -c 'curl -s http://localhost:9090/api/v1/query?query=gitaly_praefect_read_distribution'" do |line|
           QA::Runtime::Logger.debug(line)
           break line
         end
@@ -178,15 +180,6 @@ module QA
         wait_for_reliable_connection
       end
 
-      def reset_cluster
-        QA::Runtime::Logger.info('Reset Gitaly Cluster by starting all nodes and enabling writes')
-        start_node(@praefect)
-        start_node(@primary_node)
-        start_node(@secondary_node)
-        start_node(@tertiary_node)
-        wait_for_health_check_all_nodes
-      end
-
       def verify_storage_move(source_storage, destination_storage)
         return if QA::Runtime::Env.dot_com?
 
@@ -213,14 +206,14 @@ module QA
 
       def wait_for_new_primary_node(node)
         QA::Runtime::Logger.info("Wait until #{node} is the primary node")
-        with_praefect_log do |log|
+        with_praefect_log(max_duration: 120) do |log|
           break true if log['msg'] == 'primary node changed' && log['newPrimary'] == node
         end
       end
 
       def wait_for_new_primary
         QA::Runtime::Logger.info("Wait until a new primary node is selected")
-        with_praefect_log do |log|
+        with_praefect_log(max_duration: 120) do |log|
           break true if log['msg'] == 'primary node changed'
         end
       end
@@ -345,7 +338,7 @@ module QA
       end
 
       def value_for_node(data, node)
-        data.find(-> {0}) { |item| item[:node] == node }[:value]
+        data.find(-> {{ value: 0 }}) { |item| item[:node] == node }[:value]
       end
 
       def wait_for_reliable_connection
@@ -383,14 +376,18 @@ module QA
         wait_until_shell_command("docker exec #{@gitlab} bash -c 'tail -n 50 /var/log/gitlab/gitaly/current'") do |line|
           log = JSON.parse(line)
 
-          break log['grpc.request.repoPath'] if log['grpc.method'] == 'RenameRepository' && log['grpc.request.repoStorage'] == storage && !log['grpc.request.repoPath'].include?('wiki')
+          if (log['grpc.method'] == 'RenameRepository' || log['grpc.method'] == 'RemoveRepository') &&
+              log['grpc.request.repoStorage'] == storage &&
+              !log['grpc.request.repoPath'].include?('wiki')
+            break log['grpc.request.repoPath']
+          end
         rescue JSON::ParserError
           # Ignore lines that can't be parsed as JSON
         end
       end
 
       def verify_storage_move_to_praefect(repo_path, virtual_storage)
-        wait_until_shell_command("docker exec #{@gitlab} bash -c 'tail -n 50 /var/log/gitlab/praefect/current'") do |line|
+        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 50 /var/log/gitlab/praefect/current'") do |line|
           log = JSON.parse(line)
 
           log['grpc.method'] == 'ReplicateRepository' && log['virtual_storage'] == virtual_storage && log['relative_path'] == repo_path
@@ -409,8 +406,8 @@ module QA
         end
       end
 
-      def with_praefect_log
-        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 1 /var/log/gitlab/praefect/current'") do |line|
+      def with_praefect_log(**kwargs)
+        wait_until_shell_command("docker exec #{@praefect} bash -c 'tail -n 1 /var/log/gitlab/praefect/current'", **kwargs) do |line|
           QA::Runtime::Logger.debug(line.chomp)
           yield JSON.parse(line)
         end

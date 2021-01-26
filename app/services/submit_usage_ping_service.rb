@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class SubmitUsagePingService
-  URL = 'https://version.gitlab.com/usage_data'
+  PRODUCTION_URL = 'https://version.gitlab.com/usage_data'
+  STAGING_URL = 'https://gitlab-services-version-gitlab-com-staging.gs-staging.gitlab.org/usage_data'
 
   METRICS = %w[leader_issues instance_issues percentage_issues leader_notes instance_notes
                percentage_notes leader_milestones instance_milestones percentage_milestones
@@ -19,30 +20,50 @@ class SubmitUsagePingService
     return unless Gitlab::CurrentSettings.usage_ping_enabled?
     return if User.single_user&.requires_usage_stats_consent?
 
-    payload = Gitlab::UsageData.to_json(force_refresh: true)
-    raise SubmissionError.new('Usage data is blank') if payload.blank?
+    usage_data = Gitlab::UsageData.data(force_refresh: true)
+
+    raise SubmissionError.new('Usage data is blank') if usage_data.blank?
+
+    raw_usage_data = save_raw_usage_data(usage_data)
 
     response = Gitlab::HTTP.post(
-      URL,
-      body: payload,
+      url,
+      body: usage_data.to_json,
       allow_local_requests: true,
       headers: { 'Content-type' => 'application/json' }
     )
 
     raise SubmissionError.new("Unsuccessful response code: #{response.code}") unless response.success?
 
+    raw_usage_data.update_sent_at! if raw_usage_data
+
     store_metrics(response)
   end
 
   private
 
+  def save_raw_usage_data(usage_data)
+    RawUsageData.safe_find_or_create_by(recorded_at: usage_data[:recorded_at]) do |record|
+      record.payload = usage_data
+    end
+  end
+
   def store_metrics(response)
-    metrics = response['conv_index'] || response['dev_ops_score']
+    metrics = response['conv_index'] || response['dev_ops_score'] # leaving dev_ops_score here, as the response data comes from the gitlab-version-com
 
     return unless metrics.present?
 
-    DevOpsScore::Metric.create!(
+    DevOpsReport::Metric.create!(
       metrics.slice(*METRICS)
     )
+  end
+
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/233615 for details
+  def url
+    if Rails.env.production?
+      PRODUCTION_URL
+    else
+      STAGING_URL
+    end
   end
 end

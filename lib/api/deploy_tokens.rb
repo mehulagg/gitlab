@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class DeployTokens < Grape::API::Instance
+  class DeployTokens < ::API::Base
     include PaginationParams
+
+    feature_category :continuous_delivery
 
     helpers do
       def scope_params

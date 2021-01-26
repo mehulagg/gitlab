@@ -1,8 +1,7 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import DetailsRow from '~/registry/shared/components/details_row.vue';
-import { generateConanRecipe } from '../utils';
+import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
 import { PackageType } from '../../shared/constants';
 
 export default {
@@ -25,9 +24,6 @@ export default {
     },
   },
   computed: {
-    conanRecipe() {
-      return generateConanRecipe(this.packageEntity);
-    },
     showMetadata() {
       const visibilityConditions = {
         [PackageType.NUGET]: this.packageEntity.nuget_metadatum,
@@ -42,7 +38,7 @@ export default {
 
 <template>
   <div v-if="showMetadata">
-    <h3 class="gl-font-lg gl-mt-5" data-testid="title">{{ __('Additional Metadata') }}</h3>
+    <h3 class="gl-font-lg" data-testid="title">{{ __('Additional Metadata') }}</h3>
 
     <div class="gl-bg-gray-50 gl-inset-border-1-gray-100 gl-rounded-base" data-testid="main">
       <template v-if="packageEntity.nuget_metadatum">
@@ -73,7 +69,7 @@ export default {
         data-testid="conan-recipe"
       >
         <gl-sprintf :message="$options.i18n.recipeText">
-          <template #recipe>{{ conanRecipe }}</template>
+          <template #recipe>{{ packageEntity.name }}</template>
         </gl-sprintf>
       </details-row>
 

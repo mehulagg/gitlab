@@ -9,10 +9,9 @@
  * @param {string} root - the key of the state where to search fo they keys described in list
  * @returns {Object} a dictionary with all the computed properties generated
  */
-// eslint-disable-next-line import/prefer-default-export
 export const mapComputed = (list, defaultUpdateFn, root) => {
   const result = {};
-  list.forEach(item => {
+  list.forEach((item) => {
     const [getter, key, updateFn] =
       typeof item === 'string'
         ? [false, item, defaultUpdateFn]

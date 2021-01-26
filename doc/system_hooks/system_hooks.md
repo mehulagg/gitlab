@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -6,34 +9,42 @@ type: reference
 
 Your GitLab instance can perform HTTP POST requests on the following events:
 
+- `group_create`
+- `group_destroy`
+- `group_rename`
+- `key_create`
+- `key_destroy`
 - `project_create`
 - `project_destroy`
 - `project_rename`
 - `project_transfer`
 - `project_update`
+- `repository_update`
+- `user_add_to_group`
 - `user_add_to_team`
-- `user_remove_from_team`
-- `user_update_for_team`
 - `user_create`
 - `user_destroy`
 - `user_failed_login`
-- `user_rename`
-- `key_create`
-- `key_destroy`
-- `group_create`
-- `group_destroy`
-- `group_rename`
-- `user_add_to_group`
 - `user_remove_from_group`
+- `user_remove_from_team`
+- `user_rename`
 - `user_update_for_group`
+- `user_update_for_team`
 
-The triggers for most of these are self-explanatory, but `project_update` and `project_rename` deserve some clarification: `project_update` is fired any time an attribute of a project is changed (name, description, tags, etc.) *unless* the `path` attribute is also changed. In that case, a `project_rename` is triggered instead (so that, for instance, if all you care about is the repository URL, you can just listen for `project_rename`).
+The triggers for most of these are self-explanatory, but `project_update` and
+`project_rename` deserve some clarification: `project_update` is fired any time
+an attribute of a project is changed (including name, description, and tags)
+_unless_ the `path` attribute is also changed. In that case, a `project_rename`
+is triggered instead (so that, for instance, if all you care about is the
+repository URL, you can just listen for `project_rename`).
 
-`user_failed_login` is sent whenever a **blocked** user attempts to login and denied access.
+`user_failed_login` is sent whenever a _blocked_ user attempts to sign in and is
+denied access.
 
-System hooks can be used, e.g. for logging or changing information in a LDAP server.
+System hooks can be used, for example, for logging or changing information in an
+LDAP server.
 
-NOTE: **Note:**
+NOTE:
 We follow the same structure and deprecations as [Webhooks](../user/project/integrations/webhooks.md)
 for Push and Tag events, but we never display commits.
 
@@ -238,7 +249,7 @@ Please refer to `group_rename` and `user_rename` for that case.
 }
 ```
 
-If the user is blocked via LDAP, `state` will be `ldap_blocked`.
+If the user is blocked via LDAP, `state` is `ldap_blocked`.
 
 **User renamed:**
 
@@ -289,14 +300,10 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
    "updated_at": "2012-07-21T07:38:22Z",
    "event_name": "group_create",
          "name": "StoreCloud",
-  "owner_email": null,
-   "owner_name": null,
          "path": "storecloud",
      "group_id": 78
 }
 ```
-
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab/-/issues/20011>.
 
 **Group removed:**
 
@@ -306,14 +313,10 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
    "updated_at": "2012-07-21T07:38:22Z",
    "event_name": "group_destroy",
          "name": "StoreCloud",
-  "owner_email": null,
-   "owner_name": null,
          "path": "storecloud",
      "group_id": 78
 }
 ```
-
-`owner_name` and `owner_email` are always `null`. Please see [issue #20011](https://gitlab.com/gitlab-org/gitlab/-/issues/20011).
 
 **Group renamed:**
 
@@ -326,14 +329,10 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
            "path": "better-name",
       "full_path": "parent-group/better-name",
        "group_id": 64,
-     "owner_name": null,
-    "owner_email": null,
        "old_path": "old-name",
   "old_full_path": "parent-group/old-name"
 }
 ```
-
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab/-/issues/20011>.
 
 **New Group Member:**
 
@@ -524,9 +523,11 @@ X-Gitlab-Event: System Hook
 {
   "object_kind": "merge_request",
   "user": {
+    "id": 1,
     "name": "Administrator",
     "username": "root",
-    "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "email": "admin@example.com"
   },
   "project": {
     "name": "Example",
@@ -671,7 +672,7 @@ X-Gitlab-Event: System Hook
     "homepage":"http://example.com/jsmith/example",
     "url":"git@example.com:jsmith/example.git",
     "ssh_url":"git@example.com:jsmith/example.git",
-    "http_url":"http://example.com/jsmith/example.git",
+    "http_url":"http://example.com/jsmith/example.git"
   },
   "changes": [
     {

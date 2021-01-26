@@ -1,48 +1,79 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { n__, __ } from '~/locale';
-import { GlModal } from '@gitlab/ui';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlModal, GlSafeHtmlDirective, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { n__, s__ } from '~/locale';
 import CommitMessageField from './message_field.vue';
 import Actions from './actions.vue';
 import SuccessMessage from './success_message.vue';
 import { leftSidebarViews, MAX_WINDOW_HEIGHT_COMPACT } from '../../constants';
-import consts from '../../stores/modules/commit/constants';
+import { createUnexpectedCommitError } from '../../lib/errors';
+
+const MSG_CANNOT_PUSH_CODE = s__(
+  'WebIDE|You need permission to edit files directly in this project.',
+);
 
 export default {
   components: {
     Actions,
-    LoadingButton,
     CommitMessageField,
     SuccessMessage,
     GlModal,
+    GlButton,
+  },
+  directives: {
+    SafeHtml: GlSafeHtmlDirective,
+    GlTooltip: GlTooltipDirective,
   },
   data() {
     return {
       isCompact: true,
       componentHeight: null,
+      // Keep track of "lastCommitError" so we hold onto the value even when "commitError" is cleared.
+      lastCommitError: createUnexpectedCommitError(),
     };
   },
   computed: {
     ...mapState(['changedFiles', 'stagedFiles', 'currentActivityView', 'lastCommitMsg']),
-    ...mapState('commit', ['commitMessage', 'submitCommitLoading']),
-    ...mapGetters(['someUncommittedChanges']),
+    ...mapState('commit', ['commitMessage', 'submitCommitLoading', 'commitError']),
+    ...mapGetters(['someUncommittedChanges', 'canPushCode']),
     ...mapGetters('commit', ['discardDraftButtonDisabled', 'preBuiltCommitMessage']),
+    commitButtonDisabled() {
+      return !this.canPushCode || !this.someUncommittedChanges;
+    },
+    commitButtonTooltip() {
+      if (!this.canPushCode) {
+        return MSG_CANNOT_PUSH_CODE;
+      }
+
+      return '';
+    },
     overviewText() {
       return n__('%d changed file', '%d changed files', this.stagedFiles.length);
     },
-    commitButtonText() {
-      return this.stagedFiles.length ? __('Commit') : __('Stage & Commit');
-    },
-
     currentViewIsCommitView() {
       return this.currentActivityView === leftSidebarViews.commit.name;
+    },
+    commitErrorPrimaryAction() {
+      const { primaryAction } = this.lastCommitError || {};
+
+      return {
+        button: primaryAction ? { text: primaryAction.text } : undefined,
+        callback: primaryAction?.callback?.bind(this, this.$store) || (() => {}),
+      };
     },
   },
   watch: {
     currentActivityView: 'handleCompactState',
     someUncommittedChanges: 'handleCompactState',
     lastCommitMsg: 'handleCompactState',
+    commitError(val) {
+      if (!val) {
+        return;
+      }
+
+      this.lastCommitError = val;
+      this.$refs.commitErrorModal.show();
+    },
   },
   methods: {
     ...mapActions(['updateActivityBarView']),
@@ -53,12 +84,13 @@ export default {
       'updateCommitAction',
     ]),
     commit() {
-      return this.commitChanges().catch(() => {
-        this.$refs.createBranchModal.show();
-      });
-    },
-    forceCreateNewBranch() {
-      return this.updateCommitAction(consts.COMMIT_TO_NEW_BRANCH).then(() => this.commit());
+      // Even though the submit button will be disabled, we need to disable the submission
+      // since hitting enter on the branch name text input also submits the form.
+      if (!this.canPushCode) {
+        return false;
+      }
+
+      return this.commitChanges();
     },
     handleCompactState() {
       if (this.lastCommitMsg) {
@@ -98,6 +130,8 @@ export default {
       this.componentHeight = null;
     },
   },
+  // Expose for tests
+  MSG_CANNOT_PUSH_CODE,
 };
 </script>
 
@@ -119,15 +153,22 @@ export default {
       @after-enter="afterEndTransition"
     >
       <div v-if="isCompact" ref="compactEl" class="commit-form-compact">
-        <button
-          :disabled="!someUncommittedChanges"
-          type="button"
-          class="btn btn-primary btn-sm btn-block qa-begin-commit-button"
-          data-testid="begin-commit-button"
-          @click="beginCommit"
+        <div
+          v-gl-tooltip="{ title: commitButtonTooltip }"
+          data-testid="begin-commit-button-tooltip"
         >
-          {{ __('Commit…') }}
-        </button>
+          <gl-button
+            :disabled="commitButtonDisabled"
+            category="primary"
+            variant="info"
+            block
+            class="qa-begin-commit-button"
+            data-testid="begin-commit-button"
+            @click="beginCommit"
+          >
+            {{ __('Commit…') }}
+          </gl-button>
+        </div>
         <p class="text-center bold">{{ overviewText }}</p>
       </div>
       <form v-else ref="formEl" @submit.prevent.stop="commit">
@@ -140,41 +181,51 @@ export default {
         />
         <div class="clearfix gl-mt-5">
           <actions />
-          <loading-button
-            :loading="submitCommitLoading"
-            :label="commitButtonText"
-            container-class="btn btn-success btn-sm float-left qa-commit-button"
-            @click="commit"
-          />
-          <button
+          <div
+            v-gl-tooltip="{ title: commitButtonTooltip }"
+            class="float-left"
+            data-testid="commit-button-tooltip"
+          >
+            <gl-button
+              :disabled="commitButtonDisabled"
+              :loading="submitCommitLoading"
+              data-testid="commit-button"
+              class="qa-commit-button"
+              category="primary"
+              variant="success"
+              @click="commit"
+            >
+              {{ __('Commit') }}
+            </gl-button>
+          </div>
+          <gl-button
             v-if="!discardDraftButtonDisabled"
-            type="button"
-            class="btn btn-default btn-sm float-right"
+            class="float-right"
+            data-testid="discard-draft"
             @click="discardDraft"
           >
             {{ __('Discard draft') }}
-          </button>
-          <button
+          </gl-button>
+          <gl-button
             v-else
             type="button"
-            class="btn btn-default btn-sm float-right"
+            class="float-right"
+            category="secondary"
+            variant="default"
             @click="toggleIsCompact"
           >
             {{ __('Collapse') }}
-          </button>
+          </gl-button>
         </div>
         <gl-modal
-          ref="createBranchModal"
-          modal-id="ide-create-branch-modal"
-          :ok-title="__('Create new branch')"
-          :title="__('Branch has changed')"
-          ok-variant="success"
-          @ok="forceCreateNewBranch"
+          ref="commitErrorModal"
+          modal-id="ide-commit-error-modal"
+          :title="lastCommitError.title"
+          :action-primary="commitErrorPrimaryAction.button"
+          :action-cancel="{ text: __('Cancel') }"
+          @ok="commitErrorPrimaryAction.callback"
         >
-          {{
-            __(`This branch has changed since you started editing.
-                Would you like to create a new branch?`)
-          }}
+          <div v-safe-html="lastCommitError.messageHTML"></div>
         </gl-modal>
       </form>
     </transition>

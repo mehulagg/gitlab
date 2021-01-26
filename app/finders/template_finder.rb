@@ -7,7 +7,10 @@ class TemplateFinder
     dockerfiles: ::Gitlab::Template::DockerfileTemplate,
     gitignores: ::Gitlab::Template::GitignoreTemplate,
     gitlab_ci_ymls: ::Gitlab::Template::GitlabCiYmlTemplate,
-    metrics_dashboard_ymls: ::Gitlab::Template::MetricsDashboardTemplate
+    gitlab_ci_syntax_ymls: ::Gitlab::Template::GitlabCiSyntaxYmlTemplate,
+    metrics_dashboard_ymls: ::Gitlab::Template::MetricsDashboardTemplate,
+    issues: ::Gitlab::Template::IssueTemplate,
+    merge_requests: ::Gitlab::Template::MergeRequestTemplate
   ).freeze
 
   class << self
@@ -35,9 +38,9 @@ class TemplateFinder
 
   def execute
     if params[:name]
-      vendored_templates.find(params[:name])
+      vendored_templates.find(params[:name], project)
     else
-      vendored_templates.all
+      vendored_templates.all(project)
     end
   end
 end

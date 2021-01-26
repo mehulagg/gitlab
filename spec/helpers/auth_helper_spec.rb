@@ -99,6 +99,22 @@ RSpec.describe AuthHelper do
     end
   end
 
+  describe 'experiment_enabled_button_based_providers' do
+    it 'returns the intersection set of github & google_oauth2 with enabled providers' do
+      allow(helper).to receive(:enabled_button_based_providers) { %w(twitter github google_oauth2) }
+
+      expect(helper.experiment_enabled_button_based_providers).to eq(%w(github google_oauth2))
+
+      allow(helper).to receive(:enabled_button_based_providers) { %w(google_oauth2 bitbucket) }
+
+      expect(helper.experiment_enabled_button_based_providers).to eq(%w(google_oauth2))
+
+      allow(helper).to receive(:enabled_button_based_providers) { %w(bitbucket) }
+
+      expect(helper.experiment_enabled_button_based_providers).to be_empty
+    end
+  end
+
   describe 'button_based_providers_enabled?' do
     before do
       allow(helper).to receive(:auth_providers) { [:twitter, :github] }
@@ -218,6 +234,83 @@ RSpec.describe AuthHelper do
       end
 
       it { is_expected.to be(false) }
+    end
+  end
+
+  describe '#auth_active?' do
+    let(:user) { create(:user) }
+
+    def auth_active?
+      helper.auth_active?(provider)
+    end
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'for atlassian_oauth2 provider' do
+      let_it_be(:provider) { :atlassian_oauth2 }
+
+      it 'returns true when present' do
+        create(:atlassian_identity, user: user)
+
+        expect(auth_active?).to be true
+      end
+
+      it 'returns false when not present' do
+        expect(auth_active?).to be false
+      end
+    end
+
+    context 'for other omniauth providers' do
+      let_it_be(:provider) { 'google_oauth2' }
+
+      it 'returns true when present' do
+        create(:identity, provider: provider, user: user)
+
+        expect(auth_active?).to be true
+      end
+
+      it 'returns false when not present' do
+        expect(auth_active?).to be false
+      end
+    end
+  end
+
+  describe '#google_tag_manager_enabled?' do
+    let(:is_gitlab_com) { true }
+    let(:user) { nil }
+
+    before do
+      allow(Gitlab).to receive(:com?).and_return(is_gitlab_com)
+      stub_config(extra: { google_tag_manager_id: 'key' })
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    subject(:google_tag_manager_enabled?) { helper.google_tag_manager_enabled? }
+
+    context 'on gitlab.com and a key set without a current user' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when not on gitlab.com' do
+      let(:is_gitlab_com) { false }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when current user is set' do
+      let(:user) { instance_double('User') }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when no key is set' do
+      before do
+        stub_config(extra: {})
+      end
+
+      it { is_expected.to be_falsey }
     end
   end
 end

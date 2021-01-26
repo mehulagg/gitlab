@@ -2,10 +2,12 @@
 
 module API
   # Environments RESTfull API endpoints
-  class Environments < Grape::API::Instance
+  class Environments < ::API::Base
     include PaginationParams
 
     before { authenticate! }
+
+    feature_category :continuous_delivery
 
     params do
       requires :id, type: String, desc: 'The project ID'

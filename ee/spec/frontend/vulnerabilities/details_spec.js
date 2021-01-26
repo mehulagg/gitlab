@@ -1,8 +1,9 @@
-import { mount } from '@vue/test-utils';
-import { getAllByRole, getByTestId } from '@testing-library/dom';
 import { GlLink } from '@gitlab/ui';
+import { getAllByRole, getByTestId } from '@testing-library/dom';
+import { mount } from '@vue/test-utils';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import VulnerabilityDetails from 'ee/vulnerabilities/components/details.vue';
+import { SUPPORTING_MESSAGE_TYPES } from 'ee/vulnerabilities/constants';
 
 describe('Vulnerability Details', () => {
   let wrapper;
@@ -11,11 +12,11 @@ describe('Vulnerability Details', () => {
     title: 'some title',
     severity: 'bad severity',
     confidence: 'high confidence',
-    report_type: 'nice report_type',
+    reportType: 'nice report_type',
     description: 'vulnerability description',
   };
 
-  const createWrapper = vulnerabilityOverrides => {
+  const createWrapper = (vulnerabilityOverrides) => {
     const propsData = {
       vulnerability: { ...vulnerability, ...vulnerabilityOverrides },
     };
@@ -23,9 +24,9 @@ describe('Vulnerability Details', () => {
     wrapper = mount(VulnerabilityDetails, { propsData });
   };
 
-  const getById = id => wrapper.find(`[data-testid="${id}"]`);
-  const getAllById = id => wrapper.findAll(`[data-testid="${id}"]`);
-  const getText = id => getById(id).text();
+  const getById = (id) => wrapper.find(`[data-testid="${id}"]`);
+  const getAllById = (id) => wrapper.findAll(`[data-testid="${id}"]`);
+  const getText = (id) => getById(id).text();
 
   afterEach(() => {
     wrapper.destroy();
@@ -36,7 +37,7 @@ describe('Vulnerability Details', () => {
     expect(getText('title')).toBe(vulnerability.title);
     expect(getText('description')).toBe(vulnerability.description);
     expect(wrapper.find(SeverityBadge).props('severity')).toBe(vulnerability.severity);
-    expect(getText('reportType')).toBe(`Report Type: ${vulnerability.report_type}`);
+    expect(getText('reportType')).toBe(`Scan Type: ${vulnerability.reportType}`);
 
     expect(getById('image').exists()).toBe(false);
     expect(getById('os').exists()).toBe(false);
@@ -55,7 +56,7 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the operating system if it exists', () => {
-    createWrapper({ location: { operating_system: 'linux' } });
+    createWrapper({ location: { operatingSystem: 'linux' } });
     expect(getText('namespace')).toBe(`Namespace: linux`);
   });
 
@@ -87,37 +88,89 @@ describe('Vulnerability Details', () => {
   });
 
   it('shows the vulnerability identifiers if they exist', () => {
+    const identifiersData = [
+      { name: '00', url: 'http://example.com/00' },
+      { name: '11', url: 'http://example.com/11' },
+      { name: '22', url: 'http://example.com/22' },
+      { name: '33' },
+      { name: '44' },
+      { name: '55' },
+    ];
+
     createWrapper({
-      identifiers: [{ url: '0', name: '00' }, { url: '1', name: '11' }, { url: '2', name: '22' }],
+      identifiers: identifiersData,
     });
 
     const identifiers = getAllById('identifier');
-    expect(identifiers).toHaveLength(3);
 
-    const checkIdentifier = index => {
+    expect(identifiers).toHaveLength(identifiersData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
       const identifier = identifiers.at(index);
-      expect(identifier.attributes('target')).toBe('_blank');
-      expect(identifier.attributes('href')).toBe(index.toString());
-      expect(identifier.text()).toBe(`${index}${index}`);
+
+      expect(identifier.text()).toBe(name);
+
+      if (url) {
+        expect(identifier.is(GlLink)).toBe(true);
+        expect(identifier.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(identifier.is(GlLink)).toBe(false);
+      }
     };
 
-    for (let i = 0; i < identifiers.length; i += 1) {
-      checkIdentifier(i);
-    }
+    identifiersData.forEach(checkIdentifier);
+  });
+
+  it('shows the vulnerability assets if they exist', () => {
+    const assetsData = [
+      { name: 'Postman Collection', url: 'http://example.com/postman' },
+      { name: 'HTTP Messages', url: 'http://example.com/http-messages' },
+      { name: 'Foo' },
+      { name: 'Bar' },
+    ];
+
+    createWrapper({
+      assets: assetsData,
+    });
+
+    const assets = getAllById('asset');
+
+    expect(assets).toHaveLength(assetsData.length);
+
+    const checkIdentifier = ({ name, url }, index) => {
+      const asset = assets.at(index);
+
+      expect(asset.text()).toBe(name);
+
+      if (url) {
+        expect(asset.is(GlLink)).toBe(true);
+        expect(asset.attributes()).toMatchObject({
+          target: '_blank',
+          href: url,
+        });
+      } else {
+        expect(asset.is(GlLink)).toBe(false);
+      }
+    };
+
+    assetsData.forEach(checkIdentifier);
   });
 
   describe('file link', () => {
     const file = () => getById('file').find(GlLink);
 
     it('shows only the file name if there is no start line', () => {
-      createWrapper({ location: { file: 'test.txt', blob_path: 'blob_path.txt' } });
+      createWrapper({ location: { file: 'test.txt', blobPath: 'blob_path.txt' } });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob_path.txt');
       expect(file().text()).toBe('test.txt');
     });
 
     it('shows the correct line number when there is a start line', () => {
-      createWrapper({ location: { file: 'test.txt', start_line: 24, blob_path: 'blob.txt' } });
+      createWrapper({ location: { file: 'test.txt', startLine: 24, blobPath: 'blob.txt' } });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24');
       expect(file().text()).toBe('test.txt:24');
@@ -125,7 +178,7 @@ describe('Vulnerability Details', () => {
 
     it('shows the correct line numbers when there is a start and end line', () => {
       createWrapper({
-        location: { file: 'test.txt', start_line: 24, end_line: 27, blob_path: 'blob.txt' },
+        location: { file: 'test.txt', startLine: 24, endLine: 27, blobPath: 'blob.txt' },
       });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24-27');
@@ -134,7 +187,7 @@ describe('Vulnerability Details', () => {
 
     it('shows only the start line when the end line is the same', () => {
       createWrapper({
-        location: { file: 'test.txt', start_line: 24, end_line: 24, blob_path: 'blob.txt' },
+        location: { file: 'test.txt', startLine: 24, endLine: 24, blobPath: 'blob.txt' },
       });
       expect(file().attributes('target')).toBe('_blank');
       expect(file().attributes('href')).toBe('blob.txt#L24');
@@ -172,25 +225,59 @@ describe('Vulnerability Details', () => {
   });
 
   describe('http data', () => {
-    const TEST_HEADERS = [{ name: 'Name1', value: 'Value1' }, { name: 'Name2', value: 'Value2' }];
-    const TEST_URL = 'http://foo.bar/test';
-    const EXPECT_HEADERS = {
-      label: 'Headers:',
-      content: 'Name1: Value1\nName2: Value2',
+    const TEST_HEADERS = [
+      { name: 'Name1', value: 'Value1' },
+      { name: 'Name2', value: 'Value2' },
+    ];
+    const EXPECT_REQUEST = {
+      label: 'Sent request:',
+      content: 'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
       isCode: true,
     };
 
-    const getTextContent = el => el.textContent.trim();
-    const getLabel = el => getTextContent(getByTestId(el, 'label'));
-    const getContent = el => getTextContent(getByTestId(el, 'value'));
-    const getSectionData = testId => {
+    const EXPECT_REQUEST_WITHOUT_BODY = {
+      label: 'Sent request:',
+      content:
+        'GET http://www.gitlab.com\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
+    const EXPECT_RESPONSE = {
+      label: 'Actual response:',
+      content: '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_RESPONSE_WITHOUT_BODY = {
+      label: 'Actual response:',
+      content:
+        '500 INTERNAL SERVER ERROR\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
+    const EXPECT_RECORDED_RESPONSE = {
+      label: 'Unmodified response:',
+      content: '200 OK\nName1: Value1\nName2: Value2\n\n[{"user_id":1,}]',
+      isCode: true,
+    };
+
+    const EXPECT_RECORDED_RESPONSE_WITHOUT_BODY = {
+      label: 'Unmodified response:',
+      content: '200 OK\nName1: Value1\nName2: Value2\n\n<Message body is not provided>',
+      isCode: true,
+    };
+
+    const getTextContent = (el) => el.textContent.trim();
+    const getLabel = (el) => getTextContent(getByTestId(el, 'label'));
+    const getContent = (el) => getTextContent(getByTestId(el, 'value'));
+    const getSectionData = (testId) => {
       const section = getById(testId).element;
 
       if (!section) {
         return null;
       }
 
-      return getAllByRole(section, 'listitem').map(li => ({
+      return getAllByRole(section, 'listitem').map((li) => ({
         label: getLabel(li),
         content: getContent(li),
         ...(li.querySelector('code') ? { isCode: true } : {}),
@@ -198,28 +285,49 @@ describe('Vulnerability Details', () => {
     };
 
     it.each`
-      request                                                    | expectedData
-      ${{}}                                                      | ${null}
-      ${{ headers: TEST_HEADERS }}                               | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, method: 'GET' }}                | ${[{ label: 'Method:', content: 'GET' }, EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, method: 'GET', url: TEST_URL }} | ${[{ label: 'Method:', content: 'GET' }, { label: 'URL:', content: TEST_URL }, EXPECT_HEADERS]}
-      ${{ url: TEST_URL }}                                       | ${[{ label: 'URL:', content: TEST_URL }]}
-      ${{ method: 'GET' }}                                       | ${[{ label: 'Method:', content: 'GET' }]}
+      request                                                                                             | expectedData
+      ${null}                                                                                             | ${null}
+      ${{}}                                                                                               | ${null}
+      ${{ headers: TEST_HEADERS }}                                                                        | ${null}
+      ${{ method: 'GET' }}                                                                                | ${null}
+      ${{ method: 'GET', url: 'http://www.gitlab.com' }}                                                  | ${null}
+      ${{ method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }}                        | ${null}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '[{"user_id":1,}]' }} | ${[EXPECT_REQUEST]}
+      ${{ headers: TEST_HEADERS, method: 'GET', url: 'http://www.gitlab.com', body: '' }}                 | ${[EXPECT_REQUEST_WITHOUT_BODY]}
     `('shows request data for $request', ({ request, expectedData }) => {
       createWrapper({ request });
       expect(getSectionData('request')).toEqual(expectedData);
     });
 
     it.each`
-      response                                                            | expectedData
-      ${{}}                                                               | ${null}
-      ${{ headers: TEST_HEADERS }}                                        | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, status_code: 200 }}                      | ${[EXPECT_HEADERS]}
-      ${{ headers: TEST_HEADERS, status_code: 200, reason_phrase: 'OK' }} | ${[{ label: 'Status:', content: '200 OK' }, EXPECT_HEADERS]}
-      ${{ status_code: 400, reason_phrase: 'Something bad' }}             | ${[{ label: 'Status:', content: '400 Something bad' }]}
+      response                                                                                                         | expectedData
+      ${null}                                                                                                          | ${null}
+      ${{}}                                                                                                            | ${null}
+      ${{ headers: TEST_HEADERS }}                                                                                     | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]' }}                                                           | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500' }}                                        | ${null}
+      ${{ headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }} | ${[EXPECT_RESPONSE]}
+      ${{ headers: TEST_HEADERS, body: '', statusCode: '500', reasonPhrase: 'INTERNAL SERVER ERROR' }}                 | ${[EXPECT_RESPONSE_WITHOUT_BODY]}
     `('shows response data for $response', ({ response, expectedData }) => {
       createWrapper({ response });
       expect(getSectionData('response')).toEqual(expectedData);
+    });
+
+    it.each`
+      supportingMessages                                                                                                                                         | expectedData
+      ${null}                                                                                                                                                    | ${null}
+      ${[]}                                                                                                                                                      | ${null}
+      ${[{}]}                                                                                                                                                    | ${null}
+      ${[{}, { response: {} }]}                                                                                                                                  | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS } }]}                                                                                                           | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]' } }]}                                                                                 | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200' } }]}                                                             | ${null}
+      ${[{}, { response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', status_code: '200', reason_phrase: 'OK' } }]}                                        | ${null}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '[{"user_id":1,}]', statusCode: '200', reasonPhrase: 'OK' } }]} | ${[EXPECT_RECORDED_RESPONSE]}
+      ${[{}, { name: SUPPORTING_MESSAGE_TYPES.RECORDED, response: { headers: TEST_HEADERS, body: '', statusCode: '200', reasonPhrase: 'OK' } }]}                 | ${[EXPECT_RECORDED_RESPONSE_WITHOUT_BODY]}
+    `('shows response data for $supporting_messages', ({ supportingMessages, expectedData }) => {
+      createWrapper({ supportingMessages });
+      expect(getSectionData('recorded-response')).toEqual(expectedData);
     });
   });
 });

@@ -40,7 +40,7 @@ module Elastic
       def clear_tracking!
         with_redis do |redis|
           Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-            redis.del(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
+            redis.unlink(self::REDIS_SET_KEY, self::REDIS_SCORE_KEY)
           end
         end
       end
@@ -52,6 +52,30 @@ module Elastic
 
       def with_redis(&blk)
         Gitlab::Redis::SharedState.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
+      end
+
+      def maintain_indexed_associations(object, associations)
+        each_indexed_association(object, associations) do |_, association|
+          association.find_in_batches do |group|
+            track!(*group)
+          end
+        end
+      end
+
+      private
+
+      def each_indexed_association(object, associations)
+        associations.each do |association_name|
+          association = object.association(association_name)
+          scope = association.scope
+          klass = association.klass
+
+          if klass == Note
+            scope = scope.searchable
+          end
+
+          yield klass, scope
+        end
       end
     end
 

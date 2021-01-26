@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     describe 'Security Dashboard in a Project' do
       let(:vulnerability_name) { "CVE-2017-18269 in glibc" }
       let(:vulnerability_description) { "Short description to match in specs" }
@@ -37,9 +37,9 @@ module QA
         @merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = @project
           mr.source_branch = 'secure-mr'
-          mr.target_branch = 'master'
+          mr.target_branch = @project.default_branch
           mr.source = @source
-          mr.target = 'master'
+          mr.target = @project.default_branch
           mr.target_new_branch = false
         end
 
@@ -51,18 +51,17 @@ module QA
           end
           merge_request.merge!
         end
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       after(:all) do
         @runner.remove_via_api!
       end
 
-      it 'shows vulnerability details' do
+      it 'shows vulnerability details', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/949' do
         Flow::Login.sign_in_unless_signed_in
         @project.visit!
-        Page::Project::Menu.perform(&:click_on_security_dashboard)
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::SecurityDashboard.perform do |security_dashboard|
           expect(security_dashboard).to have_vulnerability(description: vulnerability_name)

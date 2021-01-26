@@ -1,9 +1,9 @@
 <script>
-import { __, s__, sprintf } from '~/locale';
 import { GlFormGroup, GlFormInput, GlFormRadioGroup, GlFormTextarea } from '@gitlab/ui';
 import { escape as esc } from 'lodash';
+import { __, s__, sprintf } from '~/locale';
 
-const defaultFileName = dashboard => dashboard.path.split('/').reverse()[0];
+const defaultFileName = (dashboard) => dashboard.path.split('/').reverse()[0];
 
 export default {
   components: {

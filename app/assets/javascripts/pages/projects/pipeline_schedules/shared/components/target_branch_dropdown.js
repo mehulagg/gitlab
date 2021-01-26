@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class TargetBranchDropdown {
   constructor() {
@@ -10,23 +11,23 @@ export default class TargetBranchDropdown {
   }
 
   initDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.formatBranchesList(),
       filterable: true,
       selectable: true,
-      toggleLabel: item => item.name,
+      toggleLabel: (item) => item.name,
       search: {
         fields: ['name'],
       },
-      clicked: cfg => this.updateInputValue(cfg),
-      text: item => item.name,
+      clicked: (cfg) => this.updateInputValue(cfg),
+      text: (item) => item.name,
     });
 
     this.setDropdownToggle();
   }
 
   formatBranchesList() {
-    return this.$dropdown.data('data').map(val => ({ name: val }));
+    return this.$dropdown.data('data').map((val) => ({ name: val }));
   }
 
   setDropdownToggle() {

@@ -1,10 +1,12 @@
 <script>
+import { GlButton } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import Dropdown from './dropdown.vue';
 
 export default {
   components: {
     Dropdown,
+    GlButton,
   },
   computed: {
     ...mapGetters(['activeFile']),
@@ -27,7 +29,7 @@ export default {
       'undoFileTemplate',
     ]),
     setInitialType() {
-      const initialTemplateType = this.templateTypes.find(t => t.name === this.activeFile.name);
+      const initialTemplateType = this.templateTypes.find((t) => t.name === this.activeFile.name);
 
       if (initialTemplateType) {
         this.setSelectedTemplateType(initialTemplateType);
@@ -65,9 +67,9 @@ export default {
       @click="selectTemplate"
     />
     <transition name="fade">
-      <button v-show="updateSuccess" type="button" class="btn btn-default" @click="undo">
+      <gl-button v-show="updateSuccess" category="secondary" variant="default" @click="undo">
         {{ __('Undo') }}
-      </button>
+      </gl-button>
     </transition>
   </div>
 </template>

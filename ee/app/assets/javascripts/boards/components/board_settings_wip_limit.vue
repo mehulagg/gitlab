@@ -1,9 +1,9 @@
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlFormInput } from '@gitlab/ui';
-import flash from '~/flash';
-import { __, n__ } from '~/locale';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import { __, n__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import { inactiveId } from '~/boards/constants';
 
@@ -37,6 +37,7 @@ export default {
   },
   computed: {
     ...mapState(['activeId']),
+    ...mapGetters(['shouldUseGraphQL']),
     wipLimitTypeText() {
       return n__('%d issue', '%d issues', this.maxIssueCount);
     },
@@ -48,7 +49,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveId', 'updateListWipLimit']),
+    ...mapActions(['unsetActiveId', 'updateListWipLimit']),
     showInput() {
       this.edit = true;
       this.currentWipLimit = this.maxIssueCount > 0 ? this.maxIssueCount : null;
@@ -75,12 +76,14 @@ export default {
         const wipLimit = this.currentWipLimit;
         const id = this.activeId;
 
-        this.updateListWipLimit({ maxIssueCount: this.currentWipLimit, id })
+        this.updateListWipLimit({ maxIssueCount: wipLimit, listId: id })
           .then(() => {
-            boardsStoreEE.setMaxIssueCountOnList(id, wipLimit);
+            if (!this.shouldUseGraphQL) {
+              boardsStoreEE.setMaxIssueCountOnList(id, wipLimit);
+            }
           })
           .catch(() => {
-            this.setActiveId(0);
+            this.unsetActiveId();
             flash(__('Something went wrong while updating your list settings'));
           })
           .finally(() => {
@@ -91,12 +94,14 @@ export default {
       }
     },
     clearWipLimit() {
-      this.updateListWipLimit({ maxIssueCount: 0, id: this.activeId })
+      this.updateListWipLimit({ maxIssueCount: 0, listId: this.activeId })
         .then(() => {
-          boardsStoreEE.setMaxIssueCountOnList(this.activeId, inactiveId);
+          if (!this.shouldUseGraphQL) {
+            boardsStoreEE.setMaxIssueCountOnList(this.activeId, inactiveId);
+          }
         })
         .catch(() => {
-          this.setActiveId(inactiveId);
+          this.unsetActiveId();
           flash(__('Something went wrong while updating your list settings'));
         })
         .finally(() => {

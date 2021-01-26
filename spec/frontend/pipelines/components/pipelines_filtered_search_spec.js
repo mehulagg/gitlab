@@ -1,20 +1,20 @@
-import Api from '~/api';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import { GlFilteredSearch } from '@gitlab/ui';
+import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import PipelinesFilteredSearch from '~/pipelines/components/pipelines_list/pipelines_filtered_search.vue';
 import { users, mockSearch, branches, tags } from '../mock_data';
-import { GlFilteredSearch } from '@gitlab/ui';
 
 describe('Pipelines filtered search', () => {
   let wrapper;
   let mock;
 
   const findFilteredSearch = () => wrapper.find(GlFilteredSearch);
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('availableTokens')
-      .find(token => token.type === type);
+      .find((token) => token.type === type);
   const findBranchToken = () => getSearchToken('ref');
   const findTagToken = () => getSearchToken('tag');
   const findUserToken = () => getSearchToken('username');
@@ -26,7 +26,7 @@ describe('Pipelines filtered search', () => {
         projectId: '21',
         params,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
   };
 
@@ -47,9 +47,6 @@ describe('Pipelines filtered search', () => {
   });
 
   it('displays UI elements', () => {
-    expect(wrapper.isVueInstance()).toBe(true);
-    expect(wrapper.isEmpty()).toBe(false);
-
     expect(findFilteredSearch().exists()).toBe(true);
   });
 

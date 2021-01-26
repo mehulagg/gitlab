@@ -1,18 +1,21 @@
 <script>
-import { GlDeprecatedButton, GlButton, GlLoadingIcon } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlButton, GlSafeHtmlDirective as SafeHtml, GlLoadingIcon } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {
   components: {
-    GlDeprecatedButton,
     GlButton,
+    GlLoadingIcon,
     EventItem,
     HistoryCommentEditor,
-    GlLoadingIcon,
+  },
+
+  directives: {
+    SafeHtml,
   },
 
   props: {
@@ -42,9 +45,6 @@ export default {
   },
 
   computed: {
-    commentNote() {
-      return this.comment?.note;
-    },
     actionButtons() {
       return [
         {
@@ -58,6 +58,23 @@ export default {
           title: __('Delete Comment'),
         },
       ];
+    },
+    initialComment() {
+      return this.comment && this.comment.note;
+    },
+    canEditComment() {
+      return this.comment.currentUser?.canEdit;
+    },
+    noteHtml() {
+      return this.isSavingComment ? undefined : this.comment.noteHtml;
+    },
+  },
+
+  watch: {
+    'comment.updatedAt': {
+      handler() {
+        this.isSavingComment = false;
+      },
     },
   },
 
@@ -94,9 +111,6 @@ export default {
               'VulnerabilityManagement|Something went wrong while trying to save the comment. Please try again later.',
             ),
           );
-        })
-        .finally(() => {
-          this.isSavingComment = false;
         });
     },
     deleteComment() {
@@ -135,8 +149,8 @@ export default {
 <template>
   <history-comment-editor
     v-if="isEditingComment"
-    class="discussion-reply-holder m-3"
-    :initial-comment="commentNote"
+    class="discussion-reply-holder"
+    :initial-comment="initialComment"
     :is-saving="isSavingComment"
     @onSave="saveComment"
     @onCancel="cancelEditingComment"
@@ -146,24 +160,25 @@ export default {
     v-else-if="comment"
     :id="comment.id"
     :author="comment.author"
-    :created-at="comment.updated_at"
-    :show-action-buttons="comment.current_user.can_edit"
+    :created-at="comment.updatedAt"
+    :show-action-buttons="canEditComment"
     :show-right-slot="isConfirmingDeletion"
     :action-buttons="actionButtons"
     icon-name="comment"
     icon-class="timeline-icon m-0"
     class="m-3"
   >
-    <div v-html="comment.note"></div>
+    <div v-safe-html="noteHtml" class="md">
+      <gl-loading-icon />
+    </div>
 
     <template #right-content>
       <gl-button
         ref="confirmDeleteButton"
         variant="danger"
-        :disabled="isDeletingComment"
+        :loading="isDeletingComment"
         @click="deleteComment"
       >
-        <gl-loading-icon v-if="isDeletingComment" class="mr-1" />
         {{ __('Delete') }}
       </gl-button>
       <gl-button
@@ -178,8 +193,13 @@ export default {
   </event-item>
 
   <div v-else class="discussion-reply-holder">
-    <gl-deprecated-button ref="addCommentButton" class="btn-text-field" @click="showCommentInput">
+    <button
+      ref="addCommentButton"
+      class="btn btn-text-field"
+      type="button"
+      @click="showCommentInput"
+    >
       {{ s__('vulnerability|Add a comment') }}
-    </gl-deprecated-button>
+    </button>
   </div>
 </template>

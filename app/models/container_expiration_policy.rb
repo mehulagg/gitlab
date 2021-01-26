@@ -3,6 +3,14 @@
 class ContainerExpirationPolicy < ApplicationRecord
   include Schedulable
   include UsageStatistics
+  include EachBatch
+
+  POLICY_PARAMS = %w[
+    older_than
+    keep_n
+    name_regex
+    name_regex_keep
+  ].freeze
 
   belongs_to :project, inverse_of: :container_expiration_policy
 
@@ -13,11 +21,22 @@ class ContainerExpirationPolicy < ApplicationRecord
   validates :cadence, presence: true, inclusion: { in: ->(_) { self.cadence_options.stringify_keys } }
   validates :older_than, inclusion: { in: ->(_) { self.older_than_options.stringify_keys } }, allow_nil: true
   validates :keep_n, inclusion: { in: ->(_) { self.keep_n_options.keys } }, allow_nil: true
+  validates :name_regex, presence: true, if: :enabled?
   validates :name_regex, untrusted_regexp: true, if: :enabled?
   validates :name_regex_keep, untrusted_regexp: true, if: :enabled?
 
   scope :active, -> { where(enabled: true) }
   scope :preloaded, -> { preload(project: [:route]) }
+
+  def self.with_container_repositories
+    where(
+      'EXISTS (?)',
+      ContainerRepository.select(1)
+                         .where(
+                           'container_repositories.project_id = container_expiration_policies.project_id'
+                         )
+    )
+  end
 
   def self.keep_n_options
     {
@@ -55,5 +74,9 @@ class ContainerExpirationPolicy < ApplicationRecord
 
   def disable!
     update_attribute(:enabled, false)
+  end
+
+  def policy_params
+    attributes.slice(*POLICY_PARAMS)
   end
 end

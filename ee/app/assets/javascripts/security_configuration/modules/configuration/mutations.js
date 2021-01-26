@@ -1,9 +1,6 @@
 import * as types from './mutation_types';
 
 export default {
-  [types.SET_SECURITY_CONFIGURATION_ENDPOINT](state, payload) {
-    state.securityConfigurationPath = payload;
-  },
   [types.REQUEST_SECURITY_CONFIGURATION](state) {
     state.isLoading = true;
     state.errorLoading = false;

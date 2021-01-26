@@ -4,6 +4,8 @@ UsageData/LargeTable:
     - 'lib/gitlab/usage_data.rb'
     - 'ee/lib/ee/gitlab/usage_data.rb'
   NonRelatedClasses:
+    - :ActionMailer::Base
+    - :Date
     - :Feature
     - :Gitlab
     - :Gitlab::AppLogger
@@ -18,11 +20,16 @@ UsageData/LargeTable:
     - :Gitlab::Runtime
     - :Gitaly::Server
     - :Gitlab::UsageData
+    - :Gitlab::UsageDataCounters
+    - :Arel::Nodes::NamedFunction
+    - :Arel
     - :License
     - :Rails
     - :Time
     - :SECURE_PRODUCT_TYPES
     - :Settings
+    - :CE_MEMOIZED_VALUES
+    - :EE_MEMOIZED_VALUES
   CountMethods:
     - :count
     - :distinct_count
@@ -30,3 +37,21 @@ UsageData/LargeTable:
     - :arel_table
     - :minimum
     - :maximum
+UsageData/DistinctCountByLargeForeignKey:
+  Enabled: true
+  Include:
+    - 'lib/gitlab/usage_data.rb'
+    - 'ee/lib/ee/gitlab/usage_data.rb'
+  AllowedForeignKeys:
+    - 'agent_id'
+    - 'author_id'
+    - 'clusters.user_id'
+    - 'creator_id'
+    - 'issue_id'
+    - 'merge_request_id'
+    - 'merge_requests.target_project_id'
+    - 'owner_id'
+    - 'project_id'
+    - 'user_id'
+    - 'resource_owner_id'
+    - 'requirement_id'

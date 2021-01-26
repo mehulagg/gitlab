@@ -34,6 +34,29 @@ RSpec.describe API::Todos do
     end
 
     context 'when authenticated' do
+      context 'when invalid params' do
+        context "invalid action" do
+          it 'returns 400' do
+            get api('/todos', john_doe), params: { action: 'InvalidAction' }
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        context "invalid state" do
+          it 'returns 400' do
+            get api('/todos', john_doe), params: { state: 'InvalidState' }
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        context "invalid type" do
+          it 'returns 400' do
+            get api('/todos', john_doe), params: { type: 'InvalidType' }
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+      end
+
       it 'returns an array of pending todos for current user' do
         get api('/todos', john_doe)
 
@@ -279,6 +302,8 @@ RSpec.describe API::Todos do
     end
 
     it 'returns 304 there already exist a todo on that issuable' do
+      stub_feature_flags(multiple_todos: false)
+
       create(:todo, project: project_1, author: author_1, user: john_doe, target: issuable)
 
       post api("/projects/#{project_1.id}/#{issuable_type}/#{issuable.iid}/todo", john_doe)

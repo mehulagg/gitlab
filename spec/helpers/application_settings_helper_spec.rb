@@ -146,4 +146,52 @@ RSpec.describe ApplicationSettingsHelper do
         ])
     end
   end
+
+  describe '.show_documentation_base_url_field?' do
+    subject { helper.show_documentation_base_url_field? }
+
+    before do
+      stub_feature_flags(help_page_documentation_redirect: feature_flag)
+    end
+
+    context 'when feature flag is enabled' do
+      let(:feature_flag) { true }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when feature flag is disabled' do
+      let(:feature_flag) { false }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '.signup_enabled?' do
+    subject { helper.signup_enabled? }
+
+    context 'when signup is enabled' do
+      before do
+        stub_application_setting(signup_enabled: true)
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'when signup is disabled' do
+      before do
+        stub_application_setting(signup_enabled: false)
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when `signup_enabled` is nil' do
+      before do
+        stub_application_setting(signup_enabled: nil)
+      end
+
+      it { is_expected.to be false }
+    end
+  end
 end

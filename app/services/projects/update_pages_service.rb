@@ -4,6 +4,9 @@ module Projects
   class UpdatePagesService < BaseService
     InvalidStateError = Class.new(StandardError)
     FailedToExtractError = Class.new(StandardError)
+    ExclusiveLeaseTaken = Class.new(StandardError)
+
+    include ::Pages::LegacyStorageLease
 
     BLOCK_SIZE = 32.kilobytes
     PUBLIC_DIR = 'public'
@@ -11,6 +14,11 @@ module Projects
     # this has to be invalid group name,
     # as it shares the namespace with groups
     TMP_EXTRACT_PATH = '@pages.tmp'
+
+    # old deployment can be cached by pages daemon
+    # so we need to give pages daemon some time update cache
+    # 10 minutes is enough, but 30 feels safer
+    OLD_DEPLOYMENTS_DESTRUCTION_DELAY = 30.minutes.freeze
 
     attr_reader :build
 
@@ -29,16 +37,11 @@ module Projects
       raise InvalidStateError, 'missing pages artifacts' unless build.artifacts?
       raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
-      # Create temporary directory in which we will extract the artifacts
-      make_secure_tmp_dir(tmp_path) do |archive_path|
-        extract_archive!(archive_path)
+      build.artifacts_file.use_file do |artifacts_path|
+        deploy_to_legacy_storage(artifacts_path)
 
-        # Check if we did extract public directory
-        archive_public_path = File.join(archive_path, PUBLIC_DIR)
-        raise InvalidStateError, 'pages miss the public folder' unless Dir.exist?(archive_public_path)
-        raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
+        create_pages_deployment(artifacts_path, build)
 
-        deploy_page!(archive_public_path)
         success
       end
     rescue InvalidStateError => e
@@ -52,7 +55,7 @@ module Projects
 
     def success
       @status.success
-      @project.mark_pages_as_deployed
+      @project.mark_pages_as_deployed(artifacts_archive: build.job_artifacts_archive)
       super
     end
 
@@ -76,15 +79,29 @@ module Projects
       )
     end
 
-    def extract_archive!(temp_path)
+    def deploy_to_legacy_storage(artifacts_path)
+      # Create temporary directory in which we will extract the artifacts
+      make_secure_tmp_dir(tmp_path) do |tmp_path|
+        extract_archive!(artifacts_path, tmp_path)
+
+        # Check if we did extract public directory
+        archive_public_path = File.join(tmp_path, PUBLIC_DIR)
+        raise InvalidStateError, 'pages miss the public folder' unless Dir.exist?(archive_public_path)
+        raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
+
+        deploy_page!(archive_public_path)
+      end
+    end
+
+    def extract_archive!(artifacts_path, temp_path)
       if artifacts.ends_with?('.zip')
-        extract_zip_archive!(temp_path)
+        extract_zip_archive!(artifacts_path, temp_path)
       else
         raise InvalidStateError, 'unsupported artifacts format'
       end
     end
 
-    def extract_zip_archive!(temp_path)
+    def extract_zip_archive!(artifacts_path, temp_path)
       raise InvalidStateError, 'missing artifacts metadata' unless build.artifacts_metadata?
 
       # Calculate page size after extract
@@ -94,15 +111,24 @@ module Projects
         raise InvalidStateError, "artifacts for pages are too large: #{public_entry.total_size}"
       end
 
-      build.artifacts_file.use_file do |artifacts_path|
-        SafeZip::Extract.new(artifacts_path)
-          .extract(directories: [PUBLIC_DIR], to: temp_path)
-      end
+      SafeZip::Extract.new(artifacts_path)
+        .extract(directories: [PUBLIC_DIR], to: temp_path)
     rescue SafeZip::Extract::Error => e
       raise FailedToExtractError, e.message
     end
 
     def deploy_page!(archive_public_path)
+      deployed = try_obtain_lease do
+        deploy_page_unsafe!(archive_public_path)
+        true
+      end
+
+      unless deployed
+        raise ExclusiveLeaseTaken, "Failed to deploy pages - other deployment is in progress"
+      end
+    end
+
+    def deploy_page_unsafe!(archive_public_path)
       # Do atomic move of pages
       # Move and removal may not be atomic, but they are significantly faster then extracting and removal
       # 1. We move deployed public to previous public path (file removal is slow)
@@ -116,6 +142,31 @@ module Projects
       FileUtils.move(archive_public_path, public_path)
     ensure
       FileUtils.rm_r(previous_public_path, force: true)
+    end
+
+    def create_pages_deployment(artifacts_path, build)
+      # we're using the full archive and pages daemon needs to read it
+      # so we want the total count from entries, not only "public/" directory
+      # because it better approximates work we need to do before we can serve the site
+      entries_count = build.artifacts_metadata_entry("", recursive: true).entries.count
+      sha256 = build.job_artifacts_archive.file_sha256
+
+      deployment = nil
+      File.open(artifacts_path) do |file|
+        deployment = project.pages_deployments.create!(file: file,
+                                                       file_count: entries_count,
+                                                       file_sha256: sha256)
+
+        raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
+
+        project.update_pages_deployment!(deployment)
+      end
+
+      DestroyPagesDeploymentsWorker.perform_in(
+        OLD_DEPLOYMENTS_DESTRUCTION_DELAY,
+        project.id,
+        deployment.id
+      )
     end
 
     def latest?
@@ -136,7 +187,7 @@ module Projects
     def max_size
       max_pages_size = max_size_from_settings
 
-      return ::Gitlab::Pages::MAX_SIZE if max_pages_size.zero?
+      return ::Gitlab::Pages::MAX_SIZE if max_pages_size == 0
 
       max_pages_size
     end

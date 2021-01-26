@@ -1,8 +1,15 @@
 <script>
+import { GlButton, GlModalDirective } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 
 export default {
   name: 'MRWidgetMergeHelp',
+  components: {
+    GlButton,
+  },
+  directives: {
+    GlModalDirective,
+  },
   props: {
     missingBranch: {
       type: String,
@@ -23,7 +30,7 @@ export default {
 };
 </script>
 <template>
-  <section class="mr-widget-help font-italic">
+  <section class="gl-py-3 gl-pr-3 gl-pl-5 gl-ml-7 mr-widget-help gl-font-style-italic">
     <template v-if="missingBranch">
       {{ missingBranchInfo }}
     </template>
@@ -31,13 +38,12 @@ export default {
       {{ s__('mrWidget|You can merge this merge request manually using the') }}
     </template>
 
-    <button
-      type="button"
-      class="btn-link btn-blank js-open-modal-help"
-      data-toggle="modal"
-      data-target="#modal_merge_info"
+    <gl-button
+      v-gl-modal-directive="'modal-merge-info'"
+      variant="link"
+      class="gl-mt-n2 js-open-modal-help"
     >
       {{ s__('mrWidget|command line') }}
-    </button>
+    </gl-button>
   </section>
 </template>

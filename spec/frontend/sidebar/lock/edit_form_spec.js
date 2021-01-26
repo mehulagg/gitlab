@@ -7,7 +7,7 @@ describe('Edit Form Dropdown', () => {
   let issuableType; // Either ISSUABLE_TYPE_ISSUE or ISSUABLE_TYPE_MR
   let issuableDisplayName;
 
-  const setIssuableType = pageType => {
+  const setIssuableType = (pageType) => {
     issuableType = pageType;
     issuableDisplayName = issuableType.replace(/_/g, ' ');
   };
@@ -38,18 +38,16 @@ describe('Edit Form Dropdown', () => {
     });
 
     describe.each`
-      isLocked | lockStatusText | lockAction  | warningText
-      ${false} | ${'unlocked'}  | ${'Lock'}   | ${'Only project members will be able to comment.'}
-      ${true}  | ${'locked'}    | ${'Unlock'} | ${'Everyone will be able to comment.'}
-    `('when $lockStatusText', ({ isLocked, lockAction, warningText }) => {
+      isLocked | lockStatusText
+      ${false} | ${'unlocked'}
+      ${true}  | ${'locked'}
+    `('when $lockStatusText', ({ isLocked }) => {
       beforeEach(() => {
         createComponent({ props: { isLocked } });
       });
 
       it(`the appropriate warning text is rendered`, () => {
-        expect(findWarningText().text()).toContain(
-          `${lockAction} this ${issuableDisplayName}? ${warningText}`,
-        );
+        expect(findWarningText().element).toMatchSnapshot();
       });
     });
   });

@@ -1,0 +1,9 @@
+fragment Project on Project {
+  id
+  name
+  nameWithNamespace
+  securityDashboardPath
+  fullPath
+  avatarUrl
+  path
+}

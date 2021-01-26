@@ -5,7 +5,7 @@ import { select } from 'd3-selection';
 import dateFormat from 'dateformat';
 import { getDayName, getDayDifference } from '~/lib/utils/datetime_utility';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { n__, s__, __ } from '~/locale';
 
 const d3 = { select, scaleLinear, scaleThreshold };
@@ -42,11 +42,7 @@ function formatTooltipText({ date, count }) {
   return `${contribText}<br />${dateDayName} ${dateText}`;
 }
 
-const initColorKey = () =>
-  d3
-    .scaleLinear()
-    .range(['#acd5f2', '#254e77'])
-    .domain([0, 3]);
+const initColorKey = () => d3.scaleLinear().range(['#acd5f2', '#254e77']).domain([0, 3]);
 
 export default class ActivityCalendar {
   constructor(
@@ -125,9 +121,6 @@ export default class ActivityCalendar {
     this.renderMonths();
     this.renderDayTitles();
     this.renderKey();
-
-    // Init tooltips
-    $(`${container} .js-tooltip`).tooltip({ html: true });
   }
 
   // Add extra padding for the last month label if it is also the last column
@@ -180,18 +173,19 @@ export default class ActivityCalendar {
         return `translate(${this.daySizeWithSpace * i + 1 + this.daySizeWithSpace}, 18)`;
       })
       .selectAll('rect')
-      .data(stamp => stamp)
+      .data((stamp) => stamp)
       .enter()
       .append('rect')
       .attr('x', '0')
-      .attr('y', stamp => this.dayYPos(stamp.day))
+      .attr('y', (stamp) => this.dayYPos(stamp.day))
       .attr('width', this.daySize)
       .attr('height', this.daySize)
-      .attr('fill', stamp =>
+      .attr('fill', (stamp) =>
         stamp.count !== 0 ? this.color(Math.min(stamp.count, 40)) : '#ededed',
       )
-      .attr('title', stamp => formatTooltipText(stamp))
-      .attr('class', 'user-contrib-cell js-tooltip')
+      .attr('title', (stamp) => formatTooltipText(stamp))
+      .attr('class', 'user-contrib-cell has-tooltip')
+      .attr('data-html', true)
       .attr('data-container', 'body')
       .on('click', this.clickDay);
   }
@@ -232,8 +226,8 @@ export default class ActivityCalendar {
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('x', 8)
-      .attr('y', day => day.y)
-      .text(day => day.text)
+      .attr('y', (day) => day.y)
+      .text((day) => day.text)
       .attr('class', 'user-contrib-text');
   }
 
@@ -245,10 +239,10 @@ export default class ActivityCalendar {
       .data(this.months)
       .enter()
       .append('text')
-      .attr('x', date => date.x)
+      .attr('x', (date) => date.x)
       .attr('y', 10)
       .attr('class', 'user-contrib-text')
-      .text(date => this.monthNames[date.month]);
+      .text((date) => this.monthNames[date.month]);
   }
 
   renderKey() {
@@ -278,10 +272,11 @@ export default class ActivityCalendar {
       .attr('height', this.daySize)
       .attr('x', (color, i) => this.daySizeWithSpace * i)
       .attr('y', 0)
-      .attr('fill', color => color)
-      .attr('class', 'js-tooltip')
+      .attr('fill', (color) => color)
+      .attr('class', 'has-tooltip')
       .attr('title', (color, i) => keyValues[i])
-      .attr('data-container', 'body');
+      .attr('data-container', 'body')
+      .attr('data-html', true);
   }
 
   initColor() {
@@ -292,10 +287,7 @@ export default class ActivityCalendar {
       this.colorKey(2),
       this.colorKey(3),
     ];
-    return d3
-      .scaleThreshold()
-      .domain([0, 10, 20, 30])
-      .range(colorRange);
+    return d3.scaleThreshold().domain([0, 10, 20, 30]).range(colorRange);
   }
 
   clickDay(stamp) {

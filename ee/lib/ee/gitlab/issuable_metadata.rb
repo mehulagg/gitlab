@@ -7,8 +7,6 @@ module EE
 
       override :metadata_for_issuable
       def metadata_for_issuable(id)
-        return super unless ::Feature.enabled?(:blocking_issues_counts)
-
         super.tap do |data|
           blocking_count =
             grouped_blocking_issues_count.find do |issue_link|
@@ -21,9 +19,9 @@ module EE
 
       def grouped_blocking_issues_count
         strong_memoize(:grouped_blocking_issues_count) do
-          next IssueLink.none unless collection_type == 'Issue'
+          next ::IssueLink.none unless collection_type == 'Issue'
 
-          IssueLink.blocking_issues_for_collection(issuable_ids)
+          ::IssueLink.blocking_issues_for_collection(issuable_ids)
         end
       end
     end

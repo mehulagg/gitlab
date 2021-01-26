@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CredentialsInventoryHelper
-  VALID_FILTERS = %w(ssh_keys personal_access_tokens).freeze
+  VALID_FILTERS = %w(ssh_keys personal_access_tokens gpg_keys).freeze
 
   def show_personal_access_tokens?
     return true if params[:filter] == 'personal_access_tokens'
@@ -13,15 +13,31 @@ module CredentialsInventoryHelper
     params[:filter] == 'ssh_keys'
   end
 
+  def show_gpg_keys?
+    params[:filter] == 'gpg_keys'
+  end
+
   def credentials_inventory_feature_available?
     License.feature_available?(:credentials_inventory)
+  end
+
+  def revoke_button_available?
+    false
   end
 
   def credentials_inventory_path(args)
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end
 
+  def ssh_key_delete_path(key)
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+  end
+
   def user_detail_path(user)
+    raise NotImplementedError, "#{self.class} does not implement #{__method__}"
+  end
+
+  def personal_access_token_revoke_path(token)
     raise NotImplementedError, "#{self.class} does not implement #{__method__}"
   end
 end

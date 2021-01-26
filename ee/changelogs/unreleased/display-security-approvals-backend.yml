@@ -1,5 +1,0 @@
----
-title: Extend configuration end point to return json when format is given
-merge_request: 37217
-author:
-type: added

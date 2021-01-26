@@ -1,23 +1,28 @@
 export default ({
   projectId,
+  groupId,
+  groupMilestonesAvailable = false,
+  projectPath,
   markdownDocsPath,
   markdownPreviewPath,
-  updateReleaseApiDocsPath,
   releaseAssetsDocsPath,
   manageMilestonesPath,
   newMilestonePath,
+  releasesPagePath,
 
   tagName = null,
-  releasesPagePath = null,
   defaultBranch = null,
 }) => ({
   projectId,
+  groupId,
+  groupMilestonesAvailable: Boolean(groupMilestonesAvailable),
+  projectPath,
   markdownDocsPath,
   markdownPreviewPath,
-  updateReleaseApiDocsPath,
   releaseAssetsDocsPath,
   manageMilestonesPath,
   newMilestonePath,
+  releasesPagePath,
 
   /**
    * The name of the tag associated with the release, provided by the backend.
@@ -25,8 +30,8 @@ export default ({
    */
   tagName,
 
-  releasesPagePath,
   defaultBranch,
+  createFrom: defaultBranch,
 
   /** The Release object */
   release: null,

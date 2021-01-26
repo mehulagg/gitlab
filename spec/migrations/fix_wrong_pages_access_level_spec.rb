@@ -17,7 +17,7 @@ RSpec.describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema:
   let(:features_table) { table(:project_features) }
 
   let(:subgroup) do
-    root_group = namespaces_table.create(path: "group", name: "group")
+    root_group = namespaces_table.create!(path: "group", name: "group")
     namespaces_table.create!(path: "subgroup", name: "group", parent_id: root_group.id)
   end
 
@@ -29,7 +29,7 @@ RSpec.describe FixWrongPagesAccessLevel, :sidekiq_might_not_need_inline, schema:
 
   it 'correctly schedules background migrations' do
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         first_id = create_project_feature("project1", project_class::PRIVATE, feature_class::PRIVATE).id
         last_id = create_project_feature("project2", project_class::PRIVATE, feature_class::PUBLIC).id
 

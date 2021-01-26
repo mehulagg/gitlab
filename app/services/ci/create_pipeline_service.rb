@@ -14,14 +14,21 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Config::Process,
                 Gitlab::Ci::Pipeline::Chain::RemoveUnwantedChatJobs,
                 Gitlab::Ci::Pipeline::Chain::Skip,
+                Gitlab::Ci::Pipeline::Chain::SeedBlock,
                 Gitlab::Ci::Pipeline::Chain::EvaluateWorkflowRules,
                 Gitlab::Ci::Pipeline::Chain::Seed,
                 Gitlab::Ci::Pipeline::Chain::Limit::Size,
+                Gitlab::Ci::Pipeline::Chain::Limit::Deployments,
                 Gitlab::Ci::Pipeline::Chain::Validate::External,
                 Gitlab::Ci::Pipeline::Chain::Populate,
+                Gitlab::Ci::Pipeline::Chain::StopDryRun,
                 Gitlab::Ci::Pipeline::Chain::Create,
                 Gitlab::Ci::Pipeline::Chain::Limit::Activity,
-                Gitlab::Ci::Pipeline::Chain::Limit::JobActivity].freeze
+                Gitlab::Ci::Pipeline::Chain::Limit::JobActivity,
+                Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines,
+                Gitlab::Ci::Pipeline::Chain::Metrics,
+                Gitlab::Ci::Pipeline::Chain::TemplateUsage,
+                Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
     # Create a new pipeline in the specified project.
     #
@@ -66,34 +73,32 @@ module Ci
         push_options: params[:push_options] || {},
         chat_data: params[:chat_data],
         bridge: bridge,
-        **extra_options(options))
+        **extra_options(**options))
 
-      sequence = Gitlab::Ci::Pipeline::Chain::Sequence
+      # Ensure we never persist the pipeline when dry_run: true
+      @pipeline.readonly! if command.dry_run?
+
+      Gitlab::Ci::Pipeline::Chain::Sequence
         .new(pipeline, command, SEQUENCE)
+        .build!
 
-      sequence.build! do |pipeline, sequence|
+      if pipeline.persisted?
         schedule_head_pipeline_update
-
-        if sequence.complete?
-          cancel_pending_pipelines if project.auto_cancel_pending_pipelines?
-          pipeline_created_counter.increment(source: source)
-
-          Ci::ProcessPipelineService
-            .new(pipeline)
-            .execute(nil, initial_process: true)
-        end
+        record_conversion_event
+        create_namespace_onboarding_action
       end
 
       # If pipeline is not persisted, try to recover IID
-      pipeline.reset_project_iid unless pipeline.persisted? ||
-          Feature.disabled?(:ci_pipeline_rewind_iid, project, default_enabled: true)
+      pipeline.reset_project_iid unless pipeline.persisted?
 
       pipeline
     end
     # rubocop: enable Metrics/ParameterLists
 
     def execute!(*args, &block)
-      execute(*args, &block).tap do |pipeline|
+      source, params = args[0], Hash(args[1])
+
+      execute(source, **params, &block).tap do |pipeline|
         unless pipeline.persisted?
           raise CreateError, pipeline.full_error_messages
         end
@@ -110,38 +115,23 @@ module Ci
       commit.try(:id)
     end
 
-    def cancel_pending_pipelines
-      Gitlab::OptimisticLocking.retry_lock(auto_cancelable_pipelines) do |cancelables|
-        cancelables.find_each do |cancelable|
-          cancelable.auto_cancel_running(pipeline)
-        end
-      end
-    end
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def auto_cancelable_pipelines
-      project.ci_pipelines
-        .where(ref: pipeline.ref)
-        .where.not(id: pipeline.same_family_pipeline_ids)
-        .where.not(sha: project.commit(pipeline.ref).try(:id))
-        .alive_or_scheduled
-        .with_only_interruptible_builds
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
-    def pipeline_created_counter
-      @pipeline_created_counter ||= Gitlab::Metrics
-        .counter(:pipelines_created_total, "Counter of pipelines created")
-    end
-
     def schedule_head_pipeline_update
       pipeline.all_merge_requests.opened.each do |merge_request|
         UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
       end
     end
 
-    def extra_options(content: nil)
-      { content: content }
+    def record_conversion_event
+      Experiments::RecordConversionEventWorker.perform_async(:ci_syntax_templates, current_user.id)
+      Experiments::RecordConversionEventWorker.perform_async(:pipelines_empty_state, current_user.id)
+    end
+
+    def create_namespace_onboarding_action
+      Namespaces::OnboardingPipelineCreatedWorker.perform_async(project.namespace_id)
+    end
+
+    def extra_options(content: nil, dry_run: false)
+      { content: content, dry_run: dry_run }
     end
   end
 end

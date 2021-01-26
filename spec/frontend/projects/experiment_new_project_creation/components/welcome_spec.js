@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
-import WelcomePage from '~/projects/experiment_new_project_creation/components/welcome.vue';
 import { mockTracking } from 'helpers/tracking_helper';
+import WelcomePage from '~/projects/experiment_new_project_creation/components/welcome.vue';
 
 describe('Welcome page', () => {
   let wrapper;
   let trackingSpy;
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(WelcomePage, { propsData });
   };
 

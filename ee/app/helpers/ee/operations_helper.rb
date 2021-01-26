@@ -37,19 +37,33 @@ module EE
 
     override :alerts_settings_data
     def alerts_settings_data(disabled: false)
-      super.merge(opsgenie_mvc_data)
+      super.merge(alert_management_multiple_integrations_data)
+    end
+
+    override :operations_settings_data
+    def operations_settings_data
+      super.merge(incident_sla_data)
     end
 
     private
 
-    def opsgenie_mvc_data
-      return {} unless alerts_service.opsgenie_mvc_available?
+    def incident_sla_data
+      setting = project_incident_management_setting
 
       {
-        'opsgenie_mvc_available' => 'true',
-        'opsgenie_mvc_form_path' => scoped_integration_path(alerts_service),
-        'opsgenie_mvc_enabled' => alerts_service.opsgenie_mvc_enabled?.to_s,
-        'opsgenie_mvc_target_url' => alerts_service.opsgenie_mvc_target_url.to_s
+        sla_feature_available: sla_feature_available?.to_s,
+        sla_active: setting.sla_timer.to_s,
+        sla_minutes: setting.sla_timer_minutes
+      }
+    end
+
+    def sla_feature_available?
+      ::IncidentManagement::IncidentSla.available_for?(@project)
+    end
+
+    def alert_management_multiple_integrations_data
+      {
+        'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
       }
     end
   end

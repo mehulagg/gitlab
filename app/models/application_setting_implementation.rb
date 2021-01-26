@@ -58,9 +58,10 @@ module ApplicationSettingImplementation
         default_projects_limit: Settings.gitlab['default_projects_limit'],
         default_snippet_visibility: Settings.gitlab.default_projects_features['visibility_level'],
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
+        disable_feed_token: false,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
-        domain_whitelist: Settings.gitlab['domain_whitelist'],
+        domain_allowlist: Settings.gitlab['domain_allowlist'],
         dsa_key_restriction: 0,
         ecdsa_key_restriction: 0,
         ed25519_key_restriction: 0,
@@ -74,12 +75,15 @@ module ApplicationSettingImplementation
         gitaly_timeout_default: 55,
         gitaly_timeout_fast: 10,
         gitaly_timeout_medium: 30,
+        gitpod_enabled: false,
+        gitpod_url: 'https://gitpod.io/',
         gravatar_enabled: Settings.gravatar['enabled'],
         group_download_export_limit: 1,
         group_export_limit: 6,
         group_import_limit: 6,
         help_page_hide_commercial_content: false,
         help_page_text: nil,
+        help_page_documentation_base_url: nil,
         hide_third_party_offers: false,
         housekeeping_bitmaps_enabled: true,
         housekeeping_enabled: true,
@@ -87,13 +91,13 @@ module ApplicationSettingImplementation
         housekeeping_gc_period: 200,
         housekeeping_incremental_repack_period: 10,
         import_sources: Settings.gitlab['import_sources'],
-        instance_statistics_visibility_private: false,
+        invisible_captcha_enabled: false,
         issues_create_limit: 300,
         local_markdown_version: 0,
         login_recaptcha_protection_enabled: false,
         max_artifacts_size: Settings.artifacts['max_size'],
         max_attachment_size: Settings.gitlab['max_attachment_size'],
-        max_import_size: 50,
+        max_import_size: 0,
         minimum_password_length: DEFAULT_MINIMUM_PASSWORD_LENGTH,
         mirror_available: true,
         notify_on_unknown_sign_in: true,
@@ -101,6 +105,7 @@ module ApplicationSettingImplementation
         password_authentication_enabled_for_git: true,
         password_authentication_enabled_for_web: Settings.gitlab['signin_enabled'],
         performance_bar_allowed_group_id: nil,
+        personal_access_token_prefix: nil,
         plantuml_enabled: false,
         plantuml_url: nil,
         polling_interval_multiplier: 1,
@@ -118,6 +123,7 @@ module ApplicationSettingImplementation
         repository_checks_enabled: true,
         repository_storages_weighted: { default: 100 },
         repository_storages: ['default'],
+        require_admin_approval_after_user_signup: true,
         require_two_factor_authentication: false,
         restricted_visibility_levels: Settings.gitlab['restricted_visibility_levels'],
         rsa_key_restriction: 0,
@@ -132,7 +138,6 @@ module ApplicationSettingImplementation
         snowplow_collector_hostname: nil,
         snowplow_cookie_domain: nil,
         snowplow_enabled: false,
-        snowplow_iglu_registry_url: nil,
         sourcegraph_enabled: false,
         sourcegraph_public_only: true,
         sourcegraph_url: nil,
@@ -164,7 +169,12 @@ module ApplicationSettingImplementation
         user_default_external: false,
         user_default_internal_regex: nil,
         user_show_add_ssh_key_message: true,
-        wiki_page_max_content_bytes: 50.megabytes
+        wiki_page_max_content_bytes: 50.megabytes,
+        container_registry_delete_tags_service_timeout: 250,
+        container_registry_expiration_policies_worker_capacity: 0,
+        kroki_enabled: false,
+        kroki_url: nil,
+        rate_limiting_response_text: nil
       }
     end
 
@@ -198,38 +208,38 @@ module ApplicationSettingImplementation
     super(sources)
   end
 
-  def domain_whitelist_raw
-    array_to_string(self.domain_whitelist)
+  def domain_allowlist_raw
+    array_to_string(self.domain_allowlist)
   end
 
-  def domain_blacklist_raw
-    array_to_string(self.domain_blacklist)
+  def domain_denylist_raw
+    array_to_string(self.domain_denylist)
   end
 
-  def domain_whitelist_raw=(values)
-    self.domain_whitelist = strings_to_array(values)
+  def domain_allowlist_raw=(values)
+    self.domain_allowlist = strings_to_array(values)
   end
 
-  def domain_blacklist_raw=(values)
-    self.domain_blacklist = strings_to_array(values)
+  def domain_denylist_raw=(values)
+    self.domain_denylist = strings_to_array(values)
   end
 
-  def domain_blacklist_file=(file)
-    self.domain_blacklist_raw = file.read
+  def domain_denylist_file=(file)
+    self.domain_denylist_raw = file.read
   end
 
-  def outbound_local_requests_whitelist_raw
+  def outbound_local_requests_allowlist_raw
     array_to_string(self.outbound_local_requests_whitelist)
   end
 
-  def outbound_local_requests_whitelist_raw=(values)
-    clear_memoization(:outbound_local_requests_whitelist_arrays)
+  def outbound_local_requests_allowlist_raw=(values)
+    clear_memoization(:outbound_local_requests_allowlist_arrays)
 
     self.outbound_local_requests_whitelist = strings_to_array(values)
   end
 
   def add_to_outbound_local_requests_whitelist(values_array)
-    clear_memoization(:outbound_local_requests_whitelist_arrays)
+    clear_memoization(:outbound_local_requests_allowlist_arrays)
 
     self.outbound_local_requests_whitelist ||= []
     self.outbound_local_requests_whitelist += values_array
@@ -241,13 +251,13 @@ module ApplicationSettingImplementation
   # application_setting.outbound_local_requests_whitelist array into 2 arrays;
   # an array of IPAddr objects (`[IPAddr.new('127.0.0.1')]`), and an array of
   # domain strings (`['www.example.com']`).
-  def outbound_local_requests_whitelist_arrays
-    strong_memoize(:outbound_local_requests_whitelist_arrays) do
+  def outbound_local_requests_allowlist_arrays
+    strong_memoize(:outbound_local_requests_allowlist_arrays) do
       next [[], []] unless self.outbound_local_requests_whitelist
 
-      ip_whitelist, domain_whitelist = separate_whitelists(self.outbound_local_requests_whitelist)
+      ip_allowlist, domain_allowlist = separate_allowlists(self.outbound_local_requests_whitelist)
 
-      [ip_whitelist, domain_whitelist]
+      [ip_allowlist, domain_allowlist]
     end
   end
 
@@ -392,19 +402,19 @@ module ApplicationSettingImplementation
 
   private
 
-  def separate_whitelists(string_array)
-    string_array.reduce([[], []]) do |(ip_whitelist, domain_whitelist), string|
+  def separate_allowlists(string_array)
+    string_array.reduce([[], []]) do |(ip_allowlist, domain_allowlist), string|
       address, port = parse_addr_and_port(string)
 
       ip_obj = Gitlab::Utils.string_to_ip_object(address)
 
       if ip_obj
-        ip_whitelist << Gitlab::UrlBlockers::IpWhitelistEntry.new(ip_obj, port: port)
+        ip_allowlist << Gitlab::UrlBlockers::IpAllowlistEntry.new(ip_obj, port: port)
       else
-        domain_whitelist << Gitlab::UrlBlockers::DomainWhitelistEntry.new(address, port: port)
+        domain_allowlist << Gitlab::UrlBlockers::DomainAllowlistEntry.new(address, port: port)
       end
 
-      [ip_whitelist, domain_whitelist]
+      [ip_allowlist, domain_allowlist]
     end
   end
 

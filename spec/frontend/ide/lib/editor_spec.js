@@ -15,7 +15,7 @@ describe('Multi-file editor library', () => {
   let holder;
   let store;
 
-  const setNodeOffsetWidth = val => {
+  const setNodeOffsetWidth = (val) => {
     Object.defineProperty(instance.instance.getDomNode(), 'offsetWidth', {
       get() {
         return val;
@@ -199,28 +199,6 @@ describe('Multi-file editor library', () => {
           }),
         ]),
       );
-    });
-  });
-
-  describe('schemas', () => {
-    let originalGon;
-
-    beforeEach(() => {
-      originalGon = window.gon;
-      window.gon = { features: { schemaLinting: true } };
-
-      delete Editor.editorInstance;
-      instance = Editor.create();
-    });
-
-    afterEach(() => {
-      window.gon = originalGon;
-    });
-
-    it('registers custom schemas defined with Monaco', () => {
-      expect(monacoLanguages.yaml.yamlDefaults.diagnosticsOptions).toMatchObject({
-        schemas: [{ fileMatch: ['*.gitlab-ci.yml'] }],
-      });
     });
   });
 

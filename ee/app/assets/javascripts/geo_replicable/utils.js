@@ -7,7 +7,6 @@ import createGqClient, { fetchPolicies } from '~/lib/graphql';
   think the sync process is broken.
 */
 
-// eslint-disable-next-line import/prefer-default-export
 export const gqClient = createGqClient(
   {},
   {

@@ -3,7 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import urlComponent from '~/serverless/components/url.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
-const createComponent = uri =>
+const createComponent = (uri) =>
   shallowMount(Vue.extend(urlComponent), {
     propsData: {
       uri,
@@ -19,7 +19,7 @@ describe('urlComponent', () => {
     expect(vm.$el.classList.contains('clipboard-group')).toBe(true);
     expect(wrapper.find(ClipboardButton).attributes('text')).toEqual(uri);
 
-    expect(vm.$el.querySelector('.url-text-field').innerHTML).toEqual(uri);
+    expect(vm.$el.querySelector('[data-testid="url-text-field"]').innerHTML).toContain(uri);
 
     vm.$destroy();
   });

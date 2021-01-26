@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -17,7 +20,7 @@ If you have a project with decompressed size exceeding this limit,
 it is possible to disable the validation by turning off the
 `validate_import_decompressed_archive_size` feature flag.
 
-Start a [Rails console](../administration/troubleshooting/debug.md#starting-a-rails-console-session).
+Start a [Rails console](../administration/operations/rails_console.md#starting-a-rails-console-session).
 
 ```ruby
 # Disable

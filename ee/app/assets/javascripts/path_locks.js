@@ -1,10 +1,10 @@
 import $ from 'jquery';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 
 export default function initPathLocks(url, path) {
-  $('a.path-lock').on('click', e => {
+  $('a.path-lock').on('click', (e) => {
     e.preventDefault();
 
     axios

@@ -1,9 +1,9 @@
-import { commitActionTypes, FILE_VIEW_MODE_EDITOR } from '../constants';
+import { commitActionTypes } from '../constants';
 import {
   relativePathToAbsolute,
   isAbsolute,
   isRootRelative,
-  isBase64DataUrl,
+  isBlobUrl,
 } from '~/lib/utils/url_utility';
 
 export const dataStructure = () => ({
@@ -12,10 +12,7 @@ export const dataStructure = () => ({
   // it can also contain a prefix `pending-` for files opened in review mode
   key: '',
   type: '',
-  projectId: '',
-  branchId: '',
   name: '',
-  url: '',
   path: '',
   tempFile: false,
   tree: [],
@@ -26,28 +23,21 @@ export const dataStructure = () => ({
   staged: false,
   lastCommitSha: '',
   rawPath: '',
-  binary: false,
   raw: '',
   content: '',
-  editorRow: 1,
-  editorColumn: 1,
-  fileLanguage: '',
-  viewMode: FILE_VIEW_MODE_EDITOR,
   size: 0,
   parentPath: null,
   lastOpenedAt: 0,
   mrChange: null,
   deleted: false,
   prevPath: undefined,
+  mimeType: '',
 });
 
-export const decorateData = entity => {
+export const decorateData = (entity) => {
   const {
     id,
-    projectId,
-    branchId,
     type,
-    url,
     name,
     path,
     content = '',
@@ -55,34 +45,31 @@ export const decorateData = entity => {
     active = false,
     opened = false,
     changed = false,
-    binary = false,
     rawPath = '',
     file_lock,
     parentPath = '',
+    mimeType = '',
   } = entity;
 
   return Object.assign(dataStructure(), {
     id,
-    projectId,
-    branchId,
     key: `${name}-${type}-${id}`,
     type,
     name,
-    url,
     path,
     tempFile,
     opened,
     active,
     changed,
     content,
-    binary,
     rawPath,
     file_lock,
     parentPath,
+    mimeType,
   });
 };
 
-export const setPageTitle = title => {
+export const setPageTitle = (title) => {
   document.title = title;
 };
 
@@ -91,7 +78,7 @@ export const setPageTitleForFile = (state, file) => {
   setPageTitle(title);
 };
 
-export const commitActionForFile = file => {
+export const commitActionForFile = (file) => {
   if (file.prevPath) {
     return commitActionTypes.move;
   } else if (file.deleted) {
@@ -103,7 +90,7 @@ export const commitActionForFile = file => {
   return commitActionTypes.update;
 };
 
-export const getCommitFiles = stagedFiles =>
+export const getCommitFiles = (stagedFiles) =>
   stagedFiles.reduce((acc, file) => {
     if (file.type === 'tree') return acc;
 
@@ -122,14 +109,19 @@ export const createCommitPayload = ({
 }) => ({
   branch,
   commit_message: state.commitMessage || getters.preBuiltCommitMessage,
-  actions: getCommitFiles(rootState.stagedFiles).map(f => ({
-    action: commitActionForFile(f),
-    file_path: f.path,
-    previous_path: f.prevPath || undefined,
-    content: f.prevPath && !f.changed ? null : f.content || undefined,
-    encoding: isBase64DataUrl(f.rawPath) ? 'base64' : 'text',
-    last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
-  })),
+  actions: getCommitFiles(rootState.stagedFiles).map((f) => {
+    const isBlob = isBlobUrl(f.rawPath);
+    const content = isBlob ? btoa(f.content) : f.content;
+
+    return {
+      action: commitActionForFile(f),
+      file_path: f.path,
+      previous_path: f.prevPath || undefined,
+      content: f.prevPath && !f.changed ? null : content || undefined,
+      encoding: isBlob ? 'base64' : 'text',
+      last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
+    };
+  }),
   start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
 });
 
@@ -147,9 +139,9 @@ const sortTreesByTypeAndName = (a, b) => {
   return 0;
 };
 
-export const sortTree = sortedTree =>
+export const sortTree = (sortedTree) =>
   sortedTree
-    .map(entity =>
+    .map((entity) =>
       Object.assign(entity, {
         tree: entity.tree.length ? sortTree(entity.tree) : [],
       }),
@@ -159,7 +151,7 @@ export const sortTree = sortedTree =>
 export const filePathMatches = (filePath, path) => filePath.indexOf(`${path}/`) === 0;
 
 export const getChangesCountForFiles = (files, path) =>
-  files.filter(f => filePathMatches(f.path, path)).length;
+  files.filter((f) => filePathMatches(f.path, path)).length;
 
 export const mergeTrees = (fromTree, toTree) => {
   if (!fromTree || !fromTree.length) {
@@ -170,7 +162,7 @@ export const mergeTrees = (fromTree, toTree) => {
     if (!n) {
       return t;
     }
-    const existingTreeNode = t.find(el => el.path === n.path);
+    const existingTreeNode = t.find((el) => el.path === n.path);
 
     if (existingTreeNode && n.tree.length > 0) {
       existingTreeNode.opened = true;
@@ -189,14 +181,9 @@ export const mergeTrees = (fromTree, toTree) => {
   return toTree;
 };
 
-export const replaceFileUrl = (url, oldPath, newPath) => {
-  // Add `/-/` so that we don't accidentally replace project path
-  return url.replace(`/-/${oldPath}`, `/-/${newPath}`);
-};
-
 export const swapInStateArray = (state, arr, key, entryPath) =>
   Object.assign(state, {
-    [arr]: state[arr].map(f => (f.key === key ? state.entries[entryPath] : f)),
+    [arr]: state[arr].map((f) => (f.key === key ? state.entries[entryPath] : f)),
   });
 
 export const getEntryOrRoot = (state, path) =>
@@ -229,12 +216,12 @@ export const removeFromParentTree = (state, oldKey, parentPath) => {
 };
 
 export const updateFileCollections = (state, key, entryPath) => {
-  ['openFiles', 'changedFiles', 'stagedFiles'].forEach(fileCollection => {
+  ['openFiles', 'changedFiles', 'stagedFiles'].forEach((fileCollection) => {
     swapInStateArray(state, fileCollection, key, entryPath);
   });
 };
 
-export const cleanTrailingSlash = path => path.replace(/\/$/, '');
+export const cleanTrailingSlash = (path) => path.replace(/\/$/, '');
 
 export const pathsAreEqual = (a, b) => {
   const cleanA = a ? cleanTrailingSlash(a) : '';
@@ -267,12 +254,7 @@ export function extractMarkdownImagesFromEntries(mdFile, entries) {
     const imageContent = entries[imagePath]?.content || entries[imagePath]?.raw;
 
     if (!isAbsolute(path) && imageContent) {
-      const ext = path.includes('.')
-        ? path
-            .split('.')
-            .pop()
-            .trim()
-        : 'jpeg';
+      const ext = path.includes('.') ? path.split('.').pop().trim() : 'jpeg';
       const src = `data:image/${ext};base64,${imageContent}`;
       i += 1;
       const key = `{{${prefix}${i}}}`;

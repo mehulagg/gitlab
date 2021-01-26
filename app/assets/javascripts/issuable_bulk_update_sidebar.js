@@ -7,7 +7,7 @@ import MilestoneSelect from './milestone_select';
 import issueStatusSelect from './issue_status_select';
 import subscriptionSelect from './subscription_select';
 import LabelsSelect from './labels_select';
-import issueableEventHub from './issuables_list/eventhub';
+import issueableEventHub from './issues_list/eventhub';
 
 const HIDDEN_CLASS = 'hidden';
 const DISABLED_CONTENT_CLASS = 'disabled-content';
@@ -39,9 +39,9 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   bindEvents() {
-    this.$bulkUpdateEnableBtn.on('click', e => this.toggleBulkEdit(e, true));
-    this.$bulkEditCancelBtn.on('click', e => this.toggleBulkEdit(e, false));
-    this.$checkAllContainer.on('click', e => this.selectAll(e));
+    this.$bulkUpdateEnableBtn.on('click', (e) => this.toggleBulkEdit(e, true));
+    this.$bulkEditCancelBtn.on('click', (e) => this.toggleBulkEdit(e, false));
+    this.$checkAllContainer.on('click', (e) => this.selectAll(e));
     this.$issuesList.on('change', () => this.updateFormState());
     this.$bulkEditSubmitBtn.on('click', () => this.prepForSubmit());
     this.$checkAllContainer.on('click', () => this.updateFormState());
@@ -159,7 +159,7 @@ export default class IssuableBulkUpdateSidebar {
     const $checkedIssues = $('.selected-issuable:checked');
 
     if ($checkedIssues.length > 0) {
-      return $.map($checkedIssues, value => $(value).data('id'));
+      return $.map($checkedIssues, (value) => $(value).data('id'));
     }
 
     return [];

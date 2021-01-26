@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 class Suggestion < ApplicationRecord
+  include Importable
   include Suggestible
 
   belongs_to :note, inverse_of: :suggestions
-  validates :note, presence: true
+  validates :note, presence: true, unless: :importing?
   validates :commit_id, presence: true, if: :applied?
 
   delegate :position, :noteable, to: :note
@@ -61,7 +62,7 @@ class Suggestion < ApplicationRecord
   end
 
   def single_line?
-    lines_above.zero? && lines_below.zero?
+    lines_above == 0 && lines_below == 0
   end
 
   def target_line

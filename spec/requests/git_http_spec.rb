@@ -90,7 +90,7 @@ RSpec.describe 'Git HTTP requests' do
 
   shared_examples_for 'pulls are allowed' do
     it 'allows pulls' do
-      download(path, env) do |response|
+      download(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
@@ -99,7 +99,7 @@ RSpec.describe 'Git HTTP requests' do
 
   shared_examples_for 'pushes are allowed' do
     it 'allows pushes', :sidekiq_might_not_need_inline do
-      upload(path, env) do |response|
+      upload(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
@@ -259,7 +259,7 @@ RSpec.describe 'Git HTTP requests' do
             it_behaves_like 'pulls are allowed'
 
             it 'rejects pushes with 403 Forbidden' do
-              upload(path, env) do |response|
+              upload(path, **env) do |response|
                 expect(response).to have_gitlab_http_status(:forbidden)
                 expect(response.body).to eq(git_access_wiki_error(:write_to_wiki))
               end
@@ -278,6 +278,20 @@ RSpec.describe 'Git HTTP requests' do
           context 'and as a developer on the team' do
             before do
               project.add_developer(user)
+            end
+
+            context 'when user is using credentials with special characters' do
+              context 'with password with special characters' do
+                before do
+                  user.update!(password: 'RKszEwéC5kFnû∆f243fycGu§Gh9ftDj!U')
+                end
+
+                it 'allows clones' do
+                  download(path, user: user.username, password: user.password) do |response|
+                    expect(response).to have_gitlab_http_status(:ok)
+                  end
+                end
+              end
             end
 
             context 'but the repo is disabled' do
@@ -347,7 +361,7 @@ RSpec.describe 'Git HTTP requests' do
               end
 
               it 'rejects pushes with 403 Forbidden' do
-                upload(path, env) do |response|
+                upload(path, **env) do |response|
                   expect(response).to have_gitlab_http_status(:forbidden)
                   expect(response.body).to eq(git_access_error(:receive_pack_disabled_over_http))
                 end
@@ -358,7 +372,7 @@ RSpec.describe 'Git HTTP requests' do
               it "rejects pushes with 403 Forbidden" do
                 allow(Gitlab.config.gitlab_shell).to receive(:upload_pack).and_return(false)
 
-                download(path, env) do |response|
+                download(path, **env) do |response|
                   expect(response).to have_gitlab_http_status(:forbidden)
                   expect(response.body).to eq(git_access_error(:upload_pack_disabled_over_http))
                 end
@@ -370,7 +384,7 @@ RSpec.describe 'Git HTTP requests' do
             it_behaves_like 'pulls are allowed'
 
             it 'rejects pushes with 403 Forbidden' do
-              upload(path, env) do |response|
+              upload(path, **env) do |response|
                 expect(response).to have_gitlab_http_status(:forbidden)
                 expect(response.body).to eq('You are not allowed to push code to this project.')
               end
@@ -433,7 +447,7 @@ RSpec.describe 'Git HTTP requests' do
           let(:path) { "#{redirect.path}.git" }
 
           it 'downloads get status 200 for redirects' do
-            clone_get(path, {})
+            clone_get(path)
 
             expect(response).to have_gitlab_http_status(:ok)
           end
@@ -465,7 +479,7 @@ RSpec.describe 'Git HTTP requests' do
                   path: "/#{path}/info/refs?service=git-upload-pack"
                 })
 
-                clone_get(path, env)
+                clone_get(path, **env)
 
                 expect(response).to have_gitlab_http_status(:forbidden)
               end
@@ -485,7 +499,7 @@ RSpec.describe 'Git HTTP requests' do
                   user.block
                   project.add_maintainer(user)
 
-                  download(path, env) do |response|
+                  download(path, **env) do |response|
                     expect(response).to have_gitlab_http_status(:unauthorized)
                   end
                 end
@@ -493,7 +507,7 @@ RSpec.describe 'Git HTTP requests' do
                 it "rejects pulls with 401 Unauthorized for unknown projects (no project existence information leak)" do
                   user.block
 
-                  download('doesnt/exist.git', env) do |response|
+                  download('doesnt/exist.git', **env) do |response|
                     expect(response).to have_gitlab_http_status(:unauthorized)
                   end
                 end
@@ -507,7 +521,7 @@ RSpec.describe 'Git HTTP requests' do
                 it "resets the IP in Rack Attack on download" do
                   expect(Rack::Attack::Allow2Ban).to receive(:reset).twice
 
-                  download(path, env) do
+                  download(path, **env) do
                     expect(response).to have_gitlab_http_status(:ok)
                     expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
                   end
@@ -516,7 +530,7 @@ RSpec.describe 'Git HTTP requests' do
                 it "resets the IP in Rack Attack on upload" do
                   expect(Rack::Attack::Allow2Ban).to receive(:reset).twice
 
-                  upload(path, env) do
+                  upload(path, **env) do
                     expect(response).to have_gitlab_http_status(:ok)
                     expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
                   end
@@ -525,7 +539,7 @@ RSpec.describe 'Git HTTP requests' do
                 it 'updates the user last activity', :clean_gitlab_redis_shared_state do
                   expect(user.last_activity_on).to be_nil
 
-                  download(path, env) do |response|
+                  download(path, **env) do |response|
                     expect(user.reload.last_activity_on).to eql(Date.today)
                   end
                 end
@@ -693,13 +707,13 @@ RSpec.describe 'Git HTTP requests' do
                 end
 
                 it 'downloads get status 200' do
-                  clone_get(path, env)
+                  clone_get(path, **env)
 
                   expect(response).to have_gitlab_http_status(:ok)
                 end
 
                 it 'uploads get status 404 with "project was moved" message' do
-                  upload(path, env) do |response|
+                  upload(path, **env) do |response|
                     expect(response).to have_gitlab_http_status(:ok)
                   end
                 end
@@ -745,7 +759,7 @@ RSpec.describe 'Git HTTP requests' do
             # We know for sure it is not an information leak since pulls using
             # the build token must be allowed.
             it "rejects pushes with 403 Forbidden" do
-              push_get(path, env)
+              push_get(path, **env)
 
               expect(response).to have_gitlab_http_status(:forbidden)
               expect(response.body).to eq(git_access_error(:auth_upload))
@@ -754,7 +768,7 @@ RSpec.describe 'Git HTTP requests' do
             # We are "authenticated" as CI using a valid token here. But we are
             # not authorized to see any other project, so return "not found".
             it "rejects pulls for other project with 404 Not Found" do
-              clone_get("#{other_project.full_path}.git", env)
+              clone_get("#{other_project.full_path}.git", **env)
 
               expect(response).to have_gitlab_http_status(:not_found)
               expect(response.body).to eq(git_access_error(:project_not_found))
@@ -763,7 +777,7 @@ RSpec.describe 'Git HTTP requests' do
 
           context 'and build created by' do
             before do
-              build.update(user: user)
+              build.update!(user: user)
               project.add_reporter(user)
             end
 
@@ -777,7 +791,7 @@ RSpec.describe 'Git HTTP requests' do
                 let(:project) { create(:project) }
 
                 it 'rejects pulls with 404 Not Found' do
-                  clone_get path, env
+                  clone_get(path, **env)
 
                   expect(response).to have_gitlab_http_status(:not_found)
                   expect(response.body).to eq(git_access_error(:no_repo))
@@ -785,7 +799,7 @@ RSpec.describe 'Git HTTP requests' do
               end
 
               it 'rejects pushes with 403 Forbidden' do
-                push_get path, env
+                push_get(path, **env)
 
                 expect(response).to have_gitlab_http_status(:forbidden)
                 expect(response.body).to eq(git_access_error(:auth_upload))
@@ -795,12 +809,24 @@ RSpec.describe 'Git HTTP requests' do
             context 'administrator' do
               let(:user) { create(:admin) }
 
-              it_behaves_like 'can download code only'
+              context 'when admin mode is enabled', :enable_admin_mode do
+                it_behaves_like 'can download code only'
 
-              it 'downloads from other project get status 403' do
-                clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
+                it 'downloads from other project get status 403' do
+                  clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
 
-                expect(response).to have_gitlab_http_status(:forbidden)
+                  expect(response).to have_gitlab_http_status(:forbidden)
+                end
+              end
+
+              context 'when admin mode is disabled' do
+                it_behaves_like 'can download code only'
+
+                it 'downloads from other project get status 404' do
+                  clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
+
+                  expect(response).to have_gitlab_http_status(:not_found)
+                end
               end
             end
 
@@ -889,7 +915,7 @@ RSpec.describe 'Git HTTP requests' do
           end
 
           it "responds with status 200" do
-            clone_get(path, env) do |response|
+            clone_get(path, **env) do |response|
               expect(response).to have_gitlab_http_status(:ok)
             end
           end
@@ -913,15 +939,15 @@ RSpec.describe 'Git HTTP requests' do
     end
 
     it 'blocks git access when the user did not accept terms', :aggregate_failures do
-      clone_get(path, env) do |response|
+      clone_get(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:forbidden)
       end
 
-      download(path, env) do |response|
+      download(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:forbidden)
       end
 
-      upload(path, env) do |response|
+      upload(path, **env) do |response|
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
@@ -932,7 +958,7 @@ RSpec.describe 'Git HTTP requests' do
       end
 
       it 'allows clones' do
-        clone_get(path, env) do |response|
+        clone_get(path, **env) do |response|
           expect(response).to have_gitlab_http_status(:ok)
         end
       end

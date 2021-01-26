@@ -5,10 +5,34 @@ require 'spec_helper'
 RSpec.describe 'layouts/nav/sidebar/_group' do
   before do
     assign(:group, group)
+    allow(view).to receive(:show_trial_status_widget?).with(group).and_return(show_trial_status_widget)
   end
 
   let(:group) { create(:group) }
   let(:user) { create(:user) }
+  let(:show_trial_status_widget) { false }
+
+  describe 'trial status widget' do
+    let!(:gitlab_subscription) { create(:gitlab_subscription, :active_trial, namespace: group) }
+
+    context 'when the experiment is off' do
+      it 'is not rendered' do
+        render
+
+        expect(rendered).not_to have_selector '#js-trial-status-widget'
+      end
+    end
+
+    context 'when the experiment is on' do
+      let(:show_trial_status_widget) { true }
+
+      it 'is rendered' do
+        render
+
+        expect(rendered).to have_selector '#js-trial-status-widget'
+      end
+    end
+  end
 
   describe 'contribution analytics tab' do
     let!(:current_user) { create(:user) }
@@ -189,6 +213,40 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
       end
     end
 
+    context 'when audit events feature is enabled' do
+      before do
+        stub_licensed_features(audit_events: true)
+      end
+
+      context 'when the user does not have access to Audit Events' do
+        before do
+          group.add_guest(user)
+          allow(view).to receive(:current_user).and_return(user)
+        end
+
+        it 'is not visible' do
+          render
+
+          expect(rendered).not_to have_link 'Security & Compliance'
+          expect(rendered).not_to have_link 'Audit Events'
+        end
+      end
+
+      context 'when the user has access to Audit Events' do
+        before do
+          group.add_owner(user)
+          allow(view).to receive(:current_user).and_return(user)
+        end
+
+        it 'is visible' do
+          render
+
+          expect(rendered).to have_link 'Security & Compliance'
+          expect(rendered).to have_link 'Audit Events'
+        end
+      end
+    end
+
     context 'when security dashboard feature is disabled' do
       let(:group) { create(:group_with_plan, plan: :bronze_plan) }
 
@@ -210,9 +268,6 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
 
       allow(view).to receive(:current_user).and_return(current_user)
       allow(view).to receive(:can?).with(current_user, :read_wiki, group).and_return(can_read_wiki)
-
-      # TODO can be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/207888
-      stub_feature_flags(group_wiki: true)
     end
 
     describe 'when wiki is available to user' do

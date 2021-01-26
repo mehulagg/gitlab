@@ -10,8 +10,14 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
   let_it_be(:guest) { create(:user) }
   let_it_be(:reporter) { create(:user) }
   let_it_be(:stranger) { create(:user) }
+  let_it_be(:link_filepath) { '/direct/asset/link/path' }
+  let_it_be(:released_at) { Time.now - 1.day }
 
-  let(:params_for_issues_and_mrs) { { scope: 'all', state: 'opened', release_tag: release.tag } }
+  let(:base_url_params) { { scope: 'all', release_tag: release.tag } }
+  let(:opened_url_params) { { state: 'opened', **base_url_params } }
+  let(:merged_url_params) { { state: 'merged', **base_url_params } }
+  let(:closed_url_params) { { state: 'closed', **base_url_params } }
+
   let(:post_query) { post_graphql(query, current_user: current_user) }
   let(:path_prefix) { %w[project release] }
   let(:data) { graphql_data.dig(*path) }
@@ -30,7 +36,7 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let(:path) { path_prefix }
 
       let(:release_fields) do
-        query_graphql_field(%{
+        %{
           tagName
           tagPath
           description
@@ -38,7 +44,8 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
           name
           createdAt
           releasedAt
-        })
+          upcomingRelease
+        }
       end
 
       before do
@@ -53,7 +60,8 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
           'descriptionHtml' => release.description_html,
           'name' => release.name,
           'createdAt' => release.created_at.iso8601,
-          'releasedAt' => release.released_at.iso8601
+          'releasedAt' => release.released_at.iso8601,
+          'upcomingRelease' => false
         })
       end
     end
@@ -68,11 +76,11 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       it 'finds all milestones associated to a release' do
         post_query
 
-        expected = release.milestones.map do |milestone|
+        expected = release.milestones.order_by_dates_and_title.map do |milestone|
           { 'id' => global_id_of(milestone), 'title' => milestone.title }
         end
 
-        expect(data).to match_array(expected)
+        expect(data).to eq(expected)
       end
     end
 
@@ -127,7 +135,7 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
 
         let(:release_fields) do
           query_graphql_field(:assets, nil,
-            query_graphql_field(:links, nil, 'nodes { id name url external }'))
+            query_graphql_field(:links, nil, 'nodes { id name url external, directAssetUrl }'))
         end
 
         it 'finds all release links' do
@@ -138,7 +146,8 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
               'id' => global_id_of(link),
               'name' => link.name,
               'url' => link.url,
-              'external' => link.external?
+              'external' => link.external?,
+              'directAssetUrl' => link.filepath ? Gitlab::Routing.url_helpers.project_release_url(project, release) << "/downloads#{link.filepath}" : link.url
             }
           end
 
@@ -175,8 +184,11 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let(:release_fields) do
         query_graphql_field(:links, nil, %{
           selfUrl
-          mergeRequestsUrl
-          issuesUrl
+          openedMergeRequestsUrl
+          mergedMergeRequestsUrl
+          closedMergeRequestsUrl
+          openedIssuesUrl
+          closedIssuesUrl
         })
       end
 
@@ -185,8 +197,11 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
 
         expect(data).to eq(
           'selfUrl' => project_release_url(project, release),
-          'mergeRequestsUrl' => project_merge_requests_url(project, params_for_issues_and_mrs),
-          'issuesUrl' => project_issues_url(project, params_for_issues_and_mrs)
+          'openedMergeRequestsUrl' => project_merge_requests_url(project, opened_url_params),
+          'mergedMergeRequestsUrl' => project_merge_requests_url(project, merged_url_params),
+          'closedMergeRequestsUrl' => project_merge_requests_url(project, closed_url_params),
+          'openedIssuesUrl' => project_issues_url(project, opened_url_params),
+          'closedIssuesUrl' => project_issues_url(project, closed_url_params)
         )
       end
     end
@@ -218,7 +233,7 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let(:path) { path_prefix }
 
       let(:release_fields) do
-        query_graphql_field('description')
+        'description'
       end
 
       before do
@@ -268,9 +283,9 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let_it_be(:project) { create(:project, :repository, :private) }
       let_it_be(:milestone_1) { create(:milestone, project: project) }
       let_it_be(:milestone_2) { create(:milestone, project: project) }
-      let_it_be(:release) { create(:release, :with_evidence, project: project, milestones: [milestone_1, milestone_2]) }
+      let_it_be(:release) { create(:release, :with_evidence, project: project, milestones: [milestone_1, milestone_2], released_at: released_at) }
       let_it_be(:release_link_1) { create(:release_link, release: release) }
-      let_it_be(:release_link_2) { create(:release_link, release: release) }
+      let_it_be(:release_link_2) { create(:release_link, release: release, filepath: link_filepath) }
 
       before_all do
         project.add_developer(developer)
@@ -309,9 +324,9 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
       let_it_be(:project) { create(:project, :repository, :public) }
       let_it_be(:milestone_1) { create(:milestone, project: project) }
       let_it_be(:milestone_2) { create(:milestone, project: project) }
-      let_it_be(:release) { create(:release, :with_evidence, project: project, milestones: [milestone_1, milestone_2]) }
+      let_it_be(:release) { create(:release, :with_evidence, project: project, milestones: [milestone_1, milestone_2], released_at: released_at) }
       let_it_be(:release_link_1) { create(:release_link, release: release) }
-      let_it_be(:release_link_2) { create(:release_link, release: release) }
+      let_it_be(:release_link_2) { create(:release_link, release: release, filepath: link_filepath) }
 
       before_all do
         project.add_developer(developer)
@@ -370,5 +385,75 @@ RSpec.describe 'Query.project(fullPath).release(tagName)' do
 
       it_behaves_like 'no access to the release field'
     end
+  end
+
+  describe 'upcoming release' do
+    let(:path) { path_prefix }
+    let(:project) { create(:project, :repository, :private) }
+    let(:release) { create(:release, :with_evidence, project: project, released_at: released_at) }
+    let(:current_user) { developer }
+
+    let(:release_fields) do
+      %{
+        releasedAt
+        upcomingRelease
+      }
+    end
+
+    before do
+      project.add_developer(developer)
+      post_query
+    end
+
+    context 'future release' do
+      let(:released_at) { Time.now + 1.day }
+
+      it 'finds all release data' do
+        expect(data).to eq({
+          'releasedAt' => release.released_at.iso8601,
+          'upcomingRelease' => true
+        })
+      end
+    end
+
+    context 'past release' do
+      let(:released_at) { Time.now - 1.day }
+
+      it 'finds all release data' do
+        expect(data).to eq({
+          'releasedAt' => release.released_at.iso8601,
+          'upcomingRelease' => false
+        })
+      end
+    end
+  end
+
+  describe 'milestone order' do
+    let(:path) { path_prefix }
+    let(:current_user) { stranger }
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be_with_reload(:release) { create(:release, project: project) }
+
+    let(:release_fields) do
+      query_graphql_field(%{
+        milestones {
+          nodes {
+            title
+          }
+        }
+      })
+    end
+
+    let(:actual_milestone_title_order) do
+      post_query
+
+      data.dig('milestones', 'nodes').map { |m| m['title'] }
+    end
+
+    before do
+      release.update!(milestones: [milestone_2, milestone_1])
+    end
+
+    it_behaves_like 'correct release milestone order'
   end
 end

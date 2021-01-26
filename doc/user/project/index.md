@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -34,9 +34,11 @@ When you create a project in GitLab, you'll have access to a large number of
   - [Protected tags](protected_tags.md): Control over who has
   permission to create tags, and prevent accidental update or deletion
   - [Repository mirroring](repository/repository_mirroring.md)
-  - [Signing commits](gpg_signed_commits/index.md): use GPG to sign your commits
+  - [Signing commits](repository/gpg_signed_commits/index.md): use GPG to sign your commits
   - [Deploy tokens](deploy_tokens/index.md): Manage project-based deploy tokens that allow permanent access to the repository and Container Registry.
 - [Web IDE](web_ide/index.md)
+- [CVE ID Requests](../application_security/cve_id_request.md): Request a CVE identifier to track a
+  vulnerability in your project.
 
 **Issues and merge requests:**
 
@@ -48,7 +50,7 @@ When you create a project in GitLab, you'll have access to a large number of
   - [Merge Request Approvals](merge_requests/merge_request_approvals.md): Ask for approval before
   implementing a change **(STARTER)**
   - [Fix merge conflicts from the UI](merge_requests/resolve_conflicts.md):
-  Your Git diff tool right from GitLab's UI
+  Your Git diff tool right from the GitLab UI
   - [Review Apps](../../ci/review_apps/index.md): Live preview the results
   of the changes proposed in a merge request in a per-branch basis
 - [Labels](labels.md): Organize issues and merge requests by labels
@@ -67,7 +69,7 @@ When you create a project in GitLab, you'll have access to a large number of
 
 **GitLab CI/CD:**
 
-- [GitLab CI/CD](../../ci/README.md): GitLab's built-in [Continuous Integration, Delivery, and Deployment](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/) tool
+- [GitLab CI/CD](../../ci/README.md): the GitLab built-in [Continuous Integration, Delivery, and Deployment](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/) tool
   - [Container Registry](../packages/container_registry/index.md): Build and push Docker
   images out-of-the-box
   - [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy): Configure GitLab CI/CD
@@ -94,11 +96,11 @@ When you create a project in GitLab, you'll have access to a large number of
 
 - [Wiki](wiki/index.md): document your GitLab project in an integrated Wiki.
 - [Snippets](../snippets.md): store, share and collaborate on code snippets.
-- [Value Stream Analytics](cycle_analytics.md): review your development lifecycle.
+- [Value Stream Analytics](../analytics/value_stream_analytics.md): review your development lifecycle.
 - [Insights](insights/index.md): configure the Insights that matter for your projects. **(ULTIMATE)**
-- [Security Dashboard](security_dashboard.md): Security Dashboard. **(ULTIMATE)**
+- [Security Dashboard](../application_security/security_dashboard/index.md): Security Dashboard. **(ULTIMATE)**
 - [Syntax highlighting](highlighting.md): an alternative to customize
-  your code blocks, overriding GitLab's default choice of language.
+  your code blocks, overriding the GitLab default choice of language.
 - [Badges](badges.md): badges for the project overview.
 - [Releases](releases/index.md): a way to track deliverables in your project as snapshot in time of
   the source, build output, other metadata, and other artifacts
@@ -180,23 +182,17 @@ Read through the documentation on [project settings](settings/index.md).
 - [Export a project from GitLab](settings/import_export.md#exporting-a-project-and-its-data)
 - [Importing and exporting projects between GitLab instances](settings/import_export.md)
 
-## Remove a project
+## Delete a project
 
-To remove a project, first navigate to the home page for that project.
+To delete a project, first navigate to the home page for that project.
 
 1. Navigate to **Settings > General**.
 1. Expand the **Advanced** section.
-1. Scroll down to the **Remove project** section.
-1. Click **Remove project**
+1. Scroll down to the **Delete project** section.
+1. Click **Delete project**
 1. Confirm this action by typing in the expected text.
 
-### Delayed removal **(PREMIUM)**
-
-By default, clicking to remove a project is followed by a seven day delay. Admins can restore the project during this period of time.
-This delay [may be changed by an admin](../admin_area/settings/visibility_and_access_controls.md#default-deletion-adjourned-period-premium-only).
-
-Admins can view all projects pending deletion. If you're an administrator, go to the top navigation bar, click **Projects > Your projects**, and then select the **Removed projects** tab.
-From this tab an admin can restore any project.
+Projects in personal namespaces are deleted immediately on request. For information on delayed deletion of projects within a group, please see [Enabling delayed project removal](../group/index.md#enabling-delayed-project-removal).
 
 ## CI/CD for external repositories **(PREMIUM)**
 
@@ -243,6 +239,14 @@ For users without permissions to view the project's code:
 
 - The wiki homepage is displayed, if any.
 - The list of issues within the project is displayed.
+
+## GitLab Workflow - VS Code extension
+
+To avoid switching from the GitLab UI and VS Code while working in GitLab repositories, you can integrate
+the [VS Code](https://code.visualstudio.com/) editor with GitLab through the
+[GitLab Workflow extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
+
+To review or contribute to the extension's code, visit [its codebase in GitLab](https://gitlab.com/gitlab-org/gitlab-vscode-extension/).
 
 ## Redirects when changing repository paths
 
@@ -318,12 +322,12 @@ through Git.
 For example:
 
 ```plaintext
-machine example.gitlab.com
+machine gitlab.example.com
 login <gitlab_user_name>
 password <personal_access_token>
 ```
 
-NOTE: **Note:**
+NOTE:
 On Windows, Go reads `~/_netrc` instead of `~/.netrc`.
 
 ### Authenticate Git fetches
@@ -370,6 +374,16 @@ project `https://gitlab.com/gitlab-org/gitlab`), the repository can be cloned
 using the alias (e.g `git clone git@gitlab.com:gitlab.git` instead of
 `git clone git@gitlab.com:gitlab-org/gitlab.git`).
 
+## Project activity analytics overview **(ULTIMATE ONLY)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/279039) in GitLab [Ultimate](https://about.gitlab.com/pricing/) 13.7 as a [Beta feature](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta).
+
+Project details include the following analytics:
+
+- Deployment Frequency
+
+For more information, see [Project Analytics API](../../api/project_analytics.md).
+
 ## Project APIs
 
 There are numerous [APIs](../../api/README.md) to use with your projects:
@@ -390,3 +404,4 @@ There are numerous [APIs](../../api/README.md) to use with your projects:
 - [Traffic](../../api/project_statistics.md)
 - [Variables](../../api/project_level_variables.md)
 - [Aliases](../../api/project_aliases.md)
+- [Analytics](../../api/project_analytics.md)

@@ -37,7 +37,8 @@ module Featurable
 
   class_methods do
     def set_available_features(available_features = [])
-      @available_features = available_features
+      @available_features ||= []
+      @available_features += available_features
 
       class_eval do
         available_features.each do |feature|
@@ -87,9 +88,6 @@ module Featurable
   end
 
   def feature_available?(feature, user)
-    # This feature might not be behind a feature flag at all, so default to true
-    return false unless ::Feature.enabled?(feature, user, default_enabled: true)
-
     get_permission(user, feature)
   end
 

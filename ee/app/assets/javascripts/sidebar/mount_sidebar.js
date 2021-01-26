@@ -8,10 +8,11 @@ import SidebarWeight from './components/weight/sidebar_weight.vue';
 import IterationSelect from './components/iteration_select.vue';
 import SidebarStore from './stores/sidebar_store';
 import createDefaultClient from '~/lib/graphql';
+import { store } from '~/notes/stores';
 
 Vue.use(VueApollo);
 
-const mountWeightComponent = mediator => {
+const mountWeightComponent = (mediator) => {
   const el = document.querySelector('.js-sidebar-weight-entry-point');
 
   if (!el) return false;
@@ -21,7 +22,7 @@ const mountWeightComponent = mediator => {
     components: {
       SidebarWeight,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-weight', {
         props: {
           mediator,
@@ -30,7 +31,7 @@ const mountWeightComponent = mediator => {
   });
 };
 
-const mountStatusComponent = mediator => {
+const mountStatusComponent = (mediator) => {
   const el = document.querySelector('.js-sidebar-status-entry-point');
 
   if (!el) {
@@ -39,10 +40,11 @@ const mountStatusComponent = mediator => {
 
   return new Vue({
     el,
+    store,
     components: {
       SidebarStatus,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-status', {
         props: {
           mediator,
@@ -64,7 +66,7 @@ const mountEpicsSelect = () => {
     components: {
       SidebarItemEpicsSelect,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-item-epics-select', {
         props: {
           sidebarStore,
@@ -95,7 +97,7 @@ function mountIterationSelect() {
     components: {
       IterationSelect,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('iteration-select', {
         props: {
           groupPath,

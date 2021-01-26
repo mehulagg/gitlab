@@ -21,21 +21,16 @@ RSpec.describe OperationsHelper do
     end
 
     context 'initial service configuration' do
-      let_it_be(:alerts_service) { AlertsService.new(project: project) }
       let_it_be(:prometheus_service) { PrometheusService.new(project: project) }
 
       before do
-        allow(project).to receive(:find_or_initialize_service).with('alerts').and_return(alerts_service)
+        allow(project).to receive(:find_or_initialize_service).and_call_original
         allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return(prometheus_service)
       end
 
       it 'returns the correct values' do
         expect(subject).to eq(
-          'activated' => 'false',
-          'url' => alerts_service.url,
-          'authorization_key' => nil,
-          'form_path' => project_service_path(project, alerts_service),
-          'alerts_setup_url' => help_page_path('user/project/integrations/generic_alerts.md', anchor: 'setting-up-generic-alerts'),
+          'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
           'alerts_usage_url' => project_alert_management_index_path(project),
           'prometheus_form_path' => project_service_path(project, prometheus_service),
           'prometheus_reset_key_path' => reset_alerting_token_project_settings_operations_path(project),
@@ -43,7 +38,9 @@ RSpec.describe OperationsHelper do
           'prometheus_api_url' => nil,
           'prometheus_activated' => 'false',
           'prometheus_url' => notify_project_prometheus_alerts_url(project, format: :json),
-          'disabled' => 'false'
+          'disabled' => 'false',
+          'project_path' => project.full_path,
+          'multi_integrations' => 'false'
         )
       end
     end
@@ -102,33 +99,6 @@ RSpec.describe OperationsHelper do
         end
       end
     end
-
-    context 'with generic alerts service configured' do
-      let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-      context 'with generic alerts enabled' do
-        it 'returns the correct values' do
-          expect(subject).to include(
-            'activated' => 'true',
-            'authorization_key' => alerts_service.token,
-            'url' => alerts_service.url
-          )
-        end
-      end
-
-      context 'with generic alerts disabled' do
-        before do
-          alerts_service.update!(active: false)
-        end
-
-        it 'returns the correct values' do
-          expect(subject).to include(
-            'activated' => 'false',
-            'authorization_key' => alerts_service.token
-          )
-        end
-      end
-    end
   end
 
   describe '#operations_settings_data' do
@@ -137,19 +107,21 @@ RSpec.describe OperationsHelper do
         :project_incident_management_setting,
         project: project,
         issue_template_key: 'template-key',
-        pagerduty_active: true
+        pagerduty_active: true,
+        auto_close_incident: false
       )
     end
 
     subject { helper.operations_settings_data }
 
     it 'returns the correct set of data' do
-      is_expected.to eq(
+      is_expected.to include(
         operations_settings_endpoint: project_settings_operations_path(project),
         templates: '[]',
         create_issue: 'false',
         issue_template_key: 'template-key',
         send_email: 'false',
+        auto_close_incident: 'false',
         pagerduty_active: 'true',
         pagerduty_token: operations_settings.pagerduty_token,
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),

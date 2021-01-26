@@ -17,7 +17,7 @@ module Resolvers
         argument :ids,
                  [GraphQL::ID_TYPE],
                  required: false,
-                 description: 'Filters registries by their ID'
+                 description: 'Filters registries by their ID.'
 
         def resolve(ids: nil)
           return registry_class.none unless geo_node_is_current?

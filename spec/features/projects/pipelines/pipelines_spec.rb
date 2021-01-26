@@ -12,6 +12,8 @@ RSpec.describe 'Pipelines', :js do
 
     before do
       sign_in(user)
+      stub_feature_flags(graphql_pipeline_details: false)
+      stub_feature_flags(graphql_pipeline_details_users: false)
       project.add_developer(user)
       project.update!(auto_devops_attributes: { enabled: false })
     end
@@ -118,7 +120,7 @@ RSpec.describe 'Pipelines', :js do
         context 'when canceling' do
           before do
             find('.js-pipelines-cancel-button').click
-            find('.js-modal-primary-action').click
+            click_button 'Stop pipeline'
             wait_for_requests
           end
 
@@ -311,7 +313,7 @@ RSpec.describe 'Pipelines', :js do
         let!(:delayed_job) do
           create(:ci_build, :scheduled,
             pipeline: pipeline,
-            name: 'delayed job',
+            name: 'delayed job 1',
             stage: 'test')
         end
 
@@ -327,7 +329,7 @@ RSpec.describe 'Pipelines', :js do
           find('.js-pipeline-dropdown-manual-actions').click
 
           time_diff = [0, delayed_job.scheduled_at - Time.now].max
-          expect(page).to have_button('delayed job')
+          expect(page).to have_button('delayed job 1')
           expect(page).to have_content(Time.at(time_diff).utc.strftime("%H:%M:%S"))
         end
 
@@ -335,7 +337,7 @@ RSpec.describe 'Pipelines', :js do
           let!(:delayed_job) do
             create(:ci_build, :expired_scheduled,
               pipeline: pipeline,
-              name: 'delayed job',
+              name: 'delayed job 1',
               stage: 'test')
           end
 
@@ -349,7 +351,7 @@ RSpec.describe 'Pipelines', :js do
         context 'when user played a delayed job immediately' do
           before do
             find('.js-pipeline-dropdown-manual-actions').click
-            page.accept_confirm { click_button('delayed job') }
+            page.accept_confirm { click_button('delayed job 1') }
             wait_for_requests
           end
 
@@ -407,7 +409,7 @@ RSpec.describe 'Pipelines', :js do
           context 'when canceling' do
             before do
               find('.js-pipelines-cancel-button').click
-              find('.js-modal-primary-action').click
+              click_button 'Stop pipeline'
             end
 
             it 'indicates that pipeline was canceled', :sidekiq_might_not_need_inline do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe QA::Page::Validator do
+RSpec.describe QA::Page::Validator do
   describe '#constants' do
     subject do
       described_class.new(QA::Page::Project)
@@ -32,7 +32,7 @@ describe QA::Page::Validator do
     let(:view) { spy('view') }
 
     before do
-      allow(QA::Page::Admin::Settings::Repository)
+      allow(QA::Page::Admin::Settings::Network)
         .to receive(:views).and_return([view])
     end
 

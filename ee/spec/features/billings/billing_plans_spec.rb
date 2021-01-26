@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Billing plan pages', :feature do
   include StubRequests
+  include SubscriptionPortalHelpers
 
   let(:user) { create(:user) }
   let(:namespace) { user.namespace }
@@ -18,9 +19,11 @@ RSpec.describe 'Billing plan pages', :feature do
   end
 
   before do
-    stub_experiment_for_user(contact_sales_btn_in_app: true)
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}")
+    stub_feature_flags(hide_deprecated_billing_plans: false)
+    stub_experiment_for_subject(contact_sales_btn_in_app: true)
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
       .to_return(status: 200, body: plans_data.to_json)
+    stub_eoa_eligibility_request(namespace.id)
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?) { true }
     gitlab_sign_in(user)
@@ -107,6 +110,18 @@ RSpec.describe 'Billing plan pages', :feature do
     end
   end
 
+  shared_examples 'used seats rendering for non paid subscriptions' do
+    before do
+      visit page_path
+    end
+
+    it 'displays the number of seats', :js do
+      page.within('.js-subscription-table') do
+        expect(page).to have_selector('p.property-value.gl-mt-2.gl-mb-0.number', text: '1')
+      end
+    end
+  end
+
   context 'users profile billing page' do
     let(:page_path) { profile_billings_path }
 
@@ -114,7 +129,7 @@ RSpec.describe 'Billing plan pages', :feature do
       let(:plan) { free_plan }
 
       let!(:subscription) do
-        create(:gitlab_subscription, namespace: namespace, hosted_plan: nil, seats: 15)
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
       end
 
       before do
@@ -146,8 +161,7 @@ RSpec.describe 'Billing plan pages', :feature do
             expect(action).not_to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'current_plan'
-            expect(action).to have_link('Upgrade')
-            expect(action).to have_css('.disabled')
+            expect(action).not_to have_link('Upgrade')
           when 'upgrade'
             expect(action).to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
@@ -241,7 +255,6 @@ RSpec.describe 'Billing plan pages', :feature do
             expect(action).not_to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'current_plan'
-            expect(action).to have_link('Upgrade')
             expect(action).not_to have_css('.disabled')
           when 'upgrade'
             expect(action).to have_link('Upgrade')
@@ -299,7 +312,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Gold plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Gold Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -327,7 +340,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Bronze plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Bronze Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -343,6 +356,13 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it_behaves_like 'can contact sales'
       end
+
+      context 'on free' do
+        let(:plan) { free_plan }
+        let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: plan) }
+
+        it_behaves_like 'used seats rendering for non paid subscriptions'
+      end
     end
   end
 
@@ -351,7 +371,7 @@ RSpec.describe 'Billing plan pages', :feature do
     let!(:group_member) { create(:group_member, :owner, group: namespace, user: user) }
 
     before do
-      stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free")
+      stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free&namespace_id=#{namespace.id}")
         .to_return(status: 200, body: plans_data.to_json)
     end
 
@@ -372,7 +392,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
         it 'displays plan header' do
           page.within('.billing-plan-header') do
-            expect(page).to have_content("#{namespace.name} is currently using the Gold plan")
+            expect(page).to have_content("#{namespace.name} is currently using the Gold Plan")
 
             expect(page).to have_css('.billing-plan-logo .identicon')
           end
@@ -386,8 +406,8 @@ RSpec.describe 'Billing plan pages', :feature do
           expect(page).to have_selector('.js-subscription-table')
         end
 
-        it_behaves_like 'downgradable plan'
         it_behaves_like 'non-upgradable plan'
+        it_behaves_like 'used seats rendering for non paid subscriptions'
       end
     end
   end
@@ -413,7 +433,7 @@ RSpec.describe 'Billing plan pages', :feature do
 
     it 'displays plan header' do
       page.within('.billing-plan-header') do
-        expect(page).to have_content("#{subgroup2.full_name} is currently using the Bronze plan")
+        expect(page).to have_content("#{subgroup2.full_name} is currently using the Bronze Plan")
         expect(page).to have_css('.billing-plan-logo .identicon')
         expect(page.find('.btn-success')).to have_content('Manage plan')
       end
@@ -456,6 +476,48 @@ RSpec.describe 'Billing plan pages', :feature do
         expect(panels.length).to eq(plans_data.length)
         plans_data.each_with_index do |data, index|
           expect(panels[index].find('.card-header')).to have_content(data[:name])
+        end
+      end
+    end
+  end
+
+  context 'when ff purchase_deprecated_plans is enabled' do
+    before do
+      stub_feature_flags(hide_deprecated_billing_plans: true)
+    end
+
+    context 'when deprecated plan is active' do
+      let(:plan) { bronze_plan }
+      let!(:subscription) do
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15)
+      end
+
+      let(:expected_card_header) { "#{plans_data[1][:name]} (Legacy)" }
+
+      it 'renders the plan card marked as Legacy' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length)
+
+          panel_with_legacy_plan = panels[1] # free [0], bronze [1]
+
+          expect(panel_with_legacy_plan.find('.card-header')).to have_content(expected_card_header)
+          expect(panel_with_legacy_plan.find('.card-body')).to have_link('frequently asked questions')
+        end
+      end
+    end
+
+    context 'when deprecated plan is inactive' do
+      let(:plan) { free_plan }
+
+      it 'does not render the card for that plan' do
+        visit profile_billings_path
+
+        page.within('.billing-plans') do
+          panels = page.all('.card')
+          expect(panels.length).to eq(plans_data.length - 1)
         end
       end
     end

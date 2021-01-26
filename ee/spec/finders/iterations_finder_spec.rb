@@ -10,15 +10,15 @@ RSpec.describe IterationsFinder do
   let_it_be(:user) { create(:user) }
   let!(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, group: group, title: 'one test', start_date: now - 1.day, due_date: now) }
   let!(:upcoming_group_iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
-  let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 2.days.from_now, due_date: 3.days.from_now) }
-  let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 4.days.from_now, due_date: 5.days.from_now) }
+  let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 3.days.from_now, due_date: 4.days.from_now) }
+  let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 5.days.from_now, due_date: 6.days.from_now) }
   let(:project_ids) { [project_1.id, project_2.id] }
 
   subject { described_class.new(user, params).execute }
 
   context 'without permissions' do
     context 'groups and projects' do
-      let(:params) { { project_ids: project_ids, group_ids: group.id, state: 'all' } }
+      let(:params) { { project_ids: project_ids, group_ids: group.id } }
 
       it 'returns iterations for groups and projects' do
         expect(subject).to be_empty
@@ -34,7 +34,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for projects' do
-      let(:params) { { project_ids: project_ids, state: 'all' } }
+      let(:params) { { project_ids: project_ids } }
 
       it 'returns iterations for projects' do
         expect(subject).to contain_exactly(iteration_from_project_1, iteration_from_project_2)
@@ -42,7 +42,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for groups' do
-      let(:params) { { group_ids: group.id, state: 'all' } }
+      let(:params) { { group_ids: group.id } }
 
       it 'returns iterations for groups' do
         expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration)
@@ -50,7 +50,7 @@ RSpec.describe IterationsFinder do
     end
 
     context 'iterations for groups and project' do
-      let(:params) { { project_ids: project_ids, group_ids: group.id, state: 'all' } }
+      let(:params) { { project_ids: project_ids, group_ids: group.id } }
 
       it 'returns iterations for groups and projects' do
         expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration, iteration_from_project_1, iteration_from_project_2)
@@ -69,14 +69,19 @@ RSpec.describe IterationsFinder do
       let(:params) do
         {
           project_ids: project_ids,
-          group_ids: group.id,
-          state: 'all'
+          group_ids: group.id
         }
       end
 
       before do
         started_group_iteration.close
         iteration_from_project_1.close
+      end
+
+      it 'filters by all states' do
+        params[:state] = 'all'
+
+        expect(subject).to contain_exactly(started_group_iteration, upcoming_group_iteration, iteration_from_project_1, iteration_from_project_2)
       end
 
       it 'filters by started state' do
@@ -130,10 +135,24 @@ RSpec.describe IterationsFinder do
         end
 
         it 'returns iterations which end after the timeframe' do
-          iteration = create(:iteration, :skip_project_validation, project: project_2, start_date: 6.days.from_now, due_date: 2.weeks.from_now)
-          params.merge!(start_date: 6.days.from_now, end_date: 7.days.from_now)
+          iteration = create(:iteration, :skip_project_validation, project: project_2, start_date: 9.days.from_now, due_date: 2.weeks.from_now)
+          params.merge!(start_date: 9.days.from_now, end_date: 10.days.from_now)
 
           expect(subject).to match_array([iteration])
+        end
+
+        describe 'when one of the timeframe params are missing' do
+          it 'does not filter by timeframe if start_date is missing' do
+            only_end_date = described_class.new(user, params.merge(end_date: 1.year.ago)).execute
+
+            expect(only_end_date).to eq(subject)
+          end
+
+          it 'does not filter by timeframe if end_date is missing' do
+            only_start_date = described_class.new(user, params.merge(start_date: 1.year.from_now)).execute
+
+            expect(only_start_date).to eq(subject)
+          end
         end
       end
     end
@@ -154,9 +173,63 @@ RSpec.describe IterationsFinder do
 
     describe '#find_by' do
       it 'finds a single iteration' do
-        finder = described_class.new(user, project_ids: [project_1.id], state: 'all')
+        finder = described_class.new(user, project_ids: [project_1.id])
 
         expect(finder.find_by(iid: iteration_from_project_1.iid)).to eq(iteration_from_project_1)
+      end
+    end
+
+    describe '.params_for_parent' do
+      let_it_be(:parent_group) { create(:group) }
+      let_it_be(:group) { create(:group, parent: parent_group) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      context 'when parent is a project' do
+        subject { described_class.params_for_parent(project, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns project and ancestor group ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group), project_ids: project.id)
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns project id' do
+            expect(subject).to eq(project_ids: project.id)
+          end
+        end
+      end
+
+      context 'when parent is a group' do
+        subject { described_class.params_for_parent(group, include_ancestors: include_ancestors) }
+
+        context 'when include_ancestors is true' do
+          let(:include_ancestors) { true }
+
+          it 'returns group and ancestor ids' do
+            expect(subject).to match(group_ids: contain_exactly(group, parent_group))
+          end
+        end
+
+        context 'when include_ancestors is false' do
+          let(:include_ancestors) { false }
+
+          it 'returns group id' do
+            expect(subject).to eq(group_ids: group.id)
+          end
+        end
+      end
+
+      context 'when parent is invalid' do
+        subject { described_class.params_for_parent(double(User)) }
+
+        it 'raises an ArgumentError' do
+          expect { subject }.to raise_error(ArgumentError, 'Invalid parent class. Only Project and Group are supported.')
+        end
       end
     end
   end

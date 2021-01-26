@@ -2,7 +2,7 @@
 type: reference
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Troubleshooting Redis
@@ -146,13 +146,13 @@ production:
   sentinels:
     -
       host: 10.0.0.1
-      port: 26379 # point to sentinel, not to redis port
+      port: 26379  # point to sentinel, not to redis port
     -
       host: 10.0.0.2
-      port: 26379 # point to sentinel, not to redis port
+      port: 26379  # point to sentinel, not to redis port
     -
       host: 10.0.0.3
-      port: 26379 # point to sentinel, not to redis port
+      port: 26379  # point to sentinel, not to redis port
 ```
 
 When in doubt, read the [Redis Sentinel documentation](https://redis.io/topics/sentinel).

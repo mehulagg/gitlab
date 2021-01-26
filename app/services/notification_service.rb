@@ -35,6 +35,12 @@ class NotificationService
     @async ||= Async.new(self)
   end
 
+  def disabled_two_factor(user)
+    return unless user.can?(:receive_notifications)
+
+    mailer.disabled_two_factor_email(user).deliver_later
+  end
+
   # Always notify user about ssh key added
   # only if ssh key is not deploy key
   #
@@ -112,8 +118,8 @@ class NotificationService
   #  * project team members with notification level higher then Participating
   #  * users with custom level checked with "close issue"
   #
-  def close_issue(issue, current_user, closed_via: nil)
-    close_resource_email(issue, current_user, :closed_issue_email, closed_via: closed_via)
+  def close_issue(issue, current_user, params = {})
+    close_resource_email(issue, current_user, :closed_issue_email, closed_via: params[:closed_via])
   end
 
   # When we reassign an issue we should send an email to:
@@ -232,6 +238,33 @@ class NotificationService
     end
   end
 
+  # When we change reviewer in a merge_request we should send an email to:
+  #
+  #  * merge_request old reviewers if their notification level is not Disabled
+  #  * merge_request new reviewers if their notification level is not Disabled
+  #  * users with custom level checked with "change reviewer merge request"
+  #
+  def changed_reviewer_of_merge_request(merge_request, current_user, previous_reviewers = [])
+    recipients = NotificationRecipients::BuildService.build_recipients(
+      merge_request,
+      current_user,
+      action: "change_reviewer",
+      previous_assignees: previous_reviewers
+    )
+
+    previous_reviewer_ids = previous_reviewers.map(&:id)
+
+    recipients.each do |recipient|
+      mailer.changed_reviewer_of_merge_request_email(
+        recipient.user.id,
+        merge_request.id,
+        previous_reviewer_ids,
+        current_user.id,
+        recipient.reason
+      ).deliver_later
+    end
+  end
+
   # When we add labels to a merge request we should send an email to:
   #
   #  * watchers of the mr's labels
@@ -320,7 +353,7 @@ class NotificationService
     issue = note.noteable
     support_bot = User.support_bot
 
-    return unless issue.service_desk_reply_to.present?
+    return unless issue.external_author.present?
     return unless issue.project.service_desk_enabled?
     return if note.author == support_bot
     return unless issue.subscribed?(support_bot, issue.project)
@@ -335,6 +368,20 @@ class NotificationService
     recipients.each do |recipient|
       mailer.new_release_email(recipient.user.id, release, recipient.reason).deliver_later
     end
+  end
+
+  def new_instance_access_request(user)
+    recipients = User.instance_access_request_approvers_to_be_notified # https://gitlab.com/gitlab-org/gitlab/-/issues/277016 will change this
+
+    return true if recipients.empty?
+
+    recipients.each do |recipient|
+      mailer.instance_access_request_email(user, recipient).deliver_later
+    end
+  end
+
+  def user_admin_rejection(name, email)
+    mailer.user_admin_rejection_email(name, email).deliver_later
   end
 
   # Members
@@ -402,6 +449,10 @@ class NotificationService
     mailer.member_invited_email(group_member.real_source_type, group_member.id, token).deliver_later
   end
 
+  def invite_member_reminder(group_member, token, reminder_index)
+    mailer.member_invited_reminder_email(group_member.real_source_type, group_member.id, token, reminder_index).deliver_later
+  end
+
   def accept_group_invite(group_member)
     mailer.member_invite_accepted_email(group_member.real_source_type, group_member.id).deliver_later
   end
@@ -430,6 +481,12 @@ class NotificationService
     mailer.member_access_granted_email(group_member.real_source_type, group_member.id).deliver_later
   end
 
+  def updated_group_member_expiration(group_member)
+    return true unless group_member.notifiable?(:mention)
+
+    mailer.member_expiration_date_updated_email(group_member.real_source_type, group_member.id).deliver_later
+  end
+
   def project_was_moved(project, old_path_with_namespace)
     recipients = project_moved_recipients(project)
     recipients = notifiable_users(recipients, :custom, custom_action: :moved_project, project: project)
@@ -448,6 +505,16 @@ class NotificationService
 
     recipients.map do |recipient|
       email = mailer.issue_moved_email(recipient.user, issue, new_issue, current_user, recipient.reason)
+      email.deliver_later
+      email
+    end
+  end
+
+  def issue_cloned(issue, new_issue, current_user)
+    recipients = NotificationRecipients::BuildService.build_recipients(issue, current_user, action: 'cloned')
+
+    recipients.map do |recipient|
+      email = mailer.issue_cloned_email(recipient.user, issue, new_issue, current_user, recipient.reason)
       email.deliver_later
       email
     end
@@ -564,7 +631,7 @@ class NotificationService
     return if project.emails_disabled?
 
     owners_and_maintainers_without_invites(project).to_a.product(alerts).each do |recipient, alert|
-      mailer.prometheus_alert_fired_email(project.id, recipient.user.id, alert).deliver_later
+      mailer.prometheus_alert_fired_email(project, recipient.user, alert).deliver_later
     end
   end
 

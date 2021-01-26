@@ -1,5 +1,4 @@
 <script>
-import eventHub from '../event_hub';
 import {
   GlFormGroup,
   GlFormCheckbox,
@@ -9,6 +8,8 @@ import {
   GlButton,
   GlCard,
 } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../event_hub';
 
 export default {
   name: 'JiraIssuesFields',
@@ -20,9 +21,17 @@ export default {
     GlLink,
     GlButton,
     GlCard,
+    JiraIssueCreationVulnerabilities: () =>
+      import('ee_component/integrations/edit/components/jira_issue_creation_vulnerabilities.vue'),
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     showJiraIssuesIntegration: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    showJiraVulnerabilitiesIntegration: {
       type: Boolean,
       required: false,
       default: false,
@@ -32,20 +41,35 @@ export default {
       required: false,
       default: null,
     },
+    initialEnableJiraVulnerabilities: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    initialVulnerabilitiesIssuetype: {
+      type: String,
+      required: false,
+      default: '',
+    },
     initialProjectKey: {
       type: String,
       required: false,
       default: null,
     },
+    gitlabIssuesEnabled: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     upgradePlanPath: {
       type: String,
       required: false,
-      default: null,
+      default: '',
     },
     editProjectPath: {
       type: String,
       required: false,
-      default: null,
+      default: '',
     },
   },
   data() {
@@ -59,6 +83,13 @@ export default {
     validProjectKey() {
       return !this.enableJiraIssues || Boolean(this.projectKey) || !this.validated;
     },
+    showJiraVulnerabilitiesOptions() {
+      return (
+        this.enableJiraIssues &&
+        this.showJiraVulnerabilitiesIntegration &&
+        this.glFeatures.jiraForVulnerabilities
+      );
+    },
   },
   created() {
     eventHub.$on('validateForm', this.validateForm);
@@ -69,6 +100,9 @@ export default {
   methods: {
     validateForm() {
       this.validated = true;
+    },
+    getJiraIssueTypes() {
+      eventHub.$emit('getJiraIssueTypes');
     },
   },
 };
@@ -100,6 +134,14 @@ export default {
               }}
             </template>
           </gl-form-checkbox>
+          <jira-issue-creation-vulnerabilities
+            v-if="showJiraVulnerabilitiesOptions"
+            :project-key="projectKey"
+            :initial-is-enabled="initialEnableJiraVulnerabilities"
+            :initial-issue-type-id="initialVulnerabilitiesIssuetype"
+            data-testid="jira-for-vulnerabilities"
+            @request-get-issue-types="getJiraIssueTypes"
+          />
         </template>
         <gl-card v-else class="gl-mt-7">
           <strong>{{ __('This is a Premium feature') }}</strong>
@@ -133,7 +175,7 @@ export default {
           :disabled="!enableJiraIssues"
         />
       </gl-form-group>
-      <p>
+      <p v-if="gitlabIssuesEnabled">
         <gl-sprintf
           :message="
             s__(

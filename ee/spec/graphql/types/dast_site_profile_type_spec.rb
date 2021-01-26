@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   let_it_be(:dast_site_profile) { create(:dast_site_profile) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id profileName targetUrl validationStatus userPermissions] }
+  let_it_be(:fields) { %i[id profileName targetUrl editPath validationStatus userPermissions normalizedTargetUrl] }
 
   subject do
     GitlabSchema.execute(
@@ -44,7 +44,9 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
                 id
                 profileName
                 targetUrl
+                editPath
                 validationStatus
+                normalizedTargetUrl
               }
             }
           }
@@ -74,9 +76,35 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
       end
     end
 
+    describe 'edit_path field' do
+      it 'is the relative path to edit the dast_site_profile' do
+        path = "/#{project.full_path}/-/security/configuration/dast_profiles/dast_site_profiles/#{dast_site_profile.id}/edit"
+
+        expect(first_dast_site_profile['editPath']).to eq(path)
+      end
+    end
+
     describe 'validation_status field' do
-      it 'is a placeholder validation status' do
-        expect(first_dast_site_profile['validationStatus']).to eq('PENDING_VALIDATION')
+      it 'is the validation status' do
+        expect(first_dast_site_profile['validationStatus']).to eq('NONE')
+      end
+    end
+
+    describe 'normalized_target_url field' do
+      it 'is the normalized url of the associated dast_site' do
+        normalized_url = DastSiteValidation.get_normalized_url_base(dast_site_profile.dast_site.url)
+
+        expect(first_dast_site_profile['normalizedTargetUrl']).to eq(normalized_url)
+      end
+    end
+
+    context 'when there are no dast_site_profiles' do
+      let(:project) { create(:project) }
+
+      it 'has no nodes' do
+        nodes = subject.dig('data', 'project', 'dastSiteProfiles', 'nodes')
+
+        expect(nodes).to be_empty
       end
     end
   end

@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
 
-import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
-
-import * as actions from 'ee/insights/stores/modules/insights/actions';
 import { CHART_TYPES } from 'ee/insights/constants';
+import * as actions from 'ee/insights/stores/modules/insights/actions';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
+
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 const ERROR_MESSAGE = 'TEST_ERROR_MESSAGE';
 
@@ -266,7 +266,10 @@ describe('Insights store actions', () => {
         actions.setActiveTab,
         key,
         state,
-        [{ type: 'SET_ACTIVE_TAB', payload: key }, { type: 'SET_ACTIVE_PAGE', payload: page }],
+        [
+          { type: 'SET_ACTIVE_TAB', payload: key },
+          { type: 'SET_ACTIVE_PAGE', payload: page },
+        ],
         [],
       );
     });
@@ -291,20 +294,6 @@ describe('Insights store actions', () => {
         keys,
         null,
         [{ type: 'INIT_CHART_DATA', payload: keys }],
-        [],
-      );
-    });
-  });
-
-  describe('setPageLoading', () => {
-    it('commits SET_PAGE_LOADING', () => {
-      const pageLoading = false;
-
-      return testAction(
-        actions.setPageLoading,
-        pageLoading,
-        null,
-        [{ type: 'SET_PAGE_LOADING', payload: false }],
         [],
       );
     });

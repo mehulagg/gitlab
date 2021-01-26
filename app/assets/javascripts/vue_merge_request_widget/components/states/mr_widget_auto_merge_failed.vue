@@ -1,13 +1,30 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import eventHub from '../../event_hub';
 import statusIcon from '../mr_widget_status_icon.vue';
+import autoMergeFailedQuery from '../../queries/states/auto_merge_failed.query.graphql';
+import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 
 export default {
   name: 'MRWidgetAutoMergeFailed',
   components: {
     statusIcon,
     GlLoadingIcon,
+    GlButton,
+  },
+  mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  apollo: {
+    mergeError: {
+      query: autoMergeFailedQuery,
+      skip() {
+        return !this.glFeatures.mergeRequestWidgetGraphql;
+      },
+      variables() {
+        return this.mergeRequestQueryVariables;
+      },
+      update: (data) => data.project?.mergeRequest?.mergeError,
+    },
   },
   props: {
     mr: {
@@ -17,6 +34,7 @@ export default {
   },
   data() {
     return {
+      mergeError: this.glFeatures.mergeRequestWidgetGraphql ? null : this.mr.mergeError,
       isRefreshing: false,
     };
   },
@@ -33,20 +51,21 @@ export default {
 <template>
   <div class="mr-widget-body media">
     <status-icon status="warning" />
-    <div class="media-body space-children">
+    <div class="media-body space-children gl-display-flex gl-flex-wrap gl-align-items-center">
       <span class="bold">
-        <template v-if="mr.mergeError">{{ mr.mergeError }}</template>
+        <template v-if="mergeError">{{ mergeError }}</template>
         {{ s__('mrWidget|This merge request failed to be merged automatically') }}
       </span>
-      <button
+      <gl-button
         :disabled="isRefreshing"
-        type="button"
-        class="btn btn-sm btn-default"
+        category="secondary"
+        variant="default"
+        size="small"
         @click="refreshWidget"
       >
         <gl-loading-icon v-if="isRefreshing" :inline="true" />
         {{ s__('mrWidget|Refresh') }}
-      </button>
+      </gl-button>
     </div>
   </div>
 </template>

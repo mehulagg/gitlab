@@ -6,6 +6,8 @@ RSpec.describe ApplicationHelper do
   include EE::GeoHelpers
 
   describe '#read_only_message', :geo do
+    let(:default_maintenance_mode_message) { 'This GitLab instance is undergoing maintenance and is operating in read-only mode.' }
+
     context 'when not in a Geo secondary' do
       it 'returns a fallback message if database is readonly' do
         expect(Gitlab::Database).to receive(:read_only?) { true }
@@ -16,78 +18,122 @@ RSpec.describe ApplicationHelper do
       it 'returns nil when database is not read_only' do
         expect(helper.read_only_message).to be_nil
       end
+
+      context 'maintenance mode' do
+        context 'enabled' do
+          before do
+            stub_application_setting(maintenance_mode: true)
+          end
+
+          it 'returns default message' do
+            expect(helper.read_only_message).to match(default_maintenance_mode_message)
+          end
+
+          it 'returns user set custom maintenance mode message' do
+            custom_message = 'Maintenance window ends at 00:00.'
+            stub_application_setting(maintenance_mode_message: custom_message)
+
+            expect(helper.read_only_message).to match(/#{custom_message}/)
+          end
+
+          context 'when database is read-only' do
+            it 'stacks read-only and maintenance mode messages' do
+              expect(Gitlab::Database).to receive(:read_only?).twice { true }
+
+              expect(helper.read_only_message).to match('You are on a read-only GitLab instance')
+              expect(helper.read_only_message).to match(/#{default_maintenance_mode_message}/)
+            end
+          end
+        end
+
+        context 'disabled' do
+          it 'returns nil' do
+            stub_application_setting(maintenance_mode: false)
+
+            expect(helper.read_only_message).to be_nil
+          end
+        end
+      end
+    end
+
+    context 'on a geo secondary' do
+      context 'maintenance mode on' do
+        it 'returns messages for both' do
+          expect(Gitlab::Geo).to receive(:secondary?).twice { true }
+          stub_application_setting(maintenance_mode: true)
+
+          expect(helper.read_only_message).to match(/you must visit the primary site/)
+          expect(helper.read_only_message).to match(/#{default_maintenance_mode_message}/)
+        end
+      end
     end
 
     context 'when in a Geo Secondary' do
+      let_it_be(:geo_primary) { create(:geo_node, :primary) }
+
       before do
         stub_current_geo_node(create(:geo_node))
       end
 
-      context 'when there is no Geo Primary node configured' do
-        it 'returns a read-only Geo message without a link to a primary node' do
-          expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-          expect(helper.read_only_message).not_to include('http://')
-        end
+      it 'includes button to visit primary node' do
+        expect(helper.read_only_message).to match(/Go to the primary site/)
+        expect(helper.read_only_message).to include(geo_primary.url)
       end
 
-      context 'when there is a Geo Primary node configured' do
-        let!(:geo_primary) { create(:geo_node, :primary) }
+      it 'returns a read-only Geo message with a link to primary node' do
+        expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+        expect(helper.read_only_message).to include(geo_primary.url)
+      end
 
-        it 'returns a read-only Geo message with a link to primary node' do
-          expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
+      it 'returns a limited actions message when @limited_actions_message is true' do
+        assign(:limited_actions_message, true)
+
+        expect(helper.read_only_message).to match(/You may be able to make a limited amount of changes or perform a limited amount of actions on this page/)
+        expect(helper.read_only_message).to include(geo_primary.url)
+      end
+
+      it 'includes a warning about database lag' do
+        allow_any_instance_of(::Gitlab::Geo::HealthCheck).to receive(:db_replication_lag_seconds).and_return(120)
+
+        expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+        expect(helper.read_only_message).to match(/The database is currently 2 minutes behind the primary node/)
+        expect(helper.read_only_message).to include(geo_primary.url)
+      end
+
+      context 'event lag' do
+        it 'includes a lag warning about a node lag' do
+          event_log = create(:geo_event_log, created_at: 4.minutes.ago)
+          create(:geo_event_log, created_at: 3.minutes.ago)
+          create(:geo_event_log_state, event_id: event_log.id)
+
+          expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+          expect(helper.read_only_message).to match(/The node is currently 3 minutes behind the primary/)
           expect(helper.read_only_message).to include(geo_primary.url)
         end
 
-        it 'returns a limited actions message when @limited_actions_message is true' do
-          assign(:limited_actions_message, true)
+        it 'does not include a lag warning because the last event is too fresh' do
+          event_log = create(:geo_event_log, created_at: 3.minutes.ago)
+          create(:geo_event_log)
+          create(:geo_event_log_state, event_id: event_log.id)
 
-          expect(helper.read_only_message).to match(/You may be able to make a limited amount of changes or perform a limited amount of actions on this page/)
-          expect(helper.read_only_message).not_to include('http://')
-        end
-
-        it 'includes a warning about database lag' do
-          allow_any_instance_of(::Gitlab::Geo::HealthCheck).to receive(:db_replication_lag_seconds).and_return(120)
-
-          expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-          expect(helper.read_only_message).to match(/The database is currently 2 minutes behind the primary node/)
+          expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+          expect(helper.read_only_message).not_to match(/The node is currently 3 minutes behind the primary/)
           expect(helper.read_only_message).to include(geo_primary.url)
         end
 
-        context 'event lag' do
-          it 'includes a lag warning about a node lag' do
-            event_log = create(:geo_event_log, created_at: 4.minutes.ago)
-            create(:geo_event_log, created_at: 3.minutes.ago)
-            create(:geo_event_log_state, event_id: event_log.id)
+        it 'does not include a lag warning because the last event is processed' do
+          event_log = create(:geo_event_log, created_at: 3.minutes.ago)
+          create(:geo_event_log_state, event_id: event_log.id)
 
-            expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-            expect(helper.read_only_message).to match(/The node is currently 3 minutes behind the primary/)
-            expect(helper.read_only_message).to include(geo_primary.url)
-          end
+          expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+          expect(helper.read_only_message).not_to match(/The node is currently 3 minutes behind the primary/)
+          expect(helper.read_only_message).to include(geo_primary.url)
+        end
 
-          it 'does not include a lag warning because the last event is too fresh' do
-            event_log = create(:geo_event_log, created_at: 3.minutes.ago)
-            create(:geo_event_log)
-            create(:geo_event_log_state, event_id: event_log.id)
-
-            expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-            expect(helper.read_only_message).not_to match(/The node is currently 3 minutes behind the primary/)
-            expect(helper.read_only_message).to include(geo_primary.url)
-          end
-
-          it 'does not include a lag warning because the last event is processed' do
-            event_log = create(:geo_event_log, created_at: 3.minutes.ago)
-            create(:geo_event_log_state, event_id: event_log.id)
-
-            expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-            expect(helper.read_only_message).not_to match(/The node is currently 3 minutes behind the primary/)
-            expect(helper.read_only_message).to include(geo_primary.url)
-          end
-
-          it 'does not include a lag warning because there are no events yet' do
-            expect(helper.read_only_message).to match(/If you want to make changes, you must visit this page on the .*primary node/)
-            expect(helper.read_only_message).not_to match(/minutes behind the primary/)
-            expect(helper.read_only_message).to include(geo_primary.url)
-          end
+        it 'does not include a lag warning because there are no events yet' do
+          expect(helper.read_only_message).to match(/If you want to make changes, you must visit the primary site./)
+          expect(helper.read_only_message).not_to match(/minutes behind the primary/)
+          expect(helper.read_only_message).to include(geo_primary.url)
         end
       end
     end
@@ -109,29 +155,39 @@ RSpec.describe ApplicationHelper do
       it 'returns paths for autocomplete_sources_controller' do
         expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :commands, :milestones])
       end
+
+      context 'when vulnerabilities are enabled' do
+        before do
+          stub_licensed_features(security_dashboard: true)
+        end
+
+        it 'returns paths for autocomplete_sources_controller with vulnerabilities' do
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :epics, :vulnerabilities, :commands, :milestones])
+        end
+      end
     end
 
     context 'project' do
       let(:object) { create(:project) }
       let(:noteable_type) { Issue }
 
-      context 'when epics are enabled' do
+      context 'when epics and vulnerabilities are enabled' do
         before do
-          stub_licensed_features(epics: true)
+          stub_licensed_features(epics: true, security_dashboard: true)
         end
 
         it 'returns paths for autocomplete_sources_controller for personal projects' do
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :vulnerabilities])
         end
 
-        it 'returns paths for autocomplete_sources_controller including epics for group projects' do
+        it 'returns paths for autocomplete_sources_controller including epics and vulnerabilities for group projects' do
           object.update!(group: create(:group))
 
-          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics])
+          expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets, :epics, :vulnerabilities])
         end
       end
 
-      context 'when epics are disabled' do
+      context 'when epics and vulnerabilities are disabled' do
         it 'returns paths for autocomplete_sources_controller' do
           expect_autocomplete_data_sources(object, noteable_type, [:members, :issues, :mergeRequests, :labels, :milestones, :commands, :snippets])
         end
@@ -186,28 +242,6 @@ RSpec.describe ApplicationHelper do
         ee_view = helper.lookup_context.find(view, [], false)
         expect(ee_view.short_identifier).to eq("ee/#{expected_view_path}")
       end
-    end
-  end
-
-  describe '#show_whats_new_dropdown_item?' do
-    using RSpec::Parameterized::TableSyntax
-
-    subject { helper.show_whats_new_dropdown_item? }
-
-    where(:feature_flag, :gitlab_com, :result) do
-      true  | true  | true
-      true  | false | false
-      false | true  | false
-      false | false | false
-    end
-
-    with_them do
-      before do
-        stub_feature_flags(whats_new_dropdown: feature_flag)
-        allow(::Gitlab).to receive(:com?).and_return(gitlab_com)
-      end
-
-      it { is_expected.to be(result) }
     end
   end
 end

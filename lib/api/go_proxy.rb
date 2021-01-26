@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 module API
-  class GoProxy < Grape::API::Instance
+  class GoProxy < ::API::Base
     helpers Gitlab::Golang
     helpers ::API::Helpers::PackagesHelpers
+
+    feature_category :package_registry
 
     # basic semver, except case encoded (A => !a)
     MODULE_VERSION_REGEX = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([-.!a-z0-9]+))?(?:\+([-.!a-z0-9]+))?/.freeze
 
     MODULE_VERSION_REQUIREMENTS = { module_version: MODULE_VERSION_REGEX }.freeze
+
+    content_type :txt, 'text/plain'
 
     before { require_packages_enabled! }
 
@@ -44,7 +48,7 @@ module API
         not_found! unless Feature.enabled?(:go_proxy, user_project)
 
         module_name = case_decode params[:module_name]
-        bad_request!('Module Name') if module_name.blank?
+        bad_request_missing_attribute!('Module Name') if module_name.blank?
 
         mod = ::Packages::Go::ModuleFinder.new(user_project, module_name).execute
 

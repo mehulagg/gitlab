@@ -1,8 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Architecture
 
-When you are developing a new feature that requires architectural design, or if
-you are changing the fundamental design of an existing feature, make sure it is
-discussed with one of the Frontend Architecture Experts.
+When developing a feature that requires architectural design, or changing the fundamental design of an existing feature, discuss it with a Frontend Architecture Expert.
 
 A Frontend Architect is an expert who makes high-level Frontend design decisions
 and decides on technical standards, including coding standards and frameworks.
@@ -15,5 +19,5 @@ You can find the Frontend Architecture experts on the [team page](https://about.
 
 ## Examples
 
-You can find documentation about the desired architecture for a new feature
-built with Vue.js [here](vue.md).
+You can find [documentation about the desired architecture](vue.md) for a new
+feature built with Vue.js.

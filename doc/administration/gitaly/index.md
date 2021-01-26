@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -22,10 +22,15 @@ In the Gitaly documentation:
 GitLab end users do not have direct access to Gitaly. Gitaly only manages Git
 repository access for GitLab. Other types of GitLab data aren't accessed using Gitaly.
 
-CAUTION: **Caution:**
-From GitLab 13.0, Gitaly support for NFS is deprecated. In GitLab 14.0, Gitaly support
-for NFS is scheduled to be removed. Upgrade to [Gitaly Cluster](praefect.md) as soon as
-possible.
+<!-- vale gitlab.FutureTense = NO -->
+
+WARNING:
+From GitLab 13.0, Gitaly support for NFS is deprecated. As of GitLab 14.0, NFS-related issues
+with Gitaly will no longer be addressed. Upgrade to [Gitaly Cluster](praefect.md) as soon as
+possible. Tools to [enable bulk moves](https://gitlab.com/groups/gitlab-org/-/epics/4916)
+of projects to Gitaly Cluster are planned.
+
+<!-- vale gitlab.FutureTense = YES -->
 
 ## Architecture
 
@@ -68,7 +73,7 @@ this default configuration used by:
 However, Gitaly can be deployed to its own server, which can benefit GitLab installations that span
 multiple machines.
 
-NOTE: **Note:**
+NOTE:
 When configured to run on their own servers, Gitaly servers
 [must be upgraded](https://docs.gitlab.com/omnibus/update/#upgrading-gitaly-servers) before Gitaly
 clients in your cluster.
@@ -90,10 +95,10 @@ When running Gitaly on its own server, note the following regarding GitLab versi
   leveraged for redundancy on block-level Git data, but only has to be mounted on the Gitaly
   servers.
 - From GitLab 11.8 to 12.2, it is possible to use Elasticsearch in a Gitaly setup that doesn't use
-  NFS. In order to use Elasticsearch in these versions, the
+  NFS. To use Elasticsearch in these versions, the
   [repository indexer](../../integration/elasticsearch.md#elasticsearch-repository-indexer)
   must be enabled in your GitLab configuration.
-- [Since GitLab 12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
+- [In GitLab 12.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
   the default and no configuration is required.
 
 ### Network architecture
@@ -121,7 +126,7 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-DANGER: **Danger:**
+WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly's network traffic is unencrypted
 by default. The use of firewall is highly recommended to restrict access to the Gitaly server.
 Another option is to [use TLS](#enable-tls-support).
@@ -140,7 +145,7 @@ We assume your GitLab installation has three repository storages:
 
 You can use as few as one server with one repository storage if desired.
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is just an arbitrary password selected by
 the administrator. It is unrelated to tokens created for the GitLab API or other similar web API
 tokens.
@@ -317,7 +322,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml`
+1. Run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 **For installations from source**
@@ -364,7 +369,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git /home/git/gitlab-shell/bin/check -config /home/git/gitlab-shell/config.yml`
+1. Run `sudo -u git /home/git/gitaly/gitaly-hooks check /home/git/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 ### Configure Gitaly clients
@@ -373,7 +378,7 @@ As the final step, you must update Gitaly clients to switch from using local Git
 the Gitaly servers you just configured.
 
 This can be risky because anything that prevents your Gitaly clients from reaching the Gitaly
-servers will cause all Gitaly requests to fail. For example, any sort of network, firewall, or name
+servers causes all Gitaly requests to fail. For example, any sort of network, firewall, or name
 resolution problems.
 
 Additionally, you must [disable Rugged](../nfs.md#improving-nfs-performance-with-gitlab)
@@ -382,15 +387,15 @@ if previously enabled manually.
 Gitaly makes the following assumptions:
 
 - Your `gitaly1.internal` Gitaly server can be reached at `gitaly1.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/default` and
+  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/default` and
   `/mnt/gitlab/storage1`.
 - Your `gitaly2.internal` Gitaly server can be reached at `gitaly2.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/storage2`.
+  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/storage2`.
 - Your `gitaly1.internal` and `gitaly2.internal` Gitaly servers can reach each other.
 
 You can't define Gitaly servers with some as a local Gitaly server
 (without `gitaly_address`) and some as remote
-server (with `gitaly_address`) unless you setup with special
+server (with `gitaly_address`) unless you use
 [mixed configuration](#mixed-configuration).
 
 **For Omnibus GitLab**
@@ -406,8 +411,8 @@ server (with `gitaly_address`) unless you setup with special
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo gitlab-rake gitlab:gitaly:check` to confirm the Gitaly client can connect to Gitaly
-   servers.
+1. Run `sudo gitlab-rake gitlab:gitaly:check` on the Gitaly client (for example, the
+   Rails application) to confirm it can connect to Gitaly servers.
 1. Tail the logs to see the requests:
 
    ```shell
@@ -424,18 +429,18 @@ server (with `gitaly_address`) unless you setup with special
        storages:
          default:
            gitaly_address: tcp://gitaly1.internal:8075
-           path: /some/dummy/path
+           path: /some/local/path
          storage1:
            gitaly_address: tcp://gitaly1.internal:8075
-           path: /some/dummy/path
+           path: /some/local/path
          storage2:
            gitaly_address: tcp://gitaly2.internal:8075
-           path: /some/dummy/path
+           path: /some/local/path
    ```
 
-   NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no data will be stored in
-   this folder. This will no longer be necessary after
+   NOTE:
+   `/some/local/path` should be set to a local folder that exists, however no data is stored in
+   this folder. This requirement is scheduled to be removed when
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
 
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
@@ -450,7 +455,7 @@ server (with `gitaly_address`) unless you setup with special
 When you tail the Gitaly logs on your Gitaly server, you should see requests coming in. One sure way
 to trigger a Gitaly request is to clone a repository from GitLab over HTTP or HTTPS.
 
-DANGER: **Danger:**
+WARNING:
 If you have [server hooks](../server_hooks.md) configured, either per repository or globally, you
 must move these to the Gitaly servers. If you have multiple Gitaly servers, copy your server hooks
 to all Gitaly servers.
@@ -461,7 +466,7 @@ GitLab can reside on the same server as one of many Gitaly servers, but doesn't 
 configuration that mixes local and remote configuration. The following setup is incorrect, because:
 
 - All addresses must be reachable from the other Gitaly servers.
-- `storage1` will be assigned a Unix socket for `gitaly_address` which is
+- `storage1` is assigned a Unix socket for `gitaly_address` which is
   invalid for some of the Gitaly servers.
 
 ```ruby
@@ -482,15 +487,23 @@ git_data_dirs({
   'storage1' => { 'gitaly_address' => 'tcp://gitlab.internal:8075', 'path' => '/mnt/gitlab/git-data' },
   'storage2' => { 'gitaly_address' => 'tcp://gitaly2.internal:8075' },
 })
+
+# Make Gitaly accept connections on all network interfaces
+gitaly['listen_addr'] = "0.0.0.0:8075"
+
+# Or for TLS
+gitaly['tls_listen_addr'] = "0.0.0.0:9999"
+gitaly['certificate_path'] = "/etc/gitlab/ssl/cert.pem"
+gitaly['key_path'] = "/etc/gitlab/ssl/key.pem"
 ```
 
 `path` can only be included for storage shards on the local Gitaly server.
-If it's excluded, default Git storage directory will be used for that storage shard.
+If it's excluded, default Git storage directory is used for that storage shard.
 
 ### Disable Gitaly where not required (optional)
 
-If you are running Gitaly [as a remote service](#run-gitaly-on-its-own-server) you may want to
-disable the local Gitaly service that runs on your GitLab server by default, leaving it only running
+If you are running Gitaly [as a remote service](#run-gitaly-on-its-own-server), you may want to
+disable the local Gitaly service that runs on your GitLab server by default and have it only running
 where required.
 
 Disabling Gitaly on the GitLab instance only makes sense when you run GitLab in a custom cluster configuration, where
@@ -521,31 +534,29 @@ To disable Gitaly on a GitLab server:
 
 ## Enable TLS support
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22602) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22602) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3160) in GitLab 13.6, outgoing TLS connections to GitLab provide client certificates if configured.
 
 Gitaly supports TLS encryption. To communicate with a Gitaly instance that listens for secure
 connections, you must use `tls://` URL scheme in the `gitaly_address` of the corresponding
 storage entry in the GitLab configuration.
+
+Gitaly provides the same server certificates as client certificates in TLS
+connections to GitLab. This can be used as part of a mutual TLS authentication strategy
+when combined with reverse proxies (for example, NGINX) that validate client certificate
+to grant access to GitLab.
 
 You must supply your own certificates as this isn't provided automatically. The certificate
 corresponding to each Gitaly server must be installed on that Gitaly server.
 
 Additionally, the certificate (or its certificate authority) must be installed on all:
 
-- Gitaly servers, including the Gitaly server using the certificate.
+- Gitaly servers.
 - Gitaly clients that communicate with it.
-
-The process is documented in the
-[GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates)
-and repeated below.
 
 Note the following:
 
-- The certificate must specify the address you use to access the Gitaly server. If you are:
-  - Addressing the Gitaly server by a hostname, you can either use the Common Name field for this,
-    or add it as a Subject Alternative Name.
-  - Addressing the Gitaly server by its IP address, you must add it as a Subject Alternative Name to
-    the certificate. [gRPC does not support using an IP address as Common Name in a certificate](https://github.com/grpc/grpc/issues/2691).
+- The certificate must specify the address you use to access the Gitaly server. You must add the hostname or IP address as a Subject Alternative Name to the certificate.
 - You can configure Gitaly servers with both an unencrypted listening address `listen_addr` and an
   encrypted listening address `tls_listen_addr` at the same time. This allows you to gradually
   transition from unencrypted to encrypted traffic if necessary.
@@ -584,7 +595,7 @@ To configure Gitaly with TLS:
    ```
 
 1. Copy all Gitaly server certificates (or their certificate authority) to
-   `/etc/gitlab/trusted-certs` so that Gitaly servers will trust the certificate when calling into themselves
+   `/etc/gitlab/trusted-certs` so that Gitaly servers trust the certificate when calling into themselves
    or other Gitaly servers:
 
    ```shell
@@ -631,18 +642,18 @@ To configure Gitaly with TLS:
        storages:
          default:
            gitaly_address: tls://gitaly1.internal:9999
-           path: /some/dummy/path
+           path: /some/local/path
          storage1:
            gitaly_address: tls://gitaly1.internal:9999
-           path: /some/dummy/path
+           path: /some/local/path
          storage2:
            gitaly_address: tls://gitaly2.internal:9999
-           path: /some/dummy/path
+           path: /some/local/path
    ```
 
-   NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no data will be stored
-   in this folder. This will no longer be necessary after
+   NOTE:
+   `/some/local/path` should be set to a local folder that exists, however no data is stored
+   in this folder. This requirement is scheduled to be removed when
    [Gitaly issue #1282](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
 
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source).
@@ -662,7 +673,7 @@ To configure Gitaly with TLS:
    ```
 
 1. Copy all Gitaly server certificates (or their certificate authority) to the system trusted
-   certificates folder so Gitaly server will trust the certificate when calling into itself or other Gitaly
+   certificates folder so Gitaly server trusts the certificate when calling into itself or other Gitaly
    servers.
 
    ```shell
@@ -710,6 +721,15 @@ Gitaly Go process. Some examples of things that are implemented in `gitaly-ruby`
 
 - RPCs that deal with wikis.
 - RPCs that create commits on behalf of a user, such as merge commits.
+
+We recommend:
+
+- At least 300MB memory per worker.
+- No more than one worker per core.
+
+NOTE:
+`gitaly-ruby` is planned to be eventually removed. To track progress, see the
+[Remove the Gitaly-Ruby sidecar](https://gitlab.com/groups/gitlab-org/-/epics/2862) epic.
 
 ### Configure number of `gitaly-ruby` workers
 
@@ -789,9 +809,9 @@ You can observe the behavior of this queue using the Gitaly logs and Prometheus:
   - `gitaly_rate_limiting_queued`.
   - `gitaly_rate_limiting_seconds`.
 
-NOTE: **Note:**
+NOTE:
 Though the name of the Prometheus metric contains `rate_limiting`, it is a concurrency limiter, not
-a rate limiter. If a Gitaly client makes 1000 requests in a row very quickly, concurrency will not
+a rate limiter. If a Gitaly client makes 1000 requests in a row very quickly, concurrency does not
 exceed 1 and the concurrency limiter has no effect.
 
 ## Rotate Gitaly authentication token
@@ -820,7 +840,7 @@ behavior of your GitLab installation using Prometheus. Use the following Prometh
 sum(rate(gitaly_authentications_total[5m])) by (enforced, status)
 ```
 
-In a system where authentication is configured correctly and where you have live traffic, you will
+In a system where authentication is configured correctly and where you have live traffic, you
 see something like this:
 
 ```prometheus
@@ -876,7 +896,7 @@ To update to a new Gitaly authentication token, on each Gitaly client **and** Gi
    ```
 
 If you run your [Prometheus query](#verify-authentication-monitoring) while this change is
-being rolled out, you will see non-zero values for the `enforced="false",status="denied"` counter.
+being rolled out, you see non-zero values for the `enforced="false",status="denied"` counter.
 
 ### Ensure there are no authentication failures
 
@@ -899,7 +919,7 @@ your Gitaly servers as follows:
 gitaly['auth_transitioning'] = false
 ```
 
-CAUTION: **Caution:**
+WARNING:
 Without completing this step, you have **no Gitaly authentication**.
 
 ### Verify authentication is enforced
@@ -950,7 +970,7 @@ not an external process, there was very little overhead between:
 - GitLab application code that tried to look up data in Git repositories.
 - The Git implementation itself.
 
-Because the combination of Rugged and Unicorn was so efficient, GitLab's application code ended up with lots of
+Because the combination of Rugged and Unicorn was so efficient, the GitLab application code ended up with lots of
 duplicate Git object lookups. For example, looking up the `master` commit a dozen times in one
 request. We could write inefficient code without poor performance.
 
@@ -986,15 +1006,18 @@ enables direct Git access.
 When GitLab calls a function that has a "Rugged patch", it performs two checks:
 
 - Is the feature flag for this patch set in the database? If so, the feature flag setting controls
-  GitLab's use of "Rugged patch" code.
-- If the feature flag is not set, GitLab tries accessing the filesystem underneath the
-  Gitaly server directly. If it can, it will use the "Rugged patch".
+  the GitLab use of "Rugged patch" code.
+- If the feature flag is not set, GitLab tries accessing the file system underneath the
+  Gitaly server directly. If it can, it uses the "Rugged patch":
+  - If using Unicorn.
+  - If using Puma and [thread count](../../install/requirements.md#puma-threads) is set
+    to `1`.
 
-The result of both of these checks is cached.
+The result of these checks is cached.
 
-To see if GitLab can access the repository filesystem directly, we use the following heuristic:
+To see if GitLab can access the repository file system directly, we use the following heuristic:
 
-- Gitaly ensures that the filesystem has a metadata file in its root with a UUID in it.
+- Gitaly ensures that the file system has a metadata file in its root with a UUID in it.
 - Gitaly reports this UUID to GitLab via the `ServerInfo` RPC.
 - GitLab Rails tries to read the metadata file directly. If it exists, and if the UUID's match,
   assume we have direct access.
@@ -1018,13 +1041,14 @@ The second facet presents the only real solution. For this, we developed
 
 ## Troubleshooting Gitaly
 
-### Checking versions when using standalone Gitaly servers
+Check [Gitaly timeouts](../../user/admin_area/settings/gitaly_timeouts.md) when troubleshooting
+Gitaly.
+
+### Check versions when using standalone Gitaly servers
 
 When using standalone Gitaly servers, you must make sure they are the same version
-as GitLab to ensure full compatibility. Check **Admin Area > Gitaly Servers** on
-your GitLab instance and confirm all Gitaly Servers are `Up to date`.
-
-![Gitaly standalone software versions diagram](img/gitlab_gitaly_version_mismatch_v12_4.png)
+as GitLab to ensure full compatibility. Check **Admin Area > Overview > Gitaly Servers** on
+your GitLab instance and confirm all Gitaly servers indicate that they are up to date.
 
 ### `gitaly-debug`
 
@@ -1055,7 +1079,7 @@ gitaly-debug -h
 remote: GitLab: 401 Unauthorized
 ```
 
-You will need to sync your `gitlab-secrets.json` file with your Gitaly clients (GitLab
+You need to sync your `gitlab-secrets.json` file with your Gitaly clients (GitLab
 app nodes).
 
 ### Client side gRPC logs
@@ -1071,6 +1095,24 @@ You can run a gRPC trace with:
 ```shell
 sudo GRPC_TRACE=all GRPC_VERBOSITY=DEBUG gitlab-rake gitlab:gitaly:check
 ```
+
+### Correlating Git processes with RPCs
+
+Sometimes you need to find out which Gitaly RPC created a particular Git process.
+
+One method for doing this is via `DEBUG` logging. However, this needs to be enabled
+ahead of time and the logs produced are quite verbose.
+
+A lightweight method for doing this correlation is by inspecting the environment
+of the Git process (using its `PID`) and looking at the `CORRELATION_ID` variable:
+
+```shell
+PID=<Git process ID>
+sudo cat /proc/$PID/environ | tr '\0' '\n' | grep ^CORRELATION_ID=
+```
+
+Please note that this method is not reliable for `git cat-file` processes because Gitaly
+internally pools and re-uses those across RPCs.
 
 ### Observing `gitaly-ruby` traffic
 
@@ -1220,13 +1262,6 @@ To remove the proxy setting, run the following commands (depending on which vari
 unset http_proxy
 unset https_proxy
 ```
-
-### Gitaly not listening on new address after reconfiguring
-
-When updating the `gitaly['listen_addr']` or `gitaly['prometheus_listen_addr']`
-values, Gitaly may continue to listen on the old address after a `sudo gitlab-ctl reconfigure`.
-
-When this occurs, performing a `sudo gitlab-ctl restart` will resolve the issue. This will no longer be necessary after [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/2521) is resolved.
 
 ### Permission denied errors appearing in Gitaly logs when accessing repositories from a standalone Gitaly server
 

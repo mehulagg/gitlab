@@ -39,17 +39,20 @@ RSpec.describe GlobalPolicy do
   it { is_expected.to be_disallowed(:read_licenses) }
   it { is_expected.to be_disallowed(:destroy_licenses) }
   it { is_expected.to be_disallowed(:read_all_geo) }
+  it { is_expected.to be_disallowed(:manage_subscription) }
 
   context 'when admin mode enabled', :enable_admin_mode do
     it { expect(described_class.new(admin, [user])).to be_allowed(:read_licenses) }
     it { expect(described_class.new(admin, [user])).to be_allowed(:destroy_licenses) }
     it { expect(described_class.new(admin, [user])).to be_allowed(:read_all_geo) }
+    it { expect(described_class.new(admin, [user])).to be_allowed(:manage_subscription) }
   end
 
   context 'when admin mode disabled' do
     it { expect(described_class.new(admin, [user])).to be_disallowed(:read_licenses) }
     it { expect(described_class.new(admin, [user])).to be_disallowed(:destroy_licenses) }
     it { expect(described_class.new(admin, [user])).to be_disallowed(:read_all_geo) }
+    it { expect(described_class.new(admin, [user])).to be_disallowed(:manage_subscription) }
   end
 
   shared_examples 'analytics policy' do |action|
@@ -235,6 +238,37 @@ RSpec.describe GlobalPolicy do
 
         it { is_expected.to be_disallowed(:list_removable_projects) }
       end
+    end
+  end
+
+  describe ':export_user_permissions', :enable_admin_mode do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :export_user_permissions }
+
+    let_it_be(:admin) { build_stubbed(:admin) }
+    let_it_be(:guest) { build_stubbed(:user) }
+
+    where(:role, :flag_enabled, :licensed, :allowed) do
+      :admin      | true  | true  | true
+      :admin      | true  | false | false
+      :admin      | false | true  | false
+      :admin      | false | false | false
+      :guest      | true  | true  | false
+      :guest      | true  | false | false
+      :guest      | false | true  | false
+      :guest      | false | false | false
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      before do
+        stub_licensed_features(export_user_permissions: licensed)
+        stub_feature_flags(export_user_permissions_feature_flag: flag_enabled)
+      end
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
     end
   end
 end

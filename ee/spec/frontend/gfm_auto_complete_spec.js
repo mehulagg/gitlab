@@ -1,6 +1,6 @@
-import GfmAutoCompleteEE from 'ee/gfm_auto_complete';
 import $ from 'jquery';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import GfmAutoCompleteEE from 'ee/gfm_auto_complete';
+import { TEST_HOST } from 'helpers/test_constants';
 
 describe('GfmAutoCompleteEE', () => {
   const dataSources = {

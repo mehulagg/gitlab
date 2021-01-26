@@ -30,18 +30,25 @@ RSpec.describe Users::BuildService do
         end
 
         context 'with scim identity' do
+          let_it_be(:group) { create(:group) }
+          let_it_be(:scim_identity_params) { { extern_uid: 'uid', provider: 'group_scim', group_id: group.id } }
+
           before do
             params.merge!(scim_identity_params)
           end
-          let_it_be(:scim_identity_params) { { extern_uid: 'uid', provider: 'group_scim', group_id: 1 } }
 
           it 'passes allowed attributes to both scim and saml identity' do
-            scim_identity_params.delete(:provider)
+            scim_params = scim_identity_params.dup
+            scim_params.delete(:provider)
 
-            expect(ScimIdentity).to receive(:new).with(hash_including(scim_identity_params)).and_call_original
+            expect(ScimIdentity).to receive(:new).with(hash_including(scim_params)).and_call_original
             expect(Identity).to receive(:new).with(hash_including(identity_params)).and_call_original
 
             service.execute
+          end
+
+          it 'marks the user as provisioned by group' do
+            expect(service.execute.provisioned_by_group_id).to eq(group.id)
           end
         end
       end
@@ -75,6 +82,44 @@ RSpec.describe Users::BuildService do
         context 'missing smartcard params' do
           it 'works as expected' do
             expect { service.execute }.not_to raise_error
+          end
+        end
+      end
+
+      context 'user signup cap' do
+        let(:new_user_signups_cap) { 10 }
+
+        before do
+          allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+        end
+
+        context 'when user signup cap is set' do
+          it 'sets the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_blocked_pending_approval
+          end
+        end
+
+        context 'when user signup cap is not set' do
+          let(:new_user_signups_cap) { nil }
+
+          it 'does not set the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_active
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(admin_new_user_signups_cap: false)
+          end
+
+          it 'does not set the user state to blocked_pending_approval' do
+            user = service.execute
+
+            expect(user).to be_active
           end
         end
       end

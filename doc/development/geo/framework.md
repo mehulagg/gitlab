@@ -1,14 +1,15 @@
-# Geo self-service framework (alpha)
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
 
-NOTE: **Note:**
-This document might be subjected to change. It's a
-proposal we're working on and once the implementation is complete this
-documentation will be updated. Follow progress in the
-[epic](https://gitlab.com/groups/gitlab-org/-/epics/2161).
+# Geo self-service framework
 
-NOTE: **Note:**
-The Geo self-service framework is currently in
-alpha. If you need to replicate a new data type, reach out to the Geo
+NOTE:
+This document is subject to change as we continue to implement and iterate on the framework.
+Follow the progress in the [epic](https://gitlab.com/groups/gitlab-org/-/epics/2161).
+If you need to replicate a new data type, reach out to the Geo
 team to discuss the options. You can contact them in `#g_geo` on Slack
 or mention `@geo-team` in the issue or merge request.
 
@@ -20,38 +21,40 @@ minimal effort of the engineer who created a data type.
 ## Nomenclature
 
 Before digging into the API, developers need to know some Geo-specific
-naming conventions.
+naming conventions:
 
-Model
-: A model is an Active Model, which is how it is known in the entire
+- **Model**:
+  A model is an Active Model, which is how it is known in the entire
   Rails codebase. It usually is tied to a database table. From Geo
   perspective, a model can have one or more resources.
 
-Resource
-: A resource is a piece of data that belongs to a model and is
+- **Resource**:
+  A resource is a piece of data that belongs to a model and is
   produced by a GitLab feature. It is persisted using a storage
-  mechanism. By default, a resource is not a replicable.
+  mechanism. By default, a resource is not a Geo replicable.
 
-Data type
-: Data type is how a resource is stored. Each resource should
+- **Data type**:
+  Data type is how a resource is stored. Each resource should
   fit in one of the data types Geo supports:
-:- Git repository
-:- Blob
-:- Database
-: For more detail, see [Data types](../../administration/geo/replication/datatypes.md).
+  - Git repository
+  - Blob
+  - Database
 
-Geo Replicable
-: A Replicable is a resource Geo wants to sync across Geo nodes. There
+  For more detail, see [Data types](../../administration/geo/replication/datatypes.md).
+
+- **Geo Replicable**:
+  A Replicable is a resource Geo wants to sync across Geo nodes. There
   is a limited set of supported data types of replicables. The effort
   required to implement replication of a resource that belongs to one
   of the known data types is minimal.
 
-Geo Replicator
-: A Geo Replicator is the object that knows how to replicate a
+- **Geo Replicator**:
+  A Geo Replicator is the object that knows how to replicate a
   replicable. It's responsible for:
-:- Firing events (producer)
-:- Consuming events (consumer)
-: It's tied to the Geo Replicable data type. All replicators have a
+  - Firing events (producer)
+  - Consuming events (consumer)
+
+  It's tied to the Geo Replicable data type. All replicators have a
   common interface that can be used to process (that is, produce and
   consume) events. It takes care of the communication between the
   primary node (where events are produced) and the secondary node
@@ -59,8 +62,8 @@ Geo Replicator
   Geo in their feature will use the API of replicators to make this
   happen.
 
-Geo Domain-Specific Language
-: The syntactic sugar that allows engineers to easily specify which
+- **Geo Domain-Specific Language**:
+  The syntactic sugar that allows engineers to easily specify which
   resources should be replicated and how.
 
 ## Geo Domain-Specific Language
@@ -91,8 +94,6 @@ module Geo
       ::Packages::PackageFile
     end
 
-    # Change this to `true` to release replication of this model. Then remove
-    # this override in the next release.
     # The feature flag follows the format `geo_#{replicable_name}_replication`,
     # so here it would be `geo_package_file_replication`
     def self.replication_enabled_by_default?
@@ -128,7 +129,7 @@ When this is set in place, it's easy to access the replicator through
 the model:
 
 ```ruby
-package_file = Packages::PackageFile.find(4) # just a random id as example
+package_file = Packages::PackageFile.find(4) # just a random ID as example
 replicator = package_file.replicator
 ```
 
@@ -140,7 +141,7 @@ replicator.model_record
 ```
 
 The replicator can be used to generate events, for example in
-ActiveRecord hooks:
+`ActiveRecord` hooks:
 
 ```ruby
   after_create_commit -> { replicator.publish_created_event }
@@ -193,7 +194,9 @@ For example, to add support for files referenced by a `Widget` model with a
        file_store == ObjectStorage::Store::LOCAL
      end
 
-     def self.replicables_for_geo_node
+     # @param primary_key_in [Range, Widget] arg to pass to primary_key_in scope
+     # @return [ActiveRecord::Relation<Widget>] everything that should be synced to this node, restricted by primary key
+     def self.replicables_for_current_secondary(primary_key_in)
        # Should be implemented. The idea of the method is to restrict
        # the set of synced items depending on synchronization settings
      end
@@ -201,9 +204,12 @@ For example, to add support for files referenced by a `Widget` model with a
    end
    ```
 
+   If there is a common constraint for records to be available for replication,
+   make sure to also overwrite the `available_replicables` scope.
+
 1. Create `ee/app/replicators/geo/widget_replicator.rb`. Implement the
-   `#carrierwave_uploader` method which should return a `CarrierWave::Uploader`.
-   And implement the class method `.model` to return the `Widget` class.
+   `#carrierwave_uploader` method which should return a `CarrierWave::Uploader`,
+   and implement the class method `.model` to return the `Widget` class:
 
    ```ruby
    # frozen_string_literal: true
@@ -220,8 +226,6 @@ For example, to add support for files referenced by a `Widget` model with a
          model_record.file
        end
 
-       # Change this to `true` to release replication of this model. Then remove
-       # this override in the next release.
        # The feature flag follows the format `geo_#{replicable_name}_replication`,
        # so here it would be `geo_widget_replication`
        def self.replication_enabled_by_default?
@@ -232,20 +236,19 @@ For example, to add support for files referenced by a `Widget` model with a
    ```
 
 1. Add this replicator class to the method `replicator_classes` in
-`ee/lib/gitlab/geo.rb`:
+   `ee/lib/gitlab/geo.rb`:
 
    ```ruby
-   def self.replicator_classes
-     classes = [::Geo::PackageFileReplicator,
-                ::Geo::WidgetReplicator]
-
-     classes.select(&:enabled?)
+   REPLICATOR_CLASSES = [
+      ::Geo::PackageFileReplicator,
+      ::Geo::WidgetReplicator
+   ]
    end
    ```
 
 1. Create `ee/spec/replicators/geo/widget_replicator_spec.rb` and perform
-   the setup necessary to define the `model_record` variable for the shared
-   examples.
+   the necessary setup to define the `model_record` variable for the shared
+   examples:
 
    ```ruby
    # frozen_string_literal: true
@@ -276,17 +279,32 @@ For example, to add support for files referenced by a `Widget` model with a
        unless table_exists?(:widget_registry)
          ActiveRecord::Base.transaction do
            create_table :widget_registry, id: :bigserial, force: :cascade do |t|
-             t.integer :widget_id, null: false
-             t.integer :state, default: 0, null: false, limit: 2
-             t.integer :retry_count, default: 0, limit: 2
-             t.datetime_with_timezone :retry_at
-             t.datetime_with_timezone :last_synced_at
+             t.bigint :widget_id, null: false
              t.datetime_with_timezone :created_at, null: false
+             t.datetime_with_timezone :last_synced_at
+             t.datetime_with_timezone :retry_at
+             t.datetime_with_timezone :verified_at
+             t.datetime_with_timezone :verification_started_at
+             t.datetime_with_timezone :verification_retry_at
+             t.integer :state, default: 0, null: false, limit: 2
+             t.integer :verification_state, default: 0, null: false, limit: 2
+             t.integer :retry_count, default: 0, limit: 2
+             t.integer :verification_retry_count, default: 0, limit: 2
+             t.boolean :checksum_mismatch
+             t.binary :verification_checksum
+             t.binary :verification_checksum_mismatched
+             t.string :verification_failure, limit: 255
              t.text :last_sync_failure
 
-             t.index :widget_id, name: :index_widget_registry_on_widget_id
+             t.index :widget_id, name: :index_widget_registry_on_widget_id, unique: true
              t.index :retry_at
              t.index :state
+             # To optimize performance of WidgetRegistry.verification_failed_batch
+             t.index :verification_retry_at, name:  :widget_registry_failed_verification, order: "NULLS FIRST",  where: "((state = 2) AND (verification_state = 3))"
+             # To optimize performance of WidgetRegistry.needs_verification_count
+             t.index :verification_state, name:  :widget_registry_needs_verification, where: "((state = 2)  AND (verification_state = ANY (ARRAY[0, 3])))"
+             # To optimize performance of WidgetRegistry.verification_pending_batch
+             t.index :verified_at, name: :widget_registry_pending_verification, order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
            end
          end
        end
@@ -307,6 +325,10 @@ For example, to add support for files referenced by a `Widget` model with a
 
    class Geo::WidgetRegistry < Geo::BaseRegistry
      include Geo::ReplicableRegistry
+     # TODO: Include VerificationState in VerifiableRegistry
+     # https://gitlab.com/gitlab-org/gitlab/-/issues/298811
+     include ::Gitlab::Geo::VerificationState
+     include ::Geo::VerifiableRegistry
 
      MODEL_CLASS = ::Widget
      MODEL_FOREIGN_KEY = :widget_id
@@ -315,14 +337,8 @@ For example, to add support for files referenced by a `Widget` model with a
    end
    ```
 
-   The method `has_create_events?` should return `true` in most of the cases.
-   However, if the entity you add doesn't have the create event, don't add the
-   method at all.
-
 1. Update `REGISTRY_CLASSES` in `ee/app/workers/geo/secondary/registry_consistency_worker.rb`.
-
 1. Add `widget_registry` to `ActiveSupport::Inflector.inflections` in `config/initializers_before_autoloader/000_inflections.rb`.
-
 1. Create `ee/spec/factories/geo/widget_registry.rb`:
 
    ```ruby
@@ -369,6 +385,7 @@ For example, to add support for files referenced by a `Widget` model with a
      end
 
      include_examples 'a Geo framework registry'
+     include_examples 'a Geo verifiable registry'
 
      describe '.find_registry_differences' do
        ... # To be implemented
@@ -376,17 +393,17 @@ For example, to add support for files referenced by a `Widget` model with a
    end
    ```
 
-Widgets should now be replicated by Geo!
+Widgets should now be replicated by Geo.
 
 #### Verification
 
 There are two ways to add verification related fields so that the Geo primary
-can track verification state:
+can track verification state.
 
 ##### Option 1: Add verification state fields to the existing `widgets` table itself
 
 1. Add a migration to add columns ordered according to [our guidelines](../ordering_table_columns.md)
-for verification state to the widgets table:
+   for verification state to the widgets table:
 
    ```ruby
    # frozen_string_literal: true
@@ -396,6 +413,8 @@ for verification state to the widgets table:
 
      def change
        change_table(:widgets) do |t|
+         t.integer :verification_state, default: 0, limit: 2, null: false
+         t.column :verification_started_at, :datetime_with_timezone
          t.integer :verification_retry_count, limit: 2
          t.column :verification_retry_at, :datetime_with_timezone
          t.column :verified_at, :datetime_with_timezone
@@ -416,46 +435,71 @@ for verification state to the widgets table:
    # frozen_string_literal: true
 
    class AddVerificationFailureLimitToWidgets < ActiveRecord::Migration[6.0]
-     DOWNTIME = false
-
-     disable_ddl_transaction!
-
-     def change
-       add_text_limit :widgets, :verification_failure, 255
-     end
-   end
-   ```
-
-1. Add a partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Add a migration in `ee/db/geo/migrate/`:
-
-   ```ruby
-   # frozen_string_literal: true
-
-   class AddVerificationFailureIndexToWidgets < ActiveRecord::Migration[6.0]
      include Gitlab::Database::MigrationHelpers
 
      DOWNTIME = false
 
      disable_ddl_transaction!
 
+     CONSTRAINT_NAME = 'widget_verification_failure_text_limit'
+
      def up
-       add_concurrent_index :widgets, :verification_failure, where: "(verification_failure IS NOT NULL)", name: "widgets_verification_failure_partial"
-       add_concurrent_index :widgets, :verification_checksum, where: "(verification_checksum IS NOT NULL)", name: "widgets_verification_checksum_partial"
+       add_text_limit :widget, :verification_failure, 255, constraint_name: CONSTRAINT_NAME
      end
 
      def down
-       remove_concurrent_index :widgets, :verification_failure
-       remove_concurrent_index :widgets, :verification_checksum
+       remove_check_constraint(:widget, CONSTRAINT_NAME)
      end
+   end
+   ```
+
+1. Add indexes on verification fields to ensure verification can be performed efficiently:
+
+   Some or all of these indexes can be omitted if the table is guaranteed to be small. Ask a database expert if you are unsure.
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class AddVerificationIndexesToWidgets < ActiveRecord::Migration[6.0]
+     include Gitlab::Database::MigrationHelpers
+
+     DOWNTIME = false
+     VERIFICATION_STATE_INDEX_NAME = "index_widgets_verification_state"
+     PENDING_VERIFICATION_INDEX_NAME = "index_widgets_pending_verification"
+     FAILED_VERIFICATION_INDEX_NAME = "index_widgets_failed_verification"
+     NEEDS_VERIFICATION_INDEX_NAME = "index_widgets_needs_verification"
+
+     disable_ddl_transaction!
+
+     def up
+       add_concurrent_index :widgets, :verification_state, name: VERIFICATION_STATE_INDEX_NAME
+       add_concurrent_index :widgets, :verified_at, where: "(verification_state = 0)", order: { verified_at: 'ASC NULLS FIRST' }, name: PENDING_VERIFICATION_INDEX_NAME
+       add_concurrent_index :widgets, :verification_retry_at, where: "(verification_state = 3)", order: { verification_retry_at: 'ASC NULLS FIRST' }, name: FAILED_VERIFICATION_INDEX_NAME
+       add_concurrent_index :widgets, :verification_state, where: "(verification_state = 0 OR verification_state = 3)", name: NEEDS_VERIFICATION_INDEX_NAME
+     end
+
+     def down
+       remove_concurrent_index_by_name :widgets, VERIFICATION_STATE_INDEX_NAME
+       remove_concurrent_index_by_name :widgets, PENDING_VERIFICATION_INDEX_NAME
+       remove_concurrent_index_by_name :widgets, FAILED_VERIFICATION_INDEX_NAME
+       remove_concurrent_index_by_name :widgets, NEEDS_VERIFICATION_INDEX_NAME
+     end
+   end
+   ```
+
+1. Add the `Gitlab::Geo::VerificationState` concern to the `widget` model if it is not already included in `Gitlab::Geo::ReplicableModel`:
+
+   ```ruby
+   class Widget < ApplicationRecord
+     ...
+     include ::Gitlab::Geo::VerificationState
+     ...
    end
    ```
 
 ##### Option 2: Create a separate `widget_states` table with verification state fields
 
-1. Add a migration in `ee/db/geo/migrate/` to create a `widget_states` table and add a
-   partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Order the columns according to [our guidelines](../ordering_table_columns.md):
+1. Create a `widget_states` table and add an index on `verification_state` to ensure verification can be performed efficiently. Order the columns according to [the guidelines](../ordering_table_columns.md):
 
    ```ruby
    # frozen_string_literal: true
@@ -472,14 +516,15 @@ for verification state to the widgets table:
          with_lock_retries do
            create_table :widget_states, id: false do |t|
              t.references :widget, primary_key: true, null: false, foreign_key: { on_delete: :cascade }
+             t.integer :verification_state, default: 0, limit: 2, null: false
+             t.column :verification_started_at, :datetime_with_timezone
              t.datetime_with_timezone :verification_retry_at
              t.datetime_with_timezone :verified_at
              t.integer :verification_retry_count, limit: 2
              t.binary :verification_checksum, using: 'verification_checksum::bytea'
              t.text :verification_failure
 
-             t.index :verification_failure, where: "(verification_failure IS NOT NULL)", name: "widgets_verification_failure_partial"
-             t.index :verification_checksum, where: "(verification_checksum IS NOT NULL)", name: "widgets_verification_checksum_partial"
+             t.index :verification_state, name: "index_widget_states_on_verification_state"
            end
          end
        end
@@ -490,6 +535,20 @@ for verification state to the widgets table:
      def down
        drop_table :widget_states
      end
+   end
+   ```
+
+1. Add the following lines to the `widget_state.rb` model:
+
+   ```ruby
+   class WidgetState < ApplicationRecord
+     ...
+     self.primary_key = :widget_id
+
+     include ::Gitlab::Geo::VerificationState
+
+     belongs_to :widget, inverse_of: :widget_state
+     ...
    end
    ```
 
@@ -513,55 +572,54 @@ for verification state to the widgets table:
 To do: Add verification on secondaries. This should be done as part of
 [Geo: Self Service Framework - First Implementation for Package File verification](https://gitlab.com/groups/gitlab-org/-/epics/1817)
 
-Widgets should now be verified by Geo!
+Widgets should now be verified by Geo.
 
 #### Metrics
 
 Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
-`GeoNodeStatus` for display in the UI, and sent to Prometheus.
+`GeoNodeStatus` for display in the UI, and sent to Prometheus:
 
-1. Add fields `widget_count`, `widget_checksummed_count`,
-   `widget_checksum_failed_count`, `widget_synced_count`,
-   `widget_failed_count`, and `widget_registry_count` to
-   `GeoNodeStatus#RESOURCE_STATUS_FIELDS` array in
-   `ee/app/models/geo_node_status.rb`.
-1. Add the same fields to `GeoNodeStatus#PROMETHEUS_METRICS` hash in
-   `ee/app/models/geo_node_status.rb`.
-1. Add the same fields to `Sidekiq metrics` table in
-   `doc/administration/monitoring/prometheus/gitlab_metrics.md`.
-1. Add the same fields to `GET /geo_nodes/status` example response in
+1. Add fields `widgets_count`, `widgets_checksummed_count`,
+   `widgets_checksum_failed_count`, `widgets_synced_count`,
+   `widgets_failed_count`, and `widgets_registry_count` to
+   `GET /geo_nodes/status` example response in
    `doc/api/geo_nodes.md`.
-1. Add the same fields to `ee/spec/models/geo_node_status_spec.rb` and
-   `ee/spec/factories/geo_node_statuses.rb`.
-1. Set `widget_count` in `GeoNodeStatus#load_data_from_current_node`:
+1. Add the same fields to `GET /geo_nodes/status` example response in
+   `ee/spec/fixtures/api/schemas/public_api/v4/geo_node_status.json`.
+1. Add fields `geo_widgets`, `geo_widgets_checksummed`,
+   `geo_widgets_checksum_failed`, `geo_widgets_synced`,
+   `geo_widgets_failed`, and `geo_widgets_registry` to
+   `Sidekiq metrics` table in
+   `doc/administration/monitoring/prometheus/gitlab_metrics.md`.
+1. Add the following to the parameterized table in
+   `ee/spec/models/geo_node_status_spec.rb`:
 
    ```ruby
-   self.widget_count = Geo::WidgetReplicator.primary_total_count
+   Geo::WidgetReplicator | :widget | :geo_widget_registry
    ```
 
-1. Add `GeoNodeStatus#load_widgets_data` to set `widget_synced_count`,
-   `widget_failed_count`, and `widget_registry_count`:
+1. Add the following to `spec/factories/widgets.rb`:
 
    ```ruby
-   def load_widget_data
-     self.widget_synced_count = Geo::WidgetReplicator.synced_count
-     self.widget_failed_count = Geo::WidgetReplicator.failed_count
-     self.widget_registry_count = Geo::WidgetReplicator.registry_count
+   trait(:verification_succeeded) do
+     with_file
+     verification_checksum { 'abc' }
+     verification_state { Widget.verification_state_value(:verification_succeeded) }
+   end
+
+   trait(:verification_failed) do
+     with_file
+     verification_failure { 'Could not calculate the checksum' }
+     verification_state { Widget.verification_state_value(:verification_failed) }
    end
    ```
 
-1. Call `GeoNodeStatus#load_widgets_data` in
-   `GeoNodeStatus#load_secondary_data`.
-
-1. Set `widget_checksummed_count` and `widget_checksum_failed_count` in
-   `GeoNodeStatus#load_verification_data`:
-
-   ```ruby
-   self.widget_checksummed_count = Geo::WidgetReplicator.checksummed_count   self.widget_checksum_failed_count = Geo::WidgetReplicator.checksum_failed_count
-   ```
+1. Make sure the factory also allows setting a `project` attribute. If the model
+   does not have a direct relation to a project, you can use a `transient`
+   attribute. Check out `spec/factories/merge_request_diffs.rb` for an example.
 
 Widget replication and verification metrics should now be available in the API,
-the Admin Area UI, and Prometheus!
+the Admin Area UI, and Prometheus.
 
 #### GraphQL API
 
@@ -573,12 +631,11 @@ the Admin Area UI, and Prometheus!
          null: true,
          resolver: ::Resolvers::Geo::WidgetRegistriesResolver,
          description: 'Find widget registries on this Geo node',
-         feature_flag: :geo_self_service_framework
+         feature_flag: :geo_widget_replication
    ```
 
 1. Add the new `widget_registries` field name to the `expected_fields` array in
    `ee/spec/graphql/types/geo/geo_node_type_spec.rb`.
-
 1. Create `ee/app/graphql/resolvers/geo/widget_registries_resolver.rb`:
 
    ```ruby
@@ -641,7 +698,7 @@ the Admin Area UI, and Prometheus!
          include ::Types::Geo::RegistryType
 
          graphql_name 'WidgetRegistry'
-         description 'Represents the sync and verification state of a widget'
+         description 'Represents the Geo sync and verification state of a widget'
 
          field :widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Widget'
        end
@@ -680,15 +737,21 @@ the Admin Area UI, and Prometheus!
    }
    ```
 
-Individual widget synchronization and verification data should now be available
-via the GraphQL API!
+1. Update the GraphQL reference documentation:
 
-1. Take care of replicating "update" events. Geo Framework does not currently support
-   replicating "update" events because all entities added to the framework, by this time,
-   are immutable. If this is the case
-   for the entity you're going to add, please follow <https://gitlab.com/gitlab-org/gitlab/-/issues/118743>
-   and <https://gitlab.com/gitlab-org/gitlab/-/issues/118745> as examples to add the new event type.
-   Please also remove this notice when you've added it.
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
+   ```
+
+Individual widget synchronization and verification data should now be available
+via the GraphQL API.
+
+Make sure to replicate the "update" events. Geo Framework does not currently support
+replicating "update" events because all entities added to the framework, by this time,
+are immutable. If this is the case
+for the entity you're going to add, follow <https://gitlab.com/gitlab-org/gitlab/-/issues/118743>
+and <https://gitlab.com/gitlab-org/gitlab/-/issues/118745> as examples to add the new event type.
+Also, remove this notice when you've added it.
 
 #### Admin UI
 
@@ -696,4 +759,293 @@ To do: This should be done as part of
 [Geo: Implement frontend for Self-Service Framework replicables](https://gitlab.com/groups/gitlab-org/-/epics/2525)
 
 Widget sync and verification data (aggregate and individual) should now be
-available in the Admin UI!
+available in the Admin UI.
+
+#### Releasing the feature
+
+1. In `ee/config/feature_flags/development/geo_widget_replication.yml`, set `default_enabled: true`
+
+1. In `ee/app/replicators/geo/widget_replicator.rb`, delete the `self.replication_enabled_by_default?` method:
+
+   ```ruby
+   module Geo
+     class WidgetReplicator < Gitlab::Geo::Replicator
+       ...
+
+       # REMOVE THIS METHOD
+       def self.replication_enabled_by_default?
+         false
+       end
+       # REMOVE THIS METHOD
+
+       ...
+     end
+   end
+   ```
+
+1. In `ee/app/graphql/types/geo/geo_node_type.rb`, remove the `feature_flag` option for the released type:
+
+   ```ruby
+   field :widget_registries, ::Types::Geo::WidgetRegistryType.connection_type,
+         null: true,
+         resolver: ::Resolvers::Geo::WidgetRegistriesResolver,
+         description: 'Find widget registries on this Geo node',
+         feature_flag: :geo_widget_replication # REMOVE THIS LINE
+   ```
+
+### Repository Replicator Strategy
+
+Models that refer to any repository on the disk
+can be easily supported by Geo with the `Geo::RepositoryReplicatorStrategy` module.
+
+For example, to add support for files referenced by a `Gizmos` model with a
+`gizmos` table, you would perform the following steps.
+
+#### Replication
+
+1. Include `Gitlab::Geo::ReplicableModel` in the `Gizmo` class, and specify
+   the Replicator class `with_replicator Geo::GizmoReplicator`.
+
+   At this point the `Gizmo` class should look like this:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class Gizmo < ApplicationRecord
+     include ::Gitlab::Geo::ReplicableModel
+
+     with_replicator Geo::GizmoReplicator
+
+     # @param primary_key_in [Range, Gizmo] arg to pass to primary_key_in scope
+     # @return [ActiveRecord::Relation<Gizmo>] everything that should be synced to this node, restricted by primary key
+     def self.replicables_for_current_secondary(primary_key_in)
+       # Should be implemented. The idea of the method is to restrict
+       # the set of synced items depending on synchronization settings
+     end
+
+     # Geo checks this method in FrameworkRepositorySyncService to avoid
+     # snapshotting repositories using object pools
+     def pool_repository
+       nil
+     end
+     ...
+   end
+   ```
+
+   Pay some attention to method `pool_repository`. Not every repository type uses
+   repository pooling. As Geo prefers to use repository snapshotting, it can lead to data loss.
+   Make sure to overwrite `pool_repository` so it returns nil for repositories that do not
+   have pools.
+
+   If there is a common constraint for records to be available for replication,
+   make sure to also overwrite the `available_replicables` scope.
+
+1. Create `ee/app/replicators/geo/gizmo_replicator.rb`. Implement the
+   `#repository` method which should return a `<Repository>` instance,
+   and implement the class method `.model` to return the `Gizmo` class:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   module Geo
+     class GizmoReplicator < Gitlab::Geo::Replicator
+       include ::Geo::RepositoryReplicatorStrategy
+
+       def self.model
+         ::Gizmo
+       end
+
+       def repository
+         model_record.repository
+       end
+
+       def self.git_access_class
+         ::Gitlab::GitAccessGizmo
+       end
+
+       # The feature flag follows the format `geo_#{replicable_name}_replication`,
+       # so here it would be `geo_gizmo_replication`
+       def self.replication_enabled_by_default?
+         false
+       end
+     end
+   end
+   ```
+
+1. Generate the feature flag definition file by running the feature flag command
+   and running through the steps:
+
+   ```shell
+   bin/feature-flag --ee geo_gizmo_replication --type development --group 'group::geo'
+   ```
+
+1. Make sure Geo push events are created. Usually it needs some
+   change in the `app/workers/post_receive.rb` file. Example:
+
+   ```ruby
+   def replicate_gizmo_changes(gizmo)
+     if ::Gitlab::Geo.primary?
+       gizmo.replicator.handle_after_update if gizmo
+     end
+   end
+   ```
+
+   See `app/workers/post_receive.rb` for more examples.
+
+1. Make sure the repository removal is also handled. You may need to add something
+   like the following in the destroy service of the repository:
+
+   ```ruby
+   gizmo.replicator.handle_after_destroy if gizmo.repository
+   ```
+
+1. Add this replicator class to the method `replicator_classes` in
+   `ee/lib/gitlab/geo.rb`:
+
+   ```ruby
+   REPLICATOR_CLASSES = [
+      ...
+      ::Geo::PackageFileReplicator,
+      ::Geo::GizmoReplicator
+   ]
+   end
+   ```
+
+1. Create `ee/spec/replicators/geo/gizmo_replicator_spec.rb` and perform
+   the necessary setup to define the `model_record` variable for the shared
+   examples:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Geo::GizmoReplicator do
+     let(:model_record) { build(:gizmo) }
+
+     include_examples 'a repository replicator'
+   end
+   ```
+
+1. Create the `gizmo_registry` table, with columns ordered according to [our guidelines](../ordering_table_columns.md) so Geo secondaries can track the sync and
+   verification state of each Gizmo. This migration belongs in `ee/db/geo/migrate`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class CreateGizmoRegistry < ActiveRecord::Migration[6.0]
+     include Gitlab::Database::MigrationHelpers
+
+     DOWNTIME = false
+
+     disable_ddl_transaction!
+
+     def up
+       create_table :gizmo_registry, id: :bigserial, force: :cascade do |t|
+         t.datetime_with_timezone :retry_at
+         t.datetime_with_timezone :last_synced_at
+         t.datetime_with_timezone :created_at, null: false
+         t.bigint :gizmo_id, null: false
+         t.integer :state, default: 0, null: false, limit: 2
+         t.integer :retry_count, default: 0, limit: 2
+         t.text :last_sync_failure
+         t.boolean :force_to_redownload
+         t.boolean :missing_on_primary
+
+         t.index :gizmo_id, name: :index_gizmo_registry_on_gizmo_id, unique: true
+         t.index :retry_at
+         t.index :state
+        end
+
+        add_text_limit :gizmo_registry, :last_sync_failure, 255
+      end
+
+      def down
+        drop_table :gizmo_registry
+      end
+   end
+   ```
+
+1. Create `ee/app/models/geo/gizmo_registry.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class Geo::GizmoRegistry < Geo::BaseRegistry
+     include Geo::ReplicableRegistry
+
+     MODEL_CLASS = ::Gizmo
+     MODEL_FOREIGN_KEY = :gizmo_id
+
+     belongs_to :gizmo, class_name: 'Gizmo'
+   end
+   ```
+
+1. Update `REGISTRY_CLASSES` in `ee/app/workers/geo/secondary/registry_consistency_worker.rb`.
+1. Add `gizmo_registry` to `ActiveSupport::Inflector.inflections` in `config/initializers_before_autoloader/000_inflections.rb`.
+1. Create `ee/spec/factories/geo/gizmo_registry.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   FactoryBot.define do
+     factory :geo_gizmo_registry, class: 'Geo::GizmoRegistry' do
+       gizmo
+       state { Geo::GizmoRegistry.state_value(:pending) }
+
+       trait :synced do
+         state { Geo::GizmoRegistry.state_value(:synced) }
+         last_synced_at { 5.days.ago }
+       end
+
+       trait :failed do
+         state { Geo::GizmoRegistry.state_value(:failed) }
+         last_synced_at { 1.day.ago }
+         retry_count { 2 }
+         last_sync_failure { 'Random error' }
+       end
+
+       trait :started do
+         state { Geo::GizmoRegistry.state_value(:started) }
+         last_synced_at { 1.day.ago }
+         retry_count { 0 }
+       end
+     end
+   end
+   ```
+
+1. Create `ee/spec/models/geo/gizmo_registry_spec.rb`:
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require 'spec_helper'
+
+   RSpec.describe Geo::GizmoRegistry, :geo, type: :model do
+     let_it_be(:registry) { create(:geo_gizmo_registry) }
+
+     specify 'factory is valid' do
+       expect(registry).to be_valid
+     end
+
+     include_examples 'a Geo framework registry'
+   end
+   ```
+
+1. Make sure the newly added repository type can be accessed by a secondary.
+   You may need to make some changes to one of the Git access classes.
+
+   Gizmos should now be replicated by Geo.
+
+#### Metrics
+
+You need to make the same changes as for Blob Replicator Strategy.
+You need to make the same changes for the [metrics as in the Blob Replicator Strategy](#metrics).
+
+#### GraphQL API
+
+You need to make the same changes for the GraphQL API [as in the Blob Replicator Strategy](#graphql-api).
+
+#### Releasing the feature
+
+You need to make the same changes for [releasing the feature as in the Blob Replicator Strategy](#releasing-the-feature).

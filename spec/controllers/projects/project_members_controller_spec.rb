@@ -14,32 +14,137 @@ RSpec.describe Projects::ProjectMembersController do
       expect(response).to have_gitlab_http_status(:ok)
     end
 
-    context 'when project belongs to group' do
-      let(:user_in_group) { create(:user) }
-      let(:project_in_group) { create(:project, :public, group: group) }
+    context 'project members' do
+      context 'when project belongs to group' do
+        let(:user_in_group) { create(:user) }
+        let(:project_in_group) { create(:project, :public, group: group) }
+
+        before do
+          group.add_owner(user_in_group)
+          project_in_group.add_maintainer(user)
+          sign_in(user)
+        end
+
+        it 'lists inherited project members by default' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id, user_in_group.id)
+        end
+
+        it 'lists direct project members only' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'exclude' }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id)
+        end
+
+        it 'lists inherited project members only' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'only' }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user_in_group.id)
+        end
+      end
+
+      context 'when invited members are present' do
+        let!(:invited_member) { create(:project_member, :invited, project: project) }
+
+        before do
+          project.add_maintainer(user)
+          sign_in(user)
+        end
+
+        it 'excludes the invited members from project members list' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:project_members).map(&:invite_email)).not_to contain_exactly(invited_member.invite_email)
+        end
+      end
+    end
+
+    context 'group links' do
+      let!(:project_group_link) { create(:project_group_link, project: project, group: group) }
+
+      it 'lists group links' do
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(assigns(:group_links).map(&:id)).to contain_exactly(project_group_link.id)
+      end
+
+      context 'when `search_groups` param is present' do
+        let(:group_2) { create(:group, :public, name: 'group_2') }
+        let!(:project_group_link_2) { create(:project_group_link, project: project, group: group_2) }
+
+        it 'lists group links that match search' do
+          get :index, params: { namespace_id: project.namespace, project_id: project, search_groups: 'group_2' }
+
+          expect(assigns(:group_links).map(&:id)).to contain_exactly(project_group_link_2.id)
+        end
+      end
+    end
+
+    context 'invited members' do
+      let!(:invited_member) { create(:project_member, :invited, project: project) }
 
       before do
-        group.add_owner(user_in_group)
-        project_in_group.add_maintainer(user)
+        project.add_maintainer(user)
         sign_in(user)
       end
 
-      it 'lists inherited project members by default' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group }
+      context 'when user has `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(true)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id, user_in_group.id)
+        it 'lists invited members' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:invited_members).map(&:invite_email)).to contain_exactly(invited_member.invite_email)
+        end
       end
 
-      it 'lists direct project members only' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'exclude' }
+      context 'when user does not have `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(false)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id)
+        it 'does not list invited members' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:invited_members)).to be_nil
+        end
+      end
+    end
+
+    context 'access requests' do
+      let(:access_requester_user) { create(:user) }
+
+      before do
+        project.request_access(access_requester_user)
+        project.add_maintainer(user)
+        sign_in(user)
       end
 
-      it 'lists inherited project members only' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'only' }
+      context 'when user has `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(true)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user_in_group.id)
+        it 'lists access requests' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:requesters).map(&:user_id)).to contain_exactly(access_requester_user.id)
+        end
+      end
+
+      context 'when user does not have `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(false)
+        end
+
+        it 'does not list access requests' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:requesters)).to be_nil
+        end
       end
     end
   end
@@ -129,6 +234,46 @@ RSpec.describe Projects::ProjectMembersController do
         expect(response).to redirect_to(project_project_members_path(project))
       end
     end
+
+    context 'access expiry date' do
+      before do
+        project.add_maintainer(user)
+      end
+
+      subject do
+        post :create, params: {
+                        namespace_id: project.namespace,
+                        project_id: project,
+                        user_ids: project_user.id,
+                        access_level: Gitlab::Access::GUEST,
+                        expires_at: expires_at
+                      }
+      end
+
+      context 'when set to a date in the past' do
+        let(:expires_at) { 2.days.ago }
+
+        it 'does not add user to members' do
+          subject
+
+          expect(flash[:alert]).to include('Expires at cannot be a date in the past')
+          expect(response).to redirect_to(project_project_members_path(project))
+          expect(project.users).not_to include project_user
+        end
+      end
+
+      context 'when set to a date in the future' do
+        let(:expires_at) { 5.days.from_now }
+
+        it 'adds user to members' do
+          subject
+
+          expect(response).to set_flash.to 'Users were successfully added.'
+          expect(response).to redirect_to(project_project_members_path(project))
+          expect(project.users).to include project_user
+        end
+      end
+    end
   end
 
   describe 'PUT update' do
@@ -139,16 +284,90 @@ RSpec.describe Projects::ProjectMembersController do
       sign_in(user)
     end
 
-    Gitlab::Access.options.each do |label, value|
-      it "can change the access level to #{label}" do
-        put :update, params: {
-          project_member: { access_level: value },
-          namespace_id: project.namespace,
-          project_id: project,
-          id: requester
-        }, xhr: true
+    context 'access level' do
+      Gitlab::Access.options.each do |label, value|
+        it "can change the access level to #{label}" do
+          params = {
+            project_member: { access_level: value },
+            namespace_id: project.namespace,
+            project_id: project,
+            id: requester
+          }
 
-        expect(requester.reload.human_access).to eq(label)
+          put :update, params: params, xhr: true
+
+          expect(requester.reload.human_access).to eq(label)
+        end
+      end
+    end
+
+    context 'access expiry date' do
+      subject do
+        put :update, xhr: true, params: {
+                                          project_member: {
+                                            expires_at: expires_at
+                                          },
+                                          namespace_id: project.namespace,
+                                          project_id: project,
+                                          id: requester
+                                        }
+      end
+
+      context 'when set to a date in the past' do
+        let(:expires_at) { 2.days.ago }
+
+        it 'does not update the member' do
+          subject
+
+          expect(requester.reload.expires_at).not_to eq(expires_at.to_date)
+        end
+      end
+
+      context 'when set to a date in the future' do
+        let(:expires_at) { 5.days.from_now }
+
+        it 'updates the member' do
+          subject
+
+          expect(requester.reload.expires_at).to eq(expires_at.to_date)
+        end
+      end
+    end
+
+    context 'expiration date' do
+      let(:expiry_date) { 1.month.from_now.to_date }
+
+      before do
+        travel_to Time.now.utc.beginning_of_day
+
+        put(
+          :update,
+          params: {
+            project_member: { expires_at: expiry_date },
+            namespace_id: project.namespace,
+            project_id: project,
+            id: requester
+          },
+          format: :json
+        )
+      end
+
+      context 'when `expires_at` is set' do
+        it 'returns correct json response' do
+          expect(json_response).to eq({
+            "expires_in" => "about 1 month",
+            "expires_soon" => false,
+            "expires_at_formatted" => expiry_date.to_time.in_time_zone.to_s(:medium)
+          })
+        end
+      end
+
+      context 'when `expires_at` is not set' do
+        let(:expiry_date) { nil }
+
+        it 'returns empty json response' do
+          expect(json_response).to be_empty
+        end
       end
     end
   end
@@ -457,6 +676,21 @@ RSpec.describe Projects::ProjectMembersController do
                         }
         end.to change { project.members.count }.by(1)
       end
+    end
+  end
+
+  describe 'POST resend_invite' do
+    let(:member) { create(:project_member, project: project) }
+
+    before do
+      project.add_maintainer(user)
+      sign_in(user)
+    end
+
+    it 'is successful' do
+      post :resend_invite, params: { namespace_id: project.namespace, project_id: project, id: member }
+
+      expect(response).to have_gitlab_http_status(:found)
     end
   end
 end

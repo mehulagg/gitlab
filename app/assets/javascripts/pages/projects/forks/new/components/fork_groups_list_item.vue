@@ -7,6 +7,7 @@ import {
   GlTooltipDirective,
   GlTooltip,
   GlBadge,
+  GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '~/groups/constants';
 import { __ } from '~/locale';
@@ -23,6 +24,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   props: {
     group: {
@@ -92,7 +94,7 @@ export default {
       </div>
       <gl-link
         :href="group.relative_path"
-        class="gl-display-none gl-flex-shrink-0 gl-display-sm-flex gl-mr-3"
+        class="gl-display-none gl-flex-shrink-0 gl-sm-display-flex gl-mr-3"
       >
         <gl-avatar :size="32" shape="rect" :entity-name="group.name" :src="group.avatarUrl" />
       </gl-link>
@@ -111,7 +113,7 @@ export default {
             <gl-badge
               v-if="isGroupPendingRemoval"
               variant="warning"
-              class="gl-display-none gl-display-sm-flex gl-mt-3 gl-mr-1"
+              class="gl-display-none gl-sm-display-flex gl-mt-3 gl-mr-1"
               >{{ __('pending removal') }}</gl-badge
             >
             <span v-if="group.permission" class="user-access-role gl-mt-3">
@@ -119,7 +121,7 @@ export default {
             </span>
           </div>
           <div v-if="group.description" class="description">
-            <span v-html="group.markdown_description"> </span>
+            <span v-safe-html="group.markdown_description"> </span>
           </div>
         </div>
         <div class="gl-display-flex gl-flex-shrink-0">

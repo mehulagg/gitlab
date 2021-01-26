@@ -1,15 +1,23 @@
-import sanitize from 'sanitize-html';
+import * as Sentry from '~/sentry/wrapper';
+import { sanitize } from '~/lib/dompurify';
 
-export const parseIssuableData = () => {
+// We currently load + parse the data from the issue app and related merge request
+let cachedParsedData;
+
+export const parseIssuableData = (el) => {
   try {
-    const initialDataEl = document.getElementById('js-issuable-app-initial-data');
+    if (cachedParsedData) return cachedParsedData;
 
-    return JSON.parse(sanitize(initialDataEl.textContent).replace(/&quot;/g, '"'));
+    const parsedData = JSON.parse(el.dataset.initial);
+    parsedData.initialTitleHtml = sanitize(parsedData.initialTitleHtml);
+    parsedData.initialDescriptionHtml = sanitize(parsedData.initialDescriptionHtml);
+
+    cachedParsedData = parsedData;
+
+    return parsedData;
   } catch (e) {
-    console.error(e); // eslint-disable-line no-console
+    Sentry.captureException(e);
 
     return {};
   }
 };
-
-export default {};

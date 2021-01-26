@@ -1,4 +1,4 @@
-import { GlSprintf, GlIcon, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlSprintf, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import EnvironmentLogs from '~/logs/components/environment_logs.vue';
 
@@ -20,7 +20,7 @@ jest.mock('~/lib/utils/scroll_utils');
 const module = 'environmentLogs';
 
 jest.mock('lodash/throttle', () =>
-  jest.fn(func => {
+  jest.fn((func) => {
     return func;
   }),
 );
@@ -39,18 +39,27 @@ describe('EnvironmentLogs', () => {
   };
 
   const updateControlBtnsMock = jest.fn();
+  const LogControlButtonsStub = {
+    template: '<div/>',
+    methods: {
+      update: updateControlBtnsMock,
+    },
+    props: {
+      scrollDownButtonDisabled: false,
+    },
+  };
 
   const findEnvironmentsDropdown = () => wrapper.find('.js-environments-dropdown');
 
   const findSimpleFilters = () => wrapper.find({ ref: 'log-simple-filters' });
   const findAdvancedFilters = () => wrapper.find({ ref: 'log-advanced-filters' });
   const findElasticsearchNotice = () => wrapper.find({ ref: 'elasticsearchNotice' });
-  const findLogControlButtons = () => wrapper.find({ name: 'log-control-buttons-stub' });
+  const findLogControlButtons = () => wrapper.find(LogControlButtonsStub);
 
   const findInfiniteScroll = () => wrapper.find({ ref: 'infiniteScroll' });
   const findLogTrace = () => wrapper.find({ ref: 'logTrace' });
   const findLogFooter = () => wrapper.find({ ref: 'logFooter' });
-  const getInfiniteScrollAttr = attr => parseInt(findInfiniteScroll().attributes(attr), 10);
+  const getInfiniteScrollAttr = (attr) => parseInt(findInfiniteScroll().attributes(attr), 10);
 
   const mockSetInitData = () => {
     state.pods.options = mockPods;
@@ -76,16 +85,7 @@ describe('EnvironmentLogs', () => {
       propsData,
       store,
       stubs: {
-        LogControlButtons: {
-          name: 'log-control-buttons-stub',
-          template: '<div/>',
-          methods: {
-            update: updateControlBtnsMock,
-          },
-          props: {
-            scrollDownButtonDisabled: false,
-          },
-        },
+        LogControlButtons: LogControlButtonsStub,
         GlInfiniteScroll: {
           name: 'gl-infinite-scroll',
           template: `
@@ -121,10 +121,7 @@ describe('EnvironmentLogs', () => {
   it('displays UI elements', () => {
     initWrapper();
 
-    expect(wrapper.isVueInstance()).toBe(true);
-    expect(wrapper.isEmpty()).toBe(false);
-
-    expect(findEnvironmentsDropdown().is(GlDeprecatedDropdown)).toBe(true);
+    expect(findEnvironmentsDropdown().is(GlDropdown)).toBe(true);
     expect(findSimpleFilters().exists()).toBe(true);
     expect(findLogControlButtons().exists()).toBe(true);
 
@@ -167,7 +164,7 @@ describe('EnvironmentLogs', () => {
 
     it('displays a disabled environments dropdown', () => {
       expect(findEnvironmentsDropdown().attributes('disabled')).toBe('true');
-      expect(findEnvironmentsDropdown().findAll(GlDeprecatedDropdownItem).length).toBe(0);
+      expect(findEnvironmentsDropdown().findAll(GlDropdownItem).length).toBe(0);
     });
 
     it('does not update buttons state', () => {
@@ -184,11 +181,7 @@ describe('EnvironmentLogs', () => {
 
     it('shows a logs trace', () => {
       expect(findLogTrace().text()).toBe('');
-      expect(
-        findLogTrace()
-          .find('.js-build-loader-animation')
-          .isVisible(),
-      ).toBe(true);
+      expect(findLogTrace().find('.js-build-loader-animation').isVisible()).toBe(true);
     });
   });
 
@@ -220,7 +213,7 @@ describe('EnvironmentLogs', () => {
 
   describe('state with data', () => {
     beforeEach(() => {
-      dispatch.mockImplementation(actionName => {
+      dispatch.mockImplementation((actionName) => {
         if (actionName === `${module}/setInitData`) {
           mockSetInitData();
         } else if (actionName === `${module}/showPodLogs`) {
@@ -244,7 +237,7 @@ describe('EnvironmentLogs', () => {
     });
 
     it('populates environments dropdown', () => {
-      const items = findEnvironmentsDropdown().findAll(GlDeprecatedDropdownItem);
+      const items = findEnvironmentsDropdown().findAll(GlDropdownItem);
       expect(findEnvironmentsDropdown().props('text')).toBe(mockEnvName);
       expect(items.length).toBe(mockEnvironments.length);
       mockEnvironments.forEach((env, i) => {
@@ -254,14 +247,14 @@ describe('EnvironmentLogs', () => {
     });
 
     it('dropdown has one environment selected', () => {
-      const items = findEnvironmentsDropdown().findAll(GlDeprecatedDropdownItem);
+      const items = findEnvironmentsDropdown().findAll(GlDropdownItem);
       mockEnvironments.forEach((env, i) => {
         const item = items.at(i);
 
         if (item.text() !== mockEnvName) {
-          expect(item.find(GlIcon).classes('invisible')).toBe(true);
+          expect(item.find(GlDropdownItem).attributes('ischecked')).toBeFalsy();
         } else {
-          expect(item.find(GlIcon).classes('invisible')).toBe(false);
+          expect(item.find(GlDropdownItem).attributes('ischecked')).toBeTruthy();
         }
       });
     });
@@ -289,7 +282,7 @@ describe('EnvironmentLogs', () => {
 
     describe('when user clicks', () => {
       it('environment name, trace is refreshed', () => {
-        const items = findEnvironmentsDropdown().findAll(GlDeprecatedDropdownItem);
+        const items = findEnvironmentsDropdown().findAll(GlDropdownItem);
         const index = 1; // any env
 
         expect(dispatch).not.toHaveBeenCalledWith(`${module}/showEnvironment`, expect.anything());

@@ -22,7 +22,7 @@ module Gitlab
         string = string.to_s unless string.is_a?(String)
 
         legacy_mode = legacy_mode_enabled?(opts.delete(:legacy_mode))
-        data = adapter_load(string, opts)
+        data = adapter_load(string, **opts)
 
         handle_legacy_mode!(data) if legacy_mode
 
@@ -67,15 +67,6 @@ module Gitlab
         ::JSON.pretty_generate(object, opts)
       end
 
-      # Feature detection for using Oj instead of the `json` gem.
-      #
-      # @return [Boolean]
-      def enable_oj?
-        return false unless feature_table_exists?
-
-        Feature.enabled?(:oj_json, default_enabled: true)
-      end
-
       private
 
       # Convert JSON string into Ruby through toggleable adapters.
@@ -91,11 +82,7 @@ module Gitlab
       def adapter_load(string, *args, **opts)
         opts = standardize_opts(opts)
 
-        if enable_oj?
-          Oj.load(string, opts)
-        else
-          ::JSON.parse(string, opts)
-        end
+        Oj.load(string, opts)
       rescue Oj::ParseError, Encoding::UndefinedConversionError => ex
         raise parser_error.new(ex)
       end
@@ -120,11 +107,7 @@ module Gitlab
       #
       # @return [String]
       def adapter_dump(object, *args, **opts)
-        if enable_oj?
-          Oj.dump(object, opts)
-        else
-          ::JSON.dump(object, *args)
-        end
+        Oj.dump(object, opts)
       end
 
       # Generates JSON for an object but with fewer options, using toggleable adapters.
@@ -135,11 +118,7 @@ module Gitlab
       def adapter_generate(object, opts = {})
         opts = standardize_opts(opts)
 
-        if enable_oj?
-          Oj.generate(object, opts)
-        else
-          ::JSON.generate(object, opts)
-        end
+        Oj.generate(object, opts)
       end
 
       # Take a JSON standard options hash and standardize it to work across adapters
@@ -149,11 +128,8 @@ module Gitlab
       # @return [Hash]
       def standardize_opts(opts)
         opts ||= {}
-
-        if enable_oj?
-          opts[:mode] = :rails
-          opts[:symbol_keys] = opts[:symbolize_keys] || opts[:symbolize_names]
-        end
+        opts[:mode] = :rails
+        opts[:symbol_keys] = opts[:symbolize_keys] || opts[:symbolize_names]
 
         opts
       end
@@ -213,11 +189,39 @@ module Gitlab
       # @param object [Object]
       # @return [String]
       def self.call(object, env = nil)
-        if Gitlab::Json.enable_oj? && Feature.enabled?(:grape_gitlab_json, default_enabled: true)
+        if Feature.enabled?(:grape_gitlab_json, default_enabled: true)
           Gitlab::Json.dump(object)
         else
           Grape::Formatter::Json.call(object, env)
         end
+      end
+    end
+
+    class LimitedEncoder
+      LimitExceeded = Class.new(StandardError)
+
+      # Generates JSON for an object or raise an error if the resulting json string is too big
+      #
+      # @param object [Hash, Array, Object] must be hash, array, or an object that responds to .to_h or .to_json
+      # @param limit [Integer] max size of the resulting json string
+      # @return [String]
+      # @raise [LimitExceeded] if the resulting json string is bigger than the specified limit
+      def self.encode(object, limit: 25.megabytes)
+        return ::Gitlab::Json.dump(object) unless Feature.enabled?(:json_limited_encoder)
+
+        buffer = []
+        buffer_size = 0
+
+        ::Yajl::Encoder.encode(object) do |data_chunk|
+          chunk_size = data_chunk.bytesize
+
+          raise LimitExceeded if buffer_size + chunk_size > limit
+
+          buffer << data_chunk
+          buffer_size += chunk_size
+        end
+
+        buffer.join('')
       end
     end
   end

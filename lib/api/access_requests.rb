@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module API
-  class AccessRequests < Grape::API::Instance
+  class AccessRequests < ::API::Base
     include PaginationParams
 
     before { authenticate! }
 
     helpers ::API::Helpers::MembersHelpers
+
+    feature_category :authentication_and_authorization
 
     %w[group project].each do |source_type|
       params do

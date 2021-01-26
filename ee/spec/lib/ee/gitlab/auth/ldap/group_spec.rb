@@ -136,7 +136,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Group do
         stub_ldap_adapter_nested_groups(group.dn, nested_groups, adapter)
         stub_ldap_adapter_nested_groups(group2_entry.dn, [], adapter)
 
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:error).with(/Configured LDAP `base` is invalid: 'invalid,dc=example,dc=com'/)
         # Users in the top-level group always get added - they're not filtered
         # through the nested groups shenanigans.
@@ -161,9 +161,9 @@ RSpec.describe EE::Gitlab::Auth::Ldap::Group do
         stub_ldap_adapter_nested_groups(group2_entry.dn, [], adapter)
         stub_ldap_adapter_nested_groups(group3_entry.dn, [], adapter)
 
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:info).with(/Returning original DN/)
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn).with(/Received invalid member/)
         expect(group.member_dns).not_to include('invalid,ou=user,ou=groups,dc=example,dc=com')
       end

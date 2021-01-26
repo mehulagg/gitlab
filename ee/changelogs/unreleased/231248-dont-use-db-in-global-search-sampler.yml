@@ -1,5 +1,0 @@
----
-title: Dont use DB connection in GlobalSearchSampler
-merge_request: 38138
-author:
-type: fixed

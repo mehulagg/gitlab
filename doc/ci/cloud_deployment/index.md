@@ -1,17 +1,19 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
 # Cloud deployment
 
 Interacting with a major cloud provider may have become a much needed task that's
-part of your delivery process. GitLab is making this process less painful by providing Docker images
-that come with the needed libraries and tools pre-installed.
-By referencing them in your CI/CD pipeline, you'll be able to interact with your chosen
-cloud provider more easily.
+part of your delivery process. With GitLab you can
+[deploy your application anywhere](https://about.gitlab.com/stages-devops-lifecycle/deploy-targets/).
+
+For some specific deployment targets, GitLab makes this process less painful by providing Docker
+images with the needed libraries and tools pre-installed. By referencing them in your
+CI/CD pipeline, you can interact with your chosen cloud provider more easily.
 
 ## AWS
 
@@ -22,9 +24,9 @@ it easier to [deploy to AWS](#deploy-your-application-to-the-aws-elastic-contain
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31167) in GitLab 12.6.
 
-GitLab's AWS Docker image provides the [AWS Command Line Interface](https://aws.amazon.com/cli/),
+The GitLab AWS Docker image provides the [AWS Command Line Interface](https://aws.amazon.com/cli/),
 which enables you to run `aws` commands. As part of your deployment strategy, you can run `aws` commands directly from
-`.gitlab-ci.yml` by specifying [GitLab's AWS Docker image](https://gitlab.com/gitlab-org/cloud-deploy).
+`.gitlab-ci.yml` by specifying the [GitLab AWS Docker image](https://gitlab.com/gitlab-org/cloud-deploy).
 
 Some credentials are required to be able to run `aws` commands:
 
@@ -32,8 +34,8 @@ Some credentials are required to be able to run `aws` commands:
 1. Log in onto the console and create [a new IAM user](https://console.aws.amazon.com/iam/home#/home).
 1. Select your newly created user to access its details. Navigate to **Security credentials > Create a new access key**.
 
-   NOTE: **Note:**
-   A new **Access key ID** and **Secret access key** pair will be generated. Please take a note of them right away.
+   NOTE:
+   A new **Access key ID** and **Secret access key** are generated. Please take a note of them right away.
 
 1. In your GitLab project, go to **Settings > CI / CD**. Set the following as
    [environment variables](../variables/README.md#gitlab-cicd-environment-variables)
@@ -45,24 +47,24 @@ Some credentials are required to be able to run `aws` commands:
      You might want to check if the AWS service you intend to use is
      [available in the chosen region](https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/).
 
-   | Env. variable name      | Value                  |
-   |:------------------------|:-----------------------|
-   | `AWS_ACCESS_KEY_ID`     | Your Access key ID     |
-   | `AWS_SECRET_ACCESS_KEY` | Your Secret access key |
-   | `AWS_DEFAULT_REGION`    | Your region code       |
+   | Environment variable name      | Value                  |
+   |:-------------------------------|:-----------------------|
+   | `AWS_ACCESS_KEY_ID`            | Your Access key ID     |
+   | `AWS_SECRET_ACCESS_KEY`        | Your Secret access key |
+   | `AWS_DEFAULT_REGION`           | Your region code       |
 
 1. You can now use `aws` commands in the `.gitlab-ci.yml` file of this project:
 
    ```yaml
    deploy:
      stage: deploy
-     image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest # see the note below
+     image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest  # see the note below
      script:
        - aws s3 ...
        - aws create-deployment ...
    ```
 
-   NOTE: **Note:**
+   NOTE:
    The image used in the example above
    (`registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest`) is hosted on the [GitLab
    Container Registry](../../user/packages/container_registry/index.md) and is
@@ -146,11 +148,11 @@ After you have these prerequisites ready, follow these steps:
    In both cases, make sure that the value for the `containerDefinitions[].name` attribute is
    the same as the `Container name` defined in your targeted ECS service.
 
-   CAUTION: **Warning:**
+   WARNING:
    `CI_AWS_ECS_TASK_DEFINITION_FILE` takes precedence over `CI_AWS_ECS_TASK_DEFINITION` if both these environment
    variables are defined within your project.
 
-   NOTE: **Note:**
+   NOTE:
    If the name of the task definition you wrote in your JSON file is the same name
    as an existing task definition on AWS, then a new revision is created for it.
    Otherwise, a brand new task definition is created, starting at revision 1.
@@ -167,15 +169,18 @@ After you have these prerequisites ready, follow these steps:
 
 1. Commit and push your updated `.gitlab-ci.yml` to your project's repository, and you're done!
 
-   Your application Docker image will be rebuilt and pushed to the GitLab registry.
-   Then the targeted task definition will be updated with the location of the new
-   Docker image, and a new revision will be created in ECS as result.
+   Your application Docker image is rebuilt and pushed to the GitLab registry.
+   If your image is located in a private registry, make sure your task definition is
+   [configured with a `repositoryCredentials` attribute](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/private-auth.html).
 
-   Finally, your AWS ECS service will be updated with the new revision of the
+   Then the targeted task definition is updated with the location of the new
+   Docker image, and a new revision is created in ECS as result.
+
+   Finally, your AWS ECS service is updated with the new revision of the
    task definition, making the cluster pull the newest version of your
    application.
 
-CAUTION: **Warning:**
+WARNING:
 The [`AWS/Deploy-ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/AWS/Deploy-ECS.gitlab-ci.yml)
 template includes both the [`Jobs/Build.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Build.gitlab-ci.yml)
 and [`Jobs/Deploy/ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml)
@@ -184,7 +189,7 @@ and [`Jobs/Deploy/ECS.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blo
 used along with the main template. They may move or change unexpectedly causing your
 pipeline to fail if you didn't include the main template. Also, the job names within
 these templates may change. Do not override these jobs names in your own pipeline,
-as the override will stop working when the name changes.
+as the override stops working when the name changes.
 
 Alternatively, if you don't wish to use the `AWS/Deploy-ECS.gitlab-ci.yml` template
 to deploy to AWS ECS, you can always use our
@@ -197,3 +202,121 @@ deploy:
   script:
     - aws ecs register-task-definition ...
 ```
+
+### Provision and deploy to your AWS Elastic Compute Cloud (EC2)
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/201742) in GitLab 13.5.
+
+You can use the `AWS/CF-Provision-and-Deploy-EC2` CI template to perform the
+following actions within the same pipeline:
+
+1. **Create stack**: Provision your own infrastructure by leveraging the [AWS CloudFormation](https://aws.amazon.com/cloudformation/) API.
+1. **Push to S3**: Push your previously-built artifact to an [AWS S3](https://aws.amazon.com/s3/) bucket.
+1. **Deploy to EC2**: Deploy this pushed content onto an [AWS EC2](https://aws.amazon.com/ec2/) instance.
+
+![CF-Provision-and-Deploy-EC2 diagram](../img/cf_ec2_diagram_v13_5.png)
+
+#### Run the `AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml` template
+
+To run the `AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml` template, you must
+pass three JSON input objects, based on existing templates:
+
+1. The AWS documentation provides templates for the _Create stack_ and _Deploy to EC2_ steps (links
+   below). We provide the template for the remaining step, _Push to S3_:
+
+   - [Template for the _Create stack_ step on AWS](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-anatomy.html).
+   - Template for the _Push to S3_ step. Note that `source` is where a preceding `build` job built
+     your application, exporting the build through [`artifacts:paths`](../yaml/README.md#artifactspaths):
+
+     ```json
+     {
+       "applicationName": "string",
+       "source": "string",
+       "s3Location": "s3://your/bucket/project_built_file...]"
+     }
+     ```
+
+   - [Template for the _Deploy to EC2_ step on AWS](https://docs.aws.amazon.com/codedeploy/latest/APIReference/API_CreateDeployment.html).
+
+1. After you have completed these three templates based on your requirements, you
+   have two ways to pass in these JSON objects:
+
+   - They can be three actual files located in your project. You must specify their path relative to
+     your project root in your `.gitlab-ci.yml` file, using the following variables. For example, if
+     your files are in a `<project_root>/aws` folder:
+
+     ```yaml
+     variables:
+       CI_AWS_CF_CREATE_STACK_FILE: 'aws/cf_create_stack.json'
+       CI_AWS_S3_PUSH_FILE: 'aws/s3_push.json'
+       CI_AWS_EC2_DEPLOYMENT_FILE: 'aws/create_deployment.json'
+     ```
+
+   - Alternatively, you can provide these JSON objects as [file-typed environment variables](../variables/README.md#custom-environment-variables-of-type-file).
+   In your project, go to **Settings > CI / CD > Variables** and add
+   the three variables listed above as file-typed environment variables.
+   For each variable, set the value to its corresponding JSON object.
+
+1. Provide the name of the stack you're creating and/or targeting, as an environment variable:
+
+   ```yaml
+   variables:
+     CI_AWS_CF_STACK_NAME: 'YourStackName'
+   ```
+
+1. Add this CI template to your `.gitlab-ci.yml`:
+
+   ```yaml
+   include:
+     - template: AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml
+   ```
+
+When running your project pipeline at this point:
+
+- Your AWS CloudFormation stack is created based on the content of your
+  `CI_AWS_CF_CREATE_STACK_FILE` file/variable.
+  If your stack already exists, this step is skipped, but the `provision` job it belongs to still
+  runs.
+- Your built application is pushed to your S3 bucket then and deployed to your EC2 instance, based
+  on the related JSON object's content. The deployment job finishes whenever the deployment to EC2
+  is done or has failed.
+
+#### Custom build job for Auto DevOps
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216008) in GitLab 13.6.
+
+To leverage [Auto DevOps](../../topics/autodevops/index.md) for your project when deploying to
+AWS EC2, first you must define [your AWS credentials as environment variables](#run-aws-commands-from-gitlab-cicd).
+
+Next, define a job for the `build` stage. To do so, you must reference the
+`Auto-DevOps.gitlab-ci.yml` template and include a job named `build_artifact` in your
+`.gitlab-ci.yml` file. For example:
+
+```yaml
+# .gitlab-ci.yml
+
+include:
+  - template: Auto-DevOps.gitlab-ci.yml
+
+variables:
+  - AUTO_DEVOPS_PLATFORM_TARGET: EC2
+
+build_artifact:
+  stage: build
+  script:
+    - <your build script goes here>
+  artifacts:
+    paths:
+      - <built artifact>
+```
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a video walkthrough of this configuration process, see [Auto Deploy to EC2](https://www.youtube.com/watch?v=4B-qSwKnacA).
+
+### Deploy to Amazon EKS
+
+- [How to deploy your application to a GitLab-managed Amazon EKS cluster with Auto DevOps](https://about.gitlab.com/blog/2020/05/05/deploying-application-eks/)
+
+## Deploy to Google Cloud
+
+- [Deploying with GitLab on Google Cloud](https://about.gitlab.com/solutions/google-cloud-platform/)

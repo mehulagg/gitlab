@@ -1,20 +1,20 @@
 import { shallowMount } from '@vue/test-utils';
+import { GlIcon } from '@gitlab/ui';
 import CommitComponent from '~/vue_shared/components/commit.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
 describe('Commit component', () => {
   let props;
   let wrapper;
 
-  const findIcon = name => {
-    const icons = wrapper.findAll(Icon).filter(c => c.attributes('name') === name);
+  const findIcon = (name) => {
+    const icons = wrapper.findAll(GlIcon).filter((c) => c.attributes('name') === name);
     return icons.length ? icons.at(0) : icons;
   };
 
   const findUserAvatar = () => wrapper.find(UserAvatarLink);
 
-  const createComponent = propsData => {
+  const createComponent = (propsData) => {
     wrapper = shallowMount(CommitComponent, {
       propsData,
     });
@@ -43,12 +43,7 @@ describe('Commit component', () => {
       },
     });
 
-    expect(
-      wrapper
-        .find('.icon-container')
-        .find(Icon)
-        .exists(),
-    ).toBe(true);
+    expect(wrapper.find('.icon-container').find(GlIcon).exists()).toBe(true);
   });
 
   describe('Given all the props', () => {

@@ -1,7 +1,7 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
-import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
 import AddStageButton from 'ee/analytics/cycle_analytics/components/add_stage_button.vue';
+import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
+import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_nav.vue';
 import { issueStage, allowedStages as stages, stageMedians as medians } from '../mock_data';
 
 describe('StageTableNav', () => {
@@ -27,10 +27,7 @@ describe('StageTableNav', () => {
   });
 
   function selectStage(index) {
-    wrapper
-      .findAll(StageNavItem)
-      .at(index)
-      .trigger('click');
+    wrapper.findAll(StageNavItem).at(index).trigger('click');
   }
 
   describe('when a stage is clicked', () => {
@@ -60,9 +57,18 @@ describe('StageTableNav', () => {
     });
   });
 
-  it('will render the add a stage button', () => {
-    wrapper = createComponent();
-    expect(wrapper.find(AddStageButton).exists()).toBe(true);
+  describe('Add stage button', () => {
+    it('will render', () => {
+      wrapper = createComponent();
+      expect(wrapper.find(AddStageButton).exists()).toBe(true);
+    });
+
+    it('will emit showAddStageForm action when clicked', () => {
+      wrapper = createComponent({ mountFn: mount });
+      wrapper.find(AddStageButton).trigger('click');
+
+      expect(wrapper.emitted('showAddStageForm')).toHaveLength(1);
+    });
   });
 
   describe.each`

@@ -1,8 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { mapComputed } from '~/vuex_shared/bindings';
 import {
-  GlDeprecatedButton as GlButton,
+  GlButton,
   GlSprintf,
   GlLink,
   GlIcon,
@@ -10,6 +9,7 @@ import {
   GlFormInput,
   GlFormCheckbox,
 } from '@gitlab/ui';
+import { mapComputed } from '~/vuex_shared/bindings';
 import { __, s__ } from '~/locale';
 
 export default {
@@ -75,9 +75,9 @@ export default {
 <template>
   <section id="status-page" class="settings no-animate js-status-page-settings">
     <div class="settings-header">
-      <h3 ref="sectionHeader" class="h4">
+      <h4 ref="sectionHeader">
         {{ $options.i18n.headerText }}
-      </h3>
+      </h4>
       <gl-button ref="toggleBtn" class="js-settings-toggle">{{
         $options.i18n.expandBtnLabel
       }}</gl-button>
@@ -180,17 +180,16 @@ export default {
         >
           <gl-form-input id="status-page-aws-secret-access-key " v-model="awsSecretKey" />
         </gl-form-group>
-        <div class="gl-display-flex gl-justify-content-end">
-          <gl-button
-            ref="submitBtn"
-            :disabled="loading"
-            variant="success"
-            type="submit"
-            class="js-no-auto-disable"
-          >
-            {{ $options.i18n.saveBtnLabel }}
-          </gl-button>
-        </div>
+        <gl-button
+          ref="submitBtn"
+          :disabled="loading"
+          variant="success"
+          category="primary"
+          type="submit"
+          class="js-no-auto-disable"
+        >
+          {{ $options.i18n.saveBtnLabel }}
+        </gl-button>
       </form>
     </div>
   </section>

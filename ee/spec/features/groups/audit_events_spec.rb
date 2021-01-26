@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Groups > Audit Events', :js do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:alex) { create(:user, name: 'Alex') }
   let(:group) { create(:group) }
@@ -27,14 +29,14 @@ RSpec.describe 'Groups > Audit Events', :js do
     end
 
     it 'does not have Audit Events button in head nav bar' do
-      visit edit_group_path(group)
+      visit group_security_dashboard_path(group)
 
       expect(page).not_to have_link('Audit Events')
     end
   end
 
   it 'has Audit Events button in head nav bar' do
-    visit edit_group_path(group)
+    visit group_security_dashboard_path(group)
 
     expect(page).to have_link('Audit Events')
   end
@@ -45,16 +47,15 @@ RSpec.describe 'Groups > Audit Events', :js do
 
       wait_for_requests
 
-      group_member = group.members.find_by(user_id: alex)
-
-      page.within "#group_member_#{group_member.id}" do
+      page.within first_row do
         click_button 'Developer'
-        click_link 'Maintainer'
+        click_button 'Maintainer'
       end
 
-      find(:link, text: 'Settings').click
-
-      click_link 'Audit Events'
+      page.within('.qa-group-sidebar') do
+        find(:link, text: 'Security & Compliance').click
+        click_link 'Audit Events'
+      end
 
       page.within('.audit-log-table') do
         expect(page).to have_content 'Changed access level from Developer to Maintainer'
@@ -67,7 +68,7 @@ RSpec.describe 'Groups > Audit Events', :js do
   describe 'filter by date' do
     let!(:audit_event_1) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: Date.current) }
     let!(:events_path) { :group_audit_events_path }
     let!(:entity) { group }
 

@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Terraform state administration (alpha)
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2673) in GitLab 12.10.
@@ -14,11 +20,8 @@ These locations can be configured using the options described below.
 
 ## Using local storage
 
-NOTE: **Note:**
-This is the default configuration
-
-To change the location where Terraform state files are stored locally, follow the steps
-below.
+The default configuration uses local storage. To change the location where
+Terraform state files are stored locally, follow the steps below.
 
 **In Omnibus installations:**
 
@@ -26,7 +29,6 @@ below.
    `/etc/gitlab/gitlab.rb` and add the following line:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_storage_path'] = "/mnt/storage/terraform_state"
    ```
 
@@ -47,8 +49,8 @@ below.
 
 ## Using object storage **(CORE ONLY)**
 
-Instead of storing Terraform state files on disk, we recommend the use of an object
-store that is S3-compatible instead. This configuration relies on valid credentials to
+Instead of storing Terraform state files on disk, we recommend the use of [one of the supported object
+storage options](object_storage.md#options). This configuration relies on valid credentials to
 be configured already.
 
 [Read more about using object storage with GitLab](object_storage.md).
@@ -63,7 +65,7 @@ The following settings are:
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `enabled` | Enable/disable object storage | `false` |
-| `remote_directory` | The bucket name where Terraform state files will be stored | |
+| `remote_directory` | The bucket name where Terraform state files are stored | |
 | `connection` | Various connection options described below | |
 
 ### S3-compatible connection settings
@@ -76,7 +78,6 @@ See [the available connection settings for different providers](object_storage.m
    the values you want:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_object_store_enabled'] = true
    gitlab_rails['terraform_state_object_store_remote_directory'] = "terraform"
    gitlab_rails['terraform_state_object_store_connection'] = {
@@ -87,7 +88,7 @@ See [the available connection settings for different providers](object_storage.m
    }
    ```
 
-   NOTE: **Note:**
+   NOTE:
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby
@@ -99,6 +100,11 @@ See [the available connection settings for different providers](object_storage.m
    ```
 
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+1. Migrate any existing local states to the object storage (GitLab 13.9 and later):
+
+   ```shell
+   gitlab-rake gitlab:terraform_states:migrate
+   ```
 
 **In installations from source:**
 
@@ -119,3 +125,8 @@ See [the available connection settings for different providers](object_storage.m
    ```
 
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
+1. Migrate any existing local states to the object storage (GitLab 13.9 and later):
+
+   ```shell
+   sudo -u git -H bundle exec rake gitlab:terraform_states:migrate RAILS_ENV=production
+   ```

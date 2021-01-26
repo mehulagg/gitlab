@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import AccessDropdown from 'ee/projects/settings/access_dropdown';
+import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import CreateItemDropdown from '~/create_item_dropdown';
 import { s__, __ } from '~/locale';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
@@ -64,12 +64,12 @@ export default class ProtectedTagCreate {
       },
     };
 
-    Object.keys(ACCESS_LEVELS).forEach(level => {
+    Object.keys(ACCESS_LEVELS).forEach((level) => {
       const accessLevel = ACCESS_LEVELS[level];
       const selectedItems = this[`${ACCESS_LEVELS.CREATE}_dropdown`].getSelectedItems();
       const levelAttributes = [];
 
-      selectedItems.forEach(item => {
+      selectedItems.forEach((item) => {
         if (item.type === LEVEL_TYPES.USER) {
           levelAttributes.push({
             user_id: item.user_id,

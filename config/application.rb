@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'boot'
 
 # Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
@@ -27,6 +28,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/middleware/basic_health_check')
     require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
     require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
+    require_dependency Rails.root.join('lib/gitlab/middleware/handle_malformed_strings')
     require_dependency Rails.root.join('lib/gitlab/runtime')
 
     # Settings in config/environments/* take precedence over those specified here.
@@ -49,7 +51,8 @@ module Gitlab
                                      #{config.root}/app/models/members
                                      #{config.root}/app/models/project_services
                                      #{config.root}/app/graphql/resolvers/concerns
-                                     #{config.root}/app/graphql/mutations/concerns])
+                                     #{config.root}/app/graphql/mutations/concerns
+                                     #{config.root}/app/graphql/types/concerns])
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
@@ -126,14 +129,16 @@ module Gitlab
       /^description$/,
       /^note$/,
       /^text$/,
-      /^title$/
+      /^title$/,
+      /^hook$/
     ]
     config.filter_parameters += %i(
       certificate
       encrypted_key
-      hook
       import_url
       elasticsearch_url
+      search
+      jwt
       otp_attempt
       sentry_dsn
       trace
@@ -150,14 +155,6 @@ module Gitlab
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
 
-    # Configure webpack
-    config.webpack.config_file = "config/webpack.config.js"
-    config.webpack.output_dir  = "public/assets/webpack"
-    config.webpack.public_path = "assets/webpack"
-
-    # Webpack dev server configuration is handled in initializers/static_files.rb
-    config.webpack.dev_server.enabled = false
-
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
     # Enable the asset pipeline
@@ -167,6 +164,8 @@ module Gitlab
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
 
+    config.assets.precompile << "application_utilities.css"
+    config.assets.precompile << "application_utilities_dark.css"
     config.assets.precompile << "application_dark.css"
 
     config.assets.precompile << "startup/*.css"
@@ -176,15 +175,52 @@ module Gitlab
     config.assets.precompile << "mailer_client_specific.css"
     config.assets.precompile << "notify.css"
     config.assets.precompile << "mailers/*.css"
+    config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "page_bundles/alert_management_details.css"
+    config.assets.precompile << "page_bundles/alert_management_settings.css"
+    config.assets.precompile << "page_bundles/boards.css"
+    config.assets.precompile << "page_bundles/build.css"
+    config.assets.precompile << "page_bundles/ci_status.css"
+    config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/dev_ops_report.css"
+    config.assets.precompile << "page_bundles/environments.css"
+    config.assets.precompile << "page_bundles/epics.css"
+    config.assets.precompile << "page_bundles/error_tracking_details.css"
+    config.assets.precompile << "page_bundles/error_tracking_index.css"
     config.assets.precompile << "page_bundles/ide.css"
+    config.assets.precompile << "page_bundles/import.css"
+    config.assets.precompile << "page_bundles/incident_management_list.css"
+    config.assets.precompile << "page_bundles/issues_list.css"
+    config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/jira_connect_users.css"
+    config.assets.precompile << "page_bundles/merge_conflicts.css"
+    config.assets.precompile << "page_bundles/merge_requests.css"
+    config.assets.precompile << "page_bundles/milestone.css"
+    config.assets.precompile << "page_bundles/oncall_schedules.css"
+    config.assets.precompile << "page_bundles/pipeline.css"
+    config.assets.precompile << "page_bundles/pipeline_schedules.css"
+    config.assets.precompile << "page_bundles/pipelines.css"
+    config.assets.precompile << "page_bundles/productivity_analytics.css"
+    config.assets.precompile << "page_bundles/profile_two_factor_auth.css"
+    config.assets.precompile << "page_bundles/reports.css"
+    config.assets.precompile << "page_bundles/roadmap.css"
+    config.assets.precompile << "page_bundles/security_dashboard.css"
+    config.assets.precompile << "page_bundles/signup.css"
+    config.assets.precompile << "page_bundles/terminal.css"
+    config.assets.precompile << "page_bundles/todos.css"
+    config.assets.precompile << "page_bundles/wiki.css"
     config.assets.precompile << "page_bundles/xterm.css"
+    config.assets.precompile << "lazy_bundles/cropper.css"
+    config.assets.precompile << "lazy_bundles/select2.css"
     config.assets.precompile << "performance_bar.css"
-    config.assets.precompile << "lib/ace.js"
     config.assets.precompile << "disable_animations.css"
     config.assets.precompile << "snippets.css"
     config.assets.precompile << "locale/**/app.js"
     config.assets.precompile << "emoji_sprites.css"
     config.assets.precompile << "errors.css"
+    config.assets.precompile << "jira_connect.js"
+
+    config.assets.precompile << "themes/*.css"
 
     config.assets.precompile << "highlight/themes/*.css"
 
@@ -194,22 +230,9 @@ module Gitlab
     config.assets.precompile << "icons.json"
     config.assets.precompile << "illustrations/*.svg"
 
-    # Import Fontawesome fonts
-    config.assets.paths << "#{config.root}/node_modules/font-awesome/fonts"
-    config.assets.precompile << "fontawesome-webfont.woff2"
-    config.assets.precompile << "fontawesome-webfont.woff"
-
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
-
-    if Gitlab.ee?
-      %w[images javascripts stylesheets].each do |path|
-        config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
-        config.assets.precompile << "jira_connect.js"
-        config.assets.precompile << "pages/jira_connect.css"
-      end
-    end
 
     # Import path for EE specific SCSS entry point
     # In CE it will import a noop file, in EE a functioning file
@@ -223,16 +246,6 @@ module Gitlab
     # This path must come last to avoid confusing sprockets
     # See https://gitlab.com/gitlab-org/gitlab-foss/issues/64091#note_194512508
     config.assets.paths << "#{config.root}/node_modules"
-
-    if Gitlab.ee?
-      # Compile non-JS/CSS assets in the ee/app/assets folder by default
-      # Mimic sprockets-rails default: https://github.com/rails/sprockets-rails/blob/v3.2.1/lib/sprockets/railtie.rb#L84-L87
-      LOOSE_EE_APP_ASSETS = lambda do |logical_path, filename|
-        filename.start_with?(config.root.join("ee/app/assets").to_s) &&
-          !['.js', '.css', ''].include?(File.extname(logical_path))
-      end
-      config.assets.precompile << LOOSE_EE_APP_ASSETS
-    end
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
@@ -249,6 +262,8 @@ module Gitlab
     config.middleware.insert_before ActionDispatch::Cookies, ::Gitlab::Middleware::SameSiteCookies
 
     config.middleware.insert_before ActionDispatch::RemoteIp, ::Gitlab::Middleware::HandleIpSpoofAttackError
+
+    config.middleware.insert_after ActionDispatch::ActionableExceptions, ::Gitlab::Middleware::HandleMalformedStrings
 
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
@@ -298,6 +313,34 @@ module Gitlab
       g.factory_bot false
     end
 
+    # sprocket-rails adds some precompile assets we actually do not need.
+    #
+    # It copies all _non_ js and CSS files from the app/assets/ older.
+    #
+    # In our case this copies for example: Vue, Markdown and Graphql, which we do not need
+    # for production.
+    #
+    # We remove this default behavior and then reimplement it in order to consider ee/ as well
+    # and remove those other files we do not need.
+    #
+    # For reference: https://github.com/rails/sprockets-rails/blob/v3.2.1/lib/sprockets/railtie.rb#L84-L87
+    initializer :correct_precompile_targets, after: :set_default_precompile do |app|
+      app.config.assets.precompile.reject! { |entry| entry == Sprockets::Railtie::LOOSE_APP_ASSETS }
+
+      asset_roots = [config.root.join("app/assets").to_s]
+
+      if Gitlab.ee?
+        asset_roots << config.root.join("ee/app/assets").to_s
+      end
+
+      LOOSE_APP_ASSETS = lambda do |logical_path, filename|
+        filename.start_with?(*asset_roots) &&
+          !['.js', '.css', '.md', '.vue', '.graphql', ''].include?(File.extname(logical_path))
+      end
+
+      app.config.assets.precompile << LOOSE_APP_ASSETS
+    end
+
     # This empty initializer forces the :let_zeitwerk_take_over initializer to run before we load
     # initializers in config/initializers. This is done because autoloading before Zeitwerk takes
     # over is deprecated but our initializers do a lot of autoloading.
@@ -312,29 +355,18 @@ module Gitlab
       end
     end
 
-    config.after_initialize do
-      # Devise (see initializers/8_devise.rb) already reloads routes if
-      # eager loading is enabled, so don't do this twice since it's
-      # expensive.
-      Rails.application.reload_routes! unless config.eager_load
-
-      project_url_helpers = Module.new do
-        extend ActiveSupport::Concern
-
-        Gitlab::Application.routes.named_routes.helper_names.each do |name|
-          next unless name.include?('namespace_project')
-
-          define_method(name.sub('namespace_project', 'project')) do |project, *args|
-            send(name, project&.namespace, project, *args)
-          end
+    # Add EE assets. They should take precedence over CE. This means if two files exist, e.g.:
+    #
+    # ee/app/assets/stylesheets/example.scss
+    # app/assets/stylesheets/example.scss
+    #
+    # The ee/ version will be preferred.
+    initializer :prefer_ee_assets, after: :append_assets_path do |app|
+      if Gitlab.ee?
+        %w[images javascripts stylesheets].each do |path|
+          app.config.assets.paths.unshift("#{config.root}/ee/app/assets/#{path}")
         end
       end
-
-      # We add the MilestonesRoutingHelper because we know that this does not
-      # conflict with the methods defined in `project_url_helpers`, and we want
-      # these methods available in the same places.
-      Gitlab::Routing.add_helpers(project_url_helpers)
-      Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)
     end
   end
 end

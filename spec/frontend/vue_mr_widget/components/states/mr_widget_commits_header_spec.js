@@ -1,11 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import CommitsHeader from '~/vue_merge_request_widget/components/states/commits_header.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 describe('Commits header component', () => {
   let wrapper;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(CommitsHeader, {
       propsData: {
         isSquashEnabled: false,
@@ -23,7 +22,6 @@ describe('Commits header component', () => {
 
   const findHeaderWrapper = () => wrapper.find('.js-mr-widget-commits-count');
   const findCommitToggle = () => wrapper.find('.commit-edit-toggle');
-  const findIcon = () => wrapper.find(Icon);
   const findCommitsCountMessage = () => wrapper.find('.commits-count-message');
   const findTargetBranchMessage = () => wrapper.find('.label-branch');
   const findModifyButton = () => wrapper.find('.modify-message-button');
@@ -61,7 +59,7 @@ describe('Commits header component', () => {
       wrapper.setData({ expanded: false });
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(findIcon().props('name')).toBe('chevron-right');
+        expect(findCommitToggle().props('icon')).toBe('chevron-right');
       });
     });
 
@@ -100,6 +98,8 @@ describe('Commits header component', () => {
     });
 
     it('does has merge commit part of the message', () => {
+      createComponent();
+
       expect(findHeaderWrapper().text()).toContain('1 merge commit');
     });
   });
@@ -110,21 +110,21 @@ describe('Commits header component', () => {
       wrapper.setData({ expanded: true });
     });
 
-    it('toggle has aria-label equal to collapse', done => {
+    it('toggle has aria-label equal to collapse', (done) => {
       wrapper.vm.$nextTick(() => {
         expect(findCommitToggle().attributes('aria-label')).toBe('Collapse');
         done();
       });
     });
 
-    it('has a chevron-down icon', done => {
+    it('has a chevron-down icon', (done) => {
       wrapper.vm.$nextTick(() => {
-        expect(findIcon().props('name')).toBe('chevron-down');
+        expect(findCommitToggle().props('icon')).toBe('chevron-down');
         done();
       });
     });
 
-    it('has a collapse text', done => {
+    it('has a collapse text', (done) => {
       wrapper.vm.$nextTick(() => {
         expect(findHeaderWrapper().text()).toBe('Collapse');
         done();

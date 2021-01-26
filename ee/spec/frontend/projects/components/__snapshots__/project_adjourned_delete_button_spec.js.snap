@@ -17,6 +17,7 @@ exports[`Project remove modal initialized matches the snapshot 1`] = `
   />
    
   <gl-button-stub
+    buttontextclasses=""
     category="primary"
     icon=""
     role="button"
@@ -24,12 +25,13 @@ exports[`Project remove modal initialized matches the snapshot 1`] = `
     tabindex="0"
     variant="danger"
   >
-    Remove project
+    Delete project
   </gl-button-stub>
    
   <gl-modal-stub
     actioncancel="[object Object]"
     actionprimary="[object Object]"
+    dismisslabel="Close"
     footer-class="gl-bg-gray-10 gl-p-5"
     modalclass=""
     modalid="fakeUniqueId"
@@ -51,7 +53,9 @@ exports[`Project remove modal initialized matches the snapshot 1`] = `
       </p>
        
       <p>
-        <code>
+        <code
+          class="gl-white-space-pre-wrap"
+        >
           foo
         </code>
       </p>

@@ -1,10 +1,11 @@
 import { LOADING, ERROR, SUCCESS } from '../../constants';
 import { sprintf, __, s__, n__ } from '~/locale';
+import { spriteIcon } from '~/lib/utils/common_utils';
 
-export const hasCodequalityIssues = state =>
+export const hasCodequalityIssues = (state) =>
   Boolean(state.newIssues?.length || state.resolvedIssues?.length);
 
-export const codequalityStatus = state => {
+export const codequalityStatus = (state) => {
   if (state.isLoading) {
     return LOADING;
   }
@@ -15,7 +16,7 @@ export const codequalityStatus = state => {
   return SUCCESS;
 };
 
-export const codequalityText = state => {
+export const codequalityText = (state) => {
   const { newIssues, resolvedIssues } = state;
   const text = [];
 
@@ -40,7 +41,7 @@ export const codequalityText = state => {
   return text.join('');
 };
 
-export const codequalityPopover = state => {
+export const codequalityPopover = (state) => {
   if (state.headPath && !state.basePath) {
     return {
       title: s__('ciReport|Base pipeline codequality artifact not found'),
@@ -48,7 +49,7 @@ export const codequalityPopover = state => {
         s__('ciReport|%{linkStartTag}Learn more about codequality reports %{linkEndTag}'),
         {
           linkStartTag: `<a href="${state.helpPath}" target="_blank" rel="noopener noreferrer">`,
-          linkEndTag: '<i class="fa fa-external-link" aria-hidden="true"></i></a>',
+          linkEndTag: `${spriteIcon('external-link', 's16')}</a>`,
         },
         false,
       ),

@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.describe 'view user notifications' do
   let(:user) do
     create(:user) do |user|
-      user.emails.create(email: 'original@example.com', confirmed_at: Time.current)
-      user.emails.create(email: 'new@example.com', confirmed_at: Time.current)
+      user.emails.create!(email: 'original@example.com', confirmed_at: Time.current)
+      user.emails.create!(email: 'new@example.com', confirmed_at: Time.current)
       user.notification_email = 'original@example.com'
       user.save!
     end
@@ -24,8 +24,8 @@ RSpec.describe 'view user notifications' do
     get profile_notifications_path
   end
 
-  describe 'GET /profile/notifications' do
-    it 'avoid N+1 due to an additional groups (with no parent group)' do
+  describe 'GET /-/profile/notifications' do
+    it 'does not have an N+1 due to an additional groups (with no parent group)' do
       get_profile_notifications
 
       control = ActiveRecord::QueryRecorder.new do

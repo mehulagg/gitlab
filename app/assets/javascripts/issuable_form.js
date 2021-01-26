@@ -7,6 +7,7 @@ import ZenMode from './zen_mode';
 import AutoWidthDropdownSelect from './issuable/auto_width_dropdown_select';
 import { parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
 import { queryToObject, objectToQuery } from './lib/utils/url_utility';
+import { loadCSSFile } from './lib/utils/css_utils';
 
 const MR_SOURCE_BRANCH = 'merge_request[source_branch]';
 const MR_TARGET_BRANCH = 'merge_request[target_branch]';
@@ -51,12 +52,12 @@ export default class IssuableForm {
     /* eslint-disable @gitlab/require-i18n-strings */
     this.wipRegex = new RegExp(
       '^\\s*(' + // Line start, then any amount of leading whitespace
-      'draft\\s-\\s' + // Draft_-_ where "_" are *exactly* one whitespace
-      '|\\[(draft|wip)\\]\\s*' + // [Draft] or [WIP] and any following whitespace
-      '|(draft|wip):\\s*' + // Draft: or WIP: and any following whitespace
-      '|(draft|wip)\\s+' + // Draft_ or WIP_ where "_" is at least one whitespace
-      '|\\(draft\\)\\s*' + // (Draft) and any following whitespace
-      ')+' + // At least one repeated match of the preceding parenthetical
+        'draft\\s-\\s' + // Draft_-_ where "_" are *exactly* one whitespace
+        '|\\[(draft|wip)\\]\\s*' + // [Draft] or [WIP] and any following whitespace
+        '|(draft|wip):\\s*' + // Draft: or WIP: and any following whitespace
+        '|(draft|wip)\\s+' + // Draft_ or WIP_ where "_" is at least one whitespace
+        '|\\(draft\\)\\s*' + // (Draft) and any following whitespace
+        ')+' + // At least one repeated match of the preceding parenthetical
         '\\s*', // Any amount of trailing whitespace
       'i', // Match any case(s)
     );
@@ -66,6 +67,7 @@ export default class IssuableForm {
       gl.GfmAutoComplete && gl.GfmAutoComplete.dataSources,
     ).setup();
     this.usersSelect = new UsersSelect();
+    this.reviewersSelect = new UsersSelect(undefined, '.js-reviewer-search');
     this.zenMode = new ZenMode();
 
     this.titleField = this.form.find('input[name*="[title]"]');
@@ -87,9 +89,9 @@ export default class IssuableForm {
         theme: 'gitlab-theme animate-picker',
         format: 'yyyy-mm-dd',
         container: $issuableDueDate.parent().get(0),
-        parse: dateString => parsePikadayDate(dateString),
-        toString: date => pikadayToString(date),
-        onSelect: dateText => $issuableDueDate.val(calendar.toString(dateText)),
+        parse: (dateString) => parsePikadayDate(dateString),
+        toString: (date) => pikadayToString(date),
+        onSelect: (dateText) => $issuableDueDate.val(calendar.toString(dateText)),
         firstDay: gon.first_day_of_week,
       });
       calendar.setDate(parsePikadayDate($issuableDueDate.val()));
@@ -183,36 +185,41 @@ export default class IssuableForm {
   initTargetBranchDropdown() {
     import(/* webpackChunkName: 'select2' */ 'select2/select2')
       .then(() => {
-        this.$targetBranchSelect.select2({
-          ...AutoWidthDropdownSelect.selectOptions('js-target-branch-select'),
-          ajax: {
-            url: this.$targetBranchSelect.data('endpoint'),
-            dataType: 'JSON',
-            quietMillis: 250,
-            data(search) {
-              return {
-                search,
-              };
-            },
-            results(data) {
-              return {
-                // `data` keys are translated so we can't just access them with a string based key
-                results: data[Object.keys(data)[0]].map(name => ({
-                  id: name,
-                  text: name,
-                })),
-              };
-            },
-          },
-          initSelection(el, callback) {
-            const val = el.val();
+        // eslint-disable-next-line promise/no-nesting
+        loadCSSFile(gon.select2_css_path)
+          .then(() => {
+            this.$targetBranchSelect.select2({
+              ...AutoWidthDropdownSelect.selectOptions('js-target-branch-select'),
+              ajax: {
+                url: this.$targetBranchSelect.data('endpoint'),
+                dataType: 'JSON',
+                quietMillis: 250,
+                data(search) {
+                  return {
+                    search,
+                  };
+                },
+                results(data) {
+                  return {
+                    // `data` keys are translated so we can't just access them with a string based key
+                    results: data[Object.keys(data)[0]].map((name) => ({
+                      id: name,
+                      text: name,
+                    })),
+                  };
+                },
+              },
+              initSelection(el, callback) {
+                const val = el.val();
 
-            callback({
-              id: val,
-              text: val,
+                callback({
+                  id: val,
+                  text: val,
+                });
+              },
             });
-          },
-        });
+          })
+          .catch(() => {});
       })
       .catch(() => {});
   }

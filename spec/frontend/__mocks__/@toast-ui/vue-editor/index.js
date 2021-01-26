@@ -1,3 +1,12 @@
+export const mockEditorApi = {
+  eventManager: {
+    addEventType: jest.fn(),
+    listen: jest.fn(),
+    removeEventHandler: jest.fn(),
+  },
+  getMarkdown: jest.fn(),
+};
+
 export const Editor = {
   props: {
     initialValue: {
@@ -16,6 +25,9 @@ export const Editor = {
     previewStyle: {
       type: String,
     },
+  },
+  created() {
+    this.$emit('load', mockEditorApi);
   },
   render(h) {
     return h('div');

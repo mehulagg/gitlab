@@ -4,14 +4,15 @@ module Vulnerabilities
   class UpdateService
     include Gitlab::Allowable
 
-    attr_reader :project, :author, :finding
+    attr_reader :project, :author, :finding, :resolved_on_default_branch
 
     delegate :vulnerability, to: :finding
 
-    def initialize(project, author, finding:)
+    def initialize(project, author, finding:, resolved_on_default_branch: nil)
       @project = project
       @author = author
       @finding = finding
+      @resolved_on_default_branch = resolved_on_default_branch
     end
 
     def execute
@@ -28,9 +29,10 @@ module Vulnerabilities
 
     def vulnerability_params
       {
-        title: finding.name,
+        title: finding.name.truncate(::Issuable::TITLE_LENGTH_MAX),
         severity: vulnerability.severity_overridden? ? vulnerability.severity : finding.severity,
-        confidence: vulnerability.confidence_overridden? ? vulnerability.confidence : finding.confidence
+        confidence: vulnerability.confidence_overridden? ? vulnerability.confidence : finding.confidence,
+        resolved_on_default_branch: resolved_on_default_branch.nil? ? vulnerability.resolved_on_default_branch : resolved_on_default_branch
       }
     end
   end

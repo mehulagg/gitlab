@@ -11,8 +11,8 @@ RSpec.shared_examples_for 'audit events date filter' do
     expect(page).not_to have_content(audit_event_3.present.date)
   end
 
-  it 'shows only yesterday events' do
-    visit method(events_path).call(entity, created_after: 2.days.ago.to_date)
+  it 'shows only today\'s event' do
+    visit method(events_path).call(entity, created_after: 1.day.ago.to_date, created_before: Date.current.to_date)
 
     find('.audit-log-table td', match: :first)
 

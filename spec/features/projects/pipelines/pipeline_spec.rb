@@ -14,6 +14,8 @@ RSpec.describe 'Pipeline', :js do
   before do
     sign_in(user)
     project.add_role(user, role)
+    stub_feature_flags(graphql_pipeline_details: false)
+    stub_feature_flags(graphql_pipeline_details_users: false)
   end
 
   shared_context 'pipeline builds' do
@@ -137,6 +139,7 @@ RSpec.describe 'Pipeline', :js do
             source_project: project,
             source_branch: pipeline.ref)
         end
+
         let!(:merge_request2) do
           create(:merge_request,
             source_project: project,
@@ -171,10 +174,17 @@ RSpec.describe 'Pipeline', :js do
       end
     end
 
-    it_behaves_like 'showing user status' do
-      let(:user_with_status) { pipeline.user }
+    describe 'pipelines details view' do
+      let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
 
-      subject { visit project_pipeline_path(project, pipeline) }
+      it 'pipeline header shows the user status and emoji' do
+        visit project_pipeline_path(project, pipeline)
+
+        within '[data-testid="ci-header-content"]' do
+          expect(page).to have_selector("[data-testid='#{status.message}']")
+          expect(page).to have_selector("[data-name='#{status.emoji}']")
+        end
+      end
     end
 
     describe 'pipeline graph' do
@@ -337,7 +347,7 @@ RSpec.describe 'Pipeline', :js do
       it 'shows Pipeline, Jobs, DAG and Failed Jobs tabs with link' do
         expect(page).to have_link('Pipeline')
         expect(page).to have_link('Jobs')
-        expect(page).to have_link('DAG')
+        expect(page).to have_link('Needs')
         expect(page).to have_link('Failed Jobs')
       end
 
@@ -370,14 +380,14 @@ RSpec.describe 'Pipeline', :js do
 
       context 'with test reports' do
         it 'shows badge counter in Tests tab' do
-          expect(page.find('.js-test-report-badge-counter').text).to eq(pipeline.test_report_summary.total_count.to_s)
+          expect(page.find('.js-test-report-badge-counter').text).to eq(pipeline.test_report_summary.total[:count].to_s)
         end
 
         it 'calls summary.json endpoint', :js do
           find('.js-tests-tab-link').click
 
           expect(page).to have_content('Jobs')
-          expect(page).to have_selector('.js-tests-detail', visible: :all)
+          expect(page).to have_selector('[data-testid="tests-detail"]', visible: :all)
         end
       end
 
@@ -399,7 +409,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('.js-retry-button').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do
@@ -614,20 +624,6 @@ RSpec.describe 'Pipeline', :js do
               href: project_commits_path(merge_request.target_project, merge_request.target_branch))
           end
         end
-      end
-    end
-
-    context 'when FF dag_pipeline_tab is disabled' do
-      before do
-        stub_feature_flags(dag_pipeline_tab: false)
-        visit_pipeline
-      end
-
-      it 'does not show DAG link' do
-        expect(page).to have_link('Pipeline')
-        expect(page).to have_link('Jobs')
-        expect(page).not_to have_link('DAG')
-        expect(page).to have_link('Failed Jobs')
       end
     end
   end
@@ -884,7 +880,7 @@ RSpec.describe 'Pipeline', :js do
       it 'shows Pipeline, Jobs and DAG tabs with link' do
         expect(page).to have_link('Pipeline')
         expect(page).to have_link('Jobs')
-        expect(page).to have_link('DAG')
+        expect(page).to have_link('Needs')
       end
 
       it 'shows counter in Jobs tab' do
@@ -901,7 +897,7 @@ RSpec.describe 'Pipeline', :js do
 
       context 'when retrying' do
         before do
-          find('.js-retry-button').click
+          find('[data-testid="retryPipeline"]').click
         end
 
         it 'does not show a "Retry" button', :sidekiq_might_not_need_inline do

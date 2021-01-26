@@ -1,10 +1,11 @@
-import SnippetHeader from '~/snippets/components/snippet_header.vue';
-import DeleteSnippetMutation from '~/snippets/mutations/deleteSnippet.mutation.graphql';
 import { ApolloMutation } from 'vue-apollo';
 import { GlButton, GlModal } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { Blob, BinaryBlob } from 'jest/blob/components/mock_data';
 import waitForPromises from 'helpers/wait_for_promises';
+import DeleteSnippetMutation from '~/snippets/mutations/deleteSnippet.mutation.graphql';
+import SnippetHeader from '~/snippets/components/snippet_header.vue';
+import { differenceInMilliseconds } from '~/lib/utils/datetime_utility';
 
 describe('Snippet header component', () => {
   let wrapper;
@@ -14,6 +15,9 @@ describe('Snippet header component', () => {
 
   let errorMsg;
   let err;
+  const originalRelativeUrlRoot = gon.relative_url_root;
+
+  const GlEmoji = { template: '<img/>' };
 
   function createComponent({
     loading = false,
@@ -45,11 +49,17 @@ describe('Snippet header component', () => {
       },
       stubs: {
         ApolloMutation,
+        GlEmoji,
       },
     });
   }
 
+  const findAuthorEmoji = () => wrapper.find(GlEmoji);
+  const findAuthoredMessage = () => wrapper.find('[data-testid="authored-message"]').text();
+  const buttonCount = () => wrapper.findAll(GlButton).length;
+
   beforeEach(() => {
+    gon.relative_url_root = '/foo/';
     snippet = {
       id: 'gid://gitlab/PersonalSnippet/50',
       title: 'The property of Thor',
@@ -63,9 +73,10 @@ describe('Snippet header component', () => {
       project: null,
       author: {
         name: 'Thor Odinson',
+        status: null,
       },
       blobs: [Blob],
-      createdAt: new Date(Date.now() - 32 * 24 * 3600 * 1000).toISOString(),
+      createdAt: new Date(differenceInMilliseconds(32 * 24 * 3600 * 1000)).toISOString(),
     };
 
     mutationVariables = {
@@ -86,6 +97,7 @@ describe('Snippet header component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    gon.relative_url_root = originalRelativeUrlRoot;
   });
 
   it('renders itself', () => {
@@ -96,9 +108,28 @@ describe('Snippet header component', () => {
   it('renders a message showing snippet creation date and author', () => {
     createComponent();
 
-    const text = wrapper.find('[data-testid="authored-message"]').text();
+    const text = findAuthoredMessage();
     expect(text).toContain('Authored 1 month ago by');
     expect(text).toContain('Thor Odinson');
+  });
+
+  describe('author status', () => {
+    it('is rendered when it is set', () => {
+      snippet.author.status = {
+        message: 'At work',
+        emoji: 'hammer',
+      };
+      createComponent();
+
+      expect(findAuthorEmoji().attributes('title')).toBe(snippet.author.status.message);
+      expect(findAuthorEmoji().attributes('data-name')).toBe(snippet.author.status.emoji);
+    });
+
+    it('is not rendered when the user has no status', () => {
+      createComponent();
+
+      expect(findAuthorEmoji().exists()).toBe(false);
+    });
   });
 
   it('renders a message showing only snippet creation date if author is null', () => {
@@ -106,7 +137,7 @@ describe('Snippet header component', () => {
 
     createComponent();
 
-    const text = wrapper.find('[data-testid="authored-message"]').text();
+    const text = findAuthoredMessage();
     expect(text).toBe('Authored 1 month ago');
   });
 
@@ -117,7 +148,7 @@ describe('Snippet header component', () => {
         updateSnippet: false,
       },
     });
-    expect(wrapper.findAll(GlButton).length).toEqual(0);
+    expect(buttonCount()).toEqual(0);
 
     createComponent({
       permissions: {
@@ -125,7 +156,7 @@ describe('Snippet header component', () => {
         updateSnippet: false,
       },
     });
-    expect(wrapper.findAll(GlButton).length).toEqual(1);
+    expect(buttonCount()).toEqual(1);
 
     createComponent({
       permissions: {
@@ -133,7 +164,7 @@ describe('Snippet header component', () => {
         updateSnippet: true,
       },
     });
-    expect(wrapper.findAll(GlButton).length).toEqual(2);
+    expect(buttonCount()).toEqual(2);
 
     createComponent({
       permissions: {
@@ -145,7 +176,7 @@ describe('Snippet header component', () => {
       canCreateSnippet: true,
     });
     return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.findAll(GlButton).length).toEqual(3);
+      expect(buttonCount()).toEqual(3);
     });
   });
 
@@ -213,7 +244,7 @@ describe('Snippet header component', () => {
       it('redirects to dashboard/snippets for personal snippet', () => {
         return createDeleteSnippet().then(() => {
           expect(wrapper.vm.closeDeleteModal).toHaveBeenCalled();
-          expect(window.location.pathname).toBe('dashboard/snippets');
+          expect(window.location.pathname).toBe(`${gon.relative_url_root}dashboard/snippets`);
         });
       });
 

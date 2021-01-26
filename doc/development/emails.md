@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Dealing with email in development
 
 ## Ensuring compatibility with mailer Sidekiq jobs
@@ -27,7 +33,7 @@ Please note that [S/MIME signed](../administration/smime_signing_email.md) email
 ## Mailer previews
 
 Rails provides a way to preview our mailer templates in HTML and plaintext using
-dummy data.
+sample data.
 
 The previews live in [`app/mailers/previews`](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/mailers/previews) and can be viewed at
 [`/rails/mailers`](http://localhost:3000/rails/mailers).
@@ -77,7 +83,7 @@ See the [Rails guides](https://guides.rubyonrails.org/action_mailer_basics.html#
      expunge_deleted: false
    ```
 
-   As mentioned, the part after `+` is ignored, and this will end up in the mailbox for `gitlab-incoming@gmail.com`.
+   As mentioned, the part after `+` is ignored, and this message is sent to the mailbox for `gitlab-incoming@gmail.com`.
 
 1. Run this command in the GitLab root directory to launch `mail_room`:
 

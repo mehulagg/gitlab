@@ -1,6 +1,6 @@
 <script>
+import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { GlButton, GlNewDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 
 export default {
   i18n: {
@@ -8,8 +8,8 @@ export default {
   },
   components: {
     GlButton,
-    GlNewDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
   props: {
     jobs: {
@@ -38,27 +38,22 @@ export default {
 
 <template>
   <div>
-    <strong>{{ s__('SecurityReports|Download Report') }}</strong>
-    <gl-new-dropdown
+    <slot name="label"></slot>
+    <gl-dropdown
       v-if="hasDropdown"
       class="d-block mt-1"
       :text="$options.i18n.FUZZING_ARTIFACTS"
       category="secondary"
-      variant="info"
       size="small"
     >
-      <gl-deprecated-dropdown-item
-        v-for="job in jobs"
-        :key="job.id"
-        :href="artifactDownloadUrl(job)"
-        >{{ job.name }}</gl-deprecated-dropdown-item
-      >
-    </gl-new-dropdown>
+      <gl-dropdown-item v-for="job in jobs" :key="job.id" :href="artifactDownloadUrl(job)">{{
+        job.name
+      }}</gl-dropdown-item>
+    </gl-dropdown>
     <gl-button
       v-else
       class="d-block mt-1"
       category="secondary"
-      variant="info"
       size="small"
       :href="artifactDownloadUrl(jobs[0])"
     >

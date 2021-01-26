@@ -7,6 +7,8 @@ class Dashboard::SnippetsController < Dashboard::ApplicationController
 
   skip_cross_project_access_check :index
 
+  feature_category :snippets
+
   def index
     @snippet_counts = Snippets::CountService
       .new(current_user, author: current_user)
@@ -16,6 +18,7 @@ class Dashboard::SnippetsController < Dashboard::ApplicationController
       .execute
       .page(params[:page])
       .inc_author
+      .inc_projects_namespace_route
 
     return if redirect_out_of_range(@snippets)
 

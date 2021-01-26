@@ -19,15 +19,16 @@ RSpec.describe Registrations::ExperienceLevelsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_user(onboarding_issues: true)
+        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
+      it { is_expected.to render_template('layouts/devise_experimental_onboarding_issues') }
       it { is_expected.to render_template(:show) }
 
       context 'when not part of the onboarding issues experiment' do
         before do
-          stub_experiment_for_user(onboarding_issues: false)
+          stub_experiment_for_subject(onboarding_issues: false)
         end
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
@@ -46,20 +47,18 @@ RSpec.describe Registrations::ExperienceLevelsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_user(onboarding_issues: true)
+        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       context 'when not part of the onboarding issues experiment' do
         before do
-          stub_experiment_for_user(onboarding_issues: false)
+          stub_experiment_for_subject(onboarding_issues: false)
         end
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
 
       context 'when user is successfully updated' do
-        it { is_expected.to set_flash[:message].to('Welcome! You have signed up successfully.') }
-
         context 'when no experience_level is sent' do
           before do
             user.user_preference.update_attribute(:experience_level, :novice)
@@ -86,16 +85,49 @@ RSpec.describe Registrations::ExperienceLevelsController do
           end
         end
 
-        context 'when a namespace_path is sent' do
-          it { is_expected.to have_gitlab_http_status(:redirect) }
-          it { is_expected.to redirect_to(group_path(namespace)) }
-        end
+        describe 'redirection' do
+          let(:project) { build(:project, namespace: namespace, creator: user, path: 'project-path') }
+          let(:issues_board) { build(:board, id: 123, project: project) }
 
-        context 'when no namespace_path is sent' do
-          let(:params) { super().merge(namespace_path: nil) }
+          before do
+            stub_experiment_for_subject(
+              onboarding_issues: true,
+              default_to_issues_board: default_to_issues_board_xp?
+            )
+            allow_next_instance_of(LearnGitlab) do |learn_gitlab|
+              allow(learn_gitlab).to receive(:available?).and_return(learn_gitlab_available?)
+              allow(learn_gitlab).to receive(:project).and_return(project)
+              allow(learn_gitlab).to receive(:board).and_return(issues_board)
+            end
+          end
 
-          it { is_expected.to have_gitlab_http_status(:redirect) }
-          it { is_expected.to redirect_to(root_path) }
+          context 'when namespace_path param is missing' do
+            let(:params) { super().merge(namespace_path: nil) }
+
+            where(
+              default_to_issues_board_xp?: [true, false],
+              learn_gitlab_available?: [true, false]
+            )
+
+            with_them do
+              it { is_expected.to redirect_to('/') }
+            end
+          end
+
+          context 'when we have a namespace_path param' do
+            using RSpec::Parameterized::TableSyntax
+
+            where(:default_to_issues_board_xp?, :learn_gitlab_available?, :path) do
+              true  | true  | '/group-path/project-path/-/boards/123'
+              true  | false | '/group-path'
+              false | true  | '/group-path'
+              false | false | '/group-path'
+            end
+
+            with_them do
+              it { is_expected.to redirect_to(path) }
+            end
+          end
         end
 
         describe 'applying the chosen level' do

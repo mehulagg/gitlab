@@ -7,9 +7,9 @@ RSpec.describe 'getting Alert Management Alerts' do
   let_it_be(:payload) { { 'custom' => { 'alert' => 'payload' }, 'runbook' => 'runbook' } }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, issue: nil, severity: :low) }
-  let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields, project: project, severity: :critical, payload: payload) }
-  let_it_be(:other_project_alert) { create(:alert_management_alert, :all_fields) }
+  let_it_be(:resolved_alert) { create(:alert_management_alert, :all_fields, :resolved, project: project, issue: nil, severity: :low).present }
+  let_it_be(:triggered_alert) { create(:alert_management_alert, :all_fields, project: project, severity: :critical, payload: payload).present }
+  let_it_be(:other_project_alert) { create(:alert_management_alert, :all_fields).present }
 
   let(:params) { {} }
 
@@ -75,6 +75,8 @@ RSpec.describe 'getting Alert Management Alerts' do
           'createdAt' => triggered_alert.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
           'updatedAt' => triggered_alert.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
           'metricsDashboardUrl' => nil,
+          'detailsUrl' => triggered_alert.details_url,
+          'prometheusAlert' => nil,
           'runbook' => 'runbook'
         )
 
@@ -135,6 +137,19 @@ RSpec.describe 'getting Alert Management Alerts' do
           let(:params) { { search: 'something random' } }
 
           it { expect(alerts.size).to eq(0) }
+        end
+      end
+
+      context 'assignee_username' do
+        let(:alert) { triggered_alert }
+        let(:assignee) { alert.assignees.first! }
+        let(:params) { { assignee_username: assignee.username } }
+
+        it_behaves_like 'a working graphql query'
+
+        specify do
+          expect(alerts.size).to eq(1)
+          expect(first_alert['iid']).to eq(alert.iid.to_s)
         end
       end
     end

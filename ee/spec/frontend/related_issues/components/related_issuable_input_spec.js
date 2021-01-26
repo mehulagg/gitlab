@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
-import { issuableTypesMap, PathIdSeparator } from 'ee/related_issues/constants';
-import RelatedIssuableInput from 'ee/related_issues/components/related_issuable_input.vue';
+import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
+import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 
 jest.mock('ee_else_ce/gfm_auto_complete', () => {
   return function gfmAutoComplete() {
@@ -77,7 +77,7 @@ describe('RelatedIssuableInput', () => {
           references: ['foo', 'bar'],
         },
         // We need to attach to document, so that `document.activeElement` is properly set in jsdom
-        attachToDocument: true,
+        attachTo: document.body,
       });
 
       wrapper.find('li').trigger('click');

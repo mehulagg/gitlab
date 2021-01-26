@@ -502,6 +502,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
       let(:project_tree_restorer) do
         described_class.new(user: user, shared: shared, project: project)
       end
+
       let(:restored_project_json) { project_tree_restorer.restore }
 
       it 'does not read a symlink' do
@@ -673,20 +674,16 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
         end
 
         it 'does not allow setting params that are excluded from import_export settings' do
-          project.create_import_data(data: { override_params: { lfs_enabled: true } })
+          original_value = project.lfs_enabled?
+
+          project.create_import_data(data: { override_params: { lfs_enabled: !original_value } })
 
           expect(restored_project_json).to eq(true)
-          expect(project.lfs_enabled).to be_falsey
+          expect(project.lfs_enabled).to eq(original_value)
         end
 
         it 'overrides project feature access levels' do
-          access_level_keys = project.project_feature.attributes.keys.select { |a| a =~ /_access_level/ }
-
-          # `pages_access_level` is not included, since it is not available in the public API
-          # and has a dependency on project's visibility level
-          # see ProjectFeature model
-          access_level_keys.delete('pages_access_level')
-
+          access_level_keys = ProjectFeature.available_features.map { |feature| ProjectFeature.access_level_attribute(feature) }
           disabled_access_levels = Hash[access_level_keys.collect { |item| [item, 'disabled'] }]
 
           project.create_import_data(data: { override_params: disabled_access_levels })
@@ -919,6 +916,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
             }
           ]
         end
+
         let(:tree_hash) { { 'project_members' => project_members } }
 
         before do
@@ -977,6 +975,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
         create(:project, :builds_disabled, :issues_disabled,
                { name: 'project', path: 'project' })
       end
+
       let(:shared) { project.import_export_shared }
       let(:project_tree_restorer) { described_class.new(user: user, shared: shared, project: project) }
 

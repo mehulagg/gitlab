@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import Component from 'ee/subscriptions/new/components/order_summary.vue';
 import createStore from 'ee/subscriptions/new/store';
 import * as types from 'ee/subscriptions/new/store/mutation_types';
-import Component from 'ee/subscriptions/new/components/order_summary.vue';
 
 describe('Order Summary', () => {
   const localVue = createLocalVue();
@@ -10,14 +10,14 @@ describe('Order Summary', () => {
 
   let wrapper;
 
-  const planData = [
-    { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
-    { id: 'thirdPlanId', code: 'gold', price_per_year: 1188 },
+  const availablePlans = [
+    { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'bronze plan' },
+    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver plan' },
+    { id: 'thirdPlanId', code: 'gold', price_per_year: 1188, name: 'gold plan' },
   ];
 
   const initialData = {
-    planData: JSON.stringify(planData),
+    availablePlans: JSON.stringify(availablePlans),
     planId: 'thirdPlanId',
     namespaceId: null,
     fullName: 'Full Name',

@@ -84,7 +84,7 @@ RSpec.shared_examples 'show and render proper snippet blob' do
         expect(page).not_to have_selector('.js-blob-viewer-switcher')
 
         # shows an enabled copy button
-        expect(page).to have_selector('.js-copy-blob-source-btn:not(.disabled)')
+        expect(page).to have_button('Copy file contents', disabled: false)
 
         # shows a raw button
         expect(page).to have_link('Open raw')
@@ -106,7 +106,6 @@ RSpec.shared_examples 'show and render proper snippet blob' do
       it 'displays the blob using the rich viewer' do
         aggregate_failures do
           # hides the simple viewer
-          expect(page).to have_selector('.blob-viewer[data-type="simple"]', visible: false)
           expect(page).to have_selector('.blob-viewer[data-type="rich"]')
 
           # shows rendered Markdown
@@ -116,7 +115,7 @@ RSpec.shared_examples 'show and render proper snippet blob' do
           expect(page).to have_selector('.js-blob-viewer-switcher')
 
           # shows a disabled copy button
-          expect(page).to have_selector('.js-copy-blob-source-btn.disabled')
+          expect(page).to have_button('Copy file contents', disabled: true)
 
           # shows a raw button
           expect(page).to have_link('Open raw')
@@ -128,7 +127,7 @@ RSpec.shared_examples 'show and render proper snippet blob' do
 
       context 'switching to the simple viewer' do
         before do
-          find('.js-blob-viewer-switch-btn[data-viewer=simple]').click
+          find_button('Display source').click
 
           wait_for_requests
         end
@@ -137,19 +136,18 @@ RSpec.shared_examples 'show and render proper snippet blob' do
           aggregate_failures do
             # hides the rich viewer
             expect(page).to have_selector('.blob-viewer[data-type="simple"]')
-            expect(page).to have_selector('.blob-viewer[data-type="rich"]', visible: false)
 
             # shows highlighted Markdown code
             expect(page).to have_content("[PEP-8](http://www.python.org/dev/peps/pep-0008/)")
 
             # shows an enabled copy button
-            expect(page).to have_selector('.js-copy-blob-source-btn:not(.disabled)')
+            expect(page).to have_button('Copy file contents', disabled: false)
           end
         end
 
         context 'switching to the rich viewer again' do
           before do
-            find('.js-blob-viewer-switch-btn[data-viewer=rich]').click
+            find_button('Display rendered file').click
 
             wait_for_requests
           end
@@ -157,11 +155,11 @@ RSpec.shared_examples 'show and render proper snippet blob' do
           it 'displays the blob using the rich viewer' do
             aggregate_failures do
               # hides the simple viewer
-              expect(page).to have_selector('.blob-viewer[data-type="simple"]', visible: false)
               expect(page).to have_selector('.blob-viewer[data-type="rich"]')
 
-              # shows an enabled copy button
-              expect(page).to have_selector('.js-copy-blob-source-btn:not(.disabled)')
+              # Used to show an enabled copy button since the code has already been fetched
+              # Will be resolved in https://gitlab.com/gitlab-org/gitlab/-/issues/262389
+              expect(page).to have_button('Copy file contents', disabled: true)
             end
           end
         end
@@ -169,7 +167,8 @@ RSpec.shared_examples 'show and render proper snippet blob' do
     end
 
     context 'visiting with a line number anchor' do
-      let(:anchor) { 'L1' }
+      # L1 used to work and will be revisited in https://gitlab.com/gitlab-org/gitlab/-/issues/262391
+      let(:anchor) { 'LC1' }
 
       it 'displays the blob using the simple viewer' do
         subject
@@ -177,7 +176,6 @@ RSpec.shared_examples 'show and render proper snippet blob' do
         aggregate_failures do
           # hides the rich viewer
           expect(page).to have_selector('.blob-viewer[data-type="simple"]')
-          expect(page).to have_selector('.blob-viewer[data-type="rich"]', visible: false)
 
           # highlights the line in question
           expect(page).to have_selector('#LC1.hll')
@@ -186,9 +184,89 @@ RSpec.shared_examples 'show and render proper snippet blob' do
           expect(page).to have_content("[PEP-8](http://www.python.org/dev/peps/pep-0008/)")
 
           # shows an enabled copy button
-          expect(page).to have_selector('.js-copy-blob-source-btn:not(.disabled)')
+          expect(page).to have_button('Copy file contents', disabled: false)
         end
       end
     end
+  end
+end
+
+RSpec.shared_examples 'personal snippet with references' do
+  let_it_be(:project)         { create(:project, :repository) }
+  let_it_be(:merge_request)   { create(:merge_request, source_project: project) }
+  let_it_be(:project_snippet) { create(:project_snippet, :repository, project: project)}
+  let_it_be(:issue)           { create(:issue, project: project) }
+  let_it_be(:commit)          { project.commit }
+
+  let(:mr_reference)          { merge_request.to_reference(full: true) }
+  let(:issue_reference)       { issue.to_reference(full: true) }
+  let(:snippet_reference)     { project_snippet.to_reference(full: true) }
+  let(:commit_reference)      { commit.reference_link_text(full: true) }
+
+  RSpec.shared_examples 'handles resource links' do
+    context 'with access to the resource' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'converts the reference to a link' do
+        subject
+
+        page.within(container) do
+          aggregate_failures do
+            expect(page).to have_link(mr_reference)
+            expect(page).to have_link(issue_reference)
+            expect(page).to have_link(snippet_reference)
+            expect(page).to have_link(commit_reference)
+          end
+        end
+      end
+    end
+
+    context 'without access to the resource' do
+      it 'does not convert the reference to a link' do
+        subject
+
+        page.within(container) do
+          expect(page).not_to have_link(mr_reference)
+          expect(page).not_to have_link(issue_reference)
+          expect(page).not_to have_link(snippet_reference)
+          expect(page).not_to have_link(commit_reference)
+        end
+      end
+    end
+  end
+
+  context 'when using references to resources' do
+    let(:references) do
+      <<~REFERENCES
+        MR: #{mr_reference}
+
+        Commit: #{commit_reference}
+
+        Issue: #{issue_reference}
+
+        ProjectSnippet: #{snippet_reference}
+      REFERENCES
+    end
+
+    it_behaves_like 'handles resource links'
+  end
+
+  context 'when using links to resources' do
+    let(:args) { { host: Gitlab.config.gitlab.url, port: nil } }
+    let(:references) do
+      <<~REFERENCES
+        MR: #{merge_request_url(merge_request, args)}
+
+        Commit: #{project_commit_url(project, commit, args)}
+
+        Issue: #{issue_url(issue, args)}
+
+        ProjectSnippet: #{project_snippet_url(project, project_snippet, args)}
+      REFERENCES
+    end
+
+    it_behaves_like 'handles resource links'
   end
 end

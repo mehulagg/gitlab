@@ -16,14 +16,20 @@ RSpec.describe BoardsResponses do
   end
 
   describe '#serialize_as_json' do
-    let!(:board) { create(:board, milestone: milestone) }
+    let(:milestone) { nil }
+    let(:iteration) { nil }
+    let(:board) { create(:board, milestone: milestone, iteration: iteration) }
+
+    context 'without milestone or iteration' do
+      it 'serialises properly' do
+        expected = { id: board.id, name: board.name }.as_json
+
+        expect(subject.serialize_as_json(board)).to match(expected)
+      end
+    end
 
     context 'with milestone' do
-      let(:milestone) { create(:milestone) }
-
-      before do
-        board.update_attribute(:milestone_id, milestone.id)
-      end
+      let_it_be(:milestone) { build_stubbed(:milestone) }
 
       it 'serialises properly' do
         expected = { id: board.id, name: board.name, milestone: { id: milestone.id, title: milestone.title } }.as_json
@@ -32,11 +38,11 @@ RSpec.describe BoardsResponses do
       end
     end
 
-    context 'without milestone' do
-      let(:milestone) { nil }
+    context 'with iteration' do
+      let_it_be(:iteration) { build_stubbed(:iteration) }
 
       it 'serialises properly' do
-        expected = { id: board.id, name: board.name }.as_json
+        expected = { id: board.id, name: board.name, iteration: { id: iteration.id, title: iteration.title } }.as_json
 
         expect(subject.serialize_as_json(board)).to match(expected)
       end

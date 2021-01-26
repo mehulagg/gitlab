@@ -1,12 +1,12 @@
-import createFlash from '~/flash';
-import { __ } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
-import * as types from '../base/mutation_types';
 import {
   mapApprovalRuleRequest,
   mapApprovalSettingsResponse,
   mapApprovalFallbackRuleRequest,
 } from 'ee/approvals/mappers';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import * as types from '../base/mutation_types';
 
 export const receiveRulesSuccess = ({ commit }, approvalSettings) => {
   commit(types.SET_APPROVAL_SETTINGS, approvalSettings);
@@ -20,7 +20,7 @@ export const fetchRules = ({ rootState, dispatch, commit }) => {
 
   return axios
     .get(settingsPath)
-    .then(response => dispatch('receiveRulesSuccess', mapApprovalSettingsResponse(response.data)))
+    .then((response) => dispatch('receiveRulesSuccess', mapApprovalSettingsResponse(response.data)))
     .catch(() => createFlash(__('An error occurred fetching the approval rules.')));
 };
 

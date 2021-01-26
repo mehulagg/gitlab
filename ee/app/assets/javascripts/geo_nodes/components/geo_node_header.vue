@@ -1,15 +1,13 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
-import icon from '~/vue_shared/components/icon.vue';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     GlLoadingIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     node: {
@@ -42,9 +40,9 @@ export default {
             v-if="nodeDetailsLoading || node.nodeActionActive"
             class="node-details-loading gl-ml-3 inline"
           />
-          <icon
+          <gl-icon
             v-if="showNodeWarningIcon"
-            v-tooltip
+            v-gl-tooltip
             class="ml-2 text-warning-500"
             name="warning"
             :size="18"

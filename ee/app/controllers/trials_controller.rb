@@ -8,21 +8,31 @@ class TrialsController < ApplicationController
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
+  before_action :record_user_for_group_only_trials_experiment, only: :select
+
+  feature_category :purchase
 
   def new
+    record_experiment_user(:remove_known_trial_form_fields, remove_known_trial_form_fields_context)
+    record_experiment_user(:trimmed_skip_trial_copy)
+    record_experiment_user(:trial_registration_with_social_signin, trial_registration_with_social_signin_context)
   end
 
   def select
   end
 
   def create_lead
+    url_params = { glm_source: params[:glm_source], glm_content: params[:glm_content] }
     @result = GitlabSubscriptions::CreateLeadService.new.execute({ trial_user: company_params })
 
-    if @result[:success]
-      redirect_to select_trials_url(glm_source: params[:glm_source], glm_content: params[:glm_content])
-    else
-      render :new
+    render(:new) && return unless @result[:success]
+
+    if params[:glm_source] == 'about.gitlab.com'
+      record_experiment_user(:trial_onboarding_issues)
+      return redirect_to(new_users_sign_up_group_path(url_params.merge(trial_onboarding_flow: true))) if experiment_enabled?(:trial_onboarding_issues)
     end
+
+    redirect_to select_trials_url(url_params)
   end
 
   def apply
@@ -31,10 +41,24 @@ class TrialsController < ApplicationController
     @result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
 
     if @result&.dig(:success)
+      record_experiment_user(:remove_known_trial_form_fields, namespace_id: @namespace.id)
+      record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @namespace.id)
+      record_experiment_user(:trial_registration_with_social_signin, namespace_id: @namespace.id)
+      record_experiment_conversion_event(:remove_known_trial_form_fields)
+      record_experiment_conversion_event(:trimmed_skip_trial_copy)
+      record_experiment_conversion_event(:trial_registration_with_social_signin)
+
       redirect_to group_url(@namespace, { trial: true })
     else
       render :select
     end
+  end
+
+  protected
+
+  # override the ConfirmEmailWarning method in order to skip
+  def show_confirm_warning?
+    false
   end
 
   private
@@ -96,5 +120,26 @@ class TrialsController < ApplicationController
     params[:namespace_id] = group.id if group.persisted?
 
     group
+  end
+
+  def record_user_for_group_only_trials_experiment
+    record_experiment_user(:group_only_trials)
+  end
+
+  def remove_known_trial_form_fields_context
+    {
+      first_name_present: current_user.first_name.present?,
+      last_name_present: current_user.last_name.present?,
+      company_name_present: current_user.organization.present?
+    }
+  end
+
+  def trial_registration_with_social_signin_context
+    identities = current_user.identities.map(&:provider)
+
+    {
+      google_signon: identities.include?('google_oauth2'),
+      github_signon: identities.include?('github')
+    }
   end
 end

@@ -67,4 +67,93 @@ RSpec.describe API::API do
       end
     end
   end
+
+  describe 'authentication with deploy token' do
+    context 'admin mode' do
+      let_it_be(:project) { create(:project, :public) }
+      let_it_be(:package) { create(:maven_package, project: project, name: project.full_path) }
+      let_it_be(:maven_metadatum) { package.maven_metadatum }
+      let_it_be(:package_file) { package.package_files.first }
+      let_it_be(:deploy_token) { create(:deploy_token) }
+      let(:headers_with_deploy_token) do
+        {
+          Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => deploy_token.token
+        }
+      end
+
+      it 'does not bypass the session' do
+        expect(Gitlab::Auth::CurrentUserMode).not_to receive(:bypass_session!)
+
+        get(api("/packages/maven/#{maven_metadatum.path}/#{package_file.file_name}"),
+            headers: headers_with_deploy_token)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq('application/octet-stream')
+      end
+    end
+  end
+
+  context 'application context' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user) { project.owner }
+
+    it 'logs all application context fields' do
+      allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
+        Labkit::Context.current.to_h.tap do |log_context|
+          expect(log_context).to match('correlation_id' => an_instance_of(String),
+                                       'meta.caller_id' => '/api/:version/projects/:id/issues',
+                                       'meta.remote_ip' => an_instance_of(String),
+                                       'meta.project' => project.full_path,
+                                       'meta.root_namespace' => project.namespace.full_path,
+                                       'meta.user' => user.username,
+                                       'meta.feature_category' => 'issue_tracking')
+        end
+      end
+
+      get(api("/projects/#{project.id}/issues", user))
+    end
+
+    it 'skips fields that do not apply' do
+      allow_any_instance_of(Gitlab::GrapeLogging::Loggers::ContextLogger).to receive(:parameters) do
+        Labkit::Context.current.to_h.tap do |log_context|
+          expect(log_context).to match('correlation_id' => an_instance_of(String),
+                                       'meta.caller_id' => '/api/:version/users',
+                                       'meta.remote_ip' => an_instance_of(String),
+                                       'meta.feature_category' => 'users')
+        end
+      end
+
+      get(api('/users'))
+    end
+  end
+
+  describe 'supported content-types' do
+    context 'GET /user/:id.txt' do
+      let_it_be(:user) { create(:user) }
+
+      subject { get api("/users/#{user.id}.txt", user) }
+
+      it 'returns application/json' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq('application/json')
+        expect(response.body).to include('{"id":')
+      end
+
+      context 'when api_always_use_application_json is disabled' do
+        before do
+          stub_feature_flags(api_always_use_application_json: false)
+        end
+
+        it 'returns text/plain' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq('text/plain')
+          expect(response.body).to include('#<API::Entities::User:')
+        end
+      end
+    end
+  end
 end

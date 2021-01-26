@@ -1,10 +1,10 @@
 import Vue from 'vue';
-import { shallowMount, createLocalVue, createWrapper } from '@vue/test-utils';
+import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import { TEST_HOST } from 'spec/test_constants';
+import AxiosMockAdapter from 'axios-mock-adapter';
 import createStore from '~/notes/stores';
 import noteActions from '~/notes/components/note_actions.vue';
 import { userDataMock } from '../mock_data';
-import AxiosMockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 
 describe('noteActions', () => {
@@ -14,9 +14,9 @@ describe('noteActions', () => {
   let actions;
   let axiosMock;
 
-  const shallowMountNoteActions = (propsData, computed) => {
+  const mountNoteActions = (propsData, computed) => {
     const localVue = createLocalVue();
-    return shallowMount(localVue.extend(noteActions), {
+    return mount(localVue.extend(noteActions), {
       store,
       propsData,
       localVue,
@@ -35,8 +35,12 @@ describe('noteActions', () => {
       canEdit: true,
       canAwardEmoji: true,
       canReportAsAbuse: true,
+      isAuthor: true,
+      isContributor: false,
+      noteableType: 'MergeRequest',
       noteId: '539',
       noteUrl: `${TEST_HOST}/group/project/-/merge_requests/1#note_1`,
+      projectName: 'project',
       reportAbusePath: `${TEST_HOST}/abuse_reports/new?ref_url=http%3A%2F%2Flocalhost%3A3000%2Fgitlab-org%2Fgitlab-ce%2Fissues%2F7%23note_539&user_id=26`,
       showReply: false,
     };
@@ -57,16 +61,26 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions(props);
+      wrapper = mountNoteActions(props);
+    });
+
+    it('should render noteable author badge', () => {
+      expect(wrapper.findAll('.note-role').at(0).text().trim()).toEqual('Author');
     });
 
     it('should render access level badge', () => {
-      expect(
-        wrapper
-          .find('.note-role')
-          .text()
-          .trim(),
-      ).toEqual(props.accessLevel);
+      expect(wrapper.findAll('.note-role').at(1).text().trim()).toEqual(props.accessLevel);
+    });
+
+    it('should render contributor badge', () => {
+      wrapper.setProps({
+        accessLevel: null,
+        isContributor: true,
+      });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.findAll('.note-role').at(1).text().trim()).toBe('Contributor');
+      });
     });
 
     it('should render emoji link', () => {
@@ -87,7 +101,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-btn-copy-note-link').exists()).toBe(true);
       });
 
-      it('should not show copy link action when `noteUrl` prop is empty', done => {
+      it('should not show copy link action when `noteUrl` prop is empty', (done) => {
         wrapper.setProps({
           ...props,
           author: {
@@ -113,7 +127,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-note-delete').exists()).toBe(true);
       });
 
-      it('closes tooltip when dropdown opens', done => {
+      it('closes tooltip when dropdown opens', (done) => {
         wrapper.find('.more-actions-toggle').trigger('click');
 
         const rootWrapper = createWrapper(wrapper.vm.$root);
@@ -146,7 +160,7 @@ describe('noteActions', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMountNoteActions(props, {
+      wrapper = mountNoteActions(props, {
         targetType: () => 'issue',
       });
       store.state.noteableData = {
@@ -173,7 +187,7 @@ describe('noteActions', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMountNoteActions(props, {
+      wrapper = mountNoteActions(props, {
         targetType: () => 'issue',
       });
     });
@@ -189,7 +203,7 @@ describe('noteActions', () => {
   describe('user is not logged in', () => {
     beforeEach(() => {
       store.dispatch('setUserData', {});
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         canDelete: false,
         canEdit: false,
@@ -209,7 +223,7 @@ describe('noteActions', () => {
 
   describe('for showReply = true', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: true,
       });
@@ -224,7 +238,7 @@ describe('noteActions', () => {
 
   describe('for showReply = false', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: false,
       });
@@ -241,7 +255,7 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions({ ...props, canResolve: true, isDraft: true });
+      wrapper = mountNoteActions({ ...props, canResolve: true, isDraft: true });
     });
 
     it('should render the right resolve button title', () => {

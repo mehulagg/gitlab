@@ -2,14 +2,14 @@
 type: reference, concepts
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Reference architectures
 
 You can set up GitLab on a single server or scale it up to serve many users.
 This page details the recommended Reference Architectures that were built and
-verified by GitLab's Quality and Support teams.
+verified by the GitLab Quality and Support teams.
 
 Below is a chart representing each architecture tier and the number of users
 they can handle. As your number of users grow with time, it’s recommended that
@@ -18,8 +18,8 @@ you scale GitLab accordingly.
 ![Reference Architectures](img/reference-architectures.png)
 <!-- Internal link: https://docs.google.com/spreadsheets/d/1obYP4fLKkVVDOljaI3-ozhmCiPtEeMblbBKkf2OADKs/edit#gid=1403207183 -->
 
-Testing on these reference architectures were performed with
-[GitLab's Performance Tool](https://gitlab.com/gitlab-org/quality/performance)
+Testing on these reference architectures was performed with the
+[GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance)
 at specific coded workloads, and the throughputs used for testing were
 calculated based on sample customer data. Select the
 [reference architecture](#available-reference-architectures) that matches your scale.
@@ -32,12 +32,12 @@ per 1,000 users:
 - Git: 2 RPS
 
 For GitLab instances with less than 2,000 users, it's recommended that you use
-the [default setup](#automated-backups-core-only) by
+the [default setup](#automated-backups) by
 [installing GitLab](../../install/README.md) on a single machine to minimize
 maintenance and resource costs.
 
-If your organization has more than 2,000 users, the recommendation is to scale
-GitLab's components to multiple machine nodes. The machine nodes are grouped by
+If your organization has more than 2,000 users, the recommendation is to scale the
+GitLab components to multiple machine nodes. The machine nodes are grouped by
 components. The addition of these nodes increases the performance and
 scalability of to your GitLab instance.
 
@@ -47,7 +47,7 @@ When scaling GitLab, there are several factors to consider:
 - A load balancer is added in front to distribute traffic across the application nodes.
 - The application nodes connects to a shared file server and PostgreSQL and Redis services on the backend.
 
-NOTE: **Note:**
+NOTE:
 Depending on your workflow, the following recommended reference architectures
 may need to be adapted accordingly. Your workload is influenced by factors
 including how active your users are, how much automation you use, mirroring,
@@ -68,16 +68,21 @@ The following reference architectures are available:
 - [Up to 25,000 users](25k_users.md)
 - [Up to 50,000 users](50k_users.md)
 
+A GitLab [Premium or Ultimate](https://about.gitlab.com/pricing/#self-managed) license is required
+to get assistance from Support with troubleshooting the [2,000 users](2k_users.md)
+and higher reference architectures.
+[Read more about our definition of scaled architectures](https://about.gitlab.com/support/#definition-of-scaled-architecture).
+
 ## Availability Components
 
 GitLab comes with the following components for your use, listed from least to
 most complex:
 
-- [Automated backups](#automated-backups-core-only)
-- [Traffic load balancer](#traffic-load-balancer-starter-only)
-- [Zero downtime updates](#zero-downtime-updates-starter-only)
-- [Automated database failover](#automated-database-failover-premium-only)
-- [Instance level replication with GitLab Geo](#instance-level-replication-with-gitlab-geo-premium-only)
+- [Automated backups](#automated-backups)
+- [Traffic load balancer](#traffic-load-balancer)
+- [Zero downtime updates](#zero-downtime-updates)
+- [Automated database failover](#automated-database-failover)
+- [Instance level replication with GitLab Geo](#instance-level-replication-with-gitlab-geo)
 
 As you implement these components, begin with a single server and then do
 backups. Only after completing the first server should you proceed to the next.
@@ -90,7 +95,6 @@ have more actual perceived uptime for your users.
 
 > - Level of complexity: **Low**
 > - Required domain knowledge: PostgreSQL, GitLab configurations, Git
-> - Supported tiers: [GitLab Core, Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 This solution is appropriate for many teams that have the default GitLab installation.
 With automatic backups of the GitLab repositories, configuration, and the database,
@@ -102,10 +106,9 @@ is the least complex to setup. This provides a point-in-time recovery of a prede
 
 > - Level of complexity: **Medium**
 > - Required domain knowledge: HAProxy, shared storage, distributed systems
-> - Supported tiers: [GitLab Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 This requires separating out GitLab into multiple application nodes with an added
-[load balancer](../high_availability/load_balancer.md). The load balancer will distribute traffic
+[load balancer](../load_balancer.md). The load balancer will distribute traffic
 across GitLab application nodes. Meanwhile, each application node connects to a
 shared file server and database systems on the back end. This way, if one of the
 application servers fails, the workflow is not interrupted.
@@ -118,11 +121,13 @@ to the default installation:
 - Enable zero-downtime upgrades.
 - Increase availability.
 
+For more details on how to configure a traffic load balancer with GitLab, you can refer
+to any of the [available reference architectures](#available-reference-architectures) with more than 1,000 users.
+
 ### Zero downtime updates **(STARTER ONLY)**
 
 > - Level of complexity: **Medium**
 > - Required domain knowledge: PostgreSQL, HAProxy, shared storage, distributed systems
-> - Supported tiers: [GitLab Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 GitLab supports [zero-downtime updates](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates).
 Single GitLab nodes can be updated with only a [few minutes of downtime](https://docs.gitlab.com/omnibus/update/README.html#single-node-deployment).
@@ -133,7 +138,6 @@ As long as at least one of each component is online and capable of handling the 
 
 > - Level of complexity: **High**
 > - Required domain knowledge: PgBouncer, Repmgr or Patroni, shared storage, distributed systems
-> - Supported tiers: [GitLab Premium and Ultimate](https://about.gitlab.com/pricing/)
 
 By adding automatic failover for database systems, you can enable higher uptime
 with additional database nodes. This extends the default database with
@@ -145,13 +149,32 @@ is recommended.
 
 > - Level of complexity: **Very High**
 > - Required domain knowledge: Storage replication
-> - Supported tiers: [GitLab Premium and Ultimate](https://about.gitlab.com/pricing/)
 
-[GitLab Geo](../geo/replication/index.md) allows you to replicate your GitLab
+[GitLab Geo](../geo/index.md) allows you to replicate your GitLab
 instance to other geographical locations as a read-only fully operational instance
 that can also be promoted in case of disaster.
 
-## Configuring select components with Cloud Native Helm
+## Deviating from the suggested reference architectures
+
+As a general rule of thumb, the further away you move from the Reference Architectures,
+the harder it will be get support for it. With any deviation, you're introducing
+a layer of complexity that will add challenges to finding out where potential
+issues might lie.
+
+The reference architectures use the official GitLab Linux packages (Omnibus
+GitLab) to install and configure the various components (with one notable exception being the suggested select Cloud Native installation method described below). The components are
+installed on separate machines (virtualized or bare metal), with machine hardware
+requirements listed in the "Configuration" column and equivalent VM standard sizes listed
+in GCP/AWS/Azure columns of each [available reference architecture](#available-reference-architectures).
+
+Running components on Docker (including Compose) with the same specs should be fine, as Docker is well known in terms of support.
+However, it is still an additional layer and may still add some support complexities, such as not being able to run `strace` easily in containers.
+
+Other technologies, like [Docker swarm](https://docs.docker.com/engine/swarm/)
+are not officially supported, but can be implemented at your own risk. In that
+case, GitLab Support will not be able to help you.
+
+### Configuring select components with Cloud Native Helm
 
 We also provide [Helm charts](https://docs.gitlab.com/charts/) as a Cloud Native installation
 method for GitLab. For the reference architectures, select components can be set up in this

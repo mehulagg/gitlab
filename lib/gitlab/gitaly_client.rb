@@ -215,12 +215,16 @@ module Gitlab
         'client_name' => CLIENT_NAME
       }
 
+      context_data = Labkit::Context.current&.to_h
+
       feature_stack = Thread.current[:gitaly_feature_stack]
       feature = feature_stack && feature_stack[0]
       metadata['call_site'] = feature.to_s if feature
       metadata['gitaly-servers'] = address_metadata(remote_storage) if remote_storage
       metadata['x-gitlab-correlation-id'] = Labkit::Correlation::CorrelationId.current_id if Labkit::Correlation::CorrelationId.current_id
       metadata['gitaly-session-id'] = session_id
+      metadata['username'] = context_data['meta.user'] if context_data&.fetch('meta.user', nil)
+      metadata['remote_ip'] = context_data['meta.remote_ip'] if context_data&.fetch('meta.remote_ip', nil)
       metadata.merge!(Feature::Gitaly.server_feature_flags)
 
       deadline_info = request_deadline(timeout)
@@ -450,7 +454,7 @@ module Gitlab
 
       stack_string = Gitlab::BacktraceCleaner.clean_backtrace(caller).drop(1).join("\n")
 
-      Gitlab::SafeRequestStore[:stack_counter] ||= Hash.new
+      Gitlab::SafeRequestStore[:stack_counter] ||= {}
 
       count = Gitlab::SafeRequestStore[:stack_counter][stack_string] || 0
       Gitlab::SafeRequestStore[:stack_counter][stack_string] = count + 1

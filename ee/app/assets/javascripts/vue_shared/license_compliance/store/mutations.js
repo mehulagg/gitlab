@@ -20,6 +20,11 @@ export default {
       isAdmin: data,
     });
   },
+  [types.SET_KNOWN_LICENSES](state, data) {
+    Object.assign(state, {
+      knownLicenses: data,
+    });
+  },
   [types.RECEIVE_MANAGED_LICENSES_SUCCESS](state, licenses = []) {
     const managedLicenses = licenses.map(normalizeLicense).reverse();
 
@@ -116,6 +121,6 @@ export default {
     state.pendingLicenses.push(id);
   },
   [types.REMOVE_PENDING_LICENSE](state, id) {
-    state.pendingLicenses = state.pendingLicenses.filter(pendingLicense => pendingLicense !== id);
+    state.pendingLicenses = state.pendingLicenses.filter((pendingLicense) => pendingLicense !== id);
   },
 };

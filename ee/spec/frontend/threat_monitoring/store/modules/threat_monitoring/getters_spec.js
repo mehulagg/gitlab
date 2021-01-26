@@ -1,6 +1,6 @@
-import createState from 'ee/threat_monitoring/store/modules/threat_monitoring/state';
-import * as getters from 'ee/threat_monitoring/store/modules/threat_monitoring/getters';
 import { INVALID_CURRENT_ENVIRONMENT_NAME } from 'ee/threat_monitoring/constants';
+import * as getters from 'ee/threat_monitoring/store/modules/threat_monitoring/getters';
+import createState from 'ee/threat_monitoring/store/modules/threat_monitoring/state';
 
 describe('threatMonitoring module getters', () => {
   let state;

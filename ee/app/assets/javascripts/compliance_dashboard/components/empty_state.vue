@@ -1,7 +1,12 @@
 <script>
+import { GlLink, GlEmptyState } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
+  components: {
+    GlLink,
+    GlEmptyState,
+  },
   props: {
     imagePath: {
       type: String,
@@ -9,27 +14,24 @@ export default {
     },
   },
   strings: {
-    heading: __(
-      "Merge requests are a place to propose changes you've made to a project and discuss those changes with others",
+    heading: __("A merge request hasn't yet been merged"),
+    subheading: __(
+      "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group.",
     ),
-    subheading: __('Interested parties can even contribute by pushing commits if they want to.'),
-    alt: __('Merge Requests'),
+    documentation: __('View documentation'),
   },
+  documentationPath: 'https://docs.gitlab.com/ee/user/compliance/compliance_dashboard/index.html',
 };
 </script>
 
 <template>
-  <div class="row empty-state merge-requests">
-    <div class="col-12">
-      <div class="svg-content">
-        <img :src="imagePath" :alt="$options.strings.alt" />
-      </div>
-    </div>
-    <div class="col-12">
-      <div class="text-content">
-        <h4>{{ $options.strings.heading }}</h4>
-        <p>{{ $options.strings.subheading }}</p>
-      </div>
-    </div>
-  </div>
+  <gl-empty-state
+    :title="$options.strings.heading"
+    :description="$options.strings.subheading"
+    :svg-path="imagePath"
+  >
+    <template #actions>
+      <gl-link :href="$options.documentationPath">{{ $options.strings.documentation }}</gl-link>
+    </template>
+  </gl-empty-state>
 </template>

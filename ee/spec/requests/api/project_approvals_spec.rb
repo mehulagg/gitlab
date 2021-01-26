@@ -101,21 +101,19 @@ RSpec.describe API::ProjectApprovals do
     shared_examples 'updates merge requests settings when possible' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:license_value, :setting_value, :param_value, :final_value) do
-        false | false | false | false
-        false | true  | false | false
-        false | false | true  | true
-        false | true  | true  | true
-        true  | false | false | false
-        true  | true  | false | false
-        true  | false | true  | true
-        true  | true  | true  | true
+      where(:permission_value, :param_value, :final_value) do
+        false | false | false
+        false | true  | false
+        true  | false | false
+        true  | true  | true
       end
 
       with_them do
         before do
-          stub_licensed_features(admin_merge_request_approvers_rules: license_value)
-          stub_application_setting(app_setting => setting_value)
+          project.update_column(setting, false)
+
+          allow(Ability).to receive(:allowed?).and_call_original
+          allow(Ability).to receive(:allowed?).with(current_user, permission, project).and_return(permission_value)
         end
 
         it 'changes settings properly' do
@@ -124,9 +122,8 @@ RSpec.describe API::ProjectApprovals do
           }
 
           post api(url, current_user), params: settings
-          project.reload
 
-          expect(project[setting]).to eq(final_value)
+          expect(project.reload[setting]).to eq(final_value)
         end
       end
     end
@@ -147,20 +144,20 @@ RSpec.describe API::ProjectApprovals do
       context 'updates merge requests settings' do
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :disable_overriding_approvers_per_merge_request }
+          let(:permission) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
         end
 
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
+          let(:permission) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
         end
 
         it_behaves_like 'updates merge requests settings when possible' do
           let(:current_user) { admin }
-          let(:app_setting) { :prevent_merge_requests_committers_approval }
-          let(:setting) { :merge_requests_disable_committers_approval }
+          let(:permission) { :modify_merge_request_author_setting }
+          let(:setting) { :merge_requests_author_approval }
         end
       end
     end

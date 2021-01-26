@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class GroupVariables < Grape::API::Instance
+  class GroupVariables < ::API::Base
     include PaginationParams
 
     before { authenticate! }
     before { authorize! :admin_build, user_group }
+
+    feature_category :continuous_integration
 
     params do
       requires :id, type: String, desc: 'The ID of a group'
@@ -13,18 +15,18 @@ module API
 
     resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Get group-level variables' do
-        success Entities::Variable
+        success Entities::Ci::Variable
       end
       params do
         use :pagination
       end
       get ':id/variables' do
         variables = user_group.variables
-        present paginate(variables), with: Entities::Variable
+        present paginate(variables), with: Entities::Ci::Variable
       end
 
       desc 'Get a specific variable from a group' do
-        success Entities::Variable
+        success Entities::Ci::Variable
       end
       params do
         requires :key, type: String, desc: 'The key of the variable'
@@ -36,12 +38,12 @@ module API
 
         break not_found!('GroupVariable') unless variable
 
-        present variable, with: Entities::Variable
+        present variable, with: Entities::Ci::Variable
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Create a new variable in a group' do
-        success Entities::Variable
+        success Entities::Ci::Variable
       end
       params do
         requires :key, type: String, desc: 'The key of the variable'
@@ -58,14 +60,14 @@ module API
         ).execute
 
         if variable.valid?
-          present variable, with: Entities::Variable
+          present variable, with: Entities::Ci::Variable
         else
           render_validation_error!(variable)
         end
       end
 
       desc 'Update an existing variable from a group' do
-        success Entities::Variable
+        success Entities::Ci::Variable
       end
       params do
         optional :key, type: String, desc: 'The key of the variable'
@@ -83,7 +85,7 @@ module API
         ).execute
 
         if variable.valid?
-          present variable, with: Entities::Variable
+          present variable, with: Entities::Ci::Variable
         else
           render_validation_error!(variable)
         end
@@ -93,7 +95,7 @@ module API
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Delete an existing variable from a group' do
-        success Entities::Variable
+        success Entities::Ci::Variable
       end
       params do
         requires :key, type: String, desc: 'The key of the variable'

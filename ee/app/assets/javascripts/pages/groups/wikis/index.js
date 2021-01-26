@@ -1,3 +1,5 @@
 import initWikis from '~/pages/shared/wikis';
+import initClonePanel from '~/clone_panel';
 
-document.addEventListener('DOMContentLoaded', initWikis);
+initWikis();
+initClonePanel();

@@ -6,9 +6,10 @@ RSpec.describe 'Admin updates EE-only settings' do
   include StubENV
 
   before do
-    stub_feature_flags(instance_level_integrations: false)
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow(License).to receive(:feature_available?).and_return(true)
     allow(Gitlab::Elastic::Helper.default).to receive(:index_exists?).and_return(true)
   end
@@ -40,7 +41,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  it 'Enables external authentication' do
+  it 'enables external authentication' do
     visit general_admin_application_settings_path
     page.within('.as-external-auth') do
       check 'Enable classification control using an external service'
@@ -52,11 +53,11 @@ RSpec.describe 'Admin updates EE-only settings' do
   end
 
   context 'Elasticsearch settings' do
+    let(:elastic_search_license) { true }
+
     before do
-      visit integrations_admin_application_settings_path
-      page.within('.as-elasticsearch') do
-        click_button 'Expand'
-      end
+      stub_licensed_features(elastic_search: elastic_search_license)
+      visit advanced_search_admin_application_settings_path
     end
 
     it 'changes elasticsearch settings' do
@@ -69,6 +70,7 @@ RSpec.describe 'Admin updates EE-only settings' do
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
         fill_in 'Bulk request concurrency', with: '23'
+        fill_in 'Client request timeout', with: '30'
 
         click_button 'Save changes'
       end
@@ -82,11 +84,12 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
         expect(current_settings.elasticsearch_max_bulk_concurrency).to eq(23)
+        expect(current_settings.elasticsearch_client_request_timeout).to eq(30)
         expect(page).to have_content 'Application settings saved successfully'
       end
     end
 
-    it 'Allows limiting projects and namespaces to index', :aggregate_failures, :js do
+    it 'allows limiting projects and namespaces to index', :aggregate_failures, :js do
       project = create(:project)
       namespace = create(:namespace)
 
@@ -115,7 +118,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       end
 
       page.within('#select2-drop') do
-        expect(page).to have_content(project.full_path)
+        expect(page).to have_content(project.name_with_namespace)
       end
 
       page.within('.as-elasticsearch') do
@@ -129,20 +132,18 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.exists?(project_id: project.id)).to be_truthy
     end
 
-    it 'Allows removing all namespaces and projects', :aggregate_failures, :js do
+    it 'allows removing all namespaces and projects', :aggregate_failures, :js do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
 
       namespace = create(:elasticsearch_indexed_namespace).namespace
       project = create(:elasticsearch_indexed_project).project
 
-      visit integrations_admin_application_settings_path
+      visit advanced_search_admin_application_settings_path
 
       expect(ElasticsearchIndexedNamespace.count).to be > 0
       expect(ElasticsearchIndexedProject.count).to be > 0
 
       page.within('.as-elasticsearch') do
-        click_button 'Expand'
-
         expect(page).to have_content('Namespaces to index')
         expect(page).to have_content('Projects to index')
         expect(page).to have_content(namespace.full_path)
@@ -161,11 +162,30 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.count).to eq(0)
       expect(page).to have_content 'Application settings saved successfully'
     end
+
+    it 'zero-downtime reindexing shows popup', :js do
+      page.within('.as-elasticsearch') do
+        expect(page).to have_content 'Trigger cluster reindexing'
+        click_link 'Trigger cluster reindexing'
+      end
+
+      text = page.driver.browser.switch_to.alert.text
+      expect(text).to eq 'Are you sure you want to reindex?'
+      page.driver.browser.switch_to.alert.accept
+    end
+
+    context 'when not licensed' do
+      let(:elastic_search_license) { false }
+
+      it 'cannot access the page' do
+        expect(page).not_to have_content("Advanced Search with Elasticsearch")
+      end
+    end
   end
 
-  it 'Enable Slack application' do
+  it 'enable Slack application' do
     allow(Gitlab).to receive(:com?).and_return(true)
-    visit integrations_admin_application_settings_path
+    visit general_admin_application_settings_path
 
     page.within('.as-slack') do
       check 'Enable Slack application'
@@ -180,13 +200,13 @@ RSpec.describe 'Admin updates EE-only settings' do
       visit templates_admin_application_settings_path
     end
 
-    it 'Render "Templates" section' do
+    it 'render "Templates" section' do
       page.within('.as-visibility-access') do
         expect(page).to have_content 'Templates'
       end
     end
 
-    it 'Render "Custom project templates" section' do
+    it 'render "Custom project templates" section' do
       page.within('.as-custom-project-templates') do
         expect(page).to have_content 'Custom project templates'
       end
@@ -203,7 +223,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP enabled' do
       let(:ldap_setting) { true }
 
-      it 'Changes to allow group owners to manage ldap' do
+      it 'changes to allow group owners to manage ldap' do
         page.within('.as-visibility-access') do
           find('#application_setting_allow_group_owners_to_manage_ldap').set(false)
           click_button 'Save'
@@ -217,7 +237,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP disabled' do
       let(:ldap_setting) { false }
 
-      it 'Does not show option to allow group owners to manage ldap' do
+      it 'does not show option to allow group owners to manage ldap' do
         expect(page).not_to have_css('#application_setting_allow_group_owners_to_manage_ldap')
       end
     end
@@ -245,7 +265,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'loads seat link payload on click', :js do
       page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
+        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
 
         expect(page).not_to have_content expected_payload_content
 
@@ -256,6 +276,75 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(page).to have_selector '.js-seat-link-payload'
         expect(page).to have_button 'Hide payload'
         expect(page).to have_content expected_payload_content
+      end
+    end
+  end
+
+  context 'sign up settings' do
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: false)
+      end
+
+      it 'does not render user cap form group' do
+        visit general_admin_application_settings_path
+
+        expect(page).not_to have_field('User cap')
+      end
+    end
+
+    context 'when feature flag is enabled' do
+      before do
+        stub_feature_flags(admin_new_user_signups_cap: true)
+      end
+
+      context 'when license has active user count' do
+        let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
+
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'disallows entering user cap greater then license allows', :js do
+          visit general_admin_application_settings_path
+
+          page.within('#js-signup-settings') do
+            fill_in 'User cap', with: 5
+
+            click_button 'Save changes'
+
+            message =
+              page.find('#application_setting_new_user_signups_cap').native.attribute('validationMessage')
+
+            expect(message).to eq('Value must be less than or equal to 1.')
+          end
+        end
+      end
+
+      it 'changes the user cap from unlimited to 5' do
+        visit general_admin_application_settings_path
+
+        expect(current_settings.new_user_signups_cap).to be_nil
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: 5
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to eq(5)
+        end
+      end
+
+      it 'changes the user cap to unlimited' do
+        visit general_admin_application_settings_path
+
+        page.within('#js-signup-settings') do
+          fill_in 'User cap', with: nil
+
+          click_button 'Save changes'
+
+          expect(current_settings.new_user_signups_cap).to be_nil
+        end
       end
     end
   end

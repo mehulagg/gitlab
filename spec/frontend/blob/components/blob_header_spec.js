@@ -11,7 +11,11 @@ describe('Blob Header Default Actions', () => {
 
   function createComponent(blobProps = {}, options = {}, propsData = {}, shouldMount = false) {
     const method = shouldMount ? mount : shallowMount;
+    const blobHash = 'foo-bar';
     wrapper = method.call(this, BlobHeader, {
+      provide: {
+        blobHash,
+      },
       propsData: {
         blob: { ...Blob, ...blobProps },
         ...propsData,
@@ -71,7 +75,7 @@ describe('Blob Header Default Actions', () => {
       expect(wrapper.find(DefaultActions).exists()).toBe(false);
     });
 
-    Object.keys(slots).forEach(slot => {
+    Object.keys(slots).forEach((slot) => {
       it('renders the slots', () => {
         const slotContent = slots[slot];
         createComponent(

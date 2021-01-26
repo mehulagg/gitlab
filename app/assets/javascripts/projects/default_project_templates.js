@@ -1,6 +1,10 @@
 import { s__ } from '~/locale';
 
 export default {
+  sample: {
+    text: s__('ProjectTemplates|Sample GitLab Project'),
+    icon: '.template-option .icon-sample',
+  },
   rails: {
     text: s__('ProjectTemplates|Ruby on Rails'),
     icon: '.template-option .icon-rails',
@@ -57,6 +61,10 @@ export default {
     text: s__('ProjectTemplates|Static Site Editor/Middleman'),
     icon: '.template-option .icon-sse_middleman',
   },
+  gitpod_spring_petclinic: {
+    text: s__('ProjectTemplates|Gitpod/Spring Petclinic'),
+    icon: '.template-option .icon-gitpod_spring_petclinic',
+  },
   nfhugo: {
     text: s__('ProjectTemplates|Netlify/Hugo'),
     icon: '.template-option .icon-nfhugo',
@@ -88,5 +96,9 @@ export default {
   cluster_management: {
     text: s__('ProjectTemplates|GitLab Cluster Management'),
     icon: '.template-option .icon-cluster_management',
+  },
+  kotlin_native_linux: {
+    text: s__('ProjectTemplates|Kotlin Native for Linux'),
+    icon: '.template-option .icon-gitlab_logo',
   },
 };

@@ -72,9 +72,14 @@ RSpec.describe Gitlab::Database::WithLockRetries do
           lock_attempts = 0
           lock_acquired = false
 
-          expect_any_instance_of(Gitlab::Database::WithLockRetries).to receive(:sleep).exactly(retry_count - 1).times # we don't sleep in the last iteration
+          # the actual number of attempts to run_block_with_transaction can never exceed the number of
+          # timings_configurations, so here we limit the retry_count if it exceeds that value
+          #
+          # also, there is no call to sleep after the final attempt, which is why it will always be one less
+          expected_runs_with_timeout = [retry_count, timing_configuration.size].min
+          expect(subject).to receive(:sleep).exactly(expected_runs_with_timeout - 1).times
 
-          allow_any_instance_of(Gitlab::Database::WithLockRetries).to receive(:run_block_with_transaction).and_wrap_original do |method|
+          expect(subject).to receive(:run_block_with_transaction).exactly(expected_runs_with_timeout).times.and_wrap_original do |method|
             lock_fiber.resume if lock_attempts == retry_count
 
             method.call
@@ -99,9 +104,69 @@ RSpec.describe Gitlab::Database::WithLockRetries do
       end
 
       context 'after 3 iterations' do
-        let(:retry_count) { 4 }
+        it_behaves_like 'retriable exclusive lock on `projects`' do
+          let(:retry_count) { 4 }
+        end
 
-        it_behaves_like 'retriable exclusive lock on `projects`'
+        context 'setting the idle transaction timeout' do
+          context 'when there is no outer transaction: disable_ddl_transaction! is set in the migration' do
+            it 'does not disable the idle transaction timeout' do
+              allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
+              allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
+              allow(subject).to receive(:run_block_with_transaction).once
+
+              expect(subject).not_to receive(:disable_idle_in_transaction_timeout)
+
+              subject.run {}
+            end
+          end
+
+          context 'when there is outer transaction: disable_ddl_transaction! is not set in the migration' do
+            it 'disables the idle transaction timeout so the code can sleep and retry' do
+              allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
+
+              n = 0
+              allow(subject).to receive(:run_block_with_transaction).twice do
+                n += 1
+                raise(ActiveRecord::LockWaitTimeout) if n == 1
+              end
+
+              expect(subject).to receive(:disable_idle_in_transaction_timeout).once
+
+              subject.run {}
+            end
+          end
+        end
+      end
+
+      context 'after the retries are exhausted' do
+        let(:timing_configuration) do
+          [
+            [1.second, 1.second]
+          ]
+        end
+
+        context 'when there is no outer transaction: disable_ddl_transaction! is set in the migration' do
+          it 'does not disable the lock_timeout' do
+            allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
+            allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
+
+            expect(subject).not_to receive(:disable_lock_timeout)
+
+            subject.run {}
+          end
+        end
+
+        context 'when there is outer transaction: disable_ddl_transaction! is not set in the migration' do
+          it 'disables the lock_timeout' do
+            allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(true)
+            allow(subject).to receive(:run_block_with_transaction).once.and_raise(ActiveRecord::LockWaitTimeout)
+
+            expect(subject).to receive(:disable_lock_timeout)
+
+            subject.run {}
+          end
+        end
       end
 
       context 'after the retries, without setting lock_timeout' do
@@ -111,6 +176,33 @@ RSpec.describe Gitlab::Database::WithLockRetries do
           before do
             expect(subject).to receive(:run_block_without_lock_timeout).and_call_original
           end
+        end
+      end
+
+      context 'after the retries, when requested to raise an error' do
+        let(:expected_attempts_with_timeout) { timing_configuration.size }
+        let(:retry_count) { timing_configuration.size + 1 }
+
+        it 'raises an error instead of waiting indefinitely for the lock' do
+          lock_attempts = 0
+          lock_acquired = false
+
+          expect(subject).to receive(:sleep).exactly(expected_attempts_with_timeout - 1).times
+          expect(subject).to receive(:run_block_with_transaction).exactly(expected_attempts_with_timeout).times.and_call_original
+
+          expect do
+            subject.run(raise_on_exhaustion: true) do
+              lock_attempts += 1
+
+              ActiveRecord::Base.transaction do
+                ActiveRecord::Base.connection.execute("LOCK TABLE #{Project.table_name} in exclusive mode")
+                lock_acquired = true
+              end
+            end
+          end.to raise_error(described_class::AttemptsExhaustedError)
+
+          expect(lock_attempts).to eq(retry_count - 1)
+          expect(lock_acquired).to eq(false)
         end
       end
 

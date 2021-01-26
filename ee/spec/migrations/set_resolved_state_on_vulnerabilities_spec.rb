@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20191114173624_set_resolved_state_on_vulnerabilities.rb')
+require_migration!
 
 RSpec.describe SetResolvedStateOnVulnerabilities do
   let(:confidence_levels) do
@@ -134,7 +134,7 @@ RSpec.describe SetResolvedStateOnVulnerabilities do
 
   describe '#up' do
     it 'sets "resolved" state only for resolved vulnerabilities' do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(find(vulnerability_open_id)).to have_attributes(state: states[:opened], resolved_by_id: nil, resolved_at: nil)

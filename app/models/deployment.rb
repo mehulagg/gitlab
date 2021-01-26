@@ -21,9 +21,7 @@ class Deployment < ApplicationRecord
 
   has_one :deployment_cluster
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) do
-    Deployment.where(project: s.project).maximum(:iid) if s&.project
-  end
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
   validates :sha, presence: true
   validates :ref, presence: true
@@ -39,12 +37,21 @@ class Deployment < ApplicationRecord
   end
 
   scope :for_status, -> (status) { where(status: status) }
+  scope :for_project, -> (project_id) { where(project_id: project_id) }
 
   scope :visible, -> { where(status: %i[running success failed canceled]) }
   scope :stoppable, -> { where.not(on_stop: nil).where.not(deployable_id: nil).success }
   scope :active, -> { where(status: %i[created running]) }
-  scope :older_than, -> (deployment) { where('id < ?', deployment.id) }
-  scope :with_deployable, -> { includes(:deployable).where('deployable_id IS NOT NULL') }
+  scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
+  scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+
+  scope :finished_between, -> (start_date, end_date = nil) do
+    selected = where('deployments.finished_at >= ?', start_date)
+    selected = selected.where('deployments.finished_at < ?', end_date) if end_date
+    selected
+  end
+
+  FINISHED_STATUSES = %i[success failed canceled].freeze
 
   state_machine :status, initial: :created do
     event :run do
@@ -63,28 +70,58 @@ class Deployment < ApplicationRecord
       transition any - [:canceled] => :canceled
     end
 
-    before_transition any => [:success, :failed, :canceled] do |deployment|
+    event :skip do
+      transition any - [:skipped] => :skipped
+    end
+
+    before_transition any => FINISHED_STATUSES do |deployment|
       deployment.finished_at = Time.current
     end
 
-    after_transition any => :success do |deployment|
-      deployment.run_after_commit do
-        Deployments::SuccessWorker.perform_async(id)
-      end
-    end
+    after_transition any => :running do |deployment|
+      next unless deployment.project.ci_forward_deployment_enabled?
 
-    after_transition any => [:success, :failed, :canceled] do |deployment|
       deployment.run_after_commit do
-        Deployments::FinishedWorker.perform_async(id)
+        Deployments::DropOlderDeploymentsWorker.perform_async(id)
       end
     end
 
     after_transition any => :running do |deployment|
-      next unless deployment.project.forward_deployment_enabled?
+      deployment.run_after_commit do
+        Deployments::ExecuteHooksWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => :success do |deployment|
+      deployment.run_after_commit do
+        Deployments::UpdateEnvironmentWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => FINISHED_STATUSES do |deployment|
+      deployment.run_after_commit do
+        Deployments::LinkMergeRequestWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => FINISHED_STATUSES do |deployment|
+      deployment.run_after_commit do
+        Deployments::ExecuteHooksWorker.perform_async(id)
+      end
+    end
+
+    after_transition any => any - [:skipped] do |deployment, transition|
+      next if transition.loopback?
 
       deployment.run_after_commit do
-        Deployments::ForwardDeploymentWorker.perform_async(id)
+        ::JiraConnect::SyncDeploymentsWorker.perform_async(id)
       end
+    end
+  end
+
+  after_create unless: :importing? do |deployment|
+    run_after_commit do
+      ::JiraConnect::SyncDeploymentsWorker.perform_async(deployment.id)
     end
   end
 
@@ -93,7 +130,8 @@ class Deployment < ApplicationRecord
     running: 1,
     success: 2,
     failed: 3,
-    canceled: 4
+    canceled: 4,
+    skipped: 5
   }
 
   def self.last_for_environment(environment)
@@ -132,6 +170,10 @@ class Deployment < ApplicationRecord
         project.repository.delete_refs(*ref_paths.flatten)
       end
     end
+
+    def latest_for_sha(sha)
+      where(sha: sha).order(id: :desc).take
+    end
   end
 
   def commit
@@ -148,6 +190,7 @@ class Deployment < ApplicationRecord
 
   def execute_hooks
     deployment_data = Gitlab::DataBuilder::Deployment.build(self)
+    project.execute_hooks(deployment_data, :deployment_hooks)
     project.execute_services(deployment_data, :deployment_hooks)
   end
 
@@ -272,7 +315,7 @@ class Deployment < ApplicationRecord
     SQL
   end
 
-  # Changes the status of a deployment and triggers the correspinding state
+  # Changes the status of a deployment and triggers the corresponding state
   # machine events.
   def update_status(status)
     case status
@@ -284,6 +327,8 @@ class Deployment < ApplicationRecord
       drop
     when 'canceled'
       cancel
+    when 'skipped'
+      skip
     else
       raise ArgumentError, "The status #{status.inspect} is invalid"
     end
@@ -303,6 +348,13 @@ class Deployment < ApplicationRecord
 
   def ref_path
     File.join(environment.ref_path, 'deployments', iid.to_s)
+  end
+
+  def equal_to?(params)
+    ref == params[:ref] &&
+      tag == params[:tag] &&
+      sha == params[:sha] &&
+      status == params[:status]
   end
 
   private

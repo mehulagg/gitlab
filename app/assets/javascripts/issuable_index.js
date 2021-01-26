@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import { s__, __ } from './locale';
 import issuableInitBulkUpdateSidebar from './issuable_init_bulk_update_sidebar';
 
@@ -13,7 +13,7 @@ export default class IssuableIndex {
   static resetIncomingEmailToken() {
     const $resetToken = $('.incoming-email-token-reset');
 
-    $resetToken.on('click', e => {
+    $resetToken.on('click', (e) => {
       e.preventDefault();
 
       $resetToken.text(s__('EmailToken|resetting...'));
@@ -21,9 +21,7 @@ export default class IssuableIndex {
       axios
         .put($resetToken.attr('href'))
         .then(({ data }) => {
-          $('#issuable_email')
-            .val(data.new_address)
-            .focus();
+          $('#issuable_email').val(data.new_address).focus();
 
           $resetToken.text(s__('EmailToken|reset it'));
         })

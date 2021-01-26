@@ -13,56 +13,22 @@ RSpec.describe 'Issue Sidebar' do
   let!(:xss_label) { create(:label, project: project, title: '&lt;script&gt;alert("xss");&lt;&#x2F;script&gt;') }
 
   before do
-    sign_in(user)
+    stub_incoming_email_setting(enabled: true, address: "p+%{key}@gl.ab")
   end
 
-  context 'assignee', :js do
-    let(:user2) { create(:user) }
-    let(:issue2) { create(:issue, project: project, author: user2) }
-
-    context 'when invite_members_version_a experiment is enabled' do
-      before do
-        stub_experiment_for_user(invite_members_version_a: true)
-      end
-
-      context 'when user can not see invite members' do
-        before do
-          project.add_developer(user)
-          visit_issue(project, issue2)
-
-          find('.block.assignee .edit-link').click
-
-          wait_for_requests
-        end
-
-        it 'does not see link to invite members' do
-          page.within '.dropdown-menu-user' do
-            expect(page).not_to have_link('Invite Members')
-          end
-        end
-      end
-
-      context 'when user can see invite members' do
-        before do
-          project.add_maintainer(user)
-          visit_issue(project, issue2)
-
-          find('.block.assignee .edit-link').click
-
-          wait_for_requests
-        end
-
-        it 'sees link to invite members' do
-          page.within '.dropdown-menu-user' do
-            expect(page).to have_link('Invite Members', href: project_project_members_path(project))
-            expect(page).to have_selector('[data-track-event="click_invite_members"]')
-            expect(page).to have_selector("[data-track-label='edit_assignee']")
-          end
-        end
-      end
+  context 'when signed in' do
+    before do
+      sign_in(user)
     end
 
-    context 'when invite_members_version_a experiment is not enabled' do
+    context 'when concerning the assignee', :js do
+      let(:user2) { create(:user) }
+      let(:issue2) { create(:issue, project: project, author: user2) }
+
+      include_examples 'issuable invite members experiments' do
+        let(:issuable_path) { project_issue_path(project, issue2) }
+      end
+
       context 'when user is a developer' do
         before do
           project.add_developer(user)
@@ -81,8 +47,7 @@ RSpec.describe 'Issue Sidebar' do
 
         it 'shows author when filtering assignee dropdown' do
           page.within '.dropdown-menu-user' do
-            find('.dropdown-input-field').native.send_keys user2.name
-            sleep 1 # Required to wait for end of input delay
+            find('.dropdown-input-field').set(user2.name)
 
             wait_for_requests
 
@@ -106,7 +71,7 @@ RSpec.describe 'Issue Sidebar' do
         end
 
         it 'keeps your filtered term after filtering and dismissing the dropdown' do
-          find('.dropdown-input-field').native.send_keys user2.name
+          find('.dropdown-input-field').set(user2.name)
 
           wait_for_requests
 
@@ -123,192 +88,205 @@ RSpec.describe 'Issue Sidebar' do
         end
       end
 
-      context 'when user is a maintainer' do
-        before do
-          project.add_maintainer(user)
-          visit_issue(project, issue2)
+      it 'shows label text as "Apply" when assignees are changed' do
+        project.add_developer(user)
+        visit_issue(project, issue2)
 
-          find('.block.assignee .edit-link').click
+        find('.block.assignee .edit-link').click
+        wait_for_requests
 
-          wait_for_requests
+        click_on 'Unassigned'
+
+        expect(page).to have_link('Apply')
+      end
+    end
+
+    context 'as a allowed user' do
+      before do
+        project.add_developer(user)
+        visit_issue(project, issue)
+      end
+
+      context 'sidebar', :js do
+        it 'changes size when the screen size is smaller' do
+          sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
+          # Resize the window
+          resize_screen_sm
+          # Make sure the sidebar is collapsed
+          find(sidebar_selector)
+          expect(page).to have_css(sidebar_selector)
+          # Once is collapsed let's open the sidebard and reload
+          open_issue_sidebar
+          refresh
+          find(sidebar_selector)
+          expect(page).to have_css(sidebar_selector)
+          # Restore the window size as it was including the sidebar
+          restore_window_size
+          open_issue_sidebar
         end
 
-        it 'shows author in assignee dropdown and no invite link' do
-          page.within '.dropdown-menu-user' do
-            expect(page).not_to have_link('Invite Members')
+        it 'escapes XSS when viewing issue labels' do
+          page.within('.block.labels') do
+            click_on 'Edit'
+
+            expect(page).to have_content '<script>alert("xss");</script>'
           end
+        end
+      end
+
+      context 'editing issue labels', :js do
+        before do
+          issue.update(labels: [label])
+          page.within('.block.labels') do
+            click_on 'Edit'
+          end
+        end
+
+        it 'shows the current set of labels' do
+          page.within('.issuable-show-labels') do
+            expect(page).to have_content label.title
+          end
+        end
+
+        it 'shows option to create a project label' do
+          page.within('.block.labels') do
+            expect(page).to have_content 'Create project'
+          end
+        end
+
+        context 'creating a project label', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27992' do
+          before do
+            page.within('.block.labels') do
+              click_link 'Create project'
+            end
+          end
+
+          it 'shows dropdown switches to "create label" section' do
+            page.within('.block.labels') do
+              expect(page).to have_content 'Create project label'
+            end
+          end
+
+          it 'adds new label' do
+            page.within('.block.labels') do
+              fill_in 'new_label_name', with: 'wontfix'
+              page.find('.suggest-colors a', match: :first).click
+              page.find('button', text: 'Create').click
+
+              page.within('.dropdown-page-one') do
+                expect(page).to have_content 'wontfix'
+              end
+            end
+          end
+
+          it 'shows error message if label title is taken' do
+            page.within('.block.labels') do
+              fill_in 'new_label_name', with: label.title
+              page.find('.suggest-colors a', match: :first).click
+              page.find('button', text: 'Create').click
+
+              page.within('.dropdown-page-two') do
+                expect(page).to have_content 'Title has already been taken'
+              end
+            end
+          end
+        end
+      end
+
+      context 'interacting with collapsed sidebar', :js do
+        collapsed_sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
+        expanded_sidebar_selector = 'aside.right-sidebar.right-sidebar-expanded'
+        confidentiality_sidebar_block = '.block.confidentiality'
+        lock_sidebar_block = '.block.lock'
+        collapsed_sidebar_block_icon = '.sidebar-collapsed-icon'
+
+        before do
+          resize_screen_sm
+        end
+
+        it 'confidentiality block expands then collapses sidebar' do
+          expect(page).to have_css(collapsed_sidebar_selector)
+
+          page.within(confidentiality_sidebar_block) do
+            find(collapsed_sidebar_block_icon).click
+          end
+
+          expect(page).to have_css(expanded_sidebar_selector)
+
+          page.within(confidentiality_sidebar_block) do
+            page.find('button', text: 'Cancel').click
+          end
+
+          expect(page).to have_css(collapsed_sidebar_selector)
+        end
+
+        it 'lock block expands then collapses sidebar' do
+          expect(page).to have_css(collapsed_sidebar_selector)
+
+          page.within(lock_sidebar_block) do
+            find(collapsed_sidebar_block_icon).click
+          end
+
+          expect(page).to have_css(expanded_sidebar_selector)
+
+          page.within(lock_sidebar_block) do
+            page.find('button', text: 'Cancel').click
+          end
+
+          expect(page).to have_css(collapsed_sidebar_selector)
+        end
+      end
+    end
+
+    context 'as a guest' do
+      before do
+        project.add_guest(user)
+        visit_issue(project, issue)
+      end
+
+      it 'does not have a option to edit labels' do
+        expect(page).not_to have_selector('.block.labels .js-sidebar-dropdown-toggle')
+      end
+
+      context 'sidebar', :js do
+        it 'finds issue copy forwarding email' do
+          expect(find('[data-qa-selector="copy-forward-email"]').text).to eq "Issue email: #{issue.creatable_note_email_address(user)}"
+        end
+      end
+
+      context 'interacting with collapsed sidebar', :js do
+        collapsed_sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
+        expanded_sidebar_selector = 'aside.right-sidebar.right-sidebar-expanded'
+        lock_sidebar_block = '.block.lock'
+        lock_button = '.block.lock .btn-close'
+        collapsed_sidebar_block_icon = '.sidebar-collapsed-icon'
+
+        before do
+          resize_screen_sm
+        end
+
+        it 'expands then does not show the lock dialog form' do
+          expect(page).to have_css(collapsed_sidebar_selector)
+
+          page.within(lock_sidebar_block) do
+            find(collapsed_sidebar_block_icon).click
+          end
+
+          expect(page).to have_css(expanded_sidebar_selector)
+          expect(page).not_to have_selector(lock_button)
         end
       end
     end
   end
 
-  context 'as a allowed user' do
-    before do
-      project.add_developer(user)
-      visit_issue(project, issue)
-    end
-
+  context 'when not signed in' do
     context 'sidebar', :js do
-      it 'changes size when the screen size is smaller' do
-        sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
-        # Resize the window
-        resize_screen_sm
-        # Make sure the sidebar is collapsed
-        find(sidebar_selector)
-        expect(page).to have_css(sidebar_selector)
-        # Once is collapsed let's open the sidebard and reload
-        open_issue_sidebar
-        refresh
-        find(sidebar_selector)
-        expect(page).to have_css(sidebar_selector)
-        # Restore the window size as it was including the sidebar
-        restore_window_size
-        open_issue_sidebar
-      end
-
-      it 'escapes XSS when viewing issue labels' do
-        page.within('.block.labels') do
-          find('.edit-link').click
-
-          expect(page).to have_content '<script>alert("xss");</script>'
-        end
-      end
-    end
-
-    context 'editing issue labels', :js do
       before do
-        issue.update(labels: [label])
-        page.within('.block.labels') do
-          find('.edit-link').click
-        end
+        visit_issue(project, issue)
       end
 
-      it 'shows the current set of labels' do
-        page.within('.issuable-show-labels') do
-          expect(page).to have_content label.title
-        end
-      end
-
-      it 'shows option to create a project label' do
-        page.within('.block.labels') do
-          expect(page).to have_content 'Create project'
-        end
-      end
-
-      context 'creating a project label', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27992' do
-        before do
-          page.within('.block.labels') do
-            click_link 'Create project'
-          end
-        end
-
-        it 'shows dropdown switches to "create label" section' do
-          page.within('.block.labels') do
-            expect(page).to have_content 'Create project label'
-          end
-        end
-
-        it 'adds new label' do
-          page.within('.block.labels') do
-            fill_in 'new_label_name', with: 'wontfix'
-            page.find('.suggest-colors a', match: :first).click
-            page.find('button', text: 'Create').click
-
-            page.within('.dropdown-page-one') do
-              expect(page).to have_content 'wontfix'
-            end
-          end
-        end
-
-        it 'shows error message if label title is taken' do
-          page.within('.block.labels') do
-            fill_in 'new_label_name', with: label.title
-            page.find('.suggest-colors a', match: :first).click
-            page.find('button', text: 'Create').click
-
-            page.within('.dropdown-page-two') do
-              expect(page).to have_content 'Title has already been taken'
-            end
-          end
-        end
-      end
-    end
-
-    context 'interacting with collapsed sidebar', :js do
-      collapsed_sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
-      expanded_sidebar_selector = 'aside.right-sidebar.right-sidebar-expanded'
-      confidentiality_sidebar_block = '.block.confidentiality'
-      lock_sidebar_block = '.block.lock'
-      collapsed_sidebar_block_icon = '.sidebar-collapsed-icon'
-
-      before do
-        resize_screen_sm
-      end
-
-      it 'confidentiality block expands then collapses sidebar' do
-        expect(page).to have_css(collapsed_sidebar_selector)
-
-        page.within(confidentiality_sidebar_block) do
-          find(collapsed_sidebar_block_icon).click
-        end
-
-        expect(page).to have_css(expanded_sidebar_selector)
-
-        page.within(confidentiality_sidebar_block) do
-          page.find('button', text: 'Cancel').click
-        end
-
-        expect(page).to have_css(collapsed_sidebar_selector)
-      end
-
-      it 'lock block expands then collapses sidebar' do
-        expect(page).to have_css(collapsed_sidebar_selector)
-
-        page.within(lock_sidebar_block) do
-          find(collapsed_sidebar_block_icon).click
-        end
-
-        expect(page).to have_css(expanded_sidebar_selector)
-
-        page.within(lock_sidebar_block) do
-          page.find('button', text: 'Cancel').click
-        end
-
-        expect(page).to have_css(collapsed_sidebar_selector)
-      end
-    end
-  end
-
-  context 'as a guest' do
-    before do
-      project.add_guest(user)
-      visit_issue(project, issue)
-    end
-
-    it 'does not have a option to edit labels' do
-      expect(page).not_to have_selector('.block.labels .edit-link')
-    end
-
-    context 'interacting with collapsed sidebar', :js do
-      collapsed_sidebar_selector = 'aside.right-sidebar.right-sidebar-collapsed'
-      expanded_sidebar_selector = 'aside.right-sidebar.right-sidebar-expanded'
-      lock_sidebar_block = '.block.lock'
-      lock_button = '.block.lock .btn-close'
-      collapsed_sidebar_block_icon = '.sidebar-collapsed-icon'
-
-      before do
-        resize_screen_sm
-      end
-
-      it 'expands then does not show the lock dialog form' do
-        expect(page).to have_css(collapsed_sidebar_selector)
-
-        page.within(lock_sidebar_block) do
-          find(collapsed_sidebar_block_icon).click
-        end
-
-        expect(page).to have_css(expanded_sidebar_selector)
-        expect(page).not_to have_selector(lock_button)
+      it 'does not find issue email' do
+        expect(page).not_to have_selector('[data-qa-selector="copy-forward-email"]')
       end
     end
   end

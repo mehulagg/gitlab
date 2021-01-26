@@ -39,6 +39,8 @@ RSpec.describe "User creates a merge request", :js do
 
     expect(find_field("merge_request_description").value).to eq(template_text)
 
+    click_button 'Approval rules'
+
     page.within('.js-approval-rules') do
       expect(page).to have_css("img[alt=\"#{approver.name}\"]")
     end

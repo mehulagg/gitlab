@@ -31,7 +31,7 @@ describe('File finder item spec', () => {
   });
 
   describe('with entries', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent({
         files: [
           {
@@ -57,7 +57,7 @@ describe('File finder item spec', () => {
       expect(vm.$el.textContent).not.toContain('folder');
     });
 
-    it('filters entries', done => {
+    it('filters entries', (done) => {
       vm.searchText = 'index';
 
       setImmediate(() => {
@@ -68,7 +68,7 @@ describe('File finder item spec', () => {
       });
     });
 
-    it('shows clear button when searchText is not empty', done => {
+    it('shows clear button when searchText is not empty', (done) => {
       vm.searchText = 'index';
 
       setImmediate(() => {
@@ -79,12 +79,12 @@ describe('File finder item spec', () => {
       });
     });
 
-    it('clear button resets searchText', done => {
+    it('clear button resets searchText', (done) => {
       vm.searchText = 'index';
 
       waitForPromises()
         .then(() => {
-          vm.$el.querySelector('.dropdown-input-clear').click();
+          vm.clearSearchInput();
         })
         .then(waitForPromises)
         .then(() => {
@@ -94,13 +94,13 @@ describe('File finder item spec', () => {
         .catch(done.fail);
     });
 
-    it('clear button focues search input', done => {
+    it('clear button focuses search input', (done) => {
       jest.spyOn(vm.$refs.searchInput, 'focus').mockImplementation(() => {});
       vm.searchText = 'index';
 
       waitForPromises()
         .then(() => {
-          vm.$el.querySelector('.dropdown-input-clear').click();
+          vm.clearSearchInput();
         })
         .then(waitForPromises)
         .then(() => {
@@ -111,7 +111,7 @@ describe('File finder item spec', () => {
     });
 
     describe('listShowCount', () => {
-      it('returns 1 when no filtered entries exist', done => {
+      it('returns 1 when no filtered entries exist', (done) => {
         vm.searchText = 'testing 123';
 
         setImmediate(() => {
@@ -131,7 +131,7 @@ describe('File finder item spec', () => {
         expect(vm.listHeight).toBe(55);
       });
 
-      it('returns 33 when entries dont exist', done => {
+      it('returns 33 when entries dont exist', (done) => {
         vm.searchText = 'testing 123';
 
         setImmediate(() => {
@@ -143,7 +143,7 @@ describe('File finder item spec', () => {
     });
 
     describe('filteredBlobsLength', () => {
-      it('returns length of filtered blobs', done => {
+      it('returns length of filtered blobs', (done) => {
         vm.searchText = 'index';
 
         setImmediate(() => {
@@ -156,7 +156,7 @@ describe('File finder item spec', () => {
 
     describe('watches', () => {
       describe('searchText', () => {
-        it('resets focusedIndex when updated', done => {
+        it('resets focusedIndex when updated', (done) => {
           vm.focusedIndex = 1;
           vm.searchText = 'test';
 
@@ -169,7 +169,7 @@ describe('File finder item spec', () => {
       });
 
       describe('visible', () => {
-        it('returns searchText when false', done => {
+        it('returns searchText when false', (done) => {
           vm.searchText = 'test';
           vm.visible = true;
 
@@ -206,7 +206,7 @@ describe('File finder item spec', () => {
     });
 
     describe('onKeyup', () => {
-      it('opens file on enter key', done => {
+      it('opens file on enter key', (done) => {
         const event = new CustomEvent('keyup');
         event.keyCode = ENTER_KEY_CODE;
 
@@ -221,7 +221,7 @@ describe('File finder item spec', () => {
         });
       });
 
-      it('closes file finder on esc key', done => {
+      it('closes file finder on esc key', (done) => {
         const event = new CustomEvent('keyup');
         event.keyCode = ESC_KEY_CODE;
 
@@ -300,7 +300,7 @@ describe('File finder item spec', () => {
   });
 
   describe('keyboard shortcuts', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       createComponent();
 
       jest.spyOn(vm, 'toggle').mockImplementation(() => {});
@@ -308,7 +308,7 @@ describe('File finder item spec', () => {
       vm.$nextTick(done);
     });
 
-    it('calls toggle on `t` key press', done => {
+    it('calls toggle on `t` key press', (done) => {
       Mousetrap.trigger('t');
 
       vm.$nextTick()
@@ -319,8 +319,8 @@ describe('File finder item spec', () => {
         .catch(done.fail);
     });
 
-    it('calls toggle on `command+p` key press', done => {
-      Mousetrap.trigger('command+p');
+    it('calls toggle on `mod+p` key press', (done) => {
+      Mousetrap.trigger('mod+p');
 
       vm.$nextTick()
         .then(() => {
@@ -330,39 +330,28 @@ describe('File finder item spec', () => {
         .catch(done.fail);
     });
 
-    it('calls toggle on `ctrl+p` key press', done => {
-      Mousetrap.trigger('ctrl+p');
-
-      vm.$nextTick()
-        .then(() => {
-          expect(vm.toggle).toHaveBeenCalled();
-        })
-        .then(done)
-        .catch(done.fail);
-    });
-
-    it('always allows `command+p` to trigger toggle', () => {
+    it('always allows `mod+p` to trigger toggle', () => {
       expect(
-        vm.mousetrapStopCallback(null, vm.$el.querySelector('.dropdown-input-field'), 'command+p'),
-      ).toBe(false);
-    });
-
-    it('always allows `ctrl+p` to trigger toggle', () => {
-      expect(
-        vm.mousetrapStopCallback(null, vm.$el.querySelector('.dropdown-input-field'), 'ctrl+p'),
+        Mousetrap.prototype.stopCallback(
+          null,
+          vm.$el.querySelector('.dropdown-input-field'),
+          'mod+p',
+        ),
       ).toBe(false);
     });
 
     it('onlys handles `t` when focused in input-field', () => {
       expect(
-        vm.mousetrapStopCallback(null, vm.$el.querySelector('.dropdown-input-field'), 't'),
+        Mousetrap.prototype.stopCallback(null, vm.$el.querySelector('.dropdown-input-field'), 't'),
       ).toBe(true);
     });
 
     it('stops callback in monaco editor', () => {
       setFixtures('<div class="inputarea"></div>');
 
-      expect(vm.mousetrapStopCallback(null, document.querySelector('.inputarea'), 't')).toBe(true);
+      expect(
+        Mousetrap.prototype.stopCallback(null, document.querySelector('.inputarea'), 't'),
+      ).toBe(true);
     });
   });
 });

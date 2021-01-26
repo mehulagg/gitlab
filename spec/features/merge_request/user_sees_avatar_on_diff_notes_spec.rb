@@ -16,10 +16,10 @@ RSpec.describe 'Merge request > User sees avatars on diff notes', :js do
       diff_refs: merge_request.diff_refs
     )
   end
+
   let!(:note) { create(:diff_note_on_merge_request, project: project, noteable: merge_request, position: position) }
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
     project.add_maintainer(user)
     sign_in user
 

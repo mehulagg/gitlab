@@ -25,7 +25,9 @@ module QA
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
 
-      context "Add project" do
+      context "Add project",
+              testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727',
+              quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/283925', type: :investigating, only: :production } do
         before do
           Resource::Project.fabricate_via_browser_ui! do |project|
             project.name = 'audit-add-project-via-ui'
@@ -35,7 +37,7 @@ module QA
         it_behaves_like 'audit event', ["Added project"]
       end
 
-      context "Add user access as guest" do
+      context "Add user access as guest", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
         before do
           project.visit!
 
@@ -48,7 +50,7 @@ module QA
         it_behaves_like 'audit event', ["Added user access as Guest"]
       end
 
-      context "Add deploy key" do
+      context "Add deploy key", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/730' do
         before do
           key = Runtime::Key::RSA.new
           deploy_key_title = 'deploy key title'
@@ -64,7 +66,7 @@ module QA
         it_behaves_like 'audit event', ["Added deploy key"]
       end
 
-      context "Change visibility" do
+      context "Change visibility", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/728' do
         before do
           project.visit!
 
@@ -80,7 +82,7 @@ module QA
         it_behaves_like 'audit event', ["Changed visibility from Public to Private"]
       end
 
-      context "Export file download", quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217949', type: :investigating } do
+      context "Export file download", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1127', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/296212', only: { subdomain: :staging }, type: :bug } do
         before do
           QA::Support::Retrier.retry_until do
             project = Resource::Project.fabricate_via_api! do |project|
@@ -96,7 +98,10 @@ module QA
               expect(page).to have_text("Project export started")
 
               Page::Project::Menu.perform(&:go_to_general_settings)
-              settings.expand_advanced_settings(&:has_download_export_link?)
+              settings.expand_advanced_settings do |advanced_settings|
+                advanced_settings.scroll_to_element(:export_project_content)
+                advanced_settings.has_download_export_link?
+              end
             end
           end
 
@@ -108,7 +113,7 @@ module QA
         it_behaves_like 'audit event', ["Export file download started"]
       end
 
-      context "Project archive and unarchive" do
+      context "Project archive and unarchive", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/726' do
         before do
           project.visit!
 

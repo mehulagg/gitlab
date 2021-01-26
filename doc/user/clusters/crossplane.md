@@ -1,7 +1,7 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Crossplane configuration
@@ -78,7 +78,6 @@ provided can manage resources in the `database.crossplane.io` API group:
 See [Configure Your Cloud Provider Account](https://crossplane.github.io/docs/v0.4/cloud-providers.html)
 to configure the installed cloud provider stack with a user account.
 
-NOTE: **Note:**
 The Secret, and the Provider resource referencing the Secret, must be
 applied to the `gitlab-managed-apps` namespace in the guide. Make sure you change that
 while following the process.

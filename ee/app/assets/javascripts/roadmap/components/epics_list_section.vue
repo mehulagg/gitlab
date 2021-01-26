@@ -68,7 +68,7 @@ export default {
     },
     epicsWithAssociatedParents() {
       return this.epics.filter(
-        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+        (epic) => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
       );
     },
     displayedEpics() {
@@ -95,7 +95,7 @@ export default {
   methods: {
     ...mapActions(['setBufferSize', 'toggleEpic']),
     initMounted() {
-      this.roadmapShellEl = this.$root.$el && this.$root.$el.firstChild;
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
       this.setBufferSize(Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT));
 
       // Wait for component render to complete
@@ -123,8 +123,10 @@ export default {
     getEmptyRowContainerStyles() {
       if (this.$refs.epicItems && this.$refs.epicItems.length) {
         return {
-          height: `${this.$el.clientHeight -
-            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
+          height: `${
+            this.$el.clientHeight -
+            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight
+          }px`,
         };
       }
       return {};
@@ -141,7 +143,7 @@ export default {
     },
     getEpicItemProps(index) {
       return {
-        key: index,
+        key: generateKey(this.displayedEpics[index]),
         props: {
           epic: this.displayedEpics[index],
           presetType: this.presetType,

@@ -19,7 +19,7 @@ class EpicEntity < IssuableEntity
   expose :due_date_fixed, :due_date_from_milestones
   expose :state
   expose :lock_version
-  expose :confidential, if: -> (epic) { Feature.enabled?(:confidential_epics, epic.group, default_enabled: true) }
+  expose :confidential
 
   expose :web_url do |epic|
     group_epic_path(epic.group, epic)

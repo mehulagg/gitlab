@@ -2,8 +2,10 @@
 
 module API
   # notification_settings API
-  class NotificationSettings < Grape::API::Instance
+  class NotificationSettings < ::API::Base
     before { authenticate! }
+
+    feature_category :users
 
     helpers ::API::Helpers::MembersHelpers
 

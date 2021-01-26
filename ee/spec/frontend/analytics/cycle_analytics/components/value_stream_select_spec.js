@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
+import { GlButton, GlDropdown } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlButton, GlModal, GlNewDropdown as GlDropdown, GlFormGroup } from '@gitlab/ui';
+import Vuex from 'vuex';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import { valueStreams } from '../mock_data';
 import { findDropdownItemText } from '../helpers';
+import { valueStreams } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,22 +12,31 @@ describe('ValueStreamSelect', () => {
   let wrapper = null;
 
   const createValueStreamMock = jest.fn(() => Promise.resolve());
+  const deleteValueStreamMock = jest.fn(() => Promise.resolve());
   const mockEvent = { preventDefault: jest.fn() };
   const mockToastShow = jest.fn();
   const streamName = 'Cool stream';
+  const selectedValueStream = valueStreams[0];
+  const deleteValueStreamError = 'Cannot delete default value stream';
 
   const fakeStore = ({ initialState = {} }) =>
     new Vuex.Store({
       state: {
-        isLoading: false,
+        isCreatingValueStream: false,
+        isDeletingValueStream: false,
         createValueStreamErrors: {},
+        deleteValueStreamError: null,
         valueStreams: [],
         selectedValueStream: {},
         ...initialState,
       },
+      actions: {
+        createValueStream: createValueStreamMock,
+        deleteValueStream: deleteValueStreamMock,
+      },
     });
 
-  const createComponent = ({ data = {}, initialState = {}, methods = {} } = {}) =>
+  const createComponent = ({ data = {}, initialState = {} } = {}) =>
     shallowMount(ValueStreamSelect, {
       localVue,
       store: fakeStore({ initialState }),
@@ -36,10 +45,6 @@ describe('ValueStreamSelect', () => {
           ...data,
         };
       },
-      methods: {
-        createValueStream: createValueStreamMock,
-        ...methods,
-      },
       mocks: {
         $toast: {
           show: mockToastShow,
@@ -47,13 +52,12 @@ describe('ValueStreamSelect', () => {
       },
     });
 
-  const findModal = () => wrapper.find(GlModal);
-  const submitButtonDisabledState = () => findModal().props('actionPrimary').attributes[1].disabled;
-  const submitForm = () => findModal().vm.$emit('primary', mockEvent);
+  const findModal = (modal) => wrapper.find(`[data-testid="${modal}-value-stream-modal"]`);
+  const submitModal = (modal) => findModal(modal).vm.$emit('primary', mockEvent);
   const findSelectValueStreamDropdown = () => wrapper.find(GlDropdown);
-  const findSelectValueStreamDropdownOptions = _wrapper => findDropdownItemText(_wrapper);
+  const findSelectValueStreamDropdownOptions = (_wrapper) => findDropdownItemText(_wrapper);
   const findCreateValueStreamButton = () => wrapper.find(GlButton);
-  const findFormGroup = () => wrapper.find(GlFormGroup);
+  const findDeleteValueStreamButton = () => wrapper.find('[data-testid="delete-value-stream"]');
 
   beforeEach(() => {
     wrapper = createComponent({
@@ -78,9 +82,55 @@ describe('ValueStreamSelect', () => {
 
     it('renders each value stream including a create button', () => {
       const opts = findSelectValueStreamDropdownOptions(wrapper);
-      [...valueStreams.map(v => v.name), 'Create new Value Stream'].forEach(vs => {
+      [...valueStreams.map((v) => v.name), 'Create new Value Stream'].forEach((vs) => {
         expect(opts).toContain(vs);
       });
+    });
+
+    describe('with a selected value stream', () => {
+      it('renders a delete option for custom value streams', () => {
+        wrapper = createComponent({
+          initialState: {
+            valueStreams,
+            selectedValueStream: {
+              ...selectedValueStream,
+              isCustom: true,
+            },
+          },
+        });
+
+        expect(findDeleteValueStreamButton().exists()).toBe(true);
+        expect(findDeleteValueStreamButton().text()).toBe(`Delete ${selectedValueStream.name}`);
+      });
+
+      it('does not render a delete option for default value streams', () => {
+        wrapper = createComponent({
+          initialState: {
+            valueStreams,
+            selectedValueStream,
+          },
+        });
+
+        expect(findDeleteValueStreamButton().exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('Only the default value stream available', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        initialState: {
+          valueStreams: [{ id: 'default', name: 'default' }],
+        },
+      });
+    });
+
+    it('does not display the create value stream button', () => {
+      expect(findCreateValueStreamButton().exists()).toBe(false);
+    });
+
+    it('displays the select value stream dropdown', () => {
+      expect(findSelectValueStreamDropdown().exists()).toBe(true);
     });
   });
 
@@ -102,82 +152,49 @@ describe('ValueStreamSelect', () => {
     });
   });
 
-  describe('Create value stream form', () => {
-    it('submit button is disabled', () => {
-      expect(submitButtonDisabledState()).toBe(true);
-    });
-
-    describe('form errors', () => {
-      const fieldErrors = ['already exists', 'is required'];
-
+  describe('Delete value stream modal', () => {
+    describe('succeeds', () => {
       beforeEach(() => {
         wrapper = createComponent({
-          data: { name: streamName },
           initialState: {
-            createValueStreamErrors: {
-              name: fieldErrors,
+            valueStreams,
+            selectedValueStream: {
+              ...selectedValueStream,
+              isCustom: true,
             },
           },
         });
+
+        submitModal('delete');
       });
 
-      it('renders the error', () => {
-        expect(findFormGroup().attributes('invalid-feedback')).toEqual(fieldErrors.join('\n'));
+      it('calls the "deleteValueStream" event when submitted', () => {
+        expect(deleteValueStreamMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          selectedValueStream.id,
+        );
       });
 
-      it('submit button is disabled', () => {
-        expect(submitButtonDisabledState()).toBe(true);
+      it('displays a toast message', () => {
+        expect(mockToastShow).toHaveBeenCalledWith(
+          `'${selectedValueStream.name}' Value Stream deleted`,
+          {
+            position: 'top-center',
+          },
+        );
       });
     });
 
-    describe('with valid fields', () => {
+    describe('fails', () => {
       beforeEach(() => {
-        wrapper = createComponent({ data: { name: streamName } });
-      });
-
-      it('submit button is enabled', () => {
-        expect(submitButtonDisabledState()).toBe(false);
-      });
-
-      describe('form submitted successfully', () => {
-        beforeEach(() => {
-          submitForm();
-        });
-
-        it('calls the "createValueStream" event when submitted', () => {
-          expect(createValueStreamMock).toHaveBeenCalledWith({ name: streamName });
-        });
-
-        it('clears the name field', () => {
-          expect(wrapper.vm.name).toEqual('');
-        });
-
-        it('displays a toast message', () => {
-          expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
-            position: 'top-center',
-          });
+        wrapper = createComponent({
+          data: { name: streamName },
+          initialState: { deleteValueStreamError },
         });
       });
 
-      describe('form submission fails', () => {
-        const createValueStreamMockFail = jest.fn(() => Promise.reject());
-
-        beforeEach(() => {
-          wrapper = createComponent({
-            data: { name: streamName },
-            actions: {
-              createValueStream: () => createValueStreamMockFail,
-            },
-          });
-        });
-
-        it('does not clear the name field', () => {
-          expect(wrapper.vm.name).toEqual(streamName);
-        });
-
-        it('does not display a toast message', () => {
-          expect(mockToastShow).not.toHaveBeenCalled();
-        });
+      it('does not display a toast message', () => {
+        expect(mockToastShow).not.toHaveBeenCalled();
       });
     });
   });

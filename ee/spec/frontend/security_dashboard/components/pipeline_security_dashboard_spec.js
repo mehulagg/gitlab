@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
-import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -15,7 +15,6 @@ const pipelineIid = 4321;
 const projectId = 5678;
 const sourceBranch = 'feature-branch-1';
 const vulnerabilitiesEndpoint = '/vulnerabilities';
-const vulnerabilityFeedbackHelpPath = '/vulnerabilities_feedback_help';
 const loadingErrorIllustrations = {
   401: '/401.svg',
   403: '/403.svg',
@@ -25,7 +24,7 @@ describe('Pipeline Security Dashboard component', () => {
   let store;
   let wrapper;
 
-  const factory = options => {
+  const factory = (options) => {
     store = new Vuex.Store({
       modules: {
         vulnerabilities: {
@@ -56,7 +55,6 @@ describe('Pipeline Security Dashboard component', () => {
         projectId,
         sourceBranch,
         vulnerabilitiesEndpoint,
-        vulnerabilityFeedbackHelpPath,
         loadingErrorIllustrations,
       },
       ...options,
@@ -90,10 +88,8 @@ describe('Pipeline Security Dashboard component', () => {
       const dashboard = wrapper.find(SecurityDashboard);
       expect(dashboard.exists()).toBe(true);
       expect(dashboard.props()).toMatchObject({
-        lockToProject: { id: projectId },
         pipelineId,
         vulnerabilitiesEndpoint,
-        vulnerabilityFeedbackHelpPath,
       });
     });
   });
@@ -102,7 +98,7 @@ describe('Pipeline Security Dashboard component', () => {
     beforeEach(() => {
       factory({
         stubs: {
-          'security-dashboard': { template: '<div><slot name="emptyState"></slot></div>' },
+          'security-dashboard': { template: '<div><slot name="empty-state"></slot></div>' },
         },
       });
     });
@@ -133,7 +129,7 @@ describe('Pipeline Security Dashboard component', () => {
           securityReportSummary,
         },
       });
-      expect(wrapper.contains(SecurityReportsSummary)).toBe(true);
+      expect(wrapper.find(SecurityReportsSummary).exists()).toBe(true);
     });
 
     it('does not show the summary if it is empty', () => {
@@ -142,7 +138,7 @@ describe('Pipeline Security Dashboard component', () => {
           securityReportSummary: null,
         },
       });
-      expect(wrapper.contains(SecurityReportsSummary)).toBe(false);
+      expect(wrapper.find(SecurityReportsSummary).exists()).toBe(false);
     });
   });
 });

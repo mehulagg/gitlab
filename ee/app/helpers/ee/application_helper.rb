@@ -11,19 +11,41 @@ module EE
 
     override :read_only_message
     def read_only_message
-      return super unless ::Gitlab::Geo.secondary?
+      message = ::Gitlab::Geo.secondary? ? geo_secondary_read_only_message : super
 
-      if @limited_actions_message
-        html_escape(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node. You may be able to make a limited amount of changes or perform a limited amount of actions on this page.')) %
-          { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe }
-      else
-        message = html_escape(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node. If you want to make changes, you must visit this page on the %{node_link_open}primary node%{node_link_close}.')) %
-          { node_link_open: "<a href=\"#{::Gitlab::Geo.primary_node&.url || '#'}\">".html_safe, node_link_close: "</a>".html_safe, b_open: '<b>'.html_safe, b_close: '</b>'.html_safe }
+      return message unless ::Gitlab.maintenance_mode?
+      return maintenance_mode_message.concat(message) if message
 
-        return "#{message} #{lag_message}".html_safe if lag_message
+      maintenance_mode_message
+    end
 
-        message
+    def maintenance_mode_message
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(custom_maintenance_mode_message)
+        end
       end
+
+      html
+    end
+
+    def geo_secondary_read_only_message
+      message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
+
+      message = "#{message} #{lag_message}".html_safe if lag_message
+
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node.').html_safe % { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe })
+          concat(" #{message}")
+        end
+      end
+
+      html.concat(tag.a(s_('Geo|Go to the primary site'), class: 'btn', href: ::Gitlab::Geo.primary_node.url, target: '_blank')) if ::Gitlab::Geo.primary_node.present?
+
+      html
     end
 
     def lag_message
@@ -70,16 +92,11 @@ module EE
       ::Gitlab.config.smartcard.client_certificate_required_port
     end
 
-    def page_class
-      class_names = super
-      class_names += system_message_class
-
-      class_names
-    end
-
     override :autocomplete_data_sources
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
+
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard)
 
       if object.is_a?(Group)
         {
@@ -88,18 +105,16 @@ module EE
           issues: issues_group_autocomplete_sources_path(object),
           mergeRequests: merge_requests_group_autocomplete_sources_path(object),
           epics: epics_group_autocomplete_sources_path(object),
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_group_autocomplete_sources_path(object) : nil,
           commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
           milestones: milestones_group_autocomplete_sources_path(object)
-        }
-      elsif object.group&.feature_available?(:epics)
-        { epics: epics_project_autocomplete_sources_path(object) }.merge(super)
+        }.compact
       else
-        super
+        {
+          epics: object.group&.feature_available?(:epics) ? epics_project_autocomplete_sources_path(object) : nil,
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_project_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       end
-    end
-
-    def instance_review_permitted?
-      ::Gitlab::CurrentSettings.instance_review_permitted? && current_user&.admin?
     end
 
     override :show_last_push_widget?
@@ -113,11 +128,12 @@ module EE
       show
     end
 
-    def show_whats_new_dropdown_item?
-      ::Gitlab.com? && ::Feature.enabled?(:whats_new_dropdown)
-    end
-
     private
+
+    def custom_maintenance_mode_message
+      ::Gitlab::CurrentSettings.maintenance_mode_message&.html_safe ||
+        s_('This GitLab instance is undergoing maintenance and is operating in read-only mode.')
+    end
 
     def appearance
       ::Appearance.current

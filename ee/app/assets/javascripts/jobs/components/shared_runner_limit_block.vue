@@ -1,10 +1,11 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton, GlAlert } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
+    GlAlert,
   },
   props: {
     quotaUsed: {
@@ -46,7 +47,7 @@ export default {
 };
 </script>
 <template>
-  <div class="bs-callout bs-callout-danger">
+  <gl-alert class="gl-my-5" variant="danger" :dismissible="false">
     <p>
       {{ runnersWarningMessage }}
 
@@ -55,13 +56,14 @@ export default {
         <a :href="runnersPath">{{ __('Runners page.') }}</a>
       </template>
     </p>
-    <gl-deprecated-button
+    <gl-button
       v-if="subscriptionsMoreMinutesUrl"
       variant="danger"
+      category="primary"
       :href="subscriptionsMoreMinutesUrl"
       class="btn-inverted"
     >
       {{ __('Purchase more minutes') }}
-    </gl-deprecated-button>
-  </div>
+    </gl-button>
+  </gl-alert>
 </template>

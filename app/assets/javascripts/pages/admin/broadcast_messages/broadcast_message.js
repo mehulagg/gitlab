@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { debounce } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import { textColorForBackground } from '~/lib/utils/color_utils';
 
@@ -82,7 +82,7 @@ export default () => {
     return $jsBroadcastMessagePreview.css(selectedColorStyle);
   };
 
-  const setSuggestedColor = e => {
+  const setSuggestedColor = (e) => {
     const color = $(e.currentTarget).data('color');
     $broadcastMessageColor
       .val(color)

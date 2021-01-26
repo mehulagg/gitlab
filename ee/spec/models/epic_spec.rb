@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Epic do
+  include NestedEpicsHelper
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
+  let_it_be(:project) { create(:project, group: group) }
 
   describe 'associations' do
     subject { build(:epic) }
@@ -16,7 +18,9 @@ RSpec.describe Epic do
     it { is_expected.to belong_to(:parent) }
     it { is_expected.to have_many(:epic_issues) }
     it { is_expected.to have_many(:children) }
-    it { is_expected.to have_many(:user_mentions).class_name("EpicUserMention") }
+    it { is_expected.to have_many(:user_mentions).class_name('EpicUserMention') }
+    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference').inverse_of(:epic) }
+    it { is_expected.to have_many(:epic_board_positions).class_name('Boards::EpicBoardPosition').inverse_of(:epic_board) }
   end
 
   describe 'scopes' do
@@ -40,6 +44,36 @@ RSpec.describe Epic do
         create(:epic, confidential: true)
 
         expect(described_class.not_confidential_or_in_groups(group)).to match_array([confidential_epic, public_epic])
+      end
+    end
+
+    describe '.order_relative_position_on_board' do
+      let_it_be(:board) { create(:epic_board) }
+      let_it_be(:epic1) { create(:epic) }
+      let_it_be(:epic2) { create(:epic) }
+      let_it_be(:epic3) { create(:epic) }
+
+      it 'returns epics ordered by position on the board, null last' do
+        create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10)
+        create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20)
+        create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20)
+
+        expect(described_class.order_relative_position_on_board(board.id)).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+      end
+    end
+
+    describe '.in_milestone' do
+      let_it_be(:milestone) { create(:milestone, project: project) }
+
+      it 'returns epics which have an issue in the milestone' do
+        issue1 = create(:issue, project: project, milestone: milestone)
+        issue2 = create(:issue, project: project, milestone: milestone)
+        other_issue = create(:issue, project: project)
+        epic1 = create(:epic_issue, issue: issue1).epic
+        epic2 = create(:epic_issue, issue: issue2).epic
+        create(:epic_issue, issue: other_issue)
+
+        expect(described_class.in_milestone(milestone.id)).to match_array([epic1, epic2])
       end
     end
   end
@@ -72,7 +106,7 @@ RSpec.describe Epic do
       expect(epic).to be_valid
     end
 
-    it 'is not valid if epic is confidential and has not-confidential issues' do
+    it 'is not valid if epic is confidential and has non-confidential issues' do
       epic = create(:epic_issue).epic
 
       epic.confidential = true
@@ -89,7 +123,7 @@ RSpec.describe Epic do
       expect(epic).to be_valid
     end
 
-    it 'is not valid if epic is confidential and has not-confidential subepics' do
+    it 'is not valid if epic is confidential and has non-confidential subepics' do
       epic = create(:epic, group: group)
       create(:epic, parent: epic, group: group)
 
@@ -184,31 +218,28 @@ RSpec.describe Epic do
 
       it 'returns false when level is too deep' do
         epic1 = create(:epic, group: group)
-        epic2 = create(:epic, group: group, parent: epic1)
-        epic3 = create(:epic, group: group, parent: epic2)
-        epic4 = create(:epic, group: group, parent: epic3)
-        epic5 = create(:epic, group: group, parent: epic4)
-        epic.parent = epic5
+        add_parents_to(epic: epic1, count: 6)
+
+        epic.parent = epic1
 
         expect(epic.valid_parent?).to be_falsey
       end
     end
 
     context 'when adding an Epic that has existing children' do
-      let(:parent_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group) }
       let(:epic) { build(:epic, group: group) }
-      let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
       it 'returns true when total depth after adding will not exceed limit' do
+        create(:epic, group: group, parent: epic)
+
         epic.parent = parent_epic
 
         expect(epic.valid_parent?).to be_truthy
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        child_epic2 = create(:epic, group: group, parent: child_epic1)
-        child_epic3 = create(:epic, group: group, parent: child_epic2)
-        create(:epic, group: group, parent: child_epic3)
+        add_children_to(epic: epic, count: 6)
 
         epic.parent = parent_epic
 
@@ -217,8 +248,8 @@ RSpec.describe Epic do
     end
 
     context 'when parent has ancestors and epic has children' do
-      let(:root_epic) { create(:epic, group: group) }
-      let(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+      let_it_be(:root_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group, parent: root_epic) }
       let(:epic) { build(:epic, group: group) }
       let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
@@ -229,8 +260,8 @@ RSpec.describe Epic do
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        root_epic.update(parent: create(:epic, group: group))
-        create(:epic, group: group, parent: child_epic1)
+        add_parents_to(epic: root_epic, count: 2)
+        add_children_to(epic: child_epic1, count: 2)
 
         epic.parent = parent_epic
 
@@ -616,9 +647,25 @@ RSpec.describe Epic do
   end
 
   context "relative positioning" do
-    it_behaves_like "a class that supports relative positioning" do
-      let(:factory) { :epic }
-      let(:default_params) { {} }
+    let_it_be(:parent) { create(:epic) }
+    let_it_be(:group) { create(:group) }
+
+    context 'there is no parent' do
+      let_it_be(:factory) { :epic }
+      let_it_be(:default_params) { { group: group } }
+
+      it_behaves_like "no-op relative positioning"
+    end
+
+    context 'there is a parent' do
+      it_behaves_like "a class that supports relative positioning" do
+        let(:factory) { :epic_tree_node }
+        let(:default_params) { { parent: parent, group: parent.group } }
+
+        def as_item(item)
+          item.epic_tree_node_identity
+        end
+      end
     end
   end
 

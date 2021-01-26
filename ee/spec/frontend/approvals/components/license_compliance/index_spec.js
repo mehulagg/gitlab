@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import LicenseComplianceApprovals from 'ee/approvals/components/license_compliance/index.vue';
-import modalModule from '~/vuex_shared/modules/modal';
 import approvalsLicenceComplianceModule, {
   APPROVALS,
   APPROVALS_MODAL,
 } from 'ee/approvals/stores/modules/license_compliance';
+import modalModule from '~/vuex_shared/modules/modal';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -55,7 +55,7 @@ describe('EE Approvals LicenseCompliance', () => {
     wrapper = null;
   });
 
-  const findByHrefAttribute = href => wrapper.find(`[href="${href}"]`);
+  const findByHrefAttribute = (href) => wrapper.find(`[href="${href}"]`);
   const findOpenModalButton = () => wrapper.find('button');
   const findLoadingIndicator = () => wrapper.find('[aria-label="loading"]');
   const findInformationIcon = () => wrapper.find(GlIcon);
@@ -126,7 +126,6 @@ describe('EE Approvals LicenseCompliance', () => {
       expect(store.modules.approvalsModal.actions.open).toHaveBeenCalledWith(
         expect.any(Object),
         mockLicenseCheckRule,
-        undefined,
       );
     });
   });

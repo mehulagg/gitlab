@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Repository storage Rake tasks **(CORE ONLY)**
 
 This is a collection of Rake tasks to help you list and migrate
@@ -68,7 +74,7 @@ To have a summary and then a list of projects and their attachments using hashed
 
 ## Migrate to hashed storage
 
-NOTE: **Note:**
+WARNING:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
 Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
@@ -76,8 +82,9 @@ Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
 The option to choose between hashed and legacy storage in the admin area has
 been disabled.
 
-This task will schedule all your existing projects and attachments associated
-with it to be migrated to the **Hashed** storage type:
+This task must be run on any machine that has Rails/Sidekiq configured and will
+schedule all your existing projects and attachments associated with it to be
+migrated to the **Hashed** storage type:
 
 - **Omnibus installation**
 
@@ -104,13 +111,12 @@ You can monitor the progress in the **Admin Area > Monitoring > Background Jobs*
 There is a specific queue you can watch to see how long it will take to finish:
 `hashed_storage:hashed_storage_project_migrate`.
 
-After it reaches zero, you can confirm every project has been migrated by running the commands below.
+After it reaches zero, you can confirm every project has been migrated by running the commands above.
 If you find it necessary, you can run this migration script again to schedule missing projects.
 
 Any error or warning will be logged in Sidekiq's log file.
 
-NOTE: **Note:**
-If [Geo](../geo/replication/index.md) is enabled, each project that is successfully migrated
+If [Geo](../geo/index.md) is enabled, each project that is successfully migrated
 generates an event to replicate the changes on any **secondary** nodes.
 
 You only need the `gitlab:storage:migrate_to_hashed` Rake task to migrate your repositories, but we have additional
@@ -118,7 +124,7 @@ commands below that helps you inspect projects and attachments in both legacy an
 
 ## Rollback from hashed storage to legacy storage
 
-NOTE: **Deprecated:**
+WARNING:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
 Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
@@ -153,7 +159,7 @@ sudo gitlab-rake gitlab:storage:rollback_to_legacy ID_FROM=50 ID_TO=100
 You can monitor the progress in the **Admin Area > Monitoring > Background Jobs** page.
 On the **Queues** tab, you can watch the `hashed_storage:hashed_storage_project_rollback` queue to see how long the process will take to finish.
 
-After it reaches zero, you can confirm every project has been rolled back by running the commands bellow.
+After it reaches zero, you can confirm every project has been rolled back by running the commands above.
 If some projects weren't rolled back, you can run this rollback script again to schedule further rollbacks.
 Any error or warning will be logged in Sidekiq's log file.
 

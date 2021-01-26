@@ -17,6 +17,7 @@ export default () => {
     settingsPath,
     approvalsDocumentationPath,
     lockedApprovalsRuleName,
+    softwareLicenses,
   } = el.dataset;
 
   const storeSettings = {
@@ -33,6 +34,8 @@ export default () => {
   store.dispatch('licenseManagement/setAPISettings', {
     apiUrlManageLicenses: readLicensePoliciesEndpoint,
   });
+  store.dispatch('licenseManagement/setKnownLicenses', JSON.parse(softwareLicenses));
+
   store.dispatch(`${LICENSE_LIST}/setLicensesEndpoint`, projectLicensesEndpoint);
 
   return new Vue({

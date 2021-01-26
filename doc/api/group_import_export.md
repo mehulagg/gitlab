@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Group Import/Export API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20353) in GitLab 12.8.
@@ -86,9 +92,9 @@ by `@`. For example:
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "name=imported-group" --form "path=imported-group" --form "file=@/path/to/file" "https://gitlab.example.com/api/v4/groups/import"
 ```
 
-NOTE: **Note:**
-The maximum import file size can be set by the Administrator, default is 50MB.
-As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [Admin UI](../user/admin_area/settings/account_and_limit_settings.md).
+NOTE:
+The maximum import file size can be set by the Administrator, default is `0` (unlimited).
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [Admin UI](../user/admin_area/settings/account_and_limit_settings.md). Default [modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8.
 
 ## Important notes
 

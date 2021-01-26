@@ -176,16 +176,63 @@ RSpec.describe API::Helpers do
   end
 
   describe '#track_event' do
-    it "creates a gitlab tracking event" do
-      expect(Gitlab::Tracking).to receive(:event).with('foo', 'my_event', {})
-
+    it "creates a gitlab tracking event", :snowplow do
       subject.track_event('my_event', category: 'foo')
+
+      expect_snowplow_event(category: 'foo', action: 'my_event')
     end
 
     it "logs an exception" do
-      expect(Rails.logger).to receive(:warn).with(/Tracking event failed/)
+      expect(Gitlab::AppLogger).to receive(:warn).with(/Tracking event failed/)
 
       subject.track_event('my_event', category: nil)
+    end
+  end
+
+  describe '#increment_unique_values' do
+    let(:value) { '9f302fea-f828-4ca9-aef4-e10bd723c0b3' }
+    let(:event_name) { 'g_compliance_dashboard' }
+    let(:unknown_event) { 'unknown' }
+    let(:feature) { "usage_data_#{event_name}" }
+
+    before do
+      skip_feature_flags_yaml_validation
+    end
+
+    context 'with feature enabled' do
+      before do
+        stub_feature_flags(feature => true)
+      end
+
+      it 'tracks redis hll event' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(event_name, values: value)
+
+        subject.increment_unique_values(event_name, value)
+      end
+
+      it 'logs an exception for unknown event' do
+        expect(Gitlab::AppLogger).to receive(:warn).with("Redis tracking event failed for event: #{unknown_event}, message: Unknown event #{unknown_event}")
+
+        subject.increment_unique_values(unknown_event, value)
+      end
+
+      it 'does not track event for nil values' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        subject.increment_unique_values(unknown_event, nil)
+      end
+    end
+
+    context 'with feature disabled' do
+      before do
+        stub_feature_flags(feature => false)
+      end
+
+      it 'does not track event' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        subject.increment_unique_values(event_name, value)
+      end
     end
   end
 
@@ -313,6 +360,51 @@ RSpec.describe API::Helpers do
         expect(subject).not_to receive(:render_api_error!)
 
         subject.check_unmodified_since!(Time.now)
+      end
+    end
+  end
+
+  describe '#present_disk_file!' do
+    let_it_be(:dummy_class) do
+      Class.new do
+        attr_reader :headers
+        alias_method :header, :headers
+
+        def initialize
+          @headers = {}
+        end
+      end
+    end
+
+    let(:dummy_instance) { dummy_class.include(described_class).new }
+    let(:path) { '/tmp/file.txt' }
+    let(:filename) { 'file.txt' }
+
+    subject { dummy_instance.present_disk_file!(path, filename) }
+
+    before do
+      expect(dummy_instance).to receive(:content_type).with('application/octet-stream')
+    end
+
+    context 'with X-Sendfile supported' do
+      before do
+        dummy_instance.headers['X-Sendfile-Type'] = 'X-Sendfile'
+      end
+
+      it 'sends the file using X-Sendfile' do
+        expect(dummy_instance).to receive(:body).with('')
+
+        subject
+
+        expect(dummy_instance.headers['X-Sendfile']).to eq(path)
+      end
+    end
+
+    context 'without X-Sendfile supported' do
+      it 'sends the file' do
+        expect(dummy_instance).to receive(:sendfile).with(path)
+
+        subject
       end
     end
   end

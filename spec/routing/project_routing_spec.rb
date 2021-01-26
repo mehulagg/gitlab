@@ -106,8 +106,8 @@ RSpec.describe 'project routing' do
       let(:base_path) { '/gitlab/gitlabhq/-/wikis' }
     end
 
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/wikis", "/gitlab/gitlabhq/-/wikis"
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/wikis/home/edit", "/gitlab/gitlabhq/-/wikis/home/edit"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/wikis", "/gitlab/gitlabhq/-/wikis"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/wikis/home/edit", "/gitlab/gitlabhq/-/wikis/home/edit"
   end
 
   # branches_project_repository GET    /:project_id/repository/branches(.:format) projects/repositories#branches
@@ -171,7 +171,7 @@ RSpec.describe 'project routing' do
       expect(delete('/gitlab/gitlabhq/-/tags/feature@45/foo/bar/baz')).to route_to('projects/tags#destroy', namespace_id: 'gitlab', project_id: 'gitlabhq', id: 'feature@45/foo/bar/baz')
     end
 
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/tags", "/gitlab/gitlabhq/-/tags"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/tags", "/gitlab/gitlabhq/-/tags"
   end
 
   #     project_deploy_keys GET    /:project_id/deploy_keys(.:format)          deploy_keys#index
@@ -259,8 +259,8 @@ RSpec.describe 'project routing' do
       let(:base_path) { '/gitlab/gitlabhq/-/merge_requests' }
     end
 
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/merge_requests", "/gitlab/gitlabhq/-/merge_requests"
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/merge_requests/1/diffs", "/gitlab/gitlabhq/-/merge_requests/1/diffs"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/merge_requests", "/gitlab/gitlabhq/-/merge_requests"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/merge_requests/1/diffs", "/gitlab/gitlabhq/-/merge_requests/1/diffs"
   end
 
   describe Projects::MergeRequests::CreationsController, 'routing' do
@@ -290,7 +290,7 @@ RSpec.describe 'project routing' do
       expect(get('/gitlab/gitlabhq/-/merge_requests/new/diffs.json')).to route_to('projects/merge_requests/creations#diffs', namespace_id: 'gitlab', project_id: 'gitlabhq', format: 'json')
     end
 
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/merge_requests/new", "/gitlab/gitlabhq/-/merge_requests/new"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/merge_requests/new", "/gitlab/gitlabhq/-/merge_requests/new"
   end
 
   describe Projects::MergeRequests::DiffsController, 'routing' do
@@ -306,12 +306,9 @@ RSpec.describe 'project routing' do
   end
   #  raw_project_snippet GET    /:project_id/snippets/:id/raw(.:format)  snippets#raw
   #     project_snippets GET    /:project_id/snippets(.:format)          snippets#index
-  #                      POST   /:project_id/snippets(.:format)          snippets#create
   #  new_project_snippet GET    /:project_id/snippets/new(.:format)      snippets#new
   # edit_project_snippet GET    /:project_id/snippets/:id/edit(.:format) snippets#edit
   #      project_snippet GET    /:project_id/snippets/:id(.:format)      snippets#show
-  #                      PUT    /:project_id/snippets/:id(.:format)      snippets#update
-  #                      DELETE /:project_id/snippets/:id(.:format)      snippets#destroy
   describe SnippetsController, 'routing' do
     it 'to #raw' do
       expect(get('/gitlab/gitlabhq/-/snippets/1/raw')).to route_to('projects/snippets#raw', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
@@ -319,10 +316,6 @@ RSpec.describe 'project routing' do
 
     it 'to #index' do
       expect(get('/gitlab/gitlabhq/-/snippets')).to route_to('projects/snippets#index', namespace_id: 'gitlab', project_id: 'gitlabhq')
-    end
-
-    it 'to #create' do
-      expect(post('/gitlab/gitlabhq/-/snippets')).to route_to('projects/snippets#create', namespace_id: 'gitlab', project_id: 'gitlabhq')
     end
 
     it 'to #new' do
@@ -335,14 +328,6 @@ RSpec.describe 'project routing' do
 
     it 'to #show' do
       expect(get('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#show', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
-    end
-
-    it 'to #update' do
-      expect(put('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#update', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
-    end
-
-    it 'to #destroy' do
-      expect(delete('/gitlab/gitlabhq/-/snippets/1')).to route_to('projects/snippets#destroy', namespace_id: 'gitlab', project_id: 'gitlabhq', id: '1')
     end
 
     it 'to #show from unscope routing' do
@@ -469,8 +454,8 @@ RSpec.describe 'project routing' do
       let(:base_path) { '/gitlab/gitlabhq/-/issues' }
     end
 
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/issues", "/gitlab/gitlabhq/-/issues"
-    it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/issues/1/edit", "/gitlab/gitlabhq/-/issues/1/edit"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/issues", "/gitlab/gitlabhq/-/issues"
+    it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/issues/1/edit", "/gitlab/gitlabhq/-/issues/1/edit"
   end
 
   # project_noteable_notes GET    /:project_id/noteable/:target_type/:target_id/notes notes#index
@@ -731,6 +716,12 @@ RSpec.describe 'project routing' do
     end
   end
 
+  describe Projects::Settings::CiCdController, 'routing' do
+    it "to #runner_setup_scripts" do
+      expect(get("/gitlab/gitlabhq/-/settings/ci_cd/runner_setup_scripts")).to route_to('projects/settings/ci_cd#runner_setup_scripts', namespace_id: 'gitlab', project_id: 'gitlabhq')
+    end
+  end
+
   describe Projects::TemplatesController, 'routing' do
     describe '#show' do
       def show_with_template_type(template_type)
@@ -778,25 +769,25 @@ RSpec.describe 'project routing' do
 
   describe Projects::EnvironmentsController, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/environments", "/gitlab/gitlabhq/-/environments"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/environments", "/gitlab/gitlabhq/-/environments"
     end
   end
 
   describe Projects::ClustersController, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/clusters", "/gitlab/gitlabhq/-/clusters"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/clusters", "/gitlab/gitlabhq/-/clusters"
     end
   end
 
   describe Projects::ErrorTrackingController, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/error_tracking", "/gitlab/gitlabhq/-/error_tracking"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/error_tracking", "/gitlab/gitlabhq/-/error_tracking"
     end
   end
 
   describe Projects::Serverless, 'routing' do
     describe 'legacy routing' do
-      it_behaves_like 'redirecting a legacy project path', "/gitlab/gitlabhq/serverless", "/gitlab/gitlabhq/-/serverless"
+      it_behaves_like 'redirecting a legacy path', "/gitlab/gitlabhq/serverless", "/gitlab/gitlabhq/-/serverless"
     end
   end
 

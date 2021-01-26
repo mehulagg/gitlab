@@ -1,90 +1,151 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
+import ActionComponent from '~/pipelines/components/graph/action_component.vue';
+import JobItem from '~/pipelines/components/graph/job_item.vue';
+import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 
-import stageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
+const mockJob = {
+  id: 4250,
+  name: 'test',
+  status: {
+    icon: 'status_success',
+    text: 'passed',
+    label: 'passed',
+    group: 'success',
+    details_path: '/root/ci-mock/builds/4250',
+    action: {
+      icon: 'retry',
+      title: 'Retry',
+      path: '/root/ci-mock/builds/4250/retry',
+      method: 'post',
+    },
+  },
+};
+
+const mockGroups = Array(4)
+  .fill(0)
+  .map((item, idx) => {
+    return { ...mockJob, id: idx, name: `fish-${idx}` };
+  });
+
+const defaultProps = {
+  title: 'Fish',
+  groups: mockGroups,
+  pipelineId: 159,
+};
 
 describe('stage column component', () => {
-  const mockJob = {
-    id: 4250,
-    name: 'test',
-    status: {
-      icon: 'status_success',
-      text: 'passed',
-      label: 'passed',
-      group: 'success',
-      details_path: '/root/ci-mock/builds/4250',
-      action: {
-        icon: 'retry',
-        title: 'Retry',
-        path: '/root/ci-mock/builds/4250/retry',
-        method: 'post',
-      },
-    },
-  };
-
   let wrapper;
 
-  beforeEach(() => {
-    const mockGroups = [];
-    for (let i = 0; i < 3; i += 1) {
-      const mockedJob = { ...mockJob };
-      mockedJob.id += i;
-      mockGroups.push(mockedJob);
-    }
+  const findStageColumnTitle = () => wrapper.find('[data-testid="stage-column-title"]');
+  const findStageColumnGroup = () => wrapper.find('[data-testid="stage-column-group"]');
+  const findAllStageColumnGroups = () => wrapper.findAll('[data-testid="stage-column-group"]');
+  const findJobItem = () => wrapper.find(JobItem);
+  const findActionComponent = () => wrapper.find(ActionComponent);
 
-    wrapper = shallowMount(stageColumnComponent, {
+  const createComponent = ({ method = shallowMount, props = {} } = {}) => {
+    wrapper = method(StageColumnComponent, {
       propsData: {
-        title: 'foo',
-        groups: mockGroups,
-        hasTriggeredBy: false,
+        ...defaultProps,
+        ...props,
       },
+    });
+  };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
+  describe('when mounted', () => {
+    beforeEach(() => {
+      createComponent({ method: mount });
+    });
+
+    it('should render provided title', () => {
+      expect(findStageColumnTitle().text()).toBe(defaultProps.title);
+    });
+
+    it('should render the provided groups', () => {
+      expect(findAllStageColumnGroups().length).toBe(mockGroups.length);
     });
   });
 
-  it('should render provided title', () => {
-    expect(
-      wrapper
-        .find('.stage-name')
-        .text()
-        .trim(),
-    ).toBe('foo');
-  });
-
-  it('should render the provided groups', () => {
-    expect(wrapper.findAll('.builds-container > ul > li').length).toBe(
-      wrapper.props('groups').length,
-    );
-  });
-
-  describe('jobId', () => {
-    it('escapes job name', () => {
-      wrapper = shallowMount(stageColumnComponent, {
-        propsData: {
+  describe('when job notifies action is complete', () => {
+    beforeEach(() => {
+      createComponent({
+        method: mount,
+        props: {
           groups: [
             {
-              id: 4259,
-              name: '<img src=x onerror=alert(document.domain)>',
-              status: {
-                icon: 'status_success',
-                label: 'success',
-                tooltip: '<img src=x onerror=alert(document.domain)>',
-              },
+              title: 'Fish',
+              size: 1,
+              jobs: [mockJob],
             },
           ],
-          title: 'test',
-          hasTriggeredBy: false,
         },
       });
+      findJobItem().vm.$emit('pipelineActionRequestComplete');
+    });
 
-      expect(wrapper.find('.builds-container li').attributes('id')).toBe(
-        'ci-badge-&lt;img src=x onerror=alert(document.domain)&gt;',
-      );
+    it('emits refreshPipelineGraph', () => {
+      expect(wrapper.emitted().refreshPipelineGraph).toHaveLength(1);
+    });
+  });
+
+  describe('job', () => {
+    describe('text handling', () => {
+      beforeEach(() => {
+        createComponent({
+          method: mount,
+          props: {
+            groups: [
+              {
+                id: 4259,
+                name: '<img src=x onerror=alert(document.domain)>',
+                status: {
+                  icon: 'status_success',
+                  label: 'success',
+                  tooltip: '<img src=x onerror=alert(document.domain)>',
+                },
+              },
+            ],
+            title: 'test <img src=x onerror=alert(document.domain)>',
+          },
+        });
+      });
+
+      it('capitalizes and escapes name', () => {
+        expect(findStageColumnTitle().text()).toBe(
+          'Test &lt;img src=x onerror=alert(document.domain)&gt;',
+        );
+      });
+
+      it('escapes id', () => {
+        expect(findStageColumnGroup().attributes('id')).toBe(
+          'ci-badge-&lt;img src=x onerror=alert(document.domain)&gt;',
+        );
+      });
+    });
+
+    describe('interactions', () => {
+      beforeEach(() => {
+        createComponent({ method: mount });
+      });
+
+      it('emits jobHovered event on mouseenter and mouseleave', async () => {
+        await findStageColumnGroup().trigger('mouseenter');
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name]]);
+        await findStageColumnGroup().trigger('mouseleave');
+        expect(wrapper.emitted().jobHover).toEqual([[defaultProps.groups[0].name], ['']]);
+      });
     });
   });
 
   describe('with action', () => {
-    it('renders action button', () => {
-      wrapper = shallowMount(stageColumnComponent, {
-        propsData: {
+    beforeEach(() => {
+      createComponent({
+        method: mount,
+        props: {
           groups: [
             {
               id: 4259,
@@ -105,15 +166,18 @@ describe('stage column component', () => {
           },
         },
       });
+    });
 
-      expect(wrapper.find('.js-stage-action').exists()).toBe(true);
+    it('renders action button', () => {
+      expect(findActionComponent().exists()).toBe(true);
     });
   });
 
   describe('without action', () => {
-    it('does not render action button', () => {
-      wrapper = shallowMount(stageColumnComponent, {
-        propsData: {
+    beforeEach(() => {
+      createComponent({
+        method: mount,
+        props: {
           groups: [
             {
               id: 4259,
@@ -129,8 +193,10 @@ describe('stage column component', () => {
           hasTriggeredBy: false,
         },
       });
+    });
 
-      expect(wrapper.find('.js-stage-action').exists()).toBe(false);
+    it('does not render action button', () => {
+      expect(findActionComponent().exists()).toBe(false);
     });
   });
 });

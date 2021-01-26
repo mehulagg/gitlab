@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GraphQL API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19008) in GitLab 11.0 (enabled by feature flag `graphql`).
@@ -10,7 +16,7 @@ For those new to the GitLab GraphQL API, see
 
 ### Quick Reference
 
-- GitLab's GraphQL API endpoint is located at `/api/graphql`.
+- The GitLab GraphQL API endpoint is located at `/api/graphql`.
 - Get an [introduction to GraphQL from graphql.org](https://graphql.org/).
 - GitLab supports a wide range of resources, listed in the [GraphQL API Reference](reference/index.md).
 
@@ -59,6 +65,31 @@ There are no plans to deprecate the REST API. To reduce the technical burden of
 supporting two APIs in parallel, they should share implementations as much as
 possible.
 
+### Deprecation process
+
+Fields marked for removal from the GitLab GraphQL API are first **deprecated** but still available
+for at least six releases, and then **removed entirely**.
+Removals occur at X.0 and X.6 releases.
+
+For example, a field can be marked as deprecated (but still usable) in %12.7, but can be used until its removal in %13.6.
+When marked as deprecated, an alternative should be provided if there is one.
+That gives consumers of the GraphQL API a minimum of six months to update their GraphQL queries.
+
+The process is as follows:
+
+1. The field is listed as deprecated in [GraphQL API Reference](reference/index.md).
+1. Removals are announced at least one release prior in the Deprecation Warnings section of the
+   release post (at or prior to X.11 and X.5 releases).
+1. Fields meeting criteria are removed in X.0 or X.6.
+
+NOTE:
+Fields behind a feature flag and disabled by default are exempt from the deprecation process,
+and can be removed at any time without notice.
+
+### List of removed items
+
+View the [fields, enums, and other items we removed](removed_items.md) from the GraphQL API.
+
 ## Available queries
 
 The GraphQL API includes the following queries at the root level:
@@ -88,11 +119,19 @@ library GitLab uses on the backend.
 
 ## Reference
 
-GitLab's GraphQL reference [is available](reference/index.md).
+The GitLab GraphQL reference [is available](reference/index.md).
 
-It is automatically generated from GitLab's GraphQL schema and embedded in a Markdown file.
+It is automatically generated from the GitLab GraphQL schema and embedded in a Markdown file.
 
 Machine-readable versions are also available:
 
 - [JSON format](reference/gitlab_schema.json)
 - [IDL format](reference/gitlab_schema.graphql)
+
+## Generate updates for documentation
+
+If you've changed the GraphQL schema, you should set up an MR to gain approval of your changes.
+To generate the required documentation and schema, follow the instructions given in the
+[Rake tasks for developers](../../development/rake_tasks.md#update-graphql-documentation-and-schema-definitions) page.
+
+Be sure to run these commands using the [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit/).

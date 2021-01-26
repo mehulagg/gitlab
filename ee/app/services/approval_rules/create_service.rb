@@ -23,6 +23,12 @@ module ApprovalRules
       super(@rule.project, user, params)
     end
 
+    def success
+      track_onboarding_progress
+
+      super
+    end
+
     private
 
     def copy_approval_project_rule_properties(params)
@@ -58,6 +64,10 @@ module ApprovalRules
 
     def approvers_present?
       %i(user_ids group_ids users groups).any? { |key| @params[key].present? }
+    end
+
+    def track_onboarding_progress
+      OnboardingProgressService.new(rule.project.namespace).execute(action: :required_mr_approvals_enabled)
     end
   end
 end

@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+module GraphQLExtensions
+  module ScalarExtensions
+    # Allow ID to unify with GlobalID Types
+    def ==(other)
+      if name == 'ID' && other.is_a?(self.class) &&
+          other.type_class.ancestors.include?(::Types::GlobalIDType)
+        return true
+      end
+
+      super
+    end
+  end
+end
+
+::GraphQL::ScalarType.prepend(GraphQLExtensions::ScalarExtensions)
+
 module Types
   class GlobalIDType < BaseScalar
     graphql_name 'GlobalID'
@@ -14,6 +30,8 @@ module Types
     # @param value [String]
     # @return [GID]
     def self.coerce_input(value, _ctx)
+      return if value.nil?
+
       gid = GlobalID.parse(value)
       raise GraphQL::CoercionError, "#{value.inspect} is not a valid Global ID" if gid.nil?
       raise GraphQL::CoercionError, "#{value.inspect} is not a Gitlab Global ID" unless gid.app == GlobalID.app
@@ -28,7 +46,7 @@ module Types
 
       @id_types[model_class] ||= Class.new(self) do
         graphql_name "#{model_class.name.gsub(/::/, '')}ID"
-        description "Identifier of #{model_class.name}"
+        description "Identifier of #{model_class.name}."
 
         self.define_singleton_method(:to_s) do
           graphql_name

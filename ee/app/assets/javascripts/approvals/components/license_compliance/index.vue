@@ -1,6 +1,12 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlButton, GlIcon, GlLink, GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
+import {
+  GlButton,
+  GlIcon,
+  GlLink,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSprintf,
+} from '@gitlab/ui';
 import { APPROVALS, APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
 import ModalLicenseCompliance from './modal.vue';
 import { s__ } from '~/locale';
@@ -16,8 +22,8 @@ export default {
   },
   computed: {
     ...mapState({
-      isLoading: state => state[APPROVALS].isLoading,
-      rules: state => state[APPROVALS].rules,
+      isLoading: (state) => state[APPROVALS].isLoading,
+      rules: (state) => state[APPROVALS].rules,
       documentationPath: ({ settings }) => settings.approvalsDocumentationPath,
       licenseCheckRuleName: ({ settings }) => settings.lockedApprovalsRuleName,
     }),

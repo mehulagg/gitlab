@@ -1,10 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
+import waitForPromises from 'helpers/wait_for_promises';
 import EditFormButtons from '~/sidebar/components/confidential/edit_form_buttons.vue';
 import eventHub from '~/sidebar/event_hub';
 import createStore from '~/notes/stores';
-import waitForPromises from 'helpers/wait_for_promises';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 
 jest.mock('~/sidebar/event_hub', () => ({ $emit: jest.fn() }));
 jest.mock('~/flash');
@@ -44,9 +43,11 @@ describe('Edit Form Buttons', () => {
 
   describe('when isLoading', () => {
     beforeEach(() => {
-      createComponent({});
-
-      wrapper.vm.$store.state.noteableData.confidential = false;
+      createComponent({
+        props: {
+          confidential: false,
+        },
+      });
     });
 
     it('renders "Applying" in the toggle button', () => {
@@ -54,11 +55,11 @@ describe('Edit Form Buttons', () => {
     });
 
     it('disables the toggle button', () => {
-      expect(findConfidentialToggle().attributes('disabled')).toBe('disabled');
+      expect(findConfidentialToggle().props('disabled')).toBe(true);
     });
 
-    it('finds the GlLoadingIcon', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    it('sets loading on the toggle button', () => {
+      expect(findConfidentialToggle().props('loading')).toBe(true);
     });
   });
 
@@ -67,6 +68,9 @@ describe('Edit Form Buttons', () => {
       createComponent({
         data: {
           isLoading: false,
+        },
+        props: {
+          confidential: false,
         },
       });
 
@@ -80,9 +84,10 @@ describe('Edit Form Buttons', () => {
         data: {
           isLoading: false,
         },
+        props: {
+          confidential: true,
+        },
       });
-
-      wrapper.vm.$store.state.noteableData.confidential = true;
     });
 
     it('renders on or off text based on confidentiality', () => {
@@ -92,21 +97,20 @@ describe('Edit Form Buttons', () => {
 
   describe('when succeeds', () => {
     beforeEach(() => {
-      createComponent({ data: { isLoading: false } });
-      wrapper.vm.$store.state.noteableData.confidential = true;
-      findConfidentialToggle().trigger('click');
+      createComponent({ data: { isLoading: false }, props: { confidential: true } });
+      findConfidentialToggle().vm.$emit('click', new Event('click'));
     });
 
     it('dispatches the correct action', () => {
-      expect(store.dispatch).toHaveBeenCalledWith('updateConfidentialityOnIssue', {
+      expect(store.dispatch).toHaveBeenCalledWith('updateConfidentialityOnIssuable', {
         confidential: false,
         fullPath: '',
       });
     });
 
-    it('resets loading', () => {
+    it('resets loading on the toggle button', () => {
       return waitForPromises().then(() => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(findConfidentialToggle().props('loading')).toBe(false);
       });
     });
 
@@ -115,16 +119,22 @@ describe('Edit Form Buttons', () => {
         expect(eventHub.$emit).toHaveBeenCalledWith('closeConfidentialityForm');
       });
     });
+
+    it('emits updateOnConfidentiality event', () => {
+      return waitForPromises().then(() => {
+        expect(eventHub.$emit).toHaveBeenCalledWith('updateIssuableConfidentiality', false);
+      });
+    });
   });
 
   describe('when fails', () => {
     beforeEach(() => {
       createComponent({
         data: { isLoading: false },
+        props: { confidential: true },
         resolved: false,
       });
-      wrapper.vm.$store.state.noteableData.confidential = true;
-      findConfidentialToggle().trigger('click');
+      findConfidentialToggle().vm.$emit('click', new Event('click'));
     });
 
     it('calls flash with the correct message', () => {

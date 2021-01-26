@@ -1,10 +1,9 @@
 <script>
 import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createIteration from '../queries/create_iteration.mutation.graphql';
 import updateIteration from '../queries/update_iteration.mutation.graphql';
 import DueDateSelectors from '~/due_date_select';
@@ -109,7 +108,7 @@ export default {
           variables: {
             input: {
               ...this.variables.input,
-              id: getIdFromGraphQLId(this.iteration.id),
+              id: this.iteration.id,
             },
           },
         })
@@ -146,7 +145,7 @@ export default {
         {{ isEditing ? __('Edit iteration') : __('New iteration') }}
       </h3>
     </div>
-    <hr />
+    <hr class="gl-mt-0" />
     <gl-form class="row common-note-form">
       <div class="col-md-6">
         <div class="form-group row">
@@ -154,7 +153,12 @@ export default {
             <label for="iteration-title">{{ __('Title') }}</label>
           </div>
           <div class="col-sm-10">
-            <gl-form-input id="iteration-title" v-model="title" autocomplete="off" />
+            <gl-form-input
+              id="iteration-title"
+              v-model="title"
+              autocomplete="off"
+              data-qa-selector="iteration_title_field"
+            />
           </div>
         </div>
 
@@ -181,6 +185,7 @@ export default {
                   dir="auto"
                   data-supports-quick-actions="false"
                   :aria-label="__('Description')"
+                  data-qa-selector="iteration_description_field"
                 >
                 </textarea>
               </template>
@@ -201,6 +206,7 @@ export default {
               class="datepicker form-control"
               :placeholder="__('Select start date')"
               autocomplete="off"
+              data-qa-selector="iteration_start_date_field"
               @change="updateStartDate"
             />
             <a class="inline float-right gl-mt-2 js-clear-start-date" href="#">{{
@@ -210,7 +216,7 @@ export default {
         </div>
         <div class="form-group row">
           <div class="col-form-label col-sm-2">
-            <label for="iteration-due-date">{{ __('Due Date') }}</label>
+            <label for="iteration-due-date">{{ __('Due date') }}</label>
           </div>
           <div class="col-sm-10">
             <gl-form-input
@@ -219,6 +225,7 @@ export default {
               class="datepicker form-control"
               :placeholder="__('Select due date')"
               autocomplete="off"
+              data-qa-selector="iteration_due_date_field"
               @change="updateDueDate"
             />
             <a class="inline float-right gl-mt-2 js-clear-due-date" href="#">{{
@@ -230,12 +237,18 @@ export default {
     </gl-form>
 
     <div class="form-actions d-flex">
-      <gl-button :loading="loading" data-testid="save-iteration" variant="success" @click="save">{{
-        isEditing ? __('Update iteration') : __('Create iteration')
-      }}</gl-button>
-      <gl-button class="ml-auto" data-testid="cancel-iteration" @click="cancel">{{
-        __('Cancel')
-      }}</gl-button>
+      <gl-button
+        :loading="loading"
+        data-testid="save-iteration"
+        variant="success"
+        data-qa-selector="save_iteration_button"
+        @click="save"
+      >
+        {{ isEditing ? __('Update iteration') : __('Create iteration') }}
+      </gl-button>
+      <gl-button class="ml-auto" data-testid="cancel-iteration" @click="cancel">
+        {{ __('Cancel') }}
+      </gl-button>
     </div>
   </div>
 </template>

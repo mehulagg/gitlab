@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:number_of_dependencies_in_fixture) { 9 }
     let(:dependency_scan_example_vuln) { 'Prototype pollution attack in mixin-deep' }
     let(:container_scan_example_vuln) { 'CVE-2017-18269 in glibc' }
@@ -23,6 +23,7 @@ module QA
         @project = Resource::Project.fabricate_via_api! do |p|
           p.name = Runtime::Env.auto_devops_project_name || 'project-with-secure'
           p.description = 'Project with Secure'
+          p.group = Resource::Group.fabricate_via_api!
         end
 
         @runner = Resource::Runner.fabricate! do |runner|
@@ -40,8 +41,7 @@ module QA
           push.commit_message = 'Create Secure compatible application to serve premade reports'
         end.project.visit!
 
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       before do
@@ -49,9 +49,8 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline' do
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
+        Flow::Pipeline.visit_latest_pipeline
 
         Page::Project::Pipeline::Show.perform do |pipeline|
           pipeline.click_on_security
@@ -74,9 +73,9 @@ module QA
         end
       end
 
-      it 'displays security reports in the project security dashboard' do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
         Page::Project::Menu.perform(&:click_project)
-        Page::Project::Menu.perform(&:click_on_security_dashboard)
+        Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::Show.perform do |dashboard|
           filter_report_and_perform(dashboard, "Dependency Scanning") do
@@ -97,12 +96,18 @@ module QA
         end
       end
 
-      it 'displays security reports in the group security dashboard' do
+      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567' do
         Page::Main::Menu.perform(&:go_to_groups)
         Page::Dashboard::Groups.perform do |groups|
           groups.click_group @project.group.path
         end
         Page::Group::Menu.perform(&:click_group_security_link)
+
+        EE::Page::Group::Secure::Show.perform do |dashboard|
+          expect(dashboard).to have_security_status_project_for_severity('F', @project)
+        end
+
+        Page::Group::Menu.perform(&:click_group_vulnerability_link)
 
         EE::Page::Group::Secure::Show.perform do |dashboard|
           dashboard.filter_project(@project.name)
@@ -125,7 +130,7 @@ module QA
         end
       end
 
-      it 'displays the Dependency List' do
+      it 'displays the Dependency List', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/564' do
         Page::Project::Menu.perform(&:click_on_dependency_list)
 
         EE::Page::Project::Secure::DependencyList.perform do |dependency_list|

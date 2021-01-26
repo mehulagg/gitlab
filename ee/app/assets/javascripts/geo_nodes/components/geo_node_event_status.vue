@@ -1,11 +1,11 @@
 <script>
+import { GlTooltipDirective } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import timeAgoMixin from '~/vue_shared/mixins/timeago';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [timeAgoMixin],
   props: {
@@ -44,10 +44,9 @@ export default {
       <strong> {{ eventString }} </strong>
       <span
         v-if="eventTimeStamp"
-        v-tooltip
+        v-gl-tooltip
         :title="timeStampString"
         class="event-status-timestamp"
-        data-placement="bottom"
       >
         ({{ timeFormatted(timeStamp) }})
       </span>

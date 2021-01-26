@@ -6,19 +6,18 @@ module EE
       extend ::Gitlab::Utils::Override
 
       override :incidents_data
-      def incidents_data(project)
+      def incidents_data(project, params)
         super.merge(
-          incidents_data_published_available(project)
+          incidents_data_ee(project)
         )
       end
 
       private
 
-      def incidents_data_published_available(project)
-        return {} unless project.feature_available?(:status_page)
-
+      def incidents_data_ee(project)
         {
-          'published-available' => 'true'
+          'published-available' => project.feature_available?(:status_page).to_s,
+          'sla-feature-available' => ::IncidentManagement::IncidentSla.available_for?(project).to_s
         }
       end
     end

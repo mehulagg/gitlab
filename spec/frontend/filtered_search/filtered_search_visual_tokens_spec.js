@@ -1,13 +1,13 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import FilteredSearchSpecHelper from 'helpers/filtered_search_spec_helper';
 import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
-import FilteredSearchSpecHelper from '../helpers/filtered_search_spec_helper';
 
 describe('Filtered Search Visual Tokens', () => {
   let mock;
   const subject = FilteredSearchVisualTokens;
 
-  const findElements = tokenElement => {
+  const findElements = (tokenElement) => {
     const tokenNameElement = tokenElement.querySelector('.name');
     const tokenOperatorElement = tokenElement.querySelector('.operator');
     const tokenValueContainer = tokenElement.querySelector('.value-container');
@@ -280,8 +280,8 @@ describe('Filtered Search Visual Tokens', () => {
         );
       });
 
-      it('contains fa-close icon', () => {
-        expect(tokenElement.querySelector('.remove-token .fa-close')).toEqual(expect.anything());
+      it('contains close icon', () => {
+        expect(tokenElement.querySelector('.remove-token .close-icon')).toEqual(expect.anything());
       });
     });
   });

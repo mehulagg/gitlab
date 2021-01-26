@@ -5,10 +5,15 @@ require 'spec_helper'
 RSpec.describe GroupPolicy do
   include_context 'GroupPolicy context'
 
+  let(:epic_rules) do
+    %i(read_epic create_epic admin_epic destroy_epic read_confidential_epic
+       destroy_epic_link read_epic_board read_epic_list)
+  end
+
   context 'when epics feature is disabled' do
     let(:current_user) { owner }
 
-    it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+    it { is_expected.to be_disallowed(*epic_rules) }
   end
 
   context 'when epics feature is enabled' do
@@ -19,47 +24,53 @@ RSpec.describe GroupPolicy do
     context 'when user is owner' do
       let(:current_user) { owner }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*epic_rules) }
+    end
+
+    context 'when user is admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(*epic_rules) }
     end
 
     context 'when user is maintainer' do
       let(:current_user) { maintainer }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is developer' do
       let(:current_user) { developer }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is reporter' do
       let(:current_user) { reporter }
 
-      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(*(epic_rules - [:destroy_epic])) }
       it { is_expected.to be_disallowed(:destroy_epic) }
     end
 
     context 'when user is guest' do
       let(:current_user) { guest }
 
-      it { is_expected.to be_allowed(:read_epic) }
-      it { is_expected.to be_disallowed(:create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_allowed(:read_epic, :read_epic_board) }
+      it { is_expected.to be_disallowed(*(epic_rules - [:read_epic, :read_epic_board, :read_epic_list])) }
     end
 
     context 'when user is not member' do
       let(:current_user) { create(:user) }
 
-      it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_disallowed(*epic_rules) }
     end
 
     context 'when user is anonymous' do
       let(:current_user) { nil }
 
-      it { is_expected.to be_disallowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+      it { is_expected.to be_disallowed(*epic_rules) }
     end
   end
 
@@ -176,7 +187,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: true)
       stub_licensed_features(group_activity_analytics: true)
     end
 
@@ -187,11 +197,68 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: false)
       stub_licensed_features(group_activity_analytics: false)
     end
 
     it { is_expected.not_to be_allowed(:read_group_activity_analytics) }
+  end
+
+  context 'group CI / CD analytics' do
+    context 'when group CI / CD analytics is available' do
+      before do
+        stub_licensed_features(group_ci_cd_analytics: true)
+      end
+
+      context 'when the user has at least reporter permissions' do
+        let(:current_user) { reporter }
+
+        it { is_expected.to be_allowed(:view_group_ci_cd_analytics) }
+      end
+
+      context 'when the user has less than reporter permissions' do
+        let(:current_user) { guest }
+
+        it { is_expected.not_to be_allowed(:view_group_ci_cd_analytics) }
+      end
+    end
+
+    context 'when group CI / CD analytics is not available' do
+      let(:current_user) { reporter }
+
+      before do
+        stub_licensed_features(group_ci_cd_analytics: false)
+      end
+
+      it { is_expected.not_to be_allowed(:view_group_ci_cd_analytics) }
+    end
+  end
+
+  context 'when group repository analytics is available' do
+    before do
+      stub_licensed_features(group_repository_analytics: true)
+    end
+
+    context 'for guests' do
+      let(:current_user) { guest }
+
+      it { is_expected.not_to be_allowed(:read_group_repository_analytics) }
+    end
+
+    context 'for reporter+' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_group_repository_analytics) }
+    end
+  end
+
+  context 'when group repository analytics is not available' do
+    let(:current_user) { admin }
+
+    before do
+      stub_licensed_features(group_repository_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_group_repository_analytics) }
   end
 
   context 'when timelogs report feature is enabled' do
@@ -253,62 +320,192 @@ RSpec.describe GroupPolicy do
   end
 
   describe 'per group SAML' do
-    let(:current_user) { maintainer }
+    def stub_group_saml_config(enabled)
+      allow(::Gitlab::Auth::GroupSaml::Config).to receive_messages(enabled?: enabled)
+    end
 
-    it { is_expected.to be_disallowed(:admin_group_saml) }
-
-    context 'owner' do
+    context 'when group_saml is unavailable' do
       let(:current_user) { owner }
 
-      it { is_expected.to be_allowed(:admin_group_saml) }
+      context 'when group saml config is disabled' do
+        before do
+          stub_group_saml_config(false)
+        end
+
+        it { is_expected.to be_disallowed(:admin_group_saml) }
+      end
+
+      context 'when the group is a subgroup' do
+        let_it_be(:subgroup) { create(:group, :private, parent: group) }
+
+        before do
+          stub_group_saml_config(true)
+        end
+
+        subject { described_class.new(current_user, subgroup) }
+
+        it { is_expected.to be_disallowed(:admin_group_saml) }
+      end
+
+      context 'when the feature is not licensed' do
+        before do
+          stub_group_saml_config(true)
+          stub_licensed_features(group_saml: false)
+        end
+
+        it { is_expected.to be_disallowed(:admin_group_saml) }
+      end
     end
 
-    context 'admin' do
-      let(:current_user) { admin }
-
-      it { is_expected.to be_allowed(:admin_group_saml) }
-    end
-
-    context 'with sso enforcement enabled' do
-      let(:current_user) { guest }
-
-      let_it_be(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
-
+    context 'when group_saml is available' do
       before do
         stub_licensed_features(group_saml: true)
       end
 
-      context 'when the session has been set globally' do
-        around do |example|
-          Gitlab::Session.with_session({}) do
-            example.run
-          end
-        end
+      context 'when group_saml_group_sync is not licensed' do
+        context 'with an enabled SAML provider' do
+          let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
 
-        it 'prevents access without a SAML session' do
-          is_expected.not_to be_allowed(:read_group)
-        end
+          context 'owner' do
+            let(:current_user) { owner }
 
-        context 'as a group owner' do
-          before do
-            group.add_owner(current_user)
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
           end
 
-          it 'prevents access without a SAML session' do
-            is_expected.not_to allow_action(:read_group)
+          context 'admin' do
+            let(:current_user) { admin }
+
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
           end
-        end
-
-        it 'allows access with a SAML session' do
-          Gitlab::Auth::GroupSaml::SsoEnforcer.new(saml_provider).update_session
-
-          is_expected.to be_allowed(:read_group)
         end
       end
 
-      context 'when there is no global session or sso state' do
-        it "allows access because we haven't yet restricted all use cases" do
-          is_expected.to be_allowed(:read_group)
+      context 'when group_saml_group_sync is licensed' do
+        before do
+          stub_group_saml_config(true)
+          stub_application_setting(check_namespace_plan: true)
+        end
+
+        before_all do
+          create(:license, plan: License::ULTIMATE_PLAN)
+          create(:gitlab_subscription, :silver, namespace: group)
+        end
+
+        context 'without an enabled SAML provider' do
+          context 'maintainer' do
+            let(:current_user) { maintainer }
+
+            it { is_expected.to be_disallowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'owner' do
+            let(:current_user) { owner }
+
+            it { is_expected.to be_allowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'admin' do
+            let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_group_saml) }
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+        end
+
+        context 'with an enabled SAML provider' do
+          let_it_be(:saml_provider) { create(:saml_provider, group: group, enabled: true) }
+
+          context 'maintainer' do
+            let(:current_user) { maintainer }
+
+            it { is_expected.to be_disallowed(:admin_saml_group_links) }
+          end
+
+          context 'owner' do
+            let(:current_user) { owner }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'admin' do
+            let(:current_user) { admin }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+
+          context 'when the group is a subgroup' do
+            let_it_be(:subgroup) { create(:group, :private, parent: group) }
+            let(:current_user) { owner }
+
+            subject { described_class.new(current_user, subgroup) }
+
+            it { is_expected.to be_allowed(:admin_saml_group_links) }
+          end
+        end
+      end
+
+      context 'with sso enforcement enabled' do
+        let(:current_user) { guest }
+
+        let_it_be(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
+
+        context 'when the session has been set globally' do
+          around do |example|
+            Gitlab::Session.with_session({}) do
+              example.run
+            end
+          end
+
+          it 'prevents access without a SAML session' do
+            is_expected.not_to be_allowed(:read_group)
+          end
+
+          context 'as a group owner' do
+            before do
+              create(:group_saml_identity, user: current_user, saml_provider: saml_provider)
+              group.add_owner(current_user)
+            end
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+
+            it 'prevents access without a SAML session for subgroup' do
+              subgroup = create(:group, :private, parent: group)
+
+              expect(described_class.new(current_user, subgroup)).not_to allow_action(:read_group)
+            end
+          end
+
+          context 'as an admin' do
+            let(:current_user) { admin }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+          end
+
+          context 'as an auditor' do
+            let(:current_user) { create(:user, :auditor) }
+
+            it 'allows access without a SAML session' do
+              is_expected.to allow_action(:read_group)
+            end
+          end
+
+          it 'allows access with a SAML session' do
+            Gitlab::Auth::GroupSaml::SsoEnforcer.new(saml_provider).update_session
+
+            is_expected.to be_allowed(:read_group)
+          end
+        end
+
+        context 'when there is no global session or sso state' do
+          it "allows access because we haven't yet restricted all use cases" do
+            is_expected.to be_allowed(:read_group)
+          end
         end
       end
     end
@@ -525,50 +722,6 @@ RSpec.describe GroupPolicy do
         it { is_expected.not_to be_allowed(:override_group_member) }
         it { is_expected.not_to be_allowed(:update_group_member) }
       end
-    end
-  end
-
-  describe 'create_jira_connect_subscription' do
-    context 'admin' do
-      let(:current_user) { admin }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with owner' do
-      let(:current_user) { owner }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with maintainer' do
-      let(:current_user) { maintainer }
-
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with reporter' do
-      let(:current_user) { reporter }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with guest' do
-      let(:current_user) { guest }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with non member' do
-      let(:current_user) { create(:user) }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-    end
-
-    context 'with anonymous' do
-      let(:current_user) { nil }
-
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
     end
   end
 
@@ -1062,6 +1215,27 @@ RSpec.describe GroupPolicy do
     end
   end
 
+  describe ':read_group_audit_events' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :read_group_audit_events }
+
+    where(:role, :allowed) do
+      :guest      | false
+      :reporter   | false
+      :developer  | true
+      :maintainer | true
+      :owner      | true
+      :admin      | true
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+    end
+  end
+
   context 'when group is locked because storage usage limit exceeded' do
     let(:current_user) { owner }
     let(:policies) do
@@ -1089,21 +1263,32 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be(:container) { create(:group) }
+    let_it_be_with_refind(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
 
-    def set_access_level(access_level)
-      allow(container).to receive(:wiki_access_level).and_return(access_level)
+    before_all do
+      create(:license, plan: License::PREMIUM_PLAN)
     end
 
     before do
-      stub_feature_flags(group_wiki: true)
+      enable_namespace_license_check!
     end
 
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(group_wiki: false)
+    # We don't have feature toggles on groups yet, so we currently simulate
+    # this by stubbing the license check instead.
+    def set_access_level(access_level)
+      case access_level
+      when ProjectFeature::ENABLED
+        stub_licensed_features(group_wikis: true)
+      when ProjectFeature::DISABLED
+        stub_licensed_features(group_wikis: false)
+      when ProjectFeature::PRIVATE
+        skip('Access level private is not supported yet for group wikis, see https://gitlab.com/gitlab-org/gitlab/-/issues/208412')
       end
+    end
+
+    context 'when the feature is not licensed on this group' do
+      let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
 
       it 'does not include the wiki permissions' do
         expect_disallowed(*wiki_permissions[:all])
@@ -1113,5 +1298,102 @@ RSpec.describe GroupPolicy do
 
   it_behaves_like 'update namespace limit policy'
 
-  include_examples 'analytics report embedding'
+  context 'group access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with owner' do
+        let(:current_user) { owner }
+
+        before do
+          group.add_owner(owner)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          group.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
+
+  describe ':read_group_release_stats' do
+    shared_examples 'read_group_release_stats permissions' do
+      context 'when user is logged out' do
+        let(:current_user) { nil }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is not a member of the group' do
+        let(:current_user) { create(:user) }
+
+        it { is_expected.to be_disallowed(:read_group_release_stats) }
+      end
+
+      context 'when user is guest' do
+        let(:current_user) { guest }
+
+        it { is_expected.to be_allowed(:read_group_release_stats) }
+      end
+    end
+
+    context 'when group is private' do
+      it_behaves_like 'read_group_release_stats permissions'
+    end
+
+    context 'when group is public' do
+      let(:group) { create(:group, :public) }
+
+      before do
+        group.add_guest(guest)
+      end
+
+      it_behaves_like 'read_group_release_stats permissions'
+    end
+
+    describe ':admin_merge_request_approval_settings' do
+      using RSpec::Parameterized::TableSyntax
+
+      let(:policy) { :admin_merge_request_approval_settings }
+
+      where(:role, :licensed, :allowed) do
+        :guest      | true  | false
+        :guest      | false | false
+        :reporter   | true  | false
+        :reporter   | false | false
+        :developer  | true  | false
+        :developer  | false | false
+        :maintainer | true  | false
+        :maintainer | false | false
+        :owner      | true  | true
+        :owner      | false | false
+        :admin      | true  | true
+        :admin      | false | false
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        before do
+          stub_licensed_features(group_merge_request_approval_settings: licensed)
+        end
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
+  end
 end

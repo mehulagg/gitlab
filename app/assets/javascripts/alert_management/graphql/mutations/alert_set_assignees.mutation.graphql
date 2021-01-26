@@ -1,4 +1,4 @@
-#import "../fragments/alert_note.fragment.graphql"
+#import "~/graphql_shared/fragments/alert_note.fragment.graphql"
 
 mutation alertSetAssignees($projectPath: ID!, $assigneeUsernames: [String!]!, $iid: String!) {
   alertSetAssignees(
@@ -10,6 +10,9 @@ mutation alertSetAssignees($projectPath: ID!, $assigneeUsernames: [String!]!, $i
       assignees {
         nodes {
           username
+          name
+          avatarUrl
+          webUrl
         }
       }
       notes {

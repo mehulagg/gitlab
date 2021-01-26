@@ -18,6 +18,8 @@ class Namespace < ApplicationRecord
   # Android repo (15) + some extra backup.
   NUMBER_OF_ANCESTORS_ALLOWED = 20
 
+  SHARED_RUNNERS_SETTINGS = %w[disabled_and_unoverridable disabled_with_override enabled].freeze
+
   cache_markdown_field :description, pipeline: :description
 
   has_many :projects, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -26,6 +28,7 @@ class Namespace < ApplicationRecord
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
+  has_one :onboarding_progress
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -37,6 +40,7 @@ class Namespace < ApplicationRecord
   has_one :chat_team, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
+  has_one :package_setting_relation, inverse_of: :namespace, class_name: 'PackageSetting'
 
   validates :owner, presence: true, unless: ->(n) { n.type == "Group" }
   validates :name,
@@ -59,6 +63,8 @@ class Namespace < ApplicationRecord
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
   validate :nesting_level_allowed
+  validate :changing_shared_runners_enabled_is_allowed
+  validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
 
   validates_associated :runners
 
@@ -79,6 +85,7 @@ class Namespace < ApplicationRecord
 
   scope :for_user, -> { where('type IS NULL') }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
+  scope :include_route, -> { includes(:route) }
 
   scope :with_statistics, -> do
     joins('LEFT JOIN project_statistics ps ON ps.namespace_id = namespaces.id')
@@ -91,9 +98,14 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.snippets_size), 0) AS snippets_size',
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
-        'COALESCE(SUM(ps.packages_size), 0) AS packages_size'
+        'COALESCE(SUM(ps.packages_size), 0) AS packages_size',
+        'COALESCE(SUM(ps.uploads_size), 0) AS uploads_size'
       )
   end
+
+  # Make sure that the name is same as strong_memoize name in root_ancestor
+  # method
+  attr_writer :root_ancestor
 
   class << self
     def by_path(path)
@@ -112,8 +124,12 @@ class Namespace < ApplicationRecord
     # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
-    def search(query)
-      fuzzy_search(query, [:name, :path])
+    def search(query, include_parents: false)
+      if include_parents
+        where(id: Route.for_routable_type(Namespace.name).fuzzy_search(query, [Route.arel_table[:path], Route.arel_table[:name]]).select(:source_id))
+      else
+        fuzzy_search(query, [:path, :name])
+      end
     end
 
     def clean_path(path)
@@ -135,6 +151,10 @@ class Namespace < ApplicationRecord
       uniquify.string(path) { |s| Namespace.find_by_path_or_name(s) }
     end
 
+    def clean_name(value)
+      value.scan(Gitlab::Regex.group_name_regex_chars).join(' ')
+    end
+
     def find_by_pages_host(host)
       gitlab_host = "." + Settings.pages.host.downcase
       host = host.downcase
@@ -143,6 +163,10 @@ class Namespace < ApplicationRecord
       name = host.delete_suffix(gitlab_host)
       Namespace.where(parent_id: nil).by_path(name)
     end
+  end
+
+  def package_settings
+    package_setting_relation || build_package_setting_relation
   end
 
   def default_branch_protection
@@ -274,7 +298,12 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    Project.inside_path(full_path)
+    if Feature.enabled?(:recursive_approach_for_all_projects)
+      namespace = user? ? self : self_and_descendants
+      Project.where(namespace: namespace)
+    else
+      Project.inside_path(full_path)
+    end
   end
 
   # Includes pipelines from this namespace and pipelines from all subgroups
@@ -290,6 +319,8 @@ class Namespace < ApplicationRecord
   def root_ancestor
     return self if persisted? && parent_id.nil?
 
+    # Make sure that strong_memoize name is in sync with root_ancestor's
+    # attr_writer name
     strong_memoize(:root_ancestor) do
       self_and_ancestors.reorder(nil).find_by(parent_id: nil)
     end
@@ -344,9 +375,13 @@ class Namespace < ApplicationRecord
 
   def pages_virtual_domain
     Pages::VirtualDomain.new(
-      all_projects_with_pages.includes(:route, :project_feature),
+      all_projects_with_pages.includes(:route, :project_feature, pages_metadatum: :pages_deployment),
       trim_prefix: full_path
     )
+  end
+
+  def any_project_with_pages_deployed?
+    all_projects.with_pages_deployed.any?
   end
 
   def closest_setting(name)
@@ -368,6 +403,54 @@ class Namespace < ApplicationRecord
 
   def actual_plan_name
     actual_plan.name
+  end
+
+  def changing_shared_runners_enabled_is_allowed
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && has_parent? && parent.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group has shared Runners disabled'))
+    end
+  end
+
+  def changing_allow_descendants_override_disabled_shared_runners_is_allowed
+    return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
+
+    if shared_runners_enabled && !new_record?
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be changed if shared runners are enabled'))
+    end
+
+    if allow_descendants_override_disabled_shared_runners && has_parent? && parent.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it'))
+    end
+  end
+
+  def shared_runners_setting
+    if shared_runners_enabled
+      'enabled'
+    else
+      if allow_descendants_override_disabled_shared_runners
+        'disabled_with_override'
+      else
+        'disabled_and_unoverridable'
+      end
+    end
+  end
+
+  def shared_runners_setting_higher_than?(other_setting)
+    if other_setting == 'enabled'
+      false
+    elsif other_setting == 'disabled_with_override'
+      shared_runners_setting == 'enabled'
+    elsif other_setting == 'disabled_and_unoverridable'
+      shared_runners_setting == 'enabled' || shared_runners_setting == 'disabled_with_override'
+    else
+      raise ArgumentError
+    end
+  end
+
+  def root?
+    !has_parent?
   end
 
   private

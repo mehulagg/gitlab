@@ -6,7 +6,7 @@ module Types
       graphql_name 'DesignAtVersion'
 
       description 'A design pinned to a specific version. ' \
-                  'The image field reflects the design as of the associated version.'
+                  'The image field reflects the design as of the associated version'
 
       authorize :read_design
 
@@ -18,7 +18,7 @@ module Types
       field :version,
             Types::DesignManagement::VersionType,
             null: false,
-            description: 'The version this design-at-versions is pinned to'
+            description: 'The version this design-at-versions is pinned to.'
 
       field :design,
             Types::DesignManagement::DesignType,

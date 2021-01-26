@@ -12,6 +12,7 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       'generatorURL' => 'http://8d467bd4607a:9090/graph?g0.expr=vector%281%29&g0.tab=1'
     }
   end
+
   let_it_be(:generic_alert, reload: true) { create(:alert_management_alert, :triggered, project: project, payload: payload) }
   let_it_be(:prometheus_alert, reload: true) { create(:alert_management_alert, :triggered, :prometheus, project: project, payload: payload) }
   let(:alert) { generic_alert }
@@ -66,7 +67,7 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       end
 
       it 'sets the issue description' do
-        expect(created_issue.description).to include(alert_presenter.issue_summary_markdown.strip)
+        expect(created_issue.description).to include(alert_presenter.send(:issue_summary_markdown).strip)
       end
     end
 
@@ -80,6 +81,30 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       it 'checks permissions' do
         execute
         expect(user).to have_received(:can?).with(:create_issue, project)
+      end
+
+      context 'with alert severity' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:alert_severity, :incident_severity) do
+          'critical' | 'critical'
+          'high'     | 'high'
+          'medium'   | 'medium'
+          'low'      | 'low'
+          'info'     | 'unknown'
+          'unknown'  | 'unknown'
+        end
+
+        with_them do
+          before do
+            alert.update!(severity: alert_severity)
+            execute
+          end
+
+          it 'sets the correct severity level' do
+            expect(created_issue.severity).to eq(incident_severity)
+          end
+        end
       end
 
       context 'when the alert is prometheus alert' do

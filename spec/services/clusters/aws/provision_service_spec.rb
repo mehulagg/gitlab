@@ -22,6 +22,7 @@ RSpec.describe Clusters::Aws::ProvisionService do
       [
         { parameter_key: 'ClusterName', parameter_value: provider.cluster.name },
         { parameter_key: 'ClusterRole', parameter_value: provider.role_arn },
+        { parameter_key: 'KubernetesVersion', parameter_value: provider.kubernetes_version },
         { parameter_key: 'ClusterControlPlaneSecurityGroup', parameter_value: provider.security_group_id },
         { parameter_key: 'VpcId', parameter_value: provider.vpc_id },
         { parameter_key: 'Subnets', parameter_value: provider.subnet_ids.join(',') },
@@ -41,9 +42,7 @@ RSpec.describe Clusters::Aws::ProvisionService do
       allow(provider).to receive(:api_client)
         .and_return(client)
 
-      allow(File).to receive(:read)
-        .with(Rails.root.join('vendor', 'aws', 'cloudformation', 'eks_cluster.yaml'))
-        .and_return(cloudformation_template)
+      stub_file_read(Rails.root.join('vendor', 'aws', 'cloudformation', 'eks_cluster.yaml'), content: cloudformation_template)
     end
 
     it 'updates the provider status to :creating and configures the provider with credentials' do

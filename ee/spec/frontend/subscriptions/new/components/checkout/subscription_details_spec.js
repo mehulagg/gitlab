@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
-import createStore from 'ee/subscriptions/new/store';
-import * as types from 'ee/subscriptions/new/store/mutation_types';
+import Vuex from 'vuex';
 import Step from 'ee/subscriptions/new/components/checkout/step.vue';
 import Component from 'ee/subscriptions/new/components/checkout/subscription_details.vue';
 import { NEW_GROUP } from 'ee/subscriptions/new/constants';
+import createStore from 'ee/subscriptions/new/store';
+import * as types from 'ee/subscriptions/new/store/mutation_types';
 
 describe('Subscription Details', () => {
   const localVue = createLocalVue();
@@ -13,9 +13,9 @@ describe('Subscription Details', () => {
   let store;
   let wrapper;
 
-  const planData = [
-    { id: 'firstPlanId', code: 'bronze', price_per_year: 48 },
-    { id: 'secondPlanId', code: 'silver', price_per_year: 228 },
+  const availablePlans = [
+    { id: 'firstPlanId', code: 'bronze', price_per_year: 48, name: 'bronze' },
+    { id: 'secondPlanId', code: 'silver', price_per_year: 228, name: 'silver' },
   ];
 
   const groupData = [
@@ -24,9 +24,9 @@ describe('Subscription Details', () => {
   ];
 
   let initialNamespaceId = null;
-  const initialData = namespaceId => {
+  const initialData = (namespaceId) => {
     return {
-      planData: JSON.stringify(planData),
+      availablePlans: JSON.stringify(availablePlans),
       groupData: JSON.stringify(groupData),
       planId: 'secondPlanId',
       namespaceId,

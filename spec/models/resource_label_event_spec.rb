@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe ResourceLabelEvent, type: :model do
-  subject { build(:resource_label_event, issue: issue) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:merge_request) { create(:merge_request, source_project: project) }
+  let_it_be(:label) { create(:label, project: project) }
 
-  let(:issue) { create(:issue) }
-  let(:merge_request) { create(:merge_request) }
+  subject { build(:resource_label_event, issue: issue, label: label) }
 
   it_behaves_like 'having unique enum values'
 
@@ -48,26 +50,28 @@ RSpec.describe ResourceLabelEvent, type: :model do
     end
   end
 
-  describe '#expire_etag_cache' do
-    def expect_expiration(issue)
-      expect_next_instance_of(Gitlab::EtagCaching::Store) do |instance|
-        expect(instance).to receive(:touch)
-          .with("/#{issue.project.namespace.to_param}/#{issue.project.to_param}/noteable/issue/#{issue.id}/notes")
+  context 'callbacks' do
+    describe '#expire_etag_cache' do
+      def expect_expiration(issue)
+        expect_next_instance_of(Gitlab::EtagCaching::Store) do |instance|
+          expect(instance).to receive(:touch)
+            .with("/#{issue.project.namespace.to_param}/#{issue.project.to_param}/noteable/issue/#{issue.id}/notes")
+        end
       end
-    end
 
-    it 'expires resource note etag cache on event save' do
-      expect_expiration(subject.issuable)
+      it 'expires resource note etag cache on event save' do
+        expect_expiration(subject.issuable)
 
-      subject.save!
-    end
+        subject.save!
+      end
 
-    it 'expires resource note etag cache on event destroy' do
-      subject.save!
+      it 'expires resource note etag cache on event destroy' do
+        subject.save!
 
-      expect_expiration(subject.issuable)
+        expect_expiration(subject.issuable)
 
-      subject.destroy!
+        subject.destroy!
+      end
     end
   end
 

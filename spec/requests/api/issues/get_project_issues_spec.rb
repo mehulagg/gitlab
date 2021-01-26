@@ -28,6 +28,7 @@ RSpec.describe API::Issues do
       updated_at: 3.hours.ago,
       closed_at: 1.hour.ago
   end
+
   let!(:confidential_issue) do
     create :issue,
       :confidential,
@@ -37,6 +38,7 @@ RSpec.describe API::Issues do
       created_at: generate(:past_time),
       updated_at: 2.hours.ago
   end
+
   let!(:issue) do
     create :issue,
       author: user,
@@ -48,14 +50,17 @@ RSpec.describe API::Issues do
       title: issue_title,
       description: issue_description
   end
+
   let_it_be(:label) do
     create(:label, title: 'label', color: '#FFAABB', project: project)
   end
+
   let!(:label_link) { create(:label_link, label: label, target: issue) }
   let(:milestone) { create(:milestone, title: '1.0.0', project: project) }
   let_it_be(:empty_milestone) do
     create(:milestone, title: '2.0.0', project: project)
   end
+
   let!(:note) { create(:note_on_issue, author: user, project: project, noteable: issue) }
 
   let(:no_milestone_title) { 'None' }
@@ -69,6 +74,7 @@ RSpec.describe API::Issues do
            target_project: project,
            description: "closes #{issue.to_reference}")
   end
+
   let!(:merge_request2) do
     create(:merge_request,
            :simple,

@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab Geo project rename replication' do
-      it 'user renames project' do
+      it 'user renames project', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/695' do
         original_project_name = 'geo-before-rename'
         original_readme_content = "The original project name was #{original_project_name}"
         readme_file_name = 'README.md'
@@ -36,10 +36,10 @@ module QA
           @geo_project_renamed = "geo-after-rename-#{SecureRandom.hex(8)}"
           Page::Project::Settings::Main.perform do |settings|
             settings.rename_project_to(@geo_project_renamed)
-            expect(page).to have_content "Project '#{@geo_project_renamed}' was successfully updated."
+            expect(settings).to have_breadcrumb(@geo_project_renamed)
 
-            settings.expand_advanced_settings do |page|
-              page.update_project_path_to(@geo_project_renamed)
+            settings.expand_advanced_settings do |advanced_settings|
+              advanced_settings.update_project_path_to(@geo_project_renamed)
             end
           end
         end

@@ -2,56 +2,76 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Search do
+RSpec.describe API::Search, factory_default: :keep do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
+  let_it_be(:namespace) { create_default(:namespace) }
+
   let(:project) { create(:project, :public, :repository, :wiki_repo, name: 'awesome project', group: group) }
 
   shared_examples 'response is correct' do |schema:, size: 1|
-    it { expect(response).to have_gitlab_http_status(:ok) }
-    it { expect(response).to match_response_schema(schema) }
-    it { expect(response).to include_limited_pagination_headers }
-    it { expect(json_response.size).to eq(size) }
+    it 'responds correctly' do
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to match_response_schema(schema)
+      expect(response).to include_limited_pagination_headers
+      expect(json_response.size).to eq(size)
+    end
   end
 
   shared_examples 'pagination' do |scope:, search: '*'|
     it 'returns a different result for each page' do
       get api(endpoint, user), params: { scope: scope, search: search, page: 1, per_page: 1 }
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response.count).to eq(1)
+
       first = json_response.first
 
       get api(endpoint, user), params: { scope: scope, search: search, page: 2, per_page: 1 }
       second = Gitlab::Json.parse(response.body).first
 
       expect(first).not_to eq(second)
-    end
 
-    it 'returns 1 result when per_page is 1' do
-      get api(endpoint, user), params: { scope: scope, search: search, per_page: 1 }
-
-      expect(json_response.count).to eq(1)
-    end
-
-    it 'returns 2 results when per_page is 2' do
       get api(endpoint, user), params: { scope: scope, search: search, per_page: 2 }
 
       expect(Gitlab::Json.parse(response.body).count).to eq(2)
     end
   end
 
+  shared_examples 'orderable by created_at' do |scope:|
+    it 'allows ordering results by created_at asc' do
+      get api(endpoint, user), params: { scope: scope, search: '*', order_by: 'created_at', sort: 'asc' }
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| Time.parse(r['created_at']) }
+
+      expect(created_ats).to eq(created_ats.sort)
+    end
+
+    it 'allows ordering results by created_at desc' do
+      get api(endpoint, user), params: { scope: scope, search: '*', order_by: 'created_at', sort: 'desc' }
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| Time.parse(r['created_at']) }
+
+      expect(created_ats).to eq(created_ats.sort.reverse)
+    end
+  end
+
   shared_examples 'elasticsearch disabled' do
-    it 'returns 400 error for wiki_blobs scope' do
+    it 'returns 400 error for wiki_blobs, blobs and commits scope' do
       get api(endpoint, user), params: { scope: 'wiki_blobs', search: 'awesome' }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-    end
 
-    it 'returns 400 error for blobs scope' do
       get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
 
       expect(response).to have_gitlab_http_status(:bad_request)
-    end
 
-    it 'returns 400 error for commits scope' do
       get api(endpoint, user), params: { scope: 'commits', search: 'folder' }
 
       expect(response).to have_gitlab_http_status(:bad_request)
@@ -66,6 +86,7 @@ RSpec.describe API::Search do
       end
 
       it_behaves_like 'pagination', scope: 'merge_requests'
+      it_behaves_like 'orderable by created_at', scope: 'merge_requests'
 
       it 'avoids N+1 queries' do
         control = ActiveRecord::QueryRecorder.new { get api(endpoint, user), params: { scope: 'merge_requests', search: '*' } }
@@ -84,11 +105,13 @@ RSpec.describe API::Search do
 
         project.wiki.index_wiki_blobs
         ensure_elasticsearch_index!
-
-        get api(endpoint, user), params: { scope: 'wiki_blobs', search: 'awesome' }
       end
 
-      it_behaves_like 'response is correct', schema: 'public_api/v4/blobs'
+      it_behaves_like 'response is correct', schema: 'public_api/v4/blobs' do
+        before do
+          get api(endpoint, user), params: { scope: 'wiki_blobs', search: 'awesome' }
+        end
+      end
 
       it_behaves_like 'pagination', scope: 'wiki_blobs'
     end
@@ -100,11 +123,11 @@ RSpec.describe API::Search do
       end
 
       context 'for commits scope' do
-        before do
-          get api(endpoint, user), params: { scope: 'commits', search: 'folder' }
+        it_behaves_like 'response is correct', schema: 'public_api/v4/commits_details', size: 2 do
+          before do
+            get api(endpoint, user), params: { scope: 'commits', search: 'folder' }
+          end
         end
-
-        it_behaves_like 'response is correct', schema: 'public_api/v4/commits_details', size: 2
 
         it_behaves_like 'pagination', scope: 'commits'
 
@@ -124,40 +147,73 @@ RSpec.describe API::Search do
       end
 
       context 'for blobs scope' do
-        before do
-          get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
+        it_behaves_like 'response is correct', schema: 'public_api/v4/blobs' do
+          before do
+            get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
+          end
         end
-
-        it_behaves_like 'response is correct', schema: 'public_api/v4/blobs'
 
         it_behaves_like 'pagination', scope: 'blobs'
 
         context 'filters' do
-          it 'by filename' do
-            get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* filename:PROCESS.md' }
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response.size).to eq(1)
-            expect(json_response.first['path']).to eq('PROCESS.md')
+          def results_filenames
+            json_response.map { |h| h['filename'] }.compact
           end
 
-          it 'by path' do
-            get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* path:markdown' }
+          def results_paths
+            json_response.map { |h| h['path'] }.compact
+          end
 
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response.size).to eq(1)
-            json_response.each do |file|
-              expect(file['path']).to match(%r[/markdown/])
+          context 'with an including filter' do
+            it 'by filename' do
+              get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* filename:PROCESS.md' }
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(json_response.size).to eq(1)
+              expect(results_filenames).to all(match(%r{PROCESS.md$}))
+            end
+
+            it 'by path' do
+              get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* path:markdown' }
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(json_response.size).to eq(1)
+              expect(results_paths).to all(match(%r{^files/markdown/}))
+            end
+
+            it 'by extension' do
+              get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* extension:md' }
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(json_response.size).to eq(3)
+              expect(results_filenames).to all(match(%r{.*.md$}))
             end
           end
 
-          it 'by extension' do
-            get api("/projects/#{project.id}/search", user), params: { scope: 'blobs', search: 'mon* extension:md' }
+          context 'with an excluding filter' do
+            it 'by filename' do
+              get api(endpoint, user), params: { scope: 'blobs', search: '* -filename:PROCESS.md' }
 
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response.size).to eq(3)
-            json_response.each do |file|
-              expect(file['path']).to match(/\A.+\.md\z/)
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(results_filenames).not_to include('PROCESS.md')
+              expect(json_response.size).to eq(20)
+            end
+
+            it 'by path' do
+              get api(endpoint, user), params: { scope: 'blobs', search: '* -path:files/markdown' }
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(results_paths).not_to include(a_string_matching(%r{^files/markdown/}))
+              expect(json_response.size).to eq(20)
+            end
+
+            it 'by extension' do
+              get api(endpoint, user), params: { scope: 'blobs', search: '* -extension:md' }
+
+              expect(response).to have_gitlab_http_status(:ok)
+
+              expect(results_filenames).not_to include(a_string_matching(%r{.*.md$}))
+              expect(json_response.size).to eq(20)
             end
           end
         end
@@ -183,6 +239,7 @@ RSpec.describe API::Search do
       end
 
       it_behaves_like 'pagination', scope: 'issues'
+      it_behaves_like 'orderable by created_at', scope: 'issues'
     end
 
     unless level == :project
@@ -240,6 +297,18 @@ RSpec.describe API::Search do
       it_behaves_like 'pagination', scope: 'users', search: ''
     end
 
+    context 'for notes scope', :sidekiq_inline do
+      before do
+        create(:note_on_merge_request, project: project, note: 'awesome note')
+        mr = create(:merge_request, source_project: project, target_branch: 'another_branch')
+        create(:note, project: project, noteable: mr, note: 'another note')
+
+        ensure_elasticsearch_index!
+      end
+
+      it_behaves_like 'pagination', scope: 'notes'
+    end
+
     if level == :global
       context 'for snippet_titles scope', :sidekiq_inline do
         before do
@@ -249,20 +318,6 @@ RSpec.describe API::Search do
         end
 
         it_behaves_like 'pagination', scope: 'snippet_titles'
-      end
-    end
-
-    if level == :project
-      context 'for notes scope', :sidekiq_inline do
-        before do
-          create(:note_on_merge_request, project: project, note: 'awesome note')
-          mr = create(:merge_request, source_project: project, target_branch: 'another_branch')
-          create(:note, project: project, noteable: mr, note: 'another note')
-
-          ensure_elasticsearch_index!
-        end
-
-        it_behaves_like 'pagination', scope: 'notes'
       end
     end
   end
@@ -371,11 +426,11 @@ RSpec.describe API::Search do
       end
 
       context 'for blobs scope' do
-        before do
-          get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
+        it_behaves_like 'response is correct', schema: 'public_api/v4/blobs', size: 2 do
+          before do
+            get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
+          end
         end
-
-        it_behaves_like 'response is correct', schema: 'public_api/v4/blobs', size: 2
 
         context 'filters' do
           it 'by filename' do
@@ -388,7 +443,7 @@ RSpec.describe API::Search do
           end
 
           it 'by path' do
-            get api(endpoint, user), params: { scope: 'blobs', search: 'mon path:markdown' }
+            get api(endpoint, user), params: { scope: 'blobs', search: 'mon path:files/markdown' }
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response.size).to eq(8)

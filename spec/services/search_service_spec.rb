@@ -18,9 +18,10 @@ RSpec.describe SearchService do
   let(:group_project) { create(:project, group: accessible_group, name: 'group_project') }
   let(:public_project) { create(:project, :public, name: 'public_project') }
 
+  let(:page) { 1 }
   let(:per_page) { described_class::DEFAULT_PER_PAGE }
 
-  subject(:search_service) { described_class.new(user, search: search, scope: scope, page: 1, per_page: per_page) }
+  subject(:search_service) { described_class.new(user, search: search, scope: scope, page: page, per_page: per_page) }
 
   before do
     accessible_project.add_maintainer(user)
@@ -242,10 +243,10 @@ RSpec.describe SearchService do
   end
 
   describe '#search_objects' do
-    context 'handling per_page param' do
-      let(:search) { '' }
-      let(:scope) { nil }
+    let(:search) { '' }
+    let(:scope) { nil }
 
+    describe 'per_page: parameter' do
       context 'when nil' do
         let(:per_page) { nil }
 
@@ -305,6 +306,34 @@ RSpec.describe SearchService do
           expect_any_instance_of(Gitlab::SearchResults)
             .to receive(:objects)
             .with(anything, hash_including(per_page: described_class::MAX_PER_PAGE))
+            .and_call_original
+
+          subject.search_objects
+        end
+      end
+    end
+
+    describe 'page: parameter' do
+      context 'when < 1' do
+        let(:page) { 0 }
+
+        it "defaults to 1" do
+          expect_any_instance_of(Gitlab::SearchResults)
+            .to receive(:objects)
+            .with(anything, hash_including(page: 1))
+            .and_call_original
+
+          subject.search_objects
+        end
+      end
+
+      context 'when nil' do
+        let(:page) { nil }
+
+        it "defaults to 1" do
+          expect_any_instance_of(Gitlab::SearchResults)
+            .to receive(:objects)
+            .with(anything, hash_including(page: 1))
             .and_call_original
 
           subject.search_objects
@@ -444,7 +473,7 @@ RSpec.describe SearchService do
         context 'with :with_api_entity_associations' do
           let(:unredacted_results) { ar_relation(MergeRequest.with_api_entity_associations, readable, unreadable) }
 
-          it_behaves_like "redaction limits N+1 queries", limit: 7
+          it_behaves_like "redaction limits N+1 queries", limit: 8
         end
       end
 
@@ -481,7 +510,7 @@ RSpec.describe SearchService do
         end
 
         context 'with :with_api_entity_associations' do
-          it_behaves_like "redaction limits N+1 queries", limit: 12
+          it_behaves_like "redaction limits N+1 queries", limit: 13
         end
       end
 
@@ -496,7 +525,7 @@ RSpec.describe SearchService do
         end
 
         context 'with :with_api_entity_associations' do
-          it_behaves_like "redaction limits N+1 queries", limit: 3
+          it_behaves_like "redaction limits N+1 queries", limit: 4
         end
       end
 

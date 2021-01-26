@@ -5,12 +5,12 @@ require 'spec_helper'
 RSpec.describe 'Setting the epic of an issue' do
   include GraphqlHelpers
 
-  let(:current_user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:epic) { create(:epic, group: group) }
-  let(:project) { create(:project, group: group) }
-  let(:issue) { create(:issue, project: project) }
-  let(:input) { { epic_id: global_id_of(epic) } }
+  let_it_be(:current_user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:epic) { create(:epic, group: group) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:issue) { create(:issue, project: project, epic: create(:epic, group: group)) }
+  let_it_be(:input) { { epic_id: global_id_of(epic) } }
 
   let(:mutation) do
     graphql_mutation(
@@ -64,5 +64,13 @@ RSpec.describe 'Setting the epic of an issue' do
     expect(mutation_response['issue']['epic']['iid']).to eq(epic.iid.to_s)
     expect(mutation_response['issue']['epic']['title']).to eq(epic.title)
     expect(issue.reload.epic).to eq(epic)
+  end
+
+  it 'removes existing epic if epic_id is nil' do
+    input[:epic_id] = nil
+    post_graphql_mutation(mutation, current_user: current_user)
+
+    expect(response).to have_gitlab_http_status(:success)
+    expect(issue.reload.epic).to be_nil
   end
 end

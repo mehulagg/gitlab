@@ -1,11 +1,12 @@
-import Vuex from 'vuex';
 import { GlFormCheckbox } from '@gitlab/ui';
-import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
-import createStore from 'ee/security_dashboard/store';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
+import Vuex from 'vuex';
+import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
+import createStore from 'ee/security_dashboard/store';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { trimText } from 'helpers/text_helper';
+import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -35,8 +36,8 @@ describe('Security Dashboard Table Row', () => {
   });
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');
-  const findContent = i => wrapper.findAll('.table-mobile-content').at(i);
-  const findAllIssueCreated = () => wrapper.findAll('.ic-issue-created');
+  const findContent = (i) => wrapper.findAll('.table-mobile-content').at(i);
+  const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
 
@@ -76,11 +77,7 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the severity', () => {
-      expect(
-        findContent(0)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.severity);
+      expect(findContent(0).text().toLowerCase()).toContain(vulnerability.severity);
     });
 
     it('should render the identifier cell', () => {
@@ -90,11 +87,9 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the report type', () => {
-      expect(
-        findContent(3)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.report_type.toLowerCase());
+      expect(findContent(3).text().toLowerCase()).toContain(
+        vulnerability.report_type.toLowerCase(),
+      );
     });
 
     it('should render the scanner vendor if the scanner does exist', () => {
@@ -110,15 +105,20 @@ describe('Security Dashboard Table Row', () => {
         expect(findContent(1).text()).toContain(vulnerability.location.file);
       });
 
-      it('should fire the openModal action when clicked', () => {
+      it('should fire the setModalData action and open the modal when clicked', () => {
         jest.spyOn(store, 'dispatch').mockImplementation();
+        jest.spyOn(wrapper.vm.$root, '$emit');
 
         const el = wrapper.find({ ref: 'vulnerability-title' });
         el.trigger('click');
 
-        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/openModal', {
+        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/setModalData', {
           vulnerability,
         });
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(
+          'bv::show::modal',
+          VULNERABILITY_MODAL_ID,
+        );
       });
     });
 
@@ -173,7 +173,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should have a `ic-issue-created` class', () => {
+    it('should have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(1);
     });
   });
@@ -185,7 +185,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should not have a `ic-issue-created` class', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
   });
@@ -197,7 +197,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(shallowMount, { props: { vulnerability } });
     });
 
-    it('should not have a `ic-issue-created` class', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
 

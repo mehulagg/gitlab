@@ -9,7 +9,6 @@ module QA
 
       attribute :sandbox do
         Sandbox.fabricate_via_api! do |sandbox|
-          sandbox.user = user
           sandbox.api_client = api_client
         end
       end
@@ -18,10 +17,12 @@ module QA
       attribute :id
       attribute :name
       attribute :runners_token
+      attribute :require_two_factor_authentication
 
       def initialize
         @path = Runtime::Namespace.name
         @description = "QA test run at #{Runtime::Namespace.time}"
+        @require_two_factor_authentication = false
       end
 
       def fabricate!
@@ -35,7 +36,6 @@ module QA
 
             Page::Group::New.perform do |group_new|
               group_new.set_path(path)
-              group_new.set_description(description)
               group_new.set_visibility('Public')
               group_new.create
             end
@@ -43,7 +43,7 @@ module QA
             # Ensure that the group was actually created
             group_show.wait_until(sleep_interval: 1) do
               group_show.has_text?(path) &&
-                group_show.has_new_project_or_subgroup_dropdown?
+                group_show.has_new_project_and_new_subgroup_buttons?
             end
           end
         end
@@ -72,7 +72,8 @@ module QA
           parent_id: sandbox.id,
           path: path,
           name: path,
-          visibility: 'public'
+          visibility: 'public',
+          require_two_factor_authentication: @require_two_factor_authentication
         }
       end
 

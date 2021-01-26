@@ -4,9 +4,9 @@
   = _('to help your contributors communicate effectively!')
   .dropdown.promotion-issue-template
     .dropdown-menu.promotion-issue-template-message
-      .dropdown-title
+      .dropdown-title.gl-display-flex.gl-justify-content-end
         %button.dropdown-title-button.dropdown-menu-close{ "aria-label" => "Close", :type => "button" }
-          %i.fa.fa-times.dropdown-menu-close-icon{ "aria-hidden" => "true", "data-hidden" => "true" }
+          = sprite_icon('close', size: 16, css_class: 'dropdown-menu-close-icon')
       %div
         %p
           = _('Description templates allow you to define context-specific templates for issue and merge request description fields for your project.')

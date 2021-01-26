@@ -59,7 +59,7 @@ RSpec.describe Users::CreateService do
           service.execute
         end
 
-        it 'executes system hooks ' do
+        it 'executes system hooks' do
           system_hook_service = spy(:system_hook_service)
 
           expect(service).to receive(:system_hook_service).and_return(system_hook_service)
@@ -154,6 +154,7 @@ RSpec.describe Users::CreateService do
       let(:params) do
         { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass', skip_confirmation: true }
       end
+
       let(:service) { described_class.new(nil, params) }
 
       it 'persists the given attributes' do

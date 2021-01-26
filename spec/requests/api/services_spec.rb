@@ -76,7 +76,9 @@ RSpec.describe API::Services do
 
         required_attributes = service_attrs_list.select do |attr|
           service_klass.validators_on(attr).any? do |v|
-            v.class == ActiveRecord::Validations::PresenceValidator
+            v.class == ActiveRecord::Validations::PresenceValidator &&
+            # exclude presence validators with conditional since those are not really required
+            ![:if, :unless].any? { |cond| v.options.include?(cond) }
           end
         end
 
@@ -262,6 +264,36 @@ RSpec.describe API::Services do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['notify_only_broken_pipelines']).to eq(true)
+    end
+  end
+
+  describe 'Hangouts Chat service' do
+    let(:service_name) { 'hangouts-chat' }
+    let(:params) do
+      {
+        webhook: 'https://hook.example.com',
+        branches_to_be_notified: 'default'
+      }
+    end
+
+    before do
+      project.create_hangouts_chat_service(
+        active: true,
+        properties: params
+      )
+    end
+
+    it 'accepts branches_to_be_notified for update', :aggregate_failures do
+      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(branches_to_be_notified: 'all')
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['properties']['branches_to_be_notified']).to eq('all')
+    end
+
+    it 'only requires the webhook param' do
+      put api("/projects/#{project.id}/services/#{service_name}", user), params: { webhook: 'https://hook.example.com' }
+
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 end

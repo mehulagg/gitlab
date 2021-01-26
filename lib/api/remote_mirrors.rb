@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module API
-  class RemoteMirrors < Grape::API::Instance
+  class RemoteMirrors < ::API::Base
     include PaginationParams
+
+    feature_category :source_code_management
 
     before do
       unauthorized! unless can?(current_user, :admin_remote_mirror, user_project)

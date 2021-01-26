@@ -58,7 +58,7 @@ EOT
 
       context 'using a diff that is too large' do
         it 'prunes the diff' do
-          diff = described_class.new(diff: 'a' * 204800)
+          diff = described_class.new({ diff: 'a' * 204800 })
 
           expect(diff.diff).to be_empty
           expect(diff).to be_too_large
@@ -78,6 +78,7 @@ EOT
           patch: raw_patch
         )
       end
+
       let(:diff) { described_class.new(gitaly_diff) }
 
       context 'with a small diff' do
@@ -98,6 +99,13 @@ EOT
         it 'prunes the diff' do
           expect(diff.diff).to be_empty
           expect(diff).to be_too_large
+        end
+
+        it 'logs the event' do
+          expect(Gitlab::Metrics).to receive(:add_event)
+            .with(:patch_hard_limit_bytes_hit)
+
+          diff
         end
       end
 
@@ -134,6 +142,7 @@ EOT
           to_id: '8e5177d718c561d36efde08bad36b43687ee6bf0'
         )
       end
+
       let(:diff) { described_class.new(commit_delta) }
 
       it 'initializes the diff' do
@@ -282,28 +291,36 @@ EOT
   end
 
   describe '#line_count' do
-    it 'returns the correct number of lines' do
-      diff = described_class.new(gitaly_diff)
+    let(:diff) { described_class.new(gitaly_diff) }
 
+    it 'returns the correct number of lines' do
       expect(diff.line_count).to eq(7)
+    end
+  end
+
+  describe "#diff_bytesize" do
+    let(:diff) { described_class.new(gitaly_diff) }
+
+    it "returns the size of the diff in bytes" do
+      expect(diff.diff_bytesize).to eq(diff.diff.bytesize)
     end
   end
 
   describe '#too_large?' do
     it 'returns true for a diff that is too large' do
-      diff = described_class.new(diff: 'a' * 204800)
+      diff = described_class.new({ diff: 'a' * 204800 })
 
       expect(diff.too_large?).to eq(true)
     end
 
     it 'returns false for a diff that is small enough' do
-      diff = described_class.new(diff: 'a')
+      diff = described_class.new({ diff: 'a' })
 
       expect(diff.too_large?).to eq(false)
     end
 
     it 'returns true for a diff that was explicitly marked as being too large' do
-      diff = described_class.new(diff: 'a')
+      diff = described_class.new({ diff: 'a' })
 
       diff.too_large!
 
@@ -313,19 +330,19 @@ EOT
 
   describe '#collapsed?' do
     it 'returns false by default even on quite big diff' do
-      diff = described_class.new(diff: 'a' * 20480)
+      diff = described_class.new({ diff: 'a' * 20480 })
 
       expect(diff).not_to be_collapsed
     end
 
     it 'returns false by default for a diff that is small enough' do
-      diff = described_class.new(diff: 'a')
+      diff = described_class.new({ diff: 'a' })
 
       expect(diff).not_to be_collapsed
     end
 
     it 'returns true for a diff that was explicitly marked as being collapsed' do
-      diff = described_class.new(diff: 'a')
+      diff = described_class.new({ diff: 'a' })
 
       diff.collapse!
 
@@ -349,7 +366,7 @@ EOT
 
   describe '#collapse!' do
     it 'prunes the diff' do
-      diff = described_class.new(diff: "foo\nbar")
+      diff = described_class.new({ diff: "foo\nbar" })
 
       diff.collapse!
 

@@ -11,6 +11,10 @@ module DashboardHelper
     merge_requests_dashboard_path(assignee_username: current_user.username)
   end
 
+  def reviewer_mrs_dashboard_path
+    merge_requests_dashboard_path(reviewer_username: current_user.username)
+  end
+
   def dashboard_nav_links
     @dashboard_nav_links ||= get_dashboard_nav_links
   end
@@ -40,7 +44,7 @@ module DashboardHelper
       end)
 
       if doc_href.present?
-        link_to_doc = link_to(sprite_icon('question', size: 16), doc_href,
+        link_to_doc = link_to(sprite_icon('question'), doc_href,
                               class: 'gl-ml-2', title: _('Documentation'),
                               target: '_blank', rel: 'noopener noreferrer')
 
@@ -56,10 +60,6 @@ module DashboardHelper
 
     if can?(current_user, :read_cross_project)
       links += [:activity, :milestones]
-    end
-
-    if can?(current_user, :read_instance_statistics)
-      links << :analytics
     end
 
     links

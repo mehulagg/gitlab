@@ -3,6 +3,7 @@ fragment SastCiConfigurationEntityFragment on SastCiConfigurationEntity {
   description
   field
   label
+  size
   type
   value
 }

@@ -3,42 +3,82 @@
 module Elastic
   module Latest
     class IssueClassProxy < ApplicationClassProxy
+      include StateFilter
+
       def elastic_search(query, options: {})
         query_hash =
           if query =~ /#(\d+)\z/
             iid_query_hash(Regexp.last_match(1))
           else
-            basic_query_hash(%w(title^2 description), query)
+            # iid field can be added here as lenient option will
+            # pardon format errors, like integer out of range.
+            fields = %w(iid^3 title^2 description)
+            basic_query_hash(fields, query)
           end
 
         options[:features] = 'issues'
-        query_hash = project_ids_filter(query_hash, options)
-        query_hash = confidentiality_filter(query_hash, options[:current_user], options[:project_ids])
+        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_new_data_to_issues_documents)
+        context.name(:issue) do
+          query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
+          query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
+          query_hash = context.name(:match) { state_filter(query_hash, options) }
+        end
+        query_hash = apply_sort(query_hash, options)
 
         search(query_hash, options)
       end
 
       private
 
-      def user_has_access_to_confidential_issues?(authorized_project_ids, project_ids)
-        # is_a?(Array) is needed because we might receive project_ids: :any
-        return false unless authorized_project_ids && project_ids.is_a?(Array)
+      # Builds an elasticsearch query that will select documents from a
+      # set of projects for Group and Project searches, taking user access
+      # rules for issues into account. Relies upon super for Global searches
+      def project_ids_filter(query_hash, options)
+        return super if options[:public_and_internal_projects]
 
-        (project_ids - authorized_project_ids).empty?
+        current_user = options[:current_user]
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        return super if scoped_project_ids == :any
+
+        context.name(:project) do
+          query_hash[:query][:bool][:filter] ||= []
+          query_hash[:query][:bool][:filter] << {
+            terms: {
+              _name: context.name,
+              project_id: filter_ids_by_feature(scoped_project_ids, current_user, 'issues')
+            }
+          }
+        end
+
+        query_hash
       end
 
-      def confidentiality_filter(query_hash, current_user, project_ids)
+      def confidentiality_filter(query_hash, options)
+        current_user = options[:current_user]
+        project_ids = options[:project_ids]
+
+        if [true, false].include?(options[:confidential])
+          query_hash[:query][:bool][:filter] << { term: { confidential: options[:confidential] } }
+        end
+
         return query_hash if current_user&.can_read_all_resources?
 
-        authorized_project_ids = current_user&.authorized_projects(Gitlab::Access::REPORTER)&.pluck_primary_key
-        return query_hash if user_has_access_to_confidential_issues?(authorized_project_ids, project_ids)
+        scoped_project_ids = scoped_project_ids(current_user, project_ids)
+        authorized_project_ids = authorized_project_ids(current_user, options)
 
-        filter =
-          if current_user
-            {
+        # we can shortcut the filter if the user is authorized to see
+        # all the projects for which this query is scoped on
+        unless scoped_project_ids == :any || scoped_project_ids.empty?
+          return query_hash if authorized_project_ids.to_set == scoped_project_ids.to_set
+        end
+
+        filter = { term: { confidential: { _name: context.name(:non_confidential), value: false } } }
+
+        if current_user
+          filter = {
               bool: {
                 should: [
-                  { term: { confidential: false } },
+                  { term: { confidential: { _name: context.name(:non_confidential), value: false } } },
                   {
                     bool: {
                       must: [
@@ -46,9 +86,9 @@ module Elastic
                         {
                           bool: {
                             should: [
-                              { term: { author_id: current_user.id } },
-                              { term: { assignee_id: current_user.id } },
-                              { terms: { project_id: authorized_project_ids } }
+                              { term: { author_id: { _name: context.name(:as_author), value: current_user.id } } },
+                              { term: { assignee_id: { _name: context.name(:as_assignee), value: current_user.id } } },
+                              { terms: { _name: context.name(:project, :membership, :id), project_id: authorized_project_ids } }
                             ]
                           }
                         }
@@ -58,9 +98,7 @@ module Elastic
                 ]
               }
             }
-          else
-            { term: { confidential: false } }
-          end
+        end
 
         query_hash[:query][:bool][:filter] << filter
         query_hash

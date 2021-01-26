@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 
 export const policiesWithDefaults = ({ policies }) => {
@@ -7,7 +6,7 @@ export const policiesWithDefaults = ({ policies }) => {
   // filter out enabled predefined policies and only append the ones
   // that are not present in a cluster.
   const predefined = PREDEFINED_NETWORK_POLICIES.filter(
-    ({ name }) => !policies.some(policy => name === policy.name),
+    ({ name }) => !policies.some((policy) => name === policy.name),
   );
   return [...policies, ...predefined];
 };

@@ -1,7 +1,7 @@
-- issues_count = group_issues_count(state: 'opened')
+- issues_count = group_open_issues_count(@group)
 - merge_requests_count = group_merge_requests_count(state: 'opened')
 
-.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?) }
+.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('groups_side_navigation', 'render', 'groups_side_navigation') }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to group_path(@group), title: @group.name do
@@ -10,6 +10,8 @@
         .sidebar-context-title
           = @group.name
     %ul.sidebar-top-level-items.qa-group-sidebar
+      = render_if_exists 'layouts/nav/sidebar/group_trial_status_widget', group: @group
+
       - if group_sidebar_link?(:overview)
         - paths = group_overview_nav_link_paths
         = nav_link(path: paths, unless: -> { current_path?('groups/contribution_analytics#show') }, html_options: { class: 'home' }) do
@@ -52,14 +54,14 @@
               = sprite_icon('issues')
             %span.nav-item-name
               = _('Issues')
-            %span.badge.badge-pill.count= number_with_delimiter(issues_count)
+            %span.badge.badge-pill.count= issues_count
 
           %ul.sidebar-sub-level-items{ data: { qa_selector: 'group_issues_sidebar_submenu'} }
             = nav_link(path: ['groups#issues', 'labels#index', 'milestones#index', 'iterations#index'], html_options: { class: "fly-out-top-item" } ) do
               = link_to issues_group_path(@group) do
                 %strong.fly-out-top-item-name
                   = _('Issues')
-                %span.badge.badge-pill.count.issue_counter.fly-out-badge= number_with_delimiter(issues_count)
+                %span.badge.badge-pill.count.issue_counter.fly-out-badge= issues_count
 
             %li.divider.fly-out-top-item
             = nav_link(path: 'groups#issues', html_options: { class: 'home' }) do
@@ -139,6 +141,8 @@
                 %strong.fly-out-top-item-name
                   = _('Members')
 
+      = content_for :invite_members_sidebar
+
       - if group_sidebar_link?(:settings)
         = nav_link(path: group_settings_nav_link_paths) do
           = link_to edit_group_path(@group) do
@@ -146,7 +150,7 @@
               = sprite_icon('settings')
             %span.nav-item-name.qa-group-settings-item
               = _('Settings')
-          %ul.sidebar-sub-level-items.qa-group-sidebar-submenu
+          %ul.sidebar-sub-level-items.qa-group-sidebar-submenu{ data: { testid: 'group-settings-menu' } }
             = nav_link(path: %w[groups#projects groups#edit badges#index ci_cd#show], html_options: { class: "fly-out-top-item" } ) do
               = link_to edit_group_path(@group) do
                 %strong.fly-out-top-item-name
@@ -156,6 +160,11 @@
               = link_to edit_group_path(@group), title: _('General'), data: { qa_selector: 'general_settings_link' } do
                 %span
                   = _('General')
+
+            = nav_link(controller: :integrations) do
+              = link_to group_settings_integrations_path(@group), title: _('Integrations') do
+                %span
+                  = _('Integrations')
 
             = nav_link(path: 'groups#projects') do
               = link_to projects_group_path(@group), title: _('Projects') do
@@ -171,11 +180,12 @@
               = link_to group_settings_ci_cd_path(@group), title: _('CI / CD') do
                 %span
                   = _('CI / CD')
-            - if Feature.enabled?(:group_level_integrations, @group)
-              = nav_link(controller: :integrations) do
-                = link_to group_settings_integrations_path(@group), title: _('Integrations') do
+
+            - if Feature.enabled?(:packages_and_registries_group_settings, @group)
+              = nav_link(controller: :packages_and_registries) do
+                = link_to group_settings_packages_and_registries_path(@group), title: _('Packages & Registries') do
                   %span
-                    = _('Integrations')
+                    = _('Packages & Registries')
 
             = render_if_exists "groups/ee/settings_nav"
 

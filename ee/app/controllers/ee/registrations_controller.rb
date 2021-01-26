@@ -5,34 +5,22 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
+    prepended do
+      before_action :ensure_can_remove_self, only: [:destroy]
+    end
+
     private
 
-    override :user_created_message
-    def user_created_message(confirmed: false)
-      experiments = "experiment_growth_recaptcha?#{show_recaptcha_sign_up?}"
-
-      super(confirmed: confirmed) + ", experiments:#{experiments}"
+    override :set_blocked_pending_approval?
+    def set_blocked_pending_approval?
+      super || ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
     end
 
-    def sign_up_params
-      clean_params = super.merge(params.require(:user).permit(:email_opted_in))
-
-      if clean_params[:email_opted_in] == '1'
-        clean_params[:email_opted_in_ip] = request.remote_ip
-        clean_params[:email_opted_in_source_id] = User::EMAIL_OPT_IN_SOURCE_ID_GITLAB_COM
-        clean_params[:email_opted_in_at] = Time.zone.now
-      end
-
-      clean_params
-    end
-
-    # Part of an experiment to build a new sign up flow. Will be resolved
-    # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
-    def choose_layout
-      if %w(welcome update_registration).include?(action_name)
-        'checkout'
-      else
-        super
+    def ensure_can_remove_self
+      unless current_user&.can_remove_self?
+        redirect_to profile_account_path,
+                    status: :see_other,
+                    alert: s_('Profiles|Account could not be deleted. GitLab was unable to verify your identity.')
       end
     end
   end

@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import TriggerFields from '~/integrations/edit/components/trigger_fields.vue';
 import { GlFormGroup, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
+import TriggerFields from '~/integrations/edit/components/trigger_fields.vue';
 
 describe('TriggerFields', () => {
   let wrapper;
@@ -29,7 +29,7 @@ describe('TriggerFields', () => {
   const findAllGlFormCheckboxes = () => wrapper.findAll(GlFormCheckbox);
   const findAllGlFormInputs = () => wrapper.findAll(GlFormInput);
 
-  describe.each([true, false])('template, isInheriting = `%p`', isInheriting => {
+  describe.each([true, false])('template, isInheriting = `%p`', (isInheriting) => {
     it('renders a label with text "Trigger"', () => {
       createComponent();
 

@@ -17,7 +17,7 @@ exports[`Alert integration settings form default state should match the default 
         data-qa-selector="create_issue_checkbox"
       >
         <span>
-          Create an issue. Issues are created for each alert triggered.
+          Create an incident. Incidents are created for each alert triggered.
         </span>
       </gl-form-checkbox-stub>
     </gl-form-group-stub>
@@ -32,7 +32,7 @@ exports[`Alert integration settings form default state should match the default 
         for="alert-integration-settings-issue-template"
       >
         
-        Issue template (optional)
+        Incident template (optional)
         
         <gl-link-stub
           href="/help/user/project/description_templates#creating-issue-templates"
@@ -45,21 +45,23 @@ exports[`Alert integration settings form default state should match the default 
         </gl-link-stub>
       </label>
        
-      <gl-new-dropdown-stub
+      <gl-dropdown-stub
         block="true"
-        category="tertiary"
+        category="primary"
         data-qa-selector="incident_templates_dropdown"
         headertext=""
+        hideheaderborder="true"
         id="alert-integration-settings-issue-template"
         size="medium"
         text="selecte_tmpl"
         variant="default"
       >
-        <gl-new-dropdown-item-stub
+        <gl-dropdown-item-stub
           avatarurl=""
           data-qa-selector="incident_templates_item"
           iconcolor=""
           iconname=""
+          iconrightarialabel=""
           iconrightname=""
           ischeckitem="true"
           secondarytext=""
@@ -67,8 +69,8 @@ exports[`Alert integration settings form default state should match the default 
           
           No template selected
         
-        </gl-new-dropdown-item-stub>
-      </gl-new-dropdown-stub>
+        </gl-dropdown-item-stub>
+      </gl-dropdown-stub>
     </gl-form-group-stub>
      
     <gl-form-group-stub
@@ -81,23 +83,32 @@ exports[`Alert integration settings form default state should match the default 
       </gl-form-checkbox-stub>
     </gl-form-group-stub>
      
-    <div
-      class="gl-display-flex gl-justify-content-end"
+    <gl-form-group-stub
+      class="gl-pl-0 gl-mb-5"
     >
-      <gl-button-stub
-        category="tertiary"
-        class="js-no-auto-disable"
-        data-qa-selector="save_changes_button"
-        icon=""
-        size="medium"
-        type="submit"
-        variant="success"
+      <gl-form-checkbox-stub
+        checked="true"
       >
-        
-        Save changes
+        <span>
+          Automatically close incidents when the associated Prometheus alert resolves.
+        </span>
+      </gl-form-checkbox-stub>
+    </gl-form-group-stub>
+     
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
+      class="js-no-auto-disable"
+      data-qa-selector="save_changes_button"
+      icon=""
+      size="medium"
+      type="submit"
+      variant="success"
+    >
       
-      </gl-button-stub>
-    </div>
+      Save changes
+    
+    </gl-button-stub>
   </form>
 </div>
 `;

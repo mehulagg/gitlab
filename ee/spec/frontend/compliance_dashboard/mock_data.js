@@ -1,10 +1,4 @@
-const twoDaysAgo = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 2);
-  return date.toISOString();
-};
-
-const createUser = id => ({
+const createUser = (id) => ({
   id,
   avatar_url: `https://${id}`,
   name: `User ${id}`,
@@ -13,23 +7,16 @@ const createUser = id => ({
   web_url: `http://localhost:3000/user-${id}`,
 });
 
-export const createMergeRequest = ({ id = 1, props } = {}) => {
-  const mergeRequest = {
-    id,
-    approved_by_users: [],
-    issuable_reference: '!1',
-    merged_at: twoDaysAgo(),
-    milestone: null,
-    path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,
-    title: `Merge request ${id}`,
-  };
+export const mergedAt = () => {
+  const date = new Date();
 
-  mergeRequest.author = createUser(id);
+  date.setFullYear(2020, 0, 1);
+  date.setHours(0, 0, 0, 0);
 
-  return { ...mergeRequest, ...props };
+  return date.toISOString();
 };
 
-export const createPipelineStatus = status => ({
+export const createPipelineStatus = (status) => ({
   details_path: '/h5bp/html5-boilerplate/pipelines/58',
   favicon: '',
   group: status,
@@ -41,15 +28,32 @@ export const createPipelineStatus = status => ({
   tooltip: status,
 });
 
-export const createApprovers = count => {
+export const createMergeRequest = ({ id = 1, props } = {}) => {
+  const mergeRequest = {
+    id,
+    approved_by_users: [],
+    issuable_reference: '!1',
+    merged_at: mergedAt(),
+    milestone: null,
+    path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,
+    title: `Merge request ${id}`,
+    author: createUser(id),
+    pipeline_status: createPipelineStatus('success'),
+    approval_status: 'success',
+  };
+
+  return { ...mergeRequest, ...props };
+};
+
+export const createApprovers = (count) => {
   return Array(count)
-    .fill()
+    .fill(null)
     .map((_, id) => createUser(id));
 };
 
 export const createMergeRequests = ({ count = 1, props = {} } = {}) => {
   return Array(count)
-    .fill()
+    .fill(null)
     .map((_, id) =>
       createMergeRequest({
         id,

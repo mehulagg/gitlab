@@ -1,5 +1,0 @@
----
-title: 'Geo: Remove support for Foreign Data Wrapper'
-merge_request: 38718
-author:
-type: removed

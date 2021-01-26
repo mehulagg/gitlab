@@ -2,12 +2,12 @@
 import $ from 'jquery';
 import { mapGetters, mapActions } from 'vuex';
 import { escape } from 'lodash';
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { truncateSha } from '~/lib/utils/text_utility';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import { __, s__, sprintf } from '../../locale';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import noteHeader from './note_header.vue';
 import noteActions from './note_actions.vue';
@@ -23,7 +23,7 @@ import {
   commentLineOptions,
   formatLineRange,
 } from './multiline_comment_utils';
-import MultilineCommentForm from './multiline_comment_form.vue';
+import { INLINE_DIFF_LINES_KEY } from '~/diffs/constants';
 
 export default {
   name: 'NoteableNote',
@@ -34,7 +34,9 @@ export default {
     noteActions,
     NoteBody,
     TimelineEntryItem,
-    MultilineCommentForm,
+  },
+  directives: {
+    SafeHtml,
   },
   mixins: [noteable, resolvable, glFeatureFlagsMixin()],
   props: {
@@ -72,6 +74,11 @@ export default {
       required: false,
       default: false,
     },
+    discussionResolvePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
@@ -80,6 +87,7 @@ export default {
       isRequesting: false,
       isResolving: false,
       commentLineStart: {},
+      resolveAsThread: this.glFeatures.removeResolveNote,
     };
   },
   computed: {
@@ -132,6 +140,10 @@ export default {
       return this.note.isDraft;
     },
     canResolve() {
+      if (this.glFeatures.removeResolveNote && !this.discussionRoot) return false;
+
+      if (this.glFeatures.removeResolveNote) return this.note.current_user.can_resolve_discussion;
+
       return (
         this.note.current_user.can_resolve ||
         (this.note.isDraft && this.note.discussion_id !== null)
@@ -147,21 +159,19 @@ export default {
       return getEndLineNumber(this.lineRange);
     },
     showMultiLineComment() {
-      if (!this.glFeatures.multilineComments || !this.discussionRoot) return false;
-      if (this.isEditing) return true;
+      if (
+        !this.glFeatures.multilineComments ||
+        !this.discussionRoot ||
+        this.startLineNumber.length === 0 ||
+        this.endLineNumber.length === 0
+      )
+        return false;
 
       return this.line && this.startLineNumber !== this.endLineNumber;
     },
-    showMultilineCommentForm() {
-      return Boolean(this.isEditing && this.note.position && this.diffFile && this.line);
-    },
     commentLineOptions() {
-      const sideA = this.line.type === 'new' ? 'right' : 'left';
-      const sideB = sideA === 'left' ? 'right' : 'left';
-      const lines = this.diffFile.highlighted_diff_lines.length
-        ? this.diffFile.highlighted_diff_lines
-        : this.diffFile.parallel_diff_lines.map(l => l[sideA] || l[sideB]);
-      return commentLineOptions(lines, this.commentLineStart, this.line.line_code, sideA);
+      const lines = this.diffFile[INLINE_DIFF_LINES_KEY].length;
+      return commentLineOptions(lines, this.commentLineStart, this.line.line_code);
     },
     diffFile() {
       if (this.commentLineStart.line_code) {
@@ -279,6 +289,7 @@ export default {
       };
       this.isRequesting = true;
       this.oldContent = this.note.note_html;
+      // eslint-disable-next-line vue/no-mutating-props
       this.note.note_html = escape(noteText);
 
       this.updateNote(data)
@@ -286,7 +297,7 @@ export default {
           this.updateSuccess();
           callback();
         })
-        .catch(response => {
+        .catch((response) => {
           if (response.status === httpStatusCodes.GONE) {
             this.removeNote(this.note);
             this.updateSuccess();
@@ -311,6 +322,7 @@ export default {
       }
       this.$refs.noteBody.resetAutoSave();
       if (this.oldContent) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.note.note_html = this.oldContent;
         this.oldContent = null;
       }
@@ -320,6 +332,7 @@ export default {
     recoverNoteContent(noteText) {
       // we need to do this to prevent noteForm inconsistent content warning
       // this is something we intentionally do so we need to recover the content
+      // eslint-disable-next-line vue/no-mutating-props
       this.note.note = noteText;
       const { noteBody } = this.$refs;
       if (noteBody) {
@@ -342,32 +355,24 @@ export default {
     :class="classNameBindings"
     :data-award-url="note.toggle_award_path"
     :data-note-id="note.id"
-    class="note note-wrapper qa-noteable-note-item"
+    class="note note-wrapper"
+    data-qa-selector="noteable_note_container"
   >
-    <div v-if="showMultiLineComment" data-testid="multiline-comment">
-      <multiline-comment-form
-        v-if="showMultilineCommentForm"
-        v-model="commentLineStart"
-        :line="line"
-        :comment-line-options="commentLineOptions"
-        :line-range="note.position.line_range"
-        class="gl-mb-3 gl-text-gray-700 gl-pb-3"
-      />
-      <div
-        v-else
-        class="gl-mb-3 gl-text-gray-700 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
-      >
-        <gl-sprintf :message="__('Comment on lines %{startLine} to %{endLine}')">
-          <template #startLine>
-            <span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
-          </template>
-          <template #endLine>
-            <span :class="getLineClasses(endLineNumber)">{{ endLineNumber }}</span>
-          </template>
-        </gl-sprintf>
-      </div>
+    <div
+      v-if="showMultiLineComment"
+      data-testid="multiline-comment"
+      class="gl-mb-3 gl-text-gray-500 gl-border-gray-200 gl-border-b-solid gl-border-b-1 gl-pb-3"
+    >
+      <gl-sprintf :message="__('Comment on lines %{startLine} to %{endLine}')">
+        <template #startLine>
+          <span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
+        </template>
+        <template #endLine>
+          <span :class="getLineClasses(endLineNumber)">{{ endLineNumber }}</span>
+        </template>
+      </gl-sprintf>
     </div>
-    <div v-once class="timeline-icon">
+    <div class="timeline-icon">
       <user-avatar-link
         :link-href="author.path"
         :img-src="author.avatar_url"
@@ -380,14 +385,13 @@ export default {
     <div class="timeline-content">
       <div class="note-header">
         <note-header
-          v-once
           :author="author"
           :created-at="note.created_at"
           :note-id="note.id"
           :is-confidential="note.confidential"
         >
           <slot slot="note-header-info" name="note-header-info"></slot>
-          <span v-if="commit" v-html="actionText"></span>
+          <span v-if="commit" v-safe-html="actionText"></span>
           <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
         <note-actions
@@ -396,6 +400,10 @@ export default {
           :note-id="note.id"
           :note-url="note.noteable_note_url"
           :access-level="note.human_access"
+          :is-contributor="note.is_contributor"
+          :is-author="note.is_noteable_author"
+          :project-name="note.project_name"
+          :noteable-type="note.noteable_type"
           :show-reply="showReplyButton"
           :can-edit="note.current_user.can_edit"
           :can-award-emoji="note.current_user.can_award_emoji"

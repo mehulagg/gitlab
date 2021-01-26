@@ -14,9 +14,11 @@ RSpec.describe Gitlab::Auth::Ldap::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info)
   end
+
   let(:ldap_user_upper_case) { described_class.new(auth_hash_upper_case) }
   let(:info_upper_case) do
     {
@@ -25,6 +27,7 @@ RSpec.describe Gitlab::Auth::Ldap::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash_upper_case) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info_upper_case)
   end
@@ -43,23 +46,6 @@ RSpec.describe Gitlab::Auth::Ldap::User do
     it "does not mark existing ldap user as changed" do
       create(:omniauth_user, email: 'john@example.com', extern_uid: 'uid=john smith,ou=people,dc=example,dc=com', provider: 'ldapmain')
       expect(ldap_user.should_save?).to be_falsey
-    end
-  end
-
-  describe '.find_by_uid_and_provider' do
-    let(:dn) { 'CN=John Åström, CN=Users, DC=Example, DC=com' }
-
-    it 'retrieves the correct user' do
-      special_info = {
-        name: 'John Åström',
-        email: 'john@example.com',
-        nickname: 'jastrom'
-      }
-      special_hash = OmniAuth::AuthHash.new(uid: dn, provider: 'ldapmain', info: special_info)
-      special_chars_user = described_class.new(special_hash)
-      user = special_chars_user.save
-
-      expect(described_class.find_by_uid_and_provider(dn, 'ldapmain')).to eq user
     end
   end
 

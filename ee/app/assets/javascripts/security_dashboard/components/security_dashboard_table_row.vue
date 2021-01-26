@@ -1,22 +1,28 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlDeprecatedButton, GlFormCheckbox, GlSkeletonLoading, GlSprintf } from '@gitlab/ui';
+import {
+  GlButton,
+  GlFormCheckbox,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSprintf,
+  GlIcon,
+} from '@gitlab/ui';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
+import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
 import { DASHBOARD_TYPES } from '../store/constants';
-import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
-import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 
 export default {
   name: 'SecurityDashboardTableRow',
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlFormCheckbox,
     GlSkeletonLoading,
     GlSprintf,
-    Icon,
+    GlIcon,
     SeverityBadge,
     VulnerabilityActionButtons,
     VulnerabilityIssueLink,
@@ -83,12 +89,20 @@ export default {
     },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    ...mapActions('vulnerabilities', [
+      'setModalData',
+      'selectVulnerability',
+      'deselectVulnerability',
+    ]),
     toggleVulnerability() {
       if (this.isSelected) {
         return this.deselectVulnerability(this.vulnerability);
       }
       return this.selectVulnerability(this.vulnerability);
+    },
+    openModal(payload) {
+      this.setModalData(payload);
+      this.$root.$emit('bv::show::modal', VULNERABILITY_MODAL_ID);
     },
   },
 };
@@ -123,15 +137,16 @@ export default {
       >
         <gl-skeleton-loading v-if="isLoading" class="mt-2 js-skeleton-loader" :lines="2" />
         <template v-else>
-          <gl-deprecated-button
+          <gl-button
             ref="vulnerability-title"
-            class="d-inline gl-reset-line-height gl-reset-text-align gl-white-space-normal"
-            variant="blank"
+            class="text-body gl-display-grid"
+            button-text-classes="gl-text-left gl-white-space-normal! gl-pr-4!"
+            variant="link"
             @click="openModal({ vulnerability })"
-            >{{ vulnerability.name }}</gl-deprecated-button
+            >{{ vulnerability.name }}</gl-button
           >
           <template v-if="isDismissed">
-            <icon
+            <gl-icon
               v-show="vulnerability.dismissal_feedback.comment_details"
               name="comment"
               class="text-warning vertical-align-middle"
@@ -146,8 +161,8 @@ export default {
             :issue="vulnerability.issue_feedback"
             :project-name="vulnerability.project.name"
           />
-          <br />
-          <small v-if="vulnerabilityNamespace" class="gl-text-gray-700 gl-word-break-all">
+
+          <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
             {{ vulnerabilityNamespace }}
           </small>
         </template>

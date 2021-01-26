@@ -4,6 +4,7 @@ import TagsListRow from './tags_list_row.vue';
 import { REMOVE_TAGS_BUTTON_TITLE, TAGS_LIST_TITLE } from '../../constants/index';
 
 export default {
+  name: 'TagsList',
   components: {
     GlButton,
     TagsListRow,
@@ -14,9 +15,9 @@ export default {
       required: false,
       default: () => [],
     },
-    isDesktop: {
+    isMobile: {
       type: Boolean,
-      default: false,
+      default: true,
       required: false,
     },
   },
@@ -31,10 +32,10 @@ export default {
   },
   computed: {
     hasSelectedItems() {
-      return this.tags.some(tag => this.selectedItems[tag.name]);
+      return this.tags.some((tag) => this.selectedItems[tag.name]);
     },
     showMultiDeleteButton() {
-      return this.tags.some(tag => tag.destroy_path) && this.isDesktop;
+      return this.tags.some((tag) => tag.canDelete) && !this.isMobile;
     },
   },
   methods: {
@@ -67,9 +68,8 @@ export default {
       :key="tag.path"
       :tag="tag"
       :first="index === 0"
-      :last="index === tags.length - 1"
       :selected="selectedItems[tag.name]"
-      :is-desktop="isDesktop"
+      :is-mobile="isMobile"
       @select="updateSelectedItems(tag.name)"
       @delete="$emit('delete', { [tag.name]: true })"
     />

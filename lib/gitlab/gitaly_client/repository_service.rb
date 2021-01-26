@@ -26,8 +26,8 @@ module Gitlab
         GitalyClient.call(@storage, :repository_service, :cleanup, request, timeout: GitalyClient.fast_timeout)
       end
 
-      def garbage_collect(create_bitmap)
-        request = Gitaly::GarbageCollectRequest.new(repository: @gitaly_repo, create_bitmap: create_bitmap)
+      def garbage_collect(create_bitmap, prune:)
+        request = Gitaly::GarbageCollectRequest.new(repository: @gitaly_repo, create_bitmap: create_bitmap, prune: prune)
         GitalyClient.call(@storage, :repository_service, :garbage_collect, request, timeout: GitalyClient.long_timeout)
       end
 
@@ -70,10 +70,11 @@ module Gitlab
         end.join
       end
 
-      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true)
+      def fetch_remote(remote, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false)
         request = Gitaly::FetchRemoteRequest.new(
           repository: @gitaly_repo, remote: remote, force: forced,
-          no_tags: no_tags, timeout: timeout, no_prune: !prune
+          no_tags: no_tags, timeout: timeout, no_prune: !prune,
+          check_tags_changed: check_tags_changed
         )
 
         if ssh_auth&.ssh_mirror_url?

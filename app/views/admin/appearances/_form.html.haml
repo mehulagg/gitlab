@@ -16,10 +16,10 @@
             = image_tag @appearance.header_logo_path, class: 'appearance-light-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove header logo', header_logos_admin_appearances_path, data: { confirm: "Header logo will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove header logo', header_logos_admin_appearances_path, data: { confirm: "Header logo will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm"
             %hr
           = f.hidden_field :header_logo_cache
-          = f.file_field :header_logo, class: ""
+          = f.file_field :header_logo, class: "", accept: 'image/*'
           .hint
             Maximum file size is 1MB. Pages are optimized for a 28px tall header logo
   %hr
@@ -35,10 +35,10 @@
             = image_tag @appearance.favicon_path, class: 'appearance-light-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove favicon', favicon_admin_appearances_path, data: { confirm: "Favicon will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove favicon', favicon_admin_appearances_path, data: { confirm: "Favicon will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm"
             %hr
           = f.hidden_field :favicon_cache
-          = f.file_field :favicon, class: ''
+          = f.file_field :favicon, class: '', accept: 'image/*'
           .hint
             Maximum file size is 1MB. Image size must be 32x32px. Allowed image formats are #{favicon_extension_whitelist}.
             %br
@@ -67,10 +67,10 @@
             = image_tag @appearance.logo_path, class: 'appearance-logo-preview'
             - if @appearance.persisted?
               %br
-              = link_to 'Remove logo', logo_admin_appearances_path, data: { confirm: "Logo will be removed. Are you sure?"}, method: :delete, class: "btn btn-inverted btn-remove btn-sm remove-logo"
+              = link_to 'Remove logo', logo_admin_appearances_path, data: { confirm: "Logo will be removed. Are you sure?"}, method: :delete, class: "btn gl-button btn-danger btn-danger-secondary btn-sm remove-logo"
             %hr
           = f.hidden_field :logo_cache
-          = f.file_field :logo, class: ""
+          = f.file_field :logo, class: "", accept: 'image/*'
           .hint
             Maximum file size is 1MB. Pages are optimized for a 640x360 px logo.
 
@@ -101,7 +101,7 @@
             = parsed_with_gfm
 
       .gl-mt-3.gl-mb-3
-        = f.submit 'Update appearance settings', class: 'btn btn-success'
+        = f.submit 'Update appearance settings', class: 'btn gl-button btn-success'
         - if @appearance.persisted? || @appearance.updated_at
           .mt-4
             - if @appearance.persisted?

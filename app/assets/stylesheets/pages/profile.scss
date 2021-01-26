@@ -138,6 +138,13 @@
   }
 }
 
+.social-provider-btn-image {
+  > img {
+    width: 16px;
+    vertical-align: inherit;
+  }
+}
+
 .provider-btn-image {
   display: inline-block;
   padding: 5px 10px;
@@ -227,6 +234,10 @@
       padding-left: 40px;
     }
 
+    .gl-label-scoped {
+      --label-inset-border: inset 0 0 0 1px currentColor;
+    }
+
     @include media-breakpoint-up(lg) {
       margin-right: 5px;
     }
@@ -257,7 +268,8 @@
   }
 }
 
-table.u2f-registrations {
+table.u2f-registrations,
+.webauthn-registrations {
   th:not(:last-child),
   td:not(:last-child) {
     border-right: solid 1px transparent;
@@ -373,19 +385,6 @@ table.u2f-registrations {
     display: inline;
     margin-right: $gl-padding / 4;
   }
-
-  .badge-verification-status {
-    border-width: 1px;
-    border-style: solid;
-
-    &.verified {
-      @include green-status-color;
-    }
-
-    &.unverified {
-      @include status-color($gray-dark, color('gray'), $common-gray-dark);
-    }
-  }
 }
 
 .edit-user {
@@ -441,21 +440,4 @@ table.u2f-registrations {
 .gitlab-slack-popup {
   width: 100%;
   max-width: $add-to-slack-popup-max-width;
-}
-
-.gitlab-slack-right-arrow svg {
-  fill: $white-dark;
-  width: $right-arrow-size;
-  height: $right-arrow-size;
-  vertical-align: text-bottom;
-}
-
-.gitlab-slack-double-headed-arrow {
-  vertical-align: text-top;
-
-  svg {
-    fill: $gray-darker;
-    width: $double-headed-arrow-width;
-    height: $double-headed-arrow-height;
-  }
 }

@@ -13,7 +13,7 @@ describe('Packages shared utils', () => {
       expect(packageTypeToTrackCategory()).toMatchInlineSnapshot(`"UI::undefined"`);
     });
 
-    it.each(Object.keys(PackageType))('returns a correct category string for %s', packageKey => {
+    it.each(Object.keys(PackageType))('returns a correct category string for %s', (packageKey) => {
       const packageName = PackageType[packageKey];
       expect(packageTypeToTrackCategory(packageName)).toBe(
         `UI::${TrackingCategories[packageName]}`,
@@ -37,7 +37,7 @@ describe('Packages shared utils', () => {
       ${'maven'}    | ${'Maven'}
       ${'npm'}      | ${'NPM'}
       ${'nuget'}    | ${'NuGet'}
-      ${'pypi'}     | ${'PyPi'}
+      ${'pypi'}     | ${'PyPI'}
       ${'composer'} | ${'Composer'}
       ${'foo'}      | ${null}
     `(`package type`, ({ packageType, expectedResult }) => {

@@ -17,6 +17,7 @@
 #     without_projects: boolean
 #     sort: string
 #     id: integer
+#     non_internal: boolean
 #
 class UsersFinder
   include CreatedAtFilter
@@ -33,6 +34,7 @@ class UsersFinder
     users = User.all.order_id_desc
     users = by_username(users)
     users = by_id(users)
+    users = by_admins(users)
     users = by_search(users)
     users = by_blocked(users)
     users = by_active(users)
@@ -42,6 +44,7 @@ class UsersFinder
     users = by_created_at(users)
     users = by_without_projects(users)
     users = by_custom_attributes(users)
+    users = by_non_internal(users)
 
     order(users)
   end
@@ -58,6 +61,12 @@ class UsersFinder
     return users unless params[:id]
 
     users.id_in(params[:id])
+  end
+
+  def by_admins(users)
+    return users unless params[:admins] && current_user&.can_read_all_resources?
+
+    users.admins
   end
 
   def by_search(users)
@@ -110,6 +119,12 @@ class UsersFinder
     return users unless params[:without_projects]
 
     users.without_projects
+  end
+
+  def by_non_internal(users)
+    return users unless params[:non_internal]
+
+    users.non_internal
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

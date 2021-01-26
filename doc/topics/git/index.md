@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: index
 ---
 
@@ -81,6 +81,7 @@ If you have problems with Git, the following may help:
 
 The following are advanced topics for those who want to get the most out of Git:
 
+- [Introduction to Git rebase, force-push, and merge conflicts](git_rebase.md)
 - [Server Hooks](../../administration/server_hooks.md)
 - [Git Attributes](../../user/project/git_attributes.md)
 - Git Submodules: [Using Git submodules with GitLab CI](../../ci/git_submodules.md#using-git-submodules-with-gitlab-ci)

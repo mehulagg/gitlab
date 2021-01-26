@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :ci_reports_security_report, class: '::Gitlab::Ci::Reports::Security::Report' do
     type { :sast }
-    commit_sha { Digest::SHA1.hexdigest(SecureRandom.hex) }
+    pipeline { association(:ci_pipeline) }
     created_at { 2.weeks.ago }
     scanned_resources { [] }
 
@@ -22,7 +22,7 @@ FactoryBot.define do
     skip_create
 
     initialize_with do
-      ::Gitlab::Ci::Reports::Security::Report.new(type, commit_sha, created_at)
+      ::Gitlab::Ci::Reports::Security::Report.new(type, pipeline, created_at)
     end
   end
 end

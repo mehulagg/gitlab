@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Epic Issues', :js do
+  include NestedEpicsHelper
   include DragTo
 
   let(:user) { create(:user) }
@@ -195,13 +196,9 @@ RSpec.describe 'Epic Issues', :js do
         end
 
         context 'when epics are nested too deep' do
-          let(:epic1) { create(:epic, group: group, parent_id: epic.id) }
-          let(:epic2) { create(:epic, group: group, parent_id: epic1.id) }
-          let(:epic3) { create(:epic, group: group, parent_id: epic2.id) }
-          let(:epic4) { create(:epic, group: group, parent_id: epic3.id) }
-
           before do
-            visit group_epic_path(group, epic4)
+            last_child = add_children_to(epic: epic, count: 6)
+            visit group_epic_path(group, last_child)
 
             wait_for_requests
 
@@ -215,7 +212,7 @@ RSpec.describe 'Epic Issues', :js do
             add_epics(references)
 
             expect(page).to have_selector('.gl-field-error')
-            expect(find('.gl-field-error')).to have_text("This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor.")
+            expect(find('.gl-field-error')).to have_text("This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor.")
           end
         end
       end

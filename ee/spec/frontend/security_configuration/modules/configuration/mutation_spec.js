@@ -8,15 +8,6 @@ describe('security configuration module mutations', () => {
     state = {};
   });
 
-  describe('SET_SECURITY_CONFIGURATION_ENDPOINT', () => {
-    const securityConfigurationPath = 123;
-
-    it(`should set the securityConfigurationPath to ${securityConfigurationPath}`, () => {
-      mutations[types.SET_SECURITY_CONFIGURATION_ENDPOINT](state, securityConfigurationPath);
-      expect(state.securityConfigurationPath).toBe(securityConfigurationPath);
-    });
-  });
-
   describe('REQUEST_SECURITY_CONFIGURATION', () => {
     it('should set the isLoading to true', () => {
       mutations[types.REQUEST_SECURITY_CONFIGURATION](state);

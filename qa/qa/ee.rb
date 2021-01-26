@@ -38,6 +38,12 @@ module QA
         autoload :Members, 'qa/ee/page/group/members'
         autoload :ContributionAnalytics, 'qa/ee/page/group/contribution_analytics'
 
+        module Iteration
+          autoload :Index, 'qa/ee/page/group/iteration/index'
+          autoload :New, 'qa/ee/page/group/iteration/new'
+          autoload :Show, 'qa/ee/page/group/iteration/show'
+        end
+
         module Settings
           autoload :SamlSSO, 'qa/ee/page/group/settings/saml_sso'
           autoload :LDAPSync, 'qa/ee/page/group/settings/ldap_sync'
@@ -52,6 +58,10 @@ module QA
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
         autoload :Menu, 'qa/ee/page/main/menu'
+      end
+
+      module Registration
+        autoload :Welcome, 'qa/ee/page/registration/welcome'
       end
 
       module Admin
@@ -71,7 +81,6 @@ module QA
 
         module Settings
           autoload :Templates, 'qa/ee/page/admin/settings/templates'
-          autoload :Integration, 'qa/ee/page/admin/settings/integration'
           autoload :Preferences, 'qa/ee/page/admin/settings/preferences'
 
           module Component
@@ -99,6 +108,10 @@ module QA
         autoload :New, 'qa/ee/page/project/new'
         autoload :Show, 'qa/ee/page/project/show'
         autoload :Menu, 'qa/ee/page/project/menu'
+
+        module Artifact
+          autoload :Show, 'qa/ee/page/project/artifact/show'
+        end
 
         module SubMenus
           autoload :SecurityCompliance, 'qa/ee/page/project/sub_menus/security_compliance'
@@ -128,10 +141,6 @@ module QA
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
           autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
-
-          module Services
-            autoload :Jenkins, 'qa/ee/page/project/settings/services/jenkins'
-          end
         end
 
         module Operations
@@ -142,6 +151,7 @@ module QA
 
         module Pipeline
           autoload :Show, 'qa/ee/page/project/pipeline/show'
+          autoload :Index, 'qa/ee/page/project/pipeline/index'
         end
 
         module Secure
@@ -154,6 +164,18 @@ module QA
 
         module PathLocks
           autoload :Index, 'qa/ee/page/project/path_locks/index'
+        end
+
+        module Packages
+          autoload :Index, 'qa/ee/page/project/packages/index'
+        end
+
+        module Snippet
+          autoload :Index, 'qa/ee/page/project/snippet/index'
+        end
+
+        module Job
+          autoload :Show, 'qa/ee/page/project/job/show'
         end
       end
 
@@ -168,6 +190,7 @@ module QA
 
         module Epic
           autoload :Index, 'qa/ee/page/group/epic/index'
+          autoload :New, 'qa/ee/page/group/epic/new'
           autoload :Show, 'qa/ee/page/group/epic/show'
         end
 
@@ -184,7 +207,9 @@ module QA
     module Resource
       autoload :License, 'qa/ee/resource/license'
       autoload :Epic, 'qa/ee/resource/epic'
-      autoload :GroupLabel, 'qa/ee/resource/group_label.rb'
+      autoload :GroupLabel, 'qa/ee/resource/group_label'
+      autoload :GroupIteration, 'qa/ee/resource/group_iteration'
+      autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'

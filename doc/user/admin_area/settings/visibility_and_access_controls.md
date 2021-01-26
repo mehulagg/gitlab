@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
@@ -43,7 +43,7 @@ To do this:
 
 1. Uncheck the **Allow owners to manage default branch protection per group** checkbox.
 
-NOTE: **Note:**
+NOTE:
 GitLab administrators can still update the default branch protection of a group.
 
 ## Default project creation protection
@@ -67,18 +67,18 @@ To ensure only admin users can delete projects:
 1. Check the **Default project deletion protection** checkbox.
 1. Click **Save changes**.
 
-## Default deletion adjourned period **(PREMIUM ONLY)**
+## Default deletion delay **(PREMIUM ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6.
 
 By default, a project marked for deletion will be permanently removed with immediate effect.
 By default, a group marked for deletion will be permanently removed after 7 days.
 
-CAUTION: **Warning:**
+WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
 [Immediate deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
-Projects within a group can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal-premium).
+Projects within a group (but not a personal namespace) can be deleted after a delayed period, by [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
 
 The default period is 7 days, and can be changed. Setting this period to 0 will enable immediate removal
 of projects or groups.
@@ -88,11 +88,11 @@ To change this period:
 1. Select the desired option.
 1. Click **Save changes**.
 
-### Override default deletion adjourned period
+### Override default deletion delayed period
 
 Alternatively, projects that are marked for removal can be deleted immediately. To do so:
 
-1. [Restore the project](../../project/settings/#restore-a-project-premium).
+1. [Restore the project](../../project/settings/#restore-a-project).
 1. Delete the project as described in the [Administering Projects page](../../admin_area/#administering-projects).
 
 ## Default project visibility
@@ -151,7 +151,7 @@ For more details, see [Exporting a project and its data](../../../user/project/s
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4696) in GitLab 8.10.
 
-With GitLab's access restrictions, you can select with which protocols users can communicate with
+With GitLab access restrictions, you can select with which protocols users can communicate with
 GitLab.
 
 Disabling an access protocol does not block access to the server itself via those ports. The ports
@@ -180,7 +180,7 @@ When only one protocol is enabled:
 On top of these UI restrictions, GitLab will deny all Git actions on the protocol
 not selected.
 
-CAUTION: **Important:**
+WARNING:
 Starting with [GitLab 10.7](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18021),
 HTTP(S) protocol will be allowed for Git clone or fetch requests done by GitLab Runner
 from CI/CD jobs, even if _Only SSH_ was selected.
@@ -208,7 +208,7 @@ To specify a custom Git clone URL for HTTP(S):
 1. Enter a root URL for **Custom Git clone URL for HTTP(S)**.
 1. Click on **Save changes**.
 
-NOTE: **Note:**
+NOTE:
 SSH clone URLs can be customized in `gitlab.rb` by setting `gitlab_rails['gitlab_ssh_host']` and
 other related settings.
 

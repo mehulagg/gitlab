@@ -28,33 +28,14 @@ RSpec.describe Projects::AlertManagementHelper do
         expect(helper.alert_management_data(current_user, project)).to match(
           'project-path' => project_path,
           'enable-alert-management-path' => setting_path,
-          'populating-alerts-help-url' => 'http://test.host/help/user/project/operations/alert_management.html#enable-alert-management',
+          'alerts-help-url' => 'http://test.host/help/operations/incident_management/index.md',
+          'populating-alerts-help-url' => 'http://test.host/help/operations/incident_management/index.md#enable-alert-management',
           'empty-alert-svg-path' => match_asset_path('/assets/illustrations/alert-management-empty-state.svg'),
           'user-can-enable-alert-management' => 'true',
-          'alert-management-enabled' => 'false'
+          'alert-management-enabled' => 'false',
+          'text-query': nil,
+          'assignee-username-query': nil
         )
-      end
-    end
-
-    context 'with alerts service' do
-      let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-      context 'when alerts service is active' do
-        it 'enables alert management' do
-          expect(data).to include(
-            'alert-management-enabled' => 'true'
-          )
-        end
-      end
-
-      context 'when alerts service is inactive' do
-        it 'disables alert management' do
-          alerts_service.update!(active: false)
-
-          expect(data).to include(
-            'alert-management-enabled' => 'false'
-          )
-        end
       end
     end
 
@@ -77,6 +58,38 @@ RSpec.describe Projects::AlertManagementHelper do
             'alert-management-enabled' => 'false'
           )
         end
+      end
+    end
+
+    context 'with http integration' do
+      let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
+      context 'when integration is active' do
+        it 'enables alert management' do
+          expect(data).to include(
+            'alert-management-enabled' => 'true'
+          )
+        end
+      end
+
+      context 'when integration is inactive' do
+        it 'disables alert management' do
+          integration.update!(active: false)
+
+          expect(data).to include(
+            'alert-management-enabled' => 'false'
+          )
+        end
+      end
+    end
+
+    context 'with an alert' do
+      let_it_be(:alert) { create(:alert_management_alert, project: project) }
+
+      it 'enables alert management' do
+        expect(data).to include(
+          'alert-management-enabled' => 'true'
+        )
       end
     end
 

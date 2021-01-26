@@ -1,14 +1,17 @@
 import { mount } from '@vue/test-utils';
+import { trimText } from 'helpers/text_helper';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import ArtifactsBlock from '~/jobs/components/artifacts_block.vue';
-import { trimText } from '../../helpers/text_helper';
 
 describe('Artifacts block', () => {
   let wrapper;
 
-  const createWrapper = propsData =>
+  const createWrapper = (propsData) =>
     mount(ArtifactsBlock, {
-      propsData,
+      propsData: {
+        helpUrl: 'help-url',
+        ...propsData,
+      },
     });
 
   const findArtifactRemoveElt = () => wrapper.find('[data-testid="artifacts-remove-timeline"]');
@@ -68,6 +71,12 @@ describe('Artifacts block', () => {
       expect(trimText(findArtifactRemoveElt().text())).toBe(
         `The artifacts were removed ${formattedDate}`,
       );
+
+      expect(
+        findArtifactRemoveElt()
+          .find('[data-testid="artifact-expired-help-link"]')
+          .attributes('href'),
+      ).toBe('help-url');
     });
 
     it('does not show the keep button', () => {
@@ -94,6 +103,12 @@ describe('Artifacts block', () => {
       expect(trimText(findArtifactRemoveElt().text())).toBe(
         `The artifacts will be removed ${formattedDate}`,
       );
+
+      expect(
+        findArtifactRemoveElt()
+          .find('[data-testid="artifact-expired-help-link"]')
+          .attributes('href'),
+      ).toBe('help-url');
     });
 
     it('renders the keep button', () => {

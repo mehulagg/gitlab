@@ -91,28 +91,9 @@ $note-form-margin-left: 72px;
       color: $blue-600;
     }
 
-    &.expanded {
-      span {
-        cursor: pointer;
-      }
-
-      svg {
-        position: relative;
-        top: 3px;
-      }
-    }
-
     &.collapsed {
       color: $gl-text-color-secondary;
       border-radius: 0 0 $border-radius-default $border-radius-default;
-
-      svg {
-        float: left;
-        position: relative;
-        top: $gl-padding-4;
-        margin-right: $gl-padding-8;
-        cursor: pointer;
-      }
 
       img {
         margin: -2px 4px 0 0;
@@ -178,7 +159,6 @@ $note-form-margin-left: 72px;
   > li {
     display: block;
     position: relative;
-    border-bottom: 0;
 
     &.being-posted {
       pointer-events: none;
@@ -186,12 +166,11 @@ $note-form-margin-left: 72px;
       padding: $gl-padding;
 
       .dummy-avatar {
-        background-color: $gl-gray-100;
-        border: 1px solid darken($gl-gray-100, 25%);
+        background-color: $gray-100;
+        border: 1px solid darken($gray-100, 25%);
       }
 
-      .note-headline-light,
-      .fa-spinner {
+      .note-headline-light {
         margin-left: 3px;
       }
     }
@@ -249,16 +228,6 @@ $note-form-margin-left: 72px;
     .note-emoji-button {
       position: relative;
       line-height: 1;
-
-      .fa-spinner {
-        display: none;
-      }
-
-      &.is-loading {
-        .fa-spinner {
-          display: inline-block;
-        }
-      }
     }
   }
 
@@ -361,7 +330,7 @@ $note-form-margin-left: 72px;
             left: $gl-padding-24;
             right: 0;
             bottom: 0;
-            background: linear-gradient(rgba($white, 0.1) -100px, $white 100%);
+            background: linear-gradient(rgba($white, 0.1) -100px, $body-bg 100%);
           }
         }
       }
@@ -407,8 +376,6 @@ $note-form-margin-left: 72px;
 .discussion-body .diff-file {
   .file-title {
     cursor: default;
-    line-height: 42px;
-    padding: 0 $gl-padding;
     border-top: 1px solid $border-color;
     border-radius: 0;
 
@@ -453,6 +420,8 @@ $note-form-margin-left: 72px;
 }
 
 .diff-file {
+  .diff-grid-left:hover,
+  .diff-grid-right:hover,
   .is-over {
     .add-diff-note {
       display: inline-flex;
@@ -490,6 +459,7 @@ $note-form-margin-left: 72px;
   .notes_holder {
     font-family: $regular-font;
 
+    .diff-td,
     td {
       border: 1px solid $border-color;
       border-left: 0;
@@ -674,7 +644,7 @@ $note-form-margin-left: 72px;
 
 .note-headline-meta {
   .system-note-separator {
-    color: $gray-700;
+    color: $gray-500;
   }
 
   .note-timestamp {
@@ -788,31 +758,18 @@ $note-form-margin-left: 72px;
     outline: none;
     color: $blue-600;
   }
-
-  .fa {
-    margin-right: 3px;
-    font-size: 10px;
-    line-height: 18px;
-    vertical-align: top;
-  }
 }
 
 .note-role {
-  margin: 0 3px;
-}
-
-.note-role-special {
-  position: relative;
-  display: inline-block;
-  color: $gl-text-color-secondary;
-  font-size: 12px;
-  text-shadow: 0 0 15px $gl-text-color-inverted;
+  margin: 0 8px;
 }
 
 /**
  * Line note button on the side of diffs
  */
 
+.diff-grid-left:hover,
+.diff-grid-right:hover,
 .line_holder .is-over:not(.no-comment-btn) {
   .add-diff-note {
     opacity: 1;
@@ -820,14 +777,24 @@ $note-form-margin-left: 72px;
   }
 }
 
-.add-diff-note {
-  @include btn-comment-icon;
-  opacity: 0;
+.tooltip-wrapper.add-diff-note {
   margin-left: -52px;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
+}
+
+.note-button.add-diff-note {
+  @include btn-comment-icon;
+  opacity: 0;
+
+  &[disabled] {
+    background: $white;
+    border-color: $gray-200;
+    color: $gray-300;
+    cursor: not-allowed;
+  }
 }
 
 .disabled-comment {
@@ -848,68 +815,28 @@ $note-form-margin-left: 72px;
 }
 
 .line-resolve-all-container {
-  margin: $gl-padding-4;
-
   > div {
     white-space: nowrap;
   }
 
-  .discussion-next-btn {
-    border-radius: 0;
-  }
-
-  .toggle-all-discussions-btn {
+  .btn-group .btn:first-child {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-  }
-
-  .btn {
-    line-height: $gl-line-height;
-
-    svg {
-      fill: $gray-700;
-    }
-
-    &.discussion-create-issue-btn {
-      border-radius: 0;
-      border-right: 0;
-
-      a {
-        padding: 0;
-        line-height: 0;
-
-        &:hover {
-          text-decoration: none;
-          border: 0;
-        }
-      }
-    }
-
-    &.discussion-next-btn {
-      border-right: 0;
-    }
   }
 }
 
 .line-resolve-all {
   vertical-align: middle;
   display: inline-block;
-  padding: $gl-padding-4 10px;
+  padding: $gl-padding-8 $gl-padding-12;
   background-color: $gray-light;
   border: 1px solid $border-color;
+  border-right: 0;
   border-radius: $border-radius-default;
-  font-size: $gl-btn-small-font-size;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  border-right: 0;
-
-  .line-resolve-btn {
-    color: $gray-700;
-
-    svg {
-      vertical-align: text-top;
-    }
-  }
+  font-size: $gl-font-size;
+  line-height: 1rem;
 
   @include media-breakpoint-down(xs) {
     flex: 1;
@@ -925,6 +852,15 @@ $note-form-margin-left: 72px;
   outline: 0;
   transition: color $general-hover-transition-duration $general-hover-transition-curve;
 
+  &[disabled] {
+    padding: 0 8px !important;
+    box-shadow: none !important;
+
+    .gl-button-loading-indicator {
+      margin-right: 0 !important;
+    }
+  }
+
   &.is-disabled {
     cursor: default;
   }
@@ -932,16 +868,22 @@ $note-form-margin-left: 72px;
   &:not(.is-disabled) {
     &:hover,
     &:focus {
-      color: $green-600;
+      svg {
+        color: $green-600;
+      }
     }
   }
 
   &.is-active {
-    color: $green-600;
+    svg {
+      @include gl-text-green-500;
+    }
 
     &:hover,
     &:focus {
-      color: $green-700;
+      svg {
+        color: $green-700;
+      }
     }
   }
 

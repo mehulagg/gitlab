@@ -18,15 +18,14 @@ const MARKUP_EXTENSIONS = [
   'wiki',
 ];
 
-const isRichReadme = file => {
+const isRichReadme = (file) => {
   const re = new RegExp(`^(${FILENAMES.join('|')})\\.(${MARKUP_EXTENSIONS.join('|')})$`, 'i');
   return re.test(file.name);
 };
 
-const isPlainReadme = file => {
+const isPlainReadme = (file) => {
   const re = new RegExp(`^(${FILENAMES.join('|')})(\\.txt)?$`, 'i');
   return re.test(file.name);
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export const readmeFile = blobs => blobs.find(isRichReadme) || blobs.find(isPlainReadme);
+export const readmeFile = (blobs) => blobs.find(isRichReadme) || blobs.find(isPlainReadme);

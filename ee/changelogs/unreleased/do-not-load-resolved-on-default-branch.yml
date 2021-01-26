@@ -1,5 +1,0 @@
----
-title: Disable loading resolvedOnDefaultBranch for Vulnerabilities
-merge_request: 38783
-author:
-type: removed

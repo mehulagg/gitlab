@@ -1,4 +1,5 @@
-import flash from '~/flash';
+import epicDetailsQuery from 'shared_queries/epic/epic_details.query.graphql';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
 import axios from '~/lib/utils/axios_utils';
@@ -7,9 +8,8 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
-import epicDetailsQuery from '../queries/epicDetails.query.graphql';
-import updateEpic from '../queries/updateEpic.mutation.graphql';
 import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+import updateEpic from '../queries/updateEpic.mutation.graphql';
 
 import * as types from './mutation_types';
 
@@ -29,7 +29,7 @@ export const fetchEpicDetails = ({ state, dispatch }) => {
       variables,
     })
     .then(({ data }) => {
-      const participants = data.group.epic.participants.edges.map(participant => ({
+      const participants = data.group.epic.participants.edges.map((participant) => ({
         name: participant.node.name,
         avatar_url: participant.node.avatarUrl,
         web_url: participant.node.webUrl,
@@ -194,6 +194,36 @@ export const saveDate = ({ state, dispatch }, { dateType, dateTypeIsFixed, newDa
     });
 };
 
+export const updateConfidentialityOnIssuable = ({ state, commit }, { confidential }) => {
+  const updateEpicInput = {
+    iid: `${state.epicIid}`,
+    groupPath: state.fullPath,
+    confidential,
+  };
+
+  return epicUtils.gqClient
+    .mutate({
+      mutation: updateEpic,
+      variables: {
+        updateEpicInput,
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.updateEpic?.errors.length) {
+        commit(types.SET_EPIC_CONFIDENTIAL, confidential);
+      } else {
+        const errMsg =
+          data?.updateEpic?.errors[0]?.replace(/Confidential /, '') ||
+          s__('Epics|Unable to perform this action');
+        throw errMsg;
+      }
+    })
+    .catch((error) => {
+      flash(error);
+      throw error;
+    });
+};
+
 /**
  * Methods to handle Epic labels selection from sidebar
  */
@@ -205,8 +235,8 @@ export const receiveEpicLabelsSelectFailure = ({ commit }) => {
   flash(s__('Epics|An error occurred while updating labels.'));
 };
 export const updateEpicLabels = ({ dispatch, state }, labels) => {
-  const addLabelIds = labels.filter(label => label.set).map(label => label.id);
-  const removeLabelIds = labels.filter(label => !label.set).map(label => label.id);
+  const addLabelIds = labels.filter((label) => label.set).map((label) => label.id);
+  const removeLabelIds = labels.filter((label) => !label.set).map((label) => label.id);
   const updateEpicInput = {
     iid: `${state.epicIid}`,
     groupPath: state.fullPath,

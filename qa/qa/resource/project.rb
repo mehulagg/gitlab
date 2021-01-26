@@ -12,6 +12,8 @@ module QA
       attr_accessor :repository_storage # requires admin access
       attr_writer :initialize_with_readme
       attr_writer :auto_devops_enabled
+      attr_writer :github_personal_access_token
+      attr_writer :github_repository_path
 
       attribute :id
       attribute :name
@@ -21,6 +23,11 @@ module QA
       attribute :runners_token
       attribute :visibility
       attribute :template_name
+      attribute :import
+
+      attribute :default_branch do
+        api_response[:default_branch] || Runtime::Env.default_branch
+      end
 
       attribute :group do
         Group.fabricate!
@@ -56,6 +63,7 @@ module QA
         @auto_devops_enabled = false
         @visibility = :public
         @template_name = nil
+        @import = false
 
         self.name = "the_awesome_project"
       end
@@ -65,6 +73,8 @@ module QA
       end
 
       def fabricate!
+        return if @import
+
         unless @standalone
           group.visit!
           Page::Group::Show.perform(&:go_to_new_project)
@@ -103,6 +113,24 @@ module QA
         response.any? { |file| file[:path] == file_path }
       end
 
+      def has_branch?(branch)
+        has_branches?(Array(branch))
+      end
+
+      def has_branches?(branches)
+        branches.all? do |branch|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_branches_path}/#{branch}").url)
+          response.code == HTTP_STATUS_OK
+        end
+      end
+
+      def has_tags?(tags)
+        tags.all? do |tag|
+          response = get(Runtime::API::Request.new(api_client, "#{api_repository_tags_path}/#{tag}").url)
+          response.code == HTTP_STATUS_OK
+        end
+      end
+
       def api_get_path
         "/projects/#{CGI.escape(path_with_namespace)}"
       end
@@ -119,6 +147,10 @@ module QA
         "#{api_get_path}/members"
       end
 
+      def api_merge_requests_path
+        "#{api_get_path}/merge_requests"
+      end
+
       def api_runners_path
         "#{api_get_path}/runners"
       end
@@ -129,6 +161,10 @@ module QA
 
       def api_repository_branches_path
         "#{api_get_path}/repository/branches"
+      end
+
+      def api_repository_tags_path
+        "#{api_get_path}/repository/tags"
       end
 
       def api_repository_tree_path
@@ -167,6 +203,10 @@ module QA
         post_body
       end
 
+      def api_delete_path
+        "/projects/#{id}"
+      end
+
       def change_repository_storage(new_storage)
         put_body = { repository_storage: new_storage }
         response = put Runtime::API::Request.new(api_client, api_put_path).url, put_body
@@ -198,6 +238,14 @@ module QA
         result[:import_status]
       end
 
+      def merge_requests
+        parse_body(get(Runtime::API::Request.new(api_client, api_merge_requests_path).url))
+      end
+
+      def merge_request_with_title(title)
+        merge_requests.find { |mr| mr[:title] == title }
+      end
+
       def runners(tag_list: nil)
         response = if tag_list
                      get Runtime::API::Request.new(api_client, "#{api_runners_path}?tag_list=#{tag_list.compact.join(',')}").url
@@ -210,6 +258,10 @@ module QA
 
       def repository_branches
         parse_body(get(Runtime::API::Request.new(api_client, api_repository_branches_path).url))
+      end
+
+      def repository_tags
+        parse_body(get(Runtime::API::Request.new(api_client, api_repository_tags_path).url))
       end
 
       def repository_tree

@@ -19,6 +19,9 @@ module Types
 
         field :description, GraphQL::STRING_TYPE, null: true,
           description: 'Analyzer description that is displayed on the form.'
+
+        field :variables, ::Types::CiConfiguration::Sast::EntityType.connection_type, null: true,
+          description: 'List of supported variables.'
       end
     end
   end
