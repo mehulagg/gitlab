@@ -23,30 +23,20 @@ RSpec.describe Users::RejectService do
 
           it 'logs the audit event info', :aggregate_failures do
             reject_user
+            audit_event = AuditEvent.where(author_id: current_user.id).last
 
-            expect(AuditEvent.last.author_id).to eq(current_user.id)
-            expect(AuditEvent.last.ip_address).to eq(current_user.current_sign_in_ip)
-            expect(AuditEvent.last.details[:target_details]).to eq(user.username)
-            expect(AuditEvent.last.details[:custom_message]).to eq('Instance request rejected')
+            expect(audit_event.ip_address).to eq(current_user.current_sign_in_ip)
+            expect(audit_event.details[:target_details]).to eq(user.username)
+            expect(audit_event.details[:custom_message]).to eq('Instance request rejected')
           end
         end
 
-        context 'when user rejection fails' do
+        context 'when user does not have permission to reject another user' do
           let(:current_user) { create(:user) }
 
           it 'does not log any audit event' do
             expect { reject_user }.not_to change { AuditEvent.count }
           end
-        end
-      end
-
-      context 'when not licensed' do
-        before do
-          stub_licensed_features(admin_audit_log: false)
-        end
-
-        it 'does not log any audit event' do
-          expect { reject_user }.not_to change(AuditEvent, :count)
         end
       end
     end

@@ -26,9 +26,11 @@ RSpec.describe Users::ApproveService do
           it 'logs the audit event info' do
             operation
 
-            expect(AuditEvent.last).to have_attributes(
-              details: hash_including(custom_message: 'Instance request approved')
-            )
+            audit_event = AuditEvent.where(author_id: current_user.id).last
+
+            expect(audit_event.ip_address).to eq(current_user.current_sign_in_ip)
+            expect(audit_event.details[:target_details]).to eq(user.username)
+            expect(audit_event.details[:custom_message]).to eq('Instance request approved')
           end
         end
 

@@ -139,23 +139,14 @@ RSpec.describe RegistrationsController do
 
           it 'logs the audit event info', :aggregate_failures do
             subject
+
             created_user = User.find_by(email: new_user_email)
+            audit_event = AuditEvent.where(author_id: created_user.id).last
 
-            expect(AuditEvent.last.author_id).to eq(created_user.id)
-            expect(AuditEvent.last.ip_address).to eq(created_user.current_sign_in_ip)
-            expect(AuditEvent.last.details[:target_details]).to eq(created_user.username)
-            expect(AuditEvent.last.details[:custom_message]).to eq('Instance access request')
+            expect(audit_event.ip_address).to eq(created_user.current_sign_in_ip)
+            expect(audit_event.details[:target_details]).to eq(created_user.username)
+            expect(audit_event.details[:custom_message]).to eq('Instance access request')
           end
-        end
-      end
-
-      context 'when not licensed' do
-        before do
-          stub_licensed_features(admin_audit_log: false)
-        end
-
-        it 'does not log any audit event' do
-          expect { subject }.not_to change(AuditEvent, :count)
         end
       end
     end

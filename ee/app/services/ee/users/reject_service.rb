@@ -5,6 +5,8 @@ module EE
     module RejectService
       extend ::Gitlab::Utils::Override
 
+      private
+
       override :after_reject_hook
       def after_reject_hook(user)
         super
@@ -12,14 +14,12 @@ module EE
         log_audit_event(user)
       end
 
-      private
-
       def log_audit_event(user)
         ::AuditEventService.new(
           current_user,
           user,
           action: :custom,
-          custom_message: _('Instance request rejected')
+          custom_message: _('Instance access request rejected')
         ).for_user.security_event
       end
     end
