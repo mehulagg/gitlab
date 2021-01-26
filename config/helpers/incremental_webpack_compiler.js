@@ -4,7 +4,7 @@ const path = require('path');
 const log = (msg, ...rest) => console.log(`IncrementalWebpackCompiler: ${msg}`, ...rest);
 
 // Just an arbitrary number that is long enough for people to _see_ and read the message
-const TIMEOUT = 10000;
+const TIMEOUT = 5000;
 
 module.exports = class IncrementalWebpackCompiler {
   constructor(enabled, cacheFile) {
@@ -62,8 +62,16 @@ module.exports = class IncrementalWebpackCompiler {
   setupMiddleware(app, server) {
     if (this.enabled) {
       app.use((req, res, next) => {
-        if (req.url.includes('/pages.')) {
-          const chunk = path.basename(req.url).replace('.chunk.js', '');
+        const fileName = path.basename(req.url);
+
+        /**
+         * We are only interested in files that have a name like `pages.foo.bar.chunk.js`
+         * because those are the ones corresponding to our entry points.
+         *
+         * This filters out hot update files that are for example named "pages.foo.bar.[hash].hot-update.js"
+         */
+        if (fileName.startsWith('pages.') && fileName.endsWith('.chunk.js')) {
+          const chunk = fileName.replace(/\.chunk\.js$/, '');
 
           this.addToHistory(chunk);
 

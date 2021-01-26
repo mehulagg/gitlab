@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   div.innerHTML = `
 <h1 style="color:white">🧙 Webpack is doing its magic 🧙</h1>
-<p>If you use Hot Module reloading, the page will reload twice in a few seconds.</p>
+<p>If you use Hot Module reloading, the page will reload in a few seconds.</p>
 <p>If you do not use Hot Module reloading, please <a href="">reload the page manually in a few seconds</a></p>
 `;
 
