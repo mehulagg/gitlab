@@ -56,16 +56,13 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
         context 'enforcement of personal access token expiry' do
           using RSpec::Parameterized::TableSyntax
 
-          where(:licensed, :application_setting, :behavior) do
-            true  | true   | 'revokes token'
-            true  | false  | 'does not revoke token'
-            false | true   | 'revokes token'
-            false | false  | 'revokes token'
+          where(:application_setting, :behavior) do
+            true   | 'revokes token'
+            false  | 'does not revoke token'
           end
 
           with_them do
             before do
-              stub_licensed_features(enforce_pat_expiration: licensed)
               stub_application_setting(enforce_pat_expiration: application_setting)
 
               it_behaves_like behavior
