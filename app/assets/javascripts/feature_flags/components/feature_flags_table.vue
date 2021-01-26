@@ -199,7 +199,7 @@ export default {
                 :key="strategy.id"
                 data-testid="strategy-badge"
                 variant="info"
-                class="gl-mr-3 gl-mt-2"
+                class="gl-mr-3 gl-mt-2 gl-white-space-normal"
                 >{{ strategyBadgeText(strategy) }}</gl-badge
               >
             </template>
