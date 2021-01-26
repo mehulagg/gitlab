@@ -238,7 +238,7 @@ export default {
         :svg-path="noAccessSvgPath"
         :description="
           __(
-            'Only \'Reporter\' roles and above on tiers Premium / Silver and above can see Value Stream Analytics.',
+            'Only \'Reporter\' roles and above on tiers Premium and above can see Value Stream Analytics.',
           )
         "
       />

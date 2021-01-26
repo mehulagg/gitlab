@@ -37,7 +37,7 @@ export default {
       if (this.project.upgrade_path) {
         return sprintf(
           __(
-            "To see this project's operational details, %{linkStart}upgrade its group plan to Silver%{linkEnd}. You can also remove the project from the dashboard.",
+            "To see this project's operational details, %{linkStart}upgrade its group plan to Premium%{linkEnd}. You can also remove the project from the dashboard.",
           ),
           {
             linkStart: `<a href="${this.project.upgrade_path}" target="_blank" rel="noopener noreferrer">`,
