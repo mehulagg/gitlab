@@ -11,6 +11,8 @@ module EE
             query: EE::BulkImports::Groups::Graphql::GetEpicsQuery
 
           transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
+          transformer EE::BulkImports::Groups::Transformers::EpicAttributesTransformer
+          transformer EE::BulkImports::Groups::Transformers::EpicParentTransformer
 
           loader EE::BulkImports::Groups::Loaders::EpicsLoader
 

@@ -10,11 +10,11 @@ module EE
           end
 
           def load(context, data)
-            ::Epics::CreateService.new(
-              context.entity.group,
-              context.current_user,
-              data
-            ).execute
+            group = ::Group.find_by_id(context.entity.namespace_id)
+
+            return unless Ability.allowed?(context.current_user, :create_epic, group)
+
+            ::Epic.create!(data)
           end
         end
       end
