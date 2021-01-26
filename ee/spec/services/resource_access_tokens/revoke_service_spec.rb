@@ -67,5 +67,15 @@ RSpec.describe ResourceAccessTokens::RevokeService do
         end
       end
     end
+
+    context 'when not licensed' do
+      before do
+        stub_licensed_features(audit_events: false)
+      end
+
+      it 'does not log any audit event' do
+        expect { subject }.not_to change(AuditEvent, :count)
+      end
+    end
   end
 end
