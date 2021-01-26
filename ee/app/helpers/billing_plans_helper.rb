@@ -127,7 +127,15 @@ module BillingPlansHelper
     end
   end
 
+  def should_show_eoa_banner(namespace)
+    ::Feature.enabled?(:show_billing_eoa_banner) && Date.current < eoa_date && namespace.bronze_plan? && ((namespace.group? && namespace.try(:has_owner?, current_user.id)) || !namespace.group?)
+  end
+
   private
+
+  def eoa_date
+    Date.parse('2022-01-26')
+  end
 
   def add_seats_url(group)
     return unless group

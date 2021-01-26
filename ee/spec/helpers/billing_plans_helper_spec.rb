@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe BillingPlansHelper do
+  include Devise::Test::ControllerHelpers
+
   describe '#subscription_plan_data_attributes' do
     let(:customer_portal_url) { "#{EE::SUBSCRIPTIONS_URL}/subscriptions" }
 
@@ -415,6 +417,109 @@ RSpec.describe BillingPlansHelper do
 
       it 'returns plans with the deprecated plan' do
         expect(helper.billing_available_plans(plans_data, current_plan)).to eq([plan])
+      end
+    end
+  end
+
+  describe '#should_show_eoa_banner' do
+    let_it_be(:user) { create(:user) }
+    stub_feature_flags(show_billing_eoa_banner: true)
+
+    before do
+      allow(helper).to receive(:eoa_date).and_return(Date.current + 5.days)
+    end
+
+    shared_examples 'current time' do
+      before do
+        allow(namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it 'displays the banner' do
+        expect(helper.should_show_eoa_banner(namespace)).to eq(true)
+      end
+    end
+
+    shared_examples 'past eoa date' do
+      before do
+        allow(namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it 'does not display the banner' do
+        travel_to(eoa_date + 1.day) do
+          expect(helper.should_show_eoa_banner(namespace)).to eq(false)
+        end
+      end
+    end
+
+    shared_examples 'with show_billing_eoa_banner turned off' do
+      before do
+        stub_feature_flags(show_billing_eoa_banner: false)
+        allow(namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it 'does not display the banner' do
+        expect(helper.should_show_eoa_banner(namespace)).to eq(false)
+      end
+    end
+
+    shared_examples 'with a different plan than Bronze' do
+      before do
+        allow(namespace).to receive(:actual_plan_name).and_return(::Plan::SILVER)
+      end
+
+      it 'does not display the banner' do
+        expect(helper.should_show_eoa_banner(namespace)).to eq(false)
+      end
+    end
+
+    context 'with group namespace' do
+      let(:group) { create(:group) }
+      let(:current_user) { user }
+
+      before do
+        group.add_owner(current_user.id)
+        allow(group).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+        allow(helper).to receive(:current_user).and_return(current_user)
+      end
+
+      it_behaves_like 'current time' do
+        let(:namespace) { group }
+      end
+
+      it_behaves_like 'past eoa date' do
+        let(:namespace) { group }
+      end
+
+      it_behaves_like 'with show_billing_eoa_banner turned off' do
+        let(:namespace) { group }
+      end
+
+      it_behaves_like 'with a different plan than Bronze' do
+        let(:namespace) { group }
+      end
+    end
+
+    context 'with personal namespace' do
+      let(:current_user) { user }
+
+      before do
+        allow(current_user.namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it_behaves_like 'current time' do
+        let(:namespace) { current_user.namespace }
+      end
+
+      it_behaves_like 'past eoa date' do
+        let(:namespace) { current_user.namespace }
+      end
+
+      it_behaves_like 'with show_billing_eoa_banner turned off' do
+        let(:namespace) { current_user.namespace }
+      end
+
+      it_behaves_like 'with a different plan than Bronze' do
+        let(:namespace) { current_user.namespace }
       end
     end
   end
