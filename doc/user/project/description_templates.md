@@ -85,10 +85,11 @@ For example: `https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_templat
 
 ![Description templates](img/description_templates.png)
 
-## Setting a default template for merge requests and issues **(STARTER)**
+## Setting a default template for merge requests and issues **(PREMIUM)**
 
 > - Templates for merge requests [introduced](https://gitlab.com/gitlab-org/gitlab/commit/7478ece8b48e80782b5465b96c79f85cc91d391b) in GitLab 6.9.
 > - Templates for issues [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28) in GitLab 8.1.
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 The visibility of issues or merge requests should be set to either "Everyone
 with access" or "Only Project Members" in your project's **Settings / Visibility, project features, permissions** section, otherwise the

@@ -37,11 +37,10 @@ Different issue board features are available in different [GitLab tiers](https:/
 as shown in the following table:
 
 | Tier             | Number of project issue boards | Number of [group issue boards](#group-issue-boards) | [Configurable issue boards](#configurable-issue-boards) | [Assignee lists](#assignee-lists) |
-|------------------|--------------------------------|------------------------------|---------------------------|----------------|
-| Core / Free      | Multiple                       | 1                            | No                        | No             |
-| Starter / Bronze | Multiple                       | 1                            | Yes                       | No             |
-| Premium / Silver | Multiple                       | Multiple                     | Yes                       | Yes            |
-| Ultimate / Gold  | Multiple                       | Multiple                     | Yes                       | Yes            |
+| -------- | -------- | -------- | --- | --- |
+| Free     | Multiple | 1        | No  | No  |
+| Premium  | Multiple | Multiple | Yes | Yes |
+| Ultimate | Multiple | Multiple | Yes | Yes |
 
 To learn more, visit [GitLab Enterprise features for issue boards](#gitlab-enterprise-features-for-issue-boards) below.
 
@@ -231,10 +230,11 @@ and vice versa.
 GitLab issue boards are available on GitLab Core and GitLab.com Free tiers, but some
 advanced functionality is present in [higher tiers only](https://about.gitlab.com/pricing/).
 
-### Configurable issue boards **(STARTER)**
+### Configurable issue boards **(PREMIUM)**
 
 > - [Introduced](https://about.gitlab.com/releases/2017/11/22/gitlab-10-2-released/#issue-boards-configuration) in GitLab 10.2.
 > - Setting current iteration as scope [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196804) in GitLab 13.8.
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 An issue board can be associated with a [milestone](milestones/index.md#milestones),
 [labels](labels.md), assignee, weight, and current [iteration](../group/iterations/index.md),
@@ -264,7 +264,9 @@ the Configurable Issue Board feature.
 To enable or disable focus mode, select the **Toggle focus mode** button (**{maximize}**) at the top
 right. In focus mode, the navigation UI is hidden, allowing you to focus on issues in the board.
 
-### Sum of issue weights **(STARTER)**
+### Sum of issue weights **(PREMIUM)**
+
+> [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 The top of each list indicates the sum of issue weights for the issues that
 belong to that list. This is useful when using boards for capacity allocation,
@@ -360,9 +362,10 @@ You can also [drag issues](#drag-issues-between-lists) to change their position 
 
 ![Drag issues between swimlanes](img/epics_swimlanes_drag_and_drop.png)
 
-## Work In Progress limits **(STARTER)**
+## Work In Progress limits **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11403) in GitLab 12.7
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 You can set a Work In Progress (WIP) limit for each issue list on an issue board. When a limit is
 set, the list's header shows the number of issues in the list and the soft limit of issues.
@@ -547,8 +550,8 @@ to another list, the label changes and a system note is recorded.
 
 When dragging issues between lists, different behavior occurs depending on the source list and the target list.
 
-|                            | To Open            | To Closed    | To label `B` list            | To assignee `Bob` list                |
-|----------------------------|--------------------|--------------|------------------------------|---------------------------------------|
+|                                | To Open            | To Closed    | To label `B` list            | To assignee `Bob` list                |
+| ------------------------------ | ------------------ | ------------ | ---------------------------- | ------------------------------------- |
 | **From Open**                  | -                  | Issue closed | `B` added                    | `Bob` assigned                        |
 | **From Closed**                | Issue reopened     | -            | Issue reopened<br/>`B` added | Issue reopened<br/>`Bob` assigned     |
 | **From label `A` list**        | `A` removed        | Issue closed | `A` removed<br/>`B` added    | `Bob` assigned                        |

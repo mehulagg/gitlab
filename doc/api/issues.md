@@ -169,7 +169,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -347,7 +347,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -530,7 +530,7 @@ Example response:
 ]
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -684,7 +684,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -833,7 +833,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -980,7 +980,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1133,7 +1133,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1298,7 +1298,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json
@@ -1421,7 +1421,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) can also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) can also see
 the `weight` parameter:
 
 ```json

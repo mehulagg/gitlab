@@ -5,7 +5,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Iterations **(STARTER)**
+# Iterations **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214713) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.1.
 > - It was deployed behind a feature flag, disabled by default.
@@ -13,7 +13,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - It's enabled on GitLab.com.
 > - It's able to be enabled or disabled per-group.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-iterations). **(STARTER ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-iterations). **(PREMIUM ONLY)**
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 Iterations are a way to track issues over a period of time. This allows teams
 to track velocity and volatility metrics. Iterations can be used with [milestones](../../project/milestones/index.md)
@@ -104,7 +105,7 @@ To group issues by label:
    You can also search for labels by typing in the search input.
 1. Click or tap outside of the label dropdown. The page is now grouped by the selected labels.
 
-## Disable iterations **(STARTER ONLY)**
+## Disable iterations **(PREMIUM ONLY)**
 
 GitLab Iterations feature is deployed with a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
