@@ -1,6 +1,31 @@
 # frozen_string_literal: true
 
 module InProductMarketingHelper
+  def subject_line(track, series)
+    {
+      create: [
+        s_('InProductMarketing|Create a project in GitLab in 5 minutes'),
+        s_('InProductMarketing|Import your project and code from GitHub, Bitbucket and others'),
+        s_('InProductMarketing|Understand repository mirroring')
+      ],
+      verify: [
+        s_('InProductMarketing|Feel the need for speed?'),
+        s_('InProductMarketing|3 ways to dive into GitLab CI/CD'),
+        s_('InProductMarketing|Explore the power of GitLab CI/CD')
+      ],
+      trial: [
+        s_('InProductMarketing|Go farther with GitLab'),
+        s_('InProductMarketing|Automated security scans directly within GitLab'),
+        s_('InProductMarketing|Take your source code management to the next level')
+      ],
+      team: [
+        s_('InProductMarketing|Working in GitLab = more efficient'),
+        s_("InProductMarketing|Multiple owners, confusing workstreams? We've got you covered"),
+        s_('InProductMarketing|Your teams can be more efficient')
+      ]
+    }[track][series]
+  end
+
   def in_product_marketing_logo(track, series)
     inline_image_link('mailers/in_product_marketing', "#{track}-#{series}.png", width: '150')
   end
@@ -236,7 +261,7 @@ module InProductMarketingHelper
   end
 
   def in_product_marketing_cta_link(track, series, group)
-    {
+    redirect_link = {
       create: [
         new_project_url,
         new_project_url(anchor: 'import_project'),
@@ -258,6 +283,8 @@ module InProductMarketingHelper
         group_group_members_url(group)
       ]
     }[track][series]
+
+    group_email_campaigns_url(group, redirect_link: redirect_link, track: track, series: series)
   end
 
   def project_link(format)
