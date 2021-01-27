@@ -2,7 +2,6 @@
 
 module UpdateRepositoryStorageMethods
   Error = Class.new(StandardError)
-  SameFilesystemError = Class.new(Error)
 
   attr_reader :repository_storage_move
   delegate :container, :source_storage_name, :destination_storage_name, to: :repository_storage_move
@@ -18,9 +17,9 @@ module UpdateRepositoryStorageMethods
       repository_storage_move.start!
     end
 
-    raise SameFilesystemError if same_filesystem?(source_storage_name, destination_storage_name)
+    same_filesystem = same_filesystem?(source_storage_name, destination_storage_name)
 
-    mirror_repositories
+    mirror_repositories unless same_filesystem
 
     repository_storage_move.transaction do
       repository_storage_move.finish_replication!
@@ -28,7 +27,7 @@ module UpdateRepositoryStorageMethods
       track_repository(destination_storage_name)
     end
 
-    remove_old_paths
+    remove_old_paths unless same_filesystem
     enqueue_housekeeping
 
     repository_storage_move.finish_cleanup!
