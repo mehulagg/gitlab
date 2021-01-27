@@ -1,3 +1,4 @@
+import { GlToggle } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 
 import settingsPanel from '~/pages/projects/shared/permissions/components/settings_panel.vue';
@@ -7,7 +8,6 @@ import {
   visibilityOptions,
 } from '~/pages/projects/shared/permissions/constants';
 import projectFeatureSetting from '~/pages/projects/shared/permissions/components/project_feature_setting.vue';
-import projectFeatureToggle from '~/vue_shared/components/toggle_button.vue';
 
 const defaultProps = {
   currentSettings: {
@@ -79,7 +79,7 @@ describe('Settings Panel', () => {
 
   const findLFSSettingsRow = () => wrapper.find({ ref: 'git-lfs-settings' });
   const findLFSSettingsMessage = () => findLFSSettingsRow().find('p');
-  const findLFSFeatureToggle = () => findLFSSettingsRow().find(projectFeatureToggle);
+  const findLFSFeatureToggle = () => findLFSSettingsRow().find(GlToggle);
 
   const findRepositoryFeatureProjectRow = () => wrapper.find({ ref: 'repository-settings' });
   const findRepositoryFeatureSetting = () =>
@@ -305,9 +305,9 @@ describe('Settings Panel', () => {
         { registryAvailable: true },
       );
 
-      expect(
-        wrapper.find('[name="project[container_registry_enabled]"]').props().disabledInput,
-      ).toBe(false);
+      expect(wrapper.find('[name="project[container_registry_enabled]"]').props('disabled')).toBe(
+        false,
+      );
     });
 
     it('should disable the container registry input when the repository is disabled', () => {
@@ -316,9 +316,9 @@ describe('Settings Panel', () => {
         { registryAvailable: true },
       );
 
-      expect(
-        wrapper.find('[name="project[container_registry_enabled]"]').props().disabledInput,
-      ).toBe(true);
+      expect(wrapper.find('[name="project[container_registry_enabled]"]').props('disabled')).toBe(
+        true,
+      );
     });
   });
 
@@ -349,7 +349,7 @@ describe('Settings Panel', () => {
         { lfsAvailable: true },
       );
 
-      expect(findLFSFeatureToggle().props().disabledInput).toBe(false);
+      expect(findLFSFeatureToggle().props('disabled')).toBe(false);
     });
 
     it('should disable the LFS input when the repository is disabled', () => {
@@ -358,7 +358,7 @@ describe('Settings Panel', () => {
         { lfsAvailable: true },
       );
 
-      expect(findLFSFeatureToggle().props().disabledInput).toBe(true);
+      expect(findLFSFeatureToggle().props('disabled')).toBe(true);
     });
 
     it('should not change lfsEnabled when disabling the repository', async () => {
@@ -449,7 +449,7 @@ describe('Settings Panel', () => {
         { packagesAvailable: true },
       );
 
-      expect(wrapper.find('[name="project[packages_enabled]"]').props().disabledInput).toBe(false);
+      expect(wrapper.find('[name="project[packages_enabled]"]').props('disabled')).toBe(false);
     });
 
     it('should disable the packages input when the repository is disabled', () => {
@@ -458,7 +458,7 @@ describe('Settings Panel', () => {
         { packagesAvailable: true },
       );
 
-      expect(wrapper.find('[name="project[packages_enabled]"]').props().disabledInput).toBe(true);
+      expect(wrapper.find('[name="project[packages_enabled]"]').props('disabled')).toBe(true);
     });
   });
 

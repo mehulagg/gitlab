@@ -1,10 +1,9 @@
 <script>
-import { GlIcon, GlSprintf, GlLink, GlFormCheckbox } from '@gitlab/ui';
+import { GlIcon, GlSprintf, GlLink, GlFormCheckbox, GlToggle } from '@gitlab/ui';
 
 import settingsMixin from 'ee_else_ce/pages/projects/shared/permissions/mixins/settings_pannel_mixin';
 import { s__ } from '~/locale';
 import projectFeatureSetting from './project_feature_setting.vue';
-import projectFeatureToggle from '~/vue_shared/components/toggle_button.vue';
 import projectSettingRow from './project_setting_row.vue';
 import {
   visibilityOptions,
@@ -22,12 +21,12 @@ const PAGE_FEATURE_ACCESS_LEVEL = s__('ProjectSettings|Everyone');
 export default {
   components: {
     projectFeatureSetting,
-    projectFeatureToggle,
     projectSettingRow,
     GlIcon,
     GlSprintf,
     GlLink,
     GlFormCheckbox,
+    GlToggle,
   },
   mixins: [settingsMixin, glFeatureFlagsMixin()],
 
@@ -475,9 +474,10 @@ export default {
               )
             }}
           </div>
-          <project-feature-toggle
+          <gl-toggle
             v-model="containerRegistryEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
             name="project[container_registry_enabled]"
           />
         </project-setting-row>
@@ -490,9 +490,10 @@ export default {
             s__('ProjectSettings|Manages large files such as audio, video, and graphics files')
           "
         >
-          <project-feature-toggle
+          <gl-toggle
             v-model="lfsEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
             name="project[lfs_enabled]"
           />
           <p v-if="!lfsEnabled && lfsObjectsExist">
@@ -522,9 +523,10 @@ export default {
             s__('ProjectSettings|Every project can have its own space to store its packages')
           "
         >
-          <project-feature-toggle
+          <gl-toggle
             v-model="packagesEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
             name="project[packages_enabled]"
           />
         </project-setting-row>
