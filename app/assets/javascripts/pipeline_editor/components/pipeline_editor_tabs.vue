@@ -42,7 +42,7 @@ export default {
 </script>
 <template>
   <gl-tabs class="file-editor gl-mb-3">
-    <editor-tab :title="$options.i18n.tabEdit" lazy>
+    <editor-tab :title="$options.i18n.tabEdit" lazy data-testid="editor-tab">
       <text-editor :value="ciFileContent" v-on="$listeners" />
     </editor-tab>
     <gl-tab
@@ -54,7 +54,7 @@ export default {
       <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
       <pipeline-graph v-else :pipeline-data="ciConfigData" />
     </gl-tab>
-    <editor-tab :title="$options.i18n.tabLint">
+    <editor-tab :title="$options.i18n.tabLint" data-testid="lint-tab">
       <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
       <ci-lint v-else :ci-config="ciConfigData" />
     </editor-tab>

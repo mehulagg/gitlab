@@ -4,14 +4,16 @@ import { __, s__, sprintf } from '~/locale';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
-import { COMMIT_FAILURE, COMMIT_SUCCESS } from './constants';
+import {
+  COMMIT_FAILURE,
+  COMMIT_SUCCESS,
+  DEFAULT_FAILURE,
+  LOAD_FAILURE_NO_FILE,
+  LOAD_FAILURE_UNKNOWN,
+} from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
-
-const DEFAULT_FAILURE = 'DEFAULT_FAILURE';
-const LOAD_FAILURE_NO_FILE = 'LOAD_FAILURE_NO_FILE';
-const LOAD_FAILURE_UNKNOWN = 'LOAD_FAILURE_UNKNOWN';
 
 export default {
   components: {

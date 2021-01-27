@@ -24,7 +24,7 @@ export default {
     onCiConfigUpdate(content) {
       this.$emit('updateCiConfig', content);
     },
-    onEditorReady() {
+    registerCiSchema() {
       const editorInstance = this.$refs.editor.getEditor();
 
       editorInstance.use(new CiSchemaExtension());
@@ -44,7 +44,7 @@ export default {
       ref="editor"
       :file-name="ciConfigPath"
       v-bind="$attrs"
-      @[$options.readyEvent]="onEditorReady"
+      @[$options.readyEvent]="registerCiSchema"
       @input="onCiConfigUpdate"
       v-on="$listeners"
     />

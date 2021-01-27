@@ -31,6 +31,11 @@ describe('~/pipeline_editor/components/info/validation_segment.vue', () => {
   const findLearnMoreLink = () => wrapper.findByTestId('learnMoreLink');
   const findValidationMsg = () => wrapper.findByTestId('validationMsg');
 
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   it('shows the loading state', () => {
     createComponent({ loading: true });
 
