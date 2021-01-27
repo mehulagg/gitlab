@@ -76,6 +76,17 @@ RSpec.describe API::Suggestions do
         expect(response).to have_gitlab_http_status(:ok)
         expect(project.repository.commit.message).to eq(message)
       end
+
+      it 'does not throw an error with a strange key/value input' do
+        project.add_maintainer(user)
+
+        message = { isTrusted: true }
+
+        put api(url, user), params: { commit_message: message }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(project.repository.commit.message).to eq(message)
+      end
     end
 
     context 'when not able to apply patch' do
