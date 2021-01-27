@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  module Epics
+  module EpicBoards
     class CreateService < Boards::CreateService
       extend ::Gitlab::Utils::Override
 

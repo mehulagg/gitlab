@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Boards::Epics::CreateService, services: true do
+RSpec.describe Boards::EpicBoards::CreateService, services: true do
   def created_board
     service.execute.payload
   end

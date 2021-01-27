@@ -2,7 +2,7 @@
 
 module Mutations
   module Boards
-    module Epics
+    module EpicBoards
       class Create < ::Mutations::BaseMutation
         include Mutations::ResolvesGroup
         include Mutations::Boards::CommonMutationArguments
@@ -20,7 +20,7 @@ module Mutations
           group_path = args.delete(:group_path)
 
           group = authorized_find!(group_path: group_path)
-          service_response = ::Boards::Epics::CreateService.new(group, current_user, args).execute
+          service_response = ::Boards::EpicBoards::CreateService.new(group, current_user, args).execute
 
           {
             epic_board: service_response.payload,
