@@ -7,7 +7,6 @@ import { s__ } from '~/locale';
 export default {
   i18n: {
     iteration: s__('IssueBoards|Iteration'),
-    noIteration: s__('IssueBoards|No iteration'),
   },
   components: {
     BoardEditableItem,
@@ -51,7 +50,6 @@ export default {
       <strong v-if="showCurrentIteration" class="gl-text-gray-900">{{
         currentIteration.title
       }}</strong>
-      <span v-else class="gl-text-gray-500">{{ $options.i18n.noIteration }}</span>
     </template>
     <iteration-select
       ref="iterationDropdown"

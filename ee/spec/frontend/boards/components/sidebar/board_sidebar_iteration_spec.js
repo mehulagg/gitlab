@@ -85,9 +85,9 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
         await wrapper.vm.$nextTick();
       });
 
-      it("renders 'No iteration'", () => {
+      it("renders 'None'", () => {
         expect(findCollapsed().isVisible()).toBe(true);
-        expect(findCollapsed().text()).toBe('No iteration');
+        expect(findCollapsed().text()).toBe('None');
       });
 
       it('closes the dropdown', () => {
@@ -101,9 +101,9 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
       createWrapper();
     });
 
-    it("renders 'No iteration' by default", () => {
+    it("renders 'None' by default", () => {
       expect(findCollapsed().isVisible()).toBe(true);
-      expect(findCollapsed().text()).toBe('No iteration');
+      expect(findCollapsed().text()).toBe('None');
     });
 
     describe('when user selects an iteration', () => {
@@ -150,9 +150,9 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
         expect(findDropdown().exists()).toBe(false);
       });
 
-      it("renders 'No iteration'", async () => {
+      it("renders 'None'", async () => {
         expect(findCollapsed().isVisible()).toBe(true);
-        expect(findCollapsed().text()).toBe('No iteration');
+        expect(findCollapsed().text()).toBe('None');
       });
     });
   });

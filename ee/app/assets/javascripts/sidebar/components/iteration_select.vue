@@ -1,5 +1,11 @@
 <script>
-import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlDropdownSectionHeader } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+  GlDropdownSectionHeader,
+  GlDropdownDivider,
+} from '@gitlab/ui';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
@@ -17,6 +23,7 @@ export default {
     GlDropdownItem,
     GlSearchBoxByType,
     GlDropdownSectionHeader,
+    GlDropdownDivider,
   },
   props: {
     groupPath: {
@@ -83,7 +90,7 @@ export default {
   },
   computed: {
     dropdownText() {
-      return this.currentIteration ? __('some iteration') : this.$options.i18n.noIteration;
+      return this.currentIteration ? this.currentIteration.title : this.$options.i18n.noIteration;
     },
   },
   watch: {
@@ -138,13 +145,13 @@ export default {
     v-if="dropdownOpen"
     :text="dropdownText"
     class="gl-w-full"
-    menu-class="gl-w-full!"
     :class="{ show: dropdownOpen }"
   >
     <gl-dropdown-section-header class="gl-display-flex gl-justify-content-center">{{
       $options.i18n.assignIteration
     }}</gl-dropdown-section-header>
     <gl-search-box-by-type ref="search" v-model="searchTerm" />
+    <gl-dropdown-divider />
     <gl-dropdown-item
       v-for="iterationItem in iterations"
       :key="iterationItem.id"
