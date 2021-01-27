@@ -1,0 +1,5 @@
+---
+title: Explicitly put timestamp into Gitaly requests
+merge_request: 52674
+author:
+type: added
