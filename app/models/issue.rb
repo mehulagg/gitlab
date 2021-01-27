@@ -424,10 +424,7 @@ class Issue < ApplicationRecord
   def issue_link_type
     return unless respond_to?(:issue_link_type_value) && respond_to?(:issue_link_source_id)
 
-    type = IssueLink.link_types.key(issue_link_type_value) || IssueLink::TYPE_RELATES_TO
-    return type if issue_link_source_id == id
-
-    IssueLink.inverse_link_type(type)
+    IssueLink.link_types.key(issue_link_type_value) || IssueLink::TYPE_RELATES_TO
   end
 
   def relocation_target

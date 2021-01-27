@@ -77,14 +77,6 @@ RSpec.describe IssueLink do
     end
   end
 
-  describe '.inverse_link_type' do
-    it 'returns reverse type of link' do
-      expect(described_class.inverse_link_type('relates_to')).to eq 'relates_to'
-      expect(described_class.inverse_link_type('blocks')).to eq 'is_blocked_by'
-      expect(described_class.inverse_link_type('is_blocked_by')).to eq 'blocks'
-    end
-  end
-
   context 'blocking issues count' do
     let_it_be(:blocked_issue_1) { create(:issue) }
     let_it_be(:project) { blocked_issue_1.project }
