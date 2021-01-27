@@ -133,6 +133,7 @@ export default {
             v-gl-tooltip
             :title="ideButtonTitle"
             class="gl-display-none d-md-inline-block gl-mr-3"
+            :tabindex="ideButtonTitle ? 0 : null"
           >
             <gl-button
               :href="webIdePath"
