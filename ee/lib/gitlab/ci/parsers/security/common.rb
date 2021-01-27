@@ -77,16 +77,21 @@ module Gitlab
             location = create_location(data['location'] || {})
             remediations = create_remediations(data['remediations'])
 
+            trackings = Reports::Security::Tracking.create_trackings(data['tracking'])
+            unless trackings.empty?
+              location = trackings.max_by(&:priority)
+            end
+
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
                 uuid: calculate_uuid_v5(identifiers.first, location),
                 report_type: report.type,
                 name: finding_name(data, identifiers, location),
-                compare_key: data['cve'] || '',
                 location: location,
-                severity: parse_severity_level(data['severity']),
-                confidence: parse_confidence_level(data['confidence']),
+                severity: parse_severity_level(data['severity']&.downcase),
+                confidence: parse_confidence_level(data['confidence']&.downcase),
                 scanner: create_scanner(data['scanner']),
+                trackings: trackings,
                 scan: report&.scan,
                 identifiers: identifiers,
                 links: links,
@@ -153,6 +158,10 @@ module Gitlab
 
           def parse_confidence_level(input)
             input&.downcase.then { |value| ::Enums::Vulnerability.confidence_levels.key?(value) ? value : 'unknown' }
+          end
+
+          def create_trackings(tracking_data)
+            raise NotImplementedError
           end
 
           def create_location(location_data)

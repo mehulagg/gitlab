@@ -7,7 +7,6 @@ module Gitlab
         class Finding
           UNSAFE_SEVERITIES = %w[unknown high critical].freeze
 
-          attr_reader :compare_key
           attr_reader :confidence
           attr_reader :identifiers
           attr_reader :links
@@ -25,10 +24,11 @@ module Gitlab
           attr_reader :remediations
           attr_reader :details
 
+          attr_reader :trackings
+
           delegate :file_path, :start_line, :end_line, to: :location
 
-          def initialize(compare_key:, identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, confidence: nil, severity: nil, details: {}) # rubocop:disable Metrics/ParameterLists
-            @compare_key = compare_key
+          def initialize(identifiers:, links: [], remediations: [], location:, metadata_version:, name:, raw_metadata:, report_type:, scanner:, scan:, uuid:, trackings:, confidence: nil, severity: nil, details: {}) # rubocop:disable Metrics/ParameterLists
             @confidence = confidence
             @identifiers = identifiers
             @links = links
@@ -41,6 +41,7 @@ module Gitlab
             @scan = scan
             @severity = severity
             @uuid = uuid
+            @trackings = trackings || []
             @remediations = remediations
             @details = details
 
@@ -49,7 +50,6 @@ module Gitlab
 
           def to_hash
             %i[
-              compare_key
               confidence
               identifiers
               links
@@ -63,6 +63,7 @@ module Gitlab
               scan
               severity
               uuid
+              trackings
               details
             ].each_with_object({}) do |key, hash|
               hash[key] = public_send(key) # rubocop:disable GitlabSecurity/PublicSend
@@ -84,8 +85,35 @@ module Gitlab
 
           def eql?(other)
             report_type == other.report_type &&
-              location.fingerprint == other.location.fingerprint &&
+              matches_fingerprints(other) &&
               primary_fingerprint == other.primary_fingerprint
+          end
+          alias_method :==, :eql?
+
+          def highest_priority_tracking
+            trackings.max_by(&:priority)
+          end
+
+          def matches_fingerprints(other)
+            # ascending priority
+            other_tfs = other.trackings.sort_by(&:priority)
+            res = false
+
+            # descending priority
+            trackings.sort_by(&:priority).reverse_each do |tf|
+              next_highest_other_tf = other_tfs.pop
+              while !next_highest_other_tf.nil? && next_highest_other_tf.same_type?(tf)
+                if tf == next_highest_other_tf
+                  res = true
+                  break
+                end
+
+                next_highest_other_tf = other_tfs.pop
+              end
+
+              break if res
+            end
+            res
           end
 
           def hash
@@ -106,10 +134,12 @@ module Gitlab
             primary_identifier&.fingerprint
           end
 
+          alias_method :first_fingerprint, :primary_fingerprint
+
           private
 
           def generate_project_fingerprint
-            Digest::SHA1.hexdigest(compare_key)
+            @location.fingerprint
           end
         end
       end

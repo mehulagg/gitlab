@@ -47,7 +47,7 @@ module Security
       report_finding = report_finding_for(security_finding)
       return Vulnerabilities::Finding.new unless report_finding
 
-      finding_data = report_finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :links)
+      finding_data = report_finding.to_hash.except(:trackings, :compare_key, :identifiers, :location, :scanner, :links)
       identifiers = report_finding.identifiers.map do |identifier|
         Vulnerabilities::Identifier.new(identifier.to_hash)
       end

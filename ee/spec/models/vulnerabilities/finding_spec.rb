@@ -947,6 +947,121 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe "#tracking_fingerprints" do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:finding2) { build(:vulnerabilities_finding) }
+
+    context "when comparing to other findings" do
+      subject { finding }
+
+      it "is equal if a legacy fingerprint matches a tracking_fingerprint" do
+        finding.location_fingerprint = "legacyfingerprint"
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "legacyfingerprint"
+        )
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "fingerprint2"
+        )
+
+        expect(finding).to eq(finding2)
+        expect(finding2).to eq(finding)
+      end
+
+      it "is equal if the highest priority fingerprint matches" do
+        finding.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "legacyfingerprint2" # does not match
+        )
+        finding.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "MATCH" # MATCHES
+        )
+
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "legacyfingerprint"
+        )
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "MATCH"
+        )
+
+        expect(finding).to eq(finding2)
+        expect(finding2).to eq(finding)
+      end
+
+      it "is not equal if the highest priority fingerprint does not match even if lower priorities do" do
+        finding.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "MATCH" # MATCHES
+        )
+        finding.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "scope_offset_fingerprint" # does NOT match
+        )
+
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "MATCH"
+        )
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "scope_offset_fingerprint2"
+        )
+
+        expect(finding).not_to eq(finding2)
+        expect(finding2).not_to eq(finding)
+      end
+
+      it "is equal if the highest fingerprint is a low priority and matches another low priority" do
+        finding.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "MATCH" # MATCHES
+        )
+
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :location,
+          priority: :source_location,
+          sha: "MATCH"
+        )
+        finding2.tracking_fingerprints << ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: :source,
+          track_method: :scope_offset,
+          priority: :source_scope_offset,
+          sha: "scope_offset_fingerprint2"
+        )
+
+        expect(finding).to eq(finding2)
+        expect(finding2).to eq(finding)
+      end
+    end
+  end
+
   describe '#uuid_v5' do
     let(:project) { create(:project) }
     let(:report_type) { :sast }

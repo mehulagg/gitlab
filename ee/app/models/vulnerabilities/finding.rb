@@ -34,6 +34,7 @@ module Vulnerabilities
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
+    has_many :tracking_fingerprints, class_name: 'Vulnerabilities::TrackingFingerprint', inverse_of: :finding
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
@@ -339,23 +340,71 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
-
     def eql?(other)
+      raise StandardError.new("other was not a Finding model") unless other.instance_of?(self.class)
+
       other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
+        matches_fingerprints(other.tracking_fingerprints_and_legacy) &&
         other.first_fingerprint == first_fingerprint
     end
 
-    # Array.difference (-) method uses hash and eql? methods to do comparison
-    def hash
-      # This is causing N+1 queries whenever we are calling findings, ActiveRecord uses #hash method to make sure the
-      # array with findings is uniq before preloading. This method is used only in Gitlab::Ci::Reports::Security::VulnerabilityReportsComparer
-      # where we are normalizing security report findings into instances of Vulnerabilities::Finding, this is why we are using original implementation
-      # when Finding is persisted and identifiers are not preloaded.
-      return super if persisted? && !identifiers.loaded?
+    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
 
-      report_type.hash ^ location_fingerprint.hash ^ first_fingerprint.hash
+    def matches_fingerprints(other_tfs)
+      res = nil
+
+      # ascending priority in a new arrays!
+      other_tfs = other_tfs.sort_by(&:priority_raw)
+      my_tfs = tracking_fingerprints_and_legacy.sort_by(&:priority_raw)
+
+      other_compare_idx = other_tfs.size - 1
+
+      # descending priority for this loop
+      my_tfs.reverse_each do |tf|
+        res, other_compare_idx = self.matches_highest_comparable_tf?(
+          tf,
+          other_tfs,
+          other_compare_idx
+        )
+        break unless res.nil?
+      end
+      res
+    end
+
+    # assumes other_tfs are sorted by priority in descending order
+    def matches_highest_comparable_tf?(tf, other_tfs, start_idx)
+      curr_idx = start_idx
+      while curr_idx >= 0
+        other_tf = other_tfs[curr_idx]
+        curr_idx -= 1
+
+        if tf.types_comparable?(other_tf)
+          are_equal = (tf == other_tf)
+          if are_equal || tf.same_type?(other_tf)
+            return [are_equal, curr_idx]
+          end
+        end
+      end
+
+      [curr_idx < 0 ? false : nil, curr_idx]
+    end
+
+    def tracking_fingerprints_and_legacy
+      # if we're operating on a normalized report Finding from
+      # pipeline_vulnerabilities_finder.rb, directly using
+      # tracking_fingerprints.count will always return 0! Need to do .to_a
+      # first
+      tf_to_a = tracking_fingerprints.to_a
+      return tf_to_a unless tf_to_a.empty?
+
+      [
+        ::Vulnerabilities::TrackingFingerprint.new(
+          track_type: ::Vulnerabilities::TrackingFingerprint.track_types[:legacy],
+          track_method: ::Vulnerabilities::TrackingFingerprint.track_methods[:legacy],
+          priority: ::Vulnerabilities::TrackingFingerprint.priorities[:legacy],
+          sha: location_fingerprint
+        )
+      ]
     end
 
     def severity_value

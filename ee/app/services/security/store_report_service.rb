@@ -49,13 +49,18 @@ module Security
         return
       end
 
-      vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner, :scan, :links)
+      vulnerability_params = finding.to_hash.except(:identifiers, :scanner, :scanner, :scan, :links, :trackings)
+      unless finding.trackings.empty?
+        vulnerability_params[:location] = finding.trackings.first.location_hash
+      end
+
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
 
       update_vulnerability_scanner(finding)
-
+      update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
+      update_tracking_fingerprints(finding, vulnerability_finding)
       reset_remediations_for(vulnerability_finding, finding)
 
       # The maximum number of identifiers is not used in validation
@@ -75,23 +80,107 @@ module Security
     def create_or_find_vulnerability_finding(finding, create_params)
       find_params = {
         scanner: scanners_objects[finding.scanner.key],
-        primary_identifier: identifiers_objects[finding.primary_identifier.key],
-        location_fingerprint: finding.location.fingerprint
+        primary_identifier: identifiers_objects[finding.primary_identifier.key]
       }
 
-      begin
-        vulnerability_finding = project
-          .vulnerability_findings
-          .create_with(create_params)
-          .find_or_initialize_by(find_params)
+      normalized_tfs = finding.trackings.map do |finding_tf|
+        ::Vulnerabilities::TrackingFingerprint.new(finding_tf.to_create_hash)
+      end
 
-        vulnerability_finding.save!
+      get_matched_findings = lambda {
+        project
+          .vulnerability_findings
+          .where(**find_params)
+          .filter { |vf| vf.matches_fingerprints(normalized_tfs) }
+      }
+      matched_findings = get_matched_findings.call
+
+      begin
+        vulnerability_finding = nil
+        if matched_findings.count == 0
+          vulnerability_finding = project.vulnerability_findings.create_with(**create_params, **find_params).new
+          vulnerability_finding.location_fingerprint = finding.highest_priority_tracking.sha
+          vulnerability_finding.project_fingerprint = finding.highest_priority_tracking.sha
+          vulnerability_finding.save!
+        else
+          vulnerability_finding = matched_findings.first
+        end
+
         vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
-        project.vulnerability_findings.find_by!(find_params)
+        get_matched_findings.call.first
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
+    end
+
+    def update_feedbacks(vulnerability_finding, new_uuid)
+      vulnerability_finding.load_feedback.each do |feedback|
+        feedback.uuid = new_uuid
+        feedback.save!
+      end
+    end
+
+    def update_tracking_fingerprints(finding, vulnerability_finding)
+      poro_type_keys = {}
+      poro_type_keys = finding.trackings.index_by(&:type_key)
+
+      ::Vulnerabilities::TrackingFingerprint.transaction do
+        to_delete = []
+        to_update = {}
+        to_create = []
+
+        vulnerability_finding.tracking_fingerprints.each do |fingerprint|
+          poro_tracking = poro_type_keys[fingerprint.type_key]
+
+          # we're no longer generating these types of fingerprints. Since
+          # we're updating the persisted vulnerability, no need carry these
+          # fingerprints forward
+          if poro_tracking.nil?
+            to_delete << fingerprint.id
+            next
+          end
+
+          poro_type_keys.delete(fingerprint.type_key)
+          to_update[fingerprint.id] = poro_tracking.to_create_hash
+        end
+
+        # any remaining poro trackings left are new
+        poro_type_keys.values.each do |poro_tracking|
+          to_create << poro_tracking.to_create_hash
+        end
+
+        if to_update.count > 0
+          ::Vulnerabilities::TrackingFingerprint.update(to_update.keys, to_update.values)
+        end
+
+        if to_delete.count > 0
+          ::Vulnerabilities::TrackingFingerprint.delete(to_delete)
+        end
+
+        if to_create.count > 0
+          ::Vulnerabilities::TrackingFingerprint.create(to_create) do |tracking_fingerprint|
+            tracking_fingerprint.finding = vulnerability_finding
+          end
+        end
+      end
+    end
+
+    def calculate_uuid_v5(vulnerability_finding)
+      uuid_v5_name_components = {
+        report_type: vulnerability_finding.report_type,
+        primary_identifier_fingerprint: vulnerability_finding.primary_fingerprint,
+        location_fingerprint: vulnerability_finding.location.fingerprint,
+        project_id: project.id
+      }
+
+      if uuid_v5_name_components.values.any?(&:nil?)
+        Gitlab::AppLogger.warn(message: "One or more UUID name components are nil", components: uuid_v5_name_components)
+      end
+
+      name = uuid_v5_name_components.values.join('-')
+
+      Gitlab::Vulnerabilities::CalculateFindingUUID.call(name)
     end
 
     def update_vulnerability_scanner(finding)

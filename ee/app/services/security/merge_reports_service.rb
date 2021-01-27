@@ -70,7 +70,7 @@ module Security
         a_severity, b_severity = a.severity, b.severity
 
         if a_severity == b_severity
-          a.compare_key <=> b.compare_key
+          a.location.sha <=> b.location.sha
         else
           ::Enums::Vulnerability.severity_levels[b_severity] <=>
             ::Enums::Vulnerability.severity_levels[a_severity]

@@ -2,7 +2,6 @@
 
 FactoryBot.define do
   factory :ci_reports_security_finding, class: '::Gitlab::Ci::Reports::Security::Finding' do
-    compare_key { "#{identifiers.first&.external_type}:#{identifiers.first&.external_id}:#{location.fingerprint}" }
     confidence { :medium }
     identifiers { Array.new(1) { association(:ci_reports_security_identifier) } }
     location factory: :ci_reports_security_locations_sast
@@ -28,6 +27,7 @@ FactoryBot.define do
         ]
       }.to_json
     end
+    trackings { [] }
     scanner factory: :ci_reports_security_scanner
     severity { :high }
     scan factory: :ci_reports_security_scan
