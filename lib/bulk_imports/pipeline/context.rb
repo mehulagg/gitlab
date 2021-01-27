@@ -17,6 +17,8 @@ module BulkImports
         assign_attributes(args)
       end
 
+      delegate :group, to: :entity
+
       private
 
       PIPELINE_ATTRIBUTES.each do |attr|
