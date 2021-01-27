@@ -201,7 +201,7 @@ module EE
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
       delegate :pipeline_configuration_full_path, to: :compliance_management_framework, allow_nil: true
-      alias_method :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
+      alias_attribute :compliance_pipeline_configuration_full_path, :pipeline_configuration_full_path
 
       validates :repository_size_limit,
         numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true }
@@ -741,12 +741,6 @@ module EE
       else
         ::Gitlab::AppLogger.error(message: 'Template Export job failed to start', project_id: self.id)
       end
-    end
-
-    def group_pipeline_configuration_full_path
-      return unless compliance_framework_setting&.compliance_management_framework
-
-      compliance_framework_setting.compliance_management_framework.pipeline_configuration_full_path
     end
 
     private

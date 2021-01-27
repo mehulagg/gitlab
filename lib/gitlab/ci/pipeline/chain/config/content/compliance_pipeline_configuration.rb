@@ -17,7 +17,7 @@ module Gitlab
               end
 
               def source
-                :parameter_source
+                :external_project_source
               end
 
               private
