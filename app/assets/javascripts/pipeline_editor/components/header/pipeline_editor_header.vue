@@ -2,6 +2,8 @@
 import ValidationSegment from './validation_segment.vue';
 
 export default {
+  validationSegmentClasses:
+    'gl-p-5 gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base',
   components: {
     ValidationSegment,
   },
@@ -20,7 +22,7 @@ export default {
 <template>
   <div class="gl-mb-5">
     <validation-segment
-      class="gl-p-5 gl-bg-gray-10 gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base"
+      :class="$options.validationSegmentClasses"
       :loading="isCiConfigDataLoading"
       :ci-config="ciConfigData"
     />

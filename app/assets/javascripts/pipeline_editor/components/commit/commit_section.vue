@@ -55,9 +55,8 @@ export default {
       );
       redirectTo(url);
     },
-    async onCommitSubmit(event) {
+    async onCommitSubmit({ message, branch, openMergeRequest }) {
       this.isSaving = true;
-      const { message, branch, openMergeRequest } = event;
 
       try {
         const {
@@ -78,16 +77,15 @@ export default {
           update(store, { data }) {
             const commitSha = data?.commitCreate?.commit?.sha;
 
-            store.writeQuery({ query: getCommitSha, data: { commitSha } });
+            if (commitSha) {
+              store.writeQuery({ query: getCommitSha, data: { commitSha } });
+            }
           },
         });
 
         if (errors?.length) {
           this.$emit('showError', { type: COMMIT_FAILURE, reasons: errors });
-          return;
-        }
-
-        if (openMergeRequest) {
+        } else if (openMergeRequest) {
           this.redirectToNewMergeRequest(branch);
         } else {
           this.$emit('commit', { type: COMMIT_SUCCESS });

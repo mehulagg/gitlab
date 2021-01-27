@@ -41,24 +41,22 @@ export default {
 };
 </script>
 <template>
-  <div class="file-editor gl-mb-3">
-    <gl-tabs>
-      <editor-tab :lazy="true" :title="$options.i18n.tabEdit">
-        <text-editor :value="ciFileContent" v-on="$listeners" />
-      </editor-tab>
-      <gl-tab
-        v-if="glFeatures.ciConfigVisualizationTab"
-        :lazy="true"
-        :title="$options.i18n.tabGraph"
-        data-testid="visualization-tab"
-      >
-        <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
-        <pipeline-graph v-else :pipeline-data="ciConfigData" />
-      </gl-tab>
-      <editor-tab :title="$options.i18n.tabLint">
-        <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
-        <ci-lint v-else :ci-config="ciConfigData" />
-      </editor-tab>
-    </gl-tabs>
-  </div>
+  <gl-tabs class="file-editor gl-mb-3">
+    <editor-tab :title="$options.i18n.tabEdit" lazy>
+      <text-editor :value="ciFileContent" v-on="$listeners" />
+    </editor-tab>
+    <gl-tab
+      v-if="glFeatures.ciConfigVisualizationTab"
+      :title="$options.i18n.tabGraph"
+      lazy
+      data-testid="visualization-tab"
+    >
+      <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
+      <pipeline-graph v-else :pipeline-data="ciConfigData" />
+    </gl-tab>
+    <editor-tab :title="$options.i18n.tabLint">
+      <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
+      <ci-lint v-else :ci-config="ciConfigData" />
+    </editor-tab>
+  </gl-tabs>
 </template>
