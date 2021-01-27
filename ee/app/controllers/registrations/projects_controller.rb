@@ -56,8 +56,6 @@ module Registrations
         ).execute
       end
 
-      cookies[:onboarding_issues_settings] = { 'groups#show' => true, 'projects#show' => true, 'issues#index' => true }.to_json if learn_gitlab_project.saved? && !helpers.in_trial_onboarding_flow?
-
       learn_gitlab_project
     end
 
