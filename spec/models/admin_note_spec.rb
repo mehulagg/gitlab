@@ -10,6 +10,6 @@ RSpec.describe AdminNote, type: :model do
   end
 
   describe 'validations' do
-    it { is_expected.to validate_presence_of(:namespace_id) }
+    it { is_expected.to validate_presence_of(:namespace) }
   end
 end

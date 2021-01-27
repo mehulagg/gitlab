@@ -64,7 +64,8 @@ RSpec.describe 'Admin Groups' do
       expect(li_texts).to match group_name
       expect(li_texts).to match path_component
       expect(li_texts).to match group_description
-      expect(li_texts).to match group_admin_note
+      p_texts = content.all('p').collect(&:text).join('/n')
+      expect(p_texts).to match group_admin_note
     end
 
     it 'shows the visibility level radio populated with the default value' do
