@@ -63,7 +63,7 @@ ActiveRecord::Schema.define(version: 2021_01_25_222907) do
     t.index ["success"], name: "index_file_registry_on_success"
   end
 
-  create_table "job_artifact_registry", id: :serial, force: :cascade do |t|
+  create_table "job_artifact_registry", force: :cascade do |t|
     t.datetime_with_timezone "created_at"
     t.datetime_with_timezone "retry_at"
     t.bigint "bytes"
@@ -78,10 +78,10 @@ ActiveRecord::Schema.define(version: 2021_01_25_222907) do
   end
 
   create_table "lfs_object_registry", force: :cascade do |t|
-    t.datetime_with_timezone "created_at", null: false
+    t.datetime_with_timezone "created_at"
     t.datetime_with_timezone "retry_at"
     t.bigint "bytes"
-    t.integer "lfs_object_id", null: false
+    t.integer "lfs_object_id"
     t.integer "retry_count", limit: 2, default: 0
     t.boolean "missing_on_primary", default: false, null: false
     t.boolean "success", default: false, null: false
