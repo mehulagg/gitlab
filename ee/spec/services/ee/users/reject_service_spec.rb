@@ -10,7 +10,7 @@ RSpec.describe Users::RejectService do
 
     subject(:reject_user) { Users::RejectService.new(current_user).execute(user) }
 
-    describe 'audit events' do
+    context 'audit events' do
       context 'when licensed' do
         before do
           stub_licensed_features(admin_audit_log: true)

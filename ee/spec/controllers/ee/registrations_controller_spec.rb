@@ -126,7 +126,7 @@ RSpec.describe RegistrationsController do
       end
     end
 
-    describe 'audit events' do
+    context 'audit events' do
       context 'when licensed' do
         before do
           stub_licensed_features(admin_audit_log: true)
