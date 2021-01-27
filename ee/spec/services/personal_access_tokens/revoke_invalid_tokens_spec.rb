@@ -99,17 +99,5 @@ RSpec.describe PersonalAccessTokens::RevokeInvalidTokens do
         expect { service.execute }.not_to change { pat.reload.revoked }
       end
     end
-
-    context 'when the feature flag for personal access token policy is disabled' do
-      before do
-        stub_feature_flags(personal_access_token_expiration_policy: false)
-      end
-
-      it_behaves_like 'user does not receive revoke notification email'
-
-      it "doesn't revoke user's tokens" do
-        expect { service.execute }.not_to change { pat.reload.revoked }
-      end
-    end
   end
 end

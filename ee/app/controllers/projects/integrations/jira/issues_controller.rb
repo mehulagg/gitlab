@@ -11,7 +11,6 @@ module Projects
         before_action :check_feature_enabled!
 
         before_action do
-          push_frontend_feature_flag(:jira_issues_integration, project, type: :licensed, default_enabled: true)
           push_frontend_feature_flag(:jira_issues_list, project, type: :development)
         end
 

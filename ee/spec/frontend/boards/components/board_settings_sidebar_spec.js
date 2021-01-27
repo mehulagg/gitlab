@@ -22,7 +22,7 @@ describe('ee/BoardSettingsSidebar', () => {
   const listId = 1;
   let mock;
 
-  const createComponent = (actions = {}, isWipLimitsOn = false) => {
+  const createComponent = (actions = {}) => {
     storeActions = actions;
 
     const store = new Vuex.Store({
@@ -36,7 +36,6 @@ describe('ee/BoardSettingsSidebar', () => {
       localVue,
       provide: {
         glFeatures: {
-          wipLimits: isWipLimitsOn,
         },
       },
       stubs: {

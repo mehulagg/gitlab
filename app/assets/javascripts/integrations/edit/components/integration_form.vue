@@ -62,7 +62,7 @@ export default {
       );
     },
     showJiraIssuesFields() {
-      return this.isJira && this.glFeatures.jiraIssuesIntegration;
+      return this.isJira;
     },
     showReset() {
       return this.isInstanceOrGroupLevel && this.propsSource.resetPath;

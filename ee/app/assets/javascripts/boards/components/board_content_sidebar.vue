@@ -58,7 +58,7 @@ export default {
     <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
     <board-sidebar-due-date />
     <board-sidebar-labels-select />
-    <board-sidebar-weight-input v-if="glFeatures.issueWeights" />
+    <board-sidebar-weight-input />
     <board-sidebar-subscription />
   </gl-drawer>
 </template>
