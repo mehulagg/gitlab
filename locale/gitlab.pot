@@ -14541,9 +14541,6 @@ msgstr ""
 msgid "How do I mirror repositories?"
 msgstr ""
 
-msgid "How do I use variables?"
-msgstr ""
-
 msgid "How does cleanup work?"
 msgstr ""
 
