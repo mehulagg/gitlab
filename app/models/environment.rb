@@ -94,13 +94,17 @@ class Environment < ApplicationRecord
   end
   scope :for_id, -> (id) { where(id: id) }
 
-  scope :deleteable_review_envs, -> (project, before, limit) do
+  scope :stopped_review_apps, -> (project, before, limit) do
     stopped
     .for_project(project)
     .in_review_folder
     .where("created_at < ?", before)
-    .order("created_at DESC")
+    .order("created_at ASC")
     .limit(limit)
+  end
+
+  scope :marked_for_deletion, -> do
+    where.not(auto_delete_at: nil)
   end
 
   state_machine :state, initial: :available do

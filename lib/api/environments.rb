@@ -84,18 +84,22 @@ module API
         optional :limit, type: Integer, desc: "Maximum number of environments to delete. Defaults to 100.", default: 100, values: 1..1000
         optional :dry_run, type: Boolean, desc: "If set, perform a dry run where no actual deletions will be performed. Defaults to true.", default: true
       end
-      delete ":id/environments/batch_delete_review_envs" do
+      delete ":id/environments/review_apps" do
         authorize! :read_environment, user_project
 
-        result = ::Environments::BatchDeleteService.new(user_project, current_user, params).execute
+        result = ::Environments::DeleteReviewAppsService.new(user_project, current_user, params).execute
+
+        response = {
+          deletable: Entities::Environment.represent(result.deletable),
+          failed: Entities::Environment.represent(result.failed)
+        }
 
         if result.success?
-          status 200
+          status result.status
+          present response, current_user: current_user
         else
-          status 400
+          render_api_error!(response.merge!(message: result.error_message), result.status)
         end
-
-        body false
       end
 
       desc 'Deletes an existing environment' do
