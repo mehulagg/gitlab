@@ -374,9 +374,6 @@ msgstr ""
 msgid "%{board_target} not found"
 msgstr ""
 
-msgid "%{code_open}Masked:%{code_close} Hidden in job logs (must match regular expression requirements)."
-msgstr ""
-
 msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
 msgstr ""
 
