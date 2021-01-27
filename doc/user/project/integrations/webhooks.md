@@ -1221,7 +1221,7 @@ X-Gitlab-Event: Pipeline Hook
             "id": 380987,
             "description": "shared-runners-manager-6.gitlab.com",
             "active": true,
-            "is_shared": true, 
+            "is_shared": true,
             "tags": [
               "linux",
               "docker"
@@ -1389,6 +1389,48 @@ X-Gitlab-Event: Deployment Hook
 ```
 
 Note that `deployable_id` is the ID of the CI job.
+
+### Subgroup events **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/260419) in GitLab 13.9.
+
+
+Subgroup events are triggered when:
+
+- A subgroup is created in a group
+- A subgroup is removed from a group
+
+#### Subgroup created in a group
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Subgroup Hook
+```
+
+**Request Body**:
+
+```json
+{
+
+}
+```
+
+#### Subgroup removed from a group
+
+**Request Header**:
+
+```plaintext
+X-Gitlab-Event: Subgroup Hook
+```
+
+**Request Body**:
+
+```json
+{
+
+}
+```
 
 ### Group member events **(PREMIUM)**
 
