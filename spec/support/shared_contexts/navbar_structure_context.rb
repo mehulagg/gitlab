@@ -19,7 +19,7 @@ RSpec.shared_context 'project navbar structure' do
       nav_item: _('Security & Compliance'),
       nav_sub_items: [
         _('Configuration'),
-        _('Audit Events')
+        (_('Audit Events') if Gitlab.ee?),
       ]
     }
   end
@@ -72,7 +72,7 @@ RSpec.shared_context 'project navbar structure' do
           _('Schedules')
         ]
       },
-      (security_and_compliance_nav_item if Gitlab.ee?),
+      security_and_compliance_nav_item,
       {
         nav_item: _('Operations'),
         nav_sub_items: [
@@ -192,7 +192,7 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Merge Requests'),
         nav_sub_items: []
       },
-      (security_and_compliance_nav_item if Gitlab.ee?),
+      security_and_compliance_nav_item,
       (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
