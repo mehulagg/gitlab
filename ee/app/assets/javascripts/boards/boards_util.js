@@ -1,5 +1,6 @@
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import {
   IterationFilterType,
   IterationIDs,
@@ -23,6 +24,55 @@ export function fullMilestoneId(milestoneId) {
 
 export function fullUserId(userId) {
   return `gid://gitlab/User/${userId}`;
+}
+
+export function fullEpicBoardId(epicBoardId) {
+  return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
+}
+
+export function formatListEpics(listEpics) {
+  const epics = {};
+  let listEpicsCount;
+
+  const listData = listEpics.nodes.reduce((map, list) => {
+    // TODO update when list.epics.count is available
+    listEpicsCount = list.epics.edges.length;
+    const sortedEpics = list.epics.edges.map((epicNode) => ({
+      ...epicNode.node,
+    }));
+    // TODO update when relativePosition is available on epic
+    // sortedEpics = sortBy(sortedEpics, 'relativePosition');
+
+    return {
+      ...map,
+      [list.id]: sortedEpics.map((i) => {
+        const id = getIdFromGraphQLId(i.id);
+
+        const listEpic = {
+          ...i,
+          id,
+          labels: i.labels?.nodes || [],
+          assignees: i.assignees?.nodes || [],
+        };
+
+        epics[id] = listEpic;
+
+        return id;
+      }),
+    };
+  }, {});
+
+  return { listData, epics, listEpicsCount };
+}
+
+export function formatEpicListsPageInfo(lists) {
+  const listData = lists.nodes.reduce((map, list) => {
+    return {
+      ...map,
+      [list.id]: list.epics.pageInfo,
+    };
+  }, {});
+  return listData;
 }
 
 export function transformBoardConfig(boardConfig) {
@@ -86,5 +136,6 @@ export default {
   fullEpicId,
   fullMilestoneId,
   fullUserId,
+  fullEpicBoardId,
   transformBoardConfig,
 };

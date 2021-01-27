@@ -11,12 +11,20 @@ import BoardColumnDeprecated from './board_column_deprecated.vue';
 
 export default {
   components: {
-    BoardColumn: gon.features?.graphqlBoardLists ? BoardColumn : BoardColumnDeprecated,
+    BoardColumn:
+      gon.features?.graphqlBoardLists || gon.features?.epicBoards
+        ? BoardColumn
+        : BoardColumnDeprecated,
     BoardContentSidebar: () => import('ee_component/boards/components/board_content_sidebar.vue'),
     EpicsSwimlanes: () => import('ee_component/boards/components/epics_swimlanes.vue'),
     GlAlert,
   },
   mixins: [glFeatureFlagMixin()],
+  inject: {
+    isEpicBoard: {
+      default: false,
+    },
+  },
   props: {
     lists: {
       type: Array,
@@ -36,7 +44,7 @@ export default {
     ...mapState(['boardLists', 'error']),
     ...mapGetters(['isSwimlanesOn']),
     boardListsToUse() {
-      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn
+      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn || this.isEpicBoard
         ? sortBy([...Object.values(this.boardLists)], 'position')
         : this.lists;
     },

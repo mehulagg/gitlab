@@ -43,14 +43,14 @@ export default {
   watch: {
     filterParams: {
       handler() {
-        this.fetchIssuesForList({ listId: this.list.id });
+        this.fetchItemsForList({ listId: this.list.id });
       },
       deep: true,
       immediate: true,
     },
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
+    ...mapActions(['fetchItemsForList']),
   },
 };
 </script>
