@@ -12,7 +12,6 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   belongs_to :lfs_object, class_name: 'LfsObject'
 
   validates :lfs_object_id, presence: true
-  validates :created_at, presence: true
 
   # If false, RegistryConsistencyService will frequently check the end of the
   # table to quickly handle new replicables.
