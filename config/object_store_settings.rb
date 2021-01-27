@@ -124,9 +124,9 @@ class ObjectStoreSettings
       target_config = common_config.merge(overrides.slice(*ALLOWED_OBJECT_STORE_OVERRIDES))
       section = settings.try(store_type)
 
-      next unless section
+      next unless uses_object_storage?(section)
 
-      if section['enabled'] && target_config['bucket'].blank?
+      if target_config['bucket'].blank?
         missing_bucket_for(store_type)
         next
       end
@@ -144,6 +144,20 @@ class ObjectStoreSettings
 
   private
 
+  # Admins can selectively disable object storage for a specific type. If
+  # this hasn't been set, we assume that the consolidated settings
+  # should be used.
+  def uses_object_storage?(section)
+    return false unless section&.dig('enabled')
+
+    enabled = section.dig('object_store', 'enabled')
+
+    # Setting hasn't been explicitly set; this is the common case
+    return true if enabled.nil?
+
+    enabled
+  end
+
   # We only can use the common object storage settings if:
   # 1. The common settings are defined
   # 2. The legacy settings are not defined
@@ -152,8 +166,9 @@ class ObjectStoreSettings
     return false unless settings.dig('object_store', 'connection').present?
 
     WORKHORSE_ACCELERATED_TYPES.each do |store|
-      # to_h is needed because something strange happens to
-      # Settingslogic#dig when stub_storage_settings is run in tests:
+      # to_h is needed because we define `default` as a Gitaly storage name
+      # in stub_storage_settings. This causes Settingslogic to redefine Hash#default,
+      # which causes Hash#dig to fail when the key doesn't exist: https://gitlab.com/gitlab-org/gitlab/-/issues/286873
       #
       # (byebug) section.dig
       # *** ArgumentError Exception: wrong number of arguments (given 0, expected 1+)
