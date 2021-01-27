@@ -35,6 +35,7 @@ RSpec.describe 'Admin Groups' do
         expect(page).to have_field('group_path')
         expect(page).to have_field('group_visibility_level_0')
         expect(page).to have_field('description')
+        expect(page).to have_field('group_admin_note_attributes_note')
       end
     end
 
