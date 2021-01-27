@@ -36,7 +36,7 @@ storage item. Click on each project's title to see a breakdown per storage item.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/247831) in GitLab 13.7.
 > - It's [deployed behind a feature flag](../user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
+> - It's enabled on GitLab SaaS.
 > - It's recommended for production use.
 
 WARNING:
