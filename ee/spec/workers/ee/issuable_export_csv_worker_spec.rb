@@ -17,7 +17,8 @@ RSpec.describe IssuableExportCsvWorker do
     end
 
     it 'calls the Requirements export service' do
-      expect(RequirementsManagement::ExportCsvService).to receive(:new).with(anything, project).once.and_call_original
+      expect(RequirementsManagement::ExportCsvService)
+        .to receive(:new).with(anything, project, []).once.and_call_original
 
       subject
     end
@@ -26,6 +27,21 @@ RSpec.describe IssuableExportCsvWorker do
       expect(RequirementsManagement::RequirementsFinder).to receive(:new).once.and_call_original
 
       subject
+    end
+
+    context 'with selected fields are present' do
+      let(:selected_fields) { %w(ID Title State') }
+
+      before do
+        params[:selected_fields] = selected_fields
+      end
+
+      it 'calls the Requirements export service with selected fields' do
+        expect(RequirementsManagement::ExportCsvService)
+          .to receive(:new).with(anything, project, selected_fields).once.and_call_original
+
+        subject
+      end
     end
 
     context 'with record not found' do

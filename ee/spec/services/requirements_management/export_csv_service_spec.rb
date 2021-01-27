@@ -7,8 +7,9 @@ RSpec.describe RequirementsManagement::ExportCsvService do
   let_it_be(:group) { create_default(:group) }
   let_it_be(:project) { create_default(:project, :public) }
   let_it_be_with_reload(:requirement) { create(:requirement, state: :opened, author: user) }
+  let(:fields) { [] }
 
-  subject { described_class.new(RequirementsManagement::Requirement.all, project) }
+  subject { described_class.new(RequirementsManagement::Requirement.all, project, fields) }
 
   before do
     stub_licensed_features(requirements: true)
@@ -37,7 +38,7 @@ RSpec.describe RequirementsManagement::ExportCsvService do
   end
 
   context 'includes' do
-    let_it_be(:report) { create(:test_report, requirement: requirement, state: :failed, build: nil, author: user) }
+    let_it_be(:report) { create(:test_report, requirement: requirement, state: :passed, build: nil, author: user) }
     let(:time_format) { '%Y-%m-%d %H:%M:%S %Z' }
 
     it 'includes the columns required for import' do
@@ -85,6 +86,42 @@ RSpec.describe RequirementsManagement::ExportCsvService do
     context 'when last test report passed' do
       before do
         report.update!(state: :passed)
+      end
+
+      specify 'latest test report state' do
+        expect(csv[0]['State']).to eq 'Satisfied'
+      end
+
+      specify 'latest test report created at' do
+        expect(csv[0]['State Updated At (UTC)']).to eq report.created_at.utc.strftime(time_format)
+      end
+    end
+
+    context 'when selected fields are present' do
+      let(:fields) { ['Title', 'Author username', 'created at', 'state', 'State updated At (UTC)'] }
+
+      specify 'iid' do
+        expect(csv[0]['Requirement ID']).to be_nil
+      end
+
+      specify 'title' do
+        expect(csv[0]['Title']).to eq requirement.title
+      end
+
+      specify 'description' do
+        expect(csv[0]['Description']).to be_nil
+      end
+
+      specify 'author' do
+        expect(csv[0]['Author']).to be_nil
+      end
+
+      specify 'author username' do
+        expect(csv[0]['Author Username']).to eq requirement.author.username
+      end
+
+      specify 'created date' do
+        expect(csv[0]['Created At (UTC)']).to be_nil
       end
 
       specify 'latest test report state' do

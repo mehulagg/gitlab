@@ -10,9 +10,10 @@ class IssuableExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
   def perform(type, current_user_id, project_id, params)
     user = User.find(current_user_id)
     project = Project.find(project_id)
+    selected_fields = params.delete(:selected_fields)
     finder_params = map_params(params, project_id)
 
-    export_service(type.to_sym, user, project, finder_params).email(user)
+    export_service(type.to_sym, user, project, finder_params, selected_fields).email(user)
   rescue ActiveRecord::RecordNotFound => error
     logger.error("Failed to export CSV (current_user_id:#{current_user_id}, project_id:#{project_id}): #{error.message}")
   end
@@ -26,10 +27,11 @@ class IssuableExportCsvWorker # rubocop:disable Scalability/IdempotentWorker
       .merge(project_id: project_id)
   end
 
-  def export_service(type, user, project, params)
+  def export_service(type, user, project, params, fields)
     issuable_class = service_classes_for(type)
     issuables = issuable_class[:finder].new(user, params).execute
-    issuable_class[:service].new(issuables, project)
+    selected_fields = fields || []
+    issuable_class[:service].new(issuables, project, selected_fields)
   end
 
   def service_classes_for(type)

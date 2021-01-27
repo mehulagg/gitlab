@@ -6,9 +6,10 @@ module Issuable
       # Target attachment size before base64 encoding
       TARGET_FILESIZE = 15.megabytes
 
-      def initialize(issuables_relation, project)
+      def initialize(issuables_relation, project, fields = [])
         @issuables = issuables_relation
         @project = project
+        @fields = fields
       end
 
       def csv_data
@@ -17,7 +18,7 @@ module Issuable
 
       private
 
-      attr_reader :project, :issuables
+      attr_reader :project, :issuables, :fields
 
       # rubocop: disable CodeReuse/ActiveRecord
       def csv_builder
