@@ -123,7 +123,7 @@ latest versions of the scanning tools without having to do anything. There are s
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
 
-## Viewing security scan information in merge requests **(CORE)**
+## Viewing security scan information in merge requests **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Core 13.5.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.

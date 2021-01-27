@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Issues **(CORE)**
+# Issues **(FREE)**
 
 Issues are the fundamental mechanism in GitLab to collaborate on ideas, solve
 problems, and plan work.

@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Pipeline Editor **(CORE)**
+# Pipeline Editor **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4540) in GitLab 13.8.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), enabled by default.

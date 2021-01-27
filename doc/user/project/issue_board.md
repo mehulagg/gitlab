@@ -4,7 +4,7 @@ group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Issue Boards **(CORE)**
+# Issue Boards **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5554) in [GitLab 8.11](https://about.gitlab.com/releases/2016/08/22/gitlab-8-11-released/#issue-board).
 
@@ -57,7 +57,7 @@ the Issue Board feature.
 > - Multiple issue boards per project [moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53811) to [GitLab Core](https://about.gitlab.com/pricing/) in GitLab 12.1.
 > - Multiple issue boards per group are available in [GitLab Premium](https://about.gitlab.com/pricing/).
 
-Multiple issue boards allow for more than one issue board for a given project **(CORE)** or group **(PREMIUM)**.
+Multiple issue boards allow for more than one issue board for a given project **(FREE)** or group **(PREMIUM)**.
 This is great for large projects with more than one team or when a repository hosts the code of multiple products.
 
 Using the search box at the top of the menu, you can filter the listed boards.

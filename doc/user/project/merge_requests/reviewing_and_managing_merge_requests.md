@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Reviewing and managing merge requests **(CORE)**
+# Reviewing and managing merge requests **(FREE)**
 
 Merge requests are the primary method of making changes to files in a GitLab project.
 Changes are proposed by [creating and submitting a merge request](creating_merge_requests.md),

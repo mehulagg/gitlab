@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, how-to
 ---
 
-# Web IDE **(CORE)**
+# Web IDE **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4539) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Core in 10.7.
