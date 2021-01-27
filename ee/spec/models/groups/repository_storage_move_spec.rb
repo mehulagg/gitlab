@@ -8,5 +8,6 @@ RSpec.describe Groups::RepositoryStorageMove, type: :model do
 
     let(:repository_storage_factory_key) { :group_repository_storage_move }
     let(:error_key) { :group }
+    let(:repository_storage_worker) { Groups::UpdateRepositoryStorageWorker }
   end
 end
