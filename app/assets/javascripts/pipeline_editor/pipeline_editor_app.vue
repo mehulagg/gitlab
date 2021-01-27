@@ -208,20 +208,10 @@ export default {
 
 <template>
   <div class="gl-mt-4">
-    <gl-alert
-      v-if="showSuccessAlert"
-      :variant="success.variant"
-      :dismissible="true"
-      @dismiss="dismissSuccess"
-    >
+    <gl-alert v-if="showSuccessAlert" :variant="success.variant" @dismiss="dismissSuccess">
       {{ success.text }}
     </gl-alert>
-    <gl-alert
-      v-if="showFailureAlert"
-      :variant="failure.variant"
-      :dismissible="true"
-      @dismiss="dismissFailure"
-    >
+    <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="dismissFailure">
       {{ failure.text }}
       <ul v-if="failureReasons.length" class="gl-mb-0">
         <li v-for="reason in failureReasons" :key="reason">{{ reason }}</li>

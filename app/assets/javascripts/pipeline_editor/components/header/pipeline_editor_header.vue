@@ -1,9 +1,9 @@
 <script>
-import validationSegment from './validation_segment.vue';
+import ValidationSegment from './validation_segment.vue';
 
 export default {
   components: {
-    validationSegment,
+    ValidationSegment,
   },
   props: {
     ciConfigData: {
