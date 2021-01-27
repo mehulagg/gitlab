@@ -251,6 +251,48 @@ RSpec.describe Gitlab::ProductIntelligence::AggregatedMetrics::Aggregate, :clean
           aggregated_metrics_data
         end
       end
+
+      context 'with AND operator' do
+        let(:recorded_at) { Time.current }
+
+        before do
+          allow_next_instance_of(described_class) do |instance|
+            allow(instance).to receive(:aggregated_metrics).and_return(aggregated_metrics)
+          end
+          [
+            {
+              metric_name: 'metric_1',
+              time_period: { _column: (7.days.ago.to_date..Date.current)},
+              recorded_at_timestamp: recorded_at,
+              data: ::Gitlab::Database::PostgresHll::Buckets.new(141 => 1, 56 => 1)
+            },
+            {
+              metric_name: 'metric_2',
+              time_period: { _column: (7.days.ago.to_date..Date.current)},
+              recorded_at_timestamp: recorded_at,
+              data: ::Gitlab::Database::PostgresHll::Buckets.new(10 => 1, 56 => 1)
+            }
+          ].each do |params|
+            Gitlab::ProductIntelligence::AggregatedMetrics::Sources::PostgresHll.save_aggregated_metrics(params)
+          end
+        end
+
+        let(:aggregated_metrics) do
+          [
+            { name: 'gmau_1', events: %w[metric_1 metric_2], operator: "AND", source: 'Database' },
+            { name: 'gmau_2', events: %w[metric_1 metric_2], operator: "OR", source: 'Database' }
+          ].map(&:with_indifferent_access)
+        end
+
+        it 'returns the number of unique events for all known events' do
+          results = {
+            'gmau_1' => 1.0373988186834358,
+            'gmau_2' => 3.124445197750687,
+          }
+
+          expect(described_class.new(recorded_at).weekly_data).to eq(results)
+        end
+      end
     end
   end
 end

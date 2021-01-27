@@ -80,27 +80,6 @@ module Gitlab
         DISTRIBUTED_HLL_FALLBACK
       end
 
-      def save_aggregated_metrics(metric_name:, time_period:, recorded_at_timestamp:, data:)
-        unless data.is_a? ::Gitlab::Database::PostgresHll::Buckets
-          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(StandardError.new("Unsupported data type: #{data.class}"))
-          return
-        end
-
-        # the longest recorded usage ping generation time for gitlab.com
-        # was below 40 hours, there is added error margin of 20 h
-        usage_ping_generation_period = 80.hours
-
-        # add timestamp at the end of the key to avoid stale keys if
-        # usage ping job is retried
-        redis_key = "#{metric_name}_#{time_period_to_human_name(time_period)}-#{recorded_at_timestamp}"
-
-        Gitlab::Redis::SharedState.with do |redis|
-          redis.set(redis_key, data.to_json, ex: usage_ping_generation_period)
-        end
-      rescue ::Redis::CommandError => e
-        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
-      end
-
       def sum(relation, column, batch_size: nil, start: nil, finish: nil)
         Gitlab::Database::BatchCount.batch_sum(relation, column, batch_size: batch_size, start: start, finish: finish)
       rescue ActiveRecord::StatementInvalid
