@@ -207,7 +207,7 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
         before do
           create(:geo_lfs_object_registry, :never_synced, lfs_object: lfs_object_local_store)
           create(:geo_lfs_object_registry, :failed, lfs_object: lfs_object_remote_store)
-          Geo::LfsObjectRegistry.create!(lfs_object_id: lfs_object_file_missing_on_primary.id, bytes: 1234, success: true, missing_on_primary: true)
+          Geo::LfsObjectRegistry.create!(lfs_object_id: lfs_object_file_missing_on_primary.id, bytes: 1234, success: true, missing_on_primary: true, created_at: Time.now)
         end
 
         it 'enqueues file downloads if there is spare capacity' do
