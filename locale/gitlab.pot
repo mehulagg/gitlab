@@ -377,6 +377,9 @@ msgstr ""
 msgid "%{code_open}Masked:%{code_close} Hidden in job logs (must match regular expression requirements)."
 msgstr ""
 
+msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
+msgstr ""
+
 msgid "%{code_open}Protected:%{code_close} Only exposed to protected branches or tags."
 msgstr ""
 
@@ -11007,7 +11010,7 @@ msgstr ""
 msgid "Environment variables are configured by your administrator to be %{link_start}protected%{link_end} by default."
 msgstr ""
 
-msgid "Environment variables on this GitLab instance are configured to be %{link_start}protected%{link_end} by default"
+msgid "Environment variables on this GitLab instance are configured to be %{link_start}protected%{link_end} by default."
 msgstr ""
 
 msgid "Environment:"
@@ -14539,6 +14542,9 @@ msgid "How do I configure runners?"
 msgstr ""
 
 msgid "How do I mirror repositories?"
+msgstr ""
+
+msgid "How do I use variables?"
 msgstr ""
 
 msgid "How does cleanup work?"
@@ -31229,6 +31235,12 @@ msgstr ""
 msgid "Variables can be:"
 msgstr ""
 
+msgid "Variables store information, like passwords and secret keys, that you can use in job scripts."
+msgstr ""
+
+msgid "Variables store information, like passwords and secret keys, that you can use in job scripts. All projects on the instance can use these variables."
+msgstr ""
+
 msgid "Various container registry settings."
 msgstr ""
 
@@ -32481,9 +32493,6 @@ msgid "You can specify notification level per group or per project."
 msgstr ""
 
 msgid "You can test your .gitlab-ci.yml in %{linkStart}CI Lint%{linkEnd}."
-msgstr ""
-
-msgid "You can use variables for passwords, secret keys, and so on. Instance variables are available in all projects on the instance, and are passed to environments by the runner."
 msgstr ""
 
 msgid "You can view the source or %{linkStart}%{cloneIcon} clone the repository%{linkEnd}"

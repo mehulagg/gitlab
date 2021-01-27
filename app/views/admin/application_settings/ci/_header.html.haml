@@ -7,8 +7,8 @@
   = expanded ? _('Collapse') : _('Expand')
 
 %p
-  = _('You can use variables for passwords, secret keys, and so on. Instance variables are available in all projects on the instance, and are passed to environments by the runner.')
-  = link_to _('Learn more.'), help_page_path('ci/variables/README', anchor: 'instance-level-cicd-environment-variables')
+  = _('Variables store information, like passwords and secret keys, that you can use in job scripts. All projects on the instance can use these variables.')
+  = link_to s_('Learn more.'), help_page_path('ci/variables/README', anchor: 'instance-level-cicd-environment-variables'), target: '_blank', rel: 'noopener noreferrer'
 %p
   = _('Variables can be:')
 %ul
