@@ -359,4 +359,15 @@ RSpec.describe Gitlab::Elastic::Helper do
       end
     end
   end
+
+  describe '#ping?' do
+    subject { helper.ping? }
+
+    it 'does not raise any exception' do
+      allow(Gitlab::Elastic::Helper.default.client).to receive(:ping).and_raise(StandardError)
+
+      expect(subject).to be_falsey
+      expect { subject }.not_to raise_exception
+    end
+  end
 end

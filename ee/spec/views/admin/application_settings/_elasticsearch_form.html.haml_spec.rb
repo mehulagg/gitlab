@@ -221,7 +221,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
 
     context 'when elasticsearch is unreachable' do
       before do
-        allow(Gitlab::Elastic::Helper.default.client).to receive(:ping).and_raise(StandardError)
+        allow(Gitlab::Elastic::Helper.default).to receive(:ping?).and_return(false)
       end
 
       it 'does not show the retry migration card' do
