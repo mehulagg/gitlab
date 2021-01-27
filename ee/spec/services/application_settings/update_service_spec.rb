@@ -38,7 +38,7 @@ RSpec.describe ApplicationSettings::UpdateService do
       let(:helper) { Gitlab::Elastic::Helper.new }
 
       before do
-        allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
+        allow(Gitlab::Elastic::Helper).to receive(:new).and_return(helper)
       end
 
       context 'index creation' do

@@ -65,9 +65,14 @@ module EE
         # The order of checks is important. We should not attempt to create a new index
         # unless elasticsearch_indexing is enabled
         return unless application_setting.elasticsearch_indexing
-        return if ::Gitlab::Elastic::Helper.default.index_exists?
 
-        ::Gitlab::Elastic::Helper.default.create_empty_index
+        es_client = ::Gitlab::Elastic::Client.build(application_setting.elasticsearch_config)
+        es_helper = ::Gitlab::Elastic::Helper.new(client: es_client)
+        return if es_helper.index_exists?
+
+        es_helper.create_empty_index
+      rescue Faraday::ConnectionFailed
+        nil
       end
     end
   end
