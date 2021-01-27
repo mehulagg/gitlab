@@ -7,7 +7,6 @@ module Projects
         include RecordUserLastActivity
         include SortingHelper
         include SortingPreference
-        include ServicesHelper
 
         before_action :check_feature_enabled!
         before_action :check_issues_show_enabled!, only: :show
@@ -79,7 +78,7 @@ module Projects
         end
 
         def check_issues_show_enabled!
-          return render_404 unless project_jira_issues_show_integration?
+          render_404 unless ::Feature.enabled?(:jira_issues_show_integration, @project, type: :development, default_enabled: :yaml)
         end
 
         # Return the informational message to the user

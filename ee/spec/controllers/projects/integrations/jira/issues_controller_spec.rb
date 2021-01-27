@@ -175,11 +175,17 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
   end
 
   describe 'GET #show' do
-    it 'returns 404 status' do
-      get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
+    context 'when `jira_issues_integration` feature is disabled' do
+      before do
+        stub_feature_flags(jira_issues_show_integration: false)
+      end
+    
+      it 'returns 404 status' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, id: 1 }
+    
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end    
 
     context 'when `jira_issues_integration` feature is enabled' do
       before do

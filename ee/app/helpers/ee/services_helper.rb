@@ -9,10 +9,6 @@ module EE
       @project.jira_issues_integration_available? && @project.jira_service.issues_enabled
     end
 
-    def project_jira_issues_show_integration?
-      ::Feature.enabled?(:jira_issues_show_integration, @project, type: :development, default_enabled: :yaml)
-    end
-
     override :integration_form_data
     def integration_form_data(integration, group: nil)
       form_data = super
