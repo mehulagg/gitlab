@@ -149,30 +149,32 @@ export default {
         {{ __('New label list') }}
       </h3>
 
-      <div class="gl-display-flex gl-flex-direction-column gl-p-4 gl-h-full gl-overflow-hidden">
+      <div class="gl-display-flex gl-flex-direction-column gl-h-full gl-overflow-hidden">
         <!-- selectbox is here in EE -->
 
-        <p>{{ $options.i18n.formDescription }}</p>
+        <p class="gl-m-5">{{ $options.i18n.formDescription }}</p>
 
         <!-- TODO: tabs to Use existing label or Create new label -->
 
-        <label>{{ __('Select label') }}</label>
+        <label class="gl-px-5">{{ __('Select label') }}</label>
 
         <gl-search-box-by-type
           v-model.trim="searchTerm"
           debounce="250"
           :placeholder="$options.i18n.searchPlaceholder"
-          class="gl-mb-5"
+          class="gl-px-5"
           @input="filterLabels"
         />
 
-        <gl-skeleton-loader v-if="loading" :width="500" :height="172">
-          <rect width="480" height="20" x="10" y="15" rx="4" />
-          <rect width="380" height="20" x="10" y="50" rx="4" />
-          <rect width="430" height="20" x="10" y="85" rx="4" />
-        </gl-skeleton-loader>
+        <div v-if="loading" class="gl-m-5">
+          <gl-skeleton-loader :width="500" :height="172">
+            <rect width="480" height="20" x="10" y="15" rx="4" />
+            <rect width="380" height="20" x="10" y="50" rx="4" />
+            <rect width="430" height="20" x="10" y="85" rx="4" />
+          </gl-skeleton-loader>
+        </div>
 
-        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto">
+        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-p-5">
           <label
             v-for="label in labels"
             :key="label.id"

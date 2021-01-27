@@ -128,10 +128,6 @@ export default {
         :can-admin-list="canAdminList"
         :disabled="disabled"
       />
-
-      <transition name="slide" @after-enter="afterFormEnters">
-        <board-add-new-column class="gl-mt-5 gl-mx-3" style="min-width: 400px; max-width: 85vw" />
-      </transition>
     </div>
 
     <board-content-sidebar v-if="isSwimlanesOn || glFeatures.graphqlBoardLists" />
