@@ -139,6 +139,9 @@ export default {
         <title-field ref="title" :form-state="formState" :issuable-templates="issuableTemplates" />
       </div>
     </div>
+    <div>
+      {{ __('Type field placeholder') }}
+    </div>
     <description-field
       ref="description"
       :form-state="formState"
