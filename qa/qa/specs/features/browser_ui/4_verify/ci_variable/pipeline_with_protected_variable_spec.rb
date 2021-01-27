@@ -9,7 +9,7 @@ module QA
     describe 'Pipeline with protected variable' do
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(8)}" }
       let(:protected_value) { Faker::Alphanumeric.alphanumeric(8) }
-      let(:project) do
+      let!(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-with-ci-variables'
           project.description = 'project with CI variables'
@@ -33,7 +33,7 @@ module QA
                   {
                       file_path: '.gitlab-ci.yml',
                       content: <<~YAML
-                        test-protected-variable:
+                        job:
                           tags:
                             - #{executor}
                           script: echo $PROTECTED_VARIABLE
@@ -55,11 +55,13 @@ module QA
       let(:dev_api_client) { Runtime::API::Client.new(:gitlab, user: developer) }
       let(:guest_api_client) { Runtime::API::Client.new(:gitlab, user: guest) }
 
+      let(:root_api) { Runtime::API::Client.new(:gitlab) }
+
       before do
-        # Flow::Login.sign_in
-        # project.visit!
-        # add_ci_variable
-        project.add_member(developer)
+        Flow::Login.sign_in
+        project.visit!
+        add_ci_variable
+        project.add_member(developer, Resource::Members::AccessLevel::DEVELOPER)
         project.add_member(guest, Resource::Members::AccessLevel::GUEST)
       end
 
@@ -68,25 +70,29 @@ module QA
       end
 
       it 'executes variable on protected branch', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/156' do
-        trigger_pipeline(dev_api_client)
         Flow::Login.sign_in(as: developer)
+        Resource::Pipeline.fabricate_via_api! do |pipeline|
+          pipeline.project = project
+        end
         project.visit!
+
         Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completed')
-        sleep 5
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('job')
+        end
       end
 
       it 'does not execute variable on unprotected branch', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/156' do
-        trigger_pipeline(guest_api_client)
         Flow::Login.sign_in(as: guest)
+        Resource::Pipeline.fabricate_via_api! do |pipeline|
+          pipeline.project = project
+        end
         project.visit!
+
         Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completed')
-        sleep 5
-        # Page::Project::Settings::CiVariables.perform do |ci_variable|
-        #   ci_variable.click_edit_ci_variable
-        #   ci_variable.click_ci_variable_delete_button
-        #
-        #   expect(ci_variable).to have_text('There are no variables yet', wait: 60)
-        # end
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('job')
+        end
       end
 
       private
@@ -106,11 +112,6 @@ module QA
           resource.project = project
           resource.allowed_to_push = allowed_to_push
         end
-      end
-
-      def trigger_pipeline(api_client)
-        request = Runtime::API::Request.new(api_client, "/projects/#{project.id}/trigger/pipeline")
-        post(request.url, nil)
       end
 
       def push_new_file(branch_name)
