@@ -21,7 +21,12 @@ import {
   urlParamsToObject,
 } from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { fullEpicId } from '../boards_util';
+import {
+  fullEpicId,
+  fullEpicBoardId,
+  formatListEpics,
+  formatEpicListsPageInfo,
+} from '../boards_util';
 
 import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import epicQuery from '../graphql/epic.query.graphql';
@@ -31,6 +36,9 @@ import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
+import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
+import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
+
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 
@@ -69,6 +77,30 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
     .then(({ data }) => {
       const { lists } = data[boardType]?.board;
       return { listIssues: formatListIssues(lists), listPageInfo: formatListsPageInfo(lists) };
+    });
+};
+
+const fetchAndFormatListEpics = (state, extraVariables) => {
+  const { fullPath, boardId, filterParams } = state;
+
+  const variables = {
+    fullPath,
+    boardId: fullEpicBoardId(boardId),
+    filters: { ...filterParams },
+    ...extraVariables,
+  };
+
+  return gqlClient
+    .query({
+      query: listsEpicsQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables,
+    })
+    .then(({ data }) => {
+      const { lists } = data.group?.epicBoard;
+      return { listEpics: formatListEpics(lists), listPageInfo: formatEpicListsPageInfo(lists) };
     });
 };
 
@@ -115,7 +147,7 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  performSearch({ dispatch, getters }) {
+  performSearch({ dispatch, getters, state }) {
     dispatch(
       'setFilters',
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
@@ -125,7 +157,7 @@ export default {
       dispatch('resetEpics');
       dispatch('resetIssues');
       dispatch('fetchEpicsSwimlanes', {});
-    } else if (gon.features.graphqlBoardLists) {
+    } else if (gon.features.graphqlBoardLists || state.isEpicBoard) {
       dispatch('fetchLists');
       dispatch('resetIssues');
     }
@@ -267,8 +299,8 @@ export default {
     notImplemented();
   },
 
-  fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
-    commit(types.REQUEST_ISSUES_FOR_LIST, { listId, fetchNext });
+  fetchItemsForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
+    commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { epicId, ...filterParams } = state.filterParams;
     if (noEpicIssues && epicId !== undefined) {
@@ -284,16 +316,30 @@ export default {
       first: 20,
     };
 
+    if (state.isEpicBoard) {
+      // This currently always fails. Epics will be loaded and displayed in the next iteration
+      return fetchAndFormatListEpics(state, variables)
+        .then(({ listEpics, listPageInfo }) => {
+          commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
+            listEpics,
+            listPageInfo,
+            listId,
+            noEpicIssues,
+          });
+        })
+        .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
+    }
+
     return fetchAndFormatListIssues(state, variables)
       .then(({ listIssues, listPageInfo }) => {
-        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, {
+        commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, {
           listIssues,
           listPageInfo,
           listId,
           noEpicIssues,
         });
       })
-      .catch(() => commit(types.RECEIVE_ISSUES_FOR_LIST_FAILURE, listId));
+      .catch(() => commit(types.RECEIVE_ITEMS_FOR_LIST_FAILURE, listId));
   },
 
   fetchIssuesForEpic: ({ state, commit }, epicId) => {
@@ -477,5 +523,36 @@ export default {
       .catch(() =>
         commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
       );
+  },
+
+  fetchLists: ({ state, dispatch }) => {
+    const { isEpicBoard } = state;
+
+    if (!isEpicBoard) {
+      dispatch('fetchIssueLists');
+    } else {
+      dispatch('fetchEpicLists');
+    }
+  },
+
+  fetchEpicLists: ({ commit, state }) => {
+    const { filterParams, fullPath, boardId } = state;
+
+    const variables = {
+      fullPath,
+      boardId: fullEpicBoardId(boardId),
+      filters: filterParams,
+    };
+
+    return gqlClient
+      .query({
+        query: epicBoardListsQuery,
+        variables,
+      })
+      .then(({ data }) => {
+        const { lists } = data.group?.epicBoard;
+        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
+      })
+      .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 };

@@ -235,7 +235,7 @@ describe('Board Store Mutations', () => {
     });
   });
 
-  describe('RECEIVE_ISSUES_FOR_LIST_SUCCESS', () => {
+  describe('RECEIVE_ITEMS_FOR_LIST_SUCCESS', () => {
     it('updates issuesByListId and issues on state', () => {
       const listIssues = {
         'gid://gitlab/List/1': [mockIssue.id],
@@ -260,7 +260,7 @@ describe('Board Store Mutations', () => {
         },
       };
 
-      mutations.RECEIVE_ISSUES_FOR_LIST_SUCCESS(state, {
+      mutations.RECEIVE_ITEMS_FOR_LIST_SUCCESS(state, {
         listIssues: { listData: listIssues, issues },
         listPageInfo,
         listId: 'gid://gitlab/List/1',
@@ -271,7 +271,7 @@ describe('Board Store Mutations', () => {
     });
   });
 
-  describe('RECEIVE_ISSUES_FOR_LIST_FAILURE', () => {
+  describe('RECEIVE_ITEMS_FOR_LIST_FAILURE', () => {
     it('sets error message', () => {
       state = {
         ...state,
@@ -281,7 +281,7 @@ describe('Board Store Mutations', () => {
 
       const listId = 'gid://gitlab/List/1';
 
-      mutations.RECEIVE_ISSUES_FOR_LIST_FAILURE(state, listId);
+      mutations.RECEIVE_ITEMS_FOR_LIST_FAILURE(state, listId);
 
       expect(state.error).toEqual(
         'An error occurred while fetching the board issues. Please reload the page.',

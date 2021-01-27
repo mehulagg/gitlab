@@ -1,0 +1,30 @@
+#import "~/graphql_shared/fragments/epic.fragment.graphql"
+
+query ListEpics(
+  $fullPath: ID!
+  $boardId: BoardsEpicBoardID!
+  $id: BoardsEpicListID
+  $after: String
+  $first: Int
+) {
+  group(fullPath: $fullPath) {
+    epicBoard(id: $boardId) {
+      lists(id: $id) {
+        nodes {
+          id
+          epics(first: $first, after: $after) {
+            edges {
+              node {
+                ...EpicNode
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
+          }
+        }
+      }
+    }
+  }
+}

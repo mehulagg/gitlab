@@ -6,7 +6,7 @@ import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import * as types from 'ee/boards/stores/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
-import { formatListIssues } from '~/boards/boards_util';
+import { formatListIssues, formatBoardLists } from '~/boards/boards_util';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
@@ -132,6 +132,81 @@ describe('performSearch', () => {
         { type: 'fetchEpicsSwimlanes', payload: {} },
       ],
     });
+  });
+});
+
+describe('fetchLists', () => {
+  it('should dispatch fetchIssueLists action when isEpicBoard is false on state', () => {
+    testAction({
+      action: actions.fetchLists,
+      state: { isEpicBoard: false },
+      expectedActions: [{ type: 'fetchIssueLists' }],
+    });
+  });
+
+  it('should dispatch fetchEpicLists action when isEpicBoard is true on state', () => {
+    testAction({
+      action: actions.fetchLists,
+      state: { isEpicBoard: true },
+      expectedActions: [{ type: 'fetchEpicLists' }],
+    });
+  });
+});
+
+describe('fetchEpicLists', () => {
+  const state = {
+    fullPath: 'gitlab-org',
+    boardId: '1',
+    filterParams: {},
+  };
+
+  const queryResponse = {
+    data: {
+      group: {
+        epicBoard: {
+          lists: {
+            nodes: mockLists,
+          },
+        },
+      },
+    },
+  };
+
+  const formattedLists = formatBoardLists(queryResponse.data.group.epicBoard.lists);
+
+  it('should commit mutations RECEIVE_BOARD_LISTS_SUCCESS on success', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchEpicLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
+          payload: formattedLists,
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutations RECEIVE_BOARD_LISTS_FAILURE on failure', (done) => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchEpicLists,
+      {},
+      state,
+      [
+        {
+          type: types.RECEIVE_BOARD_LISTS_FAILURE,
+        },
+      ],
+      [],
+      done,
+    );
   });
 });
 
@@ -425,7 +500,7 @@ describe('fetchIssuesForEpic', () => {
 
   const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', (done) => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_SUCCESS on success', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -441,7 +516,7 @@ describe('fetchIssuesForEpic', () => {
     );
   });
 
-  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', (done) => {
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ITEMS_FOR_LIST_FAILURE on failure', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
 
     testAction(

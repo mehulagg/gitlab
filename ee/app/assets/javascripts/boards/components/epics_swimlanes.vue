@@ -75,7 +75,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['moveList', 'fetchIssuesForList']),
+    ...mapActions(['moveList', 'fetchItemsForList']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
@@ -91,7 +91,7 @@ export default {
     fetchMoreUnassignedIssues() {
       this.lists.forEach((list) => {
         if (this.pageInfoByListId[list.id]?.hasNextPage) {
-          this.fetchIssuesForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
+          this.fetchItemsForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
         }
       });
     },
