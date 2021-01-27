@@ -30,9 +30,11 @@ class Admin::GroupsController < Admin::ApplicationController
 
   def new
     @group = Group.new
+    @group.build_admin_note
   end
 
   def edit
+    @group.build_admin_note unless @group.admin_note
   end
 
   def create
@@ -49,6 +51,7 @@ class Admin::GroupsController < Admin::ApplicationController
   end
 
   def update
+    @group.build_admin_note unless @group.admin_note
     if @group.update(group_params)
       redirect_to [:admin, @group], notice: _('Group was successfully updated.')
     else
