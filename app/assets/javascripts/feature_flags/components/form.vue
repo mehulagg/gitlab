@@ -10,11 +10,11 @@ import {
   GlFormCheckbox,
   GlSprintf,
   GlIcon,
+  GlToggle,
 } from '@gitlab/ui';
 import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
 import { s__ } from '~/locale';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import EnvironmentsDropdown from './environments_dropdown.vue';
 import Strategy from './strategy.vue';
 import {
@@ -37,7 +37,7 @@ export default {
     GlTooltip,
     GlSprintf,
     GlIcon,
-    ToggleButton,
+    GlToggle,
     EnvironmentsDropdown,
     Strategy,
     RelatedIssuesRoot,
@@ -398,10 +398,12 @@ export default {
                 <div class="table-mobile-header" role="rowheader">
                   {{ s__('FeatureFlags|Status') }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-status">
-                  <toggle-button
+                <div
+                  class="table-mobile-content gl-display-flex gl-justify-content-center js-feature-flag-status"
+                >
+                  <gl-toggle
                     :value="scope.active"
-                    :disabled-input="!active || !canUpdateScope(scope)"
+                    :disabled="!active || !canUpdateScope(scope)"
                     @change="(status) => (scope.active = status)"
                   />
                 </div>
@@ -530,9 +532,11 @@ export default {
                 <div class="table-mobile-header" role="rowheader">
                   {{ s__('FeatureFlags|Status') }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-status">
-                  <toggle-button
-                    :disabled-input="!active"
+                <div
+                  class="table-mobile-content gl-display-flex gl-justify-content-center js-feature-flag-status"
+                >
+                  <gl-toggle
+                    :disabled="!active"
                     :value="false"
                     @change="createNewScope({ active: true })"
                   />

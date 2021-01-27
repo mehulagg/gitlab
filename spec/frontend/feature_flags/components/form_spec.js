@@ -1,6 +1,6 @@
 import { uniqueId } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
-import { GlFormTextarea, GlFormCheckbox, GlButton } from '@gitlab/ui';
+import { GlFormTextarea, GlFormCheckbox, GlButton, GlToggle } from '@gitlab/ui';
 import Api from '~/api';
 import Form from '~/feature_flags/components/form.vue';
 import EnvironmentsDropdown from '~/feature_flags/components/environments_dropdown.vue';
@@ -14,7 +14,6 @@ import {
   NEW_VERSION_FLAG,
 } from '~/feature_flags/constants';
 import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
-import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import { featureFlag, userList, allUsersStrategy } from '../mock_data';
 
 jest.mock('~/api.js');
@@ -34,6 +33,8 @@ describe('feature flag form', () => {
       featureFlagsNewVersion: true,
     },
   };
+
+  const findGlToggle = () => wrapper.find(GlToggle);
 
   const factory = (props = {}, provide = {}) => {
     wrapper = shallowMount(Form, {
@@ -108,7 +109,7 @@ describe('feature flag form', () => {
       describe('status toggle', () => {
         describe('without filled text input', () => {
           it('should add a new scope with the text value empty and the status', () => {
-            wrapper.find(ToggleButton).vm.$emit('change', true);
+            findGlToggle().vm.$emit('change', true);
 
             expect(wrapper.vm.formScopes).toHaveLength(1);
             expect(wrapper.vm.formScopes[0].active).toEqual(true);
@@ -121,7 +122,7 @@ describe('feature flag form', () => {
         it('should be disabled if the feature flag is not active', (done) => {
           wrapper.setProps({ active: false });
           wrapper.vm.$nextTick(() => {
-            expect(wrapper.find(ToggleButton).props('disabledInput')).toBe(true);
+            expect(findGlToggle().props('disabled')).toBe(true);
             done();
           });
         });
@@ -186,7 +187,7 @@ describe('feature flag form', () => {
       describe('update scope', () => {
         describe('on click on toggle', () => {
           it('should update the scope', () => {
-            wrapper.find(ToggleButton).vm.$emit('change', false);
+            findGlToggle().vm.$emit('change', false);
 
             expect(wrapper.vm.formScopes[0].active).toBe(false);
           });
@@ -195,7 +196,7 @@ describe('feature flag form', () => {
             wrapper.setProps({ active: false });
 
             wrapper.vm.$nextTick(() => {
-              expect(wrapper.find(ToggleButton).props('disabledInput')).toBe(true);
+              expect(findGlToggle().props('disabled')).toBe(true);
               done();
             });
           });
@@ -294,7 +295,7 @@ describe('feature flag form', () => {
           const row = wrapper.findAll('.gl-responsive-table-row').at(2);
 
           expect(row.find(EnvironmentsDropdown).vm.disabled).toBe(true);
-          expect(row.find(ToggleButton).vm.disabledInput).toBe(true);
+          expect(row.find(GlToggle).props('disabled')).toBe(true);
           expect(row.find('.js-delete-scope').exists()).toBe(false);
         });
       });
@@ -347,10 +348,10 @@ describe('feature flag form', () => {
             return wrapper.vm.$nextTick();
           })
           .then(() => {
-            wrapper.find('.js-add-new-scope').find(ToggleButton).vm.$emit('change', true);
+            wrapper.find('.js-add-new-scope').find(GlToggle).vm.$emit('change', true);
           })
           .then(() => {
-            wrapper.find(ToggleButton).vm.$emit('change', true);
+            findGlToggle().vm.$emit('change', true);
             return wrapper.vm.$nextTick();
           })
 
