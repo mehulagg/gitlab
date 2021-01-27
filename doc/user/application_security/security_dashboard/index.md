@@ -178,7 +178,6 @@ When using [Auto DevOps](../../../topics/autodevops/index.md), use
 [special environment variables](../../../topics/autodevops/customize.md#environment-variables)
 to configure daily security scans.
 
-
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
