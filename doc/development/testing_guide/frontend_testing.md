@@ -1175,7 +1175,7 @@ Cons
 - Tightly coupled to an components output
 - No meaningful assertions or expectations
 
-A good rule of thumb to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
+A good guideline to follow: the more complex the component you may want to steer away from just snapshot testing. But that's not to say you can't still snapshot test and test your component as normal.
 
 ### When to use
 
@@ -1195,7 +1195,7 @@ Use
 Don't use
 
 - Composed of custom components
--
+- TODO...
 
 ---
 
