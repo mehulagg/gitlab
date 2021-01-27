@@ -5,11 +5,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# GitLab Self Managed subscription **(PREMIUM)**
+# GitLab self-managed subscription **(PREMIUM)**
 
 You can install, administer, and maintain your own GitLab instance.
 
-This page covers the details of your GitLab Self Managed subscription.
+This page covers the details of your GitLab self-managed subscription.
 
 GitLab subscription management requires access to the Customers Portal.
 
@@ -23,7 +23,7 @@ changes to their subscription.
 
 ## Subscription
 
-The cost of a GitLab Self Managed subscription is determined by the following:
+The cost of a GitLab self-managed subscription is determined by the following:
 
 - GitLab tier
 - Subscription seats
@@ -33,14 +33,14 @@ The cost of a GitLab Self Managed subscription is determined by the following:
 Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
 the features which fit your budget. For information on what features are available
 at each tier, see the
-[GitLab Self Managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/).
+[GitLab self-managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/).
 
 ## Subscription seats
 
-A GitLab Self Managed subscription uses a hybrid model. You pay for a subscription
+A GitLab self-managed subscription uses a hybrid model. You pay for a subscription
 according to the maximum number of users enabled during the subscription period.
 For instances that aren't offline or on a closed network, the maximum number of
-simultaneous users in the GitLab Self Managed installation is checked each quarter,
+simultaneous users in the GitLab self-managed installation is checked each quarter,
 using [Seat Link](#seat-link).
 
 ### Billable users
@@ -76,14 +76,14 @@ GitLab has several features which can help you manage the number of users:
 
 ## Obtain a subscription
 
-To subscribe to GitLab through a GitLab Self Managed installation:
+To subscribe to GitLab through a GitLab self-managed installation:
 
-1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a GitLab Self Managed plan.
+1. Go to the [Customers Portal](https://customers.gitlab.com/) and purchase a GitLab self-managed plan.
 1. After purchase, a license file is sent to the email address associated to the Customers Portal account,
    which must be [uploaded to your GitLab instance](../../user/admin_area/license.md#uploading-your-license).
 
 NOTE:
-If you're purchasing a subscription for an existing **Free** GitLab Self Managed
+If you're purchasing a subscription for an existing **Free** GitLab self-managed
 instance, ensure you're purchasing enough seats to
 [cover your users](../../user/admin_area/index.md#administering-users).
 
@@ -113,7 +113,7 @@ It also displays the following important statistics:
 
 To renew your subscription,
 [prepare for renewal by reviewing your account](#prepare-for-renewal-by-reviewing-your-account),
-then [renew your GitLab Self Managed subscription](#renew-a-subscription).
+then [renew your GitLab self-managed subscription](#renew-a-subscription).
 
 ### Prepare for renewal by reviewing your account
 
@@ -202,9 +202,9 @@ An invoice is generated for the renewal and available for viewing or download on
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208832) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.9.
 
-Seat Link allows GitLab Inc. to provide our GitLab Self Managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
+Seat Link allows GitLab Inc. to provide our GitLab self-managed customers with prorated charges for user growth throughout the year using a quarterly reconciliation process.
 
-Seat Link daily sends a count of all users in connected GitLab Self Managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection to `customers.gitlab.com` on port `443`.
+Seat Link daily sends a count of all users in connected GitLab self-managed instances to GitLab. That information is used to automate prorated reconciliations. The data is sent securely through an encrypted HTTPS connection to `customers.gitlab.com` on port `443`.
 
 Seat Link provides **only** the following information to GitLab:
 
@@ -324,7 +324,7 @@ behave as expected if you're not prepared for the expiry. For example,
 [environment specific variables not being passed](https://gitlab.com/gitlab-org/gitlab/-/issues/24759).
 If you renew or upgrade, your data is again accessible.
 
-For GitLab Self Managed customers, there is a 14-day grace period when your features
+For GitLab self-managed customers, there is a 14-day grace period when your features
 continue to work as-is, after which the entire instance becomes read
 only.
 

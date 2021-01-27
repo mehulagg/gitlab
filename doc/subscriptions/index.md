@@ -19,26 +19,26 @@ GitLab provides special subscriptions to participants in:
 
 When choosing a subscription, there are two factors to consider:
 
-- [GitLab SaaS or GitLab Self Managed](#choose-between-gitlab-saas-or-gitlab-self-managed)
+- [GitLab SaaS or GitLab self-managed](#choose-between-gitlab-saas-or-gitlab-self-managed)
 - [GitLab tier](#choose-a-gitlab-tier)
 
-### Choose between GitLab SaaS or GitLab Self Managed
+### Choose between GitLab SaaS or GitLab self-managed
 
 There are some differences in how a subscription applies, depending if you use
-GitLab SaaS or a Self Managed:
+GitLab SaaS or a self-managed:
 
 - [GitLab SaaS](gitlab_com/index.md): The GitLab software-as-a-service offering.
   You don't need to install anything to use GitLab SaaS, you only need to
   [sign up](https://gitlab.com/users/sign_up) and start using GitLab straight away.
-- [GitLab Self Managed](self_managed/index.md): Install, administer, and maintain
+- [GitLab self-managed](self_managed/index.md): Install, administer, and maintain
   your own GitLab instance.
 
-On a GitLab Self Managed instance, a GitLab subscription provides the same set of
+On a GitLab self-managed instance, a GitLab subscription provides the same set of
 features for _all_ users. On GitLab SaaS, you can apply a subscription to either
 a group or a personal namespace.
 
 NOTE:
-Subscriptions cannot be transferred between GitLab SaaS and GitLab Self Managed.
+Subscriptions cannot be transferred between GitLab SaaS and GitLab self-managed.
 A new subscription must be purchased and applied as needed.
 
 ### Choose a GitLab tier
@@ -48,7 +48,7 @@ the features which fit your budget. For information on what features are availab
 at each tier for each product, see:
 
 - [GitLab SaaS feature comparison](https://about.gitlab.com/pricing/gitlab-com/feature-comparison/)
-- [GitLab Self Managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/)
+- [GitLab self-managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/)
 
 ## Find your subscription
 
