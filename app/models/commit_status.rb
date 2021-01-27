@@ -209,7 +209,10 @@ class CommitStatus < ApplicationRecord
 
   def group_name
     # 'rspec:linux: 1/10' => 'rspec:linux'
-    common_name = name.to_s.gsub(%r{\b\d+[\s:\/\\]+\d+\s*}, '')
+    common_name = name.to_s
+      .sub(%r{\A\d+[\s:\/\\]+\d+\s*\b}, '') # Remove prefix match
+      .sub(%r{\b\d+[\s:\/\\]+\d+\s*\z}, '') # Remove suffix match
+      .gsub(%r{\b\d+[\s:\/\\]+\d+\s*}, '')  # Remove remaining internal matches
 
     # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
     common_name.gsub!(%r{: \[.*\]\s*\z}, '')
