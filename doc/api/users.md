@@ -186,7 +186,7 @@ Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see 
 ]
 ```
 
-Users on GitLab Saas [Premium or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab SaaS [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `group_saml` provider option:
 
 ```json
