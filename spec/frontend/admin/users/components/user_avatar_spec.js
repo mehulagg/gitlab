@@ -1,4 +1,4 @@
-import { GlAvatarLink, GlAvatarLabeled, GlBadge } from '@gitlab/ui';
+import { GlAvatarLink, GlAvatarLabeled, GlBadge, GlIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 
 import AdminUserAvatar from '~/admin/users/components/user_avatar.vue';
@@ -9,6 +9,7 @@ describe('AdminUserAvatar component', () => {
   const user = users[0];
   const adminUserPath = paths.adminUser;
 
+  const findNote = () => wrapper.find(GlIcon);
   const findAvatar = () => wrapper.find(GlAvatarLabeled);
   const findAvatarLink = () => wrapper.find(GlAvatarLink);
   const findAllBadges = () => wrapper.findAll(GlBadge);
@@ -53,10 +54,29 @@ describe('AdminUserAvatar component', () => {
       expect(findAvatar().attributes('src')).toBe(user.avatarUrl);
     });
 
+    it("renders the user's note", () => {
+      expect(findNote().attributes('title')).toBe(user.note);
+    });
+
     it("renders the user's badges", () => {
       findAllBadges().wrappers.forEach((badge, idx) => {
         expect(badge.text()).toBe(user.badges[idx].text);
         expect(badge.props('variant')).toBe(user.badges[idx].variant);
+      });
+    });
+
+    describe('and the user does not have a note', () => {
+      beforeEach(() => {
+        initComponent({
+          user: {
+            ...user,
+            note: null,
+          },
+        });
+      });
+
+      it('does not render a user note', () => {
+        expect(findNote().exists()).toBe(false);
       });
     });
   });

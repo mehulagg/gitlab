@@ -1,12 +1,16 @@
 <script>
-import { GlAvatarLink, GlAvatarLabeled, GlBadge } from '@gitlab/ui';
+import { GlAvatarLink, GlAvatarLabeled, GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { USER_AVATAR_SIZE } from '../constants';
 
 export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
     GlAvatarLink,
     GlAvatarLabeled,
     GlBadge,
+    GlIcon,
   },
   props: {
     user: {
@@ -42,6 +46,9 @@ export default {
       :sub-label="user.email"
     >
       <template #meta>
+        <div v-if="user.note" class="gl-text-gray-500 gl-p-1">
+          <gl-icon name="document" :title="user.note" v-gl-tooltip />
+        </div>
         <div v-for="(badge, idx) in user.badges" :key="idx" class="gl-p-1">
           <gl-badge class="gl-display-flex!" size="sm" :variant="badge.variant">{{
             badge.text

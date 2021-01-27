@@ -24,7 +24,8 @@ RSpec.describe Admin::UserEntity do
         :avatar_url,
         :badges,
         :projects_count,
-        :actions
+        :actions,
+        :note
       )
     end
   end
