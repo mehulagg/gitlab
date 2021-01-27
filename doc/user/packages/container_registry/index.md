@@ -559,16 +559,16 @@ Here are examples of regex patterns you may want to use:
   v.+
   ```
 
-- Match tags that contain `master`:
+- Match only the tag named `master`:
 
   ```plaintext
-  master
+  master(.+)
   ```
 
-- Match tags that either start with `v`, contain `master`, or contain `release`:
+- Match tags that either start with `v`, start with `master`, or are named `release`:
 
   ```plaintext
-  (?:v.+|master|release)
+  (?:v.+|master(.+)?|release)
   ```
 
 ### Use the cleanup policy API
