@@ -21,7 +21,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
-import { fullEpicId } from '../boards_util';
+import { fullEpicId, fullEpicBoardId } from '../boards_util';
 
 import epicQuery from '../graphql/epic.query.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
@@ -31,6 +31,7 @@ import { EpicFilterType, IterationFilterType, GroupByParamType } from '../consta
 import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
+import epicBoardListsQuery from '../graphql/epic_board_lists.query.graphql';
 import * as types from './mutation_types';
 import boardsStoreEE from './boards_store_ee';
 
@@ -115,7 +116,7 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  performSearch({ dispatch, getters }) {
+  performSearch({ dispatch, getters, state }) {
     dispatch(
       'setFilters',
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
@@ -125,7 +126,7 @@ export default {
       dispatch('resetEpics');
       dispatch('resetIssues');
       dispatch('fetchEpicsSwimlanes', {});
-    } else if (gon.features.graphqlBoardLists) {
+    } else if (gon.features.graphqlBoardLists || state.isEpicBoard) {
       dispatch('fetchLists');
       dispatch('resetIssues');
     }
@@ -477,5 +478,36 @@ export default {
       .catch(() =>
         commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
       );
+  },
+
+  fetchLists: ({ state, dispatch }) => {
+    const { isEpicBoard } = state;
+
+    if (!isEpicBoard) {
+      dispatch('fetchIssueLists');
+    } else {
+      dispatch('fetchEpicLists');
+    }
+  },
+
+  fetchEpicLists: ({ commit, state }) => {
+    const { filterParams, fullPath, boardId } = state;
+
+    const variables = {
+      fullPath,
+      boardId: fullEpicBoardId(boardId),
+      filters: filterParams,
+    };
+
+    return gqlClient
+      .query({
+        query: epicBoardListsQuery,
+        variables,
+      })
+      .then(({ data }) => {
+        const { lists } = data.group?.epicBoard;
+        commit(types.RECEIVE_BOARD_LISTS_SUCCESS, formatBoardLists(lists));
+      })
+      .catch(() => commit(types.RECEIVE_BOARD_LISTS_FAILURE));
   },
 };

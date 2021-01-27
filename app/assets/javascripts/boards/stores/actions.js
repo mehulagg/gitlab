@@ -83,7 +83,11 @@ export default {
     }
   },
 
-  fetchLists: ({ commit, state, dispatch }) => {
+  fetchLists: ({ dispatch }) => {
+    dispatch('fetchIssueLists');
+  },
+
+  fetchIssueLists: ({ commit, state, dispatch }) => {
     const { boardType, filterParams, fullPath, boardId } = state;
 
     const variables = {

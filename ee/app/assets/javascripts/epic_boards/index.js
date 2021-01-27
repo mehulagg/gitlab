@@ -3,7 +3,7 @@
 // template.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
 import Vue from 'vue';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions } from 'vuex';
 
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import toggleLabels from 'ee_else_ce/boards/toggle_labels';
@@ -79,9 +79,6 @@ export default () => {
         detailIssueVisible: false,
       };
     },
-    computed: {
-      ...mapGetters(['shouldUseGraphQL']),
-    },
     created() {
       this.setInitialBoardData({
         boardId: $boardApp.dataset.boardId,
@@ -101,6 +98,7 @@ export default () => {
             ? parseInt($boardApp.dataset.boardWeight, 10)
             : null,
         },
+        isEpicBoard: true,
       });
 
       eventHub.$on('updateTokens', this.updateTokens);
@@ -116,8 +114,11 @@ export default () => {
       sidebarEventHub.$off('toggleSubscription', this.toggleSubscription);
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
+    mounted() {
+      this.performSearch();
+    },
     methods: {
-      ...mapActions(['setInitialBoardData']),
+      ...mapActions(['setInitialBoardData', 'performSearch']),
       getNodes(data) {
         return data[this.parent]?.board?.lists.nodes;
       },

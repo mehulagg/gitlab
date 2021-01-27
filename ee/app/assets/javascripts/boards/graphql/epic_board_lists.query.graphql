@@ -1,0 +1,12 @@
+query ListEpics($fullPath: ID!, $boardId: BoardsEpicBoardID!) {
+  group(fullPath: $fullPath) {
+    epicBoard(id: $boardId) {
+      lists {
+        nodes {
+          id
+          title
+        }
+      }
+    }
+  }
+}

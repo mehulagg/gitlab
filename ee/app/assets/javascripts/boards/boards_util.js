@@ -25,6 +25,10 @@ export function fullUserId(userId) {
   return `gid://gitlab/User/${userId}`;
 }
 
+export function fullEpicBoardId(epicBoardId) {
+  return `gid://gitlab/Boards::EpicBoard/${epicBoardId}`;
+}
+
 export function transformBoardConfig(boardConfig) {
   const updatedBoardConfig = {};
   const passedFilterParams = urlParamsToObject(window.location.search);
@@ -86,5 +90,6 @@ export default {
   fullEpicId,
   fullMilestoneId,
   fullUserId,
+  fullEpicBoardId,
   transformBoardConfig,
 };
