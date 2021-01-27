@@ -7,10 +7,10 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 import {
   FEEDBACK_TYPE_DISMISSAL,
-  FEEDBACK_TYPE_ISSUE,
   FEEDBACK_TYPE_MERGE_REQUEST,
 } from '~/vue_shared/security_reports/constants';
 import * as types from './mutation_types';
+import { visitUrl } from '~/lib/utils/url_utility';
 
 let vulnerabilitiesSource;
 
@@ -91,46 +91,7 @@ export const setModalData = ({ commit }, payload = {}) => {
 };
 
 export const createIssue = ({ dispatch }, { vulnerability, flashError }) => {
-  dispatch('requestCreateIssue');
-  axios
-    .post(vulnerability.create_vulnerability_feedback_issue_path, {
-      vulnerability_feedback: {
-        feedback_type: FEEDBACK_TYPE_ISSUE,
-        category: vulnerability.report_type,
-        project_fingerprint: vulnerability.project_fingerprint,
-        finding_uuid: vulnerability.uuid,
-        vulnerability_data: {
-          ...vulnerability,
-          category: vulnerability.report_type,
-        },
-      },
-    })
-    .then(({ data }) => {
-      dispatch('receiveCreateIssueSuccess', data);
-    })
-    .catch(() => {
-      dispatch('receiveCreateIssueError', { flashError });
-    });
-};
-
-export const requestCreateIssue = ({ commit }) => {
-  commit(types.REQUEST_CREATE_ISSUE);
-};
-
-export const receiveCreateIssueSuccess = ({ commit }, payload) => {
-  commit(types.RECEIVE_CREATE_ISSUE_SUCCESS, payload);
-};
-
-export const receiveCreateIssueError = ({ commit }, { flashError }) => {
-  commit(types.RECEIVE_CREATE_ISSUE_ERROR);
-
-  if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error creating the issue.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
-  }
+  visitUrl(vulnerability.create_vulnerability_feedback_issue_path)
 };
 
 export const selectAllVulnerabilities = ({ commit }) => {

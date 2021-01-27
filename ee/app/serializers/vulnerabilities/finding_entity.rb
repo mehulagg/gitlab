@@ -13,7 +13,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
     create_jira_issue_url_for(occurrence)
   end
   expose :create_vulnerability_feedback_issue_path do |occurrence|
-    create_vulnerability_feedback_issue_path(occurrence.project)
+    new_project_issue_path(occurrence.project, { vulnerability_id: occurrence.vulnerability.id })
   end
   expose :create_vulnerability_feedback_merge_request_path do |occurrence|
     create_vulnerability_feedback_merge_request_path(occurrence.project)
