@@ -4,4 +4,7 @@
 - nav           "profile"
 - @left_sidebar = true
 
+= content_for :before_content do
+  = render "shared/search_settings"
+
 = render template: "layouts/application"
