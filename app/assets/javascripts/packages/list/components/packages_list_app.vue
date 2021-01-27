@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
+import { s__ } from '~/locale';
 import createFlash from '~/flash';
 import { historyReplaceState } from '~/lib/utils/common_utils';
 import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
@@ -21,11 +21,23 @@ export default {
     ...mapState({
       emptyListIllustration: (state) => state.config.emptyListIllustration,
       emptyListHelpUrl: (state) => state.config.emptyListHelpUrl,
-      filterQuery: (state) => state.filterQuery,
+      filter: (state) => state.filter,
       selectedType: (state) => state.selectedType,
       packageHelpUrl: (state) => state.config.packageHelpUrl,
       packagesCount: (state) => state.pagination?.total,
     }),
+    emptySearch() {
+      return (
+        this.filter.filter((f) => f.type !== 'filtered-search-term' || f.value?.data).length === 0
+      );
+    },
+
+    emptyStateTitle() {
+      if (this.emptySearch) {
+        return s__('PackageRegistry|There are no packages yet');
+      }
+      return s__('PackageRegistry|Sorry, your filter produced no results');
+    },
   },
   mounted() {
     this.requestPackagesList();
@@ -38,19 +50,6 @@ export default {
     },
     onPackageDeleteRequest(item) {
       return this.requestDeletePackage(item);
-    },
-    emptyStateTitle({ title, type }) {
-      if (this.filterQuery) {
-        return s__('PackageRegistry|Sorry, your filter produced no results');
-      }
-
-      if (type) {
-        return sprintf(s__('PackageRegistry|There are no %{packageType} packages yet'), {
-          packageType: title,
-        });
-      }
-
-      return s__('PackageRegistry|There are no packages yet');
     },
     checkDeleteAlert() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -78,9 +77,9 @@ export default {
 
     <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
       <template #empty-state>
-        <gl-empty-state title="test" :svg-path="emptyListIllustration">
+        <gl-empty-state :title="emptyStateTitle" :svg-path="emptyListIllustration">
           <template #description>
-            <gl-sprintf v-if="filter" :message="$options.i18n.widenFilters" />
+            <gl-sprintf v-if="!emptySearch" :message="$options.i18n.widenFilters" />
             <gl-sprintf v-else :message="$options.i18n.noResults">
               <template #noPackagesLink="{ content }">
                 <gl-link :href="emptyListHelpUrl" target="_blank">{{ content }}</gl-link>
