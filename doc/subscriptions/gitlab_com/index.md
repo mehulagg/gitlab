@@ -152,7 +152,7 @@ For example:
 To renew your subscription:
 
 1. [Prepare for renewal by reviewing your account.](#prepare-for-renewal-by-reviewing-your-account)
-1. [Renew your GitLab SaaS subscription.](#renew-or-change-a-gitlabcom-subscription)
+1. [Renew your GitLab SaaS subscription.](#renew-or-change-a-gitlab-saas-subscription)
 
 ### Prepare for renewal by reviewing your account
 
@@ -180,7 +180,7 @@ It's important to regularly review your user accounts, because:
 A GitLab subscription is valid for a specific number of users. For details, see
 [Choose the number of users](#choose-the-number-of-users).
 
-If the number of [billable users](#view-your-gitlabcom-subscription) exceeds the number included in the subscription, known
+If the number of [billable users](#view-your-gitlab-saas-subscription) exceeds the number included in the subscription, known
 as the number of _users over license_, you must pay for the excess number of
 users either before renewal, or at the time of renewal. This is also known the
 _true up_ process.
@@ -194,7 +194,7 @@ You can adjust the number of users before renewing your GitLab SaaS subscription
 either [disable](../../user/admin_area/activating_deactivating_users.md#deactivating-a-user) or [block](../../user/admin_area/blocking_unblocking_users.md#blocking-a-user) the user accounts you no longer need.
 
 For details on upgrading your subscription tier, see
-[Upgrade your GitLab SaaS subscription tier](#upgrade-your-gitlabcom-subscription-tier).
+[Upgrade your GitLab SaaS subscription tier](#upgrade-your-gitlab-saas-subscription-tier).
 
 #### Automatic renewal
 
