@@ -2510,8 +2510,8 @@ deployment to the `production` environment.
 
 #### `environment:name`
 
-The `environment: name` keyword can use any of the defined CI variables,
-including predefined, secure, or `.gitlab-ci.yml` [`variables`](#variables).
+The `environment: name` keyword can use any of the defined CI/CD [variables](#variables),
+including predefined, secure, or variables defined in the `.gitlab-ci.yml` file.
 
 You can't use variables defined in a `script` section.
 
@@ -2544,8 +2544,8 @@ deploy to production:
 
 #### `environment:url`
 
-The `url` keyword can use any of the defined CI variables,
-including predefined, secure, or `.gitlab-ci.yml` [`variables`](#variables).
+The `environment:url` keyword can use any of the defined CI/CD [variables](#variables),
+including predefined, secure, or variables defined in the `.gitlab-ci.yml` file.
 
 You can't use variables defined in a `script` section.
 
