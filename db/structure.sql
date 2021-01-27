@@ -18170,6 +18170,25 @@ CREATE SEQUENCE vulnerability_statistics_id_seq
 
 ALTER SEQUENCE vulnerability_statistics_id_seq OWNED BY vulnerability_statistics.id;
 
+CREATE TABLE vulnerability_tracking_fingerprints (
+    id bigint NOT NULL,
+    finding_id bigint NOT NULL,
+    sha bytea NOT NULL,
+    track_type integer NOT NULL,
+    track_method integer NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE vulnerability_tracking_fingerprints_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_tracking_fingerprints_id_seq OWNED BY vulnerability_tracking_fingerprints.id;
+
 CREATE TABLE vulnerability_user_mentions (
     id bigint NOT NULL,
     vulnerability_id bigint NOT NULL,
@@ -19177,6 +19196,8 @@ ALTER TABLE ONLY vulnerability_remediations ALTER COLUMN id SET DEFAULT nextval(
 ALTER TABLE ONLY vulnerability_scanners ALTER COLUMN id SET DEFAULT nextval('vulnerability_scanners_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_statistics ALTER COLUMN id SET DEFAULT nextval('vulnerability_statistics_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_tracking_fingerprints ALTER COLUMN id SET DEFAULT nextval('vulnerability_tracking_fingerprints_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_user_mentions ALTER COLUMN id SET DEFAULT nextval('vulnerability_user_mentions_id_seq'::regclass);
 
@@ -20740,6 +20761,9 @@ ALTER TABLE ONLY vulnerability_scanners
 ALTER TABLE ONLY vulnerability_statistics
     ADD CONSTRAINT vulnerability_statistics_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vulnerability_tracking_fingerprints
+    ADD CONSTRAINT vulnerability_tracking_fingerprints_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vulnerability_user_mentions
     ADD CONSTRAINT vulnerability_user_mentions_pkey PRIMARY KEY (id);
 
@@ -21041,6 +21065,10 @@ CREATE UNIQUE INDEX idx_security_scans_on_build_and_scan_type ON security_scans 
 CREATE INDEX idx_security_scans_on_scan_type ON security_scans USING btree (scan_type);
 
 CREATE UNIQUE INDEX idx_serverless_domain_cluster_on_clusters_applications_knative ON serverless_domain_cluster USING btree (clusters_applications_knative_id);
+
+CREATE UNIQUE INDEX idx_vuln_tracking_fingerprints_on_occurrences_id_and_sha ON vulnerability_tracking_fingerprints USING btree (finding_id, sha);
+
+CREATE UNIQUE INDEX idx_vuln_tracking_fingerprints_uniqueness ON vulnerability_tracking_fingerprints USING btree (finding_id, track_type, track_method, sha);
 
 CREATE UNIQUE INDEX idx_vulnerability_ext_issue_links_on_vulne_id_and_ext_issue ON vulnerability_external_issue_links USING btree (vulnerability_id, external_type, external_project_key, external_issue_key);
 
@@ -23356,6 +23384,8 @@ CREATE INDEX index_vulnerability_statistics_on_letter_grade ON vulnerability_sta
 
 CREATE UNIQUE INDEX index_vulnerability_statistics_on_unique_project_id ON vulnerability_statistics USING btree (project_id);
 
+CREATE INDEX index_vulnerability_tracking_fingerprints_on_finding_id ON vulnerability_tracking_fingerprints USING btree (finding_id);
+
 CREATE UNIQUE INDEX index_vulnerability_user_mentions_on_note_id ON vulnerability_user_mentions USING btree (note_id) WHERE (note_id IS NOT NULL);
 
 CREATE UNIQUE INDEX index_vulns_user_mentions_on_vulnerability_id ON vulnerability_user_mentions USING btree (vulnerability_id) WHERE (note_id IS NULL);
@@ -24970,6 +25000,9 @@ ALTER TABLE ONLY protected_environment_deploy_access_levels
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_5be1abfc25 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_tracking_fingerprints
+    ADD CONSTRAINT fk_rails_5c211d404f FOREIGN KEY (finding_id) REFERENCES vulnerability_occurrences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY cluster_providers_gcp
     ADD CONSTRAINT fk_rails_5c2c3bc814 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
