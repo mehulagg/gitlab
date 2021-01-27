@@ -741,6 +741,12 @@ module EE
       end
     end
 
+    def group_pipeline_configuration_full_path
+      return unless compliance_framework_setting&.compliance_management_framework
+
+      compliance_framework_setting.compliance_management_framework.pipeline_configuration_full_path
+    end
+
     private
 
     def group_hooks

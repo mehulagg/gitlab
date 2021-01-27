@@ -24,9 +24,8 @@ module Gitlab
 
               def pipeline_configuration_full_path
                 return unless project
-                return unless project&.compliance_framework_setting&.compliance_management_framework
 
-                project.compliance_framework_setting.compliance_management_framework.pipeline_configuration_full_path
+                project.group_pipeline_configuration_full_path
               end
             end
           end
