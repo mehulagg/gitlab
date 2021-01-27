@@ -1,4 +1,4 @@
-= _('You can use variables for passwords, secret keys, and so on. Variables are passed to environments by the runner.')
+= _('Variables store information, like passwords and secret keys, that you can use in job scripts.')
 = link_to s_('How do I use variables?'), help_page_path('ci/variables/README')
 %p
   = _('Variables can be:')
@@ -6,5 +6,5 @@
   %li
     = html_escape(_('%{code_open}Protected:%{code_close} Only exposed to protected branches or tags.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
   %li
-    = html_escape(_('%{code_open}Masked:%{code_close} Hidden in job logs (must match regular expression requirements).')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
-    = link_to _('Learn more.'), help_page_path('ci/variables/README', anchor: 'mask-a-custom-variable')
+    = html_escape(_('%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+    = link_to _('Learn more.'), help_page_path('ci/variables/README', anchor: 'mask-a-custom-variable') target: '_blank', rel: 'noopener noreferrer'
