@@ -483,12 +483,16 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### `gitlab_standard`
 
-The [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/1-0-0) is available.
+We are currently working towards sending the [`gitlab_standard` schema](https://gitlab.com/gitlab-org/iglu/-/blob/master/public/schemas/com.gitlab/gitlab_standard/jsonschema/) with every event. See [Standardize Snowplow Schema](https://gitlab.com/groups/gitlab-org/-/epics/5218) for details.
 
-| Field Name   | Required            | Type    | Description                    |
-|--------------|---------------------|---------|--------------------------------|
-| project_id   | **{dotted-circle}** | integer | ID of the associated project   |
-| namespace_id | **{dotted-circle}** | integer | ID of the associated namespace |
+The [`StandardContext`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/tracking/standard_context.rb) class is used to represent this schema in the application. 
+
+| Field Name     | Required            | Type                  | Description                                                                                 |
+|----------------|---------------------|-----------------------|---------------------------------------------------------------------------------------------|
+| `project_id`   | **{dotted-circle}** | integer               | ID of the associated project                                                                |
+| `namespace_id` | **{dotted-circle}** | integer               | ID of the associated namespace                                                              |
+| `environment`  | **{check-circle}**  | string (max 32 chars) | Name of the environment from which the event was sent (ex. production, staging)             |
+| `source`       | **{check-circle}**  | string (max 32 chars) | Name of the application from which the event was sent (ex. gitlab-rails, gitlab-javascript) |
 
 ### Default Schema
 
