@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Iterations **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214713) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214713) in GitLab 13.1.
 > - It was deployed behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) on GitLab 13.2.
 > - It's enabled on GitLab.com.
@@ -51,7 +51,7 @@ To create an iteration:
 
 ## Edit an iteration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218277) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218277) in GitLab 13.2.
 
 NOTE:
 You need Developer [permissions](../../permissions.md) or higher to edit an iteration.
@@ -60,14 +60,14 @@ To edit an iteration, click the three-dot menu (**{ellipsis_v}**) > **Edit itera
 
 ## Add an issue to an iteration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216158) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216158) in GitLab 13.2.
 
 To learn how to add an issue to an iteration, see the steps in
 [Managing issues](../../project/issues/managing_issues.md#add-an-issue-to-an-iteration).
 
 ## View an iteration report
 
-> Viewing iteration reports in projects [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222763) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
+> Viewing iteration reports in projects [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222763) in GitLab 13.5.
 
 You can track the progress of an iteration by reviewing iteration reports.
 An iteration report displays a list of all the issues assigned to an iteration and their status.
@@ -80,8 +80,8 @@ To view an iteration report, go to the iterations list page and click an iterati
 
 ### Iteration burndown and burnup charts
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222750) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/269972) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222750) in GitLab 13.5.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/269972) in GitLab 13.7.
 
 The iteration report includes [burndown and burnup charts](../../project/milestones/burndown_and_burnup_charts.md),
 similar to how they appear when viewing a [milestone](../../project/milestones/index.md).

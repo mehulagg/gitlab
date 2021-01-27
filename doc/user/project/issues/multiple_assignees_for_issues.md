@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Multiple Assignees for Issues **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1904) in [GitLab Starter 9.2](https://about.gitlab.com/releases/2017/05/22/gitlab-9-2-released/#multiple-assignees-for-issues).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1904) in GitLab 9.2.
 > - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 In large teams, where there is shared ownership of an issue, it can be difficult

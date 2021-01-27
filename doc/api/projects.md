@@ -2291,7 +2291,7 @@ PUT /projects/:id/push_rule
 
 ### Delete project push rule
 
-> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 9.0.
+> - Introduced in GitLab 9.0.
 > - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 Removes a push rule from a project. This is an idempotent method and can be
@@ -2441,7 +2441,7 @@ Read more in the [Project members](members.md) documentation.
 
 ## Configure pull mirroring for a project **(PREMIUM)**
 
-> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 11.
+> - Introduced in GitLab 11.
 > - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 Configure pull mirroring while [creating a new project](#create-project) or [updating an existing project](#edit-project) using the API if the remote repository is publicly accessible or via `username/password` authentication. In case your HTTP repository is not publicly accessible, you can add the authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`, where password is a [personal access token](../user/profile/personal_access_tokens.md) with the API scope enabled.
@@ -2454,7 +2454,7 @@ The relevant API parameters to update are:
 
 ## Start the pull mirroring process for a Project **(PREMIUM)**
 
-> - Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 10.
+> - Introduced in GitLab 10.
 > - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 ```plaintext

@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Issue weight **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/76) in [GitLab Starter](https://about.gitlab.com/pricing/) 8.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/76) in GitLab 8.3.
 > - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab [Premium](https://about.gitlab.com/pricing/) in 13.9.
 
 When you have a lot of issues, it can be hard to get an overview.
