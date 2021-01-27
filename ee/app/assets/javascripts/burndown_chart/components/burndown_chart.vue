@@ -3,11 +3,13 @@ import { merge } from 'lodash';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __, n__, s__, sprintf } from '~/locale';
 import commonChartOptions from './common_chart_options';
 
 export default {
   components: {
+    ChartSkeletonLoader,
     GlLineChart,
     ResizableChartContainer,
   },
@@ -39,6 +41,11 @@ export default {
       type: Boolean,
       required: false,
       default: true,
+    },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -126,10 +133,8 @@ export default {
     <div v-if="showTitle" class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burndown chart') }}</h3>
     </div>
-    <resizable-chart-container
-      v-if="dataSeries[0].data.length > 0"
-      class="burndown-chart js-burndown-chart"
-    >
+    <chart-skeleton-loader v-if="isLoading" />
+    <resizable-chart-container v-else class="burndown-chart js-burndown-chart">
       <gl-line-chart
         slot-scope="{ width }"
         :width="width"
