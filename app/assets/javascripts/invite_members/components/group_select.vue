@@ -1,20 +1,13 @@
 <script>
 import { debounce } from 'lodash';
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownText,
-  GlSearchBoxByType,
-  GlLoadingIcon,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlDropdownText, GlSearchBoxByType } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import Api from '~/api';
-import { GROUP_SEARCH_DELAY } from '../constants';
+import { SEARCH_DELAY } from '../constants';
 
 export default {
   name: 'GroupSelect',
   components: {
-    GlLoadingIcon,
     GlDropdown,
     GlDropdownItem,
     GlDropdownText,
@@ -22,11 +15,9 @@ export default {
   },
   model: {
     prop: 'selectedGroup',
-    event: 'input',
   },
   data() {
     return {
-      initialLoading: true,
       isFetching: false,
       groups: [],
       selectedGroup: {},
@@ -48,11 +39,10 @@ export default {
   },
   mounted() {
     this.retrieveGroups();
-
-    this.initialLoading = false;
   },
   methods: {
     retrieveGroups: debounce(function debouncedRetrieveGroups() {
+      this.isFetching = true;
       return Api.groups(this.searchTerm, this.$options.defaultFetchOptions)
         .then((response) => {
           this.groups = response.map((group) => ({
@@ -66,18 +56,15 @@ export default {
         .catch(() => {
           this.isFetching = false;
         });
-    }, GROUP_SEARCH_DELAY),
-    selectGroup(groupId) {
-      this.selectedGroup = this.groups.find((group) => group.id === groupId);
-
-      this.$emit('setSelectedGroup', this.selectedGroup);
-      this.$emit('input', this.selectedGroup);
+    }, SEARCH_DELAY),
+    selectGroup(group) {
+      this.$emit('input', group);
     },
   },
   i18n: {
-    dropdownText: s__(`GroupSelect|Select a group`),
-    searchPlaceholder: s__(`GroupSelect|Search groups`),
-    emptySearchResult: s__(`GroupSelect|No matching results`),
+    dropdownText: s__('GroupSelect|Select a group'),
+    searchPlaceholder: s__('GroupSelect|Search groups'),
+    emptySearchResult: s__('GroupSelect|No matching results'),
   },
   defaultFetchOptions: {
     exclude_internal: true,
@@ -88,29 +75,25 @@ export default {
 <template>
   <div>
     <gl-dropdown
-      data-testid="group_select_dropdown"
+      data-testid="groupSelectDropdown"
       :text="selectedGroupName"
       block
       menu-class="gl-w-full!"
-      :loading="initialLoading"
     >
       <gl-search-box-by-type
         v-model.trim="searchTerm"
+        :is-loading="isFetching"
         :placeholder="$options.i18n.searchPlaceholder"
-        data-qa-selector="group_select_dropdown_search"
+        data-qa-selector="group_select_dropdown_search_field"
       />
       <gl-dropdown-item
         v-for="group in groups"
-        v-show="!isFetching"
         :key="group.id"
         :name="group.name"
-        @click="selectGroup(group.id)"
+        @click="selectGroup(group)"
       >
         {{ group.namespacedName }}
       </gl-dropdown-item>
-      <gl-dropdown-text v-show="isFetching" data-testid="dropdown-text-loading-icon">
-        <gl-loading-icon class="gl-mx-auto" />
-      </gl-dropdown-text>
       <gl-dropdown-text v-if="isFetchResultEmpty && !isFetching" data-testid="empty-result-message">
         <span class="gl-text-gray-500">{{ $options.i18n.emptySearchResult }}</span>
       </gl-dropdown-text>

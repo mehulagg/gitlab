@@ -11,7 +11,7 @@ module QA
       end
     end
 
-    describe 'Project' do
+    describe 'Project', :requires_admin do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'awesome-project'
@@ -20,7 +20,6 @@ module QA
       end
 
       before do
-        Runtime::Feature.enable(:invite_members_group_modal, project: project)
         sign_in
       end
 
@@ -40,6 +39,7 @@ module QA
 
       context "Add user access as guest", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
         before do
+          Runtime::Feature.enable(:invite_members_group_modal)
           project.visit!
 
           Page::Project::Menu.perform(&:click_members)

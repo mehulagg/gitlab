@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Manage' do
-    describe 'Add project member' do
+    describe 'Add project member', :requires_admin do
       it 'user adds project member', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/482' do
         Flow::Login.sign_in
 
@@ -12,7 +12,7 @@ module QA
           project.name = 'add-member-project'
         end
 
-        Runtime::Feature.enable(:invite_members_group_modal, project: project)
+        Runtime::Feature.enable(:invite_members_group_modal)
 
         project.visit!
 

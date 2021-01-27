@@ -15,11 +15,11 @@ module QA
         end
 
         view 'app/assets/javascripts/invite_members/components/invite_group_trigger.vue' do
-          element :invite_group_modal_trigger
+          element :invite_a_group_button
         end
 
         view 'app/assets/javascripts/invite_members/components/invite_members_trigger.vue' do
-          element :invite_members_modal_trigger
+          element :invite_members_button
         end
 
         view 'app/views/shared/members/_group.html.haml' do

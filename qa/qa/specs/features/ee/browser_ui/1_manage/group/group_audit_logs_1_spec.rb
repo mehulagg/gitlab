@@ -24,7 +24,7 @@ module QA
       end
     end
 
-    describe 'Group' do
+    describe 'Group', :requires_admin do
       let(:group) do
         Resource::Group.fabricate_via_api! do |resource|
           resource.path = "test-group-#{SecureRandom.hex(8)}"
@@ -39,8 +39,7 @@ module QA
 
       before do
         @event_count = get_audit_event_count(group)
-        Runtime::Feature.enable(:invite_members_group_modal, project: project)
-        Runtime::Feature.enable(:invite_members_group_modal, group: group)
+        Runtime::Feature.enable(:invite_members_group_modal)
       end
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }

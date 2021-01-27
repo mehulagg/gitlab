@@ -62,15 +62,15 @@ export default {
       visible: true,
       modalId: 'invite-members-modal',
       selectedAccessLevel: this.defaultAccessLevel,
+      inviteeType: 'members',
       newUsersToInvite: [],
-      isInviteGroup: false,
       selectedDate: undefined,
       groupToBeSharedWith: {},
     };
   },
   computed: {
-    inviteeType() {
-      return this.isInviteGroup ? 'group' : 'members';
+    isInviteGroup() {
+      return this.inviteeType === 'group';
     },
     introText() {
       return sprintf(this.$options.labels.introText, {
@@ -90,7 +90,6 @@ export default {
     },
     basePostData() {
       return {
-        access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
       };
@@ -100,10 +99,16 @@ export default {
         (key) => this.accessLevels[key] === Number(this.selectedAccessLevel),
       );
     },
+    inviteDisabled() {
+      return (
+        this.newUsersToInvite.length === 0 && Object.keys(this.groupToBeSharedWith).length === 0
+      );
+    },
   },
   mounted() {
-    eventHub.$on('openModal', this.openModal);
-    eventHub.$on('openInviteGroupModal', this.openInviteGroupModal);
+    eventHub.$on('openModal', (inviteeType) => {
+      this.openModal(inviteeType);
+    });
   },
   methods: {
     partitionNewUsersToInvite() {
@@ -117,15 +122,10 @@ export default {
         usersToAddById.map((user) => user.id).join(','),
       ];
     },
-    openInviteGroupModal() {
-      this.isInviteGroup = true;
-
-      this.$root.$emit('bv::show::modal', this.modalId);
-    },
     openModal() {
       this.$root.$emit(BV_SHOW_MODAL, this.modalId);
 
-      this.isInviteGroup = false;
+      this.inviteeType = inviteeType;
 
       this.$root.$emit('bv::show::modal', this.modalId);
     },
@@ -151,15 +151,13 @@ export default {
       this.selectedAccessLevel = item;
     },
     submitShareWithGroup() {
-      if (this.isProject) {
-        Api.projectShareWithGroup(this.id, this.shareWithGroupPostData(this.groupToBeSharedWith.id))
-          .then(this.showToastMessageSuccess)
-          .catch(this.showToastMessageError);
-      } else {
-        Api.groupShareWithGroup(this.id, this.shareWithGroupPostData(this.groupToBeSharedWith.id))
-          .then(this.showToastMessageSuccess)
-          .catch(this.showToastMessageError);
-      }
+      const apiShareWithGroup = this.isProject
+        ? Api.projectShareWithGroup.bind(Api)
+        : Api.groupShareWithGroup.bind(Api);
+
+      apiShareWithGroup(this.id, this.shareWithGroupPostData(this.groupToBeSharedWith.id))
+        .then(this.showToastMessageSuccess)
+        .catch(this.showToastMessageError);
     },
     submitInviteMembers() {
       const [usersToInviteByEmail, usersToAddById] = this.partitionNewUsersToInvite();
@@ -184,17 +182,25 @@ export default {
       Promise.all(promises).then(this.showToastMessageSuccess).catch(this.showToastMessageError);
     },
     inviteByEmailPostData(usersToInviteByEmail) {
-      return { ...this.basePostData, email: usersToInviteByEmail };
+      return {
+        ...this.basePostData,
+        email: usersToInviteByEmail,
+        access_level: this.selectedAccessLevel,
+      };
     },
     addByUserIdPostData(usersToAddById) {
-      return { ...this.basePostData, user_id: usersToAddById };
+      return {
+        ...this.basePostData,
+        user_id: usersToAddById,
+        access_level: this.selectedAccessLevel,
+      };
     },
     shareWithGroupPostData(groupToBeSharedWith) {
-      const postData = { ...this.basePostData, group_id: groupToBeSharedWith };
-
-      postData.group_access = postData.access_level;
-
-      return postData;
+      return {
+        ...this.basePostData,
+        group_id: groupToBeSharedWith,
+        group_access: this.selectedAccessLevel,
+      };
     },
     showToastMessageSuccess() {
       this.$toast.show(this.$options.labels.toastMessageSuccessful, this.toastOptions);
@@ -236,7 +242,7 @@ export default {
     :title="$options.labels[inviteeType].modalTitle"
     :header-close-label="$options.labels.headerCloseLabel"
   >
-    <div class="gl-ml-5 gl-mr-5">
+    <div>
       <div>{{ introText }}</div>
 
       <label :id="$options.membersTokenSelectLabelId" class="gl-font-weight-bold gl-mt-5">{{
@@ -252,7 +258,7 @@ export default {
         <group-select v-if="isInviteGroup" v-model="groupToBeSharedWith" />
       </div>
 
-      <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.accessLevel }}</label>
+      <label class="gl-font-weight-bold gl-mt-3">{{ $options.labels.accessLevel }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full">
         <gl-dropdown
           class="gl-shadow-none gl-w-full"
@@ -273,7 +279,7 @@ export default {
         </gl-dropdown>
       </div>
 
-      <div class="gl-mt-2">
+      <div class="gl-mt-2 gl-w-half gl-xs-w-full">
         <gl-sprintf :message="$options.labels.readMoreText">
           <template #link="{ content }">
             <gl-link :href="helpLink" target="_blank">{{ content }}</gl-link>
@@ -281,7 +287,7 @@ export default {
         </gl-sprintf>
       </div>
 
-      <label class="gl-font-weight-bold gl-mt-5" for="expires_at">{{
+      <label class="gl-font-weight-bold gl-mt-5 gl-display-block" for="expires_at">{{
         $options.labels.accessExpireDate
       }}</label>
       <div class="gl-mt-2 gl-w-half gl-xs-w-full gl-display-inline-block">
@@ -303,14 +309,14 @@ export default {
     </div>
 
     <template #modal-footer>
-      <div class="gl-display-flex gl-flex-direction-row gl-justify-content-end gl-flex-wrap gl-p-3">
+      <div class="gl-display-flex gl-flex-direction-row gl-justify-content-end gl-flex-wrap gl-m-0">
         <gl-button ref="cancelButton" @click="cancelInvite">
           {{ $options.labels.cancelButtonText }}
         </gl-button>
         <div class="gl-mr-3"></div>
         <gl-button
           ref="inviteButton"
-          :disabled="!newUsersToInvite && !groupToBeSharedWith"
+          :disabled="inviteDisabled"
           variant="success"
           data-qa-selector="invite_button"
           @click="sendInvite"

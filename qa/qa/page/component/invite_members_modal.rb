@@ -15,16 +15,16 @@ module QA
           end
 
           base.view 'app/assets/javascripts/invite_members/components/group_select.vue' do
-            element :group_select_dropdown_search
+            element :group_select_dropdown_search_field
           end
         end
 
         def open_invite_members_modal
-          click_element :invite_members_modal_trigger
+          click_element :invite_members_button
         end
 
         def open_invite_group_modal
-          click_element :invite_group_modal_trigger
+          click_element :invite_a_group_button
         end
 
         def add_member(username, access_level = Resource::Members::AccessLevel::DEVELOPER)
@@ -51,7 +51,7 @@ module QA
           fill_element :access_level_dropdown, with: group_access
 
           click_button 'Select a group'
-          fill_element :group_select_dropdown_search, group_name
+          fill_element :group_select_dropdown_search_field, group_name
 
           Support::WaitForRequests.wait_for_requests
 

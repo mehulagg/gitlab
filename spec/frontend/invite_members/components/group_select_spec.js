@@ -1,5 +1,4 @@
 import { shallowMount } from '@vue/test-utils';
-import waitForPromises from 'helpers/wait_for_promises';
 import { GlSearchBoxByType } from '@gitlab/ui';
 import GroupSelect from '~/invite_members/components/group_select.vue';
 import Api from '~/api';
@@ -35,12 +34,8 @@ describe('GroupSelect', () => {
     });
   });
 
-  describe('when input is focused', () => {
-    it('calls the API to get groups', async () => {
-      findSearchBoxByType().vm.$emit('focus');
-
-      await waitForPromises();
-
+  describe('when modal is opened', () => {
+    it('calls the API to get the list of groups', async () => {
       expect(Api.groups).toHaveBeenCalled();
     });
   });

@@ -482,6 +482,27 @@ describe('Api', () => {
     });
   });
 
+  describe('projectShareWithGroup', () => {
+    it('invites a group to share access with the authenticated project', () => {
+      const projectId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/share`;
+      const params = {
+        group_id: sharedGroupId,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.projectShareWithGroup(projectId, params).then(({ data }) => {
+        expect(data.status).toBe('success');
+      });
+    });
+  });
+
   describe('projectMilestones', () => {
     it('fetches project milestones', (done) => {
       const projectId = 1;
@@ -634,6 +655,27 @@ describe('Api', () => {
         expect(response.length).toBe(1);
         expect(response[0].name).toBe('test');
         done();
+      });
+    });
+  });
+
+  describe('groupShareWithGroup', () => {
+    it('invites a group to share access with the authenticated group', () => {
+      const groupId = 1;
+      const sharedGroupId = 99;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/share`;
+      const params = {
+        group_id: sharedGroupId,
+        access_level: 10,
+        expires_at: undefined,
+      };
+
+      mock.onPost(expectedUrl).reply(200, {
+        status: 'success',
+      });
+
+      return Api.groupShareWithGroup(groupId, params).then(({ data }) => {
+        expect(data.status).toBe('success');
       });
     });
   });

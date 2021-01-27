@@ -1,23 +1,17 @@
 <script>
-import { GlLink, GlIcon } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
   components: {
-    GlLink,
-    GlIcon,
+    GlButton,
   },
   props: {
     displayText: {
       type: String,
       required: false,
       default: s__('InviteMembers|Invite a group'),
-    },
-    icon: {
-      type: String,
-      required: false,
-      default: '',
     },
     classes: {
       type: String,
@@ -27,17 +21,14 @@ export default {
   },
   methods: {
     openModal() {
-      eventHub.$emit('openInviteGroupModal');
+      eventHub.$emit('openModal', { inviteeType: 'group' });
     },
   },
 };
 </script>
 
 <template>
-  <gl-link :class="classes" data-qa-selector="invite_group_modal_trigger" @click="openModal">
-    <div v-if="icon" class="nav-icon-container">
-      <gl-icon :size="16" :name="icon" />
-    </div>
-    <span class="nav-item-name"> {{ displayText }} </span>
-  </gl-link>
+  <gl-button :class="classes" data-qa-selector="invite_a_group_button" @click="openModal">
+    {{ displayText }}
+  </gl-button>
 </template>

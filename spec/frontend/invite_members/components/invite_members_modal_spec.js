@@ -8,6 +8,7 @@ import InviteMembersModal from '~/invite_members/components/invite_members_modal
 const id = '1';
 const name = 'testgroup';
 const isProject = false;
+const inviteeType = 'members';
 const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, Owner: 50 };
 const defaultAccessLevel = '10';
 const helpLink = 'https://example.com';
@@ -28,6 +29,7 @@ const createComponent = (data = {}) => {
       id,
       name,
       isProject,
+      inviteeType,
       accessLevels,
       defaultAccessLevel,
       helpLink,
@@ -290,14 +292,14 @@ describe('InviteMembersModal', () => {
         const groupPostData = {
           group_id: sharedGroup.id,
           group_access: '10',
-          access_level: '10',
           expires_at: undefined,
           format: 'json',
         };
 
         beforeEach(() => {
-          wrapper = createComponent({ isInviteGroup: true, groupToBeSharedWith: sharedGroup });
+          wrapper = createComponent({ groupToBeSharedWith: sharedGroup });
 
+          wrapper.setData({ inviteeType: 'group' });
           wrapper.vm.$toast = { show: jest.fn() };
           jest.spyOn(Api, 'groupShareWithGroup').mockResolvedValue({ data: groupPostData });
           jest.spyOn(wrapper.vm, 'showToastMessageSuccess');
@@ -316,8 +318,9 @@ describe('InviteMembersModal', () => {
 
       describe('when sharing the group fails', () => {
         beforeEach(() => {
-          wrapper = createComponent({ isInviteGroup: true, groupToBeSharedWith: sharedGroup });
+          wrapper = createComponent({ groupToBeSharedWith: sharedGroup });
 
+          wrapper.setData({ inviteeType: 'group' });
           wrapper.vm.$toast = { show: jest.fn() };
 
           jest

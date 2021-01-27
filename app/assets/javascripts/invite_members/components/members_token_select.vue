@@ -2,7 +2,7 @@
 import { debounce } from 'lodash';
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { USER_SEARCH_DELAY } from '../constants';
+import { SEARCH_DELAY } from '../constants';
 import { getUsers } from '~/rest_api';
 
 export default {
@@ -67,7 +67,7 @@ export default {
         .catch(() => {
           this.loading = false;
         });
-    }, USER_SEARCH_DELAY),
+    }, SEARCH_DELAY),
     handleInput() {
       this.$emit('input', this.selectedTokens);
     },
