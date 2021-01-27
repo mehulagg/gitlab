@@ -33,7 +33,7 @@ module QA
       end
 
       def api_get_path
-        "/projects/#{project.id}/snippets/#{snippet_id}"
+        "/projects/#{project.id}/snippets/#{id}"
       end
 
       def api_post_path
