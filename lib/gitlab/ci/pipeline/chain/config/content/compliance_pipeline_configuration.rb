@@ -6,7 +6,7 @@ module Gitlab
       module Chain
         module Config
           class Content
-            class GroupPipelineConfiguration < Source
+            class CompliancePipelineConfiguration < Source
               def content
                 strong_memoize(:content) do
                   next unless pipeline_configuration_full_path
@@ -25,7 +25,7 @@ module Gitlab
               def pipeline_configuration_full_path
                 return unless project
 
-                project.group_pipeline_configuration_full_path
+                project.compliance_pipeline_configuration_full_path
               end
             end
           end
