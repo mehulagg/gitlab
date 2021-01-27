@@ -110,6 +110,7 @@ RSpec.describe Projects::IssuesController do
             issue = project.issues.last
             expect(issue.title).to eq('Title')
             expect(issue.description).to eq('Description')
+            expect(issue.confidential).to be false
           end
 
           context 'when vulnerability already has a linked issue' do
@@ -131,7 +132,7 @@ RSpec.describe Projects::IssuesController do
             post :create, params: {
               namespace_id: project.namespace.to_param,
               project_id: project,
-              issue: { title: 'Title', description: 'Description' },
+              issue: { title: 'Title', description: 'Description', confidential: 'false' },
               vulnerability_id: vulnerability.id
             }
           end
