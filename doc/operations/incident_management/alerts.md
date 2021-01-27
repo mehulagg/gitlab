@@ -198,7 +198,7 @@ add a to-do item:
 1. Select your desired alert to display its **Alert Management Details View**.
 1. Select the **Add a To-Do** button in the right sidebar:
 
-   ![Alert Details Add a To-Do](img/alert_detail_add_todo_v13_1.png)
+   ![Alert Details Add a To-Do](img/alert_detail_add_todo_v13_9.png)
 
 Select the **To-Do List** **{todo-done}** in the navigation bar to view your current to-do list.
 
