@@ -79,21 +79,6 @@ RSpec.describe GroupWiki do
         it 'returns the default shard' do
           expect(subject.repository_storage).to eq('default')
         end
-
-        context 'when multiple shards are configured' do
-          let(:shards) { (1..).each }
-
-          before do
-            # Force pick_storage_shard to always return a different value
-            allow(Repository).to receive(:pick_storage_shard) { "storage-#{shards.next}" }
-          end
-
-          it 'always returns the same shard when called repeatedly' do
-            shard = subject.repository_storage
-
-            expect(subject.repository_storage).to eq(shard)
-          end
-        end
       end
 
       context 'when a tracking entry exists' do
