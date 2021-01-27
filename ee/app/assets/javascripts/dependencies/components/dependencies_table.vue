@@ -10,7 +10,6 @@ import {
   GlLink,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
 import DependencyLocation from './dependency_location.vue';
@@ -45,7 +44,6 @@ export default {
     GlPopover,
     GlLink,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     dependencies: {
       type: Array,
@@ -115,25 +113,23 @@ export default {
   >
     <template #head(location)="data">
       {{ data.label }}
-      <template v-if="glFeatures.pathToVulnerableDependency">
-        <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
-        <gl-popover
-          target="location-info"
-          triggers="hover focus"
-          placement="top"
-          :title="s__('Dependencies|Location and dependency path')"
-        >
-          {{ $options.i18n.tooltipText }}
-          <div class="gl-mt-4">
-            <gl-link
-              :href="$options.DEPENDENCY_PATH_LINK"
-              target="_blank"
-              class="font-size-inherit"
-              >{{ $options.i18n.tooltipMoreText }}</gl-link
-            >
-          </div>
-        </gl-popover>
-      </template>
+      <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
+      <gl-popover
+        target="location-info"
+        triggers="hover focus"
+        placement="top"
+        :title="s__('Dependencies|Location and dependency path')"
+      >
+        {{ $options.i18n.tooltipText }}
+        <div class="gl-mt-4">
+          <gl-link
+            :href="$options.DEPENDENCY_PATH_LINK"
+            target="_blank"
+            class="font-size-inherit"
+            >{{ $options.i18n.tooltipMoreText }}</gl-link
+          >
+        </div>
+      </gl-popover>
     </template>
 
     <!-- toggleDetails and detailsShowing are scoped slot props provided by

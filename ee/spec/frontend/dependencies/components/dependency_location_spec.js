@@ -12,11 +12,6 @@ describe('Dependency Location component', () => {
     wrapper = shallowMount(DependencyLocation, {
       propsData: { ...propsData },
       stubs: { GlLink, DependencyPathViewer, GlIntersperse },
-      provide: {
-        glFeatures: {
-          pathToVulnerableDependency: true,
-        },
-      },
       ...options,
     });
   };
@@ -85,25 +80,6 @@ describe('Dependency Location component', () => {
 
     it('should not render the popover', () => {
       expect(findPopover().exists()).toBe(false);
-    });
-  });
-
-  describe('with feature flag off', () => {
-    it.each`
-      name                | location              | path
-      ${'no path'}        | ${Paths.noPath}       | ${'package.json'}
-      ${'top level path'} | ${Paths.topLevelPath} | ${'package.json'}
-      ${'short path'}     | ${Paths.shortPath}    | ${'package.json'}
-      ${'long path'}      | ${Paths.longPath}     | ${'package.json'}
-    `('do not show dependency path for $name', ({ location, path }) => {
-      createComponent({
-        propsData: {
-          location,
-        },
-        provide: { glFeatures: { pathToVulnerableDependency: false } },
-      });
-
-      expect(wrapper.text()).toBe(path);
     });
   });
 });
