@@ -382,6 +382,8 @@ db:gitlabcom-database-testing:
   image: ruby:2.7-alpine
   needs: []
   allow_failure: true
+  rules:
+    - if: '$GITLABCOM_DATABASE_TESTING_TRIGGER_TOKEN'
   script:
     - source scripts/utils.sh
     - install_gitlab_gem
