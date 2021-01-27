@@ -22,6 +22,8 @@ module QA
             EE::Resource::License.fabricate!(ENV['EE_LICENSE'])
           end
         end
+
+        Runtime::ApplicationSettings.set_application_settings(default_branch_name: 'main')
       end
     end
   end
