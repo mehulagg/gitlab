@@ -32,7 +32,7 @@ providers:
 - [Okta](okta.md)
 - [Salesforce](../../integration/salesforce.md)
 - [SAML](../../integration/saml.md)
-- [SAML for GitLab.com groups](../../user/group/saml_sso/index.md) **(SILVER ONLY)**
+- [SAML for GitLab.com groups](../../user/group/saml_sso/index.md) **(PREMIUM SAAS)**
 - [Shibboleth](../../integration/shibboleth.md)
 - [Smartcard](smartcard.md) **(PREMIUM ONLY)**
 - [Twitter](../../integration/twitter.md)

@@ -282,7 +282,7 @@ group.
 | Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
 | Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(SILVER ONLY)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
 | View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
 | View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
