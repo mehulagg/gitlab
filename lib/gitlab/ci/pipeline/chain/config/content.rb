@@ -9,7 +9,6 @@ module Gitlab
             include Chain::Helpers
 
             SOURCES = [
-              Gitlab::Ci::Pipeline::Chain::Config::Content::CompliancePipelineConfiguration,
               Gitlab::Ci::Pipeline::Chain::Config::Content::Parameter,
               Gitlab::Ci::Pipeline::Chain::Config::Content::Bridge,
               Gitlab::Ci::Pipeline::Chain::Config::Content::Repository,
@@ -35,12 +34,16 @@ module Gitlab
             private
 
             def find_config
-              SOURCES.each do |source|
+              sources.each do |source|
                 config = source.new(@pipeline, @command)
                 return config if config.exists?
               end
 
               nil
+            end
+
+            def sources
+              SOURCES
             end
           end
         end
@@ -48,3 +51,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Pipeline::Chain::Config::Content.prepend_if_ee('EE::Gitlab::Ci::Pipeline::Chain::Config::Content')
