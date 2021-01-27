@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab CI/CD pipeline configuration reference
+# Keyword reference for the .gitlab-ci.yml file
 
 This document lists the configuration options for your GitLab `.gitlab-ci.yml` file.
 
@@ -223,7 +223,7 @@ stages:
 If any job fails, the pipeline is marked as `failed` and jobs in later stages do not
 start. Jobs in the current stage are not stopped and continue to run.
 
-If no `stages` are defined in `.gitlab-ci.yml`, then `build`, `test` and `deploy`
+If no `stages` are defined in the `.gitlab-ci.yml` file, then `build`, `test` and `deploy`
 are the default pipeline stages.
 
 If a job does not specify a [`stage`](#stage), the job is assigned the `test` stage.
@@ -342,7 +342,7 @@ include:
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Core in 11.4.
 
 Use the `include` keyword to include external YAML files in your CI/CD configuration.
-You can break down one long `gitlab-ci.yml` into multiple files to increase readability,
+You can break down one long `gitlab-ci.yml` file into multiple files to increase readability,
 or reduce duplication of the same configuration in multiple places.
 
 You can also store template files in a central repository and `include` them in projects.
@@ -363,19 +363,19 @@ use the [`extends` keyword](#extends).
 | [`remote`](#includeremote)      | Include a file from a remote URL. Must be publicly accessible.    |
 | [`template`](#includetemplate)  | Include templates that are provided by GitLab.                    |
 
-`.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
+The `.gitlab-ci.yml` file configuration included by all methods is evaluated when the pipeline is created.
 The configuration is a snapshot in time and persisted in the database. Any changes to
-referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
+the referenced `.gitlab-ci.yml` file configuration is not reflected in GitLab until the next pipeline is created.
 
 The files defined by `include` are:
 
-- Deep merged with those in `.gitlab-ci.yml`.
-- Always evaluated first and merged with the content of `.gitlab-ci.yml`,
+- Deep merged with those in the `.gitlab-ci.yml` file.
+- Always evaluated first and merged with the content of the `.gitlab-ci.yml` file,
   regardless of the position of the `include` keyword.
 
 NOTE:
 Use merging to customize and override included CI/CD configurations with local
-definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
+definitions. Local definitions in the `.gitlab-ci.yml` file override included definitions.
 
 #### Variables with `include` **(CORE ONLY)**
 
@@ -383,7 +383,7 @@ definitions. Local definitions in `.gitlab-ci.yml` override included definitions
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/294294) in GitLab 13.9.
 
 You can [use some predefined variables in `include` sections](../variables/where_variables_can_be_used.md#gitlab-ciyml-file)
-in your `.gitlab-ci.yml`:
+in your `.gitlab-ci.yml` file:
 
 ```yaml
 include:
@@ -396,10 +396,10 @@ see the following [CI variable demo](https://youtu.be/4XR8gw3Pkos).
 
 #### `include:local`
 
-`include:local` includes a file from the same repository as `.gitlab-ci.yml`.
+`include:local` includes a file that is in the same repository as the `.gitlab-ci.yml` file.
 It's referenced with full paths relative to the root directory (`/`).
 
-If you use `include:local`, make sure that both `.gitlab-ci.yml` and the local file
+If you use `include:local`, make sure that both the `.gitlab-ci.yml` file and the local file
 are on the same branch.
 
 You can't include local files through Git submodules paths.
@@ -785,7 +785,7 @@ User-defined stages are executed after `.pre` and before `.post`.
 
 A pipeline is not created if all jobs are in `.pre` or `.post` stages.
 
-The order of `.pre` and `.post` can't be changed, even if defined out of order in `.gitlab-ci.yml`.
+The order of `.pre` and `.post` can't be changed, even if defined out of order in the `.gitlab-ci.yml` file.
 For example, the following are equivalent configuration:
 
 - Configured in order:
@@ -972,7 +972,7 @@ For example, if you have a local `included.yml` file:
     - echo Hello!
 ```
 
-Then, in `.gitlab-ci.yml`:
+Then, in the `.gitlab-ci.yml` file:
 
 ```yaml
 include: included.yml
@@ -3903,7 +3903,7 @@ To avoid these errors, the `resource_group` attribute can be used to ensure that
 the runner doesn't run certain jobs simultaneously. Resource groups behave similar
 to semaphores in other programming languages.
 
-When the `resource_group` key is defined for a job in `.gitlab-ci.yml`,
+When the `resource_group` key is defined for a job in the `.gitlab-ci.yml` file,
 job executions are mutually exclusive across different pipelines for the same project.
 If multiple jobs belonging to the same resource group are enqueued simultaneously,
 only one of the jobs is picked by the runner. The other jobs wait until the
@@ -4298,7 +4298,7 @@ You can also use variables to configure how many times a runner
 
 It's possible to use special YAML features like anchors (`&`), aliases (`*`)
 and map merging (`<<`). Use these features to reduce the complexity
-of `.gitlab-ci.yml`.
+of the code in the `.gitlab-ci.yml` file.
 
 Read more about the various [YAML features](https://learnxinyminutes.com/docs/yaml/).
 
