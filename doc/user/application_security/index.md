@@ -132,7 +132,7 @@ with this approach, however, and there is a
 > - It's enabled on GitLab.com.
 > - It can be enabled or disabled for a single project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -652,7 +652,7 @@ Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-a
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
 
-### Enable or disable the basic security widget **(CORE ONLY)**
+### Enable or disable the basic security widget **(FREE SELF)**
 
 The basic security widget is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.

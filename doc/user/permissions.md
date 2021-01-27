@@ -172,7 +172,7 @@ The following table depicts the various user permission levels in a project.
 | Delete wiki pages                                 |         |            |             | ✓        | ✓      |
 | View project Audit Events                         |         |            |  ✓ (*12*)   | ✓        | ✓      |
 | Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](project/settings/project_access_tokens.md) **(CORE ONLY)** |         |            |             | ✓        | ✓      |
+| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** |         |            |             | ✓        | ✓      |
 | Switch visibility level                           |         |            |             |          | ✓      |
 | Transfer project to another namespace             |         |            |             |          | ✓      |
 | Rename project                                    |         |            |             |          | ✓      |
@@ -314,7 +314,7 @@ nested groups if you have membership in one of its parents.
 To learn more, read through the documentation on
 [subgroups memberships](group/subgroups/index.md#membership).
 
-## External users **(CORE ONLY)**
+## External users **(FREE SELF)**
 
 In cases where it is desired that a user has access only to some internal or
 private projects, there is the option of creating **External Users**. This

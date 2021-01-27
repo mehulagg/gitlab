@@ -102,7 +102,7 @@ based on the [JSON Schema Store](https://www.schemastore.org/json/).
 The Web IDE has validation for certain files built in. This feature is only supported for
 the `*.gitlab-ci.yml` files.
 
-#### Enable or disable validation based on predefined schemas **(CORE ONLY)**
+#### Enable or disable validation based on predefined schemas **(FREE SELF)**
 
 Validation based on predefined schemas is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default** for self-managed instances,

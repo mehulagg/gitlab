@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index
 ---
 
-# Admin Area settings **(CORE ONLY)**
+# Admin Area settings **(FREE SELF)**
 
 As an administrator of a GitLab self-managed instance, you can manage the behavior of your deployment. To do so, select **Admin Area > Settings**.
 
