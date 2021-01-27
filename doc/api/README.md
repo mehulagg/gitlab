@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # API Docs
 
-Automate GitLab by using a simple and powerful API.
+Automate GitLab by using a simple and powerful RESTful API.
 
 The main GitLab API is a [REST](http://spec.openapis.org/oas/v3.0.3)
 API. Because of this, the documentation in this section assumes that you're
