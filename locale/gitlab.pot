@@ -31995,10 +31995,10 @@ msgstr ""
 msgid "Welcome to GitLab"
 msgstr ""
 
-msgid "Welcome to GitLab%{br_tag}%{name}!"
+msgid "Welcome to GitLab, %{first_name}!"
 msgstr ""
 
-msgid "Welcome to GitLab, %{first_name}!"
+msgid "Welcome to GitLab,%{br_tag}%{name}!"
 msgstr ""
 
 msgid "Welcome to the guided GitLab tour"
