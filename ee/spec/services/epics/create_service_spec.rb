@@ -82,6 +82,25 @@ RSpec.describe Epics::CreateService do
           expect(subject.valid?).to be false
         end
       end
+
+      context 'when description param has quick action' do
+        context 'for /parent_epic' do
+          before do
+            stub_licensed_features(epics: true, subepics: true)
+            group.add_developer(user)
+          end
+
+          it 'assigns parent epic' do
+            parent_epic = create(:epic, group: group)
+            content = "/parent_epic #{parent_epic.to_reference}"
+            params = { title: 'New epic with parent', description: content }
+
+            epic = described_class.new(group, user, params).execute
+
+            expect(epic.parent).to eq(parent_epic)
+          end
+        end
+      end
     end
   end
 end

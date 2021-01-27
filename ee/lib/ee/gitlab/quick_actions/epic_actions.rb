@@ -15,7 +15,7 @@ module EE
             _("Adds %{epic_ref} as child epic.") % { epic_ref: child_epic.to_reference(quick_action_target) } if child_epic
           end
           types Epic
-          condition { action_allowed? }
+          condition { action_allowed_only_on_update? }
           params '<&epic | group&epic | Epic URL>'
           command :child_epic do |epic_param|
             child_epic = extract_epic(epic_param)
@@ -30,7 +30,7 @@ module EE
             _("Removes %{epic_ref} from child epics.") % { epic_ref: child_epic.to_reference(quick_action_target) } if child_epic
           end
           types Epic
-          condition { action_allowed? }
+          condition { action_allowed_only_on_update? }
           params '<&epic | group&epic | Epic URL>'
           command :remove_child_epic do |epic_param|
             child_epic = extract_epic(epic_param)
@@ -57,7 +57,11 @@ module EE
           command :parent_epic do |epic_param|
             parent_epic = extract_epic(epic_param)
 
-            @execution_message[:parent_epic] = set_parent_epic(quick_action_target, parent_epic)
+            if quick_action_target.persisted?
+              @execution_message[:parent_epic] = set_parent_epic(quick_action_target, parent_epic)
+            else
+              @updates[:assign_parent_epic_id] = parent_epic.id
+            end
           end
 
           desc _('Remove parent epic from an epic')
@@ -67,7 +71,7 @@ module EE
             _('Removes parent epic %{epic_ref}.') % { epic_ref: parent_epic.to_reference(quick_action_target) } if parent_epic
           end
           types Epic
-          condition { action_allowed? }
+          condition { action_allowed_only_on_update? }
           command :remove_parent_epic do
             parent_epic = quick_action_target.parent
 
@@ -90,9 +94,12 @@ module EE
           end
 
           def action_allowed?
-            quick_action_target.persisted? &&
-              quick_action_target.group&.feature_available?(:subepics) &&
+            quick_action_target.group&.feature_available?(:subepics) &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
+          end
+
+          def action_allowed_only_on_update?
+            quick_action_target.persisted? && action_allowed?
           end
 
           def epics_related?(epic, target_epic)
