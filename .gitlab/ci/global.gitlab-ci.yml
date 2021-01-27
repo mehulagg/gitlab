@@ -23,7 +23,7 @@
       - vendor/ruby/
       - vendor/gitaly-ruby/
       - .go/pkg/mod/
-    policy: pull
+    policy: pull-push
 
 .rails-cache:
   cache:
@@ -31,7 +31,7 @@
     paths:
       - vendor/ruby/
       - vendor/gitaly-ruby/
-    policy: pull
+    policy: pull-push
 
 .static-analysis-cache:
   cache:
