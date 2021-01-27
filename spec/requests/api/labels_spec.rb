@@ -10,14 +10,15 @@ RSpec.describe API::Labels do
     else
       label_id = spec_params[:name] || spec_params[:label_id]
 
-      put api("/projects/#{project.id}/labels/#{label_id}", user),
+      put api("/projects/#{project.id}/labels/#{ERB::Util.url_encode(label_id)}", user),
           params: request_params.merge(spec_params.except(:name, :id))
     end
   end
 
-  let_it_be(:valid_label_title_1) { 'labelFoobar:subgroup::v.1' }
-  let_it_be(:valid_label_title_2) { 'labelFoobar:subgroup::v.2' }
-  let_it_be(:valid_group_label_title_1) { 'Grouplabelfoobar:sub::v.1' }
+  let_it_be(:valid_label_title_1) { 'Label foo & bar:subgroup::v.1' }
+  let_it_be(:valid_label_title_1_esc) { ERB::Util.url_encode(valid_label_title_1) }
+  let_it_be(:valid_label_title_2) { 'Label bar & foo:subgroup::v.2' }
+  let_it_be(:valid_group_label_title_1) { 'Group label foobar:sub::v.1' }
 
   let(:user) { create(:user) }
   let(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
@@ -145,7 +146,7 @@ RSpec.describe API::Labels do
         priority: nil
       }.merge(spec_params.except(:name, :id))
 
-      put api("/projects/#{project.id}/labels/#{label_id}", user),
+      put api("/projects/#{project.id}/labels/#{ERB::Util.url_encode(label_id)}", user),
           params: request_params
 
       expect(response).to have_gitlab_http_status(:ok)
@@ -171,7 +172,7 @@ RSpec.describe API::Labels do
 
     it 'returns 204 for existing label (rest route)' do
       label_id = spec_params[:name] || spec_params[:label_id]
-      delete api("/projects/#{project.id}/labels/#{label_id}", user), params: spec_params.except(:name, :label_id)
+      delete api("/projects/#{project.id}/labels/#{ERB::Util.url_encode(label_id)}", user), params: spec_params.except(:name, :label_id)
 
       expect(response).to have_gitlab_http_status(:no_content)
     end
@@ -408,7 +409,7 @@ RSpec.describe API::Labels do
     it 'returns 409 if label already exists in project' do
       post api("/projects/#{project.id}/labels", user),
            params: {
-             name: label1.title,
+             name: valid_label_title_1,
              color: '#FFAABB'
            }
       expect(response).to have_gitlab_http_status(:conflict)
@@ -450,14 +451,14 @@ RSpec.describe API::Labels do
 
     it_behaves_like '412 response' do
       let(:request) { api("/projects/#{project.id}/labels", user) }
-      let(:params) { { name: label1.title } }
+      let(:params) { { name: valid_label_title_1 } }
     end
   end
 
   describe 'PUT /projects/:id/labels' do
     context 'when using name' do
       it_behaves_like 'label update API' do
-        let(:spec_params) { { name: label1.title } }
+        let(:spec_params) { { name: valid_label_title_1 } }
         let(:expected_response_label_id) { label1.id }
       end
     end
@@ -575,7 +576,7 @@ RSpec.describe API::Labels do
   describe "POST /projects/:id/labels/:label_id/subscribe" do
     context "when label_id is a label title" do
       it "subscribes to the label" do
-        post api("/projects/#{project.id}/labels/#{label1.title}/subscribe", user)
+        post api("/projects/#{project.id}/labels/#{valid_label_title_1_esc}/subscribe", user)
 
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
@@ -621,7 +622,7 @@ RSpec.describe API::Labels do
 
     context "when label_id is a label title" do
       it "unsubscribes from the label" do
-        post api("/projects/#{project.id}/labels/#{label1.title}/unsubscribe", user)
+        post api("/projects/#{project.id}/labels/#{valid_label_title_1_esc}/unsubscribe", user)
 
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
