@@ -118,6 +118,7 @@ The following metrics are available:
 | `gitlab_external_http_total`                                   | Counter   |                   13.8 | Total number of HTTP calls to external systems | `controller`, `action` |
 | `gitlab_external_http_duration_seconds`                        | Counter   |                   13.8 | Duration in seconds spent on each HTTP call to external systems | |
 | `gitlab_external_http_exception_total`                         | Counter   |                   13.8 | Total number of exceptions raised when making external HTTP calls | |
+| `ci_report_parser_duration_seconds`                            | Histogram |                   13.9 | Duration of parsing a CI report artifact                                                            | `parser`                                            |
 
 ## Metrics controlled by a feature flag
 
