@@ -40,11 +40,10 @@ RSpec.describe 'Pipeline', :js do
         it 'expands the upstream on click' do
           subject
 
-          # live_debug
           wait_for_all_requests
           page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
           wait_for_requests
-          expect(page).to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+          expect(page).to have_selector("#pipeline-links-container-#{upstream_pipeline.id}")
         end
 
         it 'closes the expanded upstream on click' do
@@ -57,7 +56,7 @@ RSpec.describe 'Pipeline', :js do
           # close
           page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
 
-          expect(page).not_to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+          expect(page).not_to have_selector("#pipeline-links-container-#{upstream_pipeline.id}")
         end
       end
 
@@ -74,7 +73,7 @@ RSpec.describe 'Pipeline', :js do
 
           page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
           wait_for_requests
-          expect(page).to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+          expect(page).to have_selector("#pipeline-links-container-#{downstream_pipeline.id}")
         end
 
         it 'closes the expanded downstream on click' do
@@ -87,7 +86,7 @@ RSpec.describe 'Pipeline', :js do
           # close
           page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
 
-          expect(page).not_to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+          expect(page).not_to have_selector("#pipeline-links-container-#{downstream_pipeline.id}")
         end
       end
     end
@@ -124,7 +123,7 @@ RSpec.describe 'Pipeline', :js do
       it 'displays the pipeline graph' do
         expect(current_path).to eq(pipeline_path(pipeline))
         expect(page).not_to have_css('#js-tab-security')
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
       end
     end
   end
@@ -162,7 +161,7 @@ RSpec.describe 'Pipeline', :js do
       it 'displays the pipeline graph' do
         expect(current_path).to eq(pipeline_path(pipeline))
         expect(page).not_to have_content('Licenses')
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
       end
     end
   end

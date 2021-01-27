@@ -68,7 +68,7 @@ RSpec.describe 'Pipeline', :js do
     it 'shows the pipeline graph' do
       visit_pipeline
 
-      expect(page).to have_selector('.pipeline-visualization')
+      expect(page).to have_selector('.js-pipeline-graph')
       expect(page).to have_content('Build')
       expect(page).to have_content('Test')
       expect(page).to have_content('Deploy')
@@ -656,7 +656,7 @@ RSpec.describe 'Pipeline', :js do
       end
 
       it 'shows the pipeline graph' do
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
         expect(page).to have_content('Build')
         expect(page).to have_content('Test')
         expect(page).to have_content('Deploy')
@@ -696,7 +696,7 @@ RSpec.describe 'Pipeline', :js do
       end
 
       it 'shows the pipeline with a bridge job' do
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
         expect(page).to have_content('cross-build')
       end
 
@@ -776,13 +776,13 @@ RSpec.describe 'Pipeline', :js do
           expect(page).to have_content('pending')
         end
 
-        within('.pipeline-graph') do
-          within '.stage-column:nth-child(1)' do
+        within('.js-pipeline-graph') do
+          within 'div[id*=pipeline-links-container] > div > div:nth-of-type(1)' do
             expect(page).to have_content('test')
             expect(page).to have_css('.ci-status-icon-pending')
           end
 
-          within '.stage-column:nth-child(2)' do
+          within 'div[id*=pipeline-links-container] > div > div:nth-of-type(2)' do
             expect(page).to have_content('deploy')
             expect(page).to have_css('.ci-status-icon-created')
           end
@@ -801,13 +801,13 @@ RSpec.describe 'Pipeline', :js do
             expect(page).to have_content('running')
           end
 
-          within('.pipeline-graph') do
-            within '.stage-column:nth-child(1)' do
+          within('.js-pipeline-graph') do
+            within 'div[id*=pipeline-links-container] > div > div:nth-of-type(1)' do
               expect(page).to have_content('test')
               expect(page).to have_css('.ci-status-icon-success')
             end
 
-            within '.stage-column:nth-child(2)' do
+            within 'div[id*=pipeline-links-container] > div > div:nth-of-type(2)' do
               expect(page).to have_content('deploy')
               expect(page).to have_css('.ci-status-icon-pending')
             end
@@ -830,8 +830,8 @@ RSpec.describe 'Pipeline', :js do
             expect(page).to have_content('waiting')
           end
 
-          within('.pipeline-graph') do
-            within '.stage-column:nth-child(2)' do
+          within('.js-pipeline-graph') do
+            within 'div[id*=pipeline-links-container] > div > div:nth-of-type(2)' do
               expect(page).to have_content('deploy')
               expect(page).to have_css('.ci-status-icon-waiting-for-resource')
             end
@@ -850,8 +850,8 @@ RSpec.describe 'Pipeline', :js do
               expect(page).to have_content('running')
             end
 
-            within('.pipeline-graph') do
-              within '.stage-column:nth-child(2)' do
+            within('.js-pipeline-graph') do
+              within 'div[id*=pipeline-links-container] > div > div:nth-of-type(2)' do
                 expect(page).to have_content('deploy')
                 expect(page).to have_css('.ci-status-icon-pending')
               end
@@ -1077,7 +1077,7 @@ RSpec.describe 'Pipeline', :js do
 
         expect(current_path).to eq(pipeline_path(pipeline))
         expect(page).not_to have_content('Failed Jobs')
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
       end
     end
   end
