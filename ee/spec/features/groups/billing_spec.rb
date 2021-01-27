@@ -78,7 +78,6 @@ RSpec.describe 'Groups > Billing', :js do
 
     context 'with disabled feature flags' do
       before do
-        stub_feature_flags(saas_manual_renew_button: false)
         stub_feature_flags(saas_add_seats_button: false)
         visit group_billings_path(group)
       end
@@ -113,13 +112,6 @@ RSpec.describe 'Groups > Billing', :js do
   context 'with feature flags' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:saas_manual_renew_button, :saas_add_seats_button) do
-      true | true
-      true | false
-      false | true
-      false | false
-    end
-
     let(:plan) { 'bronze' }
 
     let_it_be(:subscription) do
@@ -128,7 +120,6 @@ RSpec.describe 'Groups > Billing', :js do
 
     with_them do
       before do
-        stub_feature_flags(saas_manual_renew_button: saas_manual_renew_button)
         stub_feature_flags(saas_add_seats_button: saas_add_seats_button)
       end
 
@@ -136,8 +127,7 @@ RSpec.describe 'Groups > Billing', :js do
         visit group_billings_path(group)
 
         expect(page).to have_pushed_frontend_feature_flags(
-          saasAddSeatsButton: saas_add_seats_button,
-          saasManualRenewButton: saas_manual_renew_button
+          saasAddSeatsButton: saas_add_seats_button
         )
       end
     end

@@ -53,7 +53,7 @@ export default {
       return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
     },
     canRenew() {
-      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
+      return !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;
