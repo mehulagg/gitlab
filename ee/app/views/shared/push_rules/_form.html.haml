@@ -24,48 +24,38 @@
     The list of rejected file names is available in the #{link_to "documentation", help_page_path('push_rules/push_rules')}.
 
 .form-group
-  = f.label :commit_message_regex, "Require commit message expression", class: "label-bold"
+  = f.label :commit_message_regex, "Require expression in commit messages", class: "label-bold"
   = f.text_field :commit_message_regex, class: "form-control", placeholder: 'Example: Fixes \d+\..*', data: { qa_selector: 'commit_message_field' }
   .form-text.text-muted
-    All commit messages must contain this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If empty, GitLab doesn't require any expression in commit messages.
+    All commit messages must contain this #{link_to "regular expression", 'https://github.com/google/re2/wiki/Syntax'}.
+    If empty, GitLab doesn't require commit messages to contain any expression.
 
 .form-group
-  = f.label :commit_message_negative_regex, "Reject commit message expression", class: 'label-bold'
+  = f.label :commit_message_negative_regex, "Reject expression in commit messages", class: 'label-bold'
   = f.text_field :commit_message_negative_regex, class: "form-control", placeholder: 'Example: ssh\:\/\/', data: { qa_selector: 'deny_commit_message_field' }
   .form-text.text-muted
-    Commit messages cannot contain this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
-    If left empty, GitLab doesn't reject any expression in commit messages.
+    Commit messages cannot contain this #{link_to "regular expression", 'https://github.com/google/re2/wiki/Syntax'}.
+    If left empty, GitLab doesn't reject commit messages with any expression.
 
 .form-group
   = f.label :branch_name_regex, "Branch name", class: "label-bold"
   = f.text_field :branch_name_regex, class: "form-control", placeholder: 'Example: (feature|hotfix)\/*', data: { qa_selector: 'branch_name_field' }
   .form-text.text-muted
-    All branch names must contain this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
+    All branch names must contain this #{link_to "regular expression", 'https://github.com/google/re2/wiki/Syntax'}.
     If left empty, GitLab allows any branch name.
 
 .form-group
   = f.label :author_email_regex, "Commit author's email", class: "label-bold"
   = f.text_field :author_email_regex, class: "form-control", placeholder: _('Example: @sub\.company\.com$'), data: { qa_selector: 'author_email_field' }
   .form-text.text-muted
-    All commit author's email must contain this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
+    All commit author's email must contain this #{link_to "regular expression", 'https://github.com/google/re2/wiki/Syntax'}.
     If left empty, GitLab allows any email.
 
 .form-group
   = f.label :file_name_regex, "Prohibited file names", class: "label-bold"
   = f.text_field :file_name_regex, class: "form-control", placeholder: 'Example: (jar|exe)$', data: { qa_selector: 'file_name_field' }
   .form-text.text-muted
-    All committed filenames cannot contain this
-    = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
-    to be pushed.
+    All committed filenames cannot contain this #{link_to "regular expression", 'https://github.com/google/re2/wiki/Syntax'}.
     If left empty, GitLab allows any filenames.
 
 .form-group
