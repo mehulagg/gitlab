@@ -141,9 +141,9 @@ Users can optionally specify an expiration date for
 [personal access tokens](../../profile/personal_access_tokens.md).
 This expiration date is not a requirement, and can be set to any arbitrary date.
 
-Personal access tokens are the only token needed for programmatic access to GitLab.
-However, organizations with security requirements may want to enforce more protection to require
-regular rotation of these tokens.
+Personal access tokens are the only tokens needed for programmatic access to GitLab.
+However, organizations with security requirements may want to enforce more protection by
+requiring the regular rotation of these tokens.
 
 ### Setting a limit
 
