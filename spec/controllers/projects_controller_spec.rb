@@ -5,6 +5,7 @@ require('spec_helper')
 RSpec.describe ProjectsController do
   include ExternalAuthorizationServiceHelpers
   include ProjectForksHelper
+  using RSpec::Parameterized::TableSyntax
 
   let_it_be(:project, reload: true) { create(:project, service_desk_enabled: false) }
   let_it_be(:public_project) { create(:project, :public) }
@@ -324,14 +325,37 @@ RSpec.describe ProjectsController do
       end
     end
 
-    context "redirection from http://someproject.git" do
-      it 'redirects to project page (format.html)' do
-        project = create(:project, :public)
+    context 'redirection from http://someproject.git' do
+      where(:user_type, :project_visibility, :expected_status, :expected_redirect) do
+        :anonymous | :public   | :found | :redirect_to_project
+        :anonymous | :internal | :found | :redirect_to_signup
+        :anonymous | :private  | :found | :redirect_to_signup
 
-        get :show, params: { namespace_id: project.namespace, id: project }, format: :git
+        :signed_in | :public   | :found     | :redirect_to_project
+        :signed_in | :internal | :found     | :redirect_to_project
+        :signed_in | :private  | :not_found | nil
 
-        expect(response).to have_gitlab_http_status(:found)
-        expect(response).to redirect_to(namespace_project_path)
+        :member | :public   | :found | :redirect_to_project
+        :member | :internal | :found | :redirect_to_project
+        :member | :private  | :found | :redirect_to_project
+      end
+
+      with_them do
+        let(:project) { create(:project, project_visibility) }
+        let(:user) { create(:user) }
+
+        let(:redirect_to_signup) { new_user_session_path }
+        let(:redirect_to_project) { project_path(project) }
+
+        it do
+          project.team.add_user(user, :guest) if user_type == :member
+          sign_in(user) unless user_type == :anonymous
+
+          get :show, params: { namespace_id: project.namespace, id: project }, format: :git
+
+          expect(response).to have_gitlab_http_status(expected_status)
+          expect(response).to redirect_to(send(expected_redirect)) if expected_status == :found
+        end
       end
     end
 
