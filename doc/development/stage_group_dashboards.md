@@ -145,4 +145,7 @@ stageGroupDashboards.dashboard('source_code')
 
 ![Stage Group Dashboard Customization](img/stage_group_dashboards_time_customization.png)
 
+We've recorded a pairing session customizing a dashboard if you want to see the worklow in action.
+It is available on [GitLab Unfiltered](https://youtu.be/shEd_eiUjdI).
+
 For deeper customization and more complicated metrics, visit the [Grafonnet lib](https://github.com/grafana/grafonnet-lib) project and the [GitLab Prometheus Metrics](../administration/monitoring/prometheus/gitlab_metrics.md#gitlab-prometheus-metrics) documentation.
