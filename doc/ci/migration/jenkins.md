@@ -89,13 +89,13 @@ There are some high level differences between the products worth mentioning:
   permissions), and then any project can use them. This central project could also
   contain scripts or other reusable code.
 - You can also use the [`extends` keyword](../yaml/README.md#extends) to reuse configuration
-  within a single pipeline configuration.
-- All jobs within a single stage always run in parallel, and all stages run in sequence. We are planning
+  in a single pipeline configuration.
+- All jobs in a single stage always run in parallel, and all stages run in sequence. We are planning
   to allow certain jobs to break this sequencing as needed with our [directed acyclic graph](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/47063)
   feature.
 - The [`parallel`](../yaml/README.md#parallel) keyword can automatically parallelize tasks,
   like tests that support parallelization.
-- Normally all jobs within a single stage run in parallel, and all stages run in sequence.
+- Normally all jobs in a single stage run in parallel, and all stages run in sequence.
   There are different [pipeline architectures](../pipelines/pipeline_architectures.md)
   that allow you to change this behavior.
 - The new [`rules` syntax](../yaml/README.md#rules) is the recommended method of
@@ -114,7 +114,7 @@ There are some high level differences between the products worth mentioning:
 - GitLab comes with a [container registry](../../user/packages/container_registry/index.md), and we recommend using
   container images to set up your build environment. For example, set up one pipeline that builds your build environment
   itself and publish that to the container registry. Then, have your pipelines use this instead of each building their
-  own environment, which is slower and may be less consistent. We have extensive docs on [how to use the Container Registry](../../user/packages/container_registry/index.md).
+  own environment, which is slower and may be less consistent. We have extensive documentation on [how to use the Container Registry](../../user/packages/container_registry/index.md).
 - A central utilities repository can be a great place to put assorted scheduled jobs
   or other manual jobs that function like utilities. Jenkins installations tend to
   have a few of these.
