@@ -12105,7 +12105,8 @@ CREATE TABLE environments (
     environment_type character varying,
     state character varying DEFAULT 'available'::character varying NOT NULL,
     slug character varying NOT NULL,
-    auto_stop_at timestamp with time zone
+    auto_stop_at timestamp with time zone,
+    auto_delete_at timestamp with time zone
 );
 
 CREATE SEQUENCE environments_id_seq
