@@ -5,11 +5,13 @@ import {
   GlDropdown,
   GlDropdownDivider,
   GlTooltipDirective,
+  GlModalDirective,
 } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import createFlash from '~/flash';
 import NotificationsDropdownItem from './notifications_dropdown_item.vue';
+import CustomNotificationsModal from './custom_notifications_modal.vue';
 import { CUSTOM_LEVEL, i18n } from '../constants';
 
 export default {
@@ -20,9 +22,11 @@ export default {
     GlDropdown,
     GlDropdownDivider,
     NotificationsDropdownItem,
+    CustomNotificationsModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    'gl-modal': GlModalDirective,
   },
   inject: {
     disabled: {
@@ -90,6 +94,10 @@ export default {
       try {
         await Api.updateNotificationSettings(this.projectId, this.groupId, { level });
         this.selectedNotificationLevel = level;
+
+        if (level === CUSTOM_LEVEL) {
+          this.$refs.customNotificationsModal.open();
+        }
       } catch (error) {
         createFlash({ message: this.$options.i18n.updateNotificationLevelErrorMessage });
       } finally {
@@ -99,6 +107,7 @@ export default {
   },
   customLevel: CUSTOM_LEVEL,
   i18n,
+  modalId: 'custom-notifications-modal',
 };
 </script>
 
@@ -110,7 +119,13 @@ export default {
       data-testid="notificationButton"
       :size="buttonSize"
     >
-      <gl-button :size="buttonSize" :icon="buttonIcon" :loading="isLoading" :disabled="disabled" />
+      <gl-button
+        v-gl-modal="$options.modalId"
+        :size="buttonSize"
+        :icon="buttonIcon"
+        :loading="isLoading"
+        :disabled="disabled"
+      />
       <gl-dropdown :size="buttonSize" :disabled="disabled">
         <notifications-dropdown-item
           v-for="item in notificationLevels"
@@ -161,5 +176,6 @@ export default {
         @item-selected="selectItem"
       />
     </gl-dropdown>
+    <custom-notifications-modal ref="customNotificationsModal" :modal-id="$options.modalId" />
   </div>
 </template>

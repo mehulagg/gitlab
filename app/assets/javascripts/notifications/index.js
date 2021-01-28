@@ -8,6 +8,17 @@ export default () => {
 
   const { buttonSize, disabled, dropdownItems, notificationLevel, projectId, groupId } = el.dataset;
 
+  console.log(
+    'initNotificationsDropdown :: ',
+    buttonSize,
+    disabled,
+    JSON.parse(dropdownItems),
+    notificationLevel,
+    projectId,
+    groupId,
+    el,
+  );
+
   return new Vue({
     el,
     provide: {
