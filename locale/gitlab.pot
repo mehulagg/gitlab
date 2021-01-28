@@ -23313,7 +23313,7 @@ msgstr ""
 msgid "Push to create a project"
 msgstr ""
 
-msgid "PushRule|Committer restriction"
+msgid "PushRule|Reject unverified users"
 msgstr ""
 
 msgid "Pushed"
