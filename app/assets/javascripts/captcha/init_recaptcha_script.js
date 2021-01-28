@@ -1,3 +1,4 @@
+// NOTE: This module will be used in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52044
 import { memoize } from 'lodash';
 
 export const RECAPTCHA_API_URL_PREFIX = 'https://www.google.com/recaptcha/api.js';
