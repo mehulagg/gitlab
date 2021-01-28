@@ -4,6 +4,7 @@ import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
 import * as commonUtils from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
 import PackageListApp from '~/packages/list/components/packages_list_app.vue';
+import PackageSearch from '~/packages/list/components/package_search.vue';
 import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
 import { DELETE_PACKAGE_SUCCESS_MESSAGE } from '~/packages/list/constants';
 
@@ -26,6 +27,7 @@ describe('packages_list_app', () => {
   const emptyListHelpUrl = 'helpUrl';
   const findEmptyState = () => wrapper.find(GlEmptyState);
   const findListComponent = () => wrapper.find(PackageList);
+  const findPackageSearch = () => wrapper.find(PackageSearch);
 
   const createStore = (filter = []) => {
     store = new Vuex.Store({
@@ -130,6 +132,22 @@ describe('packages_list_app', () => {
       expect(findEmptyState().text()).toContain(
         'To widen your search, change or remove the filters above',
       );
+    });
+  });
+
+  describe('Package Search', () => {
+    it('exists', () => {
+      mountComponent();
+
+      expect(findPackageSearch().exists()).toBe(true);
+    });
+
+    it.each(['sort:changed', 'filter:changed'])('on %p fetches data from the store', (event) => {
+      mountComponent();
+
+      findPackageSearch().vm.$emit(event);
+
+      expect(store.dispatch).toHaveBeenCalledWith('requestPackagesList');
     });
   });
 

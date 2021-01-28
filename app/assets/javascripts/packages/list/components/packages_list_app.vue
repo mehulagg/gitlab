@@ -8,6 +8,7 @@ import { SHOW_DELETE_SUCCESS_ALERT } from '~/packages/shared/constants';
 import PackageList from './packages_list.vue';
 import { DELETE_PACKAGE_SUCCESS_MESSAGE } from '../constants';
 import PackageTitle from './package_title.vue';
+import PackageSearch from './package_search.vue';
 
 export default {
   components: {
@@ -16,6 +17,7 @@ export default {
     GlSprintf,
     PackageList,
     PackageTitle,
+    PackageSearch,
   },
   computed: {
     ...mapState({
@@ -74,6 +76,7 @@ export default {
 <template>
   <div>
     <package-title :package-help-url="packageHelpUrl" :packages-count="packagesCount" />
+    <package-search @sort:changed="requestPackagesList" @filter:changed="requestPackagesList" />
 
     <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
       <template #empty-state>
