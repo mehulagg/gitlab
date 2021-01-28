@@ -19,7 +19,7 @@ class ApplicationExperiment < Gitlab::Experiment
   private
 
   def resolve_variant_name
-    return variant_names.first if Feature.enabled?(name, self, type: :experiment)
+    return variant_names.first if Feature.enabled?(name, self, type: :experiment, default_value: :yaml)
 
     nil # Returning nil vs. :control is important for not caching and rollouts.
   end

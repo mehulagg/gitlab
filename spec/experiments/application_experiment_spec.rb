@@ -63,6 +63,12 @@ RSpec.describe ApplicationExperiment do
   end
 
   describe "variant resolution" do
+    it "uses the default value as specified in the yaml" do
+      expect(Feature).to receive(:enabled?).with('stub', subject, type: :experiment, default_value: :yaml)
+
+      expect(subject.variant.name).to eq('control')
+    end
+
     it "returns nil when not rolled out" do
       stub_feature_flags(stub: false)
 
