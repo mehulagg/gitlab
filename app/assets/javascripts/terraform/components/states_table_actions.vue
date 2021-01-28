@@ -79,7 +79,6 @@ export default {
     },
     lock() {
       this.updateStateCache({
-        _showDetails: false,
         errorMessages: [],
         loadingActions: true,
       });
@@ -88,7 +87,6 @@ export default {
     },
     unlock() {
       this.updateStateCache({
-        _showDetails: false,
         errorMessages: [],
         loadingActions: true,
       });
@@ -111,7 +109,6 @@ export default {
         this.hideModal();
 
         this.updateStateCache({
-          _showDetails: true,
           errorMessages: [sprintf(this.$options.i18n.removing, { name: this.state.name })],
           loadingActions: true,
         });
@@ -144,7 +141,6 @@ export default {
         })
         .finally(() => {
           this.updateStateCache({
-            _showDetails: Boolean(errorMessages.length),
             errorMessages,
             loadingActions: false,
           });

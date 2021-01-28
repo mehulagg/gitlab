@@ -29,8 +29,7 @@ export default {
           ...fragmentData,
           data: {
             ...previousTerraformState,
-            // eslint-disable-next-line no-underscore-dangle
-            _showDetails: terraformState._showDetails,
+            _showDetails: Boolean(terraformState.errorMessages?.length),
             errorMessages: terraformState.errorMessages,
             loadingActions: terraformState.loadingActions,
           },

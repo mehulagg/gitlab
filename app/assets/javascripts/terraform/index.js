@@ -1,10 +1,12 @@
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import TerraformList from './components/terraform_list.vue';
 import createDefaultClient from '~/lib/graphql';
 import resolvers from './graphql/resolvers';
 
+Vue.use(GlToast);
 Vue.use(VueApollo);
 
 export default () => {
