@@ -102,11 +102,11 @@ You can customize the body of these email messages with templates.
 Save your templates in the `.gitlab/service_desk_templates/`
 directory in your repository.
 
-With Service Desk, you can use:
+With Service Desk, you can use templates for:
 
-- [Thank you email](#thank-you-email) template
-- [New note email](#new-note-email) template
-- [General email template](#general-email-template)
+- [Thank you emails](#thank-you-email)
+- [New note emails](#new-note-email) template
+- [New Service Desk issue emails](#new-service-desk-issue-email)
 
 #### Thank you email
 
@@ -132,11 +132,11 @@ You can use these placeholders to be automatically replaced in each email:
 - `%{ISSUE_PATH}`: project path appended with the issue IID
 - `%{NOTE_TEXT}`: note text
 
-#### General email template
+#### New Service Desk issue email
 
 If you have [issue description templates](description_templates.md#creating-issue-templates) in your repository's
-`.gitlab/issue_templates/` directory, you can select one **per project** to be appended to each
-Service Desk email.
+`.gitlab/issue_templates/` directory, you can select **one per project** to be appended to each
+Service Desk email when a new Service Desk issue is created.
 
 To use a custom email template, in your project:
 
