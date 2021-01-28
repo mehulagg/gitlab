@@ -65,8 +65,6 @@ using the `personal_access_token_prefix` field.
 
 ## Repository size limit **(STARTER ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/740) in [GitLab Enterprise Edition 8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/#limit-project-size-ee).
-
 Repositories in your GitLab instance can grow quickly, especially if you are
 using LFS. Their size can grow exponentially, rapidly consuming available storage.
 To prevent this from happening, you can set a hard limit for your repositories' size.
@@ -135,7 +133,7 @@ nginx['client_max_body_size'] = "200m"
 
 ## Limiting lifetime of personal access tokens **(ULTIMATE SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in GitLab Ultimate 12.6.
 
 Users can optionally specify an expiration date for
 [personal access tokens](../../profile/personal_access_tokens.md).
@@ -167,7 +165,7 @@ Once a lifetime for personal access tokens is set, GitLab will:
 
 ## Enforcement of SSH key expiration **(ULTIMATE ONLY)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276221) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276221) in GitLab Ultimate 13.9.
 > - It is deployed behind a feature flag, disabled by default.
 > - It is disabled on GitLab.com.
 > - It is not recommended for production use.
@@ -201,7 +199,7 @@ Feature.disable(:ff_enforce_ssh_key_expiration)
 
 ## Optional enforcement of Personal Access Token expiry **(ULTIMATE SELF)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in GitLab Ultimate 13.1.
 > - It is deployed behind a feature flag, disabled by default.
 > - It is disabled on GitLab.com.
 > - It is not recommended for production use.
@@ -246,6 +244,5 @@ To do this:
 
 NOTE:
 When this ability is disabled, GitLab administrators can still use the
-[Admin UI](../index.md#administering-users) and the
-[API](../../../api/users.md#user-modification) update usernames
-to update usernames.
+[Admin UI](../index.md#administering-users) or the
+[API](../../../api/users.md#user-modification) to update usernames.
