@@ -33,6 +33,7 @@ When bulk editing issues in a group, you can edit the following attributes:
 - Labels
 - Health status ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218395) in
    [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.2.) **(ULTIMATE)**
+- Iterations ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196806)
 
 To update multiple project issues at the same time:
 
