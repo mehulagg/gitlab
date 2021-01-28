@@ -4455,24 +4455,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#predefined_project_variables' do
-    let_it_be(:project) { create(:project, :repository) }
-
-    subject { project.predefined_project_variables.to_runner_variables }
-
-    specify do
-      expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false })
-    end
-
-    context 'when ci config path is overridden' do
-      before do
-        project.update!(ci_config_path: 'random.yml')
-      end
-
-      it { expect(subject).to include({ key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false }) }
-    end
-  end
-
   describe '#auto_devops_enabled?' do
     before do
       Feature.enable_percentage_of_actors(:force_autodevops_on_by_default, 0)
@@ -4747,30 +4729,6 @@ RSpec.describe Project, factory_default: :keep do
           expect(project).to have_auto_devops_implicitly_disabled
         end
       end
-    end
-  end
-
-  describe '#api_variables' do
-    let_it_be(:project) { create(:project) }
-
-    it 'exposes API v4 URL' do
-      expect(project.api_variables.first[:key]).to eq 'CI_API_V4_URL'
-      expect(project.api_variables.first[:value]).to include '/api/v4'
-    end
-
-    it 'contains a URL variable for every supported API version' do
-      # Ensure future API versions have proper variables defined. We're not doing this for v3.
-      supported_versions = API::API.versions - ['v3']
-      supported_versions = supported_versions.select do |version|
-        API::API.routes.select { |route| route.version == version }.many?
-      end
-
-      required_variables = supported_versions.map do |version|
-        "CI_API_#{version.upcase}_URL"
-      end
-
-      expect(project.api_variables.map { |variable| variable[:key] })
-        .to contain_exactly(*required_variables)
     end
   end
 
