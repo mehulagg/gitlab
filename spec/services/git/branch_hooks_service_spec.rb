@@ -431,11 +431,7 @@ RSpec.describe Git::BranchHooksService do
   end
 
   describe 'Metrics dashboard sync' do
-    context 'with feature flag enabled' do
-      before do
-        Feature.enable(:metrics_dashboards_sync)
-      end
-
+    shared_examples 'trigger dashboard sync' do
       it 'imports metrics to database' do
         expect(Metrics::Dashboard::SyncDashboardsWorker).to receive(:perform_async)
 
@@ -443,12 +439,22 @@ RSpec.describe Git::BranchHooksService do
       end
     end
 
-    context 'with feature flag disabled' do
-      it 'imports metrics to database' do
-        expect(Metrics::Dashboard::SyncDashboardsWorker).to receive(:perform_async)
+    shared_examples 'no dashboard sync' do
+      it 'does not sync metrics to database' do
+        expect(Metrics::Dashboard::SyncDashboardsWorker).not_to receive(:perform_async)
 
         service.execute
       end
+    end
+
+    context 'for default branch' do
+      include_examples 'trigger dashboard sync'
+    end
+
+    context 'for non default branch' do
+      let(:branch) { project.default_branch + '_dev' }
+
+      include_examples 'no dashboard sync'
     end
   end
 end
