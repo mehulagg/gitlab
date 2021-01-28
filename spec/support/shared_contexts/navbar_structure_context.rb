@@ -19,7 +19,7 @@ RSpec.shared_context 'project navbar structure' do
       nav_item: _('Security & Compliance'),
       nav_sub_items: [
         _('Configuration'),
-        (_('Audit Events') if Gitlab.ee?),
+        (_('Audit Events') if Gitlab.ee?)
       ]
     }
   end
