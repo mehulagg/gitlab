@@ -5,7 +5,7 @@ import AnalyzerConfiguration from 'ee/security_configuration/sast/components/ana
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
 import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
 import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
-import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
+import configureSastMutation from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
 import { makeEntities, makeSastCiConfiguration } from './helpers';
