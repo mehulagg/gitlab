@@ -52,6 +52,7 @@ export default {
     ),
     modalRemove: s__('Terraform|Remove'),
     remove: s__('Terraform|Remove state file and versions'),
+    removeSuccessful: s__('%{name} successfully removed'),
     removing: s__('Terraform|Removing %{name} and all of its versions'),
     unlock: s__('Terraform|Unlock'),
   },
@@ -78,19 +79,11 @@ export default {
       this.removeConfirmText = '';
     },
     lock() {
-      this.updateStateCache({
-        errorMessages: [],
-        loadingActions: true,
-      });
-
+      this.updateStateCache({ errorMessages: [], loadingActions: true });
       this.stateActionMutation(lockState);
     },
     unlock() {
-      this.updateStateCache({
-        errorMessages: [],
-        loadingActions: true,
-      });
-
+      this.updateStateCache({ errorMessages: [], loadingActions: true });
       this.stateActionMutation(unlockState);
     },
     updateStateCache(newData) {
@@ -108,15 +101,20 @@ export default {
       if (!this.disableModalSubmit) {
         this.hideModal();
 
+        const translateData = { name: this.state.name };
+
         this.updateStateCache({
-          errorMessages: [sprintf(this.$options.i18n.removing, { name: this.state.name })],
+          errorMessages: [sprintf(this.$options.i18n.removing, translateData)],
           loadingActions: true,
         });
 
-        this.stateActionMutation(removeState);
+        this.stateActionMutation(
+          removeState,
+          sprintf(this.$options.i18n.removeSuccessful, translateData),
+        );
       }
     },
-    stateActionMutation(mutation) {
+    stateActionMutation(mutation, successMessage = null) {
       let errorMessages = [];
 
       this.$apollo
@@ -135,15 +133,16 @@ export default {
             data?.terraformStateLock?.errors ||
             data?.terraformStateUnlock?.errors ||
             [];
+
+          if (errorMessages.length === 0 && successMessage) {
+            this.$toast.show(successMessage);
+          }
         })
         .catch(() => {
           errorMessages = [this.$options.i18n.errorUpdate];
         })
         .finally(() => {
-          this.updateStateCache({
-            errorMessages,
-            loadingActions: false,
-          });
+          this.updateStateCache({ errorMessages, loadingActions: false });
         });
     },
   },
