@@ -98,7 +98,9 @@ export default {
       return gon?.current_username;
     },
     isLoading() {
-      return this.$apollo.issueParticipants?.loading || this.$apollo.searchUsers?.loading;
+      return (
+        this.$apollo.queries.issueParticipants?.loading || this.$apollo.queries.searchUsers?.loading
+      );
     },
   },
   created() {
