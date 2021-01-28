@@ -1460,6 +1460,10 @@ class MergeRequest < ApplicationRecord
     actual_head_pipeline&.has_coverage_reports?
   end
 
+  def has_quality_reports?
+    actual_head_pipeline&.has_quality_reports?
+  end
+
   def has_terraform_reports?
     actual_head_pipeline&.has_reports?(Ci::JobArtifact.terraform_reports)
   end
@@ -1482,6 +1486,18 @@ class MergeRequest < ApplicationRecord
     end
 
     compare_reports(Ci::GenerateCoverageReportsService)
+  end
+
+  # TODO: this method and compare_test_reports use the same
+  # result type, which is handled by the controller's #reports_response.
+  # we should minimize mistakes by isolating the common parts.
+  # issue: https://gitlab.com/gitlab-org/gitlab/issues/34224
+  def find_quality_reports
+    unless has_quality_reports?
+      return { status: :error, status_reason: 'This merge request does not have quality reports' }
+    end
+
+    compare_reports(Ci::GenerateQualityReportsService)
   end
 
   def has_codequality_reports?

@@ -1118,6 +1118,125 @@ RSpec.describe Projects::MergeRequestsController do
     end
   end
 
+    describe 'GET quality_reports' do
+    let_it_be(:merge_request) do
+      create(:merge_request,
+        :with_merge_request_pipeline,
+        target_project: project,
+        source_project: project)
+    end
+
+    let(:pipeline) do
+      create(:ci_pipeline,
+        :success,
+        project: merge_request.source_project,
+        ref: merge_request.source_branch,
+        sha: merge_request.diff_head_sha)
+    end
+
+    before do
+      allow_any_instance_of(MergeRequest)
+        .to receive(:find_quality_reports)
+        .and_return(report)
+
+      allow_any_instance_of(MergeRequest)
+        .to receive(:actual_head_pipeline)
+        .and_return(pipeline)
+    end
+
+    subject(:get_quality_report) do
+      get :quality_reports, params: {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      },
+      format: :json
+    end
+
+    describe 'permissions on a public project with private CI/CD' do
+      let(:project) { create :project, :repository, :public, :builds_private }
+      let(:report) { { status: :parsed, data: [] } }
+
+      context 'while signed out' do
+        before do
+          sign_out(user)
+        end
+
+        it 'responds with a 404' do
+          get_quality_report
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+
+      context 'while signed in as an unrelated user' do
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'responds with a 404' do
+          get_quality_report
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+    end
+
+    context 'when pipeline has jobs with quality reports' do
+      before do
+        allow_any_instance_of(MergeRequest)
+          .to receive(:has_quality_reports?)
+          .and_return(true)
+      end
+
+      context 'when processing quality reports is in progress' do
+        let(:report) { { status: :parsing } }
+
+        it 'sends polling interval' do
+          expect(Gitlab::PollingInterval).to receive(:set_header)
+
+          get_quality_report
+        end
+
+        it 'returns 204 HTTP status' do
+          get_quality_report
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when processing quality reports is completed' do
+        let(:report) { { status: :parsed, data: { 'files' => {} } } }
+
+        it 'returns quality reports' do
+          get_quality_report
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to eq({ 'files' => {} })
+        end
+      end
+
+      context 'when user created corrupted coverage reports' do
+        let(:report) { { status: :error, status_reason: 'Failed to parse quality reports' } }
+
+        it 'does not send polling interval' do
+          expect(Gitlab::PollingInterval).not_to receive(:set_header)
+
+          get_quality_report
+        end
+
+        it 'returns 400 HTTP status' do
+          get_quality_report
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response).to eq({ 'status_reason' => 'Failed to parse quality reports' })
+        end
+      end
+    end
+  end
+
   describe 'GET terraform_reports' do
     let_it_be(:merge_request) do
       create(:merge_request,

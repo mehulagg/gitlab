@@ -1984,6 +1984,22 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#has_quality_reports?' do
+    subject { merge_request.has_quality_reports? }
+
+    context 'when head pipeline has quality reports' do
+      let(:merge_request) { create(:merge_request, :with_quality_reports) }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when head pipeline does not have quality reports' do
+      let(:merge_request) { create(:merge_request) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#has_codequality_reports?' do
     subject { merge_request.has_codequality_reports? }
 
@@ -2145,6 +2161,54 @@ RSpec.describe MergeRequest, factory_default: :keep do
         context 'when cached results is not latest' do
           before do
             allow_next_instance_of(Ci::GenerateCoverageReportsService) do |service|
+              allow(service).to receive(:latest?).and_return(false)
+            end
+          end
+
+          it 'raises and InvalidateReactiveCache error' do
+            expect { subject }.to raise_error(ReactiveCaching::InvalidateReactiveCache)
+          end
+        end
+      end
+    end
+  end
+
+  describe '#find_quality_reports' do
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:merge_request, :with_quality_reports, source_project: project) }
+    let(:pipeline) { merge_request.head_pipeline }
+
+    subject { merge_request.find_quality_reports }
+
+    context 'when head pipeline has coverage reports' do
+      context 'when reactive cache worker is parsing results asynchronously' do
+        it 'returns status' do
+          expect(subject[:status]).to eq(:parsing)
+        end
+      end
+
+      context 'when reactive cache worker is inline' do
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        it 'returns status and data' do
+          expect(subject[:status]).to eq(:parsed)
+        end
+
+        context 'when an error occurrs' do
+          before do
+            merge_request.update!(head_pipeline: nil)
+          end
+
+          it 'returns an error message' do
+            expect(subject[:status]).to eq(:error)
+          end
+        end
+
+        context 'when cached results is not latest' do
+          before do
+            allow_next_instance_of(Ci::GenerateQualityReportsService) do |service|
               allow(service).to receive(:latest?).and_return(false)
             end
           end
