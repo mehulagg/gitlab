@@ -24,11 +24,20 @@ export default function () {
     el,
     apolloProvider,
     methods: {
-      handleIterationSelect(iteration) {
-        const unselectedIterationValue = '0';
-        const id = !iteration?.id ? unselectedIterationValue : getIdFromGraphQLId(iteration.id);
+      setIdForIteration(iteration) {
+        const noChangeIterationValue = '';
+        const unSetIterationValue = '0';
 
-        iterationField.setAttribute('value', id);
+        if (iteration === null) {
+          return noChangeIterationValue;
+        } else if (iteration.id === null) {
+          return unSetIterationValue;
+        } else {
+          return getIdFromGraphQLId(iteration.id);
+        }
+      },
+      handleIterationSelect(iteration) {
+        iterationField.setAttribute('value', this.setIdForIteration(iteration));
       },
     },
     render(createElement) {
