@@ -133,7 +133,7 @@ add the line below to `/etc/gitlab/gitlab.rb` before increasing the max attachme
 nginx['client_max_body_size'] = "200m"
 ```
 
-## Limiting lifetime of personal access tokens **(ULTIMATE ONLY)**
+## Limiting lifetime of personal access tokens **(ULTIMATE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 
@@ -165,7 +165,7 @@ Once a lifetime for personal access tokens is set, GitLab will:
   allowed lifetime. Three hours is given to allow administrators to change the allowed lifetime,
   or remove it, before revocation takes place.
 
-## Optional enforcement of Personal Access Token expiry **(ULTIMATE ONLY)**
+## Optional enforcement of Personal Access Token expiry **(ULTIMATE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214723) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
 > - It is deployed behind a feature flag, disabled by default.

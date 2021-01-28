@@ -144,7 +144,7 @@ The following table depicts the various user permission levels in a project.
 | Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
 | Request a CVE ID **(FREE SAAS)**                  |         |            |             | ✓        | ✓      |
 | Use environment terminals                         |         |            |             | ✓        | ✓      |
-| Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)** |     |      |             | ✓        | ✓      |
+| Run Web IDE's Interactive Web Terminals **(ULTIMATE SELF)** |     |      |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
 | Enable/disable branch protection                  |         |            |             | ✓        | ✓      |
 | Push to protected branches                        |         |            |             | ✓        | ✓      |
