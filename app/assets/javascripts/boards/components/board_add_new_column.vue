@@ -137,7 +137,7 @@ export default {
 
 <template>
   <div
-    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal is-expandable"
+    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal gl-flex-shrink-0"
     data-qa-selector="board_add_new_list"
   >
     <div
@@ -162,7 +162,7 @@ export default {
           v-model.trim="searchTerm"
           debounce="250"
           :placeholder="$options.i18n.searchPlaceholder"
-          class="gl-px-5"
+          class="gl-px-5 gl-pb-4"
           @input="filterLabels"
         />
 
@@ -174,13 +174,17 @@ export default {
           </gl-skeleton-loader>
         </div>
 
-        <gl-form-radio-group v-else v-model="selectedLabelId" class="gl-overflow-y-auto gl-p-5">
+        <gl-form-radio-group
+          v-else
+          v-model="selectedLabelId"
+          class="gl-overflow-y-auto gl-p-5 gl-pt-4"
+        >
           <label
             v-for="label in labels"
             :key="label.id"
             class="gl-display-flex gl-flex-align-items-center gl-mb-5 gl-font-weight-normal"
           >
-            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3 gl-outline-0" />
+            <gl-form-radio :value="label.id" class="gl-mb-0 gl-mr-3" />
             <span
               class="dropdown-label-box gl-top-0"
               :style="{
