@@ -117,6 +117,11 @@ available, [demonstrating configuration of timed rollouts](https://gitlab.com/gl
 
 ## Blue-Green Deployment
 
+NOTE:
+[As of 13.7](https://about.gitlab.com/releases/2020/12/22/gitlab-13-7-released/#set-deployment-traffic-weight-via-the-ui), 
+teams are able to leverage an ingress annotation and set traffic weight as an alternative approach 
+to the blue-green deployment strategy documented below.
+
 Also sometimes known as A/B deployment or red-black deployment, this technique is used to reduce
 downtime and risk during a deployment. When combined with incremental rollouts, you can
 minimize the impact of a deployment causing an issue.
