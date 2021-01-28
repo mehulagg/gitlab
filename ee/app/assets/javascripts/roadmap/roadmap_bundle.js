@@ -57,6 +57,9 @@ export default () => {
         newEpicPath: dataset.newEpicPath,
         listEpicsPath: dataset.listEpicsPath,
         epicsDocsPath: dataset.epicsDocsPath,
+        groupFullPath: dataset.fullPath,
+        groupLabelsPath: dataset.groupLabelsEndpoint,
+        groupMilestonesPath: dataset.groupMilestonesEndpoint,
       };
     },
     data() {
@@ -92,8 +95,6 @@ export default () => {
         basePath: dataset.epicsPath,
         fullPath: dataset.fullPath,
         epicIid: dataset.iid,
-        groupLabelsEndpoint: dataset.groupLabelsEndpoint,
-        groupMilestonesEndpoint: dataset.groupMilestonesEndpoint,
         epicsState: dataset.epicsState,
         sortedBy: dataset.sortedBy,
         filterParams,
@@ -112,8 +113,6 @@ export default () => {
         timeframe: this.timeframe,
         basePath: this.basePath,
         filterParams: this.filterParams,
-        groupLabelsEndpoint: this.groupLabelsEndpoint,
-        groupMilestonesEndpoint: this.groupMilestonesEndpoint,
         defaultInnerHeight: this.defaultInnerHeight,
         isChildEpics: this.isChildEpics,
         hasFiltersApplied: this.hasFiltersApplied,
