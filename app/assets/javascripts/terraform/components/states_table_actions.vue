@@ -9,7 +9,7 @@ import {
   GlModal,
   GlSprintf,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, sprintf } from '~/locale';
 import addDataToState from '../graphql/mutations/add_data_to_state.mutation.graphql';
 import lockState from '../graphql/mutations/lock_state.mutation.graphql';
 import unlockState from '../graphql/mutations/unlock_state.mutation.graphql';
@@ -52,7 +52,7 @@ export default {
     ),
     modalRemove: s__('Terraform|Remove'),
     remove: s__('Terraform|Remove state file and versions'),
-    removing: s__('Terraform|Removing the state and all its versions'),
+    removing: s__('Terraform|Removing %{name} and all of its versions'),
     unlock: s__('Terraform|Unlock'),
   },
   computed: {
@@ -112,7 +112,7 @@ export default {
 
         this.updateStateCache({
           _showDetails: true,
-          errorMessages: [this.$options.i18n.removing],
+          errorMessages: [sprintf(this.$options.i18n.removing, { name: this.state.name })],
           loadingActions: true,
         });
 

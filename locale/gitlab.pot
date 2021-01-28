@@ -27944,7 +27944,7 @@ msgstr ""
 msgid "Terraform|Remove state file and versions"
 msgstr ""
 
-msgid "Terraform|Removing the state and all its versions"
+msgid "Terraform|Removing %{name} and all of its versions"
 msgstr ""
 
 msgid "Terraform|Reported Resource Changes: %{addNum} to add, %{changeNum} to change, %{deleteNum} to delete"
