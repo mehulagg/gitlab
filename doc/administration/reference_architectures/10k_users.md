@@ -2031,17 +2031,19 @@ See the [troubleshooting documentation](troubleshooting.md).
 
 ## Cloud Native Deployment (optional)
 
-For users looking to leverage the benefits of running workloads in a cloud native environment,
-the information below outlines our recommendations for running eligible GitLab components in Kubernetes.
+Hybrid installations leverage the benefits of both cloud native and traditional
+deployments. We recommend shifting the Sidekiq and Webservice components into
+Kubernetes to reap cloud native workload management benefits while the others
+are deployed using the traditional server method already described.
 
-We only recommend deploying the Sidekiq and Webservice components in Kubernetes,
-keeping the remaining components on traditional servers as documented above.
+The following sections detail this hybrid approach.
 
 ### Cluster topology
 
-As a starting point for reference, the recommended infrastructure configuration for the cluster is below.
-Note that this example references Google Cloud's Kubernetes Engine (GKE) and associated machine types, but the
-memory and CPU totals should translate to most systems.
+The following table provides a starting point for hybrid
+deployment infrastructure. The recommendations use Google Cloud's Kubernetes Engine (GKE)
+and associated machine types, but the memory and CPU requirements should
+translate to most other providers.
 
 Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Purpose
 -|-|-|-|-
@@ -2049,32 +2051,35 @@ Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Pur
 4 | `n1-standard-4` | 15.5  | 50  | GitLab Sidekiq pods
 4 | `n1-highcpu-32` | 127.5 | 118 | GitLab Webservice pods
 
-Note that "allocatable" in this table refers to the amount of resources available to
-be used by workloads deployed to Kubernetes after accounting for the overhead of
-running Kubernetes itself.
+NOTE:
+"Allocatable" in this table refers to the amount of resources available to workloads deployed in Kubernetes **_after_** accounting for the overhead of running Kubernetes itself.
+
 
 ### Resource usage settings
 
-In this section, formulas are provided to help calculate how many pods can be deployed within resource constraints.
-The [ref/10k example values file](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/ref/10k.yaml)
-documents the relevant configuration to provide to the Helm Chart for this reference architecture tier.
+The following formulas help when calculating how many pods may be deployed within resource constraints.
+The [10k reference architecture example values file](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/ref/10k.yaml)
+documents how to apply the calculated configuration to the Helm Chart.
 
 #### Sidekiq
 
-Generally, each Sidekiq pod should have about **1 vCPU and 2 GB of memory**.
+Sidekiq pods should generally have **1 vCPU and 2 GB of memory**.
 
-Given the available resources in the table above, up to **16** Sidekiq pods can be deployed. If more pods are needed, the
-available resources must expand approximately at the 1 vCPU to 2 GB of memory ratio for each pod added.
+[The provided starting point](#cluster-topology) allows the deployment of up to
+**16** Sidekiq pods. Expand available resources using the 1vCPU to 2GB memory
+ratio for each additional pod.
 
 #### Webservice
 
-Generally, each Webservice pod should have about **1 vCPU and 1.25 GB of memory _per worker_**.
-Note that the default number of worker processes is currently 2.
-This means that each Webservice pod should have about 2 vCPUs and 2.5 GB of memory with the default
-number of worker processes configured.
+Webservice pods typically need about **1 vCPU and 1.25 GB of memory _per worker_**.
+NOTE:
+Each Webservice pod will consume roughly 2 vCPUs and 2.5 GB of memory using
+the [recommended topology](#cluster-topology) because two worker processes
+are created by default.
 
-With these constraints identified, the available resources allow us to deploy up to **28** Webservice pods. If more pods are needed, the
-available resources must expand approximately at the 1 vCPU to 1.25 GB of memory _per worker_ ratio for each pod added.
+The [provided recommendations](#cluster-topology) allow the deployment of up to **28**
+Webservice pods. Expand available resources using the ratio of 1 vCPU to 1.25 GB of memory
+**_per each worker process_** for each additional Webservice pod.
 
 #### Further reading
 
