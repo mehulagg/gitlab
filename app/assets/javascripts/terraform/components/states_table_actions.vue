@@ -52,6 +52,7 @@ export default {
     ),
     modalRemove: s__('Terraform|Remove'),
     remove: s__('Terraform|Remove state file and versions'),
+    removing: s__('Terraform|Removing the state and all its versions'),
     unlock: s__('Terraform|Unlock'),
   },
   computed: {
@@ -77,9 +78,21 @@ export default {
       this.removeConfirmText = '';
     },
     lock() {
+      this.updateStateCache({
+        _showDetails: false,
+        errorMessages: [],
+        loadingActions: true,
+      });
+
       this.stateActionMutation(lockState);
     },
     unlock() {
+      this.updateStateCache({
+        _showDetails: false,
+        errorMessages: [],
+        loadingActions: true,
+      });
+
       this.stateActionMutation(unlockState);
     },
     updateStateCache(newData) {
@@ -96,17 +109,18 @@ export default {
     remove() {
       if (!this.disableModalSubmit) {
         this.hideModal();
+
+        this.updateStateCache({
+          _showDetails: true,
+          errorMessages: [this.$options.i18n.removing],
+          loadingActions: true,
+        });
+
         this.stateActionMutation(removeState);
       }
     },
     stateActionMutation(mutation) {
       let errorMessages = [];
-
-      this.updateStateCache({
-        _showDetails: false,
-        errorMessages,
-        loadingActions: true,
-      });
 
       this.$apollo
         .mutate({

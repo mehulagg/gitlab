@@ -196,15 +196,16 @@ export default {
       <gl-alert
         data-testid="terraform-states-table-error"
         variant="danger"
+        :dismissible="!row.item.loadingActions"
         @dismiss="row.toggleDetails"
       >
-        <span
+        <p
           v-for="errorMessage in row.item.errorMessages"
           :key="errorMessage"
-          class="gl-display-flex gl-justify-content-start"
+          class="gl-display-flex gl-justify-content-start gl-m-0"
         >
           {{ errorMessage }}
-        </span>
+        </p>
       </gl-alert>
     </template>
   </gl-table>
