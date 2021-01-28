@@ -13,19 +13,23 @@
  */
 
 import $ from 'jquery';
-import { GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import eventHub from '../../event_hub';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import JobItem from '../graph/job_item.vue';
 import { PIPELINES_TABLE } from '../../constants';
 
 export default {
   components: {
     GlIcon,
-    JobItem,
     GlLoadingIcon,
+    GlDropdown,
+    GlDropdownItem,
+    CiIcon,
+    JobItem,
   },
 
   directives: {
@@ -67,6 +71,10 @@ export default {
 
     triggerButtonClass() {
       return `ci-status-icon-${this.stage.status.group}`;
+    },
+
+    iconStatus() {
+      return this.stage.status;
     },
 
     borderlessIcon() {
@@ -148,12 +156,44 @@ export default {
         $(this.$refs.dropdown).dropdown('toggle');
       }
     },
+
+    onShow() {
+      // same as `onClickStage`
+      eventHub.$emit('clickedDropdown');
+      this.isLoading = true;
+      this.fetchJobs();
+    },
   },
 };
 </script>
 
 <template>
   <div class="dropdown">
+    <!-- TODO improve the active state! -->
+    <gl-dropdown
+      variant="link"
+      :lazy="true"
+      toggle-class="gl-rounded-full!"
+      :popper-opts="{ placement: 'bottom' }"
+      menu-class="mini-pipeline-graph-dropdown-menu js-builds-dropdown-container"
+      @show="onShow"
+    >
+      <template #button-content>
+        <ci-icon :aria-label="stage.title" aria-hidden="true" :size="24" :status="iconStatus" />
+      </template>
+      <gl-loading-icon v-if="isLoading" />
+      <ul v-else class="js-builds-dropdown-list scrollable-menu">
+        <li v-for="job in dropdownContent" :key="job.id">
+          <job-item
+            :dropdown-length="dropdownContent.length"
+            :job="job"
+            css-class-job-name="mini-pipeline-graph-dropdown-item"
+            @pipelineActionRequestComplete="pipelineActionRequestComplete"
+          />
+        </li>
+      </ul>
+    </gl-dropdown>
+
     <button
       id="stageDropdown"
       ref="dropdown"
