@@ -76,7 +76,7 @@ class GitlabSubscription < ApplicationRecord
   def expired?
     return false unless end_date
 
-    end_date < Date.today
+    end_date < Date.current
   end
 
   def upgradable?
@@ -98,6 +98,22 @@ class GitlabSubscription < ApplicationRecord
     return super if has_a_paid_hosted_plan? || !hosted?
 
     seats_in_use_now
+  end
+
+  def trial_days_remaining
+    (trial_ends_on - Date.current).to_i
+  end
+
+  def trial_duration
+    (trial_ends_on - trial_starts_on).to_i
+  end
+
+  def trial_days_used
+    trial_duration - trial_days_remaining
+  end
+
+  def trial_percentage_complete(decimal_places = 2)
+    (trial_days_used / trial_duration.to_f * 100).round(decimal_places)
   end
 
   private

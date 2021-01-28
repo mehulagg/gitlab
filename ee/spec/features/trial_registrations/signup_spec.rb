@@ -47,7 +47,7 @@ RSpec.describe 'Trial Sign Up' do
         click_button 'Continue'
 
         expect(current_path).to eq(new_trial_path)
-        expect(page).to have_content('Start your Free Gold Trial')
+        expect(page).to have_content('Start your Free Ultimate Trial')
       end
     end
 

@@ -407,10 +407,28 @@ module EE
           # time outing batch queries, to avoid that
           # different join strategy is used for HLL counter
           if ::Feature.enabled?(:postgres_hll_batch_counting)
-            relation = ::Security::Scan.where(time_period).group(:created_at)
+            scans_table = ::Security::Scan.arel_table
+            inner_relation = ::Security::Scan.select(:id)
+                               .where(
+                                 to_date_arel_node(Arel.sql('date_range_source'))
+                                   .eq(to_date_arel_node(scans_table[time_period.keys[0]]))
+                               )
 
-            start = relation.select('MIN(id) as min_id').order('min_id ASC').first&.min_id
-            finish = relation.select('MAX(id) as max_id').order('max_id DESC').first&.max_id
+            outer_relation = ::Security::Scan
+                               .from("generate_series(
+                                '#{time_period.values[0].first.to_time.to_s(:db)}'::timestamp,
+                                '#{time_period.values[0].last.to_time.to_s(:db)}'::timestamp,
+                                '1 day'::interval) date_range_source")
+
+            start_id = outer_relation
+                         .select("(#{inner_relation.order(id: :asc).limit(1).to_sql})")
+                         .order('1 ASC NULLS LAST')
+                         .first&.id
+
+            finish_id = outer_relation
+                          .select("(#{inner_relation.order(id: :desc).limit(1).to_sql})")
+                          .order('1 DESC NULLS LAST')
+                          .first&.id
 
             ::Security::Scan.scan_types.each do |name, scan_type|
               relation = ::Security::Scan.joins(:build)
@@ -418,10 +436,20 @@ module EE
                            .where('security_scans.scan_type = ?', scan_type)
                            .where(security_scans: time_period)
 
-              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
-                if start && finish
-                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start, finish: finish)
+              metric_name = "#{name}_pipeline"
+              aggregated_metrics_params = {
+                metric_name: metric_name,
+                recorded_at_timestamp: recorded_at,
+                time_period: time_period
+              }
+
+              pipelines_with_secure_jobs[metric_name.to_sym] =
+                if start_id && finish_id
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
+                    save_aggregated_metrics(aggregated_metrics_params.merge(data: result))
+                  end
                 else
+                  save_aggregated_metrics(aggregated_metrics_params.merge(data: ::Gitlab::Database::PostgresHll::Buckets.new))
                   0
                 end
             end
@@ -441,6 +469,11 @@ module EE
           pipelines_with_secure_jobs
         end
         # rubocop: enable UsageData/LargeTable
+
+        def to_date_arel_node(column)
+          locked_timezone = Arel::Nodes::NamedFunction.new('TIMEZONE', [Arel.sql("'UTC'"), column])
+          Arel::Nodes::NamedFunction.new('DATE', [locked_timezone])
+        end
 
         def approval_merge_request_rule_minimum_id
           strong_memoize(:approval_merge_request_rule_minimum_id) do
@@ -477,29 +510,29 @@ module EE
         def merge_requests_with_overridden_project_rules(time_period = nil)
           sql =
             <<~SQL
-          (EXISTS (
-            SELECT
-              1
-            FROM
-              approval_merge_request_rule_sources
-            WHERE
-              approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
-              AND NOT EXISTS (
+              (EXISTS (
                 SELECT
                   1
                 FROM
-                  approval_project_rules
+                  approval_merge_request_rule_sources
                 WHERE
-                  approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
-                  AND EXISTS (
+                  approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
+                  AND NOT EXISTS (
                     SELECT
                       1
                     FROM
-                      projects
+                      approval_project_rules
                     WHERE
-                      projects.id = approval_project_rules.project_id
-                      AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
-              OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
+                      approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
+                      AND EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          projects
+                        WHERE
+                          projects.id = approval_project_rules.project_id
+                          AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
+                  OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
             SQL
 
           distinct_count(

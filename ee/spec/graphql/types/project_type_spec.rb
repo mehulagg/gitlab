@@ -17,167 +17,13 @@ RSpec.describe GitlabSchema.types['Project'] do
 
   it 'includes the ee specific fields' do
     expected_fields = %w[
-      vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
+      vulnerabilities vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
       code_coverage_summary
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
-  end
-
-  describe 'sast_ci_configuration' do
-    include_context 'read ci configuration for sast enabled project'
-
-    let(:query) do
-      %(
-        query {
-            project(fullPath: "#{project.full_path}") {
-                sastCiConfiguration {
-                  global {
-                    nodes {
-                      type
-                      options {
-                        nodes {
-                          label
-                          value
-                        }
-                      }
-                      field
-                      label
-                      defaultValue
-                      value
-                      size
-                    }
-                  }
-                  pipeline {
-                    nodes {
-                      type
-                      options {
-                        nodes {
-                          label
-                          value
-                        }
-                      }
-                      field
-                      label
-                      defaultValue
-                      value
-                      size
-                    }
-                  }
-                  analyzers {
-                    nodes {
-                      name
-                      label
-                      enabled
-                    }
-                  }
-                }
-              }
-        }
-      )
-    end
-
-    before do
-      allow(project.repository).to receive(:blob_data_at).and_return(gitlab_ci_yml_content)
-    end
-
-    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
-
-    it "returns the project's sast configuration for global variables" do
-      secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
-      expect(secure_analyzers_prefix['type']).to eq('string')
-      expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
-      expect(secure_analyzers_prefix['label']).to eq('Image prefix')
-      expect(secure_analyzers_prefix['defaultValue']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['value']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['size']).to eq('LARGE')
-      expect(secure_analyzers_prefix['options']).to be_nil
-    end
-
-    it "returns the project's sast configuration for pipeline variables" do
-      pipeline_stage = subject.dig('data', 'project', 'sastCiConfiguration', 'pipeline', 'nodes').first
-      expect(pipeline_stage['type']).to eq('string')
-      expect(pipeline_stage['field']).to eq('stage')
-      expect(pipeline_stage['label']).to eq('Stage')
-      expect(pipeline_stage['defaultValue']).to eq('test')
-      expect(pipeline_stage['value']).to eq('test')
-      expect(pipeline_stage['size']).to eq('MEDIUM')
-    end
-
-    it "returns the project's sast configuration for analyzer variables" do
-      analyzer = subject.dig('data', 'project', 'sastCiConfiguration', 'analyzers', 'nodes').first
-      expect(analyzer['name']).to eq('brakeman')
-      expect(analyzer['label']).to eq('Brakeman')
-      expect(analyzer['enabled']).to eq(true)
-    end
-
-    context "with guest user" do
-      before do
-        project.add_guest(user)
-      end
-
-      context 'when project is private' do
-        let(:project) { create(:project, :private, :repository) }
-
-        it "returns no configuration" do
-          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
-          expect(secure_analyzers_prefix).to be_nil
-        end
-      end
-
-      context 'when project is public' do
-        let(:project) { create(:project, :public, :repository) }
-
-        context 'when repository is accessible by everyone' do
-          it "returns the project's sast configuration for global variables" do
-            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
-
-            expect(secure_analyzers_prefix['type']).to eq('string')
-            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
-          end
-        end
-      end
-    end
-
-    context "with non-member user" do
-      before do
-        project.team.truncate
-      end
-
-      context 'when project is private' do
-        let(:project) { create(:project, :private, :repository) }
-
-        it "returns no configuration" do
-          secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
-          expect(secure_analyzers_prefix).to be_nil
-        end
-      end
-
-      context 'when project is public' do
-        let(:project) { create(:project, :public, :repository) }
-
-        context 'when repository is accessible by everyone' do
-          it "returns the project's sast configuration for global variables" do
-            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
-            expect(secure_analyzers_prefix['type']).to eq('string')
-            expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
-          end
-        end
-
-        context 'when repository is accessible only by team members' do
-          it "returns no configuration" do
-            project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED,
-                                                   builds_access_level: ProjectFeature::DISABLED,
-                                                   repository_access_level: ProjectFeature::PRIVATE)
-
-            secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration')
-            expect(secure_analyzers_prefix).to be_nil
-          end
-        end
-      end
-    end
   end
 
   describe 'security_scanners' do
@@ -370,7 +216,7 @@ RSpec.describe GitlabSchema.types['Project'] do
           resolve_field(:compliance_frameworks, p)
         end
       end
-      frameworks = results.flat_map(&:items)
+      frameworks = results.flat_map(&:to_a)
 
       expect(frameworks).to match_array(projects.flat_map(&:compliance_management_frameworks))
     end

@@ -144,10 +144,10 @@ export default {
         : '';
     },
     constructResponse(response) {
-      const { body, statusCode, reasonPhrase, headers = [] } = response;
+      const { body, statusCode, reasonPhrase = '', headers = [] } = response;
       const headerLines = this.getHeadersAsCodeBlockLines(headers);
 
-      return statusCode && reasonPhrase && headerLines
+      return statusCode && headerLines
         ? [`${statusCode} ${reasonPhrase}\n`, headerLines, '\n\n', bodyWithFallBack(body)].join('')
         : '';
     },

@@ -82,7 +82,7 @@ describe('CustomStageForm', () => {
 
   const setFields = async (fields = minimumFields) => {
     Object.entries(fields).forEach(([field, value]) => {
-      wrapper.find(CustomStageFields).vm.$emit('update', field, value);
+      wrapper.find(CustomStageFields).vm.$emit('input', { field, value });
     });
     await wrapper.vm.$nextTick();
   };

@@ -153,10 +153,10 @@ export default {
         variables,
       })
       .then(({ data }) => {
-        const labels = data[boardType]?.labels;
-        return labels.nodes;
-      })
-      .catch(() => commit(types.RECEIVE_LABELS_FAILURE));
+        const labels = data[boardType]?.labels.nodes;
+        commit(types.RECEIVE_LABELS_SUCCESS, labels);
+        return labels;
+      });
   },
 
   moveList: (
@@ -532,6 +532,17 @@ export default {
 
   setSelectedProject: ({ commit }, project) => {
     commit(types.SET_SELECTED_PROJECT, project);
+  },
+
+  toggleBoardItemMultiSelection: ({ commit, state }, boardItem) => {
+    const { selectedBoardItems } = state;
+    const index = selectedBoardItems.indexOf(boardItem);
+
+    if (index === -1) {
+      commit(types.ADD_BOARD_ITEM_TO_SELECTION, boardItem);
+    } else {
+      commit(types.REMOVE_BOARD_ITEM_FROM_SELECTION, boardItem);
+    }
   },
 
   fetchBacklog: () => {

@@ -8,6 +8,10 @@ RSpec.describe 'Project > Members > Invite group and members', :js do
 
   let(:maintainer) { create(:user) }
 
+  before do
+    stub_feature_flags(invite_members_group_modal: false)
+  end
+
   describe 'Share group lock' do
     shared_examples 'the project cannot be shared with groups' do
       it 'user is only able to share with members' do

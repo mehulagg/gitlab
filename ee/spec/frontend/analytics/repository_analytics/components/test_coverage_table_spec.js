@@ -6,6 +6,9 @@ import getProjectsTestCoverage from 'ee/analytics/repository_analytics/graphql/q
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import Api from '~/api';
+
+jest.mock('~/api.js');
 
 const localVue = createLocalVue();
 
@@ -22,6 +25,20 @@ describe('Test coverage table component', () => {
   const findProjectAverageById = (id) => wrapper.find(`[data-testid="${id}-average"`);
   const findProjectCountById = (id) => wrapper.find(`[data-testid="${id}-count"`);
   const findProjectDateById = (id) => wrapper.find(`[data-testid="${id}-date"`);
+
+  const mockQueryDataNode = {
+    fullPath: 'test/test',
+    name: 'test',
+    id: 1,
+    repository: {
+      rootRef: 'master',
+    },
+    codeCoverageSummary: {
+      averageCoverage: '1.45',
+      coverageCount: '1',
+      lastUpdatedOn: new Date().toISOString(),
+    },
+  };
 
   const createComponent = ({ data = {}, mountFn = shallowMount } = {}) => {
     wrapper = mountFn(TestCoverageTable, {
@@ -52,6 +69,7 @@ describe('Test coverage table component', () => {
     data = {},
     mountFn = shallowMount,
     queryData = {},
+    glFeatures = {},
   } = {}) => {
     localVue.use(VueApollo);
     fakeApollo = createMockApollo([
@@ -72,6 +90,9 @@ describe('Test coverage table component', () => {
         };
       },
       apolloProvider: fakeApollo,
+      provide: {
+        glFeatures,
+      },
     });
   };
 
@@ -144,26 +165,19 @@ describe('Test coverage table component', () => {
       yesterday.setDate(yesterday.getDate() - 1);
       const allCoverageData = [
         {
-          fullPath: '-',
-          id: 1,
+          ...mockQueryDataNode,
           name: 'should be last',
-          repository: { rootRef: 'master' },
-          codeCoveragePath: '#',
           codeCoverageSummary: {
-            averageCoverage: '1.45',
-            coverageCount: '1',
+            ...mockQueryDataNode.codeCoverageSummary,
             lastUpdatedOn: yesterday.toISOString(),
           },
         },
         {
-          fullPath: '-',
-          id: 2,
+          ...mockQueryDataNode,
           name: 'should be first',
-          repository: { rootRef: 'master' },
-          codeCoveragePath: '#',
+          id: 2,
           codeCoverageSummary: {
-            averageCoverage: '1.45',
-            coverageCount: '1',
+            ...mockQueryDataNode.codeCoverageSummary,
             lastUpdatedOn: today.toISOString(),
           },
         },
@@ -198,16 +212,11 @@ describe('Test coverage table component', () => {
             projects: {
               nodes: [
                 {
+                  ...mockQueryDataNode,
                   fullPath,
-                  name: 'test',
                   id,
                   repository: {
                     rootRef,
-                  },
-                  codeCoverageSummary: {
-                    averageCoverage: '1.45',
-                    coverageCount: '1',
-                    lastUpdatedOn: new Date().toISOString(),
                   },
                 },
               ],
@@ -221,6 +230,77 @@ describe('Test coverage table component', () => {
 
       expect(findTable().exists()).toBe(true);
       expect(findProjectNameById(id).attributes('href')).toBe(expectedPath);
+    });
+
+    describe('with usage metrics', () => {
+      describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal enabled', () => {
+        it('tracks i_testing_group_code_coverage_project_click_total metric', async () => {
+          const id = 1;
+          createComponentWithApollo({
+            data: {
+              projectIds: { [id]: true },
+            },
+            queryData: {
+              data: {
+                projects: {
+                  nodes: [
+                    {
+                      ...mockQueryDataNode,
+                      id,
+                    },
+                  ],
+                },
+              },
+            },
+            mountFn: mount,
+            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: true },
+          });
+          // We have to wait for apollo to make the mock query and fill the table before
+          // we can click on the project link inside the table. Neither `runOnlyPendingTimers`
+          // nor `waitForPromises` work on their own to accomplish this.
+          jest.runOnlyPendingTimers();
+          await waitForPromises();
+          findProjectNameById(id).trigger('click');
+
+          expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+          expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(
+            wrapper.vm.$options.usagePingProjectEvent,
+          );
+        });
+      });
+
+      describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal disabled', () => {
+        it('does not track i_testing_group_code_coverage_project_click_total metric', async () => {
+          const id = 1;
+          createComponentWithApollo({
+            data: {
+              projectIds: { [id]: true },
+            },
+            queryData: {
+              data: {
+                projects: {
+                  nodes: [
+                    {
+                      ...mockQueryDataNode,
+                      id,
+                    },
+                  ],
+                },
+              },
+            },
+            mountFn: mount,
+            glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: false },
+          });
+          // We have to wait for apollo to make the mock query and fill the table before
+          // we can click on the project link inside the table. Neither `runOnlyPendingTimers`
+          // nor `waitForPromises` work on their own to accomplish this.
+          jest.runOnlyPendingTimers();
+          await waitForPromises();
+          findProjectNameById(id).trigger('click');
+
+          expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
+        });
+      });
     });
   });
 
@@ -236,12 +316,8 @@ describe('Test coverage table component', () => {
             projects: {
               nodes: [
                 {
-                  fullPath: 'test/test',
-                  name: 'test',
+                  ...mockQueryDataNode,
                   id,
-                  repository: {
-                    rootRef: 'master',
-                  },
                   codeCoverageSummary: null,
                 },
               ],

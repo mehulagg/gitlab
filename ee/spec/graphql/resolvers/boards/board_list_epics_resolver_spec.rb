@@ -36,7 +36,7 @@ RSpec.describe Resolvers::Boards::BoardListEpicsResolver do
     end
 
     it 'returns epics on the board list ordered by position on the board' do
-      expect(result.items).to eq([list1_epic2, list1_epic1])
+      expect(result.to_a).to eq([list1_epic2, list1_epic1])
     end
   end
 end

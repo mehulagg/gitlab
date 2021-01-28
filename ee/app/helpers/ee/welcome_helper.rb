@@ -16,6 +16,10 @@ module EE
       params[:trial_onboarding_flow] == 'true'
     end
 
+    def in_trial_during_signup_flow?
+      params[:trial] == 'true'
+    end
+
     def in_invitation_flow?
       redirect_path.present? && redirect_path.starts_with?('/-/invites/')
     end

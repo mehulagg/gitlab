@@ -12,8 +12,8 @@ module Elastic
           else
             # iid field can be added here as lenient option will
             # pardon format errors, like integer out of range.
-            fields = %w(iid^3 title^2 description)
-            basic_query_hash(fields, query)
+            fields = %w[iid^3 title^2 description]
+            basic_query_hash(fields, query, count_only: options[:count_only])
           end
 
         options[:features] = 'issues'

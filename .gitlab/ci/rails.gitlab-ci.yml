@@ -308,7 +308,7 @@ rspec db-library-code pg12:
     - .rails:rules:ee-and-foss-db-library-code
   script:
     - *base-script
-    - rspec_simple_job "-- spec/lib/gitlab/database/ spec/support/helpers/database/ ee/spec/lib/gitlab/database/ ee/spec/lib/ee/gitlab/database_spec.rb"
+    - rspec_db_library_code
 
 rspec fast_spec_helper:
   extends:
@@ -376,6 +376,17 @@ db:rollback:
     - bundle exec rake db:migrate VERSION=20181228175414
     - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
 
+db:gitlabcom-database-testing:
+  extends: .rails:rules:db:gitlabcom-database-testing
+  stage: test
+  image: ruby:2.7-alpine
+  needs: []
+  allow_failure: true
+  script:
+    - source scripts/utils.sh
+    - install_gitlab_gem
+    - ./scripts/trigger-build gitlab-com-database-testing
+
 gitlab:setup:
   extends: .db-job-base
   variables:
@@ -433,6 +444,8 @@ rspec:deprecations:
   variables:
     SETUP_DB: "false"
   script:
+    - grep -h -R "keyword" deprecations/ | awk '{$1=$1};1' | sort | uniq -c | sort
+    - grep -R "keyword" deprecations/ | wc
     - run_timed_command "bundle exec rubocop --only Lint/LastKeywordArgument --parallel"
   artifacts:
     expire_in: 31d

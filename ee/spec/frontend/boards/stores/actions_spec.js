@@ -156,7 +156,7 @@ describe('fetchEpicsSwimlanes', () => {
     },
   };
 
-  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', (done) => {
+  it('should commit mutation RECEIVE_EPICS_SUCCESS and UPDATE_CACHED_EPICS on success without lists', (done) => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
@@ -166,6 +166,10 @@ describe('fetchEpicsSwimlanes', () => {
       [
         {
           type: types.RECEIVE_EPICS_SUCCESS,
+          payload: [mockEpic],
+        },
+        {
+          type: types.UPDATE_CACHED_EPICS,
           payload: [mockEpic],
         },
       ],
@@ -212,6 +216,10 @@ describe('fetchEpicsSwimlanes', () => {
       [
         {
           type: types.RECEIVE_EPICS_SUCCESS,
+          payload: [mockEpic],
+        },
+        {
+          type: types.UPDATE_CACHED_EPICS,
           payload: [mockEpic],
         },
       ],
@@ -531,26 +539,174 @@ describe('resetEpics', () => {
   });
 });
 
+describe('fetchEpicForActiveIssue', () => {
+  const assignedEpic = {
+    id: mockIssue.epic.id,
+    iid: mockIssue.epic.iid,
+  };
+
+  describe("when active issue doesn't have an assigned epic", () => {
+    const getters = { activeIssue: { ...mockIssue, epic: null } };
+
+    it('should not fetch any epic', async () => {
+      await testAction(actions.fetchEpicForActiveIssue, undefined, { ...getters }, [], []);
+    });
+  });
+
+  describe('when the assigned epic for active issue is found in state.epicsCacheById', () => {
+    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const state = { epicsCacheById: { [assignedEpic.id]: assignedEpic } };
+
+    it('should not fetch any epic', async () => {
+      await testAction(
+        actions.fetchEpicForActiveIssue,
+        undefined,
+        { ...state, ...getters },
+        [],
+        [],
+      );
+    });
+  });
+
+  describe('when fetching fails', () => {
+    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const state = { epicsCacheById: {} };
+
+    it('should not commit UPDATE_CACHED_EPICS mutation and should throw an error', () => {
+      const mockError = new Error('mayday');
+      jest.spyOn(gqlClient, 'query').mockRejectedValue(mockError);
+
+      return testAction(
+        actions.fetchEpicForActiveIssue,
+        undefined,
+        { ...state, ...getters },
+        [
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: true,
+          },
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: false,
+          },
+        ],
+        [],
+      ).catch((e) => {
+        expect(e).toEqual(mockError);
+      });
+    });
+  });
+
+  describe("when the assigned epic for active issue isn't found in state.epicsCacheById", () => {
+    const getters = { activeIssue: { ...mockIssue, epic: assignedEpic } };
+    const state = { epicsCacheById: {} };
+
+    it('should commit mutation SET_EPIC_FETCH_IN_PROGRESS before and after committing mutation UPDATE_CACHED_EPICS', async () => {
+      jest.spyOn(gqlClient, 'query').mockResolvedValue({ data: { group: { epic: mockEpic } } });
+
+      await testAction(
+        actions.fetchEpicForActiveIssue,
+        undefined,
+        { ...state, ...getters },
+        [
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: true,
+          },
+          {
+            type: types.UPDATE_CACHED_EPICS,
+            payload: [mockEpic],
+          },
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: false,
+          },
+        ],
+        [],
+      );
+    });
+  });
+});
+
 describe('setActiveIssueEpic', () => {
-  const getters = { activeIssue: mockIssue };
+  const state = {
+    epics: [{ id: 'gid://gitlab/Epic/422', iid: 99, title: 'existing epic' }],
+  };
+  const getters = { activeIssue: { ...mockIssue, projectPath: 'h/b' } };
   const epicWithData = {
     id: 'gid://gitlab/Epic/42',
     iid: 1,
     title: 'Epic title',
   };
-  const input = {
-    epicId: epicWithData.id,
-    projectPath: 'h/b',
-  };
 
-  it('should return epic after setting the issue', async () => {
-    jest
-      .spyOn(gqlClient, 'mutate')
-      .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: epicWithData } } } });
+  describe('when the updated issue has an assigned epic', () => {
+    it('should commit mutation RECEIVE_FIRST_EPICS_SUCCESS, UPDATE_CACHED_EPICS and UPDATE_ISSUE_BY_ID on success', async () => {
+      jest
+        .spyOn(gqlClient, 'mutate')
+        .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: epicWithData } } } });
 
-    const result = await actions.setActiveIssueEpic({ getters }, input);
+      await testAction(
+        actions.setActiveIssueEpic,
+        epicWithData.id,
+        { ...state, ...getters },
+        [
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: true,
+          },
+          {
+            type: types.RECEIVE_FIRST_EPICS_SUCCESS,
+            payload: { epics: [epicWithData, ...state.epics] },
+          },
+          {
+            type: types.UPDATE_CACHED_EPICS,
+            payload: [epicWithData],
+          },
+          {
+            type: typesCE.UPDATE_ISSUE_BY_ID,
+            payload: {
+              issueId: mockIssue.id,
+              prop: 'epic',
+              value: { id: epicWithData.id, iid: epicWithData.iid },
+            },
+          },
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: false,
+          },
+        ],
+        [],
+      );
+    });
+  });
 
-    expect(result.id).toEqual(epicWithData.id);
+  describe('when the updated issue does not have an epic (unassigned)', () => {
+    it('should only commit UPDATE_ISSUE_BY_ID on success', async () => {
+      jest
+        .spyOn(gqlClient, 'mutate')
+        .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: null } } } });
+
+      await testAction(
+        actions.setActiveIssueEpic,
+        null,
+        { ...state, ...getters },
+        [
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: true,
+          },
+          {
+            type: typesCE.UPDATE_ISSUE_BY_ID,
+            payload: { issueId: mockIssue.id, prop: 'epic', value: null },
+          },
+          {
+            type: types.SET_EPIC_FETCH_IN_PROGRESS,
+            payload: false,
+          },
+        ],
+        [],
+      );
+    });
   });
 
   it('throws error if fails', async () => {
@@ -558,7 +714,7 @@ describe('setActiveIssueEpic', () => {
       .spyOn(gqlClient, 'mutate')
       .mockResolvedValue({ data: { issueSetEpic: { errors: ['failed mutation'] } } });
 
-    await expect(actions.setActiveIssueEpic({ getters }, input)).rejects.toThrow(Error);
+    await expect(actions.setActiveIssueEpic({ getters }, epicWithData.id)).rejects.toThrow(Error);
   });
 });
 

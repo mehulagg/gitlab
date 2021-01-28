@@ -2,12 +2,20 @@ import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
+import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';
+import Api from '~/api';
 
 import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
 
 export const setPage = ({ commit }, page) => commit(types.SET_PAGE, page);
 
-export const requestReport = ({ commit }) => commit(types.REQUEST_REPORT);
+export const requestReport = ({ commit }) => {
+  commit(types.REQUEST_REPORT);
+
+  if (gon.features[VIEW_EVENT_FEATURE_FLAG]) {
+    Api.trackRedisHllUserEvent(VIEW_EVENT_NAME);
+  }
+};
 export const receiveReportSuccess = ({ state, commit }, data) => {
   const parsedIssues = parseCodeclimateMetrics(data, state.blobPath);
   commit(types.RECEIVE_REPORT_SUCCESS, parsedIssues);

@@ -15,6 +15,7 @@ type: reference, api
 > - `reference` was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354) in GitLab 12.10 in favour of `references`.
 > - `with_merge_status_recheck` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890) in GitLab 13.0.
 > - `reviewer_username` and `reviewer_id` were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49341) in GitLab 13.8.
+> - `reviewer_ids` was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51186) in GitLab 13.8.
 
 Every API call to merge requests must be authenticated.
 
@@ -30,7 +31,7 @@ If you need the value of these fields from this endpoint, set the `with_merge_st
 `true` in the query.
 - `references.relative` is relative to the group or project that the merge request is being requested. When the merge request
 is fetched from its project, `relative` format would be the same as `short` format, and when requested across groups or projects, it is expected to be the same as `full` format.
-- If `approvals_before_merge` **(STARTER)** is not provided, it inherits the value from the target project. If provided, the following conditions must hold for it to take effect:
+- If `approvals_before_merge` is not provided, it inherits the value from the target project. If provided, the following conditions must hold for it to take effect:
 
   - The target project's `approvals_before_merge` must be greater than zero. A
     value of zero disables approvals for that project.
@@ -884,6 +885,14 @@ Parameters:
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
   }],
+  "reviewers": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
   "source_project_id": 4,
   "target_project_id": 4,
   "labels": [ ],
@@ -1052,6 +1061,8 @@ POST /projects/:id/merge_requests
 | `title`                    | string  | yes      | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | Assignee user ID.                                                                |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. If set to `0` or left empty, there will be no assignees added.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) added as a reviewer to the MR. If set to `0` or left empty, there will be no reviewers added.  |
 | `description`              | string  | no       | Description of MR. Limited to 1,048,576 characters. |
 | `target_project_id`        | integer | no       | The target project (numeric ID).                                                 |
 | `labels`                   | string  | no       | Labels for MR as a comma-separated list.                                         |
@@ -1200,6 +1211,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid
 | `title`                    | string  | no       | Title of MR.                                                                     |
 | `assignee_id`              | integer | no       | The ID of the user to assign the merge request to. Set to `0` or provide an empty value to unassign all assignees.  |
 | `assignee_ids`             | integer array | no | The ID of the user(s) to assign the MR to. Set to `0` or provide an empty value to unassign all assignees.  |
+| `reviewer_ids`             | integer array | no | The ID of the user(s) set as a reviewer to the MR. Set the value to `0` or provide an empty value to unset all reviewers.  |
 | `milestone_id`             | integer | no       | The global ID of a milestone to assign the merge request to. Set to `0` or provide an empty value to unassign a milestone.|
 | `labels`                   | string  | no       | Comma-separated label names for a merge request. Set to an empty string to unassign all labels.                    |
 | `add_labels`               | string  | no       | Comma-separated label names to add to a merge request.                          |
@@ -1245,6 +1257,14 @@ Must include at least one non-required attribute from above.
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -1386,7 +1406,7 @@ Parameters:
 | `merge_request_iid`            | integer        | yes      | The internal ID of the merge request.                                                                            |
 | `merge_commit_message`         | string         | no       | Custom merge commit message.                                                                                     |
 | `squash_commit_message`        | string         | no       | Custom squash commit message.                                                                                    |
-| `squash`                       | boolean        | no       | If `true` the commits the commits are squashed into a single commit on merge.                                    |
+| `squash`                       | boolean        | no       | If `true` the commits are squashed into a single commit on merge.                                    |
 | `should_remove_source_branch`  | boolean        | no       | If `true` removes the source branch.                                                                             |
 | `merge_when_pipeline_succeeds` | boolean        | no       | If `true` the MR is merged when the pipeline succeeds.                                                           |
 | `sha`                          | string         | no       | If present, then this SHA must match the HEAD of the source branch, otherwise the merge fails.                   |
@@ -1422,6 +1442,14 @@ Parameters:
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -1602,6 +1630,14 @@ Parameters:
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -1902,6 +1938,14 @@ Example response:
     "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
     "web_url": "https://gitlab.example.com/axel.block"
   }],
+  "reviewers": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
   "source_project_id": 2,
   "target_project_id": 3,
   "labels": [
@@ -2046,6 +2090,14 @@ Example response:
     "web_url" : "https://gitlab.example.com/admin"
   },
   "assignees": [{
+    "name": "Miss Monserrate Beier",
+    "username": "axel.block",
+    "id": 12,
+    "state": "active",
+    "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/axel.block"
+  }],
+  "reviewers": [{
     "name": "Miss Monserrate Beier",
     "username": "axel.block",
     "id": 12,
@@ -2217,6 +2269,14 @@ Example response:
       "web_url": "https://gitlab.example.com/barrett.krajcik"
     },
     "assignees": [{
+      "name": "Miss Monserrate Beier",
+      "username": "axel.block",
+      "id": 12,
+      "state": "active",
+      "avatar_url": "http://www.gravatar.com/avatar/46f6f7dc858ada7be1853f7fb96e81da?s=80&d=identicon",
+      "web_url": "https://gitlab.example.com/axel.block"
+    }],
+    "reviewers": [{
       "name": "Miss Monserrate Beier",
       "username": "axel.block",
       "id": 12,

@@ -179,9 +179,9 @@ const Api = {
       });
   },
 
-  groupLabels(namespace) {
+  groupLabels(namespace, options = {}) {
     const url = Api.buildUrl(Api.groupLabelsPath).replace(':namespace_path', namespace);
-    return axios.get(url).then(({ data }) => data);
+    return axios.get(url, options).then(({ data }) => data);
   },
 
   // Return namespaces list. Filtered by query
@@ -442,10 +442,11 @@ const Api = {
     });
   },
 
-  applySuggestion(id, message) {
+  applySuggestion(id, message = '') {
     const url = Api.buildUrl(Api.applySuggestionPath).replace(':id', encodeURIComponent(id));
+    const params = gon.features?.suggestionsCustomCommit ? { commit_message: message } : false;
 
-    return axios.put(url, { commit_message: message });
+    return axios.put(url, params);
   },
 
   applySuggestionBatch(ids) {

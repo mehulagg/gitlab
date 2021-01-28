@@ -63,8 +63,8 @@ export default {
     state.error = s__('Boards|An error occurred while creating the list. Please try again.');
   },
 
-  [mutationTypes.RECEIVE_LABELS_FAILURE]: (state) => {
-    state.error = s__('Boards|An error occurred while fetching labels. Please reload the page.');
+  [mutationTypes.RECEIVE_LABELS_SUCCESS]: (state, labels) => {
+    state.labels = labels;
   },
 
   [mutationTypes.GENERATE_DEFAULT_LISTS_FAILURE]: (state) => {
@@ -257,5 +257,17 @@ export default {
 
   [mutationTypes.SET_SELECTED_PROJECT]: (state, project) => {
     state.selectedProject = project;
+  },
+
+  [mutationTypes.ADD_BOARD_ITEM_TO_SELECTION]: (state, boardItem) => {
+    state.selectedBoardItems = [...state.selectedBoardItems, boardItem];
+  },
+
+  [mutationTypes.REMOVE_BOARD_ITEM_FROM_SELECTION]: (state, boardItem) => {
+    Vue.set(
+      state,
+      'selectedBoardItems',
+      state.selectedBoardItems.filter((obj) => obj !== boardItem),
+    );
   },
 };

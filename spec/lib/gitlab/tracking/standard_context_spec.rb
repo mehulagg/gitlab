@@ -10,9 +10,31 @@ RSpec.describe Gitlab::Tracking::StandardContext do
 
   describe '#to_context' do
     context 'with no arguments' do
-      it 'creates a Snowplow context with no data' do
-        snowplow_context.to_json[:data].each do |_, v|
-          expect(v).to be_nil
+      context 'environment' do
+        shared_examples 'contains environment' do |expected_environment|
+          it 'contains environment' do
+            expect(snowplow_context.to_json.dig(:data, :environment)).to eq(expected_environment)
+          end
+        end
+
+        context 'development or test' do
+          include_examples 'contains environment', 'development'
+        end
+
+        context 'staging' do
+          before do
+            allow(Gitlab).to receive(:staging?).and_return(true)
+          end
+
+          include_examples 'contains environment', 'staging'
+        end
+
+        context 'production' do
+          before do
+            allow(Gitlab).to receive(:com_and_canary?).and_return(true)
+          end
+
+          include_examples 'contains environment', 'production'
         end
       end
     end
@@ -28,8 +50,8 @@ RSpec.describe Gitlab::Tracking::StandardContext do
     context 'with namespace' do
       subject { described_class.new(namespace: namespace) }
 
-      it 'creates a Snowplow context using the given data' do
-        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to eq(namespace.id)
+      it 'creates a Snowplow context without namespace and project' do
+        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to be_nil
         expect(snowplow_context.to_json.dig(:data, :project_id)).to be_nil
       end
     end
@@ -37,18 +59,18 @@ RSpec.describe Gitlab::Tracking::StandardContext do
     context 'with project' do
       subject { described_class.new(project: project) }
 
-      it 'creates a Snowplow context using the given data' do
-        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to eq(project.namespace.id)
-        expect(snowplow_context.to_json.dig(:data, :project_id)).to eq(project.id)
+      it 'creates a Snowplow context without namespace and project' do
+        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to be_nil
+        expect(snowplow_context.to_json.dig(:data, :project_id)).to be_nil
       end
     end
 
     context 'with project and namespace' do
       subject { described_class.new(namespace: namespace, project: project) }
 
-      it 'creates a Snowplow context using the given data' do
-        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to eq(namespace.id)
-        expect(snowplow_context.to_json.dig(:data, :project_id)).to eq(project.id)
+      it 'creates a Snowplow context without namespace and project' do
+        expect(snowplow_context.to_json.dig(:data, :namespace_id)).to be_nil
+        expect(snowplow_context.to_json.dig(:data, :project_id)).to be_nil
       end
     end
   end

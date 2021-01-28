@@ -6,7 +6,7 @@ type: howto
 disqus_identifier: 'https://docs.gitlab.com/ee/customization/branded_login_page.html'
 ---
 
-# GitLab Appearance **(CORE ONLY)**
+# GitLab Appearance **(FREE SELF)**
 
 There are several options for customizing the appearance of a self-managed instance
 of GitLab. These settings are accessed from the **Admin Area** in the **Appearance**
@@ -20,7 +20,7 @@ used (less than 1MB) and it is automatically resized.
 
 ![Navigation bar header logo screenshot](img/appearance_header_logo_v12_3.png)
 
-Once you select and upload an image, click **Update appearance settings** at the bottom
+After you select and upload an image, click **Update appearance settings** at the bottom
 of the page to activate it in the GitLab instance.
 
 NOTE:

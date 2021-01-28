@@ -74,146 +74,148 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
         style="left: 7.142857142857143%;"
       />
        
-      <div
-        class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-        style="left: 0px; width: 0px;"
-      >
-        <span
-          class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
-          id="gid://gitlab/IncidentManagement::OncallParticipant/49"
+      <div>
+        <div
+          class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
+          style="left: 0px; width: 0px;"
         >
           <span
-            class="gl-token-content"
+            class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-blue-500"
+            id="gid://gitlab/IncidentManagement::OncallParticipant/49"
           >
-            <div
-              class="gl-avatar-labeled"
-              shape="circle"
-              size="16"
-              title="nora.schaden"
+            <span
+              class="gl-token-content"
             >
               <div
-                class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
+                class="gl-avatar-labeled"
+                shape="circle"
+                size="16"
                 title="nora.schaden"
               >
-                
-  
-
-              </div>
-               
-              <div
-                class="gl-avatar-labeled-labels gl-text-left!"
-              >
                 <div
-                  class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                >
-                  <span
-                    class="gl-avatar-labeled-label"
-                  >
-                    nora.schaden
-                  </span>
-                   
-                </div>
-                 
-                <span
-                  class="gl-avatar-labeled-sublabel"
+                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
+                  title="nora.schaden"
                 >
                   
-                </span>
+  
+
+                </div>
+                 
+                <div
+                  class="gl-avatar-labeled-labels gl-text-left!"
+                >
+                  <div
+                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
+                  >
+                    <span
+                      class="gl-avatar-labeled-label"
+                    >
+                      nora.schaden
+                    </span>
+                     
+                  </div>
+                   
+                  <span
+                    class="gl-avatar-labeled-sublabel"
+                  >
+                    
+                  </span>
+                </div>
               </div>
-            </div>
-             
-            <!---->
+               
+              <!---->
+            </span>
           </span>
-        </span>
-         
-        <div
-          class="gl-popover"
-          title="nora.schaden"
-        >
-          <p
-            class="gl-m-0"
-            data-testid="rotation-assignee-starts-at"
-          >
-            Starts: January 12, 2021, 10:01
-          </p>
            
-          <p
-            class="gl-m-0"
-            data-testid="rotation-assignee-ends-at"
+          <div
+            class="gl-popover"
+            title="nora.schaden"
           >
-            Ends: January 15, 2021, 10:01
-          </p>
+            <p
+              class="gl-m-0"
+              data-testid="rotation-assignee-starts-at"
+            >
+              Starts: January 12, 2021, 10:04am GMT+0000
+            </p>
+             
+            <p
+              class="gl-m-0"
+              data-testid="rotation-assignee-ends-at"
+            >
+              Ends: January 15, 2021, 10:04am GMT+0000
+            </p>
+          </div>
         </div>
-      </div>
-      <div
-        class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
-        style="left: 2px; width: 0px;"
-      >
-        <span
-          class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
-          id="gid://gitlab/IncidentManagement::OncallParticipant/232"
+        <div
+          class="gl-absolute gl-h-7 gl-mt-3 gl-z-index-1 gl-overflow-hidden"
+          style="left: 2px; width: 0px;"
         >
           <span
-            class="gl-token-content"
+            class="gl-w-full gl-h-6 gl-align-items-center gl-token gl-token-default-variant gl-bg-data-viz-orange-500"
+            id="gid://gitlab/IncidentManagement::OncallParticipant/232"
           >
-            <div
-              class="gl-avatar-labeled"
-              shape="circle"
-              size="16"
-              title="racheal.loving"
+            <span
+              class="gl-token-content"
             >
               <div
-                class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
+                class="gl-avatar-labeled"
+                shape="circle"
+                size="16"
                 title="racheal.loving"
               >
-                
-  
-
-              </div>
-               
-              <div
-                class="gl-avatar-labeled-labels gl-text-left!"
-              >
                 <div
-                  class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
-                >
-                  <span
-                    class="gl-avatar-labeled-label"
-                  >
-                    racheal.loving
-                  </span>
-                   
-                </div>
-                 
-                <span
-                  class="gl-avatar-labeled-sublabel"
+                  class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s16 gl-avatar-identicon-bg1"
+                  title="racheal.loving"
                 >
                   
-                </span>
+  
+
+                </div>
+                 
+                <div
+                  class="gl-avatar-labeled-labels gl-text-left!"
+                >
+                  <div
+                    class="gl-display-flex gl-flex-wrap gl-align-items-center gl-text-left! gl-mx-n1 gl-my-n1"
+                  >
+                    <span
+                      class="gl-avatar-labeled-label"
+                    >
+                      racheal.loving
+                    </span>
+                     
+                  </div>
+                   
+                  <span
+                    class="gl-avatar-labeled-sublabel"
+                  >
+                    
+                  </span>
+                </div>
               </div>
-            </div>
-             
-            <!---->
+               
+              <!---->
+            </span>
           </span>
-        </span>
-         
-        <div
-          class="gl-popover"
-          title="racheal.loving"
-        >
-          <p
-            class="gl-m-0"
-            data-testid="rotation-assignee-starts-at"
-          >
-            Starts: January 16, 2021, 10:01
-          </p>
            
-          <p
-            class="gl-m-0"
-            data-testid="rotation-assignee-ends-at"
+          <div
+            class="gl-popover"
+            title="racheal.loving"
           >
-            Ends: January 18, 2021, 10:01
-          </p>
+            <p
+              class="gl-m-0"
+              data-testid="rotation-assignee-starts-at"
+            >
+              Starts: January 16, 2021, 10:04am GMT+0000
+            </p>
+             
+            <p
+              class="gl-m-0"
+              data-testid="rotation-assignee-ends-at"
+            >
+              Ends: January 18, 2021, 10:04am GMT+0000
+            </p>
+          </div>
         </div>
       </div>
     </span>
@@ -223,8 +225,10 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
     >
       <!---->
        
-      <!---->
-      <!---->
+      <div>
+        <!---->
+        <!---->
+      </div>
     </span>
   </div>
    

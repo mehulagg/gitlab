@@ -29,7 +29,7 @@
   opened: requirements_count['opened'],
   archived: requirements_count['archived'],
   all: total_requirements,
-  current_user_email: current_user.email,
+  current_user_email: current_user&.email,
   requirements_web_url: project_requirements_management_requirements_path(@project),
   can_create_requirement: "#{can?(current_user, :create_requirement, @project)}",
   description_preview_path: preview_markdown_path(@project),

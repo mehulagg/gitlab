@@ -132,7 +132,7 @@ RSpec.describe EE::TrialHelper do
       true  | true  | 'You can apply your trial to a new group, an existing group, or your personal account.'
       true  | false | 'You can apply your trial to a new group or your personal account.'
       false | true  | 'You can apply your trial to a new group or an existing group.'
-      false | false | 'Create a new group to start your GitLab Gold trial.'
+      false | false | 'Create a new group to start your GitLab Ultimate trial.'
     end
 
     with_them do

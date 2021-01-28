@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class MergeRequestDiffCommit < ApplicationRecord
+  extend SuppressCompositePrimaryKeyWarning
+
   include BulkInsertSafe
   include ShaAttribute
   include CachedCommit
@@ -9,6 +11,9 @@ class MergeRequestDiffCommit < ApplicationRecord
 
   sha_attribute :sha
   alias_attribute :id, :sha
+
+  serialize :trailers, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+  validates :trailers, json_schema: { filename: 'git_trailers' }
 
   # Deprecated; use `bulk_insert!` from `BulkInsertSafe` mixin instead.
   # cf. https://gitlab.com/gitlab-org/gitlab/issues/207989 for progress
@@ -23,7 +28,8 @@ class MergeRequestDiffCommit < ApplicationRecord
         relative_order: index,
         sha: Gitlab::Database::ShaAttribute.serialize(sha), # rubocop:disable Cop/ActiveRecordSerialize
         authored_date: Gitlab::Database.sanitize_timestamp(commit_hash[:authored_date]),
-        committed_date: Gitlab::Database.sanitize_timestamp(commit_hash[:committed_date])
+        committed_date: Gitlab::Database.sanitize_timestamp(commit_hash[:committed_date]),
+        trailers: commit_hash.fetch(:trailers, {}).to_json
       )
     end
 

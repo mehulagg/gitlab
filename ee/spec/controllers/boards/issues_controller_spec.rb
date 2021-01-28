@@ -57,9 +57,9 @@ RSpec.describe Boards::IssuesController do
           issue4 = create(:labeled_issue, project: project_1, labels: [development], relative_position: 4)
           closed_issue = create(:issue, :closed, project: project_1)
 
-          create(:issue_link, source: issue1, target: issue2, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+          create(:issue_link, source: issue2, target: issue1, link_type: IssueLink::TYPE_BLOCKS)
           create(:issue_link, source: issue2, target: issue3, link_type: IssueLink::TYPE_BLOCKS)
-          create(:issue_link, source: issue4, target: closed_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+          create(:issue_link, source: closed_issue, target: issue4, link_type: IssueLink::TYPE_BLOCKS)
 
           list_issues user: user, board: board, list: list2
 

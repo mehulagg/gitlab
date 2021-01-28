@@ -5,9 +5,9 @@ import { __, sprintf } from '~/locale';
 
 export default {
   components: {
-    GlToken,
     GlAvatarLabeled,
     GlPopover,
+    GlToken,
   },
   props: {
     assignee: {
@@ -33,12 +33,12 @@ export default {
     },
     startsAt() {
       return sprintf(__('Starts: %{startsAt}'), {
-        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, hh:mm'),
+        startsAt: formatDate(this.rotationAssigneeStartsAt, 'mmmm d, yyyy, h:MMtt Z'),
       });
     },
     endsAt() {
       return sprintf(__('Ends: %{endsAt}'), {
-        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, hh:mm'),
+        endsAt: formatDate(this.rotationAssigneeEndsAt, 'mmmm d, yyyy, h:MMtt Z'),
       });
     },
   },

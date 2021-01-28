@@ -404,6 +404,8 @@ If an LDAP user is a group member when LDAP Synchronization is added, and they a
 
 To create group links via CN:
 
+<!-- vale gitlab.Spelling = NO -->
+
 1. Select the **LDAP Server** for the link.
 1. Select `LDAP Group cn` as the **Sync method**.
 1. In the **LDAP Group cn** text input box, begin typing the CN of the group. There will be a dropdown menu with matching CNs within the configured `group_base`. Select your CN from this list.
@@ -412,7 +414,9 @@ To create group links via CN:
 
 ![Creating group links via CN](img/ldap_sync_cn_v13_1.png)
 
-### Creating group links via filter **(PREMIUM ONLY)**
+<!-- vale gitlab.Spelling = YES -->
+
+### Creating group links via filter **(PREMIUM SELF)**
 
 To create group links via filter:
 
@@ -551,7 +555,7 @@ username, you can create a new group and transfer projects to it.
 
 You can change settings that are specific to repositories in your group.
 
-#### Custom initial branch name **(CORE ONLY)**
+#### Custom initial branch name **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 
@@ -645,9 +649,9 @@ more information.
 
 To make sure only people from within your organization can access particular
 resources, you have the option to restrict access to groups and their
-underlying projects, issues, etc, by IP address. This can help ensure that
+underlying subgroups, projects, issues, and so on, by IP address. This can help ensure that
 particular content doesn't leave the premises, while not blocking off access to
-the entire instance.
+the entire instance. IP access restrictions can only be configured at the group level.
 
 Add one or more allowed IP subnets using CIDR notation to the group settings and anyone
 coming from a different IP address won't be able to access the restricted
@@ -702,6 +706,9 @@ To enable this feature:
 
 This will enable the domain-checking for all new users added to the group from this moment on.
 
+NOTE:
+Domain restrictions only apply to groups and do not prevent users from being added as members of projects owned by the restricted group.
+
 #### Group file templates **(PREMIUM)**
 
 Group file templates allow you to share a set of templates for common file
@@ -725,6 +732,9 @@ To enable this feature, navigate to the group settings page, expand the
 **Save group**.
 
 ![Group file template settings](img/group_file_template_settings.png)
+
+To learn how to create templates for issues and merge requests, visit
+[Description templates](../project/description_templates.md).
 
 #### Group-level project templates **(PREMIUM)**
 
@@ -824,7 +834,7 @@ When set, new subgroups have push rules set for them based on either:
 - The closest parent group with push rules defined.
 - Push rules set at the instance level, if no parent groups have push rules defined.
 
-### Maximum artifacts size **(CORE ONLY)**
+### Maximum artifacts size **(FREE SELF)**
 
 For information about setting a maximum artifact size for a group, see
 [Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size).

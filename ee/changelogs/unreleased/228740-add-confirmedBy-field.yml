@@ -1,5 +1,0 @@
----
-title: Add confirmedBy field to vulnerability object in GraphQL
-merge_request: 50144
-author:
-type: changed

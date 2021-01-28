@@ -71,8 +71,7 @@ RSpec.describe API::Internal::Kubernetes do
         {
           alert: {
             title: 'minimal',
-            message: 'network problem',
-            evalMatches: [{ value: 1, metric: 'Count', tags: {} }]
+            message: 'network problem'
           }
         }
       end

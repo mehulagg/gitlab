@@ -173,4 +173,22 @@ RSpec.describe 'Projects > Audit Events', :js do
 
     it_behaves_like 'audit events date filter'
   end
+
+  describe 'combined list of authenticated and unauthenticated users' do
+    let!(:audit_event_1) { create(:project_audit_event, :unauthenticated, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
+    let!(:audit_event_2) { create(:project_audit_event, author_id: non_existing_record_id, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: Date.current) }
+
+    it 'displays the correct authors names' do
+      visit project_audit_events_path(project)
+
+      wait_for_all_requests
+
+      page.within('.audit-log-table') do
+        expect(page).to have_content('An unauthenticated user')
+        expect(page).to have_content("#{audit_event_2.author_name} (removed)")
+        expect(page).to have_content(audit_event_3.user.name)
+      end
+    end
+  end
 end

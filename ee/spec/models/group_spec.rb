@@ -27,6 +27,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:provisioned_user_details).inverse_of(:provisioned_by_group) }
     it { is_expected.to have_many(:provisioned_users) }
     it { is_expected.to have_one(:group_merge_request_approval_setting) }
+    it { is_expected.to have_many(:repository_storage_moves) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -1261,5 +1262,11 @@ RSpec.describe Group do
         end
       end
     end
+  end
+
+  it_behaves_like 'can move repository storage' do
+    let_it_be(:container) { create(:group, :wiki_repo) }
+
+    let(:repository) { container.wiki.repository }
   end
 end

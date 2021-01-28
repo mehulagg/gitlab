@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Geo database replication **(PREMIUM ONLY)**
+# Geo database replication **(PREMIUM SELF)**
 
 NOTE:
 If your GitLab installation uses external (not managed by Omnibus) PostgreSQL
@@ -472,7 +472,7 @@ information, see [High Availability with Omnibus GitLab](../../postgresql/replic
 ## Patroni support
 
 Support for Patroni is intended to replace `repmgr` as a
-[highly availabile PostgreSQL solution](../../postgresql/replication_and_failover.md)
+[highly available PostgreSQL solution](../../postgresql/replication_and_failover.md)
 on the primary node, but it can also be used for PostgreSQL HA on a secondary
 node.
 
@@ -633,6 +633,20 @@ For each Patroni instance on the secondary site:
 1. Follow the [instructions to migrate repmgr to Patroni](../../postgresql/replication_and_failover.md#switching-from-repmgr-to-patroni). When configuring Patroni on each primary site database node, add `patroni['replicaton_slots'] = { '<slot_name>' => 'physical' }`
 to `gitlab.rb` where `<slot_name>` is the name of the replication slot for your Geo secondary. This will ensure that Patroni recognizes the replication slot as permanent and will not drop it upon restarting.
 1. If database replication to the secondary was paused before migration, resume replication once Patroni is confirmed working on the primary.
+
+## Migrating a single PostgreSQL node to Patroni
+
+Before the introduction of Patroni, Geo had no Omnibus support for HA setups on the secondary node.
+
+With Patroni it's now possible to support that. In order to migrate the existing PostgreSQL to Patroni:
+
+1. Make sure you have a Consul cluster setup on the secondary (similar to how you set it up on the primary).
+1. [Configure a permanent replication slot](#step-1-configure-patroni-permanent-replication-slot-on-the-primary-site).
+1. [Configure a Standby Cluster](#step-2-configure-a-standby-cluster-on-the-secondary-site)
+   on that single node machine.
+   
+You will end up with a "Standby Cluster" with a single node. That allows you to later on add additional patroni nodes
+by following the same instructions above.
 
 ## Troubleshooting
 

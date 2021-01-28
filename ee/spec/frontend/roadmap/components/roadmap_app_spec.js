@@ -17,7 +17,6 @@ import {
   mockFormattedEpic,
   mockFormattedChildEpic2,
   mockGroupId,
-  mockNewEpicEndpoint,
   mockSortedBy,
   mockSvgPath,
   mockTimeframeInitialDate,
@@ -35,7 +34,6 @@ describe('RoadmapApp', () => {
   const emptyStateIllustrationPath = mockSvgPath;
   const epics = [mockFormattedEpic];
   const hasFiltersApplied = true;
-  const newEpicEndpoint = mockNewEpicEndpoint;
   const presetType = PRESET_TYPES.MONTHS;
   const timeframe = getTimeframeForMonthsView(mockTimeframeInitialDate);
 
@@ -44,7 +42,6 @@ describe('RoadmapApp', () => {
       localVue,
       propsData: {
         emptyStateIllustrationPath,
-        newEpicEndpoint,
         presetType,
       },
       provide: {
@@ -120,10 +117,6 @@ describe('RoadmapApp', () => {
 
     it('contains whether it is child epics', () => {
       expect(wrapper.find(EpicsListEmpty).props('isChildEpics')).toBe(false);
-    });
-
-    it('contains endpoint to create a new epic', () => {
-      expect(wrapper.find(EpicsListEmpty).props('newEpicEndpoint')).toBe(mockNewEpicEndpoint);
     });
 
     it('contains the preset type', () => {

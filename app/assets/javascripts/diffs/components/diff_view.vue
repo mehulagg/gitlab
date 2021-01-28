@@ -61,10 +61,10 @@ export default {
     ...mapActions(['setSelectedCommentPosition']),
     ...mapActions('diffs', ['showCommentForm']),
     showCommentLeft(line) {
-      return !this.inline || line.left;
+      return line.left && !line.right;
     },
     showCommentRight(line) {
-      return !this.inline || (line.right && !line.left);
+      return line.right && !line.left;
     },
     onStartDragging(line) {
       this.dragStart = line;
@@ -138,24 +138,30 @@ export default {
         :class="line.commentRowClasses"
         class="diff-grid-comments diff-tr notes_holder"
       >
-        <div v-if="showCommentLeft(line)" class="diff-td notes-content parallel old">
+        <div
+          v-if="line.left || !inline"
+          :class="{ parallel: !inline }"
+          class="diff-td notes-content old"
+        >
           <diff-comment-cell
-            v-if="line.left"
+            v-if="line.left && (line.left.renderDiscussion || line.left.hasCommentForm)"
             :line="line.left"
             :diff-file-hash="diffFile.file_hash"
             :help-page-path="helpPagePath"
-            :has-draft="line.left.hasDraft"
             line-position="left"
           />
         </div>
-        <div v-if="showCommentRight(line)" class="diff-td notes-content parallel new">
+        <div
+          v-if="line.right || !inline"
+          :class="{ parallel: !inline }"
+          class="diff-td notes-content new"
+        >
           <diff-comment-cell
-            v-if="line.right"
+            v-if="line.right && (line.right.renderDiscussion || line.right.hasCommentForm)"
             :line="line.right"
             :diff-file-hash="diffFile.file_hash"
             :line-index="index"
             :help-page-path="helpPagePath"
-            :has-draft="line.right.hasDraft"
             line-position="right"
           />
         </div>

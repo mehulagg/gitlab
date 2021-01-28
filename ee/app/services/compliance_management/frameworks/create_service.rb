@@ -17,7 +17,8 @@ module ComplianceManagement
           namespace: namespace,
           name: params[:name],
           description: params[:description],
-          color: params[:color]
+          color: params[:color],
+          pipeline_configuration_full_path: params[:pipeline_configuration_full_path]
         )
 
         return ServiceResponse.error(message: 'Not permitted to create framework') unless permitted?

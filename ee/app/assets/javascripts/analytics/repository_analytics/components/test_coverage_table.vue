@@ -1,6 +1,8 @@
 <script>
 import Vue from 'vue';
 import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import api from '~/api';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __, s__ } from '~/locale';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
@@ -19,6 +21,7 @@ export default {
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
+  mixins: [glFeatureFlagsMixin()],
   apollo: {
     projects: {
       query: getProjectsTestCoverage,
@@ -98,6 +101,11 @@ export default {
     handleError() {
       this.hasError = true;
     },
+    onProjectClick() {
+      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
+        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
+      }
+    },
     selectAllProjects(allProjects) {
       this.projectIds = Object.fromEntries(allProjects.map(({ id }) => [id, true]));
       this.allProjectsSelected = true;
@@ -154,6 +162,7 @@ export default {
     totalHeight: 15,
   },
   averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
+  usagePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
 };
 </script>
 <template>
@@ -211,7 +220,12 @@ export default {
       </template>
 
       <template #cell(project)="{ item }">
-        <gl-link target="_blank" :href="item.codeCoveragePath" :data-testid="`${item.id}-name`">
+        <gl-link
+          target="_blank"
+          :href="item.codeCoveragePath"
+          :data-testid="`${item.id}-name`"
+          @click.once="onProjectClick"
+        >
           {{ item.name }}
         </gl-link>
       </template>

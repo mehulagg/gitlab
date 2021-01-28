@@ -74,8 +74,10 @@ export default {
   methods: {
     handleLabelClick(label) {
       if (label.isAny) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels = [];
       } else if (!this.board.labels.find((l) => l.id === label.id)) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels.push(
           new ListLabel({
             id: label.id,
@@ -87,6 +89,7 @@ export default {
       } else {
         let { labels } = this.board;
         labels = labels.filter((selected) => selected.id !== label.id);
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels = labels;
       }
     },
@@ -145,12 +148,14 @@ export default {
         wrapper-class="assignee"
       />
 
+      <!-- eslint-disable vue/no-mutating-props -->
       <board-weight-select
         v-model="board.weight"
         :board="board"
         :weights="weights"
         :can-edit="canAdminBoard"
       />
+      <!-- eslint-enable vue/no-mutating-props -->
     </div>
   </div>
 </template>

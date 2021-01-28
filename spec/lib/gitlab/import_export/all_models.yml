@@ -146,6 +146,7 @@ merge_requests:
 - merge_user
 - merge_request_diffs
 - merge_request_diff
+- merge_head_diff
 - merge_request_context_commits
 - merge_request_context_commit_diff_files
 - events
@@ -561,6 +562,7 @@ project:
 - exported_protected_branches
 - incident_management_oncall_schedules
 - debian_distributions
+- merge_request_metrics
 award_emoji:
 - awardable
 - user
@@ -589,6 +591,7 @@ lfs_file_locks:
 project_badges:
 - project
 metrics:
+- target_project
 - merge_request
 - latest_closed_by
 - merged_by

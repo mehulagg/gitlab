@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Reviewing and managing merge requests **(CORE)**
+# Reviewing and managing merge requests **(FREE)**
 
 Merge requests are the primary method of making changes to files in a GitLab project.
 Changes are proposed by [creating and submitting a merge request](creating_merge_requests.md),
@@ -89,7 +89,7 @@ From there, when reviewing merge requests' **Changes** tab, you will see only on
 
 ![File-by-file diff navigation](img/file_by_file_v13_2.png)
 
-From [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/233898) onwards, if you want to change
+In [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/233898) and later, if you want to change
 this behavior, you can do so from your **User preferences** (as explained above) or directly in a
 merge request:
 
@@ -136,6 +136,46 @@ NOTE:
 You can append `?w=1` while on the diffs page of a merge request to ignore any
 whitespace changes.
 
+## Mark files as viewed
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51513) in GitLab 13.8.
+> - It's deployed behind a feature flag, enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-file-views). **(FREE SELF)**
+
+When reviewing a merge request with many files multiple times, it may be useful to the reviewer
+to focus on new changes and ignore the files that they have already reviewed and don't want to 
+see anymore unless they are changed again.
+
+To mark a file as viewed:
+
+1. Go to the merge request's **Diffs** tab.
+1. On the right-top of the file, locate the **Viewed** checkbox.
+1. Check it to mark the file as viewed.
+
+Once checked, the file will remain marked for that reviewer unless there are newly introduced 
+changes to its content or the checkbox is unchecked.
+
+### Enable or disable file views **(FREE SELF)**
+
+The file view feature is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to enable it for your instance.
+
+To enable it:
+
+```ruby
+Feature.enable(:local_file_reviews)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:local_file_reviews)
+```
+
 ## Perform inline code reviews
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/13950) in GitLab 11.5.
@@ -153,7 +193,7 @@ in a Merge Request. To do so, click the **{comment}** **comment** icon in the gu
 > - It's enabled on GitLab.com.
 > - It can be disabled or enabled per-project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-multiline-comments). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-multiline-comments). **(FREE SELF)**
 
 GitLab provides a way to select which lines of code a comment refers to. After starting a comment
 a dropdown selector is shown to select the first line that this comment refers to.
@@ -169,7 +209,7 @@ above it.
 
 ![Multiline comment selection displayed above comment](img/multiline-comment-saved.png)
 
-### Enable or disable multiline comments **(CORE ONLY)**
+### Enable or disable multiline comments **(FREE SELF)**
 
 The multiline comments feature is under development but ready for production use.
 It is deployed behind a feature flag that is **disabled by default**.

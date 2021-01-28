@@ -13,7 +13,8 @@ RSpec.describe 'Update a compliance framework' do
       params: {
         name: 'New Name',
         description: 'New Description',
-        color: '#AAC112'
+        color: '#AAC112',
+        pipeline_configuration_full_path: 'compliance/.gitlab-ci.yml'
       }
     }
   end
@@ -55,12 +56,13 @@ RSpec.describe 'Update a compliance framework' do
         expect(mutation_response['errors']).to be_empty
       end
 
-      it 'returns the updated framework' do
+      it 'returns the updated framework', :aggregate_failures do
         subject
 
         expect(mutation_response['complianceFramework']['name']).to eq 'New Name'
         expect(mutation_response['complianceFramework']['description']).to eq 'New Description'
         expect(mutation_response['complianceFramework']['color']).to eq '#AAC112'
+        expect(mutation_response['complianceFramework']['pipelineConfigurationFullPath']).to eq 'compliance/.gitlab-ci.yml'
       end
 
       context 'current_user is not permitted to update framework' do

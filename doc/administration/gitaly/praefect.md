@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Gitaly Cluster **(CORE ONLY)**
+# Gitaly Cluster **(FREE SELF)**
 
 [Gitaly](index.md), the service that provides storage for Git repositories, can
 be run in a clustered configuration to increase fault tolerance. In this
@@ -105,7 +105,7 @@ sharding is:
   replicas.
 - Simpler management, because all Gitaly nodes are identical.
 
-Under some workloads, CPU and memory requirements may require a large fleet of Gitaly nodes and it
+Under some workloads, CPU and memory requirements may require a large fleet of Gitaly nodes. It
 can be uneconomical to have one to one replication factor.
 
 A hybrid approach can be used in these instances, where each shard is configured as a smaller
@@ -168,7 +168,7 @@ If you are using Google Cloud Platform, SoftLayer, or any other vendor that prov
 
 The communication between components is secured with different secrets, which
 are described below. Before you begin, generate a unique secret for each, and
-make note of it. This makes it easy to replace these placeholder tokens
+make note of it. This enables you to replace these placeholder tokens
 with secure tokens as you complete the setup process.
 
 1. `GITLAB_SHELL_SECRET_TOKEN`: this is used by Git hooks to make callback HTTP
@@ -260,13 +260,12 @@ this, set the corresponding IP or host address of the PgBouncer instance in
 - `praefect['database_port']`, for the port.
 
 Because PgBouncer manages resources more efficiently, Praefect still requires a
-direct connection to the PostgreSQL database because it uses
+direct connection to the PostgreSQL database. It uses the
 [LISTEN](https://www.postgresql.org/docs/11/sql-listen.html)
-functionality that is [not supported](https://www.pgbouncer.org/features.html) by
+feature that is [not supported](https://www.pgbouncer.org/features.html) by
 PgBouncer with `pool_mode = transaction`.
-
-Therefore, `praefect['database_host_no_proxy']` and `praefect['database_port_no_proxy']`
-should be set to a direct connection and not a PgBouncer connection.
+Set `praefect['database_host_no_proxy']` and `praefect['database_port_no_proxy']`
+to a direct connection, and not a PgBouncer connection.
 
 Save the changes to `/etc/gitlab/gitlab.rb` and
 [reconfigure Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -960,14 +959,14 @@ To get started quickly:
    gitlab-ctl reconfigure
    ```
 
-1. Set the Grafana admin password. This command prompts you to enter a new
+1. Set the Grafana administrator password. This command prompts you to enter a new
    password:
 
    ```shell
    gitlab-ctl set-grafana-password
    ```
 
-1. In your web browser, open `/-/grafana` (e.g.
+1. In your web browser, open `/-/grafana` (such as
    `https://gitlab.example.com/-/grafana`) on your GitLab server.
 
    Login using the password you set, and the username `admin`.
@@ -983,18 +982,12 @@ cluster.
 > - Introduced in GitLab 13.1 in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) with feature flag `gitaly_distributed_reads` set to disabled.
 > - [Made generally available and enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/2951) in GitLab 13.3.
 > - [Disabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3178) in GitLab 13.5.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitaly/-/issues/3334) in GitLab 13.8.
 
 Praefect supports distribution of read operations across Gitaly nodes that are
 configured for the virtual node.
 
-The feature is disabled by default. To enable distributed reads, the `gitaly_distributed_reads`
-[feature flag](../feature_flags.md) must be enabled in a Ruby console:
-
-```ruby
-Feature.enable(:gitaly_distributed_reads)
-```
-
-If enabled, all RPCs marked with `ACCESSOR` option like
+All RPCs marked with `ACCESSOR` option like
 [GetBlob](https://gitlab.com/gitlab-org/gitaly/-/blob/v12.10.6/proto/blob.proto#L16)
 are redirected to an up to date and healthy Gitaly node.
 
@@ -1025,9 +1018,8 @@ Praefect guarantees eventual consistency by replicating all writes to secondary 
 after the write to the primary Gitaly node has happened.
 
 Praefect can instead provide strong consistency by creating a transaction and writing
-changes to all Gitaly nodes at once. Strong consistency is currently in
-[alpha](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) and not enabled by
-default. If enabled, transactions are only available for a subset of RPCs. For more
+changes to all Gitaly nodes at once.
+If enabled, transactions are only available for a subset of RPCs. For more
 information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-org/-/epics/1189).
 
 To enable strong consistency:
@@ -1092,7 +1084,7 @@ specific storage nodes to host a repository.
 support configuring a default replication factor for a virtual storage. The default replication factor
 is applied to every newly-created repository.
 
-Prafect does not store the actual replication factor, but assigns enough storages to host the repository
+Praefect does not store the actual replication factor, but assigns enough storages to host the repository
 so the desired replication factor is met. If a storage node is later removed from the virtual storage,
 the replication factor of repositories assigned to the storage is decreased accordingly.
 
@@ -1171,8 +1163,8 @@ To enable writes again, an administrator can:
 
 ### Check for data loss
 
-The Praefect `dataloss` sub-command identifies replicas that are likely to be outdated. This is
-useful for identifying potential data loss after a failover. The following parameters are
+The Praefect `dataloss` sub-command identifies replicas that are likely to be outdated. This can help
+identify potential data loss after a failover. The following parameters are
 available:
 
 - `-virtual-storage` that specifies which virtual storage to check. The default behavior is to
@@ -1196,7 +1188,7 @@ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.t
 ```
 
 Repositories which have assigned storage nodes that contain an outdated copy of the repository are listed
-in the output. A number of useful information is printed for each repository:
+in the output. This information is printed for each repository:
 
 - A repository's relative path to the storage directory identifies each repository and groups the related
   information.
@@ -1213,7 +1205,7 @@ in the output. A number of useful information is printed for each repository:
 
 Whether a replica is assigned to host the repository is listed with each replica's status. `assigned host` is printed
 next to replicas which are assigned to store the repository. The text is omitted if the replica contains a copy of
-the repository but is not assigned to store the repository. Such replicas won't be kept in-sync by Praefect but may
+the repository but is not assigned to store the repository. Such replicas aren't kept in-sync by Praefect, but may
 act as replication sources to bring assigned replicas up to date.
 
 Example output:
@@ -1282,7 +1274,7 @@ To check a project's repository checksums across on all Gitaly nodes, run the
 
 ### Enable writes or accept data loss
 
-Praefect provides the following subcommands to re-enable writes:
+Praefect provides the following sub-commands to re-enable writes:
 
 - In GitLab 13.2 and earlier, `enable-writes` to re-enable virtual storage for writes after data
   recovery attempts.
@@ -1324,7 +1316,7 @@ These tools reconcile the outdated repositories to bring them fully up to date a
 
 Praefect automatically reconciles repositories that are not up to date. By default, this is done every
 five minutes. For each outdated repository on a healthy Gitaly node, the Praefect picks a
-random, fully up to date replica of the repository on another healthy Gitaly node to replicate from. A
+random, fully up-to-date replica of the repository on another healthy Gitaly node to replicate from. A
 replication job is scheduled only if there are no other replication jobs pending for the target
 repository.
 
@@ -1383,7 +1375,7 @@ To move repositories to Gitaly Cluster:
    - The moves are in progress. Re-query the repository move until it completes successfully.
    - The moves have failed. Most failures are temporary and are solved by rescheduling the move.
 
-1. Once the moves are complete, [query projects](../../api/projects.md#list-all-projects)
+1. After the moves are complete, [query projects](../../api/projects.md#list-all-projects)
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 

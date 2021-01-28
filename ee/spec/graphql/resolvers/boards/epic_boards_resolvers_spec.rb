@@ -42,7 +42,9 @@ RSpec.describe Resolvers::Boards::EpicBoardsResolver do
         end
 
         it 'returns epic boards in the group ordered by name' do
-          expect(result).to eq([epic_board2, epic_board1])
+          expect(result)
+            .to contain_exactly(epic_board2, epic_board1)
+            .and be_sorted(:name, :asc)
         end
 
         context 'when epic_boards flag is disabled' do

@@ -272,6 +272,15 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       expect(results.issues_count).to eq 2
     end
 
+    it 'executes count only queries' do
+      results = described_class.new(user, 'hello world', limit_project_ids)
+      expect(results).to receive(:issues).with(count_only: true).and_call_original
+
+      count = results.issues_count
+
+      expect(count).to eq(2)
+    end
+
     context 'filtering' do
       let!(:project) { create(:project, :public) }
       let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
@@ -1374,6 +1383,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   context 'query performance' do
     let(:results) { described_class.new(user, 'hello world', limit_project_ids) }
 
-    include_examples 'does not hit Elasticsearch twice for objects and counts', %w|projects notes blobs wiki_blobs commits issues merge_requests milestones|
+    include_examples 'does not hit Elasticsearch twice for objects and counts', %w[projects notes blobs wiki_blobs commits issues merge_requests milestones]
+    include_examples 'does not load results for count only queries', %w[projects notes blobs wiki_blobs commits issues merge_requests milestones]
   end
 end

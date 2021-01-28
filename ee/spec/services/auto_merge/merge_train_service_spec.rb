@@ -102,10 +102,11 @@ RSpec.describe AutoMerge::MergeTrainService do
         target_project: project, target_branch: 'master')
     end
 
-    it 'calls RefreshMergeRequestsService' do
-      expect_next_instance_of(MergeTrains::RefreshMergeRequestsService) do |service|
-        expect(service).to receive(:execute).with(merge_request)
-      end
+    it 'calls RefreshWorker' do
+      expect(MergeTrains::RefreshWorker)
+        .to receive(:perform_async)
+        .with(merge_request.target_project_id, merge_request.target_branch)
+        .once
 
       subject
     end
@@ -113,8 +114,8 @@ RSpec.describe AutoMerge::MergeTrainService do
     context 'when merge request is not on a merge train' do
       let(:merge_request) { create(:merge_request) }
 
-      it 'does not call RefreshMergeRequestsService' do
-        expect(MergeTrains::RefreshMergeRequestsService).not_to receive(:new)
+      it 'does not call RefreshWorker' do
+        expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
         subject
       end
@@ -193,8 +194,8 @@ RSpec.describe AutoMerge::MergeTrainService do
 
       let(:status) { MergeTrain.state_machines[:status].states[:fresh].value }
 
-      it 'processes the next merge request on the train by default' do
-        expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_2.id)
+      it 'processes the train by default' do
+        expect(MergeTrains::RefreshWorker).to receive(:perform_async).with(merge_request_2.target_project_id, merge_request_2.target_branch)
 
         subject
 
@@ -205,7 +206,7 @@ RSpec.describe AutoMerge::MergeTrainService do
         let(:status) { MergeTrain.state_machines[:status].states[:stale].value }
 
         it 'does not do anything' do
-          expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_2.id)
+          expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
           expect { subject }.not_to raise_error
 
@@ -281,8 +282,8 @@ RSpec.describe AutoMerge::MergeTrainService do
           status: MergeTrain.state_machines[:status].states[:fresh].value)
       end
 
-      it 'processes the next merge request on the train' do
-        expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_2.id)
+      it 'processes the train' do
+        expect(MergeTrains::RefreshWorker).to receive(:perform_async).with(merge_request_2.target_project_id, merge_request_2.target_branch)
 
         subject
 
@@ -293,7 +294,7 @@ RSpec.describe AutoMerge::MergeTrainService do
         let(:args) { { process_next: false } }
 
         it 'does not process the next merge request on the train' do
-          expect(AutoMergeProcessWorker).not_to receive(:perform_async)
+          expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
           subject
         end

@@ -39,17 +39,20 @@ RSpec.describe GlobalPolicy do
   it { is_expected.to be_disallowed(:read_licenses) }
   it { is_expected.to be_disallowed(:destroy_licenses) }
   it { is_expected.to be_disallowed(:read_all_geo) }
+  it { is_expected.to be_disallowed(:manage_subscription) }
 
   context 'when admin mode enabled', :enable_admin_mode do
     it { expect(described_class.new(admin, [user])).to be_allowed(:read_licenses) }
     it { expect(described_class.new(admin, [user])).to be_allowed(:destroy_licenses) }
     it { expect(described_class.new(admin, [user])).to be_allowed(:read_all_geo) }
+    it { expect(described_class.new(admin, [user])).to be_allowed(:manage_subscription) }
   end
 
   context 'when admin mode disabled' do
     it { expect(described_class.new(admin, [user])).to be_disallowed(:read_licenses) }
     it { expect(described_class.new(admin, [user])).to be_disallowed(:destroy_licenses) }
     it { expect(described_class.new(admin, [user])).to be_disallowed(:read_all_geo) }
+    it { expect(described_class.new(admin, [user])).to be_disallowed(:manage_subscription) }
   end
 
   shared_examples 'analytics policy' do |action|

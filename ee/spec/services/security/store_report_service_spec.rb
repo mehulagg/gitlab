@@ -62,8 +62,26 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
       end
 
-      it 'inserts all vulnerabilties' do
+      it 'inserts all vulnerabilities' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
+      end
+    end
+
+    context 'when report data includes all raw_metadata' do
+      let(:trait) { :dependency_scanning_remediation }
+
+      it 'inserts top level finding data', :aggregate_failures do
+        subject
+
+        finding = Vulnerabilities::Finding.last
+        finding.raw_metadata = nil
+
+        expect(finding.metadata).to be_blank
+        expect(finding.cve).not_to be_nil
+        expect(finding.description).not_to be_nil
+        expect(finding.location).not_to be_nil
+        expect(finding.message).not_to be_nil
+        expect(finding.solution).not_to be_nil
       end
     end
 

@@ -12,6 +12,7 @@ module Projects
       before_action do
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
         push_frontend_feature_flag(:vueify_shared_runners_toggle, @project)
+        push_frontend_feature_flag(:runner_instructions, @project, default_enabled: :yaml)
       end
 
       helper_method :highlight_badge
@@ -144,8 +145,8 @@ module Projects
       def define_badges_variables
         @ref = params[:ref] || @project.default_branch || 'master'
 
-        @badges = [Gitlab::Badge::Pipeline::Status,
-                   Gitlab::Badge::Coverage::Report]
+        @badges = [Gitlab::Ci::Badge::Pipeline::Status,
+                   Gitlab::Ci::Badge::Coverage::Report]
 
         @badges.map! do |badge|
           badge.new(@project, @ref).metadata

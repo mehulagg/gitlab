@@ -398,7 +398,7 @@ RSpec.describe EpicsFinder do
 
                   params[:milestone_title] = ancestor_group_milestone.title
 
-                  expect(epics(params)).to contain_exactly(ancestor_epic1, ancestor_epic1, subgroup_epic1)
+                  expect(epics(params)).to contain_exactly(ancestor_epic1, subgroup_epic1)
                 end
 
                 it_behaves_like 'filtered by milestone', :project do

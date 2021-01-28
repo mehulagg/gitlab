@@ -3,7 +3,7 @@
 module Mutations
   module RequirementsManagement
     class ExportRequirements < BaseMutation
-      include ResolvesProject
+      include FindsProject
       include CommonRequirementArguments
 
       graphql_name 'ExportRequirements'
@@ -16,18 +16,12 @@ module Mutations
 
       def resolve(args)
         project_path = args.delete(:project_path)
-        project = authorized_find!(full_path: project_path)
+        project = authorized_find!(project_path)
         IssuableExportCsvWorker.perform_async(:requirement, current_user.id, project.id, args)
 
         {
           errors: []
         }
-      end
-
-      private
-
-      def find_object(full_path:)
-        resolve_project(full_path: full_path)
       end
     end
   end

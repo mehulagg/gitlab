@@ -4,7 +4,7 @@ class AuditEventPresenter < Gitlab::View::Presenter::Simple
   presents :audit_event
 
   def author_name
-    author&.name
+    audit_event.author_name
   end
 
   def author_url
@@ -48,7 +48,7 @@ class AuditEventPresenter < Gitlab::View::Presenter::Simple
   private
 
   def author
-    @author ||= audit_event.lazy_author
+    audit_event.author
   end
 
   def entity

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_admin' do
-  context 'on settings' do
+  context 'on templates settings' do
     before do
       stub_licensed_features(custom_file_templates: custom_file_templates)
 
@@ -23,6 +23,30 @@ RSpec.describe 'layouts/nav/sidebar/_admin' do
 
       it 'does not include Templates link' do
         expect(rendered).not_to have_link('Templates', href: '/admin/application_settings/templates')
+      end
+    end
+  end
+
+  context 'on advanced search settings' do
+    before do
+      stub_licensed_features(elastic_search: elastic_search_license)
+
+      render
+    end
+
+    context 'license with elastic_search feature' do
+      let(:elastic_search_license) { true }
+
+      it 'includes Advanced Search link' do
+        expect(rendered).to have_link('Advanced Search', href: '/admin/application_settings/advanced_search')
+      end
+    end
+
+    context 'license without elastic_search feature' do
+      let(:elastic_search_license) { false }
+
+      it 'includes Advanced Search link' do
+        expect(rendered).not_to have_link('Advanced Search', href: '/admin/application_settings/advanced_search')
       end
     end
   end

@@ -67,6 +67,7 @@ export default {
       label-for="node-selective-synchronization-field"
       :description="__('Choose specific groups or storage shards')"
     >
+      <!-- eslint-disable vue/no-mutating-props -->
       <gl-form-select
         id="node-selective-synchronization-field"
         v-model="nodeData.selectiveSyncType"
@@ -75,6 +76,7 @@ export default {
         text-field="label"
         class="col-sm-3"
       />
+      <!-- eslint-enable vue/no-mutating-props -->
     </gl-form-group>
     <gl-form-group
       v-if="selectiveSyncNamespaces"
@@ -120,9 +122,11 @@ export default {
           </template>
         </gl-sprintf>
       </template>
+      <!-- eslint-disable vue/no-mutating-props -->
       <gl-form-checkbox id="node-object-storage-field" v-model="nodeData.syncObjectStorage">{{
         __('Allow this secondary node to replicate content on Object Storage')
       }}</gl-form-checkbox>
+      <!-- eslint-enable vue/no-mutating-props -->
     </gl-form-group>
   </div>
 </template>

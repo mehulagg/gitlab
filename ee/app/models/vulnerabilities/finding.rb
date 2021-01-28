@@ -62,6 +62,11 @@ module Vulnerabilities
     validates :raw_metadata, presence: true
     validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
 
+    validates :description, length: { maximum: 15000 }
+    validates :message, length: { maximum: 3000 }
+    validates :solution, length: { maximum: 7000 }
+    validates :cve, length: { maximum: 48400 }
+
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 
     scope :report_type, -> (type) { where(report_type: report_types[type]) }
@@ -217,15 +222,15 @@ module Vulnerabilities
     end
 
     def description
-      metadata.dig('description')
+      super.presence || metadata.dig('description')
     end
 
     def solution
-      metadata.dig('solution') || remediations&.first&.dig('summary')
+      super.presence || metadata.dig('solution') || remediations&.first&.dig('summary')
     end
 
     def location
-      metadata.fetch('location', {})
+      super.presence || metadata.fetch('location', {})
     end
 
     def file
@@ -309,11 +314,11 @@ module Vulnerabilities
     end
 
     def message
-      metadata.dig('message')
+      super.presence || metadata.dig('message')
     end
 
     def cve_value
-      identifiers.find(&:cve?)&.name
+      cve || identifiers.find(&:cve?)&.name
     end
 
     def cwe_value

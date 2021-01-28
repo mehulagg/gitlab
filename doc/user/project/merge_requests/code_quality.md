@@ -75,7 +75,7 @@ GitLab 11.4 or earlier, you can view the deprecated job definitions in the
 - Using shared runners, the job should be configured For the [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker).
 - Using private runners, there is an [alternative configuration](#set-up-a-private-runner-for-code-quality-without-docker-in-docker) recommended for running CodeQuality analysis more efficiently.
 
-In either configuration, the runner mmust have enough disk space to handle generated Code Quality files. For example on the [GitLab project](https://gitlab.com/gitlab-org/gitlab) the files are approximately 7 GB.
+In either configuration, the runner must have enough disk space to handle generated Code Quality files. For example on the [GitLab project](https://gitlab.com/gitlab-org/gitlab) the files are approximately 7 GB.
 
 Once you set up GitLab Runner, include the Code Quality template in your CI configuration:
 
@@ -219,8 +219,8 @@ The end result is that:
 - Docker images, including all CodeClimate images, are cached, and not re-fetched for subsequent jobs.
 
 With this configuration, the run time for a second pipeline is much shorter. For example
-this [small change](https://gitlab.com/drewcimino/test-code-quality-template/-/merge_requests/4/diffs?commit_id=1e705607aef7236c1b20bb6f637965f3f3e53a46)
-to an [open merge request](https://gitlab.com/drewcimino/test-code-quality-template/-/merge_requests/4/pipelines)
+this [small change](https://gitlab.com/drew/test-code-quality-template/-/merge_requests/4/diffs?commit_id=1e705607aef7236c1b20bb6f637965f3f3e53a46)
+to an [open merge request](https://gitlab.com/drew/test-code-quality-template/-/merge_requests/4/pipelines)
 running Code Quality analysis ran significantly faster the second time:
 
 ![Code Quality sequential runs without DinD](img/code_quality_host_bound_sequential.png)

@@ -144,10 +144,8 @@ export default {
             :options="$options.selectOptions"
           />
         </div>
-        <template name="valid-feedback">
-          <gl-form-text v-show="showValidFeedback" class="gl-font-base gl-text-gray-400!">
-            {{ $options.i18n.validFeedback }}
-          </gl-form-text>
+        <template v-if="showValidFeedback" #description>
+          {{ $options.i18n.validFeedback }}
         </template>
       </gl-form-group>
       <gl-button variant="success" type="submit" :disabled="disableSubmit" :loading="loading">

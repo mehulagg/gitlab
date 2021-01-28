@@ -117,6 +117,11 @@ module EE
       end
 
       with_scope :subject
+      condition(:coverage_fuzzing_enabled) do
+        @subject.feature_available?(:coverage_fuzzing)
+      end
+
+      with_scope :subject
       condition(:on_demand_scans_enabled) do
         @subject.feature_available?(:security_on_demand_scans)
       end
@@ -214,6 +219,10 @@ module EE
         enable :read_vulnerability_scanner
       end
 
+      rule { coverage_fuzzing_enabled & can?(:developer_access) }.policy do
+        enable :read_coverage_fuzzing
+      end
+
       rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
         enable :read_on_demand_scans
         enable :create_on_demand_dast_scan
@@ -234,6 +243,7 @@ module EE
         enable :push_code
         enable :create_merge_request_from
         enable :create_vulnerability_feedback
+        enable :admin_merge_request
       end
 
       rule { issues_disabled & merge_requests_disabled }.policy do

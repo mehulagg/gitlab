@@ -5,7 +5,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# SAML OmniAuth Provider **(CORE ONLY)**
+# SAML OmniAuth Provider **(FREE SELF)**
 
 This page describes instance-wide SAML for self-managed GitLab instances. For SAML on GitLab.com, see [SAML SSO for GitLab.com groups](../user/group/saml_sso/index.md).
 
@@ -17,7 +17,7 @@ You should also reference the [OmniAuth documentation](omniauth.md) for general 
 |------|-------------|
 | Identity Provider (IdP) | The service which manages your user identities such as ADFS, Okta, Onelogin, or Ping Identity. |
 | Service Provider (SP) | SAML considers GitLab to be a service provider. |
-| Assertion | A piece of information about a user's identity, such as their name or role. Also know as claims or attributes. |
+| Assertion | A piece of information about a user's identity, such as their name or role. Also known as claims or attributes. |
 | SSO | Single Sign-On. |
 | Assertion consumer service URL | The callback on GitLab where users will be redirected after successfully authenticating with the identity provider. |
 | Issuer | How GitLab identifies itself to the identity provider. Also known as a "Relying party trust identifier". |
@@ -593,7 +593,7 @@ Refer to the documentation for your SAML Identity Provider for information on ho
 
 The [Generated passwords for users created through integrated authentication](../security/passwords_for_integrated_authentication_methods.md) guide provides an overview of how GitLab generates and sets passwords for users created via SAML.
 
-## Configuring Group SAML on a self-managed GitLab instance **(PREMIUM ONLY)**
+## Configuring Group SAML on a self-managed GitLab instance **(PREMIUM SELF)**
 
 For information on the GitLab.com implementation, please see the [SAML SSO for GitLab.com groups page](../user/group/saml_sso).
 

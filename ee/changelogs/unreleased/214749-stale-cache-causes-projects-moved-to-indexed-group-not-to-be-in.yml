@@ -1,5 +1,0 @@
----
-title: Invalidate Elasticsearch cache when moving projects or groups
-merge_request: 50712
-author:
-type: fixed

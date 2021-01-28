@@ -37,20 +37,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
     end
 
     context 'with valid payload' do
-      let(:payload_raw) do
-        {
-          title: 'alert title',
-          start_time: starts_at.rfc3339,
-          end_time: ended_at&.rfc3339,
-          severity: 'low',
-          monitoring_tool: tool,
-          service: 'GitLab Test Suite',
-          description: 'Very detailed description',
-          hosts: %w[1.1.1.1 2.2.2.2],
-          fingerprint: fingerprint,
-          gitlab_environment_name: environment.name
-        }.with_indifferent_access
-      end
+      let(:payload_raw) { build(:network_alert_payload) }
 
       let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
 
@@ -59,12 +46,31 @@ RSpec.describe AlertManagement::NetworkAlertService do
           .with_indifferent_access
       end
 
-      it_behaves_like 'creates an alert management alert'
-      it_behaves_like 'assigns the alert properties'
+      it 'create alert and assigns properties' do
+        subject
+
+        expect(last_alert_attributes).to match(a_hash_including({
+          description: 'POLICY_DENIED',
+          domain: 'threat_monitoring',
+          ended_at: nil,
+          environment_id: nil,
+          events:  1,
+          fingerprint: 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3',
+          hosts: [],
+          issue_id: nil,
+          monitoring_tool: 'Cilium',
+          payload: payload_raw.with_indifferent_access,
+          project_id: project.id,
+          prometheus_alert_id:  nil,
+          service: nil,
+          severity:  'critical',
+          title: 'Cilium Alert'
+        }))
+      end
 
       it 'creates a system note corresponding to alert creation' do
         expect { subject }.to change(Note, :count).by(1)
-        expect(Note.last.note).to include(payload_raw.fetch(:monitoring_tool))
+        expect(Note.last.note).to include('Cilium')
       end
 
       context 'when alert exists' do
@@ -116,7 +122,6 @@ RSpec.describe AlertManagement::NetworkAlertService do
           end
 
           it_behaves_like 'creates an alert management alert'
-          it_behaves_like 'assigns the alert properties'
         end
 
         context 'existing alert is ignored' do
@@ -146,13 +151,6 @@ RSpec.describe AlertManagement::NetworkAlertService do
 
           it_behaves_like 'adds an alert management alert event'
         end
-      end
-
-      context 'end time given' do
-        let(:ended_at) { Time.current }
-
-        it_behaves_like 'creates an alert management alert'
-        it_behaves_like 'assigns the alert properties'
       end
     end
 

@@ -25,13 +25,13 @@ RSpec.describe 'shared/billings/_trial_status.html.haml' do
     let(:trial_ends_on) { Date.tomorrow }
     let(:trial) { true }
 
-    context 'with a gold trial' do
-      let(:plan) { create(:gold_plan, title: 'Gold') }
+    context 'with a ultimate trial' do
+      let(:plan) { create(:gold_plan, title: 'Ultimate') }
 
-      it 'displays expiry date and Gold' do
+      it 'displays expiry date and Ultimate' do
         render 'shared/billings/trial_status', namespace: group
 
-        expect(rendered).to have_content("Your GitLab.com Gold trial will expire after #{trial_ends_on}. You can retain access to the Gold features by upgrading below.")
+        expect(rendered).to have_content("Your GitLab.com Ultimate trial will expire after #{trial_ends_on}. You can retain access to the Ultimate features by upgrading below.")
       end
     end
 
@@ -65,7 +65,7 @@ RSpec.describe 'shared/billings/_trial_status.html.haml' do
     it 'offers a trial' do
       render 'shared/billings/trial_status', namespace: group
 
-      expect(rendered).to have_content("start a free 30-day trial of GitLab.com Gold")
+      expect(rendered).to have_content("start a free 30-day trial of GitLab.com Ultimate")
     end
   end
 end

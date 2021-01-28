@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Billing', :js do
   include StubRequests
+  include SubscriptionPortalHelpers
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
@@ -18,6 +19,7 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   before do
+    stub_eoa_eligibility_request(group.id)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}&namespace_id=#{group.id}")
       .with(headers: { 'Accept' => 'application/json' })
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
@@ -39,7 +41,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Free plan")
+      expect(page).to have_content("#{group.name} is currently using the Free Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
@@ -63,7 +65,7 @@ RSpec.describe 'Groups > Billing', :js do
 
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: upgrade_url)
@@ -100,7 +102,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).not_to have_link("Upgrade")
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")

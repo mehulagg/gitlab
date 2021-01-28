@@ -30,7 +30,7 @@ describe('MemberTableCell', () => {
 
   const localVue = createLocalVue();
   localVue.use(Vuex);
-  localVue.component('wrapped-component', WrappedComponent);
+  localVue.component('WrappedComponent', WrappedComponent);
 
   const createStore = (state = {}) => {
     return new Vuex.Store({

@@ -1,10 +1,10 @@
 ---
-stage: none
-group: unassigned
+stage: Enablement
+group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Back up and restore GitLab **(CORE ONLY)**
+# Back up and restore GitLab **(FREE SELF)**
 
 GitLab provides Rake tasks for backing up and restoring GitLab instances.
 
@@ -100,7 +100,7 @@ the host, based on your installed version of GitLab:
 - GitLab 12.1 and earlier:
 
   ```shell
-  gitlab-rake gitlab:backup:create
+  docker exec -t <container name> gitlab-rake gitlab:backup:create
   ```
 
 If you're using the [GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab)

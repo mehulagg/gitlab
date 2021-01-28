@@ -10,7 +10,7 @@ export default {
 </script>
 <template>
   <div class="gl-border-b-solid gl-border-b-1 gl-border-gray-100">
-    <div class="gl-flex-direction-column gl-display-md-none" data-testid="mobile-loader">
+    <div class="gl-flex-direction-column gl-md-display-none" data-testid="mobile-loader">
       <div
         v-for="index in $options.SKELETON_LOADER_ROWS.mobile"
         :key="index"
@@ -24,7 +24,7 @@ export default {
       </div>
     </div>
     <div
-      class="gl-display-none gl-display-md-flex gl-flex-direction-column"
+      class="gl-display-none gl-md-display-flex gl-flex-direction-column"
       data-testid="desktop-loader"
     >
       <gl-skeleton-loader

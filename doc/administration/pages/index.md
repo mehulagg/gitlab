@@ -222,7 +222,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `api_secret_key`  | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.
 | `artifacts_server` |  Enable viewing [artifacts](../job_artifacts.md) in GitLab Pages.
 | `artifacts_server_timeout` |  Timeout (in seconds) for a proxied request to the artifacts server.
-| `artifacts_server_url` |  API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`.
+| `artifacts_server_url` |  API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`. When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server), this URL must point to the main GitLab server's API.
 | `auth_redirect_uri` |  Callback URL for authenticating with GitLab. Defaults to project's subdomain of `pages_external_url` + `/auth`.
 | `auth_secret` |  Secret key for signing authentication requests. Leave blank to pull automatically from GitLab during OAuth registration.
 | `dir` |  Working directory for configuration and secrets files.
@@ -573,7 +573,7 @@ You can configure the maximum size of the unpacked archive per project in
 **Admin Area > Settings > Preferences > Pages**, in **Maximum size of pages (MB)**.
 The default is 100MB.
 
-### Override maximum pages size per project or group **(PREMIUM ONLY)**
+### Override maximum pages size per project or group **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16610) in GitLab 12.7.
 
@@ -928,6 +928,20 @@ For example, if there is a connection timeout:
 error="failed to connect to internal Pages API: Get \"https://gitlab.example.com:3000/api/v4/internal/pages/status\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"
 ```
 
+### Pages cannot communicate with an instance of the GitLab API
+
+If you use the default value for `domain_config_source=auto` and run multiple instances of GitLab
+Pages, you may see intermittent 502 error responses while serving Pages content. You may also see
+the following warning in the Pages logs:
+
+```plaintext
+WARN[0010] Pages cannot communicate with an instance of the GitLab API. Please sync your gitlab-secrets.json file https://gitlab.com/gitlab-org/gitlab-pages/-/issues/535#workaround. error="pages endpoint unauthorized"
+```
+
+This can happen if your `gitlab-secrets.json` file is out of date between GitLab Rails and GitLab
+Pages. Follow steps 8-10 of [Running GitLab Pages on a separate server](#running-gitlab-pages-on-a-separate-server),
+in all of your GitLab Pages instances.
+
 ### 500 error with `securecookie: failed to generate random iv` and `Failed to save the session`
 
 This problem most likely results from an [out-dated operating system](https://docs.gitlab.com/omnibus/package-information/deprecated_os.html).
@@ -940,6 +954,8 @@ Upgrading to an [officially supported operating system](https://about.gitlab.com
 This problem comes from the permissions of the GitLab Pages OAuth application. To fix it, go to
 **Admin > Applications > GitLab Pages** and edit the application. Under **Scopes**, ensure that the
 `api` scope is selected and save your changes.
+When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server),
+this setting needs to be configured on the main GitLab server.
 
 ### Workaround in case no wildcard DNS entry can be set
 

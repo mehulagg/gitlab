@@ -3,7 +3,7 @@
 - if namespace_for_user
   = render_if_exists 'trials/banner', namespace: namespace
 
-.billing-plan-header.content-block.center
+.billing-plan-header.content-block.center.gl-mb-5
   .billing-plan-logo
     - if namespace_for_user
       .avatar-container.s96.home-panel-avatar.gl-mr-3.float-none.mx-auto.mb-4.mt-1
@@ -18,7 +18,7 @@
     - if namespace_for_user
       = s_("BillingPlans|@%{user_name} you are currently using the %{plan_name} plan.").html_safe % { user_name: current_user.username, plan_name: plan.code.titleize }
     - else
-      = s_("BillingPlans|%{group_name} is currently using the %{plan_name} plan.").html_safe % { group_name: namespace.full_name, plan_name: plan.code.titleize }
+      = s_("BillingPlans|%{group_name} is currently using the %{plan_name}.").html_safe % { group_name: namespace.full_name, plan_name: plan.name }
 
   - if parent_group
     %p= s_("BillingPlans|This group uses the plan associated with its parent group.")

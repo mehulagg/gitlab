@@ -4,7 +4,6 @@ module AlertManagement
   # Create alerts coming K8 through gitlab-agent
   class NetworkAlertService
     include Gitlab::Utils::StrongMemoize
-    include ::IncidentManagement::Settings
 
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
 
@@ -18,8 +17,6 @@ module AlertManagement
     def execute
       return bad_request unless valid_payload_size?
 
-      # Not meant to run with a user, but with a agent
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/291986
       process_request
 
       return bad_request unless alert.persisted?
@@ -80,14 +77,9 @@ module AlertManagement
       AlertManagement::Alert.new(**incoming_payload.alert_params, domain: :threat_monitoring, ended_at: nil)
     end
 
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/292034
     def incoming_payload
       strong_memoize(:incoming_payload) do
-        Gitlab::AlertManagement::Payload.parse(
-          project,
-          payload,
-          monitoring_tool: MONITORING_TOOL
-        )
+        Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: MONITORING_TOOL)
       end
     end
 
