@@ -15,7 +15,7 @@
     = form.label :merge_requests_template, class: 'label-bold' do
       = _('Default description template for merge requests')
       = link_to sprite_icon('question-o'), help_page_path('user/project/description_templates'), target: '_blank'
-    = form.text_area :merge_requests_template, class: "form-control", rows: 3
+    = form.text_area :merge_requests_template, class: "form-control", rows: 3, data: { qa_selector: 'default_merge_request_template_field' }
     .text-secondary
       - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/markdown') }
       = _('Description parsed with %{link_start}GitLab Flavored Markdown%{link_end}').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
