@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import lockedWarning from './locked_warning.vue';
 import titleField from './fields/title.vue';
+import typeField from './fields/type.vue';
 import descriptionField from './fields/description.vue';
 import editActions from './edit_actions.vue';
 import descriptionTemplate from './fields/description_template.vue';
@@ -12,6 +13,7 @@ export default {
   components: {
     lockedWarning,
     titleField,
+    typeField,
     descriptionField,
     descriptionTemplate,
     editActions,
@@ -121,7 +123,18 @@ export default {
 <template>
   <form>
     <locked-warning v-if="showLockedWarning" />
+    <div class="col-12">
+      <title-field ref="title" :form-state="formState" :issuable-templates="issuableTemplates" />
+    </div>
     <div class="row">
+      <div
+        :class="{
+          'col-sm-8 col-lg-9': hasIssuableTemplates,
+          'col-12': !hasIssuableTemplates,
+        }"
+      >
+        <type-field :form-state="formState" />
+      </div>
       <div v-if="hasIssuableTemplates" class="col-sm-4 col-lg-3">
         <description-template
           :form-state="formState"
@@ -130,17 +143,6 @@ export default {
           :project-namespace="projectNamespace"
         />
       </div>
-      <div
-        :class="{
-          'col-sm-8 col-lg-9': hasIssuableTemplates,
-          'col-12': !hasIssuableTemplates,
-        }"
-      >
-        <title-field ref="title" :form-state="formState" :issuable-templates="issuableTemplates" />
-      </div>
-    </div>
-    <div>
-      {{ __('Type field placeholder') }}
     </div>
     <description-field
       ref="description"
