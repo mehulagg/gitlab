@@ -1,5 +1,14 @@
 <script>
-import { GlAlert, GlBadge, GlIcon, GlLink, GlSprintf, GlTable, GlTooltip } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlBadge,
+  GlIcon,
+  GlLink,
+  GlLoadingIcon,
+  GlSprintf,
+  GlTable,
+  GlTooltip,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
@@ -14,6 +23,7 @@ export default {
     GlBadge,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     GlSprintf,
     GlTable,
     GlTooltip,
@@ -193,10 +203,21 @@ export default {
     </template>
 
     <template #row-details="row">
+      <div v-if="row.item.loadingActions" class="gl-alert gl-alert-danger gl-m-0 gl-pl-4">
+        <p
+          v-for="errorMessage in row.item.errorMessages"
+          :key="errorMessage"
+          class="gl-display-flex gl-justify-content-start gl-align-items-baseline gl-m-0"
+        >
+          <gl-loading-icon class="gl-px-3" />
+          {{ errorMessage }}
+        </p>
+      </div>
+
       <gl-alert
+        v-else
         data-testid="terraform-states-table-error"
         variant="danger"
-        :dismissible="!row.item.loadingActions"
         @dismiss="row.toggleDetails"
       >
         <p
