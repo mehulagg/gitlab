@@ -13,7 +13,7 @@ module DependencyProxy
 
     def execute
       @manifest = @group.dependency_proxy_manifests
-                        .find_or_initialize_by_file_name(@file_name)
+                        .find_or_initialize_by_file_name_or_digest(file_name: @file_name, digest: @tag)
 
       head_result = DependencyProxy::HeadManifestService.new(@image, @tag, @token).execute
 
