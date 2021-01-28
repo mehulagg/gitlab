@@ -1,10 +1,10 @@
+import {initStaticSecurityConfiguration} from "~/security_configuration";
+import {initSecurityConfiguration} from "ee/security_configuration"
+
 const el = document.querySelector('#js-security-configuration');
 
 if (el) {
-    import('ee/security_configuration').then(({initSecurityConfiguration})=> 
-        initSecurityConfiguration(el)
-    ).catch(() => {});
+    initSecurityConfiguration(el)
 } else {
-    import('~/pages/projects/security/configuration')
-    .catch(() => {});
+    initStaticSecurityConfiguration(document.querySelector('#js-security-configuration-static'));
 }

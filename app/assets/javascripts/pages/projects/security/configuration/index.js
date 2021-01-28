@@ -1,3 +1,3 @@
-import { initSecurityConfiguration } from '~/security_configuration';
+import { initStaticSecurityConfiguration } from '~/security_configuration';
 
-initSecurityConfiguration(document.querySelector('#js-security-configuration-static'));
+initStaticSecurityConfiguration(document.querySelector('#js-security-configuration-static'));
