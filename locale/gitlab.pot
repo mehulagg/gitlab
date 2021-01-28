@@ -7299,6 +7299,30 @@ msgstr ""
 msgid "CompareBranches|There isn't anything to compare."
 msgstr ""
 
+msgid "CompareRevisions|Branches"
+msgstr ""
+
+msgid "CompareRevisions|Compare"
+msgstr ""
+
+msgid "CompareRevisions|Create merge request"
+msgstr ""
+
+msgid "CompareRevisions|Filter by Git revision"
+msgstr ""
+
+msgid "CompareRevisions|Select branch/tag"
+msgstr ""
+
+msgid "CompareRevisions|Tags"
+msgstr ""
+
+msgid "CompareRevisions|There was an error while updating the branch/tag list. Please try again."
+msgstr ""
+
+msgid "CompareRevisions|View open merge request"
+msgstr ""
+
 msgid "Complete"
 msgstr ""
 
