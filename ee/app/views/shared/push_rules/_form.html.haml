@@ -5,78 +5,75 @@
 .form-check
   = f.check_box :deny_delete_tag, class: "form-check-input", data: { qa_selector: 'deny_delete_tag_checkbox' }
   = f.label :deny_delete_tag, class: "label-bold form-check-label" do
-    Do not allow users to remove git tags with
+    Disallow users to remove Git tags with
     %code git push
   %p.text-muted
-    Tags can still be deleted through the web UI.
+    Users can still delete tags through the GitLab UI.
 
 .form-check
   = f.check_box :member_check, class: "form-check-input", data: { qa_selector: 'restrict_author_checkbox' }
-  = f.label :member_check, "Check whether author is a GitLab user", class: "label-bold form-check-label"
+  = f.label :member_check, "Check whether the commit author is a GitLab user", class: "label-bold form-check-label"
   %p.text-muted
-    Restrict commits by author (email) to existing GitLab users
-
+    Restrict commits to existing GitLab users.
 
 .form-check
   = f.check_box :prevent_secrets, class: "form-check-input", data: { qa_selector: 'prevent_secrets_checkbox' }
-  = f.label :prevent_secrets, "Prevent committing secrets to Git", class: "label-bold form-check-label"
+  = f.label :prevent_secrets, "Prevent pushing secret files", class: "label-bold form-check-label"
   %p.text-muted
-    GitLab will reject any files that are likely to contain secrets.
-    The list of file names we reject is available in the #{link_to "documentation", help_page_path('push_rules/push_rules')}.
+    GitLab rejects any files that are likely to contain secrets.
+    The list of rejected file names is available in the #{link_to "documentation", help_page_path('push_rules/push_rules')}.
 
 .form-group
-  = f.label :commit_message_regex, "Commit message", class: "label-bold"
+  = f.label :commit_message_regex, "Require commit message expression", class: "label-bold"
   = f.text_field :commit_message_regex, class: "form-control", placeholder: 'Example: Fixes \d+\..*', data: { qa_selector: 'commit_message_field' }
   .form-text.text-muted
-    All commit messages must match this
+    All commit messages must contain this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
-    If this field is empty it allows any commit message.
-    For example you can require that an issue number is always mentioned in the commit message.
+    If empty, GitLab doesn't require any expression in commit messages.
 
 .form-group
-  = f.label :commit_message_negative_regex, "Commit message negative match", class: 'label-bold'
+  = f.label :commit_message_negative_regex, "Reject commit message expression", class: 'label-bold'
   = f.text_field :commit_message_negative_regex, class: "form-control", placeholder: 'Example: ssh\:\/\/', data: { qa_selector: 'deny_commit_message_field' }
   .form-text.text-muted
-    No commit message is allowed to match this
+    Commit messages cannot contain this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
-    If this field is empty it allows any commit message.
-    For example you can require that no commit message contains any links.
+    If left empty, GitLab doesn't reject any expression in commit messages.
 
 .form-group
   = f.label :branch_name_regex, "Branch name", class: "label-bold"
   = f.text_field :branch_name_regex, class: "form-control", placeholder: 'Example: (feature|hotfix)\/*', data: { qa_selector: 'branch_name_field' }
   .form-text.text-muted
-    All branch names must match this
+    All branch names must contain this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
-    If this field is empty it allows any branch name.
+    If left empty, GitLab allows any branch name.
 
 .form-group
   = f.label :author_email_regex, "Commit author's email", class: "label-bold"
   = f.text_field :author_email_regex, class: "form-control", placeholder: _('Example: @sub\.company\.com$'), data: { qa_selector: 'author_email_field' }
   .form-text.text-muted
-    All commit author's email must match this
+    All commit author's email must contain this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
-    If this field is empty it allows any email.
+    If left empty, GitLab allows any email.
 
 .form-group
   = f.label :file_name_regex, "Prohibited file names", class: "label-bold"
   = f.text_field :file_name_regex, class: "form-control", placeholder: 'Example: (jar|exe)$', data: { qa_selector: 'file_name_field' }
   .form-text.text-muted
-    All committed filenames must not match this
+    All committed filenames cannot contain this
     = link_to 'regular expression', 'https://github.com/google/re2/wiki/Syntax'
     to be pushed.
-    If this field is empty it allows any filenames.
+    If left empty, GitLab allows any filenames.
 
 .form-group
   = f.label :max_file_size, "Maximum file size (MB)", class: "label-bold"
   = f.number_field :max_file_size, class: "form-control", min: 0, data: { qa_selector: 'file_size_field' }
   .form-text.text-muted
-    Pushes that contain added or updated files that exceed this file size are rejected.
-    Set to 0 to allow files of any size.
-    Files tracked by Git LFS are exempted.
+    Reject file sizes equal to or greater than this size.
+    If set to 0, GitLab allows files of any size.
+    This rule does not apply to files tracked by Git LFS.
 
 = f.submit _("Save Push Rules"), class: "btn btn-success", data: { qa_selector: 'submit_settings_button' }
