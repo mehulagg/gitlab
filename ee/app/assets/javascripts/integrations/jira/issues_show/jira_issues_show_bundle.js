@@ -9,8 +9,13 @@ export default function initJiraIssueShow({ mountPointSelector }) {
     return null;
   }
 
+  const { issuesShowPath } = mountPointEl.dataset;
+
   return new Vue({
     el: mountPointEl,
+    provide: {
+      issuesShowPath,
+    },
     render: (createElement) => createElement(JiraIssuesShowApp),
   });
 }
