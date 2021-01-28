@@ -59,7 +59,7 @@ module Projects
           {
             titleHtml: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             descriptionHtml: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
-            created_at: Time.zone.now,
+            created_at: 2.hours.ago,
             author: {
               id: 2,
               username: 'justin_ho',
