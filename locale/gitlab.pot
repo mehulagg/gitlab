@@ -20391,9 +20391,6 @@ msgstr ""
 msgid "PackageRegistry|Delete package"
 msgstr ""
 
-msgid "PackageRegistry|Filter by name"
-msgstr ""
-
 msgid "PackageRegistry|For more information on Composer packages in GitLab, %{linkStart}see the documentation.%{linkEnd}"
 msgstr ""
 
@@ -20487,9 +20484,6 @@ msgstr ""
 msgid "PackageRegistry|Source project located at %{link}"
 msgstr ""
 
-msgid "PackageRegistry|There are no %{packageType} packages yet"
-msgstr ""
-
 msgid "PackageRegistry|There are no other versions of this package."
 msgstr ""
 
@@ -20503,6 +20497,9 @@ msgid "PackageRegistry|This NuGet package has no dependencies."
 msgstr ""
 
 msgid "PackageRegistry|To widen your search, change or remove the filters above."
+msgstr ""
+
+msgid "PackageRegistry|Type"
 msgstr ""
 
 msgid "PackageRegistry|Unable to fetch package version information."
