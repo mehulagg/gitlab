@@ -352,7 +352,7 @@ git config --global url."git@gitlab.example.com".insteadOf "https://gitlab.examp
 To quickly access a project from the GitLab UI using the project ID,
 visit the `/projects/:id` URL in your browser or other tool accessing the project.
 
-## Project aliases **(PREMIUM ONLY)**
+## Project aliases **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3264) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.1.
 

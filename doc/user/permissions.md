@@ -396,7 +396,7 @@ Beware though that even if a user is external, if they already have Reporter or
 higher permissions in any project or group, they are **not** counted as a
 free guest user.
 
-## Auditor users **(PREMIUM ONLY)**
+## Auditor users **(PREMIUM SELF)**
 
 >[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/998) in [GitLab Premium](https://about.gitlab.com/pricing/) 8.17.
 

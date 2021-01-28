@@ -198,7 +198,7 @@ To disable it:
 Feature.disable(:enforce_pat_expiration)
 ```
 
-## Disabling user profile name changes **(PREMIUM ONLY)**
+## Disabling user profile name changes **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24605) in GitLab 12.7.
 
