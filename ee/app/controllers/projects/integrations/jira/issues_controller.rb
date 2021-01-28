@@ -57,7 +57,25 @@ module Projects
 
         def issue_json
           {
-            name: 'Name'
+            titleHtml: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
+            descriptionHtml: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
+            created_at: Time.zone.now,
+            author: {
+              id: 2,
+              username: 'justin_ho',
+              name: 'Justin Ho',
+              webUrl: 'http://127.0.0.1:3000/root',
+              avatarUrl: 'http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90'
+            },
+            labels: [
+              {
+                title: 'In Progress',
+                description: 'Work that is still in progress',
+                color: '#EBECF0',
+                text_color: '#283856'
+              }
+            ],
+            state: 'opened'
           }
         end
 
