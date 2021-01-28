@@ -77,7 +77,7 @@ RSpec.describe 'Issues > Iteration bulk assignment' do
   def enable_bulk_update(context)
     if context == :project
       visit project_issues_path(project)
-    elsif context = :project_without_group
+    elsif context == :project_without_group
       visit project_issues_path(project_without_group)
     else
       visit issues_group_path(group)
