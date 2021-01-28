@@ -5,7 +5,7 @@
 .form-check
   = f.check_box :deny_delete_tag, class: "form-check-input", data: { qa_selector: 'deny_delete_tag_checkbox' }
   = f.label :deny_delete_tag, class: "label-bold form-check-label" do
-    Disallow users to remove Git tags with
+    Do not allow users to remove Git tags with
     %code git push
   %p.text-muted
     Users can still delete tags through the GitLab UI.
