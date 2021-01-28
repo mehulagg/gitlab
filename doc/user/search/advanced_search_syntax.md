@@ -5,12 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Advanced Search Syntax **(STARTER)**
-
-> - Introduced in [GitLab Enterprise Starter](https://about.gitlab.com/pricing/) 9.2
-
-NOTE:
-Advanced Search (powered by Elasticsearch) is enabled for Bronze and above on GitLab.com since 2020-07-10.
+# Advanced Search Syntax **(PREMIUM)**
 
 Use advanced queries for more targeted search results.
 

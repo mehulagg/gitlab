@@ -5,12 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference
 ---
 
-# Advanced Search **(STARTER)**
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/109) in GitLab [Starter](https://about.gitlab.com/pricing/) 8.4.
-
-NOTE:
-Advanced Search (powered by Elasticsearch) is enabled for Bronze and above on GitLab.com since 2020-07-10.
+# Advanced Search **(PREMIUM)**
 
 Leverage Elasticsearch for faster, more advanced code search across your entire
 GitLab instance.
