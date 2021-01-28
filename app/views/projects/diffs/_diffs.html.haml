@@ -1,9 +1,14 @@
 - environment = local_assigns.fetch(:environment, nil)
 - show_whitespace_toggle = local_assigns.fetch(:show_whitespace_toggle, true)
 - can_create_note = !@diff_notes_disabled && can?(current_user, :create_note, diffs.project)
-- diff_files = diffs.diff_files
 - diff_page_context = local_assigns.fetch(:diff_page_context, nil)
 - load_diff_files_async = Feature.enabled?(:async_commit_diff_files, @project) && diff_page_context == "is-commit"
+- paginate_diffs = local_assigns.fetch(:paginate_diffs, false)
+
+- if paginate_diffs
+  - diff_files = Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page])
+- else
+  - diff_files = diffs.diff_files
 
 .content-block.oneline-block.files-changed.diff-files-changed.js-diff-files-changed
   .files-changed-inner
@@ -36,3 +41,6 @@
         %span.spinner.spinner-md
   - else
     = render partial: 'projects/diffs/file', collection: diff_files, as: :diff_file, locals: { project: diffs.project, environment: environment, diff_page_context: diff_page_context }
+
+    - if paginate_diffs
+      = paginate(diff_files, theme: "gitlab")
