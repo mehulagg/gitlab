@@ -9,7 +9,7 @@ module BulkImports
         def load(context, data)
           Array.wrap(data['nodes']).each do |entry|
             Labels::CreateService.new(entry)
-              .execute(group: context.entity.group)
+              .execute(group: context.group)
           end
 
           context.entity.update_tracker_for(
