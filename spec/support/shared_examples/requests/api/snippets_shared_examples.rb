@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'raw snippet files' do
+  using RSpec::Parameterized::TableSyntax
+  
   let_it_be(:user_token) { create(:personal_access_token, user: snippet.author) }
   let(:snippet_id) { snippet.id }
   let(:user)       { snippet.author }
@@ -48,8 +50,6 @@ RSpec.shared_examples 'raw snippet files' do
   end
 
   context 'with invalid params' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:file_path, :ref, :status, :key, :message) do
       '%2Egitattributes'      | 'invalid-ref' | :not_found   | 'message' | '404 Reference Not Found'
       '%2Egitattributes'      | nil           | :not_found   | 'error'   | '404 Not Found'
@@ -83,8 +83,6 @@ RSpec.shared_examples 'snippet file updates' do
   let(:invalid_move)      { { action: 'move',   file_path: 'missing_previous_path.txt' } }
 
   context 'with various snippet file changes' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:is_multi_file, :file_name, :content, :files, :status) do
       true  | nil       | nil   | [create_action]                | :success
       true  | nil       | nil   | [update_action]                | :success
@@ -166,8 +164,6 @@ RSpec.shared_examples 'snippet non-file updates' do
 end
 
 RSpec.shared_examples 'snippet individual non-file updates' do
-  using RSpec::Parameterized::TableSyntax
-
   where(:attribute, :updated_value) do
     :description | 'new description'
     :title       | 'new title'
@@ -213,8 +209,6 @@ RSpec.shared_examples 'invalid snippet updates' do
 end
 
 RSpec.shared_examples 'snippet access with different users' do
-  using RSpec::Parameterized::TableSyntax
-
   where(:requester, :visibility, :status) do
     :admin   | :public   | :ok
     :admin   | :private  | :ok
@@ -276,8 +270,6 @@ RSpec.shared_examples 'expected response status' do
 end
 
 RSpec.shared_examples 'unauthenticated project snippet access' do
-  using RSpec::Parameterized::TableSyntax
-
   let(:user_token) { nil }
 
   where(:project_visibility, :snippet_visibility, :status) do
@@ -294,8 +286,6 @@ RSpec.shared_examples 'unauthenticated project snippet access' do
 end
 
 RSpec.shared_examples 'non-member project snippet access' do
-  using RSpec::Parameterized::TableSyntax
-
   where(:project_visibility, :snippet_visibility, :status) do
     :public   | :public   | :ok
     :public   | :internal | :ok
@@ -310,8 +300,6 @@ RSpec.shared_examples 'non-member project snippet access' do
 end
 
 RSpec.shared_examples 'member project snippet access' do
-  using RSpec::Parameterized::TableSyntax
-
   before do
     project.add_guest(user)
   end

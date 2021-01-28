@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'handling nuget service requests' do |anonymous_requests_example_name: 'process nuget service index request', anonymous_requests_status: :success|
+  using RSpec::Parameterized::TableSyntax
+
   subject { get api(url) }
 
   context 'with valid target' do
-    using RSpec::Parameterized::TableSyntax
 
     context 'personal token' do
       where(:visibility_level, :user_role, :member, :user_token, :shared_examples_name, :expected_status) do
@@ -104,8 +105,6 @@ RSpec.shared_examples 'handling nuget metadata requests with package name' do |a
   end
 
   context 'with valid target' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:visibility_level, :user_role, :member, :user_token, :shared_examples_name, :expected_status) do
       'PUBLIC'  | :developer  | true  | true  | 'process nuget metadata request at package name level' | :success
       'PUBLIC'  | :guest      | true  | true  | 'process nuget metadata request at package name level' | :success
@@ -166,8 +165,6 @@ RSpec.shared_examples 'handling nuget metadata requests with package name and pa
   end
 
   context 'with valid target' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:visibility_level, :user_role, :member, :user_token, :shared_examples_name, :expected_status) do
       'PUBLIC'  | :developer  | true  | true  | 'process nuget metadata request at package name and package version level' | :success
       'PUBLIC'  | :guest      | true  | true  | 'process nuget metadata request at package name and package version level' | :success
@@ -230,8 +227,6 @@ RSpec.shared_examples 'handling nuget search requests' do |anonymous_requests_ex
   subject { get api(url) }
 
   context 'with valid target' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:visibility_level, :user_role, :member, :user_token, :shared_examples_name, :expected_status) do
       'PUBLIC'  | :developer  | true  | true  | 'process nuget search request'  | :success
       'PUBLIC'  | :guest      | true  | true  | 'process nuget search request'  | :success
