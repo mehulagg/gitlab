@@ -5,7 +5,9 @@ module Gitlab
     module Migrations
       module BackgroundMigrationHelpers
         BACKGROUND_MIGRATION_BATCH_SIZE = 1_000 # Number of rows to process per job
+        BACKGROUND_MIGRATION_SUB_BATCH_SIZE = 100 # Number of rows to process per sub-batch
         BACKGROUND_MIGRATION_JOB_BUFFER_SIZE = 1_000 # Number of jobs to bulk queue at a time
+        BACKGROUND_MIGRATION_BATCH_CLASS_NAME = 'Gitlab::Database::BackgroundMigration::PrimaryKeyBatchingStrategy'
 
         # Bulk queues background migration jobs for an entire table, batched by ID range.
         # "Bulk" meaning many jobs will be pushed at a time for efficiency.
@@ -53,6 +55,47 @@ module Gitlab
           end
 
           bulk_migrate_async(jobs) unless jobs.empty?
+        end
+
+        def queue_batched_background_migration( # rubocop:disable Metrics/ParameterLists
+          job_class_name,
+          batch_table_name,
+          batch_column_name,
+          job_interval:,
+          batch_min_value: 1,
+          batch_max_value: nil,
+          batch_class_name: BACKGROUND_MIGRATION_BATCH_CLASS_NAME,
+          batch_size: BACKGROUND_MIGRATION_BATCH_SIZE,
+          sub_batch_size: BACKGROUND_MIGRATION_SUB_BATCH_SIZE,
+          other_job_arguments: []
+        )
+
+          batch_max_value ||= connection.select_value(<<~SQL)
+            SELECT MAX(#{connection.quote_column_name(batch_column_name)})
+            FROM #{connection.quote_table_name(batch_table_name)}
+          SQL
+
+          return if batch_max_value.nil?
+
+          Gitlab::Database::BackgroundMigration::BatchedMigration.create!(
+            job_class_name: job_class_name,
+            table_name: batch_table_name,
+            column_name: batch_column_name,
+            interval: job_interval,
+            min_value: batch_min_value,
+            max_value: batch_max_value,
+            batch_class_name: batch_class_name,
+            batch_size: batch_size,
+            sub_batch_size: sub_batch_size,
+            job_arguments: other_job_arguments,
+            status: :active)
+        end
+
+        def abort_batched_background_migrations(job_class_name, table_name, column_name)
+          Gitlab::Database::BackgroundMigration::BatchedMigration
+            .for_batch_configuration(job_class_name, table_name, column_name)
+            .not_finished
+            .update_all(status: :aborted, updated_at: Time.current)
         end
 
         # Queues background migration jobs for an entire table in batches.
