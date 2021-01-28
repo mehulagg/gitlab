@@ -5,7 +5,6 @@ import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
-// import IterationSelect from './components/iteration_select.vue';
 import SidebarItemIterationSelect from './components/sidebar_item_iteration_select.vue';
 import SidebarStore from './stores/sidebar_store';
 import createDefaultClient from '~/lib/graphql';
@@ -95,11 +94,8 @@ function mountIterationSelect() {
   return new Vue({
     el,
     apolloProvider,
-    components: {
-      SidebarItemIterationSelect,
-    },
     render: (createElement) =>
-      createElement('sidebar-item-iteration-select', {
+      createElement(SidebarItemIterationSelect, {
         props: {
           groupPath,
           canEdit,

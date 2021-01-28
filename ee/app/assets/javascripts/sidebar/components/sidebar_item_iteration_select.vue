@@ -6,9 +6,9 @@ import { __ } from '~/locale';
 
 export default {
   i18n: {
-    noIteration: iterationSelectTextMap.noIteration,
     iterationText: iterationSelectTextMap.iteration,
     edit: __('Edit'),
+    none: __('None'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -100,7 +100,7 @@ export default {
       >
     </div>
     <div data-testid="select-iteration" class="hide-collapsed">
-      <span v-if="showNoIterationContent" class="no-value">{{ $options.i18n.noIteration }}</span>
+      <span v-if="showNoIterationContent" class="no-value">{{ $options.i18n.none }}</span>
       <gl-link v-else-if="!editing" data-qa-selector="iteration_link" :href="iterationUrl"
         ><strong>{{ iterationTitle }}</strong></gl-link
       >

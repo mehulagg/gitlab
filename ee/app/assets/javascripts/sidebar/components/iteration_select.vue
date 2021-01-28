@@ -1,11 +1,5 @@
 <script>
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlSearchBoxByType,
-  GlDropdownSectionHeader,
-  GlDropdownDivider,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlDropdownDivider } from '@gitlab/ui';
 import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
@@ -15,14 +9,13 @@ import { __ } from '~/locale';
 
 export default {
   i18n: {
-    noIteration: iterationSelectTextMap.noIteration,
     assignIteration: __('Assign Iteration'),
+    noIteration: iterationSelectTextMap.noIteration,
   },
   components: {
     GlDropdown,
     GlDropdownItem,
     GlSearchBoxByType,
-    GlDropdownSectionHeader,
     GlDropdownDivider,
   },
   props: {
@@ -54,10 +47,16 @@ export default {
         };
       },
       update(data) {
+        const hasIteration = data?.project?.issue?.iteration?.id;
         const currentIteration = data?.project?.issue?.iteration;
 
-        this.$emit('iterationUpdate', currentIteration);
-        return currentIteration;
+        return hasIteration ? currentIteration : null;
+      },
+      result({ data }) {
+        const hasIteration = data?.project?.issue?.iteration?.id;
+        const currentIteration = data?.project?.issue?.iteration;
+
+        this.$emit('iterationUpdate', hasIteration ? currentIteration : null);
       },
     },
     iterations: {
@@ -77,7 +76,7 @@ export default {
         // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220379
         const nodes = data.group?.iterations?.nodes || [];
 
-        return iterationSelectTextMap.noIterationItem.concat(nodes);
+        return nodes;
       },
     },
   },
@@ -85,7 +84,7 @@ export default {
     return {
       searchTerm: '',
       currentIteration: undefined,
-      iterations: iterationSelectTextMap.noIterationItem,
+      iterations: [],
     };
   },
   computed: {
@@ -97,9 +96,7 @@ export default {
     dropdownOpen: {
       handler() {
         this.$nextTick(() => {
-          if (this.dropdownOpen) {
-            this.$refs.search.focusInput();
-          }
+          this.showDropdown();
         });
       },
     },
@@ -128,6 +125,7 @@ export default {
           createFlash(iterationSelectFail);
         })
         .finally(() => {
+          this.searchTerm = '';
           this.$emit('dropdownClose');
         });
     },
@@ -136,6 +134,14 @@ export default {
         iterationId === this.currentIteration?.id || (!this.currentIteration?.id && !iterationId)
       );
     },
+    showDropdown() {
+      if (this.dropdownOpen) {
+        this.$refs.dropdown.show();
+      }
+    },
+    setFocus() {
+      this.$refs.search.focusInput();
+    },
   },
 };
 </script>
@@ -143,14 +149,21 @@ export default {
 <template>
   <gl-dropdown
     v-if="dropdownOpen"
+    ref="dropdown"
     :text="dropdownText"
-    class="gl-w-full"
-    :class="{ show: dropdownOpen }"
+    :header-text="$options.i18n.assignIteration"
+    block
+    @shown="setFocus"
   >
-    <gl-dropdown-section-header class="gl-display-flex gl-justify-content-center">{{
-      $options.i18n.assignIteration
-    }}</gl-dropdown-section-header>
     <gl-search-box-by-type ref="search" v-model="searchTerm" />
+    <gl-dropdown-item
+      data-testid="no-iteration-item"
+      :is-check-item="true"
+      :is-checked="isIterationChecked(null)"
+      @click="setIteration(null)"
+    >
+      {{ $options.i18n.noIteration }}
+    </gl-dropdown-item>
     <gl-dropdown-divider />
     <gl-dropdown-item
       v-for="iterationItem in iterations"

@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLink, GlButton, GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
+import { GlLink, GlButton, GlDropdown } from '@gitlab/ui';
 
 import SidebarItemIterationSelect from 'ee/sidebar/components/sidebar_item_iteration_select.vue';
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
@@ -14,9 +14,7 @@ describe('SidebarItemIterationSelect', () => {
   } = {}) => {
     wrapper = shallowMount(SidebarItemIterationSelect, {
       data: () => data,
-      stubs: {
-        ...stubs,
-      },
+      stubs,
       propsData: {
         ...props,
         groupPath: '',
@@ -71,7 +69,7 @@ describe('SidebarItemIterationSelect', () => {
   });
 
   describe('when no iteration is assigned to the issue', () => {
-    it('shows "No iteration" as title and should not have a link', () => {
+    it('shows "None" as title and should not have a link', () => {
       createComponent({
         data: {
           editing: false,
@@ -79,7 +77,7 @@ describe('SidebarItemIterationSelect', () => {
         },
       });
 
-      expect(findSelectedIteration().text()).toBe('No iteration');
+      expect(findSelectedIteration().text()).toBe('None');
       expect(findGlLink().exists()).toBe(false);
     });
   });
@@ -96,12 +94,10 @@ describe('SidebarItemIterationSelect', () => {
     beforeEach(() => {
       createComponent({
         props: { canEdit: true },
-        stubs: {
-          'iteration-select': IterationSelect,
-          'gl-search-box-by-type': GlSearchBoxByType,
-        },
+        stubs: { IterationSelect },
       });
-
+      jest.spyOn(findIterationSelect().vm, 'setFocus').mockImplementation();
+      jest.spyOn(findIterationSelect().vm, 'showDropdown').mockImplementation();
       editButton = findEditButton();
     });
 

@@ -15,7 +15,6 @@ export const healthStatusTextMap = {
 export const iterationSelectTextMap = {
   iteration: __('Iteration'),
   noIteration: __('No iteration'),
-  noIterationItem: [{ title: __('No iteration'), id: null }],
   iterationSelectFail: __('Failed to set iteration on this issue. Please try again.'),
 };
 

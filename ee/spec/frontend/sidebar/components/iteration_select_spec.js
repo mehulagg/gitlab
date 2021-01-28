@@ -39,9 +39,6 @@ describe('IterationSelect', () => {
         ...props,
       },
       mocks: {
-        $options: {
-          noIterationItem: [],
-        },
         $apollo: {
           mutate: mutationPromise(),
         },
@@ -60,19 +57,22 @@ describe('IterationSelect', () => {
   });
 
   describe('when a user can edit', () => {
-    it('focuses on the input', async () => {
-      const focusInput = jest.fn();
+    it('focuses on the input and shows the dropdown', async () => {
       createComponent({
         props: { dropdownOpen: false },
-        stubs: {
-          GlSearchBoxByType: { methods: { focusInput }, template: '<div></div>' },
-        },
       });
 
+      const setFocus = jest.spyOn(wrapper.vm, 'setFocus').mockImplementation();
+      const showDropdown = jest.spyOn(wrapper.vm, 'showDropdown').mockImplementation();
+
       wrapper.setProps({ dropdownOpen: true });
+
       await wrapper.vm.$nextTick();
 
-      expect(focusInput).toHaveBeenCalled();
+      wrapper.find(GlDropdown).vm.$emit('shown');
+
+      expect(setFocus).toHaveBeenCalled();
+      expect(showDropdown).toHaveBeenCalled();
     });
 
     describe('when user is editing', () => {
@@ -254,13 +254,10 @@ describe('IterationSelect', () => {
 
         describe('when iterations is passed the wrong data object', () => {
           it.each([
-            [{}, iterationSelectTextMap.noIterationItem],
-            [{ group: {} }, iterationSelectTextMap.noIterationItem],
-            [{ group: { iterations: {} } }, iterationSelectTextMap.noIterationItem],
-            [
-              { group: { iterations: { nodes: ['nodes'] } } },
-              [...iterationSelectTextMap.noIterationItem, 'nodes'],
-            ],
+            [{}, []],
+            [{ group: {} }, []],
+            [{ group: { iterations: {} } }, []],
+            [{ group: { iterations: { nodes: ['nodes'] } } }, ['nodes']],
           ])('when %j as an argument it returns %j', (data, value) => {
             const { update } = wrapper.vm.$options.apollo.iterations;
 
@@ -279,36 +276,37 @@ describe('IterationSelect', () => {
           // needed to access this.$options in update
           const boundUpdate = update.bind(wrapper.vm);
 
-          expect(boundUpdate({ group: { iterations: { nodes: [] } } })).toEqual(
-            iterationSelectTextMap.noIterationItem,
-          );
+          expect(boundUpdate({ group: { iterations: { nodes: [] } } })).toEqual([]);
         });
       });
 
       describe('currentIteration', () => {
         let boundUpdate;
+        let boundResult;
+        const fakeIteration = { id: '123' };
+        const fakeData = { project: { issue: { iteration: fakeIteration } } };
 
         beforeEach(() => {
           createComponent();
           setupEventSpy();
 
-          const { update } = wrapper.vm.$options.apollo.currentIteration;
+          const { update, result } = wrapper.vm.$options.apollo.currentIteration;
+
           boundUpdate = update.bind(wrapper.vm);
+          boundResult = result.bind(wrapper.vm);
         });
 
-        it('should emit "iterationUpdate" event on update', () => {
-          const dummyIterationObject = {};
-          const fakeInput = { project: { issue: { iteration: dummyIterationObject } } };
-          boundUpdate(fakeInput);
+        it('should emit "iterationUpdate" event on update', async () => {
+          boundResult({ data: fakeData });
 
-          expect(eventSpy).toHaveBeenCalledWith('iterationUpdate', dummyIterationObject);
+          expect(eventSpy).toHaveBeenCalledWith('iterationUpdate', fakeIteration);
         });
 
         describe('when passes an object that doesnt contain the correct values', () => {
           it.each([
-            [{}, undefined],
-            [{ project: { issue: {} } }, undefined],
-            [{ project: { issue: { iteration: {} } } }, {}],
+            [{}, null],
+            [{ project: { issue: {} } }, null],
+            [{ project: { issue: { iteration: {} } } }, null],
           ])('when %j as an argument it returns %j', (data, value) => {
             expect(boundUpdate(data)).toEqual(value);
           });
@@ -316,9 +314,7 @@ describe('IterationSelect', () => {
 
         describe('when iteration has an id', () => {
           it('returns the id', () => {
-            expect(boundUpdate({ project: { issue: { iteration: { id: '123' } } } })).toEqual({
-              id: '123',
-            });
+            expect(boundUpdate(fakeData)).toEqual(fakeIteration);
           });
         });
       });

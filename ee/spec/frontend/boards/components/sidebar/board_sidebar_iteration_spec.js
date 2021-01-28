@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
+import { GlDropdown } from '@gitlab/ui';
 import BoardSidebarIteration from 'ee/boards/components/sidebar/board_sidebar_iteration.vue';
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
@@ -34,7 +34,12 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
     });
   };
 
-  const createWrapper = ({ data = {} } = {}) => {
+  const createWrapper = ({
+    data = {},
+    stubs = {
+      BoardEditableItem,
+    },
+  } = {}) => {
     fakeStore();
 
     wrapper = shallowMount(BoardSidebarIteration, {
@@ -48,13 +53,7 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
         editing: false,
         ...data,
       }),
-      stubs: {
-        BoardEditableItem,
-        GlDropdown,
-        IterationSelect,
-        GlSearchBoxByType,
-      },
-      mocks: {},
+      stubs,
     });
   };
 
@@ -131,7 +130,10 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
 
   describe('when edit button is clicked', () => {
     beforeEach(async () => {
-      createWrapper();
+      createWrapper({ stubs: { BoardEditableItem, IterationSelect } });
+
+      jest.spyOn(findIterationSelect().vm, 'setFocus').mockImplementation();
+      jest.spyOn(findIterationSelect().vm, 'showDropdown').mockImplementation();
 
       findEditableItem().vm.$emit('open');
       await wrapper.vm.$nextTick();
@@ -146,6 +148,7 @@ describe('~/boards/components/sidebar/board_sidebar_iteration.vue', () => {
         findEditableItem().vm.$emit('close');
         await wrapper.vm.$nextTick();
       });
+
       it('collapses the dropdown', async () => {
         expect(findDropdown().exists()).toBe(false);
       });
