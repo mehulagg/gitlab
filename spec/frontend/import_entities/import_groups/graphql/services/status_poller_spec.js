@@ -17,34 +17,14 @@ jest.mock('~/import_entities/import_groups/graphql/services/source_groups_manage
   }),
 }));
 
-const TEST_POLL_INTERVAL = 1000;
-const FAKE_PAGE_INFO = { page: 1, perPage: 20, total: 40, totalPages: 2 };
+const FAKE_POLL_PATH = '/fake/poll/path';
 
 describe('Bulk import status poller', () => {
   let poller;
   let clientMock;
 
-  const listQueryCacheCalls = () =>
-    clientMock.readQuery.mock.calls.filter((call) => call[0].query === bulkImportSourceGroupsQuery);
-
   const generateFakeGroups = (statuses) =>
     statuses.map((status, idx) => generateFakeEntry({ status, id: idx }));
-
-  const writeFakeGroupsQuery = (nodes) => {
-    clientMock.cache.writeQuery({
-      query: bulkImportSourceGroupsQuery,
-      data: {
-        bulkImportSourceGroups: {
-          __typename: clientTypenames.BulkImportSourceGroupConnection,
-          nodes,
-          pageInfo: {
-            __typename: clientTypenames.BulkImportPageInfo,
-            ...FAKE_PAGE_INFO,
-          },
-        },
-      },
-    });
-  };
 
   beforeEach(() => {
     clientMock = createMockClient({
@@ -57,15 +37,11 @@ describe('Bulk import status poller', () => {
 
     poller = new StatusPoller({
       client: clientMock,
-      interval: TEST_POLL_INTERVAL,
+      pollPath: FAKE_POLL_PATH,
     });
   });
 
   describe('general behavior', () => {
-    beforeEach(() => {
-      writeFakeGroupsQuery([]);
-    });
-
     it('does not perform polling when constructed', () => {
       jest.runOnlyPendingTimers();
       expect(listQueryCacheCalls()).toHaveLength(0);
@@ -172,8 +148,6 @@ describe('Bulk import status poller', () => {
     describe('when error occurs', () => {
       beforeEach(() => {
         writeFakeGroupsQuery([STARTED_GROUP_1, STARTED_GROUP_2]);
-
-        clientMock.query = jest.fn().mockRejectedValue(new Error('dummy error'));
         poller.startPolling();
         return waitForPromises();
       });
