@@ -137,7 +137,7 @@ export default {
 
 <template>
   <div
-    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal gl-flex-shrink-0"
+    class="board-add-new-list board gl-display-inline-block gl-h-full gl-px-3 gl-mb-7 gl-vertical-align-top gl-white-space-normal gl-flex-shrink-0"
     data-qa-selector="board_add_new_list"
   >
     <div
@@ -162,7 +162,7 @@ export default {
           v-model.trim="searchTerm"
           debounce="250"
           :placeholder="$options.i18n.searchPlaceholder"
-          class="gl-px-5 gl-pb-4"
+          class="gl-mx-5 gl-mb-4"
           @input="filterLabels"
         />
 
@@ -202,7 +202,13 @@ export default {
         <gl-button class="gl-ml-auto gl-mr-3" @click="setAddColumnFormVisibility(false)">{{
           __('Cancel')
         }}</gl-button>
-        <gl-button variant="success" class="gl-mr-4" @click="addList">{{ __('Add') }}</gl-button>
+        <gl-button
+          :disabled="!selectedLabelId"
+          variant="success"
+          class="gl-mr-4"
+          @click="addList"
+          >{{ __('Add') }}</gl-button
+        >
       </div>
     </div>
   </div>

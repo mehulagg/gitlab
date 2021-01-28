@@ -100,8 +100,11 @@ export default {
       return isListDraggable(list);
     },
     afterFormEnters() {
-      if (!this.$refs.columns.scrollTo) return;
-      this.$refs.columns.scrollTo({ left: this.$refs.columns.scrollWidth, behavior: 'smooth' });
+      const container = this.$refs.scrollableContainer;
+      container.scrollTo({
+        left: container.scrollWidth,
+        behavior: 'smooth',
+      });
     },
   },
 };
@@ -109,6 +112,7 @@ export default {
 
 <template>
   <div
+    ref="scrollableContainer"
     class="board-swimlanes gl-white-space-nowrap gl-pb-5 gl-px-3 gl-display-flex"
     data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
@@ -117,7 +121,6 @@ export default {
       <component
         :is="treeRootWrapper"
         v-bind="treeRootOptions"
-        ref="columns"
         class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-mb-5 gl-bg-white gl-top-0 gl-z-index-3"
         data-testid="board-swimlanes-headers"
         @end="handleDragOnEnd"
