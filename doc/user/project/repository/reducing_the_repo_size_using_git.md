@@ -35,9 +35,9 @@ other internal references (refs) that are automatically created by GitLab. These
 
 In addition to the refs mentioned above, GitLab also creates hidden `refs/keep-around/*`to prevent commits being deleted.
 
-These refs are not automatically downloaded or and hidden refs are not advertised, but we can remove these refs using a project export.
+These refs are not automatically downloaded and hidden refs are not advertised, but we can remove these refs using a project export.
 
-**To purge files from a GitLab Repository:**
+To purge files from a GitLab repository:
 
 1. [Install `git filter-repo`](https://github.com/newren/git-filter-repo/blob/main/INSTALL.md)
    using a supported package manager or from source.
