@@ -8,7 +8,7 @@
         = text_field_tag 'deploy-token-user', deploy_token.username, readonly: true, class: 'deploy-token-field form-control js-select-on-focus qa-deploy-token-user'
         .input-group-append
           = clipboard_button(text: deploy_token.username, title: s_('DeployTokens|Copy username'), placement: 'left')
-      %span.deploy-token-help-block.gl-mt-2.text-success= s_("DeployTokens|This username supports access. %{link_to "What kind of access?", help_page_path("user/project/protected_tags")}")
+      %span.deploy-token-help-block.gl-mt-2.text-success= s_("DeployTokens|This username supports access. #{link_to "What kind of access?", help_page_path("user/project/deploy_tokens")}")
 
     .form-group
       .input-group
