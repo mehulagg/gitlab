@@ -12,7 +12,7 @@ module Ci
     def scoped_variables(environment: expanded_environment_name, dependencies: true)
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         variables.concat(predefined_variables)
-        variables.concat(Gitlab::Ci::Variables::Builder::Project.new(project).fabricate)
+        variables.concat(project_builder.fabricate)
         variables.concat(pipeline.predefined_variables)
         variables.concat(runner.predefined_variables) if runnable? && runner
         variables.concat(deployment_variables(environment: environment))
@@ -109,6 +109,10 @@ module Ci
       parallel = self.options&.dig(:parallel)
       parallel = parallel.dig(:total) if parallel.is_a?(Hash)
       parallel || 1
+    end
+
+    def project_builder
+      @project_builder ||= Gitlab::Ci::Variables::Builder::Project.new(project)
     end
   end
 end
