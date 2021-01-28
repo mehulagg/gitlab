@@ -1,10 +1,11 @@
 <script>
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownForm, GlDropdownItem } from '@gitlab/ui';
 import updateMixin from '../../mixins/update';
 
 export default {
   components: {
     GlDropdown,
+    GlDropdownForm,
     GlDropdownItem,
   },
   mixins: [updateMixin],
@@ -20,25 +21,26 @@ export default {
 <template>
   <fieldset>
     <label class="sr-only" for="issuable-type">{{ __('Type') }}</label>
-    <!-- TODO: this rule still needed? -->
-    <!-- eslint-disable vue/no-mutating-props -->
-    <input
-      id="issuable-type"
+    <!-- <input
       ref="input"
-      v-model="formState.type"
       class="form-control qa-type-input"
       dir="auto"
       type="text"
-      :placeholder="__('Type')"
-      :aria-label="__('Type')"
-      @keydown.meta.enter="updateIssuable"
-      @keydown.ctrl.enter="updateIssuable"
-    />
-    <!-- eslint-enable vue/no-mutating-props -->
+    /> -->
 
-    <gl-dropdown text="some-dropdown">
-      <gl-dropdown-item>{{ __('hello') }}</gl-dropdown-item>
-      <gl-dropdown-item>{{ __('there') }}</gl-dropdown-item>
+    <gl-dropdown :aria-label="__('Type')" :placeholder="__('Type')" text="some-dropdown">
+      <!-- TODO: this rule still needed? -->
+      <!-- eslint-disable vue/no-mutating-props -->
+      <gl-dropdown-form
+        id="issuable-type"
+        v-model="formState.type"
+        @keydown.meta.enter="updateIssuable"
+        @keydown.ctrl.enter="updateIssuable"
+      >
+        <gl-dropdown-item>{{ __('hello') }}</gl-dropdown-item>
+        <gl-dropdown-item>{{ __('there') }}</gl-dropdown-item>
+      </gl-dropdown-form>
+      <!-- eslint-enable vue/no-mutating-props -->
     </gl-dropdown>
   </fieldset>
 </template>
