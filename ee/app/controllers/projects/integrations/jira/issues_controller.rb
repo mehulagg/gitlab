@@ -32,6 +32,15 @@ module Projects
           end
         end
 
+        def show
+          respond_to do |format|
+            format.html
+            format.json do
+              render json: issue_json
+            end
+          end
+        end
+
         private
 
         def issues_json
@@ -44,6 +53,12 @@ module Projects
           ::Integrations::Jira::IssueSerializer.new
             .with_pagination(request, response)
             .represent(jira_issues, project: project)
+        end
+
+        def issue_json
+          {
+            name: 'Name'
+          }
         end
 
         def finder
