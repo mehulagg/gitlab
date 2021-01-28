@@ -25,6 +25,12 @@ module Gitlab
             file_finder(project).read(dashboard_path)
           end
 
+          def applicable_paths?(paths)
+            paths.all? do |path|
+              path.start_with?(DASHBOARD_ROOT) && path.end_with?(DASHBOARD_EXTENSION)
+            end
+          end
+
           private
 
           def file_finder(project)

@@ -11,7 +11,8 @@ RSpec.describe Git::BranchHooksService do
 
   let(:branch) { project.default_branch }
   let(:ref) { "refs/heads/#{branch}" }
-  let(:commit) { project.commit(sample_commit.id) }
+  let(:commit_id) { sample_commit.id }
+  let(:commit) { project.commit(commit_id) }
   let(:oldrev) { commit.parent_id }
   let(:newrev) { commit.id }
 
@@ -150,7 +151,6 @@ RSpec.describe Git::BranchHooksService do
       )
     end
 
-    let(:commit) { project.repository.commit(commit_id) }
     let(:blank_sha) { Gitlab::Git::BLANK_SHA }
 
     def clears_cache(extended: [])
@@ -431,6 +431,22 @@ RSpec.describe Git::BranchHooksService do
   end
 
   describe 'Metrics dashboard sync' do
+    let(:filename) { '.gitlab/dashboards/charts.yml' }
+
+    let(:repository_actions) do
+      [repository_action_for(:create, filename)]
+    end
+
+    def repository_action_for(action, file_path)
+      { action: action, file_path: file_path, content: 'something' }
+    end
+
+    let(:commit_id) do
+      project.repository.multi_action(
+        user, message: 'message', branch_name: branch, actions: repository_actions
+      )
+    end
+
     shared_examples 'trigger dashboard sync' do
       it 'imports metrics to database' do
         expect(Metrics::Dashboard::SyncDashboardsWorker).to receive(:perform_async)
@@ -449,10 +465,32 @@ RSpec.describe Git::BranchHooksService do
 
     context 'for default branch' do
       include_examples 'trigger dashboard sync'
+
+      context 'when only deleting unrelated file' do
+        let(:repository_actions) do
+          [repository_action_for(:delete, 'README.md')]
+        end
+
+        include_examples 'no dashboard sync'
+      end
+
+      context 'when also deleting unrelated file' do
+        before do
+          repository_actions << repository_action_for(:delete, 'README.md')
+        end
+
+        include_examples 'trigger dashboard sync'
+      end
     end
 
     context 'for non default branch' do
-      let(:branch) { project.default_branch + '_dev' }
+      let(:branch) { 'fix' }
+
+      include_examples 'no dashboard sync'
+    end
+
+    context 'for unrelated file additions' do
+      let(:filename) { 'unrelated.txt' }
 
       include_examples 'no dashboard sync'
     end

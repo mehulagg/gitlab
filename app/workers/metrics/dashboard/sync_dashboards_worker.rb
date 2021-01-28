@@ -17,6 +17,10 @@ module Metrics
           ::Gitlab::Metrics::Dashboard::Importer.new(dashboard_path, project).execute!
         end
       end
+
+      def self.triggerable?(paths)
+        ::Gitlab::Metrics::Dashboard::RepoDashboardFinder.applicable_paths?(paths)
+      end
     end
   end
 end

@@ -86,6 +86,12 @@ module Git
     def enqueue_metrics_dashboard_sync
       return unless default_branch?
 
+      paths = limited_commits.flat_map do |commit|
+        commit.raw_deltas.flat_map { |diff| [diff.new_path, diff.old_path] }
+      end.uniq
+
+      return unless ::Metrics::Dashboard::SyncDashboardsWorker.triggerable?(paths)
+
       ::Metrics::Dashboard::SyncDashboardsWorker.perform_async(project.id)
     end
 
