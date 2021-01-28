@@ -4,32 +4,39 @@ module Gitlab
   module Usage
     class Metric
       include ActiveModel::Model
+      FALLBACK = -1
 
       InvalidMetricError = Class.new(RuntimeError)
 
-      attr_accessor :key_path, :value
+      attr_accessor :definition
 
-      validates :key_path, presence: true
+      validates :definition, presence: true
 
-      def definition
-        self.class.definitions[key_path]
+      def key_path
+        definition.key_path
       end
 
-      def unflatten_key_path
+      def instrument(value = nil, fallback: FALLBACK, &block)
+        metric_value = if block_given?
+                         instrument_block(fallback, &block)
+                       else
+                         value
+                       end
+
+        unflatten_key_path(metric_value)
+      end
+
+      def unflatten_key_path(value)
         unflatten(key_path.split('.'), value)
       end
 
-      class << self
-        def definitions
-          @definitions ||= Gitlab::Usage::MetricDefinition.definitions
-        end
-
-        def dictionary
-          definitions.map { |key, definition| definition.to_dictionary }
-        end
-      end
-
       private
+
+      def instrument_block(fallback, &block)
+        yield
+      rescue
+        fallback
+      end
 
       def unflatten(keys, value)
         loop do

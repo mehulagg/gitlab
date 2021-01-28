@@ -3,7 +3,7 @@
 module EE
   module Gitlab
     module Usage
-      module MetricDefinition
+      module Metrics
         extend ActiveSupport::Concern
 
         class_methods do

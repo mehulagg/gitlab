@@ -45,24 +45,6 @@ Total deployments count
 | `distribution` | ee, ce |
 | `tier` | free, starter, premium, ultimate, bronze, silver, gold |
 
-## counts.geo_nodes
-
-Total number of sites in a Geo deployment
-
-| field | value |
-| --- | --- |
-| `key_path` | **counts.geo_nodes** |
-| `value_type` | integer |
-| `product_category` | disaster_recovery |
-| `stage` | enablement |
-| `status` | data_available |
-| `milestone` | 11.2 |
-| `group` | `group::geo` |
-| `time_frame` | all |
-| `data_source` | Database |
-| `distribution` | ee |
-| `tier` | premium, ultimate |
-
 ## counts_monthy.deployments
 
 Total deployments count for recent 28 days
