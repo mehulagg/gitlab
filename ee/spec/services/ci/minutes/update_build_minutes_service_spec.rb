@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe UpdateBuildMinutesService do
+RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
   describe '#perform' do
     let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
     let(:project) { create(:project, :public, namespace: namespace) }
@@ -31,7 +31,7 @@ RSpec.describe UpdateBuildMinutesService do
 
       context 'when statistics are created' do
         before do
-          project.statistics.update(shared_runners_seconds: 100)
+          project.statistics.update!(shared_runners_seconds: 100)
           namespace.create_namespace_statistics(shared_runners_seconds: 100)
         end
 
