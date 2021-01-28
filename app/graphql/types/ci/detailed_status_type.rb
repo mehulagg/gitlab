@@ -18,6 +18,7 @@ module Types
             description: 'Indicates if the status has further details',
             method: :has_details?
       field :label, GraphQL::STRING_TYPE, null: true,
+            calls_gitaly: true,
             description: 'Label of the status'
       field :text, GraphQL::STRING_TYPE, null: true,
             description: 'Text of the status'
