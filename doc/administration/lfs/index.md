@@ -60,12 +60,12 @@ In `config/gitlab.yml`:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/2760) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0. Brought to GitLab Core in 10.7.
 
-It is possible to store LFS objects in remote object storage which allows you
-to offload local hard disk R/W operations, and free up disk space significantly.
+You can store LFS objects in remote object storage. This allows you
+to offload reads and writes to the local disk, and free up disk space significantly.
 GitLab is tightly integrated with `Fog`, so you can refer to its [documentation](http://fog.io/about/provider_documentation.html)
 to check which storage services can be integrated with GitLab.
 You can also use external object storage in a private local network. For example,
-[MinIO](https://min.io/) is a standalone object storage service, is easy to set up, and works well with GitLab instances.
+[MinIO](https://min.io/) is a standalone object storage service that works well with GitLab instances.
 
 GitLab provides two different options for the uploading mechanism: "Direct upload" and "Background upload".
 
@@ -93,7 +93,7 @@ The following general settings are supported.
 | Setting | Description | Default |
 |---------|-------------|---------|
 | `enabled` | Enable/disable object storage | `false` |
-| `remote_directory` | The bucket name where LFS objects will be stored| |
+| `remote_directory` | The bucket name where LFS objects are stored| |
 | `direct_upload` | Set to true to enable direct upload of LFS without the need of local shared storage. Option may be removed once we decide to support only single storage for all files. | `false` |
 | `background_upload` | Set to false to disable automatic upload. Option may be removed once upload is direct to S3 | `true` |
 | `proxy_download` | Set to true to enable proxying all files served. Option allows to reduce egress traffic as this allows clients to download directly from remote storage instead of proxying all data | `false` |
@@ -158,8 +158,8 @@ On Omnibus installations, the settings are prefixed by `lfs_object_store_`:
    gitlab-rake gitlab:lfs:migrate
    ```
 
-   This will migrate existing LFS objects to object storage. New LFS objects
-   will be forwarded to object storage unless
+   This migrates existing LFS objects to object storage. New LFS objects
+   are forwarded to object storage unless
    `gitlab_rails['lfs_object_store_background_upload']` and `gitlab_rails['lfs_object_store_direct_upload']` is set to `false`.
 1. Optional: Verify all files migrated properly.
    From [PostgreSQL console](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-bundled-postgresql-database)
@@ -211,8 +211,8 @@ For source installations the settings are nested under `lfs:` and then
    sudo -u git -H bundle exec rake gitlab:lfs:migrate RAILS_ENV=production
    ```
 
-   This will migrate existing LFS objects to object storage. New LFS objects
-   will be forwarded to object storage unless `background_upload` and `direct_upload` is set to
+   This migrates existing LFS objects to object storage. New LFS objects
+   are forwarded to object storage unless `background_upload` and `direct_upload` is set to
    `false`.
 1. Optional: Verify all files migrated properly.
    From PostgreSQL console (`sudo -u git -H psql -d gitlabhq_production`) verify `objectstg` below (where `file_store=2`) has count of all artifacts:
@@ -241,9 +241,10 @@ In order to migrate back to local storage:
 
 ## Storage statistics
 
-You can see the total storage used for LFS objects on groups and projects
-in the administration area, as well as through the [groups](../../api/groups.md)
-and [projects APIs](../../api/projects.md).
+You can see the total storage used for LFS objects on groups and projects:
+
+- In the administration area.
+- In the [groups](../../api/groups.md) and [projects APIs](../../api/projects.md).
 
 ## Troubleshooting: `Google::Apis::TransmissionError: execution expired`
 
@@ -283,5 +284,5 @@ See more information in [!19581](https://gitlab.com/gitlab-org/gitlab-foss/-/mer
 - Support for removing unreferenced LFS objects was added in 8.14 onward.
 - LFS authentications via SSH was added with GitLab 8.12.
 - Only compatible with the Git LFS client versions 1.1.0 and up, or 1.0.2.
-- The storage statistics currently count each LFS object multiple times for
+- The storage statistics count each LFS object multiple times for
   every project linking to it.
