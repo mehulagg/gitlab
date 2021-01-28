@@ -122,7 +122,7 @@ export default {
         usersToAddById.map((user) => user.id).join(','),
       ];
     },
-    openModal() {
+    openModal({ inviteeType }) {
       this.$root.$emit(BV_SHOW_MODAL, this.modalId);
 
       this.inviteeType = inviteeType;
