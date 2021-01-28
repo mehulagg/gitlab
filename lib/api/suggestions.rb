@@ -12,7 +12,8 @@ module API
       end
       params do
         requires :id, type: String, desc: 'The suggestion ID'
-        optional :commit_message, type: String, desc: "A custom commit message to use instead of the default generated message or the project's default message"
+        optional :commit_message, type: String, desc: "A custom commit message to use instead of the default generated message or the project's default message",
+          coerce_with: ->(string) { string.is_a?(String) ? string : "" }
       end
       put ':id/apply' do
         suggestion = Suggestion.find_by_id(params[:id])
@@ -29,7 +30,8 @@ module API
       end
       params do
         requires :ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: "An array of suggestion ID's"
-        optional :commit_message, type: String, desc: "A custom commit message to use instead of the default generated message or the project's default message"
+        optional :commit_message, type: String, desc: "A custom commit message to use instead of the default generated message or the project's default message",
+          coerce_with: ->(string) { string.is_a?(String) ? string : "" }
       end
       put 'batch_apply' do
         ids = params[:ids]
