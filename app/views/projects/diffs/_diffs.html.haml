@@ -5,7 +5,7 @@
 - load_diff_files_async = Feature.enabled?(:async_commit_diff_files, @project) && diff_page_context == "is-commit"
 - paginate_diffs = local_assigns.fetch(:paginate_diffs, false)
 
-- if paginate_diffs
+- if paginate_diffs && !load_diff_files_async
   - diff_files = Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page])
 - else
   - diff_files = diffs.diff_files
