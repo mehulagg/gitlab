@@ -60,7 +60,7 @@ next to any feature flag in the list.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254379) in GitLab 13.5.
 
 The maximum number of feature flags per project on self-managed GitLab instances
-is 200. For GitLab SaaS, the maximum number is determined by [GitLab.com tier](https://about.gitlab.com/pricing/):
+is 200. For GitLab SaaS, the maximum number is determined by [tier](https://about.gitlab.com/pricing/):
 
 | Tier     | Number of feature flags per project |
 |----------|-------------------------------------|
