@@ -29,13 +29,13 @@ module Gitlab
       # sub_batch_size - We don't want updates to take more than ~100ms
       #                  This allows us to run multiple smaller batches during
       #                  the minimum 2.minute interval that we can schedule jobs
-      def perform(start_id, end_id, table, primary_key, copy_from, copy_to, sub_batch_size)
+      def perform(start_id, end_id, batch_table, batch_column, sub_batch_size, copy_from, copy_to)
         quoted_copy_from = connection.quote_column_name(copy_from)
         quoted_copy_to = connection.quote_column_name(copy_to)
 
-        parent_batch_relation = relation_scoped_to_range(table, primary_key, start_id, end_id)
+        parent_batch_relation = relation_scoped_to_range(batch_table, batch_column, start_id, end_id)
 
-        parent_batch_relation.each_batch(column: primary_key, of: sub_batch_size) do |sub_batch|
+        parent_batch_relation.each_batch(column: batch_column, of: sub_batch_size) do |sub_batch|
           sub_batch.update_all("#{quoted_copy_to}=#{quoted_copy_from}")
 
           sleep(PAUSE_SECONDS)
@@ -50,10 +50,6 @@ module Gitlab
 
       def connection
         ActiveRecord::Base.connection
-      end
-
-      def mark_job_as_succeeded(*arguments)
-        Gitlab::Database::BackgroundMigrationJob.mark_all_as_succeeded(self.class.name, arguments)
       end
 
       def relation_scoped_to_range(source_table, source_key_column, start_id, stop_id)
