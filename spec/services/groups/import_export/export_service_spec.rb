@@ -71,6 +71,12 @@ RSpec.describe Groups::ImportExport::ExportService do
       service.execute
     end
 
+    it 'compresses and removes tmp files' do
+      expect(Gitlab::ImportExport::Saver).to receive(:new).and_call_original
+
+      service.execute
+    end
+
     it 'notifies the user' do
       expect_next_instance_of(NotificationService) do |instance|
         expect(instance).to receive(:group_was_exported)

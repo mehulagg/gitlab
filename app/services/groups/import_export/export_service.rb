@@ -12,13 +12,13 @@ module Groups
       end
 
       def async_execute
-        GroupExportWorker.perform_async(@current_user.id, @group.id, @params)
+        GroupExportWorker.perform_async(current_user.id, group.id, params)
       end
 
       def execute
         validate_user_permissions
 
-        remove_existing_export! if @group.export_file_exists?
+        remove_existing_export! if group.export_file_exists?
 
         save!
       ensure
@@ -27,25 +27,29 @@ module Groups
 
       private
 
+      attr_reader :group, :current_user, :params
       attr_accessor :shared
 
       def validate_user_permissions
-        unless @current_user.can?(:admin_group, @group)
-          @shared.error(::Gitlab::ImportExport::Error.permission_error(@current_user, @group))
+        unless current_user.can?(:admin_group, group)
+          shared.error(::Gitlab::ImportExport::Error.permission_error(current_user, group))
 
           notify_error!
         end
       end
 
       def remove_existing_export!
-        import_export_upload = @group.import_export_upload
+        import_export_upload = group.import_export_upload
 
         import_export_upload.remove_export_file!
         import_export_upload.save
       end
 
       def save!
-        if savers.all?(&:save)
+        # We cannot include the file_saver with the other savers because
+        # it removes the tmp dir. This means that if we want to add new savers
+        # in EE the data won't be available.
+        if savers.all?(&:save) && file_saver.save
           notify_success
         else
           notify_error!
@@ -53,20 +57,20 @@ module Groups
       end
 
       def savers
-        [version_saver, tree_exporter, file_saver]
+        [version_saver, tree_exporter]
       end
 
       def tree_exporter
         tree_exporter_class.new(
-          group: @group,
-          current_user: @current_user,
-          shared: @shared,
-          params: @params
+          group: group,
+          current_user: current_user,
+          shared: shared,
+          params: params
         )
       end
 
       def tree_exporter_class
-        if ::Feature.enabled?(:group_export_ndjson, @group&.parent, default_enabled: true)
+        if ::Feature.enabled?(:group_export_ndjson, group&.parent, default_enabled: true)
           Gitlab::ImportExport::Group::TreeSaver
         else
           Gitlab::ImportExport::Group::LegacyTreeSaver
@@ -78,7 +82,7 @@ module Groups
       end
 
       def file_saver
-        Gitlab::ImportExport::Saver.new(exportable: @group, shared: @shared)
+        Gitlab::ImportExport::Saver.new(exportable: group, shared: shared)
       end
 
       def remove_archive_tmp_dir
@@ -94,22 +98,22 @@ module Groups
       def notify_success
         @logger.info(
           message: 'Group Export succeeded',
-          group_id: @group.id,
-          group_name: @group.name
+          group_id: group.id,
+          group_name: group.name
         )
 
-        notification_service.group_was_exported(@group, @current_user)
+        notification_service.group_was_exported(group, current_user)
       end
 
       def notify_error
         @logger.error(
           message: 'Group Export failed',
-          group_id: @group.id,
-          group_name: @group.name,
-          errors: @shared.errors.join(', ')
+          group_id: group.id,
+          group_name: group.name,
+          errors: shared.errors.join(', ')
         )
 
-        notification_service.group_was_not_exported(@group, @current_user, @shared.errors)
+        notification_service.group_was_not_exported(group, current_user, shared.errors)
       end
 
       def notification_service
