@@ -106,8 +106,8 @@ export default {
               timezone: this.form.timezone.identifier,
             },
           },
-          update(store, { data: { oncallScheduleCreate } }) {
-            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, oncallScheduleCreate, {
+          update(store, { data }) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesQuery, data, {
               projectPath,
             });
           },

@@ -135,7 +135,6 @@ export default {
     </div>
     <delete-rotation-modal
       :rotation="rotationToUpdate"
-      :scheduleIid="scheduleIid"
       :modal-id="$options.deleteRotationModalId"
       :schedule-iid="scheduleIid"
       @set-rotation-to-update="setRotationToUpdate"

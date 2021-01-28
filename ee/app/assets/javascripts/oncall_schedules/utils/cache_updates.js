@@ -8,7 +8,8 @@ import {
   DELETE_ROTATION_ERROR,
 } from './error_messages';
 
-const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variables) => {
+const addScheduleToStore = (store, query, { oncallScheduleCreate }, variables) => {
+  const schedule = oncallScheduleCreate?.oncallSchedule;
   if (!schedule) {
     return;
   }
@@ -19,8 +20,14 @@ const addScheduleToStore = (store, query, { oncallSchedule: schedule }, variable
   });
 
   const data = produce(sourceData, (draftData) => {
-    draftData.project.incidentManagementOncallSchedules.nodes.push(schedule);
+    // eslint-disable-next-line no-param-reassign
+    draftData.project.incidentManagementOncallSchedules.nodes = [
+      ...draftData.project.incidentManagementOncallSchedules.nodes,
+      schedule
+    ]
   });
+
+  console.log(data);
 
   store.writeQuery({
     query,
@@ -67,10 +74,7 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
 
   const data = produce(sourceData, (draftData) => {
     // eslint-disable-next-line no-param-reassign
-    draftData.project.incidentManagementOncallSchedules.nodes = [
-      ...draftData.project.incidentManagementOncallSchedules.nodes,
-      schedule,
-    ];
+    draftData.project.incidentManagementOncallSchedules.nodes = draftData.project.incidentManagementOncallSchedules.nodes.map((item) => { return item.iid === schedule.iid ? schedule : item; });
   });
 
   store.writeQuery({
