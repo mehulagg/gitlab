@@ -30,6 +30,7 @@ module DependencyProxy
     def pull_new_manifest
       DependencyProxy::PullManifestService.new(@image, @tag, @token).execute_with_manifest do |new_manifest|
         @manifest.update!(
+          content_type: new_manifest[:content_type],
           digest: new_manifest[:digest],
           file: new_manifest[:file],
           size: new_manifest[:file].size
@@ -38,7 +39,9 @@ module DependencyProxy
     end
 
     def cached_manifest_matches?(head_result)
-      @manifest && @manifest.digest == head_result[:digest]
+      return if head_result[:status] == :error
+
+      @manifest && @manifest.digest == head_result[:digest] && @manifest.content_type == head_result[:content_type]
     end
 
     def respond
