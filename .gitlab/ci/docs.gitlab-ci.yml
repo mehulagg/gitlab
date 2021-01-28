@@ -20,7 +20,7 @@
   before_script:
     - apk add --update openssl
     - gem install httparty --no-document --version 0.17.3
-    - gem install gitlab --no-document --version 4.13.0
+    - gem install gitlab --no-document --version 4.17.0
 
 # Always trigger a docs build in gitlab-docs only on docs-only branches.
 # Useful to preview the docs changes live.
