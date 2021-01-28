@@ -42,7 +42,16 @@ RSpec.describe Gitlab::GitAccessWiki do
           end
 
           it 'does not give access to upload wiki code' do
-            expect { subject }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You can't push code to a read-only GitLab instance.")
+            expect { subject }.to raise_forbidden("You can't push code to a read-only GitLab instance.")
+          end
+        end
+
+        context 'when group is read-only' do
+          it 'does not allow push and allows pull access' do
+            allow(group).to receive(:repository_read_only?).and_return(true)
+
+            expect { push_changes(changes) }.to raise_forbidden('The repository is temporarily read-only. Please try again later.')
+            expect { pull_changes(changes) }.not_to raise_error
           end
         end
       end
