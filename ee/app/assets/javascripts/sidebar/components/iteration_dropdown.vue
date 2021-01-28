@@ -27,7 +27,6 @@ export default {
       query: groupIterationsQuery,
       debounce: 250,
       variables() {
-        // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/220381
         const search = this.searchTerm ? `"${this.searchTerm}"` : '';
 
         return {
@@ -69,23 +68,21 @@ export default {
       return this.currentIteration?.title || __('Select iteration');
     },
   },
-  mounted() {
-    this.$root.$on('bv::dropdown::shown', () => {
-      this.shouldFetch = true;
-    });
-  },
   methods: {
     onClick(iteration) {
       if (iteration.id === this.currentIteration?.id) {
         this.currentIteration = null;
       } else {
         this.currentIteration = iteration;
-
-        this.$emit('onIterationSelect', iteration);
       }
+
+      this.$emit('onIterationSelect', this.currentIteration);
     },
     isIterationChecked(id) {
       return id === this.currentIteration?.id;
+    },
+    onDropdownShow() {
+      this.shouldFetch = true;
     },
   },
 };
@@ -93,7 +90,7 @@ export default {
 
 <template>
   <div data-qa-selector="iteration_container">
-    <gl-dropdown :text="title" class="gl-w-full">
+    <gl-dropdown :text="title" class="gl-w-full" @show="onDropdownShow">
       <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
         __('Assign Iteration')
       }}</gl-dropdown-section-header>

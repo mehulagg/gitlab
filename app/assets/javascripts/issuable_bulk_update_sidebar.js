@@ -82,10 +82,12 @@ export default class IssuableBulkUpdateSidebar {
 
     if (IS_EE) {
       import('ee/vue_shared/components/sidebar/iterations_dropdown_bundle')
-        .then(({ default: IterationsDropdown }) => {
-          IterationsDropdown();
+        .then(({ default: iterationsDropdown }) => {
+          iterationsDropdown();
         })
-        .catch(() => {});
+        .catch((e) => {
+          throw e;
+        });
     }
   }
 

@@ -26,8 +26,7 @@ export default function () {
     methods: {
       handleIterationSelect(iteration) {
         const unselectedIterationValue = '0';
-        const id =
-          iteration.id === null ? unselectedIterationValue : getIdFromGraphQLId(iteration.id);
+        const id = !iteration?.id ? unselectedIterationValue : getIdFromGraphQLId(iteration.id);
 
         iterationField.setAttribute('value', id);
       },

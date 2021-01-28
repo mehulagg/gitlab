@@ -1,276 +1,226 @@
-import { GlDropdownItem, GlSearchBoxByType, GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
+import { GlDropdownItem, GlLoadingIcon, GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import IterationDropdown from 'ee/sidebar/components/iteration_dropdown.vue';
 import groupIterationsQuery from 'ee/sidebar/queries/group_iterations.query.graphql';
-import waitForPromises from 'helpers/wait_for_promises';
+import { iterationSelectTextMap } from 'ee/sidebar/constants';
 
 const localVue = createLocalVue();
 
 localVue.use(VueApollo);
 
+const TEST_SEARCH = 'search';
+const TEST_FULL_PATH = 'gitlab-test/test';
+const TEST_ITERATIONS = [
+  {
+    id: '1',
+    title: 'Test Title',
+    webUrl: '',
+    state: '',
+  },
+  {
+    id: '2',
+    title: 'Another Test Title',
+    webUrl: '',
+    state: '',
+  },
+];
+
 describe('IterationDropdown', () => {
   let wrapper;
   let fakeApollo;
   let groupIterationsSpy;
-  const iterations = [
-    {
-      username: 'root',
-      name: 'root',
-      webUrl: '',
-      avatarUrl: '',
-      id: 'id',
-      title: 'title',
-      state: '',
-    },
-  ];
 
-  const createComponent = ({ data = {}, props = {}, loading = false }) => {
-    wrapper = shallowMount(IterationDropdown, {
-      data() {
-        return data;
-      },
-      propsData: {
-        ...props,
-        fullPath: '',
-      },
-      mocks: {
-        $options: {
-          noIterationItem: [],
-        },
-        $apollo: {
-          loading,
-        },
-      },
-      stubs: {
-        GlSearchBoxByType,
-      },
-    });
-  };
-
-  const createComponentWithApollo = (data = {}, props = {}) => {
-    fakeApollo = createMockApollo([[groupIterationsQuery, groupIterationsSpy]]);
-    wrapper = mount(IterationDropdown, {
-      localVue,
-      apolloProvider: fakeApollo,
-      data() {
-        return { ...data };
-      },
-      propsData: {
-        ...props,
-        fullPath: '',
-        issueIid: '',
-      },
-      mocks: {
-        $options: {
-          noIterationItem: [],
-        },
-      },
-      stubs: {
-        GlSearchBoxByType,
-      },
-    });
-  };
-
-  const createQuerySpy = () => {
+  beforeEach(() => {
     groupIterationsSpy = jest.fn().mockResolvedValue({
       data: {
         group: {
           iterations: {
-            nodes: iterations,
+            nodes: TEST_ITERATIONS,
           },
         },
       },
     });
-  };
-
-  const resetQuerySpy = () => {
-    groupIterationsSpy.mockClear();
-  };
+  });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
   });
 
-  describe.each`
-    loading  | exists
-    ${true}  | ${true}
-    ${false} | ${false}
-  `('when apollo loading is $loading', ({ loading, exists }) => {
+  const waitForDebounce = async () => {
+    await wrapper.vm.$nextTick();
+    jest.runOnlyPendingTimers();
+  };
+  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownItemWithText = (text) =>
+    findDropdownItems().wrappers.find((x) => x.text() === text);
+  const findDropdownItemsData = () =>
+    findDropdownItems().wrappers.map((x) => ({
+      isCheckItem: x.props('isCheckItem'),
+      isChecked: x.props('isChecked'),
+      text: x.text(),
+    }));
+  const selectDropdownItemAndWait = async (text) => {
+    const item = findDropdownItemWithText(text);
+
+    item.vm.$emit('click');
+
+    await wrapper.vm.$nextTick();
+  };
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const showDropdownAndWait = async () => {
+    findDropdown().vm.$emit('show');
+
+    await waitForDebounce();
+  };
+  const isLoading = () => wrapper.find(GlLoadingIcon).exists();
+
+  const createComponent = ({ mountFn = shallowMount } = {}) => {
+    fakeApollo = createMockApollo([[groupIterationsQuery, groupIterationsSpy]]);
+
+    wrapper = mountFn(IterationDropdown, {
+      localVue,
+      apolloProvider: fakeApollo,
+      propsData: {
+        fullPath: TEST_FULL_PATH,
+      },
+    });
+  };
+
+  describe('default', () => {
     beforeEach(() => {
-      createComponent({
-        loading,
-      });
+      createComponent();
     });
 
-    it(`GlLoadingIcon exists is ${exists}`, () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(exists);
+    it('does not show loading', () => {
+      expect(isLoading()).toBe(false);
+    });
+
+    it('shows gl-dropdown', () => {
+      expect(wrapper.find(GlDropdown).exists()).toBe(true);
+      expect(wrapper.find(GlDropdown).element).toMatchSnapshot();
     });
   });
 
-  describe.each`
-    shouldFetch | called
-    ${true}     | ${true}
-    ${false}    | ${false}
-  `('when shouldFetch query is $shouldFetch', ({ shouldFetch, called }) => {
-    beforeEach(() => {
-      createQuerySpy();
+  describe('when dropdown opens and query is loading', () => {
+    beforeEach(async () => {
+      // return promise that doesn't resolve to force loading state
+      groupIterationsSpy.mockReturnValue(new Promise(() => {}));
 
-      createComponentWithApollo({
-        shouldFetch,
-      });
+      createComponent();
+
+      await showDropdownAndWait();
     });
 
-    afterEach(() => {
-      resetQuerySpy();
+    it('shows loading', () => {
+      expect(isLoading()).toBe(true);
     });
 
-    it(`groupIterations query called ${called}`, () => {
-      const times = called ? 1 : 0;
-
-      jest.runAllTimers();
-
-      expect(groupIterationsSpy).toHaveBeenCalledTimes(times);
-    });
-  });
-
-  describe('when bootstrap dropdown event is emitted', () => {
-    beforeEach(() => {
-      createQuerySpy();
-    });
-
-    afterEach(() => {
-      resetQuerySpy();
-    });
-
-    it('changes shouldFetch to be true', async () => {
-      createComponentWithApollo({});
-
-      wrapper.vm.$root.$emit('bv::dropdown::shown');
-
-      await waitForPromises();
-      jest.runAllTimers();
-
+    it('calls groupIterations query', () => {
       expect(groupIterationsSpy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('GlDropdownItem', () => {
-    const id = 'id';
-    const title = 'title';
-
-    beforeEach(() => {
-      createComponent({
-        data: { iterations: [{ id, title }], currentIteration: { id, title } },
+      expect(groupIterationsSpy).toHaveBeenCalledWith({
+        fullPath: TEST_FULL_PATH,
+        state: 'opened',
+        title: '',
       });
     });
-
-    it('renders the correct title', () => {
-      const findFirstDropdownItemByTitle = () =>
-        wrapper
-          .findAll(GlDropdownItem)
-          .filter((w) => w.text() === title)
-          .at(0);
-
-      expect(findFirstDropdownItemByTitle().text()).toBe(title);
-    });
-
-    it('checks the correct dropdown item', () => {
-      const findFirstDropdownItemByChecked = () =>
-        wrapper
-          .findAll(GlDropdownItem)
-          .filter((w) => w.props('isChecked') === true)
-          .at(0);
-
-      expect(findFirstDropdownItemByChecked().text()).toBe(title);
-    });
   });
 
-  describe('when clicking on dropdown item', () => {
-    beforeEach(() => {
-      createQuerySpy();
+  describe('when dropdown opens and query responds', () => {
+    beforeEach(async () => {
+      createComponent();
+
+      await showDropdownAndWait();
     });
 
-    afterEach(() => {
-      resetQuerySpy();
+    it('does not show loading', () => {
+      expect(isLoading()).toBe(false);
     });
 
-    describe('when currentIteration id is equal to iteration id', () => {
-      it('does not emit event', async () => {
-        createComponentWithApollo({
-          shouldFetch: true,
-          currentIteration: { id: 'id', title: 'title' },
+    it('shows dropdown items', () => {
+      const result = iterationSelectTextMap.noIterationItem.concat(TEST_ITERATIONS);
+
+      expect(findDropdownItemsData()).toEqual(
+        result.map((x) => ({
+          isCheckItem: true,
+          isChecked: false,
+          text: x.title,
+        })),
+      );
+    });
+
+    it('does not re-query if opened again', async () => {
+      groupIterationsSpy.mockClear();
+      await showDropdownAndWait();
+
+      expect(groupIterationsSpy).not.toHaveBeenCalled();
+    });
+
+    describe.each([0, 1, 2])('when item %s is selected', (index) => {
+      const allIterations = iterationSelectTextMap.noIterationItem.concat(TEST_ITERATIONS);
+      const selected = allIterations[index];
+      const asNotChecked = ({ title }) => ({ isCheckItem: true, isChecked: false, text: title });
+
+      beforeEach(async () => {
+        await selectDropdownItemAndWait(selected.title);
+      });
+
+      it('shows item as checked', () => {
+        const prevSelected = allIterations.slice(0, index);
+        const afterSelected = allIterations.slice(index + 1);
+
+        expect(findDropdownItemsData()).toEqual([
+          ...prevSelected.map(asNotChecked),
+          {
+            isCheckItem: true,
+            isChecked: true,
+            text: selected.title,
+          },
+          ...afterSelected.map(asNotChecked),
+        ]);
+      });
+
+      it('emits event', () => {
+        expect(wrapper.emitted('onIterationSelect')).toEqual([[selected]]);
+      });
+
+      describe('when item is clicked again', () => {
+        beforeEach(async () => {
+          await selectDropdownItemAndWait(selected.title);
         });
 
-        jest.runAllTimers();
-        await waitForPromises();
-
-        wrapper
-          .findAll(GlDropdownItem)
-          .filter((w) => w.text() === 'title')
-          .at(0)
-          .vm.$emit('click');
-
-        expect(wrapper.emitted('onIterationSelect')).toBeUndefined();
-      });
-    });
-
-    describe('when currentIteration is not equal to iteration id', () => {
-      it('emits event', async () => {
-        createComponentWithApollo({
-          shouldFetch: true,
-          currentIteration: { id: '', title: 'title' },
+        it('shows item as unchecked', () => {
+          expect(findDropdownItemsData()).toEqual(allIterations.map(asNotChecked));
         });
 
-        jest.runAllTimers();
-        await waitForPromises();
-
-        wrapper
-          .findAll(GlDropdownItem)
-          .filter((w) => w.text() === 'title')
-          .at(0)
-          .vm.$emit('click');
-
-        expect(wrapper.emitted('onIterationSelect')).toHaveLength(1);
+        it('emits event', () => {
+          expect(wrapper.emitted('onIterationSelect').length).toBe(2);
+          expect(wrapper.emitted('onIterationSelect')[1]).toEqual([null]);
+        });
       });
     });
   });
 
-  describe('when a user is searching', () => {
-    beforeEach(() => {
-      createQuerySpy();
+  describe('when dropdown opens and search is set', () => {
+    beforeEach(async () => {
+      createComponent();
 
-      createComponentWithApollo({ shouldFetch: true });
-    });
-
-    afterEach(() => {
-      createQuerySpy();
-    });
-
-    it('sets the search term', async () => {
-      const searchString = 'testing';
-
-      await wrapper.vm.$nextTick();
-      jest.runAllTimers();
-
-      /*
-       * groupIterationsSpy is fired once on open
-       * and once on search so we assert each one independently
-       */
+      await showDropdownAndWait();
 
       groupIterationsSpy.mockClear();
 
-      wrapper.find(GlSearchBoxByType).vm.$emit('input', searchString);
+      wrapper.find(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
 
-      await wrapper.vm.$nextTick();
-      jest.runAllTimers();
+      await waitForDebounce();
+    });
 
+    it('adds the search to the query', () => {
       expect(groupIterationsSpy).toHaveBeenCalledWith({
-        fullPath: '',
+        fullPath: TEST_FULL_PATH,
         state: 'opened',
-        title: `"${searchString}"`,
+        title: `"${TEST_SEARCH}"`,
       });
     });
   });
