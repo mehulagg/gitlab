@@ -20,7 +20,7 @@ module QA
         # Create an admin personal access token and use it for the remaining API calls
         @original_personal_access_token = Runtime::Env.personal_access_token
 
-        Runtime::Feature.enable(:invite_members_group_modal, group: group)
+        Runtime::Feature.enable(:invite_members_group_modal)
 
         Page::Main::Menu.perform do |menu|
           menu.sign_out if menu.has_personal_area?
@@ -74,8 +74,6 @@ module QA
 
         before do
           created_users = create_users_via_api(ldap_users)
-
-          Runtime::Feature.enable(:invite_members_group_modal, group: group)
 
           group.add_member(created_users[owner_user], Resource::Members::AccessLevel::OWNER)
 
