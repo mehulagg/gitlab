@@ -38,7 +38,7 @@ describe('BoardCardAssigneeDropdown', () => {
         return {
           search,
           selected: [],
-          participants,
+          issueParticipants: participants,
         };
       },
       store,
@@ -49,7 +49,7 @@ describe('BoardCardAssigneeDropdown', () => {
       mocks: {
         $apollo: {
           queries: {
-            participants: {
+            issueParticipants: {
               loading,
             },
           },
@@ -256,7 +256,7 @@ describe('BoardCardAssigneeDropdown', () => {
     },
   );
 
-  describe('when participants is loading', () => {
+  describe('when searching users is loading', () => {
     beforeEach(() => {
       createComponent('', true);
     });
