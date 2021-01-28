@@ -2054,7 +2054,6 @@ Machine count | Machine type | Allocatable vCPUs | Allocatable memory (GB) | Pur
 NOTE:
 "Allocatable" in this table refers to the amount of resources available to workloads deployed in Kubernetes **_after_** accounting for the overhead of running Kubernetes itself.
 
-
 ### Resource usage settings
 
 The following formulas help when calculating how many pods may be deployed within resource constraints.
