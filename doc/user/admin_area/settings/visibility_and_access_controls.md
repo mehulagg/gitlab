@@ -11,7 +11,7 @@ GitLab allows administrators to enforce specific controls.
 
 To access the visibility and access control options:
 
-1. Log in to GitLab as a user with Administrator [permissions](../../../permissions.md).
+1. Sign in to GitLab as a user with Administrator [permissions](../../../permissions.md).
 1. Go to **Admin Area > Settings > General**.
 1. Expand the **Visibility and access controls** section.
 
@@ -72,7 +72,7 @@ To ensure only Administrator users can delete projects:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6.
 
 By default, a project marked for deletion is permanently removed with immediate effect.
-By default, a group marked for deletion is permanently removed after 7 days.
+By default, a group marked for deletion is permanently removed after seven days.
 
 WARNING:
 The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org/gitlab/-/issues/32935) in GitLab 12.6 was changed to
@@ -80,7 +80,7 @@ The default behavior of [Delayed Project deletion](https://gitlab.com/gitlab-org
 
 Projects in a group (but not a personal namespace) can be deleted after a delayed period, by
 [configuring in Group Settings](../../group/index.md#enabling-delayed-project-removal).
-The default period is 7 days, and can be changed. Setting this period to `0` enables immediate removal
+The default period is seven days, and can be changed. Setting this period to `0` enables immediate removal
 of projects or groups.
 
 To change this period:
@@ -149,12 +149,10 @@ For more details, see [Exporting a project and its data](../../../user/project/s
 
 ## Enabled Git access protocols
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4696) in GitLab 8.10.
-
 With GitLab access restrictions, you can select with which protocols users can communicate with
 GitLab.
 
-Disabling an access protocol does not block access to the server itself via those ports. The ports
+Disabling an access protocol does not block access to the server itself by using those ports. The ports
 used for the protocol, SSH or HTTP(S), are still accessible. The GitLab restrictions apply at the
 application level.
 
@@ -173,7 +171,7 @@ When only one protocol is enabled:
 - The project page shows only the allowed protocol's URL, with no option to
   change it.
 - A tooltip is shown when you hover over the URL's protocol, if an action
-  on the user's part is required. For example: adding an SSH key, or setting a password.
+  on the user's part is required. For example, adding an SSH key or setting a password.
 
 ![Project URL with SSH only access](img/restricted_url.png)
 
@@ -224,8 +222,6 @@ To specify a restriction for each key type:
 For more details, see [SSH key restrictions](../../../security/ssh_keys_restrictions.md).
 
 ## Allow mirrors to be set up for projects
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3586) in GitLab 10.3.
 
 This option is enabled by default. By disabling it, both
 [pull and push mirroring](../../project/repository/repository_mirroring.md) no longer
