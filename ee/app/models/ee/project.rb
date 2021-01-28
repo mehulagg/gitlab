@@ -726,11 +726,6 @@ module EE
       ::Project.with_groups_level_repos_templates.exists?(id)
     end
 
-    override :predefined_variables
-    def predefined_variables
-      super.concat(requirements_ci_variables)
-    end
-
     def add_template_export_job(current_user:, after_export_strategy: nil, params: {})
       job_id = ProjectTemplateExportWorker.perform_async(current_user.id, self.id, after_export_strategy, params)
 
@@ -784,14 +779,6 @@ module EE
       strong_memoize(:user_defined_rules) do
         # Loading the relation in order to memoize it loaded
         approval_rules.regular_or_any_approver.order(rule_type: :desc, id: :asc).load
-      end
-    end
-
-    def requirements_ci_variables
-      ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        if requirements.opened.any?
-          variables.append(key: 'CI_HAS_OPEN_REQUIREMENTS', value: 'true')
-        end
       end
     end
 

@@ -104,3 +104,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Variables::Builder::Project.prepend_if_ee('EE::Gitlab::Ci::Variables::Builder::Project')
