@@ -105,8 +105,8 @@ export default {
   computed: {
     routerLinkTo() {
       return this.isFolder
-        ? { path: `/-/tree/${this.escapedRef}/${escapeFileUrl(this.path)}` }
-        : null;
+        ? { path: `/-/${this.type}/${this.escapedRef}/${escapeFileUrl(this.path)}` }
+        : { path: `/-/blob/${this.escapedRef}/${escapeFileUrl(this.path)}` };
     },
     isFolder() {
       return this.type === 'tree';
@@ -115,7 +115,8 @@ export default {
       return this.type === 'commit';
     },
     linkComponent() {
-      return this.isFolder ? 'router-link' : 'a';
+      return 'router-link';
+      // return this.isFolder ? 'router-link' : 'a';
     },
     fullPath() {
       return this.path.replace(new RegExp(`^${escapeRegExp(this.currentPath)}/`), '');
@@ -137,7 +138,7 @@ export default {
         :is="linkComponent"
         ref="link"
         :to="routerLinkTo"
-        :href="url"
+        :hrefabc="url"
         :class="{
           'is-submodule': isSubmodule,
         }"

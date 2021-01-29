@@ -4,12 +4,20 @@ import { escapeRegExp } from 'lodash';
 import { joinPaths } from '../lib/utils/url_utility';
 import IndexPage from './pages/index.vue';
 import TreePage from './pages/tree.vue';
+import BlobPage from './pages/blob.vue';
 
 Vue.use(VueRouter);
 
 export default function createRouter(base, baseRef) {
   const treePathRoute = {
     component: TreePage,
+    props: (route) => ({
+      path: route.params.path?.replace(/^\//, '') || '/',
+    }),
+  };
+
+  const blobPathRoute = {
+    component: BlobPage,
     props: (route) => ({
       path: route.params.path?.replace(/^\//, '') || '/',
     }),
@@ -30,6 +38,18 @@ export default function createRouter(base, baseRef) {
         // Support without decoding as well just in case the ref doesn't need to be decoded
         path: `(/-)?/tree/${escapeRegExp(baseRef)}/:path*`,
         ...treePathRoute,
+      },
+      {
+        name: 'blobPathDecoded',
+        // Sometimes the ref needs decoding depending on how the backend sends it to us
+        path: `(/-)?/blob/${decodeURI(baseRef)}/:path*`,
+        ...blobPathRoute,
+      },
+      {
+        name: 'blobPath',
+        // Support without decoding as well just in case the ref doesn't need to be decoded
+        path: `(/-)?/tree/${escapeRegExp(baseRef)}/:path*`,
+        ...blobPathRoute,
       },
       {
         path: '/',
