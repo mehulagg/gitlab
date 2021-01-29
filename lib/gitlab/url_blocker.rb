@@ -5,6 +5,7 @@ require 'ipaddress'
 
 module Gitlab
   class UrlBlocker
+    GETADDRINFO_TIMEOUT_SECONDS = 15
     BlockedUrlError = Class.new(StandardError)
 
     class << self
@@ -108,7 +109,7 @@ module Gitlab
       end
 
       def get_address_info(uri, dns_rebind_protection)
-        Addrinfo.getaddrinfo(uri.hostname, get_port(uri), nil, :STREAM).map do |addr|
+        Addrinfo.getaddrinfo(uri.hostname, get_port(uri), nil, :STREAM, timeout: GETADDRINFO_TIMEOUT_SECONDS).map do |addr|
           addr.ipv6_v4mapped? ? addr.ipv6_to_ipv4 : addr
         end
       rescue SocketError
