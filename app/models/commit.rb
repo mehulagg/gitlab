@@ -23,7 +23,6 @@ class Commit
 
   attr_accessor :redacted_description_html
   attr_accessor :redacted_title_html
-  attr_accessor :redacted_full_title_html
   attr_reader :container
 
   delegate :repository, to: :container
@@ -36,7 +35,6 @@ class Commit
   LINK_EXTENSION_PATTERN = /(patch)/.freeze
 
   cache_markdown_field :title, pipeline: :single_line
-  cache_markdown_field :full_title, pipeline: :single_line
   cache_markdown_field :description, pipeline: :commit_description, limit: 1.megabyte
 
   class << self
