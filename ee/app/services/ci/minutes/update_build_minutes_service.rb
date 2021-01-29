@@ -8,22 +8,32 @@ module Ci
         return unless build.complete?
         return unless build.duration&.positive?
 
-        count_projects_based_on_cost_factors(build)
+        consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build).amount
+
+        return unless consumption > 0
+
+        consumption_in_seconds = consumption.minutes.to_i
+        legacy_track_usage_of_monthly_minutes(consumption_in_seconds)
+
+        track_usage_of_monthly_minutes(consumption)
       end
 
       private
 
-      def count_projects_based_on_cost_factors(build)
-        cost_factor = build.runner.minutes_cost_factor(project.visibility_level)
-        duration_with_cost_factor = (build.duration * cost_factor).to_i
-
-        return unless duration_with_cost_factor > 0
-
+      def legacy_track_usage_of_monthly_minutes(consumption)
         ProjectStatistics.update_counters(project_statistics,
-          shared_runners_seconds: duration_with_cost_factor)
+          shared_runners_seconds: consumption)
 
         NamespaceStatistics.update_counters(namespace_statistics,
-          shared_runners_seconds: duration_with_cost_factor)
+          shared_runners_seconds: consumption)
+      end
+
+      def track_usage_of_monthly_minutes(consumption)
+        return unless Feature.enabled?(:ci_minutes_monthly_tracking, project, default_enabled: :yaml)
+
+        ActiveRecord::Base.transaction do
+          ::Ci::Minutes::NamespaceMonthlyUsage.increase_usage(namespace, consumption)
+        end
       end
 
       def namespace_statistics

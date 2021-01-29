@@ -15,11 +15,22 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
 
     subject { described_class.new(project, nil).execute(build) }
 
+    shared_examples 'new tracking matches legacy tracking' do
+      it 'stores the same information in both legacy and new tracking' do
+        subject
+
+        current_month_usage = Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used
+
+        expect(current_month_usage)
+          .to eq((namespace.namespace_statistics.reload.shared_runners_seconds.to_f / 60).round(2))
+      end
+    end
+
     context 'with shared runner' do
       let(:cost_factor) { 2.0 }
       let(:runner) { create(:ci_runner, :instance, public_projects_minutes_cost_factor: cost_factor) }
 
-      it "creates a statistics and sets duration with applied cost factor" do
+      it 'creates a statistics and sets duration with applied cost factor' do
         subject
 
         expect(project.statistics.reload.shared_runners_seconds)
@@ -29,20 +40,67 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
           .to eq(build.duration.to_i * 2)
       end
 
-      context 'when statistics are created' do
+      it 'tracks the usage on a monthly basis' do
+        subject
+
+        current_month_usage = Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used
+
+        expect(current_month_usage).to eq((60 * 2).to_f)
+      end
+
+      it_behaves_like 'new tracking matches legacy tracking'
+
+      context 'when feature flag ci_minutes_monthly_tracking is disabled' do
         before do
-          project.statistics.update!(shared_runners_seconds: 100)
-          namespace.create_namespace_statistics(shared_runners_seconds: 100)
+          stub_feature_flags(ci_minutes_monthly_tracking: false)
         end
 
-        it "updates statistics and adds duration with applied cost factor" do
+        it 'does not track usage on a monthly basis' do
+          expect(Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used)
+            .to eq(0)
+        end
+      end
+
+      context 'when statistics are created' do
+        let(:usage_in_seconds) { 100 }
+        let(:usage_in_minutes) { (100.to_f / 60).round(2) }
+
+        before do
+          project.statistics.update!(shared_runners_seconds: usage_in_seconds)
+          namespace.create_namespace_statistics(shared_runners_seconds: usage_in_seconds)
+          Ci::Minutes::NamespaceMonthlyUsage.create!(namespace: namespace, amount_used: usage_in_minutes)
+        end
+
+        it 'updates statistics and adds duration with applied cost factor' do
           subject
 
           expect(project.statistics.reload.shared_runners_seconds)
-            .to eq(100 + build.duration.to_i * 2)
+            .to eq(usage_in_seconds + build.duration.to_i * 2)
 
           expect(namespace.namespace_statistics.reload.shared_runners_seconds)
-            .to eq(100 + build.duration.to_i * 2)
+            .to eq(usage_in_seconds + build.duration.to_i * 2)
+        end
+
+        it 'tracks the usage on a monthly basis' do
+          subject
+
+          expect(Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used)
+            .to eq(usage_in_minutes + 60 * 2)
+        end
+
+        it_behaves_like 'new tracking matches legacy tracking'
+
+        context 'when feature flag ci_minutes_monthly_tracking is disabled' do
+          before do
+            stub_feature_flags(ci_minutes_monthly_tracking: false)
+          end
+
+          it 'does not track usage on a monthly basis' do
+            subject
+
+            expect(Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used)
+              .to eq(usage_in_minutes)
+          end
         end
       end
 
@@ -55,6 +113,24 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
 
           expect(root_ancestor.namespace_statistics.reload.shared_runners_seconds)
             .to eq(build.duration.to_i * 2)
+        end
+
+        it 'tracks the usage on a monthly basis' do
+          subject
+
+          expect(Ci::Minutes::NamespaceMonthlyUsage.current(root_ancestor).amount_used)
+            .to eq(60 * 2)
+          expect(Ci::Minutes::NamespaceMonthlyUsage.current(root_ancestor).amount_used)
+            .to eq(60 * 2)
+        end
+
+        it 'stores the same information in both legacy and new tracking' do
+          subject
+
+          current_month_usage = Ci::Minutes::NamespaceMonthlyUsage.current(root_ancestor).amount_used
+
+          expect(current_month_usage)
+            .to eq((root_ancestor.namespace_statistics.reload.shared_runners_seconds.to_f / 60).round(2))
         end
       end
 
@@ -76,10 +152,14 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
     context 'for specific runner' do
       let(:runner) { create(:ci_runner, :project) }
 
-      it "does not create statistics" do
+      it 'does not create statistics' do
         subject
 
         expect(namespace.namespace_statistics).to be_nil
+      end
+
+      it 'does not track monthly usage' do
+        expect { subject }.not_to change { Ci::Minutes::NamespaceMonthlyUsage.count }
       end
     end
   end
