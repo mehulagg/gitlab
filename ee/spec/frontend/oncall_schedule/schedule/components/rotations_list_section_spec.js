@@ -6,6 +6,7 @@ import CurrentDayIndicator from 'ee/oncall_schedules/components/schedule/compone
 import RotationsAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { getTimeframeForWeeksView } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
+import { scheduleIid } from '../../mocks/apollo_mock';
 import mockRotations from '../../mocks/mock_rotation.json';
 
 describe('RotationsListSectionComponent', () => {
@@ -22,6 +23,7 @@ describe('RotationsListSectionComponent', () => {
       propsData: {
         presetType,
         timeframe,
+        scheduleIid,
         rotations: [mockRotations[0]],
       },
       provide: {

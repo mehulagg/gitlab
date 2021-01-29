@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, concepts
 ---
 
-# Merge Request Approvals **(CORE)**
+# Merge Request Approvals **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/580) in GitLab Enterprise Edition 7.2. Available in GitLab Core and higher tiers.
 > - Redesign [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1979) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8 and [feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/10685) in 12.0.
@@ -25,7 +25,7 @@ not prevent a merge request from being merged when there is no approval.
 
 ## Required Approvals **(STARTER)**
 
-> [Introduced](https://about.gitlab.com/releases/2015/06/22/gitlab-7-12-released/#merge-request-approvers-ee-only) in GitLab Enterprise Edition 7.12. Available in [GitLab Starter](https://about.gitlab.com/pricing/) and higher tiers.
+> [Introduced](https://about.gitlab.com/releases/2015/06/22/gitlab-7-12-released/#merge-request-approvers-ee-only) in GitLab Enterprise Edition 7.12.
 
 Required approvals enable enforced code review by requiring specified people
 to approve a merge request before it can be merged.
@@ -54,9 +54,7 @@ If no approval rules are defined, any user can approve a merge request, though t
 minimum number of required approvers can still be set in the [project settings for merge request approvals](#merge-request-approvals-project-settings).
 
 You can opt to define one single rule to approve a merge request among the available rules
-or choose more than one. Single approval rules are available in GitLab Starter and higher tiers,
-while [multiple approval rules](#multiple-approval-rules) are available in
-[GitLab Premium](https://about.gitlab.com/pricing/) and above.
+or choose more than one with [multiple approval rules](#multiple-approval-rules).
 
 NOTE:
 On GitLab.com, you can add a group as an approver if you're a member of that group or the

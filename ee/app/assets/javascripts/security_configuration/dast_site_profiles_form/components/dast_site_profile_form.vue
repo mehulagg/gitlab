@@ -10,9 +10,9 @@ import {
   GlFormTextarea,
 } from '@gitlab/ui';
 import { initFormField } from 'ee/security_configuration/utils';
+import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
-import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -42,6 +42,10 @@ export default {
       required: true,
     },
     profilesLibraryPath: {
+      type: String,
+      required: true,
+    },
+    onDemandScansPath: {
       type: String,
       required: true,
     },
@@ -80,6 +84,11 @@ export default {
       token: null,
       errorMessage: '',
       errors: [],
+      returnToPreviousPage: returnToPreviousPageFactory({
+        onDemandScansPath: this.onDemandScansPath,
+        profilesLibraryPath: this.profilesLibraryPath,
+        urlParamKey: 'site_profile_id',
+      }),
     };
   },
   computed: {
@@ -146,14 +155,17 @@ export default {
         .then(
           ({
             data: {
-              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: { errors = [] },
+              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: {
+                id,
+                errors = [],
+              },
             },
           }) => {
             if (errors.length > 0) {
               this.showErrors({ message: errorMessage, errors });
               this.isLoading = false;
             } else {
-              redirectTo(this.profilesLibraryPath);
+              this.returnToPreviousPage(id);
             }
           },
         )
@@ -171,7 +183,7 @@ export default {
       }
     },
     discard() {
-      redirectTo(this.profilesLibraryPath);
+      this.returnToPreviousPage();
     },
     captureException(exception) {
       Sentry.captureException(exception);

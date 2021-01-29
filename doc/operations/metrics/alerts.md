@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Set up alerts for Prometheus metrics **(CORE)**
+# Set up alerts for Prometheus metrics **(FREE)**
 
 > [Moved from Ultimate to Core](https://gitlab.com/gitlab-org/gitlab/-/issues/42640) in GitLab 12.10.
 
@@ -78,6 +78,9 @@ For GitLab to associate your alerts with an [environment](../../ci/environments/
 you must configure a `gitlab_environment_name` label on the alerts you set up in
 Prometheus. The value of this should match the name of your environment in GitLab.
 
+You can display alerts with a `gitlab_environment_name` of `production`
+[on a dashboard](../../user/operations_dashboard/index.md#adding-a-project-to-the-dashboard).
+
 In GitLab versions 13.1 and greater, you can configure your manually configured
 Prometheus server to use the
 [Generic alerts integration](../incident_management/alert_integrations.md).
@@ -101,6 +104,7 @@ values extracted from the [`alerts` field in webhook payload](https://prometheus
 
 - Issue author: `GitLab Alert Bot`
 - Issue title: Extracted from the alert payload fields `annotations/title`, `annotations/summary`, or `labels/alertname`.
+- Issue description: Extracted from alert payload field `annotations/description`.
 - Alert `Summary`: A list of properties from the alert's payload.
   - `starts_at`: Alert start time from the payload's `startsAt` field
   - `full_query`: Alert query extracted from the payload's `generatorURL` field

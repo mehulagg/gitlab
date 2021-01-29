@@ -36,12 +36,15 @@ export default {
     addSeatsHref: {
       default: '',
     },
+    planName: {
+      default: '',
+    },
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
     ...mapGetters(['isFreePlan']),
     subscriptionHeader() {
-      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.plan.name);
+      const planName = this.isFreePlan ? s__('SubscriptionTable|Free') : escape(this.planName);
       const suffix = !this.isFreePlan && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
@@ -50,7 +53,7 @@ export default {
       return this.glFeatures.saasAddSeatsButton && !this.isFreePlan;
     },
     canRenew() {
-      return this.glFeatures.saasManualRenewButton && !this.isFreePlan;
+      return !this.isFreePlan;
     },
     canUpgrade() {
       return this.isFreePlan || this.plan.upgradable;

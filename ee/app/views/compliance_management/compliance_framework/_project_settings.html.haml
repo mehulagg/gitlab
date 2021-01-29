@@ -1,9 +1,22 @@
 - return unless current_user.can?(:admin_compliance_framework, @project)
 
 .row
-  .form-group.col-md-9.mb-5
-    = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
-      = cf.label :framework, _('Compliance framework (optional)'), class: 'label-bold'
-      %p.text-secondary= _('Select required regulatory standard')
-      - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.default_framework_definition&.identifier
-      = cf.select :framework, options_for_select(compliance_framework_options, selected_default_framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'
+  .form-group.col-md-9.gl-mb-6
+    - if Feature.enabled?(:ff_custom_compliance_frameworks)
+      - frameworks = @project.namespace.root_ancestor.compliance_management_frameworks
+      = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
+        = cf.label :framework, _('Compliance framework (optional)'), class: 'gl-font-weight-bold'
+        - if frameworks.any?
+          %p.text-secondary= _('Select required regulatory standard')
+          - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.id
+          = cf.select :framework, options_for_select(frameworks.map { |fw| [fw.name, fw.id] }, selected_default_framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'
+        - else
+          %p.text-secondary
+            = _("No compliance frameworks are in use. Create one using the GraphQL API.")
+    - else
+      = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
+        = cf.label :framework, _('Compliance framework (optional)'), class: 'gl-font-weight-bold'
+        %p.text-secondary= _('Select required regulatory standard')
+        - selected_default_framework = @project.compliance_framework_setting&.compliance_management_framework&.default_framework_definition&.identifier
+        = cf.select :framework, options_for_select(compliance_framework_options, selected_default_framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'
+

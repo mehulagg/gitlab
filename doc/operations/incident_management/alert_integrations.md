@@ -4,7 +4,7 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Alert integrations
+# Alert integrations **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13203) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/42640) to [GitLab Core](https://about.gitlab.com/pricing/) in 12.8.
@@ -30,7 +30,7 @@ The list displays the integration name, type, and status (enabled or disabled):
 GitLab can receive alerts via a HTTP endpoint that you configure,
 or the [Prometheus integration](#external-prometheus-integration).
 
-### Single HTTP Endpoint **CORE**
+### Single HTTP Endpoint **(FREE)**
 
 Enabling the HTTP Endpoint in a GitLab projects activates it to
 receive alert payloads in JSON format. You can always
@@ -92,7 +92,7 @@ parameters. All fields are optional. If the incoming alert does not contain a va
 | `hosts`                   | String or Array | One or more hosts, as to where this incident occurred. |
 | `severity`                | String          | The severity of the alert. Must be one of `critical`, `high`, `medium`, `low`, `info`, `unknown`. Default is `critical`. |
 | `fingerprint`             | String or Array | The unique identifier of the alert. This can be used to group occurrences of the same alert. |
-| `gitlab_environment_name` | String          | The name of the associated GitLab [environment](../../ci/environments/index.md). This can be used to associate your alert to your environment. |
+| `gitlab_environment_name` | String          | The name of the associated GitLab [environment](../../ci/environments/index.md). Required to [display alerts on a dashboard](../../user/operations_dashboard/index.md#adding-a-project-to-the-dashboard). |
 
 You can also add custom fields to the alert's payload. The values of extra
 parameters aren't limited to primitive types (such as strings or numbers), but

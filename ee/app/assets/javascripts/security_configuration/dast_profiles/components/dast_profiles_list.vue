@@ -201,7 +201,7 @@ export default {
               v-if="item.editPath"
               :href="item.editPath"
               category="tertiary"
-              class="gl-ml-3 gl-my-1 gl-display-md-none"
+              class="gl-ml-3 gl-my-1 gl-md-display-none"
               size="small"
               >{{ __('Edit') }}</gl-button
             >
@@ -211,7 +211,7 @@ export default {
               icon="remove"
               variant="danger"
               size="small"
-              class="gl-mx-3 gl-my-1 gl-display-md-none"
+              class="gl-mx-3 gl-my-1 gl-md-display-none"
               :title="s__('DastProfiles|Delete profile')"
               @click="prepareProfileDeletion(item.id)"
             />

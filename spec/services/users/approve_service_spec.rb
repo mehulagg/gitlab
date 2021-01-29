@@ -33,7 +33,7 @@ RSpec.describe Users::ApproveService do
           it 'returns error result' do
             expect(subject[:status]).to eq(:error)
             expect(subject[:message])
-              .to match(/The user you are trying to approve is not pending an approval/)
+              .to match(/The user you are trying to approve is not pending approval/)
           end
         end
 
@@ -80,6 +80,20 @@ RSpec.describe Users::ApproveService do
             it 'does not send a confirmation email' do
               expect { subject }
                 .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            end
+          end
+
+          context 'audit events' do
+            context 'when not licensed' do
+              before do
+                stub_licensed_features(
+                  admin_audit_log: false
+                )
+              end
+
+              it 'does not log any audit event' do
+                expect { subject }.not_to change(AuditEvent, :count)
+              end
             end
           end
         end

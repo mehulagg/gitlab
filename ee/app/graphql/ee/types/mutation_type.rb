@@ -22,6 +22,7 @@ module EE
         mount_mutation ::Mutations::Epics::Create
         mount_mutation ::Mutations::Epics::SetSubscription
         mount_mutation ::Mutations::Epics::AddIssue
+        mount_mutation ::Mutations::GitlabSubscriptions::Activate
         mount_mutation ::Mutations::Iterations::Create
         mount_mutation ::Mutations::Iterations::Update
         mount_mutation ::Mutations::RequirementsManagement::CreateRequirement
@@ -57,6 +58,7 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
+        mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
 
         prepend(Types::DeprecatedMutations)
       end

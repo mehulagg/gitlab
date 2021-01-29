@@ -2,12 +2,11 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { getParameterValues } from '~/lib/utils/url_utility';
+import { ITEM_TYPE } from '~/groups/constants';
 import createStore from './store';
 import MergeRequestAnalyticsApp from './components/app.vue';
-import { ITEM_TYPE } from '~/groups/constants';
-import { DEFAULT_NUMBER_OF_DAYS } from './constants';
+import { parseAndValidateDates } from './utils';
 
 Vue.use(VueApollo);
 
@@ -46,8 +45,10 @@ export default () => {
     selectedLabelList: label_name,
   });
 
-  const startDateParam = getParameterValues('start_date');
-  const endDateParam = getParameterValues('end_date');
+  const { startDate, endDate } = parseAndValidateDates(
+    getParameterValues('start_date'),
+    getParameterValues('end_date'),
+  );
 
   return new Vue({
     el,
@@ -61,10 +62,8 @@ export default () => {
     render: (createElement) =>
       createElement(MergeRequestAnalyticsApp, {
         props: {
-          startDate: startDateParam.length
-            ? new Date(startDateParam)
-            : getDateInPast(new Date(), DEFAULT_NUMBER_OF_DAYS),
-          endDate: endDateParam.length ? new Date(endDateParam) : new Date(),
+          startDate,
+          endDate,
         },
       }),
   });

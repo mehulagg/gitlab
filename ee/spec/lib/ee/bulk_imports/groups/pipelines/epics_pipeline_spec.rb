@@ -26,15 +26,13 @@ RSpec.describe EE::BulkImports::Groups::Pipelines::EpicsPipeline do
     subject { described_class.new }
 
     it 'imports group epics into destination group' do
-      page1 = extractor_data(has_next_page: true, cursor: 'nextPageCursor')
-      page2 = extractor_data(has_next_page: false)
+      first_page = extractor_data(has_next_page: true, cursor: 'nextPageCursor')
+      last_page = extractor_data(has_next_page: false)
 
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
-        if entity.has_next_page?(:epics)
-          allow(extractor).to receive(:extract).and_return(page2)
-        else
-          allow(extractor).to receive(:extract).and_return(page1)
-        end
+        allow(extractor)
+          .to receive(:extract)
+          .and_return(first_page, last_page)
       end
 
       expect { subject.run(context) }.to change(::Epic, :count).by(2)

@@ -107,13 +107,13 @@ export default {
 
 <template>
   <div class="discover-box">
-    <h2 class="discover-title center gl-text-gray-900 gl-mx-auto">
+    <h2 class="discover-title gl-text-center gl-text-gray-900 gl-mx-auto">
       {{ $options.i18n.discoverTitle }}
     </h2>
     <div class="discover-carousels">
       <gl-carousel
         v-model="slide"
-        class="discover-carousel discover-image-carousel gl-mx-auto gl-text-center gl-border-solid gl-border-1 gl-bg-gray-10"
+        class="discover-carousel discover-image-carousel gl-mx-auto gl-text-center gl-border-solid gl-border-1 gl-bg-gray-10 gl-border-gray-50"
         no-wrap
         controls
         :interval="0"
@@ -139,8 +139,8 @@ export default {
           </template>
         </gl-carousel-slide>
       </gl-carousel>
-      <div class="discover-footer mx-auto my-0">
-        <p class="gl-text-gray-900 text-center mb-5">
+      <div class="discover-footer gl-mx-auto gl-my-0">
+        <p class="gl-text-gray-900 gl-text-center mb-7">
           <gl-sprintf :message="$options.i18n.discoverPlanCaption">
             <template #link="{ content }">
               <gl-link
@@ -154,7 +154,9 @@ export default {
         </p>
       </div>
     </div>
-    <div class="discover-buttons d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
+    <div
+      class="discover-buttons gl-display-flex gl-flex-direction-row gl-justify-content-space-between gl-mx-auto"
+    >
       <gl-button
         class="discover-button-upgrade"
         v-bind="discoverButtonProps"
@@ -176,7 +178,7 @@ export default {
         {{ $options.i18n.discoverTrialLabel }}
       </gl-button>
     </div>
-    <div id="tooltipcontainer" class="discover-feedback w-30p position-fixed">
+    <div id="tooltipcontainer" class="discover-feedback gl-fixed">
       <gl-button
         v-gl-tooltip:tooltipcontainer.left
         :title="$options.i18n.discoverFeedbackLabel"

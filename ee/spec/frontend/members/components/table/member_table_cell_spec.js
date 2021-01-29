@@ -80,7 +80,7 @@ describe('MemberTableCell', () => {
     describe('canOverride', () => {
       it('returns `true` when `canOverride` is `true`', () => {
         createComponent({
-          member: { memberMock, canOverride: true },
+          member: { ...memberMock, canOverride: true },
         });
 
         expect(findWrappedComponent().props('permissions').canOverride).toBe(true);
@@ -88,7 +88,7 @@ describe('MemberTableCell', () => {
 
       it('returns `false` when `canOverride` is `false`', () => {
         createComponent({
-          member: { memberMock, canOverride: false },
+          member: { ...memberMock, canOverride: false },
         });
 
         expect(findWrappedComponent().props('permissions').canOverride).toBe(false);

@@ -1996,13 +1996,34 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         is_expected.to be_falsey
       end
     end
+
+    context 'bridge which is allowed to fail fails' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns true' do
+        is_expected.to be_truthy
+      end
+    end
+
+    context 'bridge which is allowed to fail is successful' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :success, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns false' do
+        is_expected.to be_falsey
+      end
+    end
   end
 
   describe '#number_of_warnings' do
     it 'returns the number of warnings' do
       create(:ci_build, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
+      create(:ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
 
-      expect(pipeline.number_of_warnings).to eq(1)
+      expect(pipeline.number_of_warnings).to eq(2)
     end
 
     it 'supports eager loading of the number of warnings' do
@@ -3522,7 +3543,19 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       context 'when pipeline status is success' do
         let(:pipeline) { create(:ci_pipeline, :success, project: project) }
 
-        it { expect(subject).to be_truthy }
+        it 'can generate a codequality report' do
+          expect(subject).to be_truthy
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(codequality_mr_diff: false)
+          end
+
+          it 'can not generate a codequality report' do
+            expect(subject).to be_falsey
+          end
+        end
       end
     end
 

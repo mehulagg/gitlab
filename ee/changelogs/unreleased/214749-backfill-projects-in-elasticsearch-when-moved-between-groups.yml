@@ -1,5 +1,0 @@
----
-title: Backfill projects in Elasticsearch when moved between groups
-merge_request: 51717
-author:
-type: fixed

@@ -1,4 +1,4 @@
-import { DAYS_IN_WEEK } from '../constants';
+import { DAYS_IN_WEEK, HOURS_IN_DAY, PRESET_TYPES } from '../constants';
 
 export default {
   currentDate: null,
@@ -29,12 +29,19 @@ export default {
     this.$options.currentDate = currentDate;
   },
   methods: {
-    getIndicatorStyles() {
-      // as we start schedule scale from the current date the indicator will always be on the first date. So we find
-      // the percentage of space one day cell takes and divide it by 2 cause the tick is in the middle of the cell.
-      // It might be updated to more precise position - time of the day
-      const left = 100 / DAYS_IN_WEEK / 2;
+    getIndicatorStyles(presetType = PRESET_TYPES.WEEKS) {
+      if (presetType === PRESET_TYPES.DAYS) {
+        const currentDate = new Date();
+        const base = 100 / HOURS_IN_DAY;
+        const hours = base * currentDate.getHours();
+        const minutes = base * (currentDate.getMinutes() / 60) - 2.25;
 
+        return {
+          left: `${hours + minutes}%`,
+        };
+      }
+
+      const left = 100 / DAYS_IN_WEEK / 2;
       return {
         left: `${left}%`,
       };

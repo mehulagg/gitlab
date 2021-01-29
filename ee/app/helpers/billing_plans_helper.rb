@@ -1,12 +1,37 @@
 # frozen_string_literal: true
 
 module BillingPlansHelper
+  include Gitlab::Utils::StrongMemoize
+
   def subscription_plan_info(plans_data, current_plan_code)
-    plans_data.find { |plan| plan.code == current_plan_code }
+    current_plan = plans_data.find { |plan| plan.code == current_plan_code && plan.current_subscription_plan? }
+    current_plan || plans_data.find { |plan| plan.code == current_plan_code }
   end
 
   def number_to_plan_currency(value)
     number_to_currency(value, unit: '$', strip_insignificant_zeros: true, format: "%u%n")
+  end
+
+  def upgrade_offer_type(namespace, plan)
+    return :no_offer if namespace.actual_plan_name != Plan::BRONZE || !offer_from_previous_tier?(namespace.id, plan.id)
+
+    upgrade_for_free?(namespace.id) ? :upgrade_for_free : :upgrade_for_offer
+  end
+
+  def has_upgrade?(upgrade_offer)
+    upgrade_offer == :upgrade_for_free || upgrade_offer == :upgrade_for_offer
+  end
+
+  def show_contact_sales_button?(purchase_link_action, upgrade_offer)
+    return false unless purchase_link_action == 'upgrade'
+
+    upgrade_offer == :upgrade_for_offer ||
+      (experiment_enabled?(:contact_sales_btn_in_app) && upgrade_offer == :no_offer)
+  end
+
+  def show_upgrade_button?(purchase_link_action, upgrade_offer)
+    purchase_link_action == 'upgrade' &&
+      (upgrade_offer == :no_offer || upgrade_offer == :upgrade_for_free)
   end
 
   def subscription_plan_data_attributes(namespace, plan)
@@ -20,7 +45,8 @@ module BillingPlansHelper
       plan_upgrade_href: plan_upgrade_url(namespace, plan),
       plan_renew_href: plan_renew_url(namespace),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
-      billable_seats_href: billable_seats_href(namespace)
+      billable_seats_href: billable_seats_href(namespace),
+      plan_name: plan&.name
     }
   end
 
@@ -30,11 +56,6 @@ module BillingPlansHelper
     return false unless current_user.last_name.present?
 
     namespace.group? && (namespace.actual_plan_name == Plan::FREE || namespace.trial_active?)
-  end
-
-  def show_contact_sales_button?(purchase_link_action)
-    experiment_enabled?(:contact_sales_btn_in_app) &&
-      purchase_link_action == 'upgrade'
   end
 
   def experiment_tracking_data_for_button_click(button_label)
@@ -97,10 +118,28 @@ module BillingPlansHelper
   def billing_available_plans(plans_data, current_plan)
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
-    plans_data.filter { |plan_data| !plan_data.deprecated? || plan_data.code == current_plan&.code }
+    plans_data.reject do |plan_data|
+      if plan_data.code == current_plan&.code
+        plan_data.deprecated? && plan_data.hide_deprecated_card?
+      else
+        plan_data.deprecated?
+      end
+    end
+  end
+
+  def show_eoa_banner?(namespace)
+    return false unless ::Feature.enabled?(:show_billing_eoa_banner)
+    return false unless Date.current < eoa_bronze_plan_end_date
+    return false unless namespace.bronze_plan?
+
+    (namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?
   end
 
   private
+
+  def eoa_bronze_plan_end_date
+    Date.parse('2022-01-26')
+  end
 
   def add_seats_url(group)
     return unless group
@@ -130,5 +169,25 @@ module BillingPlansHelper
 
   def billable_seats_href(group)
     group_seat_usage_path(group)
+  end
+
+  def offer_from_previous_tier?(namespace_id, plan_id)
+    upgrade_plan_id = upgrade_plan_data(namespace_id)[:upgrade_plan_id]
+
+    return false unless upgrade_plan_id
+
+    upgrade_plan_id == plan_id
+  end
+
+  def upgrade_for_free?(namespace_id)
+    !!upgrade_plan_data(namespace_id)[:upgrade_for_free]
+  end
+
+  def upgrade_plan_data(namespace_id)
+    strong_memoize(:upgrade_plan_data) do
+      GitlabSubscriptions::PlanUpgradeService
+        .new(namespace_id: namespace_id)
+        .execute
+    end
   end
 end

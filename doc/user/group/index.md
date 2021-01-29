@@ -404,6 +404,8 @@ If an LDAP user is a group member when LDAP Synchronization is added, and they a
 
 To create group links via CN:
 
+<!-- vale gitlab.Spelling = NO -->
+
 1. Select the **LDAP Server** for the link.
 1. Select `LDAP Group cn` as the **Sync method**.
 1. In the **LDAP Group cn** text input box, begin typing the CN of the group. There will be a dropdown menu with matching CNs within the configured `group_base`. Select your CN from this list.
@@ -412,7 +414,9 @@ To create group links via CN:
 
 ![Creating group links via CN](img/ldap_sync_cn_v13_1.png)
 
-### Creating group links via filter **(PREMIUM ONLY)**
+<!-- vale gitlab.Spelling = YES -->
+
+### Creating group links via filter **(PREMIUM SELF)**
 
 To create group links via filter:
 
@@ -551,7 +555,7 @@ username, you can create a new group and transfer projects to it.
 
 You can change settings that are specific to repositories in your group.
 
-#### Custom initial branch name **(CORE ONLY)**
+#### Custom initial branch name **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43290) in GitLab 13.6.
 
@@ -576,7 +580,7 @@ To remove a group and its contents:
 This action either:
 
 - Removes the group, and also queues a background job to delete all projects in that group.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/premium/) or higher tiers, this action adds a background job to mark a group for deletion. By default, the job schedules the deletion 7 days in the future. You can modify this waiting period through the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium](https://about.gitlab.com/pricing/premium/) or higher tiers, this action adds a background job to mark a group for deletion. By default, the job schedules the deletion 7 days in the future. You can modify this waiting period through the [instance settings](../admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
 Since [GitLab 13.6](https://gitlab.com/gitlab-org/gitlab/-/issues/39504), if the user who sets up the deletion leaves or is otherwise removed from the group before the
 actual deletion happens, the job is cancelled, and the group is no longer scheduled for deletion.
@@ -634,8 +638,8 @@ request to add a new user to a project through API will not be possible.
 
 #### IP access restriction **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate and Gold](https://about.gitlab.com/pricing/) 12.0.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium and Silver](https://about.gitlab.com/pricing/) in 13.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1985) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215410) to [GitLab Premium](https://about.gitlab.com/pricing/) in 13.1.
 
 NOTE:
 IP Access Restrictions are currently not functioning as expected on GitLab.com. Some users
@@ -672,7 +676,7 @@ To enable this feature:
 
 #### Allowed domain restriction **(PREMIUM)**
 
->- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7297) in [GitLab Premium and Silver](https://about.gitlab.com/pricing/) 12.2.
+>- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7297) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
 >- Support for specifying multiple email domains [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33143) in GitLab 13.1
 
 You can restrict access to groups by allowing only users with email addresses in particular domains to be added to the group.
@@ -702,6 +706,9 @@ To enable this feature:
 
 This will enable the domain-checking for all new users added to the group from this moment on.
 
+NOTE:
+Domain restrictions only apply to groups and do not prevent users from being added as members of projects owned by the restricted group.
+
 #### Group file templates **(PREMIUM)**
 
 Group file templates allow you to share a set of templates for common file
@@ -725,6 +732,9 @@ To enable this feature, navigate to the group settings page, expand the
 **Save group**.
 
 ![Group file template settings](img/group_file_template_settings.png)
+
+To learn how to create templates for issues and merge requests, visit
+[Description templates](../project/description_templates.md).
 
 #### Group-level project templates **(PREMIUM)**
 
@@ -765,7 +775,7 @@ To enable this feature:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220382) in GitLab 13.2.
 
 By default, projects within a group are deleted immediately.
-Optionally, on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers,
+Optionally, on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
 you can configure the projects within a group to be deleted after a delayed interval.
 
 During this interval period, the projects will be in a read-only state and can be restored, if required.
@@ -785,7 +795,7 @@ The group setting for delayed deletion is not inherited by sub-groups and has to
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216987) in GitLab 13.3.
 
 By default, projects within a group can be forked.
-Optionally, on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers,
+Optionally, on [Premium](https://about.gitlab.com/pricing/) or higher tiers,
 you can prevent the projects within a group from being forked outside of the current top-level group.
 
 Previously this setting was available only for groups enforcing group managed account. This setting will be
@@ -824,7 +834,7 @@ When set, new subgroups have push rules set for them based on either:
 - The closest parent group with push rules defined.
 - Push rules set at the instance level, if no parent groups have push rules defined.
 
-### Maximum artifacts size **(CORE ONLY)**
+### Maximum artifacts size **(FREE SELF)**
 
 For information about setting a maximum artifact size for a group, see
 [Maximum artifacts size](../admin_area/settings/continuous_integration.md#maximum-artifacts-size).

@@ -176,7 +176,7 @@ describe('EpicsSelect', () => {
           expect(wrapper.vm.assignIssueToEpic).toHaveBeenCalledWith(mockEpic2);
         });
 
-        it('should emit component event `onEpicSelect` with both `epicIssueId` & `issueId` props are not defined', () => {
+        it('should emit component event `epicSelect` with both `epicIssueId` & `issueId` props are not defined', () => {
           wrapperStandalone.setProps({
             issueId: 0,
             epicIssueId: 0,
@@ -185,8 +185,8 @@ describe('EpicsSelect', () => {
           return wrapperStandalone.vm.$nextTick(() => {
             wrapperStandalone.vm.handleItemSelect(mockEpic2);
 
-            expect(wrapperStandalone.emitted('onEpicSelect')).toBeTruthy();
-            expect(wrapperStandalone.emitted('onEpicSelect')[0]).toEqual([mockEpic2]);
+            expect(wrapperStandalone.emitted('epicSelect')).toBeTruthy();
+            expect(wrapperStandalone.emitted('epicSelect')[0]).toEqual([mockEpic2]);
           });
         });
       });

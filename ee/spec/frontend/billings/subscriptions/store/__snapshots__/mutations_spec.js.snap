@@ -9,7 +9,7 @@ Array [
 ]
 `;
 
-exports[`EE billings subscription module mutations RECEIVE_SUBSCRIPTION_SUCCESS with Gold subscription it updates table default with subscription plan 1`] = `
+exports[`EE billings subscription module mutations RECEIVE_SUBSCRIPTION_SUCCESS with Ultimate subscription it updates table default with subscription plan 1`] = `
 Array [
   Object {
     "maxSeatsUsed": 104,
@@ -26,7 +26,7 @@ Array [
 ]
 `;
 
-exports[`EE billings subscription module mutations RECEIVE_SUBSCRIPTION_SUCCESS with Gold trial it updates table trial with subscription plan 1`] = `
+exports[`EE billings subscription module mutations RECEIVE_SUBSCRIPTION_SUCCESS with Ultimate trial it updates table trial with subscription plan 1`] = `
 Array [
   Object {
     "seatsInUse": 1,

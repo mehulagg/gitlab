@@ -1,5 +1,0 @@
----
-title: Delete Elasticsearch migrations index in rake gitlab:elastic:delete_index
-merge_request: 50817
-author:
-type: added

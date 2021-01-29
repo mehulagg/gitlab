@@ -186,7 +186,7 @@ Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) 
 ]
 ```
 
-Users on GitLab [Silver or higher](https://about.gitlab.com/pricing/) also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `group_saml` provider option:
 
 ```json
@@ -350,7 +350,7 @@ the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` par
 }
 ```
 
-Users on GitLab.com [Silver, or higher](https://about.gitlab.com/pricing/) also
+Users on GitLab.com [Premium or higher](https://about.gitlab.com/pricing/) also
 see the `group_saml` option:
 
 ```json
@@ -1374,7 +1374,7 @@ Example Responses:
 ```
 
 ```json
-{ "message": "The user you are trying to approve is not pending an approval" }
+{ "message": "The user you are trying to approve is not pending approval" }
 ```
 
 ## Get an impersonation token of a user
@@ -1481,7 +1481,7 @@ Parameters:
 | `user_id`                | integer | yes      | The ID of the user                |
 | `impersonation_token_id` | integer | yes      | The ID of the impersonation token |
 
-## Create a personal access token **(CORE ONLY)**
+## Create a personal access token **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17176) in GitLab 13.6.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267553) in GitLab 13.8.

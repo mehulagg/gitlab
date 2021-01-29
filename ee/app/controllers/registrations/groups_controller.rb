@@ -27,6 +27,10 @@ module Registrations
       if helpers.in_trial_onboarding_flow?
         render_new && return unless apply_trial
 
+        record_experiment_user(:remove_known_trial_form_fields, namespace_id: @group.id)
+        record_experiment_user(:trimmed_skip_trial_copy, namespace_id: @group.id)
+        record_experiment_user(:trial_registration_with_social_signin, namespace_id: @group.id)
+
         url_params[:trial_onboarding_flow] = true
       else
         record_experiment_user(:trial_during_signup, trial_chosen: trial, namespace_id: @group.id)

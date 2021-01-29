@@ -11,6 +11,7 @@ query groupEpics(
   $milestoneTitle: String = ""
   $confidential: Boolean
   $search: String = ""
+  $first: Int = 1001
 ) {
   group(fullPath: $fullPath) {
     id
@@ -25,6 +26,7 @@ query groupEpics(
       milestoneTitle: $milestoneTitle
       confidential: $confidential
       search: $search
+      first: $first
     ) {
       edges {
         node {

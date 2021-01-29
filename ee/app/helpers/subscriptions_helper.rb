@@ -34,7 +34,7 @@ module SubscriptionsHelper
     FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
       .reject { |plan_data| plan_data[:free] }
-      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated) }
+      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name) }
   end
 
   def subscription_available_plans

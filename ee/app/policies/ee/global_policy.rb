@@ -28,6 +28,7 @@ module EE
         enable :destroy_licenses
         enable :read_all_geo
         enable :manage_devops_adoption_segments
+        enable :manage_subscription
       end
 
       rule { admin & pages_size_limit_available }.enable :update_max_pages_size

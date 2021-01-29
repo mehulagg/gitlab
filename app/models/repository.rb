@@ -1059,6 +1059,10 @@ class Repository
     blob_data_at(sha, '.lfsconfig')
   end
 
+  def changelog_config(ref = 'HEAD')
+    blob_data_at(ref, Gitlab::Changelog::Config::FILE_PATH)
+  end
+
   def fetch_ref(source_repository, source_ref:, target_ref:)
     raw_repository.fetch_ref(source_repository.raw_repository, source_ref: source_ref, target_ref: target_ref)
   end
@@ -1141,6 +1145,13 @@ class Repository
     else
       container.try(:project)
     end
+  end
+
+  # Choose one of the available repository storage options based on a normalized weighted probability.
+  # We should always use the latest settings, to avoid picking a deleted shard.
+  def self.pick_storage_shard(expire: true)
+    Gitlab::CurrentSettings.expire_current_application_settings if expire
+    Gitlab::CurrentSettings.pick_repository_storage
   end
 
   private

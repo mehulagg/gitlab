@@ -1,5 +1,6 @@
 mutation dastScannerProfileCreate($input: DastScannerProfileCreateInput!) {
   dastScannerProfileCreate(input: $input) {
+    id
     errors
   }
 }

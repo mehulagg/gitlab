@@ -67,7 +67,7 @@ RSpec.describe 'Epic show', :js do
         wait_for_requests
       end
 
-      it 'shows Roadmap timeline with child epics' do
+      it 'shows Roadmap timeline with child epics', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299298' do
         page.within('.js-epic-tabs-content #roadmap') do
           expect(page).to have_selector('.roadmap-container .js-roadmap-shell')
 
@@ -83,7 +83,7 @@ RSpec.describe 'Epic show', :js do
         expect(find('.js-noteable-awards')).to have_selector('.js-discussion-filter-container', visible: false)
       end
 
-      it 'has no limit on container width' do
+      it 'has no limit on container width', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299440' do
         expect(find('.content-wrapper .container-fluid:not(.breadcrumbs)')[:class]).not_to include('container-limited')
       end
     end

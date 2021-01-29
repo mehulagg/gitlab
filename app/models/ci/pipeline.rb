@@ -250,6 +250,7 @@ module Ci
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
           ::Ci::PipelineArtifacts::CoverageReportWorker.perform_async(pipeline.id)
+          ::Ci::PipelineArtifacts::CreateQualityReportWorker.perform_async(pipeline.id)
         end
       end
 
@@ -675,7 +676,7 @@ module Ci
 
     def number_of_warnings
       BatchLoader.for(id).batch(default_value: 0) do |pipeline_ids, loader|
-        ::Ci::Build.where(commit_id: pipeline_ids)
+        ::CommitStatus.where(commit_id: pipeline_ids)
           .latest
           .failed_but_allowed
           .group(:commit_id)
@@ -1007,6 +1008,8 @@ module Ci
     end
 
     def can_generate_codequality_reports?
+      return false unless ::Gitlab::Ci::Features.display_quality_on_mr_diff?(project)
+
       has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
@@ -1210,6 +1213,11 @@ module Ci
       end
     end
     # rubocop:enable Rails/FindEach
+
+    # EE-only
+    def merge_train_pipeline?
+      false
+    end
 
     private
 

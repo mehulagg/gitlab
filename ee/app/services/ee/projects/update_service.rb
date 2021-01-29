@@ -71,6 +71,8 @@ module EE
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
             settings.merge!(_destroy: true)
+          elsif ::Feature.enabled?(:ff_custom_compliance_frameworks)
+            settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
           else
             settings[:compliance_management_framework] = ComplianceManagement::Framework.find_or_create_legacy_default_framework(project, framework_identifier)
           end
@@ -90,8 +92,8 @@ module EE
       def refresh_merge_trains(project)
         return unless project.merge_pipelines_were_disabled?
 
-        MergeTrain.first_in_trains(project).each do |merge_request|
-          AutoMergeProcessWorker.perform_async(merge_request.id)
+        MergeTrain.first_cars_in_trains(project).each do |car|
+          MergeTrains::RefreshWorker.perform_async(car.target_project_id, car.target_branch)
         end
       end
     end

@@ -4,14 +4,9 @@ import produce from 'immer';
 import { __ } from '~/locale';
 import securityScannersQuery from '../graphql/queries/project_security_scanners.query.graphql';
 import vulnerabilitiesQuery from '../graphql/queries/project_vulnerabilities.query.graphql';
-import vulnerabilitiesQueryAutoFix from '../graphql/queries/project_vulnerabilities_autofix.query.graphql';
 import { preparePageInfo } from '../helpers';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
 import VulnerabilityList from './vulnerability_list.vue';
-
-const query = gon?.features?.secureVulnerabilityAutofixIndicator
-  ? vulnerabilitiesQueryAutoFix
-  : vulnerabilitiesQuery;
 
 export default {
   name: 'ProjectVulnerabilitiesApp',
@@ -41,7 +36,7 @@ export default {
   },
   apollo: {
     vulnerabilities: {
-      query,
+      query: vulnerabilitiesQuery,
       variables() {
         return {
           fullPath: this.projectFullPath,

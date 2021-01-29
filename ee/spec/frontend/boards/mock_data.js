@@ -106,6 +106,7 @@ export const mockIssue = {
   labels,
   epic: {
     id: 'gid://gitlab/Epic/41',
+    iid: 2,
   },
 };
 
@@ -123,6 +124,7 @@ export const mockIssue2 = {
   labels,
   epic: {
     id: 'gid://gitlab/Epic/40',
+    iid: 1,
   },
 };
 
@@ -170,6 +172,9 @@ export const mockEpic = {
   },
   issues: [mockIssue],
 };
+
+export const mockIssueWithEpic = { ...mockIssue3, epic: { id: mockEpic.id, iid: mockEpic.iid } };
+export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
 
 export const mockEpics = [
   {

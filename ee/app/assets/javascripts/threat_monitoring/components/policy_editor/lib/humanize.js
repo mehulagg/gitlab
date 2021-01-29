@@ -129,10 +129,10 @@ export default function humanizeNetworkPolicy(policy) {
     const template =
       direction === RuleDirectionInbound
         ? s__(
-            'NetworkPolicies|Allow all inbound traffic to %{selector} from %{ruleSelector} on %{ports}',
+            'NetworkPolicies|Deny all inbound traffic to %{selector} from %{ruleSelector} on %{ports}',
           )
         : s__(
-            'NetworkPolicies|Allow all outbound traffic from %{selector} to %{ruleSelector} on %{ports}',
+            'NetworkPolicies|Deny all outbound traffic from %{selector} to %{ruleSelector} on %{ports}',
           );
     const ruleSelector = humanizeNetworkPolicyRule(rule);
     const ports = humanizeNetworkPolicyRulePorts(rule);

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This model represents the merge train metadata of a single merge request.
+# Please note that, in product perspective, a merge train represents a group of merge requests,
+# however, in ActiveRecord model perspective, it exists for _each_ merge request on the train.
 class MergeTrain < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include AfterCommitQueue
@@ -81,25 +84,22 @@ class MergeTrain < ApplicationRecord
   class << self
     def all_active_mrs_in_train(target_project_id, target_branch)
       MergeRequest.joins(:merge_train).merge(
-        MergeTrain.active.for_target(target_project_id, target_branch).by_id
+        all_cars(target_project_id, target_branch)
       )
     end
 
-    def first_in_train(target_project_id, target_branch)
-      all_active_mrs_in_train(target_project_id, target_branch).first
+    def all_cars(target_project_id, target_branch, limit: nil)
+      active.for_target(target_project_id, target_branch).by_id.limit(limit)
     end
 
-    def first_in_trains(project)
-      MergeRequest.preload(:target_project).where(id: first_merge_request_ids(project))
+    def first_car(target_project_id, target_branch)
+      all_cars(target_project_id, target_branch).first
     end
 
-    def first_in_train_from(merge_request_ids)
-      merge_request = MergeRequest.find(merge_request_ids.first)
-      all_active_mrs_in_train(merge_request.target_project_id, merge_request.target_branch).find_by(id: merge_request_ids)
-    end
-
-    def last_complete_mr_in_train(target_project_id, target_branch)
-      MergeRequest.find_by(id: last_complete_merge_train(target_project_id, target_branch))
+    def first_cars_in_trains(project)
+      active.where(target_project: project)
+            .select('DISTINCT ON (target_branch) *')
+            .order(:target_branch, :id)
     end
 
     def sha_exists_in_history?(target_project_id, target_branch, newrev, limit: 20)
@@ -114,17 +114,6 @@ class MergeTrain < ApplicationRecord
 
     private
 
-    def first_merge_request_ids(project)
-      MergeTrain.where(target_project: project)
-        .active
-        .select('DISTINCT ON (target_branch) merge_request_id')
-        .order(:target_branch, :id)
-    end
-
-    def last_complete_merge_train(target_project_id, target_branch)
-      complete_merge_trains(target_project_id, target_branch, limit: 1)
-    end
-
     def complete_merge_trains(target_project_id, target_branch, limit:)
       MergeTrain.for_target(target_project_id, target_branch)
         .complete.order(id: :desc).select(:merge_request_id).limit(limit)
@@ -132,11 +121,11 @@ class MergeTrain < ApplicationRecord
   end
 
   def all_next
-    self.class.all_active_mrs_in_train(target_project_id, target_branch).where('merge_trains.id > ?', id)
+    self.class.all_cars(target_project_id, target_branch).where('merge_trains.id > ?', id)
   end
 
   def all_prev
-    self.class.all_active_mrs_in_train(target_project_id, target_branch).where('merge_trains.id < ?', id)
+    self.class.all_cars(target_project_id, target_branch).where('merge_trains.id < ?', id)
   end
 
   def next
@@ -152,7 +141,7 @@ class MergeTrain < ApplicationRecord
   end
 
   def previous_ref
-    prev&.train_ref_path || merge_request.target_branch_ref
+    prev&.merge_request&.train_ref_path || merge_request.target_branch_ref
   end
 
   def previous_ref_sha
@@ -176,7 +165,11 @@ class MergeTrain < ApplicationRecord
   end
 
   def mergeable?
-    has_pipeline? && pipeline&.success? && first_in_train?
+    has_pipeline? && pipeline&.success? && first_car?
+  end
+
+  def first_car?
+    self.class.first_car(target_project_id, target_branch) == self
   end
 
   def cleanup_ref
@@ -188,16 +181,12 @@ class MergeTrain < ApplicationRecord
   end
 
   def refresh_async
-    AutoMergeProcessWorker.perform_async(merge_request_id)
+    MergeTrains::RefreshWorker.perform_async(target_project_id, target_branch)
   end
 
   private
 
   def has_pipeline?
     pipeline_id.present? && pipeline
-  end
-
-  def first_in_train?
-    all_prev.none?
   end
 end

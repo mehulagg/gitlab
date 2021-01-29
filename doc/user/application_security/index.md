@@ -123,7 +123,7 @@ latest versions of the scanning tools without having to do anything. There are s
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
 
-## Viewing security scan information in merge requests **(CORE)**
+## Viewing security scan information in merge requests **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Core 13.5.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.
@@ -132,7 +132,7 @@ with this approach, however, and there is a
 > - It's enabled on GitLab.com.
 > - It can be enabled or disabled for a single project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -267,7 +267,7 @@ You can dismiss multiple vulnerabilities at once, providing an optional reason.
 Selecting the checkboxes on the side of each vulnerability in the list selects that individual vulnerability.
 Alternatively, you can select all the vulnerabilities in the list by selecting the checkbox in the table header.
 Deselecting the checkbox in the header deselects all the vulnerabilities in the list.
-Once you have selected some vulnerabilities, a menu appears at the top of the table that allows you to select a dismissal reason.
+After you have selected some vulnerabilities, a menu appears at the top of the table that allows you to select a dismissal reason.
 Pressing the "Dismiss Selected" button dismisses all the selected vulnerabilities at once, with the reason you chose.
 
 ![Multiple vulnerability dismissal](img/multi_select_v12_9.png)
@@ -281,7 +281,7 @@ You can create an issue for a vulnerability by visiting the vulnerability's page
 
 This creates a [confidential issue](../project/issues/confidential_issues.md) in the project the
 vulnerability came from, and pre-populates it with some useful information taken from the vulnerability
-report. Once the issue is created, you are redirected to it so you can edit, assign, or comment on
+report. After the issue is created, you are redirected to it so you can edit, assign, or comment on
 it.
 
 Upon returning to the group security dashboard, the vulnerability now has an associated issue next
@@ -395,11 +395,11 @@ must be created. A [security scanner job](#security-scanning-tools) must be enab
 job must be enabled for `License-Check`. When the proper jobs aren't configured, the following
 appears:
 
-![Unconfigured Approval Rules](img/unconfigured_security_approval_rules_and_jobs_v13_4.png)
+![Un-configured Approval Rules](img/unconfigured_security_approval_rules_and_jobs_v13_4.png)
 
 If at least one security scanner is enabled, you can enable the `Vulnerability-Check` approval rule. If a license scanning job is enabled, you can enable the `License-Check` rule.
 
-![Unconfigured Approval Rules with valid pipeline jobs](img/unconfigured_security_approval_rules_and_enabled_jobs_v13_4.png)
+![Un-configured Approval Rules with valid pipeline jobs](img/unconfigured_security_approval_rules_and_enabled_jobs_v13_4.png)
 
 For this approval group, you must set the number of approvals required to greater than zero. You
 must have Maintainer or Owner [permissions](../permissions.md#project-members-permissions)
@@ -446,7 +446,7 @@ environment.
 
 Read how to [operate the Secure scanners in an offline environment](offline_deployments/index.md).
 
-## Using private Maven repos
+## Using private Maven repositories
 
 If you have a private Apache Maven repository that requires login credentials,
 you can use the `MAVEN_CLI_OPTS` environment variable
@@ -652,7 +652,7 @@ Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-a
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
 
-### Enable or disable the basic security widget **(CORE ONLY)**
+### Enable or disable the basic security widget **(FREE SELF)**
 
 The basic security widget is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.

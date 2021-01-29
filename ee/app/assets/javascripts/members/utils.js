@@ -1,5 +1,8 @@
 import { __ } from '~/locale';
-import { generateBadges as CEGenerateBadges } from '~/members/utils';
+import {
+  generateBadges as CEGenerateBadges,
+  parseDataAttributes as CEParseDataAttributes,
+} from '~/members/utils';
 
 export {
   isGroup,
@@ -35,3 +38,12 @@ export const generateBadges = (member, isCurrentUser) => [
 ];
 
 export const canOverride = (member) => member.canOverride;
+
+export const parseDataAttributes = (el) => {
+  const { ldapOverridePath } = el.dataset;
+
+  return {
+    ...CEParseDataAttributes(el),
+    ldapOverridePath,
+  };
+};

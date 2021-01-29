@@ -41,7 +41,7 @@ export default () => {
           showHeader: Boolean(el.dataset.showHeader),
         },
         on: {
-          onEpicSelect: this.handleEpicSelect.bind(this),
+          epicSelect: this.handleEpicSelect.bind(this),
         },
       });
     },

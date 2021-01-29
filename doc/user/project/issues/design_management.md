@@ -4,7 +4,7 @@ group: Knowledge
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 ---
 
-# Design Management **(CORE)**
+# Design Management **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/660) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
 > - Support for SVGs was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12771) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
@@ -46,7 +46,7 @@ If the requirements are not met, the **Designs** tab displays a message to the u
 ## Supported files
 
 Files uploaded must have a file extension of either `png`, `jpg`, `jpeg`,
-`gif`, `bmp`, `tiff`, `ico`, or `svg`.
+`gif`, `bmp`, `tiff`, `ico`, `webp`, or `svg`.
 
 Support for [PDF](https://gitlab.com/gitlab-org/gitlab/issues/32811) is planned for a future release.
 

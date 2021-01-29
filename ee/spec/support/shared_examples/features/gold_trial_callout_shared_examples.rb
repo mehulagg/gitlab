@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'dashboard gold trial callout' do
+RSpec.shared_examples 'dashboard ultimate trial callout' do
   before do
     sign_in(user)
   end
@@ -62,7 +62,7 @@ RSpec.shared_examples 'dashboard gold trial callout' do
   end
 end
 
-RSpec.shared_examples 'billings gold trial callout' do
+RSpec.shared_examples 'billings ultimate trial callout' do
   context 'on a free plan' do
     let(:plan) { free_plan }
 
@@ -74,13 +74,13 @@ RSpec.shared_examples 'billings gold trial callout' do
       visit page_path
     end
 
-    it 'renders an undismissable gold trial callout' do
+    it 'renders an undismissable ultimate trial callout' do
       expect(page).to have_selector '.promotion-callout'
       expect(page).not_to have_selector '.promotion-callout .js-close'
     end
   end
 
-  context "on a plan that isn't gold", :js do
+  context "on a plan that isn't ultimate", :js do
     let(:plans) { { bronze: create(:bronze_plan), silver: create(:silver_plan) } }
 
     where(case_names: ->(plan_type) {"like #{plan_type}"}, plan_type: [:bronze, :silver])
@@ -96,7 +96,7 @@ RSpec.shared_examples 'billings gold trial callout' do
         visit page_path
       end
 
-      it 'renders a dismissable gold trial callout' do
+      it 'renders a dismissable ultimate trial callout' do
         expect(page).to have_selector '.promotion-callout'
 
         find('.promotion-callout .js-close').click
@@ -106,7 +106,7 @@ RSpec.shared_examples 'billings gold trial callout' do
     end
   end
 
-  context 'on a gold plan' do
+  context 'on a ultimate plan' do
     let(:plan) { gold_plan }
 
     let!(:subscription) do
@@ -117,7 +117,7 @@ RSpec.shared_examples 'billings gold trial callout' do
       visit page_path
     end
 
-    it "doesn't render a gold trial callout" do
+    it "doesn't render a ultimate trial callout" do
       expect(page).not_to have_selector '.promotion-callout'
     end
   end

@@ -75,7 +75,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#create_standalone_indices' do
+  describe '#create_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     after do
       @indices.each do |index_name, _|
         helper.delete_index(index_name: index_name)
@@ -103,7 +103,7 @@ RSpec.describe Gitlab::Elastic::Helper do
     end
   end
 
-  describe '#delete_standalone_indices' do
+  describe '#delete_standalone_indices', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297357' do
     before do
       helper.create_standalone_indices
     end
@@ -357,6 +357,17 @@ RSpec.describe Gitlab::Elastic::Helper do
       it 'creates proxies for only the target classes' do
         expect(subject.count).to eq(1)
       end
+    end
+  end
+
+  describe '#ping?' do
+    subject { helper.ping? }
+
+    it 'does not raise any exception' do
+      allow(Gitlab::Elastic::Helper.default.client).to receive(:ping).and_raise(StandardError)
+
+      expect(subject).to be_falsey
+      expect { subject }.not_to raise_exception
     end
   end
 end

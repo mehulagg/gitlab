@@ -29,6 +29,10 @@ export default {
       validator: (rotation) =>
         isEmpty(rotation) || [rotation.id, rotation.name, rotation.startsAt].every(Boolean),
     },
+    scheduleIid: {
+      type: String,
+      required: true,
+    },
     modalId: {
       type: String,
       required: true,
@@ -61,6 +65,7 @@ export default {
       const {
         projectPath,
         rotation: { id },
+        scheduleIid,
       } = this;
 
       this.loading = true;
@@ -68,11 +73,19 @@ export default {
         .mutate({
           mutation: destroyOncallRotationMutation,
           variables: {
-            iid: id,
+            id,
+            scheduleIid,
             projectPath,
           },
           update(store, { data }) {
-            updateStoreAfterRotationDelete(store, getOncallSchedulesQuery, data, { projectPath });
+            updateStoreAfterRotationDelete(
+              store,
+              getOncallSchedulesQuery,
+              { ...data, scheduleIid },
+              {
+                projectPath,
+              },
+            );
           },
         })
         .then(({ data: { oncallRotationDestroy } = {} } = {}) => {

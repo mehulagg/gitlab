@@ -6,6 +6,7 @@ import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/component
 import createStore from 'ee/security_dashboard/store';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { trimText } from 'helpers/text_helper';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
@@ -115,10 +116,7 @@ describe('Security Dashboard Table Row', () => {
         expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/setModalData', {
           vulnerability,
         });
-        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(
-          'bv::show::modal',
-          VULNERABILITY_MODAL_ID,
-        );
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(BV_SHOW_MODAL, VULNERABILITY_MODAL_ID);
       });
     });
 

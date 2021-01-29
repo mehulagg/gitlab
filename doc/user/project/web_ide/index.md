@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, how-to
 ---
 
-# Web IDE **(CORE)**
+# Web IDE **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4539) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Core in 10.7.
@@ -26,7 +26,7 @@ and from merge requests.
 
 The file finder allows you to quickly open files in the current branch by
 searching for fragments of the file path. The file finder is launched using the keyboard shortcut
-<kbd>Cmd</kbd>+<kbd>p</kbd>, <kbd>Ctrl</kbd>+<kbd>p</kbd>, or <kbd>t</kbd>
+<kbd>Command</kbd>+<kbd>p</kbd>, <kbd>Control</kbd>+<kbd>p</kbd>, or <kbd>t</kbd>
 (when editor is not in focus). Type the filename or file path fragments to
 start seeing results.
 
@@ -102,7 +102,7 @@ based on the [JSON Schema Store](https://www.schemastore.org/json/).
 The Web IDE has validation for certain files built in. This feature is only supported for
 the `*.gitlab-ci.yml` files.
 
-#### Enable or disable validation based on predefined schemas **(CORE ONLY)**
+#### Enable or disable validation based on predefined schemas **(FREE SELF)**
 
 Validation based on predefined schemas is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default** for self-managed instances,
@@ -307,7 +307,7 @@ to work:
   This section requires at least a `session_timeout` value (which defaults to 1800
   seconds) and a `listen_address` value. If `advertise_address` is not defined, `listen_address` is used.
 - If you are using a reverse proxy with your GitLab instance, web terminals need to be
-  [enabled](../../../administration/integration/terminal.md#enabling-and-disabling-terminal-support). **(ULTIMATE ONLY)**
+  [enabled](../../../administration/integration/terminal.md#enabling-and-disabling-terminal-support). **(ULTIMATE SELF)**
 
 If you have the terminal open and the job has finished with its tasks, the
 terminal blocks the job from finishing for the duration configured in

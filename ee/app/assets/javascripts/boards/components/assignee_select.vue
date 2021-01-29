@@ -89,7 +89,9 @@ export default {
           id: undefined,
         };
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee_id = assignee.id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee = assignee;
     },
   },

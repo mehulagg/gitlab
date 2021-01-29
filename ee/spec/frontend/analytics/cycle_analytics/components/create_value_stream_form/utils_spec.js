@@ -102,6 +102,11 @@ describe('validateStage', () => {
     const result = validateStage({ ...defaultFields, [field]: value });
     expectFieldError({ result, error, field });
   });
+
+  it(`returns "${ERRORS.END_EVENT_REQUIRED}" with a start event and no end event set`, () => {
+    const result = validateStage({ ...defaultFields, startEventIdentifier: 'start-event' });
+    expectFieldError({ result, error: ERRORS.END_EVENT_REQUIRED, field: 'endEventIdentifier' });
+  });
 });
 
 describe('validateValueStreamName,', () => {
@@ -110,9 +115,9 @@ describe('validateValueStreamName,', () => {
   });
 
   it.each`
-    name                               | error                | msg
-    ${'a'.repeat(NAME_MAX_LENGTH + 1)} | ${ERRORS.MAX_LENGTH} | ${'too long'}
-    ${''}                              | ${ERRORS.MIN_LENGTH} | ${'too short'}
+    name                               | error                                  | msg
+    ${'a'.repeat(NAME_MAX_LENGTH + 1)} | ${ERRORS.MAX_LENGTH}                   | ${'too long'}
+    ${''}                              | ${ERRORS.VALUE_STREAM_NAME_MIN_LENGTH} | ${'too short'}
   `('returns "$error" if name is $msg', ({ name, error }) => {
     const result = validateValueStreamName({ name });
     expectFieldError({ result, error, field: 'name' });

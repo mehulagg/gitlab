@@ -16,7 +16,7 @@ describe('RotationAssignee', () => {
   const findEndsAt = () => wrapper.findByTestId('rotation-assignee-ends-at');
 
   const formattedDate = (date) => {
-    return formatDate(date, 'mmmm d, yyyy, hh:mm');
+    return formatDate(date, 'mmmm d, yyyy, h:MMtt Z');
   };
 
   function createComponent() {

@@ -451,6 +451,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       it { is_expected.to be_empty }
     end
+
+    context 'when commit is part of the merge request and a squash commit at the same time' do
+      let!(:merge_request) { create(:merge_request, :with_diffs) }
+      let(:sha) { merge_request.commits.first.id }
+
+      before do
+        merge_request.update!(squash_commit_sha: sha)
+      end
+
+      it { is_expected.to eq([merge_request]) }
+    end
   end
 
   describe '.by_cherry_pick_sha' do
@@ -480,6 +491,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
       create(:merge_request, params).tap do |mr|
         diffs.times { mr.merge_request_diffs.create }
+        mr.create_merge_head_diff
       end
     end
 
@@ -4368,37 +4380,41 @@ RSpec.describe MergeRequest, factory_default: :keep do
   end
 
   describe '#diffable_merge_ref?' do
+    let(:merge_request) { create(:merge_request) }
+
     context 'merge request can be merged' do
-      context 'merge_to_ref is not calculated' do
+      context 'merge_head diff is not created' do
         it 'returns true' do
-          expect(subject.diffable_merge_ref?).to eq(false)
+          expect(merge_request.diffable_merge_ref?).to eq(false)
         end
       end
 
-      context 'merge_to_ref is calculated' do
+      context 'merge_head diff is created' do
         before do
-          MergeRequests::MergeToRefService.new(subject.project, subject.author).execute(subject)
+          create(:merge_request_diff, :merge_head, merge_request: merge_request)
         end
 
         it 'returns true' do
-          expect(subject.diffable_merge_ref?).to eq(true)
+          expect(merge_request.diffable_merge_ref?).to eq(true)
         end
 
         context 'merge request is merged' do
-          subject { build_stubbed(:merge_request, :merged, project: project) }
+          before do
+            merge_request.mark_as_merged!
+          end
 
           it 'returns false' do
-            expect(subject.diffable_merge_ref?).to eq(false)
+            expect(merge_request.diffable_merge_ref?).to eq(false)
           end
         end
 
         context 'merge request cannot be merged' do
           before do
-            subject.mark_as_unchecked!
+            merge_request.mark_as_unchecked!
           end
 
           it 'returns false' do
-            expect(subject.diffable_merge_ref?).to eq(true)
+            expect(merge_request.diffable_merge_ref?).to eq(true)
           end
 
           context 'display_merge_conflicts_in_diff is disabled' do
@@ -4407,7 +4423,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
             end
 
             it 'returns false' do
-              expect(subject.diffable_merge_ref?).to eq(false)
+              expect(merge_request.diffable_merge_ref?).to eq(false)
             end
           end
         end

@@ -53,7 +53,7 @@ When you start a new merge request, you can immediately include the following
 options, or add them later by clicking the **Edit** button on the merge
 request's page at the top-right side:
 
-- [Assign](#assignee) the merge request to a colleague for review. With GitLab Starter and higher tiers, you can [assign it to more than one person at a time](#multiple-assignees).
+- [Assign](#assignee) the merge request to a colleague for review. With [multiple assignees](#multiple-assignees), you can assign it to more than one person at a time.
 - Set a [milestone](../milestones/index.md) to track time-sensitive changes.
 - Add [labels](../labels.md) to help contextualize and filter your merge requests over time.
 - Require [approval](merge_request_approvals.md) from your team. **(STARTER)**
@@ -119,7 +119,7 @@ It is also possible to manage multiple assignees:
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
 > - It can be enabled or disabled for a single project.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-merge-request-reviewers). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-merge-request-reviewers). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -136,7 +136,7 @@ This makes it easy to determine the relevant roles for the users involved in the
 
 To request it, open the **Reviewers** drop-down box to search for the user you wish to get a review from.
 
-#### Enable or disable Merge Request Reviewers **(CORE ONLY)**
+#### Enable or disable Merge Request Reviewers **(FREE SELF)**
 
 Merge Request Reviewers is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.

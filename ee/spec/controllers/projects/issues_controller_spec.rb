@@ -69,10 +69,18 @@ RSpec.describe Projects::IssuesController do
           let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
           let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
 
+          subject { get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id } }
+
           it 'sets the vulnerability_id' do
-            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+            subject
 
             expect(response.body).to include(vulnerability_field)
+          end
+
+          it 'sets the confidential flag to true by default' do
+            subject
+
+            expect(assigns(:issue).confidential).to eq(true)
           end
         end
       end

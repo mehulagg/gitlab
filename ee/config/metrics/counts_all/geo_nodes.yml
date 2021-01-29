@@ -1,12 +1,9 @@
-name: geo_nodes
+key_path: counts.geo_nodes
 description: Total number of sites in a Geo deployment
 value_type: integer
 product_category: disaster_recovery
 stage: enablement
 status: data_available
-default_generation: generation_1
-full_path:
-  generation_1: counts.geo_nodes
 milestone: 11.2
 group: 'group::geo'
 time_frame: all
