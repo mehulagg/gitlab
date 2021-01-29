@@ -113,6 +113,31 @@ RSpec.describe Namespace do
 
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
+    it { is_expected.to include_module(Namespace::Traversal) }
+  end
+
+  describe 'create' do
+    let(:group) { create(:group) }
+    let(:subgroup) { create(:group, parent: group) }
+
+    describe 'initialize traversal_ids' do
+      it { expect(group.traversal_ids).to eq [group.id] }
+      it { expect(subgroup.traversal_ids).to eq [group.id, subgroup.id] }
+    end
+  end
+
+  describe 'assigning a new parent' do
+    let!(:old_parent) { create(:group) }
+    let!(:new_parent) { create(:group) }
+    let!(:subgroup) { create(:group, parent: old_parent) }
+
+    before do
+      subgroup.update(parent: new_parent)
+    end
+
+    it 'updates traversal_ids' do
+      expect(subgroup.reload.traversal_ids).to eq [new_parent.id, subgroup.id]
+    end
   end
 
   describe '#visibility_level_field' do

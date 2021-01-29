@@ -12,6 +12,7 @@ class Namespace < ApplicationRecord
   include FromUnion
   include Gitlab::Utils::StrongMemoize
   include IgnorableColumns
+  include Namespace::Traversal
 
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
