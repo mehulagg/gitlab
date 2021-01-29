@@ -22031,8 +22031,6 @@ CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON inciden
 
 CREATE INDEX index_incident_management_oncall_shifts_on_participant_id ON incident_management_oncall_shifts USING btree (participant_id);
 
-CREATE INDEX index_incident_management_oncall_shifts_on_rotation_id ON incident_management_oncall_shifts USING btree (rotation_id);
-
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
 
 CREATE INDEX index_insights_on_namespace_id ON insights USING btree (namespace_id);
@@ -22466,6 +22464,8 @@ CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
 
 CREATE UNIQUE INDEX index_onboarding_progresses_on_namespace_id ON onboarding_progresses USING btree (namespace_id);
+
+CREATE INDEX index_oncall_shifts_on_rotation_id_and_starts_at_and_ends_at ON incident_management_oncall_shifts USING btree (rotation_id, starts_at, ends_at);
 
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
