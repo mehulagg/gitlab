@@ -276,8 +276,14 @@ module EE
       return unless epic
 
       if !confidential? && epic.confidential?
-        errors.add :issue, _('Cannot set confidential epic for a non-confidential issue')
+        errors.add :issue, confidentiality_error
       end
+    end
+
+    def confidentiality_error
+      return _('cannot set confidential epic for a non-confidential issue') if persisted?
+
+      _('under confidential epics cannot be set as public')
     end
   end
 end

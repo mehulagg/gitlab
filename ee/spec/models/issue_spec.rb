@@ -296,6 +296,18 @@ RSpec.describe Issue do
         subject.confidential = false
 
         expect(subject).not_to be_valid
+        expect(subject.errors.messages[:issue]).to include(/confidential epics cannot be set as public/)
+      end
+
+      it 'is not valid when newly assigning a confidential epic to a public issue' do
+        subject.confidential = false
+        subject.save
+
+        subject.epic = create(:epic, :confidential)
+        subject.save
+
+        expect(subject).not_to be_valid
+        expect(subject.errors.messages[:issue]).to include(/cannot set confidential epic for a non-confidential issue/)
       end
     end
   end
