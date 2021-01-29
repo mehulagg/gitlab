@@ -238,13 +238,12 @@ export default {
         <div class="schedule-shell" data-testid="rotationsBody">
           <schedule-timeline-section :preset-type="presetType" :timeframe="timeframe" />
           <rotations-list-section
-            v-if="rotations.nodes.length > 0"
             :preset-type="presetType"
             :rotations="rotations.nodes"
             :timeframe="timeframe"
             :schedule-iid="schedule.iid"
+            :loading="isLoading"
           />
-          <!-- TODO: Add empty place holder grid as per: https://gitlab.com/gitlab-org/gitlab/-/issues/300181 -->
         </div>
       </gl-card>
     </gl-card>

@@ -72,6 +72,13 @@ export default {
       return this.shiftStartsAt.getTime() < this.timeframeItem.getTime();
     },
     shiftShouldRender() {
+      if (this.timeFrameIndex !== 0) {
+        return (
+          new Date(this.shiftRangeOverlap.overlapStartDate) > this.timeframeItem &&
+          new Date(this.shiftRangeOverlap.overlapStartDate) < this.currentTimeframeEndsAt
+        );
+      }
+
       return Boolean(this.shiftRangeOverlap.daysOverlap);
     },
     shiftRangeOverlap() {
@@ -81,7 +88,7 @@ export default {
       );
     },
     shiftWidth() {
-      const offset = this.shiftStartDateOutOfRange ? 0 : 1;
+      const offset = 1;
       const baseWidth =
         this.timeFrameIndex === 0
           ? this.totalShiftRangeOverlap.daysOverlap

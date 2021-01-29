@@ -1,5 +1,5 @@
 <script>
-import { GlButtonGroup, GlButton, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import { GlAlert, GlButtonGroup, GlButton, GlLoadingIcon, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
 import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
 import {
@@ -14,6 +14,7 @@ import CurrentDayIndicator from './current_day_indicator.vue';
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
   deleteRotationLabel: s__('OnCallSchedules|Delete rotation'),
+  addRotationLabel: s__('OnCallSchedules|You currently have no rotations available for this schedule. Please consider creating one using the add rotation button above.'),
 };
 
 export default {
@@ -23,6 +24,7 @@ export default {
   components: {
     GlButton,
     GlButtonGroup,
+    GlLoadingIcon,
     CurrentDayIndicator,
     DeleteRotationModal,
     ScheduleShiftWrapper,
@@ -48,6 +50,10 @@ export default {
       type: String,
       required: true,
     },
+    loading: {
+      type: Boolean,
+      required: true,
+    }
   },
   data() {
     return {
@@ -86,8 +92,13 @@ export default {
 
 <template>
   <div class="list-section">
+    <gl-loading-icon v-if="loading" />
+      <gl-alert v-else-if="rotations.length === 0" variant="tip" dismissable="false">
+        {{ addRotationLabel }}
+      </gl-alert> 
     <div
       v-for="rotation in rotations"
+      v-else
       :key="rotation.id"
       class="list-item list-item-empty clearfix"
     >
