@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Accessible as Project#external_issue_tracker
 class JiraService < IssueTrackerService
   extend ::Gitlab::Utils::Override
   include Gitlab::Routing
@@ -161,7 +162,7 @@ class JiraService < IssueTrackerService
     jira_request { client.Issue.find(issue_key) }
   end
 
-  def close_issue(entity, external_issue)
+  def close_issue(entity, external_issue, current_user)
     issue = find_issue(external_issue.iid)
 
     return if issue.nil? || has_resolution?(issue) || !jira_issue_transition_id.present?
@@ -176,8 +177,9 @@ class JiraService < IssueTrackerService
     # Depending on the Jira project's workflow, a comment during transition
     # may or may not be allowed. Refresh the issue after transition and check
     # if it is closed, so we don't have one comment for every commit.
-    issue = find_issue(issue.key) if transition_issue(issue)
-    add_issue_solved_comment(issue, commit_id, commit_url) if has_resolution?(issue)
+    issue = find_issue(issue.key) if transition_issue(issue, current_user)
+    add_issue_solved_comment(issue, commit_id, commit_url, current_user) if has_resolution?(issue)
+    log_usage(:close_issue, current_user)
   end
 
   def create_cross_reference_note(mentioned, noteable, author)
@@ -214,6 +216,7 @@ class JiraService < IssueTrackerService
     }
 
     add_comment(data, jira_issue)
+    log_usage(:cross_reference, current_user)
   end
 
   def valid_connection?
@@ -257,7 +260,7 @@ class JiraService < IssueTrackerService
   # jira_issue_transition_id can have multiple values split by , or ;
   # the issue is transitioned at the order given by the user
   # if any transition fails it will log the error message and stop the transition sequence
-  def transition_issue(issue)
+  def transition_issue(issue, current_user)
     jira_issue_transition_id.scan(Gitlab::Regex.jira_transition_id_regex).each do |transition_id|
       issue.transitions.build.save!(transition: { id: transition_id })
     rescue => error
@@ -272,6 +275,12 @@ class JiraService < IssueTrackerService
       )
       return false
     end
+  end
+
+  def log_usage(action, user)
+    key = "eco_jira_service_#{action}"
+
+    Gitlab::UsageDataCounters::HLLRedisCounter.track_event(key, values: user.id)
   end
 
   def add_issue_solved_comment(issue, commit_id, commit_url)

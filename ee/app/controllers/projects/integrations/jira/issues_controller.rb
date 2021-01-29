@@ -7,6 +7,11 @@ module Projects
         include RecordUserLastActivity
         include SortingHelper
         include SortingPreference
+        include RedisTracking
+
+        track_redis_hll_event :index,
+          name: 'eco_jira_service_issue_list',
+          feature: :usage_data_track_ecosystem_jira_service
 
         before_action :check_feature_enabled!
         before_action :check_issues_show_enabled!, only: :show
