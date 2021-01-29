@@ -32,8 +32,7 @@ other internal references (refs) that are automatically created by GitLab. These
 - `refs/pipelines/*` for
   [pipelines](../../../ci/troubleshooting.md#fatal-reference-is-not-a-tree-error).
 - `refs/environments/*` for environments.
-
-In addition to the refs mentioned above, GitLab also creates hidden `refs/keep-around/*`to prevent commits being deleted.
+- `refs/keep-around/*` are created as hidden refs to prevent commits referenced in the database from being removed
 
 These refs are not automatically downloaded and hidden refs are not advertised, but we can remove these refs using a project export.
 
