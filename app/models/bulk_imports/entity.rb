@@ -43,6 +43,8 @@ class BulkImports::Entity < ApplicationRecord
   validate :validate_parent_is_a_group, if: :parent
   validate :validate_imported_entity_type
 
+  validate :validate_destination_namespace_ascendency, if: :group_entity?
+
   enum source_type: { group_entity: 0, project_entity: 1 }
 
   state_machine :status, initial: :created do
@@ -104,6 +106,17 @@ class BulkImports::Entity < ApplicationRecord
       errors.add(
         :project,
         s_('BulkImport|expected an associated Group but has an associated Project')
+      )
+    end
+  end
+
+  def validate_destination_namespace_ascendency
+    destination = Group.find_by_full_path(destination_namespace)
+
+    if destination && destination.ancestors.any? { |ancestor| ancestor.full_path == source_full_path }
+      errors.add(
+        :destination_namespace,
+        s_('BulkImport|destination group cannot be a subgroup of the source')
       )
     end
   end
