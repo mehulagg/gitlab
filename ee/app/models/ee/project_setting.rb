@@ -11,6 +11,17 @@ module EE
 
       validate :allow_editing_commits
 
+      def jira_issue_association_required_to_merge_enabled?
+        ::Feature.enabled?(:jira_issue_association_on_merge_request) &&
+          ::License.feature_available?(:jira_issue_association_enforcement)
+      end
+
+      def jira_issue_association_required_to_merge?
+        return false unless jira_issue_association_required_to_merge_enabled?
+
+        prevent_merge_without_jira_issue
+      end
+
       private
 
       def allow_editing_commits

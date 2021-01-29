@@ -416,7 +416,7 @@ class Project < ApplicationRecord
     to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
-    :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
+    :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?, :jira_issue_association_required_to_merge_enabled?,
     to: :project_setting
   delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
 

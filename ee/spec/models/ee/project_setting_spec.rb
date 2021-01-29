@@ -14,6 +14,33 @@ RSpec.describe ProjectSetting do
     it { is_expected.to contain_exactly(setting_1) }
   end
 
+  describe '#jira_issue_association_required_to_merge?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:licensed, :feature_flag, :setting, :result) do
+      true  | true  | true  | true
+      true  | true  | false | false
+      true  | false | false | false
+      false | false | false | false
+      false | true  | true  | false
+      false | false | true  | false
+      false | true  | false | false
+    end
+
+    before do
+      stub_licensed_features(jira_issue_association_enforcement: licensed)
+      stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
+    end
+
+    subject { build(:project_setting, prevent_merge_without_jira_issue: setting) }
+
+    with_them do
+      it 'returns the correct value' do
+        expect(subject.jira_issue_association_required_to_merge?).to eq(result)
+      end
+    end
+  end
+
   describe '#allow_editing_commits' do
     subject(:setting) { build(:project_setting) }
 

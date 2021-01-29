@@ -430,6 +430,7 @@ class ProjectsController < Projects::ApplicationController
       :packages_enabled,
       :service_desk_enabled,
       project_setting_attributes: %i[
+        prevent_merge_without_jira_issue
         show_default_award_emojis
         squash_option
         allow_editing_commit_messages
