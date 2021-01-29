@@ -87,6 +87,7 @@ In maintenance mode:
 
 - No new jobs are started. Already running jobs stay in 'running'
   status but their logs are no longer updated.
+- Pipelines running when maintenance mode is turned on will eventually fail. You will need to restart them once maintenance mode is turned off.
 - If the job has been in 'running' state for longer than the project's time limit,
   it will **not** time out.
 - Pipelines cannot be started, retried or canceled in maintenance mode.
