@@ -12,14 +12,18 @@ class IterationPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def scoped_iteration_path(parent:)
-    return unless parent[:parent_object]&.is_a?(Project)
-
-    url_builder.inherited_iteration_path(parent[:parent_object], iteration)
+    if parent[:parent_object]&.is_a?(Project)
+      project_iteration_path(parent[:parent_object], iteration.id)
+    else
+      group_iteration_path(parent[:parent_object], iteration.id)
+    end
   end
 
   def scoped_iteration_url(parent:)
-    return unless parent[:parent_object]&.is_a?(Project)
-
-    url_builder.inherited_iteration_url(parent[:parent_object], iteration)
+    if parent[:parent_object]&.is_a?(Project)
+      project_iteration_url(parent[:parent_object], iteration.id)
+    else
+      group_iteration_url(parent[:parent_object], iteration.id)
+    end
   end
 end

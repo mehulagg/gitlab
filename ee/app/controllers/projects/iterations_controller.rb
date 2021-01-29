@@ -7,6 +7,7 @@ class Projects::IterationsController < Projects::ApplicationController
   feature_category :issue_tracking
 
   def index; end
+  def show; end
 
   private
 

@@ -17,6 +17,9 @@ module Types
     field :iid, GraphQL::ID_TYPE, null: false,
           description: 'Internal ID of the iteration'
 
+    field :parent_id, GraphQL::ID_TYPE, null: false,
+          description: 'Internal ID of the iteration'
+
     field :title, GraphQL::STRING_TYPE, null: false,
           description: 'Title of the iteration'
 
@@ -50,5 +53,9 @@ module Types
 
     field :updated_at, Types::TimeType, null: false,
           description: 'Timestamp of last iteration update'
+
+    def parent_id
+      object.group_id || object.project_id
+    end
   end
 end

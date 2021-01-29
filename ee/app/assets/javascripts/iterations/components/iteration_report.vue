@@ -49,13 +49,12 @@ export default {
         return {
           fullPath: this.fullPath,
           id: `gid://gitlab/Iteration/${this.iterationId}`,
-          iid: this.iterationIid,
-          hasId: Boolean(this.iterationId),
-          hasIid: Boolean(this.iterationIid),
+          isGroup: this.namespaceType === Namespace.Group,
         };
       },
       update(data) {
-        return data.group?.iterations?.nodes[0] || data.iteration || {};
+        console.log("data: ", data)
+        return data[this.namespaceType]?.iterations?.nodes[0] || {}
       },
       error(err) {
         this.error = err.message;
