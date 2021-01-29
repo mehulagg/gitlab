@@ -11345,6 +11345,9 @@ msgstr ""
 msgid "Epic"
 msgstr ""
 
+msgid "Epic Boards"
+msgstr ""
+
 msgid "Epic cannot be found."
 msgstr ""
 
