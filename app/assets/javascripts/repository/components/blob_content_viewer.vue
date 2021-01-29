@@ -3,7 +3,6 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import axios from '../../lib/utils/axios_utils';
 import getRefMixin from '../mixins/get_ref';
 import projectPathQuery from '../queries/project_path.query.graphql';
-import blobQuery from '../queries/blob.query.graphql';
 
 const LIMIT = 1000;
 const PAGE_SIZE = 100;
@@ -15,24 +14,6 @@ export default {
   apollo: {
     projectPath: {
       query: projectPathQuery,
-    },
-    blob: {
-      query: blobQuery,
-      variables() {
-        return {
-          blobName: '.gitignore',
-          projectPath: this.projectPath,
-          ref: this.ref,
-          path: '/', // this.$route.params.path.replace(/^\//, ''),
-          pageSize: 100,
-        };
-      },
-      context: {
-        isSingleRequest: true,
-      },
-      error(error) {
-        throw error;
-      },
     },
   },
   props: {
