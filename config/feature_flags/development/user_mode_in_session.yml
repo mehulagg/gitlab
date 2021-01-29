@@ -1,8 +1,8 @@
 ---
 name: user_mode_in_session
-introduced_by_url: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16981
 rollout_issue_url: 
-milestone: 
+milestone: '12.4'
 type: development
-group: 
+group: group::access
 default_enabled: false
