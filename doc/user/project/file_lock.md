@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# File Locking **(FREE)**
+# File Locking
 
 Preventing wasted work caused by unresolvable merge conflicts requires
 a different way of working. This means explicitly requesting write permissions,
@@ -41,7 +41,7 @@ users will be prevented from modifying locked files by pushing, merging,
 or any other means, and will be shown an error like: `The path '.gitignore' is
 locked by Administrator`.
 
-## Exclusive file locks
+## Exclusive file locks  **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/35856) in GitLab 10.5.
 
