@@ -4,7 +4,6 @@ module Registrations
   class ProjectsController < ApplicationController
     layout 'checkout'
 
-    before_action :check_experiment_enabled
     before_action :find_namespace, only: :new
 
     feature_category :navigation
