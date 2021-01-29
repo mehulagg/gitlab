@@ -156,6 +156,7 @@ module QA
         autoload :Mattermost, 'qa/scenario/test/integration/mattermost'
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
+        autoload :SSHTunnel, 'qa/scenario/test/integration/ssh_tunnel'
       end
 
       module Sanity
@@ -290,6 +291,10 @@ module QA
       module Packages
         autoload :Index, 'qa/page/project/packages/index'
         autoload :Show, 'qa/page/project/packages/show'
+      end
+
+      module Registry
+        autoload :Show, 'qa/page/project/registry/show'
       end
 
       module Settings

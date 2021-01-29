@@ -94,6 +94,7 @@ export default {
         class="gl-text-body gl-font-weight-bold"
         data-testid="details-link"
         :to="{ name: 'details', params: { id } }"
+        data-qa-selector="registry_information_content"
       >
         {{ item.path }}
       </router-link>
