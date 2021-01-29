@@ -33,6 +33,7 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
         before do
           project.statistics.update!(shared_runners_seconds: 100)
           namespace.create_namespace_statistics(shared_runners_seconds: 100)
+          Ci::Minutes::NamespaceMonthlyUsage.create!(namespace: namespace, amount_used: 100)
         end
 
         it "updates statistics and adds duration with applied cost factor" do
@@ -42,6 +43,13 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
             .to eq(100 + build.duration.to_i * 2)
 
           expect(namespace.namespace_statistics.reload.shared_runners_seconds)
+            .to eq(100 + build.duration.to_i * 2)
+        end
+
+        it "tracks the usage on a monthly basis" do
+          subject
+
+          expect(Ci::Minutes::NamespaceMonthlyUsage.current(namespace).amount_used)
             .to eq(100 + build.duration.to_i * 2)
         end
       end
