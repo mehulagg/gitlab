@@ -9568,7 +9568,7 @@ msgstr ""
 msgid "Deploy to..."
 msgstr ""
 
-msgid "DeployFreeze|Add a %{freeze_period_link_start}freeze period%{freeze_period_link_end} to prevent unintended releases during a period of time for a given environment. You must update deployment jobs in %{filename} according to the deploy freezes added here."
+msgid "DeployFreeze|Add a freeze period to prevent unintended releases during a period of time for a given environment. You must update the deployment jobs in %{filename} according to the deploy freezes added here. %{freeze_period_link_start}Learn more.%{freeze_period_link_end}"
 msgstr ""
 
 msgid "DeployFreeze|Freeze end"
