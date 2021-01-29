@@ -382,6 +382,10 @@ module ProjectsHelper
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
+    if can?(current_user, :read_security_configuration, project)
+      nav_tabs << :security_configuration
+    end
+
     unless project.empty_repo?
       nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)

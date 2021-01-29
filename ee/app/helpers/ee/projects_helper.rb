@@ -160,6 +160,7 @@ module EE
 
     def sidebar_security_paths
       super + %w[
+        projects/security/configuration#show
         projects/security/sast_configuration#show
         projects/security/api_fuzzing_configuration#show
         projects/security/vulnerabilities#show

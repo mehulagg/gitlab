@@ -101,4 +101,8 @@ module EE
       end
     end
   end
+<<<<<<< HEAD
 end
+=======
+  end
+>>>>>>> c2910247d2a (WIP Static Security Configuration Page)
