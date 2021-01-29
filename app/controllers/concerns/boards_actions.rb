@@ -26,6 +26,14 @@ module BoardsActions
     respond_with_board
   end
 
+  def get_boards
+    Boards::ListService.new(parent, current_user).execute
+  end
+
+  def get_board
+    boards.find(params[:id])
+  end
+
   private
 
   # Noop on FOSS
@@ -34,13 +42,13 @@ module BoardsActions
 
   def boards
     strong_memoize(:boards) do
-      Boards::ListService.new(parent, current_user).execute
+      get_boards
     end
   end
 
   def board
     strong_memoize(:board) do
-      boards.find(params[:id])
+      get_board
     end
   end
 

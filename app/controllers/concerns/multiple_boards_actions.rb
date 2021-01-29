@@ -65,6 +65,7 @@ module MultipleBoardsActions
   private
 
   def redirect_to_recent_board
+    return if params[:controller] == 'groups/epic_boards'
     return if request.format.json? || !parent.multiple_issue_boards_available? || !latest_visited_board
 
     redirect_to board_path(latest_visited_board.board)
