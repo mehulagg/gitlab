@@ -65,7 +65,7 @@ export default {
     ...mapActions(['moveList']),
     afterFormEnters() {
       // todo: apparently no safari support for using scrollTo with options obj
-      this.$refs.list.scrollTo({ left: this.$refs.list.scrollWidth, behavior: 'smooth' });
+      this.$refs.list.$el.scrollTo({ left: this.$refs.list.$el.scrollWidth, behavior: 'smooth' });
       // todo: set focus to form field
     },
     handleDragOnStart() {
