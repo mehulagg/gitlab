@@ -128,6 +128,23 @@ module ServicesHelper
     !Gitlab.com?
   end
 
+  # TODO add issue as param
+  def build_jira_issue_breadcrumb_link
+    push_to_schema_breadcrumb('TODO issue title', '')
+
+    link_to '', { class: 'gl-display-flex gl-align-items-center' } do
+      icon = image_tag image_path('illustrations/logos/jira.svg'), width: 15, height: 15, class: 'gl-mr-2'
+      [icon, content_tag("span", 'TODO issue title', class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+    end 
+  end
+
+  def jira_issue_page_title
+    jira_issue_link = build_jira_issue_breadcrumb_link
+    jira_issue_link = breadcrumb_list_item jira_issue_link
+
+    jira_issue_link.html_safe
+  end
+
   extend self
 
   private
