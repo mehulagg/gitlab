@@ -14,5 +14,53 @@ module Boards
     def lists
       epic_lists
     end
+
+    def resource_parent
+      group
+    end
+
+    def group_board?
+      true
+    end
+
+    def scoped?
+      false
+    end
+
+    def milestone_id
+      nil
+    end
+
+    def milestone
+      nil
+    end
+
+    def iteration_id
+      nil
+    end
+
+    def iteration
+      nil
+    end
+
+    def assignee_id
+      nil
+    end
+
+    def assignee
+      nil
+    end
+
+    def label_ids
+      []
+    end
+
+    def labels
+      []
+    end
+
+    def weight
+      nil
+    end
   end
 end

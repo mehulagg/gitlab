@@ -3,9 +3,28 @@
 module EE
   module BoardsActions
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     prepended do
       include ::MultipleBoardsActions
+    end
+
+    override :get_boards
+    def get_boards
+      return super unless params[:controller] == 'groups/epic_boards'
+
+      existing_boards = ::Boards::EpicBoardsFinder.new(parent).execute
+      return existing_boards if existing_boards.any?
+
+      # if no epic board exists, create one for this group
+      [::Boards::EpicBoards::CreateService.new(parent, current_user).execute.payload]
+    end
+
+    override :get_board
+    def get_board
+      return super unless params[:controller] == 'groups/epic_boards'
+
+      ::Boards::EpicBoardsFinder.new(parent, id: params[:board_id]).execute.first
     end
 
     private

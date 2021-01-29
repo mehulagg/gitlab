@@ -1,12 +1,16 @@
 - board = local_assigns.fetch(:board, nil)
 - group = local_assigns.fetch(:group, false)
+- is_epic_board = board.is_a?(::Boards::EpicBoard)
 -# TODO: Move group_id and can_admin_list to the board store
   See: https://gitlab.com/gitlab-org/gitlab/-/issues/213082
 - can_admin_list = can?(current_user, :admin_list, current_board_parent) == true
 - @no_breadcrumb_container = true
 - @no_container = true
 - @content_class = "issue-boards-content js-focus-mode-board"
-- breadcrumb_title _("Issue Boards")
+- if is_epic_board
+  - breadcrumb_title _("Epic Boards")
+- else
+  - breadcrumb_title _("Issue Boards")
 - page_title("#{board.name}", _("Boards"))
 - add_page_specific_style 'page_bundles/boards'
 
