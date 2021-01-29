@@ -62,7 +62,7 @@ To subscribe to GitLab SaaS:
      [sign up page](https://gitlab.com/users/sign_up).
   1. Visit the [billing page](https://gitlab.com/profile/billings)
      under your profile.
-  1. Select the GitLab SaaS plan through the
+  1. Select the **Premium** or **Ultimate** GitLab SaaS plan through the
      [Customers Portal](https://customers.gitlab.com/).
   1. Link your GitLab SaaS account with your Customers Portal account.
      Once a plan has been selected, if your account is not
