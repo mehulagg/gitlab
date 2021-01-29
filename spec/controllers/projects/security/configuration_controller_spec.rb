@@ -31,6 +31,7 @@ RSpec.describe Projects::Security::ConfigurationController do
 
         it 'denies access' do
           get :show, params: { namespace_id: project.namespace, project_id: project }
+
           expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
@@ -42,7 +43,7 @@ RSpec.describe Projects::Security::ConfigurationController do
 
         it 'grants access' do
           get :show, params: { namespace_id: project.namespace, project_id: project }
-          
+
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(:show)
         end
