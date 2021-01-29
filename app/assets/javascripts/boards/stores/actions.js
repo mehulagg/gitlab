@@ -545,6 +545,10 @@ export default {
     }
   },
 
+  setAddColumnFormVisibility: ({ state }, visible) => {
+    state.addColumnFormVisible = visible;
+  },
+
   fetchBacklog: () => {
     notImplemented();
   },

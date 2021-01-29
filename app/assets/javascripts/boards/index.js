@@ -16,6 +16,7 @@ import {
 } from 'ee_else_ce/boards/ee_functions';
 
 import VueApollo from 'vue-apollo';
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
@@ -284,6 +285,18 @@ export default () => {
     },
     mounted() {
       initNewListDropdown();
+    },
+  });
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el: document.querySelector('.js-create-column-trigger'),
+    components: {
+      BoardAddNewColumnTrigger,
+    },
+    store,
+    render(createElement) {
+      return createElement('board-add-new-column-trigger');
     },
   });
 
