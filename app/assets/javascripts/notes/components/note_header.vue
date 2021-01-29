@@ -211,7 +211,7 @@ export default {
         data-testid="confidentialIndicator"
         name="eye-slash"
         :size="14"
-        :title="s__('Notes|Private comments are accessible by internal staff only')"
+        :title="s__('Notes|Confidential comments are accessible by project members only')"
         class="gl-ml-1 gl-text-gray-700 align-middle"
       />
       <slot name="extra-controls"></slot>

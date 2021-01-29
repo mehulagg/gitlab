@@ -7397,6 +7397,9 @@ msgstr ""
 msgid "Confidential"
 msgstr ""
 
+msgid "Confidential comments are only visible to project members"
+msgstr ""
+
 msgid "Confidentiality"
 msgstr ""
 
@@ -17708,6 +17711,9 @@ msgstr ""
 msgid "Mark as resolved"
 msgstr ""
 
+msgid "Mark this comment as confidential"
+msgstr ""
+
 msgid "Mark this issue as a duplicate of another issue"
 msgstr ""
 
@@ -20013,7 +20019,7 @@ msgstr ""
 msgid "Notes|Collapse replies"
 msgstr ""
 
-msgid "Notes|Private comments are accessible by internal staff only"
+msgid "Notes|Confidential comments are accessible by project members only"
 msgstr ""
 
 msgid "Notes|Show all activity"

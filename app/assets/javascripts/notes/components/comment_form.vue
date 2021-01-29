@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { isEmpty } from 'lodash';
 import Autosize from 'autosize';
-import { GlButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon, GlFormCheckbox, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import { deprecatedCreateFlash as Flash } from '~/flash';
@@ -34,6 +34,10 @@ export default {
     TimelineEntryItem,
     GlIcon,
     CommentFieldLayout,
+    GlFormCheckbox,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagsMixin(), issuableStateMixin],
   props: {
@@ -46,6 +50,7 @@ export default {
     return {
       note: '',
       noteType: constants.COMMENT,
+      noteIsConfidential: false,
       isSubmitting: false,
       isSubmitButtonDisabled: true,
     };
@@ -143,6 +148,9 @@ export default {
     trackingLabel() {
       return slugifyWithUnderscore(`${this.commentButtonTitle} button`);
     },
+    confidentialNotesEnabled() {
+      return Boolean(this.glFeatures.confidentialNotes);
+    },
   },
   watch: {
     note(newNote) {
@@ -186,6 +194,7 @@ export default {
             note: {
               noteable_type: this.noteableType,
               noteable_id: this.getNoteableData.id,
+              confidential: this.noteIsConfidential,
               note: this.note,
             },
             merge_request_diff_head_sha: this.getNoteableData.diff_head_sha,
@@ -249,6 +258,7 @@ export default {
 
       if (shouldClear) {
         this.note = '';
+        this.noteIsConfidential = false;
         this.resizeTextarea();
         this.$refs.markdownField.previewMarkdown = false;
       }
@@ -337,6 +347,19 @@ export default {
               </markdown-field>
             </comment-field-layout>
             <div class="note-form-actions">
+              <div v-if="confidentialNotesEnabled" class="js-confidential-note-toggle mb-4">
+                <gl-form-checkbox v-model="noteIsConfidential">
+                  <gl-icon name="eye-slash" :size="12" />
+                  {{ __('Mark this comment as confidential') }}
+                  <gl-icon
+                    v-gl-tooltip:tooltipcontainer.bottom
+                    name="question"
+                    :size="12"
+                    :title="__('Confidential comments are only visible to project members')"
+                    class="gl-text-gray-800"
+                  />
+                </gl-form-checkbox>
+              </div>
               <div
                 class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
               >
