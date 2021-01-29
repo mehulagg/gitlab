@@ -48,6 +48,7 @@ module Gitlab
       class << self
         def validate!(command)
           return unless Rails.env.development? || Rails.env.test?
+
           return if allow_cross_slot_commands?
 
           command_name = command.first.to_s.upcase
@@ -61,7 +62,7 @@ module Gitlab
             key_slot(args.first)
           end
 
-          unless key_slots.uniq.length == 1
+          unless key_slots.uniq.length <= 1
             raise CrossSlotError.new("Redis command #{command_name} arguments hash to different slots. See https://docs.gitlab.com/ee/development/redis.html#multi-key-commands")
           end
         end
