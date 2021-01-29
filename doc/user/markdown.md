@@ -456,6 +456,7 @@ GFM recognizes the following:
 | repository file references      | `[README](doc/README.md)`  |                                         |                                |
 | repository file line references | `[README](doc/README.md#L13)` |                                      |                                |
 | [alert](../operations/incident_management/alerts.md) | `^alert#123` | `namespace/project^alert#123`    | `project^alert#123`            |
+| [feature flag](../operations/feature_flags.md)       | `^flag#123` | `namespace/project^flag#123`    | `project^flag#123`            |
 
 1. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222483) in GitLab 13.7.
 

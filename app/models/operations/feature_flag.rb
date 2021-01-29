@@ -6,6 +6,7 @@ module Operations
     include AtomicInternalId
     include IidRoutes
     include Limitable
+    include Referable
 
     self.table_name = 'operations_feature_flags'
     self.limit_scope = :project
@@ -65,6 +66,31 @@ module Operations
           .reorder(:id)
           .references(:operations_scopes)
       end
+    end
+
+    def self.reference_prefix
+      '^flag#'
+    end
+
+    def self.reference_pattern
+      @reference_pattern ||= %r{
+        (#{Project.reference_pattern})?
+        #{Regexp.escape(reference_prefix)}(?<flag>\d+)
+      }x
+    end
+
+    def self.link_reference_pattern
+      @link_reference_pattern ||= super("feature_flags", /(?<flag>\d+)\/edit(\#)?/)
+    end
+
+    def self.reference_valid?(reference)
+      reference.to_i > 0 && reference.to_i <= Gitlab::Database::MAX_INT_VALUE
+    end
+
+    def to_reference(from = nil, full: false)
+      reference = "#{self.class.reference_prefix}#{iid}"
+
+      "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
     def related_issues(current_user, preload:)
