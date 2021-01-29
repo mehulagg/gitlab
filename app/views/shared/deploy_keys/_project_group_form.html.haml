@@ -8,7 +8,7 @@
     = f.text_area :key, class: "form-control", rows: 5, required: true
   .form-group.row
     %p.light.gl-mb-0
-      = _('Paste a machine public key here.')
+      = _('Paste a public key here.')
       = link_to "How do I generate it?", help_page_path("ssh/README")
 
   = f.fields_for :deploy_keys_projects do |deploy_keys_project_form|

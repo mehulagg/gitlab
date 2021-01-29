@@ -15,7 +15,7 @@
       %p.light
         - link_start = "<a href='#{help_page_path('ssh/README')}' target='_blank' rel='noreferrer noopener'>".html_safe
         - link_end = '</a>'
-        = _('Paste a machine public key here. %{link_start}How do I generate it?%{link_end}').html_safe % { link_start: link_start, link_end: link_end.html_safe }
+        = _('Paste a public key here. %{link_start}How do I generate it?%{link_end}').html_safe % { link_start: link_start, link_end: link_end.html_safe }
       = form.text_area :key, class: 'form-control thin_area', rows: 5
   - else
     = form.label :fingerprint, class: 'col-form-label col-sm-2'
