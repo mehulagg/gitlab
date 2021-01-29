@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButtonGroup, GlButton, GlLoadingIcon, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlLoadingIcon, GlTooltipDirective, GlModalDirective } from '@gitlab/ui';
 import DeleteRotationModal from 'ee/oncall_schedules/components/rotations/components/delete_rotation_modal.vue';
 import ScheduleShiftWrapper from 'ee/oncall_schedules/components/schedule/components/shifts/components/schedule_shift_wrapper.vue';
 import {
@@ -14,7 +14,7 @@ import CurrentDayIndicator from './current_day_indicator.vue';
 export const i18n = {
   editRotationLabel: s__('OnCallSchedules|Edit rotation'),
   deleteRotationLabel: s__('OnCallSchedules|Delete rotation'),
-  addRotationLabel: s__('OnCallSchedules|You currently have no rotations available for this schedule. Please consider creating one using the add rotation button above.'),
+  addRotationLabel: s__('OnCallSchedules|Currently no rotation.'),
 };
 
 export default {
@@ -93,9 +93,23 @@ export default {
 <template>
   <div class="list-section">
     <gl-loading-icon v-if="loading" />
-      <gl-alert v-else-if="rotations.length === 0" variant="tip" dismissable="false">
-        {{ addRotationLabel }}
-      </gl-alert> 
+       <div
+       v-else-if="rotations.length === 0" class="list-item list-item-empty clearfix">
+      <span
+        class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+      >
+        <span class="gl-str-truncated">{{ $options.i18n.addRotationLabel }}</span>
+      </span>
+      <span
+        v-for="(timeframeItem, index) in timeframeToDraw"
+        :key="index"
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1"
+        :style="timelineStyles"
+        data-testid="empty-timelineCell"
+      >
+        <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
+      </span>
+    </div>
     <div
       v-for="rotation in rotations"
       v-else
@@ -138,6 +152,7 @@ export default {
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
         <schedule-shift-wrapper
           v-if="rotation.shifts"
+          v-once
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
           :timeframe="timeframe"
