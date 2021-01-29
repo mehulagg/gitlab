@@ -45,16 +45,17 @@ const createComponent = ({
     mocks: {
       $apollo: {
         queries: {
-          testCases: {
+          project: {
             loading: testCasesLoading,
-            list: testCasesList,
-            pageInfo: mockPageInfo,
-          },
-          testCasesCount: {
-            loading: testCasesLoading,
-            opened: 5,
-            closed: 0,
-            all: 5,
+            issues: {
+              nodes: testCasesList,
+              pageInfo: mockPageInfo,
+            },
+            issueStatusCounts: {
+              opened: 5,
+              closed: 0,
+              all: 5,
+            },
           },
         },
       },
