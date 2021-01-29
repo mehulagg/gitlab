@@ -33,7 +33,7 @@ module NotesActions
 
     # We might still want to investigate further adjusting ETag caching with paginated notes, but
     # let's avoid ETag caching for now until we confirm the viability of paginated notes.
-    ::Gitlab::EtagCaching::Middleware.skip!(response)
+    ::Gitlab::EtagCaching::Middleware.skip!(response) if Feature.enabled?(:paginated_notes, note_project)
 
     render json: meta.merge(notes: notes)
   end
