@@ -608,18 +608,26 @@ describe('secondsToDays', () => {
   });
 });
 
-describe('nDaysAfter', () => {
-  const date = new Date('2019-07-16T00:00:00.000Z');
+describe.only('nDaysAfter', () => {
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it.each`
     numberOfDays | expectedResult
-    ${1}         | ${new Date('2019-07-17T00:00:00.000Z').valueOf()}
-    ${90}        | ${new Date('2019-10-14T00:00:00.000Z').valueOf()}
-    ${-1}        | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
-    ${0}         | ${date.valueOf()}
-    ${0.9}       | ${date.valueOf()}
+    ${1}         | ${new Date('2019-07-17T00:00:00.000Z')}
+    ${120}       | ${new Date('2019-11-13T00:00:00.000Z')}
+    ${-1}        | ${new Date('2019-07-15T00:00:00.000Z')}
+    ${0}         | ${new Date('2019-07-16T00:00:00.000Z')}
+    ${0.9}       | ${new Date('2019-07-16T00:00:00.000Z')}
   `('returns $numberOfDays day(s) after the provided date', ({ numberOfDays, expectedResult }) => {
-    expect(datetimeUtility.nDaysAfter(date, numberOfDays)).toBe(expectedResult);
+    const date = new Date('2019-07-16T00:00:00.000Z');
+    const actual = datetimeUtility.nDaysAfter(date, numberOfDays);
+    expect(actual.toISOString()).toBe(expectedResult.toISOString());
   });
 });
 
@@ -629,7 +637,7 @@ describe('nDaysBefore', () => {
   it.each`
     numberOfDays | expectedResult
     ${1}         | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
-    ${90}        | ${new Date('2019-04-17T00:00:00.000Z').valueOf()}
+    ${180}       | ${new Date('2019-01-17T00:00:00.000Z').valueOf()}
     ${-1}        | ${new Date('2019-07-17T00:00:00.000Z').valueOf()}
     ${0}         | ${date.valueOf()}
     ${0.9}       | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
@@ -896,5 +904,19 @@ describe('getOverlapDateInPeriods', () => {
         datetimeUtility.getOverlapDateInPeriods({ start, end }, { start, end: endInvalid }),
       ).toThrow(error);
     });
+  });
+});
+
+describe('getStartOfDayUTC', () => {
+  const expected = new Date('2021-01-29T00:00:00.000Z');
+
+  it.each`
+    input                                        | expected
+    ${new Date('2021-01-29T18:08:23.014Z')}      | ${expected}
+    ${new Date('2021-01-29T13:08:23.014-05:00')} | ${expected}
+    ${new Date('2021-01-28T18:08:23.014-10:00')} | ${expected}
+    ${new Date('2021-01-30T03:08:23.014+09:00')} | ${expected}
+  `('returns $expected when called with $input', ({ expected, input }) => {
+    expect(datetimeUtility.getStartOfDayUTC(input)).toEqual(expected);
   });
 });

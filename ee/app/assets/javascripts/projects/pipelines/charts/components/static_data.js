@@ -1,15 +1,15 @@
 import dateFormat from 'dateformat';
 import { s__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { nDaysBefore, nMonthsBefore } from '~/lib/utils/datetime_utility';
+import { nDaysBefore, nMonthsBefore, getStartOfDayUTC } from '~/lib/utils/datetime_utility';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 // Compute all relative dates based on the _beginning_ of today
-const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+const startOfToday = getStartOfDayUTC(new Date());
 const lastWeek = new Date(nDaysBefore(startOfToday, 7));
 const lastMonth = new Date(nMonthsBefore(startOfToday, 1));
 const last90Days = new Date(nDaysBefore(startOfToday, 90));
-const apiDateFormatString = 'isoDateTime';
+const apiDateFormatString = 'isoUtcDateTime';
 const titleDateFormatString = 'mmm d';
 const sharedRequestParams = {
   environment: 'production',
@@ -28,14 +28,14 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(lastWeek, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(lastWeek, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: lastWeek,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastWeek, apiDateFormatString),
+      from: dateFormat(lastWeek, apiDateFormatString, true),
     },
   },
   {
@@ -45,14 +45,14 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(lastMonth, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(lastMonth, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: lastMonth,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastMonth, apiDateFormatString),
+      from: dateFormat(lastMonth, apiDateFormatString, true),
     },
   },
   {
@@ -62,14 +62,14 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(last90Days, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(last90Days, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: last90Days,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(last90Days, apiDateFormatString),
+      from: dateFormat(last90Days, apiDateFormatString, true),
     },
   },
 ];

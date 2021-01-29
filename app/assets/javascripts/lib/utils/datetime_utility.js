@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { isString, mapValues, isNumber, reduce } from 'lodash';
+import { isString, mapValues, isNumber, reduce, isFunction } from 'lodash';
 import * as timeago from 'timeago.js';
 import dateFormat from 'dateformat';
 import { languageCode, s__, __, n__ } from '../../locale';
@@ -15,7 +15,8 @@ window.timeago = timeago;
  *
  * @param {Date} date
  */
-export const newDate = (date) => (date instanceof Date ? new Date(date.getTime()) : new Date());
+export const newDate = (date) =>
+  isFunction(date?.getTime) ? new Date(date.getTime()) : new Date();
 
 /**
  * Returns i18n month names array.
@@ -682,7 +683,7 @@ export const secondsToHours = (offset) => {
  * @return {Date} the date following the date provided
  */
 export const nDaysAfter = (date, numberOfDays) =>
-  new Date(newDate(date)).setDate(date.getDate() + numberOfDays);
+  new Date(newDate(date).setUTCDate(date.getUTCDate() + numberOfDays));
 
 /**
  * Returns the date n days before the date provided
@@ -701,7 +702,7 @@ export const nDaysBefore = (date, numberOfDays) => nDaysAfter(date, -numberOfDay
  * @return {Date} the date following the date provided
  */
 export const nMonthsAfter = (date, numberOfMonths) =>
-  new Date(newDate(date)).setMonth(date.getMonth() + numberOfMonths);
+  new Date(newDate(date).setUTCMonth(date.getUTCMonth() + numberOfMonths));
 
 /**
  * Returns the date n months before the date provided
@@ -897,3 +898,10 @@ export const getOverlapDateInPeriods = (givenPeriodLeft = {}, givenPeriodRight =
     overlapEndDate,
   };
 };
+
+/**
+ * Returns a new `Date` object that represents the start of the day
+ * of the provided date, where start = Midnight UTC.
+ */
+export const getStartOfDayUTC = (date) =>
+  new Date(new Date(date.getTime()).setUTCHours(0, 0, 0, 0));

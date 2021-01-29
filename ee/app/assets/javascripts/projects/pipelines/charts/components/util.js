@@ -1,5 +1,5 @@
 import dateFormat from 'dateformat';
-import { getDatesInRange } from '~/lib/utils/datetime_utility';
+import { getDatesInRange, getStartOfDayUTC } from '~/lib/utils/datetime_utility';
 import { CHART_TITLE } from './constants';
 
 /**
@@ -8,20 +8,30 @@ import { CHART_TITLE } from './constants';
  * into series data consumable by
  * [GlAreaChart](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/charts-area-chart--default)
  *
- * @param apiData The raw JSON data from the API request
- * @param startDate The first day that should be rendered on the graph
+ * @param {Array} apiData The raw JSON data from the API request
+ * @param {Date} startDate The first day that should be rendered on the graph
  */
 export const apiDataToChartSeries = (apiData, startDate) => {
-  // Get a list of dates (formatted identically to the dates in the API response),
-  // one date per day in the graph's date range
-  const dates = getDatesInRange(startDate, new Date(), (date) => dateFormat(date, 'yyyy-mm-dd'));
+  // Get a list of dates, one date per day in the graph's date range
+  const beginningOfStartDate = getStartOfDayUTC(startDate);
+  const dates = getDatesInRange(beginningOfStartDate, getStartOfDayUTC(new Date())).map((d) =>
+    getStartOfDayUTC(d),
+  );
+
+  // Generate a map of API timestamps to its associated value.
+  // The timestamps are explicitly set to the _beginning_ of the day (in UTC)
+  // so that we can confidently compare dates by value below.
+  const timestampToApiValue = apiData.reduce((acc, curr) => {
+    const apiTimestamp = getStartOfDayUTC(new Date(curr.from)).getTime();
+    acc[apiTimestamp] = curr.value;
+    return acc;
+  }, {});
 
   // Fill in the API data (the API data doesn't included data points for
   // days with 0 deployments) and transform it for use in the graph
   const data = dates.map((date) => {
-    const value = apiData.find((dataPoint) => dataPoint.from === date)?.value || 0;
-    const formattedDate = dateFormat(new Date(date), 'mmm d');
-    return [formattedDate, value];
+    const formattedDate = dateFormat(date, 'mmm d', true);
+    return [formattedDate, timestampToApiValue[date.getTime()] || 0];
   });
 
   return [
