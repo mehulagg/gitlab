@@ -110,12 +110,21 @@ RSpec.describe Registrations::WelcomeController do
       describe 'redirection' do
         it { is_expected.to redirect_to dashboard_projects_path }
 
-        context 'when part of the onboarding issues experiment' do
+        context 'when signup_onboarding feature flag enabled' do
+          let(:gitlab_com) { true }
+
           before do
-            stub_experiment_for_subject(onboarding_issues: true)
+            stub_feature_flags(signup_onboarding: true)
+            allow(Gitlab).to receive(:com?).and_return(gitlab_com)
           end
 
           it { is_expected.to redirect_to new_users_sign_up_group_path }
+
+          context 'when not on gitlab.com' do
+            let(:gitlab_com) { false }
+
+            it { is_expected.to redirect_to dashboard_projects_path }
+          end
 
           context 'when in subscription flow' do
             before do

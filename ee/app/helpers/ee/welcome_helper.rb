@@ -42,7 +42,7 @@ module EE
       return true if in_subscription_flow?
       return false if in_invitation_flow? || in_oauth_flow? || in_trial_flow?
 
-      onboarding_issues_experiment_enabled?
+      signup_onboarding_enabled?
     end
 
     def welcome_submit_button_text
@@ -52,13 +52,13 @@ module EE
       return continue if in_subscription_flow? || in_trial_flow?
       return get_started if in_invitation_flow? || in_oauth_flow?
 
-      onboarding_issues_experiment_enabled? ? continue : get_started
+      signup_onboarding_enabled? ? continue : get_started
     end
 
     def data_attributes_for_progress_bar_js_component
       {
         is_in_subscription_flow: in_subscription_flow?.to_s,
-        is_onboarding_issues_experiment_enabled: onboarding_issues_experiment_enabled?.to_s
+        is_signup_onboarding_enabled: signup_onboarding_enabled?.to_s
       }
     end
 
@@ -68,8 +68,8 @@ module EE
 
     private
 
-    def onboarding_issues_experiment_enabled?
-      experiment_enabled?(:onboarding_issues)
+    def signup_onboarding_enabled?
+      ::Gitlab.com? && Feature.enabled?(:signup_onboarding, default_enabled: true)
     end
   end
 end
