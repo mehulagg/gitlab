@@ -1049,4 +1049,60 @@ RSpec.describe ProjectsHelper do
       end
     end
   end
+
+  describe "#conditionally_paginate_diff_files" do
+    let(:diffs_collection) { instance_double(Gitlab::Diff::FileCollection::Commit, diff_files: diff_files) }
+    let(:diff_files) { Gitlab::Git::DiffCollection.new(files) }
+    let(:page) { nil }
+
+    let(:files) do
+      30.times.map do
+        { too_large: false, diff: "" }
+      end
+    end
+
+    let(:params) do
+      {
+        page: page
+      }
+    end
+
+    subject { helper.conditionally_paginate_diff_files(diffs_collection, paginate: paginate) }
+
+    before do
+      allow(helper).to receive(:params).and_return(params)
+    end
+
+    context "pagination is enabled" do
+      let(:paginate) { true }
+
+      it "has been paginated" do
+        expect(subject).to be_an(Array)
+      end
+
+      context "page 1" do
+        let(:page) { 1 }
+
+        it "has 20 diffs" do
+          expect(subject.size).to eq(20)
+        end
+      end
+
+      context "page 2" do
+        let(:page) { 2 }
+
+        it "has the remaining 10 diffs" do
+          expect(subject.size).to eq(10)
+        end
+      end
+    end
+
+    context "pagination is disabled" do
+      let(:paginate) { false }
+
+      it "returns a thing" do
+        expect(subject).to be_a(Gitlab::Git::DiffCollection)
+      end
+    end
+  end
 end

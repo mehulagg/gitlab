@@ -376,6 +376,14 @@ module ProjectsHelper
     nil
   end
 
+  def conditionally_paginate_diff_files(diffs, paginate:)
+    if paginate
+      Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page])
+    else
+      diffs.diff_files
+    end
+  end
+
   private
 
   def get_project_nav_tabs(project, current_user)
