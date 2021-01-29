@@ -52,7 +52,7 @@ module Registrations
     end
 
     def signup_onboarding?
-      ::Gitlab.com? &&
+      ::Gitlab.dev_env_or_com? &&
         Feature.enabled?(:signup_onboarding, default_enabled: true) &&
         !helpers.in_subscription_flow? &&
         !helpers.in_invitation_flow? &&
