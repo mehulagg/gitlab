@@ -228,7 +228,7 @@ RSpec.describe Group do
     end
 
     describe '#two_factor_authentication_allowed' do
-      let_it_be(:group) { create(:group) }
+      let_it_be_with_reload(:group) { create(:group) }
 
       context 'for a parent group' do
         it 'is valid' do

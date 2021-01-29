@@ -46,6 +46,10 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
   describe '#incorrect_traversal_ids' do
     subject { described_class.new(root).incorrect_traversal_ids }
 
+    before do
+      Namespace.update_all(traversal_ids: [])
+    end
+
     it { is_expected.to match_array Namespace.all }
   end
 

@@ -114,6 +114,69 @@ RSpec.describe Namespace do
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
     it { is_expected.to include_module(Namespaces::Traversal::Recursive) }
+    it { is_expected.to include_module(Namespaces::Traversal::Linear) }
+  end
+
+  shared_examples 'avoids traversal_ids race condition' do
+    let!(:new_root) { create(:namespace) }
+    let(:namespace) { build(:namespace, parent: parent) }
+
+    before do
+      parent.update!(parent: new_root)
+      namespace.save!
+    end
+
+    it { expect(parent.traversal_ids).to eq [new_root.id, parent.id] }
+    it { expect(namespace.traversal_ids).to eq [new_root.id, parent.id, namespace.id] }
+  end
+
+  describe 'create' do
+    let(:parent) { create(:namespace) }
+    let(:namespace) { create(:namespace, parent: parent) }
+
+    describe 'initialize traversal_ids' do
+      it { expect(parent.traversal_ids).to eq [parent.id] }
+      it { expect(namespace.traversal_ids).to eq [parent.id, namespace.id] }
+    end
+
+    it_behaves_like 'avoids traversal_ids race condition'
+  end
+
+  describe 'update' do
+    let(:parent) { create(:namespace) }
+    let(:namespace) { create(:namespace, parent: parent) }
+
+    it_behaves_like 'avoids traversal_ids race condition'
+  end
+
+  describe 'assigning a new parent' do
+    let!(:old_parent) { create(:namespace) }
+    let!(:new_parent) { create(:namespace) }
+    let!(:namespace) { create(:namespace, parent: old_parent) }
+
+    before do
+      namespace.update(parent: new_parent)
+    end
+
+    it 'updates traversal_ids' do
+      expect(namespace.reload.traversal_ids).to eq [new_parent.id, namespace.id]
+    end
+  end
+
+  describe 'assigning a new grandparent' do
+    let!(:old_grandparent) { create(:namespace) }
+    let!(:new_grandparent) { create(:namespace) }
+    let!(:parent_namespace) { create(:namespace, parent: old_grandparent) }
+    let!(:namespace) { create(:namespace, parent: parent_namespace) }
+
+    before do
+      parent_namespace.update(parent: new_grandparent)
+    end
+
+    it 'updates traversal_ids for all descendants' do
+      expect(parent_namespace.reload.traversal_ids).to eq [new_grandparent.id, parent_namespace.id]
+      expect(namespace.reload.traversal_ids).to eq [new_grandparent.id, parent_namespace.id, namespace.id]
+    end
   end
 
   describe '#visibility_level_field' do
