@@ -21,7 +21,7 @@
   = f.label :prevent_secrets, "Prevent pushing secret files", class: "label-bold form-check-label"
   %p.text-muted
     GitLab rejects any files that are likely to contain secrets.
-    The list of rejected file names is available in the #{link_to "documentation", help_page_path('push_rules/push_rules')}.
+    = link_to "What secret files are rejected?", help_page_path('push_rules/push_rules', anchor: 'prevent-pushing-secrets-to-the-repository'), target: '_blank', rel: 'noopener noreferrer'
 
 .form-group
   = f.label :commit_message_regex, "Require expression in commit messages", class: "label-bold"

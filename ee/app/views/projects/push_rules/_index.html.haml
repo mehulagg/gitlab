@@ -8,7 +8,8 @@
     %button.gl-button.btn.btn-default.js-settings-toggle
       = expanded ? 'Collapse' : 'Expand'
     %p
-      Restrict push operations for this project.
+      Restrict push operations for this project with
+      = link_to _('Push Rules.'), help_page_path('push_rules/push_rules'), target: '_blank', rel: 'noopener noreferrer'
   .settings-content
     %h5
       Select push rules:
