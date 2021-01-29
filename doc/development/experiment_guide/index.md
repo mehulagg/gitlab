@@ -12,7 +12,7 @@ Experiments are run as an A/B test and are behind a feature flag to turn the tes
 
 ## Experiment tracking issue
 
-Each experiment should have an [Experiment tracking](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=growth%20experiment&search=%22Experiment+tracking%22) issue to track the experiment from roll-out through to cleanup/removal. Immediately after an experiment is deployed, the due date of the issue should be set (this depends on the experiment but can be up to a few weeks in the future).
+Each experiment should have an [Experiment tracking](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=growth%20experiment&search=%22Experiment+tracking%22) issue to track the experiment from roll-out through to cleanup/removal. The tracking issue is similar to a Feature Flag Rollout issue, and is also used to track the status of an experiment. Immediately after an experiment is deployed, the due date of the issue should be set (this depends on the experiment but can be up to a few weeks in the future).
 After the deadline, the issue needs to be resolved and either:
 
 - It was successful and the experiment becomes the new default.
@@ -36,9 +36,20 @@ and link to the issue that resolves the experiment. If the experiment is
 successful and becomes part of the product, any follow up issues should be
 addressed.
 
-## How to create an A/B test
+## Experiments uing `gitlab-experiment`
 
-### Implement the experiment
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/300383) in GitLab 13.7.
+> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com.
+> - It is not yet intended for use in GitLab self-managed instances.
+
+`gitlab-experiment` is a gem included in GitLab that can be used for running experiments. 
+
+More information: [gitlab-experiment](https://gitlab.com/gitlab-org/gitlab-experiment/)
+
+## How to create an A/B test using `experimentation.rb`
+
+#### Implement the experiment
 
 1. Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
 
