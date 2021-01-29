@@ -24,6 +24,14 @@ RSpec.describe Gitlab::ImportExport::DecompressedArchiveSizeValidator do
       it 'returns true' do
         expect(subject.valid?).to eq(true)
       end
+
+      it 'starts GC' do
+        allow(subject).to receive(:gc_start?).and_return(true)
+
+        expect(GC).to receive(:start)
+
+        subject.valid?
+      end
     end
 
     context 'when file exceeds allowed decompressed size' do
