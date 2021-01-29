@@ -24,7 +24,7 @@ uncovered edge cases.
 The default approach is to choose a reviewer from your group or team for the first review.
 This is only a recommendation and the reviewer may be from a different team.
 However, it is recommended to pick someone who is a [domain expert](#domain-experts).
-If your merge request touches more than one domain (for example, Dynamic Analysis and GraphQL), ask for reviews from an expert from each domain. 
+If your merge request touches more than one domain (for example, Dynamic Analysis and GraphQL), ask for reviews from an expert from each domain.
 
 You can read more about the importance of involving reviewer(s) in the section on the responsibility of the author below.
 
@@ -122,6 +122,7 @@ with [domain expertise](#domain-experts).
 1. If your merge request includes a new or updated [application limit](https://about.gitlab.com/handbook/product/product-processes/#introducing-application-limits), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**.
 1. If your merge request includes Product Intelligence (telemetry or analytics) changes, it should be reviewed and approved by a [Product Intelligence engineer](https://gitlab.com/gitlab-org/growth/product_intelligence/engineers).
 1. If your merge request includes an addition of, or changes to a [Feature spec](testing_guide/testing_levels.md#frontend-feature-tests), it must be **approved by a [Quality maintainer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_maintainers_qa) or [Quality reviewer](https://about.gitlab.com/handbook/engineering/projects/#gitlab_reviewers_qa)**.
+1. If your merge request introduces a new service to GitLab (Puma, Sidekiq, Gitaly are examples), it must be **approved by a [product manager](https://about.gitlab.com/company/team/)**. See the [process for adding service component to GitLab](adding_service_component.md) for details.
 
 - (*1*): Please note that specs other than JavaScript specs are considered backend code.
 - (*2*): We encourage you to seek guidance from a database maintainer if your merge
