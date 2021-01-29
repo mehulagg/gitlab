@@ -115,7 +115,7 @@ RSpec.describe Registrations::WelcomeController do
 
           before do
             stub_feature_flags(signup_onboarding: true)
-            allow(Gitlab).to receive(:dev_env_or_com?).and_return(gitlab_com)
+            allow(Gitlab).to receive(:com?).and_return(gitlab_com)
           end
 
           it { is_expected.to redirect_to new_users_sign_up_group_path }

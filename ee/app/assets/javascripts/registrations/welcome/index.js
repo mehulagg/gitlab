@@ -1,11 +1,7 @@
 import Vue from 'vue';
 import 'ee/registrations/welcome/other_role';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import {
-  STEPS,
-  SUBSCRIPTON_FLOW_STEPS,
-  SIGNUP_ONBOARDING_FLOW_STEPS,
-} from '../constants';
+import { STEPS, SUBSCRIPTON_FLOW_STEPS, SIGNUP_ONBOARDING_FLOW_STEPS } from '../constants';
 import ProgressBar from '../components/progress_bar.vue';
 
 export default () => {
@@ -14,9 +10,7 @@ export default () => {
   if (!el) return null;
 
   const isInSubscriptionFlow = parseBoolean(el.dataset.isInSubscriptionFlow);
-  const isSignupOnboardingEnabled = parseBoolean(
-    el.dataset.isSignupOnboardingEnabled,
-  );
+  const isSignupOnboardingEnabled = parseBoolean(el.dataset.isSignupOnboardingEnabled);
 
   let steps;
 
