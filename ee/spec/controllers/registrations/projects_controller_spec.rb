@@ -17,7 +17,6 @@ RSpec.describe Registrations::ProjectsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
@@ -35,14 +34,6 @@ RSpec.describe Registrations::ProjectsController do
           it { is_expected.to have_gitlab_http_status(:ok) }
           it { is_expected.to render_template(:new) }
         end
-      end
-
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
     end
   end
@@ -64,7 +55,7 @@ RSpec.describe Registrations::ProjectsController do
       before do
         namespace.add_owner(user)
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true, trial_onboarding_issues: trial_onboarding_issues_enabled)
+        stub_experiment_for_subject(trial_onboarding_issues: trial_onboarding_issues_enabled)
       end
 
       it 'creates a new project, a "Learn GitLab" project, sets a cookie and redirects to the experience level page' do
@@ -112,14 +103,6 @@ RSpec.describe Registrations::ProjectsController do
 
         it { is_expected.to have_gitlab_http_status(:ok) }
         it { is_expected.to render_template(:new) }
-      end
-
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
     end
   end

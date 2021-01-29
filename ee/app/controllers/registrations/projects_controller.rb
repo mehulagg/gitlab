@@ -61,10 +61,6 @@ module Registrations
       learn_gitlab_project
     end
 
-    def check_experiment_enabled
-      access_denied! unless experiment_enabled?(:onboarding_issues)
-    end
-
     def find_namespace
       @namespace = Namespace.find_by_id(params[:namespace_id])
 
