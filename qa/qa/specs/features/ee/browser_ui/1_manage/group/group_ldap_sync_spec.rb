@@ -12,6 +12,12 @@ module QA
       end
 
       before(:all) do
+        # Todo: Remove the 4 lines below when invite_members_group_modal feature flag is enabled by default or removed
+        ldap_username = Runtime::Env.ldap_username
+        Runtime::Env.ldap_username = nil
+        Runtime::Feature.enable(:invite_members_group_modal)
+        Runtime::Env.ldap_username = ldap_username
+
         # Create the sandbox group as the LDAP user. Without this the admin user
         # would own the sandbox group and then in subsequent tests the LDAP user
         # would not have enough permission to push etc.
@@ -19,8 +25,6 @@ module QA
 
         # Create an admin personal access token and use it for the remaining API calls
         @original_personal_access_token = Runtime::Env.personal_access_token
-
-        Runtime::Feature.enable(:invite_members_group_modal)
 
         Page::Main::Menu.perform do |menu|
           menu.sign_out if menu.has_personal_area?

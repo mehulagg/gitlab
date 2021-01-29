@@ -239,6 +239,7 @@ export default {
   <gl-modal
     :modal-id="modalId"
     size="sm"
+    data-qa-selector="invite_members_modal_content"
     :title="$options.labels[inviteeType].modalTitle"
     :header-close-label="$options.labels.headerCloseLabel"
   >

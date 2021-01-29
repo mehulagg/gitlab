@@ -12,6 +12,7 @@ module QA
           base.view 'app/assets/javascripts/invite_members/components/invite_members_modal.vue' do
             element :invite_button
             element :access_level_dropdown
+            element :invite_members_modal_content
           end
 
           base.view 'app/assets/javascripts/invite_members/components/group_select.vue' do
@@ -30,15 +31,17 @@ module QA
         def add_member(username, access_level = Resource::Members::AccessLevel::DEVELOPER)
           open_invite_members_modal
 
-          fill_element :access_level_dropdown, with: access_level
+          within_element(:invite_members_modal_content) do
+            fill_element :access_level_dropdown, with: access_level
 
-          fill_in 'Search for members to invite', with: username
+            fill_in 'Search for members to invite', with: username
 
-          Support::WaitForRequests.wait_for_requests
+            Support::WaitForRequests.wait_for_requests
 
-          click_button username
+            click_button username
 
-          click_element :invite_button
+            click_element :invite_button
+          end
 
           Support::WaitForRequests.wait_for_requests
 
