@@ -2,7 +2,7 @@ import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
-import CiCdAnalyticsAreaChart from '~/projects/pipelines/charts/components/ci_cd_analytics_area_chart.vue';
+import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
@@ -91,9 +91,8 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     });
 
     it('converts the data from the API into data usable by the chart component', () => {
-      wrapper.findAll(CiCdAnalyticsAreaChart).wrappers.forEach((chartWrapper) => {
-        expect(chartWrapper.props().chartData[0].data).toMatchSnapshot();
-      });
+      const chartWrapper = wrapper.find(CiCdAnalyticsCharts);
+      expect(chartWrapper.props().charts).toMatchSnapshot();
     });
 
     it('does not show a flash message', () => {
