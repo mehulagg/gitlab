@@ -7,7 +7,6 @@ import {
   GlSkeletonLoader,
 } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
-import { fullLabelId } from '../boards_util';
 import boardsStore from '../stores/boards_store';
 import { __ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -42,7 +41,7 @@ export default {
     ...mapActions(['createList', 'fetchLabels', 'highlightList', 'setAddColumnFormVisibility']),
     getListByLabel(label) {
       if (this.shouldUseGraphQL) {
-        return this.getListByLabelId(fullLabelId(label));
+        return this.getListByLabelId(label);
       }
       return boardsStore.findListByLabelId(label.id);
     },
