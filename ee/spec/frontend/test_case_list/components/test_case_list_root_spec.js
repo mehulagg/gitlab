@@ -31,95 +31,68 @@ const mockPageInfo = {
   endCursor: 'eyJpZCI6IjIxIiwiY3JlYXRlZF9hdCI6IjIwMjAtMDMtMzEgMTM6MzE6MTUgVVRDIn0',
 };
 
-const createComponent = ({
-  provide = mockProvide,
-  initialFilterParams = {},
-  testCasesLoading = false,
-  testCasesList = [],
-} = {}) =>
-  shallowMount(TestCaseListRoot, {
-    propsData: {
-      initialFilterParams,
-    },
-    provide,
-    mocks: {
-      $apollo: {
-        queries: {
-          project: {
-            loading: testCasesLoading,
-            issues: {
-              nodes: testCasesList,
-              pageInfo: mockPageInfo,
-            },
-            issueStatusCounts: {
-              opened: 5,
-              closed: 0,
-              all: 5,
+describe('TestCaseListRoot', () => {
+  let wrapper;
+
+  const getIssuableList = () => wrapper.find(IssuableList);
+
+  const createComponent = ({
+    provide = mockProvide,
+    initialFilterParams = {},
+    testCasesLoading = false,
+    testCasesList = [],
+  } = {}) => {
+    wrapper = shallowMount(TestCaseListRoot, {
+      propsData: {
+        initialFilterParams,
+      },
+      provide,
+      mocks: {
+        $apollo: {
+          queries: {
+            project: {
+              loading: testCasesLoading,
+              issues: {
+                nodes: testCasesList,
+                pageInfo: mockPageInfo,
+              },
+              issueStatusCounts: {
+                opened: 5,
+                closed: 0,
+                all: 5,
+              },
             },
           },
         },
       },
-    },
-  });
-
-describe('TestCaseListRoot', () => {
-  let wrapper;
-
-  beforeEach(() => {
-    wrapper = createComponent();
-  });
+    });
+  };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
+  describe('passes a correct loading state to Issuables List', () => {
+    it.each`
+      testCasesLoading | returnValue
+      ${true}          | ${true}
+      ${false}         | ${false}
+    `(
+      'passes $returnValue to Issuables List prop when query loading is $testCasesLoading',
+      ({ testCasesLoading, returnValue }) => {
+        createComponent({
+          provide: mockProvide,
+          initialFilterParams: {},
+          testCasesList: [],
+          testCasesLoading,
+        });
+
+        expect(getIssuableList().props('issuablesLoading')).toBe(returnValue);
+      },
+    );
+  });
+
   describe('computed', () => {
-    describe('testCaseListLoading', () => {
-      it.each`
-        testCasesLoading | returnValue
-        ${true}          | ${true}
-        ${false}         | ${false}
-      `(
-        'returns $returnValue when testCases query loading is $loadingValue',
-        ({ testCasesLoading, returnValue }) => {
-          const wrapperTemp = createComponent({
-            provide: mockProvide,
-            initialFilterParams: {},
-            testCasesList: [],
-            testCasesLoading,
-          });
-
-          expect(wrapperTemp.vm.testCaseListLoading).toBe(returnValue);
-
-          wrapperTemp.destroy();
-        },
-      );
-    });
-
-    describe('testCaseListEmpty', () => {
-      it.each`
-        testCasesLoading | testCasesList     | testCaseListDescription | returnValue
-        ${true}          | ${[]}             | ${'empty'}              | ${false}
-        ${true}          | ${[mockIssuable]} | ${'not empty'}          | ${false}
-        ${false}         | ${[]}             | ${'not empty'}          | ${true}
-        ${false}         | ${[mockIssuable]} | ${'empty'}              | ${true}
-      `(
-        'returns $returnValue when testCases query loading is $testCasesLoading and testCases array is $testCaseListDescription',
-        ({ testCasesLoading, testCasesList, returnValue }) => {
-          const wrapperTemp = createComponent({
-            provide: mockProvide,
-            initialFilterParams: {},
-            testCasesLoading,
-            testCasesList,
-          });
-
-          expect(wrapperTemp.vm.testCaseListEmpty).toBe(returnValue);
-
-          wrapperTemp.destroy();
-        },
-      );
-    });
-
     describe('showPaginationControls', () => {
       it.each`
         hasPreviousPage | hasNextPage  | returnValue
@@ -239,8 +212,6 @@ describe('TestCaseListRoot', () => {
   });
 
   describe('template', () => {
-    const getIssuableList = () => wrapper.find(IssuableList);
-
     it('renders issuable-list component', () => {
       expect(getIssuableList().exists()).toBe(true);
       expect(getIssuableList().props()).toMatchObject({
