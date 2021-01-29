@@ -12,7 +12,6 @@ export default {
     GlSortingItem,
     GlFilteredSearch,
   },
-  props: {},
   computed: {
     ...mapState({
       isGroupPage: (state) => state.config.isGroupPage,

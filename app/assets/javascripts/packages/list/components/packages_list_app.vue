@@ -35,10 +35,9 @@ export default {
     },
 
     emptyStateTitle() {
-      if (this.emptySearch) {
-        return s__('PackageRegistry|There are no packages yet');
-      }
-      return s__('PackageRegistry|Sorry, your filter produced no results');
+      return this.emptySearch
+        ? s__('PackageRegistry|There are no packages yet')
+        : s__('PackageRegistry|Sorry, your filter produced no results');
     },
   },
   mounted() {
