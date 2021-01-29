@@ -41,7 +41,7 @@ module Types
       field :shifts,
             ::Types::IncidentManagement::OncallShiftType.connection_type,
             null: true,
-            description: 'Blocks of time for which a participant is on-call within a given timeframe. Timeframe cannot exceed one month.',
+            description: 'Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.',
             resolver: ::Resolvers::IncidentManagement::OncallShiftsResolver
     end
   end
