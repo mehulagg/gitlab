@@ -2,7 +2,7 @@
 
 module Registrations
   class ExperienceLevelsController < ApplicationController
-    layout 'devise_experimental_onboarding_issues'
+    layout 'devise_onboarding'
 
     before_action :ensure_namespace_path_param
 
