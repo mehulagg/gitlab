@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# GitLab self-managed subscription **(PREMIUM)**
+# GitLab self-managed subscription **(PREMIUM SELF)**
 
 You can install, administer, and maintain your own GitLab instance.
 

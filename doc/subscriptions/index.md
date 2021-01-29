@@ -25,7 +25,7 @@ When choosing a subscription, there are two factors to consider:
 ### Choose between GitLab SaaS or GitLab self-managed
 
 There are some differences in how a subscription applies, depending if you use
-GitLab SaaS or a self-managed:
+GitLab SaaS or GitLab self-managed:
 
 - [GitLab SaaS](gitlab_com/index.md): The GitLab software-as-a-service offering.
   You don't need to install anything to use GitLab SaaS, you only need to

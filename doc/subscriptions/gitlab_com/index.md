@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# GitLab SaaS subscription **(PREMIUM ONLY)**
+# GitLab SaaS subscription **(PREMIUM SAAS)**
 
 GitLab SaaS is GitLab Inc.'s software-as-a-service offering. You don't need to
 install anything to use GitLab SaaS, you only need to
@@ -50,7 +50,7 @@ Every occupied seat is counted in the subscription, with the following exception
 
 NOTE:
 To support the open source community and encourage the development of open
-source projects, GitLab grants access to **Ultimate** plan features for all GitLab SaaS
+source projects, GitLab grants access to **Ultimate** features for all GitLab SaaS
 **public** projects, regardless of the subscription.
 
 ## Obtain a GitLab SaaS subscription
