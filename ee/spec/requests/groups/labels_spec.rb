@@ -14,9 +14,9 @@ RSpec.describe 'view audit events' do
     end
 
     it 'avoids N+1 DB queries', :request_store do
-      control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_request }
-
       create_list(:group, 3, parent: group)
+
+      control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_request }
 
       expect { send_request }.not_to exceed_all_query_limit(control)
     end

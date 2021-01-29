@@ -34,7 +34,7 @@ class Namespace
       sql = """
             UPDATE namespaces
             SET traversal_ids = cte.traversal_ids
-            FROM (#{recursive_traversal_ids}) as cte
+            FROM (#{recursive_traversal_ids(lock: true)}) as cte
             WHERE namespaces.id = cte.id
               AND namespaces.traversal_ids <> cte.traversal_ids
             """
@@ -55,10 +55,13 @@ class Namespace
     #
     # Note that the traversal_ids represent a calculated traversal path for the
     # namespace and not the value stored within the traversal_ids attribute.
-    def recursive_traversal_ids
+    #
+    # Locked with FOR UPDATE to ensure isolation between concurrent updates of
+    # the heirarchy.
+    def recursive_traversal_ids(lock: false)
       root_id = Integer(@root.id)
 
-      """
+      sql = <<~SQL
       WITH RECURSIVE cte(id, traversal_ids, cycle) AS (
         VALUES(#{root_id}, ARRAY[#{root_id}], false)
       UNION ALL
@@ -67,7 +70,11 @@ class Namespace
         WHERE n.parent_id = cte.id AND NOT cycle
       )
       SELECT id, traversal_ids FROM cte
-      """
+      SQL
+
+      sql += ' FOR UPDATE' if lock
+
+      sql
     end
 
     # This is essentially Namespace#root_ancestor which will soon be rewritten

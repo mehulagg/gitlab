@@ -46,6 +46,10 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
   describe '#incorrect_traversal_ids' do
     subject { described_class.new(root).incorrect_traversal_ids }
 
+    before do
+      Namespace.update_all(traversal_ids: [])
+    end
+
     it { is_expected.to match_array Namespace.all }
   end
 
@@ -57,7 +61,18 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
       root.reload
     end
 
-    it_behaves_like 'hierarchy with traversal_ids'
+    it_behaves_like 'hierarchy with traversal_ids' do
+      subject { hierarchy.sync_traversal_ids! }
+    end
+
+    it 'locks SELECT with FOR UPDATE' do
+      qr = ActiveRecord::QueryRecorder.new do
+        hierarchy.sync_traversal_ids!
+      end
+      expect(qr.count).to eq 1
+      expect(qr.log.first).to match /FOR UPDATE/
+    end
+
     it { expect(hierarchy.incorrect_traversal_ids).to be_empty }
   end
 end
