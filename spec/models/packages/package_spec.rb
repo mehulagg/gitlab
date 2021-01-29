@@ -337,16 +337,6 @@ RSpec.describe Packages::Package, type: :model do
     end
 
     describe '#package_already_taken' do
-      context 'npm package' do
-        let!(:package) { create(:npm_package) }
-
-        it 'will not allow a package of the same name' do
-          new_package = build(:npm_package, project: create(:project), name: package.name)
-
-          expect(new_package).not_to be_valid
-        end
-      end
-
       context 'maven package' do
         let!(:package) { create(:maven_package) }
 

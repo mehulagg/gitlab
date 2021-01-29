@@ -33,9 +33,9 @@ module API
           end
         end
 
+        # mainly used by the metadata endpoint where we need to get a project
+        # and return nil if not found (no errors should be raised)
         def project_or_nil
-          # mainly used by the metadata endpoint where we need to get a project
-          # and return nil if not found (no errors should be raised)
           strong_memoize(:project_or_nil) do
             next unless project_id_or_nil
 
@@ -49,10 +49,10 @@ module API
             when :project
               params[:id]
             when :instance
-              group_name = group_name_from_package_name
-              next unless group_name
+              namespace_path = namespace_path_from_package_name
+              next unless namespace_path
 
-              namespace = namespace_named(group_name)
+              namespace = namespace_from_path(namespace_path)
               next unless namespace
 
               finder = ::Packages::Npm::PackageFinder.new(params[:package_name], namespace: namespace)
@@ -62,20 +62,18 @@ module API
           end
         end
 
-        def group_name_from_package_name
+        def namespace_path_from_package_name
           package_name = params[:package_name]
           return unless package_name.starts_with?('@')
 
           package_name.match(Gitlab::Regex.npm_scope_regex)[1]
         end
 
-        def namespace_named(namespace_path)
-          finder = GroupFinder.new(current_user)
-          group = finder.execute(path: namespace_path)
-
+        def namespace_from_path(path)
+          group = Group.by_path(path)
           return group if group
 
-          Namespace.for_user.by_path(namespace_path)
+          Namespace.for_user.by_path(path)
         end
       end
     end

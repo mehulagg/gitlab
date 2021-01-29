@@ -62,7 +62,7 @@ module Gitlab
       end
 
       def npm_scope_regex
-        @npm_scope_regex ||= %r{\A@(#{Gitlab::Regex.group_name_regex_chars})\/.*\z}
+        @npm_scope_regex ||= %r{\A@(#{Gitlab::Regex.group_name_regex_chars})/[^/]+\z}
       end
 
       def nuget_package_name_regex
