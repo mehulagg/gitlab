@@ -27,6 +27,12 @@ RSpec.describe Projects::UpdateStatisticsService do
 
         service.execute
       end
+
+      it 'invalidates the cache after a refresh' do
+        expect(project.repository).to receive(:expire_statistics_caches).and_call_original
+
+        service.execute
+      end
     end
   end
 end

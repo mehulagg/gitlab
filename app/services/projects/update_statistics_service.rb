@@ -7,6 +7,7 @@ module Projects
 
       Gitlab::AppLogger.info("Updating statistics for project #{project.id}")
 
+      project.repository.expire_statistics_caches
       project.statistics.refresh!(only: statistics.map(&:to_sym))
     end
 
