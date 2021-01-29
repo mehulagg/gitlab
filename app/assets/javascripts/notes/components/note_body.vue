@@ -29,6 +29,10 @@ export default {
       required: false,
       default: null,
     },
+    file: {
+      type: Object,
+      required: true,
+    },
     canEdit: {
       type: Boolean,
       required: true,
@@ -46,6 +50,7 @@ export default {
   },
   computed: {
     ...mapGetters(['getDiscussion', 'suggestionsCount']),
+    ...mapGetters('diffs', ['suggestionCommitMessage']),
     discussion() {
       if (!this.note.isDraft) return {};
 
@@ -54,7 +59,6 @@ export default {
     ...mapState({
       batchSuggestionsInfo: (state) => state.notes.batchSuggestionsInfo,
     }),
-    ...mapState('diffs', ['defaultSuggestionCommitMessage']),
     noteBody() {
       return this.note.note;
     },
@@ -63,6 +67,28 @@ export default {
     },
     lineType() {
       return this.line ? this.line.type : null;
+    },
+    commitMessage() {
+      // Please see this issue comment for why these
+      //  are hard-coded to 1:
+      //  https://gitlab.com/gitlab-org/gitlab/-/issues/291027#note_468308022
+      const suggestionsCount = 1;
+      const filesCount = 1;
+      const filePaths = [this.file.file_path];
+      const suggestion = this.suggestionCommitMessage({
+        values: {
+          file_paths: filePaths.join(', '),
+          suggestions_count: suggestionsCount,
+          files_count: filesCount,
+        },
+      });
+
+      return suggestion
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&quot;')
+        .replace(/&/g, '&amp;');
     },
   },
   mounted() {
@@ -135,7 +161,7 @@ export default {
       :note-html="note.note_html"
       :line-type="lineType"
       :help-page-path="helpPagePath"
-      :default-commit-message="defaultSuggestionCommitMessage"
+      :default-commit-message="commitMessage"
       @apply="applySuggestion"
       @applyBatch="applySuggestionBatch"
       @addToBatch="addSuggestionToBatch"
