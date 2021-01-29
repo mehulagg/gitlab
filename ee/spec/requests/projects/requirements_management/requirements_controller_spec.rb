@@ -24,10 +24,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
 
     subject { upload_file(file, workhorse_headers, params) }
 
-    before do
-      stub_feature_flags(import_requirements_csv: true)
-    end
-
     context 'unauthorized' do
       context 'when user is not signed in' do
         it_behaves_like 'response with 404 status'
@@ -102,14 +98,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
       end
     end
 
-    context 'when requirements import FF is disabled' do
-      before do
-        stub_feature_flags(import_requirements_csv: false)
-      end
-
-      it_behaves_like 'response with 404 status'
-    end
-
     def upload_file(file, headers = {}, params = {})
       workhorse_finalize(
         import_csv_project_requirements_management_requirements_path(project),
@@ -133,10 +121,9 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
         project.add_reporter(user)
       end
 
-      context 'when feature is available' do
+      context 'when requirements feature is available' do
         before do
           stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
         end
 
         it_behaves_like 'handle uploads authorize request' do
@@ -145,10 +132,9 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
         end
       end
 
-      context 'when feature is disabled' do
+      context 'when requirements feature is disabled' do
         before do
           stub_licensed_features(requirements: true)
-          stub_feature_flags(import_requirements_csv: true)
         end
 
         it_behaves_like 'response with 404 status'
