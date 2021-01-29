@@ -7,7 +7,6 @@ module Registrations
     layout 'checkout'
 
     before_action :authorize_create_group!, only: :new
-    before_action :check_experiment_enabled
 
     feature_category :navigation
 
@@ -59,10 +58,6 @@ module Registrations
 
     def authorize_create_group!
       access_denied! unless can?(current_user, :create_group)
-    end
-
-    def check_experiment_enabled
-      access_denied! unless experiment_enabled?(:onboarding_issues)
     end
 
     def group_params

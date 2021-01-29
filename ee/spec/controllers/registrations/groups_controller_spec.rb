@@ -36,7 +36,6 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true)
       end
 
       it { is_expected.to have_gitlab_http_status(:ok) }
@@ -57,14 +56,6 @@ RSpec.describe Registrations::GroupsController do
 
       context 'user without the ability to create a group' do
         let(:user) { create(:user, can_create_group: false) }
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
-      end
-
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
@@ -93,7 +84,7 @@ RSpec.describe Registrations::GroupsController do
     context 'with an authenticated user' do
       before do
         sign_in(user)
-        stub_experiment_for_subject(onboarding_issues: true, trial_onboarding_issues: trial_onboarding_issues_enabled)
+        stub_experiment_for_subject(trial_onboarding_issues: trial_onboarding_issues_enabled)
       end
 
       it 'creates a group' do
@@ -162,7 +153,6 @@ RSpec.describe Registrations::GroupsController do
         end
 
         before do
-          allow(controller).to receive(:experiment_enabled?).with(:onboarding_issues).and_call_original
           allow(controller).to receive(:experiment_enabled?).with(:trial_during_signup).and_return(true)
         end
 
@@ -266,14 +256,6 @@ RSpec.describe Registrations::GroupsController do
           it { is_expected.not_to receive(:apply_trial) }
           it { is_expected.to render_template(:new) }
         end
-      end
-
-      context 'with the experiment not enabled for user' do
-        before do
-          stub_experiment_for_subject(onboarding_issues: false)
-        end
-
-        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
     end
   end
