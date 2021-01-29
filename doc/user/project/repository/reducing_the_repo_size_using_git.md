@@ -32,8 +32,7 @@ other internal references (refs) that are automatically created by GitLab. These
 - `refs/pipelines/*` for
   [pipelines](../../../ci/troubleshooting.md#fatal-reference-is-not-a-tree-error).
 - `refs/environments/*` for environments.
-
-In addition to the refs mentioned above, GitLab also creates hidden `refs/keep-around/*`to prevent commits being deleted.
+- `refs/keep-around/*` are created as hidden refs to prevent commits referenced in the database from being removed
 
 These refs are not automatically downloaded and hidden refs are not advertised, but we can remove these refs using a project export.
 
@@ -44,8 +43,10 @@ To purge files from a GitLab repository:
 
 1. Generate a fresh [export from the
    project](../settings/import_export.html#exporting-a-project-and-its-data) and download it.
+   The project export is used to purge files from your repository, 
+   and it also serves as a backup in case that data is erroneously removed as part of this process.
 
-1. Decompress the backup using `tar`:
+2. Decompress the backup using `tar`:
 
    ```shell
    tar xzf project-backup.tar.gz
@@ -54,13 +55,13 @@ To purge files from a GitLab repository:
    This contains a `project.bundle` file, which was created by
    [`git bundle`](https://git-scm.com/docs/git-bundle).
 
-1. Clone a fresh copy of the repository from the bundle using  `--bare` and `--mirror` options:
+3. Clone a fresh copy of the repository from the bundle using  `--bare` and `--mirror` options:
 
    ```shell
    git clone --bare --mirror /path/to/project.bundle
    ```
 
-1. Using `git filter-repo`, purge any files from the history of your repository. Because we are
+4. Using `git filter-repo`, purge any files from the history of your repository. Because we are
    trying to remove internal refs, we rely on the `commit-map` produced by each run to tell us
    which internal refs to remove.
 
@@ -85,14 +86,14 @@ To purge files from a GitLab repository:
    [`git filter-repo` documentation](https://htmlpreview.github.io/?https://github.com/newren/git-filter-repo/blob/docs/html/git-filter-repo.html#EXAMPLES)
    for more examples and the complete documentation.
 
-1. Because cloning from a bundle file sets the `origin` remote to the local bundle file, delete this `origin` remote, and set it to the URL to your repository:
+5. Because cloning from a bundle file sets the `origin` remote to the local bundle file, delete this `origin` remote, and set it to the URL to your repository:
 
    ```shell
    git remote remove origin
    git remote add origin https://gitlab.example.com/<namespace>/<project_name>.git
    ```
 
-1. Force push your changes to overwrite all branches on GitLab:
+6. Force push your changes to overwrite all branches on GitLab:
 
    ```shell
    git push origin --force 'refs/heads/*'
@@ -101,7 +102,7 @@ To purge files from a GitLab repository:
    [Protected branches](../protected_branches.md) cause this to fail. To proceed, you must
    remove branch protection, push, and then re-enable protected branches.
 
-1. To remove large files from tagged releases, force push your changes to all tags on GitLab:
+7. To remove large files from tagged releases, force push your changes to all tags on GitLab:
 
    ```shell
    git push origin --force 'refs/tags/*'
@@ -110,7 +111,7 @@ To purge files from a GitLab repository:
    [Protected tags](../protected_tags.md) cause this to fail. To proceed, you must remove tag
    protection, push, and then re-enable protected tags.
 
-1. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
+8. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
 
    ```shell
    git push origin --force 'refs/replace/*'
@@ -118,7 +119,11 @@ To purge files from a GitLab repository:
 
    Refer to the Git [`replace`](https://git-scm.com/book/en/v2/Git-Tools-Replace) documentation for information on how this works.
 
-1. Run a [repository cleanup](#repository-cleanup).
+9. Run a [repository cleanup](#repository-cleanup).
+
+
+NOTE:
+
 
 ## Repository cleanup
 
