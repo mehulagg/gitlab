@@ -7,7 +7,16 @@ module Gitlab
 
       attr_reader :token_type
 
-      validates :token_type, inclusion: { in: %i[personal_access_token job_token deploy_token] }
+      validates :token_type, inclusion: {
+        in: %i[
+          personal_access_token_with_username
+          job_token_with_username
+          deploy_token_with_username
+          personal_access_token
+          job_token
+          deploy_token
+        ]
+      }
 
       def initialize(token_type)
         @token_type = token_type
@@ -38,12 +47,21 @@ module Gitlab
 
         when :deploy_token
           resolve_deploy_token raw
+
+        when :personal_access_token_with_username
+          resolve_personal_access_token_with_username raw
+
+        when :job_token_with_username
+          resolve_job_token_with_username raw
+
+        when :deploy_token_with_username
+          resolve_deploy_token_with_username raw
         end
       end
 
       private
 
-      def resolve_personal_access_token(raw)
+      def resolve_personal_access_token_with_username(raw)
         # Check if the password is a personal access token
         pat = ::PersonalAccessToken.find_by_token(raw.password)
         return unless pat
@@ -56,7 +74,7 @@ module Gitlab
         pat
       end
 
-      def resolve_job_token(raw)
+      def resolve_job_token_with_username(raw)
         # Only look for a job if the username is correct
         return if ::Gitlab::Auth::CI_JOB_USER != raw.username
 
@@ -70,7 +88,7 @@ module Gitlab
         job
       end
 
-      def resolve_deploy_token(raw)
+      def resolve_deploy_token_with_username(raw)
         # Check if the password is a deploy token
         token = ::DeployToken.active.find_by_token(raw.password)
         return unless token
@@ -79,6 +97,28 @@ module Gitlab
         # departure from the existing behavior of #deploy_token_from_request.
         # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38627#note_474826205
         raise ::Gitlab::Auth::UnauthorizedError unless token.username == raw.username
+
+        token
+      end
+
+      def resolve_personal_access_token(raw)
+        pat = ::PersonalAccessToken.find_by_token(raw.password)
+        return unless pat
+
+        pat
+      end
+
+      def resolve_job_token(raw)
+        job = ::Ci::AuthJobFinder.new(token: raw.password).execute
+
+        raise ::Gitlab::Auth::UnauthorizedError unless job
+
+        job
+      end
+
+      def resolve_deploy_token(raw)
+        token = ::DeployToken.active.find_by_token(raw.password)
+        return unless token
 
         token
       end

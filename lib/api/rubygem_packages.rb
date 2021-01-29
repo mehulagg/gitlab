@@ -4,6 +4,7 @@
 # API endpoints for the RubyGem package registry
 module API
   class RubygemPackages < ::API::Base
+    include ::API::Helpers::Authentication
     helpers ::API::Helpers::PackagesHelpers
 
     feature_category :package_registry
@@ -18,18 +19,15 @@ module API
 
     content_type :binary, 'application/octet-stream'
 
+    authenticate_with do |accept|
+      accept.token_types(:personal_access_token, :deploy_token, :job_token)
+            .sent_through(:token_auth)
+    end
+
     before do
       require_packages_enabled!
       authenticate!
       not_found! unless Feature.enabled?(:rubygem_packages, user_project)
-    end
-
-    helpers do
-      # we override this auth_finders.rb method because RubyGems does not
-      # include a "Token" or "Bearer" prefix.
-      def parsed_oauth_token
-        request.headers['Authorization']
-      end
     end
 
     params do
@@ -43,8 +41,8 @@ module API
         params do
           requires :file_name, type: String, desc: 'Spec file name'
         end
-        route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
         get ":file_name", requirements: FILE_NAME_REQUIREMENTS do
+          # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299267
           not_found!
         end
 
@@ -54,8 +52,8 @@ module API
         params do
           requires :file_name, type: String, desc: 'Gemspec file name'
         end
-        route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
         get "quick/Marshal.#{MARSHAL_VERSION}/:file_name", requirements: FILE_NAME_REQUIREMENTS do
+          # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299284
           not_found!
         end
 
@@ -65,25 +63,25 @@ module API
         params do
           requires :file_name, type: String, desc: 'Package file name'
         end
-        route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
         get "gems/:file_name", requirements: FILE_NAME_REQUIREMENTS do
+          # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299283
           not_found!
         end
 
         namespace 'api/v1' do
-          desc 'Authorize a gem upload' do
+          desc 'Authorize a gem upload from workhorse' do
             detail 'This feature was introduced in GitLab 13.9'
           end
-          route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
           post 'gems/authorize' do
+            # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299263
             not_found!
           end
 
           desc 'Upload a gem' do
             detail 'This feature was introduced in GitLab 13.9'
           end
-          route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
           post 'gems' do
+            # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299263
             not_found!
           end
 
@@ -93,8 +91,8 @@ module API
           params do
             optional :gems, type: String, desc: 'Comma delimited gem names'
           end
-          route_setting :authentication, deploy_token_allowed: true, job_token_allowed: true
           get 'dependencies' do
+            # To be implemented in https://gitlab.com/gitlab-org/gitlab/-/issues/299282
             not_found!
           end
         end
