@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Iterations::Cadence do
+RSpec.describe ::Iterations::Cadence do
   describe 'associations' do
     subject { build(:iterations_cadence) }
 

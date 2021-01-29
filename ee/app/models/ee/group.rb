@@ -20,7 +20,8 @@ module EE
 
       has_many :epics
       has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
-
+      has_many :iterations
+      has_many :iterations_cadences, class_name: 'Iterations::Cadence'
       has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
