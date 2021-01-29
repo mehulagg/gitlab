@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - Introduced in GitLab Enterprise Edition 8.10.
 > - More statistics were added in GitLab Enterprise Edition 8.12.
-> - Moved to GitLab Core in 9.1.
+> - Moved to GitLab Free in 9.1.
 > - More statistics were added in GitLab Ultimate 11.2.
 
 This guide describes Usage Ping's purpose and how it's implemented.
