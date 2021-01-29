@@ -2,6 +2,7 @@ import {
   getIdFromGraphQLId,
   convertToGraphQLId,
   convertToGraphQLIds,
+  stripTypenames,
 } from '~/graphql_shared/utils';
 
 const mockType = 'Group';
@@ -79,5 +80,27 @@ describe('convertToGraphQLIds', () => {
     ${null}     | ${[mockId]}       | ${'type must be a string; got object'}
   `('throws TypeError with "$message" if a param is missing', ({ type, ids, message }) => {
     expect(() => convertToGraphQLIds(type, ids)).toThrow(new TypeError(message));
+  });
+});
+
+describe('stripTypenames', () => {
+  it.each`
+    input                                                  | expected
+    ${{}}                                                  | ${{}}
+    ${{ __typename: 'Foo' }}                               | ${{}}
+    ${{ bar: 'bar', __typename: 'Foo' }}                   | ${{ bar: 'bar' }}
+    ${{ bar: { __typename: 'Bar' }, __typename: 'Foo' }}   | ${{ bar: {} }}
+    ${{ bar: [{ __typename: 'Bar' }], __typename: 'Foo' }} | ${{ bar: [{}] }}
+    ${[]}                                                  | ${[]}
+    ${[{ __typename: 'Foo' }]}                             | ${[{}]}
+    ${[{ bar: [{ a: 1, __typename: 'Bar' }] }]}            | ${[{ bar: [{ a: 1 }] }]}
+    ${null}                                                | ${null}
+  `('given $input returns $expected, with all __typename keys removed', ({ input, expected }) => {
+    const actual = stripTypenames(input);
+    expect(actual).toEqual(expected);
+
+    if (expected) {
+      expect(input).not.toBe(actual);
+    }
   });
 });

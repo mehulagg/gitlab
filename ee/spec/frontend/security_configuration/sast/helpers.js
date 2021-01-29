@@ -15,6 +15,7 @@ export const makeEntities = (count, changes) =>
     label: `label${i}`,
     type: 'string',
     value: `value${i}`,
+    size: `MEDIUM`,
     ...changes,
   }));
 

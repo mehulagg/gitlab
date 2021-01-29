@@ -4,7 +4,7 @@ import {
   toSastCiConfigurationEntityInput,
   toSastCiConfigurationAnalyzerEntityInput,
 } from 'ee/security_configuration/sast/components/utils';
-import { makeEntities, makeAnalyzerEntities } from './helpers';
+import { makeEntities, makeAnalyzerEntities } from '../helpers';
 
 describe('isValidConfigurationEntity', () => {
   const validEntities = makeEntities(3);
