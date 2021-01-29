@@ -25,7 +25,7 @@ you begin. The best way back up a repository is to
 
 ## Purge files from repository history and storage
 
-To reduce the size of your repository in GitLab, you must remove references to large files from branches, tags, and
+To reduce the size of your repository in GitLab, you must remove references to large files from branches, tags, *and*
 other internal references (refs) that are automatically created by GitLab. These refs include:
 
 - `refs/merge-requests/*` for merge requests.
@@ -43,10 +43,10 @@ To purge files from a GitLab repository:
 
 1. Generate a fresh [export from the
    project](../settings/import_export.html#exporting-a-project-and-its-data) and download it.
-   The project export is used to purge files from your repository, 
-   and it also serves as a backup in case that data is erroneously removed as part of this process.
+   This project export contains a backup copy of your repository *and* refs
+   we can use to purge files from your repository.
 
-2. Decompress the backup using `tar`:
+1. Decompress the backup using `tar`:
 
    ```shell
    tar xzf project-backup.tar.gz
@@ -55,13 +55,13 @@ To purge files from a GitLab repository:
    This contains a `project.bundle` file, which was created by
    [`git bundle`](https://git-scm.com/docs/git-bundle).
 
-3. Clone a fresh copy of the repository from the bundle using  `--bare` and `--mirror` options:
+1. Clone a fresh copy of the repository from the bundle using  `--bare` and `--mirror` options:
 
    ```shell
    git clone --bare --mirror /path/to/project.bundle
    ```
 
-4. Using `git filter-repo`, purge any files from the history of your repository. Because we are
+1. Using `git filter-repo`, purge any files from the history of your repository. Because we are
    trying to remove internal refs, we rely on the `commit-map` produced by each run to tell us
    which internal refs to remove.
 
@@ -70,7 +70,7 @@ To purge files from a GitLab repository:
    the previous run. You need this file from **every** run. Do the next step every time you run
    `git filter-repo`.
 
-   To purge all large files, the `--strip-blobs-bigger-than` option can be used:
+   To purge all files larger than 10M, the `--strip-blobs-bigger-than` option can be used:
 
    ```shell
    git filter-repo --strip-blobs-bigger-than 10M
@@ -86,14 +86,14 @@ To purge files from a GitLab repository:
    [`git filter-repo` documentation](https://htmlpreview.github.io/?https://github.com/newren/git-filter-repo/blob/docs/html/git-filter-repo.html#EXAMPLES)
    for more examples and the complete documentation.
 
-5. Because cloning from a bundle file sets the `origin` remote to the local bundle file, delete this `origin` remote, and set it to the URL to your repository:
+1. Because cloning from a bundle file sets the `origin` remote to the local bundle file, delete this `origin` remote, and set it to the URL to your repository:
 
    ```shell
    git remote remove origin
    git remote add origin https://gitlab.example.com/<namespace>/<project_name>.git
    ```
 
-6. Force push your changes to overwrite all branches on GitLab:
+1. Force push your changes to overwrite all branches on GitLab:
 
    ```shell
    git push origin --force 'refs/heads/*'
@@ -102,7 +102,7 @@ To purge files from a GitLab repository:
    [Protected branches](../protected_branches.md) cause this to fail. To proceed, you must
    remove branch protection, push, and then re-enable protected branches.
 
-7. To remove large files from tagged releases, force push your changes to all tags on GitLab:
+1. To remove large files from tagged releases, force push your changes to all tags on GitLab:
 
    ```shell
    git push origin --force 'refs/tags/*'
@@ -111,7 +111,7 @@ To purge files from a GitLab repository:
    [Protected tags](../protected_tags.md) cause this to fail. To proceed, you must remove tag
    protection, push, and then re-enable protected tags.
 
-8. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
+1. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
 
    ```shell
    git push origin --force 'refs/replace/*'
@@ -119,11 +119,9 @@ To purge files from a GitLab repository:
 
    Refer to the Git [`replace`](https://git-scm.com/book/en/v2/Git-Tools-Replace) documentation for information on how this works.
 
-9. Run a [repository cleanup](#repository-cleanup).
-
+1. Run a [repository cleanup](#repository-cleanup).
 
 NOTE:
-
 
 ## Repository cleanup
 
