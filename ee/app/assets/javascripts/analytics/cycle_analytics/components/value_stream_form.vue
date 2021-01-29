@@ -102,7 +102,10 @@ export default {
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages: DEFAULT_STAGE_CONFIG,
+          stages:
+            initialPreset === PRESET_OPTIONS_DEFAULT
+              ? DEFAULT_STAGE_CONFIG
+              : [{ ...defaultCustomStageFields }],
           stageErrors: stageErrors || initializeStageErrors(initialPreset),
           ...initialData,
         }
@@ -132,21 +135,13 @@ export default {
       const { initialFormErrors } = this;
       return Boolean(Object.keys(initialFormErrors).length);
     },
-    isSuccessfullyCreated() {
-      // TODO: get this from state somehow
-      return false;
-    },
     isLoading() {
       return this.isCreating;
     },
     primaryProps() {
       return {
         text: this.$options.I18N.FORM_TITLE,
-        attributes: [
-          { variant: 'success' },
-          { disabled: this.isSuccessfullyCreated },
-          { loading: this.isLoading },
-        ],
+        attributes: [{ variant: 'success' }, { loading: this.isLoading }],
       };
     },
     secondaryProps() {

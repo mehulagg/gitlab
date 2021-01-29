@@ -93,7 +93,7 @@ describe('ValueStreamForm', () => {
     });
 
     it('submit button is enabled', () => {
-      expect(findSubmitDisabledAttribute('disabled')).toBe(false);
+      expect(findSubmitDisabledAttribute('disabled')).toBeUndefined();
     });
 
     it('does not include extended fields', () => {
@@ -138,9 +138,17 @@ describe('ValueStreamForm', () => {
 
         expect(wrapper.vm.stages.length).toBe(7);
       });
+
+      it('validates existing fields when clicked', () => {
+        expect(wrapper.vm.nameError).toEqual([]);
+
+        clickAddStage();
+
+        expect(wrapper.vm.nameError).toEqual(['Name is required']);
+      });
     });
 
-    describe.only('form errors', () => {
+    describe('form errors', () => {
       const commonExtendedData = {
         props: {
           hasExtendedFormFields: true,
@@ -148,7 +156,7 @@ describe('ValueStreamForm', () => {
         },
       };
 
-      it('renders errors for a default stage name', () => {
+      it('renders errors for a default stage field', () => {
         wrapper = createComponent({
           ...commonExtendedData,
           stubs: {
@@ -170,10 +178,9 @@ describe('ValueStreamForm', () => {
           },
         });
 
-        console.log('wrapper', wrapper.html());
         expectFieldError('custom-stage-name-0', initialFormStageErrors.stages[0].name[0]);
         expectFieldError(
-          'custom-stage-name-0',
+          'custom-stage-end-event-0',
           initialFormStageErrors.stages[0].endEventIdentifier[0],
         );
       });

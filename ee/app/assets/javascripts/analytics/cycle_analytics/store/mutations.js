@@ -1,4 +1,3 @@
-import { toArray } from 'lodash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { transformRawStages } from '../utils';
 import * as types from './mutation_types';
@@ -122,7 +121,7 @@ export default {
     state.isCreatingValueStream = true;
     state.createValueStreamErrors = {};
   },
-  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages }, errors = {} }) {
+  [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
     state.isCreatingValueStream = false;
 
     // TODO: move to utils + add additional specs
