@@ -1,0 +1,6 @@
+---
+title: Bump cluster management apps image tag in order to include the latest changes
+  related to hubble-relay and cilium
+merge_request: 51515
+author:
+type: changed
