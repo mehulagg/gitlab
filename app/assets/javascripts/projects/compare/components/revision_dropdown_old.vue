@@ -16,6 +16,10 @@ export default {
       type: String,
       required: true,
     },
+    revisionText: {
+      type: String,
+      required: true,
+    },
     paramsName: {
       type: String,
       required: true,
@@ -89,47 +93,53 @@ export default {
 </script>
 
 <template>
-  <div class="compare-form-group" :class="`js-compare-${paramsName}-dropdown`">
-    <input type="hidden" :name="paramsName" :value="selectedRevision" />
-    <gl-dropdown
-      class="gl-w-full gl-font-monospace"
-      toggle-class="form-control compare-dropdown-toggle js-compare-dropdown gl-min-w-0"
-      :text="selectedRevision"
-      header-text="Select Git revision"
-      :loading="loading"
-    >
-      <template #header>
-        <gl-search-box-by-type
-          v-model.trim="searchTerm"
-          :placeholder="s__('CompareRevisions|Filter by Git revision')"
-          @keyup.enter="onSearchEnter"
-        />
-      </template>
-      <gl-dropdown-section-header v-if="hasFilteredBranches">
-        {{ s__('CompareRevisions|Branches') }}
-      </gl-dropdown-section-header>
-      <gl-dropdown-item
-        v-for="(branch, index) in filteredBranches"
-        :key="`branch${index}`"
-        :is-check-item="true"
-        :is-checked="selectedRevision === branch"
-        @click="onClick(branch)"
+  <div class="form-group compare-form-group" :class="`js-compare-${paramsName}-dropdown`">
+    <div class="input-group inline-input-group">
+      <span class="input-group-prepend">
+        <div class="input-group-text">
+          {{ s__(`CompareRevisions|${revisionText}`) }}
+        </div>
+      </span>
+      <input type="hidden" :name="paramsName" :value="selectedRevision" />
+      <gl-dropdown
+        class="gl-flex-grow-1 gl-flex-basis-0 gl-min-w-0 gl-font-monospace"
+        toggle-class="form-control compare-dropdown-toggle js-compare-dropdown gl-min-w-0 gl-rounded-top-left-none! gl-rounded-bottom-left-none!"
+        :text="selectedRevision"
+        header-text="Select Git revision"
+        :loading="loading"
       >
-        {{ branch }}
-      </gl-dropdown-item>
-      <gl-dropdown-section-header v-if="hasFilteredTags">
-        {{ s__('CompareRevisions|Tags') }}
-      </gl-dropdown-section-header>
-      <gl-dropdown-item
-        v-for="(tag, index) in filteredTags"
-        :key="`tag${index}`"
-        :is-check-item="true"
-        :is-checked="selectedRevision === tag"
-        @click="onClick(tag)"
-      >
-        {{ tag }}
-      </gl-dropdown-item>
-    </gl-dropdown>
-    <!-- </div> -->
+        <template #header>
+          <gl-search-box-by-type
+            v-model.trim="searchTerm"
+            :placeholder="s__('CompareRevisions|Filter by Git revision')"
+            @keyup.enter="onSearchEnter"
+          />
+        </template>
+        <gl-dropdown-section-header v-if="hasFilteredBranches">
+          {{ s__('CompareRevisions|Branches') }}
+        </gl-dropdown-section-header>
+        <gl-dropdown-item
+          v-for="(branch, index) in filteredBranches"
+          :key="`branch${index}`"
+          :is-check-item="true"
+          :is-checked="selectedRevision === branch"
+          @click="onClick(branch)"
+        >
+          {{ branch }}
+        </gl-dropdown-item>
+        <gl-dropdown-section-header v-if="hasFilteredTags">
+          {{ s__('CompareRevisions|Tags') }}
+        </gl-dropdown-section-header>
+        <gl-dropdown-item
+          v-for="(tag, index) in filteredTags"
+          :key="`tag${index}`"
+          :is-check-item="true"
+          :is-checked="selectedRevision === tag"
+          @click="onClick(tag)"
+        >
+          {{ tag }}
+        </gl-dropdown-item>
+      </gl-dropdown>
+    </div>
   </div>
 </template>

@@ -1008,6 +1008,20 @@ pre.light-well {
   }
 }
 
+// Move to gitlab/ui
+.gl-sm-w-half {
+  @media (min-width: $breakpoint-sm) {
+    width: 50%;;
+  }
+}
+
+// Move to gitlab/ui
+.gl-sm-pr-3 {
+  @media (min-width: $breakpoint-sm) {
+    margin-right: $gl-spacing-scale-3;
+  }
+}
+
 .clearable-input {
   position: relative;
 
