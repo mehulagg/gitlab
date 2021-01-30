@@ -1008,6 +1008,30 @@ pre.light-well {
   }
 }
 
+.compare-revision-cards {
+  @media (min-width: $breakpoint-lg) {
+    .gl-card {
+      width: calc(50% - 15px);
+    }
+    .compare-ellipsis {
+      width: 30px;
+    }
+  }
+
+  @media (min-width: $breakpoint-sm) {
+    .compare-form-group {
+      width: 50%;
+    }
+  }
+}
+
+// Move to gitlab/ui
+.gl-sm-pr-3 {
+  @media (min-width: $breakpoint-sm) {
+    padding-right: $gl-spacing-scale-3;
+  }
+}
+
 .clearable-input {
   position: relative;
 

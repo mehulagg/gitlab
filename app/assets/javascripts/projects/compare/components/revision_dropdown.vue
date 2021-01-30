@@ -16,10 +16,6 @@ export default {
       type: String,
       required: true,
     },
-    revisionText: {
-      type: String,
-      required: true,
-    },
     paramsName: {
       type: String,
       required: true,

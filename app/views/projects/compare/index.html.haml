@@ -17,4 +17,6 @@
     refs_project_path: refs_project_path(@project),
     params_from: params[:from], params_to: params[:to],
     project_merge_request_path: @merge_request.present? ? project_merge_request_path(@project, @merge_request) : '',
-    create_mr_path: create_mr_button? ? create_mr_path : '' } }
+    create_mr_path: create_mr_button? ? create_mr_path : '',
+    project_to: { id: @project.id, name: @project.full_path }.to_json,
+    projects_from: target_projects(@project).map { |project| { id:project.id, name: project.full_path } }.to_json } }

@@ -10,12 +10,18 @@ export default function init() {
     projectCompareIndexPath,
     projectMergeRequestPath,
     createMrPath,
+    projectTo,
+    projectsFrom,
   } = el.dataset;
 
   return new Vue({
     el,
     components: {
       CompareApp,
+    },
+    provide: {
+      projectTo,
+      projectsFrom,
     },
     render(createElement) {
       return createElement(CompareApp, {
