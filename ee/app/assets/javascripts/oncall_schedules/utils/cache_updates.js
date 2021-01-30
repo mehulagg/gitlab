@@ -80,44 +80,6 @@ const updateScheduleFromStore = (store, query, { oncallScheduleUpdate }, variabl
   });
 };
 
-const addRotationToStore = (
-  store,
-  query,
-  { oncallRotationCreate, scheduleIid },
-  variables,
-) => {
-  const rotation = oncallRotationCreate?.oncallRotation;
-  if (!rotation) {
-    return;
-  }
-
-  const sourceData = store.readQuery({
-    query,
-    variables,
-  });
-
-  const data = produce(sourceData, (draftData) => {
-    const scheduleToUpdate = draftData.project.incidentManagementOncallSchedules.nodes.find(
-      ({ iid }) => iid === scheduleIid,
-    );
-    const updatedRotations = [
-      ...scheduleToUpdate.rotations.nodes,
-      rotation
-    ];
-
-    // eslint-disable-next-line no-param-reassign
-    draftData.project.incidentManagementOncallSchedules.nodes.find(
-      ({ iid }) => iid === scheduleIid,
-    ).rotations.nodes = updatedRotations;
-  });
-
-  store.writeQuery({
-    query,
-    variables,
-    data,
-  });
-};
-
 const updateRotationFromStore = (store, query, { oncallRotationUpdate, scheduleIid }, variables) => {
   const rotation = oncallRotationUpdate?.oncallRotation;
   if (!rotation) {
@@ -211,14 +173,6 @@ export const updateStoreAfterScheduleEdit = (store, query, data, variables) => {
     onError(data, UPDATE_SCHEDULE_ERROR);
   } else {
     updateScheduleFromStore(store, query, data, variables);
-  }
-};
-
-export const updateStoreAfterRotationAdd = (store, query, data, variables) => {
-  if (hasErrors(data)) {
-    onError(data, UPDATE_SCHEDULE_ERROR);
-  } else {
-    addRotationToStore(store, query, data, variables);
   }
 };
 

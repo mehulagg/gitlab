@@ -48,7 +48,7 @@ export default {
     },
     shiftsToRender() {
       const validShifts = this.rotation.shifts.nodes.filter(({ startsAt, endsAt }) => this.shiftRangeOverlap(startsAt, endsAt).hoursOverlap > 0);
-      // if week view and on same day, dont show more than 1
+      // TODO: If week view and on same day, dont show more than 1 assignee or use CSS to limit their size to be readable
       return Object.freeze(validShifts);
     }
   },

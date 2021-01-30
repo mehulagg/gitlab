@@ -38,6 +38,10 @@ export default {
       return new Date(nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK));
     },
     daysUntilEndOfTimeFrame() {
+     if(this.currentTimeframeEndsAt.getMonth() !== this.timeframeItem.getMonth()) {
+       // TODO: Handle Edge case where timeframe spans two different months
+     }
+
       return (
         this.currentTimeframeEndsAt.getDate() -
         new Date(this.shiftRangeOverlap.overlapStartDate).getDate() +
@@ -73,6 +77,8 @@ export default {
     },
     shiftShouldRender() {
       if (this.timeFrameIndex !== 0) {
+        // TDOD: Handle edge case where this.shiftRangeOverlap.overlapStartDate is the same as this.timeframeItem
+
         return (
           new Date(this.shiftRangeOverlap.overlapStartDate) > this.timeframeItem &&
           new Date(this.shiftRangeOverlap.overlapStartDate) < this.currentTimeframeEndsAt
