@@ -68,14 +68,12 @@ RSpec.describe Projects::Alerting::NotifyService do
       let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
       let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
       let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let(:notification_args) do
-        [
-          [participant.user],
-          having_attributes(class: AlertManagement::Alert, title: payload['title'])
-        ]
-      end
+      let(:payload) { { 'fingerprint' => 'fingerprint' } }
+      let(:resolving_payload) { { 'fingerprint' => 'fingerprint', "end_time": Time.current.iso8601 } }
+      let(:users) { [participant.user] }
+      let(:fingerprint) { Digest::SHA1.hexdigest('fingerprint') }
 
-      it_behaves_like 'Alert Notification Service sends notification email to on-call users'
+      it_behaves_like 'oncall users are correctly notified'
     end
   end
 end
