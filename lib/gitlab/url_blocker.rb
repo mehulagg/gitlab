@@ -9,7 +9,6 @@ module Gitlab
 
     GETADDRINFO_TIMEOUT_SECONDS = 15
     private_constant :GETADDRINFO_TIMEOUT_SECONDS
-    BlockedUrlError = Class.new(StandardError)
 
     class << self
       # Validates the given url according to the constraints specified by arguments.
