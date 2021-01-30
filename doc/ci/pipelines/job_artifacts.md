@@ -484,6 +484,10 @@ a project, you can disable this behavior to save space:
 1. Navigate to **Settings > CI/CD > Artifacts**.
 1. Uncheck **Keep artifacts from most recent successful jobs**.
 
+NOTE:
+Disabling this setting won't automatically remove the current latest artifacts. A new pipeline must be 
+run after this setting is disabled for GitLab to remove old as well as latest artifacts after expiry.
+
 ## Troubleshooting
 
 ### Error message `No files to upload`
