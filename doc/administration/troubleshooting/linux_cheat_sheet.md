@@ -324,11 +324,6 @@ systemd-resolve --status
 sudo tcpdump host www.example.com
 ```
 
-### Network Troubleshooting
-
-```shell
-```
-
 ## Package Management
 
 ```shell
