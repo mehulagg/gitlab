@@ -94,7 +94,7 @@ export default {
   <div class="list-section">
     <gl-loading-icon v-if="loading" />
        <div
-       v-else-if="rotations.length === 0" class="list-item list-item-empty clearfix">
+       v-else-if="rotations.length === 0 && !loading" class="list-item list-item-empty clearfix">
       <span
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
       >
@@ -152,7 +152,6 @@ export default {
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
         <schedule-shift-wrapper
           v-if="rotation.shifts"
-          v-once
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
           :timeframe="timeframe"

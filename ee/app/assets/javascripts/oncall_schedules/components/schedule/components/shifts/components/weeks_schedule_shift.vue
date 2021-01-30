@@ -88,13 +88,13 @@ export default {
       );
     },
     shiftWidth() {
-      const offset = 1;
+      const offset = this.shiftStartDateOutOfRange ? 0 : 1;
       const baseWidth =
         this.timeFrameIndex === 0
           ? this.totalShiftRangeOverlap.daysOverlap
-          : this.shiftRangeOverlap.daysOverlap;
+          : this.shiftRangeOverlap.daysOverlap + offset;
 
-      return baseWidth + offset;
+      return baseWidth;
     },
     timeFrameIndex() {
       return this.timeframe.indexOf(this.timeframeItem);
