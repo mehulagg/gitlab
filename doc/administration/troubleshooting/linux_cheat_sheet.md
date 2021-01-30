@@ -304,6 +304,29 @@ whois <ip_address> | grep -i "orgname\|netname"
 
 # Curl headers with redirect
 curl --head --location "https://example.com"
+
+# Test if a host is reachable on the network
+ping example.com
+
+# Show the route taken to a host
+traceroute example.com
+mtr example.com
+
+# List details of network interfaces
+ip address
+
+# Check local DNS settings
+cat /etc/hosts
+cat /etc/resolv.conf
+systemd-resolve --status
+
+# Capture traffic to/from a host
+sudo tcpdump host www.example.com
+```
+
+### Network Troubleshooting
+
+```shell
 ```
 
 ## Package Management
