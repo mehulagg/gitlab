@@ -462,7 +462,7 @@ To avoid confusion, configure only one job to generate a `codeclimate.json`.
 When using Code Quality jobs on a **Ruby** project, the following error can
 appear when using either a very recent, or very old version of Ruby:
 
-```text
+```plaintext
 /usr/local/bundle/gems/rubocop-0.52.1/lib/rubocop/config.rb:510:in `check_target_ruby':
 Unknown Ruby version 2.7 found in `.ruby-version`. (RuboCop::ValidationError)
 Supported versions: 2.1, 2.2, 2.3, 2.4, 2.5
