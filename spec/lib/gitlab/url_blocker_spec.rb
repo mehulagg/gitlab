@@ -143,6 +143,16 @@ RSpec.describe Gitlab::UrlBlocker, :stub_invalid_dns_only do
             let(:expected_hostname) { nil }
           end
         end
+
+        context 'when resolving runs into a timeout' do
+          let(:import_url) { 'http://example.com' }
+
+          it 'raises an error due to DNS timeout' do
+            stub_env('RSPEC_ALLOW_INVALID_URLS', 'false')
+            stub_const("#{described_class}::GETADDRINFO_TIMEOUT_SECONDS", 0.0001)
+            expect { subject }.to raise_error(described_class::BlockedUrlError)
+          end
+        end
       end
     end
   end
