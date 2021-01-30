@@ -181,10 +181,16 @@ reasons for including it.
 `@mention` a maintainer in merge requests that contain:
 
 - More than 500 changes.
-- Any major breaking changes.
+- Any major [breaking changes](#breaking-changes).
 - External libraries.
 
 If you are not sure who to mention, the reviewer will do this for you early in the merge request process.
+
+#### Breaking changes
+
+A "breaking change" is any change that requires users to make a corresponding change to their code, settings, or workflow.  "Users" might be humans, API clients, or even code classes that "use" another class.  For example, removing a feature is a breaking change, because existing users must find some alternative.  Expanding access to a feature is not a breaking change, because existing users are unaffected.
+
+A breaking change can be considered "major" if it affects many users, or represents a significant change in behavior.
 
 #### Issues workflow
 
