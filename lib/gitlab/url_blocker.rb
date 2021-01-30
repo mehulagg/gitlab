@@ -5,7 +5,10 @@ require 'ipaddress'
 
 module Gitlab
   class UrlBlocker
+    BlockedUrlError = Class.new(StandardError)
+
     GETADDRINFO_TIMEOUT_SECONDS = 15
+    private_constant :GETADDRINFO_TIMEOUT_SECONDS
     BlockedUrlError = Class.new(StandardError)
 
     class << self
