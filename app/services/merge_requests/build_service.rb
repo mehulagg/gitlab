@@ -243,6 +243,7 @@ module MergeRequests
         commit = first_multiline_commit
         return unless commit
       end
+
       merge_request.title ||= commit.title
       merge_request.description ||= commit.description.try(:strip)
 
