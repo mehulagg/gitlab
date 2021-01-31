@@ -1,7 +1,7 @@
 ## Contributor license agreement
 
 By submitting code as an individual you agree to the
-[individual contributor license agreement](doc/legal/individual_contributor_license_agreement.md).
+[Developer's Certificate of Origin](https://gitlab.com/gitlab-org/dco/-/blob/master/README.md).
 By submitting code as an entity you agree to the
 [corporate contributor license agreement](doc/legal/corporate_contributor_license_agreement.md).
 
