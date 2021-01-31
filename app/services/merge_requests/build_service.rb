@@ -71,6 +71,7 @@ module MergeRequests
              :compare_commits,
              :wip_title,
              :description,
+             :first_multiline_commit,
              :errors,
              to: :merge_request
 
@@ -186,7 +187,8 @@ module MergeRequests
     # interpreted as the user wants to close that issue on this project.
     #
     # For example:
-    # - Issue 112 exists, title: Emoji don't show up in commit title
+    # - Issue 112 exists
+    # - title: Emoji don't show up in commit title
     # - Source branch is: 112-fix-mep-mep
     #
     # Will lead to:
@@ -194,8 +196,9 @@ module MergeRequests
     # - Setting the title as 'Resolves "Emoji don't show up in commit title"' if there is
     #   more than one commit in the MR
     #
+    # @@@(maxcoplan) remember this!
     def assign_title_and_description
-      assign_title_and_description_from_single_commit
+      assign_title_and_description_from_commits
       merge_request.title ||= title_from_issue if target_project.issues_enabled? || target_project.external_issue_tracker
       merge_request.title ||= source_branch.titleize.humanize
       merge_request.title = wip_title if compare_commits.empty?
@@ -230,14 +233,19 @@ module MergeRequests
       end
     end
 
-    def assign_title_and_description_from_single_commit
+    def assign_title_and_description_from_commits
       commits = compare_commits
 
-      return unless commits&.count == 1
-
-      commit = commits.first
+      if commits&.count == 1
+        commit = commits.first
+      else
+        # @@@(maxcoplan) Testing failures comes from here
+        commit = first_multiline_commit
+        return unless commit
+      end
       merge_request.title ||= commit.title
       merge_request.description ||= commit.description.try(:strip)
+
     end
 
     def title_from_issue
