@@ -1,7 +1,7 @@
 <script>
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import { OVERVIEW_METRICS } from '../constants';
 import TimeMetricsCard from './time_metrics_card.vue';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 
 export default {
   name: 'OverviewActivity',

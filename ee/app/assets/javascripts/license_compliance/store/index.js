@@ -7,9 +7,9 @@ import approvalsModule, {
 } from 'ee/approvals/stores/modules/license_compliance';
 import { licenseManagementModule } from 'ee/vue_shared/license_compliance/store/index';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import modalModule from '~/vuex_shared/modules/modal';
 import createState from './state';
 
-import modalModule from '~/vuex_shared/modules/modal';
 
 import mediator from './plugins/mediator';
 

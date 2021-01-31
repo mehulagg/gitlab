@@ -4,10 +4,10 @@ import { cloneDeep } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
+import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
 import AnalyzerConfiguration from './analyzer_configuration.vue';
 import DynamicFields from './dynamic_fields.vue';
 import ExpandableSection from './expandable_section.vue';
-import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
 import {
   toSastCiConfigurationEntityInput,
   toSastCiConfigurationAnalyzerEntityInput,

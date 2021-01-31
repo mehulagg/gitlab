@@ -5,8 +5,8 @@ import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 
-import InsightsChartError from './insights_chart_error.vue';
 import { CHART_TYPES } from '../constants';
+import InsightsChartError from './insights_chart_error.vue';
 
 const CHART_HEIGHT = 300;
 

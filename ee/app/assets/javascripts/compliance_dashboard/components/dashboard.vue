@@ -2,10 +2,10 @@
 import Cookies from 'js-cookie';
 import { GlTabs, GlTab } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { COMPLIANCE_TAB_COOKIE_KEY } from '../constants';
 import MergeRequestsGrid from './merge_requests/grid.vue';
 import EmptyState from './empty_state.vue';
 import MergeCommitsExportButton from './merge_requests/merge_commits_export_button.vue';
-import { COMPLIANCE_TAB_COOKIE_KEY } from '../constants';
 
 export default {
   name: 'ComplianceDashboard',

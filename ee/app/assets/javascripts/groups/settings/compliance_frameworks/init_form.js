@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
+import createDefaultClient from '~/lib/graphql';
 import CreateForm from './components/create_form.vue';
 import EditForm from './components/edit_form.vue';
-import createDefaultClient from '~/lib/graphql';
 
 Vue.use(VueApollo);
 

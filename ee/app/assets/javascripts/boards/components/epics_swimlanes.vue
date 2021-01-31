@@ -3,12 +3,12 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import { DRAGGABLE_TAG } from '../constants';
 import defaultSortableConfig from '~/sortable/sortable_config';
 import { n__ } from '~/locale';
+import { isListDraggable } from '~/boards/boards_util';
+import { DRAGGABLE_TAG } from '../constants';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
-import { isListDraggable } from '~/boards/boards_util';
 
 export default {
   components: {

@@ -4,12 +4,12 @@ import { GlButton, GlLoadingIcon, GlIcon, GlPopover } from '@gitlab/ui';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import PaginatedList from '~/vue_shared/components/paginated_list.vue';
+import LicenseApprovals from '../../approvals/components/license_compliance/index.vue';
 import AddLicenseForm from './components/add_license_form.vue';
 import AdminLicenseManagementRow from './components/admin_license_management_row.vue';
 import LicenseManagementRow from './components/license_management_row.vue';
 import DeleteConfirmationModal from './components/delete_confirmation_modal.vue';
-import PaginatedList from '~/vue_shared/components/paginated_list.vue';
-import LicenseApprovals from '../../approvals/components/license_compliance/index.vue';
 
 export default {
   name: 'LicenseManagement',

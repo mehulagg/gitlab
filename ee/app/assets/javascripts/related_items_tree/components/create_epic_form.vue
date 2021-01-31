@@ -10,9 +10,9 @@ import {
   GlDropdownItem,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { SEARCH_DEBOUNCE } from '../constants';
 
-import { __ } from '~/locale';
 
 export default {
   components: {

@@ -1,8 +1,8 @@
 <script>
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { PRESET_TYPES } from 'ee/oncall_schedules/constants';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
-import { GlResizeObserverDirective } from '@gitlab/ui';
 
 export default {
   PRESET_TYPES,
