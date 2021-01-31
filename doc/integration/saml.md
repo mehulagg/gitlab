@@ -582,8 +582,8 @@ GitLab will sign the request with the provided private key. GitLab will include 
 
 Avoid user control of the following attributes:
 
-- [`*NameID*`](../user/group/saml_sso/index.md#nameid)
-- *Email* when used with `omniauth_auto_link_saml_user`
+- [`NameID`](../user/group/saml_sso/index.md#nameid)
+- `Email` when used with `omniauth_auto_link_saml_user`
 
 These attributes define the SAML user. If users can change these attributes, they can impersonate others.
 
