@@ -213,7 +213,7 @@ Example:
   } }
 ```
 
-### External groups **(PREMIUM SELF)**
+### External groups **(FREE SELF)**
 
 SAML login supports automatic identification on whether a user should be considered an [external](../user/permissions.md) user. This is based on the user's group membership in the SAML identity provider.
 
