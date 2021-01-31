@@ -448,7 +448,7 @@ module Gitlab
       # diff options.  The +options+ hash can also include :break_rewrites to
       # split larger rewrites into delete/add pairs.
       def diff(from, to, options = {}, *paths)
-        iterator = gitaly_commit_client.diff(from, to, options.merge(paths: paths))
+        iterator = gitaly_commit_client.diff(from, to, options.merge(paths: paths, word_diff: true))
 
         Gitlab::Git::DiffCollection.new(iterator, options)
       end

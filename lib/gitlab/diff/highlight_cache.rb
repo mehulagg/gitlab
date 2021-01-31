@@ -69,7 +69,7 @@ module Gitlab
 
       def key
         strong_memoize(:redis_key) do
-          ['highlighted-diff-files', diffable.cache_key, VERSION, diff_options].join(":")
+          ['highlighted-diff-files', diffable.cache_key, VERSION, diff_options, 10].join(":")
         end
       end
 
@@ -119,17 +119,17 @@ module Gitlab
       def write_to_redis_hash(hash)
         Gitlab::Redis::Cache.with do |redis|
           redis.pipelined do
-            hash.each do |diff_file_id, highlighted_diff_lines_hash|
-              redis.hset(
-                key,
-                diff_file_id,
-                gzip_compress(highlighted_diff_lines_hash.to_json)
-              )
-            end
+            # hash.each do |diff_file_id, highlighted_diff_lines_hash|
+            #   redis.hset(
+            #     key,
+            #     diff_file_id,
+            #     gzip_compress(highlighted_diff_lines_hash.to_json)
+            #   )
+            # end
 
             # HSETs have to have their expiration date manually updated
             #
-            redis.expire(key, EXPIRATION)
+            # redis.expire(key, EXPIRATION)
           end
 
           record_memory_usage(fetch_memory_usage(redis, key))

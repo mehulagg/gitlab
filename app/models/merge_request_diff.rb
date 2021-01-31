@@ -614,7 +614,7 @@ class MergeRequestDiff < ApplicationRecord
 
     # Can be read as: fetch the persisted diffs if yielded without the
     # Compare object.
-    return yield unless without_files? || diff_options[:ignore_whitespace_change]
+    return yield unless without_files? || diff_options[:ignore_whitespace_change] || diff_options[:word_diff]
     return yield unless diff_refs&.complete?
 
     comparison = diff_refs.compare_in(repository.project)

@@ -79,7 +79,7 @@ module Gitlab
         #    exceeded
         def filter_diff_options(options, default_options = {})
           allowed_options = [:ignore_whitespace_change, :max_files, :max_lines,
-                             :limits, :expanded]
+                             :limits, :expanded, :word_diff]
 
           if default_options
             actual_defaults = default_options.dup
