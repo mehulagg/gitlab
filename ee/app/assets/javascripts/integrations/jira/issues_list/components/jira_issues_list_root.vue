@@ -17,7 +17,6 @@ import {
 } from '~/issuable_list/constants';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
-
 export default {
   name: 'JiraIssuesList',
   IssuableListTabs,

@@ -14,7 +14,6 @@ import ZenMode from '~/zen_mode';
 import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
 import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 
-
 import RequirementMeta from '../mixins/requirement_meta';
 import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 import RequirementStatusBadge from './requirement_status_badge.vue';

@@ -32,8 +32,6 @@ import RequirementForm from './requirement_form.vue';
 import ImportRequirementsModal from './import_requirements_modal.vue';
 import ExportRequirementsModal from './export_requirements_modal.vue';
 
-
-
 export default {
   DEFAULT_PAGE_SIZE,
   AvailableSortOptions,

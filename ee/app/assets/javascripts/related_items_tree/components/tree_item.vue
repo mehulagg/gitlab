@@ -8,7 +8,6 @@ import { __ } from '~/locale';
 import { ChildType } from '../constants';
 import TreeItemBody from './tree_item_body.vue';
 
-
 export default {
   ChildType,
   components: {

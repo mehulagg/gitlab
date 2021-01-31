@@ -10,7 +10,6 @@ import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/const
 import modalModule from '~/vuex_shared/modules/modal';
 import createState from './state';
 
-
 import mediator from './plugins/mediator';
 
 import listModule from './modules/list';

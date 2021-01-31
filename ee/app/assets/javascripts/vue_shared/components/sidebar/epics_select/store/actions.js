@@ -9,7 +9,6 @@ import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
 import boardsStore from '~/boards/stores/boards_store';
 import * as types from './mutation_types';
 
-
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
 export const setIssueId = ({ commit }, issueId) => commit(types.SET_ISSUE_ID, issueId);
 

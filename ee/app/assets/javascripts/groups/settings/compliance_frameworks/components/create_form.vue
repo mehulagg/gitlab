@@ -5,7 +5,6 @@ import * as Sentry from '~/sentry/wrapper';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import SharedForm from './shared_form.vue';
 
-
 export default {
   components: {
     SharedForm,

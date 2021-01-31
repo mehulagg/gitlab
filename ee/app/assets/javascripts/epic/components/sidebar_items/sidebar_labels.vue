@@ -5,7 +5,6 @@ import { debounce } from 'lodash';
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import ListLabel from '../../models/label';
 
-
 export default {
   components: {
     LabelsSelectVue,

@@ -13,7 +13,6 @@ import {
 import { __ } from '~/locale';
 import { SEARCH_DEBOUNCE } from '../constants';
 
-
 export default {
   components: {
     GlButton,

@@ -12,7 +12,6 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
-
 import projectTestCases from '../queries/project_test_cases.query.graphql';
 import projectTestCasesCount from '../queries/project_test_cases_count.query.graphql';
 

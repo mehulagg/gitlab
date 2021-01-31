@@ -17,8 +17,6 @@ import SidebarDatePicker from './sidebar_items/sidebar_date_picker.vue';
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
 import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
 
-
-
 export default {
   dateTypes,
   components: {

@@ -15,7 +15,6 @@ import EpicsListEmpty from './epics_list_empty.vue';
 import RoadmapFilters from './roadmap_filters.vue';
 import RoadmapShell from './roadmap_shell.vue';
 
-
 export default {
   i18n: {
     warningTitle: s__('GroupRoadmap|Some of your epics might not be visible'),

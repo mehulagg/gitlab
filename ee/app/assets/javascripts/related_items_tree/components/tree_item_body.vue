@@ -23,7 +23,6 @@ import IssueHealthStatus from './issue_health_status.vue';
 
 import StateTooltip from './state_tooltip.vue';
 
-
 export default {
   itemRemoveModalId,
   components: {
