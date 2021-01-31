@@ -163,7 +163,7 @@ will be returned to GitLab and will be signed in.
 
 ## SAML Groups
 
-You can require users to be members of a certain group, or assign users `external`, `admin` or `auditor` roles based on group membership. This feature **does not** allow you to
+You can require users to be members of a certain group, or assign users [external](../user/permissions.md#external-users), admin or [auditor](../user/permissions.md#auditor-users) roles based on group membership. This feature **does not** allow you to
 automatically add users to GitLab [Groups](../user/group/index.md).
 
 ### Requirements
@@ -215,7 +215,7 @@ Example:
 
 ### External groups **(PREMIUM SELF)**
 
-SAML login supports automatic identification on whether a user should be considered an [external](../user/permissions.md) user. This is based on the user's group membership in the SAML identity provider.
+SAML login supports automatic identification on whether a user should be considered an [external user](../user/permissions.md#external-users). This is based on the user's group membership in the SAML identity provider.
 
 ```yaml
 { name: 'saml',
@@ -257,7 +257,7 @@ considered admin users.
 
 The requirements are the same as the previous settings, your IdP needs to pass Group information to GitLab, you need to tell
 GitLab where to look for the groups in the SAML response, and which group(s) should be
-considered auditor users.
+considered [auditor users](../user/permissions.md#auditor-users).
 
 ```yaml
 { name: 'saml',
