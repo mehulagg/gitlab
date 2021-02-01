@@ -26,13 +26,7 @@ module Ci
       end
 
       def append_data(model, new_data, offset)
-        if offset > 0
-          truncated_data = data(model).to_s.byteslice(0, offset)
-          new_data = truncated_data + new_data
-        end
-
-        set_data(model, new_data)
-        new_data.bytesize
+        raise NotImplementedError
       end
 
       def size(model)
