@@ -16,35 +16,18 @@ RSpec.describe EE::BulkImports::Groups::Loaders::EpicsLoader do
 
     let(:data) do
       {
-        'page_info' => {
-          'end_cursor' => 'endCursorValue',
-          'has_next_page' => true
-        },
-        'nodes' => [
-          {
-            'title' => 'epic1',
-            'state' => 'opened',
-            'confidential' => false
-          },
-          {
-            'title' => 'epic2',
-            'state' => 'closed',
-            'confidential' => true
-          }
-        ]
+        'title' => 'epic1',
+        'state' => 'opened',
+        'confidential' => false
       }
     end
 
     subject { described_class.new }
 
-    it 'creates the epics and update the entity tracker' do
-      expect { subject.load(context, data) }.to change(::Epic, :count).by(2)
+    it 'creates the epic' do
+      expect { subject.load(context, data) }.to change(::Epic, :count).by(1)
 
-      tracker = entity.trackers.last
-
-      expect(group.epics.count).to eq(2)
-      expect(tracker.has_next_page).to eq(true)
-      expect(tracker.next_page).to eq('endCursorValue')
+      expect(group.epics.count).to eq(1)
     end
   end
 end

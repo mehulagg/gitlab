@@ -35,6 +35,8 @@ import _GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_s
 // eslint-disable-next-line no-unused-vars
 import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
 
+jest.mock('~/vue_shared/components/help_popover.vue');
+
 Vue.use(VueApollo);
 
 const SAST_SELECTOR = '.js-sast-widget';

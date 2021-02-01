@@ -3,7 +3,13 @@
 module QA
   RSpec.describe 'Manage' do
     describe 'User with minimal access to group', :requires_admin do
-      let(:user_with_minimal_access) { Resource::User.fabricate_via_api! }
+      let(:admin_api_client) { Runtime::API::Client.as_admin }
+
+      let(:user_with_minimal_access) do
+        Resource::User.fabricate_via_api! do |user|
+          user.api_client = admin_api_client
+        end
+      end
 
       let(:group) do
         group = Resource::Group.fabricate_via_api!

@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Uploads administration **(CORE ONLY)**
+# Uploads administration **(FREE SELF)**
 
 Uploads represent all user data that may be sent to GitLab as a single file. As an example, avatars and notes' attachments are uploads. Uploads are integral to GitLab functionality, and therefore cannot be disabled.
 
@@ -49,12 +49,12 @@ _The uploads are stored by default in
 
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-## Using object storage **(CORE ONLY)**
+## Using object storage **(FREE SELF)**
 
 > **Notes:**
 >
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3867) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17358) in [GitLab Core](https://about.gitlab.com/pricing/) 10.7.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17358) in [GitLab Free](https://about.gitlab.com/pricing/) 10.7.
 > - Since version 11.1, we support direct_upload to S3.
 
 If you don't want to use the local disk where GitLab is installed to store the

@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import ComplianceDashboard from './components/dashboard.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import ComplianceDashboard from './components/dashboard.vue';
 
 export default () => {
   const el = document.getElementById('js-compliance-dashboard');

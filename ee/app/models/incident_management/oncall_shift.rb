@@ -2,6 +2,8 @@
 
 module IncidentManagement
   class OncallShift < ApplicationRecord
+    include BulkInsertSafe
+
     self.table_name = 'incident_management_oncall_shifts'
 
     belongs_to :rotation, class_name: 'OncallRotation', inverse_of: :shifts, foreign_key: :rotation_id
@@ -13,7 +15,10 @@ module IncidentManagement
     validates :ends_at, presence: true
     validate :timeframes_do_not_overlap, if: :rotation
 
+    scope :order_starts_at_desc, -> { order(starts_at: :desc) }
     scope :for_timeframe, -> (starts_at, ends_at) do
+      return none unless starts_at.to_i < ends_at.to_i
+
       where("tstzrange(starts_at, ends_at, '[)') && tstzrange(?, ?, '[)')", starts_at, ends_at)
     end
 

@@ -2257,8 +2257,6 @@ RSpec.describe Project do
   end
 
   describe '#repository_size_excess' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.repository_size_excess }
 
     let_it_be(:statistics) { create(:project_statistics) }
@@ -2491,8 +2489,6 @@ RSpec.describe Project do
   end
 
   describe '#adjourned_deletion?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.adjourned_deletion? }
 
     where(:licensed?, :feature_enabled_on_group?, :adjourned_period, :result) do

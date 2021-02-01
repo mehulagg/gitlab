@@ -341,7 +341,7 @@ include:
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
 > - Available for Starter, Premium, and Ultimate in GitLab 10.6 and later.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Core in 11.4.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Free in 11.4.
 
 Use the `include` keyword to include external YAML files in your CI/CD configuration.
 You can break down one long `gitlab-ci.yml` file into multiple files to increase readability,
@@ -379,7 +379,7 @@ NOTE:
 Use merging to customize and override included CI/CD configurations with local
 configurations. Local configurations in the `.gitlab-ci.yml` file override included configurations.
 
-#### Variables with `include` **(CORE ONLY)**
+#### Variables with `include` **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/284883) in GitLab 13.8.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/294294) in GitLab 13.9.
@@ -1393,7 +1393,9 @@ job:
         - Dockerfile
 ```
 
-You can also use glob patterns to match multiple files in any directory in the repository:
+Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly link outside it.
+
+You can use glob patterns to match multiple files in any directory in the repository:
 
 ```yaml
 job:
@@ -1402,6 +1404,9 @@ job:
     - exists:
         - spec/**.rb
 ```
+
+Glob patterns are interpreted with Ruby [File.fnmatch](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
+with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
 
 For performance reasons, using `exists` with patterns is limited to 10,000
 checks. After the 10,000th check, rules with patterned globs always match.
@@ -1436,7 +1441,7 @@ In this example, if the first rule matches, then the job has `when: manual` and 
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/289803) on GitLab 13.8.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-rulesvariables). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-rulesvariables). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -1461,7 +1466,7 @@ job:
     - echo "Run another script if $IS_A_FEATURE exists"
 ```
 
-##### Enable or disable rules:variables **(CORE ONLY)**
+##### Enable or disable rules:variables **(FREE SELF)**
 
 rules:variables is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -2034,7 +2039,7 @@ This example creates four paths of execution:
 - Related to the above, stages must be explicitly defined for all jobs
   that have the keyword `needs:` or are referred to by one.
 
-##### Changing the `needs:` job limit **(CORE ONLY)**
+##### Changing the `needs:` job limit **(FREE SELF)**
 
 The maximum number of jobs that can be defined in `needs:` defaults to 50.
 
@@ -3670,7 +3675,7 @@ deploystacks:
 ### `trigger`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8997) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Core in 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
 Use `trigger` to define a downstream pipeline trigger. When GitLab starts a `trigger` job,
 a downstream pipeline is created.
@@ -4235,7 +4240,8 @@ There are two types of variables.
 
 - [Custom variables](../variables/README.md#custom-environment-variables):
   You can define their values in the `.gitlab-ci.yml` file, in the GitLab UI,
-  or by using the API.
+  or by using the API. You can also input variables in the GitLab UI when
+  [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually).
 - [Predefined variables](../variables/predefined_variables.md):
   These values are set by the runner itself.
   One example is `CI_COMMIT_REF_NAME`, which is the branch or tag the project is built for.
@@ -4274,6 +4280,20 @@ All YAML-defined variables are also set to any linked
 [Docker service containers](../docker/using_docker_images.md#what-is-a-service).
 
 You can use [YAML anchors for variables](#yaml-anchors-for-variables).
+
+### Prefill variables in manual pipelines
+
+> [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/30101) GitLab 13.7.
+
+You can use the `value` and `description` keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
+
+```yaml
+variables:
+  DEPLOY_ENVIRONMENT:
+    value: "staging"  # Deploy to staging by default
+    description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
+```
 
 ### Configure runner behavior with variables
 

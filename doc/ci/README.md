@@ -71,7 +71,7 @@ available through the UI. You can use them by creating a new file,
 choosing a template that suits your application, and adjusting it
 to your needs:
 
-![Use a `.gitlab-ci.yml` template](img/add_file_template_11_10.png)
+![Use a YAML template](img/add_file_template_11_10.png)
 
 While building your `.gitlab-ci.yml`, you can use the [CI/CD configuration visualization](pipeline_editor/index.md#visualize-ci-configuration) to facilitate your writing experience.
 
@@ -134,7 +134,7 @@ Its feature set is listed on the table below according to DevOps stages.
 | [CI services](services/README.md)                                                               | Link Docker containers with your base image.                                                                                   |
 | [Code Quality](../user/project/merge_requests/code_quality.md)                                  | Analyze your source code quality.                                                                                              |
 | [GitLab CI/CD for external repositories](ci_cd_for_external_repos/index.md) **(PREMIUM)**       | Get the benefits of GitLab CI/CD combined with repositories in GitHub and Bitbucket Cloud.                                     |
-| [Interactive Web Terminals](interactive_web_terminal/index.md) **(CORE ONLY)**                  | Open an interactive web terminal to debug the running jobs.                                                                    |
+| [Interactive Web Terminals](interactive_web_terminal/index.md) **(FREE SELF)**                  | Open an interactive web terminal to debug the running jobs.                                                                    |
 | [Unit test reports](unit_test_reports.md)                                                       | Identify script failures directly on merge requests.                                                                           |
 | [Using Docker images](docker/using_docker_images.md)                                            | Use GitLab and GitLab Runner with Docker to build and test applications.                                                       |
 |-------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------|
@@ -160,7 +160,7 @@ Its feature set is listed on the table below according to DevOps stages.
 Find example project code and tutorials for using GitLab CI/CD with a variety of app frameworks, languages, and platforms
 on the [CI Examples](examples/README.md) page.
 
-## Administration **(CORE ONLY)**
+## Administration **(FREE SELF)**
 
 As a GitLab administrator, you can change the default behavior
 of GitLab CI/CD for:

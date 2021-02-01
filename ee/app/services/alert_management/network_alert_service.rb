@@ -3,7 +3,8 @@
 module AlertManagement
   # Create alerts coming K8 through gitlab-agent
   class NetworkAlertService
-    include Gitlab::Utils::StrongMemoize
+    extend ::Gitlab::Utils::Override
+    include ::AlertManagement::AlertProcessing
 
     MONITORING_TOOL = Gitlab::AlertManagement::Payload::MONITORING_TOOLS.fetch(:cilium)
 
@@ -12,12 +13,10 @@ module AlertManagement
       @payload = payload
     end
 
-    # Users of this service need to check the agent token before calling `execute`.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/292707 will handle token within the service.
     def execute
       return bad_request unless valid_payload_size?
 
-      process_request
+      process_alert
 
       return bad_request unless alert.persisted?
 
@@ -32,55 +31,25 @@ module AlertManagement
       Gitlab::Utils::DeepSize.new(payload).valid?
     end
 
-    def process_request
-      if alert.persisted?
-        alert.register_new_event!
-      else
-        create_alert
-      end
-    end
-
-    def create_alert
-      if alert.save
-        alert.execute_services
-        SystemNoteService.create_new_alert(
-          alert,
-          MONITORING_TOOL
-        )
-        return
-      end
-
-      logger.warn(
-        message:
-          "Unable to create AlertManagement::Alert from #{MONITORING_TOOL}",
-        project_id: project.id,
-        alert_errors: alert.errors.messages
+    override :build_new_alert
+    def build_new_alert
+      AlertManagement::Alert.new(
+        **incoming_payload.alert_params,
+        domain: :threat_monitoring,
+        ended_at: nil
       )
     end
 
-    def logger
-      @logger ||= Gitlab::AppLogger
-    end
-
-    def alert
-      strong_memoize(:alert) { find_existing_alert || build_new_alert }
-    end
-
-    def find_existing_alert
-      AlertManagement::Alert.not_resolved.for_fingerprint(
-        project,
-        incoming_payload.gitlab_fingerprint
-      ).first
-    end
-
-    def build_new_alert
-      AlertManagement::Alert.new(**incoming_payload.alert_params, domain: :threat_monitoring, ended_at: nil)
-    end
-
+    override :incoming_payload
     def incoming_payload
       strong_memoize(:incoming_payload) do
         Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: MONITORING_TOOL)
       end
+    end
+
+    override :resolving_alert?
+    def resolving_alert?
+      false
     end
 
     def bad_request

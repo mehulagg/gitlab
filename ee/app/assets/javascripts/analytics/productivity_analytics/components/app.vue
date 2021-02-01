@@ -14,12 +14,12 @@ import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
-import MetricChart from './metric_chart.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
-import MergeRequestTable from './mr_table.vue';
 import { chartKeys } from '../constants';
 import { dateFormats } from '../../shared/constants';
 import urlSyncMixin from '../../shared/mixins/url_sync_mixin';
+import MergeRequestTable from './mr_table.vue';
+import MetricChart from './metric_chart.vue';
 
 export default {
   components: {

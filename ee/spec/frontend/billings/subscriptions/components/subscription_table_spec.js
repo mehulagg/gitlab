@@ -19,7 +19,7 @@ describe('SubscriptionTable component', () => {
   let store;
   let wrapper;
 
-  const defaultFlags = { saasManualRenewButton: false, saasAddSeatsButton: false };
+  const defaultFlags = { saasAddSeatsButton: false };
 
   const findAddSeatsButton = () => wrapper.findByTestId('add-seats-button');
   const findManageButton = () => wrapper.findByTestId('manage-button');
@@ -143,19 +143,15 @@ describe('SubscriptionTable component', () => {
 
   describe('Renew button', () => {
     describe.each`
-      planCode    | featureFlag | expected | testDescription
-      ${'silver'} | ${true}     | ${true}  | ${'renders the button'}
-      ${'silver'} | ${false}    | ${false} | ${'does not render the button'}
-      ${null}     | ${true}     | ${false} | ${'does not render the button'}
-      ${null}     | ${false}    | ${false} | ${'does not render the button'}
-      ${'free'}   | ${true}     | ${false} | ${'does not render the button'}
-      ${'free'}   | ${false}    | ${false} | ${'does not render the button'}
+      planCode    | expected | testDescription
+      ${'silver'} | ${true}  | ${'renders the button'}
+      ${null}     | ${false} | ${'does not render the button'}
+      ${'free'}   | ${false} | ${'does not render the button'}
     `(
-      'given a plan with state: planCode = $planCode and saasManualRenewButton = $featureFlag',
-      ({ planCode, featureFlag, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode',
+      ({ planCode, expected, testDescription }) => {
         beforeEach(() => {
           createComponentWithStore({
-            featureFlags: { saasManualRenewButton: featureFlag },
             state: {
               isLoadingSubscription: false,
               plan: {

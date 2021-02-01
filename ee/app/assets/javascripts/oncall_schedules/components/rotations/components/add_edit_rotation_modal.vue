@@ -13,8 +13,8 @@ import { isNameFieldValid } from 'ee/oncall_schedules/utils/common_utils';
 import { s__, __ } from '~/locale';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import usersSearchQuery from '~/graphql_shared/queries/users_search.query.graphql';
-import AddEditRotationForm from './add_edit_rotation_form.vue';
 import { format24HourTimeStringFromInt } from '~/lib/utils/datetime_utility';
+import AddEditRotationForm from './add_edit_rotation_form.vue';
 
 export const i18n = {
   rotationCreated: s__('OnCallSchedules|Successfully created a new rotation'),

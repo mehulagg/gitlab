@@ -70,7 +70,8 @@ When you need a specific custom environment variable, you can
 or directly [in the `.gitlab-ci.yml` file](#create-a-custom-variable-in-gitlab-ciyml).
 
 The variables are used by the runner any time the pipeline runs.
-You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs).
+You can also [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
+or have them [prefilled in manual pipelines](../pipelines/index.md#prefill-variables-in-manual-pipelines).
 
 There are two types of variables: **Variable** and **File**. You cannot set types in
 the `.gitlab-ci.yml` file, but you can set them in the UI and API.
@@ -405,6 +406,10 @@ variables:
 script:
   - 'eval $LS_CMD'  # will execute 'ls -al $TMP_DIR'
 ```
+
+Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
+keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
 
 ## Group-level environment variables
 
@@ -777,7 +782,7 @@ so `&&` is evaluated before `||`.
 > - It's deployed behind a feature flag, enabled by default.
 > - It's enabled on GitLab.com.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-parenthesis-support-for-variables). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-parenthesis-support-for-variables). **(FREE SELF)**
 
 It is possible to use parentheses to group conditions. Parentheses have the highest
 precedence of all operators. Expressions enclosed in parentheses are evaluated first,
@@ -793,7 +798,7 @@ Examples:
 - `($VARIABLE1 =~ /^content.*/ || $VARIABLE2 =~ /thing$/) && $VARIABLE3`
 - `$CI_COMMIT_BRANCH == "my-branch" || (($VARIABLE1 == "thing" || $VARIABLE2 == "thing") && $VARIABLE3)`
 
-##### Enable or disable parenthesis support for variables **(CORE ONLY)**
+##### Enable or disable parenthesis support for variables **(FREE SELF)**
 
 The feature is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)

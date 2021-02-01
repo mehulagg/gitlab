@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import component from 'ee/reports/components/modal_open_name.vue';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 
 Vue.use(Vuex);
 
@@ -45,6 +46,6 @@ describe('Modal open name', () => {
     vm.$el.click();
 
     expect(vm.setModalData).toHaveBeenCalled();
-    expect(vm.$root.$emit).toHaveBeenCalledWith('bv::show::modal', VULNERABILITY_MODAL_ID);
+    expect(vm.$root.$emit).toHaveBeenCalledWith(BV_SHOW_MODAL, VULNERABILITY_MODAL_ID);
   });
 });

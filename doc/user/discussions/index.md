@@ -115,7 +115,7 @@ are resolved](#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolve
 there will be an **open an issue to resolve them later** link in the merge
 request widget.
 
-![Link in merge request widget](img/resolve_thread_open_issue.png)
+![Link in merge request widget](img/resolve_thread_open_issue_v13_9.png)
 
 This will prepare an issue with its content referring to the merge request and
 the unresolved threads.
@@ -161,7 +161,7 @@ box and hit **Save** for the changes to take effect.
 From now on, you will not be able to merge from the UI until all threads
 are resolved.
 
-![Only allow merge if all the threads are resolved message](img/resolve_thread_open_issue.png)
+![Only allow merge if all the threads are resolved message](img/resolve_thread_open_issue_v13_9.png)
 
 ### Automatically resolve merge request diff threads when they become outdated
 
@@ -284,7 +284,7 @@ Additionally, locked issues and merge requests can not be reopened.
 ## Merge Request Reviews
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4213) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/28154) to GitLab Core in 13.1.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/28154) to GitLab Free in 13.1.
 
 When looking at a Merge Request diff, you are able to start a review.
 This allows you to create comments inside a Merge Request that are **only visible to you** until published,
@@ -501,7 +501,7 @@ to your branch to address your reviewers' requests.
 
    ![A code change suggestion displayed, with the button to apply the batch of suggestions highlighted.](img/apply_batch_of_suggestions_v13_1.jpg "Apply a batch of suggestions")
 
-#### Enable or disable Batch Suggestions **(CORE ONLY)**
+#### Enable or disable Batch Suggestions **(FREE SELF)**
 
 Batch Suggestions is
 deployed behind a feature flag that is **enabled by default**.

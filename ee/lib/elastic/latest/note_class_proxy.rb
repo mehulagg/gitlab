@@ -11,14 +11,14 @@ module Elastic
 
       def elastic_search(query, options: {})
         options[:in] = ['note']
-        query_hash = basic_query_hash(%w[note], query)
+        query_hash = basic_query_hash(%w[note], query, count_only: options[:count_only])
 
         context.name(:note) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
         end
 
-        query_hash[:highlight] = highlight_options(options[:in])
+        query_hash[:highlight] = highlight_options(options[:in]) unless options[:count_only]
 
         search(query_hash, options)
       end

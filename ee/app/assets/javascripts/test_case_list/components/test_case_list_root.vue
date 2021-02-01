@@ -12,12 +12,11 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
-import TestCaseListEmptyState from './test_case_list_empty_state.vue';
-
 import projectTestCases from '../queries/project_test_cases.query.graphql';
 import projectTestCasesCount from '../queries/project_test_cases_count.query.graphql';
 
 import { TestCaseTabs, AvailableSortOptions, DEFAULT_PAGE_SIZE } from '../constants';
+import TestCaseListEmptyState from './test_case_list_empty_state.vue';
 
 export default {
   name: 'TestCaseList',

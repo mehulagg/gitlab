@@ -1,11 +1,11 @@
 import axios from '~/lib/utils/axios_utils';
-import * as types from './mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
-import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';
 import Api from '~/api';
 
 import { parseCodeclimateMetrics } from '~/reports/codequality_report/store/utils/codequality_comparison';
+import { VIEW_EVENT_FEATURE_FLAG, VIEW_EVENT_NAME } from './constants';
+import * as types from './mutation_types';
 
 export const setPage = ({ commit }, page) => commit(types.SET_PAGE, page);
 

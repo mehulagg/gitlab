@@ -4,9 +4,10 @@ import {
   dateFromParams,
   getDateInPast,
   getDayDifference,
+  secondsToDays,
 } from '~/lib/utils/datetime_utility';
 import { dateFormats } from '../shared/constants';
-import { THROUGHPUT_CHART_STRINGS, DEFAULT_NUMBER_OF_DAYS } from './constants';
+import { THROUGHPUT_CHART_STRINGS, DEFAULT_NUMBER_OF_DAYS, UNITS } from './constants';
 
 /**
  * A utility function which accepts a date range and returns
@@ -71,6 +72,42 @@ export const formatThroughputChartData = (chartData) => {
       data,
     },
   ];
+};
+
+/**
+ * A utility function which accepts the raw throughput data
+ * and computes the mean time to merge.
+ *
+ * @param {Object} rawData the raw throughput data
+ *
+ * @return {Object} the computed MTTM data
+ */
+export const computeMttmData = (rawData) => {
+  if (!rawData) return {};
+
+  const mttmData = Object.values(rawData)
+    // eslint-disable-next-line @gitlab/require-i18n-strings
+    .filter((value) => value !== 'Project')
+    .reduce(
+      (total, monthData) => {
+        return {
+          count: total.count + monthData.count,
+          totalTimeToMerge: total.totalTimeToMerge + monthData.totalTimeToMerge,
+        };
+      },
+      {
+        count: 0,
+        totalTimeToMerge: 0,
+      },
+    );
+
+  // GlSingleStat expects a String for the 'value' prop
+  // https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1152
+  return {
+    title: THROUGHPUT_CHART_STRINGS.MTTM,
+    value: `${secondsToDays(mttmData.totalTimeToMerge / mttmData.count)}`,
+    unit: UNITS.DAYS,
+  };
 };
 
 /**

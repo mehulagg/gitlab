@@ -4,9 +4,9 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Integrations **(CORE)**
+# Integrations **(FREE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/245331) in [GitLab Core](https://about.gitlab.com/pricing/) 13.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/245331) in GitLab Free 13.5.
 
 With Maintainer or higher [permissions](../../user/permissions.md), you can view
 the list of configured alerts integrations by navigating to

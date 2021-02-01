@@ -113,7 +113,7 @@ RSpec.describe 'Issues > Health status bulk assignment' do
     page.within('.issues-bulk-update') do
       click_button 'Select health status'
       items.map do |item|
-        find('.gl-button-text', text: item).click
+        find('[data-testid="health-status-dropdown-item"]', text: item).click
       end
     end
   end

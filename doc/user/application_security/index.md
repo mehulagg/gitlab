@@ -123,16 +123,16 @@ latest versions of the scanning tools without having to do anything. There are s
 with this approach, however, and there is a
 [plan to resolve them](https://gitlab.com/gitlab-org/gitlab/-/issues/9725).
 
-## Viewing security scan information in merge requests **(CORE)**
+## Viewing security scan information in merge requests **(FREE)**
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Core 13.5.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Free 13.5.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.
 > - Report download dropdown [added](https://gitlab.com/gitlab-org/gitlab/-/issues/273418) in 13.7.
 > - It's [deployed behind a feature flag](../feature_flags.md), enabled by default.
 > - It's enabled on GitLab.com.
 > - It can be enabled or disabled for a single project.
 > - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(CORE ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -522,13 +522,28 @@ This error appears when the included job's stage (named `test`) isn't declared i
 To fix this issue, you can either:
 
 - Add a `test` stage in your `.gitlab-ci.yml`.
-- Change the default stage of the included security jobs. For example, with SpotBugs (SAST):
+- Override the default stage of each security job. For example, to use a pre-defined stage name `unit-tests`:
 
   ```yaml
   include:
-    template: Security/SAST.gitlab-ci.yml
+    - template: Security/Dependency-Scanning.gitlab-ci.yml
+    - template: Security/License-Scanning.gitlab-ci.yml
+    - template: Security/SAST.gitlab-ci.yml
+    - template: Security/Secret-Detection.gitlab-ci.yml
 
-  spotbugs-sast:
+  stages:
+    - unit-tests
+
+  dependency_scanning:
+    stage: unit-tests
+
+  license_scanning:
+    stage: unit-tests
+
+  sast:
+    stage: unit-tests
+
+  .secret-analyzer:
     stage: unit-tests
   ```
 
@@ -652,7 +667,7 @@ Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-a
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
 
-### Enable or disable the basic security widget **(CORE ONLY)**
+### Enable or disable the basic security widget **(FREE SELF)**
 
 The basic security widget is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -676,3 +691,17 @@ Feature.disable(:core_security_mr_widget)
 # For a single project
 Feature.disable(:core_security_mr_widget, Project.find(<project id>))
 ```
+
+### Error: job `is used for configuration only, and its script should not be executed`
+
+[Changes made in GitLab 13.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41260)
+to the `Security/Dependency-Scanning.gitlab-ci.yml` and `Security/SAST.gitlab-ci.yml`
+templates mean that if you enable the `sast` or `dependency_scanning` jobs by setting the `rules` attribute,
+they will fail with the error `(job) is used for configuration only, and its script should not be executed`.
+
+The `sast` or `dependency_scanning` stanzas can be used to make changes to all SAST or Dependency Scanning,
+such as changing `variables` or the `stage`, but they cannot be used to define shared `rules`.
+
+There [is an issue open to improve extendability](https://gitlab.com/gitlab-org/gitlab/-/issues/218444).
+Please upvote the issue to help with prioritization, and
+[contributions are welcomed](https://about.gitlab.com/community/contribute/).

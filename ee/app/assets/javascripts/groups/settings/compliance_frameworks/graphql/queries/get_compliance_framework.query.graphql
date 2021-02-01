@@ -1,8 +1,11 @@
-query getComplianceFramework($fullPath: ID!) {
+query getComplianceFramework(
+  $fullPath: ID!
+  $complianceFramework: ComplianceManagementFrameworkID
+) {
   namespace(fullPath: $fullPath) {
     id
     name
-    complianceFrameworks {
+    complianceFrameworks(id: $complianceFramework) {
       nodes {
         id
         name

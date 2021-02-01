@@ -200,6 +200,11 @@ msgid_plural "%d fixed test results"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d group"
+msgid_plural "%d groups"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d group selected"
 msgid_plural "%d groups selected"
 msgstr[0] ""
@@ -374,10 +379,10 @@ msgstr ""
 msgid "%{board_target} not found"
 msgstr ""
 
-msgid "%{code_open}Masked%{code_close} variables are hidden in job logs (though they must match certain regexp requirements to do so)."
+msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
 msgstr ""
 
-msgid "%{code_open}Protected%{code_close} variables are only exposed to protected branches or tags."
+msgid "%{code_open}Protected:%{code_close} Only exposed to protected branches or tags."
 msgstr ""
 
 msgid "%{commit_author_link} authored %{commit_timeago}"
@@ -1253,6 +1258,9 @@ msgstr ""
 msgid "A deleted user"
 msgstr ""
 
+msgid "A description is required"
+msgstr ""
+
 msgid "A file has been changed."
 msgstr ""
 
@@ -1328,6 +1336,9 @@ msgstr ""
 msgid "A project is where you house your files (repository), plan your work (issues), and publish your documentation (wiki), %{among_other_things_link}."
 msgstr ""
 
+msgid "A project’s repository name defines its URL (the one you use to access the project via a browser) and its place on the file disk where GitLab is installed. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
 msgid "A ready-to-go template for use with Android apps"
 msgstr ""
 
@@ -1344,6 +1355,9 @@ msgid "A sign-in to your account has been made from the following IP address: %{
 msgstr ""
 
 msgid "A string appended to the project path to form the Service Desk email address."
+msgstr ""
+
+msgid "A title is required"
 msgstr ""
 
 msgid "A user can only participate in a rotation once"
@@ -1622,9 +1636,6 @@ msgid "Add a Grafana button in the admin sidebar, monitoring section, to access 
 msgstr ""
 
 msgid "Add a To Do"
-msgstr ""
-
-msgid "Add a To-Do"
 msgstr ""
 
 msgid "Add a bullet list"
@@ -2203,6 +2214,9 @@ msgstr ""
 msgid "AdminUsers|Cannot unblock LDAP blocked users"
 msgstr ""
 
+msgid "AdminUsers|Cohorts"
+msgstr ""
+
 msgid "AdminUsers|Deactivate"
 msgstr ""
 
@@ -2339,6 +2353,9 @@ msgid "AdminUsers|User will not be able to access git repositories"
 msgstr ""
 
 msgid "AdminUsers|User will not be able to login"
+msgstr ""
+
+msgid "AdminUsers|Users"
 msgstr ""
 
 msgid "AdminUsers|When the user logs back in, their account will reactivate as a fully active account"
@@ -3045,6 +3062,9 @@ msgstr ""
 msgid "An error occured while saving changes: %{error}"
 msgstr ""
 
+msgid "An error occured while updating the notification settings. Please try again."
+msgstr ""
+
 msgid "An error occurred adding a draft to the thread."
 msgstr ""
 
@@ -3259,6 +3279,9 @@ msgid "An error occurred while loading the file."
 msgstr ""
 
 msgid "An error occurred while loading the file. Please try again later."
+msgstr ""
+
+msgid "An error occurred while loading the members, please try again."
 msgstr ""
 
 msgid "An error occurred while loading the merge request changes."
@@ -3713,7 +3736,7 @@ msgstr ""
 msgid "Archived projects"
 msgstr ""
 
-msgid "Archiving the project will make it entirely read only. It is hidden from the dashboard and doesn't show up in searches. %{strong_start}The repository cannot be committed to, and no issues, comments, or other entities can be created.%{strong_end}"
+msgid "Archiving the project will make it entirely read only. It is hidden from the dashboard and doesn't show up in searches. %{strong_start}The repository cannot be committed to, and no issues, comments, or other entities can be created.%{strong_end} %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Are you ABSOLUTELY SURE you wish to delete this project?"
@@ -3905,9 +3928,6 @@ msgid "Assign To"
 msgstr ""
 
 msgid "Assign custom color like #FF0000"
-msgstr ""
-
-msgid "Assign epic"
 msgstr ""
 
 msgid "Assign labels"
@@ -4876,10 +4896,16 @@ msgstr ""
 msgid "BulkImport|Import groups from GitLab"
 msgstr ""
 
-msgid "BulkImport|Importing groups from %{link}"
+msgid "BulkImport|Importing the group failed"
 msgstr ""
 
-msgid "BulkImport|Importing the group failed"
+msgid "BulkImport|No groups available for import"
+msgstr ""
+
+msgid "BulkImport|Showing %{start}-%{end} of %{total} from %{link}"
+msgstr ""
+
+msgid "BulkImport|Showing %{start}-%{end} of %{total} matching filter \"%{filter}\" from %{link}"
 msgstr ""
 
 msgid "BulkImport|To new group"
@@ -5816,6 +5842,9 @@ msgid "Classification Label (optional)"
 msgstr ""
 
 msgid "ClassificationLabelUnavailable|is unavailable: %{reason}"
+msgstr ""
+
+msgid "Clean up after running %{link_start}git filter-repo%{link_end} on the repository."
 msgstr ""
 
 msgid "Clean up image tags"
@@ -7063,9 +7092,6 @@ msgstr ""
 msgid "CodeOwner|Pattern"
 msgstr ""
 
-msgid "Cohorts"
-msgstr ""
-
 msgid "Cohorts|Inactive users"
 msgstr ""
 
@@ -7324,6 +7350,12 @@ msgid "ComplianceFrameworks|Regulated"
 msgstr ""
 
 msgid "ComplianceFrameworks|There are no compliance frameworks set up yet"
+msgstr ""
+
+msgid "ComplianceFrameworks|Unable to save this compliance framework. Please try again"
+msgstr ""
+
+msgid "ComplianceFrameworks|Use %{codeStart}::%{codeEnd} to create a %{linkStart}scoped set%{linkEnd} (eg. %{codeStart}SOX::AWS%{codeEnd})"
 msgstr ""
 
 msgid "ComplianceFramework|GDPR"
@@ -9388,7 +9420,7 @@ msgstr ""
 msgid "Deleting a project places it into a read-only state until %{date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?"
 msgstr ""
 
-msgid "Deleting the project will delete its repository and all related resources including issues, merge requests etc."
+msgid "Deleting the project will delete its repository and all related resources including issues, merge requests, etc."
 msgstr ""
 
 msgid "Deletion pending. This project will be removed on %{date}. Repository and other project resources are read-only."
@@ -9755,6 +9787,9 @@ msgid "DeploymentFrequencyCharts|Deployments to production for the last 90 days 
 msgstr ""
 
 msgid "DeploymentFrequencyCharts|Something went wrong while getting deployment frequency data"
+msgstr ""
+
+msgid "DeploymentFrequencyCharts|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts."
 msgstr ""
 
 msgid "Deployments"
@@ -10926,6 +10961,9 @@ msgstr ""
 msgid "Enforce DNS rebinding attack protection"
 msgstr ""
 
+msgid "Enforce SSH key expiration"
+msgstr ""
+
 msgid "Enforce personal access token expiration"
 msgstr ""
 
@@ -11022,13 +11060,10 @@ msgstr ""
 msgid "Environment scope"
 msgstr ""
 
-msgid "Environment variables are applied to environments via the Runner. You can use environment variables for passwords, secret keys, etc. Make variables available to the running application by prepending the variable key with %{code_open}K8S_SECRET_%{code_close}. You can set variables to be:"
+msgid "Environment variables are configured by your administrator to be %{link_start}protected%{link_end} by default."
 msgstr ""
 
-msgid "Environment variables are configured by your administrator to be %{link_start}protected%{link_end} by default"
-msgstr ""
-
-msgid "Environment variables on this GitLab instance are configured to be %{link_start}protected%{link_end} by default"
+msgid "Environment variables on this GitLab instance are configured to be %{link_start}protected%{link_end} by default."
 msgstr ""
 
 msgid "Environment:"
@@ -11319,6 +11354,9 @@ msgstr ""
 msgid "Epics|Are you sure you want to remove %{bStart}%{targetIssueTitle}%{bEnd} from %{bStart}%{parentEpicTitle}%{bEnd}?"
 msgstr ""
 
+msgid "Epics|Assign Epic"
+msgstr ""
+
 msgid "Epics|Enter a title for your epic"
 msgstr ""
 
@@ -11332,6 +11370,12 @@ msgid "Epics|Remove epic"
 msgstr ""
 
 msgid "Epics|Remove issue"
+msgstr ""
+
+msgid "Epics|Search epics"
+msgstr ""
+
+msgid "Epics|Select epic"
 msgstr ""
 
 msgid "Epics|Show more"
@@ -11865,7 +11909,7 @@ msgstr ""
 msgid "Export this group with all related data to a new GitLab instance. Once complete, you can import the data file from the \"New Group\" page."
 msgstr ""
 
-msgid "Export this project with all its related data in order to move your project to a new GitLab instance. Once the export is finished, you can import the file from the \"New Project\" page."
+msgid "Export this project with all its related data in order to move it to a new GitLab instance. When the exported file is ready, you can download it from this page or from the download link in the email notification you will receive. You can then import it when creating a new project. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Export variable to pipelines running on protected branches and tags only."
@@ -14943,10 +14987,352 @@ msgstr ""
 msgid "In order to enable Service Desk for your instance, you must first set up incoming email."
 msgstr ""
 
-msgid "In order to personalize your experience with GitLab%{br_tag}we would like to know a bit more about you."
+msgid "In progress"
 msgstr ""
 
-msgid "In progress"
+msgid "InProductMarketing|%{strong_start}Advanced application security%{strong_end} — including SAST, DAST scanning, FUZZ testing, dependency scanning, license compliance, secrete detection"
+msgstr ""
+
+msgid "InProductMarketing|%{strong_start}Company wide portfolio management%{strong_end} — including multi-level epics, scoped labels"
+msgstr ""
+
+msgid "InProductMarketing|%{strong_start}Executive level insights%{strong_end} — including reporting on productivity, tasks by type, days to completion, value stream"
+msgstr ""
+
+msgid "InProductMarketing|%{strong_start}GitLab Inc.%{strong_end} 268 Bush Street, #350, San Francisco, CA 94104, USA"
+msgstr ""
+
+msgid "InProductMarketing|%{strong_start}Multiple approval roles%{strong_end} — including code owners and required merge approvals"
+msgstr ""
+
+msgid "InProductMarketing|*GitLab*, noun: a synonym for efficient teams"
+msgstr ""
+
+msgid "InProductMarketing|...and you can get a free trial of GitLab Gold"
+msgstr ""
+
+msgid "InProductMarketing|3 ways to dive into GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|Actually, GitLab makes the team work (better)"
+msgstr ""
+
+msgid "InProductMarketing|And finally %{deploy_link} a Python application."
+msgstr ""
+
+msgid "InProductMarketing|Are your runners ready?"
+msgstr ""
+
+msgid "InProductMarketing|Automated security scans directly within GitLab"
+msgstr ""
+
+msgid "InProductMarketing|Beef up your security"
+msgstr ""
+
+msgid "InProductMarketing|Better code in less time"
+msgstr ""
+
+msgid "InProductMarketing|Blog"
+msgstr ""
+
+msgid "InProductMarketing|By enabling code owners and required merge approvals the right person will review the right MR. This is a win-win: cleaner code and a more efficient review process."
+msgstr ""
+
+msgid "InProductMarketing|Code owners and required merge approvals are part of the paid tiers of GitLab. You can start a free 30-day trial of GitLab Gold and enable these features in less than 5 minutes with no credit card required."
+msgstr ""
+
+msgid "InProductMarketing|Create a project in GitLab in 5 minutes"
+msgstr ""
+
+msgid "InProductMarketing|Create your first project!"
+msgstr ""
+
+msgid "InProductMarketing|Did you know teams that use GitLab are far more efficient?"
+msgstr ""
+
+msgid "InProductMarketing|Dig in and create a project and a repo"
+msgstr ""
+
+msgid "InProductMarketing|Explore GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|Explore the options"
+msgstr ""
+
+msgid "InProductMarketing|Explore the power of GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|Facebook"
+msgstr ""
+
+msgid "InProductMarketing|Feel the need for speed?"
+msgstr ""
+
+msgid "InProductMarketing|Find out how your teams are really doing"
+msgstr ""
+
+msgid "InProductMarketing|Follow our steps"
+msgstr ""
+
+msgid "InProductMarketing|Get going with CI/CD quickly using our %{quick_start_link}. Start with an available runner and then create a CI .yml file – it's really that easy."
+msgstr ""
+
+msgid "InProductMarketing|Get our import guides"
+msgstr ""
+
+msgid "InProductMarketing|Get started today"
+msgstr ""
+
+msgid "InProductMarketing|Get started today with a 30-day GitLab Gold trial, no credit card required."
+msgstr ""
+
+msgid "InProductMarketing|Get started with GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|Get to know GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|Get your team set up on GitLab"
+msgstr ""
+
+msgid "InProductMarketing|Git basics"
+msgstr ""
+
+msgid "InProductMarketing|GitHub Enterprise projects to GitLab"
+msgstr ""
+
+msgid "InProductMarketing|GitLab provides static application security testing (SAST), dynamic application security testing (DAST), container scanning, and dependency scanning to help you deliver secure applications along with license compliance."
+msgstr ""
+
+msgid "InProductMarketing|GitLab's CI/CD makes software development easier. Don't believe us? Here are three ways you can take it for a fast (and satisfying) test drive:"
+msgstr ""
+
+msgid "InProductMarketing|GitLab's premium tiers are designed to make you, your team and your application more efficient and more secure with features including but not limited to:"
+msgstr ""
+
+msgid "InProductMarketing|Give us one minute..."
+msgstr ""
+
+msgid "InProductMarketing|Go farther with GitLab"
+msgstr ""
+
+msgid "InProductMarketing|Go for the gold!"
+msgstr ""
+
+msgid "InProductMarketing|Goldman Sachs went from 1 build every two weeks to thousands of builds a day"
+msgstr ""
+
+msgid "InProductMarketing|Have a different instance you'd like to import? Here's our %{import_link}."
+msgstr ""
+
+msgid "InProductMarketing|Here's what you need to know"
+msgstr ""
+
+msgid "InProductMarketing|How (and why) mirroring makes sense"
+msgstr ""
+
+msgid "InProductMarketing|How long does it take us to close issues/MRs by types like feature requests, bugs, tech debt, security?"
+msgstr ""
+
+msgid "InProductMarketing|How many days does it take our team to complete various tasks?"
+msgstr ""
+
+msgid "InProductMarketing|How to build and test faster"
+msgstr ""
+
+msgid "InProductMarketing|If you no longer wish to receive marketing emails from us,"
+msgstr ""
+
+msgid "InProductMarketing|Import your project and code from GitHub, Bitbucket and others"
+msgstr ""
+
+msgid "InProductMarketing|Improve app security with a 30-day trial"
+msgstr ""
+
+msgid "InProductMarketing|Improve code quality and streamline reviews"
+msgstr ""
+
+msgid "InProductMarketing|Invite your colleagues and start shipping code faster."
+msgstr ""
+
+msgid "InProductMarketing|Invite your colleagues to join in less than one minute"
+msgstr ""
+
+msgid "InProductMarketing|Invite your colleagues today"
+msgstr ""
+
+msgid "InProductMarketing|Invite your team in less than 60 seconds"
+msgstr ""
+
+msgid "InProductMarketing|Invite your team now"
+msgstr ""
+
+msgid "InProductMarketing|It's all in the stats"
+msgstr ""
+
+msgid "InProductMarketing|It's also possible to simply %{external_repo_link} in order to take advantage of GitLab's CI/CD."
+msgstr ""
+
+msgid "InProductMarketing|Launch GitLab CI/CD in 20 minutes or less"
+msgstr ""
+
+msgid "InProductMarketing|Making the switch? It's easier than you think to import your projects into GitLab. Move %{github_link}, or import something %{bitbucket_link}."
+msgstr ""
+
+msgid "InProductMarketing|Master the art of importing!"
+msgstr ""
+
+msgid "InProductMarketing|Move on to easily creating a Pages website %{ci_template_link}"
+msgstr ""
+
+msgid "InProductMarketing|Multiple owners, confusing workstreams? We've got you covered"
+msgstr ""
+
+msgid "InProductMarketing|Need an alternative to importing?"
+msgstr ""
+
+msgid "InProductMarketing|Our tool brings all the things together"
+msgstr ""
+
+msgid "InProductMarketing|Rapid development, simplified"
+msgstr ""
+
+msgid "InProductMarketing|Security that's integrated into your development lifecycle"
+msgstr ""
+
+msgid "InProductMarketing|Sometimes you're not ready to make a full transition to a new tool. If you're not ready to fully commit, %{mirroring_link} gives you a safe way to try out GitLab in parallel with your current tool."
+msgstr ""
+
+msgid "InProductMarketing|Start a GitLab Gold trial today in less than one minute, no credit card required."
+msgstr ""
+
+msgid "InProductMarketing|Start a free trial of GitLab Gold – no CC required"
+msgstr ""
+
+msgid "InProductMarketing|Start a trial"
+msgstr ""
+
+msgid "InProductMarketing|Start by %{performance_link}"
+msgstr ""
+
+msgid "InProductMarketing|Start by importing your projects"
+msgstr ""
+
+msgid "InProductMarketing|Start with a GitLab Gold free trial"
+msgstr ""
+
+msgid "InProductMarketing|Stop wondering and use GitLab to answer questions like:"
+msgstr ""
+
+msgid "InProductMarketing|Streamline code review, know at a glance who's unavailable, communicate in comments or in email and integrate with Slack so everyone's on the same page."
+msgstr ""
+
+msgid "InProductMarketing|Take your first steps with GitLab"
+msgstr ""
+
+msgid "InProductMarketing|Take your source code management to the next level"
+msgstr ""
+
+msgid "InProductMarketing|Team work makes the dream work"
+msgstr ""
+
+msgid "InProductMarketing|Test, create, deploy"
+msgstr ""
+
+msgid "InProductMarketing|That's all it takes to get going with GitLab, but if you're new to working with Git, check out our %{basics_link} for helpful tips and tricks for getting started."
+msgstr ""
+
+msgid "InProductMarketing|This is email %{series} of 3 in the %{track} series."
+msgstr ""
+
+msgid "InProductMarketing|Ticketmaster decreased their CI build time by 15X"
+msgstr ""
+
+msgid "InProductMarketing|Tired of wrestling with disparate tool chains, information silos and inefficient processes? GitLab's CI/CD is built on a DevOps platform with source code management, planning, monitoring and more ready to go. Find out %{ci_link}."
+msgstr ""
+
+msgid "InProductMarketing|To understand and get the most out of GitLab, start at the beginning and %{project_link}. In GitLab, repositories are part of a project, so after you've created your project you can go ahead and %{repo_link}."
+msgstr ""
+
+msgid "InProductMarketing|Try GitLab Gold for free"
+msgstr ""
+
+msgid "InProductMarketing|Try it out"
+msgstr ""
+
+msgid "InProductMarketing|Try it yourself"
+msgstr ""
+
+msgid "InProductMarketing|Twitter"
+msgstr ""
+
+msgid "InProductMarketing|Understand repository mirroring"
+msgstr ""
+
+msgid "InProductMarketing|Understand your project options"
+msgstr ""
+
+msgid "InProductMarketing|Use GitLab CI/CD"
+msgstr ""
+
+msgid "InProductMarketing|We know a thing or two about efficiency and we don't want to keep that to ourselves. Sign up for a free trial of GitLab Gold and your teams will be on it from day one."
+msgstr ""
+
+msgid "InProductMarketing|What does our value stream timeline look like from product to development to review and production?"
+msgstr ""
+
+msgid "InProductMarketing|When your team is on GitLab these answers are a click away."
+msgstr ""
+
+msgid "InProductMarketing|Working in GitLab = more efficient"
+msgstr ""
+
+msgid "InProductMarketing|YouTube"
+msgstr ""
+
+msgid "InProductMarketing|Your teams can be more efficient"
+msgstr ""
+
+msgid "InProductMarketing|comprehensive guide"
+msgstr ""
+
+msgid "InProductMarketing|connect an external repository"
+msgstr ""
+
+msgid "InProductMarketing|create a project"
+msgstr ""
+
+msgid "InProductMarketing|from Bitbucket"
+msgstr ""
+
+msgid "InProductMarketing|go to about.gitlab.com"
+msgstr ""
+
+msgid "InProductMarketing|how easy it is to get started"
+msgstr ""
+
+msgid "InProductMarketing|quick start guide"
+msgstr ""
+
+msgid "InProductMarketing|repository mirroring"
+msgstr ""
+
+msgid "InProductMarketing|set up a repo"
+msgstr ""
+
+msgid "InProductMarketing|test and deploy"
+msgstr ""
+
+msgid "InProductMarketing|testing browser performance"
+msgstr ""
+
+msgid "InProductMarketing|unsubscribe"
+msgstr ""
+
+msgid "InProductMarketing|using a CI/CD template"
+msgstr ""
+
+msgid "InProductMarketing|you may %{unsubscribe_link} at any time."
 msgstr ""
 
 msgid "Incident"
@@ -15269,6 +15655,15 @@ msgstr[1] ""
 msgid "Instance Configuration"
 msgstr ""
 
+msgid "Instance access request"
+msgstr ""
+
+msgid "Instance access request approved"
+msgstr ""
+
+msgid "Instance access request rejected"
+msgstr ""
+
 msgid "Instance administrators group already exists"
 msgstr ""
 
@@ -15462,6 +15857,9 @@ msgid "Integrations|Saving will update the default settings for all projects tha
 msgstr ""
 
 msgid "Integrations|Search Jira issues"
+msgstr ""
+
+msgid "Integrations|Sign in to add namespaces"
 msgstr ""
 
 msgid "Integrations|Standard"
@@ -16130,6 +16528,9 @@ msgstr ""
 msgid "JiraService|For example, 12, 24"
 msgstr ""
 
+msgid "JiraService|GitLab for Jira Configuration"
+msgstr ""
+
 msgid "JiraService|If different from Web URL"
 msgstr ""
 
@@ -16179,6 +16580,9 @@ msgid "JiraService|Select issue type"
 msgstr ""
 
 msgid "JiraService|Set transition IDs for Jira workflow transitions. %{link_start}Learn more%{link_end}"
+msgstr ""
+
+msgid "JiraService|Sign in to GitLab.com to get started."
 msgstr ""
 
 msgid "JiraService|This feature requires a Premium plan."
@@ -16404,6 +16808,9 @@ msgid "KeyboardKey|Ctrl+"
 msgstr ""
 
 msgid "KeyboardShortcuts|Global Shortcuts"
+msgstr ""
+
+msgid "KeyboardShortcuts|Toggle GitLab Next"
 msgstr ""
 
 msgid "KeyboardShortcuts|Toggle the Performance Bar"
@@ -17196,6 +17603,12 @@ msgstr ""
 msgid "MRApprovals|Commented by"
 msgstr ""
 
+msgid "MRDiffFile|Changes are too large to be shown."
+msgstr ""
+
+msgid "MRDiffFile|View file @ %{commitSha}"
+msgstr ""
+
 msgid "MRDiff|Show changes only"
 msgstr ""
 
@@ -17218,9 +17631,6 @@ msgid "Make issue confidential"
 msgstr ""
 
 msgid "Make sure you save it - you won't be able to access it again."
-msgstr ""
-
-msgid "Make this epic confidential"
 msgstr ""
 
 msgid "Makes this issue confidential."
@@ -17263,6 +17673,9 @@ msgid "Manage two-factor authentication"
 msgstr ""
 
 msgid "Manage your license"
+msgstr ""
+
+msgid "Manage your project's triggers"
 msgstr ""
 
 msgid "Managed Account"
@@ -17547,6 +17960,9 @@ msgstr ""
 msgid "May"
 msgstr ""
 
+msgid "Mean time to merge"
+msgstr ""
+
 msgid "Measured in bytes of code. Excludes generated and vendored code."
 msgstr ""
 
@@ -17686,6 +18102,9 @@ msgid "Members|Reverted to LDAP group sync settings."
 msgstr ""
 
 msgid "Members|Role updated successfully."
+msgstr ""
+
+msgid "Members|Search groups"
 msgstr ""
 
 msgid "Members|Search invited"
@@ -19306,6 +19725,9 @@ msgstr ""
 msgid "No commits present here"
 msgstr ""
 
+msgid "No compliance frameworks are in use. Create one using the GraphQL API."
+msgstr ""
+
 msgid "No connection could be made to a Gitaly Server, please check your logs!"
 msgstr ""
 
@@ -19399,6 +19821,9 @@ msgstr ""
 msgid "No matching results for \"%{query}\""
 msgstr ""
 
+msgid "No matching results..."
+msgstr ""
+
 msgid "No members found"
 msgstr ""
 
@@ -19474,9 +19899,6 @@ msgstr ""
 msgid "No start date"
 msgstr ""
 
-msgid "No status"
-msgstr ""
-
 msgid "No template"
 msgstr ""
 
@@ -19484,6 +19906,9 @@ msgid "No template selected"
 msgstr ""
 
 msgid "No test coverage"
+msgstr ""
+
+msgid "No triggers exist yet. Use the form above to create one."
 msgstr ""
 
 msgid "No vulnerabilities present"
@@ -19945,10 +20370,10 @@ msgstr ""
 msgid "OnDemandScans|Could not run the scan. Please try again."
 msgstr ""
 
-msgid "OnDemandScans|Create a new scanner profile"
+msgid "OnDemandScans|Create new scanner profile"
 msgstr ""
 
-msgid "OnDemandScans|Create a new site profile"
+msgid "OnDemandScans|Create new site profile"
 msgstr ""
 
 msgid "OnDemandScans|Description (optional)"
@@ -19960,7 +20385,16 @@ msgstr ""
 msgid "OnDemandScans|For example: Tests the login page for SQL injections"
 msgstr ""
 
+msgid "OnDemandScans|Manage DAST scans"
+msgstr ""
+
 msgid "OnDemandScans|Manage profiles"
+msgstr ""
+
+msgid "OnDemandScans|Manage scanner profiles"
+msgstr ""
+
+msgid "OnDemandScans|Manage site profiles"
 msgstr ""
 
 msgid "OnDemandScans|My daily scan"
@@ -20014,10 +20448,10 @@ msgstr ""
 msgid "OnDemandScans|You cannot run an active scan against an unvalidated site."
 msgstr ""
 
-msgid "Once a project is permanently deleted it %{strongStart}cannot be recovered%{strongEnd}. Permanently deleting this project will %{strongStart}immediately delete%{strongEnd} its repositories and %{strongStart}all related resources%{strongEnd} including issues, merge requests etc."
+msgid "Once a project is permanently deleted, it %{strongStart}cannot be recovered%{strongEnd}. Permanently deleting this project will %{strongStart}immediately delete%{strongEnd} its repositories and %{strongStart}all related resources%{strongEnd}, including issues, merge requests etc."
 msgstr ""
 
-msgid "Once a project is permanently deleted it cannot be recovered. You will lose this project's repository and all content: issues, merge requests etc."
+msgid "Once a project is permanently deleted, it cannot be recovered. You will lose this project's repository and all related resources, including issues, merge requests etc."
 msgstr ""
 
 msgid "Once imported, repositories can be mirrored over SSH. Read more %{link_start}here%{link_end}."
@@ -20197,9 +20631,6 @@ msgid "Options"
 msgstr ""
 
 msgid "Or you can choose one of the suggested colors below"
-msgstr ""
-
-msgid "Origin"
 msgstr ""
 
 msgid "Orphaned member"
@@ -20385,9 +20816,6 @@ msgstr ""
 msgid "PackageRegistry|Delete package"
 msgstr ""
 
-msgid "PackageRegistry|Filter by name"
-msgstr ""
-
 msgid "PackageRegistry|For more information on Composer packages in GitLab, %{linkStart}see the documentation.%{linkEnd}"
 msgstr ""
 
@@ -20481,9 +20909,6 @@ msgstr ""
 msgid "PackageRegistry|Source project located at %{link}"
 msgstr ""
 
-msgid "PackageRegistry|There are no %{packageType} packages yet"
-msgstr ""
-
 msgid "PackageRegistry|There are no other versions of this package."
 msgstr ""
 
@@ -20497,6 +20922,9 @@ msgid "PackageRegistry|This NuGet package has no dependencies."
 msgstr ""
 
 msgid "PackageRegistry|To widen your search, change or remove the filters above."
+msgstr ""
+
+msgid "PackageRegistry|Type"
 msgstr ""
 
 msgid "PackageRegistry|Unable to fetch package version information."
@@ -20635,6 +21063,9 @@ msgid "Partial token for reference only"
 msgstr ""
 
 msgid "Participants"
+msgstr ""
+
+msgid "Pass job variables"
 msgstr ""
 
 msgid "Passed"
@@ -21828,10 +22259,13 @@ msgstr ""
 msgid "Profiles|Full name"
 msgstr ""
 
-msgid "Profiles|GitLab is unable to verify your identity automatically."
+msgid "Profiles|GitLab is unable to verify your identity automatically. For security purposes, you must set a password by %{openingTag}resetting your password%{closingTag} to delete your account."
 msgstr ""
 
 msgid "Profiles|Give your individual key a title."
+msgstr ""
+
+msgid "Profiles|If after setting a password, the option to delete your account is still not available, please email %{data_request} to begin the account deletion process."
 msgstr ""
 
 msgid "Profiles|Include private contributions on my profile"
@@ -21877,9 +22311,6 @@ msgid "Profiles|Organization"
 msgstr ""
 
 msgid "Profiles|Path"
-msgstr ""
-
-msgid "Profiles|Please email %{data_request} to begin the account deletion process."
 msgstr ""
 
 msgid "Profiles|Position and size your new avatar"
@@ -24011,6 +24442,11 @@ msgstr ""
 msgid "Reports|Execution time"
 msgstr ""
 
+msgid "Reports|Failed %{count} time in %{baseBranch} in the last 14 days"
+msgid_plural "Reports|Failed %{count} times in %{baseBranch} in the last 14 days"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Reports|Failed %{count} time in %{base_branch} in the last 14 days"
 msgid_plural "Reports|Failed %{count} times in %{base_branch} in the last 14 days"
 msgstr[0] ""
@@ -25564,6 +26000,9 @@ msgid "Select groups to replicate"
 msgstr ""
 
 msgid "Select health status"
+msgstr ""
+
+msgid "Select iteration"
 msgstr ""
 
 msgid "Select label"
@@ -27881,6 +28320,9 @@ msgstr ""
 msgid "Terraform|Actions"
 msgstr ""
 
+msgid "Terraform|An error occurred while changing the state file"
+msgstr ""
+
 msgid "Terraform|An error occurred while loading your Terraform States"
 msgstr ""
 
@@ -28841,6 +29283,9 @@ msgstr ""
 msgid "There was an error with the reCAPTCHA. Please solve the reCAPTCHA again."
 msgstr ""
 
+msgid "These examples show how to trigger this project's pipeline for a branch or tag."
+msgstr ""
+
 msgid "These existing issues have a similar title. It might be better to comment there instead of creating another similar issue."
 msgstr ""
 
@@ -28856,7 +29301,7 @@ msgstr ""
 msgid "These runners are specific to this project."
 msgstr ""
 
-msgid "These variables are configured in the parent group settings, and will be active in the current project in addition to the project variables."
+msgid "These variables are inherited from the parent group."
 msgstr ""
 
 msgid "Third Party Advisory Link"
@@ -28919,16 +29364,16 @@ msgstr ""
 msgid "This action cannot be undone, and will permanently delete the %{key} SSH key"
 msgstr ""
 
-msgid "This action cannot be undone. You will lose this project's repository and all content: issues, merge requests, etc."
+msgid "This action cannot be undone. You will lose this project's repository and all related resources, including issues, merge requests, etc."
 msgstr ""
 
 msgid "This action has been performed too many times. Try again later."
 msgstr ""
 
-msgid "This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all content: issues, merge requests, etc."
+msgid "This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc."
 msgstr ""
 
-msgid "This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all content: issues, merge requests, etc."
+msgid "This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc."
 msgstr ""
 
 msgid "This also resolves all related threads"
@@ -29028,9 +29473,6 @@ msgid "This environment's canary ingress has been updated recently. Please retry
 msgstr ""
 
 msgid "This epic already has the maximum number of child epics."
-msgstr ""
-
-msgid "This epic and its child elements will only be visible to team members with at minimum Reporter access."
 msgstr ""
 
 msgid "This epic does not exist or you don't have sufficient permission."
@@ -29364,9 +29806,6 @@ msgid "This variable can not be masked."
 msgstr ""
 
 msgid "This will clear repository check states for ALL projects in the database. This cannot be undone. Are you sure?"
-msgstr ""
-
-msgid "This will help us personalize your onboarding experience."
 msgstr ""
 
 msgid "This will redirect you to an external sign in page."
@@ -29844,6 +30283,9 @@ msgstr ""
 msgid "To open Jaeger and easily view tracing from GitLab, link the %{link} page to your server"
 msgstr ""
 
+msgid "To personalize your GitLab experience, we'd like to know a bit more about you. We won't share this information with anyone."
+msgstr ""
+
 msgid "To preserve performance only %{strong_open}%{display_size} of %{real_size}%{strong_close} files are displayed."
 msgstr ""
 
@@ -29910,6 +30352,9 @@ msgstr ""
 msgid "Today"
 msgstr ""
 
+msgid "Toggle GitLab Next"
+msgstr ""
+
 msgid "Toggle Markdown preview"
 msgstr ""
 
@@ -29935,6 +30380,9 @@ msgid "Toggle dropdown"
 msgstr ""
 
 msgid "Toggle emoji award"
+msgstr ""
+
+msgid "Toggle focus mode"
 msgstr ""
 
 msgid "Toggle navigation"
@@ -29965,6 +30413,9 @@ msgid "Toggled :%{name}: emoji award."
 msgstr ""
 
 msgid "Toggles :%{name}: emoji award."
+msgstr ""
+
+msgid "Token"
 msgstr ""
 
 msgid "Token valid until revoked"
@@ -30055,6 +30506,9 @@ msgid "Transfer ownership"
 msgstr ""
 
 msgid "Transfer project"
+msgstr ""
+
+msgid "Transfer your project into another namespace. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "TransferGroup|Cannot transfer group to one of its subgroup."
@@ -30213,6 +30667,12 @@ msgid "Trigger was successfully updated."
 msgstr ""
 
 msgid "Triggerer"
+msgstr ""
+
+msgid "Triggers|In each example, replace %{code_start}TOKEN%{code_end} with the trigger token you generated and replace %{code_start}REF_NAME%{code_end} with the branch or tag name."
+msgstr ""
+
+msgid "Triggers|To pass variables to the triggered pipeline, add %{code_start}variables[VARIABLE]=VALUE%{code_end} to the API request."
 msgstr ""
 
 msgid "Troubleshoot and monitor your application with tracing"
@@ -30428,7 +30888,7 @@ msgstr ""
 msgid "Unarchive project"
 msgstr ""
 
-msgid "Unarchiving the project will restore people's ability to make changes to it. The repository can be committed to, and issues, comments, and other entities can be created. %{strong_start}Once active, this project shows up in the search and on the dashboard.%{strong_end}"
+msgid "Unarchiving the project will restore its members' ability to make changes to it. The repository can be committed to, and issues, comments, and other entities can be created. %{strong_start}Once active, this project shows up in the search and on the dashboard.%{strong_end} %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Unassign from commenting user"
@@ -30908,10 +31368,16 @@ msgstr ""
 msgid "Use %{code_start}::%{code_end} to create a %{link_start}scoped label set%{link_end} (eg. %{code_start}priority::1%{code_end})"
 msgstr ""
 
+msgid "Use .gitlab-ci.yml"
+msgstr ""
+
 msgid "Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab"
 msgstr ""
 
 msgid "Use an one time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
+msgstr ""
+
+msgid "Use cURL"
 msgstr ""
 
 msgid "Use custom color #FF0000"
@@ -30930,6 +31396,9 @@ msgid "Use template"
 msgstr ""
 
 msgid "Use this token to validate received payloads"
+msgstr ""
+
+msgid "Use webhook"
 msgstr ""
 
 msgid "Use your global notification setting"
@@ -31296,6 +31765,15 @@ msgid "Variable will be masked in job logs."
 msgstr ""
 
 msgid "Variables"
+msgstr ""
+
+msgid "Variables can be:"
+msgstr ""
+
+msgid "Variables store information, like passwords and secret keys, that you can use in job scripts."
+msgstr ""
+
+msgid "Variables store information, like passwords and secret keys, that you can use in job scripts. All projects on the instance can use these variables."
 msgstr ""
 
 msgid "Various container registry settings."
@@ -31863,6 +32341,9 @@ msgstr ""
 msgid "Webhook Settings"
 msgstr ""
 
+msgid "Webhook:"
+msgstr ""
+
 msgid "Webhooks"
 msgstr ""
 
@@ -31998,10 +32479,10 @@ msgstr ""
 msgid "Welcome to GitLab"
 msgstr ""
 
-msgid "Welcome to GitLab%{br_tag}%{name}!"
+msgid "Welcome to GitLab, %{first_name}!"
 msgstr ""
 
-msgid "Welcome to GitLab, %{first_name}!"
+msgid "Welcome to GitLab,%{br_tag}%{name}!"
 msgstr ""
 
 msgid "Welcome to the guided GitLab tour"
@@ -32421,9 +32902,6 @@ msgid "You are trying to upload something other than an image. Please upload a .
 msgstr ""
 
 msgid "You are using PostgreSQL %{pg_version_current}, but PostgreSQL %{pg_version_minimum} is required for this version of GitLab. Please upgrade your environment to a supported PostgreSQL version, see %{pg_requirements_url} for details."
-msgstr ""
-
-msgid "You can %{linkStart}view the blob%{linkEnd} instead."
 msgstr ""
 
 msgid "You can also create a project from the command line."
@@ -32927,13 +33405,13 @@ msgstr ""
 msgid "Your GPG keys (%{count})"
 msgstr ""
 
+msgid "Your GitLab Ultimate trial will last 30 days after which point you can keep your free GitLab account forever. We just need some additional information to activate your trial."
+msgstr ""
+
 msgid "Your GitLab account request has been approved!"
 msgstr ""
 
 msgid "Your GitLab group"
-msgstr ""
-
-msgid "Your Gitlab Ultimate trial will last 30 days after which point you can keep your free Gitlab account forever. We just need some additional information to activate your trial."
 msgstr ""
 
 msgid "Your Groups"
@@ -33268,6 +33746,9 @@ msgstr ""
 msgid "by"
 msgstr ""
 
+msgid "cURL:"
+msgstr ""
+
 msgid "can contain only letters of the Base64 alphabet (RFC4648) with the addition of '@', ':' and '.'"
 msgstr ""
 
@@ -33584,6 +34065,9 @@ msgid_plural "days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "days"
+msgstr ""
+
 msgid "default branch"
 msgstr ""
 
@@ -33625,8 +34109,10 @@ msgstr ""
 msgid "element is not a hierarchy"
 msgstr ""
 
-msgid "email '%{email}' does not match the allowed domains of %{email_domains}"
-msgstr ""
+msgid "email '%{email}' does not match the allowed domain of %{email_domains}"
+msgid_plural "email '%{email}' does not match the allowed domains: %{email_domains}"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "email '%{email}' is not a verified email."
 msgstr ""
@@ -33966,6 +34452,12 @@ msgstr ""
 msgid "mrWidget|%{link_start}Learn more about resolving conflicts%{link_end}"
 msgstr ""
 
+msgid "mrWidget|%{mergeError}."
+msgstr ""
+
+msgid "mrWidget|%{mergeError}. Try again."
+msgstr ""
+
 msgid "mrWidget|%{metricsLinkStart} Memory %{metricsLinkEnd} usage %{emphasisStart} decreased %{emphasisEnd} from %{memoryFrom}MB to %{memoryTo}MB"
 msgstr ""
 
@@ -34092,9 +34584,6 @@ msgstr ""
 msgid "mrWidget|Merge failed."
 msgstr ""
 
-msgid "mrWidget|Merge failed: %{mergeError}. Please try again."
-msgstr ""
-
 msgid "mrWidget|Merge locally"
 msgstr ""
 
@@ -34164,7 +34653,7 @@ msgstr ""
 msgid "mrWidget|The changes will be merged into"
 msgstr ""
 
-msgid "mrWidget|The pipeline for this merge request failed. Please retry the job or push a new commit to fix the failure"
+msgid "mrWidget|The pipeline for this merge request did not complete. Push a new commit to fix the failure or check the %{linkStart}troubleshooting documentation%{linkEnd} to see other possible actions."
 msgstr ""
 
 msgid "mrWidget|The source branch HEAD has recently changed. Please reload the page and review the changes before merging"

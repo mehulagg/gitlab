@@ -8,8 +8,8 @@ import {
   GlSprintf,
 } from '@gitlab/ui';
 import { APPROVALS, APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
-import ModalLicenseCompliance from './modal.vue';
 import { s__ } from '~/locale';
+import ModalLicenseCompliance from './modal.vue';
 
 export default {
   components: {

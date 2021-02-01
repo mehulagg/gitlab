@@ -12,7 +12,9 @@ module BulkImports
 
         info(context, message: 'Pipeline started', pipeline_class: pipeline)
 
-        Array.wrap(extracted_data_from(context)).each do |entry|
+        extracted_data = extracted_data_from(context)
+
+        extracted_data&.each do |entry|
           transformers.each do |transformer|
             entry = run_pipeline_step(:transformer, transformer.class.name, context) do
               transformer.transform(context, entry)
@@ -24,25 +26,27 @@ module BulkImports
           end
         end
 
-        after_run(context) if respond_to?(:after_run)
+        after_run(context, extracted_data) if respond_to?(:after_run)
       rescue MarkedAsFailedError
         log_skip(context)
       end
 
       private # rubocop:disable Lint/UselessAccessModifier
 
-      def run_pipeline_step(type, class_name, context)
+      def run_pipeline_step(step, class_name, context)
         raise MarkedAsFailedError if marked_as_failed?(context)
 
-        info(context, type => class_name)
+        info(context, step => class_name)
 
         yield
       rescue MarkedAsFailedError
-        log_skip(context, type => class_name)
+        log_skip(context, step => class_name)
       rescue => e
-        log_import_failure(e, context)
+        log_import_failure(e, step, context)
 
         mark_as_failed(context) if abort_on_failure?
+
+        nil
       end
 
       def extracted_data_from(context)
@@ -72,10 +76,11 @@ module BulkImports
         info(context, log)
       end
 
-      def log_import_failure(exception, context)
+      def log_import_failure(exception, step, context)
         attributes = {
           bulk_import_entity_id: context.entity.id,
           pipeline_class: pipeline,
+          pipeline_step: step,
           exception_class: exception.class.to_s,
           exception_message: exception.message.truncate(255),
           correlation_id_value: Labkit::Correlation::CorrelationId.current_or_new_id

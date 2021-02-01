@@ -4,7 +4,11 @@ module QA
   RSpec.describe 'Manage' do
     describe 'User with minimal access to group', :requires_admin do
       before(:all) do
-        @user_with_minimal_access = Resource::User.fabricate_via_api!
+        admin_api_client = Runtime::API::Client.as_admin
+
+        @user_with_minimal_access = Resource::User.fabricate_via_api! do |user|
+          user.api_client = admin_api_client
+        end
 
         @user_api_client = Runtime::API::Client.new(:gitlab, user: @user_with_minimal_access)
 

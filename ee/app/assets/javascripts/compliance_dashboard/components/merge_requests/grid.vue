@@ -4,11 +4,11 @@ import { GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
+import GridColumnHeading from '../shared/grid_column_heading.vue';
+import Pagination from '../shared/pagination.vue';
 import Approvers from './approvers.vue';
 import BranchDetails from './branch_details.vue';
-import GridColumnHeading from '../shared/grid_column_heading.vue';
 import MergeRequest from './merge_request.vue';
-import Pagination from '../shared/pagination.vue';
 import Status from './status.vue';
 
 export default {

@@ -1,0 +1,9 @@
+- return unless Key.enforce_ssh_key_expiration_feature_available?
+
+- form = local_assigns.fetch(:form)
+
+.form-group
+  .form-check
+    = form.check_box :enforce_ssh_key_expiration, class: 'form-check-input'
+    = form.label :enforce_ssh_key_expiration, class: 'form-check-label' do
+      = _('Enforce SSH key expiration')

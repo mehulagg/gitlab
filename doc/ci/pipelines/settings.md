@@ -63,7 +63,7 @@ if the job surpasses the threshold, it is marked as failed.
 Project defined timeout (either specific timeout set by user or the default
 60 minutes timeout) may be [overridden for runners](../runners/README.md#set-maximum-job-timeout-for-a-runner).
 
-## Maximum artifacts size **(CORE ONLY)**
+## Maximum artifacts size **(FREE SELF)**
 
 For information about setting a maximum artifact size for a project, see
 [Maximum artifacts size](../../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size).
@@ -131,6 +131,8 @@ averaged.
 
 ![Build status coverage](img/pipelines_test_coverage_build.png)
 
+<!-- vale gitlab.Spelling = NO -->
+
 | Coverage Tool                                  | Sample regular expression |
 |------------------------------------------------|---------------------------|
 | Simplecov (Ruby)                               | `\(\d+.\d+\%\) covered` |
@@ -145,6 +147,8 @@ averaged.
 | JaCoCo (Java/Kotlin)                           | `Total.*?([0-9]{1,3})%` |
 | `go test -cover` (Go)                          | `coverage: \d+.\d+% of statements` |
 
+<!-- vale gitlab.Spelling = YES -->
+
 ### Code Coverage history
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/209121) the ability to download a `.csv` in GitLab 12.10.
@@ -154,7 +158,7 @@ To see the evolution of your project code coverage over time,
 you can view a graph or download a CSV file with this data. From your project:
 
 1. Go to **{chart}** **Project Analytics > Repository** to see the historic data for each job listed in the dropdown above the graph.
-1. If you want a CSV file of that data, click **Download raw data (.csv)**
+1. If you want a CSV file of that data, click **Download raw data (`.csv`)**
 
 ![Code coverage graph of a project over time](img/code_coverage_graph_v13_1.png)
 

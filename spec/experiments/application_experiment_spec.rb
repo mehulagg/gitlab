@@ -9,6 +9,12 @@ RSpec.describe ApplicationExperiment, :experiment do
     allow(subject).to receive(:enabled?).and_return(true)
   end
 
+  it "naively assumes a 1x1 relationship to feature flags for tests" do
+    expect(Feature).to receive(:persist_used!).with('stub')
+
+    described_class.new(:stub)
+  end
+
   describe "enabled" do
     before do
       allow(subject).to receive(:enabled?).and_call_original

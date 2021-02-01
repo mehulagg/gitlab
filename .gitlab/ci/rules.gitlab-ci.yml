@@ -126,6 +126,8 @@
 
 .frontend-dependency-patterns: &frontend-dependency-patterns
   - "{package.json,yarn.lock}"
+  - "config/webpack.config.js"
+  - "config/helpers/*.js"
 
 .frontend-patterns: &frontend-patterns
   - "{package.json,yarn.lock}"
@@ -522,6 +524,13 @@
     - <<: *if-merge-request
       changes: *db-patterns
     - <<: *if-merge-request-title-run-all-rspec
+
+.rails:rules:db:gitlabcom-database-testing:
+  rules:
+    - if: '$GITLABCOM_DATABASE_TESTING_TRIGGER_TOKEN == null'
+      when: never
+    - <<: *if-merge-request
+      changes: *db-patterns
 
 .rails:rules:ee-and-foss-unit:
   rules:
