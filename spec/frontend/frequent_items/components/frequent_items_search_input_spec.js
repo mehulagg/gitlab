@@ -45,39 +45,6 @@ describe('FrequentItemsSearchInputComponent', () => {
     });
   });
 
-  describe('mounted', () => {
-    it('should listen `dropdownOpen` event', (done) => {
-      jest.spyOn(eventHub, '$on').mockImplementation(() => {});
-      const vmX = createComponent().vm;
-
-      vmX.$nextTick(() => {
-        expect(eventHub.$on).toHaveBeenCalledWith(
-          `${vmX.namespace}-dropdownOpen`,
-          expect.any(Function),
-        );
-        done();
-      });
-    });
-  });
-
-  describe('beforeDestroy', () => {
-    it('should unbind event listeners on eventHub', (done) => {
-      const vmX = createComponent().vm;
-      jest.spyOn(eventHub, '$off').mockImplementation(() => {});
-
-      vmX.$mount();
-      vmX.$destroy();
-
-      vmX.$nextTick(() => {
-        expect(eventHub.$off).toHaveBeenCalledWith(
-          `${vmX.namespace}-dropdownOpen`,
-          expect.any(Function),
-        );
-        done();
-      });
-    });
-  });
-
   describe('template', () => {
     it('should render component element', () => {
       expect(wrapper.classes()).toContain('search-input-container');

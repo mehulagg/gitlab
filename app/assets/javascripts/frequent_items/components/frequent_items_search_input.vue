@@ -32,12 +32,6 @@ export default {
       this.setSearchQuery(this.searchQuery);
     }, 500),
   },
-  mounted() {
-    eventHub.$on(`${this.namespace}-dropdownOpen`, this.setFocus);
-  },
-  beforeDestroy() {
-    eventHub.$off(`${this.namespace}-dropdownOpen`, this.setFocus);
-  },
   methods: {
     ...mapActions(['setSearchQuery']),
     setFocus() {
