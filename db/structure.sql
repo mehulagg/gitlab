@@ -14332,6 +14332,7 @@ CREATE TABLE namespace_settings (
     allow_mfa_for_subgroups boolean DEFAULT true NOT NULL,
     default_branch_name text,
     repository_read_only boolean DEFAULT false NOT NULL,
+    delayed_project_removal boolean DEFAULT false NOT NULL,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255))
 );
 
@@ -23731,6 +23732,8 @@ CREATE INDEX temporary_index_vulnerabilities_on_id ON vulnerabilities USING btre
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
 CREATE INDEX tmp_idx_deduplicate_vulnerability_occurrences ON vulnerability_occurrences USING btree (project_id, report_type, location_fingerprint, primary_identifier_id, id);
+
+CREATE INDEX tmp_idx_on_namespaces_delayed_project_removal ON namespaces USING btree (delayed_project_removal);
 
 CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING btree (scan_id) WHERE (uuid IS NULL);
 
