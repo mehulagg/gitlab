@@ -70,7 +70,7 @@ The GitLab codebase provides a dedicated [generator](https://gitlab.com/gitlab-o
 The generator takes the key path argument and 2 options and creates the metric YAML definition in corresponding location:
 
 - `--ee`, `--no-ee` Indicates if metric is for EE.
-- `--dir=DIR` Indicates the metric location. It must be one of: `counts_7d`, `7d`, `counts_28d`, `28d`, `counts_all`, `all`, `settings`, `license`.
+- `--dir=DIR` indicates the metric directory. It must be one of: `counts_7d`, `7d`, `counts_28d`, `28d`, `counts_all`, `all`, `settings`, `license`.
 
 ```shell
 bundle exec rails generate gitlab:usage_metric_definition counts.issues --dir=7d
