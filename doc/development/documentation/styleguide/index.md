@@ -7,10 +7,9 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 
 # Documentation Style Guide
 
-This document defines the standards for GitLab documentation. Use this guide for standards on grammar, formatting, word usage, and more.
-If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-processes`.
+This document defines the standards for GitLab documentation, including grammar, formatting, word use, and more.
 
-Related topics:
+For style questions, mention `@tw-style` in an issue or merge request. If you have access to the GitLab Slack workspace, use the `#docs-processes` channel. Other related information is also available:
 
 - [Doc contribution guidelines](../index.md)
 - [Doc style and consistency testing](../testing.md)
