@@ -7,27 +7,18 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 
 # Documentation Style Guide
 
-This document defines the standards for GitLab documentation.
+This document defines the standards for GitLab documentation. Use this guide for standards on grammar, formatting, word usage, and more.
+If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-processes`.
 
-For broader information about the documentation, see the [Documentation guidelines](../index.md).
+Related topics:
 
-For guidelines specific to text in the GitLab interface, see the Pajamas [Content](https://design.gitlab.com/content/error-messages/) section.
-
-For information on how to validate styles locally or by using GitLab CI/CD, see [Testing](../testing.md).
-
-Use this guide for standards on grammar, formatting, word usage, and more.
-
-You can also view a list of [recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix).
-
-If you can't find what you need:
-
-- View the GitLab Handbook for [writing style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines) that apply to all GitLab content.
-- Refer to:
-
-  - [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/).
-  - [Google Developer Documentation Style Guide](https://developers.google.com/style).
-
-If you have questions about style, mention `@tw-style` in an issue or merge request, or, if you have access to the GitLab Slack workspace, use `#docs-process`.
+- [Doc contribution guidelines](../index.md)
+- [Doc style and consistency testing](../testing.md)
+- [UI text guidelines](https://design.gitlab.com/content/error-messages/)
+- [GitLab Handbook style guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines)
+- [Microsoft Style Guide](https://docs.microsoft.com/en-us/style-guide/welcome/)
+- [Google Developer Documentation Style Guide](https://developers.google.com/style)
+- [Recent updates to this guide](https://gitlab.com/dashboard/merge_requests?scope=all&utf8=%E2%9C%93&state=merged&label_name[]=tw-style&not[label_name][]=docs%3A%3Afix)
 
 ## Documentation is the single source of truth (SSOT)
 
