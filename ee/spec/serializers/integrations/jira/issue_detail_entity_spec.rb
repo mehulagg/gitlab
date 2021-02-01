@@ -2,20 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Integrations::Jira::IssueEntity do
+RSpec.describe Integrations::Jira::IssueDetailEntity do
   let(:project) { build(:project) }
-
+  let(:jira_client) { double(options: { site: 'http://jira.com/' }) }
   let(:reporter) do
     double(
       'displayName' => 'reporter',
       'avatarUrls' => { '48x48' => 'http://reporter.avatar' },
-      'name' => double # Default to Jira Server issue response, Jira Cloud replaces name with accountId
+      'name' => double # Default to Jira Server issue response, Jira Cloud replaces name with accountId,
     )
   end
 
   let(:jira_issue) do
     double(
-      summary: 'summary',
+      renderedFields: { 'description' => '<p>Description</p>' },
+      summary: 'Title',
       created: '2020-06-25T15:39:30.000+0000',
       updated: '2020-06-26T15:38:32.000+0000',
       resolutiondate: '2020-06-27T13:23:51.000+0000',
@@ -29,18 +30,18 @@ RSpec.describe Integrations::Jira::IssueEntity do
     )
   end
 
-  let(:jira_client) { double(options: { site: 'http://jira.com/' }) }
-
   subject { described_class.new(jira_issue, project: project).as_json }
 
   it 'returns the Jira issues attributes' do
     expect(subject).to include(
       project_id: project.id,
-      title: 'summary',
+      title: 'Title',
+      description_html: "<p dir=\"auto\">Description</p>",
       created_at: '2020-06-25T15:39:30.000+0000'.to_datetime.utc,
       updated_at: '2020-06-26T15:38:32.000+0000'.to_datetime.utc,
       closed_at: '2020-06-27T13:23:51.000+0000'.to_datetime.utc,
       status: 'To Do',
+      state: 'closed',
       labels: [
         {
           name: 'backend',
@@ -107,6 +108,16 @@ RSpec.describe Integrations::Jira::IssueEntity do
 
     it 'returns an empty array' do
       expect(subject).to include(labels: [])
+    end
+  end
+
+  context 'without resolution date' do
+    before do
+      allow(jira_issue).to receive(:resolutiondate).and_return(nil)
+    end
+
+    it "returns 'Open' state" do
+      expect(subject).to include(state: 'opened')
     end
   end
 end
