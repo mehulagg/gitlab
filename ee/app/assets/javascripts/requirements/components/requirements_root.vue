@@ -13,6 +13,17 @@ import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/auth
 import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
+import projectRequirements from '../queries/projectRequirements.query.graphql';
+import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
+import createRequirement from '../queries/createRequirement.mutation.graphql';
+import updateRequirement from '../queries/updateRequirement.mutation.graphql';
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
+import {
+  FilterState,
+  AvailableSortOptions,
+  TestReportStatus,
+  DEFAULT_PAGE_SIZE,
+} from '../constants';
 import RequirementsTabs from './requirements_tabs.vue';
 import RequirementsLoading from './requirements_loading.vue';
 import RequirementsEmptyState from './requirements_empty_state.vue';
@@ -20,19 +31,6 @@ import RequirementItem from './requirement_item.vue';
 import RequirementForm from './requirement_form.vue';
 import ImportRequirementsModal from './import_requirements_modal.vue';
 import ExportRequirementsModal from './export_requirements_modal.vue';
-
-import projectRequirements from '../queries/projectRequirements.query.graphql';
-import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
-import createRequirement from '../queries/createRequirement.mutation.graphql';
-import updateRequirement from '../queries/updateRequirement.mutation.graphql';
-import exportRequirement from '../queries/exportRequirements.mutation.graphql';
-
-import {
-  FilterState,
-  AvailableSortOptions,
-  TestReportStatus,
-  DEFAULT_PAGE_SIZE,
-} from '../constants';
 
 export default {
   DEFAULT_PAGE_SIZE,

@@ -2,7 +2,6 @@ import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
-import * as types from './mutation_types';
 import { FETCH_VALUE_STREAM_DATA } from '../constants';
 import {
   removeFlash,
@@ -11,6 +10,7 @@ import {
   checkForDataError,
   flashErrorIfStatusNotOk,
 } from '../utils';
+import * as types from './mutation_types';
 
 const appendExtension = (path) => (path.indexOf('.') > -1 ? path : `${path}.json`);
 

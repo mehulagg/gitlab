@@ -6,10 +6,10 @@ import projectsQuery from 'ee/security_dashboard/graphql/queries/get_instance_se
 import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/mutations/add_project_to_security_dashboard.mutation.graphql';
 import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/mutations/delete_project_from_security_dashboard.mutation.graphql';
 import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_class_project_manager_utils';
-import ProjectList from './project_list.vue';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import { __, s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import ProjectList from './project_list.vue';
 
 export default {
   MINIMUM_QUERY_LENGTH: 3,

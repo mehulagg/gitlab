@@ -8,7 +8,7 @@ import ExpandableSection from 'ee/security_configuration/sast/components/expanda
 import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/wrapper';
-import { makeEntities, makeSastCiConfiguration } from './helpers';
+import { makeEntities, makeSastCiConfiguration } from '../helpers';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),

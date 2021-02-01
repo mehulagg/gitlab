@@ -125,6 +125,7 @@ export default {
       >
         <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
         <schedule-shift-wrapper
+          v-if="rotation.shifts"
           :preset-type="presetType"
           :timeframe-item="timeframeItem"
           :timeframe="timeframe"
@@ -134,8 +135,8 @@ export default {
     </div>
     <delete-rotation-modal
       :rotation="rotationToUpdate"
-      :modal-id="$options.deleteRotationModalId"
       :schedule-iid="scheduleIid"
+      :modal-id="$options.deleteRotationModalId"
       @set-rotation-to-update="setRotationToUpdate"
     />
   </div>

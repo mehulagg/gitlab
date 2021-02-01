@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlButton, GlLink, GlSprintf } from '@gitlab/ui';
-import getAgentCount from '../../graphql/queries/get_agent_count.query.graphql';
 import { s__ } from '~/locale';
+import getAgentCount from '../../graphql/queries/get_agent_count.query.graphql';
 
 export default {
   i18n: {

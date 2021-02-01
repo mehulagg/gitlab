@@ -32,6 +32,6 @@ export default {
     <div class="item-label gl-pl-6 gl-py-4" data-testid="timeline-header-label">
       {{ timelineHeaderLabel }}
     </div>
-    <days-header-sub-item />
+    <days-header-sub-item :timeframe-item="timeframeItem" />
   </span>
 </template>

@@ -9,8 +9,8 @@ import {
 } from '~/lib/utils/common_utils';
 import buildReplicableTypeQuery from '../graphql/replicable_type_query_builder';
 import { gqClient } from '../utils';
-import * as types from './mutation_types';
 import { FILTER_STATES, PREV, NEXT, DEFAULT_PAGE_SIZE } from '../constants';
+import * as types from './mutation_types';
 
 // Fetch Replicable Items
 export const requestReplicableItems = ({ commit }) => commit(types.REQUEST_REPLICABLE_ITEMS);

@@ -3,9 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe ::EE::API::Entities::BillableMember do
-  let(:member) { build(:user, public_email: public_email, email: 'private@email.com') }
+  let(:last_activity_on) { Date.today }
+  let(:public_email) { nil }
+  let(:member) { build(:user, public_email: public_email, email: 'private@email.com', last_activity_on: last_activity_on) }
 
   subject(:entity_representation) { described_class.new(member).as_json }
+
+  it 'returns the last_activity_on attribute' do
+    expect(entity_representation[:last_activity_on]).to eq last_activity_on
+  end
 
   context 'when the user has a public_email assigned' do
     let(:public_email) { 'public@email.com' }

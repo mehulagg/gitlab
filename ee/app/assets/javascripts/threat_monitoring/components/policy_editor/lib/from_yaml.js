@@ -1,5 +1,4 @@
 import { safeLoad } from 'js-yaml';
-import { buildRule } from './rules';
 import {
   DisabledByLabel,
   EndpointMatchModeAny,
@@ -13,6 +12,7 @@ import {
   RuleTypeCIDR,
   RuleTypeFQDN,
 } from '../constants';
+import { buildRule } from './rules';
 
 /*
   Convert list of matchLabel selectors used by the endpoint rule to an

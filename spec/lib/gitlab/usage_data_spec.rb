@@ -228,6 +228,29 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       )
     end
 
+    it 'includes import gmau usage data' do
+      for_defined_days_back do
+        user = create(:user)
+        group = create(:group)
+
+        group.add_owner(user)
+
+        create(:project, import_type: :github, creator_id: user.id)
+        create(:jira_import_state, :finished, project: create(:project, creator_id: user.id))
+        create(:issue_csv_import, user: user)
+        create(:group_import_state, group: group, user: user)
+        create(:bulk_import, user: user)
+      end
+
+      expect(described_class.usage_activity_by_stage_manage({})).to include(
+        unique_users_all_imports: 10
+      )
+
+      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+        unique_users_all_imports: 5
+      )
+    end
+
     it 'includes imports usage data' do
       for_defined_days_back do
         user = create(:user)
@@ -1286,8 +1309,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   describe '.aggregated_metrics_weekly' do
     subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_weekly }
 
-    it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
-      expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:aggregated_metrics_weekly_data).and_return(global_search_gmau: 123)
+    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#weekly_data', :aggregate_failures do
+      expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
+        expect(instance).to receive(:weekly_data).and_return(global_search_gmau: 123)
+      end
       expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
     end
   end
@@ -1295,8 +1320,10 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   describe '.aggregated_metrics_monthly' do
     subject(:aggregated_metrics_payload) { described_class.aggregated_metrics_monthly }
 
-    it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#aggregated_metrics_data', :aggregate_failures do
-      expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:aggregated_metrics_monthly_data).and_return(global_search_gmau: 123)
+    it 'uses ::Gitlab::Usage::Metrics::Aggregates::Aggregate#monthly_data', :aggregate_failures do
+      expect_next_instance_of(::Gitlab::Usage::Metrics::Aggregates::Aggregate) do |instance|
+        expect(instance).to receive(:monthly_data).and_return(global_search_gmau: 123)
+      end
       expect(aggregated_metrics_payload).to eq(aggregated_metrics: { global_search_gmau: 123 })
     end
   end

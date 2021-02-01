@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import * as types from './mutation_types';
 
 const setPolicies = (state, policies) => {
   state.policies = policies.map((policy) => convertObjectPropsToCamelCase(policy));

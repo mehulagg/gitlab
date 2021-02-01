@@ -1,8 +1,8 @@
 <script>
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { PRESET_TYPES, HOURS_IN_DAY } from 'ee/oncall_schedules/constants';
 import updateShiftTimeUnitWidthMutation from 'ee/oncall_schedules/graphql/mutations/update_shift_time_unit_width.mutation.graphql';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
-import { GlResizeObserverDirective } from '@gitlab/ui';
 
 export default {
   PRESET_TYPES,
@@ -11,6 +11,12 @@ export default {
     GlResizeObserver: GlResizeObserverDirective,
   },
   mixins: [CommonMixin],
+  props: {
+    timeframeItem: {
+      type: Date,
+      required: true,
+    },
+  },
   mounted() {
     this.updateShiftStyles();
   },
@@ -42,6 +48,7 @@ export default {
       >{{ hour }}</span
     >
     <span
+      v-if="isToday"
       :style="getIndicatorStyles($options.PRESET_TYPES.DAYS)"
       class="current-day-indicator-header preset-days"
       data-testid="day-item-sublabel-current-indicator"

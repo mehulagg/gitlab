@@ -173,7 +173,6 @@ export default {
       <color-picker
         :value="color"
         :label="$options.i18n.colorInputLabel"
-        :set-color="color || ''"
         :state="isValidColor"
         @input="color = $event"
       />

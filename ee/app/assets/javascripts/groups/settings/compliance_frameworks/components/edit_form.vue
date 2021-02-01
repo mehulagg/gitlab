@@ -3,10 +3,10 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
-import SharedForm from './shared_form.vue';
 
 import getComplianceFrameworkQuery from '../graphql/queries/get_compliance_framework.query.graphql';
 import updateComplianceFrameworkMutation from '../graphql/queries/update_compliance_framework.mutation.graphql';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {

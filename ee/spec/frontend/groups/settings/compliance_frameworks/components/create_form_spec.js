@@ -9,9 +9,8 @@ import CreateForm from 'ee/groups/settings/compliance_frameworks/components/crea
 import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
 import { visitUrl } from '~/lib/utils/url_utility';
 
-import { validCreateResponse, errorCreateResponse } from '../mock_data';
-
 import * as Sentry from '~/sentry/wrapper';
+import { validCreateResponse, errorCreateResponse } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);

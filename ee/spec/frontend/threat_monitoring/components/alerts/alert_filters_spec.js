@@ -1,7 +1,7 @@
-import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
-import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 import { GlFormCheckbox } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import AlertFilters from 'ee/threat_monitoring/components/alerts/alert_filters.vue';
+import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constants';
 
 describe('AlertFilters component', () => {
   let wrapper;

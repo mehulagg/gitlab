@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import { __ } from '~/locale';
-import DirtyFormChecker from './dirty_form_checker';
 import setupToggleButtons from '~/toggle_buttons';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { fixTitle } from '~/tooltips';
+import DirtyFormChecker from './dirty_form_checker';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';

@@ -4,13 +4,13 @@ import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_va
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
 import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { emptyState, emptyErrorsState, firstLabel } from './mock_data';
 import {
   customStageEvents as stageEvents,
   labelStartEvent,
   labelStopEvent,
   customStageStopEvents as endEvents,
 } from '../../mock_data';
+import { emptyState, emptyErrorsState, firstLabel } from './mock_data';
 
 const formatStartEventOpts = (_events) => [
   { text: 'Select start event', value: null },

@@ -2,8 +2,8 @@ import { s__ } from '~/locale';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import * as types from './mutation_types';
 import { getTimeWindowParams } from '../../utils';
+import * as types from './mutation_types';
 
 export const requestStatistics = ({ commit }, timeWindowParams) => {
   commit(types.REQUEST_STATISTICS, timeWindowParams);
