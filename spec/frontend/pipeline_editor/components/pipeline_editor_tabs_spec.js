@@ -1,9 +1,10 @@
 import { nextTick } from 'vue';
 import { shallowMount, mount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import CiLint from '~/pipeline_editor/components/lint/ci_lint.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tabs.vue';
-import CiLint from '~/pipeline_editor/components/lint/ci_lint.vue';
+import CiConfigMergedPreview from '~/pipeline_editor/components/editor/ci_config_merged_preview.vue';
 
 import { mockLintResponse, mockCiYml } from '../mock_data';
 
@@ -36,10 +37,12 @@ describe('Pipeline editor tabs component', () => {
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findEditorTab = () => wrapper.find('[data-testid="editor-tab"]');
   const findLintTab = () => wrapper.find('[data-testid="lint-tab"]');
+  const findMergedTab = () => wrapper.find('[data-testid="merged-tab"]');
   const findVisualizationTab = () => wrapper.find('[data-testid="visualization-tab"]');
   const findTextEditor = () => wrapper.find(MockTextEditor);
   const findPipelineGraph = () => wrapper.find(PipelineGraph);
   const findCiLint = () => wrapper.find(CiLint);
+  const findMergedPreview = () => wrapper.find(CiConfigMergedPreview);
 
   afterEach(() => {
     wrapper.destroy();
@@ -122,6 +125,28 @@ describe('Pipeline editor tabs component', () => {
         it('display the tab and the lint component', () => {
           expect(findLintTab().exists()).toBe(true);
           expect(findCiLint().exists()).toBe(true);
+        });
+      });
+    });
+
+    describe('merged tab', () => {
+      describe('while loading', () => {
+        beforeEach(() => {
+          createComponent({ props: { isCiConfigDataLoading: true } });
+        });
+
+        it('displays a loading icon if the lint query is loading', () => {
+          expect(findLoadingIcon().exists()).toBe(true);
+        });
+      });
+      describe('after loading', () => {
+        beforeEach(() => {
+          createComponent();
+        });
+
+        it('display the tab and the lint component', () => {
+          expect(findMergedTab().exists()).toBe(true);
+          expect(findMergedPreview().exists()).toBe(true);
         });
       });
     });

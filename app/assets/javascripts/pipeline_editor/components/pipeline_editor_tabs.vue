@@ -2,9 +2,10 @@
 import { GlLoadingIcon, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import CiConfigMergedPreview from './editor/ci_config_merged_preview.vue';
 import CiLint from './lint/ci_lint.vue';
 import EditorTab from './ui/editor_tab.vue';
-import TextEditor from './text_editor.vue';
+import TextEditor from './editor/text_editor.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 
 export default {
@@ -12,8 +13,10 @@ export default {
     tabEdit: s__('Pipelines|Write pipeline configuration'),
     tabGraph: s__('Pipelines|Visualize'),
     tabLint: s__('Pipelines|Lint'),
+    tabMergedYaml: s__('Pipelines|View merged YAML'),
   },
   components: {
+    CiConfigMergedPreview,
     CiLint,
     EditorTab,
     GlLoadingIcon,
@@ -57,6 +60,10 @@ export default {
     <editor-tab :title="$options.i18n.tabLint" data-testid="lint-tab">
       <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
       <ci-lint v-else :ci-config="ciConfigData" />
+    </editor-tab>
+    <editor-tab :title="$options.i18n.tabMergedYaml" lazy data-testid="merged-tab">
+      <gl-loading-icon v-if="isCiConfigDataLoading" size="lg" class="gl-m-3" />
+      <ci-config-merged-preview v-else :value="ciFileContent" v-on="$listeners" />
     </editor-tab>
   </gl-tabs>
 </template>

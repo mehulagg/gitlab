@@ -7,10 +7,10 @@ import {
   mockCommitSha,
   mockProjectPath,
   mockProjectNamespace,
-} from '../mock_data';
+} from '../../mock_data';
 
 import { EDITOR_READY_EVENT } from '~/editor/constants';
-import TextEditor from '~/pipeline_editor/components/text_editor.vue';
+import TextEditor from '~/pipeline_editor/components/editor/text_editor.vue';
 
 describe('Text editor component', () => {
   const localVue = createLocalVue();
