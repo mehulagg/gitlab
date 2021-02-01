@@ -197,7 +197,19 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
       it 'matches the response schema' do
         subject
 
-        expect(response).to match_response_schema('analytics/cycle_analytics/median', dir: 'ee')
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
+    end
+
+    describe 'GET #average' do
+      subject { get :average, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
       end
 
       include_examples 'Value Stream Analytics data endpoint examples'

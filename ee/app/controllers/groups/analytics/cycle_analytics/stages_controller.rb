@@ -9,7 +9,7 @@ module Groups
 
         before_action :load_group
         before_action :load_value_stream
-        before_action :validate_params, only: %i[median records duration_chart]
+        before_action :validate_params, only: %i[median average records duration_chart]
 
         def index
           return render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
@@ -45,6 +45,12 @@ module Groups
           return render_403 unless can?(current_user, :read_group_stage, @group)
 
           render json: { value: data_collector.median.seconds }
+        end
+
+        def average
+          return render_403 unless can?(current_user, :read_group_stage, @group)
+
+          render json: { value: data_collector.average.seconds }
         end
 
         def records
