@@ -8,6 +8,8 @@ import getComplianceFrameworkQuery from 'ee/groups/settings/compliance_framework
 import updateComplianceFrameworkMutation from 'ee/groups/settings/compliance_frameworks/graphql/queries/update_compliance_framework.mutation.graphql';
 import EditForm from 'ee/groups/settings/compliance_frameworks/components/edit_form.vue';
 import SharedForm from 'ee/groups/settings/compliance_frameworks/components/shared_form.vue';
+import FormStatus from 'ee/groups/settings/compliance_frameworks/components/form_status.vue';
+import { FETCH_ERROR, SAVE_ERROR } from 'ee/groups/settings/compliance_frameworks/constants';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 import {
@@ -25,12 +27,12 @@ localVue.use(VueApollo);
 
 jest.mock('~/lib/utils/url_utility');
 
-describe('Form', () => {
+describe('EditForm', () => {
   let wrapper;
   const sentryError = new Error('Network error');
   const sentrySaveError = new Error('Invalid values given');
   const propsData = {
-    graphqlFieldName: 'field',
+    graphqlFieldName: 'ComplianceManagement::Framework',
     groupPath: 'group-1',
     groupEditPath: 'group-1/edit',
     id: '1',
@@ -47,6 +49,7 @@ describe('Form', () => {
   const updateWithErrors = jest.fn().mockResolvedValue(errorUpdateResponse);
 
   const findForm = () => wrapper.findComponent(SharedForm);
+  const findFormStatus = () => wrapper.findComponent(FormStatus);
 
   function createMockApolloProvider(requestHandlers) {
     localVue.use(VueApollo);
@@ -62,6 +65,17 @@ describe('Form', () => {
     });
   }
 
+  async function submitForm(name, description, color) {
+    await waitForPromises();
+
+    findForm().vm.$emit('update:name', name);
+    findForm().vm.$emit('update:description', description);
+    findForm().vm.$emit('update:color', color);
+    findForm().vm.$emit('submit');
+
+    await waitForPromises();
+  }
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -71,9 +85,8 @@ describe('Form', () => {
       wrapper = createComponent([[getComplianceFrameworkQuery, fetchLoading]]);
     });
 
-    it('passes the loading state to the form', () => {
-      expect(findForm().props('loading')).toBe(true);
-      expect(findForm().props('renderForm')).toBe(false);
+    it('passes the loading state to the form status', () => {
+      expect(findFormStatus().props('loading')).toBe(true);
     });
   });
 
@@ -84,39 +97,37 @@ describe('Form', () => {
       await waitForPromises();
 
       expect(fetchOne).toHaveBeenCalledTimes(1);
-      expect(findForm().props('complianceFramework')).toMatchObject(frameworkFoundResponse);
-      expect(findForm().props('renderForm')).toBe(true);
+      expect(findForm().props()).toMatchObject({
+        name: frameworkFoundResponse.name,
+        description: frameworkFoundResponse.description,
+        color: frameworkFoundResponse.color,
+        groupEditPath: propsData.groupEditPath,
+      });
+      expect(findForm().exists()).toBe(true);
     });
 
-    it('passes the error to the form if the existing framework query returns no data', async () => {
+    it('passes the error to the form status if the existing framework query returns no data', async () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[getComplianceFrameworkQuery, fetchEmpty]]);
 
       await waitForPromises();
 
       expect(fetchEmpty).toHaveBeenCalledTimes(1);
-      expect(findForm().props('loading')).toBe(false);
-      expect(findForm().props('renderForm')).toBe(false);
-      expect(findForm().props('error')).toBe(
-        'Error fetching compliance frameworks data. Please refresh the page',
-      );
-      expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(
-        new Error('Error fetching compliance frameworks data. Please refresh the page'),
-      );
+      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findFormStatus().props('error')).toBe(FETCH_ERROR);
+      expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(new Error(FETCH_ERROR));
     });
 
-    it('passes the error to the form if the existing framework query fails', async () => {
+    it('passes the error to the form status if the existing framework query fails', async () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([[getComplianceFrameworkQuery, fetchWithErrors]]);
 
       await waitForPromises();
 
       expect(fetchWithErrors).toHaveBeenCalledTimes(1);
-      expect(findForm().props('loading')).toBe(false);
-      expect(findForm().props('renderForm')).toBe(false);
-      expect(findForm().props('error')).toBe(
-        'Error fetching compliance frameworks data. Please refresh the page',
-      );
+      expect(findFormStatus().props('loading')).toBe(false);
+      expect(findForm().exists()).toBe(false);
+      expect(findFormStatus().props('error')).toBe(FETCH_ERROR);
       expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(sentryError);
     });
   });
@@ -136,43 +147,35 @@ describe('Form', () => {
       },
     };
 
-    it('passes the error to the form when saving causes an exception and does not redirect', async () => {
+    it('passes the error to the form status when saving causes an exception and does not redirect', async () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([
         [getComplianceFrameworkQuery, fetchOne],
         [updateComplianceFrameworkMutation, updateWithNetworkErrors],
       ]);
 
-      await waitForPromises();
-      findForm().vm.$emit('submit', { name, description, color });
-      await waitForPromises();
+      await submitForm(name, description, color);
 
       expect(updateWithNetworkErrors).toHaveBeenCalledWith(updateProps);
-      expect(findForm().props('loading')).toBe(false);
-      expect(findForm().props('renderForm')).toBe(true);
+      expect(findFormStatus().props('loading')).toBe(false);
       expect(visitUrl).not.toHaveBeenCalled();
-      expect(findForm().props('error')).toBe(
-        'Unable to save this compliance framework. Please try again',
-      );
+      expect(findFormStatus().props('error')).toBe(SAVE_ERROR);
       expect(Sentry.captureException.mock.calls[0][0].networkError).toStrictEqual(sentryError);
     });
 
-    it('passes the errors to the form when saving fails and does not redirect', async () => {
+    it('passes the errors to the form status when saving fails and does not redirect', async () => {
       jest.spyOn(Sentry, 'captureException');
       wrapper = createComponent([
         [getComplianceFrameworkQuery, fetchOne],
         [updateComplianceFrameworkMutation, updateWithErrors],
       ]);
 
-      await waitForPromises();
-      findForm().vm.$emit('submit', { name, description, color });
-      await waitForPromises();
+      await submitForm(name, description, color);
 
       expect(updateWithErrors).toHaveBeenCalledWith(updateProps);
-      expect(findForm().props('loading')).toBe(false);
-      expect(findForm().props('renderForm')).toBe(true);
+      expect(findFormStatus().props('loading')).toBe(false);
       expect(visitUrl).not.toHaveBeenCalled();
-      expect(findForm().props('error')).toBe('Invalid values given');
+      expect(findFormStatus().props('error')).toBe('Invalid values given');
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentrySaveError);
     });
 
@@ -182,13 +185,10 @@ describe('Form', () => {
         [updateComplianceFrameworkMutation, update],
       ]);
 
-      await waitForPromises();
-      findForm().vm.$emit('submit', { name, description, color });
-      await waitForPromises();
+      await submitForm(name, description, color);
 
       expect(update).toHaveBeenCalledWith(updateProps);
-      expect(findForm().props('loading')).toBe(false);
-      expect(findForm().props('renderForm')).toBe(true);
+      expect(findFormStatus().props('loading')).toBe(false);
       expect(visitUrl).toHaveBeenCalledWith(propsData.groupEditPath);
     });
   });

@@ -1,12 +1,14 @@
 <script>
 import { visitUrl } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
 import SharedForm from './shared_form.vue';
+import FormStatus from './form_status.vue';
+import { DEFAULT_FORM_DATA, SAVE_ERROR } from '../constants';
 
 export default {
   components: {
+    FormStatus,
     SharedForm,
   },
   props: {
@@ -22,6 +24,7 @@ export default {
   data() {
     return {
       errorMessage: '',
+      formData: DEFAULT_FORM_DATA,
     };
   },
   computed: {
@@ -34,17 +37,18 @@ export default {
       this.errorMessage = userFriendlyText;
       Sentry.captureException(error);
     },
-    async onSubmit(formData) {
+    async onSubmit() {
       try {
+        const { name, description, color } = this.formData;
         const { data } = await this.$apollo.mutate({
           mutation: createComplianceFrameworkMutation,
           variables: {
             input: {
               namespacePath: this.groupPath,
               params: {
-                name: formData.name,
-                description: formData.description,
-                color: formData.color,
+                name,
+                description,
+                color,
               },
             },
           },
@@ -58,23 +62,20 @@ export default {
           visitUrl(this.groupEditPath);
         }
       } catch (e) {
-        this.setError(e, this.$options.i18n.saveError);
+        this.setError(e, SAVE_ERROR);
       }
     },
-  },
-  i18n: {
-    saveError: s__(
-      'ComplianceFrameworks|Unable to save this compliance framework. Please try again',
-    ),
   },
 };
 </script>
 <template>
-  <shared-form
-    :group-edit-path="groupEditPath"
-    :loading="isLoading"
-    :render-form="!isLoading"
-    :error="errorMessage"
-    @submit="onSubmit"
-  />
+  <form-status :loading="isLoading" :error="errorMessage">
+    <shared-form
+      :group-edit-path="groupEditPath"
+      :name.sync="formData.name"
+      :description.sync="formData.description"
+      :color.sync="formData.color"
+      @submit="onSubmit"
+    />
+  </form-status>
 </template>
