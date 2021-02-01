@@ -78,7 +78,7 @@ create  config/metrics/counts_7d/issues.yml
 ```
 
 NOTE:
-To create a metric definition used in EE, add `--ee` flag.
+To create a metric definition used in EE, add the `--ee` flag.
 
 ```shell
 bundle exec rails generate gitlab:usage_metric_definition counts.issues --ee --dir=7d
