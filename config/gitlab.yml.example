@@ -430,6 +430,9 @@ production: &base
   # Periodically executed jobs, to self-heal GitLab, do external synchronizations, etc.
   # Please read here for more information: https://github.com/ondrejbartas/sidekiq-cron#adding-cron-job
   cron_jobs:
+    packages_composer_cache_cleanup_worker:
+      class: "Packages::Composer::CacheCleanupWorker"
+      cron: "30 * * * *"
     # Flag stuck CI jobs as failed
     stuck_ci_jobs_worker:
       cron: "0 * * * *"

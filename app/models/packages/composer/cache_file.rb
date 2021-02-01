@@ -16,6 +16,13 @@ module Packages
 
       scope :with_namespace, ->(namespace) { where(namespace: namespace) }
       scope :with_sha, ->(sha) { where(file_sha256: sha) }
+      scope :expired, -> { where("delete_at <= ?", Time.zone.now) }
+      scope :without_namespace, -> { where(namespace_id: nil) }
+      scope :for_deletion, -> do
+        union = Gitlab::SQL::Union.new([CacheFile.expired, CacheFile.without_namespace])
+
+        CacheFile.from([Arel.sql("(#{union.to_sql}) AS #{CacheFile.table_name}")])
+      end
     end
   end
 end
