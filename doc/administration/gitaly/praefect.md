@@ -1400,7 +1400,10 @@ Gitaly Cluster automatically.
 Project repositories may be moved from one storage location using the [Project repository storage moves API](../../api/project_repository_storage_moves.md):
 
 NOTE:
-The Project repository storage moves API [cannot move all repository types](../../api/project_repository_storage_moves.md#limitations).
+The Project repository storage moves API cannot move all repository types. For other type of repositories you can read:
+
+- [Snippet repository storage moves API](snippet_repository_storage_moves.md)
+- [Group repository storage moves API](group_repository_storage_moves.md)
 
 To move repositories to Gitaly Cluster:
 
