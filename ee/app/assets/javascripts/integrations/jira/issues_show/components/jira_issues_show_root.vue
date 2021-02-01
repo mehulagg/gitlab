@@ -1,7 +1,7 @@
 <script>
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
-import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
+import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar/sidebar_root.vue';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
