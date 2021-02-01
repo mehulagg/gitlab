@@ -219,7 +219,7 @@ it('exists', () => {
   getByText(wrapper.element, /Click Me/i)
 
   // Good (especially for unit tests)
-  wrapper.find(FooComponent);
+  wrapper.findComponent(FooComponent);
   wrapper.find('input[name=foo]');
   wrapper.find('[data-testid="my-foo-id"]');
   wrapper.findByTestId('my-foo-id'); // with the extendedWrapper utility – check below
@@ -251,7 +251,7 @@ Example:
 
 ```javascript
 it('exists', () => {
-    wrapper.find(FooComponent);
+  wrapper.findComponent(FooComponent);
 });
 ```
 
@@ -1063,7 +1063,7 @@ See also [Notes on testing Vue components](../fe_guide/vue.md#testing-vue-compon
 ## Test helpers
 
 Test helpers can be found in [`spec/frontend/__helpers__`](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/frontend/__helpers__).
-If you introduce new helpers, please place them in that directory.  
+If you introduce new helpers, please place them in that directory.
 
 ### Vuex Helper: `testAction`
 
