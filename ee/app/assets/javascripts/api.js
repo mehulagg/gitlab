@@ -5,6 +5,7 @@ import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 export default {
   ...Api,
   geoNodesPath: '/api/:version/geo_nodes',
+  geoNodesStatusPath: '/api/:version/geo_nodes/status',
   geoReplicationPath: '/api/:version/geo_replication/:replicable',
   ldapGroupsPath: '/api/:version/ldap/:provider/groups.json',
   subscriptionPath: '/api/:version/namespaces/:id/gitlab_subscription',
@@ -322,6 +323,16 @@ export default {
       .replace(':action', state);
 
     return axios.post(url);
+  },
+
+  getGeoNodes() {
+    const url = Api.buildUrl(this.geoNodesPath);
+    return axios.get(url);
+  },
+
+  getGeoNodesStatus() {
+    const url = Api.buildUrl(this.geoNodesStatusPath);
+    return axios.get(url);
   },
 
   createGeoNode(node) {

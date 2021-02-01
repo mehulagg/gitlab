@@ -45,10 +45,10 @@
   }
 
   .status-red {
-    background-color: $red-500;
+    background-color: $red-400;
 
     &:hover {
-      background-color: $red-600;
+      background-color: $red-500;
     }
   }
 }

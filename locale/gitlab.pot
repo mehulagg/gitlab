@@ -4060,12 +4060,6 @@ msgstr[1] ""
 msgid "Attaching the file failed."
 msgstr ""
 
-msgid "Attachment"
-msgstr ""
-
-msgid "Attachments"
-msgstr ""
-
 msgid "Audit Events"
 msgstr ""
 
@@ -13020,6 +13014,9 @@ msgid "Geo Settings"
 msgstr ""
 
 msgid "Geo nodes are paused using a command run on the node"
+msgstr ""
+
+msgid "Geo sites"
 msgstr ""
 
 msgid "GeoNodeStatusEvent|%{timeAgoStr} (%{pendingEvents} events)"
@@ -29390,6 +29387,9 @@ msgid "There was an error fetching projects"
 msgstr ""
 
 msgid "There was an error fetching the %{replicableType}"
+msgstr ""
+
+msgid "There was an error fetching the Geo Nodes"
 msgstr ""
 
 msgid "There was an error fetching the Geo Settings"

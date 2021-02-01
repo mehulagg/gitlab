@@ -154,6 +154,7 @@ module EE
       # Hard Coded Legacy Types, we will want to remove these when they are added to SSF
       replicable_types = [
         {
+          data_type: 'Git',
           title: _('Repository'),
           title_plural: _('Repositories'),
           name: 'repository',
@@ -161,37 +162,43 @@ module EE
           secondary_view: true
         },
         {
+          data_type: 'Git',
           title: _('Wiki'),
           title_plural: _('Wikis'),
           name: 'wiki',
           name_plural: 'wikis'
         },
         {
+          data_type: 'File',
           title: _('LFS object'),
           title_plural: _('LFS objects'),
           name: 'lfs_object',
           name_plural: 'lfs_objects'
         },
         {
-          title: _('Attachment'),
-          title_plural: _('Attachments'),
+          data_type: 'File',
+          title: _('Upload'),
+          title_plural: _('Uploads'),
           name: 'attachment',
           name_plural: 'attachments',
           secondary_view: true
         },
         {
+          data_type: 'File',
           title: _('Job artifact'),
           title_plural: _('Job artifacts'),
           name: 'job_artifact',
           name_plural: 'job_artifacts'
         },
         {
+          data_type: 'File',
           title: _('Container repository'),
           title_plural: _('Container repositories'),
           name: 'container_repository',
           name_plural: 'container_repositories'
         },
         {
+          data_type: 'Git',
           title: _('Design repository'),
           title_plural: _('Design repositories'),
           name: 'design_repository',
@@ -204,6 +211,7 @@ module EE
       enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
+            data_type: 'File',
             title: replicator_class.replicable_title,
             title_plural: replicator_class.replicable_title_plural,
             name: replicator_class.replicable_name,
