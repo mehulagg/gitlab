@@ -268,7 +268,6 @@ To configure Vale in your editor, install one of the following as appropriate:
 - Visual Studio Code [`errata-ai.vale-server` extension](https://marketplace.visualstudio.com/items?itemName=errata-ai.vale-server).
   You can configure the plugin to
   [display only a subset of alerts](#show-subset-of-vale-alerts).
-  You don't need Vale Server to use the plugin.
 
   In the extension's settings:
 
