@@ -33,7 +33,6 @@ module Integrations
             name: name,
             color: '#EBECF0',
             text_color: '#283856'
-
           }
         end
       end
@@ -41,7 +40,8 @@ module Integrations
       expose :author do |jira_issue|
         {
           name: jira_issue.reporter.displayName,
-          web_url: author_web_url(jira_issue)
+          web_url: author_web_url(jira_issue),
+          avatar_url: jira_issue.reporter.avatarUrls['32x32']
         }
       end
 
