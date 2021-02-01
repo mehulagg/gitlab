@@ -46,11 +46,11 @@ module API
 
         def deployments
           strong_memoize(:deployments) do
-            ::Analytics::DeploymentsFinder.new(
+            ::DeploymentsFinder.new(
               project: user_project,
               environment_name: environment_name,
-              from: start_date,
-              to: end_date
+              finished_after: start_date,
+              finished_before: end_date
             ).execute
           end
         end
