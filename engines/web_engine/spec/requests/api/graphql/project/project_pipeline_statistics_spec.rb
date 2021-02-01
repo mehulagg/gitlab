@@ -42,11 +42,11 @@ RSpec.describe 'rendering project pipeline statistics' do
     expect(graphql_data_at(:project, :pipelineAnalytics, :weekPipelinesLabels).length).to eq(8)
   end
 
-  it "contains two arrays of 31 elements each for the month pipelines" do
+  it "contains two arrays of 32 elements each for the month pipelines" do
     post_graphql(query, current_user: user)
 
-    expect(graphql_data_at(:project, :pipelineAnalytics, :monthPipelinesTotals).length).to eq(31)
-    expect(graphql_data_at(:project, :pipelineAnalytics, :monthPipelinesLabels).length).to eq(31)
+    expect(graphql_data_at(:project, :pipelineAnalytics, :monthPipelinesTotals).length).to eq(32)
+    expect(graphql_data_at(:project, :pipelineAnalytics, :monthPipelinesLabels).length).to eq(32)
   end
 
   it "contains two arrays of 13 elements each for the year pipelines" do
