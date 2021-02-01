@@ -12017,10 +12017,10 @@ msgstr ""
 msgid "Failed to create Merge Request. Please try again."
 msgstr ""
 
-msgid "Failed to create To-Do for the design."
+msgid "Failed to create a branch for this issue. Please try again."
 msgstr ""
 
-msgid "Failed to create a branch for this issue. Please try again."
+msgid "Failed to create a to-do item for the design."
 msgstr ""
 
 msgid "Failed to create framework"
@@ -12137,10 +12137,10 @@ msgstr ""
 msgid "Failed to publish issue on status page."
 msgstr ""
 
-msgid "Failed to remove To-Do for the design."
+msgid "Failed to remove a Zoom meeting"
 msgstr ""
 
-msgid "Failed to remove a Zoom meeting"
+msgid "Failed to remove a to-do item for the design."
 msgstr ""
 
 msgid "Failed to remove issue from board, please try again."
@@ -12185,7 +12185,7 @@ msgstr ""
 msgid "Failed to signing using smartcard authentication"
 msgstr ""
 
-msgid "Failed to toggle To-Do for the design."
+msgid "Failed to toggle the to-do status for the design."
 msgstr ""
 
 msgid "Failed to update branch!"
@@ -29076,10 +29076,10 @@ msgstr ""
 msgid "There is a halted Elasticsearch migration"
 msgstr ""
 
-msgid "There is already a To-Do for this design."
+msgid "There is already a repository with that name on disk"
 msgstr ""
 
-msgid "There is already a repository with that name on disk"
+msgid "There is already a to-do item for this design."
 msgstr ""
 
 msgid "There is no chart data available."
