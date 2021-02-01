@@ -272,8 +272,9 @@ To configure Vale in your editor, install one of the following as appropriate:
   In the extension's settings:
 
   - Select the **Use CLI** checkbox.
-  - In the **Config** setting, enter an absolute path to [`gitlab/.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) on your computer.
-  - In the **Path** setting, enter the absolute path to the Vale binary. To find out what it is, run `which vale` in a terminal.
+  - In the **Config** setting, enter an absolute path to [`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) in one of the cloned GitLab repositories on your computer.
+  - In the **Path** setting, enter the absolute path to the Vale binary. In most
+    cases, `vale` should work. To find the location, run `which vale` in a terminal.
 
 - Vim [ALE plugin](https://github.com/dense-analysis/ale).
 
