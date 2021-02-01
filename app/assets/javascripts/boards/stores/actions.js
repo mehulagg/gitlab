@@ -545,8 +545,8 @@ export default {
     }
   },
 
-  setAddColumnFormVisibility: ({ state }, visible) => {
-    state.addColumnFormVisible = visible;
+  setAddColumnFormVisibility: ({ commit }, visible) => {
+    commit(types.SET_ADD_COLUMN_FORM_VISIBLE, visible);
   },
 
   fetchBacklog: () => {
