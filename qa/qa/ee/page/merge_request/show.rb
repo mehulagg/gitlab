@@ -212,6 +212,10 @@ module QA
             approvals_content.match(/Requires (\d+) more approvals/)[1].to_i
           end
 
+          def added_to_merge_train?
+            find_element(:merge_request_status_text).text.include?('Added to the merge train by')
+          end
+
           def skip_merge_train_and_merge_immediately
             click_element :merge_moment_dropdown
             click_element :merge_immediately_option
@@ -230,6 +234,10 @@ module QA
             click_element(:merge_button, text: "Start merge train")
 
             finished_loading?
+          end
+
+          def remove_from_merge_train
+            click_element(:cancel_automatic_merge_button)
           end
 
           private

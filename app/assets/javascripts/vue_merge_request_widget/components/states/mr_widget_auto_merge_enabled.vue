@@ -140,7 +140,7 @@ export default {
       <status-icon status="success" />
       <div class="media-body">
         <h4 class="gl-display-flex">
-          <span class="gl-mr-3">
+          <span class="gl-mr-3" data-qa-selector="merge_request_status_text">
             <span class="js-status-text-before-author" data-testid="beforeStatusText">{{
               statusTextBeforeAuthor
             }}</span>
@@ -156,6 +156,7 @@ export default {
             href="#"
             class="btn btn-sm btn-default js-cancel-auto-merge"
             data-testid="cancelAutomaticMergeButton"
+            data-qa-selector="cancel_automatic_merge_button"
             @click.prevent="cancelAutomaticMerge"
           >
             <gl-loading-icon v-if="isCancellingAutoMerge" inline class="gl-mr-1" />

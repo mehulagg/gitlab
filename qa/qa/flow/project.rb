@@ -15,6 +15,17 @@ module QA
         end
       end
 
+      def enable_merge_trains
+        Page::Project::Menu.perform(&:go_to_general_settings)
+        Page::Project::Settings::Main.perform do |main|
+          main.expand_merge_requests_settings do |settings|
+            settings.click_pipelines_for_merged_results_checkbox
+            settings.click_merge_trains_checkbox
+            settings.click_save_changes
+          end
+        end
+      end
+
       def go_to_create_project_from_template
         if Page::Project::NewExperiment.perform(&:shown?)
           Page::Project::NewExperiment.perform(&:click_create_from_template_link)

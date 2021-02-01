@@ -26,6 +26,11 @@ module QA
           element :merge_immediately_option
         end
 
+        view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_auto_merge_enabled.vue' do
+          element :merge_request_status_text
+          element :cancel_automatic_merge_button
+        end
+
         view 'app/assets/javascripts/vue_merge_request_widget/components/states/mr_widget_merged.vue' do
           element :merged_status_content
         end
