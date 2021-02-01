@@ -70,6 +70,7 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
       before do
         project.send("add_#{user_role}", user) unless anonymous
         project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
+
       end
 
       it_behaves_like params[:example_name], status: params[:expected_status]
@@ -306,114 +307,166 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
   end
 end
 
-RSpec.shared_examples 'handling get dist tags requests' do
+RSpec.shared_examples 'handling get dist tags requests' do |scope: :project|
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:package_tag1) { create(:packages_tag, package: package) }
   let_it_be(:package_tag2) { create(:packages_tag, package: package) }
 
-  let(:params) { {} }
+  let(:headers) { {} }
 
-  subject { get(url, params: params) }
+  subject { get(url, headers: headers) }
 
-  context 'with public project' do
-    context 'with authenticated user' do
-      let(:params) { { private_token: personal_access_token.token } }
-
-      it_behaves_like 'returns package tags', :maintainer
-      it_behaves_like 'returns package tags', :developer
-      it_behaves_like 'returns package tags', :reporter
-      it_behaves_like 'returns package tags', :guest
+  shared_examples 'handling different visibilities and user roles' do |accept_example: 'returns package tags', accept_status: :ok, reject_example: 'rejects package tags access', reject_status: nil|
+    where(:visibility, :user_role, :example_name, :expected_status) do
+      'PUBLIC'   | :anonymous | accept_example | accept_status
+      'PUBLIC'   | :guest     | accept_example | accept_status
+      'PUBLIC'   | :reporter  | accept_example | accept_status
+      'PRIVATE'  | :anonymous | reject_example | (reject_status || :not_found)
+      'PRIVATE'  | :guest     | reject_example | (reject_status || :forbidden)
+      'PRIVATE'  | :reporter  | accept_example | accept_status
+      'INTERNAL' | :anonymous | reject_example | (reject_status || :not_found)
+      'INTERNAL' | :guest     | accept_example | accept_status
+      'INTERNAL' | :reporter  | accept_example | accept_status
     end
 
-    context 'with unauthenticated user' do
-      it_behaves_like 'returns package tags', :no_type
+    with_them do
+      let(:anonymous) { user_role == :anonymous }
+
+      subject { get(url, headers: anonymous ? {} : headers) }
+
+      before do
+        project.send("add_#{user_role}", user) unless anonymous
+        project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
+      end
+
+      it_behaves_like params[:example_name], status: params[:expected_status]
     end
   end
 
-  context 'with private project' do
-    before do
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+  shared_examples 'handling different package names' do
+    context 'handling a scoped package following the naming convention' do
+      let(:package_name) { "@#{group.path}/scoped-package" }
+
+      it_behaves_like 'handling different visibilities and user roles'
     end
 
-    context 'with authenticated user' do
-      let(:params) { { private_token: personal_access_token.token } }
+    context 'handling a scoped package not following the naming convention' do
+      let(:package_name) { '@any_scope/scope-package' }
 
-      it_behaves_like 'returns package tags', :maintainer
-      it_behaves_like 'returns package tags', :developer
-      it_behaves_like 'returns package tags', :reporter
-      it_behaves_like 'rejects package tags access', :guest, :forbidden
+      params = {}
+      params = { accept_example: 'rejects package tags access', accept_status: :not_found, reject_status: :not_found } if scope == :instance
+
+      it_behaves_like 'handling different visibilities and user roles', **params
     end
 
-    context 'with unauthenticated user' do
-      it_behaves_like 'rejects package tags access', :no_type, :not_found
+    context 'handling an unscoped package' do
+      let(:package_name) { 'unscoped-package' }
+
+      params = {}
+      params = { accept_example: 'rejects package tags access', accept_status: :not_found, reject_status: :not_found } if scope == :instance
+
+      it_behaves_like 'handling different visibilities and user roles', **params
     end
+
+    context 'handling a package name with a dot in the project path' do
+      let(:package_name) { "@#{group.path}/scoped-package" }
+
+      before do
+        project.update!(path: 'foo.bar')
+      end
+
+      it_behaves_like 'handling different visibilities and user roles'
+    end
+
+    context 'handling a non existing package' do
+      let(:package_name) { 'non-existing-package' }
+
+      params = { accept_example: 'rejects package tags access', accept_status: :not_found }
+      params = params.merge(reject_status: :not_found) if scope == :instance
+
+      it_behaves_like 'handling different visibilities and user roles', **params
+    end
+  end
+
+  context 'with oauth token' do
+    let(:headers) { build_token_auth_header(token.token) }
+
+    it_behaves_like 'handling different package names'
+  end
+
+  context 'with personal access token' do
+    let(:headers) { build_token_auth_header(personal_access_token.token) }
+
+    it_behaves_like 'handling different package names'
   end
 end
 
 RSpec.shared_examples 'handling create dist tag requests' do
-  let_it_be(:tag_name) { 'test' }
+  # let_it_be(:tag_name) { 'test' }
 
-  let(:params) { {} }
-  let(:env) { {} }
-  let(:version) { package.version }
+  # let(:params) { {} }
+  # let(:env) { {} }
+  # let(:version) { package.version }
 
-  subject { put(url, env: env, params: params) }
+  # subject { put(url, env: env, params: params) }
 
-  context 'with public project' do
-    context 'with authenticated user' do
-      let(:params) { { private_token: personal_access_token.token } }
-      let(:env) { { 'api.request.body': version } }
+  # context 'with public project' do
+  #   context 'with authenticated user' do
+  #     let(:params) { { private_token: personal_access_token.token } }
+  #     let(:env) { { 'api.request.body': version } }
 
-      it_behaves_like 'create package tag', :maintainer
-      it_behaves_like 'create package tag', :developer
-      it_behaves_like 'rejects package tags access', :reporter, :forbidden
-      it_behaves_like 'rejects package tags access', :guest, :forbidden
-    end
+  #     it_behaves_like 'create package tag', :maintainer
+  #     it_behaves_like 'create package tag', :developer
+  #     it_behaves_like 'rejects package tags access', :reporter, :forbidden
+  #     it_behaves_like 'rejects package tags access', :guest, :forbidden
+  #   end
 
-    context 'with unauthenticated user' do
-      it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-    end
-  end
+  #   context 'with unauthenticated user' do
+  #     it_behaves_like 'rejects package tags access', :no_type, :unauthorized
+  #   end
+  # end
 end
 
 RSpec.shared_examples 'handling delete dist tag requests' do
-  let_it_be(:package_tag) { create(:packages_tag, package: package) }
+  # let_it_be(:package_tag) { create(:packages_tag, package: package) }
 
-  let(:params) { {} }
-  let(:tag_name) { package_tag.name }
+  # let(:params) { {} }
+  # let(:tag_name) { package_tag.name }
 
-  subject { delete(url, params: params) }
+  # subject { delete(url, params: params) }
 
-  context 'with public project' do
-    context 'with authenticated user' do
-      let(:params) { { private_token: personal_access_token.token } }
+  # context 'with public project' do
+  #   context 'with authenticated user' do
+  #     let(:params) { { private_token: personal_access_token.token } }
 
-      it_behaves_like 'delete package tag', :maintainer
-      it_behaves_like 'rejects package tags access', :developer, :forbidden
-      it_behaves_like 'rejects package tags access', :reporter, :forbidden
-      it_behaves_like 'rejects package tags access', :guest, :forbidden
-    end
+  #     it_behaves_like 'delete package tag', :maintainer
+  #     it_behaves_like 'rejects package tags access', :developer, :forbidden
+  #     it_behaves_like 'rejects package tags access', :reporter, :forbidden
+  #     it_behaves_like 'rejects package tags access', :guest, :forbidden
+  #   end
 
-    context 'with unauthenticated user' do
-      it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-    end
-  end
+  #   context 'with unauthenticated user' do
+  #     it_behaves_like 'rejects package tags access', :no_type, :unauthorized
+  #   end
+  # end
 
-  context 'with private project' do
-    before do
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-    end
+  # context 'with private project' do
+  #   before do
+  #     project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+  #   end
 
-    context 'with authenticated user' do
-      let(:params) { { private_token: personal_access_token.token } }
+  #   context 'with authenticated user' do
+  #     let(:params) { { private_token: personal_access_token.token } }
 
-      it_behaves_like 'delete package tag', :maintainer
-      it_behaves_like 'rejects package tags access', :developer, :forbidden
-      it_behaves_like 'rejects package tags access', :reporter, :forbidden
-      it_behaves_like 'rejects package tags access', :guest, :forbidden
-    end
+  #     it_behaves_like 'delete package tag', :maintainer
+  #     it_behaves_like 'rejects package tags access', :developer, :forbidden
+  #     it_behaves_like 'rejects package tags access', :reporter, :forbidden
+  #     it_behaves_like 'rejects package tags access', :guest, :forbidden
+  #   end
 
-    context 'with unauthenticated user' do
-      it_behaves_like 'rejects package tags access', :no_type, :unauthorized
-    end
-  end
+  #   context 'with unauthenticated user' do
+  #     it_behaves_like 'rejects package tags access', :no_type, :unauthorized
+  #   end
+  # end
 end

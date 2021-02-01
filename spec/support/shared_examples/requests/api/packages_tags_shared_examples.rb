@@ -1,40 +1,43 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'rejects package tags access' do |user_type, status|
-  context "for user type #{user_type}" do
-    before do
-      project.send("add_#{user_type}", user) unless user_type == :no_type
-    end
-
-    it_behaves_like 'returning response status', status
+RSpec.shared_examples 'rejects package tags access' do |status:|
+  before do
+    package.update!(name: package_name) unless package_name == 'non-existing-package'
   end
+
+  it_behaves_like 'returning response status', status
 end
 
-RSpec.shared_examples 'returns package tags' do |user_type|
+RSpec.shared_examples 'returns package tags' do |status:|
   using RSpec::Parameterized::TableSyntax
 
   before do
     stub_application_setting(npm_package_requests_forwarding: false)
-    project.send("add_#{user_type}", user) unless user_type == :no_type
   end
 
-  it_behaves_like 'returning response status', :success
+  context 'with valid package name' do
+    before do
+      package.update!(name: package_name) unless package_name == 'non-existing-package'
+    end
 
-  it 'returns a valid json response' do
-    subject
+    it_behaves_like 'returning response status', status
 
-    expect(response.media_type).to eq('application/json')
-    expect(json_response).to be_a(Hash)
-  end
+    it 'returns a valid json response' do
+      subject
 
-  it 'returns two package tags' do
-    subject
+      expect(response.media_type).to eq('application/json')
+      expect(json_response).to be_a(Hash)
+    end
 
-    expect(json_response).to match_schema('public_api/v4/packages/npm_package_tags')
-    expect(json_response.length).to eq(3) # two tags + latest (auto added)
-    expect(json_response[package_tag1.name]).to eq(package.version)
-    expect(json_response[package_tag2.name]).to eq(package.version)
-    expect(json_response['latest']).to eq(package.version)
+    it 'returns two package tags' do
+      subject
+
+      expect(json_response).to match_schema('public_api/v4/packages/npm_package_tags')
+      expect(json_response.length).to eq(3) # two tags + latest (auto added)
+      expect(json_response[package_tag1.name]).to eq(package.version)
+      expect(json_response[package_tag2.name]).to eq(package.version)
+      expect(json_response['latest']).to eq(package.version)
+    end
   end
 
   context 'with invalid package name' do
