@@ -11,10 +11,18 @@ export const initGeoNodesBeta = () => {
     return false;
   }
 
+  const {
+    geoInformationPath,
+  } = el.dataset;
+
   return new Vue({
     el,
     render(createElement) {
-      return createElement(GeoNodesBetaApp);
+      return createElement(GeoNodesBetaApp, {
+        props: {
+          geoInformationPath,
+        },
+      });
     },
   });
 };
