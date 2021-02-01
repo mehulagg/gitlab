@@ -105,7 +105,7 @@ To group issues by label:
    You can also search for labels by typing in the search input.
 1. Click or tap outside of the label dropdown. The page is now grouped by the selected labels.
 
-## Disable iterations **(PREMIUM ONLY)**
+## Disable iterations **(PREMIUM SELF)**
 
 GitLab Iterations feature is deployed with a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
