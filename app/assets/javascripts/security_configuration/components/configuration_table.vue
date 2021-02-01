@@ -76,7 +76,7 @@ export default {
     </gl-alert>
     <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
       <template #cell(feature)="{ item }">
-        <div :data-test-id="item.name" class="gl-text-gray-900">
+        <div :data-test-id="item.id" class="gl-text-gray-900">
           {{ item.name }}
         </div>
         <div>

@@ -26,7 +26,7 @@ describe('configuration Table', () => {
   });
 
   // TODO
-  // texte testen
+  // texte testen alle!
   // error handling testen!
 
 
