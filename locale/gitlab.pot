@@ -1695,9 +1695,6 @@ msgstr ""
 msgid "Add another link"
 msgstr ""
 
-msgid "Add another stage"
-msgstr ""
-
 msgid "Add approval rule"
 msgstr ""
 

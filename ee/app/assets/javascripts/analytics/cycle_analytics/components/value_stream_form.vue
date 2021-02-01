@@ -109,7 +109,8 @@ export default {
           stageErrors: stageErrors || initializeStageErrors(initialPreset),
           ...initialData,
         }
-      : { stages: [], nameError }; // TODO: not sure if i should pass empty stages here
+      : { stages: [], nameError };
+
     return {
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
@@ -131,7 +132,6 @@ export default {
       return this.nameError?.length ? this.nameError.join('\n\n') : null;
     },
     hasInitialFormErrors() {
-      // TODO: do we need this + should we check the contained arrays instead
       const { initialFormErrors } = this;
       return Boolean(Object.keys(initialFormErrors).length);
     },
@@ -171,6 +171,8 @@ export default {
     ...mapActions(['createValueStream']),
     onSubmit() {
       const { name, stages } = this;
+      console.log('onSubmit::this.nameError', this.nameError);
+      console.log('onSubmit::this.stageErrors', this.stageErrors);
       // TODO: validate before submission
       return this.createValueStream({
         name,

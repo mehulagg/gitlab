@@ -106,6 +106,19 @@ export const transformRawTasksByTypeData = (data = []) => {
 };
 
 /**
+ * Prepares the stage errors for use in the create value stream form
+ *
+ * The JSON error response returns a key value pair, the key corresponds to the
+ * index of the stage with errors and the value is the returned error(s)
+ *
+ * @param {Array} stages - Array of value stream stages
+ * @param {Object} errors - Key value pair of stage errors
+ * @returns {Array} Returns and array of stage error objects
+ */
+export const prepareStageErrors = (stages, errors) =>
+  stages.length ? stages.map((_, index) => convertObjectPropsToCamelCase(errors[index]) || {}) : [];
+
+/**
  * Takes the duration data for selected stages, transforms the date values and returns
  * the data in a flattened array
  *

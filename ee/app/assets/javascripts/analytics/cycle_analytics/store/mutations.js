@@ -1,6 +1,6 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { transformRawStages } from '../utils';
 import * as types from './mutation_types';
+import { transformRawStages, prepareStageErrors } from '../utils';
 
 export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
@@ -124,18 +124,8 @@ export default {
   [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
     state.isCreatingValueStream = false;
 
-    // TODO: move to utils + add additional specs
-    // TODO: should test that we end up with the same amount of errors as stages
-    // This is because the JSON response only includes failed stages with an index of the stage
     const { stages: stageErrors = {}, ...rest } = errors;
-    const fullStageErrors = Object.keys(stageErrors).length
-      ? stages.map((_, index) => {
-          return convertObjectPropsToCamelCase(stageErrors[index]) || {};
-        })
-      : {};
-
-    // NOTE: BE currently returns the equivalent of a JS hash for the stages errors, an array simplifies things
-    state.createValueStreamErrors = { ...rest, stages: fullStageErrors };
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;
