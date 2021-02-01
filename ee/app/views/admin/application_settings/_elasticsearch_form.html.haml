@@ -67,53 +67,53 @@
 
           .form-group
             = f.label :elasticsearch_url, 'URL', class: 'label-bold'
-            = f.text_field :elasticsearch_url, value: @application_setting.elasticsearch_url.join(', '), class: 'form-control', placeholder: 'http://localhost:9200', data: { qa_selector: 'url_field' }
+            = f.text_field :elasticsearch_url, value: @application_setting.elasticsearch_url.join(', '), class: 'form-control gl-form-input', placeholder: 'http://localhost:9200', data: { qa_selector: 'url_field' }
             .form-text.text-muted
               = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
 
           .form-group
             = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'
-            = f.number_field :elasticsearch_shards, value: @application_setting.elasticsearch_shards, class: 'form-control'
+            = f.number_field :elasticsearch_shards, value: @application_setting.elasticsearch_shards, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('How many shards to split the Elasticsearch index over.')
               = recreate_index_text
 
           .form-group
             = f.label :elasticsearch_replicas, _('Number of Elasticsearch replicas'), class: 'label-bold'
-            = f.number_field :elasticsearch_replicas, value: @application_setting.elasticsearch_replicas, class: 'form-control'
+            = f.number_field :elasticsearch_replicas, value: @application_setting.elasticsearch_replicas, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('How many replicas each Elasticsearch shard has.')
               = recreate_index_text
 
           .form-group
             = f.label :elasticsearch_indexed_file_size_limit_kb, _('Maximum file size indexed (KiB)'), class: 'label-bold'
-            = f.number_field :elasticsearch_indexed_file_size_limit_kb, value: @application_setting.elasticsearch_indexed_file_size_limit_kb, class: 'form-control'
+            = f.number_field :elasticsearch_indexed_file_size_limit_kb, value: @application_setting.elasticsearch_indexed_file_size_limit_kb, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('Any files larger than this limit will not be indexed, and thus will not be searchable.')
 
           .form-group
             = f.label :elasticsearch_indexed_field_length_limit, _('Maximum field length'), class: 'label-bold'
-            = f.number_field :elasticsearch_indexed_field_length_limit, value: @application_setting.elasticsearch_indexed_field_length_limit, class: 'form-control'
+            = f.number_field :elasticsearch_indexed_field_length_limit, value: @application_setting.elasticsearch_indexed_field_length_limit, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('If any indexed field exceeds this limit it will be truncated to this number of characters and the rest will not be indexed or searchable. This does not apply to repository and wiki indexing. Setting this to 0 means it is unlimited.')
 
           .form-group
             = f.label :elasticsearch_max_bulk_size_mb, _('Maximum bulk request size (MiB)'), class: 'label-bold'
-            = f.number_field :elasticsearch_max_bulk_size_mb, value: @application_setting.elasticsearch_max_bulk_size_mb, class: 'form-control'
+            = f.number_field :elasticsearch_max_bulk_size_mb, value: @application_setting.elasticsearch_max_bulk_size_mb, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('Maximum size of Elasticsearch bulk indexing requests.')
               = _('This only applies to repository indexing operations.')
 
           .form-group
             = f.label :elasticsearch_max_bulk_concurrency, _('Bulk request concurrency'), class: 'label-bold'
-            = f.number_field :elasticsearch_max_bulk_concurrency, value: @application_setting.elasticsearch_max_bulk_concurrency, class: 'form-control'
+            = f.number_field :elasticsearch_max_bulk_concurrency, value: @application_setting.elasticsearch_max_bulk_concurrency, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('Maximum concurrency of Elasticsearch bulk requests per indexing operation.')
               = _('This only applies to repository indexing operations.')
 
           .form-group
             = f.label :elasticsearch_client_request_timeout, _('Client request timeout'), class: 'label-bold'
-            = f.number_field :elasticsearch_client_request_timeout, value: @application_setting.elasticsearch_client_request_timeout, class: 'form-control'
+            = f.number_field :elasticsearch_client_request_timeout, value: @application_setting.elasticsearch_client_request_timeout, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('Elasticsearch HTTP client timeout value in seconds.')
               = _('Setting this to 0 means using the system default timeout value.')
@@ -212,20 +212,20 @@
                 Using AWS hosted Elasticsearch with IAM credentials
           .form-group
             = f.label :elasticsearch_aws_region, 'AWS region', class: 'label-bold'
-            = f.text_field :elasticsearch_aws_region, value: @application_setting.elasticsearch_aws_region, class: 'form-control'
+            = f.text_field :elasticsearch_aws_region, value: @application_setting.elasticsearch_aws_region, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('Region that Elasticsearch is configured')
 
           .form-group
             = f.label :elasticsearch_aws_access_key, _('AWS Access Key'), class: 'label-bold'
-            = f.text_field :elasticsearch_aws_access_key, value: @application_setting.elasticsearch_aws_access_key, class: 'form-control'
+            = f.text_field :elasticsearch_aws_access_key, value: @application_setting.elasticsearch_aws_access_key, class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('AWS Access Key. Only required if not using role instance credentials')
 
           - secret_access_key_label = @application_setting.elasticsearch_aws_secret_access_key.present? ? _('Enter new AWS Secret Access Key') : _('AWS Secret Access Key')
           .form-group
             = f.label :elasticsearch_aws_secret_access_key, secret_access_key_label, class: 'label-bold'
-            = f.password_field :elasticsearch_aws_secret_access_key, autocomplete: 'new-password', class: 'form-control'
+            = f.password_field :elasticsearch_aws_secret_access_key, autocomplete: 'new-password', class: 'form-control gl-form-input'
             .form-text.text-muted
               = _('AWS Secret Access Key. Only required if not using role instance credentials')
 

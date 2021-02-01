@@ -3,15 +3,14 @@ import { mapActions } from 'vuex';
 
 import Translate from '~/vue_shared/translate';
 
-import EpicItem from './components/epic_item.vue';
-import EpicItemContainer from './components/epic_item_container.vue';
-
 import {
   parseBoolean,
   urlParamsToObject,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
 import { visitUrl, mergeUrlParams } from '~/lib/utils/url_utility';
+import EpicItem from './components/epic_item.vue';
+import EpicItemContainer from './components/epic_item_container.vue';
 
 import { PRESET_TYPES, EPIC_DETAILS_CELL_WIDTH } from './constants';
 

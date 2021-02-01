@@ -12,13 +12,13 @@ import {
 import { capitalize } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
+import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
 import AddEditRotationModal from './rotations/components/add_edit_rotation_modal.vue';
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
-import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),

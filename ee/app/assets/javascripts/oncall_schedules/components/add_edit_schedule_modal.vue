@@ -5,9 +5,9 @@ import { s__, __ } from '~/locale';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import createOncallScheduleMutation from '../graphql/mutations/create_oncall_schedule.mutation.graphql';
 import updateOncallScheduleMutation from '../graphql/mutations/update_oncall_schedule.mutation.graphql';
-import AddEditScheduleForm from './add_edit_schedule_form.vue';
 import { updateStoreOnScheduleCreate, updateStoreAfterScheduleEdit } from '../utils/cache_updates';
 import { isNameFieldValid } from '../utils/common_utils';
+import AddEditScheduleForm from './add_edit_schedule_form.vue';
 
 export const i18n = {
   cancel: __('Cancel'),

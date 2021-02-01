@@ -12,9 +12,9 @@ import convertReportType from 'ee/vue_shared/security_reports/store/utils/conver
 import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
+import { DASHBOARD_TYPES } from '../store/constants';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
-import { DASHBOARD_TYPES } from '../store/constants';
 
 export default {
   name: 'SecurityDashboardTableRow',

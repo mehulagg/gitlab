@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __ } from '~/locale';
-import IterationsList from './iterations_list.vue';
 import IterationsQuery from '../queries/iterations.query.graphql';
 import { Namespace } from '../constants';
+import IterationsList from './iterations_list.vue';
 
 const pageSize = 20;
 

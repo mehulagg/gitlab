@@ -1,7 +1,7 @@
 <script>
-import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import { GlTooltipDirective, GlResizeObserverDirective } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 
 export default {

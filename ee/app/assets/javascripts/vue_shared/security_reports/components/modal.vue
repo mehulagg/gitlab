@@ -1,4 +1,5 @@
 <script>
+import { GlModal } from '@gitlab/ui';
 import DismissalNote from 'ee/vue_shared/security_reports/components/dismissal_note.vue';
 import DismissalCommentBoxToggle from 'ee/vue_shared/security_reports/components/dismissal_comment_box_toggle.vue';
 import DismissalCommentModalFooter from 'ee/vue_shared/security_reports/components/dismissal_comment_modal_footer.vue';
@@ -7,7 +8,6 @@ import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_re
 import ModalFooter from 'ee/vue_shared/security_reports/components/modal_footer.vue';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card_vuex.vue';
 import VulnerabilityDetails from 'ee/vue_shared/security_reports/components/vulnerability_details.vue';
-import { GlModal } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { VULNERABILITY_MODAL_ID } from './constants';
 

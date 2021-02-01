@@ -3281,6 +3281,9 @@ msgstr ""
 msgid "An error occurred while loading the file. Please try again later."
 msgstr ""
 
+msgid "An error occurred while loading the members, please try again."
+msgstr ""
+
 msgid "An error occurred while loading the merge request changes."
 msgstr ""
 
@@ -18101,6 +18104,9 @@ msgstr ""
 msgid "Members|Role updated successfully."
 msgstr ""
 
+msgid "Members|Search groups"
+msgstr ""
+
 msgid "Members|Search invited"
 msgstr ""
 
@@ -25994,6 +26000,9 @@ msgid "Select groups to replicate"
 msgstr ""
 
 msgid "Select health status"
+msgstr ""
+
+msgid "Select iteration"
 msgstr ""
 
 msgid "Select label"

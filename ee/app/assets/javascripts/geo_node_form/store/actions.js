@@ -1,5 +1,5 @@
-import Api from 'ee/api';
 import { flatten } from 'lodash';
+import Api from 'ee/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';

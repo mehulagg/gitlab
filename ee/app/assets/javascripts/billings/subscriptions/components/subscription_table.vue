@@ -4,8 +4,8 @@ import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL } from 'ee/billings/constants';
 import { s__ } from '~/locale';
-import SubscriptionTableRow from './subscription_table_row.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import SubscriptionTableRow from './subscription_table_row.vue';
 
 const createButtonProps = (text, href, testId) => ({ text, href, testId });
 

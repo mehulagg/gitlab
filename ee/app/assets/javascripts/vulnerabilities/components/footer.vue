@@ -1,19 +1,19 @@
 <script>
 import Visibility from 'visibilityjs';
+import { GlIcon } from '@gitlab/ui';
 import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
 import Api from 'ee/api';
 import { VULNERABILITY_STATE_OBJECTS } from 'ee/vulnerabilities/constants';
-import { GlIcon } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, __ } from '~/locale';
+import initUserPopovers from '~/user_popovers';
 import RelatedIssues from './related_issues.vue';
 import HistoryEntry from './history_entry.vue';
 import StatusDescription from './status_description.vue';
-import initUserPopovers from '~/user_popovers';
 
 export default {
   name: 'VulnerabilityFooter',

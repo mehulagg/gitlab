@@ -10,11 +10,11 @@ import {
   GlButton,
 } from '@gitlab/ui';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { STAGE_ACTIONS } from '../constants';
+import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
 import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 import { defaultFields, ERRORS, I18N } from './create_value_stream_form/constants';
-import { STAGE_ACTIONS } from '../constants';
-import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
 
 export default {
   components: {
