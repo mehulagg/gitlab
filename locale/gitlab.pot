@@ -1635,9 +1635,6 @@ msgstr ""
 msgid "Add a Grafana button in the admin sidebar, monitoring section, to access a variety of statistics on the health and performance of GitLab."
 msgstr ""
 
-msgid "Add a To Do"
-msgstr ""
-
 msgid "Add a bullet list"
 msgstr ""
 
