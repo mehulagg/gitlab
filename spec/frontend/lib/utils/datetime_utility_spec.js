@@ -585,11 +585,28 @@ describe('secondsToMilliseconds', () => {
 });
 
 describe('dayAfter', () => {
-  const date = new Date('2019-07-16T00:00:00.000Z');
+  let date;
+
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+    date = new Date('2019-07-16T00:00:00.000Z');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it('returns the following date', () => {
     const nextDay = datetimeUtility.dayAfter(date);
     const expectedNextDate = new Date('2019-07-17T00:00:00.000Z');
+
+    expect(nextDay).toStrictEqual(expectedNextDate);
+  });
+
+  it("returns the following date, even over a daylight saving's boundary", () => {
+    date = new Date('2019-03-10T00:00:00.000Z');
+    const nextDay = datetimeUtility.dayAfter(date);
+    const expectedNextDate = new Date('2019-03-11T00:00:00.000Z');
 
     expect(nextDay).toStrictEqual(expectedNextDate);
   });
@@ -609,87 +626,123 @@ describe('secondsToDays', () => {
 });
 
 describe('nDaysAfter', () => {
-  const date = new Date('2019-07-16T00:00:00.000Z');
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it.each`
     numberOfDays | expectedResult
-    ${1}         | ${new Date('2019-07-17T00:00:00.000Z').valueOf()}
-    ${90}        | ${new Date('2019-10-14T00:00:00.000Z').valueOf()}
-    ${-1}        | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
-    ${0}         | ${date.valueOf()}
-    ${0.9}       | ${date.valueOf()}
+    ${1}         | ${'2019-07-17T00:00:00.000Z'}
+    ${-1}        | ${'2019-07-15T00:00:00.000Z'}
+    ${0}         | ${'2019-07-16T00:00:00.000Z'}
+    ${0.9}       | ${'2019-07-16T00:00:00.000Z'}
+    ${120}       | ${'2019-11-13T00:00:00.000Z'}
+    ${250}       | ${'2020-03-22T00:00:00.000Z'}
   `('returns $numberOfDays day(s) after the provided date', ({ numberOfDays, expectedResult }) => {
-    expect(datetimeUtility.nDaysAfter(date, numberOfDays)).toBe(expectedResult);
+    const date = new Date('2019-07-16T00:00:00.000Z');
+    expect(datetimeUtility.nDaysAfter(date, numberOfDays).toISOString()).toBe(expectedResult);
   });
 });
 
 describe('nDaysBefore', () => {
-  const date = new Date('2019-07-16T00:00:00.000Z');
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it.each`
     numberOfDays | expectedResult
-    ${1}         | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
-    ${90}        | ${new Date('2019-04-17T00:00:00.000Z').valueOf()}
-    ${-1}        | ${new Date('2019-07-17T00:00:00.000Z').valueOf()}
-    ${0}         | ${date.valueOf()}
-    ${0.9}       | ${new Date('2019-07-15T00:00:00.000Z').valueOf()}
+    ${1}         | ${'2019-07-15T00:00:00.000Z'}
+    ${-1}        | ${'2019-07-17T00:00:00.000Z'}
+    ${0}         | ${'2019-07-16T00:00:00.000Z'}
+    ${0.9}       | ${'2019-07-15T00:00:00.000Z'}
+    ${180}       | ${'2019-01-17T00:00:00.000Z'}
+    ${280}       | ${'2018-10-09T00:00:00.000Z'}
   `('returns $numberOfDays day(s) before the provided date', ({ numberOfDays, expectedResult }) => {
-    expect(datetimeUtility.nDaysBefore(date, numberOfDays)).toBe(expectedResult);
+    const date = new Date('2019-07-16T00:00:00.000Z');
+    expect(datetimeUtility.nDaysBefore(date, numberOfDays).toISOString()).toBe(expectedResult);
   });
 });
 
 describe('nMonthsAfter', () => {
   // February has 28 days
-  const feb2019 = new Date('2019-02-15T00:00:00.000Z');
+  const feb2019 = '2019-02-15T00:00:00.000Z';
   // Except in 2020, it had 29 days
-  const feb2020 = new Date('2020-02-15T00:00:00.000Z');
+  const feb2020 = '2020-02-15T00:00:00.000Z';
   // April has 30 days
-  const apr2020 = new Date('2020-04-15T00:00:00.000Z');
+  const apr2020 = '2020-04-15T00:00:00.000Z';
   // May has 31 days
-  const may2020 = new Date('2020-05-15T00:00:00.000Z');
+  const may2020 = '2020-05-15T00:00:00.000Z';
+
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it.each`
     date       | numberOfMonths | expectedResult
-    ${feb2019} | ${1}           | ${new Date('2019-03-15T00:00:00.000Z').valueOf()}
-    ${feb2020} | ${1}           | ${new Date('2020-03-15T00:00:00.000Z').valueOf()}
-    ${apr2020} | ${1}           | ${new Date('2020-05-15T00:00:00.000Z').valueOf()}
-    ${may2020} | ${1}           | ${new Date('2020-06-15T00:00:00.000Z').valueOf()}
-    ${may2020} | ${12}          | ${new Date('2021-05-15T00:00:00.000Z').valueOf()}
-    ${may2020} | ${-1}          | ${new Date('2020-04-15T00:00:00.000Z').valueOf()}
-    ${may2020} | ${0}           | ${may2020.valueOf()}
-    ${may2020} | ${0.9}         | ${may2020.valueOf()}
+    ${feb2019} | ${1}           | ${'2019-03-15T00:00:00.000Z'}
+    ${feb2020} | ${1}           | ${'2020-03-15T00:00:00.000Z'}
+    ${apr2020} | ${1}           | ${'2020-05-15T00:00:00.000Z'}
+    ${may2020} | ${1}           | ${'2020-06-15T00:00:00.000Z'}
+    ${may2020} | ${12}          | ${'2021-05-15T00:00:00.000Z'}
+    ${may2020} | ${-1}          | ${'2020-04-15T00:00:00.000Z'}
+    ${may2020} | ${0}           | ${may2020}
+    ${may2020} | ${0.9}         | ${may2020}
   `(
     'returns $numberOfMonths month(s) after the provided date',
     ({ date, numberOfMonths, expectedResult }) => {
-      expect(datetimeUtility.nMonthsAfter(date, numberOfMonths)).toBe(expectedResult);
+      expect(datetimeUtility.nMonthsAfter(new Date(date), numberOfMonths).toISOString()).toBe(
+        expectedResult,
+      );
     },
   );
 });
 
 describe('nMonthsBefore', () => {
   // The previous month (February) has 28 days
-  const march2019 = new Date('2019-03-15T00:00:00.000Z');
+  const march2019 = '2019-03-15T00:00:00.000Z';
   // Except in 2020, it had 29 days
-  const march2020 = new Date('2020-03-15T00:00:00.000Z');
+  const march2020 = '2020-03-15T00:00:00.000Z';
   // The previous month (April) has 30 days
-  const may2020 = new Date('2020-05-15T00:00:00.000Z');
+  const may2020 = '2020-05-15T00:00:00.000Z';
   // The previous month (May) has 31 days
-  const june2020 = new Date('2020-06-15T00:00:00.000Z');
+  const june2020 = '2020-06-15T00:00:00.000Z';
+
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
 
   it.each`
     date         | numberOfMonths | expectedResult
-    ${march2019} | ${1}           | ${new Date('2019-02-15T00:00:00.000Z').valueOf()}
-    ${march2020} | ${1}           | ${new Date('2020-02-15T00:00:00.000Z').valueOf()}
-    ${may2020}   | ${1}           | ${new Date('2020-04-15T00:00:00.000Z').valueOf()}
-    ${june2020}  | ${1}           | ${new Date('2020-05-15T00:00:00.000Z').valueOf()}
-    ${june2020}  | ${12}          | ${new Date('2019-06-15T00:00:00.000Z').valueOf()}
-    ${june2020}  | ${-1}          | ${new Date('2020-07-15T00:00:00.000Z').valueOf()}
-    ${june2020}  | ${0}           | ${june2020.valueOf()}
-    ${june2020}  | ${0.9}         | ${new Date('2020-05-15T00:00:00.000Z').valueOf()}
+    ${march2019} | ${1}           | ${'2019-02-15T00:00:00.000Z'}
+    ${march2020} | ${1}           | ${'2020-02-15T00:00:00.000Z'}
+    ${may2020}   | ${1}           | ${'2020-04-15T00:00:00.000Z'}
+    ${june2020}  | ${1}           | ${'2020-05-15T00:00:00.000Z'}
+    ${june2020}  | ${12}          | ${'2019-06-15T00:00:00.000Z'}
+    ${june2020}  | ${-1}          | ${'2020-07-15T00:00:00.000Z'}
+    ${june2020}  | ${0}           | ${june2020}
+    ${june2020}  | ${0.9}         | ${'2020-05-15T00:00:00.000Z'}
   `(
     'returns $numberOfMonths month(s) before the provided date',
     ({ date, numberOfMonths, expectedResult }) => {
-      expect(datetimeUtility.nMonthsBefore(date, numberOfMonths)).toBe(expectedResult);
+      expect(datetimeUtility.nMonthsBefore(new Date(date), numberOfMonths).toISOString()).toBe(
+        expectedResult,
+      );
     },
   );
 });
@@ -896,5 +949,27 @@ describe('getOverlapDateInPeriods', () => {
         datetimeUtility.getOverlapDateInPeriods({ start, end }, { start, end: endInvalid }),
       ).toThrow(error);
     });
+  });
+});
+
+describe('getStartOfDayUTC', () => {
+  const expectedTimestamp = '2021-01-29T00:00:00.000Z';
+
+  beforeEach(() => {
+    timezoneMock.register('US/Eastern');
+  });
+
+  afterEach(() => {
+    timezoneMock.unregister();
+  });
+
+  it.each`
+    input                              | expected
+    ${'2021-01-29T18:08:23.014Z'}      | ${expectedTimestamp}
+    ${'2021-01-29T13:08:23.014-05:00'} | ${expectedTimestamp}
+    ${'2021-01-28T18:08:23.014-10:00'} | ${expectedTimestamp}
+    ${'2021-01-30T03:08:23.014+09:00'} | ${expectedTimestamp}
+  `('returns $expected when called with $input', ({ expected, input }) => {
+    expect(datetimeUtility.getStartOfDayUTC(new Date(input)).toISOString()).toEqual(expected);
   });
 });

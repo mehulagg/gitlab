@@ -682,7 +682,7 @@ export const secondsToHours = (offset) => {
  * @return {Date} the date following the date provided
  */
 export const nDaysAfter = (date, numberOfDays) =>
-  new Date(newDate(date)).setDate(date.getDate() + numberOfDays);
+  new Date(newDate(date).setUTCDate(date.getUTCDate() + numberOfDays));
 
 /**
  * Returns the date n days before the date provided
@@ -701,7 +701,7 @@ export const nDaysBefore = (date, numberOfDays) => nDaysAfter(date, -numberOfDay
  * @return {Date} the date following the date provided
  */
 export const nMonthsAfter = (date, numberOfMonths) =>
-  new Date(newDate(date)).setMonth(date.getMonth() + numberOfMonths);
+  new Date(newDate(date).setUTCMonth(date.getUTCMonth() + numberOfMonths));
 
 /**
  * Returns the date n months before the date provided
@@ -718,7 +718,7 @@ export const nMonthsBefore = (date, numberOfMonths) => nMonthsAfter(date, -numbe
  * @param {Date} date the initial date
  * @return {Date} the date following the date provided
  */
-export const dayAfter = (date) => new Date(newDate(date).setDate(date.getDate() + 1));
+export const dayAfter = (date) => nDaysAfter(date, 1);
 
 /**
  * Mimics the behaviour of the rails distance_of_time_in_words function
@@ -897,3 +897,10 @@ export const getOverlapDateInPeriods = (givenPeriodLeft = {}, givenPeriodRight =
     overlapEndDate,
   };
 };
+
+/**
+ * @returns {Date} A new `Date` object that represents the start of the day
+ * of the provided date, where start = Midnight UTC.
+ */
+export const getStartOfDayUTC = (date) =>
+  new Date(new Date(date.getTime()).setUTCHours(0, 0, 0, 0));

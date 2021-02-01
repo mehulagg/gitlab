@@ -6,9 +6,9 @@ import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
 // Compute all relative dates based on the _beginning_ of today
 const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
-const lastWeek = new Date(nDaysBefore(startOfToday, 7));
-const lastMonth = new Date(nMonthsBefore(startOfToday, 1));
-const last90Days = new Date(nDaysBefore(startOfToday, 90));
+const lastWeek = nDaysBefore(startOfToday, 7);
+const lastMonth = nMonthsBefore(startOfToday, 1);
+const last90Days = nDaysBefore(startOfToday, 90);
 const apiDateFormatString = 'isoDateTime';
 const titleDateFormatString = 'mmm d';
 const sharedRequestParams = {
