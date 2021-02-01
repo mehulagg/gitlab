@@ -6,18 +6,13 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlDropdownDivider,
-  GlFilteredSearchToken,
 } from '@gitlab/ui';
 
 import { __ } from '~/locale';
-import Api from '~/api';
-import axios from '~/lib/utils/axios_utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { visitUrl, mergeUrlParams, updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+
+import EpicsFilteredSearchMixin from '../mixins/filtered_search_mixin';
 
 import { EPICS_STATES, PRESET_TYPES } from '../constants';
 
@@ -54,16 +49,9 @@ export default {
     GlDropdownDivider,
     FilteredSearchBar,
   },
+  mixins: [EpicsFilteredSearchMixin],
   computed: {
-    ...mapState([
-      'presetType',
-      'epicsState',
-      'sortedBy',
-      'fullPath',
-      'groupLabelsEndpoint',
-      'groupMilestonesEndpoint',
-      'filterParams',
-    ]),
+    ...mapState(['presetType', 'epicsState', 'sortedBy', 'filterParams']),
     selectedEpicStateTitle() {
       if (this.epicsState === EPICS_STATES.ALL) {
         return __('All epics');
@@ -73,213 +61,37 @@ export default {
       return __('Closed epics');
     },
   },
+  watch: {
+    urlParams: {
+      deep: true,
+      immediate: true,
+      handler(params) {
+        if (Object.keys(params).length) {
+          updateHistory({
+            url: setUrlParams(params, window.location.href, true),
+            title: document.title,
+            replace: true,
+          });
+        }
+      },
+    },
+  },
   methods: {
     ...mapActions(['setEpicsState', 'setFilterParams', 'setSortedBy', 'fetchEpics']),
-    getFilteredSearchTokens() {
-      return [
-        {
-          type: 'author_username',
-          icon: 'user',
-          title: __('Author'),
-          unique: true,
-          symbol: '@',
-          token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          fetchAuthors: Api.users.bind(Api),
-        },
-        {
-          type: 'label_name',
-          icon: 'labels',
-          title: __('Label'),
-          unique: false,
-          symbol: '~',
-          token: LabelToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          fetchLabels: (search = '') => {
-            const params = {
-              only_group_labels: true,
-              include_ancestor_groups: true,
-              include_descendant_groups: true,
-            };
-
-            if (search) {
-              params.search = search;
-            }
-
-            return axios.get(this.groupLabelsEndpoint, {
-              params,
-            });
-          },
-        },
-        {
-          type: 'milestone_title',
-          icon: 'clock',
-          title: __('Milestone'),
-          unique: true,
-          symbol: '%',
-          token: MilestoneToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          fetchMilestones: (search = '') => {
-            return axios.get(this.groupMilestonesEndpoint).then(({ data }) => {
-              // TODO: Remove below condition check once either of the following is supported.
-              // a) Milestones Private API supports search param.
-              // b) Milestones Public API supports including child projects' milestones.
-              if (search) {
-                return {
-                  data: data.filter((m) => m.title.toLowerCase().includes(search.toLowerCase())),
-                };
-              }
-              return { data };
-            });
-          },
-        },
-        {
-          type: 'confidential',
-          icon: 'eye-slash',
-          title: __('Confidential'),
-          unique: true,
-          token: GlFilteredSearchToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          options: [
-            { icon: 'eye-slash', value: true, title: __('Yes') },
-            { icon: 'eye', value: false, title: __('No') },
-          ],
-        },
-      ];
-    },
-    getFilteredSearchValue() {
-      const { authorUsername, labelName, milestoneTitle, confidential, search } =
-        this.filterParams || {};
-      const filteredSearchValue = [];
-
-      if (authorUsername) {
-        filteredSearchValue.push({
-          type: 'author_username',
-          value: { data: authorUsername },
-        });
-      }
-
-      if (milestoneTitle) {
-        filteredSearchValue.push({
-          type: 'milestone_title',
-          value: { data: milestoneTitle },
-        });
-      }
-
-      if (labelName?.length) {
-        filteredSearchValue.push(
-          ...labelName.map((label) => ({
-            type: 'label_name',
-            value: { data: label },
-          })),
-        );
-      }
-
-      if (confidential !== undefined) {
-        filteredSearchValue.push({
-          type: 'confidential',
-          value: { data: confidential },
-        });
-      }
-
-      if (search) {
-        filteredSearchValue.push(search);
-      }
-
-      return filteredSearchValue;
-    },
-    updateUrl() {
-      const queryParams = urlParamsToObject(window.location.search);
-      const { authorUsername, labelName, milestoneTitle, confidential, search } =
-        this.filterParams || {};
-
-      queryParams.state = this.epicsState;
-      queryParams.sort = this.sortedBy;
-
-      if (authorUsername) {
-        queryParams.author_username = authorUsername;
-      } else {
-        delete queryParams.author_username;
-      }
-
-      if (milestoneTitle) {
-        queryParams.milestone_title = milestoneTitle;
-      } else {
-        delete queryParams.milestone_title;
-      }
-
-      delete queryParams.label_name;
-      if (labelName?.length) {
-        queryParams['label_name[]'] = labelName;
-      }
-
-      if (confidential !== undefined) {
-        queryParams.confidential = confidential;
-      } else {
-        delete queryParams.confidential;
-      }
-
-      if (search) {
-        queryParams.search = search;
-      } else {
-        delete queryParams.search;
-      }
-
-      // We want to replace the history state so that back button
-      // correctly reloads the page with previous URL.
-      updateHistory({
-        url: setUrlParams(queryParams, window.location.href, true),
-        title: document.title,
-        replace: true,
-      });
-    },
     handleRoadmapLayoutChange(presetType) {
       visitUrl(mergeUrlParams({ layout: presetType }, window.location.href));
     },
     handleEpicStateChange(epicsState) {
       this.setEpicsState(epicsState);
       this.fetchEpics();
-      this.updateUrl();
     },
     handleFilterEpics(filters) {
-      const filterParams = filters.length ? {} : null;
-      const labels = [];
-
-      filters.forEach((filter) => {
-        if (typeof filter === 'object') {
-          switch (filter.type) {
-            case 'author_username':
-              filterParams.authorUsername = filter.value.data;
-              break;
-            case 'milestone_title':
-              filterParams.milestoneTitle = filter.value.data;
-              break;
-            case 'label_name':
-              labels.push(filter.value.data);
-              break;
-            case 'confidential':
-              filterParams.confidential = filter.value.data;
-              break;
-            default:
-              break;
-          }
-        } else {
-          filterParams.search = filter;
-        }
-      });
-
-      if (labels.length) {
-        filterParams.labelName = labels;
-      }
-
-      this.setFilterParams(filterParams);
+      this.setFilterParams(this.getFilterParams(filters));
       this.fetchEpics();
-      this.updateUrl();
     },
     handleSortEpics(sortedBy) {
       this.setSortedBy(sortedBy);
       this.fetchEpics();
-      this.updateUrl();
     },
   },
 };
@@ -325,7 +137,7 @@ export default {
         >
       </gl-dropdown>
       <filtered-search-bar
-        :namespace="fullPath"
+        :namespace="groupFullPath"
         :search-input-placeholder="__('Search or filter results...')"
         :tokens="getFilteredSearchTokens()"
         :sort-options="$options.availableSortOptions"

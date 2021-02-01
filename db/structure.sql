@@ -22487,6 +22487,10 @@ CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON a
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
+CREATE INDEX index_on_merge_requests_for_latest_diffs ON merge_requests USING btree (target_project_id) INCLUDE (id, latest_merge_request_diff_id);
+
+COMMENT ON INDEX index_on_merge_requests_for_latest_diffs IS 'Index used to efficiently obtain the oldest merge request for a commit SHA';
+
 CREATE INDEX index_on_namespaces_lower_name ON namespaces USING btree (lower((name)::text));
 
 CREATE INDEX index_on_namespaces_lower_path ON namespaces USING btree (lower((path)::text));
@@ -22510,6 +22514,14 @@ CREATE INDEX index_on_users_lower_email ON users USING btree (lower((email)::tex
 CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username)::text));
 
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
+
+CREATE INDEX index_onboarding_progresses_for_create_track ON onboarding_progresses USING btree (created_at) WHERE (git_write_at IS NULL);
+
+CREATE INDEX index_onboarding_progresses_for_team_track ON onboarding_progresses USING btree (GREATEST(git_write_at, pipeline_created_at, trial_started_at)) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NOT NULL) AND (trial_started_at IS NOT NULL) AND (user_added_at IS NULL));
+
+CREATE INDEX index_onboarding_progresses_for_trial_track ON onboarding_progresses USING btree (GREATEST(git_write_at, pipeline_created_at)) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NOT NULL) AND (trial_started_at IS NULL));
+
+CREATE INDEX index_onboarding_progresses_for_verify_track ON onboarding_progresses USING btree (git_write_at) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NULL));
 
 CREATE UNIQUE INDEX index_onboarding_progresses_on_namespace_id ON onboarding_progresses USING btree (namespace_id);
 
@@ -23504,6 +23516,8 @@ CREATE INDEX temporary_index_vulnerabilities_on_id ON vulnerabilities USING btre
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
 CREATE INDEX tmp_idx_deduplicate_vulnerability_occurrences ON vulnerability_occurrences USING btree (project_id, report_type, location_fingerprint, primary_identifier_id, id);
+
+CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING btree (scan_id) WHERE (uuid IS NULL);
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 

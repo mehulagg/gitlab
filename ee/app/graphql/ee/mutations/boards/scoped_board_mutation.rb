@@ -10,7 +10,7 @@ module EE
         def resolve(**args)
           parsed_params = parse_arguments(args)
 
-          super(parsed_params)
+          super(**parsed_params)
         end
 
         def ready?(**args)

@@ -56,7 +56,8 @@ export default {
         'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
       )
     }}</template>
-    <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
+    <template #new-profile>{{ s__('OnDemandScans|Create new scanner profile') }}</template>
+    <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
     <template #summary>
       <slot name="summary"></slot>
     </template>

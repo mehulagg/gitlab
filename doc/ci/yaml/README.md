@@ -341,7 +341,7 @@ include:
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.5.
 > - Available for Starter, Premium, and Ultimate in GitLab 10.6 and later.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Core in 11.4.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/42861) to GitLab Free in 11.4.
 
 Use the `include` keyword to include external YAML files in your CI/CD configuration.
 You can break down one long `gitlab-ci.yml` file into multiple files to increase readability,
@@ -1393,7 +1393,9 @@ job:
         - Dockerfile
 ```
 
-You can also use glob patterns to match multiple files in any directory in the repository:
+Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly link outside it.
+
+You can use glob patterns to match multiple files in any directory in the repository:
 
 ```yaml
 job:
@@ -1402,6 +1404,9 @@ job:
     - exists:
         - spec/**.rb
 ```
+
+Glob patterns are interpreted with Ruby [File.fnmatch](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
+with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
 
 For performance reasons, using `exists` with patterns is limited to 10,000
 checks. After the 10,000th check, rules with patterned globs always match.
@@ -3670,7 +3675,7 @@ deploystacks:
 ### `trigger`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8997) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Core in 12.8.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
 Use `trigger` to define a downstream pipeline trigger. When GitLab starts a `trigger` job,
 a downstream pipeline is created.

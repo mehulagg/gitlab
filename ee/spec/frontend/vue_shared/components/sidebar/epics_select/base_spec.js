@@ -1,13 +1,8 @@
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import { DropdownVariant } from 'ee/vue_shared/components/sidebar/epics_select//constants';
 import EpicsSelectBase from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
-import DropdownButton from 'ee/vue_shared/components/sidebar/epics_select/dropdown_button.vue';
-import DropdownContents from 'ee/vue_shared/components/sidebar/epics_select/dropdown_contents.vue';
-import DropdownHeader from 'ee/vue_shared/components/sidebar/epics_select/dropdown_header.vue';
-import DropdownSearchInput from 'ee/vue_shared/components/sidebar/epics_select/dropdown_search_input.vue';
-import DropdownTitle from 'ee/vue_shared/components/sidebar/epics_select/dropdown_title.vue';
 import DropdownValue from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value.vue';
 import DropdownValueCollapsed from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value_collapsed.vue';
 
@@ -19,7 +14,6 @@ describe('EpicsSelect', () => {
   describe('Base', () => {
     let wrapper;
     let wrapperStandalone;
-    // const errorMessage = 'Something went wrong while fetching group epics.';
     const store = createDefaultStore();
     const storeStandalone = createDefaultStore();
 
@@ -77,38 +71,35 @@ describe('EpicsSelect', () => {
 
     describe('watchers', () => {
       describe('issueId', () => {
-        it('should update `issueId` within state when prop is updated', () => {
+        it('should update `issueId` within state when prop is updated', async () => {
           wrapper.setProps({
             issueId: 123,
           });
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.vm.$store.state.issueId).toBe(123);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.$store.state.issueId).toBe(123);
         });
       });
 
       describe('initialEpic', () => {
-        it('should update `selectedEpic` within state when prop is updated', () => {
+        it('should update `selectedEpic` within state when prop is updated', async () => {
           wrapper.setProps({
             initialEpic: mockEpic2,
           });
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
         });
       });
 
       describe('initialEpicLoading', () => {
-        it('should update `selectedEpic` within state when prop is updated', () => {
+        it('should update `selectedEpic` within state when prop is updated', async () => {
           wrapper.setProps({
             initialEpic: mockEpic2,
           });
 
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.$store.state.selectedEpic).toBe(mockEpic2);
         });
       });
 
@@ -117,36 +108,34 @@ describe('EpicsSelect', () => {
           jest.spyOn(wrapper.vm, 'fetchEpics').mockImplementation(jest.fn());
         });
 
-        it('should call action `fetchEpics` with `searchQuery` when value is set and `groupEpics` is empty', () => {
+        it('should call action `fetchEpics` with `searchQuery` when value is set and `groupEpics` is empty', async () => {
           wrapper.vm.$store.dispatch('setSearchQuery', 'foo');
 
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.fetchEpics).toHaveBeenCalledWith('foo');
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.fetchEpics).toHaveBeenCalledWith('foo');
         });
 
-        it('should call action `fetchEpics` without any params when value is empty', () => {
+        it('should call action `fetchEpics` without any params when value is empty', async () => {
           wrapper.vm.$store.dispatch('setSearchQuery', '');
 
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.fetchEpics).toHaveBeenCalledWith();
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.vm.fetchEpics).toHaveBeenCalledWith();
         });
       });
     });
 
     describe('methods', () => {
-      describe('handleDropdownHidden', () => {
-        it('should set `showDropdown` to false', () => {
-          wrapper.vm.handleDropdownHidden();
+      describe('hideDropdown', () => {
+        it('should set `isDropdownShowing` to false', () => {
+          wrapper.vm.hideDropdown();
 
-          expect(wrapper.vm.showDropdown).toBe(false);
+          expect(wrapper.vm.isDropdownShowing).toBe(false);
         });
 
-        it('should set `showDropdown` to true when dropdown variant is "standalone"', () => {
-          wrapperStandalone.vm.handleDropdownHidden();
+        it('should set `isDropdownShowing` to true when dropdown variant is "standalone"', () => {
+          wrapperStandalone.vm.hideDropdown();
 
-          expect(wrapperStandalone.vm.showDropdown).toBe(true);
+          expect(wrapperStandalone.vm.isDropdownShowing).toBe(true);
         });
       });
 
@@ -176,18 +165,17 @@ describe('EpicsSelect', () => {
           expect(wrapper.vm.assignIssueToEpic).toHaveBeenCalledWith(mockEpic2);
         });
 
-        it('should emit component event `epicSelect` with both `epicIssueId` & `issueId` props are not defined', () => {
+        it('should emit component event `epicSelect` with both `epicIssueId` & `issueId` props are not defined', async () => {
           wrapperStandalone.setProps({
             issueId: 0,
             epicIssueId: 0,
           });
 
-          return wrapperStandalone.vm.$nextTick(() => {
-            wrapperStandalone.vm.handleItemSelect(mockEpic2);
+          await wrapperStandalone.vm.$nextTick();
+          wrapperStandalone.vm.handleItemSelect(mockEpic2);
 
-            expect(wrapperStandalone.emitted('epicSelect')).toBeTruthy();
-            expect(wrapperStandalone.emitted('epicSelect')[0]).toEqual([mockEpic2]);
-          });
+          expect(wrapperStandalone.emitted('epicSelect')).toBeTruthy();
+          expect(wrapperStandalone.emitted('epicSelect')[0]).toEqual([mockEpic2]);
         });
       });
     });
@@ -198,7 +186,7 @@ describe('EpicsSelect', () => {
           canEdit: true,
         });
         w.setData({
-          showDropdown: true,
+          isDropdownShowing: true,
         });
       };
 
@@ -216,103 +204,71 @@ describe('EpicsSelect', () => {
         expect(wrapperStandalone.find(DropdownValueCollapsed).exists()).toBe(false);
       });
 
-      it('should render DropdownTitle component', () => {
-        expect(wrapper.find(DropdownTitle).exists()).toBe(true);
+      it('should render a dropdown title component', () => {
+        expect(wrapper.findComponent(GlDropdown).exists()).toBe(true);
       });
 
-      it('should not render DropdownTitle component when variant is "standalone"', () => {
-        expect(wrapperStandalone.find(DropdownTitle).exists()).toBe(false);
+      it('should not render a dropdown title component when variant is "standalone"', () => {
+        expect(wrapperStandalone.findComponent(GlDropdown).find('.title').exists()).toBe(false);
       });
 
-      it('should render DropdownValue component when `showDropdown` is false', (done) => {
+      it('should render DropdownValue component when `showDropdown` is false', async () => {
         wrapper.vm.showDropdown = false;
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(DropdownValue).exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find(DropdownValue).exists()).toBe(true);
       });
 
       it('should not render DropdownValue component when variant is "standalone"', () => {
         expect(wrapperStandalone.find(DropdownValue).exists()).toBe(false);
       });
 
-      it('should render dropdown container element when props `canEdit` & `showDropdown` are true', (done) => {
+      it('should render dropdown container element when props `canEdit` & `showDropdown` are true', async () => {
         showDropdown();
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find('.epic-dropdown-container').exists()).toBe(true);
-          expect(wrapper.find('.epic-dropdown-container .dropdown').exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('.epic-dropdown-container').exists()).toBe(true);
+        expect(wrapper.findComponent(GlDropdown).exists()).toBe(true);
       });
 
       it('should render dropdown container element when variant is "standalone"', () => {
         expect(wrapperStandalone.find('.epic-dropdown-container').exists()).toBe(true);
       });
 
-      it('should render DropdownButton component when props `canEdit` & `showDropdown` are true', (done) => {
+      it('should render dropdown menu container element when props `canEdit` & `showDropdown` are true', async () => {
         showDropdown();
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(DropdownButton).exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('.dropdown-menu-epics').exists()).toBe(true);
       });
 
-      it('should render dropdown menu container element when props `canEdit` & `showDropdown` are true', (done) => {
+      it('should render a dropdown header component when props `canEdit` & `showDropdown` are true', async () => {
         showDropdown();
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find('.dropdown .dropdown-menu.dropdown-menu-epics').exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.findComponent(GlDropdown).props('headerText')).toBe('Assign Epic');
       });
 
-      it('should render DropdownHeader component when props `canEdit` & `showDropdown` are true', (done) => {
-        showDropdown();
-
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(DropdownHeader).exists()).toBe(true);
-          done();
-        });
-      });
-
-      it('should not render DropdownHeader component when variant is "standalone"', () => {
+      it('should render a dropdown header component when variant is "standalone"', async () => {
         showDropdown(wrapperStandalone);
-
-        return wrapperStandalone.vm.$nextTick(() => {
-          expect(wrapperStandalone.find(DropdownHeader).exists()).toBe(false);
-        });
+        await wrapperStandalone.vm.$nextTick();
+        expect(wrapper.findComponent(GlDropdown).props('headerText')).toBe('Assign Epic');
       });
 
-      it('should render DropdownSearchInput component when props `canEdit` & `showDropdown` are true', (done) => {
+      it('should render a list of dropdown items when props `canEdit` & `showDropdown` are true and `isEpicsLoading` is false and `receiveEpicsSuccess` returns a valid response of epics', async () => {
         showDropdown();
+        store.dispatch('receiveEpicsSuccess', [mockEpic1]);
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(DropdownSearchInput).exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.findAllComponents(GlDropdownItem)).toHaveLength(2);
       });
 
-      it('should render DropdownContents component when props `canEdit` & `showDropdown` are true and `isEpicsLoading` is false', (done) => {
-        showDropdown();
-        store.dispatch('receiveEpicsSuccess', []);
-
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(DropdownContents).exists()).toBe(true);
-          done();
-        });
-      });
-
-      it('should render GlLoadingIcon component when props `canEdit` & `showDropdown` and `isEpicsLoading` are true', (done) => {
+      it('should render GlLoadingIcon component when props `canEdit` & `showDropdown` and `isEpicsLoading` are true', async () => {
         showDropdown();
         store.dispatch('requestEpics');
 
-        wrapper.vm.$nextTick(() => {
-          expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-          done();
-        });
+        await wrapper.vm.$nextTick();
+        expect(wrapper.findComponent(GlDropdown).findComponent(GlLoadingIcon).exists()).toBe(true);
       });
     });
   });

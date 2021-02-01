@@ -1,3 +1,4 @@
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useFakeDate } from 'helpers/fake_date';
@@ -44,6 +45,7 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
       provide: {
         projectPath: 'test/project',
       },
+      stubs: { GlSprintf },
     });
   };
 
@@ -67,6 +69,9 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
     wrapper = null;
     mock.restore();
   });
+
+  const findHelpText = () => wrapper.find('[data-testid="help-text"]');
+  const findDocLink = () => findHelpText().find(GlLink);
 
   describe('when there are no network errors', () => {
     beforeEach(async () => {
@@ -93,6 +98,18 @@ describe('ee_component/projects/pipelines/charts/components/deployment_frequency
 
     it('does not show a flash message', () => {
       expect(createFlash).not.toHaveBeenCalled();
+    });
+
+    it('renders description text', () => {
+      expect(findHelpText().text()).toMatchInterpolatedText(
+        'These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named production for its data to appear in these charts. Learn more.',
+      );
+    });
+
+    it('renders a link to the documentation', () => {
+      expect(findDocLink().attributes().href).toBe(
+        '/help/user/analytics/ci_cd_analytics.html#deployment-frequency-charts',
+      );
     });
   });
 
