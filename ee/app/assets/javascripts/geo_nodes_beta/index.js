@@ -11,9 +11,7 @@ export const initGeoNodesBeta = () => {
     return false;
   }
 
-  const {
-    geoInformationPath,
-  } = el.dataset;
+  const { geoInformationPath } = el.dataset;
 
   return new Vue({
     el,
