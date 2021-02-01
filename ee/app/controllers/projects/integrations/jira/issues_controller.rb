@@ -57,14 +57,15 @@ module Projects
 
         def issue_json
           {
+            title: 'FE-2 The second FE issue on Jira',
             title_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             description_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             created_at: 2.hours.ago,
+            web_url: 'https://jira.reali.sh:8080/projects/FE/issues/FE-2',
             author: {
-              id: 2,
               username: 'justin_ho',
               name: 'Justin Ho',
-              web_url: 'http://127.0.0.1:3000/root',
+              web_url: 'http://jira.reali.sh:8080/users/root',
               avatar_url: 'http://127.0.0.1:3000/uploads/-/system/user/avatar/1/avatar.png?width=90'
             },
             labels: [

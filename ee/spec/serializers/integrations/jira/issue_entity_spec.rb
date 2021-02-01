@@ -32,29 +32,41 @@ RSpec.describe Integrations::Jira::IssueEntity do
 
   subject { described_class.new(jira_issue, project: project).as_json }
 
-  it 'returns the Jira issues attributes' do
-    expect(subject).to include(
-      project_id: project.id,
-      title: 'summary',
-      created_at: '2020-06-25T15:39:30.000+0000'.to_datetime.utc,
-      updated_at: '2020-06-26T15:38:32.000+0000'.to_datetime.utc,
-      closed_at: '2020-06-27T13:23:51.000+0000'.to_datetime.utc,
-      status: 'To Do',
-      labels: [
-        {
-          name: 'backend',
-          color: '#EBECF0',
-          text_color: '#283856'
-        }
-      ],
-      author: hash_including(name: 'reporter'),
-      assignees: [
-        { name: 'assignee' }
-      ],
-      web_url: 'http://jira.com/browse/GL-5',
-      references: { relative: 'GL-5' },
-      external_tracker: 'jira'
-    )
+  context 'feature flag "jira_issues_show_integration" is disabled' do
+    it 'returns web_url with remote Jira url' do
+      stub_feature_flags(jira_issues_show_integration: false)
+
+      expect(subject[:web_url]).to eq('http://jira.com/browse/GL-5')
+    end
+  end
+
+  context 'feature flag "jira_issues_show_integration" is enabled' do
+    it 'returns the Jira issues attributes' do
+      stub_feature_flags(jira_issues_show_integration: true)
+
+      expect(subject).to include(
+        project_id: project.id,
+        title: 'summary',
+        created_at: '2020-06-25T15:39:30.000+0000'.to_datetime.utc,
+        updated_at: '2020-06-26T15:38:32.000+0000'.to_datetime.utc,
+        closed_at: '2020-06-27T13:23:51.000+0000'.to_datetime.utc,
+        status: 'To Do',
+        labels: [
+          {
+            name: 'backend',
+            color: '#EBECF0',
+            text_color: '#283856'
+          }
+        ],
+        author: hash_including(name: 'reporter'),
+        assignees: [
+          { name: 'assignee' }
+        ],
+        web_url: Gitlab::Routing.url_helpers.project_integrations_jira_issue_path(project, 'GL-5'),
+        references: { relative: 'GL-5' },
+        external_tracker: 'jira'
+      )
+    end
   end
 
   context 'with Jira Server configuration' do
@@ -69,9 +81,13 @@ RSpec.describe Integrations::Jira::IssueEntity do
     context 'and context_path' do
       let(:jira_client) { double(options: { site: 'http://jira.com/', context_path: '/jira-sub-path' }) }
 
-      it 'returns URLs including context path' do
-        expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
-        expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+      context 'feature flag "jira_issues_show_integration" is disabled' do
+        it 'returns URLs including context path' do
+          stub_feature_flags(jira_issues_show_integration: false)
+
+          expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
+          expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+        end
       end
     end
   end

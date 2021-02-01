@@ -8,6 +8,10 @@
   a {
     color: $gl-text-color;
 
+    &:hover {
+      color: $gl-text-color;
+    }
+
     &.link {
       color: $blue-600;
     }

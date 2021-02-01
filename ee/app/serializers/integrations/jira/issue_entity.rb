@@ -3,6 +3,8 @@
 module Integrations
   module Jira
     class IssueEntity < Grape::Entity
+      include RequestAwareEntity
+
       expose :project_id do |_jira_issue, options|
         options[:project].id
       end
@@ -58,7 +60,11 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{base_web_url(jira_issue)}/browse/#{jira_issue.key}"
+        if ::Feature.enabled?(:jira_issues_show_integration, options[:project], default_enabled: :yaml)
+          project_integrations_jira_issue_path(options[:project], jira_issue.key)
+        else
+          "#{base_web_url(jira_issue)}/browse/#{jira_issue.key}"
+        end
       end
 
       expose :references do |jira_issue|
