@@ -24,7 +24,7 @@ module QA
 
         Page::Project::Menu.perform(&:click_members)
         Page::Project::Members.perform do |member_settings|
-          member_settings.add_member(username)
+          member_settings.add_member(user.username)
         end
 
         expect(page).to have_content(/@#{user.username}(\n| )?Given access/)
