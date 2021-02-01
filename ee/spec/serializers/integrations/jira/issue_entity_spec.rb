@@ -73,9 +73,13 @@ RSpec.describe Integrations::Jira::IssueEntity do
     context 'and context_path' do
       let(:jira_client) { double(options: { site: 'http://jira.com/', context_path: '/jira-sub-path' }) }
 
-      it 'returns URLs including context path' do
-        expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
-        expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+      context 'feature flag "jira_issues_show_integration" is disabled' do
+        it 'returns URLs including context path' do
+          stub_feature_flags(jira_issues_show_integration: false)
+
+          expect(subject[:author]).to include(web_url: 'http://jira.com/jira-sub-path/secure/ViewProfile.jspa?name=reporter@reporter.com')
+          expect(subject[:web_url]).to eq('http://jira.com/jira-sub-path/browse/GL-5')
+        end
       end
     end
   end
