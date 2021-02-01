@@ -131,6 +131,7 @@ module EE
 
       rule { reporter }.policy do
         enable :admin_list
+        enable :admin_epic_list
         enable :view_productivity_analytics
         enable :view_type_of_work_charts
         enable :read_group_timelogs
@@ -323,6 +324,7 @@ module EE
         prevent :upload_file
         prevent :admin_label
         prevent :admin_list
+        prevent :admin_epic_list
         prevent :admin_issue
         prevent :admin_pipeline
         prevent :add_cluster
