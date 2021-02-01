@@ -21,17 +21,17 @@ By default, a protected branch does these things:
 - It prevents **anyone** from force pushing to the branch.
 - It prevents **anyone** from deleting the branch.
 
-NOTE:
-A GitLab administrator is allowed to push to the protected branches.
+**Permissions:**
 
-NOTE: **Note:**
-A user with the [Developer role](../permissions.md) is allowed to create a project in a group, but
-might not be allowed to initially push to the `master` branch (depending on the configuration of the
-instance).
-
-See the [Changelog](#changelog) section for changes over time.
+- GitLab administrators are allowed to push to the protected branches.
+- Users with [Developer permissions](../permissions.md) are allowed to
+  create a project in a group, but might not be allowed to initially
+  push to the `main` branch (depending on the configuration of the
+  instance).
 
 The default branch protection level is set in the [Admin Area](../admin_area/settings/visibility_and_access_controls.md#default-branch-protection).
+
+See the [Changelog](#changelog) section for changes over time.
 
 ## Configuring protected branches
 
