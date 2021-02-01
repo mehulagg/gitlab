@@ -1,40 +1,29 @@
 <script>
-import { GlLink, GlSprintf, GlTable } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlTable, GlAlert } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import  ManageSast from './manage_sast.vue';
-import { helpPagePath } from '~/helpers/help_page_helper'
+import ManageSast from './manage_sast.vue';
+import Upgrade from './upgrade.vue';
+import FeaturesConstants from './features_constants.vue';
+import {
+  REPORT_TYPE_SAST,
+  REPORT_TYPE_DAST,
+  REPORT_TYPE_DEPENDENCY_SCANNING,
+  REPORT_TYPE_CONTAINER_SCANNING,
+  REPORT_TYPE_COVERAGE_FUZZING,
+  REPORT_TYPE_LICENSE_COMPLIANCE
+  
+  } from './constants';
 
 export default {
   components: {
     GlLink,
     GlSprintf,
-    GlTable
+    GlTable,
+    GlAlert
   },
   data: () => ({
-    features: [
-      {
-        manage: 'Enable via Merge Request',
-        name: 'Static Application Security Testing (SAST)',
-        description: 'Analyze your source code for known vulnerabilities.',
-        link: helpPagePath('user/application_security/sast/index'),
-        type: 'sast'
-      },
-      {
-        manage: 'Available with upgrade or free trial',
-        name: 'Dynamic Application Security Testing (DAST)',
-        description: 'Analyze a review version of your web application.',
-        link: helpPagePath('user/application_security/dast/index'),
-        type: 'dast'
-      },
-      {
-        manage: '',
-        name: 'Secret Detection',
-        description: 'Analyze your source code and git history for secrets.',
-        link: helpPagePath('user/application_security/secret_detection/index'),
-        // fix me use imported constants
-        type: 'secret_detection'
-      }
-    ]
+    features: FeaturesConstants.features,
+    errorMessage: ''
   }),
   computed: {
     fields() {
@@ -46,14 +35,14 @@ export default {
           key: 'feature',
           label: s__('SecurityConfiguration|Security Control'),
           thClass,
-        },        
+        },
         {
           key: 'manage',
           label: s__('SecurityConfiguration|Manage'),
           thClass,
         },
       ];
-    }
+    },
   },
   methods: {
     getFeatureDocumentationLinkLabel(item) {
@@ -61,42 +50,51 @@ export default {
         featureName: item.name,
       });
     },
-    onError(value){
-      console.log('goterror', value);
+    onError(value) {
+      this.errorMessage = value;
     },
     getComponentForItem(item) {
       const COMPONENTS = {
-        sast: ManageSast,
-        // secret_detection: ManageSecretDetection,
-        // dast: ManageDast
+        [REPORT_TYPE_SAST]: ManageSast,
+        [REPORT_TYPE_DAST]: Upgrade,
+        [REPORT_TYPE_DEPENDENCY_SCANNING]: Upgrade,
+        [REPORT_TYPE_CONTAINER_SCANNING]: Upgrade,
+        [REPORT_TYPE_COVERAGE_FUZZING]: Upgrade,
+        [REPORT_TYPE_LICENSE_COMPLIANCE]: Upgrade
       };
-      
-      return COMPONENTS[item.type];
 
-    }
-  }
+      return COMPONENTS[item.type];
+    },
+  },
 };
 </script>
 
 <template>
-  <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
+  <div>
+    <gl-alert v-if="errorMessage" variant="danger" :dismissible="false">
+      {{errorMessage}}
+    </gl-alert>
+    <gl-table ref="securityControlTable" :items="features" :fields="fields" stacked="md">
       <template #cell(feature)="{ item }">
-      <div class="gl-text-gray-900">{{ item.name }}</div>
-      <div>
+        <div :data-test-id="item.name" class="gl-text-gray-900">
+          {{ item.name }}
+        </div>
+        <div>
           {{ item.description }}
           <gl-link
-          target="_blank"
-          :href="item.link"
-          :aria-label="getFeatureDocumentationLinkLabel(item)"
-          data-testid="docsLink"
+            target="_blank"
+            :href="item.link"
+            :aria-label="getFeatureDocumentationLinkLabel(item)"
+            data-testid="docsLink"
           >
-          {{ s__('SecurityConfiguration|More information') }}
+            {{ s__('SecurityConfiguration|More information') }}
           </gl-link>
-      </div>
+        </div>
       </template>
 
       <template #cell(manage)="{ item }">
-      <component :is="getComponentForItem(item)" @error="onError"></component>
+        <component :is="getComponentForItem(item)" @error="onError"></component>
       </template>
-  </gl-table>
+    </gl-table>
+  </div>
 </template>

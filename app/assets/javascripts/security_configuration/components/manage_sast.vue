@@ -30,16 +30,20 @@ export default {
         });
         const { errors, successPath } = data.configureSast;
 
-        if (errors.length > 0 || !successPath) {
+        if (errors.length > 0) {
           // eslint-disable-next-line @gitlab/require-i18n-strings
+          throw new Error(errors[0]);
+        }
+
+        if (!successPath) {
           throw new Error('SAST merge request creation mutation failed');
         }
+
         redirectTo(successPath);
       } catch (e) {
         this.$emit('error', e.message);
         this.isLoading = false;
       }
-      // do similar like app/assets/javascripts/security_configuration/sast/components/configuration_form.vue
     },
   },
 };
