@@ -28,7 +28,8 @@ class UserCallout < ApplicationRecord
     feature_flags_new_version: 24,
     registration_enabled_callout: 25,
     new_user_signups_cap_reached: 26,           # EE-only
-    unfinished_tag_cleanup_callout: 27
+    unfinished_tag_cleanup_callout: 27,
+    eoa_bronze_plan_banner: 28
   }
 
   validates :user, presence: true
