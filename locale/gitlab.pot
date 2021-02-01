@@ -19785,6 +19785,9 @@ msgstr ""
 msgid "No iteration"
 msgstr ""
 
+msgid "No iterations found"
+msgstr ""
+
 msgid "No iterations to show"
 msgstr ""
 

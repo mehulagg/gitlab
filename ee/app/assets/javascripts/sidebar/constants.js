@@ -15,8 +15,9 @@ export const healthStatusTextMap = {
 export const iterationSelectTextMap = {
   iteration: __('Iteration'),
   noIteration: __('No iteration'),
-  noIterationItem: [{ title: __('No iteration'), id: null }],
+  assignIteration: __('Assign Iteration'),
   iterationSelectFail: __('Failed to set iteration on this issue. Please try again.'),
+  noIterationsFound: __('No iterations found'),
 };
 
 export const iterationDisplayState = 'opened';
