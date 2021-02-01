@@ -151,10 +151,6 @@ class MigrateNotesToSeparateIndex < Elastic::Migration
     helper.documents_count(index_name: notes_index_name)
   end
 
-  def get_number_of_shards
-    helper.get_settings.dig('number_of_shards').to_i
-  end
-
   def default_index_name
     helper.target_name
   end

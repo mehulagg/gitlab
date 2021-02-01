@@ -33,6 +33,10 @@ module Elastic
       Elastic::DataMigrationService[version]
     end
 
+    def get_number_of_shards
+      helper.get_settings.dig('number_of_shards').to_i
+    end
+
     def fail_migration_halt_error!(retry_attempt: 0)
       set_migration_state(
         retry_attempt: retry_attempt,
