@@ -1,0 +1,9 @@
+- group = local_assigns.fetch(:group)
+- return unless group&.feature_available?(:iterations)
+
+.block
+  .title
+    = _('Iteration')
+  .filter-item
+    #js-iteration-dropdown{ data: { full_path: group.full_path } }
+  %input{ id: 'issue_iteration_id', type: 'hidden', name: 'update[iteration_id]' }

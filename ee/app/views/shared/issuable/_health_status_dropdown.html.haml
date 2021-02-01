@@ -1,0 +1,9 @@
+- group = local_assigns.fetch(:group)
+- return unless group&.feature_available?(:issuable_health_status)
+
+.block
+  .title
+    = _('Health status')
+  .filter-item.health-status.health-status-filter
+    #js-bulk-update-health-status-root
+  %input{ id: 'issue_health_status_value', type: 'hidden', name: 'update[health_status]' }

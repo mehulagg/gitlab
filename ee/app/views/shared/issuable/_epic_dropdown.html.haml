@@ -1,0 +1,9 @@
+- group = local_assigns.fetch(:group)
+- return unless group&.feature_available?(:epics)
+
+.block
+  .title
+    = _('Epic')
+  .filter-item.epic-bulk-edit
+    #js-epic-select-root{ data: { group_id: group.id, show_header: "true" } }
+  %input{ id: 'issue_epic_id', type: 'hidden', name: 'update[epic_id]' }
