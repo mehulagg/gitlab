@@ -14,7 +14,8 @@ module Gitlab
       ].freeze
 
       ES_SEPARATE_CLASSES = [
-        Issue
+        Issue,
+        Note
       ].freeze
 
       attr_reader :version, :client
