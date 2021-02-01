@@ -5,6 +5,7 @@ import { __, sprintf } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { isScopedLabel } from '~/lib/utils/common_utils';
+import { isExternal } from '~/lib/utils/url_utility';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 import IssuableAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
@@ -55,13 +56,7 @@ export default {
       return getIdFromGraphQLId(`${this.author.id}`);
     },
     isIssuableUrlExternal() {
-      // Check if URL is relative, which means it is internal.
-      if (!/^https?:\/\//g.test(this.webUrl)) {
-        return false;
-      }
-      // In case URL is absolute, it may or may not be internal,
-      // hence use `gon.gitlab_url` which is current instance domain.
-      return !this.webUrl.includes(gon.gitlab_url);
+      return isExternal(this.issuable.webUrl);
     },
     labels() {
       return this.issuable.labels?.nodes || this.issuable.labels || [];
