@@ -93,6 +93,8 @@ graphql-reference-verify:
     - .docs:rules:graphql-reference-verify
     - .use-pg11
   stage: test
+  variables:
+    TEST_WEB_ENGINE: "true"
   needs: ["setup-test-env"]
   script:
     - bundle exec rake gitlab:graphql:check_docs

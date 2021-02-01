@@ -256,6 +256,17 @@ rspec unit pg11:
     - .rails:rules:ee-and-foss-unit
     - .rspec-unit-parallel
 
+.rspec-web-engine-base:
+  variables:
+    TEST_WEB_ENGINE: "true"
+
+rspec-web-engine unit pg11:
+  extends:
+    - .rspec-web-engine-base
+    - .rspec-base-pg11
+    - .rails:rules:ee-and-foss-unit
+    - .rspec-unit-parallel
+
 rspec unit pg11 minimal:
   extends:
     - rspec unit pg11
@@ -264,6 +275,7 @@ rspec unit pg11 minimal:
 
 rspec integration pg11:
   extends:
+    - .rspec-web-engine-base
     - .rspec-base-pg11
     - .rails:rules:ee-and-foss-integration
     - .rspec-integration-parallel
@@ -277,6 +289,7 @@ rspec integration pg11 minimal:
 rspec system pg11:
   extends:
     - .rspec-base-pg11
+    - .rspec-web-engine-base
     - .rails:rules:ee-and-foss-system
     - .rspec-system-parallel
 
@@ -387,10 +400,12 @@ rspec:coverage:
     - setup-test-env
     - rspec migration pg11
     - rspec unit pg11
+    - rspec-web-engine unit pg11
     - rspec integration pg11
     - rspec system pg11
     - rspec-ee migration pg11
     - rspec-ee unit pg11
+    - rspec-web-engine-ee unit pg11
     - rspec-ee integration pg11
     - rspec-ee system pg11
     - rspec-ee unit pg11 geo
@@ -425,10 +440,12 @@ rspec:feature-flags:
     - setup-test-env
     - rspec migration pg11
     - rspec unit pg11
+    - rspec-web-engine unit pg11
     - rspec integration pg11
     - rspec system pg11
     - rspec-ee migration pg11
     - rspec-ee unit pg11
+    - rspec-web-engine-ee unit pg11
     - rspec-ee integration pg11
     - rspec-ee system pg11
     - rspec-ee unit pg11 geo
@@ -473,6 +490,7 @@ rspec unit pg11-as-if-foss minimal:
 rspec integration pg11-as-if-foss:
   extends:
     - .rspec-base-pg11-as-if-foss
+    - .rspec-web-engine-base
     - .rails:rules:as-if-foss-integration
     - .rspec-integration-parallel
 
@@ -484,6 +502,7 @@ rspec integration pg11-as-if-foss minimal:
 
 rspec system pg11-as-if-foss:
   extends:
+    - .rspec-web-engine-base
     - .rspec-base-pg11-as-if-foss
     - .rails:rules:as-if-foss-system
     - .rspec-system-parallel
@@ -513,6 +532,13 @@ rspec-ee unit pg11:
     - .rails:rules:ee-only-unit
     - .rspec-ee-unit-parallel
 
+rspec-web-engine-ee unit pg11:
+  extends:
+    - .rspec-web-engine-base
+    - .rspec-ee-base-pg11
+    - .rails:rules:ee-only-unit
+    - .rspec-ee-unit-parallel
+
 rspec-ee unit pg11 minimal:
   extends:
     - rspec-ee unit pg11
@@ -521,6 +547,14 @@ rspec-ee unit pg11 minimal:
 
 rspec-ee integration pg11:
   extends:
+    - .rspec-ee-base-pg11
+    - .rspec-web-engine-base
+    - .rails:rules:ee-only-integration
+    - .rspec-ee-integration-parallel
+
+rspec-web-engine-ee integration pg11:
+  extends:
+    - .rspec-web-engine-base
     - .rspec-ee-base-pg11
     - .rails:rules:ee-only-integration
     - .rspec-ee-integration-parallel
@@ -534,6 +568,7 @@ rspec-ee integration pg11 minimal:
 rspec-ee system pg11:
   extends:
     - .rspec-ee-base-pg11
+    - .rspec-web-engine-base
     - .rails:rules:ee-only-system
     - .rspec-ee-system-parallel
 
@@ -559,6 +594,7 @@ rspec-ee unit pg11 geo:
 rspec-ee integration pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
+    - .rspec-web-engine-base
     - .rails:rules:ee-only-integration
 
 # FIXME: Temporarily disable geo minimal rspec jobs https://gitlab.com/gitlab-org/gitlab/-/issues/294212
@@ -571,6 +607,7 @@ rspec-ee integration pg11 geo:
 rspec-ee system pg11 geo:
   extends:
     - .rspec-ee-base-geo-pg11
+    - .rspec-web-engine-base
     - .rails:rules:ee-only-system
 
 # FIXME: Temporarily disable geo minimal rspec jobs https://gitlab.com/gitlab-org/gitlab/-/issues/294212
@@ -608,12 +645,14 @@ rspec unit pg12:
 rspec integration pg12:
   extends:
     - .rspec-base-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-integration-parallel
 
 rspec system pg12:
   extends:
     - .rspec-base-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage
     - .rspec-system-parallel
 # EE/FOSS: master nightly scheduled jobs #
@@ -637,12 +676,14 @@ rspec-ee unit pg12:
 rspec-ee integration pg12:
   extends:
     - .rspec-ee-base-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-integration-parallel
 
 rspec-ee system pg12:
   extends:
     - .rspec-ee-base-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-system-parallel
 
@@ -655,11 +696,13 @@ rspec-ee unit pg12 geo:
 rspec-ee integration pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
 
 rspec-ee system pg12 geo:
   extends:
     - .rspec-ee-base-geo-pg12
+    - .rspec-web-engine-base
     - .rails:rules:master-schedule-nightly--code-backstage-ee-only
 # EE: master nightly scheduled jobs #
 #####################################

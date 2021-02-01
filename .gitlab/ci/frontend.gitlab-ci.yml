@@ -6,6 +6,7 @@
     SETUP_DB: "false"
     # we override the max_old_space_size to prevent OOM errors
     NODE_OPTIONS: --max_old_space_size=3584
+    TEST_WEB_ENGINE: "true"
 
 .yarn-install: &yarn-install
   - source scripts/utils.sh
@@ -120,7 +121,18 @@ rspec frontend_fixture:
     - .frontend-fixtures-base
     - .frontend:rules:default-frontend-jobs
 
+rspec-web-engine frontend_fixture:
+  extends:
+    - .frontend-fixtures-base
+    - .frontend:rules:default-frontend-jobs
+
 rspec frontend_fixture as-if-foss:
+  extends:
+    - .frontend-fixtures-base
+    - .frontend:rules:default-frontend-jobs-as-if-foss
+    - .as-if-foss
+
+rspec-web-engine frontend_fixture as-if-foss:
   extends:
     - .frontend-fixtures-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
@@ -162,7 +174,7 @@ karma:
     - .karma-base
     - .frontend:rules:default-frontend-jobs
   # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture", "rspec-web-engine frontend_fixture"]
   coverage: '/^Statements *: (\d+\.\d+%)/'
   artifacts:
     name: coverage-javascript
@@ -181,7 +193,7 @@ karma-as-if-foss:
     - .karma-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["rspec frontend_fixture as-if-foss"]
+  needs: ["rspec frontend_fixture as-if-foss", "rspec-web-engine frontend_fixture as-if-foss"]
 
 .jest-base:
   extends: .frontend-test-base
@@ -194,7 +206,7 @@ jest:
     - .jest-base
     - .frontend:rules:default-frontend-jobs
   # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture", "rspec-web-engine frontend_fixture"]
   artifacts:
     name: coverage-frontend
     expire_in: 31d
@@ -215,14 +227,14 @@ jest-integration:
     - *yarn-install
     - run_timed_command "yarn jest:integration --ci"
   # Don't use `needs` since `rspec-ee frontend_fixture` doesn't exist in `gitlab-foss` pipelines.
-  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture"]
+  dependencies: ["rspec frontend_fixture", "rspec-ee frontend_fixture", "rspec-web-engine frontend_fixture"]
 
 jest-as-if-foss:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["rspec frontend_fixture as-if-foss"]
+  needs: ["rspec frontend_fixture as-if-foss", "rspec-web-engine frontend_fixture as-if-foss"]
   parallel: 2
 
 coverage-frontend:

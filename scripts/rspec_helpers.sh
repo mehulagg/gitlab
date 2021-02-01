@@ -85,6 +85,10 @@ function rspec_paralellized_job() {
 
   if [[ "${test_tool}" =~ "-ee" ]]; then
     spec_folder_prefix="ee/"
+  elif [[ "${test_tool}" =~ "-web-engine" ]]; then
+    spec_folder_prefix="engines/web_engine/"
+  elif [[ "${test_tool}" =~ "-web-engine-ee" ]]; then
+    spec_folder_prefix="engines/web_engine/ee/"
   fi
 
   export KNAPSACK_LOG_LEVEL="debug"
