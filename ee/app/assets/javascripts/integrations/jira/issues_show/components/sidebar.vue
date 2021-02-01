@@ -1,9 +1,11 @@
 <script>
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import Assignees from '~/sidebar/components/assignees/assignees.vue';
 
 export default {
   components: {
     LabelsSelect,
+    Assignees,
   },
   props: {
     sidebarExpanded: {
@@ -14,15 +16,26 @@ export default {
       type: Array,
       required: true,
     },
+    assignees: {
+      type: Array,
+      required: true,
+    },
+    rootPath: {
+      type: String,
+      required: true,
+    },
   },
 };
 </script>
 
 <template>
-  <labels-select
-    :selected-labels="selectedLabels"
-    variant="sidebar"
-    class="block labels js-labels-block"
-    >{{ __('None') }}</labels-select
-  >
+  <div>
+    <assignees class="block" :users="assignees" :editable="false" :root-path="rootPath" />
+    <labels-select
+      :selected-labels="selectedLabels"
+      variant="sidebar"
+      class="block labels js-labels-block"
+      >{{ __('None') }}</labels-select
+    >
+  </div>
 </template>

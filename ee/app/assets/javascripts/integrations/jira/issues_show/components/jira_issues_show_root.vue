@@ -33,6 +33,9 @@ export default {
     statusBadgeText() {
       return issueStateLabels[this.issue.state];
     },
+    assignees() {
+      return [];
+    },
   },
   async mounted() {
     this.issue = convertObjectPropsToCamelCase(await fetchIssue(this.issuesShowPath), {
@@ -54,7 +57,12 @@ export default {
       <template #status-badge>{{ statusBadgeText }}</template>
 
       <template #right-sidebar-items="{ sidebarExpanded }">
-        <sidebar :sidebar-expanded="sidebarExpanded" :selected-labels="issue.labels" />
+        <sidebar
+          :sidebar-expanded="sidebarExpanded"
+          :selected-labels="issue.labels"
+          :assignees="assignees"
+          root-path=""
+        />
       </template>
     </issuable-show>
   </div>
