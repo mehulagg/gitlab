@@ -876,9 +876,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/990429615/artifacts/raw/gitlab-ui.gl-avatar-label-slots.tgz":
-  version "27.1.1"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/990429615/artifacts/raw/gitlab-ui.gl-avatar-label-slots.tgz#651e2bed465c387ba024158df1ec45f8d1af6227"
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/999230119/artifacts/raw/gitlab-ui.gl-avatar-label-slots.tgz":
+  version "27.0.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/999230119/artifacts/raw/gitlab-ui.gl-avatar-label-slots.tgz#bd9e7e7faa1b75533e238a90abea444ceb496b6a"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
