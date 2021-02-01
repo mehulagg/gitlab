@@ -9,6 +9,8 @@ RSpec.describe 'Merge request < User sees mini pipeline graph', :js do
   let(:pipeline) { create(:ci_empty_pipeline, project: project, ref: 'master', status: 'running', sha: project.commit.id) }
   let(:build) { create(:ci_build, pipeline: pipeline, stage: 'test') }
 
+  dropdown_toggle_selector = '[data-testid="mini-pipeline-graph-dropdown-toggle"]'
+
   before do
     build.run
     build.trace.set('hello')
@@ -51,40 +53,40 @@ RSpec.describe 'Merge request < User sees mini pipeline graph', :js do
 
   describe 'build list toggle' do
     let(:toggle) do
-      find('.mini-pipeline-graph-dropdown-toggle')
-      first('.mini-pipeline-graph-dropdown-toggle')
+      find(dropdown_toggle_selector)
+      first(dropdown_toggle_selector)
     end
 
     # Status icon button styles should update as described in
     # https://gitlab.com/gitlab-org/gitlab-foss/issues/42769
     it 'has unique styles for default, :hover, :active, and :focus states' do
-      find('.mini-pipeline-graph-dropdown-toggle')
-      default_background_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('background-color');")
-      default_foreground_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible svg').css('fill');")
-      default_box_shadow = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('box-shadow');")
+      find(dropdown_toggle_selector)
+      default_background_color = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('background-color');")
+      default_foreground_color = evaluate_script("$('#{dropdown_toggle_selector}:visible svg').css('fill');")
+      default_box_shadow = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('box-shadow');")
 
       toggle.hover
 
-      find('.mini-pipeline-graph-dropdown-toggle')
-      hover_background_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('background-color');")
-      hover_foreground_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible svg').css('fill');")
-      hover_box_shadow = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('box-shadow');")
+      find(dropdown_toggle_selector)
+      hover_background_color = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('background-color');")
+      hover_foreground_color = evaluate_script("$('#{dropdown_toggle_selector}:visible svg').css('fill');")
+      hover_box_shadow = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('box-shadow');")
 
       page.driver.browser.action.click_and_hold(toggle.native).perform
 
-      find('.mini-pipeline-graph-dropdown-toggle')
-      active_background_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('background-color');")
-      active_foreground_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible svg').css('fill');")
-      active_box_shadow = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('box-shadow');")
+      find(dropdown_toggle_selector)
+      active_background_color = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('background-color');")
+      active_foreground_color = evaluate_script("$('#{dropdown_toggle_selector}:visible svg').css('fill');")
+      active_box_shadow = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('box-shadow');")
 
       page.driver.browser.action.release(toggle.native)
                                 .move_by(100, 100)
                                 .perform
 
-      find('.mini-pipeline-graph-dropdown-toggle')
-      focus_background_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('background-color');")
-      focus_foreground_color = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible svg').css('fill');")
-      focus_box_shadow = evaluate_script("$('.mini-pipeline-graph-dropdown-toggle:visible').css('box-shadow');")
+      find(dropdown_toggle_selector)
+      focus_background_color = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('background-color');")
+      focus_foreground_color = evaluate_script("$('#{dropdown_toggle_selector}:visible svg').css('fill');")
+      focus_box_shadow = evaluate_script("$('#{dropdown_toggle_selector}:visible').css('box-shadow');")
 
       expect(default_background_color).not_to eq(hover_background_color)
       expect(hover_background_color).not_to eq(active_background_color)
@@ -112,8 +114,8 @@ RSpec.describe 'Merge request < User sees mini pipeline graph', :js do
 
   describe 'builds list menu' do
     let(:toggle) do
-      find('.mini-pipeline-graph-dropdown-toggle')
-      first('.mini-pipeline-graph-dropdown-toggle')
+      find(dropdown_toggle_selector)
+      first(dropdown_toggle_selector)
     end
 
     before do

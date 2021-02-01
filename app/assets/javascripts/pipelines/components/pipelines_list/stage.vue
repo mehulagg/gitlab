@@ -161,6 +161,7 @@ export default {
       :class="triggerButtonClass"
       :title="stage.title"
       class="mini-pipeline-graph-dropdown-toggle js-builds-dropdown-button"
+      data-testid="mini-pipeline-graph-dropdown-toggle"
       data-toggle="dropdown"
       data-display="static"
       type="button"
