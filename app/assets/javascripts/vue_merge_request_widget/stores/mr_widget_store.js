@@ -163,10 +163,15 @@ export default class MergeRequestStore {
 
   setGraphqlData(project) {
     const { mergeRequest } = project;
-    const pipeline = mergeRequest.pipelines?.nodes?.[0];
 
     this.projectArchived = project.archived;
     this.onlyAllowMergeIfPipelineSucceeds = project.onlyAllowMergeIfPipelineSucceeds;
+
+    this.setGraphqlMergeRequestData(mergeRequest);
+  }
+
+  setGraphqlMergeRequestData(mergeRequest) {
+    const pipeline = mergeRequest.pipelines?.nodes?.[0];
 
     this.autoMergeEnabled = mergeRequest.autoMergeEnabled;
     this.canBeMerged = mergeRequest.mergeStatus === 'can_be_merged';
@@ -182,6 +187,11 @@ export default class MergeRequestStore {
     this.isSHAMismatch = this.sha !== mergeRequest.diffHeadSha;
     this.shouldBeRebased = mergeRequest.shouldBeRebased;
     this.workInProgress = mergeRequest.workInProgress;
+    this.mergeRequestState = mergeRequest.state;
+
+    mrEventHub.$emit('mr.state.updated', {
+      state: this.mergeRequestState,
+    });
 
     this.setState();
   }

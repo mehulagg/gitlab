@@ -20,6 +20,8 @@ module MergeRequests
         merge_request.update_column(:merge_ref_sha, nil)
       end
 
+      GitlabSchema.subscriptions.trigger('mergeRequestUpdated', { project_path: merge_request.project.full_path, iid: merge_request.iid }, merge_request)
+
       merge_request
     end
 

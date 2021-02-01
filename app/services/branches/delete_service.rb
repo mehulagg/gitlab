@@ -4,6 +4,7 @@ module Branches
   class DeleteService < BaseService
     def execute(branch_name)
       repository = project.repository
+      merge_requests = project.merge_requests.opened.by_source_or_target_branch(branch_name)
       branch = repository.find_branch(branch_name)
 
       unless current_user.can?(:push_code, project)
@@ -20,6 +21,11 @@ module Branches
 
       if repository.rm_branch(current_user, branch_name)
         unlock_artifacts(branch_name)
+
+        merge_requests.each do |merge_request|
+          GitlabSchema.subscriptions.trigger('mergeRequestUpdated', { project_path: merge_request.project.full_path, iid: merge_request.iid }, merge_request)
+        end
+
         ServiceResponse.success(message: 'Branch was deleted')
       else
         ServiceResponse.error(

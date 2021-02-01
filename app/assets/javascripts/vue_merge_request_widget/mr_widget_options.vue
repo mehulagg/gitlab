@@ -46,6 +46,7 @@ import GroupedTestReportsApp from '../reports/components/grouped_test_reports_ap
 import { setFaviconOverlay } from '../lib/utils/favicon';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import getStateQuery from './queries/get_state.query.graphql';
+import getStateSubscription from './queries/get_state.subscription.graphql';
 
 export default {
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/25
@@ -94,7 +95,6 @@ export default {
     state: {
       query: getStateQuery,
       manual: true,
-      pollInterval: 10 * 1000,
       skip() {
         return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
       },
@@ -106,6 +106,18 @@ export default {
           this.mr.setGraphqlData(project);
           this.loading = false;
         }
+      },
+      subscribeToMore: {
+        document: getStateSubscription,
+        variables() {
+          return this.mergeRequestQueryVariables;
+        },
+        updateQuery(oldData, { subscriptionData: { data } }) {
+          this.mr.setGraphqlMergeRequestData(data?.mergeRequestUpdated);
+        },
+        skip() {
+          return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
+        },
       },
     },
   },

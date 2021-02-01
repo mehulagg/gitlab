@@ -25,6 +25,8 @@ module MergeRequests
         cleanup_refs(merge_request)
       end
 
+      GitlabSchema.subscriptions.trigger('mergeRequestUpdated', { project_path: merge_request.project.full_path, iid: merge_request.iid }, merge_request)
+
       merge_request
     end
 

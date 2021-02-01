@@ -89,6 +89,7 @@ module MergeRequests
 
     def after_update(issuable)
       issuable.cache_merge_request_closes_issues!(current_user)
+      GitlabSchema.subscriptions.trigger('mergeRequestUpdated', { project_path: issuable.project.full_path, iid: issuable.iid }, issuable)
     end
 
     private

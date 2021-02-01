@@ -1,0 +1,24 @@
+subscription state($projectPath: ID!, $iid: String!) {
+  mergeRequestUpdated(projectPath: $projectPath, iid: $iid) {
+    autoMergeEnabled
+    commitCount
+    conflicts
+    diffHeadSha
+    mergeError
+    mergeStatus
+    mergeableDiscussionsState
+    pipelines(first: 1) {
+      nodes {
+        status
+      }
+    }
+    shouldBeRebased
+    sourceBranchExists
+    state
+    targetBranchExists
+    userPermissions {
+      canMerge
+    }
+    workInProgress
+  }
+}
