@@ -513,6 +513,6 @@ gem 'webauthn', '~> 2.3'
 # IPAddress utilities
 gem 'ipaddress', '~> 0.8.3'
 
-group :engines, :test do
+group :engines do
   gem 'web_engine', path: 'engines/web_engine'
 end

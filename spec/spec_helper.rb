@@ -71,6 +71,9 @@ Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| requir
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
 quality_level = Quality::TestLevel.new
+test_web_engine = Gitlab::Utils.to_boolean(ENV['TEST_WEB_ENGINE'], default: false)
+
+require_relative('../engines/web_engine/spec/spec_helper') if test_web_engine
 
 RSpec.configure do |config|
   config.filter_run focus: true

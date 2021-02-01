@@ -7,7 +7,7 @@ module Epics
     def initialize(current_user, moving_object_id, params)
       @current_user = current_user
       @params = params
-      @moving_object = find_object(moving_object_id)&.sync
+      @moving_object = find_object(moving_object_id)
     end
 
     def execute
@@ -33,7 +33,7 @@ module Epics
     end
 
     def new_parent_different?
-      params[:new_parent_id] != GitlabSchema.id_from_object(moving_object.parent)
+      params[:new_parent_id] != moving_object.parent.to_global_id
     end
 
     def create_issuable_links(parent)
@@ -138,23 +138,29 @@ module Epics
     end
 
     def base_epic
-      @base_epic ||= find_object(params[:base_epic_id])&.sync
+      @base_epic ||= find_object(params[:base_epic_id])#&.sync
     end
 
     def adjacent_reference
       return unless params[:adjacent_reference_id]
 
-      @adjacent_reference ||= find_object(params[:adjacent_reference_id])&.sync
+      @adjacent_reference ||= find_object(params[:adjacent_reference_id])#&.sync
     end
 
     def new_parent
       return unless params[:new_parent_id]
 
-      @new_parent ||= find_object(params[:new_parent_id])&.sync
+      @new_parent ||= find_object(params[:new_parent_id])#&.sync
     end
 
     def find_object(id)
-      GitlabSchema.find_by_gid(id)
+      if id.model_class < ApplicationRecord
+        id.model_class.find(id.model_id)
+      elsif id.model_class.respond_to?(:lazy_find)
+        id.model_class.lazy_find(id.model_id)
+      else
+        id.find
+      end
     end
   end
 end

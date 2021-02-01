@@ -18,7 +18,8 @@ RSpec.describe BlobPresenter, :seed_helper do
   describe '.web_url' do
     let(:project) { create(:project, :repository) }
     let(:repository) { project.repository }
-    let(:blob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.tree.blobs.first, repository) }
+    let(:git_blob) { repository.tree.blobs.first }
+    let(:blob) { Blob.new(git_blob, project) }
 
     subject { described_class.new(blob) }
 
@@ -28,7 +29,8 @@ RSpec.describe BlobPresenter, :seed_helper do
   describe '#web_path' do
     let(:project) { create(:project, :repository) }
     let(:repository) { project.repository }
-    let(:blob) { Gitlab::Graphql::Representation::TreeEntry.new(repository.tree.blobs.first, repository) }
+    let(:git_blob) { repository.tree.blobs.first }
+    let(:blob) { Blob.new(git_blob, project) }
 
     subject { described_class.new(blob) }
 

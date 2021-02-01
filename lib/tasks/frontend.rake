@@ -4,6 +4,8 @@ unless Rails.env.production?
     RSpec::Core::RakeTask.new(:fixtures, [:pattern]) do |t, args|
       directories = %w[spec]
       directories << 'ee/spec' if Gitlab.ee?
+      test_web_engine = Gitlab::Utils.to_boolean(ENV['TEST_WEB_ENGINE'], default: false)
+      directories << 'engines/web_engine/spec' if test_web_engine
       directory_glob = "{#{directories.join(',')}}"
       args.with_defaults(pattern: "#{directory_glob}/frontend/fixtures/*.rb")
       ENV['NO_KNAPSACK'] = 'true'

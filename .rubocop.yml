@@ -47,6 +47,8 @@ Cop/StaticTranslationDefinition:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Lint/LastKeywordArgument:
   Enabled: true
@@ -116,6 +118,8 @@ Naming/FileName:
     - 'ee/lib/generators/**/*'
     - 'qa/qa/scenario/test/integration/ldap_no_tls.rb'
     - 'qa/qa/scenario/test/integration/ldap_tls.rb'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
   IgnoreExecutableScripts: true
   AllowedAcronyms:
@@ -203,6 +207,8 @@ Rails/FindBy:
     - 'ee/lib/**/*.rb'
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 # This is currently exiting with a rubocop exception error and should be
 # resolved hopefully a future update
@@ -242,6 +248,8 @@ Gitlab/HTTParty:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Gitlab/Json:
   Enabled: true
@@ -259,6 +267,8 @@ Gitlab/AvoidUploadedFileFromParams:
     - 'lib/gitlab/middleware/multipart.rb'
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 GitlabSecurity/PublicSend:
   Enabled: true
@@ -272,6 +282,8 @@ GitlabSecurity/PublicSend:
     - 'ee/db/**/*'
     - 'ee/lib/**/*.rake'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Gitlab/DuplicateSpecLocation:
   Enabled: true
@@ -287,6 +299,8 @@ Cop/InjectEnterpriseEditionModule:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Style/ReturnNil:
   Enabled: true
@@ -301,6 +315,8 @@ Cop/ActiveRecordAssociationReload:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Gitlab/AvoidFeatureGet:
   Enabled: true
@@ -312,6 +328,8 @@ RSpec/TimecopFreeze:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 RSpec/TimecopTravel:
   Enabled: true
@@ -320,12 +338,16 @@ RSpec/TimecopTravel:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 Naming/PredicateName:
   Enabled: true
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 RSpec/FactoriesInMigrationSpecs:
   Enabled: true
@@ -341,12 +363,16 @@ Cop/IncludeSidekiqWorker:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Gitlab/Union:
   Enabled: true
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 API/Base:
   Enabled: true
@@ -365,6 +391,8 @@ Cop/SidekiqOptionsQueue:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 Graphql/ResolverType:
   Enabled: true
@@ -382,6 +410,8 @@ Graphql/AuthorizeTypes:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 Graphql/GIDExpectedType:
   Enabled: true
@@ -391,6 +421,8 @@ Graphql/GIDExpectedType:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 Graphql/IDType:
   Enabled: true
@@ -406,12 +438,16 @@ Graphql/JSONType:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 RSpec/EnvAssignment:
   Enable: true
   Include:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/.rb*'
+    - 'engines/web_engine/ee/spec/**/*.rb'
   Exclude:
     - 'spec/**/fast_spec_helper.rb'
     - 'ee/spec/**/fast_spec_helper.rb'
@@ -499,6 +535,8 @@ RSpec/HaveGitlabHttpStatus:
   Include:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+    - 'engines/web_engine/spec/**/*'
+    - 'engines/web_engine/ee/spec/**/*'
 
 Style/MultilineWhenThen:
   Enabled: false
@@ -559,6 +597,8 @@ Rails/SaveBang:
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
     - 'qa/qa/specs/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 Cop/PutProjectRoutesUnderScope:
   Include:
@@ -590,6 +630,8 @@ Gitlab/RailsLogger:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+    - 'engines/web_engine/spec/**/*.rb'
+    - 'engines/web_engine/ee/spec/**/*.rb'
 
 # WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/267606
 FactoryBot/InlineAssociation:

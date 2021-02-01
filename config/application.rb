@@ -32,6 +32,10 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/runtime')
     require_dependency Rails.root.join('config/engines')
 
+    initializer 'append_routing_paths', after: :add_routing_paths do |app|
+      app.routes_reloader.paths.push(File.dirname(__FILE__) + "/routes/unmatched_route.rb")
+    end
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

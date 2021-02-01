@@ -1,3 +1,8 @@
+Rails.application.configure do |config|
+  # ApolloUploadServer::Middleware expects to find uploaded files ready to use
+  config.middleware.insert_after(Gitlab::Middleware::ReadOnly, Gitlab::Middleware::Multipart)
+end
+
 # The Gitlab::Middleware::Multipart middleware inserts instances of our
 # own ::UploadedFile class in the Rack env of requests. These instances
 # will be blocked by the 'strong parameters' feature of ActionController

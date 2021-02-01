@@ -227,7 +227,10 @@ RSpec.describe PageLayoutHelper do
 
     let(:user) { build(:user) }
 
-    availability_types = Types::AvailabilityEnum.enum
+    availability_types = {}.with_indifferent_access
+    ::UserStatus.availabilities.keys.each do |availability_value|
+      availability_types[availability_value.downcase] = availability_value
+    end
 
     where(:message, :emoji, :availability) do
       "Some message" | UserStatus::DEFAULT_EMOJI | availability_types[:busy]

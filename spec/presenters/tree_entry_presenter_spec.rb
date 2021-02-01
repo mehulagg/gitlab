@@ -7,7 +7,8 @@ RSpec.describe TreeEntryPresenter do
 
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
-  let(:tree) { Gitlab::Graphql::Representation::TreeEntry.new(repository.tree.trees.first, repository) }
+  let(:git_tree) { repository.tree.trees.first }
+  let(:tree) { Blob.new(git_tree, project) }
   let(:presenter) { described_class.new(tree) }
 
   describe '.web_url' do

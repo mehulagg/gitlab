@@ -31,7 +31,13 @@ module ProfilesHelper
   end
 
   def availability_values
-    Types::AvailabilityEnum.enum
+    @availability_values ||= begin
+                               enum = {}.with_indifferent_access
+                               ::UserStatus.availabilities.keys.each do |availability_value|
+                                 enum[availability_value.downcase] = availability_value
+                               end
+                               enum
+                             end
   end
 
   def user_status_set_to_busy?(status)

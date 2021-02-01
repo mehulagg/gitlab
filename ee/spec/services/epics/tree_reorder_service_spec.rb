@@ -18,12 +18,12 @@ RSpec.describe Epics::TreeReorderService do
     let(:relative_position) { 'after' }
     let!(:tree_object_1) { epic1 }
     let!(:tree_object_2) { epic2 }
-    let(:adjacent_reference_id) { GitlabSchema.id_from_object(tree_object_1) }
-    let(:moving_object_id) { GitlabSchema.id_from_object(tree_object_2) }
+    let(:adjacent_reference_id) { tree_object_1.to_global_id }
+    let(:moving_object_id) { tree_object_2.to_global_id }
     let(:new_parent_id) { nil }
     let(:params) do
       {
-        base_epic_id: GitlabSchema.id_from_object(epic),
+        base_epic_id: epic.to_global_id,
         adjacent_reference_id: adjacent_reference_id,
         relative_position: relative_position,
         new_parent_id: new_parent_id
@@ -82,7 +82,7 @@ RSpec.describe Epics::TreeReorderService do
           context 'when object being moved is not the same type as the switched object' do
             let!(:tree_object_3) { epic1 }
             let!(:tree_object_4) { epic2 }
-            let(:adjacent_reference_id) { GitlabSchema.id_from_object(epic2) }
+            let(:adjacent_reference_id) { epic2.to_global_id }
 
             it 'reorders the objects' do
               subject
@@ -93,7 +93,7 @@ RSpec.describe Epics::TreeReorderService do
 
           context 'when no object to switch is provided' do
             let(:adjacent_reference_id) { nil }
-            let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+            let(:new_parent_id) { epic.to_global_id }
 
             before do
               tree_object_2.update(epic: epic1)
@@ -120,13 +120,13 @@ RSpec.describe Epics::TreeReorderService do
 
             context 'when the new_parent_id does not match the parent of the relative positioning object' do
               let(:unrelated_epic) { create(:epic, group: group) }
-              let(:new_parent_id) { GitlabSchema.id_from_object(unrelated_epic) }
+              let(:new_parent_id) { unrelated_epic.to_global_id }
 
               it_behaves_like 'error for the tree update', "The sibling object's parent must match the new parent epic."
             end
 
             context 'when the new_parent_id matches the parent id of the relative positioning object' do
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               it 'reorders the objects' do
                 subject
@@ -137,13 +137,13 @@ RSpec.describe Epics::TreeReorderService do
           end
 
           context 'when object being moved is not supported type' do
-            let(:moving_object_id) { GitlabSchema.id_from_object(issue1) }
+            let(:moving_object_id) { issue1.to_global_id }
 
             it_behaves_like 'error for the tree update', 'Only epics and epic_issues are supported.'
           end
 
           context 'when adjacent object is not supported type' do
-            let(:adjacent_reference_id) { GitlabSchema.id_from_object(issue2) }
+            let(:adjacent_reference_id) { issue2.to_global_id }
 
             it_behaves_like 'error for the tree update', 'Only epics and epic_issues are supported.'
           end
@@ -151,7 +151,7 @@ RSpec.describe Epics::TreeReorderService do
           context 'when user does not have permissions to admin the previous parent' do
             let(:other_group) { create(:group) }
             let(:other_epic) { create(:epic, group: other_group) }
-            let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+            let(:new_parent_id) { epic.to_global_id }
 
             before do
               epic_issue2.update(parent: other_epic)
@@ -163,7 +163,7 @@ RSpec.describe Epics::TreeReorderService do
           context 'when user does not have permissions to admin the new parent' do
             let(:other_group) { create(:group) }
             let(:other_epic) { create(:epic, group: other_group) }
-            let(:new_parent_id) { GitlabSchema.id_from_object(other_epic) }
+            let(:new_parent_id) { other_epic.to_global_id }
 
             it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
           end
@@ -182,7 +182,7 @@ RSpec.describe Epics::TreeReorderService do
             end
 
             context 'when new_parent_id is provided' do
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
             end
@@ -196,7 +196,7 @@ RSpec.describe Epics::TreeReorderService do
             end
 
             context 'when a new_parent_id of a valid parent is provided' do
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               before do
                 epic_issue2.update(epic: epic1)
@@ -224,7 +224,7 @@ RSpec.describe Epics::TreeReorderService do
           let!(:tree_object_2) { epic2 }
 
           context 'when subepics feature is disabled' do
-            let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+            let(:new_parent_id) { epic.to_global_id }
 
             before do
               stub_licensed_features(epics: true, subepics: false)
@@ -241,7 +241,7 @@ RSpec.describe Epics::TreeReorderService do
             context 'when user does not have permissions to admin the previous parent' do
               let(:other_group) { create(:group) }
               let(:other_epic) { create(:epic, group: other_group) }
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               before do
                 epic2.update(parent: other_epic)
@@ -251,7 +251,7 @@ RSpec.describe Epics::TreeReorderService do
             end
 
             context 'when user does not have permissions to admin the previous parent links' do
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               before do
                 group.add_guest(user)
@@ -262,7 +262,7 @@ RSpec.describe Epics::TreeReorderService do
 
             context 'when there is some other error with the new parent' do
               let(:other_group) { create(:group) }
-              let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+              let(:new_parent_id) { epic.to_global_id }
 
               before do
                 other_group.add_developer(user)
@@ -276,7 +276,7 @@ RSpec.describe Epics::TreeReorderService do
             context 'when user does not have permissions to admin the new parent' do
               let(:other_group) { create(:group) }
               let(:other_epic) { create(:epic, group: other_group) }
-              let(:new_parent_id) { GitlabSchema.id_from_object(other_epic) }
+              let(:new_parent_id) { other_epic.to_global_id }
 
               it_behaves_like 'error for the tree update', 'You don\'t have permissions to move the objects.'
             end
@@ -303,7 +303,7 @@ RSpec.describe Epics::TreeReorderService do
               end
 
               context 'when new parent is current epic' do
-                let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+                let(:new_parent_id) { epic.to_global_id }
 
                 it 'updates the relative positions' do
                   subject
@@ -318,7 +318,7 @@ RSpec.describe Epics::TreeReorderService do
 
               context 'when object being moved is from another epic and new_parent_id matches parent of adjacent object' do
                 let(:other_epic) { create(:epic, group: group) }
-                let(:new_parent_id) { GitlabSchema.id_from_object(epic) }
+                let(:new_parent_id) { epic.to_global_id }
                 let(:epic3) { create(:epic, parent: other_epic, group: group) }
                 let(:tree_object_2) { epic3 }
 
