@@ -1056,7 +1056,7 @@ RSpec.describe ProjectsHelper do
     let(:page) { nil }
 
     let(:files) do
-      30.times.map do
+      Array.new(30).map do
         { too_large: false, diff: "" }
       end
     end
@@ -1100,7 +1100,17 @@ RSpec.describe ProjectsHelper do
     context "pagination is disabled" do
       let(:paginate) { false }
 
-      it "returns a thing" do
+      it "returns a standard DiffCollection" do
+        expect(subject).to be_a(Gitlab::Git::DiffCollection)
+      end
+    end
+
+    context "feature flag is disabled" do
+      let(:paginate) { true }
+
+      it "returns a standard DiffCollection" do
+        stub_feature_flags(paginate_commit_view: false)
+
         expect(subject).to be_a(Gitlab::Git::DiffCollection)
       end
     end

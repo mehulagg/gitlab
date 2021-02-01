@@ -377,7 +377,7 @@ module ProjectsHelper
   end
 
   def conditionally_paginate_diff_files(diffs, paginate:)
-    if paginate
+    if paginate && Feature.enabled?(:paginate_commit_view, type: :experiment)
       Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page])
     else
       diffs.diff_files
