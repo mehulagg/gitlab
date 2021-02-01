@@ -159,11 +159,7 @@ export default {
           <strong v-if="item.latestSnapshot">{{ item.name }}</strong>
           <template v-else>
             <span class="gl-text-gray-400">{{ item.name }}</span>
-            <gl-icon
-              v-gl-tooltip.hover="$options.i18n.pendingTooltip"
-              name="hourglass"
-              class="gl-text-gray-400"
-            />
+            <gl-icon name="hourglass" class="gl-text-gray-400" />
           </template>
         </div>
       </template>

@@ -1,5 +1,5 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
 import { makeEntities } from '../helpers';
 
 describe('DynamicFields component', () => {

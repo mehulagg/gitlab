@@ -17439,6 +17439,22 @@ CREATE SEQUENCE todos_id_seq
 
 ALTER SEQUENCE todos_id_seq OWNED BY todos.id;
 
+CREATE TABLE token_with_ivs (
+    id bigint NOT NULL,
+    hashed_token bytea NOT NULL,
+    hashed_plaintext_token bytea NOT NULL,
+    iv bytea NOT NULL
+);
+
+CREATE SEQUENCE token_with_ivs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE token_with_ivs_id_seq OWNED BY token_with_ivs.id;
+
 CREATE TABLE trending_projects (
     id integer NOT NULL,
     project_id integer NOT NULL
@@ -19161,6 +19177,8 @@ ALTER TABLE ONLY timelogs ALTER COLUMN id SET DEFAULT nextval('timelogs_id_seq':
 
 ALTER TABLE ONLY todos ALTER COLUMN id SET DEFAULT nextval('todos_id_seq'::regclass);
 
+ALTER TABLE ONLY token_with_ivs ALTER COLUMN id SET DEFAULT nextval('token_with_ivs_id_seq'::regclass);
+
 ALTER TABLE ONLY trending_projects ALTER COLUMN id SET DEFAULT nextval('trending_projects_id_seq'::regclass);
 
 ALTER TABLE ONLY u2f_registrations ALTER COLUMN id SET DEFAULT nextval('u2f_registrations_id_seq'::regclass);
@@ -20688,6 +20706,9 @@ ALTER TABLE ONLY timelogs
 
 ALTER TABLE ONLY todos
     ADD CONSTRAINT todos_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY token_with_ivs
+    ADD CONSTRAINT token_with_ivs_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY trending_projects
     ADD CONSTRAINT trending_projects_pkey PRIMARY KEY (id);
@@ -23224,6 +23245,10 @@ CREATE INDEX index_todos_on_user_id ON todos USING btree (user_id);
 CREATE INDEX index_todos_on_user_id_and_id_done ON todos USING btree (user_id, id) WHERE ((state)::text = 'done'::text);
 
 CREATE INDEX index_todos_on_user_id_and_id_pending ON todos USING btree (user_id, id) WHERE ((state)::text = 'pending'::text);
+
+CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_plaintext_token ON token_with_ivs USING btree (hashed_plaintext_token);
+
+CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_token ON token_with_ivs USING btree (hashed_token);
 
 CREATE UNIQUE INDEX index_trending_projects_on_project_id ON trending_projects USING btree (project_id);
 

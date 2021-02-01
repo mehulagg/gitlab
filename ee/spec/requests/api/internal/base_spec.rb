@@ -248,7 +248,7 @@ RSpec.describe API::Internal::Base do
       let_it_be(:project) { create(:project, :repository) }
 
       before do
-        stub_application_setting(maintenance_mode: true)
+        stub_maintenance_mode_setting(true)
 
         project.add_developer(user)
       end

@@ -6,8 +6,8 @@ import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import configureSastMutation from '../graphql/configure_sast.mutation.graphql';
 import AnalyzerConfiguration from './analyzer_configuration.vue';
-import DynamicFields from './dynamic_fields.vue';
-import ExpandableSection from './expandable_section.vue';
+import DynamicFields from '../../components/dynamic_fields.vue';
+import ExpandableSection from '../../components/expandable_section.vue';
 import {
   toSastCiConfigurationEntityInput,
   toSastCiConfigurationAnalyzerEntityInput,

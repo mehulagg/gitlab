@@ -1,11 +1,12 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormText, GlLink, GlSprintf } from '@gitlab/ui';
-import { CUSTOM_VALUE_MESSAGE, SCHEMA_TO_PROP_SIZE_MAP, LARGE } from './constants';
+import { GlFormGroup, GlDropdown, GlDropdownItem, GlFormText, GlLink, GlSprintf } from '@gitlab/ui';
+import { CUSTOM_VALUE_MESSAGE } from './constants';
 
 export default {
   components: {
     GlFormGroup,
-    GlFormInput,
+    GlDropdown,
+    GlDropdownItem,
     GlFormText,
     GlLink,
     GlSprintf,
@@ -25,19 +26,18 @@ export default {
     },
     defaultValue: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     field: {
       type: String,
       required: true,
     },
-    size: {
-      type: String,
-      required: false,
-      default: LARGE,
-      validator: (size) => Object.keys(SCHEMA_TO_PROP_SIZE_MAP).includes(size),
-    },
     label: {
+      type: String,
+      required: true,
+    },
+    defaultText: {
       type: String,
       required: true,
     },
@@ -50,18 +50,27 @@ export default {
       required: false,
       default: false,
     },
+    options: {
+      type: Array,
+      required: true,
+      validator: (options) =>
+        options.every(({ value, text }) => ![value, text].includes(undefined)),
+    },
   },
   computed: {
     showCustomValueMessage() {
-      return !this.disabled && this.value !== this.defaultValue;
+      return this.defaultValue !== null && !this.disabled && this.value !== this.defaultValue;
     },
-    inputSize() {
-      return SCHEMA_TO_PROP_SIZE_MAP[this.size];
+    text() {
+      return this.options.find((option) => option.value === this.value)?.text || this.defaultText;
     },
   },
   methods: {
     resetToDefaultValue() {
       this.$emit('input', this.defaultValue);
+    },
+    handleInput(option) {
+      this.$emit('input', option.value);
     },
   },
   i18n: {
@@ -77,13 +86,11 @@ export default {
       <gl-form-text class="gl-mt-3">{{ description }}</gl-form-text>
     </template>
 
-    <gl-form-input
-      :id="field"
-      :size="inputSize"
-      :value="value"
-      :disabled="disabled"
-      @input="$emit('input', $event)"
-    />
+    <gl-dropdown :id="field" :text="text" :disabled="disabled">
+      <gl-dropdown-item v-for="option in options" :key="option.value" @click="handleInput(option)">
+        {{ option.text }}
+      </gl-dropdown-item>
+    </gl-dropdown>
 
     <template v-if="showCustomValueMessage" #description>
       <gl-sprintf :message="$options.i18n.CUSTOM_VALUE_MESSAGE">

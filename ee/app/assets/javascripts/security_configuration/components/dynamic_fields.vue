@@ -1,6 +1,7 @@
 <script>
 import { GlFormGroup } from '@gitlab/ui';
 import FormInput from './form_input.vue';
+import DropdownInput from './dropdown_input.vue';
 import { isValidConfigurationEntity } from './utils';
 
 export default {
@@ -49,6 +50,7 @@ export default {
   // before the frontend adds support for them.
   entityTypeToComponent: {
     string: FormInput,
+    select: DropdownInput,
   },
 };
 </script>
