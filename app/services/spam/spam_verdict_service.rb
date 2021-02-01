@@ -69,17 +69,19 @@ module Spam
 
       project = target.try(:project)
 
+      emails = user.emails.map { |email| { email: email.email, verified: !email.confirmed_at.nil? } }
+
       {
-        target: {
-          title: target.spam_title,
-          description: target.spam_description,
-          type: target.class.to_s
-        },
         user: {
           created_at: user.created_at,
-          email: user.email,
-          username: user.username
+          username: user.username,
+          org: user.organization,
+          emails: emails
         },
+        title: target.spam_title,
+        description: target.spam_description,
+        created_at: target.created_at,
+        updated_at: target.updated_at,
         user_in_project: user.authorized_project?(project),
         action: context[:action] == 'create' ? 0 : 1
       }
