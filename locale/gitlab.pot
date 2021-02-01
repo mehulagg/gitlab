@@ -4605,9 +4605,6 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-msgid "Board"
-msgstr ""
-
 msgid "Board scope affects which issues are displayed for anyone who visits this board"
 msgstr ""
 
@@ -4660,6 +4657,9 @@ msgid "Boards|An error occurred while removing the list. Please try again."
 msgstr ""
 
 msgid "Boards|An error occurred while updating the list. Please try again."
+msgstr ""
+
+msgid "Boards|Board"
 msgstr ""
 
 msgid "Boards|Collapse"
