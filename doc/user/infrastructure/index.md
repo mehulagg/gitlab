@@ -39,6 +39,15 @@ This template also includes some opinionated decisions, which you can override:
   [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml)
   `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
 
+The following video shows a whole walk-through of GitLab's Terraform integration features as of January 2021
+
+<div class="video-fallback">
+  See the video: <a href="https://www.youtube.com/watch?v=iGXjUrkkzDI">Video title</a>.
+</div>
+<figure class="video-container">
+  <iframe src="https://www.youtube.com/embed/iGXjUrkkzDI" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
+
 ## GitLab Managed Terraform state
 
 [Terraform remote backends](https://www.terraform.io/docs/backends/index.html)
