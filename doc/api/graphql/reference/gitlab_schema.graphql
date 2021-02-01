@@ -20387,6 +20387,11 @@ type Query {
     dryRun: Boolean
 
     """
+    Whether or not to include merged CI config yaml in the response.
+    """
+    includeMergedYaml: Boolean
+
+    """
     The project of the CI config.
     """
     projectPath: ID!

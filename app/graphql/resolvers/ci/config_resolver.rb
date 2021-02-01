@@ -18,29 +18,35 @@ module Resolvers
                required: true,
                description: "Contents of '.gitlab-ci.yml'."
 
+      argument :include_merged_yaml, GraphQL::BOOLEAN_TYPE,
+               required: false,
+               description: 'Whether or not to include merged CI config yaml in the response.'
+
       argument :dry_run, GraphQL::BOOLEAN_TYPE,
                required: false,
                description: 'Run pipeline creation simulation, or only do static check.'
 
-      def resolve(project_path:, content:, dry_run: false)
+      def resolve(project_path:, content:, dry_run: false, include_merged_yaml: false)
         project = authorized_find!(project_path: project_path)
 
         result = ::Gitlab::Ci::Lint
           .new(project: project, current_user: context[:current_user])
           .validate(content, dry_run: dry_run)
 
-        if result.errors.empty?
-          {
-            status: :valid,
-            errors: [],
-            stages: make_stages(result.jobs)
-          }
-        else
-          {
-            status: :invalid,
-            errors: result.errors
-          }
-        end
+        response = if result.errors.empty?
+                     {
+                       status: :valid,
+                       errors: [],
+                       stages: make_stages(result.jobs)
+                     }
+                   else
+                     {
+                       status: :invalid,
+                       errors: result.errors
+                     }
+                   end
+
+        response.merge(merged_yaml: result.merged_yaml) if include_merged_yaml
       end
 
       private
