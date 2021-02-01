@@ -2,9 +2,8 @@
 import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
 
-import ListLabel from '../../models/label';
-
 import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
+import ListLabel from '../../models/label';
 
 export default {
   components: {

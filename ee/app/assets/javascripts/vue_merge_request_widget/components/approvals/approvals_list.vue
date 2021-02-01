@@ -5,8 +5,8 @@ import EmptyRuleName from 'ee/approvals/components/empty_rule_name.vue';
 import { RULE_TYPE_CODE_OWNER, RULE_TYPE_ANY_APPROVER } from 'ee/approvals/constants';
 import { sprintf, __, s__ } from '~/locale';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
-import ApprovedIcon from './approved_icon.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import ApprovedIcon from './approved_icon.vue';
 
 export default {
   components: {

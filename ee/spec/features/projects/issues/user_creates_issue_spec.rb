@@ -47,7 +47,7 @@ RSpec.describe "User creates issue", :js do
 
     it 'creates an issue with no epic' do
       click_button 'Select epic'
-      click_link('No Epic')
+      find('.gl-new-dropdown-item', text: 'No Epic').click
       click_button('Submit issue')
 
       wait_for_all_requests
@@ -61,7 +61,7 @@ RSpec.describe "User creates issue", :js do
 
     it 'credates an issue with an epic' do
       click_button 'Select epic'
-      click_link(epic.title)
+      find('.gl-new-dropdown-item', text: epic.title).click
       click_button('Submit issue')
 
       wait_for_all_requests

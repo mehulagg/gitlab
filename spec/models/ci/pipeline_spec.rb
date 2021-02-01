@@ -1996,13 +1996,34 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         is_expected.to be_falsey
       end
     end
+
+    context 'bridge which is allowed to fail fails' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns true' do
+        is_expected.to be_truthy
+      end
+    end
+
+    context 'bridge which is allowed to fail is successful' do
+      before do
+        create :ci_bridge, :allowed_to_fail, :success, pipeline: pipeline, name: 'rubocop'
+      end
+
+      it 'returns false' do
+        is_expected.to be_falsey
+      end
+    end
   end
 
   describe '#number_of_warnings' do
     it 'returns the number of warnings' do
       create(:ci_build, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
+      create(:ci_bridge, :allowed_to_fail, :failed, pipeline: pipeline, name: 'rubocop')
 
-      expect(pipeline.number_of_warnings).to eq(1)
+      expect(pipeline.number_of_warnings).to eq(2)
     end
 
     it 'supports eager loading of the number of warnings' do
@@ -2300,7 +2321,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
     context 'on waiting for resource' do
       before do
-        allow(build).to receive(:requires_resource?) { true }
+        allow(build).to receive(:with_resource_group?) { true }
         allow(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async)
 
         build.enqueue
@@ -3367,7 +3388,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
   describe '#batch_lookup_report_artifact_for_file_type' do
     context 'with code quality report artifact' do
-      let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
 
       it "returns the code quality artifact" do
         expect(pipeline.batch_lookup_report_artifact_for_file_type(:codequality)).to eq(pipeline.job_artifacts.sample)
@@ -3493,7 +3514,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     subject { pipeline.has_codequality_reports? }
 
     context 'when pipeline has a codequality artifact' do
-      let(:pipeline) { create(:ci_pipeline, :with_codequality_report_artifact, :running, project: project) }
+      let(:pipeline) { create(:ci_pipeline, :with_quality_report_artifact, :running, project: project) }
 
       it { expect(subject).to be_truthy }
     end

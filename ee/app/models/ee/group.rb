@@ -14,6 +14,7 @@ module EE
       include InsightsFeature
       include HasTimelogsReport
       include HasWiki
+      include CanMoveRepositoryStorage
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
@@ -49,6 +50,7 @@ module EE
       has_one :deletion_schedule, class_name: 'GroupDeletionSchedule'
       delegate :deleting_user, :marked_for_deletion_on, to: :deletion_schedule, allow_nil: true
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
+      delegate :repository_read_only, :repository_read_only?, to: :namespace_settings, allow_nil: true
 
       has_one :group_wiki_repository
       has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
@@ -455,6 +457,11 @@ module EE
       end
     end
 
+    override :git_transfer_in_progress?
+    def git_transfer_in_progress?
+      reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
+    end
+
     private
 
     def custom_project_templates_group_allowed
@@ -516,6 +523,18 @@ module EE
 
     def invited_or_shared_group_members(groups)
       ::GroupMember.active_without_invites_and_requests.where(source_id: ::Gitlab::ObjectHierarchy.new(groups).base_and_ancestors)
+    end
+
+    override :_safe_read_repository_read_only_column
+    def _safe_read_repository_read_only_column
+      ::NamespaceSetting.where(namespace: self).pick(:repository_read_only)
+    end
+
+    override :_update_repository_read_only_column
+    def _update_repository_read_only_column(value)
+      settings = namespace_settings || create_namespace_settings
+
+      settings.update_column(:repository_read_only, value)
     end
   end
 end

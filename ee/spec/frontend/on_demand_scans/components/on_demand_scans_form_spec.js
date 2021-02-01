@@ -12,9 +12,9 @@ import dastOnDemandScanCreateMutation from 'ee/on_demand_scans/graphql/dast_on_d
 import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
 import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 import { stubComponent } from 'helpers/stub_component';
+import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
 import * as responses from '../mocks/apollo_mocks';
 import { scannerProfiles, siteProfiles } from '../mocks/mock_data';
-import { redirectTo, setUrlParams } from '~/lib/utils/url_utility';
 
 const URL_HOST = 'https://localhost/';
 const helpPagePath = '/application_security/dast/index#on-demand-scans';

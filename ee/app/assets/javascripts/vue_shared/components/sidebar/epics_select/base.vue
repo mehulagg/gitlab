@@ -1,36 +1,41 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-
-import $ from 'jquery';
-import { GlLoadingIcon } from '@gitlab/ui';
-
+import {
+  GlLink,
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownItem,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
+import { debounce } from 'lodash';
 import { noneEpic } from 'ee/vue_shared/constants';
-import { __ } from '~/locale';
-
+import { __, s__ } from '~/locale';
 import createStore from './store';
-
-import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
+import { DropdownVariant, DATA_REFETCH_DELAY } from './constants';
 
-import DropdownButton from './dropdown_button.vue';
-import DropdownHeader from './dropdown_header.vue';
-import DropdownSearchInput from './dropdown_search_input.vue';
-import DropdownContents from './dropdown_contents.vue';
-
-import { DropdownVariant } from './constants';
+export const i18n = {
+  selectEpic: s__('Epics|Select epic'),
+  searchEpic: s__('Epics|Search epics'),
+  assignEpic: s__('Epics|Assign Epic'),
+  noMatch: __('No Matching Results'),
+};
 
 export default {
+  i18n,
+  noneEpic,
   store: createStore(),
   components: {
+    GlLink,
     GlLoadingIcon,
-    DropdownTitle,
+    GlDropdown,
+    GlDropdownDivider,
+    GlDropdownItem,
+    GlSearchBoxByType,
     DropdownValue,
     DropdownValueCollapsed,
-    DropdownButton,
-    DropdownHeader,
-    DropdownSearchInput,
-    DropdownContents,
   },
   props: {
     groupId: {
@@ -51,11 +56,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    blockTitle: {
-      type: String,
-      required: false,
-      default: __('Epic'),
-    },
     initialEpic: {
       type: Object,
       required: true,
@@ -72,12 +72,13 @@ export default {
     showHeader: {
       type: Boolean,
       required: false,
-      default: false,
+      default: true,
     },
   },
   data() {
     return {
-      showDropdown: this.variant === DropdownVariant.Standalone,
+      isDropdownShowing: false,
+      search: '',
     };
   },
   computed: {
@@ -89,11 +90,37 @@ export default {
       'selectedEpicIssueId',
     ]),
     ...mapGetters(['isDropdownVariantSidebar', 'isDropdownVariantStandalone', 'groupEpics']),
-    dropdownSelectInProgress() {
-      return this.initialEpicLoading || this.epicSelectInProgress;
-    },
     dropdownButtonTextClass() {
-      return { 'is-default': this.isDropdownVariantStandalone };
+      return {
+        'is-default': this.isDropdownVariantStandalone,
+        'dropdown-menu-toggle js-epic-select js-extra-options gl-py-3!': true,
+      };
+    },
+    dropDownTitle() {
+      return this.selectedEpic.title || this.$options.i18n.selectEpic;
+    },
+    dropdownClass() {
+      if (this.isDropdownVariantSidebar) {
+        return this.isDropdownShowing ? 'dropdown-menu-epics' : 'gl-display-none';
+      }
+
+      return 'dropdown-menu-epics';
+    },
+    dropdownHeaderText() {
+      if (this.showHeader) {
+        return this.$options.i18n.assignEpic;
+      }
+
+      return '';
+    },
+    isLoading() {
+      return this.epicsFetchInProgress || this.epicSelectInProgress || this.initialEpicLoading;
+    },
+    epicListValid() {
+      return this.groupEpics.length > 0 && !this.isLoading;
+    },
+    epicListNotValid() {
+      return this.groupEpics.length === 0 && !this.isLoading;
     },
   },
   watch: {
@@ -133,6 +160,9 @@ export default {
         this.fetchEpics();
       }
     },
+    search: debounce(function debouncedEpicSearch() {
+      this.setSearchQuery(this.search);
+    }, DATA_REFETCH_DELAY),
   },
   mounted() {
     this.setInitialData({
@@ -142,8 +172,6 @@ export default {
       selectedEpic: this.initialEpic,
       selectedEpicIssueId: this.epicIssueId,
     });
-    $(this.$refs.dropdown).on('shown.bs.dropdown', () => this.fetchEpics());
-    $(this.$refs.dropdown).on('hidden.bs.dropdown', this.handleDropdownHidden);
   },
   methods: {
     ...mapActions([
@@ -156,31 +184,29 @@ export default {
       'assignIssueToEpic',
       'removeIssueFromEpic',
     ]),
-    handleEditClick() {
-      this.showDropdown = true;
-
-      // Wait for component to render dropdown container
-      this.$nextTick(() => {
-        // We're not calling $.dropdown('show') to open
-        // dropdown and instead triggerring click on button
-        // so that clicking outside can make dropdown close
-        // additionally, this approach requires event trigger
-        // to be deferred so that it doesn't close
-        setTimeout(() => {
-          $(this.$refs.dropdownButton.$el).trigger('click');
-        });
-      });
-    },
-    handleDropdownHidden() {
-      this.showDropdown = this.isDropdownVariantStandalone;
-    },
     handleItemSelect(epic) {
-      if (this.selectedEpicIssueId && epic.id === noneEpic.id && epic.title === noneEpic.title) {
+      if (
+        this.selectedEpicIssueId &&
+        epic.id === this.$options.noneEpic.id &&
+        epic.title === this.$options.noneEpic.title
+      ) {
         this.removeIssueFromEpic(this.selectedEpic);
       } else if (this.issueId) {
         this.assignIssueToEpic(epic);
       } else {
         this.$emit('epicSelect', epic);
+      }
+    },
+    hideDropdown() {
+      this.isDropdownShowing = this.isDropdownVariantStandalone;
+    },
+    toggleFormDropdown() {
+      const { dropdown } = this.$refs.dropdown.$refs;
+      this.isDropdownShowing = !this.isDropdownShowing;
+
+      if (dropdown && this.isDropdownShowing) {
+        dropdown.show();
+        this.fetchEpics();
       }
     },
   },
@@ -189,44 +215,77 @@ export default {
 
 <template>
   <div class="js-epic-block" :class="{ 'block epic': isDropdownVariantSidebar }">
-    <dropdown-value-collapsed v-if="isDropdownVariantSidebar" :epic="selectedEpic" />
-    <dropdown-title
-      v-if="isDropdownVariantSidebar"
-      :can-edit="canEdit"
-      :block-title="blockTitle"
-      :is-loading="dropdownSelectInProgress"
-      @onClickEdit="handleEditClick"
-    />
-    <dropdown-value v-if="isDropdownVariantSidebar" v-show="!showDropdown" :epic="selectedEpic">
-      <slot></slot>
-    </dropdown-value>
-    <div
-      v-if="canEdit || isDropdownVariantStandalone"
-      v-show="showDropdown"
-      class="epic-dropdown-container"
-    >
-      <div ref="dropdown" class="dropdown">
-        <dropdown-button
-          ref="dropdownButton"
-          :selected-epic-title="selectedEpic.title"
-          :toggle-text-class="dropdownButtonTextClass"
-        />
-        <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
-          <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
-          <dropdown-search-input @onSearchInput="setSearchQuery" />
-          <dropdown-contents
-            v-if="!epicsFetchInProgress"
-            :epics="groupEpics"
-            :selected-epic="selectedEpic"
-            @onItemSelect="handleItemSelect"
-          />
-          <gl-loading-icon
-            v-if="epicsFetchInProgress"
-            class="dropdown-contents-loading"
-            size="md"
-          />
-        </div>
-      </div>
+    <div class="hide-collapsed epic-dropdown-container">
+      <p
+        v-if="isDropdownVariantSidebar"
+        class="title gl-display-flex gl-justify-content-space-between"
+      >
+        <span>
+          {{ __('Epic')
+          }}<gl-loading-icon v-if="epicSelectInProgress" class="gl-ml-2" :inline="true"
+        /></span>
+
+        <gl-link
+          v-if="canEdit"
+          ref="editButton"
+          class="sidebar-dropdown-toggle"
+          href="#"
+          @click="toggleFormDropdown"
+          @keydown.esc="hideDropdown"
+        >
+          {{ __('Edit') }}
+        </gl-link>
+      </p>
+
+      <gl-dropdown
+        v-if="canEdit || isDropdownVariantStandalone"
+        ref="dropdown"
+        :text="dropDownTitle"
+        class="gl-w-full"
+        :class="dropdownClass"
+        :toggle-class="dropdownButtonTextClass"
+        :header-text="dropdownHeaderText"
+        @keydown.esc.native="hideDropdown"
+        @hide="hideDropdown"
+        @toggle="toggleFormDropdown"
+      >
+        <template #header>
+          <gl-search-box-by-type v-model.trim="search" :placeholder="$options.i18n.searchEpic" />
+        </template>
+        <template v-if="epicListValid">
+          <gl-dropdown-item
+            :active="!selectedEpic"
+            active-class="is-active"
+            :is-check-item="true"
+            :is-checked="selectedEpic.id === $options.noneEpic.id"
+            @click="handleItemSelect($options.noneEpic)"
+          >
+            {{ __('No Epic') }}
+          </gl-dropdown-item>
+          <gl-dropdown-divider />
+          <gl-dropdown-item
+            v-for="epic in groupEpics"
+            :key="epic.id"
+            :active="selectedEpic.id === epic.id"
+            active-class="is-active"
+            :is-check-item="true"
+            :is-checked="selectedEpic.id === epic.id"
+            @click="handleItemSelect(epic)"
+            >{{ epic.title }}</gl-dropdown-item
+          >
+        </template>
+        <p v-else-if="epicListNotValid" class="gl-mx-5 gl-my-4">
+          {{ $options.i18n.noMatch }}
+        </p>
+        <gl-loading-icon v-else />
+      </gl-dropdown>
+    </div>
+
+    <div v-if="isDropdownVariantSidebar && !isDropdownShowing">
+      <dropdown-value-collapsed :epic="selectedEpic" />
+      <dropdown-value :epic="selectedEpic">
+        <slot></slot>
+      </dropdown-value>
     </div>
   </div>
 </template>

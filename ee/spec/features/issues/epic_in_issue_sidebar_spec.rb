@@ -16,6 +16,7 @@ RSpec.describe 'Epic in issue sidebar', :js do
     context 'projects within a group' do
       before do
         group.add_owner(user)
+        sign_in user
         visit project_issue_path(project, issue)
       end
 
@@ -34,7 +35,7 @@ RSpec.describe 'Epic in issue sidebar', :js do
           wait_for_requests
 
           expect(page).to have_selector('.js-epic-select', visible: true)
-          expect(page.all('.dropdown-content li a').length).to eq(4) # `No Epic` + 3 epics
+          expect(page.all('.gl-new-dropdown-contents .gl-new-dropdown-item').length).to eq(4) # `No Epic` + 3 epics
         end
       end
 
@@ -44,11 +45,11 @@ RSpec.describe 'Epic in issue sidebar', :js do
 
           wait_for_requests
 
-          page.find('.dropdown-input-field').send_keys('Foo')
+          page.find('.gl-form-input').send_keys('Foo')
 
           wait_for_requests
 
-          expect(page).to have_selector('.dropdown-content li a', count: 2) # `No Epic` + 1 matching epic
+          expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 2) # `No Epic` + 1 matching epic
         end
       end
 
@@ -58,7 +59,7 @@ RSpec.describe 'Epic in issue sidebar', :js do
 
           wait_for_requests
 
-          click_link epic2.title
+          find('.gl-new-dropdown-item', text: epic2.title).click
 
           wait_for_requests
 

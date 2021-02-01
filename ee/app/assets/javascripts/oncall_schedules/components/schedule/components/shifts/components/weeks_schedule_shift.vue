@@ -1,8 +1,7 @@
 <script>
 import RotationAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
 import { DAYS_IN_WEEK, DAYS_IN_DATE_WEEK, ASSIGNEE_SPACER } from 'ee/oncall_schedules/constants';
-import { getOverlapDateInPeriods } from '~/lib/utils/datetime_utility';
-import { incrementDateByDays } from '../../../utils';
+import { getOverlapDateInPeriods, nDaysAfter } from '~/lib/utils/datetime_utility';
 
 export default {
   components: {
@@ -36,7 +35,7 @@ export default {
   },
   computed: {
     currentTimeframeEndsAt() {
-      return incrementDateByDays(this.timeframeItem, DAYS_IN_DATE_WEEK);
+      return new Date(nDaysAfter(this.timeframeItem, DAYS_IN_DATE_WEEK));
     },
     daysUntilEndOfTimeFrame() {
       return (
@@ -49,18 +48,18 @@ export default {
       const startDate = this.shiftStartsAt.getDay();
       const firstDayOfWeek = this.timeframeItem.getDay();
       const isFirstCell = startDate === firstDayOfWeek;
-      const left =
-        isFirstCell || this.shiftStartDateOutOfRange
-          ? '0px'
-          : `${
-              (DAYS_IN_WEEK - this.daysUntilEndOfTimeFrame) * this.shiftTimeUnitWidth +
-              ASSIGNEE_SPACER
-            }px`;
-      const width = `${this.shiftTimeUnitWidth * this.shiftWidth}px`;
+      let left = 0;
+
+      if (!(isFirstCell || this.shiftStartDateOutOfRange)) {
+        left =
+          (DAYS_IN_WEEK - this.daysUntilEndOfTimeFrame) * this.shiftTimeUnitWidth + ASSIGNEE_SPACER;
+      }
+
+      const width = this.shiftTimeUnitWidth * this.shiftWidth;
 
       return {
-        left,
-        width,
+        left: `${left}px`,
+        width: `${width}px`,
       };
     },
     shiftStartsAt() {
@@ -111,7 +110,7 @@ export default {
       return getOverlapDateInPeriods(
         {
           start: this.timeframeItem,
-          end: incrementDateByDays(this.timeFrameEndsAt, DAYS_IN_DATE_WEEK),
+          end: nDaysAfter(this.timeFrameEndsAt, DAYS_IN_DATE_WEEK),
         },
         { start: this.shiftStartsAt, end: this.shiftEndsAt },
       );

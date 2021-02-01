@@ -2,11 +2,11 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlAlert } from '@gitlab/ui';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
-import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
 import { s__, sprintf, __ } from '~/locale';
 import { formattedDate } from '../../shared/utils';
 import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
+import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
+import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
 
 export default {
   name: 'TypeOfWorkCharts',

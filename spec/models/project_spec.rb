@@ -21,6 +21,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:services) }
     it { is_expected.to have_many(:events) }
     it { is_expected.to have_many(:merge_requests) }
+    it { is_expected.to have_many(:merge_request_metrics).class_name('MergeRequest::Metrics') }
     it { is_expected.to have_many(:issues) }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:iterations) }
@@ -2246,8 +2247,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#ci_config_path=' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build_stubbed(:project) }
 
     where(:default_ci_config_path, :project_ci_config_path, :expected_ci_config_path) do
@@ -3946,7 +3945,6 @@ RSpec.describe Project, factory_default: :keep do
   describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
-    using RSpec::Parameterized::TableSyntax
 
     let_it_be(:group) { create(:group) }
     let!(:project) { create(:project, project_level, namespace: group ) }
@@ -4196,8 +4194,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
@@ -5821,8 +5817,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'validation #changing_shared_runners_enabled_is_allowed' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
       'enabled'                    | true  | true
       'enabled'                    | false | true
@@ -6045,8 +6039,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#closest_setting' do
-    using RSpec::Parameterized::TableSyntax
-
     shared_examples_for 'fetching closest setting' do
       let!(:namespace) { create(:namespace) }
       let!(:project) { create(:project, namespace: namespace) }

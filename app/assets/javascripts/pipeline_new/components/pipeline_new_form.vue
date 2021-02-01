@@ -22,9 +22,9 @@ import * as Sentry from '~/sentry/wrapper';
 import { s__, __, n__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
 import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
 
 export default {
   typeOptions: [
@@ -251,10 +251,6 @@ export default {
       return index < this.variables.length - 1;
     },
     fetchConfigVariables(refValue) {
-      if (!gon?.features?.newPipelineFormPrefilledVars) {
-        return Promise.resolve({ params: {}, descriptions: {} });
-      }
-
       this.isLoading = true;
 
       return backOff((next, stop) => {

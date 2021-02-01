@@ -8,6 +8,8 @@ RSpec.describe 'Projects > Members > Member is removed from project' do
   let(:other_user) { create(:user) }
 
   before do
+    stub_feature_flags(vue_project_members_list: false)
+
     project.add_maintainer(user)
     project.add_maintainer(other_user)
     sign_in(user)

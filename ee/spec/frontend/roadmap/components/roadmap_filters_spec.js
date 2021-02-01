@@ -26,8 +26,8 @@ const createComponent = ({
   presetType = PRESET_TYPES.MONTHS,
   epicsState = EPICS_STATES.ALL,
   sortedBy = mockSortedBy,
-  fullPath = 'gitlab-org',
-  groupLabelsEndpoint = '/groups/gitlab-org/-/labels.json',
+  groupFullPath = 'gitlab-org',
+  groupMilestonesPath = '/groups/gitlab-org/-/milestones.json',
   timeframe = getTimeframeForMonthsView(mockTimeframeInitialDate),
   filterParams = {},
 } = {}) => {
@@ -40,8 +40,6 @@ const createComponent = ({
     presetType,
     epicsState,
     sortedBy,
-    fullPath,
-    groupLabelsEndpoint,
     filterParams,
     timeframe,
   });
@@ -49,6 +47,10 @@ const createComponent = ({
   return shallowMount(RoadmapFilters, {
     localVue,
     store,
+    provide: {
+      groupFullPath,
+      groupMilestonesPath,
+    },
   });
 };
 
@@ -81,8 +83,8 @@ describe('RoadmapFilters', () => {
     });
   });
 
-  describe('methods', () => {
-    describe('updateUrl', () => {
+  describe('watch', () => {
+    describe('urlParams', () => {
       it('updates window URL based on presence of props for state, filtered search and sort criteria', async () => {
         wrapper.vm.$store.dispatch('setEpicsState', EPICS_STATES.CLOSED);
         wrapper.vm.$store.dispatch('setFilterParams', {
@@ -95,10 +97,8 @@ describe('RoadmapFilters', () => {
 
         await wrapper.vm.$nextTick();
 
-        wrapper.vm.updateUrl();
-
         expect(global.window.location.href).toBe(
-          `${TEST_HOST}/?state=${EPICS_STATES.CLOSED}&sort=end_date_asc&author_username=root&milestone_title=4.0&label_name%5B%5D=Bug&confidential=true`,
+          `${TEST_HOST}/?state=${EPICS_STATES.CLOSED}&sort=end_date_asc&author_username=root&label_name%5B%5D=Bug&milestone_title=4.0&confidential=true`,
         );
       });
     });
@@ -145,12 +145,12 @@ describe('RoadmapFilters', () => {
           value: { data: 'root' },
         },
         {
-          type: 'milestone_title',
-          value: { data: '4.0' },
-        },
-        {
           type: 'label_name',
           value: { data: 'Bug' },
+        },
+        {
+          type: 'milestone_title',
+          value: { data: '4.0' },
         },
         {
           type: 'confidential',
@@ -253,7 +253,6 @@ describe('RoadmapFilters', () => {
       it('fetches filtered epics when `onFilter` event is emitted', async () => {
         jest.spyOn(wrapper.vm, 'setFilterParams');
         jest.spyOn(wrapper.vm, 'fetchEpics');
-        jest.spyOn(wrapper.vm, 'updateUrl');
 
         await wrapper.vm.$nextTick();
 
@@ -268,13 +267,11 @@ describe('RoadmapFilters', () => {
           confidential: true,
         });
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
-        expect(wrapper.vm.updateUrl).toHaveBeenCalled();
       });
 
       it('fetches epics with updated sort order when `onSort` event is emitted', async () => {
         jest.spyOn(wrapper.vm, 'setSortedBy');
         jest.spyOn(wrapper.vm, 'fetchEpics');
-        jest.spyOn(wrapper.vm, 'updateUrl');
 
         await wrapper.vm.$nextTick();
 
@@ -284,7 +281,6 @@ describe('RoadmapFilters', () => {
 
         expect(wrapper.vm.setSortedBy).toHaveBeenCalledWith('end_date_asc');
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
-        expect(wrapper.vm.updateUrl).toHaveBeenCalled();
       });
     });
   });

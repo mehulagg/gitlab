@@ -32,7 +32,7 @@ export default (startDate = null, endDate = null) => {
         milestoneTitle: $milestoneTitle,
         sourceBranches: $sourceBranches,
         targetBranches: $targetBranches
-      ) { count }
+      ) { count, totalTimeToMerge }
     `;
   });
 

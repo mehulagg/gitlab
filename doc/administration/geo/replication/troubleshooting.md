@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: howto
 ---
 
-# Troubleshooting Geo **(PREMIUM ONLY)**
+# Troubleshooting Geo **(PREMIUM SELF)**
 
 Setting up Geo requires careful attention to details and sometimes it's easy to
 miss a step.
@@ -677,6 +677,20 @@ sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
 ```
 
 GitLab 12.9 and later are [unaffected by this error](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5147).
+
+### Message: `ERROR - Replication is not up-to-date` during `gitlab-ctl promotion-preflight-checks`
+
+In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+this command reports `ERROR - Replication is not up-to-date` even if
+replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
+later.
+
+### Message: `ERROR - Replication is not up-to-date` during `gitlab-ctl promote-to-primary-node`
+
+In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+this command reports `ERROR - Replication is not up-to-date` even if
+replication is actually up-to-date. If replication and verification output
+shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
 ## Expired artifacts
 

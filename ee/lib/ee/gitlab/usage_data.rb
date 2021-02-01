@@ -436,10 +436,20 @@ module EE
                            .where('security_scans.scan_type = ?', scan_type)
                            .where(security_scans: time_period)
 
-              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] =
+              metric_name = "#{name}_pipeline"
+              aggregated_metrics_params = {
+                metric_name: metric_name,
+                recorded_at_timestamp: recorded_at,
+                time_period: time_period
+              }
+
+              pipelines_with_secure_jobs[metric_name.to_sym] =
                 if start_id && finish_id
-                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id)
+                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
+                    save_aggregated_metrics(aggregated_metrics_params.merge(data: result))
+                  end
                 else
+                  save_aggregated_metrics(aggregated_metrics_params.merge(data: ::Gitlab::Database::PostgresHll::Buckets.new))
                   0
                 end
             end
@@ -500,29 +510,29 @@ module EE
         def merge_requests_with_overridden_project_rules(time_period = nil)
           sql =
             <<~SQL
-          (EXISTS (
-            SELECT
-              1
-            FROM
-              approval_merge_request_rule_sources
-            WHERE
-              approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
-              AND NOT EXISTS (
+              (EXISTS (
                 SELECT
                   1
                 FROM
-                  approval_project_rules
+                  approval_merge_request_rule_sources
                 WHERE
-                  approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
-                  AND EXISTS (
+                  approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
+                  AND NOT EXISTS (
                     SELECT
                       1
                     FROM
-                      projects
+                      approval_project_rules
                     WHERE
-                      projects.id = approval_project_rules.project_id
-                      AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
-              OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
+                      approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
+                      AND EXISTS (
+                        SELECT
+                          1
+                        FROM
+                          projects
+                        WHERE
+                          projects.id = approval_project_rules.project_id
+                          AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
+                  OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
             SQL
 
           distinct_count(

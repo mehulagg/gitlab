@@ -4,9 +4,9 @@ import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import DueDateSelectors from '~/due_date_select';
 import createIteration from '../queries/create_iteration.mutation.graphql';
 import updateIteration from '../queries/update_iteration.mutation.graphql';
-import DueDateSelectors from '~/due_date_select';
 
 export default {
   components: {

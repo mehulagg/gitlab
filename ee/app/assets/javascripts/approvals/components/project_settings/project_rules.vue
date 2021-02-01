@@ -3,9 +3,9 @@ import { mapState, mapActions } from 'vuex';
 import RuleName from 'ee/approvals/components/rule_name.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { n__, sprintf } from '~/locale';
+import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR } from '../../constants';
 
-import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import Rules from '../rules.vue';
 import RuleControls from '../rule_controls.vue';
 import EmptyRule from '../empty_rule.vue';

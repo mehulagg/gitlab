@@ -21,7 +21,7 @@ Contributions are welcome.
 For a list of the available resources and their endpoints, see
 [API resources](api_resources.md).
 
-## SCIM **(SILVER ONLY)**
+## SCIM **(PREMIUM SAAS)**
 
 GitLab provides an [SCIM API](scim.md) that both implements
 [the RFC7644 protocol](https://tools.ietf.org/html/rfc7644) and provides the
@@ -124,7 +124,7 @@ There are several methods you can use to authenticate with the GitLab API:
 - [GitLab CI/CD job token](#gitlab-ci-job-token) **(Specific endpoints only)**
 
 NOTE:
-Project access tokens are supported for self-managed instances on Core and
+Project access tokens are supported for self-managed instances on Free and
 higher. They're also supported on GitLab.com Bronze and higher.
 
 For administrators who want to authenticate with the API as a specific user, or who want
@@ -207,7 +207,7 @@ to authenticate with the API:
   - [Go Proxy](../user/packages/go_proxy/index.md)
   - [Maven Repository](../user/packages/maven_repository/index.md#authenticate-with-a-ci-job-token-in-maven)
   - [NPM Repository](../user/packages/npm_registry/index.md#authenticate-with-a-ci-job-token)
-  - [Nuget Repository](../user/packages/nuget_repository/index.md)
+  - [NuGet Repository](../user/packages/nuget_repository/index.md)
   - [PyPI Repository](../user/packages/pypi_repository/index.md#authenticate-with-a-ci-job-token)
   - [Generic packages](../user/packages/generic_packages/index.md#publish-a-generic-package-by-using-cicd)
 - [Get job artifacts](job_artifacts.md#get-job-artifacts)

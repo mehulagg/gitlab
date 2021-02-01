@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Although GitLab has discontinued selling the Bronze and Starter tiers, GitLab
 continues to honor the entitlements of existing Bronze and Starter tier GitLab
 customers for the duration of their contracts at that level.
-​
+
 These features remain available to Bronze and Starter customers, even though
 the tiers are no longer mentioned in GitLab documentation:
 
@@ -49,7 +49,7 @@ the tiers are no longer mentioned in GitLab documentation:
   - Syncing information through LDAP:
     - Groups: [one group](../administration/auth/ldap/ldap-troubleshooting.md#sync-one-group),
       [all groups programmatically](../administration/auth/ldap/index.md#group-sync),
-      [group sync schedule](../administration/auth/ldap/index.md#adjusting-ldap-group-sync-schedule),
+      [group sync schedule](../administration/auth/ldap/index.md#adjusting-ldap-group-sync-schedule), and
       [all groups manually](../administration/auth/ldap/ldap-troubleshooting.md#sync-all-groups)
     - [Configuration settings](../administration/auth/ldap/index.md#ldap-sync-configuration-settings)
     - Users: [all users](../administration/auth/ldap/index.md#user-sync),
@@ -63,6 +63,7 @@ the tiers are no longer mentioned in GitLab documentation:
   - [`audit_json.log`](../administration/logs.md#audit_jsonlog) (specific entries)
   - [`elasticsearch.log`](../administration/logs.md#elasticsearchlog)
 - Merge requests:
+  - [Full code quality reports in the code quality tab](../user/project/merge_requests/code_quality.md#code-quality-reports)
   - [Merge request approvals](../user/project/merge_requests/merge_request_approvals.md)
   - [Multiple assignees](../user/project/merge_requests/getting_started.md#multiple-assignees)
   - [Approval Rule information for Reviewers](../user/project/merge_requests/getting_started.md#approval-rule-information-for-reviewers), and [enabling or disabling it](../user/project/merge_requests/getting_started.md#enable-or-disable-approval-rule-information-for-reviewers)
@@ -70,6 +71,7 @@ the tiers are no longer mentioned in GitLab documentation:
   - [Code Owners as eligible approvers](../user/project/merge_requests/merge_request_approvals.md#code-owners-as-eligible-approvers)
   - All [Approval rules](../user/project/merge_requests/merge_request_approvals.md#approval-rules) features
   - [Restricting push and merge access to certain users](../user/project/protected_branches.md#restricting-push-and-merge-access-to-certain-users)
+  - [Visual Reviews](../ci/review_apps/index.md#visual-reviews)
 - Metrics and analytics:
   - [Contribution Analytics](../user/group/contribution_analytics/index.md)
   - [Merge Request Analytics](../user/analytics/merge_request_analytics.md)
@@ -108,7 +110,7 @@ the tiers are no longer mentioned in GitLab documentation:
   - [Advanced Global Search (Elasticsearch)](../user/search/advanced_global_search.md)
   - [Advanced Search Syntax](../user/search/advanced_search_syntax.md)
 - [Service Desk](../user/project/service_desk.md)
-- [Storage usage statistics](../user/usage_quotas.md#storage-usage-statistics-bronze-only)
+- [Storage usage statistics](../user/usage_quotas.md#storage-usage-statistics)
 
 The following developer features continue to be available to Starter and
 Bronze-level subscribers:
@@ -132,5 +134,6 @@ Bronze-level subscribers:
   - Fields in the [Merge requests API](../api/merge_requests.md) for [merge request approvals](../user/project/merge_requests/merge_request_approvals.md)
   - Fields in the [Protected branches API](../api/protected_branches.md) that specify users or groups allowed to merge
   - [Merge request approvals API](../api/merge_request_approvals.md)
+  - [Visual review discussions API](../api/visual_review_discussions.md)
 - Development information:
   - [Run Jenkins in a macOS development environment](../development/integrations/jenkins.md)

@@ -6,8 +6,10 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
+import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 import CiLint from './components/lint/ci_lint.vue';
 import CommitForm from './components/commit/commit_form.vue';
+import ConfirmUnsavedChangesDialog from './components/ui/confirm_unsaved_changes_dialog.vue';
 import EditorTab from './components/ui/editor_tab.vue';
 import TextEditor from './components/text_editor.vue';
 import ValidationSegment from './components/info/validation_segment.vue';
@@ -15,7 +17,6 @@ import ValidationSegment from './components/info/validation_segment.vue';
 import commitCiFileMutation from './graphql/mutations/commit_ci_file.mutation.graphql';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
-import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
 
 const MR_SOURCE_BRANCH = 'merge_request[source_branch]';
 const MR_TARGET_BRANCH = 'merge_request[target_branch]';
@@ -30,6 +31,7 @@ export default {
   components: {
     CiLint,
     CommitForm,
+    ConfirmUnsavedChangesDialog,
     EditorTab,
     GlAlert,
     GlLoadingIcon,
@@ -66,6 +68,7 @@ export default {
       ciConfigData: {},
       content: '',
       contentModel: '',
+      lastCommittedContent: '',
       lastCommitSha: this.commitSha,
       isSaving: false,
 
@@ -88,7 +91,9 @@ export default {
         };
       },
       update(data) {
-        return data?.blobContent?.rawData;
+        const content = data?.blobContent?.rawData;
+        this.lastCommittedContent = content;
+        return content;
       },
       result({ data }) {
         this.contentModel = data?.blobContent?.rawData ?? '';
@@ -122,6 +127,9 @@ export default {
     },
   },
   computed: {
+    hasUnsavedChanges() {
+      return this.lastCommittedContent !== this.contentModel;
+    },
     isBlobContentLoading() {
       return this.$apollo.queries.content.loading;
     },
@@ -264,6 +272,7 @@ export default {
 
           // Update latest commit
           this.lastCommitSha = commit.sha;
+          this.lastCommittedContent = this.contentModel;
         }
       } catch (error) {
         this.reportFailure(COMMIT_FAILURE, [error?.message]);
@@ -342,5 +351,6 @@ export default {
         @submit="onCommitSubmit"
       />
     </div>
+    <confirm-unsaved-changes-dialog :has-unsaved-changes="hasUnsavedChanges" />
   </div>
 </template>

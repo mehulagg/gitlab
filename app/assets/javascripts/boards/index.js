@@ -3,6 +3,7 @@ import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
+import VueApollo from 'vue-apollo';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
 import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
@@ -15,7 +16,6 @@ import {
   getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
 
-import VueApollo from 'vue-apollo';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
 import createDefaultClient from '~/lib/graphql';
@@ -73,6 +73,7 @@ export default () => {
     boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
   }
 
+  // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,
     components: {
@@ -275,7 +276,7 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
     data: {

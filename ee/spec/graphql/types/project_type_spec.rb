@@ -218,7 +218,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       end
       frameworks = results.flat_map(&:to_a)
 
-      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_frameworks))
+      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_framework))
     end
   end
 

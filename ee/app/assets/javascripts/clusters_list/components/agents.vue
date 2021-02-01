@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
-import AgentEmptyState from './agent_empty_state.vue';
-import AgentTable from './agent_table.vue';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 import { MAX_LIST_COUNT } from '../constants';
+import AgentEmptyState from './agent_empty_state.vue';
+import AgentTable from './agent_table.vue';
 
 export default {
   apollo: {

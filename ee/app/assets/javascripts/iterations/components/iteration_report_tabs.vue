@@ -2,10 +2,10 @@
 import { GlBadge, GlFormSelect, GlTab, GlTabs } from '@gitlab/ui';
 import { differenceBy, unionBy } from 'lodash';
 import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
-import { GroupBy, Namespace } from '../constants';
 import { DropdownVariant } from '~/vue_shared/components/sidebar/labels_select_vue/constants';
-import IterationReportIssues from './iteration_report_issues.vue';
 import { __ } from '~/locale';
+import { GroupBy, Namespace } from '../constants';
+import IterationReportIssues from './iteration_report_issues.vue';
 
 export default {
   selectOptions: [

@@ -17,12 +17,11 @@ import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import ItemDueDate from '~/boards/components/issue_due_date.vue';
 
+import { ChildType, ChildState, itemRemoveModalId } from '../constants';
 import EpicHealthStatus from './epic_health_status.vue';
 import IssueHealthStatus from './issue_health_status.vue';
 
 import StateTooltip from './state_tooltip.vue';
-
-import { ChildType, ChildState, itemRemoveModalId } from '../constants';
 
 export default {
   itemRemoveModalId,

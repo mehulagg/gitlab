@@ -2,6 +2,7 @@ Akismet
 Alertmanager
 Algolia
 Alibaba
+Aliyun
 allowlist
 allowlisted
 allowlisting
@@ -11,6 +12,7 @@ Ansible
 Anthos
 approvers
 architected
+architecting
 Arel
 Artifactory
 Asana
@@ -34,6 +36,7 @@ autoscaler
 autoscales
 autoscaling
 awardable
+awardables
 Axios
 Azure
 B-tree
@@ -58,6 +61,10 @@ boolean
 booleans
 Bootsnap
 browsable
+bugfix
+bugfixed
+bugfixes
+bugfixing
 Bugzilla
 Buildkite
 buildpack
@@ -70,6 +77,7 @@ burstable
 cacheable
 callstack
 callstacks
+Camo
 CentOS
 Certbot
 changeset
@@ -105,10 +113,12 @@ crosslinks
 Crossplane
 CrowdIn
 CSV
+cybersecurity
 Dangerfile
 datetime
 Debian
 Decompressor
+decryptable
 deduplicate
 deduplicated
 deduplicates
@@ -129,6 +139,7 @@ dequarantined
 dequarantining
 DevOps
 discoverability
+dismissable
 Disqus
 Divio
 Dockerfile
@@ -165,6 +176,7 @@ Figma
 Filebeat
 Fio
 firewalled
+firewalling
 Flawfinder
 Flowdock
 Fluentd
@@ -233,6 +245,7 @@ issuables
 Istio
 Jaeger
 jasmine-jquery
+Javafuzz
 JavaScript
 Jenkins
 Jenkinsfile
@@ -251,6 +264,7 @@ keytab
 keytabs
 Kibana
 Kinesis
+Klar
 Knative
 Kramdown
 Kroki
@@ -263,9 +277,11 @@ Laravel
 ldapsearch
 Lefthook
 Leiningen
+libFuzzer
 Libravatar
 liveness
 Lograge
+logrotate
 Logstash
 lookahead
 lookaheads
@@ -276,6 +292,7 @@ loopback
 Lucene
 Maildir
 Mailgun
+Mailroom
 Makefile
 Makefiles
 Markdown
@@ -341,6 +358,7 @@ onboarding
 OpenID
 OpenShift
 Opsgenie
+Overcommit
 Packagist
 parallelization
 parallelizations
@@ -392,6 +410,7 @@ pseudocode
 pseudonymized
 pseudonymizer
 Puma
+pytest
 Python
 Qualys
 queryable
@@ -405,6 +424,7 @@ reauthenticate
 reauthenticated
 reauthenticates
 reauthenticating
+rebalancing
 rebar
 rebase
 rebased
@@ -421,6 +441,8 @@ referer
 referers
 reflog
 reflogs
+refspec
+refspecs
 reindex
 reindexed
 reindexes
@@ -476,14 +498,17 @@ serializer
 serializers
 serializing
 serverless
+sharded
 sharding
 shfmt
 Shibboleth
+Shopify
 Sidekiq
 Silverlight
 Sisense
 Sitespeed
 Slack
+Slackbot
 Slony
 smartcard
 smartcards
@@ -496,6 +521,8 @@ spidering
 Splunk
 SpotBugs
 Stackdriver
+starrer
+starrers
 storable
 storages
 strace
@@ -516,18 +543,27 @@ subnet
 subnets
 subnetting
 subpath
+subproject
+subprojects
 subqueried
 subqueries
 subquery
 subquerying
 substring
 substrings
+subtask
+subtasks
 subtree
 subtrees
 sudo
+supercookie
+supercookies
+supertype
+supertypes
 swappiness
 swimlane
 swimlanes
+syncable
 Sysbench
 syslog
 tanuki
@@ -553,7 +589,10 @@ transpile
 transpiles
 transpiling
 Trello
+triaged
+triages
 triaging
+Truststore
 Twilio
 Twitter
 TypeScript
@@ -586,6 +625,8 @@ unindexed
 unlink
 unlinking
 unlinks
+unmappable
+unmapped
 unmergeable
 unmerged
 unmerges
@@ -595,6 +636,7 @@ unoptimize
 unoptimized
 unoptimizes
 unoptimizing
+unpatched
 unprioritized
 unprotect
 unprotected
@@ -618,6 +660,9 @@ unresolved
 unresolving
 unschedule
 unscoped
+unshare
+unshared
+unshares
 unstage
 unstaged
 unstages
@@ -637,6 +682,7 @@ unverify
 unverifying
 uploader
 uploaders
+upstreams
 upvoted
 upvotes
 URIs

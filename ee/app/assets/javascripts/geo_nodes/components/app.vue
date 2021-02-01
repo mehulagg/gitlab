@@ -3,6 +3,7 @@ import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import SmartInterval from '~/smart_interval';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 
 import eventHub from '../event_hub';
 
@@ -194,11 +195,11 @@ export default {
       if (actionType === NODE_ACTIONS.TOGGLE && !node.enabled) {
         this.toggleNode(this.targetNode);
       } else {
-        this.$root.$emit('bv::show::modal', this.modalId);
+        this.$root.$emit(BV_SHOW_MODAL, this.modalId);
       }
     },
     hideNodeActionModal() {
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     nodeRemovalAllowed(node) {
       return !node.primary || this.nodes.length <= 1;

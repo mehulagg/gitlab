@@ -5,6 +5,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import httpStatusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
 import PipelineNewForm from '~/pipeline_new/components/pipeline_new_form.vue';
+import { redirectTo } from '~/lib/utils/url_utility';
 import {
   mockBranches,
   mockTags,
@@ -13,7 +14,6 @@ import {
   mockProjectId,
   mockError,
 } from '../mock_data';
-import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
@@ -225,42 +225,29 @@ describe('Pipeline New Form', () => {
     });
   });
 
-  describe('when feature flag new_pipeline_form_prefilled_vars is enabled', () => {
-    let origGon;
-
+  describe('when yml defines a variable', () => {
     const mockYmlKey = 'yml_var';
     const mockYmlValue = 'yml_var_val';
     const mockYmlDesc = 'A var from yml.';
 
-    beforeAll(() => {
-      origGon = window.gon;
-      window.gon = { features: { newPipelineFormPrefilledVars: true } };
-    });
+    it('loading icon is shown when content is requested and hidden when received', async () => {
+      createComponent('', mockParams, mount);
 
-    afterAll(() => {
-      window.gon = origGon;
-    });
-
-    describe('loading state', () => {
-      it('loading icon is shown when content is requested and hidden when received', async () => {
-        createComponent('', mockParams, mount);
-
-        mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
-          [mockYmlKey]: {
-            value: mockYmlValue,
-            description: mockYmlDesc,
-          },
-        });
-
-        expect(findLoadingIcon().exists()).toBe(true);
-
-        await waitForPromises();
-
-        expect(findLoadingIcon().exists()).toBe(false);
+      mock.onGet(configVariablesPath).reply(httpStatusCodes.OK, {
+        [mockYmlKey]: {
+          value: mockYmlValue,
+          description: mockYmlDesc,
+        },
       });
+
+      expect(findLoadingIcon().exists()).toBe(true);
+
+      await waitForPromises();
+
+      expect(findLoadingIcon().exists()).toBe(false);
     });
 
-    describe('when yml defines a variable with description', () => {
+    describe('with description', () => {
       beforeEach(async () => {
         createComponent('', mockParams, mount);
 
@@ -302,7 +289,7 @@ describe('Pipeline New Form', () => {
       });
     });
 
-    describe('when yml defines a variable without description', () => {
+    describe('without description', () => {
       beforeEach(async () => {
         createComponent('', mockParams, mount);
 

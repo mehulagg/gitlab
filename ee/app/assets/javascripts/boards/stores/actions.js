@@ -9,11 +9,7 @@ import {
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType } from '~/boards/constants';
-import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
-import boardsStoreEE from './boards_store_ee';
-import * as types from './mutation_types';
 import * as typesCE from '~/boards/stores/mutation_types';
-import { fullEpicId } from '../boards_util';
 import {
   formatBoardLists,
   formatListIssues,
@@ -22,16 +18,20 @@ import {
 } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
-
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
+import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import { fullEpicId } from '../boards_util';
+
 import epicQuery from '../graphql/epic.query.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
-import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import { EpicFilterType, IterationFilterType, GroupByParamType } from '../constants';
 import issueMoveListMutation from '../graphql/issue_move_list.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/updateBoardEpicUserPreferences.mutation.graphql';
+import * as types from './mutation_types';
+import boardsStoreEE from './boards_store_ee';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */

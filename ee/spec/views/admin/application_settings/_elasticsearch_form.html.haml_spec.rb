@@ -218,5 +218,18 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
         expect(rendered).to include('Retry migration')
       end
     end
+
+    context 'when elasticsearch is unreachable' do
+      before do
+        allow(Gitlab::Elastic::Helper.default).to receive(:ping?).and_return(false)
+      end
+
+      it 'does not show the retry migration card' do
+        render
+
+        expect(rendered).not_to include('There is a halted Elasticsearch migration')
+        expect(rendered).not_to include('Retry migration')
+      end
+    end
   end
 end

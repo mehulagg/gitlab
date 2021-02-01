@@ -30,6 +30,21 @@ RSpec.describe GroupMember do
           expect(build(:group_member, group: group, user: acme_user)).to be_valid
         end
 
+        it 'shows proper error message' do
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domains: gitlab.com, acme.com")
+        end
+
+        it 'shows proper error message for single domain limitation' do
+          group.allowed_email_domains.last.destroy!
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domain of gitlab.com")
+        end
+
         it 'invited email must match at least one of the allowed domain emails' do
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gmail.com')).to be_invalid
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gitlab.com')).to be_valid

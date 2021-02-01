@@ -14,8 +14,8 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import IssuableEventHub from '~/issuable_show/event_hub';
 
-import TestCaseSidebar from './test_case_sidebar.vue';
 import TestCaseGraphQL from '../mixins/test_case_graphql';
+import TestCaseSidebar from './test_case_sidebar.vue';
 
 const stateEvent = {
   Close: 'CLOSE',

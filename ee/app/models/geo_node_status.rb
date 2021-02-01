@@ -38,7 +38,9 @@ class GeoNodeStatus < ApplicationRecord
       "#{replicable_class.replicable_name_plural}_checksum_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to checksum on primary",
       "#{replicable_class.replicable_name_plural}_synced_count".to_sym => "Number of #{replicable_class.replicable_title_plural} in the registry",
       "#{replicable_class.replicable_name_plural}_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} synced on secondary",
-      "#{replicable_class.replicable_name_plural}_registry_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to sync on secondary"
+      "#{replicable_class.replicable_name_plural}_registry_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to sync on secondary",
+      "#{replicable_class.replicable_name_plural}_verified_count".to_sym => "Number of #{replicable_class.replicable_title_plural} verified on the secondary",
+      "#{replicable_class.replicable_name_plural}_verification_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to verify on secondary"
     }
   end
 
@@ -375,8 +377,8 @@ class GeoNodeStatus < ApplicationRecord
   def self.add_attr_in_percentage_for_replicable_classes
     Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
       replicable = replicator.replicable_name_plural
-      attr_in_percentage "#{replicable}_checksummed",  "#{replicable}_checksummed_count",  "#{replicable}_count"
       attr_in_percentage "#{replicable}_synced",       "#{replicable}_synced_count",       "#{replicable}_registry_count"
+      attr_in_percentage "#{replicable}_verified",     "#{replicable}_verified_count",     "#{replicable}_registry_count"
     end
   end
 
@@ -400,8 +402,8 @@ class GeoNodeStatus < ApplicationRecord
     public_send("#{replicator_class.replicable_name_plural}_synced_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
   end
 
-  def checksummed_in_percentage_for(replicator_class)
-    public_send("#{replicator_class.replicable_name_plural}_checksummed_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
+  def verified_in_percentage_for(replicator_class)
+    public_send("#{replicator_class.replicable_name_plural}_verified_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
   end
 
   def count_for(replicator_class)
@@ -578,6 +580,11 @@ class GeoNodeStatus < ApplicationRecord
     self.wikis_checksum_mismatch_count = Geo::ProjectRegistry.mismatch(:wiki).count
     self.repositories_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:repository).count
     self.wikis_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:wiki).count
+
+    ::Gitlab::Geo.verification_enabled_replicator_classes.each do |replicator|
+      public_send("#{replicator.replicable_name_plural}_verified_count=", replicator.verified_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_verification_failed_count=", replicator.verification_failed_count) # rubocop:disable GitlabSecurity/PublicSend
+    end
   end
 
   def primary_storage_digest

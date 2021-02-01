@@ -8,6 +8,8 @@ RSpec.describe 'Projects > Audit Events', :js do
   let(:project) { create(:project, :repository, namespace: user.namespace) }
 
   before do
+    stub_feature_flags(vue_project_members_list: false)
+
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -175,9 +177,9 @@ RSpec.describe 'Projects > Audit Events', :js do
   end
 
   describe 'combined list of authenticated and unauthenticated users' do
-    let!(:audit_event_1) { create(:project_audit_event, :unauthenticated, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
-    let!(:audit_event_2) { create(:project_audit_event, author_id: non_existing_record_id, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: Date.current) }
+    let!(:audit_event_1) { create(:project_audit_event, :unauthenticated, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_2) { create(:project_audit_event, author_id: non_existing_record_id, entity_type: 'Project', entity_id: project.id) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id) }
 
     it 'displays the correct authors names' do
       visit project_audit_events_path(project)

@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # CI/CD Analytics
 
-## Pipeline success and duration charts **(CORE)**
+## Pipeline success and duration charts **(FREE)**
 
 > - Introduced in GitLab 3.1.1 as Commit Stats, and later renamed to Pipeline Charts.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/issues/38318) to CI/CD Analytics in GitLab 12.8.
@@ -22,12 +22,12 @@ View pipeline duration history:
 
 ![Pipeline duration](img/pipelines_duration_chart.png)
 
-## DORA4 Metrics 
+## DORA4 Metrics
 
 Customer experience is a key metric. Users want to measure platform stability and other
 post-deployment performance KPIs, and set targets for customer behavior, experience, and financial
 impact. Tracking and measuring these indicators solves an important pain point. Similarly, creating
-views that manage products, not projects or repos, provides users with a more relevant data set.
+views that manage products, not projects or repositories, provides users with a more relevant data set.
 Since GitLab is a tool for the entire DevOps life-cycle, information from different workflows is
 integrated and can be used to measure the success of the teams.
 

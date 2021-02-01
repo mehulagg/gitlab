@@ -114,16 +114,15 @@ export default {
           </div>
         </button>
       </div>
-      <div
+      <section
         v-show="isExpanded"
         :id="contentContainerId"
         ref="contentContainer"
         :aria-labelledby="buttonId"
-        role="region"
       >
         <slot name="sub-title"></slot>
         <div ref="content" :style="contentStyles"><slot name="default"></slot></div>
-      </div>
+      </section>
     </template>
     <div v-else ref="loadingIndicator" class="d-flex p-2">
       <div class="h-32-px">
