@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
+import { GlButton, GlIcon, GlLink, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 import createFlash from '~/flash';
