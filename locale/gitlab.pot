@@ -8264,6 +8264,9 @@ msgstr ""
 msgid "Create iteration"
 msgstr ""
 
+msgid "Create list"
+msgstr ""
+
 msgid "Create lists from labels. Issues with that label appear in that list."
 msgstr ""
 
