@@ -6,33 +6,49 @@ import NotificationsDropdown from './components/notifications_dropdown.vue';
 Vue.use(GlToast);
 
 export default () => {
-  const el = document.querySelector('.js-vue-notification-dropdown');
+  const container = document.querySelectorAll('.js-vue-notification-dropdown');
 
-  if (!el) return false;
+  if (!container.length) return false;
 
-  const {
-    containerClass,
-    buttonSize,
-    disabled,
-    dropdownItems,
-    notificationLevel,
-    projectId,
-    groupId,
-  } = el.dataset;
-
-  return new Vue({
-    el,
-    provide: {
+  container.forEach((el) => {
+    const {
       containerClass,
       buttonSize,
-      disabled: parseBoolean(disabled),
-      dropdownItems: JSON.parse(dropdownItems),
-      initialNotificationLevel: notificationLevel,
+      disabled,
+      dropdownItems,
+      notificationLevel,
       projectId,
       groupId,
-    },
-    render(h) {
-      return h(NotificationsDropdown);
-    },
+      showLabel,
+    } = el.dataset;
+
+    console.log(
+      'initNotificationsDropdown :: ',
+      buttonSize,
+      disabled,
+      JSON.parse(dropdownItems),
+      notificationLevel,
+      projectId,
+      groupId,
+      showLabel,
+      el,
+    );
+
+    return new Vue({
+      el,
+      provide: {
+        containerClass,
+        buttonSize,
+        disabled: parseBoolean(disabled),
+        dropdownItems: JSON.parse(dropdownItems),
+        initialNotificationLevel: notificationLevel,
+        projectId,
+        groupId,
+        showLabel: parseBoolean(showLabel),
+      },
+      render(h) {
+        return h(NotificationsDropdown);
+      },
+    });
   });
 };
