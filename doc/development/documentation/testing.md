@@ -269,6 +269,13 @@ To configure Vale in your editor, install one of the following as appropriate:
   You can configure the plugin to
   [display only a subset of alerts](#show-subset-of-vale-alerts).
   You don't need Vale Server to use the plugin.
+
+  In the extension's settings:
+
+  - Select the **Use CLI** checkbox.
+  - In the **Config** setting, enter an absolute path to [`gitlab/.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) on your computer.
+  - In the **Path** setting, enter the absolute path to the Vale binary. To find out what it is, run `which vale` in a terminal.
+
 - Vim [ALE plugin](https://github.com/dense-analysis/ale).
 
 We don't use [Vale Server](https://errata-ai.github.io/vale/#using-vale-with-a-text-editor-or-another-third-party-application).
