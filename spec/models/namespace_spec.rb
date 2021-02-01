@@ -113,6 +113,7 @@ RSpec.describe Namespace do
 
   describe 'inclusions' do
     it { is_expected.to include_module(Gitlab::VisibilityLevel) }
+    it { is_expected.to include_module(Namespaces::Traversal::Recursive) }
   end
 
   describe '#visibility_level_field' do
