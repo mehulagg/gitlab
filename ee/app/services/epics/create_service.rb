@@ -24,6 +24,7 @@ module Epics
 
     def after_create(epic)
       assign_parent_epic_for(epic)
+      assign_child_epic_for(epic)
     end
 
     def set_date_params
