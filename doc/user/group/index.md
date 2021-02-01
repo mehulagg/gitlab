@@ -470,7 +470,6 @@ There are a few limitations compared to project wikis:
 For updates, you can follow:
 
 - [The epic tracking feature parity with project wikis](https://gitlab.com/groups/gitlab-org/-/epics/2782).
-- [The issue for adding the ability to move group wikis using the API](https://gitlab.com/gitlab-org/gitlab/-/issues/219003).
 
 ## Group Security Dashboard **(ULTIMATE)**
 
