@@ -9,8 +9,8 @@ describe('AdminUserAvatar component', () => {
   const user = users[0];
   const adminUserPath = paths.adminUser;
 
-  const findAvatar = () => wrapper.find(GlAvatarLabeled);
-  const findAvatarLink = () => wrapper.find(GlAvatarLink);
+  const findAvatar = () => wrapper.findComponent(GlAvatarLabeled);
+  const findAvatarLink = () => wrapper.findComponent(GlAvatarLink);
   const findAllBadges = () => wrapper.findAll(GlBadge);
 
   const initComponent = (props = {}) => {

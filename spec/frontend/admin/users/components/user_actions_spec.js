@@ -18,7 +18,7 @@ describe('AdminUserActions component', () => {
 
   const findEditButton = () => wrapper.find('[data-testid="edit"]');
   const findActionsDropdown = () => wrapper.find('[data-testid="actions"');
-  const findDropdownDivider = () => wrapper.find(GlDropdownDivider);
+  const findDropdownDivider = () => wrapper.findComponent(GlDropdownDivider);
 
   const initComponent = ({ actions = [] } = {}) => {
     wrapper = shallowMount(AdminUserActions, {

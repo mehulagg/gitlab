@@ -91,11 +91,11 @@ describe('DevopsAdoptionApp', () => {
     });
 
     it('does not display the empty state', () => {
-      expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
+      expect(wrapper.findComponent(DevopsAdoptionEmptyState).exists()).toBe(false);
     });
 
     it('displays the loader', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
     });
   });
 
@@ -115,11 +115,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
     });
 
@@ -132,11 +132,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('renders the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(true);
       });
 
       it('should fetch data once', () => {
@@ -156,11 +156,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data once', () => {
@@ -168,7 +168,7 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('displays the error message and calls Sentry', () => {
-        const alert = wrapper.find(GlAlert);
+        const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
         expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
@@ -200,11 +200,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('renders the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(true);
       });
 
       it('should fetch data twice', () => {
@@ -231,7 +231,7 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('should fetch data twice', () => {
@@ -255,11 +255,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data twice', () => {
@@ -276,7 +276,7 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('displays the error message and calls Sentry', () => {
-        const alert = wrapper.find(GlAlert);
+        const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
         expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
@@ -294,11 +294,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionEmptyState).exists()).toBe(false);
       });
 
       it('displays the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
       });
     });
 
@@ -310,11 +310,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('displays the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(true);
+        expect(wrapper.findComponent(DevopsAdoptionEmptyState).exists()).toBe(true);
       });
 
       it('does not display the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionTable).exists()).toBe(false);
       });
     });
 
@@ -329,11 +329,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionEmptyState).exists()).toBe(false);
       });
 
       it('displays the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(true);
+        expect(wrapper.findComponent(DevopsAdoptionTable).exists()).toBe(true);
       });
 
       describe('table header', () => {
@@ -425,19 +425,19 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('does not render the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionTable).exists()).toBe(false);
       });
 
       it('displays the error message ', () => {
-        const alert = wrapper.find(GlAlert);
+        const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.segmentsError);
       });

@@ -13,7 +13,7 @@ describe('AdminUsersTable component', () => {
 
   const getCellByLabel = (trIdx, label) => {
     return wrapper
-      .find(GlTable)
+      .findComponent(GlTable)
       .find('tbody')
       .findAll('tr')
       .at(trIdx)
@@ -47,7 +47,7 @@ describe('AdminUsersTable component', () => {
     });
 
     it('renders the user actions', () => {
-      expect(wrapper.find(AdminUserActions).exists()).toBe(true);
+      expect(wrapper.findComponent(AdminUserActions).exists()).toBe(true);
     });
 
     it.each`

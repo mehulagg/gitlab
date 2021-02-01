@@ -26,8 +26,8 @@ describe('DevopsAdoptionEmptyState', () => {
     });
   };
 
-  const findEmptyState = () => wrapper.find(GlEmptyState);
-  const findEmptyStateAction = () => findEmptyState().find(GlButton);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findEmptyStateAction = () => findEmptyState().findComponent(GlButton);
 
   afterEach(() => {
     wrapper.destroy();

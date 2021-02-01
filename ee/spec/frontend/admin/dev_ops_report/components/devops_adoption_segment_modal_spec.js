@@ -62,12 +62,12 @@ describe('DevopsAdoptionSegmentModal', () => {
     });
   };
 
-  const findModal = () => wrapper.find(GlModal);
+  const findModal = () => wrapper.findComponent(GlModal);
   const findByTestId = (testId) => findModal().find(`[data-testid="${testId}"]`);
   const actionButtonDisabledState = () => findModal().props('actionPrimary').attributes[0].disabled;
   const cancelButtonDisabledState = () => findModal().props('actionCancel').attributes[0].disabled;
   const actionButtonLoadingState = () => findModal().props('actionPrimary').attributes[0].loading;
-  const findAlert = () => findModal().find(GlAlert);
+  const findAlert = () => findModal().findComponent(GlAlert);
 
   afterEach(() => {
     wrapper.destroy();
@@ -95,7 +95,7 @@ describe('DevopsAdoptionSegmentModal', () => {
       const name = findByTestId('name');
 
       expect(name.exists()).toBe(true);
-      expect(name.find(GlFormInput).exists()).toBe(true);
+      expect(name.findComponent(GlFormInput).exists()).toBe(true);
     });
 
     it('contains the radio group component', () => {
@@ -115,11 +115,11 @@ describe('DevopsAdoptionSegmentModal', () => {
           const filter = findByTestId('filter');
 
           expect(filter.exists()).toBe(true);
-          expect(filter.find(GlFormInput).exists()).toBe(true);
+          expect(filter.findComponent(GlFormInput).exists()).toBe(true);
         });
 
         it('contains the filter icon', () => {
-          const icon = findByTestId('filter').find(GlIcon);
+          const icon = findByTestId('filter').findComponent(GlIcon);
 
           expect(icon.exists()).toBe(true);
           expect(icon.props('name')).toBe('search');

@@ -32,7 +32,7 @@ describe('DevopsAdoptionTable', () => {
     wrapper = null;
   });
 
-  const findTable = () => wrapper.find(GlTable);
+  const findTable = () => wrapper.findComponent(GlTable);
 
   const findCol = (testId) => findTable().find(`[data-testid="${testId}"]`);
 
