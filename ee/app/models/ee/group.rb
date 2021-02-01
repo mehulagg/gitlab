@@ -444,18 +444,41 @@ module EE
     end
 
     override :execute_hooks
-    def execute_hooks(data, hooks_scope)
-      super
+    def execute_hooks(data, hooks_scope, execute_for_hierarchy: self_and_ancestors)
+      super(data, hooks_scope)
 
       return unless feature_available?(:group_webhooks)
 
-      self_and_ancestor_hooks = GroupHook.where(group_id: self.self_and_ancestors)
-      self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
+      hooks = GroupHook.where(group_id: execute_for_hierarchy)
+      hooks.hooks_for(hooks_scope).each do |hook|
         hook.async_execute(data, hooks_scope.to_s)
       end
     end
 
     private
+
+    override :post_create_hook
+    def post_create_hook
+      super
+
+      execute_subgroup_hooks(:create)
+    end
+
+    override :post_destroy_hook
+    def post_destroy_hook
+      super
+
+      execute_subgroup_hooks(:destroy)
+    end
+
+    def execute_subgroup_hooks(event)
+      return unless subgroup?
+
+      run_after_commit do
+        data = ::Gitlab::HookData::SubgroupBuilder.new(self).build(event)
+        self.execute_hooks(data, :subgroup_hooks, execute_for_hierarchy: ancestors)
+      end
+    end
 
     def custom_project_templates_group_allowed
       return if custom_project_templates_group_id.blank?
