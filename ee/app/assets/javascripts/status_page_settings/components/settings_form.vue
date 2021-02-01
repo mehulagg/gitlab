@@ -91,7 +91,7 @@ export default {
       <p>
         <gl-sprintf :message="$options.i18n.introText">
           <template #docsLink>
-            <gl-link href="/help/user/project/status_page/index.html">
+            <gl-link href="/help/operations/incident_management/status_page.md">
               <span>{{ $options.i18n.introLinkText }}</span>
             </gl-link>
           </template>
@@ -112,7 +112,7 @@ export default {
         >
           <gl-form-input id="status-page-url" v-model="url" />
           <p class="form-text text-muted">
-            <gl-link href="/help/user/project/status_page/index.html">
+            <gl-link href="/help/operations/incident_management/status_page.md">
               {{ $options.i18n.url.linkText }}
             </gl-link>
           </p>

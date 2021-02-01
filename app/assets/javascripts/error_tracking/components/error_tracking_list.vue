@@ -404,7 +404,7 @@ export default {
         <template #description>
           <div>
             <span>{{ __('Monitor your errors by integrating with Sentry.') }}</span>
-            <gl-link target="_blank" href="/help/user/project/operations/error_tracking.html">{{
+            <gl-link target="_blank" href="/help/operations/error_tracking.md">{{
               __('More information')
             }}</gl-link>
           </div>
