@@ -1421,7 +1421,7 @@ To move repositories to Gitaly Cluster:
    using the API to confirm that all projects have moved. No projects should be returned
    with `repository_storage` field set to the old storage.
 
-In a similar way, you can move Snippet repositories using the [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md):
+In a similar way, you can move Snippet repositories or Groups **(PREMIUM SELF)**, using the [Snippet repository storage moves API](../../api/snippet_repository_storage_moves.md) or the [Groups repository storage moves API](../../api/group_repository_storage_moves.md) .
 
 ## Debugging Praefect
 

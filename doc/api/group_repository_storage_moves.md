@@ -5,15 +5,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Snippet repository storage moves API **(FREE SELF)**
+# Group repository storage moves API **(PREMIUM SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49228) in GitLab 13.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53016) in GitLab 13.9.
 
-Snippet repositories can be moved between storages. This can be useful when
+Group repositories can be moved between storages. This can be useful when
 [migrating to Gitaly Cluster](../administration/gitaly/praefect.md#migrate-existing-repositories-to-gitaly-cluster),
 for example.
 
-As snippet repository storage moves are processed, they transition through different states. Values
+As group repository storage moves are processed, they transition through different states. Values
 of `state` are:
 
 - `initial`
@@ -24,7 +24,7 @@ of `state` are:
 - `replicated`
 - `cleanup failed`
 
-To ensure data integrity, snippets are put in a temporary read-only state for the
+To ensure data integrity, groups are put in a temporary read-only state for the
 duration of the move. During this time, users receive a `The repository is temporarily
 read-only. Please try again later.` message if they try to push new commits.
 
@@ -33,12 +33,12 @@ This API requires you to [authenticate yourself](README.md#authentication) as an
 For other type of repositories you can read:
 
 - [Project repository storage moves API](project_repository_storage_moves.md)
-- [Group repository storage moves API](group_repository_storage_moves.md)
+- [Snippet repository storage moves API](snippet_repository_storage_moves.md)
 
-## Retrieve all snippet repository storage moves
+## Retrieve all group repository storage moves
 
 ```plaintext
-GET /snippet_repository_storage_moves
+GET /group_repository_storage_moves
 ```
 
 By default, `GET` requests return 20 results at a time because the API results
@@ -47,7 +47,7 @@ are [paginated](README.md#pagination).
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/group_repository_storage_moves"
 ```
 
 Example response:
@@ -77,10 +77,10 @@ Example response:
 ]
 ```
 
-## Retrieve all repository storage moves for a snippet
+## Retrieve all repository storage moves for a group
 
 ```plaintext
-GET /snippets/:snippet_id/repository_storage_moves
+GET /groups/:group_id/repository_storage_moves
 ```
 
 By default, `GET` requests return 20 results at a time because the API results
@@ -90,12 +90,12 @@ Supported attributes:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `snippet_id` | integer | yes | ID of the snippet. |
+| `group_id` | integer | yes | ID of the group. |
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1/repository_storage_moves"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/repository_storage_moves"
 ```
 
 Example response:
@@ -125,22 +125,22 @@ Example response:
 ]
 ```
 
-## Get a single snippet repository storage move
+## Get a single group repository storage move
 
 ```plaintext
-GET /snippet_repository_storage_moves/:repository_storage_id
+GET /group_repository_storage_moves/:repository_storage_id
 ```
 
 Supported attributes:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `repository_storage_id` | integer | yes | ID of the snippet repository storage move. |
+| `repository_storage_id` | integer | yes | ID of the group repository storage move. |
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippet_repository_storage_moves/1"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/group_repository_storage_moves/1"
 ```
 
 Example response:
@@ -168,23 +168,23 @@ Example response:
 }
 ```
 
-## Get a single repository storage move for a snippet
+## Get a single repository storage move for a group
 
 ```plaintext
-GET /snippets/:snippet_id/repository_storage_moves/:repository_storage_id
+GET /groups/:group_id/repository_storage_moves/:repository_storage_id
 ```
 
 Supported attributes:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `snippet_id` | integer | yes | ID of the snippet. |
-| `repository_storage_id` | integer | yes | ID of the snippet repository storage move. |
+| `group_id` | integer | yes | ID of the group. |
+| `repository_storage_id` | integer | yes | ID of the group repository storage move. |
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/snippets/1/repository_storage_moves/1"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/repository_storage_moves/1"
 ```
 
 Example response:
@@ -212,26 +212,24 @@ Example response:
 }
 ```
 
-## Schedule a repository storage move for a snippet
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49228) in GitLab 13.8.
+## Schedule a repository storage move for a group
 
 ```plaintext
-POST /snippets/:snippet_id/repository_storage_moves
+POST /groups/:group_id/repository_storage_moves
 ```
 
 Supported attributes:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `snippet_id` | integer | yes | ID of the snippet. |
+| `group_id` | integer | yes | ID of the group. |
 | `destination_storage_name` | string | no | Name of the destination storage shard. In [GitLab 13.5 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/3209), the storage is selected automatically if not provided. |
 
 Example request:
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
---data '{"destination_storage_name":"storage2"}' "https://gitlab.example.com/api/v4/snippets/1/repository_storage_moves"
+--data '{"destination_storage_name":"storage2"}' "https://gitlab.example.com/api/v4/groups/1/repository_storage_moves"
 ```
 
 Example response:
@@ -259,14 +257,12 @@ Example response:
 }
 ```
 
-## Schedule repository storage moves for all snippets on a storage shard
+## Schedule repository storage moves for all groups on a storage shard
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49228) in GitLab 13.8.
-
-Schedules repository storage moves for each snippet repository stored on the source storage shard.
+Schedules repository storage moves for each group repository stored on the source storage shard.
 
 ```plaintext
-POST /snippet_repository_storage_moves
+POST /group_repository_storage_moves
 ```
 
 Supported attributes:
@@ -280,7 +276,7 @@ Example request:
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
---data '{"source_storage_name":"default"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+--data '{"source_storage_name":"default"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
 ```
 
 Example response:
