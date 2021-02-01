@@ -8,6 +8,11 @@ FactoryBot.define do
     length { 5 }
     length_unit { :days }
 
+    trait :with_interval do
+      interval_start { Time.parse('08:00') }
+      interval_end { Time.parse('17:00') }
+    end
+
     trait :with_participant do
       after(:create) do |rotation|
         user = create(:user)
