@@ -21,6 +21,8 @@ You can view packages for your project or group.
 
 You can search, sort, and filter packages on this page.
 
+When viewing Packages & Registries within Groups you will only see those Packages in Projects that you can access. Packages in private projects that you aren't a member of will not be displayed. Group views only display Project registries, in order to retrieve packages from then you still need to utilize the Project endpoint.
+
 For information on how to create and upload a package, view the GitLab documentation for your package type.
 
 ## Use GitLab CI/CD to build packages
