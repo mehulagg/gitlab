@@ -11,10 +11,6 @@ module QA
           element :invite_member_button
         end
 
-        view 'app/views/projects/project_members/_team.html.haml' do
-          element :members_list
-        end
-
         view 'app/views/projects/project_members/index.html.haml' do
           element :invite_group_tab
           element :groups_list_tab
@@ -25,8 +21,11 @@ module QA
           element :invite_group_button
         end
 
-        view 'app/views/shared/members/_group.html.haml' do
+        view 'app/assets/javascripts/pages/projects/project_members/index.js' do
           element :group_row
+        end
+
+        view 'app/assets/javascripts/members/components/action_buttons/remove_group_link_button.vue' do
           element :delete_group_access_link
         end
 
