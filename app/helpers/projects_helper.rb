@@ -374,6 +374,7 @@ module ProjectsHelper
 
   private
 
+  # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
@@ -413,8 +414,13 @@ module ProjectsHelper
 
     nav_tabs += package_nav_tabs(project, current_user)
 
+    if show_learn_gitlab_experiment?(project)
+      nav_tabs << :learn_gitlab
+    end
+
     nav_tabs
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def package_nav_tabs(project, current_user)
     [].tap do |tabs|
@@ -801,6 +807,13 @@ module ProjectsHelper
       push_to_schema_breadcrumb(name, url)
       link_to(name, url)
     end
+  end
+
+  def show_learn_gitlab_experiment?(project)
+    Gitlab.dev_env_or_com? &&
+      (Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
+        Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)) &&
+      OnboardingProgress.onboarded?(project.namespace)
   end
 end
 

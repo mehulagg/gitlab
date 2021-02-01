@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
   include ProjectForksHelper
+  include AfterNextHelpers
 
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be_with_refind(:project_with_repo) { create(:project, :repository) }
@@ -458,6 +459,31 @@ RSpec.describe ProjectsHelper do
     context 'when project does not have confluence enabled' do
       it { is_expected.not_to include(:confluence) }
       it { is_expected.to include(:wiki) }
+    end
+
+    context 'learn gitlab experiment' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:is_com, :experiment_a, :experiment_b, :onboarded, :result) do
+        true    | true        | false         | true      | true
+        true    | false       | true          | true      | true
+        true    | false       | false         | true      | false
+        false   | true        | true          | true      | false
+        true    | true        | true          | false     | false
+      end
+
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_com)
+          stub_experiment(learn_gitlab_a: experiment_a, learn_gitlab_b: experiment_b)
+          stub_experiment_for_subject(learn_gitlab_a: experiment_a, learn_gitlab_b: experiment_b)
+          allow(OnboardingProgress).to receive(:onboarded?).with(project.namespace).and_return(onboarded)
+        end
+
+        it do
+          expect(subject.include?(:learn_gitlab)).to eq(result)
+        end
+      end
     end
   end
 
