@@ -6,17 +6,17 @@ require File.expand_path('ee/elastic/migrate/20210201104800_migrate_notes_to_sep
 RSpec.describe MigrateNotesToSeparateIndex, :elastic, :sidekiq_inline do
   let(:version) { 20210201104800 }
   let(:migration) { described_class.new(version) }
-  let(:issues) { create_list(:issue, 3) }
+  let(:notes) { create_list(:note, 3) }
   let(:index_name) { "#{es_helper.target_name}-notes" }
 
   before do
     allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-      .with(:migrate_issues_to_separate_index)
+      .with(:migrate_notes_to_separate_index)
       .and_return(false)
 
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
-    issues
+    notes
 
     ensure_elasticsearch_index!
   end
@@ -43,7 +43,7 @@ RSpec.describe MigrateNotesToSeparateIndex, :elastic, :sidekiq_inline do
     end
 
     context 'batch run' do
-      it 'migrates all issues' do
+      it 'migrates all notes' do
         total_shards = es_helper.get_settings.dig('number_of_shards').to_i
         migration.set_migration_state(slice: 0, max_slices: total_shards)
 
@@ -52,7 +52,7 @@ RSpec.describe MigrateNotesToSeparateIndex, :elastic, :sidekiq_inline do
         end
 
         expect(migration.completed?).to be_truthy
-        expect(es_helper.documents_count(index_name: "#{es_helper.target_name}-issues")).to eq(issues.count)
+        expect(es_helper.documents_count(index_name: "#{es_helper.target_name}-notes")).to eq(notes.count)
       end
     end
 
@@ -124,7 +124,7 @@ RSpec.describe MigrateNotesToSeparateIndex, :elastic, :sidekiq_inline do
     end
 
     context 'counts are equal' do
-      let(:issues_count) { issues.count }
+      let(:notes_count) { notes.count }
 
       it 'returns true' do
         is_expected.to be_truthy
