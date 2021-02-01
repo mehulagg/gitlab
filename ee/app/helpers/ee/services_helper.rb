@@ -53,7 +53,7 @@ module EE
 
     def jira_issues_show_data
       {
-        issues_show_path: project_integrations_jira_issue_path(@project, format: :json)
+        issues_show_path: project_integrations_jira_issue_path(@project, params[:id], format: :json)
       }
     end
   end
