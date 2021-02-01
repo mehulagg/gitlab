@@ -60,6 +60,7 @@ module Projects
             title_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             description_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             created_at: 2.hours.ago,
+            web_url: 'https://jira.reali.sh:8080/projects/FE/issues/FE-2',
             author: {
               id: 2,
               username: 'justin_ho',

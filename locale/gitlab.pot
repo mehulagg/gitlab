@@ -16531,6 +16531,9 @@ msgstr ""
 msgid "JiraService|If different from Web URL"
 msgstr ""
 
+msgid "JiraService|In order to view more details or to make changes to this issue, please visit the issue directly in %{linkStart}Jira%{linkEnd}"
+msgstr ""
+
 msgid "JiraService|Issue List"
 msgstr ""
 
@@ -16583,6 +16586,9 @@ msgid "JiraService|Sign in to GitLab.com to get started."
 msgstr ""
 
 msgid "JiraService|This feature requires a Premium plan."
+msgstr ""
+
+msgid "JiraService|This issue is being synced from Jira"
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version"

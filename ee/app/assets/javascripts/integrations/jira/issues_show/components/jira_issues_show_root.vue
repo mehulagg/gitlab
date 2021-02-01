@@ -1,4 +1,6 @@
 <script>
+import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
+
 import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
 import Sidebar from 'ee/integrations/jira/issues_show/components/sidebar.vue';
@@ -9,6 +11,9 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 export default {
   name: 'JiraIssuesShow',
   components: {
+    GlAlert,
+    GlLink,
+    GlSprintf,
     IssuableShow,
     Sidebar,
   },
@@ -45,6 +50,24 @@ export default {
 
 <template>
   <div>
+    <gl-alert
+      variant="info"
+      :dismissible="false"
+      :title="s__('JiraService|This issue is being synced from Jira')"
+      class="gl-mt-5 gl-mb-2"
+    >
+      <gl-sprintf
+        :message="
+          s__(
+            `JiraService|In order to view more details or to make changes to this issue, please visit the issue directly in %{linkStart}Jira%{linkEnd}`,
+          )
+        "
+      >
+        <template #link="{ content }">
+          <gl-link :href="issue.webUrl" target="_blank">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <issuable-show
       v-if="!isLoading"
       :issuable="issue"
