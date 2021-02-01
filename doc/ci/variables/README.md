@@ -211,7 +211,7 @@ The value of the variable must:
 - Not be a predefined or custom environment variable.
 - Consist only of characters from the Base64 alphabet (RFC4648).
   [In GitLab 12.2](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/63043)
-  and newer, `@` and `:` are also valid values.
+  and newer `@` and `:` were added. [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29022) added `.`. 
 
 You can't mask variables that don't meet these requirements.
 
