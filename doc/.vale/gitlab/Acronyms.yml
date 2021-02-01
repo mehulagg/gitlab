@@ -118,6 +118,7 @@ exceptions:
   - RSS
   - RVM
   - SAML
+  - SAAS
   - SAST
   - SCIM
   - SCP
