@@ -90,7 +90,6 @@ Service Desk is now enabled for this project! You should be able to access it fr
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2460) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215364) to [GitLab Free](https://about.gitlab.com/pricing/) in 13.2.
->>>>>>> doc/user/project/service_desk.md
 
 An email is sent to the author when:
 
