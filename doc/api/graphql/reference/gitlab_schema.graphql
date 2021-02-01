@@ -16565,6 +16565,11 @@ input OncallRotationCreateInput {
   clientMutationId: String
 
   """
+  The interval of time that the on-call rotation should take place.
+  """
+  interval: OncallRotationTimeIntervalType
+
+  """
   The name of the on-call rotation.
   """
   name: String!
@@ -16688,6 +16693,21 @@ input OncallRotationLengthInputType {
   The unit of the rotation length of the on-call rotation.
   """
   unit: OncallRotationUnitEnum!
+}
+
+"""
+Time interval input type for on-call rotation
+"""
+input OncallRotationTimeIntervalType {
+  """
+  The start of the rotation interval.
+  """
+  from: String!
+
+  """
+  The end of the rotation interval.
+  """
+  to: String!
 }
 
 """

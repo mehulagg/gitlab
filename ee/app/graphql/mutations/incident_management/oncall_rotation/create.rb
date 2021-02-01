@@ -29,6 +29,10 @@ module Mutations
                  required: true,
                  description: 'The rotation length of the on-call rotation.'
 
+        argument :interval, Types::IncidentManagement::OncallRotationTimeIntervalType,
+                 required: false,
+                 description: 'The interval of time that the on-call rotation should take place.'
+
         argument :participants,
                  [Types::IncidentManagement::OncallUserInputType],
                  required: true,
@@ -66,12 +70,16 @@ module Mutations
           rotation_length = args[:rotation_length][:length]
           rotation_length_unit = args[:rotation_length][:unit]
           starts_at = parse_start_time(schedule, args)
+          interval_start = args[:interval][:from]
+          interval_end = args[:interval][:to]
 
           args.slice(:name).merge(
             length: rotation_length,
             length_unit: rotation_length_unit,
             starts_at: starts_at,
-            participants: find_participants(participants)
+            participants: find_participants(participants),
+            interval_start: interval_start,
+            interval_end: interval_end
           )
         end
 

@@ -28,5 +28,13 @@ module IncidentManagement
       # As length_unit is an enum, input is guaranteed to be appropriate
       length.public_send(length_unit) # rubocop:disable GitlabSecurity/PublicSend
     end
+
+    def interval_start
+      self.read_attribute(:interval_start)&.strftime('%H:%M')
+    end
+
+    def interval_end
+      self.read_attribute(:interval_end)&.strftime('%H:%M')
+    end
   end
 end

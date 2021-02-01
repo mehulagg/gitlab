@@ -49055,6 +49055,16 @@
               "defaultValue": null
             },
             {
+              "name": "interval",
+              "description": "The interval of time that the on-call rotation should take place.",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "OncallRotationTimeIntervalType",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "participants",
               "description": "The usernames of users participating in the on-call rotation.",
               "type": {
@@ -49356,6 +49366,45 @@
                 "ofType": {
                   "kind": "ENUM",
                   "name": "OncallRotationUnitEnum",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
+          "name": "OncallRotationTimeIntervalType",
+          "description": "Time interval input type for on-call rotation",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "from",
+              "description": "The start of the rotation interval.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "to",
+              "description": "The end of the rotation interval.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 }
               },
