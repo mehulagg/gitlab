@@ -75,7 +75,7 @@ You must have Owner level [permissions](../../user/permissions.md) to view the b
 The following table describes details of your subscription:
 
 | Field                       | Description |
-|-----------------------------|-------------|
+|:----------------------------|:------------|
 | **Seats in subscription**   | If this is a paid plan, represents the number of seats you've bought for this group. |
 | **Seats currently in use**  | Number of seats in use. Select **See usage** to see a list of the users using these seats. For more details, see [Seat usage](#seat-usage). |
 | **Max seats used**          | Highest number of seats you've used. |
