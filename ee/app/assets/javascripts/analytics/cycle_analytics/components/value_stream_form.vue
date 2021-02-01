@@ -17,9 +17,6 @@ import { validateValueStreamName, validateStage } from './create_value_stream_fo
 import DefaultStageFields from './create_value_stream_form/default_stage_fields.vue';
 import CustomStageFields from './create_value_stream_form/custom_stage_fields.vue';
 
-const findStageIndexByName = (stages, target = '') =>
-  stages.findIndex(({ name }) => name === target);
-
 const initializeStageErrors = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? DEFAULT_STAGE_CONFIG.map(() => ({})) : [{}];
 
@@ -30,12 +27,11 @@ const initializeStages = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
 
 const formatStageDataForSubmission = (stages) => {
   return stages.map(({ custom = false, name, ...rest }) => {
-    const additionalProps = custom ? convertObjectPropsToSnakeCase({ ...rest }) : {};
-    return {
-      ...additionalProps,
-      custom,
-      name,
-    };
+    return custom
+      ? convertObjectPropsToSnakeCase({ ...rest, custom, name })
+      : {
+          name,
+        };
   });
 };
 
@@ -85,6 +81,7 @@ export default {
       : { stages: [], nameError };
 
     return {
+      hiddenStages: [],
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
       name: '',
@@ -126,12 +123,6 @@ export default {
           { class: this.hasExtendedFormFields ? '' : 'gl-display-none' },
         ],
       };
-    },
-    hiddenStages() {
-      return this.stages.filter((stage) => stage.hidden);
-    },
-    activeStages() {
-      return this.stages.filter((stage) => !stage.hidden);
     },
     hasFormErrors() {
       return Boolean(
@@ -177,7 +168,7 @@ export default {
       return sprintf(this.$options.I18N.HIDDEN_DEFAULT_STAGE, { name });
     },
     validateStages() {
-      return this.activeStages.map(validateStage);
+      return this.stages.map(validateStage);
     },
     validate() {
       const { name } = this;
@@ -196,14 +187,15 @@ export default {
       Vue.set(this, 'stages', newStages);
     },
     validateStageFields(index) {
-      Vue.set(this.stageErrors, index, validateStage(this.activeStages[index]));
+      Vue.set(this.stageErrors, index, validateStage(this.stages[index]));
     },
     fieldErrors(index) {
       return this.stageErrors && this.stageErrors[index] ? this.stageErrors[index] : {};
     },
     onHide(index) {
-      const stage = this.stages[index];
-      Vue.set(this.stages, index, { ...stage, hidden: true });
+      const target = this.stages[index];
+      Vue.set(this, 'stages', [...this.stages.filter((_, i) => i !== index)]);
+      Vue.set(this, 'hiddenStages', [...this.hiddenStages, target]);
     },
     onRemove(index) {
       const newErrors = this.stageErrors.filter((_, idx) => idx !== index);
@@ -212,9 +204,11 @@ export default {
       Vue.set(this, 'stageErrors', [...newErrors]);
     },
     onRestore(hiddenStageIndex) {
-      const stage = this.hiddenStages[hiddenStageIndex];
-      const stageIndex = findStageIndexByName(this.stages, stage.name);
-      Vue.set(this.stages, stageIndex, { ...stage, hidden: false });
+      const target = this.hiddenStages[hiddenStageIndex];
+      Vue.set(this, 'hiddenStages', [
+        ...this.hiddenStages.filter((_, i) => i !== hiddenStageIndex),
+      ]);
+      Vue.set(this, 'stages', [...this.stages, target]);
     },
     onAddStage() {
       // validate previous stages only and add a new stage
@@ -297,7 +291,7 @@ export default {
         @input="onSelectPreset"
       />
       <div v-if="hasExtendedFormFields" data-testid="extended-form-fields">
-        <div v-for="(stage, activeStageIndex) in activeStages" :key="stageKey(activeStageIndex)">
+        <div v-for="(stage, activeStageIndex) in stages" :key="stageKey(activeStageIndex)">
           <hr class="gl-my-3" />
           <span
             class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
@@ -308,7 +302,7 @@ export default {
             :stage="stage"
             :stage-events="formEvents"
             :index="activeStageIndex"
-            :total-stages="activeStages.length"
+            :total-stages="stages.length"
             :errors="fieldErrors(activeStageIndex)"
             @move="handleMove"
             @remove="onRemove"
@@ -319,7 +313,7 @@ export default {
             :stage="stage"
             :stage-events="formEvents"
             :index="activeStageIndex"
-            :total-stages="activeStages.length"
+            :total-stages="stages.length"
             :errors="fieldErrors(activeStageIndex)"
             @move="handleMove"
             @hide="onHide"

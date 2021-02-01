@@ -122,10 +122,9 @@ export default {
     state.createValueStreamErrors = {};
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
-    state.isCreatingValueStream = false;
-
     const { stages: stageErrors = {}, ...rest } = errors;
     state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
+    state.isCreatingValueStream = false;
   },
   [types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS](state, valueStream) {
     state.isCreatingValueStream = false;
