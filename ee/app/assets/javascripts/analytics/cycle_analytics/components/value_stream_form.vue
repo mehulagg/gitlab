@@ -3,6 +3,7 @@ import Vue from 'vue';
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { sprintf } from '~/locale';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import {
   DEFAULT_STAGE_CONFIG,
@@ -22,45 +23,20 @@ const findStageIndexByName = (stages, target = '') =>
 const initializeStageErrors = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? DEFAULT_STAGE_CONFIG.map(() => ({})) : [{}];
 
-// Not great, we're mixing types
-// better to make everything arrays 🤔
-const maybeFirstElem = (arr = null) => {
-  if (Array.isArray(arr)) {
-    return arr.length ? arr[0] : null;
-  }
-  return arr || null;
-};
+const initializeStages = (selectedPreset = PRESET_OPTIONS_DEFAULT) =>
+  selectedPreset === PRESET_OPTIONS_DEFAULT
+    ? DEFAULT_STAGE_CONFIG
+    : [{ ...defaultCustomStageFields }];
 
-// TODO: move to utils
-const formatStageData = (stages) => {
-  return stages
-    .filter(({ hidden = false }) => !hidden)
-    .map(
-      ({
-        startEventIdentifier,
-        endEventIdentifier,
-        startEventLabelId,
-        endEventLabelId,
-        custom = false,
-        name,
-        ...rest
-      }) => {
-        const additionalProps = custom
-          ? {
-              start_event_identifier: maybeFirstElem(startEventIdentifier),
-              end_event_identifier: maybeFirstElem(endEventIdentifier),
-              start_event_label_id: maybeFirstElem(startEventLabelId),
-              end_event_label_id: maybeFirstElem(endEventLabelId),
-            }
-          : {};
-        return {
-          ...rest,
-          ...additionalProps,
-          custom,
-          name,
-        };
-      },
-    );
+const formatStageDataForSubmission = (stages) => {
+  return stages.map(({ custom = false, name, ...rest }) => {
+    const additionalProps = custom ? convertObjectPropsToSnakeCase({ ...rest }) : {};
+    return {
+      ...additionalProps,
+      custom,
+      name,
+    };
+  });
 };
 
 export default {
@@ -102,10 +78,7 @@ export default {
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages:
-            initialPreset === PRESET_OPTIONS_DEFAULT
-              ? DEFAULT_STAGE_CONFIG
-              : [{ ...defaultCustomStageFields }],
+          stages: initializeStages(initialPreset),
           stageErrors: stageErrors || initializeStageErrors(initialPreset),
           ...initialData,
         }
@@ -128,7 +101,7 @@ export default {
     isValueStreamNameValid() {
       return !this.nameError?.length;
     },
-    invalidFeedback() {
+    invalidNameFeedback() {
       return this.nameError?.length ? this.nameError.join('\n\n') : null;
     },
     hasInitialFormErrors() {
@@ -160,6 +133,11 @@ export default {
     activeStages() {
       return this.stages.filter((stage) => !stage.hidden);
     },
+    hasFormErrors() {
+      return Boolean(
+        this.nameError.length || this.stageErrors.some((obj) => Object.keys(obj).length),
+      );
+    },
   },
   watch: {
     initialFormErrors({ name: nameError, stages: stageErrors }) {
@@ -170,19 +148,20 @@ export default {
   methods: {
     ...mapActions(['createValueStream']),
     onSubmit() {
-      const { name, stages } = this;
-      console.log('onSubmit::this.nameError', this.nameError);
-      console.log('onSubmit::this.stageErrors', this.stageErrors);
-      // TODO: validate before submission
+      this.validate();
+      if (this.hasFormErrors) return false;
       return this.createValueStream({
-        name,
-        stages: formatStageData(stages),
+        name: this.name,
+        stages: formatStageDataForSubmission(this.stages),
       }).then(() => {
         if (!this.hasInitialFormErrors) {
-          this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name }), {
+          this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name: this.name }), {
             position: 'top-center',
           });
           this.name = '';
+          this.nameError = [];
+          this.stages = initializeStages(this.selectedPreset);
+          this.stageErrors = initializeStageErrors(this.selectedPreset);
         }
       });
     },
@@ -287,7 +266,7 @@ export default {
         data-testid="create-value-stream-name"
         label-for="create-value-stream-name"
         :label="$options.I18N.FORM_FIELD_NAME_LABEL"
-        :invalid-feedback="invalidFeedback"
+        :invalid-feedback="invalidNameFeedback"
         :state="isValueStreamNameValid"
       >
         <div class="gl-display-flex gl-justify-content-space-between">

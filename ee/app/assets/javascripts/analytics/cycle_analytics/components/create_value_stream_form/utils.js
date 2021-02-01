@@ -88,20 +88,16 @@ export const validateStage = (fields) => {
   if (fields?.name) {
     if (fields.name.length > NAME_MAX_LENGTH) {
       newErrors.name = [ERRORS.MAX_LENGTH];
-    } else {
-      newErrors.name =
-        fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())
-          ? [ERRORS.STAGE_NAME_EXISTS]
-          : [];
+    }
+    if (fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())) {
+      newErrors.name = [ERRORS.STAGE_NAME_EXISTS];
     }
   } else {
     newErrors.name = [ERRORS.STAGE_NAME_MIN_LENGTH];
   }
 
   if (fields?.startEventIdentifier) {
-    if (fields?.endEventIdentifier) {
-      newErrors.endEventIdentifier = [];
-    } else {
+    if (!fields?.endEventIdentifier) {
       newErrors.endEventIdentifier = [ERRORS.END_EVENT_REQUIRED];
     }
   } else {

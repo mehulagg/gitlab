@@ -1,4 +1,5 @@
 <script>
+import Vue from 'vue';
 import { mapGetters, mapState } from 'vuex';
 import { isEqual } from 'lodash';
 import {
@@ -163,7 +164,7 @@ export default {
         this.fields.startEventIdentifier && this.eventMismatchError
           ? [ERRORS.INVALID_EVENT_PAIRS]
           : newErrors.endEventIdentifier;
-      this.errors = { ...this.errors, ...newErrors };
+      Vue.set(this, 'errors', newErrors);
     },
   },
   I18N,
