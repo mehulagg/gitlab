@@ -75,5 +75,11 @@ module BulkImports
         class_attributes[sym] << { klass: klass, options: options }
       end
     end
+
+    # This method must be overwritten in the Pipeline itself to
+    # check for the user authorization
+    def authorized?(_context)
+      true
+    end
   end
 end

@@ -4,10 +4,11 @@ module BulkImports
   module Pipeline
     module Runner
       extend ActiveSupport::Concern
-
+      NotAllowedError = Class.new(StandardError)
       MarkedAsFailedError = Class.new(StandardError)
 
       def run(context)
+        raise NotAllowedError unless authorized?(context)
         raise MarkedAsFailedError if marked_as_failed?(context)
 
         info(context, message: 'Pipeline started', pipeline_class: pipeline)
@@ -27,7 +28,7 @@ module BulkImports
         end
 
         after_run(context, extracted_data) if respond_to?(:after_run)
-      rescue MarkedAsFailedError
+      rescue MarkedAsFailedError, NotAllowedError
         log_skip(context)
       end
 
