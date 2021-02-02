@@ -3,6 +3,8 @@
 class PushRule < ApplicationRecord
   extend Gitlab::Cache::RequestCache
 
+  has_many :groups, inverse_of: :group
+
   request_cache_key do
     [self.id]
   end
