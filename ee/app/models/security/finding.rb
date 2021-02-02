@@ -40,6 +40,7 @@ module Security
     scope :with_scan, -> { includes(:scan) }
     scope :with_scanner, -> { includes(:scanner) }
     scope :deduplicated, -> { where(deduplicated: true) }
+    scope :count_by_scan_type, -> { joins(:scan).group('security_scans.scan_type').count }
 
     delegate :scan_type, to: :scan, allow_nil: true
   end
