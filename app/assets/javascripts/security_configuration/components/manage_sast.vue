@@ -17,6 +17,7 @@ export default {
   }),
   methods: {
     async mutate() {
+      console.log('mutate2');
       this.isLoading = true;
       try {
         const { data } = await this.$apollo.mutate({
@@ -28,6 +29,7 @@ export default {
             },
           },
         });
+        console.log('data', data);
         const { errors, successPath } = data.configureSast;
 
         if (errors.length > 0) {
@@ -38,6 +40,7 @@ export default {
         if (!successPath) {
           throw new Error('SAST merge request creation mutation failed');
         }
+
 
         redirectTo(successPath);
       } catch (e) {

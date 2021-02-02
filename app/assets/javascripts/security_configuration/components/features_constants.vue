@@ -100,6 +100,7 @@ export default {
       description: LICENSE_COMPLIANCE_DESCRIPTION,
       link: LICENSE_COMPLIANCE_LINK,
       type: REPORT_TYPE_LICENSE_COMPLIANCE,
+      id: LICENSE_COMPLIANCE_ID
     },
   ],
 };

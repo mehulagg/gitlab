@@ -11,7 +11,7 @@ export default {
 
 <template>
 <!-- Testing, shallow mount and assert -->
-  <span>
+  <span data-test-id="upgrade">
     <gl-sprintf :message="s__('Available with %{linkStart}upgrade or free trial%{linkEnd}')">
       <template #link="{ content }">
         <gl-link target="_blank" :href="'http://www.TOBEDEFINED'" data-testid="docsLink">
