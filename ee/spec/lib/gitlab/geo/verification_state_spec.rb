@@ -139,6 +139,30 @@ RSpec.describe Gitlab::Geo::VerificationState do
     end
   end
 
+  describe '.needs_verification' do
+    it 'includes verification_pending' do
+      subject.save!
+
+      expect(subject.class.needs_verification).to include(subject)
+    end
+
+    it 'includes verification_failed and retry_due' do
+      subject.verification_started
+      subject.verification_failed_with_message!('foo')
+      subject.update!(verification_retry_at: 1.minute.ago)
+
+      expect(subject.class.needs_verification).to include(subject)
+    end
+
+    it 'excludes verification_failed with future verification_retry_at' do
+      subject.verification_started
+      subject.verification_failed_with_message!('foo')
+      subject.update!(verification_retry_at: 2.hours.from_now)
+
+      expect(subject.class.needs_verification).not_to include(subject)
+    end
+  end
+
   describe '.fail_verification_timeouts' do
     before do
       subject.verification_started!

@@ -36,7 +36,7 @@ module Gitlab
         scope :not_checksummed, -> { where(verification_checksum: nil) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
         scope :retry_due, -> { where(arel_table[:verification_retry_at].eq(nil).or(arel_table[:verification_retry_at].lt(Time.current))) }
-        scope :needs_verification, -> { with_verification_state(:verification_pending, :verification_failed) }
+        scope :needs_verification, -> { with_verification_state(:verification_pending).or(with_verification_state(:verification_failed).retry_due) }
         # rubocop:enable CodeReuse/ActiveRecord
 
         state_machine :verification_state, initial: :verification_pending do
