@@ -13,7 +13,8 @@ module Types
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the user'
     field :bot, GraphQL::BOOLEAN_TYPE, null: false,
-          description: 'If the user is a bot.'
+          description: 'Indicates if the user is a bot.',
+          method: :bot?
     field :username, GraphQL::STRING_TYPE, null: false,
           description: 'Username of the user. Unique within this instance of GitLab'
     field :name, GraphQL::STRING_TYPE, null: false,
@@ -66,9 +67,5 @@ module Types
           null: true,
           description: 'Snippets authored by the user',
           resolver: Resolvers::Users::SnippetsResolver
-
-    def bot
-      object.bot?
-    end
   end
 end
