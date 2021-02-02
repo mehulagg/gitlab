@@ -4728,12 +4728,6 @@ msgstr ""
 msgid "Branch not loaded - %{branchId}"
 msgstr ""
 
-msgid "BranchSwitcherPlaceholder|Search branches"
-msgstr ""
-
-msgid "BranchSwitcherTitle|Switch branch"
-msgstr ""
-
 msgid "Branches"
 msgstr ""
 
@@ -5314,12 +5308,6 @@ msgid "ChangeReviewer|Reviewer changed to %{new}"
 msgstr ""
 
 msgid "ChangeReviewer|Unassigned"
-msgstr ""
-
-msgid "ChangeTypeActionLabel|Pick into branch"
-msgstr ""
-
-msgid "ChangeTypeActionLabel|Revert in branch"
 msgstr ""
 
 msgid "ChangeTypeAction|A new branch will be created in your fork and a new merge request will be started."
