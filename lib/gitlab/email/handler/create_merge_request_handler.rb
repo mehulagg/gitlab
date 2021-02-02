@@ -70,10 +70,24 @@ module Gitlab
           if patch_attachments.any?
             apply_patches_to_source_branch(start_branch: merge_request.target_branch)
             remove_patch_attachments
-            # Rebuild the merge request as the source branch might just have
-            # been created, so we should re-validate.
-            merge_request = build_merge_request
+
+          else
+            GitLab::AppLogger.warn mail.body
+            result = Commits::CommitPatchService
+                       .new(project, author, branch_name: source_branch, patches: [message], start_branch: merge_request.target_branch)
+                       .execute
+            GitLab::AppLogger.warn result
+
+            if result[:status] != :success
+              message = "Could not apply patches to #{source_branch}:\n#{result[:message]}"
+              raise InvalidAttachment, message
+            end
+
           end
+
+          # Rebuild the merge request as the source branch might just have
+          # been created, so we should re-validate.
+          merge_request = build_merge_request
 
           if merge_request.errors.any?
             merge_request
@@ -119,7 +133,11 @@ module Gitlab
         end
 
         def source_branch
-          @source_branch ||= mail.subject
+          @source_branch ||= if mail.subject.start_with?('[PATCH] ')
+                               Gitlab::Utils.slugify(mail.subject.gsub('[PATCH] ', ''))
+                             else
+                               mail.subject
+                             end
         end
       end
     end
