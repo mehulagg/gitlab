@@ -7,7 +7,7 @@ import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_opt
 import { sprintf, __ } from '~/locale';
 import eventHub from '../eventhub';
 import BoardNewIssue from './board_new_issue.vue';
-import BoardCard from './board_card.vue';
+import BoardCardLayout from './board_card_layout.vue';
 
 export default {
   name: 'BoardList',
@@ -17,7 +17,7 @@ export default {
     showingAllIssues: __('Showing all issues'),
   },
   components: {
-    BoardCard,
+    BoardCardLayout,
     BoardNewIssue,
     GlLoadingIcon,
   },
@@ -220,13 +220,15 @@ export default {
       @start="handleDragOnStart"
       @end="handleDragOnEnd"
     >
-      <board-card
+      <board-card-layout
+        data-qa-selector="board_card"
         v-for="(issue, index) in issues"
         ref="issue"
         :key="issue.id"
         :index="index"
         :list="list"
         :issue="issue"
+        v-bind="$attrs"
         :disabled="disabled"
       />
       <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">

@@ -29,11 +29,6 @@ export default {
       default: 0,
       required: false,
     },
-    isActive: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -41,14 +36,17 @@ export default {
     };
   },
   computed: {
-    ...mapState(['selectedBoardItems']),
+    ...mapState(['selectedBoardItems', 'activeId']),
     ...mapGetters(['isSwimlanesOn']),
     multiSelectVisible() {
       return this.selectedBoardItems.findIndex((boardItem) => boardItem.id === this.issue.id) > -1;
     },
+    isActive() {
+      return this.issue.id === this.activeId;
+    },
   },
   methods: {
-    ...mapActions(['setActiveId', 'toggleBoardItemMultiSelection']),
+    ...mapActions(['setActiveId', 'unsetActiveId', 'toggleBoardItemMultiSelection']),
     mouseDown() {
       this.showDetail = true;
     },
@@ -64,6 +62,7 @@ export default {
       if (!isMultiSelect) {
         this.setActiveId({ id: this.issue.id, sidebarType: ISSUABLE });
       } else {
+        this.unsetActiveId();
         this.toggleBoardItemMultiSelection(this.issue);
       }
 
