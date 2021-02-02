@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Security scanner integration
 
 Integrating a security scanner into GitLab consists of providing end users
-with a [CI job definition](../../ci/yaml/README.md)
+with a [CI job definition](../../../ci/yaml/README.md)
 they can add to their CI configuration files to scan their GitLab projects.
 This CI job should then output its results in a GitLab-specified format. These results are then
 automatically presented in various places in GitLab, such as the Pipeline view, Merge Request
@@ -23,7 +23,7 @@ scanner, as well as requirements and guidelines for the Docker image.
 
 This section describes several important fields to add to the security scanner's job
 definition file. Full documentation on these and other available fields can be viewed
-in the [CI documentation](../../ci/yaml/README.md#image).
+in the [CI documentation](../../../ci/yaml/README.md#image).
 
 ### Name
 
@@ -34,41 +34,41 @@ For instance, the dependency scanning job based on the "MySec" scanner would be 
 
 ### Image
 
-The [`image`](../../ci/yaml/README.md#image) keyword is used to specify
-the [Docker image](../../ci/docker/using_docker_images.md#what-is-an-image)
+The [`image`](../../../ci/yaml/README.md#image) keyword is used to specify
+the [Docker image](../../../ci/docker/using_docker_images.md#what-is-an-image)
 containing the security scanner.
 
 ### Script
 
-The [`script`](../../ci/yaml/README.md#script) keyword
+The [`script`](../../../ci/yaml/README.md#script) keyword
 is used to specify the commands to run the scanner.
 Because the `script` entry can't be left empty, it must be set to the command that performs the scan.
 It is not possible to rely on the predefined `ENTRYPOINT` and `CMD` of the Docker image
 to perform the scan automatically, without passing any command.
 
-The [`before_script`](../../ci/yaml/README.md#before_script)
+The [`before_script`](../../../ci/yaml/README.md#before_script)
 should not be used in the job definition because users may rely on this to prepare their projects before performing the scan.
 For instance, it is common practice to use `before_script` to install system libraries
 a particular project needs before performing SAST or Dependency Scanning.
 
-Similarly, [`after_script`](../../ci/yaml/README.md#after_script)
+Similarly, [`after_script`](../../../ci/yaml/README.md#after_script)
 should not be used in the job definition, because it may be overridden by users.
 
 ### Stage
 
 For consistency, scanning jobs should belong to the `test` stage when possible.
-The [`stage`](../../ci/yaml/README.md#stage) keyword can be omitted because `test` is the default value.
+The [`stage`](../../../ci/yaml/README.md#stage) keyword can be omitted because `test` is the default value.
 
 ### Fail-safe
 
 To be aligned with the [GitLab Security paradigm](https://about.gitlab.com/direction/secure/#security-paradigm),
 scanning jobs should not block the pipeline when they fail,
-so the [`allow_failure`](../../ci/yaml/README.md#allow_failure) parameter should be set to `true`.
+so the [`allow_failure`](../../../ci/yaml/README.md#allow_failure) parameter should be set to `true`.
 
 ### Artifacts
 
 Scanning jobs must declare a report that corresponds to the type of scanning they perform,
-using the [`artifacts:reports`](../../ci/pipelines/job_artifacts.md#artifactsreports) keyword.
+using the [`artifacts:reports`](../../../ci/pipelines/job_artifacts.md#artifactsreports) keyword.
 Valid reports are: `dependency_scanning`, `container_scanning`, `dast`, and `sast`.
 
 For example, here is the definition of a SAST job that generates a file named `gl-sast-report.json`,
@@ -88,7 +88,7 @@ it's declared under the `reports:sast` key in the job definition, not because of
 
 ### Policies
 
-Certain GitLab workflows, such as [AutoDevOps](../../topics/autodevops/customize.md#disable-jobs),
+Certain GitLab workflows, such as [AutoDevOps](../../../topics/autodevops/customize.md#disable-jobs),
 define variables to indicate that given scans should be disabled. You can check for this by looking
 for variables such as `DEPENDENCY_SCANNING_DISABLED`, `CONTAINER_SCANNING_DISABLED`,
 `SAST_DISABLED`, and `DAST_DISABLED`. If appropriate based on the scanner type, you should then
@@ -97,7 +97,7 @@ disable running the custom scanner.
 GitLab also defines a `CI_PROJECT_REPOSITORY_LANGUAGES` variable, which provides the list of
 languages in the repository. Depending on this value, your scanner may or may not do something different.
 Language detection currently relies on the [`linguist`](https://github.com/github/linguist) Ruby gem.
-See [GitLab CI/CD predefined variables](../../ci/variables/predefined_variables.md).
+See [GitLab CI/CD predefined variables](../../../ci/variables/predefined_variables.md).
 
 #### Policy checking example
 
@@ -171,7 +171,7 @@ It also generates text output on the standard output and standard error streams,
 ### Variables
 
 All CI variables are passed to the scanner as environment variables.
-The scanned project is described by the [predefined CI variables](../../ci/variables/README.md).
+The scanned project is described by the [predefined CI variables](../../../ci/variables/README.md).
 
 #### SAST and Dependency Scanning
 
@@ -209,7 +209,7 @@ It is recommended to name the output file after the type of scanning, and to use
 Since all Secure reports are JSON files, it is recommended to use `.json` as a file extension.
 For instance, a suggested filename for a Dependency Scanning report is `gl-dependency-scanning.json`.
 
-The [`artifacts:reports`](../../ci/pipelines/job_artifacts.md#artifactsreports) keyword
+The [`artifacts:reports`](../../../ci/pipelines/job_artifacts.md#artifactsreports) keyword
 of the job definition must be consistent with the file path where the Security report is written.
 For instance, if a Dependency Scanning analyzer writes its report to the CI project directory,
 and if this report filename is `depscan.json`,
@@ -220,7 +220,7 @@ then `artifacts:reports:dependency_scanning` must be set to `depscan.json`.
 Following the POSIX exit code standard, the scanner exits with 0 for success and any number from 1 to 255 for anything else.
 Success also includes the case when vulnerabilities are found.
 
-When executing a scanning job using the [Docker-in-Docker privileged mode](../../user/application_security/sast/index.md#requirements),
+When executing a scanning job using the [Docker-in-Docker privileged mode](../../../user/application_security/sast/index.md#requirements),
 we reserve the following standard exit codes.
 
 | Orchestrator Exit Code | Description                      |
@@ -279,10 +279,10 @@ The report is a JSON document that combines vulnerabilities with possible remedi
 This documentation gives an overview of the report JSON format,
 as well as recommendations and examples to help integrators set its fields.
 The format is extensively described in the documentation of
-[SAST](../../user/application_security/sast/index.md#reports-json-format),
-[DAST](../../user/application_security/dast/#reports),
-[Dependency Scanning](../../user/application_security/dependency_scanning/index.md#reports-json-format),
-and [Container Scanning](../../user/application_security/container_scanning/index.md#reports-json-format).
+[SAST](../../../user/application_security/sast/index.md#reports-json-format),
+[DAST](../../../user/application_security/dast/#reports),
+[Dependency Scanning](../../../user/application_security/dependency_scanning/index.md#reports-json-format),
+and [Container Scanning](../../../user/application_security/container_scanning/index.md#reports-json-format).
 
 You can find the schemas for these scanners here:
 
@@ -389,7 +389,7 @@ new generic identifiers to if needed. Analyzers may also produce vendor-specific
 identifiers, which don't belong in the [common library](https://gitlab.com/gitlab-org/security-products/analyzers/common).
 
 The first item of the `identifiers` array is called the [primary
-identifier](../../user/application_security/terminology/#primary-identifier).
+identifier](../../../user/application_security/terminology/#primary-identifier).
 The primary identifier is particularly important, because it is used to
 [track vulnerabilities](#tracking-and-merging-vulnerabilities) as new commits are pushed to the repository.
 Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-merging-vulnerabilities)
@@ -400,7 +400,7 @@ isn't a stable identifier and you shouldn't assume it as such when tracking vuln
 
 The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
 the system saves only the first 20 of them. Note that vulnerabilities in the [Pipeline
-Security](../../user/application_security/security_dashboard/#pipeline-security)
+Security](../../../user/application_security/security_dashboard/#pipeline-security)
 tab do not enforce this limit and all identifiers present in the report artifact are displayed.
 
 ### Location
@@ -541,14 +541,14 @@ The confidence ranges from `Low` to `Confirmed`, but it can also be `Unknown`,
 Valid values are: `Ignore`, `Unknown`, `Experimental`, `Low`, `Medium`, `High`, or `Confirmed`
 
 `Unknown` values means that data is unavailable to determine it's actual value. Therefore, it may be `high`, `medium`, or `low`,
-and needs to be investigated. We have [provided a chart](../../user/application_security/sast/analyzers.md#analyzers-data)
+and needs to be investigated. We have [provided a chart](../../../user/application_security/sast/analyzers.md#analyzers-data)
 of the available SAST Analyzers and what data is currently available.
 
 ### Remediations
 
 The `remediations` field of the report is an array of remediation objects.
 Each remediation describes a patch that can be applied to
-[automatically fix](../../user/application_security/#automatic-remediation-for-vulnerabilities)
+[automatically fix](../../../user/application_security/#automatic-remediation-for-vulnerabilities)
 a set of vulnerabilities.
 
 Here is an example of a report that contains remediations.
