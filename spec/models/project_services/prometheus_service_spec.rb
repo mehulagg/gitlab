@@ -468,14 +468,14 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
           type: 'text',
           name: 'api_url',
           title: 'API URL',
-          placeholder: s_('PrometheusService|Prometheus API Base URL, like http://prometheus.example.com/'),
+          placeholder: s_('PrometheusService|Prometheus API base URL, like https://prometheus.example.com/'),
           required: true
         },
         {
           type: 'text',
           name: 'google_iap_audience_client_id',
           title: 'Google IAP Audience Client ID',
-          placeholder: s_('PrometheusService|Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'),
+          placeholder: s_('PrometheusService|Client ID of the IAP-secured resource, like IAP_CLIENT_ID.apps.googleusercontent.com'),
           autocomplete: 'off',
           required: false
         },
@@ -483,7 +483,7 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
           type: 'textarea',
           name: 'google_iap_service_account_json',
           title: 'Google IAP Service Account JSON',
-          placeholder: s_('PrometheusService|Contents of the credentials.json file of your service account, like: { "type": "service_account", "project_id": ... }'),
+          placeholder: s_('PrometheusService|Contents of the credentials.json file of your service account, like { "type": "service_account", "project_id": ... }'),
           required: false
         }
       ]
