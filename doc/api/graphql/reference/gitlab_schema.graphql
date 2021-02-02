@@ -15400,10 +15400,29 @@ enum MergeRequestSort {
 State of a GitLab merge request
 """
 enum MergeRequestState {
+  """
+  Merge Request is in any state
+  """
   all
+
+  """
+  Merge Request is closed, not merged
+  """
   closed
+
+  """
+  Merge Request that has its discussion locked
+  """
   locked
+
+  """
+  Merge Request has been merged
+  """
   merged
+
+  """
+  Merge Request is open
+  """
   opened
 }
 
