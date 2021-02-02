@@ -88,7 +88,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
   }
 
   initBrowserPerformanceReport(data) {
-    this.browserPerformance = data.browser_performance;
+    this.browserPerformance = data.performance || data.browser_performance;
     this.browserPerformanceMetrics = {
       improved: [],
       degraded: [],

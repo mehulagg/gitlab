@@ -6,6 +6,21 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      expose :performance, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:performance) } do
+        expose :degradation_threshold do |merge_request|
+          merge_request.head_pipeline&.present(current_user: current_user)
+            &.degradation_threshold(:performance)
+        end
+
+        expose :head_path do |merge_request|
+          head_pipeline_downloadable_path_for_report_type(:performance)
+        end
+
+        expose :base_path do |merge_request|
+          base_pipeline_downloadable_path_for_report_type(:performance)
+        end
+      end
+
       expose :browser_performance, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:browser_performance) } do
         expose :degradation_threshold do |merge_request|
           merge_request.head_pipeline&.present(current_user: current_user)

@@ -786,9 +786,7 @@ module Ci
     end
 
     def artifacts_file_for_type(type)
-      file_types = Ci::JobArtifact.associated_file_types_for(type)
-      file_types_ids = file_types.map { |file_type| Ci::JobArtifact.file_types[file_type] }
-      job_artifacts.find_by(file_type: file_types_ids)&.file
+      job_artifacts.find_by(file_type: Ci::JobArtifact.file_types[type])&.file
     end
 
     def coverage_regex
