@@ -32,11 +32,6 @@ export default {
       type: Boolean,
       required: false,
     },
-    showUploadCsv: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     isOpenTab() {
@@ -91,7 +86,6 @@ export default {
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
       <gl-button-group>
         <gl-button
-          v-if="showUploadCsv"
           v-gl-tooltip
           :title="__('Export as CSV')"
           category="secondary"
@@ -100,7 +94,6 @@ export default {
           @click="$emit('click-export-requirements')"
         />
         <gl-button
-          v-if="showUploadCsv"
           v-gl-tooltip
           :title="__('Import requirements')"
           category="secondary"
