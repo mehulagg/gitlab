@@ -61,7 +61,6 @@ module DeprecationToolkitEnv
       rspec-mocks-3.10.0/lib/rspec/mocks/message_expectation.rb
       activerecord-6.0.3.4/lib/active_record/migration.rb
       devise-4.7.3/lib/devise/test/controller_helpers.rb
-      attr_encrypted-3.1.0/lib/attr_encrypted/adapters/active_record.rb
       rspec-mocks-3.10.0/lib/rspec/mocks/message_expectation.rb
       rspec-expectations-3.10.0/lib/rspec/matchers/built_in/has.rb
       grape-1.5.1/lib/grape/middleware/stack.rb
