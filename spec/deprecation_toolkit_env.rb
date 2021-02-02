@@ -57,7 +57,6 @@ module DeprecationToolkitEnv
     %w[
       ee/lib/ee/gitlab/usage_data.rb
       spec/lib/gitlab/utils/usage_data_spec.rb
-      spec/support/gitlab_experiment.rb
       spec/support/helpers/next_instance_of.rb
       rspec-mocks-3.10.0/lib/rspec/mocks/message_expectation.rb
       activerecord-6.0.3.4/lib/active_record/migration.rb
