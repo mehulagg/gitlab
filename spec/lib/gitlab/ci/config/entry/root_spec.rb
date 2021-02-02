@@ -35,7 +35,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Root do
           variables: { VAR: 'root', VAR2: { value: 'val 2', description: 'this is var 2' } },
           after_script: ['make clean'],
           stages: %w(build pages release),
-          cache: { key: 'k', untracked: true, paths: ['public/'] },
+          cache: [{ key: 'k', untracked: true, paths: ['public/'] }, { key: 'l', untracked: true, paths: ['/logs'] }],
           rspec: { script: %w[rspec ls] },
           spinach: { before_script: [], variables: {}, script: 'spinach' },
           release: {

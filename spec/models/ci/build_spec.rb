@@ -817,7 +817,10 @@ RSpec.describe Ci::Build do
   end
 
   describe '#cache' do
-    let(:options) { { cache: { key: "key", paths: ["public"], policy: "pull-push" } } }
+    let(:options) do
+      { cache: [{ key: "key", paths: ["public"], policy: "pull-push" },
+                { key: "key2", paths: ["public"], policy: "pull-push" }] }
+    end
 
     subject { build.cache }
 

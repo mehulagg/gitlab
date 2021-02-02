@@ -811,8 +811,9 @@ module Ci
       cache = options[:cache]
 
       if cache && project.jobs_cache_index
-        cache = cache.merge(
-          key: "#{cache[:key]}-#{project.jobs_cache_index}")
+        cache.map do |single_cache|
+          cache = single_cache.merge(key: "#{single_cache[:key]}-#{project.jobs_cache_index}")
+        end
       end
 
       [cache]

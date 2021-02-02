@@ -1422,10 +1422,13 @@ module Gitlab
           )
         end
 
-        it 'returns cache key when defined in a job' do
+        it 'returns cache key/s when defined in a job' do
           config = YAML.dump({
                                rspec: {
-                                 cache: { paths: ['logs/', 'binaries/'], untracked: true, key: 'key' },
+                                 cache: [
+                                   { paths: ['binaries/'], untracked: true, key: 'keya' },
+                                   { paths: ['logs/', 'binaries/'], untracked: true, key: 'key' }
+                                  ],
                                  script: 'rspec'
                                }
                              })
@@ -1445,11 +1448,18 @@ module Gitlab
         it 'returns cache files' do
           config = YAML.dump(
             rspec: {
-              cache: {
-                paths: ['logs/', 'binaries/'],
-                untracked: true,
-                key: { files: ['file'] }
-              },
+              cache: [
+                {
+                  paths: ['binaries/'],
+                  untracked: true,
+                  key: { files: ['file'] }
+                },
+                {
+                  paths: ['logs/', 'binaries/'],
+                  untracked: true,
+                  key: { files: ['file'] }
+                }
+              ],
               script: 'rspec'
             }
           )
