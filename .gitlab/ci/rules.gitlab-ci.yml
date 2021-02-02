@@ -940,7 +940,7 @@
       changes: *code-backstage-qa-patterns
       allow_failure: true
 
-.reports:rules:dast:
+.reports:dast-test:
   rules:
     - if: '$DAST_DISABLED || $GITLAB_FEATURES !~ /\bdast\b/'
       when: never
@@ -995,9 +995,7 @@
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *code-qa-patterns
-      # when: manual 
-      # above line commented to trigger the dast scans
-      when: never
+      when: manual 
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-schedule
       allow_failure: true
