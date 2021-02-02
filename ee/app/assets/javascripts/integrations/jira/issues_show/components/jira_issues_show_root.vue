@@ -38,6 +38,9 @@ export default {
     statusBadgeText() {
       return issueStateLabels[this.issue.state];
     },
+    statusIcon() {
+      return this.isIssueOpen ? 'issue-open-m' : 'mobile-issue-close';
+    },
   },
   async mounted() {
     this.issue = convertObjectPropsToCamelCase(await fetchIssue(this.issuesShowPath), {
@@ -73,6 +76,7 @@ export default {
       :issuable="issue"
       :enable-edit="false"
       :status-badge-class="statusBadgeClass"
+      :status-icon="statusIcon"
     >
       <template #status-badge>{{ statusBadgeText }}</template>
 

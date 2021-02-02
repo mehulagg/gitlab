@@ -57,6 +57,7 @@ module Projects
 
         def issue_json
           {
+            title: 'FE-2 The second FE issue on Jira',
             title_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             description_html: '<a href="https://jira.reali.sh:8080/projects/FE/issues/FE-2">FE-2</a> The second FE issue on Jira',
             created_at: 2.hours.ago,
