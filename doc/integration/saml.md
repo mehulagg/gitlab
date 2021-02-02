@@ -168,6 +168,16 @@ These groups are checked on each SAML login and user attributes updated as neces
 This feature **does not** allow you to
 automatically add users to GitLab [Groups](../user/group/index.md).
 
+Support for these groups depends on your [subscription](https://about.gitlab.com/pricing/)
+and whether you've installed [GitLab Enterprise Edition (EE)](https://gitlab.com/gitlab-org/gitlab).
+
+| Group                        | Tier               | GitLab Enterprise Edition (EE) Only? |
+|------------------------------|--------------------|--------------------------------------|
+| [Required](#required-groups) | **(FREE SELF)**    | Yes                                  |
+| [External](#external-groups) | **(FREE SELF)**    | No                                   |
+| [Admin](#admin-groups)       | **(FREE SELF)**    | Yes                                  |
+| [Auditor](#auditor-groups)   | **(PREMIUM SELF)** | Yes                                  |
+
 ### Requirements
 
 First you need to tell GitLab where to look for group information. For this you
@@ -189,7 +199,7 @@ The name of the attribute can be anything you like, but it must contain the grou
 to which a user belongs. In order to tell GitLab where to find these groups, you need
 to add a `groups_attribute:` element to your SAML settings.
 
-### Required groups **(PREMIUM SELF)**
+### Required groups **(FREE SELF)**
 
 Your IdP passes Group Information to the SP (GitLab) in the SAML Response. You need to configure GitLab to identify:
 
@@ -233,7 +243,7 @@ SAML login supports automatic identification on whether a user should be conside
   } }
 ```
 
-### Admin groups **(PREMIUM SELF)**
+### Admin groups **(FREE SELF)**
 
 The requirements are the same as the previous settings, your IdP needs to pass Group information to GitLab, you need to tell
 GitLab where to look for the groups in the SAML response, and which group(s) should be
