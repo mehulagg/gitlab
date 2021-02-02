@@ -15,6 +15,7 @@ module Types
 
     implements(Types::Notes::NoteableType)
     implements(Types::CurrentUserTodos)
+    implements(Types::EventableType)
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the epic.'

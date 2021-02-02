@@ -83,6 +83,48 @@ RSpec.describe 'getting epics information' do
     end
   end
 
+  context 'query for epics with events' do
+    let_it_be(:epic) { create(:epic, group: group) }
+
+    it 'can lookahead to prevent N+1 queries' do
+      create_list(:event, 10, :created, target: epic, group: group)
+
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+        query_epics_with_events(1)
+      end.count
+
+      events = graphql_data['group']['epics']['nodes'].first['events']['nodes']
+      expect(events.count).to eq(1)
+
+      expect do
+        query_epics_with_events(10)
+      end.not_to exceed_all_query_limit(control_count)
+
+      events = Gitlab::Json.parse(response.body)['data']['group']['epics']['nodes'].first['events']['nodes']
+      expect(events.count).to eq(10)
+    end
+  end
+
+  def query_epics_with_events(number)
+    epics_field = <<~NODE
+      epics {
+        nodes {
+          id
+          events(first: #{number}) {
+            nodes {
+              id
+            }
+          }
+        }
+      }
+    NODE
+
+    post_graphql(
+      graphql_query_for('group', { 'fullPath' => group.full_path }, epics_field),
+      current_user: user
+    )
+  end
+
   def epics_query(group, field, value)
     epics_query_by_hash(group, field => value)
   end
