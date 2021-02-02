@@ -147,6 +147,20 @@ export default {
     state.createValueStreamErrors = {};
     state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
   },
+  [types.REQUEST_UPDATE_VALUE_STREAM](state) {
+    state.isEditingValueStream = true;
+    state.createValueStreamErrors = {};
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_ERROR](state, { data: { stages = [] }, errors = {} }) {
+    const { stages: stageErrors = {}, ...rest } = errors;
+    state.createValueStreamErrors = { ...rest, stages: prepareStageErrors(stages, stageErrors) };
+    state.isEditingValueStream = false;
+  },
+  [types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS](state, valueStream) {
+    state.isEditingValueStream = false;
+    state.createValueStreamErrors = {};
+    state.selectedValueStream = convertObjectPropsToCamelCase(valueStream, { deep: true });
+  },
   [types.REQUEST_DELETE_VALUE_STREAM](state) {
     state.isDeletingValueStream = true;
     state.deleteValueStreamError = null;
