@@ -43,12 +43,23 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      showModal: false,
+      isEditing: false,
+      initialData: {
+        name: '',
+        stages: [],
+      },
+    };
+  },
   computed: {
     ...mapState({
       isDeleting: 'isDeletingValueStream',
       deleteValueStreamError: 'deleteValueStreamError',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
+      selectedValueStreamStages: 'stages',
       initialFormErrors: 'createValueStreamErrors',
     }),
     hasValueStreams() {
@@ -91,10 +102,29 @@ export default {
         }
       });
     },
+    onHide() {
+      this.showModal = false;
+      console.log('onHide::hidden');
+    },
+    onCreate() {
+      this.showModal = true;
+      this.initialData = {
+        name: '',
+        stages: [],
+      };
+      console.log('Creating', this.isEditing, this.initialData);
+    },
     onEdit() {
       // TODO: trigger the modal with the selected value stream
-      console.log('Editing', this.selectedValueStreamId);
-      this.setSelectedValueStream(this.selectedValueStreamId);
+      this.showModal = true;
+      this.isEditing = true;
+      this.initialData = {
+        ...this.selectedValueStream,
+        stages: this.selectedValueStreamStages,
+      };
+
+      console.log('Editing', this.selectedValueStream, this.isEditing, this.initialData);
+      // this.setSelectedValueStream(this.selectedValueStreamId);
       // TODO: programmtically launch the modal? + preset the values
     },
   },
@@ -121,7 +151,7 @@ export default {
         >{{ streamName }}</gl-dropdown-item
       >
       <gl-dropdown-divider />
-      <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'">{{
+      <gl-dropdown-item v-gl-modal-directive="'value-stream-form-modal'" @click="onCreate">{{
         $options.I18N.CREATE_VALUE_STREAM
       }}</gl-dropdown-item>
       <gl-dropdown-item
@@ -136,8 +166,12 @@ export default {
       $options.I18N.CREATE_VALUE_STREAM
     }}</gl-button>
     <value-stream-form
+      v-if="showModal"
+      :initial-data="initialData"
       :initial-form-errors="initialFormErrors"
       :has-extended-form-fields="hasExtendedFormFields"
+      :is-editing="isEditing"
+      @hidden="onHide"
     />
     <gl-modal
       data-testid="delete-value-stream-modal"

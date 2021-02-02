@@ -68,15 +68,25 @@ export default {
       required: false,
       default: false,
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
-    const { hasExtendedFormFields, initialData, initialFormErrors, initialPreset } = this;
+    const {
+      hasExtendedFormFields,
+      initialData: { name: initialName, stages: initialStages },
+      initialFormErrors,
+      initialPreset,
+    } = this;
+    console.log('data::initialData', initialStages, initialName);
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages: initializeStages(initialPreset),
+          stages: this.isEditing ? initialStages : initializeStages(initialPreset),
           stageErrors: stageErrors || initializeStageErrors(initialPreset),
-          ...initialData,
         }
       : { stages: [], nameError };
 
@@ -84,7 +94,7 @@ export default {
       hiddenStages: [],
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
-      name: '',
+      name: initialName,
       nameError,
       stageErrors,
       ...additionalFields,
@@ -130,11 +140,15 @@ export default {
       );
     },
   },
-  watch: {
-    initialFormErrors({ name: nameError, stages: stageErrors }) {
-      Vue.set(this, 'nameError', nameError);
-      Vue.set(this, 'stageErrors', stageErrors);
-    },
+  // TODO: do we still need this if we are hiding the form correctly?
+  // watch: {
+  //   initialFormErrors({ name: nameError, stages: stageErrors }) {
+  //     Vue.set(this, 'nameError', nameError);
+  //     Vue.set(this, 'stageErrors', stageErrors);
+  //   },
+  // },
+  mounted() {
+    console.log('ValueStreamForm::mounted', this.initialData);
   },
   methods: {
     ...mapActions(['createValueStream']),
@@ -252,6 +266,7 @@ export default {
     :action-primary="primaryProps"
     :action-secondary="secondaryProps"
     :action-cancel="{ text: $options.I18N.BTN_CANCEL }"
+    @hidden.prevent="$emit('hidden')"
     @secondary.prevent="onAddStage"
     @primary.prevent="onSubmit"
   >
