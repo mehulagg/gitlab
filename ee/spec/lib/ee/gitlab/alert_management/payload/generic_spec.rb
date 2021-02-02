@@ -3,9 +3,88 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::AlertManagement::Payload::Generic do
-  let_it_be(:project) { build_stubbed(:project) }
-  let(:raw_payload) { {} }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:raw_payload) { {} }
   let(:parsed_payload) { described_class.new(project: project, payload: raw_payload) }
+
+  shared_examples 'parsing alert payload fields with default paths' do
+    describe '#title' do
+      subject { parsed_payload.title }
+
+      it { is_expected.to eq('default title') }
+    end
+  end
+
+  describe 'attributes' do
+    let_it_be(:raw_payload) do
+      {
+        'title' => 'default title',
+        'alert' => {
+          'name' => 'mapped title'
+        }
+      }
+    end
+
+    context 'with multiple HTTP integrations feature available' do
+      before do
+        stub_licensed_features(multiple_alert_http_integrations: true)
+      end
+
+      context 'with multiple_http_integrations_custom_mapping feature flag enabled' do
+        let_it_be(:attribute_mapping) do
+          {
+            title: { path: %w(alert name), type: 'string', label: 'Name' }
+          }
+        end
+
+        before do
+          stub_feature_flags(multiple_http_integrations_custom_mapping: project)
+        end
+
+        context 'with defined custom mapping' do
+          let_it_be(:integration) do
+            create(:alert_management_http_integration, project: project, payload_attribute_mapping: attribute_mapping)
+          end
+
+          context '#title' do
+            subject { parsed_payload.title }
+
+            it { is_expected.to eq('mapped title') }
+          end
+        end
+
+        context 'with inactive HTTP integration' do
+          let_it_be(:integration) do
+            create(:alert_management_http_integration, :inactive, project: project, payload_attribute_mapping: attribute_mapping)
+          end
+
+          it_behaves_like 'parsing alert payload fields with default paths'
+        end
+
+        context 'with blank custom mapping' do
+          let_it_be(:integration) { create(:alert_management_http_integration, project: project) }
+
+          it_behaves_like 'parsing alert payload fields with default paths'
+        end
+      end
+
+      context 'with multiple_http_integrations_custom_mapping feature flag disabled' do
+        before do
+          stub_feature_flags(multiple_http_integrations_custom_mapping: false)
+        end
+
+        it_behaves_like 'parsing alert payload fields with default paths'
+      end
+    end
+
+    context 'with multiple HTTP integrations feature unavailable' do
+      before do
+        stub_licensed_features(multiple_alert_http_integrations: false)
+      end
+
+      it_behaves_like 'parsing alert payload fields with default paths'
+    end
+  end
 
   describe '#gitlab_fingerprint' do
     subject { parsed_payload.gitlab_fingerprint }

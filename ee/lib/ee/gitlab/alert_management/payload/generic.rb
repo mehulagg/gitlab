@@ -7,8 +7,17 @@ module EE
       module Payload
         module Generic
           extend ::Gitlab::Utils::Override
+          # extend ActiveSupport::Concern
 
           EXCLUDED_PAYLOAD_FINGERPRINT_PARAMS = %w(start_time end_time hosts).freeze
+
+          prepended do
+            override :attribute_paths
+            def self.attribute_paths(default)
+              # NOT CALLED
+              default
+            end
+          end
 
           private
 
