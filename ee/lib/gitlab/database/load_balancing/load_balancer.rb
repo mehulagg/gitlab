@@ -113,6 +113,8 @@ module Gitlab
         def primary_write_location
           location = read_write do |connection|
             ::Gitlab::Database.get_write_location(connection)
+          rescue ActiveRecord::StatementInvalid
+            ::Gitlab::Database.get_replay_write_location(connection)
           end
 
           return location if location
