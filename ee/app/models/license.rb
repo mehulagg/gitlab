@@ -122,6 +122,7 @@ class License < ApplicationRecord
     swimlanes
     group_timelogs
     type_of_work_analytics
+    two_factor_in_git_cli
     minimal_access_role
     unprotection_restrictions
     ci_project_subscriptions
