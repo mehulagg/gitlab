@@ -153,8 +153,8 @@ Remember to change the entry point to launch a bash login shell if you chose the
 
 Here are some examples to get you started:
 
--   <https://gitlab.com/gitlab-org/security-products/license-management/-/blob/0b976fcffe0a9b8e80587adb076bcdf279c9331c/config/install.sh#L168-170>
--   <https://gitlab.com/gitlab-org/security-products/license-management/-/blob/0b976fcffe0a9b8e80587adb076bcdf279c9331c/config/.bashrc#L49>
+- <https://gitlab.com/gitlab-org/security-products/license-management/-/blob/0b976fcffe0a9b8e80587adb076bcdf279c9331c/config/install.sh#L168-170>
+- <https://gitlab.com/gitlab-org/security-products/license-management/-/blob/0b976fcffe0a9b8e80587adb076bcdf279c9331c/config/.bashrc#L49>
 
 ### Image tag
 
@@ -246,11 +246,11 @@ one set in the `SECURE_LOG_LEVEL` variable. For instance, `info` and `warn`
 messages should be skipped when `SECURE_LOG_LEVEL` is set to `error`. Accepted
 values are as follows, listed from highest to lowest:
 
--   `fatal`
--   `error`
--   `warn`
--   `info`
--   `debug`
+- `fatal`
+- `error`
+- `warn`
+- `info`
+- `debug`
 
 It is recommended to use the `debug` level for verbose logging that could be
 useful when debugging. The default value for `SECURE_LOG_LEVEL` should be set
@@ -286,10 +286,10 @@ and [Container Scanning](../../../user/application_security/container_scanning/i
 
 You can find the schemas for these scanners here:
 
--   [SAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json)
--   [DAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dast-report-format.json)
--   [Dependency Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dependency-scanning-report-format.json)
--   [Container Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/container-scanning-report-format.json)
+- [SAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/sast-report-format.json)
+- [DAST](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dast-report-format.json)
+- [Dependency Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/dependency-scanning-report-format.json)
+- [Container Scanning](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/container-scanning-report-format.json)
 
 ### Version
 
@@ -326,7 +326,7 @@ whereas the `message` may repeat the location.
 As a visual example, this screenshot highlights where these fields are used when viewing a
 vulnerability as part of a pipeline view.
 
-![Example Vulnerability](img/example_vuln.png)
+![Example Vulnerability](../img/example_vuln.png)
 
 For instance, a `message` for a vulnerability
 reported by Dependency Scanning gives information on the vulnerable dependency,
@@ -503,16 +503,16 @@ All other attributes are optional.
 
 Users may give feedback on a vulnerability:
 
--   They may dismiss a vulnerability if it doesn't apply to their projects
--   They may create an issue for a vulnerability if there's a possible threat
+- They may dismiss a vulnerability if it doesn't apply to their projects
+- They may create an issue for a vulnerability if there's a possible threat
 
 GitLab tracks vulnerabilities so that user feedback is not lost
 when new Git commits are pushed to the repository.
 Vulnerabilities are tracked using a combination of three attributes:
 
--   [Report type](#category)
--   [Location fingerprint](#location)
--   [Primary identifier](#identifiers)
+- [Report type](#category)
+- [Location fingerprint](#location)
+- [Primary identifier](#identifiers)
 
 Right now, GitLab cannot track a vulnerability if its location changes
 as new Git commits are pushed, and this results in user feedback being lost.
@@ -608,8 +608,8 @@ The `diff` field is a base64-encoded remediation code diff, compatible with
 
 Container Scanning currently has these limitations:
 
--   Although the Security Dashboard can display scan results from multiple images, if multiple
+- Although the Security Dashboard can display scan results from multiple images, if multiple
     vulnerabilities have the same fingerprint, only the first instance of that vulnerability is
     displayed. We're working on removing this limitation. You can follow our progress on the issue
     [Change location fingerprint for Container Scanning](https://gitlab.com/gitlab-org/gitlab/-/issues/215466).
--   Different scanners may each report the same vulnerability, resulting in duplicate findings.
+- Different scanners may each report the same vulnerability, resulting in duplicate findings.
