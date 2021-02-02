@@ -37,7 +37,7 @@ module ComplianceManagement
       def force_includes_available?
         return true unless params[:pipeline_configuration_full_path].present?
 
-        can? current_user, :manage_compliance_forced_includes, framework
+        can? current_user, :manage_compliance_force_includes, framework
       end
 
       def success
