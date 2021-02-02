@@ -10,8 +10,16 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { capitalize } from 'lodash';
-import { formatDate } from '~/lib/utils/datetime_utility';
 import { s__, __ } from '~/locale';
+import * as Sentry from '~/sentry/wrapper';
+import { fetchPolicies } from '~/lib/graphql';
+import {
+  formatDate,
+  nWeeksBefore,
+  nWeeksAfter,
+  nDaysBefore,
+  nDaysAfter,
+} from '~/lib/utils/datetime_utility';
 import ScheduleTimelineSection from './schedule/components/schedule_timeline_section.vue';
 import DeleteScheduleModal from './delete_schedule_modal.vue';
 import EditScheduleModal from './add_edit_schedule_modal.vue';
@@ -19,6 +27,7 @@ import AddEditRotationModal from './rotations/components/add_edit_rotation_modal
 import RotationsListSection from './schedule/components/rotations_list_section.vue';
 import { getTimeframeForWeeksView } from './schedule/utils';
 import { addRotationModalId, editRotationModalId, PRESET_TYPES } from '../constants';
+import getShiftsForRotations from '../graphql/queries/get_oncall_schedules_with_rotations_shifts.query.graphql';
 
 export const i18n = {
   scheduleForTz: s__('OnCallSchedules|On-call schedule for the %{timezone}'),
@@ -54,21 +63,42 @@ export default {
     GlModal: GlModalDirective,
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['timezones'],
+  inject: ['projectPath', 'timezones'],
   props: {
     schedule: {
       type: Object,
       required: true,
     },
+  },
+  apollo: {
     rotations: {
-      type: Array,
-      required: false,
-      default: () => [],
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
+      query: getShiftsForRotations,
+      variables() {
+        const startsAt = this.timeframeStartDate;
+        const endsAt = new Date(nWeeksAfter(startsAt, 2));
+
+        return {
+          projectPath: this.projectPath,
+          startsAt,
+          endsAt,
+        };
+      },
+      update(data) {
+        const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
+        const schedule = nodes.pop() || {};
+        return schedule?.rotations.nodes ?? [];
+      },
+      error(error) {
+        Sentry.captureException(error);
+      },
     },
   },
   data() {
     return {
       presetType: this.$options.PRESET_TYPES.WEEKS,
+      timeframeStartDate: new Date(),
+      rotations: this.schedule.rotations.nodes,
     };
   },
   computed: {
@@ -77,24 +107,61 @@ export default {
       return __(`(UTC ${selectedTz.formatted_offset})`);
     },
     timeframe() {
-      return getTimeframeForWeeksView();
+      return getTimeframeForWeeksView(this.timeframeStartDate);
     },
     scheduleRange() {
-      const end =
-        this.presetType === this.$options.PRESET_TYPES.DAYS
-          ? this.timeframe[0]
-          : this.timeframe[this.timeframe.length - 1];
-      const range = { start: this.timeframe[0], end };
+      switch (this.presetType) {
+        case PRESET_TYPES.DAYS:
+          return formatDate(this.timeframe[0], 'mmmm d, yyyy');
+        case PRESET_TYPES.WEEKS: {
+          const firstDayOfTheLastWeek = this.timeframe[this.timeframe.length - 1];
+          const firstDayOfTheNextTimeframe = nWeeksAfter(firstDayOfTheLastWeek, 1);
+          const lastDayOfTimeframe = nDaysBefore(new Date(firstDayOfTheNextTimeframe), 1);
 
-      return `${formatDate(range.start, 'mmmm d')} - ${formatDate(range.end, 'mmmm d, yyyy')}`;
+          return `${formatDate(this.timeframe[0], 'mmmm d')} - ${formatDate(
+            lastDayOfTimeframe,
+            'mmmm d, yyyy',
+          )}`;
+        }
+        default:
+          return '';
+      }
+    },
+    isLoading() {
+      return this.$apollo.queries.rotations.loading;
     },
   },
   methods: {
-    setPresetType(type) {
+    switchPresetType(type) {
       this.presetType = type;
+      this.timeframeStartDate = new Date();
     },
     formatPresetType(type) {
       return capitalize(type);
+    },
+    updateToViewPreviousTimeframe() {
+      switch (this.presetType) {
+        case PRESET_TYPES.DAYS:
+          this.timeframeStartDate = new Date(nDaysBefore(this.timeframeStartDate, 1));
+          break;
+        case PRESET_TYPES.WEEKS:
+          this.timeframeStartDate = new Date(nWeeksBefore(this.timeframeStartDate, 2));
+          break;
+        default:
+          break;
+      }
+    },
+    updateToViewNextTimeframe() {
+      switch (this.presetType) {
+        case PRESET_TYPES.DAYS:
+          this.timeframeStartDate = new Date(nDaysAfter(this.timeframeStartDate, 1));
+          break;
+        case PRESET_TYPES.WEEKS:
+          this.timeframeStartDate = new Date(nWeeksAfter(this.timeframeStartDate, 2));
+          break;
+        default:
+          break;
+      }
     },
   },
 };
@@ -141,15 +208,25 @@ export default {
             :key="type"
             :is-check-item="true"
             :is-checked="type === presetType"
-            @click="setPresetType(type)"
+            @click="switchPresetType(type)"
             >{{ formatPresetType(type) }}</gl-dropdown-item
           >
         </gl-dropdown>
       </p>
       <div class="gl-w-full gl-display-flex gl-align-items-center gl-pb-3">
         <gl-button-group>
-          <gl-button icon="chevron-left" />
-          <gl-button icon="chevron-right" />
+          <gl-button
+            data-testid="previous-timeframe-btn"
+            icon="chevron-left"
+            :disabled="isLoading"
+            @click="updateToViewPreviousTimeframe"
+          />
+          <gl-button
+            data-testid="next-timeframe-btn"
+            icon="chevron-right"
+            :disabled="isLoading"
+            @click="updateToViewNextTimeframe"
+          />
         </gl-button-group>
         <p class="gl-ml-3 gl-mb-0">{{ scheduleRange }}</p>
       </div>

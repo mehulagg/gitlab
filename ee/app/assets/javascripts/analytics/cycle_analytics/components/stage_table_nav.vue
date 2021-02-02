@@ -1,10 +1,10 @@
 <script>
 import Sortable from 'sortablejs';
-import StageNavItem from './stage_nav_item.vue';
-import AddStageButton from './add_stage_button.vue';
 import { STAGE_ACTIONS } from '../constants';
 import { NO_DRAG_CLASS } from '../../shared/constants';
 import sortableDefaultOptions from '../../shared/mixins/sortable_default_options';
+import AddStageButton from './add_stage_button.vue';
+import StageNavItem from './stage_nav_item.vue';
 
 export default {
   name: 'StageTableNav',

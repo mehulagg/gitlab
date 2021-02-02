@@ -108,6 +108,25 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
     end
 
+    describe '#default_branch' do
+      include_examples 'audit event logging' do
+        let(:operation) { update_project(project, user, default_branch: 'feature') }
+        let(:fail_condition!) do
+          allow_next_instance_of(Project) do |project|
+            allow(project).to receive(:change_head).and_return(false)
+          end
+        end
+
+        let(:attributes) do
+          audit_event_params.tap do |param|
+            param[:details].merge!(
+              custom_message: "Default branch changed from master to feature"
+            )
+          end
+        end
+      end
+    end
+
     describe '#visibility' do
       include_examples 'audit event logging' do
         let(:operation) do
@@ -310,18 +329,18 @@ RSpec.describe Projects::UpdateService, '#execute' do
         expect { update_project(project, user, opts) }.to change {
           project
             .reload
-            .compliance_management_frameworks
-        }.from([]).to([framework])
+            .compliance_management_framework
+        }.from(nil).to(framework)
       end
 
       it 'unassigns a framework from a project' do
-        project.compliance_management_frameworks = [framework]
+        project.compliance_management_framework = framework
 
         expect { update_project(project, user, { compliance_framework_setting_attributes: { framework: nil } }) }.to change {
           project
             .reload
-            .compliance_management_frameworks
-        }.from([framework]).to([])
+            .compliance_management_framework
+        }.from(framework).to(nil)
       end
     end
 
@@ -331,7 +350,9 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
 
       it 'does not set a framework' do
-        expect { update_project(project, user, opts) }.not_to change { project.reload.compliance_management_frameworks.count }
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_management_framework).not_to be_present
       end
     end
   end

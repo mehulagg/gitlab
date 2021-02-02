@@ -4,15 +4,15 @@ import dateFormat from 'dateformat';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { Namespace } from '../constants';
+import BurnupQuery from '../graphql/burnup.query.graphql';
+import BurndownChartData from '../burn_chart_data';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import TimeboxSummaryCards from './timebox_summary_cards.vue';
 import OpenTimeboxSummary from './open_timebox_summary.vue';
-import { Namespace } from '../constants';
-import BurnupQuery from '../graphql/burnup.query.graphql';
-import BurndownChartData from '../burn_chart_data';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {

@@ -5,9 +5,8 @@ import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui'
 
 import { __ } from '~/locale';
 
-import TreeItemBody from './tree_item_body.vue';
-
 import { ChildType } from '../constants';
+import TreeItemBody from './tree_item_body.vue';
 
 export default {
   ChildType,

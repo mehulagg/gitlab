@@ -1,0 +1,5 @@
+---
+title: Add last_activity_on attribute to Billable Members API
+merge_request: 52666
+author:
+type: changed

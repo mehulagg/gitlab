@@ -19,12 +19,15 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
 
+    it { is_expected.to delegate_method(:pipeline_configuration_full_path).to(:compliance_management_framework) }
+
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
     it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
     it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
+    it { is_expected.to have_one(:compliance_management_framework).class_name('ComplianceManagement::Framework') }
     it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
     it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
 

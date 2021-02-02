@@ -53,7 +53,7 @@ describe('RotationAssignee', () => {
     });
 
     it('should render an assignee schedule and rotation information in a popover', () => {
-      expect(findPopOver().attributes('target')).toBe(assignee.participant.id);
+      expect(findPopOver().attributes('target')).toBe(assignee.id);
       expect(findStartsAt().text()).toContain(formattedDate(assignee.startsAt));
       expect(findEndsAt().text()).toContain(formattedDate(assignee.endsAt));
     });

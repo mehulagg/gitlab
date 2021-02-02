@@ -35,6 +35,17 @@ RSpec.describe IncidentManagement::OncallRotation do
     end
   end
 
+  describe 'scopes' do
+    describe '.started' do
+      subject { described_class.started }
+
+      let_it_be(:rotation_1) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let_it_be(:rotation_2) { create(:incident_management_oncall_rotation, schedule: schedule, starts_at: 1.week.from_now) }
+
+      it { is_expected.to contain_exactly(rotation_1) }
+    end
+  end
+
   describe '#shift_duration' do
     let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule, length: 5, length_unit: :days) }
 

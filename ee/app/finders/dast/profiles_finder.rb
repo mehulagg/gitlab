@@ -2,7 +2,7 @@
 
 module Dast
   class ProfilesFinder
-    DEFAULT_SORT = { id: :asc }.freeze
+    DEFAULT_SORT = { id: :desc }.freeze
 
     def initialize(params = {})
       @params = params

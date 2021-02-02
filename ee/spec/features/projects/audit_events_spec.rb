@@ -8,6 +8,8 @@ RSpec.describe 'Projects > Audit Events', :js do
   let(:project) { create(:project, :repository, namespace: user.namespace) }
 
   before do
+    stub_feature_flags(vue_project_members_list: false)
+
     project.add_maintainer(user)
     sign_in(user)
   end

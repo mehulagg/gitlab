@@ -2,10 +2,10 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { fullEpicId } from '../../boards_util';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import createFlash from '~/flash';
 import { __, s__ } from '~/locale';
+import { fullEpicId } from '../../boards_util';
 
 export default {
   components: {

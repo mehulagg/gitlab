@@ -4,9 +4,9 @@ import { camelCase, kebabCase } from 'lodash';
 import * as Sentry from '~/sentry/wrapper';
 import { __, s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {

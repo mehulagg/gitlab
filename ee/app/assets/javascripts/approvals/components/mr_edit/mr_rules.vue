@@ -1,8 +1,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
-import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR, RULE_NAME_ANY_APPROVER } from '../../constants';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
+import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR, RULE_NAME_ANY_APPROVER } from '../../constants';
 import Rules from '../rules.vue';
 import RuleControls from '../rule_controls.vue';
 import EmptyRule from '../empty_rule.vue';

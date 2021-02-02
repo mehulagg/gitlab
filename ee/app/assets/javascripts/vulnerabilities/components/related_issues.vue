@@ -6,8 +6,8 @@ import RelatedIssuesBlock from '~/related_issues/components/related_issues_block
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import { sprintf, __, s__ } from '~/locale';
 import { joinPaths, redirectTo } from '~/lib/utils/url_utility';
-import { RELATED_ISSUES_ERRORS } from '../constants';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { RELATED_ISSUES_ERRORS } from '../constants';
 import { getFormattedIssue, getAddRelatedIssueRequestParams } from '../helpers';
 
 export default {

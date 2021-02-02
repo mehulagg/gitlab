@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import createStore from './stores';
 import projectSettingsModule from './stores/modules/project_settings';
 import ProjectSettingsApp from './components/project_settings/app.vue';
-import { parseBoolean } from '~/lib/utils/common_utils';
 
 Vue.use(Vuex);
 

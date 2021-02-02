@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import WeightSelect from 'ee/boards/components/weight_select.vue';
 import { GlButton, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import WeightSelect from 'ee/boards/components/weight_select.vue';
 
 describe('WeightSelect', () => {
   let wrapper;

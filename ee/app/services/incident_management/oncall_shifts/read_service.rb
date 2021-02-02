@@ -15,6 +15,7 @@ module IncidentManagement
         @current_user = current_user
         @start_time = start_time
         @end_time = end_time
+        @current_time = Time.current
       end
 
       def execute
@@ -23,16 +24,42 @@ module IncidentManagement
         return error_invalid_range unless start_before_end?
         return error_excessive_range unless under_max_timeframe?
 
-        success(
-          ::IncidentManagement::OncallShiftGenerator
-          .new(rotation)
-          .for_timeframe(starts_at: start_time, ends_at: end_time)
-        )
+        persisted_shifts = find_shifts
+        generated_shifts = generate_shifts
+        shifts = combine_shifts(persisted_shifts, generated_shifts)
+
+        success(shifts)
       end
 
       private
 
-      attr_reader :rotation, :current_user, :start_time, :end_time
+      attr_reader :rotation, :current_user, :start_time, :end_time, :current_time
+
+      def find_shifts
+        rotation
+          .shifts
+          .for_timeframe(start_time, [end_time, current_time].min)
+          .order_starts_at_desc
+      end
+
+      def generate_shifts
+        ::IncidentManagement::OncallShiftGenerator
+          .new(rotation)
+          .for_timeframe(
+            starts_at: [start_time, current_time].max,
+            ends_at: end_time
+          )
+      end
+
+      def combine_shifts(persisted_shifts, generated_shifts)
+        return generated_shifts unless persisted_shifts.present?
+
+        # Remove duplicate or overlapping shifts
+        min_start_time = persisted_shifts.last.ends_at
+        generated_shifts.reject! { |shift| shift.starts_at < min_start_time }
+
+        persisted_shifts + generated_shifts
+      end
 
       def available?
         ::Gitlab::IncidentManagement.oncall_schedules_available?(rotation.project)

@@ -73,7 +73,7 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
     createFlash(
       sprintf(
         s__(
-          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Silver plan.',
+          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Premium plan.',
         ),
         {
           invalidProjects,
