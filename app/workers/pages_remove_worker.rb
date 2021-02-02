@@ -12,6 +12,5 @@ class PagesRemoveWorker # rubocop:disable Scalability/IdempotentWorker
     return unless project
 
     project.remove_pages
-    project.pages_domains.delete_all
   end
 end

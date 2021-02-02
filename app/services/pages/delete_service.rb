@@ -3,6 +3,9 @@
 module Pages
   class DeleteService < BaseService
     def execute
+      project.mark_pages_as_not_deployed # prevents domain from updating config when deleted
+      project.pages_domains.delete_all
+
       PagesRemoveWorker.perform_async(project.id)
     end
   end
