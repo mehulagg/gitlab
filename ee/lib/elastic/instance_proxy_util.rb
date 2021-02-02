@@ -54,6 +54,15 @@ module Elastic
       nil
     end
 
+    # protect against missing project_feature and set visibility to PRIVATE
+    # if the project_feature is missing on a project
+    def safely_read_project_feature_for_elasticsearch(feature)
+      target.project.project_feature.issues_access_level
+    rescue NoMethodError => e
+      Gitlab::ErrorTracking.track_exception(e, project_id: target.project_id, issue_id: target.id)
+      ProjectFeature::PRIVATE
+    end
+
     def apply_field_limit(result)
       return result unless result.is_a? String
 

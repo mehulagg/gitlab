@@ -20,7 +20,17 @@ module Elastic
             'author_id' => noteable.author_id,
             'confidential' => noteable.confidential
           }
+          data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues_access_level)
+        elsif noteable.is_a?(Snippet)
+          data['snippets_access_level'] = safely_read_project_feature_for_elasticsearch(:snippets_access_level)
+        elsif noteable.is_a?(MergeRequest)
+          data['merge_requests_access_level'] = safely_read_project_feature_for_elasticsearch(:merge_requests_access_level)
+        elsif noteable.is_a?(Commit)
+          data['repository_access_level'] = safely_read_project_feature_for_elasticsearch(:repository_access_level)
         end
+        # TODO - do we index Epic or Wiki comments?
+
+        data['visibility_level'] = target.project.visibility_level
 
         data.merge(generic_attributes)
       end

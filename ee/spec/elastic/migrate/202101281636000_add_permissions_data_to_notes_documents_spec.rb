@@ -1,0 +1,133 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+require File.expand_path('ee/elastic/migrate/20210128163600_add_permissions_data_to_notes_documents.rb')
+
+RSpec.describe AddPermissionsDataToNotesDocuments, :elastic, :sidekiq_inline do
+  let(:version) { 20210128163600 }
+  let(:migration) { described_class.new(version) }
+  let(:helper) { Gitlab::Elastic::Helper.new }
+
+  before do
+    stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+    allow(migration).to receive(:helper).and_return(helper)
+  end
+
+  describe 'migration_options' do
+    it 'has migration options set', :aggregate_failures do
+      expect(migration.batched?).to be_truthy
+      expect(migration.throttle_delay).to eq(5.minutes)
+    end
+  end
+
+  describe '.migrate' do
+    let!(:note_on_commit) { create(:note_on_commit) }
+    let!(:note_on_issue) { create(:note_on_issue) }
+    let!(:note_on_merge_request) { create(:note_on_merge_request) }
+    let!(:note_on_snippet) { create(:note_on_project_snippet) }
+
+    before do
+      ensure_elasticsearch_index!
+    end
+
+    context 'when migration is completed' do
+      it 'does not execute delete_by_query' do
+        expect(migration.completed?).to be_truthy
+        expect(::Elastic::ProcessBookkeepingService).not_to receive(:track!)
+
+        migration.migrate
+      end
+    end
+
+    context 'migration process' do
+      before do
+        remove_permission_data_for_notes([note_on_commit, note_on_issue, note_on_merge_request, note_on_snippet])
+      end
+
+      it 'adds permission data to the index' do
+        # track calls are batched in groups of 100
+        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).once do |*tracked_refs|
+          expect(tracked_refs.count).to eq(4)
+        end
+
+        migration.migrate
+      end
+
+      it 'only updates note documents missing data', :aggregate_failures do
+        add_permission_data_for_notes([note_on_issue, note_on_snippet, note_on_merge_request])
+
+        expected = [Gitlab::Elastic::DocumentReference.new(Note, note_on_commit.id, note_on_commit.es_id, note_on_commit.es_parent)]
+        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).with(*expected).once
+
+        migration.migrate
+      end
+
+      it 'processes in batches', :aggregate_failures do
+        stub_const("#{described_class}::QUERY_BATCH_SIZE", 2)
+        stub_const("#{described_class}::UPDATE_BATCH_SIZE", 1)
+
+        expect(::Elastic::ProcessBookkeepingService).to receive(:track!).exactly(4).times.and_call_original
+
+        migration.migrate
+
+        ensure_elasticsearch_index!
+
+        migration.migrate
+      end
+    end
+  end
+
+  private
+
+  def add_permission_data_for_notes(notes)
+    script =  {
+      source: "ctx._source['visibility_level'] = params.visibility_level; ctx._source['issues_access_level'] = params.visibility_level; ctx._source['merge_requests_access_level'] = params.visibility_level; ctx._source['snippets_access_level'] = params.visibility_level; ctx._source['repository_access_level'] = params.visibility_level;",
+      lang: "painless",
+      params: {
+        visibility_level: Gitlab::VisibilityLevel::PRIVATE
+      }
+    }
+
+    update_by_query(notes, script)
+  end
+
+  def remove_permission_data_for_notes(notes)
+    script =  {
+      source: "ctx._source.remove('visibility_level'); ctx._source.remove('repository_access_level'); ctx._source.remove('snippets_access_level'); ctx._source.remove('merge_requests_access_level'); ctx._source.remove('issues_access_level');"
+    }
+
+    update_by_query(notes, script)
+  end
+
+  def update_by_query(notes, script)
+    note_ids = notes.map { |i| i.id }
+
+    client = Note.__elasticsearch__.client
+    client.update_by_query({
+                             index: Note.__elasticsearch__.index_name,
+                             wait_for_completion: true, # run synchronously
+                             refresh: true, # make operation visible to search
+                             body: {
+                               script: script,
+                               query: {
+                                 bool: {
+                                   must: [
+                                     {
+                                       terms: {
+                                         id: note_ids
+                                       }
+                                     },
+                                     {
+                                       term: {
+                                         type: {
+                                           value: 'note'
+                                         }
+                                       }
+                                     }
+                                   ]
+                                 }
+                               }
+                             }
+                           })
+  end
+end

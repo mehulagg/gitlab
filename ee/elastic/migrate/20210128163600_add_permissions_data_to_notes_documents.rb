@@ -1,0 +1,117 @@
+# frozen_string_literal: true
+
+class AddPermissionsDataToNotesDocuments < Elastic::Migration
+  batched!
+  throttle_delay 5.minutes # TODO - is this long enough
+
+  QUERY_BATCH_SIZE = 5000
+  UPDATE_BATCH_SIZE = 100
+
+  def migrate
+    if completed?
+      log "Skipping adding permission data to notes documents migration since it is already applied"
+      return
+    end
+
+    log "Adding permission data to notes documents for batch of #{QUERY_BATCH_SIZE} documents"
+
+    query = {
+      size: QUERY_BATCH_SIZE,
+      query: {
+        bool: {
+          must: note_type_filter,
+          should: [
+            field_does_not_exist('visibility_level'),
+            field_does_not_exist_for_type('issues_access_level', 'Issue'),
+            field_does_not_exist_for_type('repository_access_level', 'Commit'),
+            field_does_not_exist_for_type('merge_requests_access_level', 'MergeRequest'),
+            field_does_not_exist_for_type('snippets_access_level', 'Snippet')
+          ],
+          minimum_should_match: 1
+        }
+      }
+    }
+
+    results = client.search(index: helper.target_index_name, body: query)
+    hits = results.dig('hits', 'hits') || []
+
+    document_references = hits.map do |hit|
+      id = hit.dig('_source', 'id')
+      es_id = hit.dig('_id')
+      es_parent = hit.dig('_source', 'join_field', 'parent')
+
+      # ensure that any notes missing from the database will be removed from Elasticsearch
+      # as the data is back-filled
+      Gitlab::Elastic::DocumentReference.new(Note, id, es_id, es_parent)
+    end
+
+    document_references.each_slice(UPDATE_BATCH_SIZE) do |refs|
+      Elastic::ProcessBookkeepingService.track!(*refs)
+    end
+
+    log "Adding permission data to notes documents is completed for batch of #{document_references.size} documents"
+  end
+
+  def completed?
+    query = {
+      size: 0,
+      query: note_type_filter,
+      aggs: {
+        notes: {
+          filter: {
+            bool: {
+              should: [
+                field_does_not_exist('visibility_level'),
+                field_does_not_exist_for_type('issues_access_level', 'Issue'),
+                field_does_not_exist_for_type('repository_access_level', 'Commit'),
+                field_does_not_exist_for_type('merge_requests_access_level', 'MergeRequest'),
+                field_does_not_exist_for_type('snippets_access_level', 'Snippet')
+              ],
+              minimum_should_match: 1
+            }
+          }
+        }
+      }
+    }
+
+    results = client.search(index: helper.target_index_name, body: query)
+    doc_count = results.dig('aggregations', 'notes', 'doc_count')
+    doc_count && doc_count == 0
+  end
+
+  private
+
+  def note_type_filter
+    {
+      term: {
+        type: {
+          value: 'note'
+        }
+      }
+    }
+  end
+
+  def field_does_not_exist(field)
+    {
+      bool: {
+        must_not: {
+          exists: {
+            field: field
+          }
+        }
+      }
+    }
+  end
+
+  def field_does_not_exist_for_type(field, type)
+    query = field_does_not_exist(field)
+    query[:bool][:must] = {
+      term: {
+        noteable_type: {
+          value: type
+        }
+      }
+    }
+    query
+  end
+end
