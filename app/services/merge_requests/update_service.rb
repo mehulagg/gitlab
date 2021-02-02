@@ -87,6 +87,19 @@ module MergeRequests
       MergeRequests::CloseService
     end
 
+    # rubocop:disable GitlabSecurity/PublicSend
+    def before_update(issuable, skip_spam_check: false)
+      return unless issuable.changed?
+
+      %w(title description).each do |action|
+        if issuable.changes[action]
+          Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+            .send("track_#{action}_edit_action".to_sym, **{ user: current_user })
+        end
+      end
+    end
+    # rubocop:enable GitlabSecurity/PublicSend
+
     def after_update(issuable)
       issuable.cache_merge_request_closes_issues!(current_user)
     end
