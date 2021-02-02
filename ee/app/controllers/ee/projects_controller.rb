@@ -49,7 +49,7 @@ module EE
 
     override :project_feature_attributes
     def project_feature_attributes
-      super + [:requirements_access_level]
+      super + [:requirements_access_level, :security_and_compliance_access_level]
     end
 
     override :project_params_attributes

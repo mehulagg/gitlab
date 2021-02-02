@@ -7,6 +7,10 @@ module Projects
       include IssuableActions
       include RendersNotes
 
+      before_action do
+        push_frontend_feature_flag(:jira_for_vulnerabilities, @project, default_enabled: :yaml)
+      end
+
       before_action :vulnerability, except: :index
 
       alias_method :vulnerable, :project

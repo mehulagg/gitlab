@@ -10,13 +10,14 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { n__, s__, __ } from '~/locale';
-import AccessorUtilities from '../../lib/utils/accessor';
-import IssueCount from './issue_count.vue';
-import eventHub from '../eventhub';
 import sidebarEventHub from '~/sidebar/event_hub';
-import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { isListDraggable } from '~/boards/boards_util';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import { inactiveId, LIST, ListType } from '../constants';
+import eventHub from '../eventhub';
+import AccessorUtilities from '../../lib/utils/accessor';
+import IssueCount from './issue_count.vue';
 
 export default {
   i18n: {
@@ -158,7 +159,7 @@ export default {
 
       // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
       // Close all tooltips manually to prevent dangling tooltips.
-      this.$root.$emit('bv::hide::tooltip');
+      this.$root.$emit(BV_HIDE_TOOLTIP);
     },
     addToLocalStorage() {
       if (AccessorUtilities.isLocalStorageAccessSafe()) {

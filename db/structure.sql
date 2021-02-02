@@ -9411,6 +9411,7 @@ CREATE TABLE application_settings (
     invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
+    git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
     CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
@@ -14068,7 +14069,8 @@ CREATE TABLE merge_request_reviewers (
     id bigint NOT NULL,
     user_id bigint NOT NULL,
     merge_request_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    state smallint DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE merge_request_reviewers_id_seq
@@ -14786,6 +14788,27 @@ CREATE SEQUENCE packages_build_infos_id_seq
 
 ALTER SEQUENCE packages_build_infos_id_seq OWNED BY packages_build_infos.id;
 
+CREATE TABLE packages_composer_cache_files (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    delete_at timestamp with time zone,
+    namespace_id integer,
+    file_store smallint DEFAULT 1 NOT NULL,
+    file text NOT NULL,
+    file_sha256 bytea NOT NULL,
+    CONSTRAINT check_84f5ba81f5 CHECK ((char_length(file) <= 255))
+);
+
+CREATE SEQUENCE packages_composer_cache_files_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_composer_cache_files_id_seq OWNED BY packages_composer_cache_files.id;
+
 CREATE TABLE packages_composer_metadata (
     package_id bigint NOT NULL,
     target_sha bytea NOT NULL,
@@ -14861,6 +14884,24 @@ CREATE SEQUENCE packages_debian_group_architectures_id_seq
 
 ALTER SEQUENCE packages_debian_group_architectures_id_seq OWNED BY packages_debian_group_architectures.id;
 
+CREATE TABLE packages_debian_group_components (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    distribution_id bigint NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_a9bc7d85be CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE packages_debian_group_components_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_debian_group_components_id_seq OWNED BY packages_debian_group_components.id;
+
 CREATE TABLE packages_debian_group_distributions (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -14919,6 +14960,24 @@ CREATE SEQUENCE packages_debian_project_architectures_id_seq
     CACHE 1;
 
 ALTER SEQUENCE packages_debian_project_architectures_id_seq OWNED BY packages_debian_project_architectures.id;
+
+CREATE TABLE packages_debian_project_components (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    distribution_id bigint NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_517559f298 CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE packages_debian_project_components_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_debian_project_components_id_seq OWNED BY packages_debian_project_components.id;
 
 CREATE TABLE packages_debian_project_distributions (
     id bigint NOT NULL,
@@ -15778,7 +15837,8 @@ CREATE TABLE project_features (
     metrics_dashboard_access_level integer,
     requirements_access_level integer DEFAULT 20 NOT NULL,
     operations_access_level integer DEFAULT 20 NOT NULL,
-    analytics_access_level integer DEFAULT 20 NOT NULL
+    analytics_access_level integer DEFAULT 20 NOT NULL,
+    security_and_compliance_access_level integer DEFAULT 10 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -16069,7 +16129,7 @@ CREATE TABLE projects (
     repository_storage character varying DEFAULT 'default'::character varying NOT NULL,
     repository_read_only boolean,
     request_access_enabled boolean DEFAULT true NOT NULL,
-    has_external_wiki boolean,
+    has_external_wiki boolean DEFAULT false,
     ci_config_path character varying,
     lfs_enabled boolean,
     description_html text,
@@ -17402,6 +17462,22 @@ CREATE SEQUENCE todos_id_seq
     CACHE 1;
 
 ALTER SEQUENCE todos_id_seq OWNED BY todos.id;
+
+CREATE TABLE token_with_ivs (
+    id bigint NOT NULL,
+    hashed_token bytea NOT NULL,
+    hashed_plaintext_token bytea NOT NULL,
+    iv bytea NOT NULL
+);
+
+CREATE SEQUENCE token_with_ivs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE token_with_ivs_id_seq OWNED BY token_with_ivs.id;
 
 CREATE TABLE trending_projects (
     id integer NOT NULL,
@@ -18911,15 +18987,21 @@ ALTER TABLE ONLY operations_user_lists ALTER COLUMN id SET DEFAULT nextval('oper
 
 ALTER TABLE ONLY packages_build_infos ALTER COLUMN id SET DEFAULT nextval('packages_build_infos_id_seq'::regclass);
 
+ALTER TABLE ONLY packages_composer_cache_files ALTER COLUMN id SET DEFAULT nextval('packages_composer_cache_files_id_seq'::regclass);
+
 ALTER TABLE ONLY packages_conan_file_metadata ALTER COLUMN id SET DEFAULT nextval('packages_conan_file_metadata_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_conan_metadata ALTER COLUMN id SET DEFAULT nextval('packages_conan_metadata_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_debian_group_architectures ALTER COLUMN id SET DEFAULT nextval('packages_debian_group_architectures_id_seq'::regclass);
 
+ALTER TABLE ONLY packages_debian_group_components ALTER COLUMN id SET DEFAULT nextval('packages_debian_group_components_id_seq'::regclass);
+
 ALTER TABLE ONLY packages_debian_group_distributions ALTER COLUMN id SET DEFAULT nextval('packages_debian_group_distributions_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_debian_project_architectures ALTER COLUMN id SET DEFAULT nextval('packages_debian_project_architectures_id_seq'::regclass);
+
+ALTER TABLE ONLY packages_debian_project_components ALTER COLUMN id SET DEFAULT nextval('packages_debian_project_components_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_debian_project_distributions ALTER COLUMN id SET DEFAULT nextval('packages_debian_project_distributions_id_seq'::regclass);
 
@@ -19120,6 +19202,8 @@ ALTER TABLE ONLY terraform_states ALTER COLUMN id SET DEFAULT nextval('terraform
 ALTER TABLE ONLY timelogs ALTER COLUMN id SET DEFAULT nextval('timelogs_id_seq'::regclass);
 
 ALTER TABLE ONLY todos ALTER COLUMN id SET DEFAULT nextval('todos_id_seq'::regclass);
+
+ALTER TABLE ONLY token_with_ivs ALTER COLUMN id SET DEFAULT nextval('token_with_ivs_id_seq'::regclass);
 
 ALTER TABLE ONLY trending_projects ALTER COLUMN id SET DEFAULT nextval('trending_projects_id_seq'::regclass);
 
@@ -19577,6 +19661,9 @@ ALTER TABLE ONLY chat_teams
 
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
+
+ALTER TABLE projects
+    ADD CONSTRAINT check_421d399b70 CHECK ((has_external_wiki IS NOT NULL)) NOT VALID;
 
 ALTER TABLE group_import_states
     ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;
@@ -20271,6 +20358,9 @@ ALTER TABLE ONLY operations_user_lists
 ALTER TABLE ONLY packages_build_infos
     ADD CONSTRAINT packages_build_infos_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_composer_cache_files
+    ADD CONSTRAINT packages_composer_cache_files_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY packages_composer_metadata
     ADD CONSTRAINT packages_composer_metadata_pkey PRIMARY KEY (package_id);
 
@@ -20286,11 +20376,17 @@ ALTER TABLE ONLY packages_debian_file_metadata
 ALTER TABLE ONLY packages_debian_group_architectures
     ADD CONSTRAINT packages_debian_group_architectures_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_debian_group_components
+    ADD CONSTRAINT packages_debian_group_components_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY packages_debian_group_distributions
     ADD CONSTRAINT packages_debian_group_distributions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY packages_debian_project_architectures
     ADD CONSTRAINT packages_debian_project_architectures_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY packages_debian_project_components
+    ADD CONSTRAINT packages_debian_project_components_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY packages_debian_project_distributions
     ADD CONSTRAINT packages_debian_project_distributions_pkey PRIMARY KEY (id);
@@ -20642,6 +20738,9 @@ ALTER TABLE ONLY timelogs
 
 ALTER TABLE ONLY todos
     ADD CONSTRAINT todos_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY token_with_ivs
+    ADD CONSTRAINT token_with_ivs_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY trending_projects
     ADD CONSTRAINT trending_projects_pkey PRIMARY KEY (id);
@@ -22031,8 +22130,6 @@ CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON inciden
 
 CREATE INDEX index_incident_management_oncall_shifts_on_participant_id ON incident_management_oncall_shifts USING btree (participant_id);
 
-CREATE INDEX index_incident_management_oncall_shifts_on_rotation_id ON incident_management_oncall_shifts USING btree (rotation_id);
-
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
 
 CREATE INDEX index_insights_on_namespace_id ON insights USING btree (namespace_id);
@@ -22441,6 +22538,10 @@ CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON a
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
+CREATE INDEX index_on_merge_requests_for_latest_diffs ON merge_requests USING btree (target_project_id) INCLUDE (id, latest_merge_request_diff_id);
+
+COMMENT ON INDEX index_on_merge_requests_for_latest_diffs IS 'Index used to efficiently obtain the oldest merge request for a commit SHA';
+
 CREATE INDEX index_on_namespaces_lower_name ON namespaces USING btree (lower((name)::text));
 
 CREATE INDEX index_on_namespaces_lower_path ON namespaces USING btree (lower((path)::text));
@@ -22465,7 +22566,17 @@ CREATE INDEX index_on_users_lower_username ON users USING btree (lower((username
 
 CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
 
+CREATE INDEX index_onboarding_progresses_for_create_track ON onboarding_progresses USING btree (created_at) WHERE (git_write_at IS NULL);
+
+CREATE INDEX index_onboarding_progresses_for_team_track ON onboarding_progresses USING btree (GREATEST(git_write_at, pipeline_created_at, trial_started_at)) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NOT NULL) AND (trial_started_at IS NOT NULL) AND (user_added_at IS NULL));
+
+CREATE INDEX index_onboarding_progresses_for_trial_track ON onboarding_progresses USING btree (GREATEST(git_write_at, pipeline_created_at)) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NOT NULL) AND (trial_started_at IS NULL));
+
+CREATE INDEX index_onboarding_progresses_for_verify_track ON onboarding_progresses USING btree (git_write_at) WHERE ((git_write_at IS NOT NULL) AND (pipeline_created_at IS NULL));
+
 CREATE UNIQUE INDEX index_onboarding_progresses_on_namespace_id ON onboarding_progresses USING btree (namespace_id);
+
+CREATE INDEX index_oncall_shifts_on_rotation_id_and_starts_at_and_ends_at ON incident_management_oncall_shifts USING btree (rotation_id, starts_at, ends_at);
 
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
@@ -22490,6 +22601,8 @@ CREATE UNIQUE INDEX index_ops_feature_flags_issues_on_feature_flag_id_and_issue_
 CREATE UNIQUE INDEX index_ops_strategies_user_lists_on_strategy_id_and_user_list_id ON operations_strategies_user_lists USING btree (strategy_id, user_list_id);
 
 CREATE INDEX index_packages_build_infos_on_pipeline_id ON packages_build_infos USING btree (pipeline_id);
+
+CREATE UNIQUE INDEX index_packages_composer_cache_namespace_and_sha ON packages_composer_cache_files USING btree (namespace_id, file_sha256);
 
 CREATE UNIQUE INDEX index_packages_composer_metadata_on_package_id_and_target_sha ON packages_composer_metadata USING btree (package_id, target_sha);
 
@@ -23167,6 +23280,10 @@ CREATE INDEX index_todos_on_user_id_and_id_done ON todos USING btree (user_id, i
 
 CREATE INDEX index_todos_on_user_id_and_id_pending ON todos USING btree (user_id, id) WHERE ((state)::text = 'pending'::text);
 
+CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_plaintext_token ON token_with_ivs USING btree (hashed_plaintext_token);
+
+CREATE UNIQUE INDEX index_token_with_ivs_on_hashed_token ON token_with_ivs USING btree (hashed_token);
+
 CREATE UNIQUE INDEX index_trending_projects_on_project_id ON trending_projects USING btree (project_id);
 
 CREATE INDEX index_u2f_registrations_on_key_handle ON u2f_registrations USING btree (key_handle);
@@ -23459,11 +23576,17 @@ CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree 
 
 CREATE INDEX tmp_idx_deduplicate_vulnerability_occurrences ON vulnerability_occurrences USING btree (project_id, report_type, location_fingerprint, primary_identifier_id, id);
 
+CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING btree (scan_id) WHERE (uuid IS NULL);
+
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
+CREATE UNIQUE INDEX uniq_pkgs_deb_grp_components_on_distribution_id_and_name ON packages_debian_group_components USING btree (distribution_id, name);
+
 CREATE UNIQUE INDEX uniq_pkgs_deb_proj_architectures_on_distribution_id_and_name ON packages_debian_project_architectures USING btree (distribution_id, name);
+
+CREATE UNIQUE INDEX uniq_pkgs_deb_proj_components_on_distribution_id_and_name ON packages_debian_project_components USING btree (distribution_id, name);
 
 CREATE UNIQUE INDEX uniq_pkgs_debian_group_distributions_group_id_and_codename ON packages_debian_group_distributions USING btree (group_id, codename);
 
@@ -25324,6 +25447,9 @@ ALTER TABLE ONLY users_ops_dashboard_projects
 ALTER TABLE ONLY project_incident_management_settings
     ADD CONSTRAINT fk_rails_9c2ea1b7dd FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY packages_debian_project_components
+    ADD CONSTRAINT fk_rails_9d072b5073 FOREIGN KEY (distribution_id) REFERENCES packages_debian_project_distributions(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY gpg_keys
     ADD CONSTRAINT fk_rails_9d1f5d8719 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -25464,6 +25590,9 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 
 ALTER TABLE ONLY approval_project_rules_protected_branches
     ADD CONSTRAINT fk_rails_b7567b031b FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_composer_cache_files
+    ADD CONSTRAINT fk_rails_b82cea43a0 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY alerts_service_data
     ADD CONSTRAINT fk_rails_b93215a42c FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
@@ -25785,6 +25914,9 @@ ALTER TABLE ONLY board_group_recent_visits
 
 ALTER TABLE ONLY resource_state_events
     ADD CONSTRAINT fk_rails_f5827a7ccd FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY packages_debian_group_components
+    ADD CONSTRAINT fk_rails_f5f1ef54c6 FOREIGN KEY (distribution_id) REFERENCES packages_debian_group_distributions(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT fk_rails_f6eef06841 FOREIGN KEY (participant_id) REFERENCES incident_management_oncall_participants(id) ON DELETE CASCADE;

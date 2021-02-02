@@ -7,8 +7,8 @@ import { __, s__ } from '~/locale';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import SelectProjectsDropdown from './select_projects_dropdown.vue';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
+import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
   name: 'TestCoverageTable',

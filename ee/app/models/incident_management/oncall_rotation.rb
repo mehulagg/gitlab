@@ -22,6 +22,8 @@ module IncidentManagement
     validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
 
+    scope :started, -> { where('starts_at < ?', Time.current) }
+
     delegate :project, to: :schedule
 
     def shift_duration

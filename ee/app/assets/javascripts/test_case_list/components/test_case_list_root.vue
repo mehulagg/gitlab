@@ -12,12 +12,10 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
-import TestCaseListEmptyState from './test_case_list_empty_state.vue';
-
 import projectTestCases from '../queries/project_test_cases.query.graphql';
-import projectTestCasesCount from '../queries/project_test_cases_count.query.graphql';
 
 import { TestCaseTabs, AvailableSortOptions, DEFAULT_PAGE_SIZE } from '../constants';
+import TestCaseListEmptyState from './test_case_list_empty_state.vue';
 
 export default {
   name: 'TestCaseList',
@@ -48,7 +46,7 @@ export default {
     },
   },
   apollo: {
-    testCases: {
+    project: {
       query: projectTestCases,
       variables() {
         const queryVariables = {
@@ -79,42 +77,9 @@ export default {
 
         return queryVariables;
       },
-      update(data) {
-        const testCasesRoot = data.project?.issues;
-
-        return {
-          list: testCasesRoot?.nodes || [],
-          pageInfo: testCasesRoot?.pageInfo || {},
-        };
-      },
       error(error) {
         createFlash({
           message: s__('TestCases|Something went wrong while fetching test cases list.'),
-          captureError: true,
-          error,
-        });
-      },
-    },
-    testCasesCount: {
-      query: projectTestCasesCount,
-      variables() {
-        return {
-          projectPath: this.projectFullPath,
-          types: ['TEST_CASE'],
-        };
-      },
-      update(data) {
-        const { opened, closed, all } = data.project?.issueStatusCounts;
-
-        return {
-          opened,
-          closed,
-          all,
-        };
-      },
-      error(error) {
-        createFlash({
-          message: s__('TestCases|Something went wrong while fetching count of test cases.'),
           captureError: true,
           error,
         });
@@ -129,23 +94,32 @@ export default {
       nextPageCursor: this.next,
       filterParams: this.initialFilterParams,
       sortedBy: this.initialSortBy,
-      testCases: {
-        list: [],
-        pageInfo: {},
-      },
-      testCasesCount: {
-        opened: 0,
-        closed: 0,
-        all: 0,
+      project: {
+        issueStatusCounts: {},
+        issues: {},
       },
     };
   },
   computed: {
+    testCases() {
+      return {
+        list: this.project?.issues?.nodes || [],
+        pageInfo: this.project?.issues?.pageInfo || {},
+      };
+    },
+    testCasesCount() {
+      const { opened = 0, closed = 0, all = 0 } = this.project?.issueStatusCounts || {};
+      return {
+        opened,
+        closed,
+        all,
+      };
+    },
     testCaseListLoading() {
-      return this.$apollo.queries.testCases.loading;
+      return this.$apollo.queries.project.loading;
     },
     testCaseListEmpty() {
-      return !this.$apollo.queries.testCases.loading && !this.testCases.list.length;
+      return !this.$apollo.queries.project.loading && !this.testCases.list.length;
     },
     showPaginationControls() {
       const { hasPreviousPage, hasNextPage } = this.testCases.pageInfo;

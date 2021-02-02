@@ -352,6 +352,9 @@ An administrator can flag a user as external by either of the following methods:
   or edit an existing one. There, you can find the option to flag the user as
   external.
 
+Additionally users can be set as external users using [SAML groups](../integration/saml.md#external-groups)
+and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
+
 ### Setting new users to external
 
 By default, new users are not set as external users. This behavior can be changed
@@ -421,7 +424,8 @@ details such as projects or subgroups. They do not have access to the group's pa
 ### Minimal access users take license seats
 
 Users with even a "minimal access" role are counted against your number of license seats. This
-requirement does not apply for [GitLab Gold/Ultimate](https://about.gitlab.com/pricing/) subscriptions.
+requirement does not apply for [GitLab Ultimate](https://about.gitlab.com/pricing/)
+subscriptions.
 
 ## Project features
 

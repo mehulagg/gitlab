@@ -1,10 +1,10 @@
 <script>
 import { GlFormGroup, GlFormInput, GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import StageFieldActions from './stage_field_actions.vue';
 import LabelsSelector from '../labels_selector.vue';
+import { isLabelEvent, getLabelEventsIdentifiers } from '../../utils';
+import StageFieldActions from './stage_field_actions.vue';
 import { I18N } from './constants';
 import { startEventOptions, endEventOptions } from './utils';
-import { isLabelEvent, getLabelEventsIdentifiers } from '../../utils';
 
 export default {
   name: 'CustomStageFormFields',

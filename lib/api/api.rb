@@ -30,7 +30,7 @@ module API
                   ]
 
     allow_access_with_scope :api
-    allow_access_with_scope :read_api, if: -> (request) { request.get? }
+    allow_access_with_scope :read_api, if: -> (request) { request.get? || request.head? }
     prefix :api
 
     version 'v3', using: :path do
@@ -268,6 +268,7 @@ module API
       mount ::API::Release::Links
       mount ::API::RemoteMirrors
       mount ::API::Repositories
+      mount ::API::ResourceAccessTokens
       mount ::API::Search
       mount ::API::Services
       mount ::API::Settings

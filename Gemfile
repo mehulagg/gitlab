@@ -103,7 +103,7 @@ gem 'hashie-forbidden_attributes'
 gem 'kaminari', '~> 1.0'
 
 # HAML
-gem 'hamlit', '~> 2.14.2'
+gem 'hamlit', '~> 2.14.4'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'
@@ -477,7 +477,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.4.5'
+gem 'gitlab-experiment', '~> 0.4.8'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

@@ -112,7 +112,7 @@ module Types
     field :suggestion_commit_message, GraphQL::STRING_TYPE, null: true,
           description: 'The commit message used to apply merge request suggestions'
     field :squash_read_only, GraphQL::BOOLEAN_TYPE, null: false, method: :squash_readonly?,
-          description: 'Indicates if squash readonly is enabled'
+          description: 'Indicates if `squashReadOnly` is enabled'
 
     field :namespace, Types::NamespaceType, null: true,
           description: 'Namespace of the project'
@@ -179,7 +179,7 @@ module Types
           description: 'A single issue of the project',
           resolver: Resolvers::IssuesResolver.single
 
-    field :packages, Types::Packages::PackageType.connection_type, null: true,
+    field :packages,
          description: 'Packages of the project',
          resolver: Resolvers::PackagesResolver
 

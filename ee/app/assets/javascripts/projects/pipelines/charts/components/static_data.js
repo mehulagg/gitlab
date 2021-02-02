@@ -1,13 +1,21 @@
 import dateFormat from 'dateformat';
 import { s__, sprintf } from '~/locale';
-import { nDaysBefore, nMonthsBefore } from '~/lib/utils/datetime_utility';
+import { helpPagePath } from '~/helpers/help_page_helper';
+import { nDaysBefore, nMonthsBefore, getStartOfDay, dayAfter } from '~/lib/utils/datetime_utility';
 import { LAST_WEEK, LAST_MONTH, LAST_90_DAYS } from './constants';
 
-// Compute all relative dates based on the _beginning_ of today
-const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
-const lastWeek = new Date(nDaysBefore(startOfToday, 7));
-const lastMonth = new Date(nMonthsBefore(startOfToday, 1));
-const last90Days = new Date(nDaysBefore(startOfToday, 90));
+// Compute all relative dates based on the _beginning_ of today.
+// We use this date as the end date for the charts. This causes
+// the current date to be the last day included in the graph.
+const startOfToday = getStartOfDay(new Date(), { utc: true });
+
+// We use this date as the "to" parameter for the API. This allows
+// us to get deployment information about the current day.
+const startOfTomorrow = dayAfter(startOfToday, { utc: true });
+
+const lastWeek = nDaysBefore(startOfTomorrow, 7, { utc: true });
+const lastMonth = nMonthsBefore(startOfTomorrow, 1, { utc: true });
+const last90Days = nDaysBefore(startOfTomorrow, 90, { utc: true });
 const apiDateFormatString = 'isoDateTime';
 const titleDateFormatString = 'mmm d';
 const sharedRequestParams = {
@@ -27,14 +35,16 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for last week (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(lastWeek, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(lastWeek, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: lastWeek,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastWeek, apiDateFormatString),
+      from: dateFormat(lastWeek, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
   {
@@ -44,14 +54,16 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for last month (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(lastMonth, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(lastMonth, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: lastMonth,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(lastMonth, apiDateFormatString),
+      from: dateFormat(lastMonth, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
   {
@@ -61,14 +73,16 @@ export const allChartDefinitions = [
         'DeploymentFrequencyCharts|Deployments to production for the last 90 days (%{startDate} - %{endDate})',
       ),
       {
-        startDate: dateFormat(last90Days, titleDateFormatString),
-        endDate: dateFormat(startOfToday, titleDateFormatString),
+        startDate: dateFormat(last90Days, titleDateFormatString, true),
+        endDate: dateFormat(startOfToday, titleDateFormatString, true),
       },
     ),
     startDate: last90Days,
+    endDate: startOfTomorrow,
     requestParams: {
       ...sharedRequestParams,
-      from: dateFormat(last90Days, apiDateFormatString),
+      from: dateFormat(last90Days, apiDateFormatString, true),
+      to: dateFormat(startOfTomorrow, apiDateFormatString, true),
     },
   },
 ];
@@ -84,3 +98,11 @@ export const areaChartOptions = {
     minInterval: 1,
   },
 };
+
+export const chartDescriptionText = s__(
+  'DeploymentFrequencyCharts|These charts display the frequency of deployments to the production environment, as part of the DORA 4 metrics. The environment must be named %{codeStart}production%{codeEnd} for its data to appear in these charts.',
+);
+
+export const chartDocumentationHref = helpPagePath('user/analytics/ci_cd_analytics.html', {
+  anchor: 'deployment-frequency-charts',
+});

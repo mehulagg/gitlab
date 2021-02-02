@@ -21,28 +21,6 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
           Scanner profile
         </h3>
       </div>
-       
-      <div
-        class="col-5 gl-text-right"
-      >
-        <a
-          class="btn btn-success btn-sm gl-button btn-success-secondary"
-          data-testid="manage-profiles-link"
-          href="/test/scanner/profiles/library/path"
-        >
-          <!---->
-           
-          <!---->
-            
-          <span
-            class="gl-button-text"
-          >
-            
-          Manage profiles
-        
-          </span>
-        </a>
-      </div>
     </div>
   </div>
    
@@ -104,11 +82,45 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
             <div
               class="gl-new-dropdown-inner"
             >
-              <!---->
+              <div
+                class="gl-new-dropdown-header gl-border-b-0!"
+              >
+                <!---->
+                 
+                <div
+                  class="gl-search-box-by-type"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="gl-search-box-by-type-search-icon gl-icon s16"
+                    data-testid="search-icon"
+                  >
+                    <use
+                      href="#search"
+                    />
+                  </svg>
+                   
+                  <input
+                    aria-label="Search"
+                    class="gl-form-input gl-search-box-by-type-input form-control"
+                    placeholder="Search"
+                    type="text"
+                  />
+                   
+                  <div
+                    class="gl-search-box-by-type-right-icons"
+                  >
+                    <!---->
+                     
+                    <!---->
+                  </div>
+                </div>
+              </div>
                
               <div
                 class="gl-new-dropdown-contents"
               >
+                 
                 <li
                   class="gl-new-dropdown-item"
                   role="presentation"
@@ -189,9 +201,86 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                     <!---->
                   </button>
                 </li>
+                 
+                <div
+                  class="gl-p-3 gl-text-center"
+                  style="display: none;"
+                >
+                  
+        No matching results...
+      
+                </div>
               </div>
                
-              <!---->
+              <div
+                class="gl-new-dropdown-footer"
+              >
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
+                >
+                  <a
+                    class="dropdown-item"
+                    data-testid="create-profile-option"
+                    href="/test/new/scanner/profile/path"
+                    role="menuitem"
+                    target="_self"
+                  >
+                    <!---->
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        Create new scanner profile
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </a>
+                </li>
+                 
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
+                >
+                  <a
+                    class="dropdown-item"
+                    data-testid="manage-profiles-option"
+                    href="/test/scanner/profiles/library/path"
+                    role="menuitem"
+                    target="_self"
+                  >
+                    <!---->
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        Manage scanner profiles
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </a>
+                </li>
+              </div>
             </div>
              
           </ul>
@@ -201,6 +290,26 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
           class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
           data-testid="selected-profile-summary"
         >
+          <a
+            class="btn gl-absolute gl-right-7 btn-default btn-md gl-button btn-icon"
+            href="/scanner_profile/edit/1"
+            title="Edit profile"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="pencil-icon"
+            >
+              <use
+                href="#pencil"
+              />
+            </svg>
+              
+            <!---->
+          </a>
+           
           <div>
             Scanner profile #1's summary
           </div>
@@ -236,29 +345,6 @@ exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1
           Scanner profile
         </h3>
       </div>
-       
-      <div
-        class="col-5 gl-text-right"
-      >
-        <button
-          class="btn btn-success btn-sm disabled gl-button btn-success-secondary"
-          data-testid="manage-profiles-link"
-          disabled="disabled"
-          type="button"
-        >
-          <!---->
-           
-          <!---->
-            
-          <span
-            class="gl-button-text"
-          >
-            
-          Manage profiles
-        
-          </span>
-        </button>
-      </div>
     </div>
   </div>
    
@@ -284,7 +370,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1
       <span
         class="gl-button-text"
       >
-        Create a new scanner profile
+        Create new scanner profile
       </span>
     </a>
   </div>

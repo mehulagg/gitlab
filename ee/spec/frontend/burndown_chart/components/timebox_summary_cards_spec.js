@@ -1,6 +1,6 @@
-import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 import { mount } from '@vue/test-utils';
 import { GlCard } from '@gitlab/ui';
+import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 
 describe('Iterations report summary cards', () => {
   let wrapper;

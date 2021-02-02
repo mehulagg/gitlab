@@ -970,9 +970,13 @@ For Omnibus GitLab installations, Redis logs reside in `/var/log/gitlab/redis/`.
 
 For Omnibus GitLab installations, Alertmanager logs reside in `/var/log/gitlab/alertmanager/`.
 
+<!-- vale gitlab.Spelling = NO -->
+
 ## Crond Logs
 
-For Omnibus GitLab installations, `crond` logs reside in `/var/log/gitlab/crond/`.
+For Omnibus GitLab installations, crond logs reside in `/var/log/gitlab/crond/`.
+
+<!-- vale gitlab.Spelling = YES -->
 
 ## Grafana Logs
 
@@ -980,7 +984,7 @@ For Omnibus GitLab installations, Grafana logs reside in `/var/log/gitlab/grafan
 
 ## LogRotate Logs
 
-For Omnibus GitLab installations, logrotate logs reside in `/var/log/gitlab/logrotate/`.
+For Omnibus GitLab installations, `logrotate` logs reside in `/var/log/gitlab/logrotate/`.
 
 ## GitLab Monitor Logs
 
@@ -1006,7 +1010,7 @@ installations from source.
 Performance bar statistics (currently only duration of SQL queries) are recorded in that file. For example:
 
 ```json
-{"severity":"INFO","time":"2020-12-04T09:29:44.592Z","correlation_id":"33680b1490ccd35981b03639c406a697","filename":"app/models/ci/pipeline.rb","filenum":"395","method":"each_with_object","request_id":"rYHomD0VJS4","duration_ms":26.889,"type": "sql"}
+{"severity":"INFO","time":"2020-12-04T09:29:44.592Z","correlation_id":"33680b1490ccd35981b03639c406a697","filename":"app/models/ci/pipeline.rb","method_path":"app/models/ci/pipeline.rb:each_with_object","request_id":"rYHomD0VJS4","duration_ms":26.889,"count":2,"type": "sql"}
 ```
 
 These statistics are logged on .com only, disabled on self-deployments.
@@ -1023,14 +1027,14 @@ GitLab Support often asks for one of these, and maintains the required tools.
 ### Briefly tail the main logs
 
 If the bug or error is readily reproducible, save the main GitLab logs
-[to a file](troubleshooting/linux_cheat_sheet.md#files--dirs) while reproducing the
+[to a file](troubleshooting/linux_cheat_sheet.md#files-and-directories) while reproducing the
 problem a few times:
 
 ```shell
 sudo gitlab-ctl tail | tee /tmp/<case-ID-and-keywords>.log
 ```
 
-Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+Conclude the log gathering with <kbd>Control</kbd> + <kbd>C</kbd>.
 
 ### GitLabSOS
 

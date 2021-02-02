@@ -1,7 +1,7 @@
 import { s__ } from '~/locale';
 import createFlash from '~/flash';
-import * as types from './mutation_types';
 import { deleteMetricImage, getMetricImages, uploadMetricImage } from '../service';
+import * as types from './mutation_types';
 
 export const fetchMetricImages = async ({ state, commit }) => {
   commit(types.REQUEST_METRIC_IMAGES);

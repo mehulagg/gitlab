@@ -1145,11 +1145,32 @@ RSpec.describe Project, factory_default: :keep do
       is_expected.to eq(nil)
     end
 
-    it 'sets Project#has_external_wiki when it is nil' do
-      create(:service, project: project, type: 'ExternalWikiService', active: true)
-      project.update_column(:has_external_wiki, nil)
+    it 'calls Project#cache_has_external_wiki when `has_external_wiki` is nil' do
+      project = build(:project, has_external_wiki: nil)
 
-      expect { subject }.to change { project.has_external_wiki }.from(nil).to(true)
+      expect(project).to receive(:cache_has_external_wiki)
+
+      project.external_wiki
+    end
+
+    it 'does not call Project#cache_has_external_wiki when `has_external_wiki` is not nil' do
+      project = build(:project)
+
+      expect(project).not_to receive(:cache_has_external_wiki)
+
+      project.external_wiki
+    end
+  end
+
+  describe '#cache_has_external_wiki (private method)' do
+    it 'sets Project#has_external_wiki correctly, affecting Project#external_wiki' do
+      project = create(:project)
+      create(:service, project: project, type: 'ExternalWikiService', active: true)
+      project.update_column(:has_external_wiki, false)
+
+      expect { project.send(:cache_has_external_wiki) }
+        .to change { project.has_external_wiki }.from(false).to(true)
+        .and(change { project.external_wiki }.from(nil).to(kind_of(ExternalWikiService)))
     end
   end
 
@@ -2247,8 +2268,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#ci_config_path=' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build_stubbed(:project) }
 
     where(:default_ci_config_path, :project_ci_config_path, :expected_ci_config_path) do
@@ -3947,7 +3966,6 @@ RSpec.describe Project, factory_default: :keep do
   describe '.filter_by_feature_visibility' do
     include_context 'ProjectPolicyTable context'
     include ProjectHelpers
-    using RSpec::Parameterized::TableSyntax
 
     let_it_be(:group) { create(:group) }
     let!(:project) { create(:project, project_level, namespace: group ) }
@@ -4197,8 +4215,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#git_transfer_in_progress?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { build(:project) }
 
     subject { project.git_transfer_in_progress? }
@@ -5822,8 +5838,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'validation #changing_shared_runners_enabled_is_allowed' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
       'enabled'                    | true  | true
       'enabled'                    | false | true
@@ -6046,8 +6060,6 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#closest_setting' do
-    using RSpec::Parameterized::TableSyntax
-
     shared_examples_for 'fetching closest setting' do
       let!(:namespace) { create(:namespace) }
       let!(:project) { create(:project, namespace: namespace) }

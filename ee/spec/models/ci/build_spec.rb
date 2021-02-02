@@ -468,12 +468,6 @@ RSpec.describe Ci::Build do
 
       it { is_expected.to be true }
     end
-
-    context 'with pipeline for merge train' do
-      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
-
-      it { is_expected.to be false }
-    end
   end
 
   describe ".license_scan" do

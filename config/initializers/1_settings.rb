@@ -545,6 +545,12 @@ Settings.cron_jobs['manage_evidence_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['manage_evidence_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['manage_evidence_worker']['job_class'] = 'Releases::ManageEvidenceWorker'
 
+Gitlab.com do
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['cron'] ||= '0 9 * * *'
+  Settings.cron_jobs['namespaces_in_product_marketing_emails_worker']['job_class'] = 'Namespaces::InProductMarketingEmailsWorker'
+end
+
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * *'
@@ -597,6 +603,9 @@ Gitlab.ee do
   Settings.cron_jobs['incident_sla_exceeded_check_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['incident_sla_exceeded_check_worker']['cron'] ||= '*/2 * * * *'
   Settings.cron_jobs['incident_sla_exceeded_check_worker']['job_class'] = 'IncidentManagement::IncidentSlaExceededCheckWorker'
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['cron'] ||= '*/5 * * * *'
+  Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['job_class'] = 'IncidentManagement::OncallRotations::PersistAllRotationsShiftsJob'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'

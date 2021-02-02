@@ -1,5 +1,13 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.8.2 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
+
+
 ## 13.8.1 (2021-01-26)
 
 ### Fixed (2 changes)
@@ -117,6 +125,14 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update repository mirroring UI text. !51311
 - Update what's new UI text. !51422
 - Enable DevOps Adoption Report feature flag if any Segments already exist. !51602
+
+
+## 13.7.6 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
 
 
 ## 13.7.5 (2021-01-25)
@@ -298,6 +314,14 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Convert group saml buttons to gl-button styles. !49852
 - Convert group settings expand button to gl-button. !49857
 - Rename code coverage analytics sections. !49931
+
+
+## 13.6.6 (2021-02-01)
+
+### Security (2 changes)
+
+- Remove Kubernetes IP address from error messages returned in Threat Monitoring.
+- Sanitize XSS in Epic milestone due date.
 
 
 ## 13.6.5 (2021-01-13)

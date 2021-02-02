@@ -462,6 +462,10 @@ module EE
       reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
     end
 
+    def repository_storage
+      group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
+    end
+
     private
 
     def custom_project_templates_group_allowed

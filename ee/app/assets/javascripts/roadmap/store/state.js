@@ -3,8 +3,6 @@ export default () => ({
   basePath: '',
   epicsState: '',
   filterParams: null,
-  groupLabelsEndpoint: '',
-  groupMilestonesEndpoint: '',
 
   // Data
   epicIid: '',

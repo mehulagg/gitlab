@@ -20,7 +20,7 @@ RSpec.describe Dast::ProfilesFinder do
       aggregate_failures do
         expect(Dast::Profile).to receive(:limit).with(100).and_call_original
 
-        expect(subject).to contain_exactly(dast_profile1, dast_profile2, dast_profile3)
+        expect(subject).to contain_exactly(dast_profile3, dast_profile2, dast_profile1)
       end
     end
 
@@ -36,7 +36,7 @@ RSpec.describe Dast::ProfilesFinder do
       let(:params) { { project_id: project1.id } }
 
       it 'returns the matching dast_profiles' do
-        expect(subject).to contain_exactly(dast_profile1, dast_profile3)
+        expect(subject).to contain_exactly(dast_profile3, dast_profile1)
       end
     end
 
@@ -49,8 +49,8 @@ RSpec.describe Dast::ProfilesFinder do
     end
 
     context 'sorting' do
-      it 'orders by id asc by default' do
-        expect(subject).to be_sorted(:id, :asc)
+      it 'orders by id desc by default' do
+        expect(subject).to be_sorted(:id, :desc)
       end
     end
   end

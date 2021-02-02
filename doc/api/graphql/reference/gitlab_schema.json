@@ -953,7 +953,7 @@
             },
             {
               "name": "todos",
-              "description": "Todos of the current user for the alert.",
+              "description": "To-dos of the current user for the alert.",
               "args": [
                 {
                   "name": "action",
@@ -2699,7 +2699,7 @@
             },
             {
               "name": "unicode",
-              "description": "The emoji in unicode.",
+              "description": "The emoji in Unicode.",
               "args": [
 
               ],
@@ -2717,7 +2717,7 @@
             },
             {
               "name": "unicodeVersion",
-              "description": "The unicode version for this emoji.",
+              "description": "The Unicode version for this emoji.",
               "args": [
 
               ],
@@ -2863,6 +2863,118 @@
                     }
                   }
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "AwardEmojiConnection",
+          "description": "The connection type for AwardEmoji.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AwardEmojiEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "AwardEmoji",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "AwardEmojiEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmoji",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -3297,7 +3409,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -3997,6 +4109,59 @@
                   "name": "User",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "awardEmoji",
+              "description": "A list of award emojis associated with the epic",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmojiConnection",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -6584,7 +6749,7 @@
             },
             {
               "name": "mergedYaml",
-              "description": "Merged CI config YAML.",
+              "description": "Merged CI configuration YAML.",
               "args": [
 
               ],
@@ -10563,6 +10728,55 @@
           "fields": null,
           "inputFields": null,
           "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "ComposerMetadata",
+          "description": "Composer metadata",
+          "fields": [
+            {
+              "name": "composerJson",
+              "description": "Data of the Composer JSON file.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageComposerJsonType",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "targetSha",
+              "description": "Target SHA of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
           "enumValues": null,
           "possibleTypes": null
         },
@@ -14995,6 +15209,229 @@
           "interfaces": [
 
           ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfile",
+          "description": "Represents a DAST Profile",
+          "fields": [
+            {
+              "name": "dastScannerProfile",
+              "description": "The associated scanner profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastScannerProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "dastSiteProfile",
+              "description": "The associated site profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastSiteProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "description",
+              "description": "The description of the scan.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "editPath",
+              "description": "Relative web path to the edit page of a profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DastProfileID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "The name of the profile.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileConnection",
+          "description": "The connection type for DastProfile.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastProfileEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "DastProfile",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "DastProfileEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfile",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "SCALAR",
+          "name": "DastProfileID",
+          "description": "Identifier of Dast::Profile.",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
           "enumValues": null,
           "possibleTypes": null
         },
@@ -22387,7 +22824,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -22841,6 +23278,59 @@
                   "name": "User",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "awardEmoji",
+              "description": "A list of award emojis associated with the epic",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "AwardEmojiConnection",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -31960,7 +32450,7 @@
             },
             {
               "name": "shifts",
-              "description": "Blocks of time for which a participant is on-call within a given timeframe. Timeframe cannot exceed one month.",
+              "description": "Blocks of time for which a participant is on-call within a given time frame. Time frame cannot exceed one month.",
               "args": [
                 {
                   "name": "startTime",
@@ -41315,6 +41805,136 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "MergeRequestReviewerRereviewInput",
+          "description": "Autogenerated input type of MergeRequestReviewerRereview",
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "projectPath",
+              "description": "The project the merge request to mutate is in.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "iid",
+              "description": "The IID of the merge request to mutate.",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "userId",
+              "description": "The user ID for the user that has been requested for a new review.\n",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "UserID",
+                  "ofType": null
+                }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "MergeRequestReviewerRereviewPayload",
+          "description": "Autogenerated return type of MergeRequestReviewerRereview",
+          "fields": [
+            {
+              "name": "clientMutationId",
+              "description": "A unique identifier for the client performing the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "errors",
+              "description": "Errors encountered during execution of the mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequest",
+              "description": "The merge request after mutation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequest",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "MergeRequestSetAssigneesInput",
           "description": "Autogenerated input type of MergeRequestSetAssignees",
           "fields": null,
@@ -45603,6 +46223,33 @@
               "deprecationReason": null
             },
             {
+              "name": "mergeRequestReviewerRereview",
+              "description": null,
+              "args": [
+                {
+                  "name": "input",
+                  "description": null,
+                  "type": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "MergeRequestReviewerRereviewInput",
+                      "ofType": null
+                    }
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestReviewerRereviewPayload",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "mergeRequestSetAssignees",
               "description": null,
               "args": [
@@ -49849,7 +50496,7 @@
           "fields": [
             {
               "name": "createdAt",
-              "description": "The created date.",
+              "description": "Date of creation.",
               "args": [
 
               ],
@@ -49867,7 +50514,7 @@
             },
             {
               "name": "id",
-              "description": "The ID of the package.",
+              "description": "ID of the package.",
               "args": [
 
               ],
@@ -49876,7 +50523,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "SCALAR",
-                  "name": "ID",
+                  "name": "PackagesPackageID",
                   "ofType": null
                 }
               },
@@ -49884,8 +50531,22 @@
               "deprecationReason": null
             },
             {
+              "name": "metadata",
+              "description": "Package metadata.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "UNION",
+                "name": "PackageMetadata",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "name",
-              "description": "The name of the package.",
+              "description": "Name of the package.",
               "args": [
 
               ],
@@ -49903,7 +50564,7 @@
             },
             {
               "name": "packageType",
-              "description": "The type of the package.",
+              "description": "Package type.",
               "args": [
 
               ],
@@ -49992,7 +50653,7 @@
             },
             {
               "name": "tags",
-              "description": "The package tags.",
+              "description": "Package tags.",
               "args": [
                 {
                   "name": "after",
@@ -50045,7 +50706,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "The updated date.",
+              "description": "Date of most recent update.",
               "args": [
 
               ],
@@ -50063,7 +50724,7 @@
             },
             {
               "name": "version",
-              "description": "The version of the package.",
+              "description": "Version string.",
               "args": [
 
               ],
@@ -50122,319 +50783,7 @@
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "PackageConnection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "PackageComposerDetails",
-          "description": "Details of a Composer package",
-          "fields": [
-            {
-              "name": "composerMetadatum",
-              "description": "The Composer metadatum.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "PackageComposerMetadatumType",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "createdAt",
-              "description": "The created date.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Time",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "id",
-              "description": "The ID of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "name",
-              "description": "The name of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "packageType",
-              "description": "The type of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "PackageTypeEnum",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "pipelines",
-              "description": "Pipelines that built the package.",
-              "args": [
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "PipelineConnection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "project",
-              "description": "Project where the package is stored.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "Project",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "tags",
-              "description": "The package tags.",
-              "args": [
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "PackageTagConnection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "updatedAt",
-              "description": "The updated date.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Time",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "version",
-              "description": "The version of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "versions",
-              "description": "The other versions of the package.",
-              "args": [
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "PackageConnection",
+                "name": "PackageWithoutVersionsConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -50505,55 +50854,6 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "PackageComposerMetadatumType",
-          "description": "Composer metadatum",
-          "fields": [
-            {
-              "name": "composerJson",
-              "description": "Data of the Composer JSON file.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "PackageComposerJsonType",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "targetSha",
-              "description": "Target SHA of the package.",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -50924,6 +51224,22 @@
           "possibleTypes": null
         },
         {
+          "kind": "UNION",
+          "name": "PackageMetadata",
+          "description": "Represents metadata associated with a Package",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": [
+            {
+              "kind": "OBJECT",
+              "name": "ComposerMetadata",
+              "ofType": null
+            }
+          ]
+        },
+        {
           "kind": "OBJECT",
           "name": "PackageSettings",
           "description": "Namespace-level Package Registry settings",
@@ -51231,6 +51547,373 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "PackageWithoutVersions",
+          "description": "Represents a version of a package in the Package Registry",
+          "fields": [
+            {
+              "name": "createdAt",
+              "description": "Date of creation.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "id",
+              "description": "ID of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "PackagesPackageID",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "metadata",
+              "description": "Package metadata.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "UNION",
+                "name": "PackageMetadata",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "name",
+              "description": "Name of the package.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "packageType",
+              "description": "Package type.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "PackageTypeEnum",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pipelines",
+              "description": "Pipelines that built the package.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PipelineConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "project",
+              "description": "Project where the package is stored.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Project",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "tags",
+              "description": "Package tags.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageTagConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "updatedAt",
+              "description": "Date of most recent update.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Time",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "version",
+              "description": "Version string.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageWithoutVersionsConnection",
+          "description": "The connection type for PackageWithoutVersions.",
+          "fields": [
+            {
+              "name": "edges",
+              "description": "A list of edges.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageWithoutVersionsEdge",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "nodes",
+              "description": "A list of nodes.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PackageWithoutVersions",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "pageInfo",
+              "description": "Information to aid in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PageInfo",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "PackageWithoutVersionsEdge",
+          "description": "An edge in a connection.",
+          "fields": [
+            {
+              "name": "cursor",
+              "description": "A cursor for use in pagination.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "node",
+              "description": "The item at the end of the edge.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "PackageWithoutVersions",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "PackagesPackageID",
           "description": "Identifier of Packages::Package.",
@@ -51388,7 +52071,7 @@
             },
             {
               "name": "configSource",
-              "description": "Config source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE)",
+              "description": "Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE)",
               "args": [
 
               ],
@@ -53499,8 +54182,61 @@
               "deprecationReason": null
             },
             {
+              "name": "dastProfiles",
+              "description": "DAST Profiles associated with the project. Always returns no nodes if `dast_saved_scans` is disabled.",
+              "args": [
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "DastProfileConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "dastScannerProfiles",
-              "description": "The DAST scanner profiles associated with the project",
+              "description": "The DAST scanner profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -53553,7 +54289,7 @@
             },
             {
               "name": "dastSiteProfile",
-              "description": "DAST Site Profile associated with the project",
+              "description": "DAST Site Profile associated with the project.",
               "args": [
                 {
                   "name": "id",
@@ -53580,7 +54316,7 @@
             },
             {
               "name": "dastSiteProfiles",
-              "description": "DAST Site Profiles associated with the project",
+              "description": "DAST Site Profiles associated with the project.",
               "args": [
                 {
                   "name": "after",
@@ -53633,7 +54369,7 @@
             },
             {
               "name": "dastSiteValidations",
-              "description": "DAST Site Validations associated with the project. Will always return no nodes if `security_on_demand_scans_site_validation` is disabled",
+              "description": "DAST Site Validations associated with the project. Always returns no nodes if `security_on_demand_scans_site_validation` is disabled.",
               "args": [
                 {
                   "name": "normalizedTargetUrls",
@@ -56604,7 +57340,7 @@
             },
             {
               "name": "squashReadOnly",
-              "description": "Indicates if squash readonly is enabled",
+              "description": "Indicates if `squashReadOnly` is enabled",
               "args": [
 
               ],
@@ -59703,8 +60439,8 @@
               "deprecationReason": null
             },
             {
-              "name": "packageComposerDetails",
-              "description": "Find a composer package",
+              "name": "package",
+              "description": "Find a package",
               "args": [
                 {
                   "name": "id",
@@ -59723,7 +60459,7 @@
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "PackageComposerDetails",
+                "name": "Package",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -65628,7 +66364,7 @@
           "fields": [
             {
               "name": "apiFuzzing",
-              "description": "Aggregated counts for the api_fuzzing scan",
+              "description": "Aggregated counts for the `api_fuzzing` scan",
               "args": [
 
               ],
@@ -65642,7 +66378,7 @@
             },
             {
               "name": "containerScanning",
-              "description": "Aggregated counts for the container_scanning scan",
+              "description": "Aggregated counts for the `container_scanning` scan",
               "args": [
 
               ],
@@ -65656,7 +66392,7 @@
             },
             {
               "name": "coverageFuzzing",
-              "description": "Aggregated counts for the coverage_fuzzing scan",
+              "description": "Aggregated counts for the `coverage_fuzzing` scan",
               "args": [
 
               ],
@@ -65670,7 +66406,7 @@
             },
             {
               "name": "dast",
-              "description": "Aggregated counts for the dast scan",
+              "description": "Aggregated counts for the `dast` scan",
               "args": [
 
               ],
@@ -65684,7 +66420,7 @@
             },
             {
               "name": "dependencyScanning",
-              "description": "Aggregated counts for the dependency_scanning scan",
+              "description": "Aggregated counts for the `dependency_scanning` scan",
               "args": [
 
               ],
@@ -65698,7 +66434,7 @@
             },
             {
               "name": "sast",
-              "description": "Aggregated counts for the sast scan",
+              "description": "Aggregated counts for the `sast` scan",
               "args": [
 
               ],
@@ -65712,7 +66448,7 @@
             },
             {
               "name": "secretDetection",
-              "description": "Aggregated counts for the secret_detection scan",
+              "description": "Aggregated counts for the `secret_detection` scan",
               "args": [
 
               ],
@@ -68740,7 +69476,7 @@
             },
             {
               "name": "loadAsync",
-              "description": "Shows whether the blob content is loaded async",
+              "description": "Shows whether the blob content is loaded asynchronously",
               "args": [
 
               ],
@@ -69551,7 +70287,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],
@@ -71345,11 +72081,11 @@
         {
           "kind": "OBJECT",
           "name": "Todo",
-          "description": "Representing a todo entry",
+          "description": "Representing a to-do entry",
           "fields": [
             {
               "name": "action",
-              "description": "Action of the todo",
+              "description": "Action of the to-do",
               "args": [
 
               ],
@@ -71367,7 +72103,7 @@
             },
             {
               "name": "author",
-              "description": "The author of this todo",
+              "description": "The author of this to-do",
               "args": [
 
               ],
@@ -71385,7 +72121,7 @@
             },
             {
               "name": "body",
-              "description": "Body of the todo",
+              "description": "Body of the to-do",
               "args": [
 
               ],
@@ -71403,7 +72139,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp this todo was created",
+              "description": "Timestamp this to-do was created",
               "args": [
 
               ],
@@ -71421,7 +72157,7 @@
             },
             {
               "name": "group",
-              "description": "Group this todo is associated with",
+              "description": "Group this to-do is associated with",
               "args": [
 
               ],
@@ -71435,7 +72171,7 @@
             },
             {
               "name": "id",
-              "description": "ID of the todo",
+              "description": "ID of the to-do",
               "args": [
 
               ],
@@ -71453,7 +72189,7 @@
             },
             {
               "name": "project",
-              "description": "The project this todo is associated with",
+              "description": "The project this to-do is associated with",
               "args": [
 
               ],
@@ -71467,7 +72203,7 @@
             },
             {
               "name": "state",
-              "description": "State of the todo",
+              "description": "State of the to-do",
               "args": [
 
               ],
@@ -71485,7 +72221,7 @@
             },
             {
               "name": "targetType",
-              "description": "Target type of the todo",
+              "description": "Target type of the to-do",
               "args": [
 
               ],
@@ -71794,7 +72530,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global ID of the todo to mark as done.",
+              "description": "The global ID of the to-do to mark as done.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71868,7 +72604,7 @@
             },
             {
               "name": "todo",
-              "description": "The requested todo.",
+              "description": "The requested to-do.",
               "args": [
 
               ],
@@ -71900,7 +72636,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "The global ID of the todo to restore.",
+              "description": "The global ID of the to-do to restore.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -71935,7 +72671,7 @@
           "inputFields": [
             {
               "name": "ids",
-              "description": "The global IDs of the todos to restore (a maximum of 50 is supported at once).",
+              "description": "The global IDs of the to-dos to restore (a maximum of 50 is supported at once).",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -72017,7 +72753,7 @@
             },
             {
               "name": "todos",
-              "description": "Updated todos.",
+              "description": "Updated to-dos.",
               "args": [
 
               ],
@@ -72043,7 +72779,7 @@
             },
             {
               "name": "updatedIds",
-              "description": "The IDs of the updated todo items. Deprecated in 13.2: Use todos.",
+              "description": "The IDs of the updated to-do items. Deprecated in 13.2: Use todos.",
               "args": [
 
               ],
@@ -72122,7 +72858,7 @@
             },
             {
               "name": "todo",
-              "description": "The requested todo.",
+              "description": "The requested to-do.",
               "args": [
 
               ],
@@ -72763,7 +73499,7 @@
             },
             {
               "name": "sha",
-              "description": "Last commit sha for the entry",
+              "description": "Last commit SHA for the entry",
               "args": [
 
               ],

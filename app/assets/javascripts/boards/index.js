@@ -3,6 +3,7 @@ import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
+import VueApollo from 'vue-apollo';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
 import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
@@ -15,7 +16,10 @@ import {
   getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
 
+<<<<<<< HEAD
 import VueApollo from 'vue-apollo';
+=======
+>>>>>>> 8126cd5f033683dc683d97a2c95a7bf102d11089
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
@@ -74,6 +78,7 @@ export default () => {
     boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
   }
 
+  // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,
     components: {
@@ -276,7 +281,7 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
     data: {
@@ -288,17 +293,20 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: document.querySelector('.js-create-column-trigger'),
-    components: {
-      BoardAddNewColumnTrigger,
-    },
-    store,
-    render(createElement) {
-      return createElement('board-add-new-column-trigger');
-    },
-  });
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement('board-add-new-column-trigger');
+      },
+    });
+  }
 
   boardConfigToggle(boardsStore);
 

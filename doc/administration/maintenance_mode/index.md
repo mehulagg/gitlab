@@ -4,7 +4,7 @@ group: Geo
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab in maintenance mode **PREMIUM SELF**
+# GitLab in maintenance mode **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2149) in GitLab Premium 13.9.
 
@@ -108,7 +108,7 @@ both primary and secondaries will fail.
 
 ### Merge requests, issues, epics
 
-All write actions except those mentioned above will fail. So, in maintenace mode, a user cannot update merge requests, issues, etc.
+All write actions except those mentioned above will fail. So, in maintenance mode, a user cannot update merge requests, issues, etc.
 
 ### Container Registry
 

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import loadAgents from './load_agents';
 import loadClusters from '~/clusters_list/load_clusters';
+import loadAgents from './load_agents';
 
 Vue.use(VueApollo);
 

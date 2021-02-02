@@ -1,13 +1,20 @@
 # frozen_string_literal: true
 
 class ApplicationExperiment < Gitlab::Experiment
+  def enabled?
+    return false if Feature::Definition.get(name).nil? # there has to be a feature flag yaml file
+    return false unless Gitlab.dev_env_or_com? # we're in an environment that allows experiments
+
+    Feature.get(name).state != :off # rubocop:disable Gitlab/AvoidFeatureGet
+  end
+
   def publish(_result)
     track(:assignment) # track that we've assigned a variant for this context
     Gon.global.push({ experiment: { name => signature } }, true) # push to client
   end
 
   def track(action, **event_args)
-    return if excluded? # no events for opted out actors or excluded subjects
+    return unless should_track? # no events for opted out actors or excluded subjects
 
     Gitlab::Tracking.event(name, action.to_s, **event_args.merge(
       context: (event_args[:context] || []) << SnowplowTracker::SelfDescribingJson.new(
@@ -19,7 +26,7 @@ class ApplicationExperiment < Gitlab::Experiment
   private
 
   def resolve_variant_name
-    return variant_names.first if Feature.enabled?(name, self, type: :experiment)
+    return variant_names.first if Feature.enabled?(name, self, type: :experiment, default_enabled: :yaml)
 
     nil # Returning nil vs. :control is important for not caching and rollouts.
   end

@@ -46,6 +46,8 @@ describe('RoadmapApp', () => {
       },
       provide: {
         glFeatures: { asyncFiltering: true },
+        groupFullPath: 'gitlab-org',
+        groupMilestonesPath: '/groups/gitlab-org/-/milestones.json',
       },
       store,
     });

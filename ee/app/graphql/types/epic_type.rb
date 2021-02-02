@@ -141,6 +141,11 @@ module Types
     field :health_status, Types::EpicHealthStatusType, null: true, complexity: 10,
           description: 'Current health status of the epic'
 
+    field :award_emoji,
+          Types::AwardEmojis::AwardEmojiType.connection_type,
+          null: true,
+          description: 'A list of award emojis associated with the epic'
+
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|
         node.children.any?

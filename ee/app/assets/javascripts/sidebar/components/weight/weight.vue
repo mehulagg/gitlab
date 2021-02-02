@@ -1,6 +1,4 @@
 <script>
-// Work around for https://github.com/vuejs/eslint-plugin-vue/issues/1411
-/* eslint-disable vue/one-component-per-file */
 import $ from 'jquery';
 import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';

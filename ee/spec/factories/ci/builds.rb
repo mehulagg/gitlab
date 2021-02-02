@@ -25,6 +25,12 @@ FactoryBot.define do
         after(:build) do |build|
           build.job_artifacts << build(:ee_ci_job_artifact, report_type, job: build)
         end
+
+        after(:create) do |build|
+          if Security::Scan.scan_types.include?(report_type)
+            build.security_scans << build(:security_scan, scan_type: report_type, build: build)
+          end
+        end
       end
     end
 

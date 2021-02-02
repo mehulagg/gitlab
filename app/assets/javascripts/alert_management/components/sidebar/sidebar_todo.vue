@@ -2,14 +2,14 @@
 import produce from 'immer';
 import { s__ } from '~/locale';
 import Todo from '~/sidebar/components/todo_toggle/todo.vue';
-import createAlertTodoMutation from '../../graphql/mutations/alert_todo_create.mutation.graphql';
 import todoMarkDoneMutation from '~/graphql_shared/mutations/todo_mark_done.mutation.graphql';
+import createAlertTodoMutation from '../../graphql/mutations/alert_todo_create.mutation.graphql';
 import alertQuery from '../../graphql/queries/details.query.graphql';
 
 export default {
   i18n: {
     UPDATE_ALERT_TODO_ERROR: s__(
-      'AlertManagement|There was an error while updating the To-Do of the alert.',
+      'AlertManagement|There was an error while updating the to-do item of the alert.',
     ),
   },
   components: {

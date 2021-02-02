@@ -106,7 +106,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
         end
 
         context "when access provisioning fails" do
-          let_it_be(:user) { create(:user, :project_bot) }
+          let_it_be(:user) { create(:user) }
           let(:unpersisted_member) { build(:project_member, source: resource, user: user) }
 
           before do

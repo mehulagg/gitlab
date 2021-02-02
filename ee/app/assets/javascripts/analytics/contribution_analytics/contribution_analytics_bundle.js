@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { sortBy } from 'lodash';
-import ColumnChart from './components/column_chart.vue';
 import { __ } from '~/locale';
+import ColumnChart from './components/column_chart.vue';
 
 const sortByValue = (data) => sortBy(data, (item) => item[1]).reverse();
 

@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import boardsStore from '~/boards/stores/boards_store';
 import vuexStore from '~/boards/stores';
-import ListContainer from './list_container.vue';
 import { fullMilestoneId, fullUserId } from '../../boards_util';
+import ListContainer from './list_container.vue';
 
 export default Vue.extend({
   components: {

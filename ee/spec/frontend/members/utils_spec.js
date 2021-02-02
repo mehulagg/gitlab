@@ -1,4 +1,10 @@
-import { member as memberMock, membersJsonString, members } from 'jest/members/mock_data';
+import {
+  member as memberMock,
+  directMember,
+  inheritedMember,
+  membersJsonString,
+  members,
+} from 'jest/members/mock_data';
 import { generateBadges, canOverride, parseDataAttributes } from 'ee/members/utils';
 
 describe('Members Utils', () => {
@@ -30,9 +36,11 @@ describe('Members Utils', () => {
 
   describe('canOverride', () => {
     test.each`
-      member                                  | expected
-      ${{ ...memberMock, canOverride: true }} | ${true}
-      ${memberMock}                           | ${false}
+      member                                        | expected
+      ${{ ...directMember, canOverride: true }}     | ${true}
+      ${{ ...inheritedMember, canOverride: true }}  | ${false}
+      ${{ ...directMember, canOverride: false }}    | ${false}
+      ${{ ...inheritedMember, canOverride: false }} | ${false}
     `('returns $expected', ({ member, expected }) => {
       expect(canOverride(member)).toBe(expected);
     });

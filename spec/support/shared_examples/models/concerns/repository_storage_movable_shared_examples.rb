@@ -33,7 +33,7 @@ RSpec.shared_examples 'handles repository moves' do
       subject { build(repository_storage_factory_key, container: container) }
 
       it "does not allow the container to be read-only on create" do
-        container.update!(repository_read_only: true)
+        container.set_repository_read_only!
 
         expect(subject).not_to be_valid
         expect(subject.errors[error_key].first).to match(/is read only/)

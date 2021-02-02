@@ -13,7 +13,9 @@ export default {
 </script>
 
 <template>
-  <gl-button variant="success" class="gl-ml-4" @click="setAddColumnFormVisibility(true)"
-    >{{ __('Create list') }}
-  </gl-button>
+  <span class="gl-ml-4">
+    <gl-button variant="success" @click="setAddColumnFormVisibility(true)"
+      >{{ __('Create list') }}
+    </gl-button>
+  </span>
 </template>

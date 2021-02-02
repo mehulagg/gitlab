@@ -38,7 +38,7 @@ RSpec.describe ApplicationSettings::UpdateService do
       let(:helper) { Gitlab::Elastic::Helper.new }
 
       before do
-        allow(Gitlab::Elastic::Helper).to receive(:default).and_return(helper)
+        allow(Gitlab::Elastic::Helper).to receive(:new).and_return(helper)
       end
 
       context 'index creation' do
@@ -59,6 +59,15 @@ RSpec.describe ApplicationSettings::UpdateService do
             expect(helper).to(receive(:create_empty_index))
 
             service.execute
+          end
+        end
+
+        context 'when ES service is not reachable' do
+          it 'does not throw exception' do
+            expect(helper).to receive(:index_exists?).and_raise(Faraday::ConnectionFailed, nil)
+            expect(helper).not_to receive(:create_empty_index)
+
+            expect { service.execute }.not_to raise_error
           end
         end
       end
