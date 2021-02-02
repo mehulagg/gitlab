@@ -146,6 +146,7 @@ class License < ApplicationRecord
     enforce_ssh_key_expiration
     enterprise_templates
     environment_alerts
+    evaluate_group_level_compliance_pipeline
     group_ci_cd_analytics
     group_level_compliance_dashboard
     incident_management

@@ -13,6 +13,7 @@ module ComplianceManagement
 
       def execute
         return error unless permitted?
+        return ServiceResponse.error(message: 'Not permitted to update pipeline_configuration_full_path') unless force_includes_available?
 
         framework.update(params) ? success : error
       end
@@ -29,6 +30,12 @@ module ComplianceManagement
 
       def permitted?
         can? current_user, :manage_compliance_framework, framework
+      end
+
+      def force_includes_available?
+        return true unless params[:pipeline_configuration_full_path].present?
+
+        can? current_user, :manage_compliance_force_includes, framework
       end
     end
   end
