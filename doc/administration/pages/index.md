@@ -728,6 +728,12 @@ or report an issue.
 
 [Read more about using object storage with GitLab](../object_storage.md).
 
+NOTE:
+While Pages can store site content on Object Storage with the following configuration,
+_deploying_ the pages site still requires the use of NFS. **Do not remove the
+NFS mount used by pages** when applying these settings.
+For more information, [click here](https://gitlab.com/groups/gitlab-org/-/epics/3901#how-to-test-object-storage-integration-in-beta).
+
 ### Object storage settings
 
 The following settings are:
