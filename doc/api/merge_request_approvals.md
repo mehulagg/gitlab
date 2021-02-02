@@ -503,7 +503,7 @@ DELETE /projects/:id/approval_rules/:approval_rule_id
 
 ### Change allowed approvers
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in GitLab 10.6.
 > - Moved to GitLab Premium in 13.9.
 
 NOTE:
