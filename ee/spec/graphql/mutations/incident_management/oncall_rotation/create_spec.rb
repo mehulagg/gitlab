@@ -60,6 +60,29 @@ RSpec.describe Mutations::IncidentManagement::OncallRotation::Create do
         end
       end
 
+      context 'with interval times given' do
+        before do
+          args[:interval] = {
+            from: '08:00',
+            to: '17:00'
+          }
+        end
+
+        it 'returns the on-call rotation with no errors' do
+          expect(resolve).to match(
+            oncall_rotation: ::IncidentManagement::OncallRotation.last!,
+            errors: be_empty
+          )
+        end
+
+        it 'saves the on-call rotation with interval times' do
+          rotation = expect(resolve)[:oncall_rotation]
+
+          expect(rotation).interval_start = "08:00"
+          expect(rotation).interval_end = "17:00"
+        end
+      end
+
       describe 'error cases' do
         context 'user cannot be found' do
           before do

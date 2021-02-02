@@ -70,8 +70,8 @@ module Mutations
           rotation_length = args[:rotation_length][:length]
           rotation_length_unit = args[:rotation_length][:unit]
           starts_at = parse_start_time(schedule, args)
-          interval_start = args[:interval][:from]
-          interval_end = args[:interval][:to]
+          interval_start = args.dig(:interval, :from)
+          interval_end = args.dig(:interval, :to)
 
           args.slice(:name).merge(
             length: rotation_length,

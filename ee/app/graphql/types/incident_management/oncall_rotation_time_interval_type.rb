@@ -21,7 +21,6 @@ module Types
         raise invalid_time_error unless TIME_FORMAT.match(from)
         raise invalid_time_error unless TIME_FORMAT.match(to)
 
-
         parsed_from = Time.parse(from)
         parsed_to = Time.parse(to)
 

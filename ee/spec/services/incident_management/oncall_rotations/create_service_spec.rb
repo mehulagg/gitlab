@@ -121,21 +121,60 @@ RSpec.describe IncidentManagement::OncallRotations::CreateService do
     end
 
     context 'with valid params' do
-      it 'successfully creates an on-call rotation with participants' do
-        expect(execute).to be_success
+      shared_examples 'successfully creates rotation' do
+        it 'successfully creates an on-call rotation with participants' do
+          expect(execute).to be_success
 
-        oncall_rotation = execute.payload[:oncall_rotation]
-        expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
-        expect(oncall_rotation.name).to eq('On-call rotation')
-        expect(oncall_rotation.length).to eq(1)
-        expect(oncall_rotation.length_unit).to eq('days')
+          oncall_rotation = execute.payload[:oncall_rotation]
+          expect(oncall_rotation).to be_a(::IncidentManagement::OncallRotation)
+          expect(oncall_rotation.name).to eq('On-call rotation')
+          expect(oncall_rotation.length).to eq(1)
+          expect(oncall_rotation.length_unit).to eq('days')
 
-        expect(oncall_rotation.participants.length).to eq(1)
-        expect(oncall_rotation.participants.first).to have_attributes(
-          **participants.first,
-          rotation: oncall_rotation,
-          persisted?: true
-        )
+          expect(oncall_rotation.participants.length).to eq(1)
+          expect(oncall_rotation.participants.first).to have_attributes(
+            **participants.first,
+            rotation: oncall_rotation,
+            persisted?: true
+          )
+        end
+      end
+
+      it_behaves_like 'successfully creates rotation'
+
+      context 'with an interval given' do
+        let(:interval_start) { "08:00" }
+        let(:interval_end) { "17:00" }
+
+        before do
+          params[:interval_start] = interval_start
+          params[:interval_end] = interval_end
+        end
+
+        shared_examples 'saved the interval times' do
+          it 'saves the interval times' do
+            oncall_rotation = execute.payload[:oncall_rotation]
+
+            expect(oncall_rotation.interval_start).to eq(interval_start)
+            expect(oncall_rotation.interval_end).to eq(interval_end)
+          end
+        end
+
+        it_behaves_like 'successfully creates rotation'
+        it_behaves_like 'saved the interval times'
+
+        context 'when only one interval is set' do
+          let(:interval_end) { nil }
+
+          it_behaves_like 'error response', "Interval end can't be blank"
+        end
+
+        context 'when end interval is before start interval' do
+          let(:interval_start) { "17:00" }
+          let(:interval_end) { "08:00" }
+
+          it_behaves_like 'saved the interval times'
+        end
       end
     end
   end

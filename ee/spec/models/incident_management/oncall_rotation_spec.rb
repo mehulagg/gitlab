@@ -33,6 +33,24 @@ RSpec.describe IncidentManagement::OncallRotation do
         expect(subject.errors.full_messages.to_sentence).to eq('Name has already been taken')
       end
     end
+
+    describe 'interval start/end time' do
+      before do
+        allow(subject).to receive(stubbed_arg).and_return('08:00')
+      end
+
+      context 'start time set' do
+        let(:stubbed_field) { :interval_start }
+
+        it { is_expected.to validate_presence_of(:interval_end) }
+      end
+
+      context 'end time set' do
+        let(:stubbed_field) { :interval_end }
+
+        it { is_expected.to validate_presence_of(:interval_start) }
+      end
+    end
   end
 
   describe 'scopes' do

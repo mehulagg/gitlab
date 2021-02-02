@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class AddIntervalsToOnCallRotations < ActiveRecord::Migration[6.0]
+  DOWNTIME = false
+
   def change
     # rubocop:disable Migration/Datetime
     add_column :incident_management_oncall_rotations, :interval_start, :datetime, null: true

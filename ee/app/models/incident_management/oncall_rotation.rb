@@ -23,6 +23,9 @@ module IncidentManagement
     validates :length, presence: true, numericality: true
     validates :length_unit, presence: true
 
+    validates :interval_start, presence: true, if: :interval_end
+    validates :interval_end, presence: true, if: :interval_start
+
     scope :started, -> { where('starts_at < ?', Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
