@@ -105,6 +105,7 @@ module EE
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
+      elastic_index_dependant_association :notes, on_change: :visibility_level
 
       scope :with_shared_runners_limit_enabled, -> do
         if ::Ci::Runner.has_shared_runners_with_non_zero_public_cost?
