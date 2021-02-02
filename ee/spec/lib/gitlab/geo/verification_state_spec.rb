@@ -114,6 +114,14 @@ RSpec.describe Gitlab::Geo::VerificationState do
       expect(subject.class.verification_failed_batch(batch_size: 2)).to match_array(expected)
     end
 
+    context 'when verification_retry_at is in the future' do
+      it 'does not return the row' do
+        subject.update!(verification_retry_at: 2.hours.from_now)
+
+        expect(subject.class.verification_failed_batch(batch_size: 3)).not_to include(subject.id)
+      end
+    end
+
     context 'other verification states' do
       it 'does not include them' do
         subject.verification_started!

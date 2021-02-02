@@ -35,6 +35,7 @@ module Gitlab
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :not_checksummed, -> { where(verification_checksum: nil) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
+        scope :retry_due, -> { where(arel_table[:verification_retry_at].eq(nil).or(arel_table[:verification_retry_at].lt(Time.current))) }
         scope :needs_verification, -> { with_verification_state(:verification_pending, :verification_failed) }
         # rubocop:enable CodeReuse/ActiveRecord
 
@@ -124,7 +125,7 @@ module Gitlab
 
         # Overridden by Geo::VerifiableRegistry
         def verification_failed_batch_relation(batch_size:)
-          verification_failed.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
+          verification_failed.retry_due.order(Gitlab::Database.nulls_first_order(:verification_retry_at)).limit(batch_size) # rubocop:disable CodeReuse/ActiveRecord
         end
 
         # @return [Integer] number of records that need verification
