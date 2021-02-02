@@ -12,6 +12,7 @@ import { mapState, mapActions } from 'vuex';
 import { sprintf, __ } from '~/locale';
 import ValueStreamForm from './value_stream_form.vue';
 
+// TODO: name spaces like the others
 const I18N = {
   DELETE_NAME: __('Delete %{name}'),
   DELETE_CONFIRMATION: __('Are you sure you want to delete "%{name}" Value Stream?'),
@@ -19,6 +20,7 @@ const I18N = {
   DELETE: __('Delete'),
   CREATE_VALUE_STREAM: __('Create new Value Stream'),
   CANCEL: __('Cancel'),
+  EDIT_VALUE_STREAM: __('Edit'),
 };
 
 export default {
@@ -89,12 +91,21 @@ export default {
         }
       });
     },
+    onEdit() {
+      // TODO: trigger the modal with the selected value stream
+      console.log('Editing', this.selectedValueStreamId);
+      this.setSelectedValueStream(this.selectedValueStreamId);
+      // TODO: programmtically launch the modal? + preset the values
+    },
   },
   I18N,
 };
 </script>
 <template>
   <div>
+    <gl-button v-gl-modal-directive="'value-stream-form-modal'" @click="onEdit">{{
+      $options.I18N.EDIT_VALUE_STREAM
+    }}</gl-button>
     <gl-dropdown
       v-if="hasValueStreams"
       data-testid="dropdown-value-streams"
