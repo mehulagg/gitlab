@@ -16,9 +16,9 @@ import { __, s__ } from '~/locale';
 import { serializeFormObject } from '~/lib/utils/forms';
 import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import DastSiteAuthSection from './dast_site_auth_section.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
+import DastSiteAuthSection from './dast_site_auth_section.vue';
 
 export default {
   name: 'DastSiteProfileForm',

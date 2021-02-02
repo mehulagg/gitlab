@@ -732,13 +732,64 @@ RSpec.describe Gitlab::UsageData do
       )
     end
 
+    it 'counts users who have run scans' do
+      for_defined_days_back do
+        create(:ee_ci_build, :api_fuzzing, :success, user: user3)
+        create(:ee_ci_build, :dast, :running, user: user2)
+        create(:ee_ci_build, :dast, :success, user: user3)
+        create(:ee_ci_build, :container_scanning, :success, user: user3)
+        create(:ee_ci_build, :coverage_fuzzing, :success, user: user)
+        create(:ee_ci_build, :dependency_scanning, :success, user: user)
+        create(:ee_ci_build, :dependency_scanning, :failed, user: user2)
+        create(:ee_ci_build, :sast, :success, user: user2)
+        create(:ee_ci_build, :sast, :success, user: user3)
+        create(:ee_ci_build, :secret_detection, :success, user: user)
+        create(:ee_ci_build, :secret_detection, :success, user: user)
+        create(:ee_ci_build, :secret_detection, :failed, user: user2)
+      end
+
+      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+        user_api_fuzzing_scans: be_within(error_rate).percent_of(1),
+        user_container_scanning_scans: be_within(error_rate).percent_of(1),
+        user_coverage_fuzzing_scans: be_within(error_rate).percent_of(1),
+        user_dast_scans: be_within(error_rate).percent_of(1),
+        user_dependency_scanning_scans: be_within(error_rate).percent_of(1),
+        user_sast_scans: be_within(error_rate).percent_of(2),
+        user_secret_detection_scans: be_within(error_rate).percent_of(1)
+      )
+    end
+
     context 'with feature flag: postgres_hll_batch_counting is disabled' do
       before do
         stub_feature_flags(postgres_hll_batch_counting: false)
       end
 
+      it 'does not count users who have run scans' do
+        for_defined_days_back do
+          create(:ee_ci_build, :api_fuzzing, :success, user: user3)
+          create(:ee_ci_build, :dast, :success, user: user2)
+          create(:ee_ci_build, :container_scanning, :success, user: user3)
+          create(:ee_ci_build, :coverage_fuzzing, :success, user: user)
+          create(:ee_ci_build, :dependency_scanning, :success, user: user)
+          create(:ee_ci_build, :sast, :success, user: user2)
+          create(:ee_ci_build, :secret_detection, :success, user: user)
+          create(:ee_ci_build, :secret_detection, :running, user: user2)
+          create(:ee_ci_build, :secret_detection, :failed, user: user3)
+        end
+
+        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).not_to include(
+          :user_api_fuzzing_scans,
+          :user_container_scanning_scans,
+          :user_coverage_fuzzing_scans,
+          :user_dast_scans,
+          :user_dependency_scanning_scans,
+          :user_sast_scans,
+          :user_secret_detection_scans
+        )
+      end
+
       it 'includes accurate usage_activity_by_stage data' do
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
+        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_container_scanning_jobs: 1,
           user_api_fuzzing_jobs: 1,
@@ -836,7 +887,7 @@ RSpec.describe Gitlab::UsageData do
           create(:ci_build, name: 'dast', user: user3)
         end
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
+        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_api_fuzzing_jobs: 1,
           user_api_fuzzing_dnd_jobs: 1,
@@ -870,7 +921,7 @@ RSpec.describe Gitlab::UsageData do
           create(:ci_build, name: 'license_scanning', user: user)
         end
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
+        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_api_fuzzing_jobs: 1,
           user_api_fuzzing_dnd_jobs: 1,

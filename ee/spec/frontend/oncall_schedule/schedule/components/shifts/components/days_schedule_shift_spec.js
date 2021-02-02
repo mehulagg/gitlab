@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import DaysScheduleShift from 'ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue';
 import RotationsAssignee from 'ee/oncall_schedules/components/rotations/components/rotation_assignee.vue';
-import { incrementDateByDays } from 'ee/oncall_schedules/components/schedule/utils';
 import { PRESET_TYPES, DAYS_IN_WEEK } from 'ee/oncall_schedules/constants';
+import { nDaysAfter } from '~/lib/utils/datetime_utility';
 
 const shift = {
   participant: {
@@ -17,7 +17,7 @@ const shift = {
 
 const CELL_WIDTH = 50;
 const timeframeItem = new Date(2021, 0, 15);
-const timeframe = [timeframeItem, incrementDateByDays(timeframeItem, DAYS_IN_WEEK)];
+const timeframe = [timeframeItem, nDaysAfter(timeframeItem, DAYS_IN_WEEK)];
 
 describe('ee/oncall_schedules/components/schedule/components/shifts/components/days_schedule_shift.vue', () => {
   let wrapper;

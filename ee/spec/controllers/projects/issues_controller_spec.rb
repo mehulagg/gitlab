@@ -112,6 +112,15 @@ RSpec.describe Projects::IssuesController do
             expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
           end
 
+          it 'overwrites the default fields' do
+            send_request
+
+            issue = project.issues.last
+            expect(issue.title).to eq('Title')
+            expect(issue.description).to eq('Description')
+            expect(issue.confidential).to be false
+          end
+
           context 'when vulnerability already has a linked issue' do
             render_views
 
@@ -131,7 +140,7 @@ RSpec.describe Projects::IssuesController do
             post :create, params: {
               namespace_id: project.namespace.to_param,
               project_id: project,
-              issue: { title: 'Title', description: 'Description' },
+              issue: { title: 'Title', description: 'Description', confidential: 'false' },
               vulnerability_id: vulnerability.id
             }
           end

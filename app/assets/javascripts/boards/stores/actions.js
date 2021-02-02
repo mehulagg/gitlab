@@ -5,7 +5,9 @@ import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
 import { BoardType, ListType, inactiveId } from '~/boards/constants';
-import * as types from './mutation_types';
+import createFlash from '~/flash';
+import { __ } from '~/locale';
+import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import {
   formatBoardLists,
   formatListIssues,
@@ -14,10 +16,8 @@ import {
   formatIssue,
   formatIssueInput,
   updateListPosition,
+  transformNotFilters,
 } from '../boards_util';
-import createFlash from '~/flash';
-import { __ } from '~/locale';
-import updateAssigneesMutation from '~/vue_shared/components/sidebar/queries/updateAssignees.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import createBoardListMutation from '../graphql/board_list_create.mutation.graphql';
@@ -31,6 +31,7 @@ import issueSetSubscriptionMutation from '../graphql/issue_set_subscription.muta
 import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
 import issueSetTitleMutation from '../graphql/issue_set_title.mutation.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
+import * as types from './mutation_types';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -66,6 +67,7 @@ export default {
       'releaseTag',
       'search',
     ]);
+    filterParams.not = transformNotFilters(filters);
     commit(types.SET_FILTERS, filterParams);
   },
 
@@ -543,6 +545,10 @@ export default {
     } else {
       commit(types.REMOVE_BOARD_ITEM_FROM_SELECTION, boardItem);
     }
+  },
+
+  setAddColumnFormVisibility: ({ commit }, visible) => {
+    commit(types.SET_ADD_COLUMN_FORM_VISIBLE, visible);
   },
 
   fetchBacklog: () => {

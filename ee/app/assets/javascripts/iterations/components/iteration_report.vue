@@ -13,10 +13,10 @@ import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationForm from './iteration_form.vue';
-import IterationReportTabs from './iteration_report_tabs.vue';
 import query from '../queries/iteration.query.graphql';
 import { Namespace } from '../constants';
+import IterationForm from './iteration_form.vue';
+import IterationReportTabs from './iteration_report_tabs.vue';
 
 const iterationStates = {
   closed: 'closed',

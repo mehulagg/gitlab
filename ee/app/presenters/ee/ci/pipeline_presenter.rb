@@ -30,6 +30,10 @@ module EE
           job_artifact.job.degradation_threshold
         end
       end
+
+      def retryable?
+        !merge_train_pipeline? && super
+      end
     end
   end
 end

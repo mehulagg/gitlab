@@ -2,9 +2,8 @@
 import { visitUrl } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import * as Sentry from '~/sentry/wrapper';
-import SharedForm from './shared_form.vue';
-
 import createComplianceFrameworkMutation from '../graphql/queries/create_compliance_framework.mutation.graphql';
+import SharedForm from './shared_form.vue';
 
 export default {
   components: {

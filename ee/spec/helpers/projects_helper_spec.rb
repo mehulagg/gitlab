@@ -155,12 +155,15 @@ RSpec.describe ProjectsHelper do
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
-          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix')
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
+          scanners: '[{"external_id":"security_vendor","vendor":"Security Vendor","report_type":"SAST"}]'
         }
       end
 
       before do
         create(:vulnerability, project: project)
+        scanner = create(:vulnerabilities_scanner, project: project, external_id: 'security_vendor')
+        create(:vulnerabilities_finding, project: project, scanner: scanner)
       end
 
       context 'without pipeline' do

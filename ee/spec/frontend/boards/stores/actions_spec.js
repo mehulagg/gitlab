@@ -37,7 +37,7 @@ describe('setFilters', () => {
     };
 
     const filters = { labelName: 'label', epicId: 1 };
-    const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1' };
+    const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1', not: {} };
 
     return testAction(
       actions.setFilters,
@@ -54,7 +54,7 @@ describe('setFilters', () => {
     };
 
     const filters = { labelName: 'label', epicId: 'None' };
-    const updatedFilters = { labelName: 'label', epicWildcardId: 'NONE' };
+    const updatedFilters = { labelName: 'label', epicWildcardId: 'NONE', not: {} };
 
     return testAction(
       actions.setFilters,
@@ -71,7 +71,7 @@ describe('setFilters', () => {
     };
 
     const filters = { labelName: 'label', iterationId: 'None' };
-    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE' };
+    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE', not: {} };
 
     return testAction(
       actions.setFilters,
@@ -88,7 +88,7 @@ describe('setFilters', () => {
     };
 
     const filters = { labelName: 'label', epicId: 1, groupBy: 'epic' };
-    const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1' };
+    const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1', not: {} };
 
     return testAction(
       actions.setFilters,

@@ -66,10 +66,12 @@ module EE
       end
 
       def vulnerability_issue_build_parameters
+        issue = params[:issue]
+
         {
-          title: _("Investigate vulnerability: %{title}") % { title: vulnerability.title },
-          description: render_vulnerability_description,
-          confidential: true
+          title: issue.fetch(:title, _("Investigate vulnerability: %{title}") % { title: vulnerability.title }),
+          description: issue.fetch(:description, render_vulnerability_description),
+          confidential: issue.fetch(:confidential, true)
         }
       end
 

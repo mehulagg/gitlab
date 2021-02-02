@@ -128,14 +128,7 @@ with this approach, however, and there is a
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4393) in GitLab Free 13.5.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/273205) in 13.6.
 > - Report download dropdown [added](https://gitlab.com/gitlab-org/gitlab/-/issues/273418) in 13.7.
-> - It's [deployed behind a feature flag](../feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It can be enabled or disabled for a single project.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-basic-security-widget). **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/249550) in GitLab 13.9.
 
 Merge requests which have run security scans let you know that the generated
 reports are available to download. To download a report, click on the
@@ -667,27 +660,16 @@ Analyzer results are displayed in the [job logs](../../ci/jobs/index.md#expand-a
 or [Security Dashboard](security_dashboard/index.md).
 There is [an open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/235772) in which changes to this behavior are being discussed.
 
-### Enable or disable the basic security widget **(FREE SELF)**
+### Error: job `is used for configuration only, and its script should not be executed`
 
-The basic security widget is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../feature_flags.md)
-can opt to disable it.
+[Changes made in GitLab 13.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41260)
+to the `Security/Dependency-Scanning.gitlab-ci.yml` and `Security/SAST.gitlab-ci.yml`
+templates mean that if you enable the `sast` or `dependency_scanning` jobs by setting the `rules` attribute,
+they will fail with the error `(job) is used for configuration only, and its script should not be executed`.
 
-To enable it:
+The `sast` or `dependency_scanning` stanzas can be used to make changes to all SAST or Dependency Scanning,
+such as changing `variables` or the `stage`, but they cannot be used to define shared `rules`.
 
-```ruby
-# For the instance
-Feature.enable(:core_security_mr_widget)
-# For a single project
-Feature.enable(:core_security_mr_widget, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# For the instance
-Feature.disable(:core_security_mr_widget)
-# For a single project
-Feature.disable(:core_security_mr_widget, Project.find(<project id>))
-```
+There [is an issue open to improve extendability](https://gitlab.com/gitlab-org/gitlab/-/issues/218444).
+Please upvote the issue to help with prioritization, and
+[contributions are welcomed](https://about.gitlab.com/community/contribute/).

@@ -22,6 +22,10 @@ export default (el) => {
       vulnerabilityId: vulnerability.id,
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,
+      createJiraIssueUrl: vulnerability.createJiraIssueUrl,
+      relatedJiraIssuesPath: vulnerability.relatedJiraIssuesPath,
+      relatedJiraIssuesHelpPath: vulnerability.relatedJiraIssuesHelpPath,
+      jiraIntegrationSettingsPath: vulnerability.jiraIntegrationSettingsPath,
     },
     render: (h) =>
       h(App, {

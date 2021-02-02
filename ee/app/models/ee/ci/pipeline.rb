@@ -89,10 +89,6 @@ module EE
         tag? && project_has_subscriptions?
       end
 
-      def retryable?
-        !merge_train_pipeline? && super
-      end
-
       def batch_lookup_report_artifact_for_file_type(file_type)
         return unless available_licensed_report_type?(file_type)
 

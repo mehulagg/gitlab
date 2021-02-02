@@ -6,8 +6,8 @@ import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { unparsedIssues, parsedIssues } from '../mock_data';
 import Api from '~/api';
+import { unparsedIssues, parsedIssues } from '../mock_data';
 
 jest.mock('~/api.js');
 jest.mock('~/flash');

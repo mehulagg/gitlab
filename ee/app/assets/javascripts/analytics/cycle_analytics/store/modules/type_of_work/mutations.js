@@ -1,7 +1,7 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
 import { transformRawTasksByTypeData, toggleSelectedLabel } from '../../../utils';
 import { TASKS_BY_TYPE_FILTERS } from '../../../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.SET_LOADING](state, loading) {

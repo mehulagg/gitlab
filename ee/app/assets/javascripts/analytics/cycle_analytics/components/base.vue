@@ -1,15 +1,15 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { PROJECTS_PER_PAGE } from '../constants';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import DateRange from '../../shared/components/daterange.vue';
+import { toYmd } from '../../shared/utils';
 import StageTable from './stage_table.vue';
 import DurationChart from './duration_chart.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
-import { toYmd } from '../../shared/utils';
 import StageTableNav from './stage_table_nav.vue';
 import CustomStageForm from './custom_stage_form.vue';
 import PathNavigation from './path_navigation.vue';
@@ -238,7 +238,7 @@ export default {
         :svg-path="noAccessSvgPath"
         :description="
           __(
-            'Only \'Reporter\' roles and above on tiers Premium / Silver and above can see Value Stream Analytics.',
+            'Only \'Reporter\' roles and above on tiers Premium and above can see Value Stream Analytics.',
           )
         "
       />

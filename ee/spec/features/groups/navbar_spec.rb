@@ -66,6 +66,7 @@ RSpec.describe 'Group navbar' do
   context 'when epics are available' do
     before do
       stub_licensed_features(epics: true)
+      stub_feature_flags(epic_boards: false)
 
       insert_after_nav_item(
         _('Group overview'),
@@ -73,6 +74,28 @@ RSpec.describe 'Group navbar' do
           nav_item: _('Epics'),
           nav_sub_items: [
             _('List'),
+            _('Roadmap')
+          ]
+        }
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when epics and epic boards are available' do
+    before do
+      stub_licensed_features(epics: true)
+
+      insert_after_nav_item(
+        _('Group overview'),
+        new_nav_item: {
+          nav_item: _('Epics'),
+          nav_sub_items: [
+            _('List'),
+            _('Boards'),
             _('Roadmap')
           ]
         }

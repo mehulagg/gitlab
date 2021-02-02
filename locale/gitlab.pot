@@ -1635,9 +1635,6 @@ msgstr ""
 msgid "Add a Grafana button in the admin sidebar, monitoring section, to access a variety of statistics on the health and performance of GitLab."
 msgstr ""
 
-msgid "Add a To Do"
-msgstr ""
-
 msgid "Add a bullet list"
 msgstr ""
 
@@ -1903,6 +1900,9 @@ msgid "Admin mode disabled"
 msgstr ""
 
 msgid "Admin mode enabled"
+msgstr ""
+
+msgid "Admin navigation"
 msgstr ""
 
 msgid "Admin notes"
@@ -2573,9 +2573,6 @@ msgstr ""
 msgid "AlertManagement|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
 msgstr ""
 
-msgid "AlertManagement|There was an error while updating the To-Do of the alert."
-msgstr ""
-
 msgid "AlertManagement|There was an error while updating the assignee(s) list. Please try again."
 msgstr ""
 
@@ -2583,6 +2580,9 @@ msgid "AlertManagement|There was an error while updating the assignee(s) of the 
 msgstr ""
 
 msgid "AlertManagement|There was an error while updating the status of the alert."
+msgstr ""
+
+msgid "AlertManagement|There was an error while updating the to-do item of the alert."
 msgstr ""
 
 msgid "AlertManagement|This assignee cannot be assigned to this alert."
@@ -3279,6 +3279,9 @@ msgid "An error occurred while loading the file."
 msgstr ""
 
 msgid "An error occurred while loading the file. Please try again later."
+msgstr ""
+
+msgid "An error occurred while loading the members, please try again."
 msgstr ""
 
 msgid "An error occurred while loading the merge request changes."
@@ -4653,6 +4656,9 @@ msgstr ""
 msgid "Boards|An error occurred while updating the list. Please try again."
 msgstr ""
 
+msgid "Boards|Board"
+msgstr ""
+
 msgid "Boards|Collapse"
 msgstr ""
 
@@ -4848,6 +4854,9 @@ msgstr ""
 msgid "Branches|protected"
 msgstr ""
 
+msgid "Breadcrumbs"
+msgstr ""
+
 msgid "Brief title about the change"
 msgstr ""
 
@@ -4885,6 +4894,9 @@ msgid "Built-in"
 msgstr ""
 
 msgid "Bulk request concurrency"
+msgstr ""
+
+msgid "Bulk update"
 msgstr ""
 
 msgid "BulkImport|From source group"
@@ -5847,7 +5859,16 @@ msgstr ""
 msgid "Clean up image tags"
 msgstr ""
 
+msgid "Cleanup policies are executed by background workers. This setting defines the maximum number of workers that can run concurrently. Set it to 0 to remove all workers and not execute the cleanup policies."
+msgstr ""
+
+msgid "Cleanup policy maximum number of tags to be deleted"
+msgstr ""
+
 msgid "Cleanup policy maximum processing time (seconds)"
+msgstr ""
+
+msgid "Cleanup policy maximum workers running concurrently"
 msgstr ""
 
 msgid "Clear"
@@ -7677,6 +7698,9 @@ msgstr ""
 msgid "ContainerRegistry|Image repository deletion failed"
 msgstr ""
 
+msgid "ContainerRegistry|Image repository not found"
+msgstr ""
+
 msgid "ContainerRegistry|Image repository will be deleted"
 msgstr ""
 
@@ -7802,7 +7826,13 @@ msgstr ""
 msgid "ContainerRegistry|The cleanup policy timed out before it could delete all tags. An administrator can %{adminLinkStart}manually run cleanup now%{adminLinkEnd} or you can wait for the cleanup policy to automatically run again. %{docLinkStart}More information%{docLinkEnd}"
 msgstr ""
 
+msgid "ContainerRegistry|The image repository could not be found."
+msgstr ""
+
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
+msgstr ""
+
+msgid "ContainerRegistry|The requested image repository does not exist or has been deleted. If you think this is an error, try refreshing the page."
 msgstr ""
 
 msgid "ContainerRegistry|The value of this input should be less than 256 characters"
@@ -8162,9 +8192,6 @@ msgstr ""
 msgid "Could not upload your designs as one or more files uploaded are not supported."
 msgstr ""
 
-msgid "Couldn't calculate number of %{issuables}."
-msgstr ""
-
 msgid "Country"
 msgstr ""
 
@@ -8279,6 +8306,9 @@ msgid "Create issue"
 msgstr ""
 
 msgid "Create iteration"
+msgstr ""
+
+msgid "Create list"
 msgstr ""
 
 msgid "Create lists from labels. Issues with that label appear in that list."
@@ -8883,7 +8913,7 @@ msgstr ""
 msgid "Dashboard|%{firstProject}, %{rest}, and %{secondProject}"
 msgstr ""
 
-msgid "Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Silver plan."
+msgid "Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Premium plan."
 msgstr ""
 
 msgid "DastProfiles|A passive scan monitors all HTTP messages (requests and responses) sent to the target. An active scan attacks the target to find potential vulnerabilities."
@@ -9585,6 +9615,9 @@ msgstr ""
 msgid "Deploy to..."
 msgstr ""
 
+msgid "DeployFreeze|Add a freeze period to prevent unintended releases during a period of time for a given environment. You must update the deployment jobs in %{filename} according to the deploy freezes added here. %{freeze_period_link_start}Learn more.%{freeze_period_link_end}"
+msgstr ""
+
 msgid "DeployFreeze|Freeze end"
 msgstr ""
 
@@ -9594,13 +9627,10 @@ msgstr ""
 msgid "DeployFreeze|No deploy freezes exist for this project. To add one, click %{strongStart}Add deploy freeze%{strongEnd}"
 msgstr ""
 
-msgid "DeployFreeze|Specify times when deployments are not allowed for an environment. The %{filename} file must be updated to make deployment jobs aware of the %{freeze_period_link_start}freeze period%{freeze_period_link_end}."
+msgid "DeployFreeze|Specify deploy freezes using %{cron_syntax_link_start}cron syntax%{cron_syntax_link_end}."
 msgstr ""
 
 msgid "DeployFreeze|Time zone"
-msgstr ""
-
-msgid "DeployFreeze|You can specify deploy freezes using only %{cron_syntax_link_start}cron syntax%{cron_syntax_link_end}."
 msgstr ""
 
 msgid "DeployKeys|+%{count} others"
@@ -10090,9 +10120,6 @@ msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar mo
 msgstr ""
 
 msgid "DevopsAdoption|Filter by name"
-msgstr ""
-
-msgid "DevopsAdoption|Group data pending until the start of next month"
 msgstr ""
 
 msgid "DevopsAdoption|Issues"
@@ -12005,10 +12032,10 @@ msgstr ""
 msgid "Failed to create Merge Request. Please try again."
 msgstr ""
 
-msgid "Failed to create To-Do for the design."
+msgid "Failed to create a branch for this issue. Please try again."
 msgstr ""
 
-msgid "Failed to create a branch for this issue. Please try again."
+msgid "Failed to create a to-do item for the design."
 msgstr ""
 
 msgid "Failed to create framework"
@@ -12125,10 +12152,10 @@ msgstr ""
 msgid "Failed to publish issue on status page."
 msgstr ""
 
-msgid "Failed to remove To-Do for the design."
+msgid "Failed to remove a Zoom meeting"
 msgstr ""
 
-msgid "Failed to remove a Zoom meeting"
+msgid "Failed to remove a to-do item for the design."
 msgstr ""
 
 msgid "Failed to remove issue from board, please try again."
@@ -12173,7 +12200,7 @@ msgstr ""
 msgid "Failed to signing using smartcard authentication"
 msgstr ""
 
-msgid "Failed to toggle To-Do for the design."
+msgid "Failed to toggle the to-do status for the design."
 msgstr ""
 
 msgid "Failed to update branch!"
@@ -13853,6 +13880,9 @@ msgid "Group name"
 msgstr ""
 
 msgid "Group name (your organization)"
+msgstr ""
+
+msgid "Group navigation"
 msgstr ""
 
 msgid "Group overview"
@@ -16702,7 +16732,7 @@ msgstr ""
 msgid "Job|Job has been erased"
 msgstr ""
 
-msgid "Job|Job has been erased by"
+msgid "Job|Job has been erased by %{userLink}"
 msgstr ""
 
 msgid "Job|Keep"
@@ -18099,6 +18129,9 @@ msgid "Members|Reverted to LDAP group sync settings."
 msgstr ""
 
 msgid "Members|Role updated successfully."
+msgstr ""
+
+msgid "Members|Search groups"
 msgstr ""
 
 msgid "Members|Search invited"
@@ -20483,7 +20516,7 @@ msgstr ""
 msgid "One or more of your personal access tokens will expire in %{days_to_expire} days or less."
 msgstr ""
 
-msgid "Only 'Reporter' roles and above on tiers Premium / Silver and above can see Value Stream Analytics."
+msgid "Only 'Reporter' roles and above on tiers Premium and above can see Value Stream Analytics."
 msgstr ""
 
 msgid "Only 1 appearances row can exist"
@@ -20519,7 +20552,7 @@ msgstr ""
 msgid "Only verified users with an email address in any of these domains can be added to the group."
 msgstr ""
 
-msgid "Only ‘Reporter’ roles and above on tiers Premium / Silver and above can see Productivity Analytics."
+msgid "Only ‘Reporter’ roles and above on tiers Premium and above can see Productivity Analytics."
 msgstr ""
 
 msgid "Oops, are you sure?"
@@ -22587,6 +22620,9 @@ msgid "Project name"
 msgstr ""
 
 msgid "Project name suffix"
+msgstr ""
+
+msgid "Project navigation"
 msgstr ""
 
 msgid "Project order will not be saved as local storage is not available."
@@ -25571,6 +25607,9 @@ msgstr ""
 msgid "Security dashboard"
 msgstr ""
 
+msgid "Security navigation"
+msgstr ""
+
 msgid "Security report is out of date. Please update your branch with the latest changes from the target branch (%{targetBranchName})"
 msgstr ""
 
@@ -25994,6 +26033,9 @@ msgid "Select groups to replicate"
 msgstr ""
 
 msgid "Select health status"
+msgstr ""
+
+msgid "Select iteration"
 msgstr ""
 
 msgid "Select label"
@@ -27683,6 +27725,9 @@ msgstr ""
 msgid "Subgroup milestone"
 msgstr ""
 
+msgid "Subgroup navigation"
+msgstr ""
+
 msgid "Subgroup overview"
 msgstr ""
 
@@ -28430,9 +28475,6 @@ msgstr ""
 msgid "TestCases|Something went wrong while creating a test case."
 msgstr ""
 
-msgid "TestCases|Something went wrong while fetching count of test cases."
-msgstr ""
-
 msgid "TestCases|Something went wrong while fetching test case."
 msgstr ""
 
@@ -28782,6 +28824,9 @@ msgstr ""
 msgid "The maximum file size is %{size}."
 msgstr ""
 
+msgid "The maximum number of tags that a single worker accepts for cleanup. If the number of tags goes above this limit, the list of tags to delete is truncated to this number. To remove this limit, set it to 0."
+msgstr ""
+
 msgid "The merge conflicts for this merge request cannot be resolved through GitLab. Please try to resolve them locally."
 msgstr ""
 
@@ -29058,10 +29103,10 @@ msgstr ""
 msgid "There is a halted Elasticsearch migration"
 msgstr ""
 
-msgid "There is already a To-Do for this design."
+msgid "There is already a repository with that name on disk"
 msgstr ""
 
-msgid "There is already a repository with that name on disk"
+msgid "There is already a to-do item for this design."
 msgstr ""
 
 msgid "There is no chart data available."
@@ -30292,7 +30337,7 @@ msgstr ""
 msgid "To see all the user's personal access tokens you must impersonate them first."
 msgstr ""
 
-msgid "To see this project's operational details, %{linkStart}upgrade its group plan to Silver%{linkEnd}. You can also remove the project from the dashboard."
+msgid "To see this project's operational details, %{linkStart}upgrade its group plan to Premium%{linkEnd}. You can also remove the project from the dashboard."
 msgstr ""
 
 msgid "To see this project's operational details, contact an owner of group %{groupName} to upgrade the plan. You can also remove the project from the dashboard."
@@ -30329,9 +30374,6 @@ msgid "To widen your search, change or remove filters above"
 msgstr ""
 
 msgid "To widen your search, change or remove filters."
-msgstr ""
-
-msgid "To-Do"
 msgstr ""
 
 msgid "To-Do List"
@@ -32044,6 +32086,9 @@ msgstr ""
 msgid "VulnerabilityChart|Severity"
 msgstr ""
 
+msgid "VulnerabilityManagement, Fetching linked Jira issues"
+msgstr ""
+
 msgid "VulnerabilityManagement|%{statusStart}Confirmed%{statusEnd} %{timeago} by %{user}"
 msgstr ""
 
@@ -32065,13 +32110,25 @@ msgstr ""
 msgid "VulnerabilityManagement|Could not process %{issueReference}: %{errorMessage}."
 msgstr ""
 
+msgid "VulnerabilityManagement|Create Jira issue"
+msgstr ""
+
 msgid "VulnerabilityManagement|Detected"
 msgstr ""
 
 msgid "VulnerabilityManagement|Needs triage"
 msgstr ""
 
+msgid "VulnerabilityManagement|Read more about related issues"
+msgstr ""
+
+msgid "VulnerabilityManagement|Related Jira issues"
+msgstr ""
+
 msgid "VulnerabilityManagement|Something went wrong while trying to delete the comment. Please try again later."
+msgstr ""
+
+msgid "VulnerabilityManagement|Something went wrong while trying to fetch related Jira issues. Please check the %{linkStart}Jira integration settings%{linkEnd} and try again."
 msgstr ""
 
 msgid "VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later."
