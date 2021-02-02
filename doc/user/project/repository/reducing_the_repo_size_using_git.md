@@ -25,7 +25,7 @@ you begin. The best way back up a repository is to
 
 ## Purge files from repository history
 
-To reduce the size of your repository in GitLab, you must remove references to large files from branches, tags, *and*
+To reduce the size of your repository in GitLab, you must first remove references to large files from branches, tags, *and*
 other internal references (refs) that are automatically created by GitLab. These refs include:
 
 - `refs/merge-requests/*` for merge requests.
