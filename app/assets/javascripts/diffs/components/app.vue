@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
+import { GlPagination, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
 import { __ } from '~/locale';
@@ -10,6 +10,10 @@ import PanelResizer from '~/vue_shared/components/panel_resizer.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { updateHistory } from '~/lib/utils/url_utility';
+
+import FilesLoader from './loaders/diff_files_loading.vue';
+import TreeLoader from './loaders/file_tree_loading.vue';
+import VersionsLoader from './loaders/mr_version_controls_loading.vue';
 
 import notesEventHub from '../../notes/event_hub';
 import eventHub from '../event_hub';
@@ -51,10 +55,12 @@ export default {
     CollapsedFilesWarning,
     CommitWidget,
     TreeList,
-    GlLoadingIcon,
     PanelResizer,
     GlPagination,
     GlSprintf,
+    FilesLoader,
+    TreeLoader,
+    VersionsLoader,
   },
   mixins: [glFeatureFlagsMixin()],
   alerts: {
@@ -464,7 +470,17 @@ export default {
 
 <template>
   <div v-show="shouldShow">
-    <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
+    <div v-if="isLoading || !isTreeLoaded" class="app-loading gl-pt-5">
+      <div class="gl-pt-2 gl-pl-4">
+        <versions-loader />
+      </div>
+      <div class="tree-loader">
+        <tree-loader />
+      </div>
+      <div class="files-loader gl-pl-5">
+        <files-loader />
+      </div>
+    </div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
         :is-limited-container="isLimitedContainer"
@@ -515,7 +531,7 @@ export default {
           }"
         >
           <commit-widget v-if="commit" :commit="commit" :collapsible="false" />
-          <div v-if="isBatchLoading" class="loading"><gl-loading-icon size="lg" /></div>
+          <div v-if="isBatchLoading" class="files-loader gl-pl-5 gl-pt-5"><files-loader /></div>
           <template v-else-if="renderDiffFiles">
             <diff-file
               v-for="(file, index) in diffs"
@@ -545,7 +561,9 @@ export default {
                 <template #total>{{ diffFiles.length }}</template>
               </gl-sprintf>
             </div>
-            <gl-loading-icon v-else-if="retrievingBatches" size="lg" />
+            <div v-else-if="retrievingBatches" class="files-loader gl-pl-5 gl-pt-5">
+              <files-loader />
+            </div>
           </template>
           <no-changes v-else :changes-empty-state-illustration="changesEmptyStateIllustration" />
         </div>

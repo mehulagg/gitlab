@@ -445,6 +445,50 @@ $mr-widget-min-height: 69px;
   }
 }
 
+#diff-notes-app {
+  .files-loader {
+    height: 285px;
+  }
+
+  .tree-loader {
+    height: 240px;
+  }
+
+  .gl-skeleton-loader {
+    height: 100%;
+  }
+
+  .app-loading {
+    display: grid;
+    grid-gap: 1rem;
+    grid-template-areas:
+      'header       header'
+      'fileTree     diffFiles';
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: 2rem 1fr;
+
+    > div,
+    .gl-skeleton-loader-default-container,
+    svg {
+      width: 100%;
+    }
+
+    > div {
+      &:nth-child(1) {
+        grid-area: header;
+      }
+
+      &:nth-child(2) {
+        grid-area: fileTree;
+      }
+
+      &:nth-child(3) {
+        grid-area: diffFiles;
+      }
+    }
+  }
+}
+
 .mr-list {
   .merge-request {
     padding: 10px $gl-padding;
