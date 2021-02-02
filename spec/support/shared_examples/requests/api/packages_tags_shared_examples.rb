@@ -137,11 +137,11 @@ end
 RSpec.shared_examples 'delete package tag' do |user_type|
   using RSpec::Parameterized::TableSyntax
 
-  before do
-    project.send("add_#{user_type}", user) unless user_type == :no_type
-  end
+  context 'with valid package name' do
+    before do
+      package.update!(name: package_name) unless package_name == 'non-existing-package'
+    end
 
-  context "for #{user_type} user" do
     it_behaves_like 'returning response status', :no_content
 
     it 'returns a valid response' do
@@ -162,29 +162,29 @@ RSpec.shared_examples 'delete package tag' do |user_type|
 
       it_behaves_like 'returning response status', :not_found
     end
+  end
 
-    context 'with invalid package name' do
-      where(:package_name, :status) do
-        'unknown' | :not_found
-        ''        | :not_found
-        '%20'     | :bad_request
-      end
-
-      with_them do
-        it_behaves_like 'returning response status', params[:status]
-      end
+  context 'with invalid package name' do
+    where(:package_name, :status) do
+      'unknown' | :not_found
+      ''        | :not_found
+      '%20'     | :bad_request
     end
 
-    context 'with invalid tag name' do
-      where(:tag_name, :status) do
-        'unknown' | :not_found
-        ''        | :not_found
-        '%20'     | :bad_request
-      end
+    with_them do
+      it_behaves_like 'returning response status', params[:status]
+    end
+  end
 
-      with_them do
-        it_behaves_like 'returning response status', params[:status]
-      end
+  context 'with invalid tag name' do
+    where(:tag_name, :status) do
+      'unknown' | :not_found
+      ''        | :not_found
+      '%20'     | :bad_request
+    end
+
+    with_them do
+      it_behaves_like 'returning response status', params[:status]
     end
   end
 end
