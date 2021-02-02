@@ -305,10 +305,10 @@ whois <ip_address> | grep -i "orgname\|netname"
 # Curl headers with redirect
 curl --head --location "https://example.com"
 
-# Test if a host is reachable on the network
+# Test if a host is reachable on the network. `ping6` works on IPv6 networks.
 ping example.com
 
-# Show the route taken to a host
+# Show the route taken to a host. `traceroute6` works on IPv6 networks.
 traceroute example.com
 mtr example.com
 
