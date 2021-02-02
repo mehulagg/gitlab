@@ -730,7 +730,7 @@ export const updateConfidentialityOnIssuable = (
         issueSetConfidential: { issue, errors },
       } = data;
 
-      if (errors) {
+      if (errors.length) {
         Flash(errors[0], 'alert');
         return { ...data, hasFlash: true };
       }
