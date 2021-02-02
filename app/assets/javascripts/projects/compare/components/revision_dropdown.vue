@@ -130,6 +130,5 @@ export default {
         {{ tag }}
       </gl-dropdown-item>
     </gl-dropdown>
-    <!-- </div> -->
   </div>
 </template>

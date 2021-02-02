@@ -53,8 +53,9 @@ export default {
     :action="projectCompareIndexPath"
   >
     <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
-    <!-- <div class="gl-display-flex gl-align-items-center"> -->
-    <div class="gl-md-flex-direction-row gl-md-display-flex gl-align-items-center">
+    <div
+      class="gl-lg-flex-direction-row gl-lg-display-flex gl-align-items-center compare-revision-cards"
+    >
       <revision-card
         :refs-project-path="refsProjectPath"
         revision-text="Source"
@@ -62,7 +63,7 @@ export default {
         :params-branch="paramsTo"
       />
       <div
-        class="compare-ellipsis gl-display-flex gl-justify-content-center gl-align-items-center gl-mx-2 gl-my-4 gl-md-my-0"
+        class="compare-ellipsis gl-display-flex gl-justify-content-center gl-align-items-center gl-my-4 gl-md-my-0"
         data-testid="ellipsis"
       >
         ...
@@ -74,7 +75,7 @@ export default {
         :params-branch="paramsFrom"
       />
     </div>
-    <div class="gl-mt-2">
+    <div class="gl-mt-4">
       <gl-button category="primary" variant="success" @click="onSubmit">
         {{ s__('CompareRevisions|Compare') }}
       </gl-button>

@@ -67,10 +67,14 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="compare-form-group">
     <!-- SAM: communicate with BE for input name -->
     <input type="hidden" :name="`${paramsName}_repo`" :value="selectedRepo" />
-    <gl-dropdown :text="selectedRepo" header-text="Header" class="gl-w-full gl-font-monospace">
+    <gl-dropdown
+      :text="selectedRepo"
+      header-text="Header"
+      class="gl-w-full gl-font-monospace gl-sm-pr-3"
+    >
       <template #header>
         <gl-search-box-by-type v-model.trim="searchTerm" />
       </template>
