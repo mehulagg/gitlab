@@ -112,6 +112,10 @@ class ApplicationController < ActionController::Base
   end
 
   def route_not_found
+    render_404
+  end
+
+  def redirect_to_login
     if current_user || browser.bot.search_engine?
       not_found
     else
