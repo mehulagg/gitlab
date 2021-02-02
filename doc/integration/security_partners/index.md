@@ -1,4 +1,3 @@
-
 ---
 stage: Create
 group: Ecosystem
