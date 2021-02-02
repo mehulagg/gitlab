@@ -23354,10 +23354,10 @@ msgstr ""
 msgid "PrometheusService|Auto configuration"
 msgstr ""
 
-msgid "PrometheusService|Automatically deploy and configure Prometheus on your clusters to monitor your project’s environments"
+msgid "PrometheusService|Automatically deploy and configure Prometheus on your clusters to monitor your project’s environments."
 msgstr ""
 
-msgid "PrometheusService|Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)"
+msgid "PrometheusService|Client ID of the IAP secured resource, like IAP_CLIENT_ID.apps.googleusercontent.com"
 msgstr ""
 
 msgid "PrometheusService|Common metrics"
@@ -23366,7 +23366,7 @@ msgstr ""
 msgid "PrometheusService|Common metrics are automatically monitored based on a library of metrics from popular exporters."
 msgstr ""
 
-msgid "PrometheusService|Contents of the credentials.json file of your service account, like: { \"type\": \"service_account\", \"project_id\": ... }"
+msgid "PrometheusService|Contents of the credentials.json file of your service account, like { \"type\": \"service_account\", \"project_id\": ... }"
 msgstr ""
 
 msgid "PrometheusService|Custom metrics"
@@ -23382,6 +23382,9 @@ msgid "PrometheusService|Finding and configuring metrics..."
 msgstr ""
 
 msgid "PrometheusService|Finding custom metrics..."
+msgstr ""
+
+msgid "PrometheusService|GitLab is managing Prometheus on your clusters."
 msgstr ""
 
 msgid "PrometheusService|Install Prometheus on clusters"
@@ -23411,13 +23414,10 @@ msgstr ""
 msgid "PrometheusService|No custom metrics have been created. Create one using the button above"
 msgstr ""
 
-msgid "PrometheusService|Prometheus API Base URL, like http://prometheus.example.com/"
+msgid "PrometheusService|Prometheus API base URL, like https://prometheus.example.com/"
 msgstr ""
 
-msgid "PrometheusService|Prometheus is being automatically managed on your clusters"
-msgstr ""
-
-msgid "PrometheusService|Select the Active checkbox to override the Auto Configuration with custom settings. If unchecked, Auto Configuration settings are used."
+msgid "PrometheusService|Select the Active checkbox to override the Auto configuration with custom settings. To use the Auto configuration settings, deselect the checkbox."
 msgstr ""
 
 msgid "PrometheusService|These metrics will only be monitored after your first deployment to an environment"
@@ -23426,7 +23426,7 @@ msgstr ""
 msgid "PrometheusService|Time-series monitoring service"
 msgstr ""
 
-msgid "PrometheusService|To enable the installation of Prometheus on your clusters, deactivate the manual configuration below"
+msgid "PrometheusService|To enable the installation of Prometheus on your clusters, deactivate the manual configuration below."
 msgstr ""
 
 msgid "PrometheusService|Waiting for your first deployment to an environment to find common metrics"
