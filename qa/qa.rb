@@ -157,6 +157,7 @@ module QA
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
         autoload :SSHTunnel, 'qa/scenario/test/integration/ssh_tunnel'
+        autoload :ServiceDesk, 'qa/scenario/test/integration/service_desk'
       end
 
       module Sanity
@@ -310,6 +311,7 @@ module QA
         autoload :MirroringRepositories, 'qa/page/project/settings/mirroring_repositories'
         autoload :ProtectedTags, 'qa/page/project/settings/protected_tags'
         autoload :VisibilityFeaturesPermissions, 'qa/page/project/settings/visibility_features_permissions'
+        autoload :ServiceDesk, 'qa/page/project/settings/service_desk'
 
         module Services
           autoload :Jira, 'qa/page/project/settings/services/jira'

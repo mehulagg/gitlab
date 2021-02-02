@@ -16,6 +16,10 @@ module QA
             element :visibility_features_permissions_content
           end
 
+          view 'app/views/projects/_service_desk_settings.html.haml' do
+            element :service_desk_settings_content
+          end
+
           view 'app/views/projects/settings/_general.html.haml' do
             element :project_name_field
             element :save_naming_topics_avatar_button
@@ -43,6 +47,12 @@ module QA
           def expand_merge_requests_settings(&block)
             expand_content(:merge_request_settings_content) do
               MergeRequest.perform(&block)
+            end
+          end
+
+          def expand_service_desk_settings(&block)
+            expand_content(:service_desk_settings_content) do
+              ServiceDesk.perform(&block)
             end
           end
 
