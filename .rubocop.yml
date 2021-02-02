@@ -7,7 +7,7 @@ require:
   - rubocop-rspec
 
 inherit_from:
-  - .rubocop_manual_todo.yml
+  - <%= '.rubocop_manual_todo.yml' unless ENV['ENABLE_RUBOCOP_TODO'] %>
   - .rubocop_todo.yml
   - ./rubocop/rubocop-migrations.yml
   - ./rubocop/rubocop-usage-data.yml
