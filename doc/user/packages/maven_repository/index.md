@@ -613,8 +613,8 @@ the existing package is overwritten.
 
 ## Install a package
 
-To install a package from the GitLab Package Registry, you must configure
-the [remote and authenticate](#authenticate-to-the-package-registry-with-maven).
+To install a package from the GitLab Package Registry, you must [configure
+the remote](#use-the-gitlab-endpoint-for-maven-packages) and [authenticate](#authenticate-to-the-package-registry-with-maven).
 When this is completed, you can install a package from a project,
 group, or namespace.
 
