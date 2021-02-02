@@ -71,6 +71,22 @@ Fields default to adding `1` to a query's complexity score, but developers can
 
 Requests time out at 30 seconds.
 
+## Breaking changes
+
+The GitLab GraphQL API is [versionless](https://graphql.org/learn/best-practices/#versioning) which means
+developers must familiarize themselves with our [deprecation cycle of breaking changes](#breaking-changes).
+
+Breaking changes include:
+
+- Renaming a field, argument, enum value or mutation.
+- Removing a field, argument, enum value or mutation.
+- Raising the [complexity](#max-complexity) of a field.
+
+Fields that use the [`feature_flag` property](#feature_flag-property) and the flag is disabled by default are exempt
+from the deprecation process, and can be removed at any time without notice.
+
+See the [deprecating fields and enum values](#deprecating-fields-and-enum-values) section for how to deprecate items.
+
 ## Global IDs
 
 The GitLab GraphQL API uses Global IDs (i.e: `"gid://gitlab/MyObject/123"`)
