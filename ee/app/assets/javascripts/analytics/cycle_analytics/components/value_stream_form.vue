@@ -2,6 +2,7 @@
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { cloneDeep, isEqual, pick } from 'lodash';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { sprintf } from '~/locale';
@@ -24,14 +25,31 @@ const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DE
     ? defaultStageConfig
     : [{ ...defaultCustomStageFields }];
 
-const formatStageDataForSubmission = (stages) => {
-  return stages.map(({ custom = false, name, ...rest }) => {
+const formatStageDataForSubmission = (stages, isEditing = false) => {
+  return stages.map(({ id = null, custom = false, name, ...rest }) => {
+    const editProps = isEditing ? { id, custom: true } : { custom };
     return custom
-      ? convertObjectPropsToSnakeCase({ ...rest, custom, name })
-      : {
-          name,
-        };
+      ? convertObjectPropsToSnakeCase({ ...rest, ...editProps, name })
+      : { ...editProps, name };
   });
+};
+
+const hasDirtyName = (current, original) =>
+  current.trim().toLowerCase() !== original.trim().toLowerCase();
+
+const hasDirtyStage = (currentStages, originalStages) => {
+  const targetFields = [
+    'id',
+    'name',
+    'startEventIdentifier',
+    'endEventIdentifier',
+    'startEventLabelId',
+    'endEventLabelId',
+  ];
+
+  const cs = currentStages.map((s) => pick(s, targetFields));
+  const os = originalStages.map((s) => pick(s, targetFields));
+  return !isEqual(cs, os);
 };
 
 export default {
@@ -71,21 +89,28 @@ export default {
       type: Array,
       required: true,
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     const {
       defaultStageConfig = [],
       hasExtendedFormFields,
-      initialData,
+      initialData: { name: initialName, stages: initialStages },
       initialFormErrors,
       initialPreset,
     } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = hasExtendedFormFields
       ? {
-          stages: initializeStages(defaultStageConfig, initialPreset),
-          stageErrors: stageErrors || initializeStageErrors(defaultStageConfig, initialPreset),
-          ...initialData,
+          stages: this.isEditing
+            ? cloneDeep(initialStages)
+            : initializeStages(defaultStageConfig, initialPreset),
+          stageErrors:
+            cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
         }
       : { stages: [], nameError };
 
@@ -93,7 +118,7 @@ export default {
       hiddenStages: [],
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
-      name: '',
+      name: initialName,
       nameError,
       stageErrors,
       ...additionalFields,
@@ -117,7 +142,7 @@ export default {
     },
     primaryProps() {
       return {
-        text: this.$options.I18N.FORM_TITLE,
+        text: this.isEditing ? this.$options.I18N.EDIT_FORM_TITLE : this.$options.I18N.FORM_TITLE,
         attributes: [{ variant: 'success' }, { loading: this.isLoading }],
       };
     },
@@ -136,22 +161,44 @@ export default {
         this.nameError.length || this.stageErrors.some((obj) => Object.keys(obj).length),
       );
     },
-  },
-  watch: {
-    initialFormErrors({ name: nameError, stages: stageErrors }) {
-      Vue.set(this, 'nameError', nameError);
-      Vue.set(this, 'stageErrors', stageErrors);
+    isDirtyEditing() {
+      return (
+        this.isEditing &&
+        (hasDirtyName(this.name, this.initialData.name) ||
+          hasDirtyStage(this.stages, this.initialData.stages))
+      );
+    },
+    canRestore() {
+      return this.hiddenStages.length || this.isDirtyEditing;
     },
   },
+  // TODO: do we still need this if we are hiding the form correctly?
+  // watch: {
+  //   initialFormErrors({ name: nameError, stages: stageErrors }) {
+  //     Vue.set(this, 'nameError', nameError);
+  //     Vue.set(this, 'stageErrors', stageErrors);
+  //   },
+  // },
   methods: {
-    ...mapActions(['createValueStream']),
+    ...mapActions(['createValueStream', 'updateValueStream']),
     onSubmit() {
       this.validate();
       if (this.hasFormErrors) return false;
-      return this.createValueStream({
+
+      let req = this.createValueStream;
+      let params = {
         name: this.name,
-        stages: formatStageDataForSubmission(this.stages),
-      }).then(() => {
+        stages: formatStageDataForSubmission(this.stages, this.isEditing),
+      };
+      if (this.isEditing) {
+        req = this.updateValueStream;
+        params = {
+          ...params,
+          id: this.initialData.id,
+        };
+      }
+
+      return req(params).then(() => {
         if (!this.hasInitialFormErrors) {
           this.$toast.show(sprintf(this.$options.I18N.FORM_CREATED, { name: this.name }), {
             position: 'top-center',
@@ -190,8 +237,9 @@ export default {
     handleMove({ index, direction }) {
       const newStages = this.moveItem(this.stages, index, direction);
       const newErrors = this.moveItem(this.stageErrors, index, direction);
-      Vue.set(this, 'stageErrors', newErrors);
-      Vue.set(this, 'stages', newStages);
+      // TODO: cleanup this once specs for editing are added
+      Vue.set(this, 'stageErrors', cloneDeep(newErrors));
+      Vue.set(this, 'stages', cloneDeep(newStages));
     },
     validateStageFields(index) {
       Vue.set(this.stageErrors, index, validateStage(this.stages[index]));
@@ -228,10 +276,20 @@ export default {
       Vue.set(this.stages, activeStageIndex, updatedStage);
     },
     handleResetDefaults() {
-      this.name = '';
-      this.defaultStageConfig.forEach((stage, index) => {
-        Vue.set(this.stages, index, { ...stage, hidden: false });
-      });
+      if (this.isEditing) {
+        const {
+          initialData: { name: initialName, stages: initialStages },
+        } = this;
+        Vue.set(this, 'name', initialName);
+        Vue.set(this, 'nameError', []);
+        Vue.set(this, 'stages', cloneDeep(initialStages));
+        Vue.set(this, 'stageErrors', [{}]);
+      } else {
+        this.name = '';
+        this.defaultStageConfig.forEach((stage, index) => {
+          Vue.set(this.stages, index, { ...stage, hidden: false });
+        });
+      }
     },
     handleResetBlank() {
       this.name = '';
@@ -263,6 +321,7 @@ export default {
     :action-primary="primaryProps"
     :action-secondary="secondaryProps"
     :action-cancel="{ text: $options.I18N.BTN_CANCEL }"
+    @hidden.prevent="$emit('hidden')"
     @secondary.prevent="onAddStage"
     @primary.prevent="onSubmit"
   >
@@ -284,7 +343,7 @@ export default {
             required
           />
           <gl-button
-            v-if="hiddenStages.length"
+            v-if="canRestore"
             class="gl-ml-3"
             variant="link"
             @click="handleResetDefaults"
@@ -293,7 +352,7 @@ export default {
         </div>
       </gl-form-group>
       <gl-form-radio-group
-        v-if="hasExtendedFormFields"
+        v-if="hasExtendedFormFields && !isEditing"
         v-model="selectedPreset"
         class="gl-mb-4"
         data-testid="vsa-preset-selector"
