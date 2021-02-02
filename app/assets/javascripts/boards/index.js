@@ -289,17 +289,20 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
-  new Vue({
-    el: document.querySelector('.js-create-column-trigger'),
-    components: {
-      BoardAddNewColumnTrigger,
-    },
-    store,
-    render(createElement) {
-      return createElement('board-add-new-column-trigger');
-    },
-  });
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
+      },
+      store,
+      render(createElement) {
+        return createElement('board-add-new-column-trigger');
+      },
+    });
+  }
 
   boardConfigToggle(boardsStore);
 
