@@ -876,17 +876,16 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@27.0.0":
-  version "27.0.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-27.0.0.tgz#79839c94e6a5cac52a2144e1969987e0d8bc0702"
-  integrity sha512-3Rect5ZUNICyIBaf8QzB/+hm5Gr9Ob6kVlna9EBUs+B5L7GuqDWTVcNxLGGnnzAba4UP8Ja/9cXbWvCIbw0o2A==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1002463436/artifacts/raw/gitlab-ui.mrincon-echarts-4-x-upgrade.tgz":
+  version "27.1.4"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1002463436/artifacts/raw/gitlab-ui.mrincon-echarts-4-x-upgrade.tgz#e8a7d51c5d0582b001145d6a793e61142768d5e4"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
     bootstrap-vue "2.13.1"
     copy-to-clipboard "^3.0.8"
     dompurify "^2.2.6"
-    echarts "^4.2.1"
+    echarts "4.3.0"
     highlight.js "^9.13.1"
     js-beautify "^1.8.8"
     lodash "^4.17.20"
@@ -4267,12 +4266,12 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-echarts@^4.2.1:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/echarts/-/echarts-4.6.0.tgz#b5a47a1046cec93ceeef954f9ee54751340558ec"
-  integrity sha512-xKkcr6v9UVOSF+PMuj7Ngt3bnzLwN1sSXWCvpvX+jYb3mePYsZnABq7wGkPac/m0nV653uGHXoHK8DCKCprdNg==
+echarts@4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/echarts/-/echarts-4.3.0.tgz#3728c2b5e8f277898f7299b4fe1cfc537170abd5"
+  integrity sha512-tX2dAyhI9D78eVrlKhqJGdrM7Ku599HHvPxT2Pu6tgb/dBP8tYmkWjn8r1Ea9oABQxAKXr0p2/tG1OzKdzULbw==
   dependencies:
-    zrender "4.2.0"
+    zrender "4.1.0"
 
 editions@^1.3.3:
   version "1.3.4"
@@ -13154,7 +13153,7 @@ zen-observable@^0.8.0:
   resolved "https://registry.yarnpkg.com/zen-observable/-/zen-observable-0.8.11.tgz#d3415885eeeb42ee5abb9821c95bb518fcd6d199"
   integrity sha512-N3xXQVr4L61rZvGMpWe8XoCGX8vhU35dPyQ4fm5CY/KDlG0F75un14hjbckPXTDuKUY6V0dqR2giT6xN8Y4GEQ==
 
-zrender@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/zrender/-/zrender-4.2.0.tgz#d001302e155f28de1f9fc7fcd5c254bad28471cf"
-  integrity sha512-YJ9hxt5uFincYYU3KK31+Ce+B6PJmYYK0Q9fQ6jOUAoC/VHbe4kCKAPkxKeT7jGTxrK5wYu18R0TLGqj2zbEOA==
+zrender@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/zrender/-/zrender-4.1.0.tgz#866ab97d0744c473d9b314ac5a89e7207c140608"
+  integrity sha512-PkWDpBSRIZAKyBBSkizWCP5/bIL5s/+W+FM/AwkivN4m4QCVH04PS0nJmBB/E6CnUNQv9ZPfIV4tthg1qEP1gg==
