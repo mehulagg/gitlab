@@ -250,7 +250,6 @@ export default {
           v-if="shouldRenderSharedRunnerLimitWarning"
           :quota-used="job.runners.quota.used"
           :quota-limit="job.runners.quota.limit"
-          :runners-path="runnerHelpUrl"
           :project-path="projectPath"
           :subscriptions-more-minutes-url="subscriptionsMoreMinutesUrl"
         />
