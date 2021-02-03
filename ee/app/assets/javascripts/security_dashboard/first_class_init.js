@@ -37,6 +37,7 @@ export default (el, dashboardType) => {
     pipelinePath,
     pipelineSecurityBuildsFailedCount,
     pipelineSecurityBuildsFailedPath,
+    hasJiraVulnerabilitiesIntegrationEnabled,
   } = el.dataset;
 
   if (isUnavailable) {
@@ -61,6 +62,9 @@ export default (el, dashboardType) => {
     noPipelineRunScannersHelpPath,
     hasVulnerabilities: parseBoolean(hasVulnerabilities),
     scanners: scanners ? JSON.parse(scanners) : [],
+    hasJiraVulnerabilitiesIntegrationEnabled: parseBoolean(
+      hasJiraVulnerabilitiesIntegrationEnabled,
+    ),
   };
 
   const props = {
