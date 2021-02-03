@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'active_support/testing/time_helpers'
+require_relative '../../support/helpers/stub_env'
+
+require_relative '../../../tooling/rspec_flaky/listener'
 
 RSpec.describe RspecFlaky::Listener, :aggregate_failures do
+  include ActiveSupport::Testing::TimeHelpers
+  include StubENV
+
   let(:already_flaky_example_uid) { '6e869794f4cfd2badd93eb68719371d1' }
   let(:suite_flaky_example_report) do
     {
@@ -130,14 +136,15 @@ RSpec.describe RspecFlaky::Listener, :aggregate_failures do
       it 'changes the flaky examples hash' do
         new_example = RspecFlaky::Example.new(rspec_example)
 
-        now = Time.now
-        Timecop.freeze(now) do
+        the_future = nil
+        travel_to(Time.now + 42) do
+          the_future = Time.now
           expect { listener.example_passed(notification) }
             .to change { listener.flaky_examples[new_example.uid].to_h }
         end
 
         expect(listener.flaky_examples[new_example.uid].to_h)
-          .to eq(expected_flaky_example.merge(last_flaky_at: now))
+          .to eq(expected_flaky_example.merge(last_flaky_at: the_future))
       end
     end
 
@@ -157,14 +164,15 @@ RSpec.describe RspecFlaky::Listener, :aggregate_failures do
       it 'changes the all flaky examples hash' do
         new_example = RspecFlaky::Example.new(rspec_example)
 
-        now = Time.now
-        Timecop.freeze(now) do
+        the_future = nil
+        travel_to(Time.now + 42) do
+          the_future = Time.now
           expect { listener.example_passed(notification) }
             .to change { listener.flaky_examples[new_example.uid].to_h }
         end
 
         expect(listener.flaky_examples[new_example.uid].to_h)
-          .to eq(expected_flaky_example.merge(first_flaky_at: now, last_flaky_at: now))
+          .to eq(expected_flaky_example.merge(first_flaky_at: the_future, last_flaky_at: the_future))
       end
     end
 

@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'active_support/testing/time_helpers'
+require_relative '../../support/helpers/stub_env'
+
+require_relative '../../../tooling/rspec_flaky/flaky_example'
 
 RSpec.describe RspecFlaky::FlakyExample, :aggregate_failures do
+  include ActiveSupport::Testing::TimeHelpers
+  include StubENV
+
   let(:flaky_example_attrs) do
     {
       example_id: 'spec/foo/bar_spec.rb:2',
@@ -78,18 +84,23 @@ RSpec.describe RspecFlaky::FlakyExample, :aggregate_failures do
       let(:flaky_example) { described_class.new(args) }
 
       it 'updates the first_flaky_at' do
-        now = Time.now
-        expected_first_flaky_at = flaky_example.first_flaky_at || now
-        Timecop.freeze(now) { flaky_example.update_flakiness! }
+        expected_first_flaky_at = nil
+        travel_to(Time.now + 42) do
+          expected_first_flaky_at = flaky_example.first_flaky_at || Time.now
+          flaky_example.update_flakiness!
+        end
 
         expect(flaky_example.first_flaky_at).to eq(expected_first_flaky_at)
       end
 
       it 'updates the last_flaky_at' do
-        now = Time.now
-        Timecop.freeze(now) { flaky_example.update_flakiness! }
+        the_future = nil
+        travel_to(Time.now + 42) do
+          the_future = Time.now
+          flaky_example.update_flakiness!
+        end
 
-        expect(flaky_example.last_flaky_at).to eq(now)
+        expect(flaky_example.last_flaky_at).to eq(the_future)
       end
 
       it 'updates the flaky_reports' do
