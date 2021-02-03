@@ -28,7 +28,7 @@ Please provide as many of these fields as possible when submitting a query perfo
 
 <!--
 
-- Examples of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
+- Example of a postgres checkup report - https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/snippets/2056787
 - Epic - Improving the Database resource usage (&365) - https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/365#reports-of-database-performance-peak-investigation-analysis-executed
 
 -->
