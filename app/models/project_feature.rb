@@ -3,6 +3,7 @@
 class ProjectFeature < ApplicationRecord
   include Featurable
 
+  # When updating this array, make sure to update rubocop/cop/gitlab/feature_available_usage.rb as well.
   FEATURES = %i(issues forking merge_requests wiki snippets builds repository pages metrics_dashboard analytics operations).freeze
 
   set_available_features(FEATURES)

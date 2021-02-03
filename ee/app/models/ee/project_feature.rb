@@ -4,6 +4,7 @@ module EE
   module ProjectFeature
     extend ActiveSupport::Concern
 
+    # When updating this array, make sure to update rubocop/cop/gitlab/feature_available_usage.rb as well.
     EE_FEATURES = %i(requirements security_and_compliance).freeze
 
     prepended do
