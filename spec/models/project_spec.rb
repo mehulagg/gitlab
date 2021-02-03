@@ -4144,27 +4144,6 @@ RSpec.describe Project, factory_default: :keep do
 
       expect { project.destroy }.not_to raise_error
     end
-
-    context 'when there is an old pages deployment' do
-      let!(:old_deployment_from_another_project) { create(:pages_deployment) }
-      let!(:old_deployment) { create(:pages_deployment, project: project) }
-
-      it 'schedules a destruction of pages deployments' do
-        expect(DestroyPagesDeploymentsWorker).to(
-          receive(:perform_async).with(project.id)
-        )
-
-        project.remove_pages
-      end
-
-      it 'removes pages deployments', :sidekiq_inline do
-        expect do
-          project.remove_pages
-        end.to change { PagesDeployment.count }.by(-1)
-
-        expect(PagesDeployment.find_by_id(old_deployment.id)).to be_nil
-      end
-    end
   end
 
   describe '#remove_export' do

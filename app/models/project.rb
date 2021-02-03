@@ -1789,14 +1789,13 @@ class Project < ApplicationRecord
   end
 
   # TODO: what to do here when not using Legacy Storage? Do we still need to rename and delay removal?
+  # answer: we should just remove all of this
   # rubocop: disable CodeReuse/ServiceClass
   def remove_pages
     # Projects with a missing namespace cannot have their pages removed
     return unless namespace
 
     mark_pages_as_not_deployed unless destroyed?
-
-    DestroyPagesDeploymentsWorker.perform_async(id)
 
     # 1. We rename pages to temporary directory
     # 2. We wait 5 minutes, due to NFS caching
