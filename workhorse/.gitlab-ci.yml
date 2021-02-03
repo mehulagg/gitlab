@@ -27,9 +27,10 @@ test:release:
   script:
     - git describe --exact-match
 
-# Disable DIND for SAST because we need to execute a before_script in the gosec-sast job
 variables:
+  # Disable DIND for SAST because we need to execute a before_script in the gosec-sast job
   SAST_DISABLE_DIND: "true"
+  WORKHORSE_DIR: "."
 
 include:
   - local: '/.gitlab/ci/shared-gitlab.ci.yml'
