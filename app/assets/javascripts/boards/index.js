@@ -16,10 +16,6 @@ import {
   getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
 
-<<<<<<< HEAD
-import VueApollo from 'vue-apollo';
-=======
->>>>>>> 8126cd5f033683dc683d97a2c95a7bf102d11089
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
 import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
