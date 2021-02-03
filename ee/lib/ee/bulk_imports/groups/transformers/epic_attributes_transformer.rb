@@ -23,7 +23,20 @@ module EE
           end
 
           def add_author_id(context, data)
-            data.merge('author_id' => context.current_user.id)
+            author_email = data.dig('author', 'public_email')
+            user = ConfirmedUserByEmailFinder
+              .new(context.group.users)
+              .find(author_email)
+
+            if user
+              data
+                .merge('author_id' => user.id)
+                .except('author')
+            else
+              data
+                .merge('author_id' => context.current_user.id)
+                .except('author')
+            end
           end
 
           def add_parent(context, data)
