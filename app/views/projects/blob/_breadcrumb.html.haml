@@ -29,7 +29,7 @@
             class: 'gl-button btn btn-default js-blob-blame-link' unless blob.empty?
 
     = link_to 'History', project_commits_path(@project, @id),
-        class: 'gl-button btn btn-default another-one'
+        class: 'gl-button btn btn-default'
 
     = link_to 'Permalink', project_blob_path(@project,
         tree_join(@commit.sha, @path)), class: 'gl-button btn btn-default js-data-file-blob-permalink-url'
