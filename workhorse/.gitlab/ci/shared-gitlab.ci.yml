@@ -1,5 +1,7 @@
 .workhorse:default:
   image: golang:1.14
+  stage: test
+  needs: []
   extends: .workhorse:rules:workhorse
 
 workhorse:verify:
