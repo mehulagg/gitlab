@@ -5,6 +5,7 @@ import { deprecatedCreateFlash as Flash } from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
+import boardsStore from '~/boards/stores/boards_store';
 import { fullLabelId, fullBoardId } from '../boards_util';
 
 import updateBoardMutation from '../graphql/board_update.mutation.graphql';
@@ -99,18 +100,11 @@ export default {
       type: Object,
       required: true,
     },
-    currentPage: {
-      type: String,
-      required: true,
-    },
-    cancel: {
-      type: Function,
-      required: true,
-    },
   },
   data() {
     return {
       board: { ...boardDefaults, ...this.currentBoard },
+      currentPage: boardsStore.state.currentPage,
       isLoading: false,
     };
   },
@@ -260,6 +254,9 @@ export default {
           this.isLoading = false;
         }
       }
+    },
+    cancel() {
+      boardsStore.showPage('');
     },
     resetFormState() {
       if (this.isNewForm) {

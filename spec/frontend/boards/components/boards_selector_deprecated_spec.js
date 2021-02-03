@@ -2,7 +2,8 @@ import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { GlDropdown, GlLoadingIcon, GlDropdownSectionHeader } from '@gitlab/ui';
 import { TEST_HOST } from 'spec/test_constants';
-import BoardsSelector from '~/boards/components/boards_selector.vue';
+import BoardsSelector from '~/boards/components/boards_selector_deprecated.vue';
+import boardsStore from '~/boards/stores/boards_store';
 
 const throttleDuration = 1;
 
@@ -46,6 +47,14 @@ describe('BoardsSelector', () => {
       },
     };
 
+    boardsStore.setEndpoints({
+      boardsEndpoint: '',
+      recentBoardsEndpoint: '',
+      listsEndpoint: '',
+      bulkUpdatePath: '',
+      boardId: '',
+    });
+
     allBoardsResponse = Promise.resolve({
       data: {
         group: {
@@ -58,6 +67,9 @@ describe('BoardsSelector', () => {
     recentBoardsResponse = Promise.resolve({
       data: recentBoards,
     });
+
+    boardsStore.allBoards = jest.fn(() => allBoardsResponse);
+    boardsStore.recentBoards = jest.fn(() => recentBoardsResponse);
 
     wrapper = mount(BoardsSelector, {
       propsData: {
@@ -83,9 +95,6 @@ describe('BoardsSelector', () => {
       },
       mocks: { $apollo },
       attachTo: document.body,
-      provide: {
-        fullPath: '',
-      },
     });
 
     wrapper.vm.$apollo.addSmartQuery = jest.fn((_, options) => {
@@ -138,7 +147,7 @@ describe('BoardsSelector', () => {
       });
 
       it('shows all boards without filtering', () => {
-        expect(getDropdownItems()).toHaveLength(boards.length);
+        expect(getDropdownItems()).toHaveLength(boards.length + recentBoards.length);
       });
 
       it('shows only matching boards when filtering', () => {
@@ -162,9 +171,7 @@ describe('BoardsSelector', () => {
       });
     });
 
-    // GraphQL boards currently don't have recent boards query
-    // eslint-disable-next-line jest/no-disabled-tests
-    describe.skip('recent boards section', () => {
+    describe('recent boards section', () => {
       it('shows only when boards are greater than 10', () => {
         wrapper.setData({
           boards,
