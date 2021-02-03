@@ -113,6 +113,7 @@ export default {
         v-if="nodeEditAllowed"
         :href="node.editPath"
         class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+        data-qa-selector="geo_node_edit_button"
       >
         {{ __('Edit') }}
       </gl-button>

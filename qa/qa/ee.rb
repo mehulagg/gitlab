@@ -72,6 +72,7 @@ module QA
           module Nodes
             autoload :Show, 'qa/ee/page/admin/geo/nodes/show'
             autoload :New, 'qa/ee/page/admin/geo/nodes/new'
+            autoload :Edit, 'qa/ee/page/admin/geo/nodes/edit'
           end
         end
 

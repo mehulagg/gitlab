@@ -2,18 +2,22 @@
 
 module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
-    describe 'GitLab Geo attachment replication' do
+    describe 'Attachment replication' do
       let(:file_to_attach) { File.absolute_path(File.join('qa', 'fixtures', 'designs', 'banana_sample.gif')) }
 
-      it 'user uploads attachment to the primary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/692' do
+      before do
+        enable_object_storage_geo_replication
+      end
+
+      it 'replicates attachment to object storage of secondary Geo site', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/692' do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do
           @project = Resource::Project.fabricate_via_api! do |project|
-            project.name = 'project-for-issues'
-            project.description = 'project for adding issues'
+            project.name = 'geo-project-for-attachment-replication'
+            project.description = 'Project for geo-replication of attachments'
           end
 
           @issue = Resource::Issue.fabricate_via_api! do |issue|
-            issue.title = 'My geo issue'
+            issue.title = 'My geo attachment replication issue'
             issue.project = @project
           end
 
@@ -54,6 +58,15 @@ module QA
 
             expect(found).to be_truthy
           end
+        end
+      end
+
+      def enable_object_storage_geo_replication
+        QA::Flow::Login.while_signed_in_as_admin(address: :geo_primary) do
+          Page::Main::Menu.perform(&:go_to_admin_area)
+          Page::Admin::Menu.perform(&:click_geo_menu_link)
+          EE::Page::Admin::Geo::Nodes::Show.perform(&:click_edit_secondary_node_link)
+          EE::Page::Admin::Geo::Nodes::Edit.perform(&:enable_object_storage_geo_replication)
         end
       end
     end

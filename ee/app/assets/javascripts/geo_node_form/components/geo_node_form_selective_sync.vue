@@ -123,7 +123,7 @@ export default {
         </gl-sprintf>
       </template>
       <!-- eslint-disable vue/no-mutating-props -->
-      <gl-form-checkbox id="node-object-storage-field" v-model="nodeData.syncObjectStorage">{{
+      <gl-form-checkbox id="node-object-storage-field" v-model="nodeData.syncObjectStorage" data-qa-selector="geo_object_storage_replication_checkbox">{{
         __('Allow this secondary node to replicate content on Object Storage')
       }}</gl-form-checkbox>
       <!-- eslint-enable vue/no-mutating-props -->
