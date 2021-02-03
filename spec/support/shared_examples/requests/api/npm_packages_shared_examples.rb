@@ -506,8 +506,8 @@ RSpec.shared_examples 'handling delete dist tag requests' do |scope: :project|
 
   shared_examples 'handling different visibilities and user roles' do |accept_example: 'delete package tag', accept_status: :ok, reject_example: 'rejects package tags access', reject_status: nil|
     where(:visibility, :user_role, :example_name, :expected_status) do
-      'PUBLIC'   | :anonymous | reject_example | (reject_status || :forbidden)
-      'PUBLIC'   | :guest     | reject_example | (reject_status || :forbidden)
+      'PUBLIC'   | :anonymous  | reject_example | (reject_status || :forbidden)
+      'PUBLIC'   | :guest      | reject_example | (reject_status || :forbidden)
       'PUBLIC'   | :maintainer | accept_example | accept_status
       'PRIVATE'  | :anonymous  | reject_example | (reject_status || :not_found)
       'PRIVATE'  | :guest      | reject_example | (reject_status || :forbidden)

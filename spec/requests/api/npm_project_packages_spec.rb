@@ -33,10 +33,14 @@ RSpec.describe API::NpmProjectPackages do
   describe 'GET /api/v4/projects/:id/packages/npm/*package_name/-/*file_name' do
     let_it_be(:package_file) { package.package_files.first }
 
-    let(:params) { {} }
+    let(:headers) { {} }
     let(:url) { api("/projects/#{project.id}/packages/npm/#{package_file.package.name}/-/#{package_file.file_name}") }
 
-    subject { get(url, params: params) }
+    subject { get(url, headers: headers) }
+
+    before do
+      project.add_developer(user)
+    end
 
     shared_examples 'a package file that requires auth' do
       it 'denies download with no token' do
@@ -46,7 +50,7 @@ RSpec.describe API::NpmProjectPackages do
       end
 
       context 'with access token' do
-        let(:params) { { access_token: token.token } }
+        let(:headers) { build_token_auth_header(token.token) }
 
         it 'returns the file' do
           subject
@@ -57,7 +61,7 @@ RSpec.describe API::NpmProjectPackages do
       end
 
       context 'with job token' do
-        let(:params) { { job_token: job.token } }
+        let(:headers) { build_token_auth_header(job.token) }
 
         it 'returns the file' do
           subject
@@ -87,7 +91,7 @@ RSpec.describe API::NpmProjectPackages do
       it_behaves_like 'a package file that requires auth'
 
       context 'with guest' do
-        let(:params) { { access_token: token.token } }
+        let(:headers) { build_token_auth_header(token.token) }
 
         it 'denies download when not enough permissions' do
           project.add_guest(user)
@@ -109,7 +113,11 @@ RSpec.describe API::NpmProjectPackages do
   end
 
   describe 'PUT /api/v4/projects/:id/packages/npm/:package_name' do
-    RSpec.shared_examples 'handling invalid record with 400 error' do
+    before do
+      project.add_developer(user)
+    end
+
+    shared_examples 'handling invalid record with 400 error' do
       it 'handles an ActiveRecord::RecordInvalid exception with 400 error' do
         expect { upload_package_with_token(package_name, params) }
           .not_to change { project.packages.count }
@@ -263,7 +271,9 @@ RSpec.describe API::NpmProjectPackages do
     end
 
     def upload_package(package_name, params = {})
-      put api("/projects/#{project.id}/packages/npm/#{package_name.sub('/', '%2f')}"), params: params
+      token = params.delete(:access_token) || params.delete(:job_token)
+      headers = build_token_auth_header(token)
+      put api("/projects/#{project.id}/packages/npm/#{package_name.sub('/', '%2f')}"), params: params, headers: headers
     end
 
     def upload_package_with_token(package_name, params = {})
