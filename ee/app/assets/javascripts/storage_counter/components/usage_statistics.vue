@@ -32,6 +32,10 @@ export default {
         footerNote: s__(
           'UsageQuota|This is the total amount of storage used across your projects within this namespace.',
         ),
+        link: {
+          text: s__('UsageQuota|Learn more about usage quotas'),
+          url: 'https://docs.gitlab.com/ee/user/usage_quotas.html'
+        },
       };
     },
     excessUsage() {
@@ -41,6 +45,10 @@ export default {
         footerNote: s__(
           'UsageQuota|This is the total amount of storage used by projects above the free %{actualRepositorySizeLimit} storage limit.',
         ),
+        link: {
+          text: s__('UsageQuota|Learn more about excess storage usage'),
+          url: 'https://docs.gitlab.com/ee/user/usage_quotas.html#excess-storage-usage',
+        },
       };
     },
     purchasedUsage() {
@@ -93,9 +101,6 @@ export default {
       :description="totalUsage.description"
       css-class="gl-mr-4"
     >
-      <template #footer="{}">
-        {{ totalUsage.footerNote }}
-      </template>
     </usage-statistics-card>
     <usage-statistics-card
       data-testid="excessUsage"
@@ -104,13 +109,6 @@ export default {
       :description="excessUsage.description"
       css-class="gl-mx-4"
     >
-      <template #footer="{}">
-        <gl-sprintf :message="excessUsage.footerNote">
-          <template #actualRepositorySizeLimit>
-            {{ formattedActualRepoSizeLimit }}
-          </template>
-        </gl-sprintf>
-      </template>
     </usage-statistics-card>
     <usage-statistics-card
       v-if="purchasedUsage"
