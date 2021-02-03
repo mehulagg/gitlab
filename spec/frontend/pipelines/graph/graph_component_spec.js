@@ -25,8 +25,8 @@ describe('graph component', () => {
   const defaultData = {
     measurements: {
       width: 800,
-      height: 800
-    }
+      height: 800,
+    },
   };
 
   const createComponent = ({
@@ -43,7 +43,7 @@ describe('graph component', () => {
       data() {
         return {
           ...defaultData,
-          ...data
+          ...data,
         };
       },
       provide: {

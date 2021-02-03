@@ -124,10 +124,7 @@ export default {
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
         <div v-else :class="{ 'gl-opacity-3': isFadedOut(group.name) }">
-          <job-group-dropdown
-            :group="group"
-            :pipeline-id="pipelineId"
-          />
+          <job-group-dropdown :group="group" :pipeline-id="pipelineId" />
         </div>
       </div>
     </template>
