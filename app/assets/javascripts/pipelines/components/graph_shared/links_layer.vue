@@ -45,9 +45,10 @@ export default {
       return !this.showLinkedLayers && !this.alertDismissed;
     },
     showLinkedLayers() {
-      return (
-        !this.containerZero && (this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS)
-      );
+      return false;
+      // return (
+      //   !this.containerZero && (this.showLinksOverride || this.numGroups < this.$options.MAX_GROUPS)
+      // );
     },
   },
   methods: {
@@ -74,13 +75,15 @@ export default {
   <div v-else>
     <gl-alert
       v-if="showAlert"
-      class="gl-w-max-content gl-ml-4"
+      class="gl-ml-4 gl-mb-4"
       :primary-button-text="$options.i18n.showLinksAnyways"
       @primaryAction="overrideShowLinks"
       @dismiss="dismissAlert"
     >
       {{ $options.i18n.tooManyJobs }}
     </gl-alert>
-    <slot></slot>
+    <div class="gl-display-flex gl-relative">
+      <slot></slot>
+    </div>
   </div>
 </template>
