@@ -32,6 +32,8 @@ module QA
         QA::Page::Project::Settings::Services::Jira.perform do |jira|
           jira.setup_service_with(url: Vendor::Jira::JiraAPI.perform(&:base_url))
         end
+
+        expect(page).not_to have_text("Requests to the local network are not allowed")
       end
 
       it 'closes an issue via pushing a commit', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/827' do
