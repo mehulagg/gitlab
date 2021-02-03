@@ -9,6 +9,7 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormTextarea,
   GlLink,
   GlDropdown,
   GlDropdownItem,
@@ -46,6 +47,7 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormTextarea,
     GlLink,
     GlDropdown,
     GlDropdownItem,
@@ -426,10 +428,12 @@ export default {
             data-testid="pipeline-form-ci-variable-key"
             @change="addEmptyVariable(refFullName)"
           />
-          <gl-form-input
+          <gl-form-textarea
             v-model="variable.value"
             :placeholder="s__('CiVariables|Input variable value')"
             class="gl-mb-3"
+            style="height: 32px"
+            :no-resize="false"
             data-testid="pipeline-form-ci-variable-value"
           />
 
