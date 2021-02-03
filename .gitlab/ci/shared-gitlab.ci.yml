@@ -7,7 +7,7 @@
 workhorse:verify:
   extends: .workhorse:default
   script:
-  - make verify
+  - make -C $WORKHORSE_DIR verify
 
 .workhorse:test:
   extends: .workhorse:default
@@ -21,7 +21,7 @@ workhorse:verify:
   script:
   - go version
   - apt-get update && apt-get -y install libimage-exiftool-perl
-  - make test
+  - make -C $WORKHORSE_DIR test
 
 workhorse:test using go 1.14:
   extends: .workhorse:test
