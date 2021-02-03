@@ -129,6 +129,10 @@ class Packages::Package < ApplicationRecord
     joins(:maven_metadatum).where(packages_maven_metadata: { path: path })
   end
 
+  def self.grouped_by_project_and_name
+    select("project_id, name").order("project_id, name").group("project_id, name")
+  end
+
   def self.by_name_and_file_name(name, file_name)
     with_name(name)
       .joins(:package_files)
