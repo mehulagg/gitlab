@@ -55,7 +55,7 @@ have a pipelines that include jobs from multiple types (e.g. a combination of do
 
 #### Documentation only MR pipeline
 
-[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/pipelines/135236627):
+[Reference pipeline](https://gitlab.com/gitlab-org/gitlab/-/pipelines/250546928):
 
 ```mermaid
 graph LR
