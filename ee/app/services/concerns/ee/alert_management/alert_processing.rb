@@ -17,17 +17,12 @@ module EE
       def notify_oncall
         notification_service
           .async
-          .notify_oncall_users_of_alert(oncall_notification_recipients, alert)
+          .notify_oncall_users_of_alert(oncall_notification_recipients.to_a, alert)
       end
 
       def oncall_notification_recipients
         strong_memoize(:oncall_notification_recipients) do
-          ::IncidentManagement::OncallParticipantsFinder
-            .new(project, oncall_at: Time.current)
-            .execute
-            .with_users
-            .map(&:user)
-            .uniq
+          ::IncidentManagement::OncallUsersFinder.new(project).execute
         end
       end
     end

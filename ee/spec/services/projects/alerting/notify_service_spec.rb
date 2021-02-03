@@ -68,7 +68,7 @@ RSpec.describe Projects::Alerting::NotifyService do
       let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
       let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
       let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-      let(:notification_service) { spy }
+      let(:notification_service) { instance_double(NotificationService) }
 
       context 'with oncall schedules enabled' do
         before do
@@ -86,7 +86,7 @@ RSpec.describe Projects::Alerting::NotifyService do
         end
 
         it 'does not have an N+1 for fetching users' do
-          subject # Initial serivce request has many additional requests
+          subject # Initial service request has many additional requests
 
           query_count = ActiveRecord::QueryRecorder.new { described_class.new(project.reload, payload).execute(token, integration) }
 

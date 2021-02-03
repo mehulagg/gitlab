@@ -26,13 +26,17 @@ module IncidentManagement
     scope :started, -> { where('starts_at < ?', Time.current) }
     scope :except_ids, -> (ids) { where.not(id: ids) }
     scope :with_shift_generation_associations, -> do
-      joins(:participants)
-       .distinct
-       .includes(:participants, :schedule)
+      joins(:participants, :schedule)
+        .distinct
+        .includes(:participants, :schedule)
        .order(:id, 'incident_management_oncall_participants.id ASC')
     end
 
     delegate :project, to: :schedule
+
+    def self.pluck_id_and_user_id
+      joins(shifts: { participant: :user }).pluck(:id, 'users.id')
+    end
 
     def shift_duration
       # As length_unit is an enum, input is guaranteed to be appropriate

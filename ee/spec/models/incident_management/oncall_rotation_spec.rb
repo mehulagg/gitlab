@@ -6,10 +6,10 @@ RSpec.describe IncidentManagement::OncallRotation do
   let_it_be(:schedule) { create(:incident_management_oncall_schedule) }
 
   describe '.associations' do
-    it { is_expected.to belong_to(:schedule) }
-    it { is_expected.to have_many(:participants).order(id: :asc) }
+    it { is_expected.to belong_to(:schedule).class_name('OncallSchedule').inverse_of(:rotations) }
+    it { is_expected.to have_many(:participants).order(id: :asc).class_name('OncallParticipant').inverse_of(:rotation) }
     it { is_expected.to have_many(:users).through(:participants) }
-    it { is_expected.to have_many(:shifts) }
+    it { is_expected.to have_many(:shifts).class_name('OncallShift').inverse_of(:rotation) }
   end
 
   describe '.validations' do

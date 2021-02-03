@@ -72,7 +72,7 @@ RSpec.describe IncidentManagement::OncallShift do
     let_it_be(:fri_to_sun) { create_shift(friday, sunday, participant2) }
 
     # Third rotation
-    let_it_be(:tue_to_sun) { create_shift(wednesday, sunday, participant3) }
+    let_it_be(:tue_to_sun) { create_shift(tuesday, sunday, participant3) }
 
     describe '.for_timeframe' do
       subject(:shifts) { described_class.for_timeframe(wednesday, saturday) }
@@ -102,10 +102,19 @@ RSpec.describe IncidentManagement::OncallShift do
     describe '.order_starts_at_desc' do
       subject { described_class.order_starts_at_desc }
 
-      let_it_be(:shift1) { create_shift(Time.current, Time.current + 1.hour, participant) }
-      let_it_be(:shift2) { create_shift(Time.current + 2.hours, Time.current + 3.hours, participant) }
-
-      it { is_expected.to eq [shift2, shift1]}
+      it do
+        is_expected.to eq [
+          sat_to_sun,
+          fri_to_sun,
+          fri_to_sat,
+          thu_to_fri,
+          wed_to_thu,
+          tue_to_sun,
+          tue_to_wed,
+          mon_to_thu,
+          mon_to_tue
+        ]
+      end
     end
 
     describe '.for_timestamp' do

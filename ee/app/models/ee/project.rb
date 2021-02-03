@@ -104,7 +104,6 @@ module EE
 
       has_many :incident_management_oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', inverse_of: :project
       has_many :incident_management_oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :incident_management_oncall_schedules, source: :rotations
-      has_many :incident_management_oncall_participants, class_name: 'IncidentManagement::OncallParticipant', through: :incident_management_oncall_schedules, source: :participants
 
       elastic_index_dependant_association :issues, on_change: :visibility_level
 
