@@ -8,7 +8,7 @@ As the name implies, the purpose of the template is to detail underperforming qu
   - For example - `Query Performance Investigation - SELECT "namespaces".* FROM "namespaces" WHERE "namespaces"."id" = $1 LIMIT $2`
 - [ ] Provide information in the Requested Data Points table
 - [ ] Provide [priority and severity labels](https://about.gitlab.com/handbook/engineering/quality/issue-triage/#availability)
-- [ ] If this requires immediate attention cc (at)gitlab-org/database-team and reach out in the #g_database slack channel
+- [ ] If this requires immediate attention cc `@gitlab-org/database-team` and reach out in the #g_database slack channel
 
 ### Requested Data points
 
