@@ -12,10 +12,6 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
 
   subject { get(url, headers: headers) }
 
-  before do
-    package.update!(name: package_name) unless package_name == 'non-existing-package'
-  end
-
   shared_examples 'accept metadata request' do |status:|
     it 'accepts the metadata request' do
       subject
@@ -49,260 +45,260 @@ RSpec.shared_examples 'handling get metadata requests' do |scope: :project|
     end
   end
 
-  shared_examples 'handling different visibilities and user roles' do |accept_example: 'accept metadata request', accept_status: :ok, reject_example: 'reject metadata request', reject_status: nil|
-    where(:visibility, :user_role, :example_name, :expected_status) do
-      'PUBLIC'   | :anonymous | accept_example | accept_status
-      'PUBLIC'   | :guest     | accept_example | accept_status
-      'PUBLIC'   | :reporter  | accept_example | accept_status
-      'PRIVATE'  | :anonymous | reject_example | (reject_status || :not_found)
-      'PRIVATE'  | :guest     | reject_example | (reject_status || :forbidden)
-      'PRIVATE'  | :reporter  | accept_example | accept_status
-      'INTERNAL' | :anonymous | reject_example | (reject_status || :not_found)
-      'INTERNAL' | :guest     | accept_example | accept_status
-      'INTERNAL' | :reporter  | accept_example | accept_status
-    end
+  where(:auth, :package_name_type, :request_forward, :visibility, :user_role, :expected_result, :expected_status) do
+    nil | :scoped_naming_convention    | true  | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :scoped_naming_convention    | false | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :scoped_no_naming_convention | true  | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :scoped_no_naming_convention | false | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :unscoped | true  | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :unscoped | false | 'PUBLIC'  | :anonymous | :accept | :ok
+    nil | :non_existing | true  | 'PUBLIC'  | :anonymous | :redirect | :redirected
+    nil | :non_existing | false | 'PUBLIC'  | :anonymous | :reject | :not_found
+    nil | :scoped_naming_convention    | true  | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :scoped_naming_convention    | false | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :scoped_no_naming_convention | true  | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :scoped_no_naming_convention | false | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :unscoped | true  | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :unscoped | false | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :non_existing | true  | 'PRIVATE'  | :anonymous | :redirect | :redirected
+    nil | :non_existing | false | 'PRIVATE'  | :anonymous | :reject | :not_found
+    nil | :scoped_naming_convention    | true  | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :scoped_naming_convention    | false | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :scoped_no_naming_convention | true  | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :scoped_no_naming_convention | false | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :unscoped | true  | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :unscoped | false | 'INTERNAL'  | :anonymous | :reject | :not_found
+    nil | :non_existing | true  | 'INTERNAL'  | :anonymous | :redirect | :redirected
+    nil | :non_existing | false | 'INTERNAL'  | :anonymous | :reject | :not_found
 
-    with_them do
-      let(:anonymous) { user_role == :anonymous }
+    :oauth | :scoped_naming_convention    | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :scoped_naming_convention    | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :scoped_naming_convention    | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :scoped_naming_convention    | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :scoped_no_naming_convention | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :scoped_no_naming_convention | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :unscoped | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :oauth | :unscoped | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :oauth | :non_existing | true  | 'PUBLIC'  | :guest     | :redirect | :redirected
+    :oauth | :non_existing | true  | 'PUBLIC'  | :reporter  | :redirect | :redirected
+    :oauth | :non_existing | false | 'PUBLIC'  | :guest     | :reject | :not_found
+    :oauth | :non_existing | false | 'PUBLIC'  | :reporter  | :reject | :not_found
+    :oauth | :scoped_naming_convention    | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :scoped_naming_convention    | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :scoped_naming_convention    | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :scoped_naming_convention    | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :scoped_no_naming_convention | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :scoped_no_naming_convention | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :unscoped | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :unscoped | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :oauth | :non_existing | true  | 'PRIVATE'  | :guest     | :redirect | :redirected
+    :oauth | :non_existing | true  | 'PRIVATE'  | :reporter  | :redirect | :redirected
+    :oauth | :non_existing | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :oauth | :non_existing | false | 'PRIVATE'  | :reporter  | :reject | :not_found
+    :oauth | :scoped_naming_convention    | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :scoped_naming_convention    | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :scoped_naming_convention    | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :scoped_naming_convention    | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :scoped_no_naming_convention | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :scoped_no_naming_convention | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :scoped_no_naming_convention | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :unscoped | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :unscoped | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :oauth | :unscoped | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :oauth | :non_existing | true  | 'INTERNAL'  | :guest     | :redirect | :redirected
+    :oauth | :non_existing | true  | 'INTERNAL'  | :reporter  | :redirect | :redirected
+    :oauth | :non_existing | false | 'INTERNAL'  | :guest     | :reject | :not_found
+    :oauth | :non_existing | false | 'INTERNAL'  | :reporter  | :reject | :not_found
 
-      subject { get(url, headers: anonymous ? {} : headers) }
+    :personal_access_token | :scoped_naming_convention    | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | true  | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :unscoped | true  | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | false | 'PUBLIC'  | :guest     | :accept | :ok
+    :personal_access_token | :unscoped | false | 'PUBLIC'  | :reporter  | :accept | :ok
+    :personal_access_token | :non_existing | true  | 'PUBLIC'  | :guest     | :redirect | :redirected
+    :personal_access_token | :non_existing | true  | 'PUBLIC'  | :reporter  | :redirect | :redirected
+    :personal_access_token | :non_existing | false | 'PUBLIC'  | :guest     | :reject | :not_found
+    :personal_access_token | :non_existing | false | 'PUBLIC'  | :reporter  | :reject | :not_found
+    :personal_access_token | :scoped_naming_convention    | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :scoped_naming_convention    | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :scoped_naming_convention    | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :scoped_no_naming_convention | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :scoped_no_naming_convention | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | true  | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :unscoped | true  | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :unscoped | false | 'PRIVATE'  | :reporter  | :accept | :ok
+    :personal_access_token | :non_existing | true  | 'PRIVATE'  | :guest     | :redirect | :redirected
+    :personal_access_token | :non_existing | true  | 'PRIVATE'  | :reporter  | :redirect | :redirected
+    :personal_access_token | :non_existing | false | 'PRIVATE'  | :guest     | :reject | :forbidden
+    :personal_access_token | :non_existing | false | 'PRIVATE'  | :reporter  | :reject | :not_found
+    :personal_access_token | :scoped_naming_convention    | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_naming_convention    | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :scoped_no_naming_convention | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | true  | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :unscoped | true  | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :unscoped | false | 'INTERNAL'  | :guest     | :accept | :ok
+    :personal_access_token | :unscoped | false | 'INTERNAL'  | :reporter  | :accept | :ok
+    :personal_access_token | :non_existing | true  | 'INTERNAL'  | :guest     | :redirect | :redirected
+    :personal_access_token | :non_existing | true  | 'INTERNAL'  | :reporter  | :redirect | :redirected
+    :personal_access_token | :non_existing | false | 'INTERNAL'  | :guest     | :reject | :not_found
+    :personal_access_token | :non_existing | false | 'INTERNAL'  | :reporter  | :reject | :not_found
 
-      before do
-        project.send("add_#{user_role}", user) unless anonymous
-        project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
-      end
+    :job_token | :scoped_naming_convention    | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :scoped_naming_convention    | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :unscoped | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :unscoped | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :job_token | :non_existing | true  | 'PUBLIC'  | :developer    | :redirect | :redirected
+    :job_token | :non_existing | false | 'PUBLIC'  | :developer    | :reject | :not_found
+    :job_token | :scoped_naming_convention    | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :scoped_naming_convention    | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :unscoped | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :unscoped | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :job_token | :non_existing | true  | 'PRIVATE'  | :developer    | :redirect | :redirected
+    :job_token | :non_existing | false | 'PRIVATE'  | :developer    | :reject | :not_found
+    :job_token | :scoped_naming_convention    | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :scoped_naming_convention    | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :scoped_no_naming_convention | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :unscoped | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :unscoped | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :job_token | :non_existing | true  | 'INTERNAL'  | :developer    | :redirect | :redirected
+    :job_token | :non_existing | false | 'INTERNAL'  | :developer    | :reject | :not_found
 
-      it_behaves_like params[:example_name], status: params[:expected_status]
-    end
+    :deploy_token | :scoped_naming_convention    | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_naming_convention    | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | true  | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | false | 'PUBLIC'  | :developer    | :accept | :ok
+    :deploy_token | :non_existing | true  | 'PUBLIC'  | :developer    | :redirect | :redirected
+    :deploy_token | :non_existing | false | 'PUBLIC'  | :developer    | :reject | :not_found
+    :deploy_token | :scoped_naming_convention    | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_naming_convention    | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | true  | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | false | 'PRIVATE'  | :developer    | :accept | :ok
+    :deploy_token | :non_existing | true  | 'PRIVATE'  | :developer    | :redirect | :redirected
+    :deploy_token | :non_existing | false | 'PRIVATE'  | :developer    | :reject | :not_found
+    :deploy_token | :scoped_naming_convention    | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_naming_convention    | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :scoped_no_naming_convention | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | true  | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :unscoped | false | 'INTERNAL'  | :developer    | :accept | :ok
+    :deploy_token | :non_existing | true  | 'INTERNAL'  | :developer    | :redirect | :redirected
+    :deploy_token | :non_existing | false | 'INTERNAL'  | :developer    | :reject | :not_found
   end
 
-  shared_examples 'handling different package names' do
-    context 'handling a scoped package following the naming convention' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        it_behaves_like 'handling different visibilities and user roles'
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        it_behaves_like 'handling different visibilities and user roles'
+  with_them do
+    let(:anonymous) { user_role == :anonymous }
+    let(:package_name) do
+      case package_name_type
+      when :scoped_naming_convention
+        "@#{group.path}/scoped-package"
+      when :scoped_no_naming_convention
+        '@any-scope/scoped-package'
+      when :unscoped
+        'unscoped-package'
+      when :non_existing
+        'non-existing-package'
       end
     end
 
-    context 'handling a scoped package not following the naming convention' do
-      let(:package_name) { '@any_scope/scope-package' }
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        params = {}
-        params = { accept_example: 'redirect metadata request', accept_status: :redirected, reject_example: 'redirect metadata request', reject_status: :redirected } if scope == :instance
-
-        it_behaves_like 'handling different visibilities and user roles', **params
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        params = {}
-        params = { accept_example: 'reject metadata request', accept_status: :not_found, reject_status: :not_found } if scope == :instance
-
-        it_behaves_like 'handling different visibilities and user roles', **params
-      end
-    end
-
-    context 'handling an unscoped package' do
-      let(:package_name) { 'unscoped-package' }
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        params = {}
-        params = { accept_example: 'redirect metadata request', accept_status: :redirected, reject_example: 'redirect metadata request', reject_status: :redirected } if scope == :instance
-
-        it_behaves_like 'handling different visibilities and user roles', **params
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        params = {}
-        params = { accept_example: 'reject metadata request', accept_status: :not_found, reject_status: :not_found } if scope == :instance
-
-        it_behaves_like 'handling different visibilities and user roles', **params
-      end
-    end
-
-    context 'handling a package name with a dot in the project path' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      before do
-        project.update!(path: 'foo.bar')
-      end
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        it_behaves_like 'handling different visibilities and user roles'
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        it_behaves_like 'handling different visibilities and user roles'
-      end
-    end
-
-    context 'handling a non existing package' do
-      let(:package_name) { 'non-existing-package' }
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        it_behaves_like 'handling different visibilities and user roles', accept_example: 'redirect metadata request', accept_status: :redirected, reject_example: 'redirect metadata request', reject_status: :redirected
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        reject_status = :not_found if scope == :instance
-        it_behaves_like 'handling different visibilities and user roles', accept_example: 'reject metadata request', accept_status: :not_found, reject_status: reject_status
-      end
-    end
-  end
-
-  shared_examples 'handling different package names for a given user role' do
-    context 'handling a scoped package following the naming convention' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      it_behaves_like 'handling request forward and accepting the request'
-    end
-
-    context 'handling a scoped package not following the naming convention' do
-      let(:package_name) { '@any_scope/scope-package' }
-
-      it_behaves_like 'handling request forward and accepting the request except for the instance scope'
-    end
-
-    context 'handling an unscoped package' do
-      let(:package_name) { 'unscoped-package' }
-
-      it_behaves_like 'handling request forward and accepting the request except for the instance scope'
-    end
-
-    context 'handling a package name with a dot in the project path' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
-
-      before do
-        project.update!(path: 'foo.bar')
-      end
-
-      it_behaves_like 'handling request forward and accepting the request'
-    end
-
-    context 'handling a non existing package' do
-      let(:package_name) { 'non-existing-package' }
-
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        it_behaves_like 'redirect metadata request', status: :redirect
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        it_behaves_like 'reject metadata request', status: :not_found
-      end
-    end
-  end
-
-  shared_examples 'handling request forward and accepting the request' do
-    context 'with request forward enabled' do
-      include_context 'npm request forward enabled'
-
-      it_behaves_like 'accept metadata request', status: :ok
-    end
-
-    context 'with request forward disabled' do
-      include_context 'npm request forward disabled'
-
-      it_behaves_like 'accept metadata request', status: :ok
-    end
-  end
-
-  shared_examples 'handling request forward and accepting the request except for the instance scope' do
-    context 'with request forward enabled' do
-      include_context 'npm request forward enabled'
-
-      if scope == :project
-        it_behaves_like 'accept metadata request', status: :ok
+    let(:headers) do
+      case auth
+      when :oauth
+        build_token_auth_header(token.token)
+      when :personal_access_token
+        build_token_auth_header(personal_access_token.token)
+      when :job_token
+        build_token_auth_header(job.token)
+      when :deploy_token
+        build_token_auth_header(deploy_token.token)
       else
-        it_behaves_like 'redirect metadata request', status: :redirect
+        {}
       end
     end
 
-    context 'with request forward disabled' do
-      include_context 'npm request forward disabled'
+    subject { get(url, headers: anonymous ? {} : headers) }
 
-      if scope == :project
-        it_behaves_like 'accept metadata request', status: :ok
+    before do
+      project.send("add_#{user_role}", user) unless anonymous
+      project.update!(visibility: Gitlab::VisibilityLevel.const_get(visibility, false))
+      package.update!(name: package_name) unless package_name == 'non-existing-package'
+      stub_application_setting(npm_package_requests_forwarding: request_forward)
+    end
+
+    example_name = "#{params[:expected_result]} metadata request"
+    status = params[:expected_status]
+
+    if scope == :instance && params[:package_name_type] != :scoped_naming_convention
+      if params[:request_forward]
+        example_name = 'redirect metadata request'
+        status = :redirected
       else
-        it_behaves_like 'reject metadata request', status: :not_found
+        example_name = 'reject metadata request'
+        status = :not_found
       end
     end
+
+    it_behaves_like example_name, status: status
   end
 
-  context 'with oauth token' do
-    let(:headers) { build_token_auth_header(token.token) }
-
-    it_behaves_like 'handling different package names'
-  end
-
-  context 'with personal access token' do
+  context 'with a developer' do
     let(:headers) { build_token_auth_header(personal_access_token.token) }
-
-    it_behaves_like 'handling different package names'
-  end
-
-  context 'with job token' do
-    let(:headers) { build_token_auth_header(job.token) }
 
     before do
       project.add_developer(user)
     end
 
-    it_behaves_like 'handling different package names for a given user role'
+    context 'project path with a dot' do
+      before do
+        project.update!(path: 'foo.bar')
+      end
 
-    context 'without running job' do
-      let(:package_name) { "@#{group.path}/scoped-package" }
+      it_behaves_like 'accept metadata request', status: :ok
+    end
+
+    context 'with a job token' do
+      let(:headers) { build_token_auth_header(job.token) }
 
       before do
         job.update!(status: :success)
       end
 
-      context 'with request forward enabled' do
-        include_context 'npm request forward enabled'
-
-        it_behaves_like 'reject metadata request', status: :unauthorized
-      end
-
-      context 'with request forward disabled' do
-        include_context 'npm request forward disabled'
-
-        it_behaves_like 'reject metadata request', status: :unauthorized
-      end
+      it_behaves_like 'reject metadata request', status: :unauthorized
     end
-  end
-
-  context 'with deploy token' do
-    let(:headers) { build_token_auth_header(deploy_token.token) }
-
-    it_behaves_like 'handling different package names for a given user role'
   end
 end
 
