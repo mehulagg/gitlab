@@ -31,40 +31,13 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
         let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
         let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
         let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
-        let(:notification_service) { spy }
 
-        context 'with oncall schedules enabled' do
-          before do
-            stub_licensed_features(oncall_schedules: project)
-          end
-
-          it 'sends a notification email to all users oncall' do
-            expect(NotificationService).to receive(:new).and_return(notification_service)
-
-            expect(notification_service).to receive_message_chain(:async, :notify_oncall_users_of_alert).with(
+        it_behaves_like 'Alert Notification Service sends notification email to on-call users' do
+          let(:notification_args) do
+            [
               [participant.user],
               having_attributes(class: AlertManagement::Alert, fingerprint: fingerprint)
-            )
-            expect(subject).to be_success
-          end
-
-          it 'does have an N+1 for fetching users' do
-            subject # Initial service load includes a few additional queries
-
-            query_count = ActiveRecord::QueryRecorder.new { described_class.new(project.reload, payload).execute }
-
-            new_rotation = create(:incident_management_oncall_rotation, schedule: schedule)
-            create(:incident_management_oncall_participant, :with_developer_access, rotation: new_rotation)
-
-            expect { described_class.new(project.reload, payload).execute }.not_to exceed_query_limit(query_count)
-          end
-        end
-
-        context 'with oncall schedules disabled' do
-          it 'does not notify the on-call users' do
-            expect(NotificationService).not_to receive(:new)
-
-            expect(subject).to be_success
+            ]
           end
         end
       end
