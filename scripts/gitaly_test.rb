@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file contains environment settings for gitaly when it's running
 # as part of the gitlab-ce/ee test suite.
 #
