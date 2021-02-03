@@ -70,7 +70,7 @@ If for some reason the GitLab integration in CrowdIn does not exist, it can be
 recreated by the following steps:
 
 1. Sign in to GitLab as `gitlab-crowdin-bot` (If you're a GitLab Team Member, find credentials in the GitLab shared  [1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams)
-1. Sign in to Crowdin with the GitLab integration
+1. Sign in to CrowdIn with the GitLab integration
 1. Navigate to Settings > Integrations > GitLab > Set Up Integration
 1. Select `gitlab-org/gitlab` repository
 1. On `Select Branches for Translation`, select `master`

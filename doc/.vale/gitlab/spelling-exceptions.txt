@@ -125,6 +125,10 @@ deduplicates
 deduplicating
 deduplication
 deliverables
+denormalize
+denormalized
+denormalizes
+denormalizing
 denylist
 denylisting
 denylists
@@ -138,6 +142,7 @@ dequarantine
 dequarantined
 dequarantining
 DevOps
+disambiguates
 discoverability
 dismissable
 Disqus
@@ -169,6 +174,7 @@ failover
 failovers
 failsafe
 Falco
+falsy
 fastlane
 favicon
 favorited
@@ -181,6 +187,7 @@ Flawfinder
 Flowdock
 Fluentd
 Forgerock
+formatters
 Fugit
 fuzzer
 Gantt
@@ -206,6 +213,7 @@ goroutines
 Gosec
 Gradle
 Grafana
+Grafonnet
 gravatar
 Gzip
 Haml
@@ -253,6 +261,7 @@ Jira
 jq
 jQuery
 jsdom
+Jsonnet
 JupyterHub
 kanban
 kanbans
@@ -282,6 +291,7 @@ Libravatar
 liveness
 Lograge
 logrotate
+Logrus
 Logstash
 lookahead
 lookaheads
@@ -521,6 +531,7 @@ spidering
 Splunk
 SpotBugs
 Stackdriver
+Stackprof
 starrer
 starrers
 storable
@@ -553,6 +564,8 @@ substring
 substrings
 subtask
 subtasks
+subtest
+subtests
 subtree
 subtrees
 sudo
@@ -592,6 +605,7 @@ Trello
 triaged
 triages
 triaging
+truthy
 Truststore
 Twilio
 Twitter
@@ -605,6 +619,7 @@ unarchive
 unarchived
 unarchives
 unarchiving
+unary
 unassign
 unassigning
 unassigns
@@ -673,6 +688,7 @@ unstarted
 unstash
 unstashed
 unstashing
+unsynced
 untarred
 untracked
 untrusted
