@@ -23357,7 +23357,7 @@ msgstr ""
 msgid "PrometheusService|Automatically deploy and configure Prometheus on your clusters to monitor your project’s environments."
 msgstr ""
 
-msgid "PrometheusService|Client ID of the IAP secured resource, like IAP_CLIENT_ID.apps.googleusercontent.com"
+msgid "PrometheusService|Client ID of the IAP-secured resource, like IAP_CLIENT_ID.apps.googleusercontent.com"
 msgstr ""
 
 msgid "PrometheusService|Common metrics"
