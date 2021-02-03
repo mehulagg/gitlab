@@ -271,7 +271,7 @@ RSpec.describe MergeRequests::BuildService do
           end
 
           it 'uses the title of the commit as the title of the merge request' do
-            expect(merge_request.title).to eq('Initial commit')
+            expect(merge_request.title).to eq('Closes #1234 Second commit')
           end
 
           it 'appends the closing description' do
@@ -324,6 +324,66 @@ RSpec.describe MergeRequests::BuildService do
       end
     end
 
+    context 'no multi-line commit messages in the diff' do
+      let(:commits) { Commit.decorate([commit_1, commit_3], project) }
+
+      before do
+        stub_compare
+      end
+
+      it_behaves_like 'allows the merge request to be created'
+
+      context 'no multi-line commit messages in the diff' do
+        let(:commits) { Commit.decorate([commit_1, commit_3], project) }
+
+        it 'uses the title of the branch as the merge request title' do
+          expect(merge_request.title).to eq('Feature branch')
+        end
+        it 'does not add a description' do
+          expect(merge_request.description).to be_nil
+        end
+      end
+
+      context 'merge request already has a description set' do
+        let(:description) { 'Merge request description' }
+
+        it 'keeps the description from the initial params' do
+          expect(merge_request.description).to eq(description)
+        end
+      end
+
+      context 'when the source branch matches an issue' do
+        where(:issue_tracker, :source_branch, :title, :closing_message) do
+          :jira                 | 'FOO-123-fix-issue' | 'Resolve FOO-123 "Fix issue"' | 'Closes FOO-123'
+          :jira                 | 'fix-issue'         | 'Fix issue'                   | nil
+          :custom_issue_tracker | '123-fix-issue'     | 'Resolve #123 "Fix issue"'    | 'Closes #123'
+          :custom_issue_tracker | 'fix-issue'         | 'Fix issue'                   | nil
+          :internal             | '123-fix-issue'     | 'Resolve "A bug"'             | 'Closes #123'
+          :internal             | 'fix-issue'         | 'Fix issue'                   | nil
+          :internal             | '124-fix-issue'     | '124 fix issue'               | nil
+        end
+
+        with_them do
+          before do
+            if issue_tracker == :internal
+              issue.update!(iid: 123)
+            else
+              create(:"#{issue_tracker}_service", project: project)
+              project.reload
+            end
+          end
+
+          it 'sets the correct title' do
+            expect(merge_request.title).to eq(title)
+          end
+
+          it 'sets the closing description' do
+            expect(merge_request.description).to eq(closing_message)
+          end
+        end
+      end
+    end
+
     context 'a multi-line commit message in the diff' do
       let(:commits) { Commit.decorate([commit_1, commit_2, commit_3], project) }
 
@@ -339,17 +399,6 @@ RSpec.describe MergeRequests::BuildService do
 
       it 'adds the remaining lines of the first multi-line commit message as the description' do
         expect(merge_request.description).to eq('Create the app')
-      end
-
-      context 'no multi-line commit messages in the diff' do
-        let(:commits) { Commit.decorate([commit_1, commit_3], project) }
-
-        it 'uses the title of the branch as the merge request title' do
-          expect(merge_request.title).to eq('Feature branch')
-        end
-        it 'does not add a description' do
-          expect(merge_request.description).to be_nil
-        end
       end
 
       context 'merge request already has a description set' do

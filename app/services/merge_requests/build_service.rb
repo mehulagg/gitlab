@@ -201,8 +201,8 @@ module MergeRequests
       merge_request.title ||= title_from_issue if target_project.issues_enabled? || target_project.external_issue_tracker
       merge_request.title ||= source_branch.titleize.humanize
       merge_request.title = wip_title if compare_commits.empty?
-
       append_closes_description
+
     end
 
     def assign_labels
