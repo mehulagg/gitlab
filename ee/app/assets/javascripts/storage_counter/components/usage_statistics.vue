@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlSprintf } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import { formatUsageSize } from '../utils';
 import UsageStatisticsCard from './usage_statistics_card.vue';
@@ -34,7 +35,7 @@ export default {
         ),
         link: {
           text: s__('UsageQuota|Learn more about usage quotas'),
-          url: 'https://docs.gitlab.com/ee/user/usage_quotas.html'
+          url: helpPagePath('user/usage_quotas'),
         },
       };
     },
@@ -47,7 +48,7 @@ export default {
         ),
         link: {
           text: s__('UsageQuota|Learn more about excess storage usage'),
-          url: 'https://docs.gitlab.com/ee/user/usage_quotas.html#excess-storage-usage',
+          url: helpPagePath('user/usage_quotas', { anchor: 'excess-storage-usage' }),
         },
       };
     },
@@ -95,7 +96,7 @@ export default {
 <template>
   <div class="gl-display-flex gl-sm-flex-direction-column">
     <usage-statistics-card
-      data-testid="totalUsage"
+      data-testid="total-usage"
       :usage="totalUsage.usage"
       :link="totalUsage.link"
       :description="totalUsage.description"
@@ -103,7 +104,7 @@ export default {
     >
     </usage-statistics-card>
     <usage-statistics-card
-      data-testid="excessUsage"
+      data-testid="excess-usage"
       :usage="excessUsage.usage"
       :link="excessUsage.link"
       :description="excessUsage.description"
@@ -112,7 +113,7 @@ export default {
     </usage-statistics-card>
     <usage-statistics-card
       v-if="purchasedUsage"
-      data-testid="purchasedUsage"
+      data-testid="purchased-usage"
       :usage="purchasedUsage.usage"
       :usage-total="purchasedUsage.usageTotal"
       :link="purchasedUsage.link"
