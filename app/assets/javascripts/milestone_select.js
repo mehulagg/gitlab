@@ -95,6 +95,9 @@ export default class MilestoneSelect {
                   name: m.title,
                 }))
                 .sort((mA, mB) => {
+                  const dueDateA = mA.due_date ? parsePikadayDate(mA.due_date) : null;
+                  const dueDateB = mB.due_date ? parsePikadayDate(mB.due_date) : null;
+
                   // Move all expired milestones to the bottom.
                   if (mA.expired) {
                     return 1;
@@ -102,7 +105,13 @@ export default class MilestoneSelect {
                   if (mB.expired) {
                     return -1;
                   }
-                  return 0;
+
+                  // Don't change positions if due date is not set.
+                  if (!dueDateA) return 0;
+                  if (!dueDateB) return 0;
+
+                  // Sort by due date in ascending order.
+                  return dueDateA - dueDateB;
                 }),
             )
             .then((data) => {
