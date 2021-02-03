@@ -23,7 +23,6 @@ module Gitlab
             --->
 
             <!-- vale gitlab.Spelling = NO -->
-
           MARKDOWN
         end
 
