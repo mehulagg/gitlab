@@ -12,15 +12,35 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData,
 });
 
-const defaultClient = createDefaultClient(
-  {},
-  {
-    cacheConfig: {
-      fragmentMatcher,
+// -- start -- temporary local resolver @TODO Remove me
+const resolvers = {
+  Vulnerability: {
+    externalIssueLinks: () => {
+      return {
+        __typename: 'VulnerabilityExternalIssueLinkConnection',
+        nodes: [
+          {
+            __typename: 'VulnerabilityExternalIssueLink',
+            externalIssue: {
+              __typename: 'ExternalIssue',
+              externalTracker: 'jira',
+              webUrl: 'https://mparuszewski-gitlab.atlassian.net/browse/GV-11',
+            },
+            linkType: 'CREATED',
+          },
+        ],
+      };
     },
-    assumeImmutableResults: true,
   },
-);
+};
+// -- end -- temporary local resolver @TODO Remove me
+
+const defaultClient = createDefaultClient(resolvers, {
+  cacheConfig: {
+    fragmentMatcher,
+  },
+  assumeImmutableResults: true,
+});
 
 export default new VueApollo({
   defaultClient,

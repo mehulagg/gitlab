@@ -23,6 +23,14 @@ query project(
     ) {
       nodes {
         ...Vulnerability
+        externalIssueLinks @client {
+          nodes {
+            externalIssue {
+              externalTracker
+              webUrl
+            }
+          }
+        }
         hasSolutions
         mergeRequest {
           webUrl
