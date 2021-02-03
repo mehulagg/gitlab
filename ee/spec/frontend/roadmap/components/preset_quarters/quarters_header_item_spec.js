@@ -4,6 +4,7 @@ import QuartersHeaderItemComponent from 'ee/roadmap/components/preset_quarters/q
 import { getTimeframeForQuartersView } from 'ee/roadmap/utils/roadmap_utils';
 
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { useFakeDate } from 'helpers/fake_date';
 import { mockTimeframeInitialDate } from '../../mock_data';
 
 const mockTimeframeIndex = 0;
@@ -24,6 +25,8 @@ const createComponent = ({
 };
 
 describe('QuartersHeaderItemComponent', () => {
+  // Some parts of this spec are dependent that the current date is > 2018
+  useFakeDate(2020, 6, 3);
   let vm;
 
   afterEach(() => {

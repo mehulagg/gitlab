@@ -103,7 +103,7 @@ describe('IssuableBody', () => {
     it('renders issuable edit info', () => {
       const editedEl = wrapper.find('small');
 
-      expect(editedEl.text()).toMatchInterpolatedText('Edited 3 months ago by Administrator');
+      expect(editedEl.text()).toMatchInterpolatedText('Edited 9 months ago by Administrator');
     });
 
     it('renders issuable-edit-form when `editFormVisible` prop is true', async () => {

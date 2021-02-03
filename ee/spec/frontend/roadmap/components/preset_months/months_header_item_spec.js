@@ -3,6 +3,7 @@ import Vue from 'vue';
 import MonthsHeaderItemComponent from 'ee/roadmap/components/preset_months/months_header_item.vue';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
+import { useFakeDate } from 'helpers/fake_date';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockTimeframeInitialDate } from '../../mock_data';
 
@@ -24,6 +25,8 @@ const createComponent = ({
 };
 
 describe('MonthsHeaderItemComponent', () => {
+  // Some parts of this spec are dependent that the current date is > 2018
+  useFakeDate(2020, 6, 3);
   let vm;
 
   afterEach(() => {

@@ -9,7 +9,9 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 describe('WeeksHeaderSubItemComponent', () => {
   let wrapper;
   // January 3rd, 2018 - current date (faked)
-  useFakeDate(2018, 0, 3);
+  beforeAll(() => {
+    useFakeDate(2018, 0, 3);
+  });
   const mockTimeframeInitialDate = new Date(2018, 0, 1);
   const mockTimeframeWeeks = getTimeframeForWeeksView(mockTimeframeInitialDate);
 

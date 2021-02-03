@@ -3,6 +3,7 @@ import { GlLink, GlIcon } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import { trimText } from 'helpers/text_helper';
 import { getJSONFixture } from 'helpers/fixtures';
+import { useFakeDate } from 'helpers/fake_date';
 import ReleaseBlockFooter from '~/releases/components/release_block_footer.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -11,6 +12,9 @@ const originalRelease = getJSONFixture('api/releases/release.json');
 const mockFutureDate = new Date(2020, new Date().getMonth() + 1, 6).toISOString();
 
 describe('Release block footer', () => {
+  // The API fixture uses a date past our default date
+  useFakeDate(2020, 6, 6);
+
   let wrapper;
   let release;
 

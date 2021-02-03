@@ -13,21 +13,21 @@ export const mockAuthor = {
 export const mockTestReport = {
   id: 'gid://gitlab/RequirementsManagement::TestReport/1',
   state: 'PASSED',
-  createdAt: '2020-06-04T10:55:48Z',
+  createdAt: '2015-06-04T10:55:48Z',
   __typename: 'TestReport',
 };
 
 export const mockTestReportFailed = {
   id: 'gid://gitlab/RequirementsManagement::TestReport/1',
   state: 'FAILED',
-  createdAt: '2020-06-04T10:55:48Z',
+  createdAt: '2015-06-04T10:55:48Z',
   __typename: 'TestReport',
 };
 
 export const mockTestReportMissing = {
   id: 'gid://gitlab/RequirementsManagement::TestReport/1',
   state: '',
-  createdAt: '2020-06-04T10:55:48Z',
+  createdAt: '2015-06-04T10:55:48Z',
   __typename: 'TestReport',
 };
 
@@ -38,8 +38,8 @@ export const requirement1 = {
     'Virtutis, magnitudinis animi, patientiae, fortitudinis fomentis dolor mitigari solet.',
   description: 'fortitudinis _fomentis_ dolor mitigari solet.',
   descriptionHtml: 'fortitudinis <i>fomentis</i> dolor mitigari solet.',
-  createdAt: '2020-03-19T08:09:09Z',
-  updatedAt: '2020-03-20T08:09:09Z',
+  createdAt: '2015-03-19T08:09:09Z',
+  updatedAt: '2015-03-20T08:09:09Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
@@ -58,8 +58,8 @@ export const requirement2 = {
     'Est autem officium, quod ita factum est, ut eius facti probabilis ratio reddi possit.',
   description: 'ut eius facti _probabilis_ ratio reddi possit.',
   descriptionHtml: 'ut eius facti <i>probabilis</i> ratio reddi possit.',
-  createdAt: '2020-03-19T08:08:14Z',
-  updatedAt: '2020-03-20T08:08:14Z',
+  createdAt: '2015-03-19T08:08:14Z',
+  updatedAt: '2015-03-20T08:08:14Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
@@ -77,8 +77,8 @@ export const requirement3 = {
   titleHtml: 'Non modo carum sibi quemque, verum etiam vehementer carum esse',
   description: 'verum etiam _vehementer_ carum esse.',
   descriptionHtml: 'verum etiam <i>vehementer</i> carum esse.',
-  createdAt: '2020-03-19T08:08:25Z',
-  updatedAt: '2020-03-20T08:08:25Z',
+  createdAt: '2015-03-19T08:08:25Z',
+  updatedAt: '2015-03-20T08:08:25Z',
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
@@ -96,8 +96,8 @@ export const requirementArchived = {
   titleHtml: 'Cuius quidem, quoniam Stoicus fuit',
   description: 'quoniam _Stoicus_ fuit.',
   descriptionHtml: 'quoniam <i>Stoicus</i> fuit.',
-  createdAt: '2020-03-31T13:31:40Z',
-  updatedAt: '2020-03-31T13:31:40Z',
+  createdAt: '2015-03-31T13:31:40Z',
+  updatedAt: '2015-03-31T13:31:40Z',
   state: 'ARCHIVED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,

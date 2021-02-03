@@ -4,7 +4,7 @@ import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import CompareDropdownLayout from '~/diffs/components/compare_dropdown_layout.vue';
 
 const TEST_COMMIT_TEXT = '1 commit';
-const TEST_CREATED_AT = '2018-10-23T11:49:16.611Z';
+const TEST_CREATED_AT = '2012-10-23T11:49:16.611Z';
 
 describe('CompareDropdownLayout', () => {
   let wrapper;

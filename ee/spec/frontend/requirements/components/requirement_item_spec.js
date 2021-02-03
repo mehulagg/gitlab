@@ -101,7 +101,7 @@ describe('RequirementItem', () => {
 
       expect(createdAtEl.text()).toContain('created');
       expect(createdAtEl.text()).toContain('ago');
-      expect(createdAtEl.attributes('title')).toBe('Mar 19, 2020 8:09am GMT+0000');
+      expect(createdAtEl.attributes('title')).toBe('Mar 19, 2015 8:09am GMT+0000');
     });
 
     it('renders element containing requirement author information', () => {
@@ -116,7 +116,7 @@ describe('RequirementItem', () => {
 
       expect(updatedAtEl.text()).toContain('updated');
       expect(updatedAtEl.text()).toContain('ago');
-      expect(updatedAtEl.attributes('title')).toBe('Mar 20, 2020 8:09am GMT+0000');
+      expect(updatedAtEl.attributes('title')).toBe('Mar 20, 2015 8:09am GMT+0000');
     });
 
     it('renders requirement-status-badge component', () => {

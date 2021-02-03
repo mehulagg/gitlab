@@ -8,6 +8,8 @@ import {
 } from './mock_data';
 
 describe('computeMonthRangeData', () => {
+  useFakeDate('2021-01-21');
+
   const start = new Date('2020-05-17T00:00:00.000Z');
   const end = new Date('2020-07-17T00:00:00.000Z');
 
@@ -47,8 +49,6 @@ describe('computeMttmData', () => {
 });
 
 describe('parseAndValidateDates', () => {
-  useFakeDate('2021-01-21');
-
   it.each`
     scenario                                                         | startDateParam  | endDateParam    | expected
     ${'returns the default range if not specified'}                  | ${''}           | ${''}           | ${{ startDate: new Date('2020-01-22'), endDate: new Date('2021-01-21') }}

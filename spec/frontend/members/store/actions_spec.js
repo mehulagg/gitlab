@@ -73,7 +73,16 @@ describe('Vuex members actions', () => {
     });
 
     describe('updateMemberExpiration', () => {
-      useFakeDate(2020, 2, 15, 3);
+      let origDate;
+
+      beforeAll(() => {
+        origDate = global.Date;
+        useFakeDate(2020, 2, 15, 3);
+      });
+
+      afterAll(() => {
+        global.Date = origDate;
+      });
 
       const memberId = members[0].id;
       const expiresAt = '2020-3-17';

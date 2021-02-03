@@ -17,6 +17,9 @@ import {
 } from '~/registry/explorer/constants';
 
 describe('Details Header', () => {
+  // set the date to Dec 4, 2020
+  useFakeDate(2020, 11, 4);
+
   let wrapper;
 
   const defaultImage = {
@@ -32,8 +35,6 @@ describe('Details Header', () => {
     },
   };
 
-  // set the date to Dec 4, 2020
-  useFakeDate(2020, 11, 4);
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   const findLastUpdatedAndVisibility = () => findByTestId('updated-and-visibility');

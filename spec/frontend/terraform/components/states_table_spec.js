@@ -5,8 +5,9 @@ import StateActions from '~/terraform/components/states_table_actions.vue';
 import StatesTable from '~/terraform/components/states_table.vue';
 
 describe('StatesTable', () => {
-  let wrapper;
   useFakeDate([2020, 10, 15]);
+
+  let wrapper;
 
   const defaultProps = {
     states: [

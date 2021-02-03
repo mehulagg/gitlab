@@ -2,6 +2,7 @@ import Vue from 'vue';
 
 import geoNodeEventStatusComponent from 'ee/geo_nodes/components/geo_node_event_status.vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { useFakeDate } from 'helpers/fake_date';
 import { mockNodeDetails } from '../mock_data';
 
 const createComponent = ({
@@ -19,6 +20,9 @@ const createComponent = ({
 };
 
 describe('GeoNodeEventStatus', () => {
+  // Some of the tests are dependent that the year is > 2017
+  useFakeDate(2018, 1, 1);
+
   let vm;
 
   beforeEach(() => {

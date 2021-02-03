@@ -1,11 +1,14 @@
 import { GlAlert, GlDropdown, GlDropdownItem, GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { useFakeDate } from 'helpers/fake_date';
 import DownloadTestCoverage from 'ee/analytics/repository_analytics/components/download_test_coverage.vue';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
 
 const localVue = createLocalVue();
 
 describe('Download test coverage component', () => {
+  useFakeDate(2020, 6, 6);
+
   let wrapper;
 
   const findCodeCoverageModalButton = () =>

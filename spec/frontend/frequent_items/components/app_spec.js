@@ -36,6 +36,8 @@ describe('Frequent Items App Component', () => {
   let mock;
 
   beforeEach(() => {
+    // A nested test depends on Date.now() changing so we useRealDate only in that context.
+    useFakeDate();
     mock = new MockAdapter(axios);
     vm = createComponentWithStore();
   });

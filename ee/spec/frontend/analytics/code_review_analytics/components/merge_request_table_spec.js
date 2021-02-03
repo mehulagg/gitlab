@@ -3,12 +3,16 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import createState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
+import { useFakeDate } from 'helpers/fake_date';
 import { mockMergeRequests } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('MergeRequestTable component', () => {
+  // Some tests are dependent that the year is >= 2020
+  useFakeDate(2020, 6, 6);
+
   let wrapper;
   let vuexStore;
 

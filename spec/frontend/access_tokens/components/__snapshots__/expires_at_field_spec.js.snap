@@ -7,7 +7,7 @@ exports[`~/access_tokens/components/expires_at_field should render datepicker wi
   container=""
   displayfield="true"
   firstday="0"
-  mindate="Mon Jul 06 2020 00:00:00 GMT+0000 (Greenwich Mean Time)"
+  mindate="Fri Jul 03 2015 10:00:00 GMT+0000 (Greenwich Mean Time)"
   placeholder="YYYY-MM-DD"
   theme=""
 >

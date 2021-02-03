@@ -1,7 +1,16 @@
 import dateFormat from 'dateformat';
-import timezoneMock from 'timezone-mock';
 import BurndownChartData from 'ee/burndown_chart/burn_chart_data';
 import { useFakeDate } from 'helpers/fake_date';
+
+let timezoneMock;
+
+// The tests assume the date is >= 2017-03-03
+useFakeDate(2017, 6, 6);
+
+beforeAll(async () => {
+  // Timezone mock keeps a reference of the Date on import, so we async import after setting the date.
+  timezoneMock = await import('timezone-mock');
+});
 
 describe('BurndownChartData', () => {
   const startDate = '2017-03-01';

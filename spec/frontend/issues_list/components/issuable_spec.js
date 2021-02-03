@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlSprintf, GlLabel, GlIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
+import { DEFAULT_ARGS } from 'helpers/fake_date';
 import initUserPopovers from '~/user_popovers';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { mergeUrlParams } from '~/lib/utils/url_utility';

@@ -1,12 +1,12 @@
 import { GlSprintf, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { useFakeDate } from 'helpers/fake_date';
 import CiCdAnalyticsCharts from '~/projects/pipelines/charts/components/ci_cd_analytics_charts.vue';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import * as Sentry from '~/sentry/wrapper';
 import httpStatus from '~/lib/utils/http_status';
+import DeploymentFrequencyCharts from 'ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue';
 
 jest.mock('~/flash');
 jest.mock('~/sentry/wrapper');
@@ -22,21 +22,6 @@ const last90DaysData = getJSONFixture(
 );
 
 describe('ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue', () => {
-  // Set the current Date to the same value that is used when generating the fixtures
-  useFakeDate(2015, 6, 3, 10);
-
-  let DeploymentFrequencyCharts;
-
-  // Import the component _after_ the date has been set using `useFakeDate`, so
-  // that any calls to `new Date()` during module initialization use the fake date
-  beforeAll(async () => {
-    DeploymentFrequencyCharts = (
-      await import(
-        'ee_component/projects/pipelines/charts/components/deployment_frequency_charts.vue'
-      )
-    ).default;
-  });
-
   let wrapper;
   let mock;
 
