@@ -241,22 +241,13 @@ export default {
               triggers="hover focus"
               placement="left"
             >
-              <div class="gl-display-inline-flex gl-flex-direction-column">
-                <gl-button
-                  v-gl-modal="$options.devopsSegmentModalId"
-                  category="tertiary"
-                  class="gl-w-max-content"
-                  @click="setSelectedSegment(item)"
-                  >{{ $options.i18n.editButton }}</gl-button
-                >
-                <gl-button
-                  v-gl-modal="$options.devopsSegmentDeleteModalId"
-                  category="tertiary"
-                  variant="danger"
-                  @click="setSelectedSegment(item)"
-                  >{{ $options.i18n.deleteButton }}</gl-button
-                >
-              </div>
+              <gl-button
+                v-gl-modal="$options.devopsSegmentDeleteModalId"
+                category="tertiary"
+                variant="danger"
+                @click="setSelectedSegment(item)"
+                >{{ $options.i18n.deleteButton }}</gl-button
+              >
             </gl-popover>
           </div>
         </div>

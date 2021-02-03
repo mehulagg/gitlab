@@ -1,9 +1,8 @@
 <script>
 import { GlFormGroup, GlFormInput, GlFormRadioGroup, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
-import { getIdFromGraphQLId, convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
+import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
 import * as Sentry from '~/sentry/wrapper';
 import createDevopsAdoptionSegmentMutation from '../graphql/mutations/create_devops_adoption_segment.mutation.graphql';
-import updateDevopsAdoptionSegmentMutation from '../graphql/mutations/update_devops_adoption_segment.mutation.graphql';
 import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from '../constants';
 import { addSegmentToCache } from '../utils/cache_updates';
 
@@ -18,11 +17,6 @@ export default {
     GlIcon,
   },
   props: {
-    segment: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     groups: {
       type: Array,
       required: true,
@@ -31,8 +25,7 @@ export default {
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
   data() {
     return {
-      name: this.segment?.namespace?.fullName || '',
-      selectedGroupId: this.segment ? this.groupIdFromSegment() : null,
+      selectedGroupId: null,
       filter: '',
       loading: false,
       errors: [],
@@ -54,7 +47,7 @@ export default {
     primaryOptions() {
       return {
         button: {
-          text: this.segment ? this.$options.i18n.editingButton : this.$options.i18n.addingButton,
+          text: this.$options.i18n.addingButton,
           attributes: [
             {
               variant: 'info',
@@ -63,17 +56,17 @@ export default {
             },
           ],
         },
-        callback: this.segment ? this.updateSegment : this.createSegment,
+        callback: this.createSegment,
       };
     },
     canSubmit() {
-      return this.name.length && Boolean(this.selectedGroupId);
+      return Boolean(this.selectedGroupId);
     },
     displayError() {
       return this.errors[0];
     },
     modalTitle() {
-      return this.segment ? this.$options.i18n.editingTitle : this.$options.i18n.addingTitle;
+      return this.$options.i18n.addingTitle;
     },
     filteredOptions() {
       return this.filter
@@ -94,8 +87,7 @@ export default {
         } = await this.$apollo.mutate({
           mutation: createDevopsAdoptionSegmentMutation,
           variables: {
-            name: this.name,
-            groupIds: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
+            namespaceId: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
           },
           update: (store, { data }) => {
             const {
@@ -119,46 +111,14 @@ export default {
         this.loading = false;
       }
     },
-    async updateSegment() {
-      try {
-        this.loading = true;
-        const {
-          data: {
-            updateDevopsAdoptionSegment: { errors },
-          },
-        } = await this.$apollo.mutate({
-          mutation: updateDevopsAdoptionSegmentMutation,
-          variables: {
-            id: this.segment.id,
-            name: this.name,
-            groupIds: convertToGraphQLId(TYPE_GROUP, this.selectedGroupId),
-          },
-        });
-
-        if (errors.length) {
-          this.errors = errors;
-        } else {
-          this.closeModal();
-        }
-      } catch (error) {
-        this.errors.push(this.$options.i18n.error);
-        Sentry.captureException(error);
-      } finally {
-        this.loading = false;
-      }
-    },
     clearErrors() {
       this.errors = [];
     },
     closeModal() {
       this.$refs.modal.hide();
     },
-    groupIdFromSegment() {
-      return getIdFromGraphQLId(this.segment?.namespace?.id);
-    },
     resetForm() {
-      this.name = this.segment?.name || '';
-      this.selectedGroupId = this.segment ? this.groupIdFromSegment() : null;
+      this.selectedGroupId = null;
       this.filter = '';
     },
   },
@@ -181,17 +141,6 @@ export default {
     <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
       {{ displayError }}
     </gl-alert>
-    <gl-form-group :label="$options.i18n.nameLabel" label-for="name">
-      <gl-form-input
-        id="name"
-        v-model="name"
-        data-testid="name"
-        type="text"
-        :placeholder="$options.i18n.namePlaceholder"
-        required
-        :disabled="loading"
-      />
-    </gl-form-group>
     <gl-form-group class="gl-mb-3" data-testid="filter">
       <gl-icon name="search" :size="18" class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3" />
       <gl-form-input

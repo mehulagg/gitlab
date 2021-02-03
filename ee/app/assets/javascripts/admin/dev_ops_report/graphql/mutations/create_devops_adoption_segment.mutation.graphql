@@ -1,11 +1,7 @@
-mutation($name: String!, $groupIds: [GroupID!]!) {
-  createDevopsAdoptionSegment(input: { name: $name, groupIds: $groupIds }) {
+mutation($namespaceId: NamespaceID!) {
+  createDevopsAdoptionSegment(input: { namespaceId: $namespaceId }) {
     segment {
       id
-      name
-      groups {
-        id
-      }
       latestSnapshot {
         issueOpened
         mergeRequestOpened
@@ -15,6 +11,10 @@ mutation($name: String!, $groupIds: [GroupID!]!) {
         deploySucceeded
         securityScanSucceeded
         recordedAt
+      }
+      namespace {
+        fullName
+        id
       }
     }
     errors

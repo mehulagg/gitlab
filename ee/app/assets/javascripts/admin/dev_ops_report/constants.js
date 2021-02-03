@@ -42,20 +42,17 @@ export const DEVOPS_ADOPTION_STRINGS = {
   },
   modal: {
     addingTitle: s__('DevopsAdoption|Add Group'),
-    editingTitle: s__('DevopsAdoption|Edit Group'),
     addingButton: s__('DevopsAdoption|Add Group'),
     editingButton: s__('DevopsAdoption|Save changes'),
     cancel: __('Cancel'),
     namePlaceholder: s__('DevopsAdoption|My group'),
     filterPlaceholder: s__('DevopsAdoption|Filter by name'),
-    nameLabel: s__('DevopsAdoption|Name'),
     selectedGroupsTextSingular: s__('DevopsAdoption|%{selectedCount} group selected'),
     selectedGroupsTextPlural: s__('DevopsAdoption|%{selectedCount} groups selected'),
     error: s__('DevopsAdoption|An error occured while saving the group. Please try again.'),
     noResults: s__('DevopsAdoption|No filter results.'),
   },
   table: {
-    editButton: s__('DevopsAdoption|Edit Group'),
     deleteButton: s__('DevopsAdoption|Delete Group'),
     headers: {
       name: {

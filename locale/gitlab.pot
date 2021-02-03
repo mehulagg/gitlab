@@ -10051,9 +10051,6 @@ msgstr ""
 msgid "DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin."
 msgstr ""
 
-msgid "DevopsAdoption|Edit Group"
-msgstr ""
-
 msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
 msgstr ""
 
@@ -10073,9 +10070,6 @@ msgid "DevopsAdoption|Maximum %{maxSegments} groups allowed"
 msgstr ""
 
 msgid "DevopsAdoption|My group"
-msgstr ""
-
-msgid "DevopsAdoption|Name"
 msgstr ""
 
 msgid "DevopsAdoption|No filter results."
