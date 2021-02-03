@@ -76,7 +76,7 @@ export default {
     },
     isFadedOut(jobName) {
       return (
-        this.jobHovered &&
+        Boolean(this.jobHovered) &&
         this.highlightedJobs.length > 1 &&
         !this.highlightedJobs.includes(jobName)
       );
@@ -123,12 +123,13 @@ export default {
           :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
           @pipelineActionRequestComplete="$emit('refreshPipelineGraph')"
         />
-        <job-group-dropdown
-          v-else
-          :group="group"
-          :pipeline-id="pipelineId"
-          :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
-        />
+        <div v-else :class="{ 'gl-opacity-3': isFadedOut(group.name) }"
+>
+          <job-group-dropdown
+            :group="group"
+            :pipeline-id="pipelineId"
+          />
+        </div>
       </div>
     </template>
   </main-graph-wrapper>
