@@ -132,7 +132,7 @@ uploads, or artifacts), using an [object storage service](#configure-the-object-
 is recommended instead of using NFS. Using an object storage service also
 doesn't require you to provision and maintain a node.
 
-It's also worth noting that at this time [Praefect requires it's own database server][Gitaly Cluster](../gitaly/praefect.md#postgresql) and
+It's also worth noting that at this time [Praefect requires its own database server][Gitaly Cluster](../gitaly/praefect.md#postgresql) and
 that to achieve full High Availability a third party PostgreSQL database solution will be required.
 We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
 can be set up via Omnibus GitLab, which the above specs reflect. Refer to the following issues for more information: [omnibus-gitlab#5919](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [gitaly#3398](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)
@@ -1365,7 +1365,7 @@ This section will detail how to configure the recommended standard setup in orde
 Praefect, the routing and transaction manager for Gitaly Cluster, requires a database to store data on Gitaly Cluster status.
 
 **As noted earlier in this guide [Praefect currently requires a third party PostgreSQL database solution to achieve full High Availability](../gitaly/praefect.md#postgresql)**.
-In addition to this it should be noted that Praefect also currently requires it's own separate database server.
+In addition to this it should be noted that Praefect also currently requires its own separate database server.
 
 We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
 can be set up via Omnibus GitLab, which this section will detail.
