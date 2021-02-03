@@ -196,7 +196,6 @@ module MergeRequests
     # - Setting the title as 'Resolves "Emoji don't show up in commit title"' if there is
     #   more than one commit in the MR
     #
-    # @@@(maxcoplan) remember this!
     def assign_title_and_description
       assign_title_and_description_from_commits
       merge_request.title ||= title_from_issue if target_project.issues_enabled? || target_project.external_issue_tracker

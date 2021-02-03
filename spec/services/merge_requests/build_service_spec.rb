@@ -19,9 +19,9 @@ RSpec.describe MergeRequests::BuildService do
   let(:label_ids) { [] }
   let(:merge_request) { service.execute }
   let(:compare) { double(:compare, commits: commits) }
-  let(:commit_1) { double(:commit_3, sha: 'f00ba7', safe_message: 'Initial commit') }
-  let(:commit_2) { double(:commit_2, sha: 'f00ba7', safe_message: "Second commit\n\nCreate the app") }
-  let(:commit_3) { double(:commit_3, sha: 'f00ba7', safe_message: 'This is a bad commit message!') }
+  let(:commit_1) { double(:commit_3, sha: 'f00ba7', safe_message: 'Initial commit', gitaly_commit?: false) }
+  let(:commit_2) { double(:commit_2, sha: 'f00ba7', safe_message: "Second commit\n\nCreate the app", gitaly_commit?: false) }
+  let(:commit_3) { double(:commit_3, sha: 'f00ba7', safe_message: 'This is a bad commit message!', gitaly_commit?: false) }
   let(:commits) { nil }
 
   let(:params) do
@@ -210,7 +210,6 @@ RSpec.describe MergeRequests::BuildService do
 
       it_behaves_like 'allows the merge request to be created'
 
-      # @@@(maxcoplan) look here
       it 'uses the title of the commit as the title of the merge request' do
         expect(merge_request.title).to eq(commit_2.safe_message.split("\n").first)
       end
@@ -322,18 +321,16 @@ RSpec.describe MergeRequests::BuildService do
 
       it_behaves_like 'allows the merge request to be created'
 
-      # @@@(maxcoplan) remember this
       it 'uses the first line of the first multi-line commit message as the title' do
         expect(merge_request.title).to eq('Second commit')
       end
 
-      # @@@(maxcoplan)
       it 'adds the remaining lines of the first multi-line commit message as the description' do
         expect(merge_request.description).to eq('Create the app')
       end
 
       context 'no multi-line commit messages in the diff' do
-        let(:commits) { Commit.decorate([commit_2, commit_3], project) }
+        let(:commits) { Commit.decorate([commit_1, commit_3], project) }
 
         it 'uses the title of the branch as the merge request title' do
           expect(merge_request.title).to eq('Feature branch')

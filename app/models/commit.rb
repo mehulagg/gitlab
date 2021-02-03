@@ -224,7 +224,6 @@ class Commit
 
   # Returns full commit message if title is truncated (greater than 99 characters)
   # otherwise returns commit message without first line
-  # @@@(maxcoplan)
   def description
     return safe_message if full_title.length >= 100
     return no_commit_message if safe_message.blank?

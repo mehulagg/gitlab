@@ -93,7 +93,6 @@ RSpec.describe MergeRequests::SquashService do
         expect(squash_commit.sha).not_to eq(merge_request.diff_head_sha)
       end
 
-      # @@@(maxcoplan) look here
       it 'has a default squash commit message if no message was provided' do
         puts squash_commit.inspect
         expect(squash_commit.message.chomp).to eq(merge_request.default_squash_commit_message.chomp)
