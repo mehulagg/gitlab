@@ -44088,13 +44088,13 @@
           "interfaces": null,
           "enumValues": [
             {
-              "name": "active",
+              "name": "ACTIVE",
               "description": "Milestone is currently active",
               "isDeprecated": false,
               "deprecationReason": null
             },
             {
-              "name": "closed",
+              "name": "CLOSED",
               "description": "Milestone is closed",
               "isDeprecated": false,
               "deprecationReason": null

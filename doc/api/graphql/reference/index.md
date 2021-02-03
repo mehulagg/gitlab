@@ -5000,8 +5000,8 @@ Current state of milestone.
 
 | Value | Description |
 | ----- | ----------- |
-| `active` | Milestone is currently active |
-| `closed` | Milestone is closed |
+| `ACTIVE` | Milestone is currently active |
+| `CLOSED` | Milestone is closed |
 
 ### MoveType
 

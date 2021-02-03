@@ -16033,12 +16033,12 @@ enum MilestoneStateEnum {
   """
   Milestone is currently active
   """
-  active
+  ACTIVE
 
   """
   Milestone is closed
   """
-  closed
+  CLOSED
 }
 
 """
