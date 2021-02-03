@@ -15,7 +15,7 @@ full list of reference architectures, see
 > - **High Availability:** Yes*
 > - **Test requests per second (RPS) rates:** API: 200 RPS, Web: 20 RPS, Git (Pull): 20 RPS, Git (Push): 4 RPS
 >
-> _\* At this time Praefect requires a third party PostgreSQL database solution to achieve full High Availability. We hope to offer a built in solution for this in the future. Refer to the following issues for more information: [omnibus-gitlab#5919](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [gitaly#3398](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)_
+> _\* At this time Praefect requires a third party PostgreSQL database solution to achieve full High Availability. We hope to offer a built in solution for this in the future. Refer to the following issues for more information: [`omnibus-gitlab#5919`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [`gitaly#3398`](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)_
 
 | Service                                    | Nodes       | Configuration           | GCP             | AWS         | Azure    |
 |--------------------------------------------|-------------|-------------------------|-----------------|-------------|----------|
@@ -135,7 +135,7 @@ doesn't require you to provision and maintain a node.
 It's also worth noting that at this time [Praefect requires it's own database server][Gitaly Cluster](../gitaly/praefect.md#postgresql) and
 that to achieve full High Availability a third party PostgreSQL database solution will be required.
 We hope to offer a built in solutions for these restrictions in the future but in the meantime a non HA PostgreSQL server
-can be set up via Omnibus GitLab, which the above specs reflect. Refer to the following issues for more information: [omnibus-gitlab#5919](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [gitaly#3398](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)
+can be set up via Omnibus GitLab, which the above specs reflect. Refer to the following issues for more information: [`omnibus-gitlab#5919`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5919) & [`gitaly#3398`](https://gitlab.com/gitlab-org/gitaly/-/issues/3398)
 
 ## Setup components
 
