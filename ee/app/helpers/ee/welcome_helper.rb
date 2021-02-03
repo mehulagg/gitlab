@@ -16,6 +16,13 @@ module EE
       params[:trial_onboarding_flow] == 'true'
     end
 
+    def trial_onboarding_board_path(project)
+      board = project.boards.find_by_name('Learn GitLab - Ultimate trial')
+      project_board_path(project, board) if board
+
+      project_boards_path(project)
+    end
+
     def in_trial_during_signup_flow?
       params[:trial] == 'true'
     end
