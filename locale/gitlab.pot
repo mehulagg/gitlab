@@ -13822,6 +13822,9 @@ msgstr ""
 msgid "Group URL"
 msgstr ""
 
+msgid "Group Wikis"
+msgstr ""
+
 msgid "Group avatar"
 msgstr ""
 
