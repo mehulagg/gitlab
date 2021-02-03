@@ -9,7 +9,7 @@ workflow:
     # For stable branches, create a pipeline.
     - if: '$CI_COMMIT_BRANCH =~ /^[\d-]+-stable$/'
 
-.workhorse:rules:workhorse: # empty
+.workhorse:rules:workhorse: {}
 
 changelog:
   image: golang:1.14
